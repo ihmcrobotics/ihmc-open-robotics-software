@@ -1,13 +1,16 @@
 package us.ihmc.darpaRoboticsChallenge.posePlayback;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-import javax.vecmath.Point3d;
-
+import com.martiansoftware.jsap.FlaggedOption;
+import com.martiansoftware.jsap.JSAP;
+import com.martiansoftware.jsap.JSAPResult;
+import com.yobotics.simulationconstructionset.*;
+import com.yobotics.simulationconstructionset.robotController.ModularRobotController;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicCoordinateSystem;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
+import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedSensorReader;
 import us.ihmc.SdfLoader.SDFRobot;
@@ -15,34 +18,20 @@ import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.configuration.LocalCloudMachines;
-import us.ihmc.darpaRoboticsChallenge.environment.DRCTask;
-import us.ihmc.darpaRoboticsChallenge.environment.DRCTaskName;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.math.geometry.FrameOrientation;
-import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.FramePose;
-import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.*;
 
-import com.martiansoftware.jsap.FlaggedOption;
-import com.martiansoftware.jsap.JSAP;
-import com.martiansoftware.jsap.JSAPResult;
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
-import com.yobotics.simulationconstructionset.EnumYoVariable;
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.VariableChangedListener;
-import com.yobotics.simulationconstructionset.YoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.robotController.ModularRobotController;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicCoordinateSystem;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
+import javax.swing.*;
+import javax.vecmath.Point3d;
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
 
 public class PosePlaybackSCSBridge
 {
@@ -102,11 +91,12 @@ public class PosePlaybackSCSBridge
       posePlaybackSender = new PosePlaybackSender(posePlaybackController, ipAddress);
       posePlaybackRobotPoseSequence = new PosePlaybackRobotPoseSequence();
 
-      DRCTask vrcTask = new DRCTask(DRCTaskName.ONLY_VEHICLE, robotModel);
-      SDFFullRobotModel fullRobotModel = vrcTask.getFullRobotModelFactory().create();
+      DRCRobotJointMap jointMap = robotModel.getJointMap(false, false);
+      JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
+      sdfRobot = loader.createRobot(jointMap, false);
+      SDFFullRobotModel fullRobotModel = loader.createFullRobotModel(jointMap);
 
-      sdfRobot = vrcTask.getRobot();
-      ReferenceFrames referenceFrames = new ReferenceFrames(fullRobotModel, vrcTask.getJointMap(), vrcTask.getJointMap().getAnkleHeight());
+      ReferenceFrames referenceFrames = new ReferenceFrames(fullRobotModel, jointMap, jointMap.getAnkleHeight());
       SDFPerfectSimulatedSensorReader reader = new SDFPerfectSimulatedSensorReader(sdfRobot, fullRobotModel, referenceFrames);
       ModularRobotController controller = new ModularRobotController("Reader");
       controller.setRawSensorReader(reader);
@@ -151,8 +141,8 @@ public class PosePlaybackSCSBridge
       dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
       dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
 
-      SDFFullRobotModel fullRobotModelForSlider = vrcTask.getFullRobotModelFactory().create();
-      ReferenceFrames referenceFramesForSlider = new ReferenceFrames(fullRobotModelForSlider, vrcTask.getJointMap(), vrcTask.getJointMap().getAnkleHeight());
+      SDFFullRobotModel fullRobotModelForSlider = loader.createFullRobotModel(jointMap);
+      ReferenceFrames referenceFramesForSlider = new ReferenceFrames(fullRobotModelForSlider, jointMap, jointMap.getAnkleHeight());
       DRCRobotMidiSliderBoardPositionManipulation sliderBoard = new DRCRobotMidiSliderBoardPositionManipulation(scs, sdfRobot, referenceFramesForSlider,
             fullRobotModelForSlider, dynamicGraphicObjectsListRegistry);
 

@@ -1,17 +1,15 @@
 package us.ihmc.darpaRoboticsChallenge.posePlayback;
 
-import static org.junit.Assert.assertTrue;
-
-import org.junit.Test;
-
-import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.environment.DRCTask;
-import us.ihmc.darpaRoboticsChallenge.environment.DRCTaskName;
-import us.ihmc.utilities.ThreadTools;
-
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import org.junit.Test;
+import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
+import us.ihmc.utilities.ThreadTools;
+
+import static org.junit.Assert.assertTrue;
 
 public class PosePlaybackSmoothPoseInterpolatorTest
 {
@@ -56,8 +54,8 @@ public class PosePlaybackSmoothPoseInterpolatorTest
       SDFRobot sdfRobot = null;
       if (SHOW_GUI)
       {
-         DRCTask vrcTask = new DRCTask(DRCTaskName.ONLY_VEHICLE, robotModel);
-         sdfRobot = vrcTask.getRobot();
+         DRCRobotJointMap jointMap = robotModel.getJointMap(false, false);
+         sdfRobot = DRCRobotSDFLoader.loadDRCRobot(jointMap, false).createRobot(jointMap, false);
 
          scs = new SimulationConstructionSet(sdfRobot);
          int recordFrequency = 1;

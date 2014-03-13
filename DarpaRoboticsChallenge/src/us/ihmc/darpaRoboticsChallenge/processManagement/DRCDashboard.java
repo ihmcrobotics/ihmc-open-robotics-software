@@ -2,8 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.processManagement;
 
 import org.apache.commons.lang.WordUtils;
 import us.ihmc.darpaRoboticsChallenge.DRCDemo01;
-import us.ihmc.darpaRoboticsChallenge.DRCDemo01Types;
-import us.ihmc.darpaRoboticsChallenge.DRCEnvironmentModel;
+import us.ihmc.darpaRoboticsChallenge.DRCDemo01StartingLocation;
 import us.ihmc.darpaRoboticsChallenge.configuration.LocalCloudMachines;
 import us.ihmc.darpaRoboticsChallenge.processManagement.DRCDashboardTypes.DRCPluginTasks;
 import us.ihmc.darpaRoboticsChallenge.processManagement.DRCDashboardTypes.DRCROSTasks;
@@ -935,7 +934,7 @@ public class DRCDashboard
                     && (taskCombo.getSelectedItem() != DRCPluginTasks.HAND) && (taskCombo.getSelectedItem() != DRCPluginTasks.PARKING_LOT))
             {
                Object[] startingLocations =
-                  DRCDemo01Types.environmentModelMap.get(DRCEnvironmentModel.valueOf(taskCombo.getSelectedItem().toString().toUpperCase())).keySet().toArray();
+                  DRCDemo01StartingLocation.initialSetupMap.keySet().toArray();
                for (int i = startingLocations.length - 1; i >= 0; --i)
                {
                   startingLocationsListModel.addElement(startingLocations[i].toString());
