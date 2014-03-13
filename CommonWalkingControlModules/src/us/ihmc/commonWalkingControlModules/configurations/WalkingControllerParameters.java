@@ -104,4 +104,7 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 
    public abstract double getDefaultTransferTime();
    public abstract double getDefaultSwingTime();
+
+   public abstract double getPelvisPitchUpperLimit();
+   public abstract double getPelvisPitchLowerLimit();
 }
