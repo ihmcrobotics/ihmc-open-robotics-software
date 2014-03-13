@@ -30,6 +30,13 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    private final SideDependentList<Transform3D> handControlFramesWithRespectToFrameAfterWrist = new SideDependentList<Transform3D>();
    private final SideDependentList<Transform3D> handPosesWithRespectToChestFrame = new SideDependentList<Transform3D>();
    private final double minElbowRollAngle = 0.5;
+   // Limits
+   private final double DRC_ROBOT_NECK_PITCH_UPPER_LIMIT = 1.14494; //0.83;    // true limit is = 1.134460, but pitching down more just looks at more robot chest
+   private final double DRC_ROBOT_NECK_PITCH_LOWER_LIMIT = -0.602139; //-0.610865;    // -Math.PI/2.0;
+   private final double DRC_ROBOT_HEAD_YAW_LIMIT = Math.PI / 4.0;
+   private final double DRC_ROBOT_HEAD_ROLL_LIMIT = Math.PI / 4.0;
+   private final double DRC_ROBOT_PELVIS_PITCH_UPPER_LIMIT = 0.0;
+   private final double DRC_ROBOT_PELVIS_PITCH_LOWER_LIMIT = -0.35; //-Math.PI / 6.0;
 
    public AtlasWalkingControllerParameters()
    {
@@ -232,22 +239,22 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
 
    public double getUpperNeckPitchLimit()
    {
-      return AtlasAndHandRobotParameters.DRC_ROBOT_NECK_PITCH_UPPER_LIMIT;
+      return DRC_ROBOT_NECK_PITCH_UPPER_LIMIT;
    }
 
    public double getLowerNeckPitchLimit()
    {
-      return AtlasAndHandRobotParameters.DRC_ROBOT_NECK_PITCH_LOWER_LIMIT;
+      return DRC_ROBOT_NECK_PITCH_LOWER_LIMIT;
    }
 
    public double getHeadYawLimit()
    {
-      return AtlasAndHandRobotParameters.DRC_ROBOT_HEAD_YAW_LIMIT;
+      return DRC_ROBOT_HEAD_YAW_LIMIT;
    }
 
    public double getHeadRollLimit()
    {
-      return AtlasAndHandRobotParameters.DRC_ROBOT_HEAD_ROLL_LIMIT;
+      return DRC_ROBOT_HEAD_ROLL_LIMIT;
    }
 
    public String getJointNameForExtendedPitchRange()
@@ -546,5 +553,14 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    public double getDefaultSwingTime()
    {
       return DRCConfigParameters.DEFAULT_SWING_TIME;
+   }
+
+   public double getPelvisPitchUpperLimit()
+   {
+      return DRC_ROBOT_PELVIS_PITCH_UPPER_LIMIT;
+   }
+   public double getPelvisPitchLowerLimit()
+   {
+      return DRC_ROBOT_PELVIS_PITCH_LOWER_LIMIT;
    }
 }
