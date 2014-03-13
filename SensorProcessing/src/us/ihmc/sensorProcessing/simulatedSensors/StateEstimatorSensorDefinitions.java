@@ -2,6 +2,7 @@ package us.ihmc.sensorProcessing.simulatedSensors;
 
 import java.util.ArrayList;
 
+import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.ForceSensorDefinition;
 import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -15,6 +16,7 @@ public class StateEstimatorSensorDefinitions
    private final ArrayList<IMUDefinition> imuDefinitionsForAngularVelocitySensors = new ArrayList<IMUDefinition>();
    private final ArrayList<IMUDefinition> imuDefinitionsForLinearAccelerationSensors = new ArrayList<IMUDefinition>();
 
+   private final SideDependentList<ForceSensorDefinition> footForceSensors = new SideDependentList<ForceSensorDefinition>();
    private final ArrayList<ForceSensorDefinition> forceSensorDefinitions = new ArrayList<ForceSensorDefinition>();
 
    public ArrayList<ForceSensorDefinition> getForceSensorDefinitions()
