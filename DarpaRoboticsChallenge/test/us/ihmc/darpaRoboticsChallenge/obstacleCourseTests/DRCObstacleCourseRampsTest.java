@@ -1,20 +1,15 @@
 package us.ihmc.darpaRoboticsChallenge.obstacleCourseTests;
 
-import static org.junit.Assert.assertTrue;
-
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataListCorruptor;
 import us.ihmc.darpaRoboticsChallenge.DRCDemo01StartingLocation;
-import us.ihmc.darpaRoboticsChallenge.DRCEnvironmentModel;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
@@ -22,8 +17,10 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+
+import static org.junit.Assert.assertTrue;
 
 public class DRCObstacleCourseRampsTest
 {
@@ -77,8 +74,8 @@ public class DRCObstacleCourseRampsTest
       BambooTools.reportTestStartedMessage();
       
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.RAMP_TOP;
-      DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingDownRampWithMediumSteps", "", selectedLocation, selectedEnvironment, checkNothingChanged, showGUI, createMovie, robotModel);
+      
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingDownRampWithMediumSteps", "", selectedLocation,  checkNothingChanged, showGUI, createMovie, robotModel);
       
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
@@ -148,8 +145,8 @@ public class DRCObstacleCourseRampsTest
    private void doUpRampTest(FootstepDataListCorruptor footstepDataListCorruptor, StepLength stepLength) throws SimulationExceededMaximumTimeException
    {
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.RAMP_BOTTOM;
-      DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingUpRampTest", "", selectedLocation, selectedEnvironment, checkNothingChanged, showGUI, createMovie, robotModel);
+      
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingUpRampTest", "", selectedLocation,  checkNothingChanged, showGUI, createMovie, robotModel);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();

@@ -1,17 +1,13 @@
 package us.ihmc.darpaRoboticsChallenge.obstacleCourseTests;
 
-import static org.junit.Assert.assertTrue;
-
-import javax.vecmath.Point3d;
-
+import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
 import us.ihmc.darpaRoboticsChallenge.DRCDemo01StartingLocation;
-import us.ihmc.darpaRoboticsChallenge.DRCEnvironmentModel;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
@@ -19,8 +15,9 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import javax.vecmath.Point3d;
+
+import static org.junit.Assert.assertTrue;
 
 public class DRCObstacleCoursePlatformTest
 {
@@ -63,8 +60,8 @@ public class DRCObstacleCoursePlatformTest
       BambooTools.reportTestStartedMessage();
 
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.SMALL_PLATFORM;
-      DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOverSmallPlatformTest", "", selectedLocation, selectedEnvironment, checkNothingChanged, showGUI, createMovie, robotModel);
+      
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOverSmallPlatformTest", "", selectedLocation,  checkNothingChanged, showGUI, createMovie, robotModel);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
@@ -101,8 +98,8 @@ public class DRCObstacleCoursePlatformTest
       BambooTools.reportTestStartedMessage();
 
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.MEDIUM_PLATFORM;
-      DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOntoMediumPlatformToesTouchingTest", "", selectedLocation, selectedEnvironment, checkNothingChanged, showGUI, createMovie, robotModel);
+      
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOntoMediumPlatformToesTouchingTest", "", selectedLocation,  checkNothingChanged, showGUI, createMovie, robotModel);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
@@ -132,8 +129,8 @@ public class DRCObstacleCoursePlatformTest
       BambooTools.reportTestStartedMessage();
       
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.ON_MEDIUM_PLATFORM;
-      DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOntoMediumPlatformToesTouchingTest", "", selectedLocation, selectedEnvironment, checkNothingChanged, showGUI, createMovie, robotModel);
+      
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOntoMediumPlatformToesTouchingTest", "", selectedLocation,  checkNothingChanged, showGUI, createMovie, robotModel);
    
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();

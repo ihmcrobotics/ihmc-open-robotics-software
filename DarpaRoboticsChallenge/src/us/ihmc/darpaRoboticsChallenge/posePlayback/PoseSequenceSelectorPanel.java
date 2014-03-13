@@ -1,31 +1,25 @@
 package us.ihmc.darpaRoboticsChallenge.posePlayback;
 
-import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.io.File;
-import java.util.ArrayList;
-
-import javax.swing.JFileChooser;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.table.DefaultTableModel;
-
+import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.robotController.ModularRobotController;
+import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedSensorReader;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.environment.DRCTask;
-import us.ihmc.darpaRoboticsChallenge.environment.DRCTaskName;
+import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap;
-import us.ihmc.userInterface.input.EscapeKeyActionBinding;
 
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.robotController.ModularRobotController;
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.io.File;
+import java.util.ArrayList;
 
 public class PoseSequenceSelectorPanel extends JPanel 
 {
@@ -44,11 +38,14 @@ public class PoseSequenceSelectorPanel extends JPanel
        registry = new YoVariableRegistry("PoseSequenceGUI");
        
        posePlaybackController = new PosePlaybackAllJointsController(registry);
-       DRCTask vrcTask = new DRCTask(DRCTaskName.ONLY_VEHICLE, robotModel);
-       SDFFullRobotModel fullRobotModel = vrcTask.getFullRobotModelFactory().create();
-       
-       sdfRobot = vrcTask.getRobot();       
-       ReferenceFrames referenceFrames = new ReferenceFrames(fullRobotModel, vrcTask.getJointMap(), vrcTask.getJointMap().getAnkleHeight());
+
+      DRCRobotJointMap jointMap = robotModel.getJointMap(false, false);
+      JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
+
+       SDFFullRobotModel fullRobotModel = loader.createFullRobotModel(jointMap);
+      sdfRobot = loader.createRobot(jointMap,false);
+
+       ReferenceFrames referenceFrames = new ReferenceFrames(fullRobotModel, jointMap, jointMap.getAnkleHeight());
        SDFPerfectSimulatedSensorReader reader = new SDFPerfectSimulatedSensorReader(sdfRobot, fullRobotModel, referenceFrames);
        ModularRobotController controller = new ModularRobotController("Reader");
        controller.setRawSensorReader(reader);

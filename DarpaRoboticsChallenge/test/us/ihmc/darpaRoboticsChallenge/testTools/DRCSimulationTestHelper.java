@@ -1,13 +1,10 @@
 package us.ihmc.darpaRoboticsChallenge.testTools;
 
-import static org.junit.Assert.assertFalse;
-
-import java.util.ArrayList;
-import java.util.Random;
-
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import com.yobotics.simulationconstructionset.time.GlobalTimer;
+import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
+import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import com.yobotics.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.visualization.SliderBoardFactory;
 import us.ihmc.atlas.visualization.WalkControllerSliderBoard;
@@ -17,13 +14,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepD
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.packets.ComHeightPacket;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
-import us.ihmc.darpaRoboticsChallenge.DRCController;
-import us.ihmc.darpaRoboticsChallenge.DRCDemo01;
-import us.ihmc.darpaRoboticsChallenge.DRCDemo01StartingLocation;
-import us.ihmc.darpaRoboticsChallenge.DRCEnvironmentModel;
-import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseSimulation;
-import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.*;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.AsyncContinuousExecutor;
@@ -31,11 +22,12 @@ import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.TimerTaskScheduler;
 
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.time.GlobalTimer;
-import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
-import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import com.yobotics.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+import java.util.ArrayList;
+import java.util.Random;
+
+import static org.junit.Assert.assertFalse;
 
 public class DRCSimulationTestHelper
 {
@@ -48,14 +40,13 @@ public class DRCSimulationTestHelper
    
    private final boolean createMovie;
 
-   public DRCSimulationTestHelper(String name, String scriptFilename, DRCDemo01StartingLocation selectedLocation, DRCEnvironmentModel selectedEnvironment,
+   public DRCSimulationTestHelper(String name, String scriptFilename, DRCDemo01StartingLocation selectedLocation,
          boolean checkNothingChanged, boolean showGUI, boolean createMovie, DRCRobotModel robotModel)
    {
-      this(name, scriptFilename, selectedLocation, selectedEnvironment, checkNothingChanged, showGUI, createMovie, false, robotModel);
+      this(name, scriptFilename, selectedLocation, checkNothingChanged, showGUI, createMovie, false, robotModel);
    }
    
-   public DRCSimulationTestHelper(String name, String scriptFilename, DRCDemo01StartingLocation selectedLocation, DRCEnvironmentModel
-         selectedEnvironment, boolean checkNothingChanged, boolean showGUI, boolean createMovie, boolean createLoadOfContactPointForTheFeet,
+   public DRCSimulationTestHelper(String name, String scriptFilename, DRCDemo01StartingLocation selectedLocation, boolean checkNothingChanged, boolean showGUI, boolean createMovie, boolean createLoadOfContactPointForTheFeet,
          DRCRobotModel robotModel)
    {
       networkObjectCommunicator = new ScriptedFootstepDataListObjectCommunicator("Team");
@@ -73,7 +64,7 @@ public class DRCSimulationTestHelper
       SliderBoardFactory sliderBoardFactory = WalkControllerSliderBoard.getFactory();
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false, sliderBoardFactory);
       
-      drcSimulation = DRCDemo01.startDRCSim(scriptFilename, networkObjectCommunicator, selectedLocation, guiInitialSetup, selectedEnvironment, initializeEstimatorToActual,
+      drcSimulation = DRCDemo01.startDRCSim(scriptFilename, networkObjectCommunicator, selectedLocation, guiInitialSetup, initializeEstimatorToActual,
             startOutsidePen, automaticallyStartSimulation, startDRCNetworkProcessor, createLoadOfContactPointForTheFeet, robotModel);
       
       blockingSimulationRunner = new BlockingSimulationRunner(drcSimulation.getSimulationConstructionSet(), 60.0 * 10.0);

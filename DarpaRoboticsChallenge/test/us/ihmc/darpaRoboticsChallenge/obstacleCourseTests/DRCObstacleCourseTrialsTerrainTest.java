@@ -1,18 +1,14 @@
 package us.ihmc.darpaRoboticsChallenge.obstacleCourseTests;
 
-import static org.junit.Assert.assertTrue;
-
-import javax.vecmath.Point3d;
-
+import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
 import us.ihmc.darpaRoboticsChallenge.DRCDemo01StartingLocation;
-import us.ihmc.darpaRoboticsChallenge.DRCEnvironmentModel;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
@@ -20,8 +16,9 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import javax.vecmath.Point3d;
+
+import static org.junit.Assert.assertTrue;
 
 public class DRCObstacleCourseTrialsTerrainTest
 {
@@ -69,8 +66,8 @@ public class DRCObstacleCourseTrialsTerrainTest
       String scriptName = "scripts/ExerciseAndJUnitScripts/DRCTrialsSlopeLeftFootPose.xml";
       String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(this.getClass(), scriptName);
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DRC_TRIALS_TRAINING_WALKING;
-      DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCSlopeTest", fileName, selectedLocation, selectedEnvironment, checkNothingChanged, createMovie,
+      
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCSlopeTest", fileName, selectedLocation, checkNothingChanged, createMovie,
               false, robotModel);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -95,8 +92,8 @@ public class DRCObstacleCourseTrialsTerrainTest
       String scriptName = "scripts/ExerciseAndJUnitScripts/DRCTrialsSlopeLeftFootPose.xml";
       String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(this.getClass(), scriptName);
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DRC_TRIALS_TRAINING_WALKING;
-      DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCSlopeTest", fileName, selectedLocation, selectedEnvironment, checkNothingChanged, createMovie,
+      
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCSlopeTest", fileName, selectedLocation, checkNothingChanged, createMovie,
               false, robotModel);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -133,8 +130,8 @@ public class DRCObstacleCourseTrialsTerrainTest
       String scriptName = "scripts/ExerciseAndJUnitScripts/DRCTrialsZigzagHurdlesLeftFootPose.xml";
       String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(this.getClass(), scriptName);
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.IN_FRONT_OF_ZIGZAG_BLOCKS;
-      DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCZigzagHurdlesTest", fileName, selectedLocation, selectedEnvironment, checkNothingChanged,
+      
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCZigzagHurdlesTest", fileName, selectedLocation, checkNothingChanged,
               createMovie, false, robotModel);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -159,8 +156,8 @@ public class DRCObstacleCourseTrialsTerrainTest
       String scriptName = "scripts/ExerciseAndJUnitScripts/DRCTrialsZigzagHurdlesLeftFootPose.xml";
       String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(this.getClass(), scriptName);
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.IN_FRONT_OF_ZIGZAG_BLOCKS;
-      DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCZigzagHurdlesTest", fileName, selectedLocation, selectedEnvironment, checkNothingChanged,
+      
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCZigzagHurdlesTest", fileName, selectedLocation, checkNothingChanged,
               createMovie, false, robotModel);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -197,8 +194,8 @@ public class DRCObstacleCourseTrialsTerrainTest
       String scriptName = "scripts/ExerciseAndJUnitScripts/DRCTrialsCinderblockFieldPartOneLeftFootPose.xml";
       String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(this.getClass(), scriptName);
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.IN_FRONT_OF_CINDERBLOCK_FIELD;
-      DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCCinderblockFieldPartOneTest", fileName, selectedLocation, selectedEnvironment,
+      
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCCinderblockFieldPartOneTest", fileName, selectedLocation,
               checkNothingChanged, createMovie, false, robotModel);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -223,8 +220,8 @@ public class DRCObstacleCourseTrialsTerrainTest
       String scriptName = "scripts/ExerciseAndJUnitScripts/DRCTrialsCinderblockFieldPartTwoLeftFootPose.xml";
       String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(this.getClass(), scriptName);
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.IN_FRONT_OF_SLANTED_CINDERBLOCK_FIELD;
-      DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCCinderblockfieldPartTwoTest", fileName, selectedLocation, selectedEnvironment,
+      
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCCinderblockfieldPartTwoTest", fileName, selectedLocation,
               checkNothingChanged, createMovie, false, robotModel);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -249,8 +246,8 @@ public class DRCObstacleCourseTrialsTerrainTest
       String scriptName = "scripts/ExerciseAndJUnitScripts/DRCTrialsUpFlatCinderblocks.xml";
       String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(this.getClass(), scriptName);
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.IN_FRONT_OF_CINDERBLOCK_FIELD;
-      DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCFlatCinderblockTest", fileName, selectedLocation, selectedEnvironment, checkNothingChanged,
+      
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCFlatCinderblockTest", fileName, selectedLocation, checkNothingChanged,
               createMovie, false, robotModel);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -274,8 +271,8 @@ public class DRCObstacleCourseTrialsTerrainTest
       String scriptName = "scripts/ExerciseAndJUnitScripts/DRCTrialsUpSlantedCinderblocks.xml";
       String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(this.getClass(), scriptName);
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.IN_FRONT_OF_SLANTED_CINDERBLOCK_FIELD;
-      DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCSlantedCinderblockTest", fileName, selectedLocation, selectedEnvironment, checkNothingChanged,
+      
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCSlantedCinderblockTest", fileName, selectedLocation, checkNothingChanged,
               createMovie, false, robotModel);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -300,8 +297,8 @@ public class DRCObstacleCourseTrialsTerrainTest
       String scriptName = "scripts/ExerciseAndJUnitScripts/DRCTrialsCinderblockFieldBoth.xml";
       String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(this.getClass(), scriptName);
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.IN_FRONT_OF_CINDERBLOCK_FIELD;
-      DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCSlantedCinderblockTest", fileName, selectedLocation, selectedEnvironment, checkNothingChanged,
+      
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCSlantedCinderblockTest", fileName, selectedLocation, checkNothingChanged,
               createMovie, false, robotModel);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -328,8 +325,8 @@ public class DRCObstacleCourseTrialsTerrainTest
       BambooTools.reportTestStartedMessage();
 
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DRC_TRIALS_TRAINING_WALKING;
-      DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOntoSlopesTest", "", selectedLocation, selectedEnvironment, checkNothingChanged,
+      
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOntoSlopesTest", "", selectedLocation, checkNothingChanged,
               createMovie);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -367,8 +364,8 @@ public class DRCObstacleCourseTrialsTerrainTest
       BambooTools.reportTestStartedMessage();
 
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DRC_TRIALS_TRAINING_WALKING;
-      DRCEnvironmentModel selectedEnvironment = DRCEnvironmentModel.OBSTACLE_COURSE;
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOntoSlopesTest", "", selectedLocation, selectedEnvironment, checkNothingChanged,
+      
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOntoSlopesTest", "", selectedLocation, checkNothingChanged,
             showGUI, createMovie, robotModel);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();

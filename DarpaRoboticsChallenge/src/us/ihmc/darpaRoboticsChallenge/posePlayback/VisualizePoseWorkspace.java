@@ -1,30 +1,24 @@
 package us.ihmc.darpaRoboticsChallenge.posePlayback;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-
-import javax.swing.JFileChooser;
-
-import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.environment.DRCTask;
-import us.ihmc.darpaRoboticsChallenge.environment.DRCTaskName;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.utilities.ThreadTools;
-
-import com.bulletphysics.dynamics.RigidBody;
 import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPResult;
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.VariableChangedListener;
-import com.yobotics.simulationconstructionset.YoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.*;
 import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import us.ihmc.SdfLoader.JaxbSDFLoader;
+import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
+import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.utilities.ThreadTools;
+
+import javax.swing.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
 
 public class VisualizePoseWorkspace
 {
@@ -44,18 +38,19 @@ public class VisualizePoseWorkspace
    
    public VisualizePoseWorkspace(DRCRobotModel robotModel) throws IOException
    {
+      DRCRobotJointMap jointMap = robotModel.getJointMap(false, false);
+      JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
+      SDFRobot sdfRobot = loader.createRobot(jointMap, false);
+
       interpolator = new PosePlaybackSmoothPoseInterpolator(registry);
 
       posePlaybackController = new PosePlaybackAllJointsController(registry);
       posePlaybackSender = new PosePlaybackSender(posePlaybackController, ipAddress);
       posePlaybackRobotPoseSequence = new PosePlaybackRobotPoseSequence();
 
-      DRCTask vrcTask = new DRCTask(DRCTaskName.ONLY_VEHICLE, robotModel);
-      SDFRobot sdfRobot = vrcTask.getRobot();
-
       SimulationConstructionSet scs = new SimulationConstructionSet(sdfRobot);
       scs.addYoVariableRegistry(registry);
-     dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
+      dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
 
       DRCRobotMidiSliderBoardPositionManipulation sliderBoard = new DRCRobotMidiSliderBoardPositionManipulation(scs);
 
