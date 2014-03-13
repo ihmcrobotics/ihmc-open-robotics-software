@@ -56,7 +56,7 @@ public class LoadCloudWithPoses extends SimpleApplication
       //REAL
       float crc = -.0010908f;
       crc = -.002f;
-      LidarScanParameters param = new LidarScanParameters(1081, -2.356194f+crc, 2.356194f+crc, 0, 0, 1, 0, 0, 0, 0, 0, false);
+      LidarScanParameters param = new LidarScanParameters(1081, -2.356194f+crc, 2.356194f+crc, 0, 0, 1, 0, 0, 0, 0, 0, false,true);
       
       //SCS
       //LidarScanParameters param = new LidarScanParameters(720, -1.570796f, 1.570796f, 0, 0, 1, 0, 0, 0, 0, 0, false);
