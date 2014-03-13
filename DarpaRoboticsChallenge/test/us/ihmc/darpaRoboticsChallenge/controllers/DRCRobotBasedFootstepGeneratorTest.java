@@ -135,7 +135,7 @@ public class DRCRobotBasedFootstepGeneratorTest
          Footstep swingStart = testableFootstepQueue.get(i);
          Footstep stance = testableFootstepQueue.get(i + 1);
          Footstep swingEnd = testableFootstepQueue.get(i + 2);
-         assertTrue(footstepValidityMetric.isValid(swingStart, stance, swingEnd));
+         assertTrue(footstepValidityMetric.assertValid(swingStart, stance, swingEnd));
       }
    }
 
