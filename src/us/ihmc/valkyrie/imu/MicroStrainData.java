@@ -7,10 +7,16 @@ import javax.vecmath.Vector3d;
 
 public class MicroStrainData
 {
+   private long receiveTime;
    private final Vector3d acceleration = new Vector3d();
    private final Vector3d gyro = new Vector3d();
    private final Quat4d quaternion = new Quat4d();
 
+   public void setReceiveTime(long time)
+   {
+      receiveTime = time;
+   }
+   
    public void setAcceleration(double x, double y, double z)
    {
       acceleration.set(x, y, z);
@@ -39,6 +45,11 @@ public class MicroStrainData
    public Quat4d getQuaternion()
    {
       return quaternion;
+   }
+   
+   public long getReceiveTime()
+   {
+      return receiveTime;
    }
 
    @Override
