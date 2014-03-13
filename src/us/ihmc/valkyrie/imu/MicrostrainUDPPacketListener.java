@@ -6,6 +6,8 @@ import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 
 import us.ihmc.concurrent.ConcurrentCopier;
+import us.ihmc.realtime.PriorityParameters;
+import us.ihmc.realtime.RealtimeThread;
 
 public class MicrostrainUDPPacketListener implements Runnable
 {
@@ -51,6 +53,9 @@ public class MicrostrainUDPPacketListener implements Runnable
    public void readFields(ByteBuffer buffer)
    {
       MicroStrainData data = microstrainBuffer.getCopyForWriting();
+      
+      long time = RealtimeThread.getCurrentMonotonicClockTime();
+      data.setReceiveTime(time);
       
       while (buffer.position() < buffer.limit() - 2)
       {
@@ -116,9 +121,24 @@ public class MicrostrainUDPPacketListener implements Runnable
          }
       }
    }
+   
+   public void stop()
+   {
+      requestStop = true;
+   }
+   
+   public static MicrostrainUDPPacketListener createRealtimeListener(PriorityParameters priority, long serialNumber) throws IOException
+   {
+      int port = 50000 + (int) (serialNumber % 10000);
+      MicrostrainUDPPacketListener listener = new MicrostrainUDPPacketListener(port);
+      new RealtimeThread(priority, listener).start();
+      
+      return listener;
+      
+   }
 
    public static void main(String[] args) throws IOException
    {
-      new Thread(new MicrostrainUDPPacketListener(1234)).start();
+      new Thread(new MicrostrainUDPPacketListener(50571)).start();
    }
 }
