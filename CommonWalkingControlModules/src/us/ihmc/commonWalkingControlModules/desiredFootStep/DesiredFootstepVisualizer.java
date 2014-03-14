@@ -28,7 +28,6 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FramePose2d;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
-import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.ZUpFrame;
 import us.ihmc.utilities.math.overheadPath.TurnThenStraightOverheadPath;
@@ -295,19 +294,8 @@ public class DesiredFootstepVisualizer
 
       RobotSide initialStanceSide = RobotSide.LEFT;
       RobotSide swingLegSide = initialStanceSide.getOppositeSide();
-
-      FramePose pose = new FramePose(ReferenceFrame.getWorldFrame());
-      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("visualizePathBasedFootstepListCreator", pose);
-
-      ContactablePlaneBody contactablePlaneBody = bipedFeet.get(initialStanceSide);
-      ReferenceFrame soleFrame = FootstepUtils.createSoleFrame(poseReferenceFrame, contactablePlaneBody);
-
-      List<FramePoint> expectedContactPoints = FootstepUtils.getContactPointsInFrame(contactablePlaneBody, soleFrame);
-
-      boolean trustHeight = false;
-      Footstep initialStanceFootstep = new Footstep(contactablePlaneBody, poseReferenceFrame, soleFrame, expectedContactPoints, trustHeight);
       
-      TurningThenStraightFootstepGenerator footstepGenerator = new TurningThenStraightFootstepGenerator(bipedFeet, footstepPath, initialStanceFootstep);
+      TurningThenStraightFootstepGenerator footstepGenerator = new TurningThenStraightFootstepGenerator(bipedFeet, footstepPath, initialStanceSide);
       footstepGenerator.setStraightWalkingStepLength(0.2);
       footstepGenerator.setStraightWalkingStepWidth(0.1);
 

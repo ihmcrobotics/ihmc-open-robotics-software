@@ -44,7 +44,6 @@ public class DRCRobotBasedFootstepGeneratorTest
    private static final double eps = 1e-7;
    private final static boolean VISUALIZE = false;
    private final static boolean SIDESTEP = false;
-   private final static boolean DEBUG_S_PARAM = false;
    public static final ReferenceFrame WORLD_FRAME = ReferenceFrames.getWorldFrame();
    private List<Footstep> footSteps = new ArrayList<Footstep>();
    private FullRobotModel fullRobotModel;
@@ -104,9 +103,7 @@ public class DRCRobotBasedFootstepGeneratorTest
 
    public void generateFootstepsUsingPath(TurnThenStraightOverheadPath pathToDestination)
    {
-      Footstep stanceStart = FootstepUtils.getCurrentFootstep(RobotSide.RIGHT, referenceFrames, bipedFeet);
-
-      TurningThenStraightFootstepGenerator footstepGenerator = new TurningThenStraightFootstepGenerator(bipedFeet, pathToDestination, stanceStart);
+      TurningThenStraightFootstepGenerator footstepGenerator = new TurningThenStraightFootstepGenerator(bipedFeet, pathToDestination, RobotSide.RIGHT);
       footstepGenerator.setTurningStepsHipOpeningStepAngle(Math.PI / 6);
       footstepGenerator.setStraightWalkingStepLength(0.4);
       footstepGenerator.setStraightWalkingStepWidth(0.2);
