@@ -7,6 +7,7 @@ import us.ihmc.atlas.visualization.SliderBoardFactory;
 import us.ihmc.darpaRoboticsChallenge.valkyrie.ValkyrieJointMap;
 import us.ihmc.darpaRoboticsChallenge.valkyrie.ValkyrieSDFLoader;
 import us.ihmc.robotDataCommunication.YoVariableClient;
+import us.ihmc.robotDataCommunication.visualizer.SCSYoVariablesUpdatedListener;
 import us.ihmc.valkyrie.ValkyrieNetworkParameters;
 import us.ihmc.valkyrie.controllers.ValkyrieSliderBoard;
 
@@ -20,7 +21,8 @@ public class RemoteValkyrieVisualizer
    public static final String defaultHost = ValkyrieNetworkParameters.CONTROL_COMPUTER_HOST;
    public static final int defaultPort = ValkyrieNetworkParameters.VARIABLE_SERVER_PORT;
 
-   private static final boolean USE_FORCE_CONTROL = true;
+   private static final boolean USE_SLIDER_BOARD = false;
+   private static final boolean USE_FORCE_CONTROL = false;
 
    public RemoteValkyrieVisualizer(String host, int port, int bufferSize)
    {
@@ -28,21 +30,27 @@ public class RemoteValkyrieVisualizer
       ValkyrieJointMap jointMap = new ValkyrieJointMap();
       JaxbSDFLoader robotLoader = ValkyrieSDFLoader.loadValkyrieRobot(false);
 
-
-      SliderBoardFactory sliderBoardFactory;
-      if (USE_FORCE_CONTROL)
+      SCSYoVariablesUpdatedListener scsYoVariablesUpdatedListener;
+      if (USE_SLIDER_BOARD)
       {
-         sliderBoardFactory = ValkyrieSliderBoard.getForceControlFactory();
+         SliderBoardFactory sliderBoardFactory;
+         if (USE_FORCE_CONTROL)
+         {
+            sliderBoardFactory = ValkyrieSliderBoard.getForceControlFactory();
+         }
+         else
+         {
+            sliderBoardFactory = ValkyrieSliderBoard.getTurboDriverPositionControlFactory();
+         }
+
+         scsYoVariablesUpdatedListener = new ValkyrieSliderBoardControllerListener(robotLoader, jointMap, bufferSize, sliderBoardFactory);
+
       }
       else
       {
-         sliderBoardFactory = ValkyrieSliderBoard.getTurboDriverPositionControlFactory();
+         scsYoVariablesUpdatedListener = new SCSYoVariablesUpdatedListener(robotLoader.createRobot(jointMap, false), 16000);
+
       }
-
-      SliderBoardControllerListener scsYoVariablesUpdatedListener = new ValkyrieSliderBoardControllerListener(robotLoader, jointMap, bufferSize,
-                                                                       sliderBoardFactory);
-
-//    SCSYoVariablesUpdatedListener scsYoVariablesUpdatedListener = new SCSYoVariablesUpdatedListener(robot, 16000);
 
       YoVariableClient client = new YoVariableClient(host, port, scsYoVariablesUpdatedListener, "remote", false);
       client.start();
