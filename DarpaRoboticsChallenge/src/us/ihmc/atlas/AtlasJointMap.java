@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.media.j3d.Transform3D;
+import javax.vecmath.Matrix3d;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -27,6 +28,7 @@ import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.*;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.Pair;
+import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.math.geometry.TransformTools;
 
 public class AtlasJointMap extends DRCRobotJointMap 
@@ -50,6 +52,49 @@ public class AtlasJointMap extends DRCRobotJointMap
    public static final String[] imuSensorsToUse = { bodyIMUSensor };
    
    private final double ankleHeight = 0.084;
+   
+   
+   private static final Vector3d pelvisBoxOffset = new Vector3d(-0.100000, 0.000000, -0.050000);
+   private static final double pelvisBoxSizeX = 0.100000;
+   private static final double pelvisBoxSizeY = 0.150000;
+   private static final double pelvisBoxSizeZ = 0.200000;
+   public static final Transform3D pelvisContactPointTransform = new Transform3D();
+   static
+   {
+      Vector3d translation = new Vector3d(0.0, 0.0, -pelvisBoxSizeZ / 2.0);
+      translation.add(pelvisBoxOffset);
+      pelvisContactPointTransform.setTranslation(translation);
+   }
+   
+   public static final List<Point2d> pelvisContacts = new ArrayList<Point2d>();
+   static
+   {
+      pelvisContacts.add(new Point2d(pelvisBoxSizeX / 2.0, pelvisBoxSizeY / 2.0));
+      pelvisContacts.add(new Point2d(pelvisBoxSizeX / 2.0, -pelvisBoxSizeY / 2.0));
+      pelvisContacts.add(new Point2d(-pelvisBoxSizeX / 2.0, pelvisBoxSizeY / 2.0));
+      pelvisContacts.add(new Point2d(-pelvisBoxSizeX / 2.0, -pelvisBoxSizeY / 2.0));
+   }
+   
+   public static final Transform3D pelvisBackContactPointTransform = new Transform3D();
+   static
+   {
+      Matrix3d rotation = new Matrix3d();
+      RotationFunctions.setYawPitchRoll(rotation, 0.0, Math.PI / 2.0, 0.0);
+      pelvisBackContactPointTransform.set(rotation);
+
+      Vector3d translation = new Vector3d(-pelvisBoxSizeX / 2.0, 0.0, 0.0);
+      translation.add(pelvisBoxOffset);
+      pelvisBackContactPointTransform.setTranslation(translation);
+   }
+   
+   public static final List<Point2d> pelvisBackContacts = new ArrayList<Point2d>();
+   static
+   {
+      pelvisBackContacts.add(new Point2d(-pelvisBoxSizeZ / 2.0, pelvisBoxSizeY / 2.0));
+      pelvisBackContacts.add(new Point2d(-pelvisBoxSizeZ / 2.0, -pelvisBoxSizeY / 2.0));
+      pelvisBackContacts.add(new Point2d(pelvisBoxSizeZ / 2.0, pelvisBoxSizeY / 2.0));
+      pelvisBackContacts.add(new Point2d(pelvisBoxSizeZ / 2.0, -pelvisBoxSizeY / 2.0));
+   }
 
    // Enable joint limits
    public static boolean ENABLE_JOINT_VELOCITY_TORQUE_LIMITS = false;
@@ -275,17 +320,17 @@ public class AtlasJointMap extends DRCRobotJointMap
 
       if (addLoadsOfContactPoints)
       {
-         for (Point2d point : AtlasAndHandRobotParameters.pelvisContactPoints)
+         for (Point2d point : pelvisContacts)
          {
             Point3d point3d = new Point3d(point.getX(), point.getY(), 0.0);
-            AtlasAndHandRobotParameters.pelvisContactPointTransform.transform(point3d);
+            pelvisContactPointTransform.transform(point3d);
             pelvisContactPoints.add(new Pair<String, Vector3d>("pelvis", new Vector3d(point3d)));
          }
 
-         for (Point2d point : AtlasAndHandRobotParameters.pelvisBackContactPoints)
+         for (Point2d point : pelvisBackContacts)
          {
             Point3d point3d = new Point3d(point.getX(), point.getY(), 0.0);
-            AtlasAndHandRobotParameters.pelvisBackContactPointTransform.transform(point3d);
+            pelvisBackContactPointTransform.transform(point3d);
             pelvisBackContactPoints.add(new Pair<String, Vector3d>("pelvis", new Vector3d(point3d)));
          }
          
@@ -573,5 +618,29 @@ public class AtlasJointMap extends DRCRobotJointMap
    public String getHighestNeckPitchJointName()
    {
       return "neck_ry";
+   }
+
+   @Override
+   public Transform3D getPelvisContactPointTransform()
+   {
+      return pelvisContactPointTransform;
+   }
+
+   @Override
+   public List<Point2d> getPelvisContactPoints()
+   {
+      return pelvisContacts;
+   }
+
+   @Override
+   public Transform3D getPelvisBackContactPointTransform()
+   {
+      return pelvisBackContactPointTransform;
+   }
+
+   @Override
+   public List<Point2d> getPelvisBackContactPoints()
+   {
+      return pelvisBackContacts;
    }
 }
