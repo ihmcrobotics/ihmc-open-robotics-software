@@ -6,7 +6,7 @@ import java.util.List;
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotInterface;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.AtlasAndHandRobotParameters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.HandContactParameters;
 
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.Robot;

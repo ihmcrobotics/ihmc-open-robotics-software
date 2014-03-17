@@ -1,6 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import us.ihmc.darpaRoboticsChallenge.drcRobot.AtlasAndHandRobotParameters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.HandContactParameters;
 import us.ihmc.utilities.math.TimeTools;
 
 public class DRCConfigParameters
