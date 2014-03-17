@@ -9,6 +9,8 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Point2d;
 
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.atlas.AtlasArmControllerParameters;
+import us.ihmc.atlas.AtlasRobotMultiContactControllerParameters;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;

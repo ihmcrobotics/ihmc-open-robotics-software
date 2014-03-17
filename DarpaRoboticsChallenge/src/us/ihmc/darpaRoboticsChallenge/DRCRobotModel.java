@@ -1,6 +1,8 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+import us.ihmc.atlas.AtlasArmControllerParameters;
 import us.ihmc.atlas.AtlasJointMap;
+import us.ihmc.atlas.AtlasWalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.acsell.ACSELLArmControlParameters;

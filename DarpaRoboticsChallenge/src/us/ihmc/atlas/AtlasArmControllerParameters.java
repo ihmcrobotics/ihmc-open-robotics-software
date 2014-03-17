@@ -1,6 +1,7 @@
-package us.ihmc.darpaRoboticsChallenge;
+package us.ihmc.atlas;
 
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
+import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 
 public class AtlasArmControllerParameters implements ArmControllerParameters
 {

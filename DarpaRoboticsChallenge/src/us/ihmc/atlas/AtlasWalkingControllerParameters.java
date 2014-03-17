@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge;
+package us.ihmc.atlas;
 
 import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.back_bkx;
 import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.back_bky;
@@ -16,6 +16,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
+import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.HandContactParameters;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
