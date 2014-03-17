@@ -9,6 +9,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepUtils;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData;
@@ -17,7 +18,6 @@ import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.commonWalkingControlModules.trajectories.SimpleTwoWaypointTrajectoryParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.AtlasAndHandRobotParameters;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -31,9 +31,9 @@ public class ScriptedFootstepGenerator
 {
    private final SideDependentList<ContactablePlaneBody> bipedFeet;
 
-   public ScriptedFootstepGenerator(ReferenceFrames referenceFrames, FullRobotModel fullRobotModel)
+   public ScriptedFootstepGenerator(ReferenceFrames referenceFrames, FullRobotModel fullRobotModel, WalkingControllerParameters walkingControllerParameters)
    {
-      this.bipedFeet = setupBipedFeet(referenceFrames, fullRobotModel);
+      this.bipedFeet = setupBipedFeet(referenceFrames, fullRobotModel, walkingControllerParameters);
    }
 
    public ScriptedFootstepGenerator(SideDependentList<ContactablePlaneBody> bipedFeet)
@@ -117,15 +117,15 @@ public class ScriptedFootstepGenerator
       return footstep;
    }
 
-   public SideDependentList<ContactablePlaneBody> setupBipedFeet(ReferenceFrames referenceFrames, FullRobotModel fullRobotModel)
+   public SideDependentList<ContactablePlaneBody> setupBipedFeet(ReferenceFrames referenceFrames, FullRobotModel fullRobotModel, WalkingControllerParameters walkingControllerParameters)
    {
       double footForward, footBack, footWidth;
 
       if (DRCConfigParameters.USE_GFE_ROBOT_MODEL)
       {
-         footForward = AtlasAndHandRobotParameters.DRC_ROBOT_FOOT_FORWARD;
-         footBack = AtlasAndHandRobotParameters.DRC_ROBOT_FOOT_BACK;
-         footWidth = AtlasAndHandRobotParameters.DRC_ROBOT_FOOT_WIDTH;
+         footForward = walkingControllerParameters.getFoot_forward();
+         footBack = walkingControllerParameters.getFoot_back();
+         footWidth = walkingControllerParameters.getFoot_width();
       }
       else
       {

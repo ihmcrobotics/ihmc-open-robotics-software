@@ -31,12 +31,24 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    private final SideDependentList<Transform3D> handPosesWithRespectToChestFrame = new SideDependentList<Transform3D>();
    private final double minElbowRollAngle = 0.5;
    // Limits
-   private final double DRC_ROBOT_NECK_PITCH_UPPER_LIMIT = 1.14494; //0.83;    // true limit is = 1.134460, but pitching down more just looks at more robot chest
-   private final double DRC_ROBOT_NECK_PITCH_LOWER_LIMIT = -0.602139; //-0.610865;    // -Math.PI/2.0;
-   private final double DRC_ROBOT_HEAD_YAW_LIMIT = Math.PI / 4.0;
-   private final double DRC_ROBOT_HEAD_ROLL_LIMIT = Math.PI / 4.0;
-   private final double DRC_ROBOT_PELVIS_PITCH_UPPER_LIMIT = 0.0;
-   private final double DRC_ROBOT_PELVIS_PITCH_LOWER_LIMIT = -0.35; //-Math.PI / 6.0;
+   private final double neck_pitch_upper_limit = 1.14494; //0.83;    // true limit is = 1.134460, but pitching down more just looks at more robot chest
+   private final double neck_pitch_lower_limit = -0.602139; //-0.610865;    // -math.pi/2.0;
+   private final double head_yaw_limit = Math.PI / 4.0;
+   private final double head_roll_limit = Math.PI / 4.0;
+   private final double pelvis_pitch_upper_limit = 0.0;
+   private final double pelvis_pitch_lower_limit = -0.35; //-math.pi / 6.0;
+   
+   // drc robot model parameters
+   private final double  ankle_height = 0.084;
+   private final double  foot_width = 0.12;   // 0.08;   //0.124887;
+   private final double  toe_width = 0.095;  //0.07;   //0.05;   //
+   private final double  foot_length = 0.255;
+   private final double  foot_back = 0.09; // 0.06;   //0.082;    // 0.07;
+   private final double  foot_start_toetaper_from_back = 0.195;
+   private final double  foot_forward = foot_length - foot_back;   // 0.16;   //0.178;    // 0.18;
+   private final double  shin_length = 0.374;
+   private final double  thigh_length = 0.422;
+   private final double  min_leg_length_before_collapsing_single_support = 0.53; // corresponds to q_kny = 1.70 rad
 
    public AtlasWalkingControllerParameters()
    {
@@ -190,7 +202,9 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
 // USE THESE FOR Real Atlas Robot and sims when controlling pelvis height instead of CoM.
    private final double minimumHeightAboveGround = 0.595 + 0.03;                                       
    private double nominalHeightAboveGround = 0.675 + 0.03; 
-   private final double maximumHeightAboveGround = 0.735 + 0.03; 
+   private final double maximumHeightAboveGround = 0.735 + 0.03;
+
+   private double foot_backward; 
    
 // USE THESE FOR DRC Atlas Model TASK 2 UNTIL WALKING WORKS BETTER WITH OTHERS.
 //   private final double minimumHeightAboveGround = 0.785;                                       
@@ -239,22 +253,22 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
 
    public double getUpperNeckPitchLimit()
    {
-      return DRC_ROBOT_NECK_PITCH_UPPER_LIMIT;
+      return neck_pitch_upper_limit;
    }
 
    public double getLowerNeckPitchLimit()
    {
-      return DRC_ROBOT_NECK_PITCH_LOWER_LIMIT;
+      return neck_pitch_lower_limit;
    }
 
    public double getHeadYawLimit()
    {
-      return DRC_ROBOT_HEAD_YAW_LIMIT;
+      return head_yaw_limit;
    }
 
    public double getHeadRollLimit()
    {
-      return DRC_ROBOT_HEAD_ROLL_LIMIT;
+      return head_roll_limit;
    }
 
    public String getJointNameForExtendedPitchRange()
@@ -275,27 +289,27 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
 
    public double getFootForwardOffset()
    {
-      return AtlasAndHandRobotParameters.DRC_ROBOT_FOOT_FORWARD;
+      return foot_forward;
    }
 
    public double getFootBackwardOffset()
    {
-      return AtlasAndHandRobotParameters.DRC_ROBOT_FOOT_BACK;
+      return foot_backward;
    }
    
    public double getAnkleHeight()
    {
-      return AtlasAndHandRobotParameters.DRC_ROBOT_ANKLE_HEIGHT;
+      return ankle_height;
    }
 
    public double getLegLength()
    {
-      return AtlasAndHandRobotParameters.DRC_ROBOT_SHIN_LENGTH + AtlasAndHandRobotParameters.DRC_ROBOT_THIGH_LENGTH;
+      return shin_length + thigh_length;
    }
    
    public double getMinLegLengthBeforeCollapsingSingleSupport()
    {
-      return AtlasAndHandRobotParameters.DRC_ROBOT_MIN_LEG_LENGTH_BEFORE_COLLAPSING_SINGLE_SUPPORT;
+      return min_leg_length_before_collapsing_single_support;
    }
 
    public double getFinalToeOffPitchAngularVelocity()
@@ -557,16 +571,57 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
 
    public double getPelvisPitchUpperLimit()
    {
-      return DRC_ROBOT_PELVIS_PITCH_UPPER_LIMIT;
+      return pelvis_pitch_upper_limit;
    }
+   
    public double getPelvisPitchLowerLimit()
    {
-      return DRC_ROBOT_PELVIS_PITCH_LOWER_LIMIT;
+      return pelvis_pitch_lower_limit;
    }
 
-   @Override
    public boolean isPelvisPitchReversed()
    {
       return false;
    }
+   public double getAnkle_height()
+   {
+      return ankle_height;
+   }
+
+   public double getFoot_width()
+   {
+      return foot_width;
+   }
+
+   public double getToe_width()
+   {
+      return toe_width;
+   }
+
+   public double getFoot_length()
+   {
+      return foot_length;
+   }
+
+   public double getFoot_back()
+   {
+      return foot_back;
+   }
+
+   public double getFoot_start_toetaper_from_back()
+   {
+      return foot_start_toetaper_from_back;
+   }
+
+   public double getFoot_forward()
+   {
+      return foot_forward;
+   }
+   
+   public double getSideLengthOfBoundingBoxForFootstepHeight()
+   {
+      return (1 + 0.3) * 2 * Math.sqrt(getFoot_forward() * getFoot_forward()
+            + 0.25 * getFoot_width() * getFoot_width());
+   }
 }
+

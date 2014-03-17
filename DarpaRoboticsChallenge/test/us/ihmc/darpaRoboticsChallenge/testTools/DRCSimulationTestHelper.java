@@ -5,10 +5,12 @@ import com.yobotics.simulationconstructionset.time.GlobalTimer;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import com.yobotics.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
+
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.visualization.SliderBoardFactory;
 import us.ihmc.atlas.visualization.WalkControllerSliderBoard;
 import us.ihmc.bambooTools.BambooTools;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.BlindWalkingPacket;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
@@ -37,6 +39,7 @@ public class DRCSimulationTestHelper
    private final boolean checkNothingChanged;
    private final NothingChangedVerifier nothingChangedVerifier;
    private BlockingSimulationRunner blockingSimulationRunner;
+   private final WalkingControllerParameters walkingControlParameters;
    
    private final boolean createMovie;
 
@@ -50,7 +53,7 @@ public class DRCSimulationTestHelper
          DRCRobotModel robotModel)
    {
       networkObjectCommunicator = new ScriptedFootstepDataListObjectCommunicator("Team");
-
+      this.walkingControlParameters = robotModel.getWalkingControlParamaters();
       this.checkNothingChanged = checkNothingChanged;
       this.createMovie = createMovie;
       if (createMovie) showGUI = true;
@@ -96,7 +99,7 @@ public class DRCSimulationTestHelper
       ReferenceFrames referenceFrames = controller.getControllerReferenceFrames();
       FullRobotModel fullRobotModel = controller.getControllerModel();
 
-      ScriptedFootstepGenerator scriptedFootstepGenerator = new ScriptedFootstepGenerator(referenceFrames, fullRobotModel);
+      ScriptedFootstepGenerator scriptedFootstepGenerator = new ScriptedFootstepGenerator(referenceFrames, fullRobotModel,walkingControlParameters);
 
       return scriptedFootstepGenerator;
    }

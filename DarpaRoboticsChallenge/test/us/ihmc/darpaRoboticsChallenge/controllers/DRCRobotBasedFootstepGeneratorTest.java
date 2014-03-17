@@ -15,6 +15,7 @@ import org.junit.Test;
 
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepGeneratorVisualizer;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepUtils;
@@ -25,7 +26,6 @@ import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.AtlasAndHandRobotParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.userInterface.DRCOperatorUserInterface;
 import us.ihmc.robotSide.RobotSide;
@@ -49,6 +49,7 @@ public class DRCRobotBasedFootstepGeneratorTest
    private FullRobotModel fullRobotModel;
    private ReferenceFrames referenceFrames;
    private SideDependentList<ContactablePlaneBody> bipedFeet;
+   private WalkingControllerParameters walkingParamaters;
 
 
    @Before
@@ -140,7 +141,7 @@ public class DRCRobotBasedFootstepGeneratorTest
    {
       for (Footstep footstep : footSteps)
       {
-         assertEquals(AtlasAndHandRobotParameters.DRC_ROBOT_ANKLE_HEIGHT, footstep.getPoseCopy().getZ(), eps);
+         assertEquals(walkingParamaters.getAnkle_height(), footstep.getPoseCopy().getZ(), eps);
       }
    }
 
@@ -167,9 +168,10 @@ public class DRCRobotBasedFootstepGeneratorTest
       DRCRobotModel robotModel = DRCRobotModel.ATLAS_NO_HANDS_ADDED_MASS;
       DRCRobotJointMap jointMap = robotModel.getJointMap(false, false);
       JaxbSDFLoader jaxbSDFLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
+      walkingParamaters = robotModel.getWalkingControlParamaters();
       fullRobotModel = jaxbSDFLoader.createFullRobotModel(jointMap);
       referenceFrames = new ReferenceFrames(fullRobotModel, jointMap, jointMap.getAnkleHeight());
-      bipedFeet = DRCOperatorUserInterface.setupBipedFeet(referenceFrames, fullRobotModel);
+      bipedFeet = DRCOperatorUserInterface.setupBipedFeet(referenceFrames, fullRobotModel, walkingParamaters);
    }
 
 

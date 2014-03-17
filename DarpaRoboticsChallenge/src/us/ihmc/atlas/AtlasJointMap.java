@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.NeckJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineJointName;
+import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel.RobotType;
 import us.ihmc.darpaRoboticsChallenge.IncorrectDrcRobotModelException;
@@ -26,6 +27,7 @@ import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.*;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.Pair;
+import us.ihmc.utilities.math.geometry.TransformTools;
 
 public class AtlasJointMap extends DRCRobotJointMap 
 {
@@ -47,7 +49,7 @@ public class AtlasJointMap extends DRCRobotJointMap
    public static final String bodyIMUSensor = "pelvis_imu_sensor";
    public static final String[] imuSensorsToUse = { bodyIMUSensor };
    
-   private final double ankleHeight = AtlasAndHandRobotParameters.DRC_ROBOT_ANKLE_HEIGHT;
+   private final double ankleHeight = 0.084;
 
    private final LegJointName[] legJoints =
    {
@@ -80,6 +82,56 @@ public class AtlasJointMap extends DRCRobotJointMap
    private final List<Pair<String, Vector3d>> chestBackContactPoints = new ArrayList<Pair<String, Vector3d>>();
    private final List<Pair<String, Vector3d>> jointNameGroundContactPointMap = new ArrayList<Pair<String, Vector3d>>();
    private final DRCRobotModel selectedModel;
+   private final Transform3D ankle_to_sole_frame_tranform = TransformTools.createTranslationTransform(new Vector3d(0.0, 0.0, -ankleHeight));
+   
+   private static final double  foot_width = 0.12;   // 0.08;   //0.124887;
+   private static final double  toe_width = 0.095;  //0.07;   //0.05;   //
+   private static final double  foot_length = 0.255;
+   private static final double  foot_back = 0.09; // 0.06;   //0.082;    // 0.07;
+   private static final double  foot_start_toetaper_from_back = 0.195;
+   private static final double  foot_forward = foot_length - foot_back;   // 0.16;   //0.178;    // 0.18;
+   
+ public static final ArrayList<Point2d> ground_contact_point_offset_from_foot = new ArrayList<Point2d>();
+
+ static
+ {
+    ground_contact_point_offset_from_foot.add(new Point2d(-foot_back, -(foot_width / 2.0)));
+    ground_contact_point_offset_from_foot.add(new Point2d(-foot_back, foot_width / 2.0));
+    ground_contact_point_offset_from_foot.add(new Point2d(foot_forward, -(toe_width / 2.0)));
+    ground_contact_point_offset_from_foot.add(new Point2d(foot_forward, toe_width / 2.0));
+    //Added contact points between corners
+    if (DRCConfigParameters.USE_SIX_CONTACT_POINTS_PER_FOOT)
+    {
+       ground_contact_point_offset_from_foot.add(new Point2d(foot_start_toetaper_from_back-foot_back, -(foot_width / 2.0)));
+       ground_contact_point_offset_from_foot.add(new Point2d(foot_start_toetaper_from_back-foot_back, foot_width / 2.0));
+    }
+ }
+
+ public static final ArrayList<Point2d> ground_loads_of_contact_point_offset_from_foot = new ArrayList<Point2d>();
+
+ static
+ {
+    int nSubdivisionsX = 3;
+    int nSubdivisionsY = 2;
+
+    double lengthSubdivision = foot_length / (nSubdivisionsX + 1.0);
+    double widthSubdivision = foot_width / (nSubdivisionsY + 1.0);
+
+    double offsetX = -foot_back;
+    
+    for (int i = 0; i <= nSubdivisionsX + 1; i++)
+    {
+       double offsetY = -foot_width / 2.0;
+       for (int j = 0; j <= nSubdivisionsY + 1; j++)
+       {
+          Point2d contactPointOffset = new Point2d(offsetX, offsetY);
+          ground_loads_of_contact_point_offset_from_foot.add(contactPointOffset);
+          offsetY += widthSubdivision;
+       }
+       offsetX += lengthSubdivision;
+    }
+ }
+   
 
    public AtlasJointMap(DRCRobotModel selectedModel, boolean addLoadsOfContactPoints)
    {
@@ -131,14 +183,14 @@ public class AtlasJointMap extends DRCRobotJointMap
 
          ArrayList<Point2d> contactPointOffsetList;
          if (addLoadsOfContactPointsForFeetOnly)
-            contactPointOffsetList = AtlasAndHandRobotParameters.DRC_ROBOT_GROUND_LOADS_OF_CONTACT_POINT_OFFSET_FROM_FOOT;
+            contactPointOffsetList = ground_loads_of_contact_point_offset_from_foot;
          else
-            contactPointOffsetList = AtlasAndHandRobotParameters.DRC_ROBOT_GROUND_CONTACT_POINT_OFFSET_FROM_FOOT;
+            contactPointOffsetList = ground_contact_point_offset_from_foot;
             
          for (Point2d footv3d : contactPointOffsetList)
          {
             // add ankle joint contact points on each corner of the foot
-            footGroundContactPoints.get(robotSide).add(new Pair<String, Vector3d>(forcedSideJointNames[l_leg_akx], new Vector3d(footv3d.getX(), footv3d.getY(), -AtlasAndHandRobotParameters.DRC_ROBOT_ANKLE_HEIGHT)));
+            footGroundContactPoints.get(robotSide).add(new Pair<String, Vector3d>(forcedSideJointNames[l_leg_akx], new Vector3d(footv3d.getX(), footv3d.getY(), -ankleHeight)));
          }
 
          if (selectedModel == DRCRobotModel.ATLAS_SANDIA_HANDS && addLoadsOfContactPoints)
@@ -496,14 +548,14 @@ public class AtlasJointMap extends DRCRobotJointMap
    @Override
    public SideDependentList<Transform3D> getAnkleToSoleFrameTransform()
    {
-      return new SideDependentList<>(AtlasAndHandRobotParameters.DRC_ROBOT_ANKLE_TO_SOLE_FRAME_TRANFORM,
-            AtlasAndHandRobotParameters.DRC_ROBOT_ANKLE_TO_SOLE_FRAME_TRANFORM);
+      return new SideDependentList<>(ankle_to_sole_frame_tranform,
+            ankle_to_sole_frame_tranform);
    }
 
    @Override
    public SideDependentList<ArrayList<Point2d>> getFootGroundContactPointsInSoleFrameForController()
    {
-      return new SideDependentList<>(AtlasAndHandRobotParameters.DRC_ROBOT_GROUND_CONTACT_POINT_OFFSET_FROM_FOOT, AtlasAndHandRobotParameters.DRC_ROBOT_GROUND_CONTACT_POINT_OFFSET_FROM_FOOT);
+      return new SideDependentList<>(ground_contact_point_offset_from_foot, ground_contact_point_offset_from_foot);
    }
 
    @Override
