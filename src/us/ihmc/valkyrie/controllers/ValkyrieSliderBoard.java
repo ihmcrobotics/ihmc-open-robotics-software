@@ -51,19 +51,23 @@ public class ValkyrieSliderBoard
               ValkyrieSliderBoardController.ValkyrieSliderBoardSelectableJoints.values())
       {
          String jointName = jointId.toString();
-         String pdControllerBaseName = jointName + "ValkyrieJointPDController";
+         if(!jointName.contains("Ibeo"))
+         {
+            String pdControllerBaseName = jointName + "ValkyrieJointPDController";
 
-         // knobs
+            // knobs
 
-         sliderBoardConfigurationManager.setKnob(1, selectedJoint, 0, ValkyrieSliderBoardController.ValkyrieSliderBoardSelectableJoints.values().length - 1);
+            sliderBoardConfigurationManager.setKnob(1, selectedJoint, 0, ValkyrieSliderBoardController.ValkyrieSliderBoardSelectableJoints.values().length - 1);
 
-         // sliders
-         sliderBoardConfigurationManager.setSlider(1, pdControllerBaseName + "_q_d", registry,
-                 generalizedSDFRobotModel.getJointHolder(jointName).getLowerLimit(), generalizedSDFRobotModel.getJointHolder(jointName).getUpperLimit());
-         sliderBoardConfigurationManager.setSlider(2, "kp_" + pdControllerBaseName, registry, 0.0, 60.0);
-         sliderBoardConfigurationManager.setSlider(3, "kd_" + pdControllerBaseName, registry, 0.0, 60.0);
+            // sliders
+            sliderBoardConfigurationManager.setSlider(1, pdControllerBaseName + "_q_d", registry,
+                    generalizedSDFRobotModel.getJointHolder(jointName).getLowerLimit(), generalizedSDFRobotModel.getJointHolder(jointName).getUpperLimit());
+            sliderBoardConfigurationManager.setSlider(2, "kp_" + pdControllerBaseName, registry, 0.0, 60.0);
+            sliderBoardConfigurationManager.setSlider(3, "kd_" + pdControllerBaseName, registry, 0.0, 60.0);
 
-         sliderBoardConfigurationManager.saveConfiguration(jointId.toString());
+            sliderBoardConfigurationManager.saveConfiguration(jointId.toString());
+         }
+
       }
 
 
@@ -90,7 +94,7 @@ public class ValkyrieSliderBoard
               ValkyrieSliderBoardController.ValkyrieSliderBoardSelectableJoints.values())
       {
          String jointName = jointId.toString();
-
+         System.out.println(jointName);
          // knobs
 
          sliderBoardConfigurationManager.setKnob(1, selectedJoint, 0, ValkyrieSliderBoardController.ValkyrieSliderBoardSelectableJoints.values().length - 1);
@@ -123,7 +127,7 @@ public class ValkyrieSliderBoard
    private void setupSliderBoardForWalking(YoVariableRegistry registry, GeneralizedSDFRobotModel generalizedSDFRobotModel,
                                            final SliderBoardConfigurationManager sliderBoardConfigurationManager)
    {
-      //TODO: This
+      sliderBoardConfigurationManager.setSlider(1, "transitionFactor", registry, 0.0, 1.0);
    }
 
    private static final SliderBoardFactory turboDriverPositionControlFactory = new SliderBoardFactory()
@@ -164,10 +168,8 @@ public class ValkyrieSliderBoard
    };
 
    //FIXME: Implement this
-   public static SliderBoardFactory getWalkingSliderBoardFactory()
+   public static SliderBoardFactory getDefaultSliderBoardFactory()
    {
-      throw new RuntimeException("Not Yet Implemented! Fix this!");
-
-//      return walkingFactory;
+      return walkingFactory;
    }
 }

@@ -4,16 +4,16 @@ LeftShoulderExtensor:
 RightShoulderExtensor:
     kp: 18.3
     kd: 7.08661
-LeftShouldAdductor:
+LeftShoulderAdductor:
     kp: 34.48819
     kd: 15.11811
-RightShouldAdductor:
+RightShoulderAdductor:
     kp: 34.48819
     kd: 15.11811
-LeftShoulderSuppinator:
+LeftShoulderSupinator:
     kp: 44.40945
     kd: 8.03150
-RightShoulderSuppinator:
+RightShoulderSupinator:
     kp: 44.40945
     kd: 8.03150
 LeftElbowExtensor:
@@ -38,11 +38,11 @@ RightHipRotator:
     kp: 46.77165
     kd: 9.44882
 LeftHipAdductor:
-    kp: 425
-    kd: 60
+    kp: 425.0
+    kd: 60.0
 RightHipAdductor:
-    kp: 425
-    kd: 60
+    kp: 425.0
+    kd: 60.0
 LeftHipExtensor:
     kp: 50.07874
     kd: 26.45669
@@ -76,3 +76,21 @@ LeftAnkleExtensor:
 LeftAnkle:
     kp: 20.0
     kd: 8.0
+LeftForearmSupinator:
+    kp: 0.0
+    kd: 0.0
+RightForearmSupinator:
+    kp: 0.0
+    kd: 0.0
+LeftWristExtensor:
+    kp: 0.0
+    kd: 0.0
+RightWristExtensor:
+    kp: 0.0
+    kd: 0.0
+LeftWrist:
+    kp: 0.0
+    kd: 0.0
+RightWrist:
+    kp: 0.0
+    kd: 0.0

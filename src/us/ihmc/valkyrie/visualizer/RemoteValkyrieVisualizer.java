@@ -14,18 +14,18 @@ import us.ihmc.robotDataCommunication.visualizer.SCSYoVariablesUpdatedListener;
 import us.ihmc.valkyrie.ValkyrieNetworkParameters;
 import us.ihmc.valkyrie.controllers.ValkyrieSliderBoard;
 
-public class RemoteValkyrieWalkingSliderBoardVisualizer
+public class RemoteValkyrieVisualizer
 {
    public static final String defaultHost = ValkyrieNetworkParameters.CONTROL_COMPUTER_HOST;
    public static final int defaultPort = ValkyrieNetworkParameters.VARIABLE_SERVER_PORT;
 
-   public RemoteValkyrieWalkingSliderBoardVisualizer(String host, int port, int bufferSize)
+   public RemoteValkyrieVisualizer(String host, int port, int bufferSize)
    {
       System.out.println("Connecting to host " + host);
       ValkyrieJointMap jointMap = new ValkyrieJointMap();
       JaxbSDFLoader robotLoader = ValkyrieSDFLoader.loadValkyrieRobot(false);
 
-      SliderBoardFactory sliderBoardFactory = ValkyrieSliderBoard.getWalkingSliderBoardFactory();
+      SliderBoardFactory sliderBoardFactory = ValkyrieSliderBoard.getDefaultSliderBoardFactory();
 
       SCSYoVariablesUpdatedListener scsYoVariablesUpdatedListener = new ValkyrieSliderBoardControllerListener(robotLoader, jointMap, bufferSize, sliderBoardFactory);
 
@@ -53,12 +53,12 @@ public class RemoteValkyrieWalkingSliderBoardVisualizer
          String host = config.getString("host");
          int port = config.getInt("port");
 
-         new RemoteValkyrieWalkingSliderBoardVisualizer(host, port, bufferSize);
+         new RemoteValkyrieVisualizer(host, port, bufferSize);
       }
       else
       {
          System.err.println();
-         System.err.println("Usage: java " + RemoteValkyrieWalkingSliderBoardVisualizer.class.getName());
+         System.err.println("Usage: java " + RemoteValkyrieVisualizer.class.getName());
          System.err.println("                " + jsap.getUsage());
          System.err.println();
          System.exit(1);
