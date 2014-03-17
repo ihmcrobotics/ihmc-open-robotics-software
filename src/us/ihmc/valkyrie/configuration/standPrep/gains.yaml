@@ -1,0 +1,78 @@
+LeftShoulderExtensor:
+    kp: 18.3
+    kd: 7.08661
+RightShoulderExtensor:
+    kp: 18.3
+    kd: 7.08661
+LeftShouldAdductor:
+    kp: 34.48819
+    kd: 15.11811
+RightShouldAdductor:
+    kp: 34.48819
+    kd: 15.11811
+LeftShoulderSuppinator:
+    kp: 44.40945
+    kd: 8.03150
+RightShoulderSuppinator:
+    kp: 44.40945
+    kd: 8.03150
+LeftElbowExtensor:
+    kp: 28.81890
+    kd: 5.66929
+RightElbowExtensor:
+    kp: 28.81890
+    kd: 5.66929
+WaistRotator:
+    kp: 36.37795
+    kd: 8.97638
+WaistExtensor:
+    kp: 35.433
+    kd: 11.338
+WaistLateralExtensor:
+    kp: 22.20472
+    kd: 8.50394
+LeftHipRotator:
+    kp: 46.77165
+    kd: 9.44882
+RightHipRotator:
+    kp: 46.77165
+    kd: 9.44882
+LeftHipAdductor:
+    kp: 425
+    kd: 60
+RightHipAdductor:
+    kp: 425
+    kd: 60
+LeftHipExtensor:
+    kp: 50.07874
+    kd: 26.45669
+RightHipExtensor:
+    kp: 50.07874
+    kd: 26.45669
+LeftKneeExtensor:
+    kp: 60.0
+    kd: 10.39370
+RightKneeExtensor:
+    kp: 60.0
+    kd: 10.39370
+LowerNeckExtensor:
+    kp: 20.0
+    kd: 8.0
+NeckRotator:
+    kp: 20.0
+    kd: 8.0
+UpperNeckExtensor:
+    kp: 20.0
+    kd: 8.0
+RightAnkleExtensor:
+    kp: 20.0
+    kd: 8.0
+RightAnkle:
+    kp: 20.0
+    kd: 8.0
+LeftAnkleExtensor:
+    kp: 20.0
+    kd: 8.0
+LeftAnkle:
+    kp: 20.0
+    kd: 8.0
