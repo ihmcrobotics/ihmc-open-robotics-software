@@ -27,6 +27,7 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactoryHelper;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredJointAccelerationCommand;
@@ -94,7 +95,7 @@ public class DRCOptimizationMomentumControlModuleTest
       ScrewTestTools.setRandomVelocities(allJoints, random);
       OneDoFJoint[] oneDoFJoints = ScrewTools.filterJoints(allJoints, OneDoFJoint.class);
 
-      SideDependentList<ContactablePlaneBody> feet = createFeet(fullRobotModel, referenceFrames);
+      SideDependentList<ContactablePlaneBody> feet = createFeet(fullRobotModel, referenceFrames,robotModel.getWalkingControlParamaters());
       YoVariableRegistry registry = new YoVariableRegistry("test");
       double coefficientOfFriction = 1.0;
 
@@ -180,7 +181,7 @@ public class DRCOptimizationMomentumControlModuleTest
 //    ScrewTestTools.setRandomVelocities(allJoints, random);
       OneDoFJoint[] oneDoFJoints = ScrewTools.filterJoints(allJoints, OneDoFJoint.class);
 
-      SideDependentList<ContactablePlaneBody> feet = createFeet(fullRobotModel, referenceFrames);
+      SideDependentList<ContactablePlaneBody> feet = createFeet(fullRobotModel, referenceFrames,robotModel.getWalkingControlParamaters());
       YoVariableRegistry registry = new YoVariableRegistry("test");
       double coefficientOfFriction = 1.0;
 
@@ -325,11 +326,11 @@ public class DRCOptimizationMomentumControlModuleTest
       return contactStates;
    }
 
-   private SideDependentList<ContactablePlaneBody> createFeet(SDFFullRobotModel fullRobotModel, ReferenceFrames referenceFrames)
+   private SideDependentList<ContactablePlaneBody> createFeet(SDFFullRobotModel fullRobotModel, ReferenceFrames referenceFrames, WalkingControllerParameters walkingControlParamaters)
    {
-      double footForward = AtlasAndHandRobotParameters.DRC_ROBOT_FOOT_FORWARD;
-      double footBack = AtlasAndHandRobotParameters.DRC_ROBOT_FOOT_BACK;
-      double footWidth = AtlasAndHandRobotParameters.DRC_ROBOT_FOOT_WIDTH;
+      double footForward = walkingControlParamaters.getFoot_forward();
+      double footBack = walkingControlParamaters.getFoot_back();
+      double footWidth = walkingControlParamaters.getFoot_width();
 
       SideDependentList<ContactablePlaneBody> bipedFeet = new SideDependentList<ContactablePlaneBody>();
       for (RobotSide robotSide : RobotSide.values)

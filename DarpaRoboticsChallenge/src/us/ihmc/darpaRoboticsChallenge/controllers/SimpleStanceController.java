@@ -18,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlane
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CoMBasedMomentumRateOfChangeControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
@@ -422,10 +423,10 @@ public class SimpleStanceController implements RobotController
 
       DRCRobotInitialSetup<SDFRobot> intialSetup = new SquaredUpDRCRobotInitialSetup();
       intialSetup.initializeRobot(robot, jointMap);
-
-      double footForward = AtlasAndHandRobotParameters.DRC_ROBOT_FOOT_FORWARD;
-      double footBack = AtlasAndHandRobotParameters.DRC_ROBOT_FOOT_BACK;
-      double footWidth = AtlasAndHandRobotParameters.DRC_ROBOT_FOOT_WIDTH;
+      WalkingControllerParameters walkingControlParams = model.getWalkingControlParamaters();
+      double footForward =  walkingControlParams.getFoot_forward();
+      double footBack = walkingControlParams.getFoot_back();
+      double footWidth = walkingControlParams.getFoot_width();
 
       double controlDT = 0.005;
       InverseDynamicsJoint[] jointsToOptimize = createJointsToOptimize(fullRobotModel);

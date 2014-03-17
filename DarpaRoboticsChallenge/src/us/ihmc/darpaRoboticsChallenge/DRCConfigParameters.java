@@ -244,12 +244,6 @@ public class DRCConfigParameters
    public static final double OCTREE_RESOLUTION_WHEN_NOT_USING_RESOLUTION_SPHERE = 0.025;
    public static final double FOOTSTEP_FITTING_BUFFER_SIZE = -0.01;
 
-   // Footstep Generator
-   public static final double BOUNDING_BOX_FOR_FOOTSTEP_HEIGHT_FINDING_SIDE_LENGTH =
-      (1 + 0.3) * 2
-      * Math.sqrt(AtlasAndHandRobotParameters.DRC_ROBOT_FOOT_FORWARD * AtlasAndHandRobotParameters.DRC_ROBOT_FOOT_FORWARD
-                  + 0.25 * AtlasAndHandRobotParameters.DRC_ROBOT_FOOT_WIDTH * AtlasAndHandRobotParameters.DRC_ROBOT_FOOT_WIDTH);
-
    public static final int JOINT_CONFIGURATION_RATE_IN_MS = 10;
 
    public static final boolean USE_TABS_IN_UI = true;
