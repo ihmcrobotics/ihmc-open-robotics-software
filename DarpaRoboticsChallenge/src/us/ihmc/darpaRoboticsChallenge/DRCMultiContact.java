@@ -18,7 +18,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Mu
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel.RobotType;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControllerFactory;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.AtlasAndHandRobotParameters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.HandContactParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.PlainDRCRobot;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
@@ -95,8 +95,8 @@ public class DRCMultiContact
       for (RobotSide robotSide : RobotSide.values)
       {
          namesOfJointsBeforeHands.put(robotSide, jointMap.getNameOfJointBeforeHand(robotSide));
-         handContactPointTransforms.put(robotSide, AtlasAndHandRobotParameters.invisibleContactablePlaneHandContactPointTransforms.get(robotSide));
-         handContactPoints.put(robotSide, AtlasAndHandRobotParameters.invisibleContactablePlaneHandContactPoints.get(robotSide));
+         handContactPointTransforms.put(robotSide, HandContactParameters.invisibleContactablePlaneHandContactPointTransforms.get(robotSide));
+         handContactPoints.put(robotSide, HandContactParameters.invisibleContactablePlaneHandContactPoints.get(robotSide));
       }
       WalkingControllerParameters controllerParameters = robotModel.getWalkingControlParamaters();
       ArmControllerParameters armControllerParameters = robotModel.getArmControllerParameters();

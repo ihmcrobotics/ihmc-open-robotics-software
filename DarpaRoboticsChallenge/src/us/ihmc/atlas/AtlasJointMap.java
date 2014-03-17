@@ -22,7 +22,7 @@ import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel.RobotType;
 import us.ihmc.darpaRoboticsChallenge.IncorrectDrcRobotModelException;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.AtlasAndHandRobotParameters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.HandContactParameters;
 import us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap;
 import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.*;
 import us.ihmc.robotSide.RobotSide;
@@ -94,6 +94,66 @@ public class AtlasJointMap extends DRCRobotJointMap
       pelvisBackContacts.add(new Point2d(-pelvisBoxSizeZ / 2.0, -pelvisBoxSizeY / 2.0));
       pelvisBackContacts.add(new Point2d(pelvisBoxSizeZ / 2.0, pelvisBoxSizeY / 2.0));
       pelvisBackContacts.add(new Point2d(pelvisBoxSizeZ / 2.0, -pelvisBoxSizeY / 2.0));
+   }
+   
+   private static final Vector3d chestBoxOffset = new Vector3d(0.044600, 0.000000, 0.186900);
+   private static final double chestBoxSizeX = 0.318800;
+   private static final double chestBoxSizeY = 0.240000;
+   private static final double chestBoxSizeZ = 0.316200;
+   public static final Transform3D chestBackContactPointTransform = new Transform3D();
+   static
+   {
+      Matrix3d rotation = new Matrix3d();
+      RotationFunctions.setYawPitchRoll(rotation, 0.0, Math.PI / 2.0, 0.0);
+      chestBackContactPointTransform.set(rotation);
+      
+      Vector3d translation = new Vector3d(-chestBoxSizeX / 2.0, 0.0, 0.0);
+      translation.add(chestBoxOffset);
+      chestBackContactPointTransform.setTranslation(translation);
+   }
+   
+   public static final List<Point2d> chestBackContacts = new ArrayList<Point2d>();
+   static
+   {
+      chestBackContacts.add(new Point2d(0.0, chestBoxSizeY / 2.0));
+      chestBackContacts.add(new Point2d(0.0, -chestBoxSizeY / 2.0));
+      chestBackContacts.add(new Point2d(chestBoxSizeZ / 2.0, chestBoxSizeY / 2.0));
+      chestBackContacts.add(new Point2d(chestBoxSizeZ / 2.0, -chestBoxSizeY / 2.0));
+   }
+   
+   public static final SideDependentList<Transform3D> thighContactPointTransforms = new SideDependentList<Transform3D>();
+   static
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         Transform3D thighContactPointTransform = new Transform3D();
+         double pitch = Math.PI / 2.0;
+         thighContactPointTransform.setEuler(new Vector3d(0.0, pitch, 0.0));
+         thighContactPointTransform.setTranslation(new Vector3d(-0.1179, robotSide.negateIfRightSide(0.02085), -0.08));
+         thighContactPointTransforms.put(robotSide, thighContactPointTransform);
+      }
+   }
+   
+   public static final SideDependentList<List<Point2d>> thighContactPoints = new SideDependentList<List<Point2d>>();
+   static
+   {
+      double[] xOffsets = new double[] {0.0, 0.1};// {0.0, 0.2};
+      double[] yOffsets = new double[] {0.0, 0.0};
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         ArrayList<Point2d> offsetsForSide = new ArrayList<Point2d>();
+
+         for (int i = 0; i < 2; i++)
+         {
+            double xOffset = xOffsets[i];
+            double yOffset = robotSide.negateIfRightSide(yOffsets[i]);
+
+            offsetsForSide.add(new Point2d(xOffset, yOffset));
+         }
+
+         thighContactPoints.put(robotSide, offsetsForSide);
+      }
    }
 
    // Enable joint limits
@@ -253,7 +313,7 @@ public class AtlasJointMap extends DRCRobotJointMap
          {
             // add finger joint contact points offset to the middle of palm-facing side of the finger segment
             String longPrefix = (robotSide == RobotSide.LEFT) ? "left_" : "right_";
-            for (double[] fJointContactOffsets : AtlasAndHandRobotParameters.sandiaFingerContactPointOffsets)
+            for (double[] fJointContactOffsets : HandContactParameters.sandiaFingerContactPointOffsets)
             {
                if (((robotSide == RobotSide.LEFT) && (int) fJointContactOffsets[0] == 0)
                        || ((robotSide == RobotSide.RIGHT) && (int) fJointContactOffsets[0] == 1))
@@ -265,7 +325,7 @@ public class AtlasJointMap extends DRCRobotJointMap
             }
 
             // add wrist joint contact point on finger-facing side of palm
-            for(Vector3d offset : AtlasAndHandRobotParameters.sandiaWristContactPointOffsets.get(robotSide))
+            for(Vector3d offset : HandContactParameters.sandiaWristContactPointOffsets.get(robotSide))
             {
                handGroundContactPoints.get(robotSide).add(new Pair<String, Vector3d>(getNameOfJointBeforeHand(robotSide), offset));
             }
@@ -274,7 +334,7 @@ public class AtlasJointMap extends DRCRobotJointMap
          {
             // add finger joint contact points offset to the middle of palm-facing side of the finger segment
             String longPrefix = (robotSide == RobotSide.LEFT) ? "left_" : "right_";
-            for (double[] fJointContactOffsets : AtlasAndHandRobotParameters.irobotFingerContactPointOffsets)
+            for (double[] fJointContactOffsets : HandContactParameters.irobotFingerContactPointOffsets)
             {
                if (((robotSide == RobotSide.LEFT) && (int) fJointContactOffsets[0] == 0)
                        || ((robotSide == RobotSide.RIGHT) && (int) fJointContactOffsets[0] == 1))
@@ -290,17 +350,17 @@ public class AtlasJointMap extends DRCRobotJointMap
             }
 
             // add wrist joint contact point on finger-facing side of palm
-            for(Vector3d offset : AtlasAndHandRobotParameters.irobotWristContactPointOffsets.get(robotSide))
+            for(Vector3d offset : HandContactParameters.irobotWristContactPointOffsets.get(robotSide))
             {
                handGroundContactPoints.get(robotSide).add(new Pair<String, Vector3d>(getNameOfJointBeforeHand(robotSide), offset));
             }
          }
          else if (selectedModel == DRCRobotModel.ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS)
          {
-            for (Point2d point : AtlasAndHandRobotParameters.invisibleContactablePlaneHandContactPoints.get(robotSide))
+            for (Point2d point : HandContactParameters.invisibleContactablePlaneHandContactPoints.get(robotSide))
             {
                Point3d point3d = new Point3d(point.getX(), point.getY(), 0.0);
-               AtlasAndHandRobotParameters.invisibleContactablePlaneHandContactPointTransforms.get(robotSide).transform(point3d);
+               HandContactParameters.invisibleContactablePlaneHandContactPointTransforms.get(robotSide).transform(point3d);
                handGroundContactPoints.get(robotSide).add(new Pair<String, Vector3d>(getNameOfJointBeforeHand(robotSide), new Vector3d(point3d)));
             }
          }
@@ -308,10 +368,10 @@ public class AtlasJointMap extends DRCRobotJointMap
          // add butt contact points on back of thighs
          if(addLoadsOfContactPoints)
          {
-            for (Point2d point : AtlasAndHandRobotParameters.thighContactPoints.get(robotSide))
+            for (Point2d point : thighContactPoints.get(robotSide))
             {
                Point3d point3d = new Point3d(point.getX(), point.getY(), 0.0);
-               AtlasAndHandRobotParameters.thighContactPointTransforms.get(robotSide).transform(point3d);
+               thighContactPointTransforms.get(robotSide).transform(point3d);
                thighGroundContactPoints.get(robotSide).add(new Pair<String, Vector3d>(getNameOfJointBeforeThigh(robotSide), new Vector3d(point3d)));
             }
          }
@@ -334,10 +394,10 @@ public class AtlasJointMap extends DRCRobotJointMap
             pelvisBackContactPoints.add(new Pair<String, Vector3d>("pelvis", new Vector3d(point3d)));
          }
          
-         for (Point2d point : AtlasAndHandRobotParameters.chestBackContactPoints)
+         for (Point2d point : chestBackContacts)
          {
             Point3d point3d = new Point3d(point.getX(), point.getY(), 0.0);
-            AtlasAndHandRobotParameters.chestBackContactPointTransform.transform(point3d);
+            chestBackContactPointTransform.transform(point3d);
             chestBackContactPoints.add(new Pair<String, Vector3d>(getNameOfJointBeforeChest(), new Vector3d(point3d)));
          }
       }
@@ -642,5 +702,29 @@ public class AtlasJointMap extends DRCRobotJointMap
    public List<Point2d> getPelvisBackContactPoints()
    {
       return pelvisBackContacts;
+   }
+
+   @Override
+   public Transform3D getChestBackContactPointTransform()
+   {
+      return chestBackContactPointTransform;
+   }
+
+   @Override
+   public List<Point2d> getChestBackContactPoints()
+   {
+      return chestBackContacts;
+   }
+
+   @Override
+   public SideDependentList<Transform3D> getThighContactPointTransforms()
+   {
+      return thighContactPointTransforms;
+   }
+
+   @Override
+   public SideDependentList<List<Point2d>> getThighContactPoints()
+   {
+      return thighContactPoints;
    }
 }

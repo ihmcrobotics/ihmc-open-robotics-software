@@ -15,7 +15,7 @@ import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.AtlasAndHandRobotParameters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.HandContactParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -72,7 +72,7 @@ public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInter
          ReferenceFrame handFrame = fullRobotModel.getHand(robotSide).getParentJoint().getFrameAfterJoint();
          Transform3D handToWorld = handFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
          Transform3D handContactPlaneToWorld = new Transform3D();
-         handContactPlaneToWorld.mul(handToWorld, AtlasAndHandRobotParameters.invisibleContactablePlaneHandContactPointTransforms.get(robotSide));
+         handContactPlaneToWorld.mul(handToWorld, HandContactParameters.invisibleContactablePlaneHandContactPointTransforms.get(robotSide));
          combinedTerrainObject.addTerrainObject(createConvexPolygonTerrainObject(handContactPlaneToWorld));
       }
 

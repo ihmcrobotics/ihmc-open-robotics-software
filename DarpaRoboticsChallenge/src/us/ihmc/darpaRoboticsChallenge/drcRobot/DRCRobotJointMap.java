@@ -94,5 +94,12 @@ public abstract class DRCRobotJointMap implements SDFJointNameMap
 
    public abstract List<Point2d> getPelvisBackContactPoints();
 
+   public abstract Transform3D getChestBackContactPointTransform();
+
+   public abstract List<Point2d> getChestBackContactPoints();
+
+   public abstract SideDependentList<Transform3D> getThighContactPointTransforms();
+
+   public abstract SideDependentList<List<Point2d>> getThighContactPoints();
    
 }
