@@ -111,7 +111,7 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
 
       if (sdfJointNameMap != null)
       {
-         enableTorqueVelocityLimits = enableTorqueVelocityLimits && sdfJointNameMap.enableTorqueVelocityLimits();
+         enableTorqueVelocityLimits = enableTorqueVelocityLimits && sdfJointNameMap.isTorqueVelocityLimitsEnabled();
       }
 
       for (SDFJointHolder child : rootLink.getChildren())

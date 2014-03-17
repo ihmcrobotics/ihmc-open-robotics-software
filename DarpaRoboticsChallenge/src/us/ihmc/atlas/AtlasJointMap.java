@@ -51,6 +51,17 @@ public class AtlasJointMap extends DRCRobotJointMap
    
    private final double ankleHeight = 0.084;
 
+   // Enable joint limits
+   public static boolean ENABLE_JOINT_VELOCITY_TORQUE_LIMITS = false;
+
+   static
+   {
+      if (!ENABLE_JOINT_VELOCITY_TORQUE_LIMITS)
+      {
+         System.err.println("Running with torque and velocity limits disabled, do not check in !!");
+      }
+   }
+   
    private final LegJointName[] legJoints =
    {
       LegJointName.HIP_YAW, LegJointName.HIP_ROLL, LegJointName.HIP_PITCH, LegJointName.KNEE, LegJointName.ANKLE_PITCH, LegJointName.ANKLE_ROLL
@@ -482,9 +493,9 @@ public class AtlasJointMap extends DRCRobotJointMap
    }
 
    @Override
-   public boolean enableTorqueVelocityLimits()
+   public boolean isTorqueVelocityLimitsEnabled()
    {
-      return AtlasAndHandRobotParameters.ENABLE_JOINT_VELOCITY_TORQUE_LIMITS;
+      return ENABLE_JOINT_VELOCITY_TORQUE_LIMITS;
    }
 
    @Override

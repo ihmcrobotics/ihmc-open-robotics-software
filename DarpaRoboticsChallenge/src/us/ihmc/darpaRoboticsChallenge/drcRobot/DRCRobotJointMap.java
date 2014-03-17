@@ -30,7 +30,7 @@ public abstract class DRCRobotJointMap implements SDFJointNameMap
 
    public abstract String getLeftCameraName();
 
-   public abstract boolean enableTorqueVelocityLimits();
+   public abstract boolean isTorqueVelocityLimitsEnabled();
 
    public abstract String getModelName();
 
