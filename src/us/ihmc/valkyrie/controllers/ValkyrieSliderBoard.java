@@ -163,8 +163,11 @@ public class ValkyrieSliderBoard
       }
    };
 
+   //FIXME: Implement this
    public static SliderBoardFactory getWalkingSliderBoardFactory()
    {
-      return walkingFactory;
+      throw new RuntimeException("Not Yet Implemented! Fix this!");
+
+//      return walkingFactory;
    }
 }

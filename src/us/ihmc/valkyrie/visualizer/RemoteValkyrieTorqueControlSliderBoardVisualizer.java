@@ -1,8 +1,11 @@
 package us.ihmc.valkyrie.visualizer;
 
 
+import com.martiansoftware.jsap.FlaggedOption;
+import com.martiansoftware.jsap.JSAP;
+import com.martiansoftware.jsap.JSAPException;
+import com.martiansoftware.jsap.JSAPResult;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
-import us.ihmc.atlas.visualization.SliderBoardControllerListener;
 import us.ihmc.atlas.visualization.SliderBoardFactory;
 import us.ihmc.darpaRoboticsChallenge.valkyrie.ValkyrieJointMap;
 import us.ihmc.darpaRoboticsChallenge.valkyrie.ValkyrieSDFLoader;
@@ -11,46 +14,20 @@ import us.ihmc.robotDataCommunication.visualizer.SCSYoVariablesUpdatedListener;
 import us.ihmc.valkyrie.ValkyrieNetworkParameters;
 import us.ihmc.valkyrie.controllers.ValkyrieSliderBoard;
 
-import com.martiansoftware.jsap.FlaggedOption;
-import com.martiansoftware.jsap.JSAP;
-import com.martiansoftware.jsap.JSAPException;
-import com.martiansoftware.jsap.JSAPResult;
-
-public class RemoteValkyrieVisualizer
+public class RemoteValkyrieTorqueControlSliderBoardVisualizer
 {
    public static final String defaultHost = ValkyrieNetworkParameters.CONTROL_COMPUTER_HOST;
    public static final int defaultPort = ValkyrieNetworkParameters.VARIABLE_SERVER_PORT;
 
-   private static final boolean USE_SLIDER_BOARD = false;
-   private static final boolean USE_FORCE_CONTROL = false;
-
-   public RemoteValkyrieVisualizer(String host, int port, int bufferSize)
+   public RemoteValkyrieTorqueControlSliderBoardVisualizer(String host, int port, int bufferSize)
    {
       System.out.println("Connecting to host " + host);
       ValkyrieJointMap jointMap = new ValkyrieJointMap();
       JaxbSDFLoader robotLoader = ValkyrieSDFLoader.loadValkyrieRobot(false);
 
-      SCSYoVariablesUpdatedListener scsYoVariablesUpdatedListener;
-      if (USE_SLIDER_BOARD)
-      {
-         SliderBoardFactory sliderBoardFactory;
-         if (USE_FORCE_CONTROL)
-         {
-            sliderBoardFactory = ValkyrieSliderBoard.getForceControlFactory();
-         }
-         else
-         {
-            sliderBoardFactory = ValkyrieSliderBoard.getTurboDriverPositionControlFactory();
-         }
+      SliderBoardFactory sliderBoardFactory = ValkyrieSliderBoard.getForceControlFactory();
 
-         scsYoVariablesUpdatedListener = new ValkyrieSliderBoardControllerListener(robotLoader, jointMap, bufferSize, sliderBoardFactory);
-
-      }
-      else
-      {
-         scsYoVariablesUpdatedListener = new SCSYoVariablesUpdatedListener(robotLoader.createRobot(jointMap, false), 16000);
-
-      }
+      SCSYoVariablesUpdatedListener scsYoVariablesUpdatedListener = new ValkyrieSliderBoardControllerListener(robotLoader, jointMap, bufferSize, sliderBoardFactory);
 
       YoVariableClient client = new YoVariableClient(host, port, scsYoVariablesUpdatedListener, "remote", false);
       client.start();
@@ -76,12 +53,12 @@ public class RemoteValkyrieVisualizer
          String host = config.getString("host");
          int port = config.getInt("port");
 
-         new RemoteValkyrieVisualizer(host, port, bufferSize);
+         new RemoteValkyrieTorqueControlSliderBoardVisualizer(host, port, bufferSize);
       }
       else
       {
          System.err.println();
-         System.err.println("Usage: java " + RemoteValkyrieVisualizer.class.getName());
+         System.err.println("Usage: java " + RemoteValkyrieTorqueControlSliderBoardVisualizer.class.getName());
          System.err.println("                " + jsap.getUsage());
          System.err.println();
          System.exit(1);
