@@ -1,67 +1,201 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
-import javax.vecmath.Vector3d;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
+import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
+import us.ihmc.robotSide.RobotSide;
+import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
+import us.ihmc.utilities.screwTheory.RevoluteJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
+import us.ihmc.utilities.screwTheory.SixDoFJoint;
+import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.TotalMassCalculator;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.utilities.screwTheory.Wrench;
 
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.VariableChangedListener;
+import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
+import com.yobotics.simulationconstructionset.util.GainCalculator;
+import com.yobotics.simulationconstructionset.util.PDController;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 
+/**
+ * Simple controller using an inverse dynamics calculator. Mainly used to check gravity compensation, and simple controls while having the robot hanging in the air.
+ * @author Plenty of people :)
+ */
 public class InverseDynamicsJointController extends State<HighLevelState>
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   
+   /** Simply add an external wrench on each foot to compensate for the robot weight when true */
+   private static final boolean STAND_ON_FEET = false;
+   
+   /** Specify if the controller uses the mass matrix for the PD controllers */
+   private static final boolean USE_MASS_MATRIX = false;
+   
+   /** Compensate for Coriolis and centrifugal terms */
+   private static final boolean COMPENSATE_BIAS = false;
+   
    private final TwistCalculator twistCalculator;
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
    
    private final FullRobotModel fullRobotModel;
-   private final RigidBody chest;
-   
+   private final SixDoFJoint rootJoint;
+   private final SideDependentList<RigidBody> feet = new SideDependentList<>();
+
    private final InverseDynamicsJoint[] allJoints;
-   private final Wrench comWrench;
-   private final Wrench rootJointWrench = new Wrench();
-   
-   private final ReferenceFrame centerOfMassFrame;
+   private final RevoluteJoint[] allRevoluteJoints;
+   private final SideDependentList<Wrench> footWrenches = new SideDependentList<>();
    
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final YoFrameVector rootJointForce = new YoFrameVector("rootJointForce", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector rootJointTorque = new YoFrameVector("rootJointTorque", ReferenceFrame.getWorldFrame(), registry);
    
    private final double totalMass, gravityZ;
+   private final FrameVector weightVector = new FrameVector();
    
+   private final DoubleYoVariable percentOfGravityCompensation = new DoubleYoVariable("percentOfGravityCompensation", registry);
+
+   private final SpatialAccelerationVector desiredRootJointAcceleration;
+   private final FrameVector desiredVerticalAccelerationVector = new FrameVector();
+
+   private final DoubleYoVariable allJointGains = new DoubleYoVariable("gravityComp_allJointGains", registry);
+   private final DoubleYoVariable allJointZetas = new DoubleYoVariable("gravityComp_allJointZetas", registry);
    
-   public InverseDynamicsJointController(FullRobotModel fullRobotModel, TwistCalculator twistCalculator, double gravityZ, CommonWalkingReferenceFrames referenceFrames, YoVariableRegistry parentRegistry)
+   private final LinkedHashMap<RevoluteJoint, PDController> pdControllers = new LinkedHashMap<>();
+   private final LinkedHashMap<RevoluteJoint, DoubleYoVariable> desiredJointPositions = new LinkedHashMap<>();
+   private final LinkedHashMap<RevoluteJoint, DoubleYoVariable> pdControllerOutputs = new LinkedHashMap<>();
+   
+   private final DoubleYoVariable gainScaling = new DoubleYoVariable("gravityComp_gainScaling", registry);
+   
+   public InverseDynamicsJointController(FullRobotModel fullRobotModel, TwistCalculator twistCalculator, double gravityZ, YoVariableRegistry parentRegistry)
    {
       super(HighLevelState.INVERSE_DYNAMICS_JOINT_CONTROL);
       
-      centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
+      gainScaling.set(0.0);
+      gainScaling.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void variableChanged(YoVariable v)
+         {
+            gainScaling.set(MathTools.clipToMinMax(gainScaling.getDoubleValue(), 0.0, 1.0));
+         }
+      });
       
       this.fullRobotModel = fullRobotModel;
       
       this.gravityZ = gravityZ;
+      this.percentOfGravityCompensation.set(0.0);
+      percentOfGravityCompensation.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void variableChanged(YoVariable v)
+         {
+            percentOfGravityCompensation.set(MathTools.clipToMinMax(percentOfGravityCompensation.getDoubleValue(), -0.3, 1.3));
+         }
+      });
+      
+      rootJoint = fullRobotModel.getRootJoint();
+      desiredRootJointAcceleration = new SpatialAccelerationVector(rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(), rootJoint.getFrameAfterJoint());
       
       this.twistCalculator = twistCalculator;
-      this.inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ);
+      SpatialAccelerationVector rootAcceleration = ScrewTools.createGravitationalSpatialAcceleration(twistCalculator.getRootBody(), 0.0);
+      LinkedHashMap<RigidBody, Wrench> externalWrenches = new LinkedHashMap<RigidBody, Wrench>();
+      this.inverseDynamicsCalculator = new InverseDynamicsCalculator(worldFrame, rootAcceleration, externalWrenches,
+            new ArrayList<InverseDynamicsJoint>(), COMPENSATE_BIAS, false, twistCalculator);
    
-      RigidBody elevator = fullRobotModel.getElevator();
-      this.totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
+      this.totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
       
-      allJoints = ScrewTools.computeSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
-      chest = fullRobotModel.getChest();
-      comWrench = new Wrench(chest.getBodyFixedFrame(), chest.getBodyFixedFrame());
+      allJoints = ScrewTools.computeSupportAndSubtreeJoints(rootJoint.getSuccessor());
+      allRevoluteJoints = ScrewTools.filterJoints(allJoints, RevoluteJoint.class);
+      
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBody foot = fullRobotModel.getFoot(robotSide);
+         feet.put(robotSide, foot);
+         footWrenches.put(robotSide, new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame()));
+      }
+      
+      for (int i = 0; i < allRevoluteJoints.length; i++)
+      {
+         RevoluteJoint revoluteJoint = allRevoluteJoints[i];
+
+         String prefix = "gravityComp_" + revoluteJoint.getName();
+         
+         PDController pdController = new PDController(prefix, registry);
+         pdControllers.put(revoluteJoint, pdController);
+
+         DoubleYoVariable desiredJointPosition = new DoubleYoVariable(prefix + "_q_d", registry);
+         desiredJointPositions.put(revoluteJoint, desiredJointPosition);
+         
+         DoubleYoVariable pdControllerOutput = new DoubleYoVariable(prefix + "_PDOutput", registry);
+         pdControllerOutputs.put(revoluteJoint, pdControllerOutput);
+      }
+      
+      VariableChangedListener gainsChangedListener = new VariableChangedListener()
+      {
+         @Override
+         public void variableChanged(YoVariable v)
+         {
+            for (int i = 0; i < allRevoluteJoints.length; i++)
+            {
+               if (!USE_MASS_MATRIX)
+               {
+                  allJointGains.set(MathTools.clipToMinMax(allJointGains.getDoubleValue(), 0.0, 3.0));
+                  allJointZetas.set(MathTools.clipToMinMax(allJointZetas.getDoubleValue(), 0.0, 0.3));
+               }
+               
+               RevoluteJoint revoluteJoint = allRevoluteJoints[i];
+               PDController pdController = pdControllers.get(revoluteJoint);
+               
+               double kp = allJointGains.getDoubleValue() * gainScaling.getDoubleValue();
+               double kd;
+               
+               if (USE_MASS_MATRIX)
+               {
+                  kd = GainCalculator.computeDerivativeGain(kp, allJointZetas.getDoubleValue());
+               }
+               else
+               {
+                  double mass = TotalMassCalculator.computeSubTreeMass(revoluteJoint.getSuccessor());
+                  kp *= mass;
+                  kd = GainCalculator.computeDampingForSecondOrderSystem(mass, kp, allJointZetas.getDoubleValue()) * gainScaling.getDoubleValue();
+               }
+               
+               pdController.setProportionalGain(kp);
+               pdController.setDerivativeGain(kd);
+            }
+         }
+      };
+      
+      if (USE_MASS_MATRIX)
+      {
+         allJointGains.set(40.0);
+         allJointZetas.set(0.5);
+      }
+      else
+      {
+         allJointGains.set(1.0);
+         allJointZetas.set(0.15);
+      }
+      allJointGains.addVariableChangedListener(gainsChangedListener);
+      allJointZetas.addVariableChangedListener(gainsChangedListener);
+      gainScaling.addVariableChangedListener(gainsChangedListener);
+      gainsChangedListener.variableChanged(null);
       
       parentRegistry.addChild(registry);
    }
 
+   private final DoubleYoVariable test_qd_LeftHiptPitch = new DoubleYoVariable("test_qd_LeftHiptPitch", registry);
+   
    @Override
    public void doAction()
    {
@@ -71,32 +205,87 @@ public class InverseDynamicsJointController extends State<HighLevelState>
          joint.setDesiredAccelerationToZero();
       }
       
-      comWrench.set(centerOfMassFrame, new Vector3d(0.0, 0.0, totalMass * gravityZ), new Vector3d());
-      comWrench.changeFrame(chest.getBodyFixedFrame());
+      if (USE_MASS_MATRIX)
+      {
+         doPDControl();
+         
+         for (int i = 0; i < allRevoluteJoints.length; i++)
+         {
+            RevoluteJoint revoluteJoint = allRevoluteJoints[i];
+            
+            double qddDesired = pdControllerOutputs.get(revoluteJoint).getDoubleValue();
+            revoluteJoint.setQddDesired(qddDesired);
+         }
+      }
+      
+      test_qd_LeftHiptPitch.set(fullRobotModel.getLegJointVelocities(RobotSide.LEFT).getJointVelocity(LegJointName.HIP_PITCH));
+      
+      desiredVerticalAccelerationVector.set(worldFrame, 0.0, 0.0, percentOfGravityCompensation.getDoubleValue() * gravityZ);
+      desiredVerticalAccelerationVector.changeFrame(rootJoint.getFrameAfterJoint());
+      desiredRootJointAcceleration.setLinearPart(desiredVerticalAccelerationVector.getVector());
+      fullRobotModel.getRootJoint().setDesiredAcceleration(desiredRootJointAcceleration);
+      
+      if (STAND_ON_FEET)
+      {
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            RigidBody foot = feet.get(robotSide);
 
-      inverseDynamicsCalculator.setExternalWrench(chest, comWrench);
+            weightVector.set(worldFrame, 0.0, 0.0, totalMass * gravityZ / 2.0);
+            weightVector.changeFrame(foot.getBodyFixedFrame());
+
+            Wrench footWrench = footWrenches.get(robotSide);
+            footWrench.setLinearPart(weightVector.getVector());
+
+            inverseDynamicsCalculator.setExternalWrench(foot, footWrench);
+         }
+      }
       
       twistCalculator.compute();
       inverseDynamicsCalculator.compute();
-      
-      fullRobotModel.getRootJoint().packWrench(rootJointWrench);
-      rootJointWrench.changeFrame(ReferenceFrame.getWorldFrame());
-      
-      FrameVector force = rootJointWrench.getLinearPartAsFrameVectorCopy();
-      FrameVector torque = rootJointWrench.getAngularPartAsFrameVectorCopy();
-      
-      rootJointForce.set(force);
-      rootJointTorque.set(torque);
+
+      if (!USE_MASS_MATRIX)
+      {
+         doPDControl();
+
+         for (int i = 0; i < allRevoluteJoints.length; i++)
+         {
+            RevoluteJoint revoluteJoint = allRevoluteJoints[i];
+            double tauFromPDControl = pdControllerOutputs.get(revoluteJoint).getDoubleValue();
+            revoluteJoint.setTau(revoluteJoint.getTau() + tauFromPDControl);
+         }
+      }
+   }
+
+   private void doPDControl()
+   {
+      for (int i = 0; i < allRevoluteJoints.length; i++)
+      {
+         RevoluteJoint revoluteJoint = allRevoluteJoints[i];
+         PDController pdController = pdControllers.get(revoluteJoint);
+         
+         double q = revoluteJoint.getQ();
+         double q_d = desiredJointPositions.get(revoluteJoint).getDoubleValue();
+         double qd = revoluteJoint.getQd();
+         double qd_d = 0.0;
+         
+         pdControllerOutputs.get(revoluteJoint).set(pdController.compute(q, q_d, qd, qd_d));
+      }
    }
 
    @Override
    public void doTransitionIntoAction()
    {
+      for (int i = 0; i < allRevoluteJoints.length; i++)
+      {
+         RevoluteJoint revoluteJoint = allRevoluteJoints[i];
+         DoubleYoVariable q_d = desiredJointPositions.get(revoluteJoint);
+         q_d.set(revoluteJoint.getQ());
+      }
    }
 
    @Override
    public void doTransitionOutOfAction()
    {
    }
-
 }
