@@ -11,11 +11,15 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
  */
 public class ValkyrieSliderBoard
 {
+   private enum ValkyrieSliderBoardType
+   {
+      ON_BOARD_POSITION, TORQUE_PD_CONTROL, WALKING
+   }
    private final EnumYoVariable<ValkyrieSliderBoardController.ValkyrieSliderBoardSelectableJoints> selectedJoint, remoteSelectedJoint;
 
    @SuppressWarnings("unchecked")
    public ValkyrieSliderBoard(SimulationConstructionSet scs, YoVariableRegistry registry, GeneralizedSDFRobotModel generalizedSDFRobotModel,
-                              boolean forceControl)
+                              ValkyrieSliderBoardType sliderBoardType)
    {
       selectedJoint = new EnumYoVariable<>("selectedJoint", registry, ValkyrieSliderBoardController.ValkyrieSliderBoardSelectableJoints.class);
       selectedJoint.set(ValkyrieSliderBoardController.ValkyrieSliderBoardSelectableJoints.RightKneeExtensor);
@@ -24,13 +28,17 @@ public class ValkyrieSliderBoard
 
       final SliderBoardConfigurationManager sliderBoardConfigurationManager = new SliderBoardConfigurationManager(scs);
 
-      if (!forceControl)
+      switch(sliderBoardType)
       {
-         setupSliderBoardForOnBoardPositionControl(registry, generalizedSDFRobotModel, sliderBoardConfigurationManager);
-      }
-      else
-      {
-         setupSliderBoardForForceControl(registry, generalizedSDFRobotModel, sliderBoardConfigurationManager);
+         case ON_BOARD_POSITION:
+            setupSliderBoardForOnBoardPositionControl(registry, generalizedSDFRobotModel, sliderBoardConfigurationManager);
+            break;
+         case TORQUE_PD_CONTROL:
+            setupSliderBoardForForceControl(registry, generalizedSDFRobotModel, sliderBoardConfigurationManager);
+            break;
+         case WALKING:
+            setupSliderBoardForWalking(registry, generalizedSDFRobotModel, sliderBoardConfigurationManager);
+            break;
       }
 
       sliderBoardConfigurationManager.loadConfiguration(selectedJoint.getEnumValue().toString());
@@ -112,12 +120,18 @@ public class ValkyrieSliderBoard
       });
    }
 
+   private void setupSliderBoardForWalking(YoVariableRegistry registry, GeneralizedSDFRobotModel generalizedSDFRobotModel,
+                                           final SliderBoardConfigurationManager sliderBoardConfigurationManager)
+   {
+      //TODO: This
+   }
+
    private static final SliderBoardFactory turboDriverPositionControlFactory = new SliderBoardFactory()
    {
       @Override
       public void makeSliderBoard(SimulationConstructionSet scs, YoVariableRegistry registry, GeneralizedSDFRobotModel generalizedSDFRobotModel)
       {
-         new ValkyrieSliderBoard(scs, registry, generalizedSDFRobotModel, false);
+         new ValkyrieSliderBoard(scs, registry, generalizedSDFRobotModel, ValkyrieSliderBoardType.ON_BOARD_POSITION);
       }
    };
 
@@ -131,12 +145,26 @@ public class ValkyrieSliderBoard
       @Override
       public void makeSliderBoard(SimulationConstructionSet scs, YoVariableRegistry registry, GeneralizedSDFRobotModel generalizedSDFRobotModel)
       {
-         new ValkyrieSliderBoard(scs, registry, generalizedSDFRobotModel, true);
+         new ValkyrieSliderBoard(scs, registry, generalizedSDFRobotModel, ValkyrieSliderBoardType.TORQUE_PD_CONTROL);
       }
    };
 
    public static SliderBoardFactory getForceControlFactory()
    {
       return forceControlFactory;
+   }
+
+   private static final SliderBoardFactory walkingFactory = new SliderBoardFactory()
+   {
+      @Override
+      public void makeSliderBoard(SimulationConstructionSet scs, YoVariableRegistry registry, GeneralizedSDFRobotModel generalizedSDFRobotModel)
+      {
+         new ValkyrieSliderBoard(scs, registry, generalizedSDFRobotModel, ValkyrieSliderBoardType.WALKING);
+      }
+   };
+
+   public static SliderBoardFactory getWalkingSliderBoardFactory()
+   {
+      return walkingFactory;
    }
 }
