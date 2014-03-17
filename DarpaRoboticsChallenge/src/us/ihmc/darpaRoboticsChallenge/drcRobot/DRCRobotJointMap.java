@@ -3,6 +3,8 @@ package us.ihmc.darpaRoboticsChallenge.drcRobot;
 import java.util.List;
 import java.util.Set;
 
+import javax.media.j3d.Transform3D;
+import javax.vecmath.Point2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFJointNameMap;
@@ -83,6 +85,14 @@ public abstract class DRCRobotJointMap implements SDFJointNameMap
    public abstract String[] getOrderedJointNames();
    
    public abstract String getHighestNeckPitchJointName();
+
+   public abstract Transform3D getPelvisContactPointTransform();
+
+   public abstract List<Point2d> getPelvisContactPoints();
+
+   public abstract Transform3D getPelvisBackContactPointTransform();
+
+   public abstract List<Point2d> getPelvisBackContactPoints();
 
    
 }
