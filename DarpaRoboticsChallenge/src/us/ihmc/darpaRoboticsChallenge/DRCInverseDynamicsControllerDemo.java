@@ -6,6 +6,7 @@ import java.util.Arrays;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.visualization.SliderBoardFactory;
 import us.ihmc.atlas.visualization.WalkControllerSliderBoard;
@@ -16,12 +17,14 @@ import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepTimingParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.PolyvalentHighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.InverseDynamicsJointController;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.PlainDRCRobot;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCSimDRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.valkyrie.ValkyrieInitialSetup;
 import us.ihmc.graphics3DAdapter.GroundProfile;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.Pair;
@@ -32,14 +35,16 @@ import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
+import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.FlatGroundProfile;
 import com.yobotics.simulationconstructionset.util.GainCalculator;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 
-public class DRCRobotInverseDynamicsController
+public class DRCInverseDynamicsControllerDemo
 {
    private static final double ROBOT_FLOATING_HEIGHT = 0.3;
 
@@ -48,7 +53,7 @@ public class DRCRobotInverseDynamicsController
    private final HumanoidRobotSimulation<SDFRobot> drcSimulation;
    private final DRCController drcController;
 
-   public DRCRobotInverseDynamicsController(WalkingControllerParameters drcControlParameters, ArmControllerParameters armControllerParameters, 
+   public DRCInverseDynamicsControllerDemo(WalkingControllerParameters drcControlParameters, ArmControllerParameters armControllerParameters, 
                                     DRCRobotInterface robotInterface, DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
                                     DRCSCSInitialSetup scsInitialSetup, AutomaticSimulationRunner automaticSimulationRunner,
                                     double timePerRecordTick, int simulationDataBufferSize, DRCRobotModel model)
@@ -89,9 +94,11 @@ public class DRCRobotInverseDynamicsController
       drcSimulation.addAdditionalYoVariableRegistriesToSCS(registry);
       
       
-      HoldRobotInTheAir controller = new HoldRobotInTheAir(drcSimulation.getRobot());
+      HoldRobotInTheAir controller = new HoldRobotInTheAir(drcSimulation.getRobot(), drcSimulation.getSimulationConstructionSet(), drcController.getControllerModel());
       drcSimulation.getRobot().setController(controller);
       controller.initialize();
+      
+      new InverseDynamicsJointController.GravityCompensationSliderBoard(getSimulationConstructionSet(), drcController.getControllerModel(), registry);
       
       if (automaticSimulationRunner != null)
       {
@@ -171,7 +178,7 @@ public class DRCRobotInverseDynamicsController
       WalkingControllerParameters drcControlParameters = model.getWalkingControlParamaters();
       ArmControllerParameters armControlParameters = model.getArmControllerParameters();
       
-      new DRCRobotInverseDynamicsController(drcControlParameters, armControlParameters, robotInterface, robotInitialSetup, guiInitialSetup, scsInitialSetup,
+      new DRCInverseDynamicsControllerDemo(drcControlParameters, armControlParameters, robotInterface, robotInitialSetup, guiInitialSetup, scsInitialSetup,
                                     automaticSimulationRunner, DRCConfigParameters.CONTROL_DT, 16000, model);
    }
    
@@ -181,7 +188,7 @@ public class DRCRobotInverseDynamicsController
       
       private final ArrayList<ExternalForcePoint> externalForcePoints = new ArrayList<>();
       private final ArrayList<Vector3d> efp_offsetFromRootJoint = new ArrayList<>();
-      private final double dx = 0.5, dy = 0.5;
+      private final double dx = 0.0, dy = 0.12, dz = 0.4;
       
       private final ArrayList<Vector3d> initialPositions = new ArrayList<>();
 
@@ -191,28 +198,49 @@ public class DRCRobotInverseDynamicsController
       
       private final SDFRobot robot;
       
-      public HoldRobotInTheAir(SDFRobot robot)
+      private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry(true);
+      private final ArrayList<DynamicGraphicPosition> efp_positionViz = new ArrayList<>();
+      
+      public HoldRobotInTheAir(SDFRobot robot, SimulationConstructionSet scs, SDFFullRobotModel sdfFullRobotModel)
       {
          this.robot = robot;
          robotMass = robot.computeCenterOfMass(new Point3d());
          robotWeight = robotMass * Math.abs(robot.getGravityZ());
          
-         holdPelvisKp.set(1500.0);
+         Joint jointToAddExternalForcePoints;
+         try
+         {
+            String lastSpineJointName = sdfFullRobotModel.getChest().getParentJoint().getName();
+            jointToAddExternalForcePoints = robot.getJoint(lastSpineJointName);
+         }
+         catch(NullPointerException e)
+         {
+            System.err.println("No chest or spine found. Stack trace:");
+            e.printStackTrace();
+            
+            jointToAddExternalForcePoints = robot.getPelvisJoint();
+         }
+         
+         holdPelvisKp.set(5000.0);
          holdPelvisKv.set(GainCalculator.computeDampingForSecondOrderSystem(robotMass, holdPelvisKp.getDoubleValue(), 1.0));
          
-         efp_offsetFromRootJoint.add(new Vector3d(dx, dy, 0.0));
-         efp_offsetFromRootJoint.add(new Vector3d(dx, -dy, 0.0));
-         efp_offsetFromRootJoint.add(new Vector3d(-dx, dy, 0.0));
-         efp_offsetFromRootJoint.add(new Vector3d(-dx, -dy, 0.0));
+         efp_offsetFromRootJoint.add(new Vector3d(dx, dy, dz));
+         efp_offsetFromRootJoint.add(new Vector3d(dx, -dy, dz));
          
          for (int i = 0; i < efp_offsetFromRootJoint.size(); i++)
          {
             initialPositions.add(new Vector3d());
             
-            ExternalForcePoint efp = new ExternalForcePoint("efp_pelvis_" + String.valueOf(i) + "_", efp_offsetFromRootJoint.get(i), robot);
+            String linkName = jointToAddExternalForcePoints.getLink().getName();
+            ExternalForcePoint efp = new ExternalForcePoint("efp_" + linkName + "_" + String.valueOf(i) + "_", efp_offsetFromRootJoint.get(i), robot);
             externalForcePoints.add(efp);
-            robot.getPelvisJoint().addExternalForcePoint(efp);
+            jointToAddExternalForcePoints.addExternalForcePoint(efp);
+            
+            efp_positionViz.add(efp.getYoPosition().createDynamicGraphicPosition(efp.getName(), 0.05, YoAppearance.Red()));
          }
+         
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects("EFP", efp_positionViz);
+         dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
       }
 
       @Override
@@ -223,6 +251,7 @@ public class DRCRobotInverseDynamicsController
          for (int i = 0; i < efp_offsetFromRootJoint.size(); i++)
          {
             externalForcePoints.get(i).getYoPosition().getPoint3d(initialPositions.get(i));
+            efp_positionViz.get(i).update();
          }
          
          doControl();
@@ -249,6 +278,8 @@ public class DRCRobotInverseDynamicsController
             
             efp.setForce(pdControlOutput);
             efp.fz.add(robotWeight / efp_offsetFromRootJoint.size());
+
+            efp_positionViz.get(i).update();
          }
       }
 
