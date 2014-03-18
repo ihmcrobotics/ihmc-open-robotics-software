@@ -5,13 +5,14 @@ import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
+
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.atlas.visualization.SliderBoardFactory;
 import us.ihmc.darpaRoboticsChallenge.valkyrie.ValkyrieJointMap;
 import us.ihmc.darpaRoboticsChallenge.valkyrie.ValkyrieSDFLoader;
 import us.ihmc.robotDataCommunication.YoVariableClient;
 import us.ihmc.robotDataCommunication.visualizer.SCSYoVariablesUpdatedListener;
-import us.ihmc.valkyrie.ValkyrieNetworkParameters;
+import us.ihmc.valkyrie.configuration.ValkyrieNetworkParameters;
 import us.ihmc.valkyrie.controllers.ValkyrieSliderBoard;
 
 public class RemoteValkyrieVisualizer
