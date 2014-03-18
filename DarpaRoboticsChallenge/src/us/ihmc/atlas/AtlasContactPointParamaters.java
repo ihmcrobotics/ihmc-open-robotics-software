@@ -21,7 +21,6 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
-import us.ihmc.utilities.math.geometry.TransformTools;
 
 public class AtlasContactPointParamaters extends DRCRobotContactPointParamaters
 {
@@ -36,15 +35,6 @@ public class AtlasContactPointParamaters extends DRCRobotContactPointParamaters
          System.err.println("Running with torque and velocity limits disabled, do not check in !!");
       }
    }
-   
-   public static final double pelvisToFoot = 0.887;
-   private final Transform3D ankle_to_sole_frame_tranform;
-   private static final double  foot_width = 0.12;   // 0.08;   //0.124887;
-   private static final double  toe_width = 0.095;  //0.07;   //0.05;   //
-   private static final double  foot_length = 0.255;
-   private static final double  foot_back = 0.09; // 0.06;   //0.082;    // 0.07;
-   private static final double  foot_start_toetaper_from_back = 0.195;
-   private static final double  foot_forward = foot_length - foot_back;   // 0.16;   //0.178;    // 0.18;
    
    private final Vector3d pelvisBoxOffset = new Vector3d(-0.100000, 0.000000, -0.050000);
    private final double pelvisBoxSizeX = 0.100000;
@@ -77,15 +67,15 @@ public class AtlasContactPointParamaters extends DRCRobotContactPointParamaters
 
    static
    {
-      ground_contact_point_offset_from_foot.add(new Point2d(-foot_back, -(foot_width / 2.0)));
-      ground_contact_point_offset_from_foot.add(new Point2d(-foot_back, foot_width / 2.0));
-      ground_contact_point_offset_from_foot.add(new Point2d(foot_forward, -(toe_width / 2.0)));
-      ground_contact_point_offset_from_foot.add(new Point2d(foot_forward, toe_width / 2.0));
+      ground_contact_point_offset_from_foot.add(new Point2d(-AtlasPhysicalProperties.foot_back, -(AtlasPhysicalProperties.foot_width / 2.0)));
+      ground_contact_point_offset_from_foot.add(new Point2d(-AtlasPhysicalProperties.foot_back, AtlasPhysicalProperties.foot_width / 2.0));
+      ground_contact_point_offset_from_foot.add(new Point2d(AtlasPhysicalProperties.foot_forward, -(AtlasPhysicalProperties.toe_width / 2.0)));
+      ground_contact_point_offset_from_foot.add(new Point2d(AtlasPhysicalProperties.foot_forward, AtlasPhysicalProperties.toe_width / 2.0));
       //Added contact points between corners
       if (DRCConfigParameters.USE_SIX_CONTACT_POINTS_PER_FOOT)
       {
-         ground_contact_point_offset_from_foot.add(new Point2d(foot_start_toetaper_from_back-foot_back, -(foot_width / 2.0)));
-         ground_contact_point_offset_from_foot.add(new Point2d(foot_start_toetaper_from_back-foot_back, foot_width / 2.0));
+         ground_contact_point_offset_from_foot.add(new Point2d(AtlasPhysicalProperties.foot_start_toetaper_from_back-AtlasPhysicalProperties.foot_back, -(AtlasPhysicalProperties.foot_width / 2.0)));
+         ground_contact_point_offset_from_foot.add(new Point2d(AtlasPhysicalProperties.foot_start_toetaper_from_back-AtlasPhysicalProperties.foot_back, AtlasPhysicalProperties.foot_width / 2.0));
       }
    }
    
@@ -96,14 +86,14 @@ public class AtlasContactPointParamaters extends DRCRobotContactPointParamaters
       int nSubdivisionsX = 3;
       int nSubdivisionsY = 2;
 
-      double lengthSubdivision = foot_length / (nSubdivisionsX + 1.0);
-      double widthSubdivision = foot_width / (nSubdivisionsY + 1.0);
+      double lengthSubdivision = AtlasPhysicalProperties.foot_length / (nSubdivisionsX + 1.0);
+      double widthSubdivision = AtlasPhysicalProperties.foot_width / (nSubdivisionsY + 1.0);
 
-      double offsetX = -foot_back;
+      double offsetX = -AtlasPhysicalProperties.foot_back;
       
       for (int i = 0; i <= nSubdivisionsX + 1; i++)
       {
-         double offsetY = -foot_width / 2.0;
+         double offsetY = -AtlasPhysicalProperties.foot_width / 2.0;
          for (int j = 0; j <= nSubdivisionsY + 1; j++)
          {
             Point2d contactPointOffset = new Point2d(offsetX, offsetY);
@@ -116,11 +106,9 @@ public class AtlasContactPointParamaters extends DRCRobotContactPointParamaters
    
    
    
-   public AtlasContactPointParamaters(DRCRobotModel selectedModel, boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsForFeetOnly)
+   public AtlasContactPointParamaters(DRCRobotModel selectedModel, DRCRobotJointMap jointMap, boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsForFeetOnly)
    {
       DRCRobotPhysicalProperties physicalParamaters = selectedModel.getPhysicalProperties();
-      DRCRobotJointMap jointMap = selectedModel.getJointMap(false,false);
-      ankle_to_sole_frame_tranform = TransformTools.createTranslationTransform(new Vector3d(0.0, 0.0, -physicalParamaters.getAnkleHeight()));
       
       Vector3d t0 = new Vector3d(0.0, 0.0, -pelvisBoxSizeZ / 2.0);
       t0.add(pelvisBoxOffset);
@@ -194,7 +182,7 @@ public class AtlasContactPointParamaters extends DRCRobotContactPointParamaters
          for (Point2d footv3d : contactPointOffsetList)
          {
             // add ankle joint contact points on each corner of the foot
-            footGroundContactPoints.get(robotSide).add(new Pair<String, Vector3d>("l_leg_akx", new Vector3d(footv3d.getX(), footv3d.getY(), -physicalParamaters.getAnkleHeight())));
+            footGroundContactPoints.get(robotSide).add(new Pair<String, Vector3d>(jointMap.getJointBeforeFootName(robotSide), new Vector3d(footv3d.getX(), footv3d.getY(), -physicalParamaters.getAnkleHeight())));
          }
 
          if (selectedModel == DRCRobotModel.ATLAS_SANDIA_HANDS && addLoadsOfContactPoints)
@@ -289,6 +277,7 @@ public class AtlasContactPointParamaters extends DRCRobotContactPointParamaters
             chestBackContactPoints.add(new Pair<String, Vector3d>(jointMap.getNameOfJointBeforeChest(), new Vector3d(point3d)));
          }
       }
+      
       for (RobotSide robotSide : RobotSide.values)
       {
          jointNameGroundContactPointMap.addAll(footGroundContactPoints.get(robotSide));
@@ -362,18 +351,6 @@ public class AtlasContactPointParamaters extends DRCRobotContactPointParamaters
    {
       return handGroundContactPoints.get(robotSide);
    }
-   
-//   @Override
-//   public double getPelvisToFoot()
-//   {
-//      return pelvisToFoot;
-//   }
-   
-//   @Override
-//   public double getAnkleHeight()
-//   {
-//      return ankleHeight;
-//   }
 
    @Override
    public List<Pair<String, Vector3d>> getJointNameGroundContactPointMap()
@@ -381,22 +358,9 @@ public class AtlasContactPointParamaters extends DRCRobotContactPointParamaters
       return jointNameGroundContactPointMap;
    }
    
-//   @Override
-//   public SideDependentList<Transform3D> getAnkleToSoleFrameTransform()
-//   {
-//      return new SideDependentList<>(ankle_to_sole_frame_tranform,
-//            ankle_to_sole_frame_tranform);
-//   }
-
    @Override
    public SideDependentList<ArrayList<Point2d>> getFootGroundContactPointsInSoleFrameForController()
    {
       return new SideDependentList<>(ground_contact_point_offset_from_foot, ground_contact_point_offset_from_foot);
    }
-   
-//   @Override
-//   public boolean isTorqueVelocityLimitsEnabled()
-//   {
-//      return ENABLE_JOINT_VELOCITY_TORQUE_LIMITS;
-//   }
 }
