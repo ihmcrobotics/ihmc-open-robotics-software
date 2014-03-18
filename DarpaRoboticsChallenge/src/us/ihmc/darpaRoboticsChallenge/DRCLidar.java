@@ -37,7 +37,7 @@ public class DRCLidar
          if (lidarSensors.size() >= 2)
             System.err.println("DRCLidar: Only one LIDAR unit is supported at this time. Found " + lidarSensors.size()
                   + " LIDAR units. Will use only the first.");
-         return lidarSensors.get(0); // the only one.
+         return lidarSensors.get(2); // the only one.
       }
    }
 
