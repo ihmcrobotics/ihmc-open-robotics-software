@@ -788,6 +788,11 @@ public class MomentumBasedController
       return twistCalculator;
    }
 
+   public InverseDynamicsCalculator getInverseDynamicsCalculator()
+   {
+      return inverseDynamicsCalculator;
+   }
+
    public CenterOfMassJacobian getCenterOfMassJacobian()
    {
       return centerOfMassJacobian;
