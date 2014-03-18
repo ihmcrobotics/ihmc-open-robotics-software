@@ -10,6 +10,9 @@ public class ValkyrieConfigurationRoot
 
    public static final SideDependentList<String> FOOT_SENSOR_FILES_BASENAMES = new SideDependentList<>("FT14020", "FT14175");
 
-   public static final String SCHEDULE_FILE = "main_bench.yaml";
-   public static final String URDF_FILE = "models/V1_hw_bench.urdf";
+   public static final String SCHEDULE_FILE = "main_sim.yaml";
+   public static final String URDF_FILE = "models/V1_hw.urdf";
+
+   public static final String BENCH_SCHEDULE_FILE = "main_bench.yaml";
+   public static final String BENCH_URDF_FILE = "models/V1_hw_bench.urdf";
 }
