@@ -72,7 +72,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 
       pelvisLinearStateUpdater = new PelvisLinearStateUpdater(inverseDynamicsStructure, footSwitches, bipedFeet,
             gravitationalAcceleration, estimateDT, dynamicGraphicObjectsListRegistry, registry);
-      pelvisLinearStateUpdater.setJointAndIMUSensorDataSource(jointAndIMUSensorDataSource);
+//      pelvisLinearStateUpdater.setJointAndIMUSensorDataSource(jointAndIMUSensorDataSource);
 
       sensorReader.setJointAndIMUSensorDataSource(jointAndIMUSensorDataSource);
    }
