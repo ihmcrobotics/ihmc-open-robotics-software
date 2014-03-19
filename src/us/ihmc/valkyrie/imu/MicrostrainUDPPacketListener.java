@@ -15,12 +15,13 @@ public class MicrostrainUDPPacketListener implements Runnable
 
    private static final byte SCALED_ACCELEROMETER_DESCRIPTOR = 0x04;
    private static final byte SCALED_GYRO_DESCRIPTOR = 0x05;
+   private static final byte MATRIX_DESCRIPTOR = 0x09;
    private static final byte QUATERNION_DESCRIPTOR = 0x0A;
 
    private DatagramChannel receiveChannel;
    private volatile boolean requestStop = false;
    private final ByteBuffer receiveBuffer = ByteBuffer.allocate(1024);
-   
+
    private final ConcurrentCopier<MicroStrainData> microstrainBuffer = new ConcurrentCopier<>(new MicroStrainData.MicroStrainDataBuilder());
 
    public MicrostrainUDPPacketListener(int port) throws IOException
@@ -53,16 +54,19 @@ public class MicrostrainUDPPacketListener implements Runnable
    public void readFields(ByteBuffer buffer)
    {
       MicroStrainData data = microstrainBuffer.getCopyForWriting();
-      
+
       long time = RealtimeThread.getCurrentMonotonicClockTime();
       data.setReceiveTime(time);
-      
+
       while (buffer.position() < buffer.limit() - 2)
       {
          int fieldLength = buffer.get();
          int descriptor = buffer.get();
          switch (descriptor)
          {
+         case MATRIX_DESCRIPTOR:
+            data.setMatrix(buffer.getFloat(), buffer.getFloat(), buffer.getFloat(), buffer.getFloat(), buffer.getFloat(), buffer.getFloat(), buffer.getFloat(), buffer.getFloat(), buffer.getFloat());
+            break;
          case QUATERNION_DESCRIPTOR:
             data.setQuaternion(buffer.getFloat(), buffer.getFloat(), buffer.getFloat(), buffer.getFloat());
             break;
@@ -80,7 +84,7 @@ public class MicrostrainUDPPacketListener implements Runnable
       }
       microstrainBuffer.commit();
    }
-   
+
    public MicroStrainData getLatestData()
    {
       return microstrainBuffer.getCopyForReading();
@@ -96,7 +100,6 @@ public class MicrostrainUDPPacketListener implements Runnable
             receiveBuffer.clear();
             receiveChannel.receive(receiveBuffer);
             receiveBuffer.flip();
-
             if (!isChecksumValid(receiveBuffer))
             {
                System.err.println("Invalid checksum");
@@ -121,20 +124,31 @@ public class MicrostrainUDPPacketListener implements Runnable
          }
       }
    }
-   
+
    public void stop()
    {
       requestStop = true;
    }
-   
-   public static MicrostrainUDPPacketListener createRealtimeListener(PriorityParameters priority, long serialNumber) throws IOException
+
+   private static MicrostrainUDPPacketListener create(long serialNumber) throws IOException
    {
       int port = 50000 + (int) (serialNumber % 10000);
-      MicrostrainUDPPacketListener listener = new MicrostrainUDPPacketListener(port);
+      System.out.println("Connecting to IMU on port " + port);
+      return new MicrostrainUDPPacketListener(port);
+   }
+
+   public static MicrostrainUDPPacketListener createRealtimeListener(PriorityParameters priority, long serialNumber) throws IOException
+   {
+      MicrostrainUDPPacketListener listener = create(serialNumber);
       new RealtimeThread(priority, listener).start();
-      
       return listener;
-      
+   }
+   
+   public static MicrostrainUDPPacketListener createNonRealtimeListener(long serialNumber) throws IOException
+   {
+      MicrostrainUDPPacketListener listener = create(serialNumber);
+      new Thread(listener).start();
+      return listener;
    }
 
    public static void main(String[] args) throws IOException
