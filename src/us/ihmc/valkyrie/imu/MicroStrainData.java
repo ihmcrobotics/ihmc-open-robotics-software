@@ -1,16 +1,21 @@
 package us.ihmc.valkyrie.imu;
 
-import us.ihmc.concurrent.Builder;
-
+import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.concurrent.Builder;
+
 public class MicroStrainData
 {
+   public static final Matrix3d MICROSTRAIN_TO_ZUP_WORLD = new Matrix3d(1.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, -1.0);
+   public static final double MICROSTRAIN_GRAVITY = 9.80665; // MicroStrain's definition of g, as given on pg 64 of '3DM-GX3-15-25 MIP Data Communications Protocol'
+   
    private long receiveTime;
    private final Vector3d acceleration = new Vector3d();
    private final Vector3d gyro = new Vector3d();
    private final Quat4d quaternion = new Quat4d();
+   private final Matrix3d matrix = new Matrix3d();
 
    public void setReceiveTime(long time)
    {
@@ -47,6 +52,11 @@ public class MicroStrainData
       return quaternion;
    }
    
+   public Matrix3d getMatrix()
+   {
+      return matrix;
+   }
+   
    public long getReceiveTime()
    {
       return receiveTime;
@@ -70,5 +80,18 @@ public class MicroStrainData
          return new MicroStrainData();
       }
 
+   }
+
+   public void setMatrix(float m0, float m1, float m2, float m3, float m4, float m5, float m6, float m7, float m8)
+   {
+      matrix.setM00(m0);
+      matrix.setM10(m1);
+      matrix.setM20(m2);
+      matrix.setM01(m3);
+      matrix.setM11(m4);
+      matrix.setM21(m5);
+      matrix.setM02(m6);
+      matrix.setM12(m7);
+      matrix.setM22(m8);
    }
 }
