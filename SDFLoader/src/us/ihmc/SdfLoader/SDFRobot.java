@@ -442,7 +442,8 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
 
                if (imu != null)
                {
-                  Transform3D pose = SDFConversionsHelper.poseToTransform(sensor.getPose());
+                  Transform3D pose = new Transform3D(child.getTransformFromModelReferenceFrame());
+                  pose.mul(SDFConversionsHelper.poseToTransform(sensor.getPose()));
 
                   IMUMount imuMount = new IMUMount(child.getName() + "_" + sensor.getName(), pose, this);
 
