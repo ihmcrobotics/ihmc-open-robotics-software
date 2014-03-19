@@ -3,20 +3,24 @@ package us.ihmc.darpaRoboticsChallenge;
 import us.ihmc.atlas.AtlasArmControllerParameters;
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.atlas.AtlasPhysicalProperties;
+import us.ihmc.atlas.AtlasStateEstimatorParameters;
 import us.ihmc.atlas.AtlasWalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.acsell.ACSELLArmControlParameters;
 import us.ihmc.darpaRoboticsChallenge.acsell.ACSELLPhysicalProperties;
+import us.ihmc.darpaRoboticsChallenge.acsell.ACSELLStateEstimatorParameters;
 import us.ihmc.darpaRoboticsChallenge.acsell.ACSELLWalkingControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.acsell.AxlJointMap;
 import us.ihmc.darpaRoboticsChallenge.acsell.BonoJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandModel;
+import us.ihmc.darpaRoboticsChallenge.stateEstimation.StateEstimatorParameters;
 import us.ihmc.darpaRoboticsChallenge.valkyrie.ValkyrieArmControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.valkyrie.ValkyrieJointMap;
 import us.ihmc.darpaRoboticsChallenge.valkyrie.ValkyriePhysicalProperties;
+import us.ihmc.darpaRoboticsChallenge.valkyrie.ValkyrieStateEstimatorParameters;
 import us.ihmc.darpaRoboticsChallenge.valkyrie.ValkyrieWalkingControllerParameters;
 
 public enum DRCRobotModel
@@ -88,6 +92,33 @@ public enum DRCRobotModel
       default:
          throw new RuntimeException("Unkown model");
       }
+   }
+   
+   public StateEstimatorParameters getStateEstimatorParameters(boolean runningOnRealRobot)
+   {
+	      switch (this)
+	      {
+	      case VALKYRIE:
+	         return new ValkyrieStateEstimatorParameters(runningOnRealRobot);	         
+	      case ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS:
+	      case ATLAS_NO_HANDS_ADDED_MASS:
+	      case ATLAS_SANDIA_HANDS:
+	      case DRC_EXTENDED_HANDS:
+	      case DRC_EXTENDED_HOOKS:
+	      case DRC_HANDS:
+	      case DRC_HOOKS:
+	      case DRC_NO_HANDS:
+	      case DRC_TASK_HOSE:
+	         return new AtlasStateEstimatorParameters(runningOnRealRobot);
+	         
+	      case AXL:
+	      case BONO:
+	         return new ACSELLStateEstimatorParameters(runningOnRealRobot);
+	         
+	      default:
+	         throw new RuntimeException("Unkown model");
+	      }
+	   
    }
    
    public DRCRobotPhysicalProperties getPhysicalProperties()

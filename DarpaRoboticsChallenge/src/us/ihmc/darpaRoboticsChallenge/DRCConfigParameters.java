@@ -182,9 +182,6 @@ public class DRCConfigParameters
    public static final double NOISE_FILTER_ALPHA = 1e-1;
    public static final double POSITION_NOISE_STD = 0.01;
    public static final double QUATERNION_NOISE_STD = 0.01;
-   public static final boolean ASSUME_PERFECT_IMU = true;    // assume perfect orientation, angular velocity and linear acceleration output from IMU
-   public static final boolean USE_SIMPLE_PELVIS_POSITION_ESTIMATOR = true;
-
 
  
    // LIDAR Configuration - LIDAR filtering parameters now in LidarFilterParameters

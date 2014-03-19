@@ -26,6 +26,7 @@ import us.ihmc.darpaRoboticsChallenge.ros.ROSSandiaJointMap;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCSimulatedSensorNoiseParameters;
 import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCStateEstimatorInterface;
+import us.ihmc.darpaRoboticsChallenge.stateEstimation.StateEstimatorParameters;
 import us.ihmc.projectM.R2Sim02.initialSetup.ScsInitialSetup;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.simulatedSensors.GroundContactPointBasedWrenchCalculator;
@@ -70,6 +71,8 @@ public class DRCSimulationFactory
       double estimateDT = DRCConfigParameters.ESTIMATOR_DT;
       double simulateDT = robotInterface.getSimulateDT();
       double controlDT = controllerFactory.getControlDT();
+      StateEstimatorParameters stateEstimatorParameters = drcRobotModel.getStateEstimatorParameters(false);
+      
       int estimationTicksPerControlTick = (int) (estimateDT / simulateDT);
 
       SDFRobot simulatedRobot = robotInterface.getRobot();
@@ -166,7 +169,7 @@ public class DRCSimulationFactory
 
       DRCController robotController = new DRCController(robotInterface.getFullRobotModelFactory(), controllerFactory, sensorReaderFactory, drcOutputWriter,
             jointMap, lidarControllerInterface, gravity, estimateDT, controlDT, dataProducer, robotInterface.getTimeStampProvider(),
-            dynamicGraphicObjectsListRegistry, guiSetterUpperRegistry, registry, null, threadFactory, threadSynchronizer);
+            dynamicGraphicObjectsListRegistry, guiSetterUpperRegistry, registry, null, threadFactory, threadSynchronizer, stateEstimatorParameters);
       robotController.initialize();
 
       final HumanoidRobotSimulation<SDFRobot> humanoidRobotSimulation = new HumanoidRobotSimulation<SDFRobot>(simulatedRobot, controller,
@@ -189,7 +192,7 @@ public class DRCSimulationFactory
          Joint estimationJoint = getEstimationJoint(simulatedRobot);
 
          StateEstimatorErrorCalculatorController stateEstimatorErrorCalculatorController = new StateEstimatorErrorCalculatorController(stateEstimator,
-               simulatedRobot, estimationJoint, DRCConfigParameters.ASSUME_PERFECT_IMU, DRCConfigParameters.USE_SIMPLE_PELVIS_POSITION_ESTIMATOR);
+               simulatedRobot, estimationJoint, stateEstimatorParameters.getAssumePerfectImu(), stateEstimatorParameters.getUseSimplePelvisPositionEstimator());
          simulatedRobot.setController(stateEstimatorErrorCalculatorController, estimationTicksPerControlTick);
       }
 
