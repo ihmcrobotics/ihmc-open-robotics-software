@@ -8,14 +8,13 @@ import javax.vecmath.Quat4d;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.sensors.WrenchBasedFootSwitch;
 import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCSimulatedSensorNoiseParameters;
 import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCStateEstimatorInterface;
+import us.ihmc.darpaRoboticsChallenge.stateEstimation.StateEstimatorParameters;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.simulatedSensors.JointAndIMUSensorMap;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorFilterParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
@@ -47,18 +46,15 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
          .createNoiseParametersForEstimatorJerryTuningSeptember2013();
    
    public DRCKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure,
-         RigidBodyToIndexMap estimatorRigidBodyToIndexMap, double estimateDT, SensorReaderFactory sensorReaderFactory, double gravitationalAcceleration,
+         RigidBodyToIndexMap estimatorRigidBodyToIndexMap, double estimateDT, StateEstimatorParameters stateEstimatorParameters,
+         SensorReaderFactory sensorReaderFactory, double gravitationalAcceleration,
          SideDependentList<WrenchBasedFootSwitch> footSwitches, SideDependentList<ContactablePlaneBody> bipedFeet,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       sensorReader = sensorReaderFactory.getSensorReader();
 
-      SensorFilterParameters sensorFilterParameters = new SensorFilterParameters(
-            DRCConfigParameters.JOINT_POSITION_FILTER_FREQ_HZ, DRCConfigParameters.JOINT_VELOCITY_FILTER_FREQ_HZ, 
-            DRCConfigParameters.ORIENTATION_FILTER_FREQ_HZ, DRCConfigParameters.ANGULAR_VELOCITY_FILTER_FREQ_HZ,
-            DRCConfigParameters.LINEAR_ACCELERATION_FILTER_FREQ_HZ, estimateDT);
 
-      JointAndIMUSensorDataSource jointAndIMUSensorDataSource = new JointAndIMUSensorDataSource(sensorReaderFactory.getStateEstimatorSensorDefinitions(), sensorFilterParameters, registry);
+      JointAndIMUSensorDataSource jointAndIMUSensorDataSource = new JointAndIMUSensorDataSource(sensorReaderFactory.getStateEstimatorSensorDefinitions(), stateEstimatorParameters.getSensorFilterParameters(estimateDT), registry);
       JointAndIMUSensorMap jointAndIMUSensorMap = jointAndIMUSensorDataSource.getSensorMap();
 
       jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, jointAndIMUSensorDataSource, registry);

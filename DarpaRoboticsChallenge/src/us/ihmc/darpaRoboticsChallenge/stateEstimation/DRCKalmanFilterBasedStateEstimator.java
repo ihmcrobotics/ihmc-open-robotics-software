@@ -6,16 +6,13 @@ import javax.vecmath.Quat4d;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.controlFlow.ControlFlowGraph;
-import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.sensors.WrenchBasedFootSwitch;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorFilterParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.stateEstimation.JointAndIMUSensorDataSource;
-import us.ihmc.sensorProcessing.stateEstimation.PointMeasurementNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromController;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimator;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorWithPorts;
@@ -51,28 +48,16 @@ public class DRCKalmanFilterBasedStateEstimator implements DRCStateEstimatorInte
    public DRCKalmanFilterBasedStateEstimator(StateEstimationDataFromController stateEstimatorDataFromControllerSource, SDFFullRobotModel estimatorModel,
          FullInverseDynamicsStructure inverseDynamicsStructure, AfterJointReferenceFrameNameMap estimatorReferenceFrameMap,
          RigidBodyToIndexMap estimatorRigidBodyToIndexMap, double estimateDT, SensorReaderFactory sensorReaderFactory, double gravitationalAcceleration,
-         boolean assumePerfectIMU, SideDependentList<WrenchBasedFootSwitch> footSwitches,
+         StateEstimatorParameters stateEstimatorParameters, SideDependentList<WrenchBasedFootSwitch> footSwitches,
          SideDependentList<ContactablePlaneBody> bipedFeet, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       sensorReader = sensorReaderFactory.getSensorReader();
-      this.assumePerfectIMU = assumePerfectIMU;
-
-      SensorFilterParameters sensorFilterParameters = new SensorFilterParameters(
-            DRCConfigParameters.JOINT_POSITION_FILTER_FREQ_HZ, DRCConfigParameters.JOINT_VELOCITY_FILTER_FREQ_HZ, 
-            DRCConfigParameters.ORIENTATION_FILTER_FREQ_HZ, DRCConfigParameters.ANGULAR_VELOCITY_FILTER_FREQ_HZ,
-            DRCConfigParameters.LINEAR_ACCELERATION_FILTER_FREQ_HZ, estimateDT);
-      
-      PointMeasurementNoiseParameters pointMeasurementNoiseParameters = new  PointMeasurementNoiseParameters(
-            DRCConfigParameters.pointVelocityXYMeasurementStandardDeviation,
-            DRCConfigParameters.pointVelocityZMeasurementStandardDeviation,
-            DRCConfigParameters.pointPositionXYMeasurementStandardDeviation,
-            DRCConfigParameters.pointPositionZMeasurementStandardDeviation);
-
+      this.assumePerfectIMU = stateEstimatorParameters.getAssumePerfectImu();
       
       // Make the estimator here.
       sensorAndEstimatorAssembler = new SensorAndEstimatorAssembler(stateEstimatorDataFromControllerSource,
-            sensorReaderFactory.getStateEstimatorSensorDefinitions(), sensorNoiseParametersForEstimator, sensorFilterParameters,
-            pointMeasurementNoiseParameters, gravitationalAcceleration, inverseDynamicsStructure, estimatorReferenceFrameMap, estimatorRigidBodyToIndexMap,
+            sensorReaderFactory.getStateEstimatorSensorDefinitions(), sensorNoiseParametersForEstimator, stateEstimatorParameters.getSensorFilterParameters(estimateDT),
+            stateEstimatorParameters.getPointMeasurementNoiseParameters(), gravitationalAcceleration, inverseDynamicsStructure, estimatorReferenceFrameMap, estimatorRigidBodyToIndexMap,
             estimateDT, assumePerfectIMU, registry);
 
       stateEstimatorWithPorts = sensorAndEstimatorAssembler.getEstimator();
