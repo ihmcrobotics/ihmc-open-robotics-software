@@ -60,6 +60,7 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
    private static final boolean SHOW_CONTACT_POINTS = true;
    private static final boolean USE_POLAR_LIDAR_MODEL = true;
    private static final boolean SHOW_COM_REFERENCE_FRAMES = true;
+   private static final boolean SHOW_SENSOR_REFERENCE_FRAMES = false;
 
    private static final long serialVersionUID = 5864358637898048080L;
 
@@ -102,10 +103,10 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
       setPositionInWorld(offset);
       setOrientation(orientation);
 
-      addSensors(rootJoint, rootLink);
 
       Link scsRootLink = createLink(rootLink, new Transform3D(), useCollisionMeshes);
       rootJoint.setLink(scsRootLink);
+      addSensors(rootJoint, rootLink);
 
       addRootJoint(rootJoint);
 
@@ -442,8 +443,10 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
 
                if (imu != null)
                {
+                  //TODO: This is incorrect. Need to get pose between sensor and joint, not world
+                  Transform3D sensorPose = SDFConversionsHelper.poseToTransform(sensor.getPose());
                   Transform3D pose = new Transform3D(child.getTransformFromModelReferenceFrame());
-                  pose.mul(SDFConversionsHelper.poseToTransform(sensor.getPose()));
+                  pose.mul(sensorPose);
 
                   IMUMount imuMount = new IMUMount(child.getName() + "_" + sensor.getName(), pose, this);
 
@@ -473,6 +476,14 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
                   }
 
                   scsJoint.addIMUMount(imuMount);
+                  if(SHOW_SENSOR_REFERENCE_FRAMES)
+                  {
+                     Graphics3DObject linkGraphics = scsJoint.getLink().getLinkGraphics();
+                     linkGraphics.identity();
+                     linkGraphics.transform(sensorPose);
+                     linkGraphics.addCoordinateSystem(1.0);
+                     linkGraphics.identity();
+                  }
                }
                else
                {
