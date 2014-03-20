@@ -1,6 +1,7 @@
 package us.ihmc.valkyrie.configuration;
 
 import us.ihmc.realtime.PriorityParameters;
+import us.ihmc.valkyrie.roboNet.api.turbodriver_api.TurbodriverAPI_DRCv4;
 
 public class ValkyrieTimingParameters
 {
@@ -13,7 +14,7 @@ public class ValkyrieTimingParameters
    
 
    // FQN of the turbodriver we use to test overall round trip time
-   public static final String timingNode = "/pelvis/wj1";
+   public static final Class<?>[] timedTurbodrivers = { TurbodriverAPI_DRCv4.class };
    public static final String timingWriteName = "LoopbackWrite";
    public static final String timingReadName = "LoopbackRead";
    
