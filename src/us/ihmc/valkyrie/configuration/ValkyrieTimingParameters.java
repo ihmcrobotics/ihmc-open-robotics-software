@@ -10,4 +10,11 @@ public class ValkyrieTimingParameters
    
    public static final long ESTIMATOR_DT_IN_NS = 2000000;
    public static final long CONTROL_DT_IN_NS = 6000000;
+   
+
+   // FQN of the turbodriver we use to test overall round trip time
+   public static final String timingNode = "/pelvis/wj1";
+   public static final String timingWriteName = "LoopbackWrite";
+   public static final String timingReadName = "LoopbackRead";
+   
 }
