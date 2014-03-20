@@ -127,7 +127,9 @@ public class ValkyrieSliderBoard
    private void setupSliderBoardForWalking(YoVariableRegistry registry, GeneralizedSDFRobotModel generalizedSDFRobotModel,
                                            final SliderBoardConfigurationManager sliderBoardConfigurationManager)
    {
-      sliderBoardConfigurationManager.setSlider(1, "transitionFactor", registry, 0.0, 1.0);
+      sliderBoardConfigurationManager.setSlider(1, "percentOfGravityCompensation", registry, 0.0, 1.0);
+      sliderBoardConfigurationManager.setSlider(2, "gravityComp_gainScaling", registry, 0.0, 1.0);
+      sliderBoardConfigurationManager.setSlider(8, "transitionFactor", registry, 0.0, 1.0);
    }
 
    private static final SliderBoardFactory turboDriverPositionControlFactory = new SliderBoardFactory()
