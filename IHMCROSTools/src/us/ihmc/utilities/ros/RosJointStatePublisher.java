@@ -1,13 +1,8 @@
 package us.ihmc.utilities.ros;
 
 import org.ros.message.Time;
-import org.ros.time.NtpTimeProvider;
-import org.ros.time.TimeProvider;
 import sensor_msgs.JointState;
 import std_msgs.Header;
-
-import java.net.InetAddress;
-import java.net.URI;
 import java.util.List;
 
 public class RosJointStatePublisher extends RosTopicPublisher<JointState>
@@ -54,10 +49,23 @@ public class RosJointStatePublisher extends RosTopicPublisher<JointState>
       header.setFrameId("/world");
       header.setSeq(seq++);
       message.setHeader(header);
-      message.setName(name);
-      message.setPosition(position);
-      message.setVelocity(velocity);
-      message.setEffort(effort);
+
+      if (name != null) {
+         message.setName(name);
+      }
+
+      if (position != null) {
+         message.setPosition(position);
+      }
+
+      if(velocity != null) {
+        message.setVelocity(velocity);
+      }
+
+      if(effort != null) {
+        message.setEffort(effort);
+      }
+
       publish(message);
    }
 }
