@@ -26,7 +26,7 @@ public class ValkyrieJoint
       desiredEffort = new DoubleYoVariable(name + "_tau_d", registry);
    }
 
-   public void setQ(double q)
+   public void setPosition(double q)
    {
       this.position.set(q);
    }
