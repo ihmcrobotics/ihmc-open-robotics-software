@@ -32,12 +32,17 @@ public class DRCLidar
          System.err.println("DRCLidar: No LIDAR units found on SDF Robot.");
          return null;
       }
+      else if (lidarSensors.size() < 3)
+      {
+         System.err.println("DRCLidar: Only one LIDAR unit is supported at this time. Found " + lidarSensors.size()
+               + " LIDAR units. Will use only the first.");
+         return lidarSensors.get(0);
+      }
       else
       {
-         if (lidarSensors.size() >= 2)
             System.err.println("DRCLidar: Only one LIDAR unit is supported at this time. Found " + lidarSensors.size()
-                  + " LIDAR units. Will use only the first.");
-         return lidarSensors.get(0); // the only one.
+                  + " LIDAR units. Assuming this is Valkyrie and using the third.");
+         return lidarSensors.get(2);
       }
    }
 
