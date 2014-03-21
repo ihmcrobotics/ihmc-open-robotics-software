@@ -17,6 +17,8 @@ public class AtlasPhysicalProperties extends DRCRobotPhysicalProperties
    public static final double  foot_back = 0.09; // 0.06;   //0.082;    // 0.07;
    public static final double  foot_start_toetaper_from_back = 0.195;
    public static final double  foot_forward = foot_length - foot_back;   // 0.16;   //0.178;    // 0.18;
+   public static final double  shinLength = 0.374;
+   public static final double  thighLength = 0.422;
    
    @Override
    public double getAnkleHeight()

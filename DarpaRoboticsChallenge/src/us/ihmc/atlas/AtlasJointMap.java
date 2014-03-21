@@ -1,15 +1,30 @@
 package us.ihmc.atlas;
 
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.back_bkx;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.back_bky;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.back_bkz;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.forcedSideDependentJointNames;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.jointNames;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_arm_elx;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_arm_ely;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_arm_shx;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_arm_shy;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_arm_wrx;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_arm_wry;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_leg_akx;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_leg_aky;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_leg_hpx;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_leg_hpy;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_leg_hpz;
+import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_leg_kny;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
-
 import javax.media.j3d.Transform3D;
-import javax.vecmath.Matrix3d;
 import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
@@ -17,19 +32,14 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.NeckJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineJointName;
-import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel.RobotType;
 import us.ihmc.darpaRoboticsChallenge.IncorrectDrcRobotModelException;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.HandContactParameters;
 import us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap;
-import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.*;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.Pair;
-import us.ihmc.utilities.math.geometry.RotationFunctions;
-import us.ihmc.utilities.math.geometry.TransformTools;
 
 public class AtlasJointMap extends DRCRobotJointMap 
 {
