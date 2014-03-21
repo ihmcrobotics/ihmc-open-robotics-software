@@ -119,9 +119,11 @@ public class DRCRobotSDFLoader
 
          case AXL:
             fileInputStream = myClass.getResourceAsStream("acsell/models/axl/axl_description/axl/robots/axl.sdf");
+            resourceDirectories.add(myClass.getResource("acsell/models/axl/axl_description").getFile());
             break;
          case BONO:
             fileInputStream = myClass.getResourceAsStream("acsell/models/axl/axl_description/bono/robots/bono.sdf");
+            resourceDirectories.add(myClass.getResource("acsell/models/axl/axl_description").getFile());
             break;
          default :
             throw new RuntimeException("DRCRobotSDFLoader: Unimplemented enumeration case : " + selectedModel);
@@ -165,7 +167,5 @@ public class DRCRobotSDFLoader
       
       SimulationConstructionSet scs = new SimulationConstructionSet(loader.createRobot(jointMap, false));
       scs.startOnAThread();
-
    }
-
 }
