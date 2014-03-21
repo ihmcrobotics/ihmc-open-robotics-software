@@ -231,66 +231,7 @@ public class DRCFlatGroundWalkingTest
    }
 
 
-   @Test
-   public void testBONOFlatGroundWalking() throws SimulationExceededMaximumTimeException
-   {
-      BambooTools.reportTestStartedMessage();
-
-      DRCRobotModel robotModel = DRCRobotModel.BONO;
-      ACSELLControllerComponentFactory acsellControllerComponentFactory = new ACSELLControllerComponentFactory(robotModel);
-      DRCRobotInterface robotInterface = acsellControllerComponentFactory.getRobotInterface();
-      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = acsellControllerComponentFactory.getRobotInitialSetup(0.0, 0.0);
-      WalkingControllerParameters walkingControllerParameters = acsellControllerComponentFactory.getWalkingControllerParameters();
-      ArmControllerParameters armControllerParameters = acsellControllerComponentFactory.getArmControllerParameters();
-      
-      DRCFlatGroundWalkingTrack track = setupFlatGroundSimulationTrack(walkingControllerParameters, armControllerParameters, robotInterface, robotInitialSetup, robotModel);
-
-      drcController = track.getDrcController();
-      SimulationConstructionSet scs = track.getSimulationConstructionSet();
-
-      NothingChangedVerifier nothingChangedVerifier = null;
-      double walkingTimeDuration;
-      if (checkNothingChanged)
-      {
-         nothingChangedVerifier = new NothingChangedVerifier("BONOFlatGroundWalkingTest", scs);
-         walkingTimeDuration = 7.0;
-      }
-      else
-         walkingTimeDuration = defaultWalkingTimeDuration;
-
-      blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
-
-      DoubleYoVariable comError = (DoubleYoVariable) scs.getVariable("positionError_comHeight");
-
-      initiateMotion(scs, standingTimeDuration, blockingSimulationRunner);
-
-      double timeIncrement = 1.0;
-
-      while (scs.getTime() - standingTimeDuration < walkingTimeDuration)
-      {
-         blockingSimulationRunner.simulateAndBlock(timeIncrement);
-
-         // TODO: Put test for heading back in here.
-//       if (!MathTools.epsilonEquals(desiredHeading.getDoubleValue(), pelvisYaw.getDoubleValue(), epsilonHeading))
-//       {
-//          fail("Desired Heading too large of error: " + desiredHeading.getDoubleValue());
-//       }
-
-         //TODO: Reduce the error tolerance from 2.5 cm to under 1 cm after we change things so that we are truly 
-         // controlling pelvis height, not CoM height.
-         if (Math.abs(comError.getDoubleValue()) > 0.06)
-         {
-            fail("Math.abs(comError.getDoubleValue()) > 0.06: " + comError.getDoubleValue() + " at t = " + scs.getTime());
-         }
-      }
-
-      if (checkNothingChanged)
-         checkNothingChanged(nothingChangedVerifier);
-
-      createMovie(scs);
-      BambooTools.reportTestFinishedMessage();
-
-   }
+   
    
  
    private void initiateMotion(SimulationConstructionSet scs, double standingTimeDuration, BlockingSimulationRunner runner)
