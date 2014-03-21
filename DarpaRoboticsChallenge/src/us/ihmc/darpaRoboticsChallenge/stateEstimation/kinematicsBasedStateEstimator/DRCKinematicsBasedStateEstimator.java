@@ -1,5 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.stateEstimation.kinematicsBasedStateEstimator;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.vecmath.Point3d;
@@ -31,6 +32,7 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
 
 public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterface, StateEstimator
 {
@@ -42,6 +44,9 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    private final PelvisRotationalStateUpdater pelvisRotationalStateUpdater;
    private final PelvisLinearStateUpdater pelvisLinearStateUpdater;
  
+   private boolean visualize = false;
+   private final ArrayList<DynamicGraphicReferenceFrame> dynamicGraphicMeasurementFrames = new ArrayList<>();
+   
    private final SensorNoiseParameters sensorNoiseParametersForEstimator = DRCSimulatedSensorNoiseParameters
          .createNoiseParametersForEstimatorJerryTuningSeptember2013();
    
@@ -62,13 +67,29 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       List<OrientationSensorConfiguration> orientationSensorConfigurations = sensorConfigurationFactory.createOrientationSensorConfigurations(jointAndIMUSensorMap.getOrientationSensors());
       List<AngularVelocitySensorConfiguration> angularVelocitySensorConfigurations = sensorConfigurationFactory.createAngularVelocitySensorConfigurations(jointAndIMUSensorMap.getAngularVelocitySensors());
       
-      pelvisRotationalStateUpdater = new PelvisRotationalStateUpdater(orientationSensorConfigurations, angularVelocitySensorConfigurations, inverseDynamicsStructure, registry);
+      pelvisRotationalStateUpdater = new PelvisRotationalStateUpdater(inverseDynamicsStructure, orientationSensorConfigurations, angularVelocitySensorConfigurations, registry);
 
       pelvisLinearStateUpdater = new PelvisLinearStateUpdater(inverseDynamicsStructure, footSwitches, bipedFeet,
             gravitationalAcceleration, estimateDT, dynamicGraphicObjectsListRegistry, registry);
 //      pelvisLinearStateUpdater.setJointAndIMUSensorDataSource(jointAndIMUSensorDataSource);
 
       sensorReader.setJointAndIMUSensorDataSource(jointAndIMUSensorDataSource);
+      
+      visualize = visualize && dynamicGraphicObjectsListRegistry != null;
+      
+      if (visualize)
+         setupDynamicGraphicObjects(dynamicGraphicObjectsListRegistry, orientationSensorConfigurations);
+   }
+
+   private void setupDynamicGraphicObjects(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+         List<OrientationSensorConfiguration> orientationSensorConfigurations)
+   {
+      for (int i = 0; i < orientationSensorConfigurations.size(); i++)
+      {
+         DynamicGraphicReferenceFrame dynamicGraphicMeasurementFrame = new DynamicGraphicReferenceFrame(orientationSensorConfigurations.get(i).getMeasurementFrame(), registry, 1.0);
+         dynamicGraphicMeasurementFrames.add(dynamicGraphicMeasurementFrame);
+      }
+      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects("imuFrame", dynamicGraphicMeasurementFrames);
    }
 
    public StateEstimator getStateEstimator()
@@ -86,8 +107,17 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    public void doControl()
    {
       jointStateUpdater.updateJointState();
-      pelvisRotationalStateUpdater.updatePelvisOrientationAndAngularVelocity();
+      pelvisRotationalStateUpdater.updateRootJointOrientationAndAngularVelocity();
       pelvisLinearStateUpdater.updatePelvisPositionAndLinearVelocity();
+      
+      if (visualize)
+         updateVisualizers();
+   }
+
+   private void updateVisualizers()
+   {
+      for (int i = 0; i < dynamicGraphicMeasurementFrames.size(); i++)
+         dynamicGraphicMeasurementFrames.get(i).update();
    }
 
    public void startIMUDriftEstimation()
@@ -126,9 +156,9 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       sensorReader.setForceSensorDataHolder(forceSensorDataHolderForEstimator);
    }
 
-   public void getEstimatedOrientation(FrameOrientation frameOrientationToPack)
+   public void getEstimatedOrientation(FrameOrientation estimatedOrientationToPack)
    {
-      throw new RuntimeException("Should not get there, IMU is trusted");
+      pelvisRotationalStateUpdater.getEstimatedOrientation(estimatedOrientationToPack);
    }
 
    public void setEstimatedOrientation(FrameOrientation estimatedOrientation)
@@ -138,7 +168,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 
    public void getEstimatedAngularVelocity(FrameVector estimatedAngularVelocityToPack)
    {
-      throw new RuntimeException("Should not get there, IMU is trusted");
+      pelvisRotationalStateUpdater.getEstimatedAngularVelocity(estimatedAngularVelocityToPack);
    }
 
    public void setEstimatedAngularVelocity(FrameVector estimatedAngularVelocity)
