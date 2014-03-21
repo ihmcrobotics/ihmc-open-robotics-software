@@ -3,7 +3,6 @@ package us.ihmc.darpaRoboticsChallenge.stateEstimation;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.controlFlow.ControlFlowGraph;
 import us.ihmc.darpaRoboticsChallenge.sensors.WrenchBasedFootSwitch;
@@ -44,8 +43,8 @@ public class DRCKalmanFilterBasedStateEstimator implements DRCStateEstimatorInte
          .createNoiseParametersForEstimatorJerryTuningSeptember2013();
    
    private final boolean assumePerfectIMU;
-   
-   public DRCKalmanFilterBasedStateEstimator(StateEstimationDataFromController stateEstimatorDataFromControllerSource, SDFFullRobotModel estimatorModel,
+
+   public DRCKalmanFilterBasedStateEstimator(StateEstimationDataFromController stateEstimatorDataFromControllerSource,
          FullInverseDynamicsStructure inverseDynamicsStructure, AfterJointReferenceFrameNameMap estimatorReferenceFrameMap,
          RigidBodyToIndexMap estimatorRigidBodyToIndexMap, double estimateDT, SensorReaderFactory sensorReaderFactory, double gravitationalAcceleration,
          StateEstimatorParameters stateEstimatorParameters, SideDependentList<WrenchBasedFootSwitch> footSwitches,
