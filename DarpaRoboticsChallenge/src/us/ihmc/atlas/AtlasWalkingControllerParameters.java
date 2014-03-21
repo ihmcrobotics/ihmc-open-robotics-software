@@ -17,7 +17,6 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.HandContactParameters;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
@@ -27,10 +26,10 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 public class AtlasWalkingControllerParameters implements WalkingControllerParameters
 {   
    private final boolean runningOnRealRobot;
-   
    private final SideDependentList<Transform3D> handControlFramesWithRespectToFrameAfterWrist = new SideDependentList<Transform3D>();
    private final SideDependentList<Transform3D> handPosesWithRespectToChestFrame = new SideDependentList<Transform3D>();
    private final double minElbowRollAngle = 0.5;
+   
    // Limits
    private final double neck_pitch_upper_limit = 1.14494; //0.83;    // true limit is = 1.134460, but pitching down more just looks at more robot chest
    private final double neck_pitch_lower_limit = -0.602139; //-0.610865;    // -math.pi/2.0;
@@ -38,17 +37,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    private final double head_roll_limit = Math.PI / 4.0;
    private final double pelvis_pitch_upper_limit = 0.0;
    private final double pelvis_pitch_lower_limit = -0.35; //-math.pi / 6.0;
-   
-   // drc robot model parameters
-   private final double  ankle_height = 0.084;
-   private final double  foot_width = 0.12;   // 0.08;   //0.124887;
-   private final double  toe_width = 0.095;  //0.07;   //0.05;   //
-   private final double  foot_length = 0.255;
-   private final double  foot_back = 0.09; // 0.06;   //0.082;    // 0.07;
-   private final double  foot_start_toetaper_from_back = 0.195;
-   private final double  foot_forward = foot_length - foot_back;   // 0.16;   //0.178;    // 0.18;
-   private final double  shin_length = 0.374;
-   private final double  thigh_length = 0.422;
+
    private final double  min_leg_length_before_collapsing_single_support = 0.53; // corresponds to q_kny = 1.70 rad
 
    public AtlasWalkingControllerParameters()
@@ -59,7 +48,6 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    public AtlasWalkingControllerParameters(boolean runningOnRealRobot)
    {
       this.runningOnRealRobot = runningOnRealRobot;
-      
       for(RobotSide robotSide : RobotSide.values)
       {
          Transform3D rotationPart = new Transform3D();
@@ -104,53 +92,6 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       }
    }
    
-   public SideDependentList<Transform3D> getDesiredHandPosesWithRespectToChestFrame()
-   {
-      return handPosesWithRespectToChestFrame;
-   }
-
-   public Map<OneDoFJoint, Double> getDefaultArmJointPositions(FullRobotModel fullRobotModel, RobotSide robotSide)
-   {
-      Map<OneDoFJoint, Double> jointPositions = new LinkedHashMap<OneDoFJoint, Double>();
-
-      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_ROLL), robotSide.negateIfRightSide(-1.30));
-      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_PITCH), 0.34);
-      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_ROLL), robotSide.negateIfRightSide(1.18));
-      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH), 1.94);
-      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.WRIST_PITCH), -0.19);
-      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.WRIST_ROLL), robotSide.negateIfRightSide(-0.07));
-
-//      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_ROLL), robotSide.negateIfRightSide(0.0));
-//      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_PITCH), 0.0);
-//      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_ROLL), robotSide.negateIfRightSide(0.0));
-//      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH), 0.0);
-//      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.WRIST_PITCH), 0.0);
-//      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.WRIST_ROLL), robotSide.negateIfRightSide(0.0));
-
-      return jointPositions;
-   }
-
-
-   public Map<OneDoFJoint, Double> getMinTaskspaceArmJointPositions(FullRobotModel fullRobotModel, RobotSide robotSide)
-   {
-      Map<OneDoFJoint, Double> ret = new LinkedHashMap<OneDoFJoint, Double>();
-      if (robotSide == RobotSide.LEFT)
-      {
-         ret.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_ROLL), minElbowRollAngle);
-      }
-      return ret;
-   }
-
-   public Map<OneDoFJoint, Double> getMaxTaskspaceArmJointPositions(FullRobotModel fullRobotModel, RobotSide robotSide)
-   {
-      Map<OneDoFJoint, Double> ret = new LinkedHashMap<OneDoFJoint, Double>();
-      if (robotSide == RobotSide.RIGHT)
-      {
-         ret.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_ROLL), -minElbowRollAngle);
-      }
-      return ret;
-   }
-
    public boolean stayOnToes()
    {
       return false; // Not working for now
@@ -173,10 +114,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
 
    public String[] getDefaultHeadOrientationControlJointNames()
    {
-      // Get rid of back_bkx to prevent hip roll jumps.
-//      return new String[] {jointNames[back_bkz], jointNames[back_bkx], jointNames[neck_ry]}; // Pelvis will jump around with these setting.
       return new String[] {jointNames[back_bkz], jointNames[neck_ry]}; 
-//      return new String[] {jointNames[neck_ry]};
    }
    
    public String[] getAllowableHeadOrientationControlJointNames()
@@ -186,7 +124,6 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
 
    public String[] getDefaultChestOrientationControlJointNames()
    {
-      //    return new String[] {jointNames[back_bky]};
       return new String[]{};
    }
 
@@ -277,12 +214,6 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       return jointNames[back_bky];
    }
 
-
-   public SideDependentList<Transform3D> getHandControlFramesWithRespectToFrameAfterWrist()
-   {
-      return handControlFramesWithRespectToFrameAfterWrist;
-   }
-
    public boolean finishSwingWhenTrajectoryDone()
    {
       return false;
@@ -290,7 +221,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
 
    public double getFootForwardOffset()
    {
-      return foot_forward;
+      return AtlasPhysicalProperties.foot_forward;
    }
 
    public double getFootBackwardOffset()
@@ -300,12 +231,12 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    
    public double getAnkleHeight()
    {
-      return ankle_height;
+      return AtlasPhysicalProperties.ankleHeight;
    }
 
    public double getLegLength()
    {
-      return shin_length + thigh_length;
+      return AtlasPhysicalProperties.shinLength + AtlasPhysicalProperties.thighLength;
    }
    
    public double getMinLegLengthBeforeCollapsingSingleSupport()
@@ -586,43 +517,95 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    }
    public double getAnkle_height()
    {
-      return ankle_height;
+      return AtlasPhysicalProperties.ankleHeight;
    }
 
    public double getFoot_width()
    {
-      return foot_width;
+      return AtlasPhysicalProperties.foot_width;
    }
 
    public double getToe_width()
    {
-      return toe_width;
+      return AtlasPhysicalProperties.toe_width;
    }
 
    public double getFoot_length()
    {
-      return foot_length;
+      return AtlasPhysicalProperties.foot_length;
    }
 
    public double getFoot_back()
    {
-      return foot_back;
+      return AtlasPhysicalProperties.foot_back;
    }
 
    public double getFoot_start_toetaper_from_back()
    {
-      return foot_start_toetaper_from_back;
+      return AtlasPhysicalProperties.foot_start_toetaper_from_back;
    }
 
    public double getFoot_forward()
    {
-      return foot_forward;
+      return AtlasPhysicalProperties.foot_forward;
    }
    
    public double getSideLengthOfBoundingBoxForFootstepHeight()
    {
       return (1 + 0.3) * 2 * Math.sqrt(getFoot_forward() * getFoot_forward()
             + 0.25 * getFoot_width() * getFoot_width());
+   }
+   
+   public SideDependentList<Transform3D> getDesiredHandPosesWithRespectToChestFrame()
+   {
+      return handPosesWithRespectToChestFrame;
+   }
+
+   public Map<OneDoFJoint, Double> getDefaultArmJointPositions(FullRobotModel fullRobotModel, RobotSide robotSide)
+   {
+      Map<OneDoFJoint, Double> jointPositions = new LinkedHashMap<OneDoFJoint, Double>();
+
+      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_ROLL), robotSide.negateIfRightSide(-1.30));
+      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_PITCH), 0.34);
+      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_ROLL), robotSide.negateIfRightSide(1.18));
+      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH), 1.94);
+      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.WRIST_PITCH), -0.19);
+      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.WRIST_ROLL), robotSide.negateIfRightSide(-0.07));
+
+//      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_ROLL), robotSide.negateIfRightSide(0.0));
+//      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_PITCH), 0.0);
+//      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_ROLL), robotSide.negateIfRightSide(0.0));
+//      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH), 0.0);
+//      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.WRIST_PITCH), 0.0);
+//      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.WRIST_ROLL), robotSide.negateIfRightSide(0.0));
+
+      return jointPositions;
+   }
+
+
+   public Map<OneDoFJoint, Double> getMinTaskspaceArmJointPositions(FullRobotModel fullRobotModel, RobotSide robotSide)
+   {
+      Map<OneDoFJoint, Double> ret = new LinkedHashMap<OneDoFJoint, Double>();
+      if (robotSide == RobotSide.LEFT)
+      {
+         ret.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_ROLL), minElbowRollAngle);
+      }
+      return ret;
+   }
+
+   public Map<OneDoFJoint, Double> getMaxTaskspaceArmJointPositions(FullRobotModel fullRobotModel, RobotSide robotSide)
+   {
+      Map<OneDoFJoint, Double> ret = new LinkedHashMap<OneDoFJoint, Double>();
+      if (robotSide == RobotSide.RIGHT)
+      {
+         ret.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_ROLL), -minElbowRollAngle);
+      }
+      return ret;
+   }
+   
+   public SideDependentList<Transform3D> getHandControlFramesWithRespectToFrameAfterWrist()
+   {
+      return handControlFramesWithRespectToFrameAfterWrist;
    }
 }
 
