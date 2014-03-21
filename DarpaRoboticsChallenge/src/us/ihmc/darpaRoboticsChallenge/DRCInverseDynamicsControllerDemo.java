@@ -1,7 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -21,18 +20,13 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.PlainDRCRobot;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCSimDRCRobotInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.valkyrie.ValkyrieInitialSetup;
 import us.ihmc.graphics3DAdapter.GroundProfile;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.Pair;
 
-import com.martiansoftware.jsap.FlaggedOption;
-import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
-import com.martiansoftware.jsap.JSAPResult;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.Joint;
@@ -46,6 +40,8 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPositi
 
 public class DRCInverseDynamicsControllerDemo
 {
+   private static final DRCRobotModel defaultModelForGraphicSelector = DRCRobotModel.ATLAS_NO_HANDS_ADDED_MASS;
+
    private static final double ROBOT_FLOATING_HEIGHT = 0.3;
 
    private static final HighLevelState INVERSE_DYNAMICS_JOINT_CONTROL = HighLevelState.INVERSE_DYNAMICS_JOINT_CONTROL;
@@ -98,7 +94,7 @@ public class DRCInverseDynamicsControllerDemo
       drcSimulation.getRobot().setController(controller);
       controller.initialize();
       
-      new InverseDynamicsJointController.GravityCompensationSliderBoard(getSimulationConstructionSet(), drcController.getControllerModel(), registry);
+      new InverseDynamicsJointController.GravityCompensationSliderBoard(getSimulationConstructionSet(), drcController.getControllerModel(), getSimulationConstructionSet().getRootRegistry());
       
       if (automaticSimulationRunner != null)
       {
@@ -122,33 +118,15 @@ public class DRCInverseDynamicsControllerDemo
 
    public static void main(String[] args) throws JSAPException
    {
-      // Add flag to set robot model
-      JSAP jsap = new JSAP();
-      FlaggedOption robotModel = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(true).setStringParser(JSAP.STRING_PARSER);
-      robotModel.setHelp("Robot models: " + Arrays.toString(DRCRobotModel.values()));
+      DRCRobotModel model = null;
       
-      DRCRobotModel model;
-      try
-      {
-         jsap.registerParameter(robotModel);
-
-         JSAPResult config = jsap.parse(args);
-
-         if (config.success())
-         {
-            model = DRCRobotModel.valueOf(config.getString("robotModel"));
-         }
-         else
-         {
-            System.out.println("Enter a robot model.");
-            return;
-         }
-      }
-      catch (JSAPException e)
-      {
-         e.printStackTrace();
-         return;
-      }
+      model = DRCRobotModel.selectModelFromFlag(args);
+      
+      if (model == null)
+         model = DRCRobotModel.selectModelFromGraphicSelector(defaultModelForGraphicSelector);
+      
+      if (model == null)
+         throw new RuntimeException("No robot model selected");
       
       AutomaticSimulationRunner automaticSimulationRunner = null;
 
@@ -165,15 +143,7 @@ public class DRCInverseDynamicsControllerDemo
       scsInitialSetup.setInitializeEstimatorToActual(true);
       
       double initialYaw = 0.0;
-      DRCRobotInitialSetup<SDFRobot> robotInitialSetup;
-      if (model.equals(DRCRobotModel.VALKYRIE))
-      {
-         robotInitialSetup = new ValkyrieInitialSetup(groundHeight + ROBOT_FLOATING_HEIGHT, initialYaw);
-      }
-      else
-      {
-         robotInitialSetup = new DRCSimDRCRobotInitialSetup(groundHeight + ROBOT_FLOATING_HEIGHT, initialYaw);
-      }
+      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = model.getDefaultRobotInitialSetup(groundHeight + ROBOT_FLOATING_HEIGHT, initialYaw);
 
       WalkingControllerParameters drcControlParameters = model.getWalkingControlParamaters();
       ArmControllerParameters armControlParameters = model.getArmControllerParameters();
@@ -181,7 +151,7 @@ public class DRCInverseDynamicsControllerDemo
       new DRCInverseDynamicsControllerDemo(drcControlParameters, armControlParameters, robotInterface, robotInitialSetup, guiInitialSetup, scsInitialSetup,
                                     automaticSimulationRunner, DRCConfigParameters.CONTROL_DT, 16000, model);
    }
-   
+
    private class HoldRobotInTheAir implements RobotController
    {
       private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());

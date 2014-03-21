@@ -1,7 +1,5 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import java.util.Arrays;
-
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.visualization.SliderBoardFactory;
 import us.ihmc.atlas.visualization.WalkControllerSliderBoard;
@@ -15,7 +13,6 @@ import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControlle
 import us.ihmc.darpaRoboticsChallenge.drcRobot.PlainDRCRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.SimulatedModelCorruptorDRCRobotInterface;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCSimDRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.remote.RemoteAtlasVisualizer;
 import us.ihmc.graphics3DAdapter.GroundProfile;
 import us.ihmc.robotDataCommunication.YoVariableServer;
@@ -23,10 +20,7 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.Pair;
 
-import com.martiansoftware.jsap.FlaggedOption;
-import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
-import com.martiansoftware.jsap.JSAPResult;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.FlatGroundProfile;
@@ -35,6 +29,8 @@ import com.yobotics.simulationconstructionset.util.ground.BumpyGroundProfile;
 
 public class DRCFlatGroundWalkingTrack
 {
+   private static final DRCRobotModel defaultModelForGraphicSelector = DRCRobotModel.ATLAS_NO_HANDS_ADDED_MASS;
+   
    private static final boolean USE_BUMPY_GROUND = false;
    
    private static final boolean START_YOVARIABLE_SERVER = false; 
@@ -134,33 +130,15 @@ public class DRCFlatGroundWalkingTrack
 
    public static void main(String[] args) throws JSAPException
    {
-      // Add flag to set robot model
-      JSAP jsap = new JSAP();
-      FlaggedOption robotModel = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(true).setStringParser(JSAP.STRING_PARSER);
-      robotModel.setHelp("Robot models: " + Arrays.toString(DRCRobotModel.values()));
+      DRCRobotModel model = null;
       
-      DRCRobotModel model;
-      try
-      {
-         jsap.registerParameter(robotModel);
+      model = DRCRobotModel.selectModelFromFlag(args);
+      
+      if (model == null)
+         model = DRCRobotModel.selectModelFromGraphicSelector(defaultModelForGraphicSelector);
 
-         JSAPResult config = jsap.parse(args);
-
-         if (config.success())
-         {
-            model = DRCRobotModel.valueOf(config.getString("robotModel"));
-         }
-         else
-         {
-            System.out.println("Enter a robot model.");
-            return;
-         }
-      }
-      catch (JSAPException e)
-      {
-         e.printStackTrace();
-         return;
-      }
+      if (model == null)
+         throw new RuntimeException("No robot model selected");
       
       AutomaticSimulationRunner automaticSimulationRunner = null;
 
@@ -192,7 +170,7 @@ public class DRCFlatGroundWalkingTrack
       scsInitialSetup.setInitializeEstimatorToActual(true);
       
       double initialYaw = 0.3;
-      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = new DRCSimDRCRobotInitialSetup(groundHeight, initialYaw);
+      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = model.getDefaultRobotInitialSetup(groundHeight, initialYaw);
 
       boolean useVelocityAndHeadingScript = true;
       boolean cheatWithGroundHeightAtForFootstep = false;

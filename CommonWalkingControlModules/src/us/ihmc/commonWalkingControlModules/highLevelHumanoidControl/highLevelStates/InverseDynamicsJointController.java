@@ -318,14 +318,20 @@ public class InverseDynamicsJointController extends State<HighLevelState>
 
          public static final SideDependentList<SliderBoardMode> armDesireds = new SideDependentList<>(LeftArmDesireds, RightArmDesireds);
       };
-      
+
       public GravityCompensationSliderBoard(SimulationConstructionSet scs, FullRobotModel fullRobotModel, YoVariableRegistry registry)
+      {
+         this(scs, fullRobotModel, registry, null, 0.0, 0.0);
+      }
+      
+      public GravityCompensationSliderBoard(SimulationConstructionSet scs, FullRobotModel fullRobotModel, YoVariableRegistry registry, String varNameForLastSlider, double varMinValue, double varMaxValue)
       {
          final EnumYoVariable<SliderBoardMode> sliderBoardMode = new EnumYoVariable<SliderBoardMode>("sliderBoardMode", registry, SliderBoardMode.class);
          final SliderBoardConfigurationManager sliderBoardConfigurationManager = new SliderBoardConfigurationManager(scs);
 
-         sliderBoardConfigurationManager.setSlider(1, "percentOfGravityCompensation", scs, 0.0, 1.0);
-         sliderBoardConfigurationManager.setSlider(2, "gravityComp_gainScaling", scs, 0.0, 1.0);
+         sliderBoardConfigurationManager.setSlider(1, "percentOfGravityCompensation", registry, 0.0, 1.0);
+         sliderBoardConfigurationManager.setSlider(2, "gravityComp_gainScaling", registry, 0.0, 1.0);
+         int maxNumberOfDofs = 7;
          double maxGains = 3.0;
          double maxZetas = 0.3;
          if (USE_MASS_MATRIX)
@@ -333,9 +339,11 @@ public class InverseDynamicsJointController extends State<HighLevelState>
             maxGains = 100.0;
             maxZetas = 1.0;
          }
-         sliderBoardConfigurationManager.setSlider(3, "gravityComp_allJointGains", scs, 0.0, maxGains);
-         sliderBoardConfigurationManager.setSlider(4, "gravityComp_allJointZetas", scs, 0.0, maxZetas);
+         sliderBoardConfigurationManager.setSlider(3, "gravityComp_allJointGains", registry, 0.0, maxGains);
+         sliderBoardConfigurationManager.setSlider(4, "gravityComp_allJointZetas", registry, 0.0, maxZetas);
 
+         if (varNameForLastSlider != null)
+            sliderBoardConfigurationManager.setSlider(8, varNameForLastSlider, registry, varMinValue, varMaxValue);
          sliderBoardConfigurationManager.setKnob  (8, "sliderBoardMode", registry, 0.0, SliderBoardMode.values().length);
          sliderBoardConfigurationManager.saveConfiguration(SliderBoardMode.Gains.toString());
          sliderBoardConfigurationManager.clearControls();
@@ -344,16 +352,10 @@ public class InverseDynamicsJointController extends State<HighLevelState>
          {
             RevoluteJoint[] legRevoluteJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(fullRobotModel.getPelvis(), fullRobotModel.getFoot(robotSide)), RevoluteJoint.class);
 
-            for (int i = 0; i < legRevoluteJoints.length; i++)
-            {
-               if (i >= 8)
-               {
-                  System.err.println("Too many joints for the slider board. Last joint configured: " + legRevoluteJoints[i-1].getName());
-                  break;
-               }
-               setupJointSliderAndKnob(scs, sliderBoardConfigurationManager, i, legRevoluteJoints[i]);
-            }
+            setupJointSlidersAndKnobs(registry, sliderBoardConfigurationManager, maxNumberOfDofs, legRevoluteJoints);
 
+            if (varNameForLastSlider != null)
+               sliderBoardConfigurationManager.setSlider(8, varNameForLastSlider, registry, varMinValue, varMaxValue);
             sliderBoardConfigurationManager.setKnob  (8, "sliderBoardMode", registry, 0.0, SliderBoardMode.values().length);
             sliderBoardConfigurationManager.saveConfiguration(SliderBoardMode.legDesireds.get(robotSide).toString());
             sliderBoardConfigurationManager.clearControls();
@@ -363,16 +365,10 @@ public class InverseDynamicsJointController extends State<HighLevelState>
          {
             RevoluteJoint[] armRevoluteJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(fullRobotModel.getChest(), fullRobotModel.getHand(robotSide)), RevoluteJoint.class);
 
-            for (int i = 0; i < armRevoluteJoints.length; i++)
-            {
-               if (i >= 8)
-               {
-                  System.err.println("Too many joints for the slider board. Last joint configured: " + armRevoluteJoints[i-1].getName());
-                  break;
-               }
-               setupJointSliderAndKnob(scs, sliderBoardConfigurationManager, i, armRevoluteJoints[i]);
-            }
+            setupJointSlidersAndKnobs(registry, sliderBoardConfigurationManager, maxNumberOfDofs, armRevoluteJoints);
 
+            if (varNameForLastSlider != null)
+               sliderBoardConfigurationManager.setSlider(8, varNameForLastSlider, registry, varMinValue, varMaxValue);
             sliderBoardConfigurationManager.setKnob  (8, "sliderBoardMode", registry, 0.0, SliderBoardMode.values().length);
             sliderBoardConfigurationManager.saveConfiguration(SliderBoardMode.armDesireds.get(robotSide).toString());
             sliderBoardConfigurationManager.clearControls();
@@ -380,16 +376,10 @@ public class InverseDynamicsJointController extends State<HighLevelState>
 
          RevoluteJoint[] spineAndNeckRevoluteJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(fullRobotModel.getPelvis(), fullRobotModel.getHead()), RevoluteJoint.class);
 
-         for (int i = 0; i < spineAndNeckRevoluteJoints.length; i++)
-         {
-            if (i >= 8)
-            {
-               System.err.println("Too many joints for the slider board. Last joint configured: " + spineAndNeckRevoluteJoints[i-1].getName());
-               break;
-            }
-            setupJointSliderAndKnob(scs, sliderBoardConfigurationManager, i, spineAndNeckRevoluteJoints[i]);
-         }
+         setupJointSlidersAndKnobs(registry, sliderBoardConfigurationManager, maxNumberOfDofs, spineAndNeckRevoluteJoints);
 
+         if (varNameForLastSlider != null)
+            sliderBoardConfigurationManager.setSlider(8, varNameForLastSlider, registry, varMinValue, varMaxValue);
          sliderBoardConfigurationManager.setKnob  (8, "sliderBoardMode", registry, 0.0, SliderBoardMode.values().length);
          sliderBoardConfigurationManager.saveConfiguration(SliderBoardMode.SpineNeckDesireds.toString());
          sliderBoardConfigurationManager.clearControls();
@@ -409,14 +399,24 @@ public class InverseDynamicsJointController extends State<HighLevelState>
          listener.variableChanged(null);
       }
 
-      private void setupJointSliderAndKnob(SimulationConstructionSet scs, final SliderBoardConfigurationManager sliderBoardConfigurationManager, int i,
-            RevoluteJoint revoluteJoint)
+      private void setupJointSlidersAndKnobs(YoVariableRegistry registry, final SliderBoardConfigurationManager sliderBoardConfigurationManager,
+            int maxNumberOfDofs, RevoluteJoint[] revoluteJoints)
       {
-         String q_d_varName = CONTROLLER_PREFIX + revoluteJoint.getName() + "_q_d";
-         sliderBoardConfigurationManager.setSlider(i+1, q_d_varName, scs, revoluteJoint.getJointLimitLower(), revoluteJoint.getJointLimitUpper());
-         
-         String jointGainScalingVarName = CONTROLLER_PREFIX + revoluteJoint.getName() + "_gainScaling";
-         sliderBoardConfigurationManager.setKnob(i+1, jointGainScalingVarName, scs, 0.0, 1.0);
+         for (int i = 0; i < revoluteJoints.length; i++)
+         {
+            if (i > maxNumberOfDofs)
+            {
+               System.err.println("Too many joints for the slider board. Last joint configured: " + revoluteJoints[i-1].getName());
+               break;
+            }
+            
+            RevoluteJoint revoluteJoint = revoluteJoints[i];
+            String q_d_varName = CONTROLLER_PREFIX + revoluteJoint.getName() + "_q_d";
+            sliderBoardConfigurationManager.setSlider(i+1, q_d_varName, registry, revoluteJoint.getJointLimitLower(), revoluteJoint.getJointLimitUpper());
+            
+            String jointGainScalingVarName = CONTROLLER_PREFIX + revoluteJoint.getName() + "_gainScaling";
+            sliderBoardConfigurationManager.setKnob(i+1, jointGainScalingVarName, registry, 0.0, 1.0);
+         }
       }
    }
 }

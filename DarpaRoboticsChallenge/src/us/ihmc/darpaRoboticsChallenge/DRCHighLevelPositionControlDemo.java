@@ -1,13 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import java.awt.BorderLayout;
 import java.util.ArrayList;
-import java.util.Arrays;
 
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
@@ -25,18 +19,13 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.PlainDRCRobot;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCSimDRCRobotInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.valkyrie.ValkyrieInitialSetup;
 import us.ihmc.graphics3DAdapter.GroundProfile;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.Pair;
 
-import com.martiansoftware.jsap.FlaggedOption;
-import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
-import com.martiansoftware.jsap.JSAPResult;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.Joint;
@@ -47,10 +36,11 @@ import com.yobotics.simulationconstructionset.util.FlatGroundProfile;
 import com.yobotics.simulationconstructionset.util.GainCalculator;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
-import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class DRCHighLevelPositionControlDemo
 {
+   private static final DRCRobotModel defaultModelForGraphicSelector = DRCRobotModel.ATLAS_NO_HANDS_ADDED_MASS;
+   
    private static final double ROBOT_FLOATING_HEIGHT = 0.3;
 
    private static final HighLevelState TASKSPACE_POSITION_CONTROL = HighLevelState.TASKSPACE_POSITION_CONTROL;
@@ -125,32 +115,15 @@ public class DRCHighLevelPositionControlDemo
 
    public static void main(String[] args) throws JSAPException
    {
-      // Add flag to set robot model
-      JSAP jsap = new JSAP();
-      FlaggedOption robotModel = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(true).setStringParser(JSAP.STRING_PARSER);
-      robotModel.setHelp("Robot models: " + Arrays.toString(DRCRobotModel.values()));
+      DRCRobotModel model = null;
       
-      DRCRobotModel model;
-      try
-      {
-         jsap.registerParameter(robotModel);
+      model = DRCRobotModel.selectModelFromFlag(args);
+      
+      if (model == null)
+         model = DRCRobotModel.selectModelFromGraphicSelector(defaultModelForGraphicSelector);
 
-         JSAPResult config = jsap.parse(args);
-
-         if (config.success())
-         {
-            model = DRCRobotModel.valueOf(config.getString("robotModel"));
-         }
-         else
-         {
-            model = useGraphicSelector();
-         }
-      }
-      catch (JSAPException e)
-      {
-         e.printStackTrace();
-         return;
-      }
+      if (model == null)
+         throw new RuntimeException("No robot model selected");
       
       AutomaticSimulationRunner automaticSimulationRunner = null;
 
@@ -167,15 +140,7 @@ public class DRCHighLevelPositionControlDemo
       scsInitialSetup.setInitializeEstimatorToActual(true);
       
       double initialYaw = 0.0;
-      DRCRobotInitialSetup<SDFRobot> robotInitialSetup;
-      if (model.equals(DRCRobotModel.VALKYRIE))
-      {
-         robotInitialSetup = new ValkyrieInitialSetup(groundHeight + ROBOT_FLOATING_HEIGHT, initialYaw);
-      }
-      else
-      {
-         robotInitialSetup = new DRCSimDRCRobotInitialSetup(groundHeight + ROBOT_FLOATING_HEIGHT, initialYaw);
-      }
+      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = model.getDefaultRobotInitialSetup(groundHeight + ROBOT_FLOATING_HEIGHT, initialYaw);
 
       WalkingControllerParameters drcControlParameters = model.getWalkingControlParamaters();
       ArmControllerParameters armControlParameters = model.getArmControllerParameters();
@@ -183,42 +148,6 @@ public class DRCHighLevelPositionControlDemo
       new DRCHighLevelPositionControlDemo(drcControlParameters, armControlParameters, robotInterface, robotInitialSetup, guiInitialSetup, scsInitialSetup,
                                     automaticSimulationRunner, DRCConfigParameters.CONTROL_DT, 16000, model);
    }
-   
-   private static DRCRobotModel useGraphicSelector()
-   {
-      JPanel userPromptPanel = new JPanel(new BorderLayout());
-      JPanel comboBoxPanel = new JPanel(new BorderLayout());
-
-      JLabel userMessageLabel = new JLabel("What robot?");
-
-      @SuppressWarnings({"rawtypes", "unchecked"}) JComboBox robotTypeComboBox = new JComboBox(DRCRobotModel.values());
-      robotTypeComboBox.setSelectedItem(DRCRobotModel.VALKYRIE);
-
-      comboBoxPanel.add(robotTypeComboBox, BorderLayout.NORTH);
-
-      userPromptPanel.add(userMessageLabel, BorderLayout.NORTH);
-      userPromptPanel.add(comboBoxPanel, BorderLayout.CENTER);
-
-      int selectedOption = JOptionPane.showOptionDialog(null, userPromptPanel, "Select", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null,
-                              null, null);
-      
-      if (selectedOption == JOptionPane.CANCEL_OPTION)
-      {
-         System.err.println("Operation canceled by the user.");
-         return null;
-      }
-      else if (selectedOption == JOptionPane.OK_OPTION)
-      {
-         String groundTypeString = robotTypeComboBox.getSelectedItem().toString();
-         DRCRobotModel model = DRCRobotModel.valueOf(groundTypeString);
-         return model;
-      }
-      else
-      {
-         throw new RuntimeException("Ooops!");
-      }
-   }
-
    
    private class HoldRobotInTheAir implements RobotController
    {
