@@ -45,14 +45,12 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    private final SensorNoiseParameters sensorNoiseParametersForEstimator = DRCSimulatedSensorNoiseParameters
          .createNoiseParametersForEstimatorJerryTuningSeptember2013();
    
-   public DRCKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure,
-         RigidBodyToIndexMap estimatorRigidBodyToIndexMap, double estimateDT, StateEstimatorParameters stateEstimatorParameters,
-         SensorReaderFactory sensorReaderFactory, double gravitationalAcceleration,
+   public DRCKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, RigidBodyToIndexMap estimatorRigidBodyToIndexMap,
+         double estimateDT, StateEstimatorParameters stateEstimatorParameters, SensorReaderFactory sensorReaderFactory, double gravitationalAcceleration,
          SideDependentList<WrenchBasedFootSwitch> footSwitches, SideDependentList<ContactablePlaneBody> bipedFeet,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       sensorReader = sensorReaderFactory.getSensorReader();
-
 
       JointAndIMUSensorDataSource jointAndIMUSensorDataSource = new JointAndIMUSensorDataSource(sensorReaderFactory.getStateEstimatorSensorDefinitions(), stateEstimatorParameters.getSensorFilterParameters(estimateDT), registry);
       JointAndIMUSensorMap jointAndIMUSensorMap = jointAndIMUSensorDataSource.getSensorMap();
