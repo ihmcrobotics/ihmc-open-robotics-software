@@ -9,7 +9,7 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
-import us.ihmc.darpaRoboticsChallenge.DRCMultiContact.MultiContactTask;
+import us.ihmc.darpaRoboticsChallenge.AtlasMultiContact.MultiContactTask;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.MemoryTools;
@@ -23,7 +23,7 @@ import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimu
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class DRCMultiContactTest {
-   private static final boolean ALWAYS_SHOW_GUI = false;
+   private static final boolean ALWAYS_SHOW_GUI = true;
    private static final boolean KEEP_SCS_UP = false;
 
    private static final boolean CREATE_MOVIE = BambooTools.doMovieCreation();
@@ -82,7 +82,7 @@ public class DRCMultiContactTest {
       int prepDuration = 1;
       int testDuration = 5;
 
-      DRCMultiContact drcMultiContact = setupSimulation();
+      AtlasMultiContact drcMultiContact = setupSimulation();
       SimulationConstructionSet scs = drcMultiContact.getSimulationConstructionSet();
       drcController = drcMultiContact.getDRCController();
 
@@ -119,7 +119,7 @@ public class DRCMultiContactTest {
    }
 
  
-   private DRCMultiContact setupSimulation()
+   private AtlasMultiContact setupSimulation()
    {
       AutomaticSimulationRunner automaticSimulationRunner = null;
       DRCGuiInitialSetup guiInitialSetup = createGUIInitialSetup();
@@ -127,7 +127,7 @@ public class DRCMultiContactTest {
       double timePerRecordTick = DRCConfigParameters.CONTROL_DT;
       int simulationDataBufferSize = 16000;
       
-      DRCMultiContact drcMultiContact = new DRCMultiContact(new AtlasRobotModel(AtlasRobotVersion.ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS), guiInitialSetup, automaticSimulationRunner, timePerRecordTick,
+      AtlasMultiContact drcMultiContact = new AtlasMultiContact(new AtlasRobotModel(AtlasRobotVersion.ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS), guiInitialSetup, automaticSimulationRunner, timePerRecordTick,
               simulationDataBufferSize, MultiContactTask.DEFAULT);
       SimulationConstructionSet scs = drcMultiContact.getSimulationConstructionSet();
 

@@ -5,7 +5,6 @@ import javax.swing.JButton;
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.atlas.visualization.SliderBoardFactory;
-import us.ihmc.darpaRoboticsChallenge.DRCRobotModel.RobotType;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.NullGraphics3DAdapter;
@@ -98,7 +97,7 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
       JaxbSDFLoader robotLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
       GeneralizedSDFRobotModel generalizedSDFRobotModel = robotLoader.getGeneralizedSDFRobotModel(jointMap.getModelName());
       
-      if (DRCLocalConfigParameters.MAKE_SLIDER_BOARD && sliderBoardFactory != null && robotModel.getType() == RobotType.ATLAS)
+      if (DRCLocalConfigParameters.MAKE_SLIDER_BOARD && sliderBoardFactory != null)//&& robotModel.getType() == RobotType.ATLAS
          sliderBoardFactory.makeSliderBoard(scs, scs.getRootRegistry(), generalizedSDFRobotModel);
    }
 
