@@ -33,7 +33,6 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.NeckJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineJointName;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.DRCRobotModel.RobotType;
 import us.ihmc.darpaRoboticsChallenge.IncorrectDrcRobotModelException;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap;
@@ -79,22 +78,13 @@ public class AtlasJointMap extends DRCRobotJointMap
    private final AtlasContactPointParamaters contactPointParamaters;
    
 
-   public AtlasJointMap(DRCRobotModel selectedModel, boolean addLoadsOfContactPoints)
+   public AtlasJointMap(AtlasRobotModel selectedModel, boolean addLoadsOfContactPoints)
    {
       this(selectedModel, addLoadsOfContactPoints, false);
    }
    
-   private void checkModel(DRCRobotModel m)
+   public AtlasJointMap(AtlasRobotModel selectedModel, boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsForFeetOnly)
    {
-      if(m.getType() != RobotType.ATLAS)
-      {
-         throw new IncorrectDrcRobotModelException("Loaded robot model is not Atlas model dog!");
-      }
-   }
-   
-   public AtlasJointMap(DRCRobotModel selectedModel, boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsForFeetOnly)
-   {
-      checkModel(selectedModel);
       this.selectedModel = selectedModel;
 
       for (RobotSide robotSide : RobotSide.values)

@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.AtlasArmControllerParameters;
+import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasWalkingControllerParameters;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
@@ -24,6 +25,7 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.SquaredUpDRCRobotInitialSetup
 import us.ihmc.darpaRoboticsChallenge.valkyrie.ValkyrieArmControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.valkyrie.ValkyrieInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.valkyrie.ValkyrieRobotInterface;
+import us.ihmc.darpaRoboticsChallenge.valkyrie.ValkyrieRobotModel;
 import us.ihmc.darpaRoboticsChallenge.valkyrie.ValkyrieWalkingControllerParameters;
 import us.ihmc.graphics3DAdapter.GroundProfile;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
@@ -110,7 +112,7 @@ public class DRCFlatGroundWalkingTest
       BambooTools.reportTestStartedMessage();
       
 
-      DRCRobotModel robotModel = DRCRobotModel.DRC_NO_HANDS;
+      DRCRobotModel robotModel = new AtlasRobotModel();
       DRCRobotInterface robotInterface = new PlainDRCRobot(robotModel, false, useLoadOfContactPointsForTheFeet);
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = new SquaredUpDRCRobotInitialSetup(0.0);
 
@@ -175,7 +177,7 @@ public class DRCFlatGroundWalkingTest
    {
       BambooTools.reportTestStartedMessage();
 
-      DRCRobotModel robotModel = DRCRobotModel.VALKYRIE;
+      DRCRobotModel robotModel = new ValkyrieRobotModel();
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = new ValkyrieInitialSetup(0.0, 0.0);
       DRCRobotInterface robotInterface = new ValkyrieRobotInterface();
       

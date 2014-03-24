@@ -10,6 +10,7 @@ import javax.vecmath.Point2d;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.AtlasArmControllerParameters;
+import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotMultiContactControllerParameters;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
@@ -178,7 +179,7 @@ public class DRCMultiContact
 
       double timePerRecordTick = DRCConfigParameters.CONTROL_DT;
       int simulationDataBufferSize = 16000;
-      new DRCMultiContact(DRCRobotModel.ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS, guiInitialSetup, automaticSimulationRunner, timePerRecordTick,
+      new DRCMultiContact(new AtlasRobotModel(AtlasRobotVersion.ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS), guiInitialSetup, automaticSimulationRunner, timePerRecordTick,
                           simulationDataBufferSize, MultiContactTask.DEFAULT);
    }
 

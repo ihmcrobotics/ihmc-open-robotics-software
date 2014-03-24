@@ -34,9 +34,9 @@ public class DRCRobotModelFileInvestigator
 
    public void writeAllModelFiles()
    {
-      for (DRCRobotModel model : DRCRobotModel.values())
+      for (String st : DRCRobotModelFactory.getAvailableRobotModels())
       {
-         writeModelFile(model);
+         writeModelFile(DRCRobotModelFactory.CreateDRCRobotModel(st));
       }
    }
 

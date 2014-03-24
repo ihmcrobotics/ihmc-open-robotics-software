@@ -32,12 +32,11 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.commonWalkingControlModules.terrain.TerrainType;
 import us.ihmc.controlFlow.ControlFlowInputPort;
-import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.DRCRobotModelFactory;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCSimulationVisualizer;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.HandContactParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.SquaredUpDRCRobotInitialSetup;
@@ -390,7 +389,7 @@ public class SimpleStanceController implements RobotController
       // Flag to set robot model
       JSAP jsap = new JSAP();
       FlaggedOption robotModel = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(true).setStringParser(JSAP.STRING_PARSER);
-      robotModel.setHelp("Robot models: " + Arrays.toString(DRCRobotModel.values()));
+      robotModel.setHelp("Robot models: " + DRCRobotModelFactory.robotModelsToString());
       
       DRCRobotModel model;
       try
@@ -401,7 +400,7 @@ public class SimpleStanceController implements RobotController
 
          if (config.success())
          {
-            model = DRCRobotModel.valueOf(config.getString("robotModel"));
+            model = DRCRobotModelFactory.CreateDRCRobotModel(config.getString("robotModel"));
          }
          else
          {

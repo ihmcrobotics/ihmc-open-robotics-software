@@ -5,12 +5,15 @@ import boofcv.alg.geo.calibration.PlanarCalibrationTarget;
 import boofcv.factory.calib.FactoryPlanarCalibrationTarget;
 import boofcv.struct.calib.IntrinsicParameters;
 import georegression.struct.point.Point2D_F64;
+
 import org.ddogleg.optimization.FactoryOptimization;
 import org.ddogleg.optimization.UnconstrainedLeastSquares;
 import org.ddogleg.optimization.UtilOptimize;
 import org.junit.Test;
+
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
@@ -24,6 +27,7 @@ import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -43,7 +47,8 @@ public class KinematicCalibrationHeadLoopResidualTest
    PlanarCalibrationTarget calibGrid = FactoryPlanarCalibrationTarget.gridChess(
          DetectChessboardInKinematicsData.boardWidth, DetectChessboardInKinematicsData.boardHeight, 0.03);
 
-   DRCRobotJointMap jointMap = DRCRobotModel.ATLAS_NO_HANDS_ADDED_MASS.getJointMap(false, false);
+   DRCRobotModel robotModel = new AtlasRobotModel();
+   DRCRobotJointMap jointMap = robotModel.getJointMap(false, false);
    JaxbSDFLoader robotLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
    SDFFullRobotModel fullRobotModel = robotLoader.createFullRobotModel(jointMap);
 

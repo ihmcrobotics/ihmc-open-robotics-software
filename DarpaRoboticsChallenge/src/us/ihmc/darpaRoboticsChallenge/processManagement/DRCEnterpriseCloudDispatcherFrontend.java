@@ -4,9 +4,11 @@ import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
+
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.DRCRobotModelFactory;
 import us.ihmc.darpaRoboticsChallenge.userInterface.DRCOperatorUserInterface;
 import us.ihmc.utilities.fixedPointRepresentation.UnsignedByteTools;
 import us.ihmc.utilities.gui.IHMCSwingTools;
@@ -22,6 +24,7 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.PlainDocument;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -529,8 +532,9 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
                                                 JOptionPane.ERROR_MESSAGE);
                else
                {
-                  DRCRobotModel model = DRCRobotModel.valueOf(selectRobotModelRadioButtonGroup.getSelection().getActionCommand());
-                  netProcClient.write(new byte[] {UnsignedByteTools.fromInt(0x00), UnsignedByteTools.fromInt(model.ordinal())});
+            	  String modelAsString = selectRobotModelRadioButtonGroup.getSelection().getActionCommand();
+                  DRCRobotModel model = DRCRobotModelFactory.CreateDRCRobotModel(modelAsString);
+                  netProcClient.write(new byte[] {UnsignedByteTools.fromInt(0x00), UnsignedByteTools.fromInt(DRCRobotModelFactory.getOrdinalOfModel(modelAsString))});
                }
             }
             catch (DisconnectedException e)
@@ -600,18 +604,18 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
                                                 JOptionPane.ERROR_MESSAGE);
                else if (selectControllerRadioButtonGroup.getSelection().getActionCommand().contains(BLUE_TEAM_ACTION_COMMAND))
                {
-                  DRCRobotModel model = DRCRobotModel.valueOf(selectRobotModelRadioButtonGroup.getSelection().getActionCommand());
+            	  String modelAsString = selectRobotModelRadioButtonGroup.getSelection().getActionCommand();
                   int leftHandIP = Integer.parseInt(leftHandField.getText());
                   int rightHandIP = Integer.parseInt(rightHandField.getText());
-                  controllerClient.write(new byte[] {UnsignedByteTools.fromInt(0x00), UnsignedByteTools.fromInt(model.ordinal()),
+                  controllerClient.write(new byte[] {UnsignedByteTools.fromInt(0x00), UnsignedByteTools.fromInt(DRCRobotModelFactory.getOrdinalOfModel(modelAsString)),
                                                      UnsignedByteTools.fromInt(leftHandIP), UnsignedByteTools.fromInt(rightHandIP)});
                }
                else if (selectControllerRadioButtonGroup.getSelection().getActionCommand().contains(RED_TEAM_ACTION_COMMAND))
                {
-                  DRCRobotModel model = DRCRobotModel.valueOf(selectRobotModelRadioButtonGroup.getSelection().getActionCommand());
+            	   String modelAsString = selectRobotModelRadioButtonGroup.getSelection().getActionCommand();
                   int leftHandIP = Integer.parseInt(leftHandField.getText());
                   int rightHandIP = Integer.parseInt(rightHandField.getText());
-                  controllerClient.write(new byte[] {UnsignedByteTools.fromInt(0x01), UnsignedByteTools.fromInt(model.ordinal()),
+                  controllerClient.write(new byte[] {UnsignedByteTools.fromInt(0x01), UnsignedByteTools.fromInt(DRCRobotModelFactory.getOrdinalOfModel(modelAsString)),
                                                      UnsignedByteTools.fromInt(leftHandIP), UnsignedByteTools.fromInt(rightHandIP)});
                }
             }
@@ -654,17 +658,17 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
 
    private void setupSelectRobotModelPanel()
    {
-      selectRobotModelPanel = new JPanel(new GridLayout(DRCRobotModel.values().length + 1, 1));
+      selectRobotModelPanel = new JPanel(new GridLayout(DRCRobotModelFactory.getAvailableRobotModels().length + 1, 1));
       robotModelScrollPane = new JScrollPane(selectRobotModelPanel);
 
       selectRobotModelRadioButtonGroup = new ButtonGroup();
 
       selectRobotModelPanel.add(new JLabel("<html><body style=\"margin-left: 32px;\"><h2>Select Robot Model</h2></body></html>"));
 
-      for (DRCRobotModel model : DRCRobotModel.values())
+      for (String st : DRCRobotModelFactory.getAvailableRobotModels())
       {
-         JRadioButton nextButton = new JRadioButton(model.name());
-         nextButton.setActionCommand(model.name());
+         JRadioButton nextButton = new JRadioButton(st);
+         nextButton.setActionCommand(st);
          nextButton.setHorizontalAlignment(AbstractButton.LEADING);
          nextButton.setHorizontalTextPosition(AbstractButton.TRAILING);
          selectRobotModelRadioButtonGroup.add(nextButton);

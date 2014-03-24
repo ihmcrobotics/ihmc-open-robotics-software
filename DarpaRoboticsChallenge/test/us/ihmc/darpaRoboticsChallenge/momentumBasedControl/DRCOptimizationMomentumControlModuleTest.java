@@ -24,6 +24,7 @@ import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedSensorReader;
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
@@ -73,7 +74,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
  */
 public class DRCOptimizationMomentumControlModuleTest
 {
-   private static final DRCRobotModel robotModel = DRCRobotModel.ATLAS_NO_HANDS_ADDED_MASS;
+   private static final DRCRobotModel robotModel = new AtlasRobotModel();
    
    @Test
    public void testAllJointAccelerationsZero() throws IOException, JAXBException

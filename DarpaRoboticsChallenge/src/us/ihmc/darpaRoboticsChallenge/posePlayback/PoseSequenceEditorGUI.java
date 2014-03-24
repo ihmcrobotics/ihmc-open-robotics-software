@@ -3,7 +3,6 @@ package us.ihmc.darpaRoboticsChallenge.posePlayback;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Arrays;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -12,6 +11,7 @@ import javax.swing.JPanel;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.DRCRobotModelFactory;
 
 import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
@@ -151,7 +151,7 @@ public class PoseSequenceEditorGUI extends JFrame
       // Flag to set robot model
       JSAP jsap = new JSAP();
       FlaggedOption robotModel = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(true).setStringParser(JSAP.STRING_PARSER);
-      robotModel.setHelp("Robot models: " + Arrays.toString(DRCRobotModel.values()));
+      robotModel.setHelp("Robot models: " + DRCRobotModelFactory.robotModelsToString());
       
       DRCRobotModel model;
       try
@@ -162,7 +162,7 @@ public class PoseSequenceEditorGUI extends JFrame
 
          if (config.success())
          {
-            model = DRCRobotModel.valueOf(config.getString("robotModel"));
+            model = DRCRobotModelFactory.CreateDRCRobotModel(config.getString("robotModel"));
          }
          else
          {

@@ -6,16 +6,19 @@ import com.martiansoftware.jsap.JSAPResult;
 import com.yobotics.simulationconstructionset.*;
 import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.DRCRobotModelFactory;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.ThreadTools;
 
 import javax.swing.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -225,7 +228,7 @@ public class VisualizePoseWorkspace
       // Flag to set robot model
       JSAP jsap = new JSAP();
       FlaggedOption robotModel = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(true).setStringParser(JSAP.STRING_PARSER);
-      robotModel.setHelp("Robot models: " + Arrays.toString(DRCRobotModel.values()));
+      robotModel.setHelp("Robot models: " + DRCRobotModelFactory.robotModelsToString());
       
       DRCRobotModel model;
       try
@@ -236,7 +239,7 @@ public class VisualizePoseWorkspace
 
          if (config.success())
          {
-            model = DRCRobotModel.valueOf(config.getString("robotModel"));
+            model = DRCRobotModelFactory.CreateDRCRobotModel(config.getString("robotModel"));
          }
          else
          {

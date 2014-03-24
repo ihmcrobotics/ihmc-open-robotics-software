@@ -147,7 +147,7 @@ public class DRCDemo03
       // Flag to set robot model
       JSAP jsap = new JSAP();
       FlaggedOption robotModel = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(true).setStringParser(JSAP.STRING_PARSER);
-      robotModel.setHelp("Robot models: " + Arrays.toString(DRCRobotModel.values()));
+      robotModel.setHelp("Robot models: " + DRCRobotModelFactory.robotModelsToString());
       
       DRCRobotModel model;
       try
@@ -158,7 +158,7 @@ public class DRCDemo03
 
          if (config.success())
          {
-            model = DRCRobotModel.valueOf(config.getString("robotModel"));
+            model = DRCRobotModelFactory.CreateDRCRobotModel(config.getString("robotModel"));
          }
          else
          {

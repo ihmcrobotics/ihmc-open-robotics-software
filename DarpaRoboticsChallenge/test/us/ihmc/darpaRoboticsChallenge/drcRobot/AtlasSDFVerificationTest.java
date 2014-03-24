@@ -4,9 +4,12 @@ import com.yobotics.simulationconstructionset.*;
 import com.yobotics.simulationconstructionset.time.GlobalTimer;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import com.yobotics.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
+
 import org.junit.*;
+
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
@@ -19,6 +22,7 @@ import us.ihmc.utilities.math.MathTools;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -84,7 +88,8 @@ public class AtlasSDFVerificationTest
    {
       BambooTools.reportTestStartedMessage();
 
-      DRCRobotJointMap jointMap = DRCRobotModel.ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS.getJointMap(false, false);
+      DRCRobotModel selectedModel = new AtlasRobotModel();
+      DRCRobotJointMap jointMap = selectedModel.getJointMap(false, false);
       JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(jointMap, false);
       SDFRobot sdfRobot = loader.createRobot(jointMap, true);
 

@@ -5,6 +5,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
@@ -126,7 +127,7 @@ public class DRCMultiContactTest {
       double timePerRecordTick = DRCConfigParameters.CONTROL_DT;
       int simulationDataBufferSize = 16000;
       
-      DRCMultiContact drcMultiContact = new DRCMultiContact(DRCRobotModel.ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS, guiInitialSetup, automaticSimulationRunner, timePerRecordTick,
+      DRCMultiContact drcMultiContact = new DRCMultiContact(new AtlasRobotModel(AtlasRobotVersion.ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS), guiInitialSetup, automaticSimulationRunner, timePerRecordTick,
               simulationDataBufferSize, MultiContactTask.DEFAULT);
       SimulationConstructionSet scs = drcMultiContact.getSimulationConstructionSet();
 

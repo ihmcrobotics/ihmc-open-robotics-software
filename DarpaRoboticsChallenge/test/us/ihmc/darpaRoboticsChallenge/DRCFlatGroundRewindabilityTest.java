@@ -10,6 +10,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
@@ -36,7 +37,7 @@ public class DRCFlatGroundRewindabilityTest
    private static final double totalTimeToTest = 10.0;
    private static final double timeToTickAhead = 1.5;
    private static final double timePerTick = 0.01;
-   private static final DRCRobotModel robotModel = DRCRobotModel.DRC_NO_HANDS;
+   private static final DRCRobotModel robotModel = new AtlasRobotModel();
 
    @Before
    public void setUp() throws Exception
