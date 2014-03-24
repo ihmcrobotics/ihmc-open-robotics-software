@@ -156,9 +156,9 @@ public class KinematicPointTest
 	@Test
 	public void testGetYoVelocity()
 	{
-		assertEquals("(0.0, 0.0, 0.0)", kinematicPoint.getYoVelocity().toString());
+		assertEquals("(0.0, 0.0, 0.0): World", kinematicPoint.getYoVelocity().toString());
 		kinematicPoint.getYoVelocity().set(new Vector3d(5.0, 5.1, 5.2));
-		assertEquals("(5.0, 5.1, 5.2)", kinematicPoint.getYoVelocity().toString());
+		assertEquals("(5.0, 5.1, 5.2): World", kinematicPoint.getYoVelocity().toString());
 	}
 	
 	
