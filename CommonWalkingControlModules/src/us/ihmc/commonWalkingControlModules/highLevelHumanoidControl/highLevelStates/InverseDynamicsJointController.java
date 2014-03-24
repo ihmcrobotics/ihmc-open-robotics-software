@@ -82,6 +82,7 @@ public class InverseDynamicsJointController extends State<HighLevelState>
    private final LinkedHashMap<RevoluteJoint, DoubleYoVariable> individualJointGainScalingMap = new LinkedHashMap<>();
    
    private final DoubleYoVariable gainScaling = new DoubleYoVariable("gravityComp_gainScaling", registry);
+   private final DoubleYoVariable footForceScaling = new DoubleYoVariable("gravityComp_footForceScaling", registry);
    
    public InverseDynamicsJointController(FullRobotModel fullRobotModel, TwistCalculator twistCalculator, double gravityZ, YoVariableRegistry parentRegistry)
    {
@@ -109,6 +110,17 @@ public class InverseDynamicsJointController extends State<HighLevelState>
             percentOfGravityCompensation.set(MathTools.clipToMinMax(percentOfGravityCompensation.getDoubleValue(), -0.3, 1.3));
          }
       });
+      
+      this.footForceScaling.set(0.0);
+      footForceScaling.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void variableChanged(YoVariable v)
+         {
+            footForceScaling.set(MathTools.clipToMinMax(footForceScaling.getDoubleValue(), 0.0, 1.0));
+         }
+      });
+      
       
       rootJoint = fullRobotModel.getRootJoint();
       desiredRootJointAcceleration = new SpatialAccelerationVector(rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(), rootJoint.getFrameAfterJoint());
@@ -250,7 +262,7 @@ public class InverseDynamicsJointController extends State<HighLevelState>
          {
             RigidBody foot = feet.get(robotSide);
 
-            weightVector.set(worldFrame, 0.0, 0.0, totalMass * gravityZ / 2.0);
+            weightVector.set(worldFrame, 0.0, 0.0, totalMass * gravityZ / 2.0 * footForceScaling.getDoubleValue());
             weightVector.changeFrame(foot.getBodyFixedFrame());
 
             Wrench footWrench = footWrenches.get(robotSide);
@@ -341,7 +353,12 @@ public class InverseDynamicsJointController extends State<HighLevelState>
          }
          sliderBoardConfigurationManager.setSlider(3, "gravityComp_allJointGains", registry, 0.0, maxGains);
          sliderBoardConfigurationManager.setSlider(4, "gravityComp_allJointZetas", registry, 0.0, maxZetas);
-
+         
+         if (STAND_ON_FEET)
+         {
+            sliderBoardConfigurationManager.setSlider(5, "gravityComp_footForceScaling", registry, 0.0, 1.0);
+         }
+         
          if (varNameForLastSlider != null)
             sliderBoardConfigurationManager.setSlider(8, varNameForLastSlider, registry, varMinValue, varMaxValue);
          sliderBoardConfigurationManager.setKnob  (8, "sliderBoardMode", registry, 0.0, SliderBoardMode.values().length);
