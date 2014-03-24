@@ -3,9 +3,12 @@ package us.ihmc.darpaRoboticsChallenge.obstacleCourseTests;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.darpaRoboticsChallenge.DRCDemo01StartingLocation;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
@@ -20,8 +23,7 @@ import static org.junit.Assert.assertTrue;
 public class DRCObstacleCourseTrialsWalkingTaskTest
 {
    private static final boolean KEEP_SCS_UP = false;
-   private static final DRCRobotModel robotModel = DRCRobotModel.ATLAS_NO_HANDS_ADDED_MASS;
-
+   private static final DRCRobotModel robotModel = new AtlasRobotModel();
 
    private static final boolean createMovie = BambooTools.doMovieCreation();
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();

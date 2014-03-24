@@ -15,7 +15,9 @@ import org.junit.Test;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
+import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
+import us.ihmc.darpaRoboticsChallenge.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
@@ -33,7 +35,7 @@ import us.ihmc.utilities.test.JUnitTools;
 public class NumericalInverseKinematicsCalculatorWithRobotTest
 {
    private static final long seed = 1391092L;
-   private static final DRCRobotModel robotModel = DRCRobotModel.ATLAS_SANDIA_HANDS;
+   private static final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_SANDIA_HANDS);
    private static final Random randomNumberGenerator = new Random(seed);
    private static final ArrayList<Double> shoulderRollLimits = new ArrayList<Double>();
    private static final ArrayList<Double> elbowRollLimits = new ArrayList<Double>();

@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
@@ -44,7 +45,7 @@ public class DRCBumpyAndShallowRampsWalkingTest
 {
    private static final boolean ALWAYS_SHOW_GUI = false;
    private static final boolean KEEP_SCS_UP = false;
-   private static final DRCRobotModel robotModel = DRCRobotModel.DRC_NO_HANDS;
+   private static final DRCRobotModel robotModel = new AtlasRobotModel();
 
    private static final boolean CREATE_MOVIE = BambooTools.doMovieCreation();
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();

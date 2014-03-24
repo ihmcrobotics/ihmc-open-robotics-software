@@ -14,6 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.JaxbSDFLoader;
+import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
@@ -165,7 +166,7 @@ public class DRCRobotBasedFootstepGeneratorTest
 
    private void setupRobotParameters()
    {
-      DRCRobotModel robotModel = DRCRobotModel.ATLAS_NO_HANDS_ADDED_MASS;
+      DRCRobotModel robotModel = new AtlasRobotModel();
       DRCRobotJointMap jointMap = robotModel.getJointMap(false, false);
       JaxbSDFLoader jaxbSDFLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
       walkingParamaters = robotModel.getWalkingControlParamaters();

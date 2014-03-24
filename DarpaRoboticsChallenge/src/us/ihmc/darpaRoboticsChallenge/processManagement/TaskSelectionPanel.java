@@ -10,6 +10,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.DRCRobotModelFactory;
 import us.ihmc.darpaRoboticsChallenge.processManagement.DRCDashboardTypes.DRCROSTasks;
 
 public class TaskSelectionPanel extends JPanel
@@ -47,7 +48,7 @@ public class TaskSelectionPanel extends JPanel
       this.add(robotModelLabel, c);
       
       c.gridy++;
-      robotModelCombo = new JComboBox(DRCRobotModel.values());
+      robotModelCombo = new JComboBox(DRCRobotModelFactory.getAvailableRobotModels());
       this.add(robotModelCombo, c);
    }
 }

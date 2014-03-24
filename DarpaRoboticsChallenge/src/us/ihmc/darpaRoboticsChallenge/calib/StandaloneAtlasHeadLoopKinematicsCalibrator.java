@@ -4,11 +4,14 @@ import boofcv.alg.geo.calibration.PlanarCalibrationTarget;
 import boofcv.factory.calib.FactoryPlanarCalibrationTarget;
 import boofcv.misc.BoofMiscOps;
 import boofcv.struct.calib.IntrinsicParameters;
+
 import org.ddogleg.optimization.FactoryOptimization;
 import org.ddogleg.optimization.UnconstrainedLeastSquares;
 import org.ddogleg.optimization.UtilOptimize;
+
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
@@ -16,6 +19,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 import javax.media.j3d.Transform3D;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -49,7 +53,8 @@ public class StandaloneAtlasHeadLoopKinematicsCalibrator
    public StandaloneAtlasHeadLoopKinematicsCalibrator()
    {
       //load robot
-      DRCRobotJointMap jointMap = DRCRobotModel.ATLAS_NO_HANDS_ADDED_MASS.getJointMap(false, false);
+	   DRCRobotModel robotModel = new AtlasRobotModel();
+      DRCRobotJointMap jointMap = robotModel.getJointMap(false, false);
       JaxbSDFLoader robotLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
       fullRobotModel = robotLoader.createFullRobotModel(jointMap);
       joints = fullRobotModel.getOneDoFJoints();

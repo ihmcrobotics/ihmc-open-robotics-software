@@ -3,13 +3,13 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
 
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.DRCRobotModelFactory;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.configuration.DRCNetClassList;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotDataReceiver;
@@ -222,7 +222,7 @@ public class DRCNetworkProcessor
       FlaggedOption robotModel = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(true)
             .setStringParser(JSAP.STRING_PARSER);
       
-      robotModel.setHelp("Robot models: " + Arrays.toString(DRCRobotModel.values()));
+      robotModel.setHelp("Robot models: " + DRCRobotModelFactory.robotModelsToString());
       jsap.registerParameter(robotModel);
       
       jsap.registerParameter(scsIPFlag);
@@ -246,7 +246,7 @@ public class DRCNetworkProcessor
          DRCRobotModel model;
          try
          {
-            model = DRCRobotModel.valueOf(config.getString("robotModel"));
+            model = DRCRobotModelFactory.CreateDRCRobotModel(config.getString("robotModel"));
          }
          catch(IllegalArgumentException e)
          {

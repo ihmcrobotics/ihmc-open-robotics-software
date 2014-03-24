@@ -7,6 +7,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.visualization.SliderBoardFactory;
 import us.ihmc.atlas.visualization.WalkControllerSliderBoard;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
@@ -40,7 +41,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPositi
 
 public class DRCInverseDynamicsControllerDemo
 {
-   private static final DRCRobotModel defaultModelForGraphicSelector = DRCRobotModel.ATLAS_NO_HANDS_ADDED_MASS;
+   private static final DRCRobotModel defaultModelForGraphicSelector = new AtlasRobotModel();
 
    private static final double ROBOT_FLOATING_HEIGHT = 0.3;
 
@@ -120,10 +121,10 @@ public class DRCInverseDynamicsControllerDemo
    {
       DRCRobotModel model = null;
       
-      model = DRCRobotModel.selectModelFromFlag(args);
+      model = DRCRobotModelFactory.selectModelFromFlag(args);
       
       if (model == null)
-         model = DRCRobotModel.selectModelFromGraphicSelector(defaultModelForGraphicSelector);
+         model = DRCRobotModelFactory.selectModelFromGraphicSelector(defaultModelForGraphicSelector);
       
       if (model == null)
          throw new RuntimeException("No robot model selected");
