@@ -24,12 +24,14 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimator;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.RigidBodyToIndexMap;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.AngularVelocitySensorConfiguration;
+import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.LinearAccelerationSensorConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.OrientationSensorConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.SensorConfigurationFactory;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
@@ -38,12 +40,16 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 {
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
+   private final DoubleYoVariable yoTime = new DoubleYoVariable("t_stateEstimator", registry);
+   
    private final SensorReader sensorReader;
 
    private final JointStateUpdater jointStateUpdater;
    private final PelvisRotationalStateUpdater pelvisRotationalStateUpdater;
    private final PelvisLinearStateUpdater pelvisLinearStateUpdater;
  
+   private final double estimatorDT;
+   
    private boolean visualize = false;
    private final ArrayList<DynamicGraphicReferenceFrame> dynamicGraphicMeasurementFrames = new ArrayList<>();
    
@@ -51,13 +57,15 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
          .createNoiseParametersForEstimatorJerryTuningSeptember2013();
    
    public DRCKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, RigidBodyToIndexMap estimatorRigidBodyToIndexMap,
-         double estimateDT, StateEstimatorParameters stateEstimatorParameters, SensorReaderFactory sensorReaderFactory, double gravitationalAcceleration,
+         double estimatorDT, StateEstimatorParameters stateEstimatorParameters, SensorReaderFactory sensorReaderFactory, double gravitationalAcceleration,
          SideDependentList<WrenchBasedFootSwitch> footSwitches, SideDependentList<ContactablePlaneBody> bipedFeet,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
+      this.estimatorDT = estimatorDT;
+      
       sensorReader = sensorReaderFactory.getSensorReader();
 
-      JointAndIMUSensorDataSource jointAndIMUSensorDataSource = new JointAndIMUSensorDataSource(sensorReaderFactory.getStateEstimatorSensorDefinitions(), stateEstimatorParameters.getSensorFilterParameters(estimateDT), registry);
+      JointAndIMUSensorDataSource jointAndIMUSensorDataSource = new JointAndIMUSensorDataSource(sensorReaderFactory.getStateEstimatorSensorDefinitions(), stateEstimatorParameters.getSensorFilterParameters(estimatorDT), registry);
       JointAndIMUSensorMap jointAndIMUSensorMap = jointAndIMUSensorDataSource.getSensorMap();
 
       jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, jointAndIMUSensorDataSource, registry);
@@ -66,12 +74,12 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       
       List<OrientationSensorConfiguration> orientationSensorConfigurations = sensorConfigurationFactory.createOrientationSensorConfigurations(jointAndIMUSensorMap.getOrientationSensors());
       List<AngularVelocitySensorConfiguration> angularVelocitySensorConfigurations = sensorConfigurationFactory.createAngularVelocitySensorConfigurations(jointAndIMUSensorMap.getAngularVelocitySensors());
+      List<LinearAccelerationSensorConfiguration> linearAccelerationSensorConfigurations = sensorConfigurationFactory.createLinearAccelerationSensorConfigurations(jointAndIMUSensorMap.getLinearAccelerationSensors());
       
       pelvisRotationalStateUpdater = new PelvisRotationalStateUpdater(inverseDynamicsStructure, orientationSensorConfigurations, angularVelocitySensorConfigurations, registry);
 
-      pelvisLinearStateUpdater = new PelvisLinearStateUpdater(inverseDynamicsStructure, footSwitches, bipedFeet,
-            gravitationalAcceleration, estimateDT, dynamicGraphicObjectsListRegistry, registry);
-//      pelvisLinearStateUpdater.setJointAndIMUSensorDataSource(jointAndIMUSensorDataSource);
+      pelvisLinearStateUpdater = new PelvisLinearStateUpdater(inverseDynamicsStructure, angularVelocitySensorConfigurations, linearAccelerationSensorConfigurations, footSwitches, bipedFeet,
+            gravitationalAcceleration, yoTime, estimatorDT, dynamicGraphicObjectsListRegistry, registry);
 
       sensorReader.setJointAndIMUSensorDataSource(jointAndIMUSensorDataSource);
       
@@ -106,9 +114,11 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    
    public void doControl()
    {
+      yoTime.add(estimatorDT); //Hack to have a yoTime in the state estimator
+      
       jointStateUpdater.updateJointState();
       pelvisRotationalStateUpdater.updateRootJointOrientationAndAngularVelocity();
-      pelvisLinearStateUpdater.updatePelvisPositionAndLinearVelocity();
+      pelvisLinearStateUpdater.updateRootJointPositionAndLinearVelocity();
       
       if (visualize)
          updateVisualizers();

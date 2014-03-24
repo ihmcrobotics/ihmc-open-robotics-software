@@ -4,6 +4,7 @@ import javax.vecmath.AxisAngle4d;
 
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.utilities.math.geometry.AngleTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -63,15 +64,15 @@ public class IMUDriftCompensator
    private final TwistCalculator twistCalculator;
    
    private final SixDoFJoint rootJoint;
-   private final ReferenceFrame pelvisFrame;
+   private final ReferenceFrame rootJointFrame;
    
-   public IMUDriftCompensator(SideDependentList<ReferenceFrame> footFrames, ReferenceFrame pelvisFrame, TwistCalculator twistCalculator, SixDoFJoint rootJoint, double estimatorDT, YoVariableRegistry parentRegistry)
+   public IMUDriftCompensator(SideDependentList<ReferenceFrame> footFrames, FullInverseDynamicsStructure inverseDynamicsStructure, double estimatorDT, YoVariableRegistry parentRegistry)
    {
-      this.rootJoint = rootJoint;
+      this.rootJoint = inverseDynamicsStructure.getRootJoint();
       this.footFrames = footFrames;
-      this.pelvisFrame = pelvisFrame;
+      this.rootJointFrame = rootJoint.getFrameAfterJoint();
       this.estimatorDT = estimatorDT;
-      this.twistCalculator = twistCalculator;
+      this.twistCalculator = inverseDynamicsStructure.getTwistCalculator();
       
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -230,7 +231,7 @@ public class IMUDriftCompensator
       rootJointAngularVelocity.changeFrame(worldFrame);
       rootJointYawRateCorrected.set(rootJointAngularVelocity.getZ() - imuDriftYawRateFiltered.getDoubleValue());
       rootJointAngularVelocity.setZ(rootJointYawRateCorrected.getDoubleValue());
-      rootJointAngularVelocity.changeFrame(pelvisFrame);
+      rootJointAngularVelocity.changeFrame(rootJointFrame);
       rootJointTwist.setAngularPart(rootJointAngularVelocity.getVector());
       rootJoint.setJointTwist(rootJointTwist);
       twistCalculator.compute();
