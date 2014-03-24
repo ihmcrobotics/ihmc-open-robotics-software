@@ -10,7 +10,6 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.packets.ArmJointAnglePacket;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
-import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
@@ -55,12 +54,13 @@ public class HandPoseCalcaulatorFromArmJointAngles
    {
       RobotSide robotSide = armJointAnglePacket.getRobotSide();
 
-      oneDoFJoints.get(robotSide).get(ArmJointName.SHOULDER_PITCH).setQ(armJointAnglePacket.getShy());
-      oneDoFJoints.get(robotSide).get(ArmJointName.SHOULDER_ROLL).setQ(armJointAnglePacket.getShx());
-      oneDoFJoints.get(robotSide).get(ArmJointName.ELBOW_PITCH).setQ(armJointAnglePacket.getEly());
-      oneDoFJoints.get(robotSide).get(ArmJointName.ELBOW_ROLL).setQ(armJointAnglePacket.getElx());
-      oneDoFJoints.get(robotSide).get(ArmJointName.WRIST_PITCH).setQ(armJointAnglePacket.getWry());
-      oneDoFJoints.get(robotSide).get(ArmJointName.WRIST_ROLL).setQ(armJointAnglePacket.getWrx());
+      //TODO: replace hard-coded arm joint names with call to robot-specific list of arm joints
+      oneDoFJoints.get(robotSide).get(ArmJointName.SHOULDER_PITCH).setQ(armJointAnglePacket.getJointAngles().get(ArmJointName.SHOULDER_PITCH));
+      oneDoFJoints.get(robotSide).get(ArmJointName.SHOULDER_ROLL).setQ(armJointAnglePacket.getJointAngles().get(ArmJointName.SHOULDER_ROLL));
+      oneDoFJoints.get(robotSide).get(ArmJointName.ELBOW_PITCH).setQ(armJointAnglePacket.getJointAngles().get(ArmJointName.ELBOW_PITCH));
+      oneDoFJoints.get(robotSide).get(ArmJointName.ELBOW_ROLL).setQ(armJointAnglePacket.getJointAngles().get(ArmJointName.ELBOW_ROLL));
+      oneDoFJoints.get(robotSide).get(ArmJointName.WRIST_PITCH).setQ(armJointAnglePacket.getJointAngles().get(ArmJointName.WRIST_PITCH));
+      oneDoFJoints.get(robotSide).get(ArmJointName.WRIST_ROLL).setQ(armJointAnglePacket.getJointAngles().get(ArmJointName.WRIST_ROLL));
 
       ReferenceFrame targetBody = fullRobotModel.getHand(robotSide).getParentJoint().getFrameAfterJoint();
       ReferenceFrame handPositionControlFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("targetBody_" + robotSide, targetBody,
