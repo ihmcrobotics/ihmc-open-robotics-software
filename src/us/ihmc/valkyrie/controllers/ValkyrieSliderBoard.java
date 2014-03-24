@@ -1,10 +1,19 @@
 package us.ihmc.valkyrie.controllers;
 
-import com.yobotics.simulationconstructionset.*;
-import com.yobotics.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
 import us.ihmc.atlas.visualization.SliderBoardFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.CommonNames;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.InverseDynamicsJointController;
+import us.ihmc.darpaRoboticsChallenge.valkyrie.ValkyrieJointMap;
+
+import com.yobotics.simulationconstructionset.EnumYoVariable;
+import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import com.yobotics.simulationconstructionset.VariableChangedListener;
+import com.yobotics.simulationconstructionset.YoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
 
 /**
  * Created by dstephen on 2/28/14.
@@ -173,5 +182,21 @@ public class ValkyrieSliderBoard
    public static SliderBoardFactory getDefaultSliderBoardFactory()
    {
       return walkingFactory;
+   }
+   
+   private static final SliderBoardFactory inverseDynamicsControllerSliderBoardFactory = new SliderBoardFactory()
+   {
+      @Override
+      public void makeSliderBoard(SimulationConstructionSet scs, YoVariableRegistry registry, GeneralizedSDFRobotModel generalizedSDFRobotModel)
+      {
+         SDFFullRobotModelFactory fullRobotModelFactory = new SDFFullRobotModelFactory(generalizedSDFRobotModel, new ValkyrieJointMap());
+         SDFFullRobotModel fullRobotModel = fullRobotModelFactory.create();
+         new InverseDynamicsJointController.GravityCompensationSliderBoard(scs, fullRobotModel, registry, "transitionFactor", 0.0, 1.0);
+      }
+   };
+   
+   public static SliderBoardFactory getIDControllerSliderBoardFactory()
+   {
+      return inverseDynamicsControllerSliderBoardFactory;
    }
 }
