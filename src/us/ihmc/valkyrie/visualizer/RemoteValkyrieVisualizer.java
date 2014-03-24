@@ -9,6 +9,7 @@ import us.ihmc.robotDataCommunication.YoVariableClient;
 import us.ihmc.robotDataCommunication.visualizer.SCSYoVariablesUpdatedListener;
 import us.ihmc.valkyrie.configuration.ValkyrieNetworkParameters;
 import us.ihmc.valkyrie.controllers.StandPrepSliderBoardFactory;
+import us.ihmc.valkyrie.controllers.ValkyrieSliderBoard;
 
 import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
@@ -26,7 +27,7 @@ public class RemoteValkyrieVisualizer
       ValkyrieJointMap jointMap = new ValkyrieJointMap();
       JaxbSDFLoader robotLoader = ValkyrieSDFLoader.loadValkyrieRobot(false);
 
-      SliderBoardFactory sliderBoardFactory = new StandPrepSliderBoardFactory();
+      SliderBoardFactory sliderBoardFactory = ValkyrieSliderBoard.getIDControllerSliderBoardFactory();
 
       SCSYoVariablesUpdatedListener scsYoVariablesUpdatedListener = new ValkyrieSliderBoardControllerListener(robotLoader, jointMap, bufferSize, sliderBoardFactory);
 
