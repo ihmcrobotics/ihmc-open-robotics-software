@@ -26,7 +26,6 @@ public enum AtlasRobotVersion {
 			return DRCHandModel.IROBOT;
 
 		case ATLAS_SANDIA_HANDS:
-		case ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS:
 			return DRCHandModel.SANDIA;
 
 		case DRC_HOOKS:
@@ -34,6 +33,7 @@ public enum AtlasRobotVersion {
 			
 		case ATLAS_NO_HANDS_ADDED_MASS:
 		case DRC_NO_HANDS:
+		case ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS:
 		case DRC_EXTENDED_HOOKS:
 		default:
 			return DRCHandModel.NONE;

@@ -115,4 +115,9 @@ public class AtlasRobotModel implements DRCRobotModel {
    {
       return new DRCSimDRCRobotInitialSetup(groundHeight, initialYaw);
    }
+
+	@Override
+	public WalkingControllerParameters getMultiContactControllerParameters() {
+		return new AtlasRobotMultiContactControllerParameters();
+	}
 }
