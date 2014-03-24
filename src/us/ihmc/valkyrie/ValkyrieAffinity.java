@@ -1,11 +1,15 @@
 package us.ihmc.valkyrie;
 
+import java.util.logging.Logger;
+
 import us.ihmc.affinity.CPUTopology;
 import us.ihmc.affinity.Package;
 import us.ihmc.affinity.Processor;
 
 public class ValkyrieAffinity
 {
+   private final static Logger log = Logger.getLogger(ValkyrieAffinity.class.getName());
+   
    private final boolean setAffinity;
   
    private final Processor estimatorThreadProcessor;
@@ -17,19 +21,19 @@ public class ValkyrieAffinity
       
       if(topology.isHyperThreadingEnabled())
       {
-         System.err.println("WARNING: Hyper-Threading is enabled. Expect higher amounts of jitter");
+         log.severe("WARNING: Hyper-Threading is enabled. Expect higher amounts of jitter");
       }
       
       if(topology.getNumberOfCores() < 8)
       {
-         System.out.println("Number of cores < 8. Disabling affinity");
+         log.config("Number of cores < 8. Disabling affinity");
          setAffinity = false;
          estimatorThreadProcessor = null;
          controlThreadProcessor = null;
       }
       else
       {
-         System.out.println("Number of cores >= 8. Pinning control threads to processor 1 & 2.");
+         log.config("Number of cores >= 8. Pinning control threads to processor 1 & 2.");
          setAffinity = true;
          Package socket = topology.getPackage(0);
          estimatorThreadProcessor = socket.getCore(1).getDefaultProcessor();

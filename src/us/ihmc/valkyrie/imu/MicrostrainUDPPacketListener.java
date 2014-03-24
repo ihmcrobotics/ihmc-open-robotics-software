@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
+import java.util.logging.Logger;
 
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.realtime.PriorityParameters;
@@ -11,6 +12,9 @@ import us.ihmc.realtime.RealtimeThread;
 
 public class MicrostrainUDPPacketListener implements Runnable
 {
+   private final static Logger log = Logger.getLogger(MicrostrainUDPPacketListener.class.getName());
+
+   
    private static final byte AHRS_DESCRIPTOR = (byte) 0x80;
 
    private static final byte SCALED_ACCELEROMETER_DESCRIPTOR = 0x04;
@@ -77,7 +81,7 @@ public class MicrostrainUDPPacketListener implements Runnable
             data.setGyro(buffer.getFloat(), buffer.getFloat(), buffer.getFloat());
             break;
          default:
-            System.err.println("Unknown field " + descriptor);
+            log.warning("Unknown field " + descriptor);
             buffer.position(buffer.position() + fieldLength);
             break;
          }
@@ -102,7 +106,7 @@ public class MicrostrainUDPPacketListener implements Runnable
             receiveBuffer.flip();
             if (!isChecksumValid(receiveBuffer))
             {
-               System.err.println("Invalid checksum");
+               log.warning("Invalid checksum");
                continue;
             }
 
@@ -114,7 +118,7 @@ public class MicrostrainUDPPacketListener implements Runnable
                readFields(receiveBuffer);
                break;
             default:
-               System.err.println("Unknown packet type  " + descriptor);
+               log.warning("Unknown packet type  " + descriptor);
             }
          }
          catch (IOException e)
@@ -133,7 +137,7 @@ public class MicrostrainUDPPacketListener implements Runnable
    private static MicrostrainUDPPacketListener create(long serialNumber) throws IOException
    {
       int port = 50000 + (int) (serialNumber % 10000);
-      System.out.println("Connecting to IMU on port " + port);
+      log.info("Connecting to IMU on port " + port);
       return new MicrostrainUDPPacketListener(port);
    }
 
