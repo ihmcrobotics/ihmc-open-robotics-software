@@ -46,7 +46,7 @@ public class InverseDynamicsJointController extends State<HighLevelState>
    private static final boolean STAND_ON_FEET = false;
    
    /** Specify if the controller uses the mass matrix for the PD controllers */
-   private static final boolean USE_MASS_MATRIX = false;
+   private static final boolean USE_MASS_MATRIX = true;
    
    /** Compensate for Coriolis and centrifugal terms */
    private static final boolean COMPENSATE_BIAS = false;
@@ -198,13 +198,13 @@ public class InverseDynamicsJointController extends State<HighLevelState>
       
       if (USE_MASS_MATRIX)
       {
-         allJointGains.set(40.0);
-         allJointZetas.set(0.5);
+         allJointGains.set(2.0);
+         allJointZetas.set(0.02);
       }
       else
       {
          allJointGains.set(1.0);
-         allJointZetas.set(0.15);
+         allJointZetas.set(0.02);
       }
       allJointGains.addVariableChangedListener(gainsChangedListener);
       allJointZetas.addVariableChangedListener(gainsChangedListener);
@@ -401,7 +401,6 @@ public class InverseDynamicsJointController extends State<HighLevelState>
          sliderBoardConfigurationManager.saveConfiguration(SliderBoardMode.SpineNeckDesireds.toString());
          sliderBoardConfigurationManager.clearControls();
          
-         sliderBoardMode.set(SliderBoardMode.Gains);
 
          VariableChangedListener listener = new VariableChangedListener()
          {
@@ -413,7 +412,9 @@ public class InverseDynamicsJointController extends State<HighLevelState>
          };
 
          sliderBoardMode.addVariableChangedListener(listener);
-         listener.variableChanged(null);
+//         listener.variableChanged(null);
+         sliderBoardMode.set(SliderBoardMode.Gains);
+         sliderBoardConfigurationManager.loadConfiguration(SliderBoardMode.Gains.toString());
       }
 
       private void setupJointSlidersAndKnobs(YoVariableRegistry registry, final SliderBoardConfigurationManager sliderBoardConfigurationManager,
