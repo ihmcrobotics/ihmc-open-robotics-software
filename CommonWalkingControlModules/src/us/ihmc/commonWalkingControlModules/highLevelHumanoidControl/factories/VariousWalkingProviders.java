@@ -220,7 +220,7 @@ public class VariousWalkingProviders
       DesiredThighLoadBearingProvider thighLoadBearingProvider = new DesiredThighLoadBearingProvider();
       DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider = new DesiredPelvisLoadBearingProvider();
       
-      DesiredArmJointAngleProvider armJointAngleProvider = new DesiredArmJointAngleProvider();
+      DesiredArmJointAngleProvider armJointAngleProvider = new DesiredArmJointAngleProvider(fullRobotModel);
 
       objectCommunicator.attachListener(FootstepDataList.class, footstepPathConsumer);
       objectCommunicator.attachListener(BlindWalkingPacket.class, blindWalkingPacketConsumer);
@@ -286,7 +286,7 @@ public class VariousWalkingProviders
       DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider = new DesiredPelvisLoadBearingProvider();
       DesiredThighLoadBearingProvider thighLoadBearingProvider = new DesiredThighLoadBearingProvider();
 
-      DesiredArmJointAngleProvider armJointAngleProvider = new DesiredArmJointAngleProvider();
+      DesiredArmJointAngleProvider armJointAngleProvider = new DesiredArmJointAngleProvider(fullRobotModel);
       
       ControlStatusProducer controlStatusProducer = new SystemErrControlStatusProducer();
 
