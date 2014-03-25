@@ -1,4 +1,4 @@
-package us.ihmc.acsell.junitTests;
+package us.ihmc.acsell;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
