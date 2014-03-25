@@ -12,7 +12,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlane
 import us.ihmc.darpaRoboticsChallenge.sensors.WrenchBasedFootSwitch;
 import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCSimulatedSensorNoiseParameters;
 import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCStateEstimatorInterface;
-import us.ihmc.darpaRoboticsChallenge.stateEstimation.StateEstimatorParameters;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.simulatedSensors.JointAndIMUSensorMap;
@@ -21,6 +20,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.stateEstimation.JointAndIMUSensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimator;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.RigidBodyToIndexMap;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.AngularVelocitySensorConfiguration;
@@ -57,15 +57,15 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
          .createNoiseParametersForEstimatorJerryTuningSeptember2013();
    
    public DRCKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, RigidBodyToIndexMap estimatorRigidBodyToIndexMap,
-         double estimatorDT, StateEstimatorParameters stateEstimatorParameters, SensorReaderFactory sensorReaderFactory, double gravitationalAcceleration,
+         StateEstimatorParameters stateEstimatorParameters, SensorReaderFactory sensorReaderFactory, double gravitationalAcceleration,
          SideDependentList<WrenchBasedFootSwitch> footSwitches, SideDependentList<ContactablePlaneBody> bipedFeet,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      this.estimatorDT = estimatorDT;
+      this.estimatorDT = stateEstimatorParameters.getEstimatorDT();
       
       sensorReader = sensorReaderFactory.getSensorReader();
 
-      JointAndIMUSensorDataSource jointAndIMUSensorDataSource = new JointAndIMUSensorDataSource(sensorReaderFactory.getStateEstimatorSensorDefinitions(), stateEstimatorParameters.getSensorFilterParameters(estimatorDT), registry);
+      JointAndIMUSensorDataSource jointAndIMUSensorDataSource = new JointAndIMUSensorDataSource(sensorReaderFactory.getStateEstimatorSensorDefinitions(), stateEstimatorParameters.getSensorFilterParameters(), registry);
       JointAndIMUSensorMap jointAndIMUSensorMap = jointAndIMUSensorDataSource.getSensorMap();
 
       jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, jointAndIMUSensorDataSource, registry);
@@ -79,7 +79,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       pelvisRotationalStateUpdater = new PelvisRotationalStateUpdater(inverseDynamicsStructure, orientationSensorConfigurations, angularVelocitySensorConfigurations, registry);
 
       pelvisLinearStateUpdater = new PelvisLinearStateUpdater(inverseDynamicsStructure, angularVelocitySensorConfigurations, linearAccelerationSensorConfigurations, footSwitches, bipedFeet,
-            gravitationalAcceleration, yoTime, estimatorDT, dynamicGraphicObjectsListRegistry, registry);
+            gravitationalAcceleration, yoTime, stateEstimatorParameters, dynamicGraphicObjectsListRegistry, registry);
 
       sensorReader.setJointAndIMUSensorDataSource(jointAndIMUSensorDataSource);
       

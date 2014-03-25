@@ -16,6 +16,7 @@ import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAccelerationsFromRobot
 import us.ihmc.sensorProcessing.stateEstimation.JointAndIMUSensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.PointMeasurementNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromController;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorWithPorts;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -58,13 +59,18 @@ public class ComposableStateEstimatorEvaluator
       SensorNoiseParameters simulatedSensorNoiseParameters = SensorNoiseParametersForEvaluator.createSensorNoiseParameters();
 //      SensorNoiseParameters simulatedSensorNoiseParameters = SensorNoiseParametersForEvaluator.createZeroNoiseParameters();
 
-
+      double jointPositionFilterFrequencyInHertz = 12.0;
+      double jointVelocityFilterFrequencyInHertz = 12.0; // 16.0
+      double orientationFilterFrequencyInHertz = 12.0;
+      double angularVelocityFilterFrequencyInHertz = 12.0;
+      double linearAccelerationFilterFrequencyInHertz = 12.0;
+      double jointVelocitySlopTimeForBacklashCompensation = 0.007;
+      final SensorFilterParameters sensorFilterParameters = new SensorFilterParameters(jointPositionFilterFrequencyInHertz, jointVelocityFilterFrequencyInHertz,
+            orientationFilterFrequencyInHertz, angularVelocityFilterFrequencyInHertz, linearAccelerationFilterFrequencyInHertz,
+            jointVelocitySlopTimeForBacklashCompensation, controlDT);
       
-      double filterFreqHz = 16.0;
-      double slopTime = 0.007; //15;
       SensorReaderFactory simulatedSensorHolderAndReaderFromRobotFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(robot,
-            simulatedSensorNoiseParameters, controlDT, filterFreqHz, slopTime,
-            imuMounts, new ArrayList<WrenchCalculatorInterface>(), registry);
+            simulatedSensorNoiseParameters, sensorFilterParameters, imuMounts, new ArrayList<WrenchCalculatorInterface>(), registry);
       
       boolean addLinearAccelerationSensors = true;
       
@@ -90,7 +96,7 @@ public class ComposableStateEstimatorEvaluator
 //      SensorNoiseParameters sensorNoiseParametersForEstimator = SensorNoiseParametersForEvaluator.createVeryLittleSensorNoiseParameters();
 //      SensorNoiseParameters sensorNoiseParametersForEstimator = SensorNoiseParametersForEvaluator.createSensorNoiseParameters();
 //      SensorNoiseParameters sensorNoiseParametersForEstimator = SensorNoiseParametersForEvaluator.createLotsOfSensorNoiseParameters();
-      SensorNoiseParameters sensorNoiseParametersForEstimator = SensorNoiseParametersForEvaluator.createTunedNoiseParametersForEvaluator();
+      final SensorNoiseParameters sensorNoiseParametersForEstimator = SensorNoiseParametersForEvaluator.createTunedNoiseParametersForEvaluator();
 
       RigidBodyToIndexMap rigidBodyToIndexMap = new RigidBodyToIndexMap(inverseDynamicsStructure.getElevator());
 
@@ -98,29 +104,58 @@ public class ComposableStateEstimatorEvaluator
       final StateEstimationDataFromController stateEstimatorDataFromControllerSource = new StateEstimationDataFromController(estimationFrame);
       final StateEstimationDataFromController stateEstimationDataFromControllerSink = new StateEstimationDataFromController(estimationFrame);
       
-      double jointPositionFilterFrequencyInHertz = 12.0;
-      double jointVelocityFilterFrequencyInHertz = 12.0;
-      double orientationFilterFrequencyInHertz = 12.0;
-      double angularVelocityFilterFrequencyInHertz = 12.0;
-      double linearAccelerationFilterFrequencyInHertz = 12.0;
-      SensorFilterParameters sensorFilterParameters = new SensorFilterParameters(jointPositionFilterFrequencyInHertz, jointVelocityFilterFrequencyInHertz,
-            orientationFilterFrequencyInHertz, angularVelocityFilterFrequencyInHertz, linearAccelerationFilterFrequencyInHertz, controlDT);
-
       double pointVelocityXYMeasurementStandardDeviation = 2.0;
       double pointPositionZMeasurementStandardDeviation = 0.1;
       double pointVelocityZMeasurementStandardDeviation = 2.0;
       double pointPositionXYMeasurementStandardDeviation = 0.1;
       
-      PointMeasurementNoiseParameters pointMeasurementNoiseParameters = new  PointMeasurementNoiseParameters(
+      final PointMeasurementNoiseParameters pointMeasurementNoiseParameters = new  PointMeasurementNoiseParameters(
             pointVelocityXYMeasurementStandardDeviation,
             pointVelocityZMeasurementStandardDeviation,
             pointPositionXYMeasurementStandardDeviation,
             pointPositionZMeasurementStandardDeviation);
       
+      StateEstimatorParameters stateEstimatorParameters = new StateEstimatorParameters()
+      {
+         public boolean useKinematicsBasedStateEstimator()
+         {
+            return false;
+         }
+         
+         public boolean isRunningOnRealRobot()
+         {
+            return false;
+         }
+         
+         public SensorNoiseParameters getSensorNoiseParameters()
+         {
+            return sensorNoiseParametersForEstimator;
+         }
+         
+         public SensorFilterParameters getSensorFilterParameters()
+         {
+            return sensorFilterParameters;
+         }
+         
+         public PointMeasurementNoiseParameters getPointMeasurementNoiseParameters()
+         {
+            return pointMeasurementNoiseParameters;
+         }
+         
+         public double getEstimatorDT()
+         {
+            return controlDT;
+         }
+         
+         public boolean getAssumePerfectIMU()
+         {
+            return assumePerfectIMU;
+         }
+      };
+      
       SensorAndEstimatorAssembler sensorAndEstimatorAssembler = new SensorAndEstimatorAssembler(stateEstimatorDataFromControllerSource,
-            simulatedSensorHolderAndReaderFromRobotFactory.getStateEstimatorSensorDefinitions(), sensorNoiseParametersForEstimator, sensorFilterParameters,
-            pointMeasurementNoiseParameters, gravitationalAcceleration, inverseDynamicsStructure, referenceFrameMap, rigidBodyToIndexMap, controlDT,
-            assumePerfectIMU, registry);
+            simulatedSensorHolderAndReaderFromRobotFactory.getStateEstimatorSensorDefinitions(), stateEstimatorParameters, gravitationalAcceleration,
+            inverseDynamicsStructure, referenceFrameMap, rigidBodyToIndexMap, registry);
 
       ControlFlowGraph controlFlowGraph = sensorAndEstimatorAssembler.getControlFlowGraph();
       StateEstimatorWithPorts orientationEstimator = sensorAndEstimatorAssembler.getEstimator();

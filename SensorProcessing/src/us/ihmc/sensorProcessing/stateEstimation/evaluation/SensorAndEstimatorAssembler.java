@@ -18,6 +18,7 @@ import us.ihmc.sensorProcessing.stateEstimation.JointStateFullRobotModelUpdater;
 import us.ihmc.sensorProcessing.stateEstimation.OrientationStateRobotModelUpdater;
 import us.ihmc.sensorProcessing.stateEstimation.PointMeasurementNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromController;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorWithPorts;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.AngularVelocitySensorConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.LinearAccelerationSensorConfiguration;
@@ -51,13 +52,17 @@ public class SensorAndEstimatorAssembler
    private final boolean assumePerfectIMU;
 
    public SensorAndEstimatorAssembler(StateEstimationDataFromController stateEstimatorDataFromControllerSource,
-         StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, SensorNoiseParameters sensorNoiseParametersForEstimator,
-         SensorFilterParameters sensorFilterParameters, PointMeasurementNoiseParameters pointMeasurementNoiseParameters, double gravitationalAcceleration,
+         StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, StateEstimatorParameters stateEstimatorParameters, double gravitationalAcceleration,
          FullInverseDynamicsStructure inverseDynamicsStructure, AfterJointReferenceFrameNameMap estimatorReferenceFrameMap,
-         RigidBodyToIndexMap estimatorRigidBodyToIndexMap, double estimatorDT, boolean assumePerfectIMU, YoVariableRegistry parentRegistry)
+         RigidBodyToIndexMap estimatorRigidBodyToIndexMap, YoVariableRegistry parentRegistry)
    {
-      this.assumePerfectIMU = assumePerfectIMU;
+      this.assumePerfectIMU = stateEstimatorParameters.getAssumePerfectIMU();
+      double estimatorDT = stateEstimatorParameters.getEstimatorDT();
 
+      SensorNoiseParameters sensorNoiseParametersForEstimator = stateEstimatorParameters.getSensorNoiseParameters();
+      SensorFilterParameters sensorFilterParameters = stateEstimatorParameters.getSensorFilterParameters();
+      PointMeasurementNoiseParameters pointMeasurementNoiseParameters = stateEstimatorParameters.getPointMeasurementNoiseParameters();
+      
       this.stateEstimatorDataFromControllerSource = stateEstimatorDataFromControllerSource;
       SensorConfigurationFactory sensorConfigurationFactory = new SensorConfigurationFactory(sensorNoiseParametersForEstimator, gravitationalAcceleration);
 

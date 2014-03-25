@@ -1,6 +1,5 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import us.ihmc.darpaRoboticsChallenge.drcRobot.HandContactParameters;
 import us.ihmc.utilities.math.TimeTools;
 
 public class DRCConfigParameters
@@ -252,44 +251,11 @@ public class DRCConfigParameters
    public static final int CHEATING_POLARIS_PORT = 1543;
    public static final String CHEATING_POLARIS_HOST = "localhost";
 
-   // Filter Parameters
-   public static final double positionSensorFrequencyHz;
-   public static final double velocitySensorFrequencyHz;
-
-   static
-   {
-      if (!DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT)
-      {
-         positionSensorFrequencyHz = Double.POSITIVE_INFINITY;
-         velocitySensorFrequencyHz = Double.POSITIVE_INFINITY;
-      }
-      else
-      {
-         positionSensorFrequencyHz = 16.0;
-         velocitySensorFrequencyHz = 16.0;
-      }
-   }
-
    // Atlas on-board filtering parameters
    public static final boolean USE_IHMCFILTER_JOINT_ANGLES = false;
    public static final boolean USE_IHMCFILTER_JOINT_VELOCITIES = false;
    public static final boolean USE_IHMCFILTER_JOINT_TORQUES = true;
    public static final String ATLAS_CALIBRATION_FILE = "AtlasCalibration/AtlasNullOffsets.properties";
-
-   public static final double JOINT_VELOCITY_SLOP_TIME_FOR_BACKLASH_COMPENSATION = 0.06;    // 0.045; //0.03;
-
-   public static final double JOINT_POSITION_FILTER_FREQ_HZ = positionSensorFrequencyHz;
-   public static final double JOINT_VELOCITY_FILTER_FREQ_HZ = velocitySensorFrequencyHz;
-   public static final double ORIENTATION_FILTER_FREQ_HZ = positionSensorFrequencyHz;
-   public static final double ANGULAR_VELOCITY_FILTER_FREQ_HZ = velocitySensorFrequencyHz;
-   public static final double LINEAR_ACCELERATION_FILTER_FREQ_HZ = velocitySensorFrequencyHz;
-
-   // State Estimator Filter Parameters
-   public static final double pointVelocityXYMeasurementStandardDeviation = 2.0;    // 8.0; //2.0;
-   public static final double pointVelocityZMeasurementStandardDeviation = 2.0;    // 8.0; //2.0;
-
-   public static final double pointPositionXYMeasurementStandardDeviation = 0.1;    // 0.4; //0.1;
-   public static final double pointPositionZMeasurementStandardDeviation = 0.1;    // 0.4; //0.1;
 
    public static final double contactTresholdForceForSCS = 5.0;
    public static final double contactTresholdForceForGazebo = 120.0;

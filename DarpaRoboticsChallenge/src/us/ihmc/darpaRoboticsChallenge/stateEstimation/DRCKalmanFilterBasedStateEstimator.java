@@ -8,12 +8,12 @@ import us.ihmc.controlFlow.ControlFlowGraph;
 import us.ihmc.darpaRoboticsChallenge.sensors.WrenchBasedFootSwitch;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.stateEstimation.JointAndIMUSensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromController;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimator;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorWithPorts;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.ControlFlowGraphExecutorController;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
@@ -37,27 +37,22 @@ public class DRCKalmanFilterBasedStateEstimator implements DRCStateEstimatorInte
    private final SensorAndEstimatorAssembler sensorAndEstimatorAssembler;
    private final StateEstimatorWithPorts stateEstimatorWithPorts;
    private final ControlFlowGraphExecutorController controlFlowGraphExecutorController;
-
-   //      DRCSimulatedSensorNoiseParameters.createNoiseParametersForEstimatorJerryTuning();
-   private final SensorNoiseParameters sensorNoiseParametersForEstimator = DRCSimulatedSensorNoiseParameters
-         .createNoiseParametersForEstimatorJerryTuningSeptember2013();
    
    private final boolean assumePerfectIMU;
 
    public DRCKalmanFilterBasedStateEstimator(StateEstimationDataFromController stateEstimatorDataFromControllerSource,
          FullInverseDynamicsStructure inverseDynamicsStructure, AfterJointReferenceFrameNameMap estimatorReferenceFrameMap,
-         RigidBodyToIndexMap estimatorRigidBodyToIndexMap, double estimateDT, SensorReaderFactory sensorReaderFactory, double gravitationalAcceleration,
+         RigidBodyToIndexMap estimatorRigidBodyToIndexMap, SensorReaderFactory sensorReaderFactory, double gravitationalAcceleration,
          StateEstimatorParameters stateEstimatorParameters, SideDependentList<WrenchBasedFootSwitch> footSwitches,
          SideDependentList<ContactablePlaneBody> bipedFeet, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       sensorReader = sensorReaderFactory.getSensorReader();
-      this.assumePerfectIMU = stateEstimatorParameters.getAssumePerfectImu();
+      this.assumePerfectIMU = stateEstimatorParameters.getAssumePerfectIMU();
       
       // Make the estimator here.
       sensorAndEstimatorAssembler = new SensorAndEstimatorAssembler(stateEstimatorDataFromControllerSource,
-            sensorReaderFactory.getStateEstimatorSensorDefinitions(), sensorNoiseParametersForEstimator, stateEstimatorParameters.getSensorFilterParameters(estimateDT),
-            stateEstimatorParameters.getPointMeasurementNoiseParameters(), gravitationalAcceleration, inverseDynamicsStructure, estimatorReferenceFrameMap, estimatorRigidBodyToIndexMap,
-            estimateDT, assumePerfectIMU, registry);
+            sensorReaderFactory.getStateEstimatorSensorDefinitions(), stateEstimatorParameters, gravitationalAcceleration, inverseDynamicsStructure,
+            estimatorReferenceFrameMap, estimatorRigidBodyToIndexMap, registry);
 
       stateEstimatorWithPorts = sensorAndEstimatorAssembler.getEstimator();
 
