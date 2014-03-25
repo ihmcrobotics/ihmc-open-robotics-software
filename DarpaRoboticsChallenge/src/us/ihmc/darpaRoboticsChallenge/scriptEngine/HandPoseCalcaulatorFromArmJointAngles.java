@@ -27,26 +27,25 @@ public class HandPoseCalcaulatorFromArmJointAngles
    private FullRobotModel fullRobotModel;
    private SideDependentList<EnumMap<ArmJointName, OneDoFJoint>> oneDoFJoints = SideDependentList.createListOfEnumMaps(ArmJointName.class);
    private WalkingControllerParameters drcRobotWalkingControllerParameters;
+   private DRCRobotJointMap jointMap;
 
 
    public HandPoseCalcaulatorFromArmJointAngles(DRCRobotModel robotModel)
    {
-      DRCRobotJointMap jointMap = robotModel.getJointMap(false, false);
+      jointMap = robotModel.getJointMap(false, false);
       JaxbSDFLoader jaxbSDFLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap, true);
       SDFFullRobotModelFactory fullRobotModelFactory = new SDFFullRobotModelFactory(jaxbSDFLoader.getGeneralizedSDFRobotModel(jointMap.getModelName()),
-            jointMap);
+                                                          jointMap);
 
       drcRobotWalkingControllerParameters = robotModel.getWalkingControlParamaters();
       fullRobotModel = fullRobotModelFactory.create();
 
-      for(RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values())
       {
-         oneDoFJoints.get(robotSide).put(ArmJointName.SHOULDER_PITCH, fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_PITCH));
-         oneDoFJoints.get(robotSide).put(ArmJointName.SHOULDER_ROLL, fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_ROLL));
-         oneDoFJoints.get(robotSide).put(ArmJointName.ELBOW_PITCH, fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH));
-         oneDoFJoints.get(robotSide).put(ArmJointName.ELBOW_ROLL, fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_ROLL));
-         oneDoFJoints.get(robotSide).put(ArmJointName.WRIST_PITCH, fullRobotModel.getArmJoint(robotSide, ArmJointName.WRIST_PITCH));
-         oneDoFJoints.get(robotSide).put(ArmJointName.WRIST_ROLL, fullRobotModel.getArmJoint(robotSide, ArmJointName.WRIST_ROLL));
+    	  for(ArmJointName jointName : jointMap.getArmJointNames())
+    	  {
+    		  oneDoFJoints.get(robotSide).put(jointName, fullRobotModel.getArmJoint(robotSide, jointName));
+    	  }
       }
    }
 
@@ -54,17 +53,14 @@ public class HandPoseCalcaulatorFromArmJointAngles
    {
       RobotSide robotSide = armJointAnglePacket.getRobotSide();
 
-      //TODO: replace hard-coded arm joint names with call to robot-specific list of arm joints
-      oneDoFJoints.get(robotSide).get(ArmJointName.SHOULDER_PITCH).setQ(armJointAnglePacket.getJointAngles().get(ArmJointName.SHOULDER_PITCH));
-      oneDoFJoints.get(robotSide).get(ArmJointName.SHOULDER_ROLL).setQ(armJointAnglePacket.getJointAngles().get(ArmJointName.SHOULDER_ROLL));
-      oneDoFJoints.get(robotSide).get(ArmJointName.ELBOW_PITCH).setQ(armJointAnglePacket.getJointAngles().get(ArmJointName.ELBOW_PITCH));
-      oneDoFJoints.get(robotSide).get(ArmJointName.ELBOW_ROLL).setQ(armJointAnglePacket.getJointAngles().get(ArmJointName.ELBOW_ROLL));
-      oneDoFJoints.get(robotSide).get(ArmJointName.WRIST_PITCH).setQ(armJointAnglePacket.getJointAngles().get(ArmJointName.WRIST_PITCH));
-      oneDoFJoints.get(robotSide).get(ArmJointName.WRIST_ROLL).setQ(armJointAnglePacket.getJointAngles().get(ArmJointName.WRIST_ROLL));
+      for(ArmJointName jointName : jointMap.getArmJointNames())
+      {
+    	  oneDoFJoints.get(robotSide).get(jointName).setQ(armJointAnglePacket.getJointAngles().get(jointName));
+      }
 
       ReferenceFrame targetBody = fullRobotModel.getHand(robotSide).getParentJoint().getFrameAfterJoint();
       ReferenceFrame handPositionControlFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("targetBody_" + robotSide, targetBody,
-            drcRobotWalkingControllerParameters.getHandControlFramesWithRespectToFrameAfterWrist().get(robotSide));
+                                                   drcRobotWalkingControllerParameters.getHandControlFramesWithRespectToFrameAfterWrist().get(robotSide));
 
       FramePose handPose = new FramePose(handPositionControlFrame, wristToHandTansform);
       handPose.changeFrame(fullRobotModel.getChest().getParentJoint().getFrameAfterJoint());
