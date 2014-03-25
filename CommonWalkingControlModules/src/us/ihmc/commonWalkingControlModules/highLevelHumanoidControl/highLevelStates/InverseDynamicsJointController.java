@@ -84,7 +84,7 @@ public class InverseDynamicsJointController extends State<HighLevelState>
    private final DoubleYoVariable gainScaling = new DoubleYoVariable("gravityComp_gainScaling", registry);
    private final DoubleYoVariable footForceScaling = new DoubleYoVariable("gravityComp_footForceScaling", registry);
    
-   public InverseDynamicsJointController(FullRobotModel fullRobotModel, TwistCalculator twistCalculator, double gravityZ, YoVariableRegistry parentRegistry)
+   public InverseDynamicsJointController(FullRobotModel fullRobotModel, TwistCalculator twistCalculator, double gravityZ)
    {
       super(HighLevelState.INVERSE_DYNAMICS_JOINT_CONTROL);
       
@@ -222,7 +222,6 @@ public class InverseDynamicsJointController extends State<HighLevelState>
       }
       
       gainsChangedListener.variableChanged(null);
-      parentRegistry.addChild(registry);
    }
 
    private final DoubleYoVariable test_qd_LeftHiptPitch = new DoubleYoVariable("test_qd_LeftHiptPitch", registry);
@@ -318,6 +317,11 @@ public class InverseDynamicsJointController extends State<HighLevelState>
    @Override
    public void doTransitionOutOfAction()
    {
+   }
+
+   public YoVariableRegistry getYoVariableRegistry()
+   {
+      return registry;
    }
 
    public static class GravityCompensationSliderBoard
