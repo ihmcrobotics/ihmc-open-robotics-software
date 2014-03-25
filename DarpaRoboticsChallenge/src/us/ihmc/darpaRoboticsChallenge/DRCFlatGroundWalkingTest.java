@@ -18,7 +18,6 @@ import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSi
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
-import us.ihmc.darpaRoboticsChallenge.acsell.ACSELLControllerComponentFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.PlainDRCRobot;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.SquaredUpDRCRobotInitialSetup;
