@@ -26,7 +26,6 @@ import us.ihmc.darpaRoboticsChallenge.ros.ROSSandiaJointMap;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCSimulatedSensorNoiseParameters;
 import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCStateEstimatorInterface;
-import us.ihmc.darpaRoboticsChallenge.stateEstimation.StateEstimatorParameters;
 import us.ihmc.projectM.R2Sim02.initialSetup.ScsInitialSetup;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.simulatedSensors.GroundContactPointBasedWrenchCalculator;
@@ -34,6 +33,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReaderFromRobotFactory;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimator;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.RunnableRunnerController;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.StateEstimatorErrorCalculatorController;
 import us.ihmc.util.NonRealtimeThreadFactory;
@@ -71,7 +71,7 @@ public class DRCSimulationFactory
       double estimateDT = DRCConfigParameters.ESTIMATOR_DT;
       double simulateDT = robotInterface.getSimulateDT();
       double controlDT = controllerFactory.getControlDT();
-      StateEstimatorParameters stateEstimatorParameters = drcRobotModel.getStateEstimatorParameters(false);
+      StateEstimatorParameters stateEstimatorParameters = drcRobotModel.getStateEstimatorParameters(false, estimateDT);
       
       int estimationTicksPerControlTick = (int) (estimateDT / simulateDT);
 
@@ -147,11 +147,8 @@ public class DRCSimulationFactory
       }
       else
       {
-         double filterFreqHz = DRCConfigParameters.JOINT_VELOCITY_FILTER_FREQ_HZ;
-         double slopTime = DRCConfigParameters.JOINT_VELOCITY_SLOP_TIME_FOR_BACKLASH_COMPENSATION;
-
          SimulatedSensorHolderAndReaderFromRobotFactory simulatedSensorHolderAndReaderFromRobotFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(
-               simulatedRobot, sensorNoiseParameters, estimateDT, filterFreqHz, slopTime, imuMounts, wrenchProviders, registry);
+               simulatedRobot, sensorNoiseParameters, stateEstimatorParameters.getSensorFilterParameters(), imuMounts, wrenchProviders, registry);
          controller.addRobotController(new RunnableRunnerController(simulatedSensorHolderAndReaderFromRobotFactory.getSensorReader()));
          sensorReaderFactory = simulatedSensorHolderAndReaderFromRobotFactory;
       }
@@ -168,7 +165,7 @@ public class DRCSimulationFactory
       ThreadSynchronizer threadSynchronizer = new BlockingThreadSynchronizer();
 
       DRCController robotController = new DRCController(robotInterface.getFullRobotModelFactory(), controllerFactory, sensorReaderFactory, drcOutputWriter,
-            jointMap, lidarControllerInterface, gravity, estimateDT, controlDT, dataProducer, robotInterface.getTimeStampProvider(),
+            jointMap, lidarControllerInterface, gravity, controlDT, dataProducer, robotInterface.getTimeStampProvider(),
             dynamicGraphicObjectsListRegistry, guiSetterUpperRegistry, registry, null, threadFactory, threadSynchronizer, stateEstimatorParameters);
       robotController.initialize();
 
@@ -192,7 +189,7 @@ public class DRCSimulationFactory
          Joint estimationJoint = getEstimationJoint(simulatedRobot);
 
          StateEstimatorErrorCalculatorController stateEstimatorErrorCalculatorController = new StateEstimatorErrorCalculatorController(stateEstimator,
-               simulatedRobot, estimationJoint, stateEstimatorParameters.getAssumePerfectImu(), stateEstimatorParameters.getUseSimplePelvisPositionEstimator());
+               simulatedRobot, estimationJoint, stateEstimatorParameters.getAssumePerfectIMU(), stateEstimatorParameters.useKinematicsBasedStateEstimator());
          simulatedRobot.setController(stateEstimatorErrorCalculatorController, estimationTicksPerControlTick);
       }
 

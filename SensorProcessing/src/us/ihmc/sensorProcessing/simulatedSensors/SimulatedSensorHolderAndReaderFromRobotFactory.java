@@ -42,16 +42,16 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
    private Map<WrenchCalculatorInterface, ForceSensorDefinition> forceSensorDefinitions;
    private StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions;
    
-   
-   public SimulatedSensorHolderAndReaderFromRobotFactory(Robot robot, SensorNoiseParameters sensorNoiseParameters, double estimateDT,
-         double filterFreqHz, double slopTime, ArrayList<IMUMount> imuMounts, ArrayList<WrenchCalculatorInterface> groundContactPointBasedWrenchCalculators, YoVariableRegistry registry)
+   public SimulatedSensorHolderAndReaderFromRobotFactory(Robot robot, SensorNoiseParameters sensorNoiseParameters,
+         SensorFilterParameters sensorFilterParameters, ArrayList<IMUMount> imuMounts,
+         ArrayList<WrenchCalculatorInterface> groundContactPointBasedWrenchCalculators, YoVariableRegistry registry)
    {
       this.registry = registry;
       this.robot = robot;
       this.sensorNoiseParameters = sensorNoiseParameters;
-      this.simulatedSensorHolderAndReader = new SimulatedSensorHolderAndReader(estimateDT, filterFreqHz, slopTime, registry); 
+      this.simulatedSensorHolderAndReader = new SimulatedSensorHolderAndReader(sensorFilterParameters, registry); 
       
-      this.estimateDT = estimateDT;
+      this.estimateDT = sensorFilterParameters.getEstimatorDT();
       this.imuMounts = imuMounts;
       this.groundContactPointBasedWrenchCalculators = groundContactPointBasedWrenchCalculators;
 

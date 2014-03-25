@@ -13,6 +13,7 @@ import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.sensors.WrenchBasedFootSwitch;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.AngularVelocitySensorConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.LinearAccelerationSensorConfiguration;
@@ -128,10 +129,10 @@ public class PelvisLinearStateUpdater
    public PelvisLinearStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure,
          List<AngularVelocitySensorConfiguration> angularVelocitySensorConfigurations,
          List<LinearAccelerationSensorConfiguration> linearAccelerationSensorConfigurations, SideDependentList<WrenchBasedFootSwitch> footSwitches,
-         SideDependentList<ContactablePlaneBody> bipedFeet, double gravitationalAcceleration, DoubleYoVariable yoTime, final double estimatorDT,
+         SideDependentList<ContactablePlaneBody> bipedFeet, double gravitationalAcceleration, DoubleYoVariable yoTime, StateEstimatorParameters stateEstimatorParameters,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
    {      
-      this.estimatorDT = estimatorDT;
+      this.estimatorDT = stateEstimatorParameters.getEstimatorDT();
       this.footSwitches = footSwitches;
       this.bipedFeet = bipedFeet;
       
@@ -177,7 +178,7 @@ public class PelvisLinearStateUpdater
       kinematicsBasedLinearStateCalculator.setAlphaPelvisPosition(0.0);
       kinematicsBasedLinearStateCalculator.setAlphaPelvisLinearVelocity(computeAlphaGivenBreakFrequencyProperly(16.0, estimatorDT));
       kinematicsBasedLinearStateCalculator.setPelvisLinearVelocityBacklashParameters(computeAlphaGivenBreakFrequencyProperly(16.0, estimatorDT),
-            DRCConfigParameters.JOINT_VELOCITY_SLOP_TIME_FOR_BACKLASH_COMPENSATION);
+            stateEstimatorParameters.getSensorFilterParameters().getJointVelocitySlopTimeForBacklashCompensation());
       kinematicsBasedLinearStateCalculator.setAlphaCenterOfPressure(computeAlphaGivenBreakFrequencyProperly(4.0, estimatorDT));
 
       imuBasedLinearStateCalculator = new PelvisIMUBasedLinearStateCalculator(inverseDynamicsStructure, angularVelocitySensorConfigurations, linearAccelerationSensorConfigurations, estimatorDT, gravitationalAcceleration, registry);

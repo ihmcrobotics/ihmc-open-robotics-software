@@ -15,109 +15,121 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCSimDRCRobotInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.stateEstimation.StateEstimatorParameters;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 
-public class AtlasRobotModel implements DRCRobotModel {
+public class AtlasRobotModel implements DRCRobotModel
+{
+   private AtlasRobotVersion selectedVersion;
 
+   public AtlasRobotModel()
+   {
+      this(AtlasRobotVersion.DRC_NO_HANDS);
+   }
 
-	private AtlasRobotVersion selectedVersion;
-	
-	public AtlasRobotModel()
-	{
-		this(AtlasRobotVersion.DRC_NO_HANDS);
-	}
-	
-	public AtlasRobotModel(AtlasRobotVersion atlasVersion)
-	{
-		selectedVersion = atlasVersion;
-	}
-	
-	public ArmControllerParameters getArmControllerParameters() {
-		return new AtlasArmControllerParameters(DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT);
-	}
+   public AtlasRobotModel(AtlasRobotVersion atlasVersion)
+   {
+      selectedVersion = atlasVersion;
+   }
 
-	public WalkingControllerParameters getWalkingControlParamaters() {
-		return new AtlasWalkingControllerParameters();
-	}
+   public ArmControllerParameters getArmControllerParameters()
+   {
+      return new AtlasArmControllerParameters(DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT);
+   }
 
-	public StateEstimatorParameters getStateEstimatorParameters(
-			boolean runningOnRealRobot) {
-		return new AtlasStateEstimatorParameters(runningOnRealRobot);
-	}
+   public WalkingControllerParameters getWalkingControlParamaters()
+   {
+      return new AtlasWalkingControllerParameters();
+   }
 
-	public DRCRobotPhysicalProperties getPhysicalProperties() {
-		return new AtlasPhysicalProperties();
-	}
+   public StateEstimatorParameters getStateEstimatorParameters(boolean runningOnRealRobot, double estimatorDT)
+   {
+      return new AtlasStateEstimatorParameters(runningOnRealRobot, estimatorDT);
+   }
 
-	public DRCRobotJointMap getJointMap(boolean addLoadsOfContactPoints,
-			boolean addLoadsOfContactPointsToFeetOnly) {
-		return new AtlasJointMap(this, addLoadsOfContactPoints, addLoadsOfContactPointsToFeetOnly);
-	}
+   public DRCRobotPhysicalProperties getPhysicalProperties()
+   {
+      return new AtlasPhysicalProperties();
+   }
 
-	public boolean hasIRobotHands() {
-		return selectedVersion.getHandModel() == DRCHandModel.IROBOT;
-	}
+   public DRCRobotJointMap getJointMap(boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsToFeetOnly)
+   {
+      return new AtlasJointMap(this, addLoadsOfContactPoints, addLoadsOfContactPointsToFeetOnly);
+   }
 
-	public boolean hasArmExtensions() {
-		return selectedVersion.hasArmExtensions();
-	}
+   public boolean hasIRobotHands()
+   {
+      return selectedVersion.getHandModel() == DRCHandModel.IROBOT;
+   }
 
-	public boolean hasHookHands() {
-		return selectedVersion.getHandModel() == DRCHandModel.HOOK;
-	}
+   public boolean hasArmExtensions()
+   {
+      return selectedVersion.hasArmExtensions();
+   }
 
-	public DRCHandModel getHandModel() {
-		return selectedVersion.getHandModel();
-	}
+   public boolean hasHookHands()
+   {
+      return selectedVersion.getHandModel() == DRCHandModel.HOOK;
+   }
 
-	public String getModelName() {
-		return "atlas";
-	}
-	
-	public AtlasRobotVersion getAtlasVersion()
-	{
-		return selectedVersion;
-	}
+   public DRCHandModel getHandModel()
+   {
+      return selectedVersion.getHandModel();
+   }
 
-	@Override
-	public String getSdfFile() {
-		return selectedVersion.getSdfFile();
-	}
+   public String getModelName()
+   {
+      return "atlas";
+   }
 
-	@Override
-	public String[] getResourceDirectories() {
-		return selectedVersion.getResourceDirectories();
-	}
+   public AtlasRobotVersion getAtlasVersion()
+   {
+      return selectedVersion;
+   }
 
-	@Override
-	public InputStream getSdfFileAsStream() {
-		return selectedVersion.getSdfFileAsStream();
-	}
+   @Override
+   public String getSdfFile()
+   {
+      return selectedVersion.getSdfFile();
+   }
 
-	@Override
-	public Transform getOffsetHandFromWrist(RobotSide side) {
-		return selectedVersion.getOffsetFromWrist(side);
-	}
+   @Override
+   public String[] getResourceDirectories()
+   {
+      return selectedVersion.getResourceDirectories();
+   }
 
-	@Override
-	public RobotType getType() {
-		return RobotType.ATLAS;
-	}
-	
-	public String toString()
-	{
-		return selectedVersion.toString();
-	}
+   @Override
+   public InputStream getSdfFileAsStream()
+   {
+      return selectedVersion.getSdfFileAsStream();
+   }
 
-	
-	public DRCRobotInitialSetup<SDFRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw)
+   @Override
+   public Transform getOffsetHandFromWrist(RobotSide side)
+   {
+      return selectedVersion.getOffsetFromWrist(side);
+   }
+
+   @Override
+   public RobotType getType()
+   {
+      return RobotType.ATLAS;
+   }
+
+   public String toString()
+   {
+      return selectedVersion.toString();
+   }
+
+   public DRCRobotInitialSetup<SDFRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw)
    {
       return new DRCSimDRCRobotInitialSetup(groundHeight, initialYaw);
    }
 
-	@Override
-	public WalkingControllerParameters getMultiContactControllerParameters() {
-		return new AtlasRobotMultiContactControllerParameters();
-	}
+   @Override
+   public WalkingControllerParameters getMultiContactControllerParameters()
+   {
+      return new AtlasRobotMultiContactControllerParameters();
+   }
 }

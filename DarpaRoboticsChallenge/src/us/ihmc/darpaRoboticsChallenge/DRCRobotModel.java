@@ -11,8 +11,8 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.stateEstimation.StateEstimatorParameters;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 
 public interface DRCRobotModel
 {
@@ -23,7 +23,7 @@ public interface DRCRobotModel
    
    public ArmControllerParameters getArmControllerParameters();
    public WalkingControllerParameters getWalkingControlParamaters();
-   public StateEstimatorParameters getStateEstimatorParameters(boolean runningOnRealRobot);
+   public StateEstimatorParameters getStateEstimatorParameters(boolean runningOnRealRobot, double estimatorDT);
    public DRCRobotPhysicalProperties getPhysicalProperties();
    public DRCRobotJointMap getJointMap(boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsToFeetOnly);
    public boolean hasIRobotHands();

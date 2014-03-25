@@ -73,18 +73,18 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
    
    private ObjectObjectMap<OneDoFJoint, BacklashCompensatingVelocityYoVariable> finiteDifferenceVelocities;
    
-   public SimulatedSensorHolderAndReader(double estimateDT, double filterFreqHz, double slopTime, YoVariableRegistry parentRegistry)
+   public SimulatedSensorHolderAndReader(SensorFilterParameters sensorFilterParameters, YoVariableRegistry parentRegistry)
    {
-      this.estimatorDT = estimateDT;
-      this.estimateDTinNs = TimeTools.secondsToNanoSeconds(estimateDT);
+      this.estimatorDT = sensorFilterParameters.getEstimatorDT();
+      this.estimateDTinNs = TimeTools.secondsToNanoSeconds(estimatorDT);
       step.set(29831);
       
       useFiniteDifferencesForVelocities = new BooleanYoVariable("useFiniteDifferencesForVelocities", registry);
       alphaFiniteDifferences = new DoubleYoVariable("alphaFiniteDifferences", registry);
       slopTimeFiniteDifferences = new DoubleYoVariable("slopTimeFiniteDifferences", registry);
       
-      alphaFiniteDifferences.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filterFreqHz, estimateDT));
-      slopTimeFiniteDifferences.set(slopTime);
+      alphaFiniteDifferences.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(sensorFilterParameters.getJointVelocityFilterFrequencyInHertz(), estimatorDT));
+      slopTimeFiniteDifferences.set(sensorFilterParameters.getJointVelocitySlopTimeForBacklashCompensation());
       useFiniteDifferencesForVelocities.set(false);
       
       if(parentRegistry != null)
