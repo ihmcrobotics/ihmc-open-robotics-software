@@ -11,6 +11,7 @@ import javax.vecmath.Quat4d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.SimplePathParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.TurningThenStraightFootstepGenerator;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -23,7 +24,6 @@ import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FramePose2d;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.overheadPath.TurnThenStraightOverheadPath;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTestTools;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
@@ -175,10 +175,14 @@ public class FootstepGeneratorVisualizer
 
          bipedFeet.set(robotSide, contactableBody);
       }
+      
+      FramePose2d startPose = new FramePose2d(worldFrame, new Point2d(0.0, 0.0), Math.PI);
+      FramePoint2d endPoint = new FramePoint2d(worldFrame, new Point2d(0.0, -3.0));
 
-      TurnThenStraightOverheadPath footstepPath = generateSimpleOverheadPath();
+      SimplePathParameters pathType = new SimplePathParameters(0.4, 0.2, 0.0, Math.PI * 0.8, Math.PI * 0.15, 0.35);
 
-      TurningThenStraightFootstepGenerator generator = new TurningThenStraightFootstepGenerator(bipedFeet, footstepPath, RobotSide.LEFT);
+      TurningThenStraightFootstepGenerator generator = new TurningThenStraightFootstepGenerator(bipedFeet, startPose, endPoint,
+            pathType, RobotSide.LEFT);
       List<Footstep> footsteps = generator.generateDesiredFootstepList();
 
       return footsteps;
@@ -227,15 +231,6 @@ public class FootstepGeneratorVisualizer
       deleteFirstDataPointAndCropData(scs);
    }
 
-
-   public static TurnThenStraightOverheadPath generateSimpleOverheadPath()
-   {
-      FramePose2d startPoint = new FramePose2d(worldFrame, new Point2d(0.0, 0.0), Math.PI);
-      FramePoint2d endPoint = new FramePoint2d(worldFrame, new Point2d(0.0, -3.0));
-      TurnThenStraightOverheadPath footstepPath = new TurnThenStraightOverheadPath(startPoint, endPoint, 0.0);
-
-      return footstepPath;
-   }
 
    private static void deleteFirstDataPointAndCropData(SimulationConstructionSet scs)
    {

@@ -13,6 +13,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.SimplePathParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.TurningThenStraightFootstepGenerator;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScript;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.ManualDesiredVelocityControlModule;
@@ -30,7 +31,6 @@ import us.ihmc.utilities.math.geometry.FramePose2d;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.ZUpFrame;
-import us.ihmc.utilities.math.overheadPath.TurnThenStraightOverheadPath;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
@@ -289,15 +289,16 @@ public class DesiredFootstepVisualizer
 
       SideDependentList<? extends ContactablePlaneBody> bipedFeet = desiredFootstepVisualizer.getBipedFeet();
 
-      TurnThenStraightOverheadPath footstepPath = new TurnThenStraightOverheadPath(new FramePose2d(ReferenceFrame.getWorldFrame()),
-                                     new FramePoint2d(ReferenceFrame.getWorldFrame(), 10.0, 0.0), 0.0);
-
       RobotSide initialStanceSide = RobotSide.LEFT;
       RobotSide swingLegSide = initialStanceSide.getOppositeSide();
       
-      TurningThenStraightFootstepGenerator footstepGenerator = new TurningThenStraightFootstepGenerator(bipedFeet, footstepPath, initialStanceSide);
-      footstepGenerator.setStraightWalkingStepLength(0.2);
-      footstepGenerator.setStraightWalkingStepWidth(0.1);
+      SimplePathParameters pathType = new SimplePathParameters(0.2, 0.1, 0.0, Math.PI * 0.8, Math.PI * 0.15, 0.35); 
+
+      FramePose2d startPose = new FramePose2d(ReferenceFrame.getWorldFrame());
+      FramePoint2d endPoint = new FramePoint2d(ReferenceFrame.getWorldFrame(), 10.0, 0.0);
+
+      TurningThenStraightFootstepGenerator footstepGenerator = new TurningThenStraightFootstepGenerator(bipedFeet, startPose, endPoint,
+            pathType, initialStanceSide);
 
       List<Footstep> footsteps = footstepGenerator.generateDesiredFootstepList();
 
