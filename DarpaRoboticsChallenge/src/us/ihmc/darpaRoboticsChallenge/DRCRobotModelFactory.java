@@ -9,7 +9,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.darpaRoboticsChallenge.acsell.BonoRobotModel;
 import us.ihmc.darpaRoboticsChallenge.valkyrie.ValkyrieRobotModel;
 
 import com.martiansoftware.jsap.FlaggedOption;
@@ -35,10 +34,6 @@ public class DRCRobotModelFactory {
 			if(robotModelAsString.equals("VALKYRIE"))
 			{
 				return new ValkyrieRobotModel();
-			}
-			if(robotModelAsString.equals("BONO"))
-			{
-				return new BonoRobotModel();
 			}
 		}
 		throw new IllegalArgumentException(robotModelAsString + " Not a valid robot model");
