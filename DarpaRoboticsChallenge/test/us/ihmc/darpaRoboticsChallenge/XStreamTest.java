@@ -9,6 +9,7 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Random;
 
+import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.compression.Serializer;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.compression.SerializerFactory;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.compression.UplinkSerializerFactory;
@@ -97,8 +98,8 @@ public class XStreamTest
       
       XStream xStream = new XStream();
       ObjectOutputStream out = xStream.createObjectOutputStream(writer);
-      
-      SerializerFactory serializerFactory = new UplinkSerializerFactory();
+      //XXX: fix hard-coded robot model
+      SerializerFactory serializerFactory = new UplinkSerializerFactory(new AtlasRobotModel());
       ArrayList<Serializer<?>> serializers = serializerFactory.getSerializers();
       
       ArrayList<Object> serializedObjects = new ArrayList<Object>();
