@@ -10,7 +10,6 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.darpaRoboticsChallenge.sensors.WrenchBasedFootSwitch;
-import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCSimulatedSensorNoiseParameters;
 import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCStateEstimatorInterface;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
@@ -53,8 +52,6 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    private boolean visualize = false;
    private final ArrayList<DynamicGraphicReferenceFrame> dynamicGraphicMeasurementFrames = new ArrayList<>();
    
-   private final SensorNoiseParameters sensorNoiseParametersForEstimator = DRCSimulatedSensorNoiseParameters
-         .createNoiseParametersForEstimatorJerryTuningSeptember2013();
    
    public DRCKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, RigidBodyToIndexMap estimatorRigidBodyToIndexMap,
          StateEstimatorParameters stateEstimatorParameters, SensorReaderFactory sensorReaderFactory, double gravitationalAcceleration,
@@ -70,6 +67,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 
       jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, jointAndIMUSensorDataSource, registry);
 
+      SensorNoiseParameters sensorNoiseParametersForEstimator = stateEstimatorParameters.getSensorNoiseParameters();
       SensorConfigurationFactory sensorConfigurationFactory = new SensorConfigurationFactory(sensorNoiseParametersForEstimator, gravitationalAcceleration);
       
       List<OrientationSensorConfiguration> orientationSensorConfigurations = sensorConfigurationFactory.createOrientationSensorConfigurations(jointAndIMUSensorMap.getOrientationSensors());
