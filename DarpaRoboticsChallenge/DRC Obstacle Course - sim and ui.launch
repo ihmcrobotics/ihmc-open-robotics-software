@@ -25,7 +25,7 @@
 <listEntry value="1"/>
 </listAttribute>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="us.ihmc.darpaRoboticsChallenge.DRCDemo01"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="--ui --sim --env OBSTACLE_COURSE -m ATLAS_NO_HANDS_ADDED_MASS"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="--ui --sim -m ATLAS_NO_HANDS_ADDED_MASS"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="DarpaRoboticsChallenge"/>
 <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xms1024m -Xmx3000m"/>
 </launchConfiguration>

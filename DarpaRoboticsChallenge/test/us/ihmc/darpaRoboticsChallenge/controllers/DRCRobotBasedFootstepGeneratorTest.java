@@ -22,6 +22,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepGeneratorVisu
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepUtils;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepValidityMetric;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.SemiCircularStepValidityMetric;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.SimplePathParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.TurningThenStraightFootstepGenerator;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
@@ -36,7 +37,6 @@ import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.overheadPath.TurnThenStraightOverheadPath;
 
 import com.yobotics.simulationconstructionset.Robot;
 
@@ -90,9 +90,7 @@ public class DRCRobotBasedFootstepGeneratorTest
    private void testPathToDestination(Point3d destination)
    {
       setupRobotParameters();
-      TurnThenStraightOverheadPath pathToDestination = new TurnThenStraightOverheadPath(new FramePose2d(WORLD_FRAME),
-                                                          new FramePoint2d(WORLD_FRAME, destination.x, destination.y), SIDESTEP ? Math.PI / 2 : 0.0);
-      generateFootstepsUsingPath(pathToDestination);
+      generateFootsteps(new FramePose2d(WORLD_FRAME), new FramePoint2d(WORLD_FRAME, destination.x, destination.y), SIDESTEP ? Math.PI / 2 : 0.0);
       FootstepValidityMetric footstepValidityMetric = new SemiCircularStepValidityMetric(fullRobotModel.getFoot(RobotSide.LEFT), 0.00, 1.2, 1.5);
       assertAllStepsLevelAndZeroHeight();
       assertAllStepsValid(footstepValidityMetric);
@@ -103,13 +101,12 @@ public class DRCRobotBasedFootstepGeneratorTest
          ThreadTools.sleepForever();
    }
 
-   public void generateFootstepsUsingPath(TurnThenStraightOverheadPath pathToDestination)
+   private void generateFootsteps(FramePose2d startPose, FramePoint2d endPoint, double pathOrientation)
    {
-      TurningThenStraightFootstepGenerator footstepGenerator = new TurningThenStraightFootstepGenerator(bipedFeet, pathToDestination, RobotSide.RIGHT);
-      footstepGenerator.setTurningStepsHipOpeningStepAngle(Math.PI / 6);
-      footstepGenerator.setStraightWalkingStepLength(0.4);
-      footstepGenerator.setStraightWalkingStepWidth(0.2);
-      footstepGenerator.setTurningStepsStepWidth(0.35);
+      SimplePathParameters pathType = new SimplePathParameters(0.4, 0.2, pathOrientation, Math.PI / 6, Math.PI * 0.15, 0.35);
+
+      TurningThenStraightFootstepGenerator footstepGenerator = new TurningThenStraightFootstepGenerator(bipedFeet, startPose, endPoint, pathType,
+                                                                  RobotSide.RIGHT);
 
       footSteps = footstepGenerator.generateDesiredFootstepList();
    }
