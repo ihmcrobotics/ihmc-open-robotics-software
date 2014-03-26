@@ -17,7 +17,7 @@ public class ValkyrieTimingParameters
    
 
    // FQN of the turbodriver we use to test overall round trip time
-   public static final Class<?>[] timedTurbodrivers = { TurbodriverAPI_DRCv4.class, TurbodriverAPI_DRCv4_ihmc.class, TurbodriverAPI_DRCv4_bench.class};
+   public static final Class<?>[] timedTurbodrivers = {TurbodriverAPI_DRCv4_ihmc.class, TurbodriverAPI_DRCv4_bench.class};
    public static final String timingWriteName = "LoopbackWrite";
    public static final String timingReadName = "LoopbackRead";
    
