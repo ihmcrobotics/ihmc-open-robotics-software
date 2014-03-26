@@ -168,7 +168,7 @@ public class ValkyrieSliderBoard
                            sliderBoardConfigurationManager.setKnob(1, selectedJoint, 0,
                                    ValkyrieSliderBoardController.ValkyrieSliderBoardSelectableJoints.values().length - 1);
                            sliderBoardConfigurationManager.setKnob(3, turboName + "_lowLevelKp", registry, 0.0, 12.0);
-                           sliderBoardConfigurationManager.setKnob(4, turboName + "_lowLevelKd", registry, 0.0, 12.0);
+                           sliderBoardConfigurationManager.setKnob(4, turboName + "_lowLevelKd", registry, 0.0, 2.0);
                            sliderBoardConfigurationManager.setKnob(5, turboName + "_forceAlpha", registry, 0.0, 1.0);
                            sliderBoardConfigurationManager.setKnob(6, turboName + "_forceDotAlpha", registry, 0.0, 1.0);
                            sliderBoardConfigurationManager.setKnob(7, turboName + "_parallelDamping", registry, 0.0, 10.0);
@@ -199,7 +199,7 @@ public class ValkyrieSliderBoard
                                       ValkyrieSliderBoardController.ValkyrieSliderBoardSelectableJoints.values().length - 1);
                               sliderBoardConfigurationManager.setKnob(2, turboIndexMonitor, 0, 1);
                               sliderBoardConfigurationManager.setKnob(3, turboName + "_lowLevelKp", registry, 0.0, 12.0);
-                              sliderBoardConfigurationManager.setKnob(4, turboName + "_lowLevelKd", registry, 0.0, 12.0);
+                              sliderBoardConfigurationManager.setKnob(4, turboName + "_lowLevelKd", registry, 0.0, 2.0);
                               sliderBoardConfigurationManager.setKnob(5, turboName + "_forceAlpha", registry, 0.0, 1.0);
                               sliderBoardConfigurationManager.setKnob(6, turboName + "_forceDotAlpha", registry, 0.0, 1.0);
                               sliderBoardConfigurationManager.setKnob(7, turboName + "_parallelDamping", registry, 0.0, 10.0);
