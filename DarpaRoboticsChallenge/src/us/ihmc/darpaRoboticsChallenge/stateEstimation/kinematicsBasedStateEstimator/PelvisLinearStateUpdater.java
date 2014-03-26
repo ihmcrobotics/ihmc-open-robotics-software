@@ -114,6 +114,8 @@ public class PelvisLinearStateUpdater
    
    private final SixDoFJoint rootJoint;
    
+   private final StateEstimatorParameters stateEstimatorParameters;
+   
    // Temporary variables
    private final FramePoint rootJointPosition = new FramePoint(worldFrame);
    private final FrameVector rootJointVelocity = new FrameVector(worldFrame);
@@ -135,6 +137,7 @@ public class PelvisLinearStateUpdater
       this.estimatorDT = stateEstimatorParameters.getEstimatorDT();
       this.footSwitches = footSwitches;
       this.bipedFeet = bipedFeet;
+      this.stateEstimatorParameters = stateEstimatorParameters;
       
       twistCalculator = inverseDynamicsStructure.getTwistCalculator();
       rootJoint = inverseDynamicsStructure.getRootJoint();
@@ -175,34 +178,36 @@ public class PelvisLinearStateUpdater
       setupStateMachine();
       
       kinematicsBasedLinearStateCalculator = new PelvisKinematicsBasedLinearStateCalculator(inverseDynamicsStructure, bipedFeet, estimatorDT, dynamicGraphicObjectsListRegistry, registry);
-      kinematicsBasedLinearStateCalculator.setAlphaPelvisPosition(0.0);
-      kinematicsBasedLinearStateCalculator.setAlphaPelvisLinearVelocity(computeAlphaGivenBreakFrequencyProperly(16.0, estimatorDT));
-      kinematicsBasedLinearStateCalculator.setPelvisLinearVelocityBacklashParameters(computeAlphaGivenBreakFrequencyProperly(16.0, estimatorDT),
-            stateEstimatorParameters.getSensorFilterParameters().getJointVelocitySlopTimeForBacklashCompensation());
-      kinematicsBasedLinearStateCalculator.setAlphaCenterOfPressure(computeAlphaGivenBreakFrequencyProperly(4.0, estimatorDT));
+      kinematicsBasedLinearStateCalculator.setAlphaPelvisPosition(computeAlphaGivenBreakFrequencyProperly(stateEstimatorParameters.getKinematicsPelvisPositionFilterFreqInHertz(), estimatorDT));
+      double alphaFilter = computeAlphaGivenBreakFrequencyProperly(stateEstimatorParameters.getKinematicsPelvisLinearVelocityFilterFreqInHertz(), estimatorDT);
+      kinematicsBasedLinearStateCalculator.setAlphaPelvisLinearVelocity(alphaFilter);
+      kinematicsBasedLinearStateCalculator.setPelvisLinearVelocityBacklashParameters(alphaFilter, stateEstimatorParameters.getSensorFilterParameters()
+            .getJointVelocitySlopTimeForBacklashCompensation());
+      kinematicsBasedLinearStateCalculator.setAlphaCenterOfPressure(computeAlphaGivenBreakFrequencyProperly(stateEstimatorParameters.getCoPFilterFreqInHertz(), estimatorDT));
 
       imuBasedLinearStateCalculator = new PelvisIMUBasedLinearStateCalculator(inverseDynamicsStructure, angularVelocitySensorConfigurations, linearAccelerationSensorConfigurations, estimatorDT, gravitationalAcceleration, registry);
-      imuBasedLinearStateCalculator.enableEsimationModule(false);
-      imuBasedLinearStateCalculator.useHackishAccelerationIntegration(true);
-      imuBasedLinearStateCalculator.setAlhaGravityEstimation(computeAlphaGivenBreakFrequencyProperly(5.3052e-4, estimatorDT));
+      imuBasedLinearStateCalculator.enableEsimationModule(stateEstimatorParameters.useAccelerometerForEstimation());
+      imuBasedLinearStateCalculator.useHackishAccelerationIntegration(stateEstimatorParameters.useHackishAccelerationIntegration());
+      imuBasedLinearStateCalculator.enableGravityEstimation(stateEstimatorParameters.estimateGravity());
+      imuBasedLinearStateCalculator.setAlhaGravityEstimation(computeAlphaGivenBreakFrequencyProperly(stateEstimatorParameters.getGravityFilterFreqInHertz(), estimatorDT));
 
-      alphaIMUAgainstKinematicsForVelocity.set(computeAlphaGivenBreakFrequencyProperly(0.4261, estimatorDT)); // alpha = 0.992 with dt = 0.003
-      alphaIMUAgainstKinematicsForPosition.set(computeAlphaGivenBreakFrequencyProperly(11.7893, estimatorDT)); // alpha = 0.8 with dt = 0.003
+      alphaIMUAgainstKinematicsForVelocity.set(computeAlphaGivenBreakFrequencyProperly(stateEstimatorParameters.getPelvisLinearVelocityFusingFrequency(), estimatorDT));
+      alphaIMUAgainstKinematicsForPosition.set(computeAlphaGivenBreakFrequencyProperly(stateEstimatorParameters.getPelvisPositionFusingFrequency(), estimatorDT));
 
-      delayTimeBeforeTrustingFoot.set(0.02);
+      delayTimeBeforeTrustingFoot.set(stateEstimatorParameters.getDelayTimeForTrustingFoot());
 
-      footVelocityThreshold.set(Double.MAX_VALUE); // 0.01);
+      footVelocityThreshold.set(Double.MAX_VALUE);
 
-      forceZInPercentThresholdToFilterFoot.set(0.3); 
+      forceZInPercentThresholdToFilterFoot.set(stateEstimatorParameters.getForceInPercentOfWeightThresholdToTrustFoot()); 
       
       slippageCompensatorMode.set(SlippageCompensatorMode.LOAD_THRESHOLD);
 
       imuDriftCompensator = new IMUDriftCompensator(footFrames, inverseDynamicsStructure, estimatorDT, registry);
       imuDriftCompensator.activateEstimation(false);
       imuDriftCompensator.activateCompensation(false);
-      imuDriftCompensator.setAlphaIMUDrift(computeAlphaGivenBreakFrequencyProperly(0.5332, estimatorDT));
-      imuDriftCompensator.setAlphaFootAngularVelocity(computeAlphaGivenBreakFrequencyProperly(0.5332, estimatorDT));
-      imuDriftCompensator.setFootAngularVelocityThreshold(0.03);
+      imuDriftCompensator.setAlphaIMUDrift(computeAlphaGivenBreakFrequencyProperly(stateEstimatorParameters.getIMUDriftFilterFreqInHertz(), estimatorDT));
+      imuDriftCompensator.setAlphaFootAngularVelocity(computeAlphaGivenBreakFrequencyProperly(stateEstimatorParameters.getFootVelocityUsedForImuDriftFilterFreqInHertz(), estimatorDT));
+      imuDriftCompensator.setFootAngularVelocityThreshold(stateEstimatorParameters.getFootVelocityThresholdToEnableIMUDriftCompensation());
       
       parentRegistry.addChild(registry);
    }
@@ -242,12 +247,14 @@ public class PelvisLinearStateUpdater
 
    public void startIMUDriftEstimation()
    {
-      imuDriftCompensator.activateEstimation(true);
+      if (stateEstimatorParameters.estimateIMUDrift())
+         imuDriftCompensator.activateEstimation(true);
    }
    
    public void startIMUDriftCompensation()
    {
-      imuDriftCompensator.activateCompensation(true);
+      if (stateEstimatorParameters.compensateIMUDrift())
+         imuDriftCompensator.activateCompensation(true);
    }
    
    public void initialize()

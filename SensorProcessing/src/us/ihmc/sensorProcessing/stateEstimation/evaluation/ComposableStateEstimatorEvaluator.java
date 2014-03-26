@@ -151,6 +151,86 @@ public class ComposableStateEstimatorEvaluator
          {
             return assumePerfectIMU;
          }
+
+         public double getKinematicsPelvisPositionFilterFreqInHertz()
+         {
+            return 0;
+         }
+
+         public double getKinematicsPelvisLinearVelocityFilterFreqInHertz()
+         {
+            return 0;
+         }
+
+         public double getCoPFilterFreqInHertz()
+         {
+            return 0;
+         }
+
+         public boolean useAccelerometerForEstimation()
+         {
+            return false;
+         }
+
+         public boolean useHackishAccelerationIntegration()
+         {
+            return false;
+         }
+
+         public boolean estimateGravity()
+         {
+            return false;
+         }
+
+         public double getGravityFilterFreqInHertz()
+         {
+            return 0;
+         }
+
+         public double getPelvisPositionFusingFrequency()
+         {
+            return 0;
+         }
+
+         public double getPelvisLinearVelocityFusingFrequency()
+         {
+            return 0;
+         }
+
+         public double getDelayTimeForTrustingFoot()
+         {
+            return 0;
+         }
+
+         public double getForceInPercentOfWeightThresholdToTrustFoot()
+         {
+            return 0;
+         }
+
+         public boolean estimateIMUDrift()
+         {
+            return false;
+         }
+
+         public boolean compensateIMUDrift()
+         {
+            return false;
+         }
+
+         public double getIMUDriftFilterFreqInHertz()
+         {
+            return 0;
+         }
+
+         public double getFootVelocityUsedForImuDriftFilterFreqInHertz()
+         {
+            return 0;
+         }
+
+         public double getFootVelocityThresholdToEnableIMUDriftCompensation()
+         {
+            return 0;
+         }
       };
       
       SensorAndEstimatorAssembler sensorAndEstimatorAssembler = new SensorAndEstimatorAssembler(stateEstimatorDataFromControllerSource,

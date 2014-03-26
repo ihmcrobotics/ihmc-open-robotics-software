@@ -18,4 +18,36 @@ public interface StateEstimatorParameters
    public abstract SensorNoiseParameters getSensorNoiseParameters();
 
    public abstract double getEstimatorDT();
+   
+   // Parameters related to the kinematics based state estimator
+   public abstract double getKinematicsPelvisPositionFilterFreqInHertz();
+   public abstract double getKinematicsPelvisLinearVelocityFilterFreqInHertz();
+
+   public abstract double getCoPFilterFreqInHertz();
+   
+   public abstract boolean useAccelerometerForEstimation();
+   
+   @Deprecated
+   public abstract boolean useHackishAccelerationIntegration();
+   
+   public abstract boolean estimateGravity();
+   
+   public abstract double getGravityFilterFreqInHertz();
+
+   public abstract double getPelvisPositionFusingFrequency();
+   public abstract double getPelvisLinearVelocityFusingFrequency();
+   
+   public abstract double getDelayTimeForTrustingFoot();
+   
+   public abstract double getForceInPercentOfWeightThresholdToTrustFoot();
+   
+   public abstract boolean estimateIMUDrift();
+
+   public abstract boolean compensateIMUDrift();
+   
+   public abstract double getIMUDriftFilterFreqInHertz();
+   
+   public abstract double getFootVelocityUsedForImuDriftFilterFreqInHertz();
+   
+   public abstract double getFootVelocityThresholdToEnableIMUDriftCompensation();
 }

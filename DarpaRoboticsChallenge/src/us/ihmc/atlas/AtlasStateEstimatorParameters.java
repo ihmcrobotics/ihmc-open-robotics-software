@@ -117,4 +117,100 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
    {
       return runningOnRealRobot;
    }
+
+   @Override
+   public double getKinematicsPelvisPositionFilterFreqInHertz()
+   {
+      return Double.POSITIVE_INFINITY;
+   }
+
+   @Override
+   public double getKinematicsPelvisLinearVelocityFilterFreqInHertz()
+   {
+      return 16.0;
+   }
+
+   @Override
+   public double getCoPFilterFreqInHertz()
+   {
+      return 4.0;
+   }
+
+   @Override
+   public boolean useAccelerometerForEstimation()
+   {
+      return true;
+   }
+
+   @Override
+   public boolean useHackishAccelerationIntegration()
+   {
+      return true;
+   }
+
+   @Override
+   public boolean estimateGravity()
+   {
+      return true;
+   }
+
+   @Override
+   public double getGravityFilterFreqInHertz()
+   {
+      return 5.3052e-4;
+   }
+
+   @Override
+   public double getPelvisPositionFusingFrequency()
+   {
+      return 11.7893; // alpha = 0.8 with dt = 0.003
+   }
+
+   @Override
+   public double getPelvisLinearVelocityFusingFrequency()
+   {
+      return 0.4261; // alpha = 0.992 with dt = 0.003
+   }
+
+   @Override
+   public double getDelayTimeForTrustingFoot()
+   {
+      return 0.02;
+   }
+
+   @Override
+   public double getForceInPercentOfWeightThresholdToTrustFoot()
+   {
+      return 0.3;
+   }
+
+   @Override
+   public boolean estimateIMUDrift()
+   {
+      return false;
+   }
+
+   @Override
+   public boolean compensateIMUDrift()
+   {
+      return false;
+   }
+
+   @Override
+   public double getIMUDriftFilterFreqInHertz()
+   {
+      return 0.5332;
+   }
+
+   @Override
+   public double getFootVelocityUsedForImuDriftFilterFreqInHertz()
+   {
+      return 0.5332;
+   }
+
+   @Override
+   public double getFootVelocityThresholdToEnableIMUDriftCompensation()
+   {
+      return 0.03;
+   }
 }
