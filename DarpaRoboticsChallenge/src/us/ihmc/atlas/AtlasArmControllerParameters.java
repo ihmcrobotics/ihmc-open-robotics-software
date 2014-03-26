@@ -100,5 +100,4 @@ public class AtlasArmControllerParameters implements ArmControllerParameters
    {
       return runningOnRealRobot && DRCConfigParameters.USE_LOW_LEVEL_POSITION_CONTROL_FOR_HANDS;
    }
-
 }

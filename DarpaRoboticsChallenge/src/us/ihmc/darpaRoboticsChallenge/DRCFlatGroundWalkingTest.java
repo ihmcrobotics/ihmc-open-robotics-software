@@ -10,9 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.atlas.AtlasArmControllerParameters;
 import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.atlas.AtlasWalkingControllerParameters;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
@@ -21,11 +19,9 @@ import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.PlainDRCRobot;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.SquaredUpDRCRobotInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.valkyrie.ValkyrieArmControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.valkyrie.ValkyrieInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.valkyrie.ValkyrieRobotInterface;
 import us.ihmc.darpaRoboticsChallenge.valkyrie.ValkyrieRobotModel;
-import us.ihmc.darpaRoboticsChallenge.valkyrie.ValkyrieWalkingControllerParameters;
 import us.ihmc.graphics3DAdapter.GroundProfile;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.utilities.AsyncContinuousExecutor;
@@ -115,9 +111,9 @@ public class DRCFlatGroundWalkingTest
       DRCRobotInterface robotInterface = new PlainDRCRobot(robotModel, false, useLoadOfContactPointsForTheFeet);
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = new SquaredUpDRCRobotInitialSetup(0.0);
 
-      WalkingControllerParameters drcControlParameters = new AtlasWalkingControllerParameters();
-      ArmControllerParameters armControllerParameters = new AtlasArmControllerParameters();
-      DRCFlatGroundWalkingTrack track = setupFlatGroundSimulationTrack(drcControlParameters, armControllerParameters, robotInterface, robotInitialSetup, robotModel);
+      WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControlParamaters();
+      ArmControllerParameters armControllerParameters = robotModel.getArmControllerParameters();
+      DRCFlatGroundWalkingTrack track = setupFlatGroundSimulationTrack(walkingControllerParameters, armControllerParameters, robotInterface, robotInitialSetup, robotModel);
 
       drcController = track.getDrcController();
       SimulationConstructionSet scs = track.getSimulationConstructionSet();
@@ -180,8 +176,8 @@ public class DRCFlatGroundWalkingTest
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = new ValkyrieInitialSetup(0.0, 0.0);
       DRCRobotInterface robotInterface = new ValkyrieRobotInterface();
       
-      WalkingControllerParameters walkingControllerParameters = new ValkyrieWalkingControllerParameters();
-      ArmControllerParameters armControllerParameters = new ValkyrieArmControllerParameters();
+      WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControlParamaters();
+      ArmControllerParameters armControllerParameters = robotModel.getArmControllerParameters();
       DRCFlatGroundWalkingTrack track = setupFlatGroundSimulationTrack(walkingControllerParameters, armControllerParameters, robotInterface, robotInitialSetup, robotModel);
 
       drcController = track.getDrcController();

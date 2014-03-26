@@ -23,7 +23,7 @@ public interface DRCRobotModel
    
    public ArmControllerParameters getArmControllerParameters();
    public WalkingControllerParameters getWalkingControlParamaters();
-   public StateEstimatorParameters getStateEstimatorParameters(boolean runningOnRealRobot, double estimatorDT);
+   public StateEstimatorParameters getStateEstimatorParameters(double estimatorDT);
    public DRCRobotPhysicalProperties getPhysicalProperties();
    public DRCRobotJointMap getJointMap(boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsToFeetOnly);
    public boolean hasIRobotHands();
