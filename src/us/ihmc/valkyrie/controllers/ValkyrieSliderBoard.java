@@ -136,59 +136,37 @@ public class ValkyrieSliderBoard
             if (i.getType().equals("JointToActuatorStateInterface"))
             {
                ArrayList<String> turbos = new ArrayList<>();
-
+               boolean isForearm = false;
                for (Interface.Actuator a : i.getActuators())
                {
-                  turbos.add(a.getName());
+                  if(a.getName().toLowerCase().contains("forearm"))
+                  {
+                     isForearm = true;
+                  }
+                  else
+                  {
+                     turbos.add(a.getName().replace("/", "_"));
+                  }
                }
 
                for (Interface.Joint j : i.getJoints())
                {
-                  String jointName = j.getName();
-                  String pdControllerBaseName = jointName + "ValkyrieJointTorqueControlTuner";
-
-                  if (!jointName.contains("Ibeo"))
+                  if (!isForearm)
                   {
-                     if (isTunableRotaryJoint(jointName))
+                     String jointName = j.getName();
+                     String pdControllerBaseName = jointName + "ValkyrieJointTorqueControlTuner";
+
+                     if (!jointName.contains("Ibeo"))
                      {
-                        assert turbos.size() == 1;
-
-                        String turboName = turbos.get(0);
-
-                        // knobs
-                        sliderBoardConfigurationManager.setKnob(1, selectedJoint, 0,
-                                ValkyrieSliderBoardController.ValkyrieSliderBoardSelectableJoints.values().length - 1);
-                        sliderBoardConfigurationManager.setKnob(3, turboName + "_lowLevelKp", registry, 0.0, 12.0);
-                        sliderBoardConfigurationManager.setKnob(4, turboName + "_lowLevelKd", registry, 0.0, 12.0);
-                        sliderBoardConfigurationManager.setKnob(5, turboName + "_forceAlpha", registry, 0.0, 1.0);
-                        sliderBoardConfigurationManager.setKnob(6, turboName + "_forceDotAlpha", registry, 0.0, 1.0);
-                        sliderBoardConfigurationManager.setKnob(7, turboName + "_parallelDamping", registry, 0.0, 10.0);
-
-                        // sliders
-                        sliderBoardConfigurationManager.setSlider(1, pdControllerBaseName + "_q_d", registry,
-                                generalizedSDFRobotModel.getJointHolder(jointName).getLowerLimit(),
-                                generalizedSDFRobotModel.getJointHolder(jointName).getUpperLimit());
-                        sliderBoardConfigurationManager.setSlider(2, "kp_" + pdControllerBaseName, registry, 0.0, 2000.0);
-                        sliderBoardConfigurationManager.setSlider(3, "kd_" + pdControllerBaseName, registry, 0.0, 600.0);
-                        sliderBoardConfigurationManager.setSlider(4, pdControllerBaseName + "_transitionFactor", registry, 0.0, 1.0);
-                        sliderBoardConfigurationManager.setSlider(5, pdControllerBaseName + "_tauDesired", registry, 0.0, 100.0);
-
-                        sliderBoardConfigurationManager.saveConfiguration(jointName);
-                        sliderBoardConfigurationManager.clearControls();
-                     }
-                     else if (isTunableLinearActuatorJoint(jointName))
-                     {
-                        assert turbos.size() == 2;
-                        IntegerYoVariable turboIndexMonitor = new IntegerYoVariable(jointName + "_turboIndexMonitor", registry);
-
-                        for (int count = 0; count < turbos.size(); count++)
+                        if (isTunableRotaryJoint(jointName))
                         {
-                           String turboName = turbos.get(count);
+                           assert turbos.size() == 1;
+
+                           String turboName = turbos.get(0);
 
                            // knobs
                            sliderBoardConfigurationManager.setKnob(1, selectedJoint, 0,
                                    ValkyrieSliderBoardController.ValkyrieSliderBoardSelectableJoints.values().length - 1);
-                           sliderBoardConfigurationManager.setKnob(2, turboIndexMonitor, 0, 1);
                            sliderBoardConfigurationManager.setKnob(3, turboName + "_lowLevelKp", registry, 0.0, 12.0);
                            sliderBoardConfigurationManager.setKnob(4, turboName + "_lowLevelKd", registry, 0.0, 12.0);
                            sliderBoardConfigurationManager.setKnob(5, turboName + "_forceAlpha", registry, 0.0, 1.0);
@@ -204,36 +182,68 @@ public class ValkyrieSliderBoard
                            sliderBoardConfigurationManager.setSlider(4, pdControllerBaseName + "_transitionFactor", registry, 0.0, 1.0);
                            sliderBoardConfigurationManager.setSlider(5, pdControllerBaseName + "_tauDesired", registry, 0.0, 100.0);
 
-                           sliderBoardConfigurationManager.saveConfiguration(jointName + count);
+                           sliderBoardConfigurationManager.saveConfiguration(jointName);
                            sliderBoardConfigurationManager.clearControls();
                         }
-
-                        storedTurboIndex.put(jointName, turboIndexMonitor);
-
-                        turboIndexMonitor.addVariableChangedListener(new VariableChangedListener()
+                        else if (isTunableLinearActuatorJoint(jointName))
                         {
-                           @Override
-                           public void variableChanged(YoVariable v)
+                           assert turbos.size() == 2;
+                           IntegerYoVariable turboIndexMonitor = new IntegerYoVariable(jointName + "_turboIndexMonitor", registry);
+
+                           for (int count = 0; count < turbos.size(); count++)
                            {
-                              if (isTunableRotaryJoint(selectedJoint.getEnumValue().toString()))
-                              {
-                                 System.out.println("loading configuration " + selectedJoint.getEnumValue());
-                                 sliderBoardConfigurationManager.loadConfiguration(selectedJoint.getEnumValue().toString());
-                              }
+                              String turboName = turbos.get(count);
 
-                              if (isTunableLinearActuatorJoint(selectedJoint.getEnumValue().toString()))
-                              {
-                                 int storedIndex = storedTurboIndex.get(selectedJoint.getEnumType().toString()).getIntegerValue();
-                                 System.out.println("loading configuration " + selectedJoint.getEnumValue() + " " + storedIndex);
-                                 sliderBoardConfigurationManager.loadConfiguration(selectedJoint.getEnumValue().toString() + storedIndex);
-                              }
+                              // knobs
+                              sliderBoardConfigurationManager.setKnob(1, selectedJoint, 0,
+                                      ValkyrieSliderBoardController.ValkyrieSliderBoardSelectableJoints.values().length - 1);
+                              sliderBoardConfigurationManager.setKnob(2, turboIndexMonitor, 0, 1);
+                              sliderBoardConfigurationManager.setKnob(3, turboName + "_lowLevelKp", registry, 0.0, 12.0);
+                              sliderBoardConfigurationManager.setKnob(4, turboName + "_lowLevelKd", registry, 0.0, 12.0);
+                              sliderBoardConfigurationManager.setKnob(5, turboName + "_forceAlpha", registry, 0.0, 1.0);
+                              sliderBoardConfigurationManager.setKnob(6, turboName + "_forceDotAlpha", registry, 0.0, 1.0);
+                              sliderBoardConfigurationManager.setKnob(7, turboName + "_parallelDamping", registry, 0.0, 10.0);
 
-                              if (remoteSelectedJoint != null)
-                              {
-                                 remoteSelectedJoint.set(selectedJoint.getEnumValue());
-                              }
+                              // sliders
+                              sliderBoardConfigurationManager.setSlider(1, pdControllerBaseName + "_q_d", registry,
+                                      generalizedSDFRobotModel.getJointHolder(jointName).getLowerLimit(),
+                                      generalizedSDFRobotModel.getJointHolder(jointName).getUpperLimit());
+                              sliderBoardConfigurationManager.setSlider(2, "kp_" + pdControllerBaseName, registry, 0.0, 2000.0);
+                              sliderBoardConfigurationManager.setSlider(3, "kd_" + pdControllerBaseName, registry, 0.0, 600.0);
+                              sliderBoardConfigurationManager.setSlider(4, pdControllerBaseName + "_transitionFactor", registry, 0.0, 1.0);
+                              sliderBoardConfigurationManager.setSlider(5, pdControllerBaseName + "_tauDesired", registry, 0.0, 100.0);
+
+                              sliderBoardConfigurationManager.saveConfiguration(jointName + count);
+                              sliderBoardConfigurationManager.clearControls();
                            }
-                        });
+
+                           storedTurboIndex.put(jointName, turboIndexMonitor);
+
+                           turboIndexMonitor.addVariableChangedListener(new VariableChangedListener()
+                           {
+                              @Override
+                              public void variableChanged(YoVariable v)
+                              {
+                                 if (isTunableRotaryJoint(selectedJoint.getEnumValue().toString()))
+                                 {
+                                    System.out.println("loading configuration " + selectedJoint.getEnumValue());
+                                    sliderBoardConfigurationManager.loadConfiguration(selectedJoint.getEnumValue().toString());
+                                 }
+
+                                 if (isTunableLinearActuatorJoint(selectedJoint.getEnumValue().toString()))
+                                 {
+                                    int storedIndex = storedTurboIndex.get(selectedJoint.getEnumType().toString()).getIntegerValue();
+                                    System.out.println("loading configuration " + selectedJoint.getEnumValue() + " " + storedIndex);
+                                    sliderBoardConfigurationManager.loadConfiguration(selectedJoint.getEnumValue().toString() + storedIndex);
+                                 }
+
+                                 if (remoteSelectedJoint != null)
+                                 {
+                                    remoteSelectedJoint.set(selectedJoint.getEnumValue());
+                                 }
+                              }
+                           });
+                        }
                      }
                   }
                }
