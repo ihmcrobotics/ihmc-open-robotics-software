@@ -52,10 +52,10 @@ public class HandPoseCalcaulatorFromArmJointAngles
    public FramePose getHandPoseInChestFrame(ArmJointAnglePacket armJointAnglePacket, Transform3D wristToHandTansform)
    {
       RobotSide robotSide = armJointAnglePacket.getRobotSide();
-
+      int i = -1;
       for(ArmJointName jointName : jointMap.getArmJointNames())
       {
-    	  oneDoFJoints.get(robotSide).get(jointName).setQ(armJointAnglePacket.getJointAngles().get(jointName));
+    	  oneDoFJoints.get(robotSide).get(jointName).setQ(armJointAnglePacket.getJointAngles()[++i]);
       }
 
       ReferenceFrame targetBody = fullRobotModel.getHand(robotSide).getParentJoint().getFrameAfterJoint();
