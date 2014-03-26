@@ -20,21 +20,33 @@ public class BonoRobotModel implements DRCRobotModel
 
    private static Class<BonoRobotModel> thisClass = BonoRobotModel.class;
    private static String[] resourceDirectories;
+   
+   private final boolean runningOnRealRobot;
+   
+   public BonoRobotModel()
+   {
+      this(false);
+   }
+   
+   public BonoRobotModel(boolean runningOnRealRobot)
+   {
+     this.runningOnRealRobot = runningOnRealRobot;
+   }
 
    @Override
    public ArmControllerParameters getArmControllerParameters()
    {
-      return new ACSELLArmControlParameters();
+      return new ACSELLArmControlParameters(runningOnRealRobot);
    }
 
    @Override
    public WalkingControllerParameters getWalkingControlParamaters()
    {
-      return new ACSELLWalkingControllerParameters();
+      return new ACSELLWalkingControllerParameters(runningOnRealRobot);
    }
 
    @Override
-   public StateEstimatorParameters getStateEstimatorParameters(boolean runningOnRealRobot, double estimatorDT)
+   public StateEstimatorParameters getStateEstimatorParameters(double estimatorDT)
    {
       return new ACSELLStateEstimatorParameters(runningOnRealRobot, estimatorDT);
    }
