@@ -1,10 +1,24 @@
 package us.ihmc.acsell;
 
+import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
+
 /**
  * Created by dstephen on 2/14/14.
  */
-public class ACSELLArmControlParameters implements us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters
+public class ACSELLArmControlParameters implements ArmControllerParameters
 {
+   private final boolean runningOnRealRobot;
+   
+   public ACSELLArmControlParameters()
+   {
+      this(false);
+   }
+   
+   public ACSELLArmControlParameters(boolean runningOnRealRobot)
+   {
+      this.runningOnRealRobot = runningOnRealRobot;
+   }
+   
    @Override
    public double getArmJointspaceKp()
    {

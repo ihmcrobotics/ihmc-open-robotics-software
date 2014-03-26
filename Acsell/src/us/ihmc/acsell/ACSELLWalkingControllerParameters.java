@@ -7,7 +7,6 @@ import javax.media.j3d.Transform3D;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
-import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -21,9 +20,17 @@ public class ACSELLWalkingControllerParameters implements WalkingControllerParam
    private final SideDependentList<Transform3D> handControlFramesWithRespectToFrameAfterWrist = new SideDependentList<>();
    private final SideDependentList<Transform3D> handPosesWithRespectToChestFrame = new SideDependentList<>();
 
+   private final boolean runningOnRealRobot;
+   
    public ACSELLWalkingControllerParameters()
    {
-
+      this(false);
+   }
+   
+   public ACSELLWalkingControllerParameters(boolean runningOnRealRobot)
+   {
+      this.runningOnRealRobot = runningOnRealRobot;
+      
       for(RobotSide robotSide : RobotSide.values())
       {
          handControlFramesWithRespectToFrameAfterWrist.put(robotSide, new Transform3D());
