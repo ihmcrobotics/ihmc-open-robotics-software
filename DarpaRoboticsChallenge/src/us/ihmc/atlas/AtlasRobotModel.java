@@ -2,13 +2,10 @@ package us.ihmc.atlas;
 
 import java.io.InputStream;
 
-import com.jme3.math.Transform;
-
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.AtlasRobotVersion;
-import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
@@ -18,9 +15,13 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCSimDRCRobotInitialSetup;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 
+import com.jme3.math.Transform;
+
 public class AtlasRobotModel implements DRCRobotModel
 {
-   private AtlasRobotVersion selectedVersion;
+   private final AtlasRobotVersion selectedVersion;
+   
+   private final boolean runningOnRealRobot;
 
    public AtlasRobotModel()
    {
@@ -29,20 +30,27 @@ public class AtlasRobotModel implements DRCRobotModel
 
    public AtlasRobotModel(AtlasRobotVersion atlasVersion)
    {
+      this(atlasVersion, false);
+   }
+
+   public AtlasRobotModel(AtlasRobotVersion atlasVersion, boolean runningOnRealRobot)
+   {
       selectedVersion = atlasVersion;
+      
+      this.runningOnRealRobot = runningOnRealRobot;
    }
 
    public ArmControllerParameters getArmControllerParameters()
    {
-      return new AtlasArmControllerParameters(DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT);
+      return new AtlasArmControllerParameters(runningOnRealRobot);
    }
 
    public WalkingControllerParameters getWalkingControlParamaters()
    {
-      return new AtlasWalkingControllerParameters();
+      return new AtlasWalkingControllerParameters(runningOnRealRobot);
    }
 
-   public StateEstimatorParameters getStateEstimatorParameters(boolean runningOnRealRobot, double estimatorDT)
+   public StateEstimatorParameters getStateEstimatorParameters(double estimatorDT)
    {
       return new AtlasStateEstimatorParameters(runningOnRealRobot, estimatorDT);
    }

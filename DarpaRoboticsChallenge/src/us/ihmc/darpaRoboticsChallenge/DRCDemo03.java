@@ -1,10 +1,8 @@
 package us.ihmc.darpaRoboticsChallenge;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.atlas.AtlasArmControllerParameters;
 import us.ihmc.atlas.AtlasDrivingControllerParameters;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
@@ -64,7 +62,7 @@ public class DRCDemo03
       GlobalDataProducer dataProducer = new GlobalDataProducer(drcNetworkProcessorServer);
 
       WalkingControllerParameters drivingControllerParameters = new AtlasDrivingControllerParameters();
-      ArmControllerParameters armControllerParameters = new AtlasArmControllerParameters();
+      ArmControllerParameters armControllerParameters = robotModel.getArmControllerParameters();
 //      DRCRobotJointMap jointMap = robotInterface.getJointMap();
       HighLevelState initialBehavior = HighLevelState.DRIVING;
       FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulation(drivingControllerParameters);
