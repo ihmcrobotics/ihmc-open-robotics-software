@@ -72,8 +72,8 @@ public class InverseDynamicsJointController extends State<HighLevelState>
    private final SpatialAccelerationVector desiredRootJointAcceleration;
    private final FrameVector desiredVerticalAccelerationVector = new FrameVector();
 
-   private final DoubleYoVariable allJointGains = new DoubleYoVariable("gravityComp_allJointGains", registry);
-   private final DoubleYoVariable allJointZetas = new DoubleYoVariable("gravityComp_allJointZetas", registry);
+   private final DoubleYoVariable allJointGains = new DoubleYoVariable(CONTROLLER_PREFIX + "allJointGains", registry);
+   private final DoubleYoVariable allJointZetas = new DoubleYoVariable(CONTROLLER_PREFIX + "allJointZetas", registry);
    
    private final LinkedHashMap<RevoluteJoint, PDController> pdControllers = new LinkedHashMap<>();
    private final LinkedHashMap<RevoluteJoint, DoubleYoVariable> desiredJointPositions = new LinkedHashMap<>();
@@ -81,8 +81,8 @@ public class InverseDynamicsJointController extends State<HighLevelState>
 
    private final LinkedHashMap<RevoluteJoint, DoubleYoVariable> individualJointGainScalingMap = new LinkedHashMap<>();
    
-   private final DoubleYoVariable gainScaling = new DoubleYoVariable("gravityComp_gainScaling", registry);
-   private final DoubleYoVariable footForceScaling = new DoubleYoVariable("gravityComp_footForceScaling", registry);
+   private final DoubleYoVariable gainScaling = new DoubleYoVariable(CONTROLLER_PREFIX + "gainScaling", registry);
+   private final DoubleYoVariable footForceScaling = new DoubleYoVariable(CONTROLLER_PREFIX + "footForceScaling", registry);
    
    public InverseDynamicsJointController(FullRobotModel fullRobotModel, TwistCalculator twistCalculator, double gravityZ)
    {
@@ -346,7 +346,7 @@ public class InverseDynamicsJointController extends State<HighLevelState>
          final SliderBoardConfigurationManager sliderBoardConfigurationManager = new SliderBoardConfigurationManager(scs);
 
          sliderBoardConfigurationManager.setSlider(1, "percentOfGravityCompensation", registry, 0.0, 1.0);
-         sliderBoardConfigurationManager.setSlider(2, "gravityComp_gainScaling", registry, 0.0, 1.0);
+         sliderBoardConfigurationManager.setSlider(2, CONTROLLER_PREFIX + "gainScaling", registry, 0.0, 1.0);
          int maxNumberOfDofs = 7;
          double maxGains = 3.0;
          double maxZetas = 0.3;
@@ -355,12 +355,12 @@ public class InverseDynamicsJointController extends State<HighLevelState>
             maxGains = 100.0;
             maxZetas = 1.0;
          }
-         sliderBoardConfigurationManager.setSlider(3, "gravityComp_allJointGains", registry, 0.0, maxGains);
-         sliderBoardConfigurationManager.setSlider(4, "gravityComp_allJointZetas", registry, 0.0, maxZetas);
+         sliderBoardConfigurationManager.setSlider(3, CONTROLLER_PREFIX + "allJointGains", registry, 0.0, maxGains);
+         sliderBoardConfigurationManager.setSlider(4, CONTROLLER_PREFIX + "allJointZetas", registry, 0.0, maxZetas);
          
          if (STAND_ON_FEET)
          {
-            sliderBoardConfigurationManager.setSlider(5, "gravityComp_footForceScaling", registry, 0.0, 1.0);
+            sliderBoardConfigurationManager.setSlider(5, CONTROLLER_PREFIX + "footForceScaling", registry, 0.0, 1.0);
          }
          
          if (varNameForLastSlider != null)
