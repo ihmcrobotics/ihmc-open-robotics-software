@@ -17,6 +17,7 @@ public enum VideoSettings
    
    SONY_720P60_TRIPOD("Tripod", 0, 14, false, VideoIn.SDI),
    BLACKMAGIC_1080P30_CRANE("AFrame", 1, 9, false, VideoIn.SDI),
+   BLACKMAGIC_1080P30_TRIPOD("Tripod", 0, 9, false, VideoIn.SDI),
    CANON_XA25_720P("ValkyrieTripod", 0, 14, false, VideoIn.SDI),
    MARSHALL_CV330_720P("ValkyrieGorillaPod", 1, 15, false, VideoIn.SDI);
    
