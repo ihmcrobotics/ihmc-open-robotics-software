@@ -38,14 +38,12 @@ public class RosJointStatePublisher extends RosTopicPublisher<JointState>
    }
 
 
-   public void publish(List<String> name, double[] position, double[] velocity, double[] effort, double t)
+   public void publish(List<String> name, double[] position, double[] velocity, double[] effort, Time t)
    {
       JointState message = getMessage();
+
       Header header = message.getHeader();
-
-      header.setStamp(new Time(System.currentTimeMillis() / 1000.0 ));
-      System.out.println("time: " + System.currentTimeMillis() / 1000.0);
-
+      header.setStamp(t);
       header.setFrameId("/world");
       header.setSeq(seq++);
       message.setHeader(header);
