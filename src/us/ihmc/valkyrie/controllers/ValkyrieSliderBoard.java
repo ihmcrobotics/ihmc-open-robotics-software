@@ -243,7 +243,7 @@ public class ValkyrieSliderBoard
 
                                  if (isTunableLinearActuatorJoint(selectedJoint.getEnumValue().toString()))
                                  {
-                                    int storedIndex = storedTurboIndex.get(selectedJoint.getEnumType().toString()).getIntegerValue();
+                                    int storedIndex = storedTurboIndex.get(selectedJoint.getEnumValue().toString()).getIntegerValue();
                                     remoteTurboIndex.set(storedIndex);
                                     System.out.println("loading configuration " + selectedJoint.getEnumValue() + " " + storedIndex);
                                     sliderBoardConfigurationManager.loadConfiguration(selectedJoint.getEnumValue().toString() + storedIndex);
@@ -276,8 +276,8 @@ public class ValkyrieSliderBoard
             }
 
             if (isTunableLinearActuatorJoint(selectedJoint.getEnumValue().toString()))
-            {
-               int storedIndex = storedTurboIndex.get(selectedJoint.getEnumType().toString()).getIntegerValue();
+            {               
+               int storedIndex = storedTurboIndex.get(selectedJoint.getEnumValue().toString()).getIntegerValue();
                remoteTurboIndex.set(storedIndex);
                System.out.println("loading configuration " + selectedJoint.getEnumValue() + " " + storedIndex);
                sliderBoardConfigurationManager.loadConfiguration(selectedJoint.getEnumValue().toString() + storedIndex);
