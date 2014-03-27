@@ -315,17 +315,15 @@ public class ValkyrieSliderBoard
 
    private boolean isTunableLinearActuatorJoint(String jointName)
    {
-      boolean ret = false;
-
       for (String s : tunableLinearActuatorJoint)
       {
          if (jointName.contains(s))
          {
-            ret = true;
+            return true;
          }
       }
 
-      return ret;
+      return false;
    }
 
    private void setupSliderBoardForOnBoardPositionControl(YoVariableRegistry registry, GeneralizedSDFRobotModel generalizedSDFRobotModel,
