@@ -1,6 +1,8 @@
 package us.ihmc.valkyrie.controllers;
 
 import com.yobotics.simulationconstructionset.*;
+import com.yobotics.simulationconstructionset.util.math.functionGenerator.YoFunctionGenerator;
+import com.yobotics.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
@@ -163,7 +165,6 @@ public class ValkyrieSliderBoard
                            assert turbos.size() == 1;
 
                            String turboName = turbos.get(0);
-
                            // knobs
                            sliderBoardConfigurationManager.setKnob(1, selectedJoint, 0,
                                    ValkyrieSliderBoardController.ValkyrieSliderBoardSelectableJoints.values().length - 1);
@@ -172,11 +173,12 @@ public class ValkyrieSliderBoard
                            sliderBoardConfigurationManager.setKnob(5, turboName + "_forceAlpha", registry, 0.0, 1.0);
                            sliderBoardConfigurationManager.setKnob(6, turboName + "_forceDotAlpha", registry, 0.0, 1.0);
                            sliderBoardConfigurationManager.setKnob(7, turboName + "_parallelDamping", registry, 0.0, 10.0);
+                           sliderBoardConfigurationManager.setKnob(8, "requestedFunctionGeneratorMode", registry, 0, YoFunctionGeneratorMode.values().length - 1);
 
                            // sliders
                            sliderBoardConfigurationManager.setSlider(1, pdControllerBaseName + "_q_d", registry,
-                                   generalizedSDFRobotModel.getJointHolder(jointName).getLowerLimit(),
-                                   generalizedSDFRobotModel.getJointHolder(jointName).getUpperLimit());
+                                 generalizedSDFRobotModel.getJointHolder(jointName).getLowerLimit(),
+                                 generalizedSDFRobotModel.getJointHolder(jointName).getUpperLimit());
                            sliderBoardConfigurationManager.setSlider(2, "kp_" + pdControllerBaseName, registry, 0.0, 2000.0);
                            sliderBoardConfigurationManager.setSlider(3, "kd_" + pdControllerBaseName, registry, 0.0, 600.0);
                            sliderBoardConfigurationManager.setSlider(4, pdControllerBaseName + "_transitionFactor", registry, 0.0, 1.0);
@@ -185,7 +187,7 @@ public class ValkyrieSliderBoard
                            sliderBoardConfigurationManager.setButton(1, pdControllerBaseName + "_useFunctionGenerator", registry);
                            sliderBoardConfigurationManager.setSlider(6, pdControllerBaseName + "_functionGeneratorAmplitude", registry, 0, 200);
                            sliderBoardConfigurationManager.setSlider(7, pdControllerBaseName + "_functionGeneratorFrequency", registry, 0, 50);
-                           sliderBoardConfigurationManager.setSlider(8, pdControllerBaseName + "_functionGeneratorOffset", registry, -20, 20);
+                           sliderBoardConfigurationManager.setSlider(8, pdControllerBaseName + "_functionGeneratorOffset", registry, -100, 100);
 
                            sliderBoardConfigurationManager.saveConfiguration(jointName);
                            sliderBoardConfigurationManager.clearControls();
@@ -203,11 +205,12 @@ public class ValkyrieSliderBoard
                               sliderBoardConfigurationManager.setKnob(1, selectedJoint, 0,
                                       ValkyrieSliderBoardController.ValkyrieSliderBoardSelectableJoints.values().length - 1);
                               sliderBoardConfigurationManager.setKnob(2, turboIndexMonitor, 0, 1);
-                              sliderBoardConfigurationManager.setKnob(3, turboName + "_lowLevelKp", registry, 0.0, 12.0);
-                              sliderBoardConfigurationManager.setKnob(4, turboName + "_lowLevelKd", registry, 0.0, 2.0);
+                              sliderBoardConfigurationManager.setKnob(3, turboName + "_lowLevelKp", registry, 0.0, 2.0);
+                              sliderBoardConfigurationManager.setKnob(4, turboName + "_lowLevelKd", registry, 0.0, 0.3);
                               sliderBoardConfigurationManager.setKnob(5, turboName + "_forceAlpha", registry, 0.0, 1.0);
                               sliderBoardConfigurationManager.setKnob(6, turboName + "_forceDotAlpha", registry, 0.0, 1.0);
                               sliderBoardConfigurationManager.setKnob(7, turboName + "_parallelDamping", registry, 0.0, 10.0);
+                              sliderBoardConfigurationManager.setKnob(8, "requestedFunctionGeneratorMode", registry, 0, YoFunctionGeneratorMode.values().length - 1);
 
                               // sliders
                               sliderBoardConfigurationManager.setSlider(1, pdControllerBaseName + "_q_d", registry,
@@ -221,7 +224,7 @@ public class ValkyrieSliderBoard
                               sliderBoardConfigurationManager.setButton(1, pdControllerBaseName + "_useFunctionGenerator", registry);
                               sliderBoardConfigurationManager.setSlider(6, pdControllerBaseName + "_functionGeneratorAmplitude", registry, 0, 200);
                               sliderBoardConfigurationManager.setSlider(7, pdControllerBaseName + "_functionGeneratorFrequency", registry, 0, 50);
-                              sliderBoardConfigurationManager.setSlider(8, pdControllerBaseName + "_functionGeneratorOffset", registry, -20, 20);
+                              sliderBoardConfigurationManager.setSlider(8, pdControllerBaseName + "_functionGeneratorOffset", registry, -100, 100);
 
                               sliderBoardConfigurationManager.saveConfiguration(jointName + count);
                               sliderBoardConfigurationManager.clearControls();
