@@ -94,11 +94,8 @@ public enum AtlasRobotVersion {
 		if(resourceDirectories == null)
 		{
 			resourceDirectories = new String[] {
-			         thisClass.getResource("models/GFE/gazebo").getFile(),
-			         thisClass.getResource("models/GFE/").getFile(),
 			         thisClass.getResource("models/GFE/gazebo_models/atlas_description").getFile(),
 			         thisClass.getResource("models/GFE/gazebo_models/multisense_sl_description").getFile(),
-			         thisClass.getResource("models").getFile(),
 			         thisClass.getResource("models/GFE/gazebo_models/irobot_hand_description").getFile()
 				};
 		}

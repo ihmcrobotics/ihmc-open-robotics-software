@@ -28,16 +28,13 @@ public class DRCRobotSDFLoader
 
       if (!headless)
       {
+         resourceDirectories.add(myClass.getResource("models").getFile());
+         resourceDirectories.add(myClass.getResource("models/GFE/").getFile());
+         resourceDirectories.add(myClass.getResource("models/GFE/gazebo").getFile());
     	  for(String resource : selectedModel.getResourceDirectories())
     	  {
     		  resourceDirectories.add(resource);
     	  }
-    	  
-//         resourceDirectories.add(myClass.getResource("models/GFE/gazebo").getFile());
-//         resourceDirectories.add(myClass.getResource("models/GFE/").getFile());
-//         resourceDirectories.add(myClass.getResource("models/GFE/gazebo_models/atlas_description").getFile());
-//         resourceDirectories.add(myClass.getResource("models/GFE/gazebo_models/multisense_sl_description").getFile());
-//         resourceDirectories.add(myClass.getResource("models").getFile());
       }
 
       fileInputStream = selectedModel.getSdfFileAsStream();
