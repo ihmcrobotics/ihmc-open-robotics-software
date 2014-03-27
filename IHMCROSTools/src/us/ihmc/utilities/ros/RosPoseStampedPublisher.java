@@ -34,19 +34,15 @@ public class RosPoseStampedPublisher extends RosTopicPublisher<PoseStamped>
       }
    }
 
-
-   public void publish(String frameID, Vector3d pos, Quat4d rot, double t)
+   public void publish(String frameID, Vector3d pos, Quat4d rot, Time t)
    {
       PoseStamped message = getMessage();
+
       Header header = message.getHeader();
-
-      header.setStamp(new Time(System.currentTimeMillis() / 1000.0 ));
-      System.out.println("time: " + System.currentTimeMillis() / 1000.0);
-
+      header.setStamp(t);
       header.setFrameId(frameID);
       header.setSeq(seq++);
       message.setHeader(header);
-
 
       if (pos != null) {
           message.getPose().getPosition().setX(pos.getX());
@@ -56,7 +52,6 @@ public class RosPoseStampedPublisher extends RosTopicPublisher<PoseStamped>
           message.getPose().getPosition().setX(0.0);
           message.getPose().getPosition().setY(0.0);
           message.getPose().getPosition().setZ(0.0);
-
       }
 
       if (rot != null) {
