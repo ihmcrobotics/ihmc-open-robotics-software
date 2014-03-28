@@ -5,11 +5,15 @@ import java.io.InputStream;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactPointInformation;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCContactPointInformationFactory;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParamaters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.darpaRoboticsChallenge.valkyrie.ValkyrieContactPointParamaters;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 
@@ -54,11 +58,11 @@ public class BonoRobotModel implements DRCRobotModel
    @Override
    public DRCRobotPhysicalProperties getPhysicalProperties()
    {
-      return new ACSELLPhysicalProperties();
+      return new BonoPhysicalProperties();
    }
 
    @Override
-   public DRCRobotJointMap getJointMap(boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsToFeetOnly)
+   public DRCRobotJointMap getJointMap()
    {
       return new BonoJointMap(this);
    }
@@ -140,6 +144,18 @@ public class BonoRobotModel implements DRCRobotModel
    public WalkingControllerParameters getMultiContactControllerParameters()
    {
       return new ACSELLWalkingControllerParameters();
+   }
+   //XXX: fix this
+   @Override
+   public DRCRobotContactPointParamaters getContactPointParamaters(boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsToFeetOnly)
+   {
+      return new BonoContactPointParamaters(getJointMap());
+   }
+
+   @Override
+   public ContactPointInformation getContactPointInformation(boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsToFeetOnly)
+   {
+      return DRCContactPointInformationFactory.createContactPointInformation(getJointMap(),getContactPointParamaters(addLoadsOfContactPoints, addLoadsOfContactPointsToFeetOnly)) ;
    }
 
 }

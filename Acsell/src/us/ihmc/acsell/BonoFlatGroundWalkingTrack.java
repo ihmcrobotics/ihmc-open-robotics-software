@@ -26,7 +26,7 @@ public class BonoFlatGroundWalkingTrack
       AutomaticSimulationRunner automaticSimulationRunner = null;
       SliderBoardFactory sliderBoardFactory = WalkControllerSliderBoard.getFactory();
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false, sliderBoardFactory);
-      DRCRobotInterface robotInterface = new PlainDRCRobot(robotModel, false);
+      DRCRobotInterface robotInterface = new PlainDRCRobot(robotModel);
 
       if (DRCConfigParameters.CORRUPT_SIMULATION_MODEL)
       {
