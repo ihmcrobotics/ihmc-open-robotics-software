@@ -164,7 +164,7 @@ public class DRCRobotBasedFootstepGeneratorTest
    private void setupRobotParameters()
    {
       DRCRobotModel robotModel = new AtlasRobotModel();
-      DRCRobotJointMap jointMap = robotModel.getJointMap(false, false);
+      DRCRobotJointMap jointMap = robotModel.getJointMap();
       JaxbSDFLoader jaxbSDFLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
       walkingParamaters = robotModel.getWalkingControlParamaters();
       fullRobotModel = jaxbSDFLoader.createFullRobotModel(jointMap);

@@ -48,7 +48,7 @@ public class KinematicCalibrationHeadLoopResidualTest
          DetectChessboardInKinematicsData.boardWidth, DetectChessboardInKinematicsData.boardHeight, 0.03);
 
    DRCRobotModel robotModel = new AtlasRobotModel();
-   DRCRobotJointMap jointMap = robotModel.getJointMap(false, false);
+   DRCRobotJointMap jointMap = robotModel.getJointMap();
    JaxbSDFLoader robotLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
    SDFFullRobotModel fullRobotModel = robotLoader.createFullRobotModel(jointMap);
 

@@ -105,9 +105,8 @@ public class AtlasContactPointParamaters extends DRCRobotContactPointParamaters
    
    
    
-   public AtlasContactPointParamaters(AtlasRobotModel selectedModel, DRCRobotJointMap jointMap, boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsForFeetOnly)
+   public AtlasContactPointParamaters(AtlasRobotVersion selectedVersion, DRCRobotJointMap jointMap, boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsForFeetOnly)
    {
-      DRCRobotPhysicalProperties physicalParamaters = selectedModel.getPhysicalProperties();
       
       Vector3d t0 = new Vector3d(0.0, 0.0, -pelvisBoxSizeZ / 2.0);
       t0.add(pelvisBoxOffset);
@@ -181,10 +180,10 @@ public class AtlasContactPointParamaters extends DRCRobotContactPointParamaters
          for (Point2d footv3d : contactPointOffsetList)
          {
             // add ankle joint contact points on each corner of the foot
-            footGroundContactPoints.get(robotSide).add(new Pair<String, Vector3d>(jointMap.getJointBeforeFootName(robotSide), new Vector3d(footv3d.getX(), footv3d.getY(), -physicalParamaters.getAnkleHeight())));
+            footGroundContactPoints.get(robotSide).add(new Pair<String, Vector3d>(jointMap.getJointBeforeFootName(robotSide), new Vector3d(footv3d.getX(), footv3d.getY(), -AtlasPhysicalProperties.ankleHeight)));
          }
 
-         if (selectedModel.getHandModel() == DRCHandModel.SANDIA && addLoadsOfContactPoints)
+         if (selectedVersion.getHandModel() == DRCHandModel.SANDIA && addLoadsOfContactPoints)
          {
             // add finger joint contact points offset to the middle of palm-facing side of the finger segment
             String longPrefix = (robotSide == RobotSide.LEFT) ? "left_" : "right_";
@@ -205,7 +204,7 @@ public class AtlasContactPointParamaters extends DRCRobotContactPointParamaters
                handGroundContactPoints.get(robotSide).add(new Pair<String, Vector3d>(jointMap.getNameOfJointBeforeHand(robotSide), offset));
             }
          }
-         else if ((selectedModel.hasIRobotHands()) && addLoadsOfContactPoints)
+         else if ((selectedVersion.hasIrobotHands()) && addLoadsOfContactPoints)
          {
             // add finger joint contact points offset to the middle of palm-facing side of the finger segment
             String longPrefix = (robotSide == RobotSide.LEFT) ? "left_" : "right_";
@@ -230,7 +229,7 @@ public class AtlasContactPointParamaters extends DRCRobotContactPointParamaters
                handGroundContactPoints.get(robotSide).add(new Pair<String, Vector3d>(jointMap.getNameOfJointBeforeHand(robotSide), offset));
             }
          }
-         else if (selectedModel.getAtlasVersion() == AtlasRobotVersion.ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS)
+         else if (selectedVersion == AtlasRobotVersion.ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS)
          {
             for (Point2d point : HandContactParameters.invisibleContactablePlaneHandContactPoints.get(robotSide))
             {

@@ -44,7 +44,7 @@ public class DRCDemo03
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
       
       environment = new DRCDemoEnvironmentWithBoxAndSteeringWheel(dynamicGraphicObjectsListRegistry);
-      final PlainDRCRobot robotInterface = new PlainDRCRobot(robotModel, true);
+      final PlainDRCRobot robotInterface = new PlainDRCRobot(robotModel);
       scsInitialSetup = new DRCSCSInitialSetup(environment, robotInterface.getSimulateDT());
       
       scsInitialSetup.setSimulationDataBufferSize(simulationDataBufferSize);
@@ -68,7 +68,7 @@ public class DRCDemo03
       FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulation(drivingControllerParameters);
 
       ControllerFactory controllerFactory = DRCObstacleCourseSimulation.createDRCMultiControllerFactory(null, dataProducer, footstepTimingParameters, drivingControllerParameters, 
-            armControllerParameters, robotInterface.getJointMap(),initialBehavior);
+            armControllerParameters, robotInterface.getJointMap(),initialBehavior,robotModel);
 
       
       Pair<HumanoidRobotSimulation<SDFRobot>, DRCController> humanoidSimulation = DRCSimulationFactory.createSimulation(controllerFactory, environment, robotInterface, robotInitialSetup, scsInitialSetup,

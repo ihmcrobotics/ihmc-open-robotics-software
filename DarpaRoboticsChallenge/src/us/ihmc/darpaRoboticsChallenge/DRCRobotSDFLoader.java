@@ -67,7 +67,7 @@ public class DRCRobotSDFLoader
    public static void main(String[] args)
    {
 	   DRCRobotModel selectedModel = new AtlasRobotModel();
-      DRCRobotJointMap jointMap = selectedModel.getJointMap(false, false);
+      DRCRobotJointMap jointMap = selectedModel.getJointMap();
       JaxbSDFLoader loader = loadDRCRobot(jointMap, false);
       System.out.println(loader.createRobot(jointMap, true).getName());
       

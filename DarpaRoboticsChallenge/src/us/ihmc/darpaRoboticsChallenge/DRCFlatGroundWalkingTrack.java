@@ -148,7 +148,7 @@ public class DRCFlatGroundWalkingTrack
 
 //    DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(TerrainType.FLAT_Z_NEGATIVE_TWO);
 //    RobotInitialSetup<SDFRobot> robotInitialSetup = new SquaredUpDRCRobotInitialSetup(-2.0);
-      DRCRobotInterface robotInterface = new PlainDRCRobot(model, false);
+      DRCRobotInterface robotInterface = new PlainDRCRobot(model);
       
       if (DRCConfigParameters.CORRUPT_SIMULATION_MODEL)
       {

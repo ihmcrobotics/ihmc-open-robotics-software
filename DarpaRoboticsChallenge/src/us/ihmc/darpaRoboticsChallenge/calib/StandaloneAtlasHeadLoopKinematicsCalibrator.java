@@ -54,7 +54,7 @@ public class StandaloneAtlasHeadLoopKinematicsCalibrator
    {
       //load robot
 	   DRCRobotModel robotModel = new AtlasRobotModel();
-      DRCRobotJointMap jointMap = robotModel.getJointMap(false, false);
+      DRCRobotJointMap jointMap = robotModel.getJointMap();
       JaxbSDFLoader robotLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
       fullRobotModel = robotLoader.createFullRobotModel(jointMap);
       joints = fullRobotModel.getOneDoFJoints();

@@ -65,8 +65,6 @@ public class DRCSimulationFactory
       GUISetterUpperRegistry guiSetterUpperRegistry = new GUISetterUpperRegistry();
 
       DRCRobotJointMap jointMap = robotInterface.getJointMap();
-      DRCRobotJointMap map = drcRobotModel.getJointMap(false, false);
-
 
       double estimateDT = DRCConfigParameters.ESTIMATOR_DT;
       double simulateDT = robotInterface.getSimulateDT();
@@ -121,7 +119,7 @@ public class DRCSimulationFactory
       ArrayList<OneDegreeOfFreedomJoint> forceTorqueSensorJoints = new ArrayList<OneDegreeOfFreedomJoint>();
       // TODO: Get from SDF file
 
-      for (String name : map.getForceSensorNames())
+      for (String name : jointMap.getForceSensorNames())
       {
          forceTorqueSensorJoints.add(simulatedRobot.getOneDoFJoint(name));
       }
@@ -166,7 +164,7 @@ public class DRCSimulationFactory
 
       DRCController robotController = new DRCController(robotInterface.getFullRobotModelFactory(), controllerFactory, sensorReaderFactory, drcOutputWriter,
             jointMap, lidarControllerInterface, gravity, controlDT, dataProducer, robotInterface.getTimeStampProvider(),
-            dynamicGraphicObjectsListRegistry, guiSetterUpperRegistry, registry, null, threadFactory, threadSynchronizer, stateEstimatorParameters);
+            dynamicGraphicObjectsListRegistry, guiSetterUpperRegistry, registry, null, threadFactory, threadSynchronizer, stateEstimatorParameters, drcRobotModel.getPhysicalProperties(), drcRobotModel.getContactPointParamaters(false, false));
       robotController.initialize();
 
       final HumanoidRobotSimulation<SDFRobot> humanoidRobotSimulation = new HumanoidRobotSimulation<SDFRobot>(simulatedRobot, controller,
@@ -178,7 +176,7 @@ public class DRCSimulationFactory
       {
          System.err.println("Warning! Initializing Estimator to Actual!");
          DRCStateEstimatorInterface drcStateEstimator = robotController.getDRCStateEstimator();
-         initializeEstimatorToActual(drcStateEstimator, robotInitialSetup, simulatedRobot, drcRobotModel.getJointMap(false, false));
+         initializeEstimatorToActual(drcStateEstimator, robotInitialSetup, simulatedRobot, drcRobotModel.getJointMap());
       }
 
       if (COMPUTE_ESTIMATOR_ERROR && robotController.getDRCStateEstimator() != null)

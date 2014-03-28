@@ -70,7 +70,8 @@ public class AtlasMultiContact
 
       }
 
-      DRCRobotJointMap jointMap = robotModel.getJointMap(true, false);
+//      DRCRobotJointMap jointMap = robotModel.getJointMap(true, false);
+      DRCRobotJointMap jointMap = robotModel.getJointMap();
 
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
       boolean updateInSimulationThread=false; //being updated in DRC-Controller thread, SCS only for display
@@ -80,7 +81,7 @@ public class AtlasMultiContact
           dynamicGraphicObjectsListRegistry = null;
 
       environment = new MultiContactTestEnvironment(robotInitialSetup, jointMap, dynamicGraphicObjectsListRegistry, footContactSides, handContactSides);
-      final PlainDRCRobot robotInterface = new PlainDRCRobot(robotModel, false);
+      final PlainDRCRobot robotInterface = new PlainDRCRobot(robotModel);
       scsInitialSetup = new DRCSCSInitialSetup(environment, robotInterface.getSimulateDT());
       scsInitialSetup.setSimulationDataBufferSize(simulationDataBufferSize);
 

@@ -39,7 +39,7 @@ public class PoseSequenceSelectorPanel extends JPanel
        
        posePlaybackController = new PosePlaybackAllJointsController(registry);
 
-      DRCRobotJointMap jointMap = robotModel.getJointMap(false, false);
+      DRCRobotJointMap jointMap = robotModel.getJointMap();
       JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
 
        SDFFullRobotModel fullRobotModel = loader.createFullRobotModel(jointMap);

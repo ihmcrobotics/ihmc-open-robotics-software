@@ -56,7 +56,7 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
       behindPelvis.setCameraTrackingVars("q_x", "q_y", "q_z");
       scs.setupCamera(behindPelvis);
 
-      DRCRobotJointMap jointMap = robotModel.getJointMap(false, false);
+      DRCRobotJointMap jointMap = robotModel.getJointMap();
       CameraConfiguration camera5 = new CameraConfiguration(jointMap.getLeftCameraName());
       camera5.setCameraMount(jointMap.getLeftCameraName());
       scs.setupCamera(camera5);

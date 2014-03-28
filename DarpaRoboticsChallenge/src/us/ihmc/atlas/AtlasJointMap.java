@@ -77,13 +77,8 @@ public class AtlasJointMap extends DRCRobotJointMap
    private final DRCRobotModel selectedModel;
    private final AtlasContactPointParamaters contactPointParamaters;
    
-
-   public AtlasJointMap(AtlasRobotModel selectedModel, boolean addLoadsOfContactPoints)
-   {
-      this(selectedModel, addLoadsOfContactPoints, false);
-   }
    
-   public AtlasJointMap(AtlasRobotModel selectedModel, boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsForFeetOnly)
+   public AtlasJointMap(AtlasRobotModel selectedModel)
    {
       this.selectedModel = selectedModel;
 
@@ -135,7 +130,7 @@ public class AtlasJointMap extends DRCRobotJointMap
          jointRoles.put(neckJoint, JointRole.NECK);
       }
 
-      contactPointParamaters = new AtlasContactPointParamaters(selectedModel, this, addLoadsOfContactPoints, addLoadsOfContactPointsForFeetOnly);
+      contactPointParamaters = new AtlasContactPointParamaters(selectedModel.getAtlasVersion(), this, false, false);
    }
    
    @Override
@@ -250,20 +245,10 @@ public class AtlasJointMap extends DRCRobotJointMap
       return jointBeforeFeetNames.get(robotSide);
    }
 
-   public List<Pair<String, Vector3d>> getFootContactPoints(RobotSide robotSide)
-   {
-      return contactPointParamaters.getFootContactPoints(robotSide);
-   }
-
-   public List<Pair<String, Vector3d>> getThighContactPoints(RobotSide robotSide)
-   {
-      return contactPointParamaters.getThighContactPoints(robotSide);
-   }
-
-   public List<Pair<String, Vector3d>> getHandContactPoints(RobotSide robotSide)
-   {
-      return contactPointParamaters.getHandContactPoints(robotSide);
-   }
+//   public List<Pair<String, Vector3d>> getHandContactPoints(RobotSide robotSide)
+//   {
+//      return contactPointParamaters.getHandContactPoints(robotSide);
+//   }
 
    @Override
    public double getAnkleHeight()
@@ -372,57 +357,9 @@ public class AtlasJointMap extends DRCRobotJointMap
     		  AtlasPhysicalProperties.ankle_to_sole_frame_tranform);
    }
    
-   @Override
-   public SideDependentList<ArrayList<Point2d>> getFootGroundContactPointsInSoleFrameForController()
-   {
-	   return contactPointParamaters.getFootGroundContactPointsInSoleFrameForController();
-   }
-
-   @Override
-   public Transform3D getPelvisContactPointTransform()
-   {
-      return contactPointParamaters.getPelvisContactPointTransform();
-   }
-
-   @Override
-   public List<Point2d> getPelvisContactPoints()
-   {
-      return contactPointParamaters.getPelvisContactPoints();
-   }
-
-   @Override
-   public Transform3D getPelvisBackContactPointTransform()
-   {
-      return contactPointParamaters.getPelvisBackContactPointTransform();
-   }
-
-   @Override
-   public List<Point2d> getPelvisBackContactPoints()
-   {
-      return contactPointParamaters.getPelvisBackContactPoints();
-   }
-
-   @Override
-   public Transform3D getChestBackContactPointTransform()
-   {
-      return contactPointParamaters.getChestBackContactPointTransform();
-   }
-
-   @Override
-   public List<Point2d> getChestBackContactPoints()
-   {
-      return contactPointParamaters.getChestBackContactPoints();
-   }
-
-   @Override
-   public SideDependentList<Transform3D> getThighContactPointTransforms()
-   {
-      return contactPointParamaters.getThighContactPointTransforms();
-   }
-
-   @Override
-   public SideDependentList<List<Point2d>> getThighContactPoints()
-   {
-      return contactPointParamaters.getThighContactPoints();
-   }
+//   @Override
+//   public SideDependentList<ArrayList<Point2d>> getFootGroundContactPointsInSoleFrameForController()
+//   {
+//	   return contactPointParamaters.getFootGroundContactPointsInSoleFrameForController();
+//   }
 }
