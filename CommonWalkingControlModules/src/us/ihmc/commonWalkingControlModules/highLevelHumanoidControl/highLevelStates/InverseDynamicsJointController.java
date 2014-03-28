@@ -538,7 +538,8 @@ public class InverseDynamicsJointController extends State<HighLevelState>
             String kp_varName = "kp_" + varPrefix;
             String zeta_varName = varPrefix + "_zeta";
 
-            sliderBoardConfigurationManager.setSlider(i + 1, kp_varName, registry, 0.0, maxGains);
+            double subtreeMass = TotalMassCalculator.computeSubTreeMass(revoluteJoint.getSuccessor());
+            sliderBoardConfigurationManager.setSlider(i + 1, kp_varName, registry, 0.0, subtreeMass * maxGains);
             sliderBoardConfigurationManager.setKnob(i + 1, zeta_varName, registry, 0.0, maxZetas);
          }
       }
