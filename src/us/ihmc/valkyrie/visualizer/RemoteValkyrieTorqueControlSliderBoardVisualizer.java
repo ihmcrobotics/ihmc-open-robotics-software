@@ -8,12 +8,12 @@ import com.martiansoftware.jsap.JSAPResult;
 
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.atlas.visualization.SliderBoardFactory;
-import us.ihmc.darpaRoboticsChallenge.valkyrie.ValkyrieJointMap;
-import us.ihmc.darpaRoboticsChallenge.valkyrie.ValkyrieSDFLoader;
 import us.ihmc.robotDataCommunication.YoVariableClient;
 import us.ihmc.robotDataCommunication.visualizer.SCSYoVariablesUpdatedListener;
+import us.ihmc.valkyrie.ValkyrieSDFLoader;
 import us.ihmc.valkyrie.configuration.ValkyrieNetworkParameters;
 import us.ihmc.valkyrie.controllers.ValkyrieSliderBoard;
+import us.ihmc.valkyrie.paramaters.ValkyrieJointMap;
 
 public class RemoteValkyrieTorqueControlSliderBoardVisualizer
 {

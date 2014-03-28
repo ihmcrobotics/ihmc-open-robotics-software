@@ -3,23 +3,26 @@ package us.ihmc.valkyrie.controllers;
 import com.yobotics.simulationconstructionset.*;
 import com.yobotics.simulationconstructionset.util.math.functionGenerator.YoFunctionGenerator;
 import com.yobotics.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
+
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
 import us.ihmc.atlas.visualization.SliderBoardFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.CommonNames;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.InverseDynamicsJointController;
-import us.ihmc.darpaRoboticsChallenge.valkyrie.ValkyrieJointMap;
 
 import com.yobotics.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
+
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
 import us.ihmc.valkyrie.kinematics.urdf.Interface;
 import us.ihmc.valkyrie.kinematics.urdf.Transmission;
 import us.ihmc.valkyrie.kinematics.urdf.URDFRobotRoot;
+import us.ihmc.valkyrie.paramaters.ValkyrieJointMap;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
