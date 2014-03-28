@@ -1,4 +1,4 @@
-package us.ihmc.valkyrie.paramaters;
+package us.ihmc.valkyrie;
 
 import java.io.InputStream;
 
@@ -16,13 +16,19 @@ import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
-import us.ihmc.valkyrie.ValkyrieInitialSetup;
+import us.ihmc.valkyrie.models.ModelRoot;
+import us.ihmc.valkyrie.paramaters.ValkyrieArmControllerParameters;
+import us.ihmc.valkyrie.paramaters.ValkyrieContactPointParamaters;
+import us.ihmc.valkyrie.paramaters.ValkyrieJointMap;
+import us.ihmc.valkyrie.paramaters.ValkyriePhysicalProperties;
+import us.ihmc.valkyrie.paramaters.ValkyrieStateEstimatorParameters;
+import us.ihmc.valkyrie.paramaters.ValkyrieWalkingControllerParameters;
 
 import com.jme3.math.Transform;
 
 public class ValkyrieRobotModel implements DRCRobotModel
 {
-   private static Class<AtlasRobotVersion> thisClass = AtlasRobotVersion.class;
+   private static Class<ModelRoot> valModelRoot = ModelRoot.class;
    private static String[] resourceDirectories;
    private final ArmControllerParameters armControllerParameters;
    private final DRCRobotPhysicalProperties physicalProperties;
@@ -128,7 +134,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
 
    public String getSdfFile()
    {
-      return "models/V1/sdf/V1_sim.sdf";
+      return "V1/sdf/V1_sim.sdf";
    }
 
    public String[] getResourceDirectories()
@@ -137,9 +143,10 @@ public class ValkyrieRobotModel implements DRCRobotModel
       if (resourceDirectories == null)
       {
          resourceDirectories = new String[] {
-               thisClass.getResource("models/V1/").getFile(),
-               thisClass.getResource("models/V1/meshes/").getFile(),
-               thisClass.getResource("models/V1/meshes/2013_05_16/").getFile(),
+               valModelRoot.getResource("").getFile(),
+               valModelRoot.getResource("V1/").getFile(),
+               valModelRoot.getResource("V1/meshes/").getFile(),
+               valModelRoot.getResource("V1/meshes/2013_05_16/").getFile(),
                };
       }
       return resourceDirectories;
@@ -147,7 +154,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
 
    public InputStream getSdfFileAsStream()
    {
-      return thisClass.getResourceAsStream(getSdfFile());
+      return valModelRoot.getResourceAsStream(getSdfFile());
    }
 
    @Override
