@@ -9,7 +9,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.darpaRoboticsChallenge.valkyrie.ValkyrieRobotModel;
 
 import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
@@ -18,7 +17,7 @@ import com.martiansoftware.jsap.JSAPResult;
 
 public class DRCRobotModelFactory
 {
-   private static String[] AvailableRobotModels = { "Valkyrie", "Bono", "ATLAS_NO_HANDS_ADDED_MASS", "ATLAS_SANDIA_HANDS",
+   private static String[] AvailableRobotModels = { "ATLAS_NO_HANDS_ADDED_MASS", "ATLAS_SANDIA_HANDS",
          "ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS", "DRC_NO_HANDS", "DRC_HANDS", "DRC_EXTENDED_HANDS", "DRC_HOOKS", "DRC_TASK_HOSE", "DRC_EXTENDED_HOOKS" };
 
    public static DRCRobotModel CreateDRCRobotModel(String robotModelAsString)
@@ -34,10 +33,6 @@ public class DRCRobotModelFactory
       }
       catch (Exception e)
       {
-         if (robotModelAsString.equals("VALKYRIE"))
-         {
-            return new ValkyrieRobotModel();
-         }
       }
       throw new IllegalArgumentException(robotModelAsString + " Not a valid robot model");
    }
