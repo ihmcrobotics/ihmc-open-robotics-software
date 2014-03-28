@@ -56,7 +56,7 @@ public class DRCDoubleElevationChangeSimulation
       AutomaticSimulationRunner automaticSimulationRunner = null;
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false);
 
-      DRCRobotInterface robotInterface = new PlainDRCRobot(model, false);
+      DRCRobotInterface robotInterface = new PlainDRCRobot(model);
       final double groundHeight = 0.0;
       double elevationChange = 0.0;
       if(stepUp) elevationChange = Math.abs(stepHeight);

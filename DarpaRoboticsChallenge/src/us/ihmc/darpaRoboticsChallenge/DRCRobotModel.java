@@ -7,6 +7,8 @@ import com.jme3.math.Transform;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactPointInformation;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParamaters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandModel;
@@ -25,7 +27,7 @@ public interface DRCRobotModel
    public WalkingControllerParameters getWalkingControlParamaters();
    public StateEstimatorParameters getStateEstimatorParameters(double estimatorDT);
    public DRCRobotPhysicalProperties getPhysicalProperties();
-   public DRCRobotJointMap getJointMap(boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsToFeetOnly);
+   public DRCRobotJointMap getJointMap();
    public boolean hasIRobotHands();
    public boolean hasArmExtensions();
    public boolean hasHookHands();
@@ -39,7 +41,8 @@ public interface DRCRobotModel
    public DRCRobotInitialSetup<SDFRobot> getDefaultRobotInitialSetup(
 		double groundHeight, double initialYaw);
    public WalkingControllerParameters getMultiContactControllerParameters();
-   
+   public DRCRobotContactPointParamaters getContactPointParamaters(boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsToFeetOnly);
+   public ContactPointInformation getContactPointInformation(boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsToFeetOnly);
    //TODO: RobotBoundingBoxes.java
    
 }

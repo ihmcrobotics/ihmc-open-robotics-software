@@ -103,7 +103,7 @@ public class PosePlaybackSCSBridge
       posePlaybackSender = new PosePlaybackSender(posePlaybackController, ipAddress);
       posePlaybackRobotPoseSequence = new PosePlaybackRobotPoseSequence();
 
-      DRCRobotJointMap jointMap = robotModel.getJointMap(false, false);
+      DRCRobotJointMap jointMap = robotModel.getJointMap();
       JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
       sdfRobot = loader.createRobot(jointMap, false);
       SDFFullRobotModel fullRobotModel = loader.createFullRobotModel(jointMap);

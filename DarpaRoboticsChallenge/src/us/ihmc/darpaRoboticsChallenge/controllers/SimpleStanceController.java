@@ -414,7 +414,7 @@ public class SimpleStanceController implements RobotController
          return;
       }
       
-      DRCRobotJointMap jointMap = model.getJointMap(false, false);
+      DRCRobotJointMap jointMap = model.getJointMap();
       JaxbSDFLoader jaxbSDFLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
       SDFFullRobotModel fullRobotModel = jaxbSDFLoader.createFullRobotModel(jointMap);
       SDFRobot robot = jaxbSDFLoader.createRobot(jointMap, false);

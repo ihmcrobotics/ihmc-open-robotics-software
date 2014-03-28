@@ -89,7 +89,7 @@ public class AtlasSDFVerificationTest
       BambooTools.reportTestStartedMessage();
 
       DRCRobotModel selectedModel = new AtlasRobotModel();
-      DRCRobotJointMap jointMap = selectedModel.getJointMap(false, false);
+      DRCRobotJointMap jointMap = selectedModel.getJointMap();
       JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(jointMap, false);
       SDFRobot sdfRobot = loader.createRobot(jointMap, true);
 

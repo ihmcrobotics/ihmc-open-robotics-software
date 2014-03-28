@@ -56,7 +56,7 @@ public class PosePlaybackSmoothPoseInterpolatorTest
       SDFRobot sdfRobot = null;
       if (SHOW_GUI)
       {
-         DRCRobotJointMap jointMap = robotModel.getJointMap(false, false);
+         DRCRobotJointMap jointMap = robotModel.getJointMap();
          sdfRobot = DRCRobotSDFLoader.loadDRCRobot(jointMap, false).createRobot(jointMap, false);
 
          scs = new SimulationConstructionSet(sdfRobot);

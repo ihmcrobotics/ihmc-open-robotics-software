@@ -108,7 +108,7 @@ public class DRCFlatGroundWalkingTest
       
 
       DRCRobotModel robotModel = new AtlasRobotModel();
-      DRCRobotInterface robotInterface = new PlainDRCRobot(robotModel, false, useLoadOfContactPointsForTheFeet);
+      DRCRobotInterface robotInterface = new PlainDRCRobot(robotModel);
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = new SquaredUpDRCRobotInitialSetup(0.0);
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControlParamaters();

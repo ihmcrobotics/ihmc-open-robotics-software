@@ -131,7 +131,7 @@ public class DRCHighLevelPositionControlDemo
       SliderBoardFactory sliderBoardFactory = WalkControllerSliderBoard.getFactory();
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false, sliderBoardFactory);
 
-      DRCRobotInterface robotInterface = new PlainDRCRobot(model, false);
+      DRCRobotInterface robotInterface = new PlainDRCRobot(model);
       
       final double groundHeight = 0.0;
       GroundProfile groundProfile = new FlatGroundProfile(groundHeight);

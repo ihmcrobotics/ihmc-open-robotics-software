@@ -293,12 +293,12 @@ public class SDFFullRobotModel implements FullRobotModel
          {
          //TODO: Should armJointLists use legJoingName.first or armJointName.first?? looks backwards
          case ARM:
-            Pair<RobotSide, ArmJointName> legJointName = sdfJointNameMap.getArmJointName(joint.getName());
-            armJointLists.get(legJointName.first()).put(legJointName.second(), inverseDynamicsJoint);
+            Pair<RobotSide, ArmJointName> armJointName = sdfJointNameMap.getArmJointName(joint.getName());
+            armJointLists.get(armJointName.first()).put(armJointName.second(), inverseDynamicsJoint);
             break;
          case LEG:
-            Pair<RobotSide, LegJointName> armJointName = sdfJointNameMap.getLegJointName(joint.getName());
-            legJointLists.get(armJointName.first()).put(armJointName.second(), inverseDynamicsJoint);
+            Pair<RobotSide, LegJointName> legJointName = sdfJointNameMap.getLegJointName(joint.getName());
+            legJointLists.get(legJointName.first()).put(legJointName.second(), inverseDynamicsJoint);
             break;
          case NECK:
             NeckJointName neckJointName = sdfJointNameMap.getNeckJointName(joint.getName());

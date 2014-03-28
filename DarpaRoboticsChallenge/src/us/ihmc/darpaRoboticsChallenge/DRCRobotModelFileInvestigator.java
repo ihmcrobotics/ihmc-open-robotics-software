@@ -18,7 +18,7 @@ public class DRCRobotModelFileInvestigator
 
          PrintWriter printWriter = new PrintWriter(file);
 
-         DRCRobotJointMap jointMap = model.getJointMap(false, false);
+         DRCRobotJointMap jointMap = model.getJointMap();
          JaxbSDFLoader robotLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
          final SDFRobot robot = robotLoader.createRobot(jointMap, false);
 
