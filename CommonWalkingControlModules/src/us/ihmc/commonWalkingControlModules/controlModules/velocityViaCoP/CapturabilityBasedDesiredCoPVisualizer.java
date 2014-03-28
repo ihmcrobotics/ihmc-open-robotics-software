@@ -28,7 +28,6 @@ public class CapturabilityBasedDesiredCoPVisualizer
    private final YoFrameLineSegment2d guideLine = new YoFrameLineSegment2d("guideLine", "", world, registry);
    private final YoFramePoint desiredCMP = new YoFramePoint("desiredCMP", "", world, registry);
    private final YoFramePoint pseudoCMP = new YoFramePoint("pseudoCMP", "", world, registry);
-   private final YoFramePoint centerOfMass = new YoFramePoint("CoM", "", world, registry);
    private final YoFramePoint finalDesiredCapturePoint = new YoFramePoint("finalDesiredCapturePoint", "", world, registry);
    
    public CapturabilityBasedDesiredCoPVisualizer(YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
@@ -42,7 +41,6 @@ public class CapturabilityBasedDesiredCoPVisualizer
          addDesiredCoPViz(dynamicGraphicObjectList, artifactList);
          addDesiredCapturePointViz(dynamicGraphicObjectList, artifactList);
          addDesiredCMPViz(dynamicGraphicObjectList, artifactList);
-         addCoMViz(dynamicGraphicObjectList, artifactList);
          addGuideLineViz(artifactList);
 
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectList);
@@ -50,7 +48,6 @@ public class CapturabilityBasedDesiredCoPVisualizer
       }
       desiredCMP.setToNaN();
       pseudoCMP.setToNaN();
-      centerOfMass.setToNaN();
       
       parentRegistry.addChild(registry);
    }
@@ -74,14 +71,6 @@ public class CapturabilityBasedDesiredCoPVisualizer
             GraphicType.CROSS);
       dynamicGraphicObjectList.add(pseudoCMPViz);
       artifactList.add(pseudoCMPViz.createArtifact());
-   }
-
-   private void addCoMViz(DynamicGraphicObjectsList dynamicGraphicObjectList, ArtifactList artifactList)
-   {
-      DynamicGraphicPosition comCMPViz = centerOfMass.createDynamicGraphicPosition("CoM", 0.006, YoAppearance.Black(),
-            GraphicType.CROSS);
-      dynamicGraphicObjectList.add(comCMPViz);
-      artifactList.add(comCMPViz.createArtifact());
    }
 
    private void addDesiredCapturePointViz(DynamicGraphicObjectsList dynamicGraphicObjectList, ArtifactList artifactList)
@@ -157,11 +146,5 @@ public class CapturabilityBasedDesiredCoPVisualizer
    {
       pseudoCMP.changeFrame(this.pseudoCMP.getReferenceFrame());
       this.pseudoCMP.set(pseudoCMP);
-   }
-
-   public void setCoM(FramePoint centerOfMass)
-   {
-      centerOfMass.changeFrame(this.centerOfMass.getReferenceFrame());
-      this.centerOfMass.set(centerOfMass);
    }
 }
