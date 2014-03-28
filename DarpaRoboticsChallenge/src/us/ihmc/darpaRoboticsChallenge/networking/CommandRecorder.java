@@ -49,7 +49,7 @@ public class CommandRecorder
          String path = ScriptEngineSettings.scriptSavingDirectory + "/" + proposedFilename;
 
 
-         scriptFileSaver = new ScriptFileSaver(path);
+         scriptFileSaver = new ScriptFileSaver(path, false);
          startTime = timestampProvider.getTimestamp();
          this.recordTransform.set(recordTransform);
          isRecording = true;
