@@ -13,7 +13,6 @@ import us.ihmc.atlas.AtlasPhysicalProperties;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParamaters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
-import us.ihmc.darpaRoboticsChallenge.valkyrie.ValkyriePhysicalProperties;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.Pair;
@@ -136,13 +135,13 @@ public class BonoContactPointParamaters extends DRCRobotContactPointParamaters
       for (RobotSide robotSide : RobotSide.values)
       {
         controllerContactPointsInSoleFrame.put(robotSide, new ArrayList<Point2d>());
-        Transform3D ankleToSoleFrame = ValkyriePhysicalProperties.getAnkleToSoleFrameTransform(robotSide);
+        Transform3D ankleToSoleFrame = BonoPhysicalProperties.getAnkleToSoleFrameTransform(robotSide);
         
          ArrayList<Pair<String, Point2d>> footGroundContactPoints = new ArrayList<>();
-         footGroundContactPoints.add(new Pair<String, Point2d>(jointMap.getJointBeforeFootName(robotSide), new Point2d(ValkyriePhysicalProperties.footForward, -ValkyriePhysicalProperties.footWidth / 2.0)));
-         footGroundContactPoints.add(new Pair<String, Point2d>(jointMap.getJointBeforeFootName(robotSide), new Point2d(ValkyriePhysicalProperties.footForward, ValkyriePhysicalProperties.footWidth / 2.0)));
-         footGroundContactPoints.add(new Pair<String, Point2d>(jointMap.getJointBeforeFootName(robotSide), new Point2d(-ValkyriePhysicalProperties.footBack, -ValkyriePhysicalProperties.footWidth / 2.0)));
-         footGroundContactPoints.add(new Pair<String, Point2d>(jointMap.getJointBeforeFootName(robotSide), new Point2d(-ValkyriePhysicalProperties.footBack, ValkyriePhysicalProperties.footWidth / 2.0)));
+         footGroundContactPoints.add(new Pair<String, Point2d>(jointMap.getJointBeforeFootName(robotSide), new Point2d(BonoPhysicalProperties.footForward, -BonoPhysicalProperties.footWidth / 2.0)));
+         footGroundContactPoints.add(new Pair<String, Point2d>(jointMap.getJointBeforeFootName(robotSide), new Point2d(BonoPhysicalProperties.footForward, BonoPhysicalProperties.footWidth / 2.0)));
+         footGroundContactPoints.add(new Pair<String, Point2d>(jointMap.getJointBeforeFootName(robotSide), new Point2d(-BonoPhysicalProperties.footBack, -BonoPhysicalProperties.footWidth / 2.0)));
+         footGroundContactPoints.add(new Pair<String, Point2d>(jointMap.getJointBeforeFootName(robotSide), new Point2d(-BonoPhysicalProperties.footBack, BonoPhysicalProperties.footWidth / 2.0)));
    
          
          for(Pair<String, Point2d> gc : footGroundContactPoints)
