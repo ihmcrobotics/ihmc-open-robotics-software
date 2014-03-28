@@ -54,10 +54,10 @@ public class DRCRobotModelFactory
 
    public static int getOrdinalOfModel(String st)
    {
-      st = st.toLowerCase();
+      st = st.toUpperCase();
       for (int i = 0; i < AvailableRobotModels.length; i++)
       {
-         if (st == AvailableRobotModels[i])
+         if (st == AvailableRobotModels[i].toUpperCase())
          {
             return i;
          }
