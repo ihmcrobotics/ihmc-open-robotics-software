@@ -206,7 +206,7 @@ public class ACSELLWalkingControllerParameters implements WalkingControllerParam
 //      if (model == DRCRobotModel.AXL)
 //         return AxlJointMap.footForward;
 //      else if (model == DRCRobotModel.BONO)
-         return BonoJointMap.footForward;
+         return BonoPhysicalProperties.footForward;
 //      else
 //         throw new RuntimeException("Should not get there");
    }
@@ -216,7 +216,7 @@ public class ACSELLWalkingControllerParameters implements WalkingControllerParam
 //      if (model == DRCRobotModel.AXL)
 //         return AxlJointMap.footBack;
 //      else if (model == DRCRobotModel.BONO)
-         return BonoJointMap.footBack;
+         return BonoPhysicalProperties.footBack;
 //      else
 //         throw new RuntimeException("Should not get there");
    }
@@ -226,7 +226,7 @@ public class ACSELLWalkingControllerParameters implements WalkingControllerParam
 //      if (model == DRCRobotModel.AXL)
 //         return AxlJointMap.ankleHeight;
 //      else if (model == DRCRobotModel.BONO)
-         return BonoJointMap.ankleHeight;
+         return BonoPhysicalProperties.ankleHeight;
 //      else
 //         throw new RuntimeException("Should not get there");
    }
@@ -236,7 +236,7 @@ public class ACSELLWalkingControllerParameters implements WalkingControllerParam
 //      if (model == DRCRobotModel.AXL)
 //         return AxlJointMap.legLength;
 //      else if (model == DRCRobotModel.BONO)
-         return BonoJointMap.legLength;
+         return BonoPhysicalProperties.legLength;
 //      else
 //         throw new RuntimeException("Should not get there");
    }
@@ -499,14 +499,14 @@ public class ACSELLWalkingControllerParameters implements WalkingControllerParam
    public double getAnkle_height()
    {
       // TODO Auto-generated method stub
-      return 0;
+      return BonoPhysicalProperties.ankleHeight;
    }
 
    @Override
    public double getFoot_width()
    {
       // TODO Auto-generated method stub
-      return 0;
+      return BonoPhysicalProperties.footWidth;
    }
 
    @Override
@@ -520,14 +520,14 @@ public class ACSELLWalkingControllerParameters implements WalkingControllerParam
    public double getFoot_length()
    {
       // TODO Auto-generated method stub
-      return 0;
+      return BonoPhysicalProperties.footForward + BonoPhysicalProperties.footBack;
    }
 
    @Override
    public double getFoot_back()
    {
       // TODO Auto-generated method stub
-      return 0;
+      return BonoPhysicalProperties.footBack;
    }
 
    @Override
@@ -541,7 +541,7 @@ public class ACSELLWalkingControllerParameters implements WalkingControllerParam
    public double getFoot_forward()
    {
       // TODO Auto-generated method stub
-      return 0;
+      return BonoPhysicalProperties.footForward;
    }
 
    @Override
