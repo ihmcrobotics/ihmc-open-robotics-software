@@ -149,8 +149,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
          {
             String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
             DynamicGraphicPosition copInWorld = new DynamicGraphicPosition(sidePrefix + "StateEstimatorCoP", copPositionsInWorld.get(robotSide), 0.005, YoAppearance.DeepPink());
-            dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("StateEstimatorCoP", copInWorld);
-            dynamicGraphicObjectsListRegistry.registerArtifact("StateEstimatorCoP", copInWorld.createArtifact());
+            dynamicGraphicObjectsListRegistry.registerArtifact("StateEstimator", copInWorld.createArtifact());
          }
       }
       

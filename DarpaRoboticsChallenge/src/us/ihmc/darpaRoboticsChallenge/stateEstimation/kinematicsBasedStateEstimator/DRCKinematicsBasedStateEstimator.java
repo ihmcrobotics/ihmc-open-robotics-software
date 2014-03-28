@@ -112,13 +112,13 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
             YoFramePoint rawCoPPositionInWorld = new YoFramePoint("raw" + side + "CoPPositionsInWorld", worldFrame, registry);
             footRawCoPPositionsInWorld.put(robotSide, rawCoPPositionInWorld);
             
-            DynamicGraphicPositionArtifact copArtifact = rawCoPPositionInWorld.createDynamicGraphicPosition("raw" + side + "CoP", 0.01, YoAppearance.DarkRed(), GraphicType.DIAMOND).createArtifact();
-            dynamicGraphicObjectsListRegistry.registerArtifact("RawCoPs", copArtifact);
+            DynamicGraphicPositionArtifact copArtifact = rawCoPPositionInWorld.createDynamicGraphicPosition("Meas " + side + "CoP", 0.008, YoAppearance.DarkRed(), GraphicType.DIAMOND).createArtifact();
+            dynamicGraphicObjectsListRegistry.registerArtifact("StateEstimator", copArtifact);
          }
          
          overallRawCoPPositionInWorld = new YoFramePoint("overallRawCoPPositionInWorld", worldFrame, registry);
-         DynamicGraphicPositionArtifact overallRawCoPArtifact = overallRawCoPPositionInWorld.createDynamicGraphicPosition("overallCoP", 0.02, YoAppearance.DarkRed(), GraphicType.DIAMOND).createArtifact();
-         dynamicGraphicObjectsListRegistry.registerArtifact("RawCoPs", overallRawCoPArtifact);
+         DynamicGraphicPositionArtifact overallRawCoPArtifact = overallRawCoPPositionInWorld.createDynamicGraphicPosition("Meas CoP", 0.015, YoAppearance.DarkRed(), GraphicType.DIAMOND).createArtifact();
+         dynamicGraphicObjectsListRegistry.registerArtifact("StateEstimator", overallRawCoPArtifact);
       }
       else
       {
