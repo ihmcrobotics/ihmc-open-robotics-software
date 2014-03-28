@@ -15,7 +15,7 @@ import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.GroundProfile;
 import us.ihmc.valkyrie.ValkyrieRobotInterface;
-import us.ihmc.valkyrie.paramaters.ValkyrieRobotModel;
+import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 import com.yobotics.simulationconstructionset.util.FlatGroundProfile;
 

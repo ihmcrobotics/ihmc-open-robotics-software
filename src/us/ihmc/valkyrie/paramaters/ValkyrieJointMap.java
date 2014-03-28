@@ -20,6 +20,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.Pair;
+import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 public class ValkyrieJointMap extends DRCRobotJointMap 
 {
