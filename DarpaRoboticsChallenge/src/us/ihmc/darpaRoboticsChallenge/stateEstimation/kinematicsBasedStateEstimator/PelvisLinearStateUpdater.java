@@ -211,9 +211,11 @@ public class PelvisLinearStateUpdater
       imuDriftCompensator.setAlphaFootAngularVelocity(computeAlphaGivenBreakFrequencyProperly(stateEstimatorParameters.getFootVelocityUsedForImuDriftFilterFreqInHertz(), estimatorDT));
       imuDriftCompensator.setFootAngularVelocityThreshold(stateEstimatorParameters.getFootVelocityThresholdToEnableIMUDriftCompensation());
 
-      DynamicGraphicPositionArtifact comArtifact = yoCenterOfMassPosition.createDynamicGraphicPosition("Meas CoM", 0.006, YoAppearance.Black(), GraphicType.CROSS).createArtifact();
-      dynamicGraphicObjectsListRegistry.registerArtifact("StateEstimator", comArtifact);
-      
+      if (dynamicGraphicObjectsListRegistry != null)
+      {
+         DynamicGraphicPositionArtifact comArtifact = yoCenterOfMassPosition.createDynamicGraphicPosition("Meas CoM", 0.006, YoAppearance.Black(), GraphicType.CROSS).createArtifact();
+         dynamicGraphicObjectsListRegistry.registerArtifact("StateEstimator", comArtifact);
+      }
       parentRegistry.addChild(registry);
    }
 
