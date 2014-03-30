@@ -3,7 +3,7 @@ package us.ihmc.robotDataCommunication.logger.util;
 public class BMDCapture implements ExternalProgram
 {
    private static final String bmdCapture = ExternalProgramHelpers.extractExternalProgram(BMDCapture.class.getResource(
-         "bin/" + ExternalProgramHelpers.getOS() + "/bmdcapture" + ExternalProgramHelpers.getExecutableExtension()));
+         "bin/" + ExternalProgramHelpers.getOSNameAsString() + "/bmdcapture" + ExternalProgramHelpers.getExecutableExtension()));
    
    private final String path;
    

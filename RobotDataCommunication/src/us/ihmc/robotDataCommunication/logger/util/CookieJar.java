@@ -2,7 +2,7 @@ package us.ihmc.robotDataCommunication.logger.util;
 
 public class CookieJar implements ExternalProgram
 {
-   private static final String cookieJarSH = ExternalProgramHelpers.extractExternalProgram(CookieJar.class.getResource("bin/" + ExternalProgramHelpers.getOS()
+   private static final String cookieJarSH = ExternalProgramHelpers.extractExternalProgram(CookieJar.class.getResource("bin/" + ExternalProgramHelpers.getOSNameAsString()
          + "/cookiejar.sh"));
 
    private String host;

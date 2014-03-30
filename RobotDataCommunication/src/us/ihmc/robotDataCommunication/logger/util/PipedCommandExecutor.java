@@ -3,6 +3,7 @@ package us.ihmc.robotDataCommunication.logger.util;
 import java.io.IOException;
 import java.io.PrintStream;
 
+import us.ihmc.robotDataCommunication.logger.util.ExternalProgramHelpers.OS;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.processManagement.ProcessStreamGobbler;
 
@@ -27,7 +28,15 @@ public class PipedCommandExecutor
       }
 
       System.out.println("Running command " + cmd.toString());
-      processBuilder = new ProcessBuilder("sh", "-c", cmd.toString());
+      
+      if (ExternalProgramHelpers.getOS() == OS.WINDOWS)
+      {
+         processBuilder = new ProcessBuilder("cmd", "/C", cmd.toString());
+      }
+      else
+      {
+         processBuilder = new ProcessBuilder("sh", "-c", cmd.toString());
+      }
    }
 
    public void execute() throws IOException

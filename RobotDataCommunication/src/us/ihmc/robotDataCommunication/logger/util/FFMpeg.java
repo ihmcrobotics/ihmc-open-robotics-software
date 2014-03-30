@@ -1,12 +1,27 @@
 package us.ihmc.robotDataCommunication.logger.util;
 
+import us.ihmc.robotDataCommunication.logger.util.ExternalProgramHelpers.OS;
+
 public class FFMpeg implements ExternalProgram
 {
    /*
     * LibAV is broken with respect to timestamps, use ffmpeg version 2.0.2.
     */
-   private static final String builtinFFMpeg = ExternalProgramHelpers.extractExternalProgram(FFMpeg.class.getResource(
-         "bin/" + ExternalProgramHelpers.getOS() + "/ffmpeg" + ExternalProgramHelpers.getExecutableExtension()));
+   private static final String builtinFFMpeg;
+   static
+   {
+      String temp = ExternalProgramHelpers.extractExternalProgram(FFMpeg.class.getResource(
+            "bin/" + ExternalProgramHelpers.getOSNameAsString() + "/ffmpeg" + ExternalProgramHelpers.getExecutableExtension()));
+      if (ExternalProgramHelpers.getOS() == OS.WINDOWS)
+      {
+         // Windows doesn't handle the first slash in the absolute path string: "/C:/..."
+         builtinFFMpeg = temp.substring(1);
+      }
+      else
+      {
+         builtinFFMpeg = temp;
+      }
+   }
 
    private final String path;
 
