@@ -114,15 +114,16 @@ public class MassMatrixEstimatingToolRigidBody
       this.toolBody = new RigidBody("toolBody", inertia, toolJoint);
       
       TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), toolBody);
+      boolean doVelocityTerms = true;
       SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(toolBody, elevatorFrame,
-            ScrewTools.createGravitationalSpatialAcceleration(fullRobotModel.getElevator(), gravity), twistCalculator, true, true);
+            ScrewTools.createGravitationalSpatialAcceleration(fullRobotModel.getElevator(), gravity), twistCalculator, doVelocityTerms, doVelocityTerms);
       
       ArrayList<InverseDynamicsJoint> jointsToIgnore = new ArrayList<InverseDynamicsJoint>();
       jointsToIgnore.addAll(twistCalculator.getRootBody().getChildrenJoints());
       jointsToIgnore.remove(toolJoint);
       
       inverseDynamicsCalculator = new InverseDynamicsCalculator(ReferenceFrame.getWorldFrame(), new LinkedHashMap<RigidBody, Wrench>(),
-            jointsToIgnore, spatialAccelerationCalculator, twistCalculator);
+            jointsToIgnore, spatialAccelerationCalculator, twistCalculator, doVelocityTerms);
 
          
          
