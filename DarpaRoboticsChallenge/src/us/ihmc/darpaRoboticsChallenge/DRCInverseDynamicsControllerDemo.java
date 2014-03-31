@@ -50,8 +50,7 @@ public class DRCInverseDynamicsControllerDemo
    private final HumanoidRobotSimulation<SDFRobot> drcSimulation;
    private final DRCController drcController;
 
-   public DRCInverseDynamicsControllerDemo(WalkingControllerParameters drcControlParameters, ArmControllerParameters armControllerParameters, 
-                                    DRCRobotInterface robotInterface, DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
+   public DRCInverseDynamicsControllerDemo(DRCRobotInterface robotInterface, DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
                                     DRCSCSInitialSetup scsInitialSetup, AutomaticSimulationRunner automaticSimulationRunner,
                                     double timePerRecordTick, int simulationDataBufferSize, DRCRobotModel model)
    {
@@ -69,11 +68,14 @@ public class DRCInverseDynamicsControllerDemo
       else
          dynamicGraphicObjectsListRegistry = null;
       YoVariableRegistry registry = new YoVariableRegistry("adjustableParabolicTrajectoryDemoSimRegistry");
+      
+      WalkingControllerParameters walkingControlParameters = model.getWalkingControlParamaters();
+      ArmControllerParameters armControlParameters = model.getArmControllerParameters();
 
-      FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulation(drcControlParameters);
+      FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulation(walkingControlParameters);
       
       PolyvalentHighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory = new PolyvalentHighLevelHumanoidControllerFactory(null,
-            footstepTimingParameters, drcControlParameters, drcControlParameters, armControllerParameters, false, false, false, INVERSE_DYNAMICS_JOINT_CONTROL);
+            footstepTimingParameters, walkingControlParameters, walkingControlParameters, armControlParameters, false, false, false, INVERSE_DYNAMICS_JOINT_CONTROL);
 
       SideDependentList<String> footForceSensorNames = new SideDependentList<>();
       for(RobotSide robotSide : RobotSide.values)
@@ -146,11 +148,8 @@ public class DRCInverseDynamicsControllerDemo
       double initialYaw = 0.0;
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = model.getDefaultRobotInitialSetup(groundHeight + ROBOT_FLOATING_HEIGHT, initialYaw);
 
-      WalkingControllerParameters drcControlParameters = model.getWalkingControlParamaters();
-      ArmControllerParameters armControlParameters = model.getArmControllerParameters();
-      
-      new DRCInverseDynamicsControllerDemo(drcControlParameters, armControlParameters, robotInterface, robotInitialSetup, guiInitialSetup, scsInitialSetup,
-                                    automaticSimulationRunner, DRCConfigParameters.CONTROL_DT, 16000, model);
+      new DRCInverseDynamicsControllerDemo(robotInterface, robotInitialSetup, guiInitialSetup, scsInitialSetup, automaticSimulationRunner,
+            DRCConfigParameters.CONTROL_DT, 16000, model);
    }
 
    private class HoldRobotInTheAir implements RobotController
@@ -159,7 +158,7 @@ public class DRCInverseDynamicsControllerDemo
       
       private final ArrayList<ExternalForcePoint> externalForcePoints = new ArrayList<>();
       private final ArrayList<Vector3d> efp_offsetFromRootJoint = new ArrayList<>();
-      private final double dx = 0.0, dy = 0.12, dz = 0.4;
+      private final double dx = 0.05, dy = 0.12, dz = 0.4;
       
       private final ArrayList<Vector3d> initialPositions = new ArrayList<>();
 
@@ -194,9 +193,11 @@ public class DRCInverseDynamicsControllerDemo
          
          holdPelvisKp.set(5000.0);
          holdPelvisKv.set(GainCalculator.computeDampingForSecondOrderSystem(robotMass, holdPelvisKp.getDoubleValue(), 1.0));
-         
+
          efp_offsetFromRootJoint.add(new Vector3d(dx, dy, dz));
          efp_offsetFromRootJoint.add(new Vector3d(dx, -dy, dz));
+         efp_offsetFromRootJoint.add(new Vector3d(-dx, dy, dz));
+         efp_offsetFromRootJoint.add(new Vector3d(-dx, -dy, dz));
          
          for (int i = 0; i < efp_offsetFromRootJoint.size(); i++)
          {
