@@ -2,6 +2,8 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.robotSide.RobotSide;
@@ -41,19 +43,19 @@ public class InverseDynamicsJointController extends State<HighLevelState>
    private static final String CONTROLLER_PREFIX = "gravityComp_";
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   
+
    /** Simply add an external wrench on each foot to compensate for the robot weight when true */
    private static final boolean STAND_ON_FEET = false;
-   
+
    /** Specify if the controller uses the mass matrix for the PD controllers */
    private static final boolean USE_MASS_MATRIX = true;
-   
+
    /** Compensate for Coriolis and centrifugal terms */
    private static final boolean COMPENSATE_BIAS = false;
-   
+
    private final TwistCalculator twistCalculator;
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
-   
+
    private final FullRobotModel fullRobotModel;
    private final SixDoFJoint rootJoint;
    private final SideDependentList<RigidBody> feet = new SideDependentList<>();
@@ -61,12 +63,12 @@ public class InverseDynamicsJointController extends State<HighLevelState>
    private final InverseDynamicsJoint[] allJoints;
    private final RevoluteJoint[] allRevoluteJoints;
    private final SideDependentList<Wrench> footWrenches = new SideDependentList<>();
-   
+
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   
+
    private final double totalMass, gravityZ;
    private final FrameVector weightVector = new FrameVector();
-   
+
    private final DoubleYoVariable percentOfGravityCompensation = new DoubleYoVariable("percentOfGravityCompensation", registry);
 
    private final SpatialAccelerationVector desiredRootJointAcceleration;
@@ -74,24 +76,26 @@ public class InverseDynamicsJointController extends State<HighLevelState>
 
    private final DoubleYoVariable allJointGains = new DoubleYoVariable(CONTROLLER_PREFIX + "allJointGains", registry);
    private final DoubleYoVariable allJointZetas = new DoubleYoVariable(CONTROLLER_PREFIX + "allJointZetas", registry);
-   
+
    private final LinkedHashMap<RevoluteJoint, PDController> pdControllers = new LinkedHashMap<>();
    private final LinkedHashMap<RevoluteJoint, DoubleYoVariable> desiredJointPositions = new LinkedHashMap<>();
+   private final LinkedHashMap<RevoluteJoint, DoubleYoVariable> kpMap = new LinkedHashMap<>();
+   private final LinkedHashMap<RevoluteJoint, DoubleYoVariable> kpScaledMap = new LinkedHashMap<>();
+   private final LinkedHashMap<RevoluteJoint, DoubleYoVariable> zetaMap = new LinkedHashMap<>();
+   private final LinkedHashMap<RevoluteJoint, DoubleYoVariable> kdMap = new LinkedHashMap<>();
    private final LinkedHashMap<RevoluteJoint, DoubleYoVariable> tau_d_PDCtrlMap = new LinkedHashMap<>();
    private final LinkedHashMap<RevoluteJoint, DoubleYoVariable> qdd_dMap = new LinkedHashMap<>();
    private final LinkedHashMap<RevoluteJoint, DoubleYoVariable> tau_G_Map = new LinkedHashMap<>();
 
    private final LinkedHashMap<RevoluteJoint, DoubleYoVariable> individualJointGainScalingMap = new LinkedHashMap<>();
 
-   private final LinkedHashMap<RevoluteJoint, DoubleYoVariable> zetasMap = new LinkedHashMap<>();
-   
    private final DoubleYoVariable gainScaling = new DoubleYoVariable(CONTROLLER_PREFIX + "gainScaling", registry);
    private final DoubleYoVariable footForceScaling = new DoubleYoVariable(CONTROLLER_PREFIX + "footForceScaling", registry);
-   
+
    public InverseDynamicsJointController(FullRobotModel fullRobotModel, TwistCalculator twistCalculator, double gravityZ)
    {
       super(HighLevelState.INVERSE_DYNAMICS_JOINT_CONTROL);
-      
+
       gainScaling.set(0.0);
       gainScaling.addVariableChangedListener(new VariableChangedListener()
       {
@@ -101,20 +105,12 @@ public class InverseDynamicsJointController extends State<HighLevelState>
             gainScaling.set(MathTools.clipToMinMax(gainScaling.getDoubleValue(), 0.0, 1.0));
          }
       });
-      
+
       this.fullRobotModel = fullRobotModel;
-      
+
       this.gravityZ = gravityZ;
       this.percentOfGravityCompensation.set(0.0);
-      percentOfGravityCompensation.addVariableChangedListener(new VariableChangedListener()
-      {
-         @Override
-         public void variableChanged(YoVariable v)
-         {
-            percentOfGravityCompensation.set(MathTools.clipToMinMax(percentOfGravityCompensation.getDoubleValue(), -0.3, 1.3));
-         }
-      });
-      
+
       this.footForceScaling.set(0.0);
       footForceScaling.addVariableChangedListener(new VariableChangedListener()
       {
@@ -124,108 +120,64 @@ public class InverseDynamicsJointController extends State<HighLevelState>
             footForceScaling.set(MathTools.clipToMinMax(footForceScaling.getDoubleValue(), 0.0, 1.0));
          }
       });
-      
-      
+
       rootJoint = fullRobotModel.getRootJoint();
       desiredRootJointAcceleration = new SpatialAccelerationVector(rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(), rootJoint.getFrameAfterJoint());
-      
+
       this.twistCalculator = twistCalculator;
       SpatialAccelerationVector rootAcceleration = ScrewTools.createGravitationalSpatialAcceleration(twistCalculator.getRootBody(), 0.0);
       LinkedHashMap<RigidBody, Wrench> externalWrenches = new LinkedHashMap<RigidBody, Wrench>();
-      this.inverseDynamicsCalculator = new InverseDynamicsCalculator(worldFrame, rootAcceleration, externalWrenches,
-            new ArrayList<InverseDynamicsJoint>(), COMPENSATE_BIAS, false, twistCalculator);
-   
+      this.inverseDynamicsCalculator = new InverseDynamicsCalculator(worldFrame, rootAcceleration, externalWrenches, new ArrayList<InverseDynamicsJoint>(),
+            COMPENSATE_BIAS, USE_MASS_MATRIX, twistCalculator);
+
       this.totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
-      
+
       allJoints = ScrewTools.computeSupportAndSubtreeJoints(rootJoint.getSuccessor());
       allRevoluteJoints = ScrewTools.filterJoints(allJoints, RevoluteJoint.class);
-      
+
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBody foot = fullRobotModel.getFoot(robotSide);
          feet.put(robotSide, foot);
          footWrenches.put(robotSide, new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame()));
       }
-      
+
       for (int i = 0; i < allRevoluteJoints.length; i++)
       {
          final RevoluteJoint revoluteJoint = allRevoluteJoints[i];
 
          String prefix = CONTROLLER_PREFIX + revoluteJoint.getName();
-         
-         final PDController pdController = new PDController(prefix, registry);
+
+         DoubleYoVariable kp = new DoubleYoVariable(prefix + "_kp", registry);
+         kpMap.put(revoluteJoint, kp);
+
+         DoubleYoVariable kd = new DoubleYoVariable(prefix + "_kd", registry);
+         kdMap.put(revoluteJoint, kd);
+
+         DoubleYoVariable kpScaled = new DoubleYoVariable(prefix + "_kpScaled", registry);
+         kpScaledMap.put(revoluteJoint, kpScaled);
+
+         final PDController pdController = new PDController(kpScaled, kd, prefix, registry);
          pdControllers.put(revoluteJoint, pdController);
 
          DoubleYoVariable desiredJointPosition = new DoubleYoVariable(prefix + "_q_d", registry);
          desiredJointPositions.put(revoluteJoint, desiredJointPosition);
-         
+
          DoubleYoVariable tau_d_PDCtrl = new DoubleYoVariable(prefix + "_tau_d_PDCtrl", registry);
          tau_d_PDCtrlMap.put(revoluteJoint, tau_d_PDCtrl);
-         
+
          DoubleYoVariable qdd_d = new DoubleYoVariable(prefix + "_qdd_d", registry);
          qdd_dMap.put(revoluteJoint, qdd_d);
-         
+
          DoubleYoVariable tau_G = new DoubleYoVariable(prefix + "_tau_G", registry);
          tau_G_Map.put(revoluteJoint, tau_G);
-         
+
          final DoubleYoVariable zeta = new DoubleYoVariable(prefix + "_zeta", registry);
-         zeta.addVariableChangedListener(new VariableChangedListener()
-         {
-            @Override
-            public void variableChanged(YoVariable v)
-            {
-               double kd;
-               if (USE_MASS_MATRIX)
-                  kd = GainCalculator.computeDerivativeGain(pdController.getProportionalGain(), zeta.getDoubleValue());
-               else
-               {
-                  double mass = TotalMassCalculator.computeSubTreeMass(revoluteJoint.getSuccessor());
-                  kd = GainCalculator.computeDampingForSecondOrderSystem(mass, pdController.getProportionalGain(), zeta.getDoubleValue());
-               }
-               pdController.setDerivativeGain(kd);
-            }
-         });
-         zetasMap.put(revoluteJoint, zeta);
+         zetaMap.put(revoluteJoint, zeta);
+
+         DoubleYoVariable individualJointGainScaling = new DoubleYoVariable(prefix + "_gainScaling", registry);
+         individualJointGainScalingMap.put(revoluteJoint, individualJointGainScaling);
       }
-      
-      VariableChangedListener gainsChangedListener = new VariableChangedListener()
-      {
-         @Override
-         public void variableChanged(YoVariable v)
-         {
-            for (int i = 0; i < allRevoluteJoints.length; i++)
-            {
-               if (!USE_MASS_MATRIX)
-               {
-                  allJointGains.set(MathTools.clipToMinMax(allJointGains.getDoubleValue(), 0.0, 3.0));
-                  allJointZetas.set(MathTools.clipToMinMax(allJointZetas.getDoubleValue(), 0.0, 0.3));
-               }
-               
-               RevoluteJoint revoluteJoint = allRevoluteJoints[i];
-               PDController pdController = pdControllers.get(revoluteJoint);
-               double individualJointGainScaling = individualJointGainScalingMap.get(revoluteJoint).getDoubleValue();
-               
-               double kp = allJointGains.getDoubleValue() * gainScaling.getDoubleValue() * individualJointGainScaling;
-               double kd;
-               
-               zetasMap.get(revoluteJoint).set(allJointZetas.getDoubleValue(), false); // No need to call the changed listener
-               
-               if (USE_MASS_MATRIX)
-               {
-                  kd = GainCalculator.computeDerivativeGain(kp, allJointZetas.getDoubleValue());
-               }
-               else
-               {
-                  double mass = TotalMassCalculator.computeSubTreeMass(revoluteJoint.getSuccessor());
-                  kp *= mass;
-                  kd = GainCalculator.computeDampingForSecondOrderSystem(mass, kp, allJointZetas.getDoubleValue());
-               }
-               
-               pdController.setProportionalGain(kp);
-               pdController.setDerivativeGain(kd);
-            }
-         }
-      };
       
       if (USE_MASS_MATRIX)
       {
@@ -237,30 +189,94 @@ public class InverseDynamicsJointController extends State<HighLevelState>
          allJointGains.set(1.0);
          allJointZetas.set(0.02);
       }
-      allJointGains.addVariableChangedListener(gainsChangedListener);
-      allJointZetas.addVariableChangedListener(gainsChangedListener);
-      gainScaling.addVariableChangedListener(gainsChangedListener);
+      
+      setupVariableChangedListeners();
+   }
+
+   private void setupVariableChangedListeners()
+   {
+      allJointGains.addVariableChangedListener(createMapUpdater(kpMap, allJointGains));
+      allJointZetas.addVariableChangedListener(createMapUpdater(zetaMap, allJointZetas));
+      gainScaling.addVariableChangedListener(createMapUpdater(individualJointGainScalingMap, gainScaling));
+
+      allJointGains.notifyVariableChangedListeners();
+      allJointZetas.notifyVariableChangedListeners();
+      gainScaling.notifyVariableChangedListeners();
 
       for (int i = 0; i < allRevoluteJoints.length; i++)
       {
-         RevoluteJoint revoluteJoint = allRevoluteJoints[i];
-         String prefix = CONTROLLER_PREFIX + revoluteJoint.getName();
+         final RevoluteJoint revoluteJoint = allRevoluteJoints[i];
 
-         DoubleYoVariable individualJointGainScaling = new DoubleYoVariable(prefix + "_gainScaling", registry);
-         individualJointGainScaling.set(1.0);
-         individualJointGainScaling.addVariableChangedListener(gainsChangedListener);
-         individualJointGainScalingMap.put(revoluteJoint, individualJointGainScaling);
+         VariableChangedListener kpScaledUpdater = new VariableChangedListener()
+         {
+            @Override
+            public void variableChanged(YoVariable v)
+            {
+               DoubleYoVariable kpScaled = kpScaledMap.get(revoluteJoint);
+               DoubleYoVariable kp = kpMap.get(revoluteJoint);
+               DoubleYoVariable individualJointGainScaling = individualJointGainScalingMap.get(revoluteJoint);
+               
+               kpScaled.set(kp.getDoubleValue() * individualJointGainScaling.getDoubleValue());
+
+               if (!USE_MASS_MATRIX)
+                  kpScaled.mul(TotalMassCalculator.computeSubTreeMass(revoluteJoint.getSuccessor()));
+            }
+         };
+         
+         VariableChangedListener kdUpdater = new VariableChangedListener()
+         {
+            @Override
+            public void variableChanged(YoVariable v)
+            {
+               DoubleYoVariable kd = kdMap.get(revoluteJoint);
+               DoubleYoVariable kpScaled = kpScaledMap.get(revoluteJoint);
+               DoubleYoVariable zeta = zetaMap.get(revoluteJoint);
+
+               if (USE_MASS_MATRIX)
+               {
+                  kd.set(GainCalculator.computeDerivativeGain(kpScaled.getDoubleValue(), zeta.getDoubleValue()));
+               }
+               else
+               {
+                  double mass = TotalMassCalculator.computeSubTreeMass(revoluteJoint.getSuccessor());
+                  kd.set(GainCalculator.computeDampingForSecondOrderSystem(mass, kpScaled.getDoubleValue(), zeta.getDoubleValue()));
+               }
+            }
+         };
+         
+         individualJointGainScalingMap.get(revoluteJoint).addVariableChangedListener(kpScaledUpdater);
+         kpMap.get(revoluteJoint).addVariableChangedListener(kpScaledUpdater);
+         kpScaledMap.get(revoluteJoint).addVariableChangedListener(kdUpdater);
+         zetaMap.get(revoluteJoint).addVariableChangedListener(kdUpdater);
+         
+         kpScaledUpdater.variableChanged(null);
+         kdUpdater.variableChanged(null);
       }
-      
-      gainsChangedListener.variableChanged(null);
+   }
+
+   private <T> VariableChangedListener createMapUpdater(final Map<T, DoubleYoVariable> mapToUpdate, final DoubleYoVariable refVariable)
+   {
+      VariableChangedListener variableChangedListener = new VariableChangedListener()
+      {
+         private final List<T> keyList = new ArrayList<T>(mapToUpdate.keySet());
+
+         @Override
+         public void variableChanged(YoVariable v)
+         {
+            for (int i = 0; i < keyList.size(); i++)
+               mapToUpdate.get(keyList.get(i)).set(refVariable.getDoubleValue());
+         }
+      };
+      variableChangedListener.variableChanged(null);
+      return variableChangedListener;
    }
 
    private void initializeIDCalcultor()
    {
       inverseDynamicsCalculator.reset();
-      for(InverseDynamicsJoint joint : allJoints)
+      for (InverseDynamicsJoint joint : allJoints)
          joint.setDesiredAccelerationToZero();
-      
+
       desiredVerticalAccelerationVector.set(worldFrame, 0.0, 0.0, percentOfGravityCompensation.getDoubleValue() * gravityZ);
       desiredVerticalAccelerationVector.changeFrame(rootJoint.getFrameAfterJoint());
       desiredRootJointAcceleration.setLinearPart(desiredVerticalAccelerationVector.getVector());
@@ -273,7 +289,7 @@ public class InverseDynamicsJointController extends State<HighLevelState>
       computeGravityTorquesForViz();
 
       initializeIDCalcultor();
-      
+
       doPDControl();
 
       for (int i = 0; i < allRevoluteJoints.length; i++)
@@ -283,7 +299,7 @@ public class InverseDynamicsJointController extends State<HighLevelState>
          double qddDesired = qdd_dMap.get(revoluteJoint).getDoubleValue();
          revoluteJoint.setQddDesired(qddDesired);
       }
-      
+
       if (STAND_ON_FEET)
       {
          for (RobotSide robotSide : RobotSide.values)
@@ -299,7 +315,7 @@ public class InverseDynamicsJointController extends State<HighLevelState>
             inverseDynamicsCalculator.setExternalWrench(foot, footWrench);
          }
       }
-      
+
       twistCalculator.compute();
       inverseDynamicsCalculator.compute();
 
@@ -317,12 +333,12 @@ public class InverseDynamicsJointController extends State<HighLevelState>
       {
          RevoluteJoint revoluteJoint = allRevoluteJoints[i];
          PDController pdController = pdControllers.get(revoluteJoint);
-         
+
          double q = revoluteJoint.getQ();
          double q_d = desiredJointPositions.get(revoluteJoint).getDoubleValue();
          double qd = revoluteJoint.getQd();
          double qd_d = 0.0;
-         
+
          if (USE_MASS_MATRIX)
          {
             qdd_dMap.get(revoluteJoint).set(pdController.compute(q, q_d, qd, qd_d));
@@ -335,14 +351,14 @@ public class InverseDynamicsJointController extends State<HighLevelState>
          }
       }
    }
-   
+
    private void computeGravityTorquesForViz()
    {
       initializeIDCalcultor();
-      
+
       twistCalculator.compute();
       inverseDynamicsCalculator.compute();
-      
+
       for (int i = 0; i < allRevoluteJoints.length; i++)
       {
          RevoluteJoint revoluteJoint = allRevoluteJoints[i];
@@ -381,37 +397,42 @@ public class InverseDynamicsJointController extends State<HighLevelState>
 
          public static final SideDependentList<SliderBoardMode> armDesireds = new SideDependentList<>(LeftArmDesireds, RightArmDesireds);
       };
-      
-      private enum SliderBoardSubMode {Gains, Desireds}
+
+      private enum SliderBoardSubMode
+      {
+         Gains, Desireds
+      }
 
       private final EnumYoVariable<SliderBoardMode> sliderBoardMode;
       private final BooleanYoVariable sliderInGainsMode;
-      
+
       private final SliderBoardConfigurationManager sliderBoardConfigurationManager;
-      
+
       private final String lastSliderVarName;
       private final double lastSliderMinValue;
       private final double lastSliderMaxValue;
-      
+
       private final int maxNumberOfDofs = 7;
 
       private final double maxGains = USE_MASS_MATRIX ? 100.0 : 3.0;
       private final double maxZetas = USE_MASS_MATRIX ? 1.0 : 0.3;
-      
+
       private final YoVariableRegistry registry;
-      
+
       public GravityCompensationSliderBoard(SimulationConstructionSet scs, FullRobotModel fullRobotModel, YoVariableRegistry registry)
       {
          this(scs, fullRobotModel, registry, null, 0.0, 0.0);
       }
-      public GravityCompensationSliderBoard(SimulationConstructionSet scs, FullRobotModel fullRobotModel, YoVariableRegistry registry, String varNameForLastSlider, double varMinValue, double varMaxValue)
+
+      public GravityCompensationSliderBoard(SimulationConstructionSet scs, FullRobotModel fullRobotModel, YoVariableRegistry registry,
+            String varNameForLastSlider, double varMinValue, double varMaxValue)
       {
          this.registry = registry;
-         
+
          lastSliderVarName = varNameForLastSlider;
          lastSliderMinValue = varMinValue;
          lastSliderMaxValue = varMaxValue;
-         
+
          sliderBoardMode = new EnumYoVariable<SliderBoardMode>("sliderBoardMode", registry, SliderBoardMode.class);
          final EnumYoVariable<SliderBoardSubMode> sliderBoardSubMode = new EnumYoVariable<SliderBoardSubMode>("sliderBoardSubMode", registry, SliderBoardSubMode.class);
          sliderInGainsMode = new BooleanYoVariable("sliderInGainsMode", registry);
@@ -421,7 +442,7 @@ public class InverseDynamicsJointController extends State<HighLevelState>
          sliderBoardConfigurationManager.setSlider(2, CONTROLLER_PREFIX + "gainScaling", registry, 0.0, 1.0);
          sliderBoardConfigurationManager.setSlider(3, CONTROLLER_PREFIX + "allJointGains", registry, 0.0, maxGains);
          sliderBoardConfigurationManager.setSlider(4, CONTROLLER_PREFIX + "allJointZetas", registry, 0.0, maxZetas);
-         
+
          if (STAND_ON_FEET)
          {
             sliderBoardConfigurationManager.setSlider(5, CONTROLLER_PREFIX + "footForceScaling", registry, 0.0, 1.0);
@@ -466,7 +487,6 @@ public class InverseDynamicsJointController extends State<HighLevelState>
 
          setupJointSlidersAndKnobsForGains(spineAndNeckRevoluteJoints);
          finalizeConfiguration(currentMode, SliderBoardSubMode.Gains);
-         
 
          sliderInGainsMode.addVariableChangedListener(new VariableChangedListener()
          {
@@ -479,7 +499,6 @@ public class InverseDynamicsJointController extends State<HighLevelState>
                   sliderBoardSubMode.set(SliderBoardSubMode.Desireds);
             }
          });
-         
 
          VariableChangedListener variableChangedListener = new VariableChangedListener()
          {
@@ -487,7 +506,7 @@ public class InverseDynamicsJointController extends State<HighLevelState>
             public void variableChanged(YoVariable v)
             {
                sliderBoardConfigurationManager.loadConfiguration(sliderBoardMode.getEnumValue().toString() + sliderBoardSubMode.getEnumValue().toString());
-               
+
                if (sliderBoardMode.getEnumValue() == SliderBoardMode.WholeBody && !sliderInGainsMode.getBooleanValue())
                   sliderInGainsMode.set(true);
             }
@@ -512,7 +531,7 @@ public class InverseDynamicsJointController extends State<HighLevelState>
             RevoluteJoint revoluteJoint = revoluteJoints[i];
             double jointLimitLower = revoluteJoint.getJointLimitLower();
             double jointLimitUpper = revoluteJoint.getJointLimitUpper();
-            
+
             String varPrefix = CONTROLLER_PREFIX + revoluteJoint.getName();
             String q_d_varName = varPrefix + "_q_d";
             String jointGainScalingVarName = varPrefix + "_gainScaling";
@@ -533,9 +552,9 @@ public class InverseDynamicsJointController extends State<HighLevelState>
             }
 
             RevoluteJoint revoluteJoint = revoluteJoints[i];
-            
+
             String varPrefix = CONTROLLER_PREFIX + revoluteJoint.getName();
-            String kp_varName = "kp_" + varPrefix;
+            String kp_varName = varPrefix + "_kp";
             String zeta_varName = varPrefix + "_zeta";
 
             double subtreeMass = TotalMassCalculator.computeSubTreeMass(revoluteJoint.getSuccessor());
