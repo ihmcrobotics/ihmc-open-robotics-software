@@ -177,6 +177,78 @@ public class InverseDynamicsCalculatorTest
       doRobotDynamics(robot);
       assertAccelerationsEqual(jointMap);
    }
+
+   @Test
+   public void testDoingInverseDynamicsTermPerTerm()
+   {
+      Robot robot = new Robot("robot");
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+      LinkedHashMap<RevoluteJoint, PinJoint> jointMap = new LinkedHashMap<RevoluteJoint, PinJoint>();
+      LinkedHashMap<RevoluteJoint, Double> tau_gravity = new LinkedHashMap<RevoluteJoint, Double>();
+      LinkedHashMap<RevoluteJoint, Double> tau_cc = new LinkedHashMap<RevoluteJoint, Double>();
+      LinkedHashMap<RevoluteJoint, Double> tau_qdd = new LinkedHashMap<RevoluteJoint, Double>();
+      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new Transform3D());
+      RigidBody elevator = new RigidBody("elevator", elevatorFrame);
+      double gravity = -9.8;
+
+      int numberOfJoints = 100;
+      createRandomTreeRobotAndSetJointPositionsAndVelocities(robot, jointMap, worldFrame, elevator, numberOfJoints, gravity, true, true, random);
+
+      if (EXPLORE_AND_PRINT)
+      {
+         exploreAndPrintRobot(robot);
+         exploreAndPrintInverseDynamicsMechanism(elevator);
+      }
+
+      // gravity term
+      createInverseDynamicsCalculatorAndCompute(elevator, gravity, worldFrame, false, false);
+      for (RevoluteJoint joint : jointMap.keySet())
+         tau_gravity.put(joint, joint.getTau());
+      // coriolis/centrifugal term
+      createInverseDynamicsCalculatorAndCompute(elevator, 0.0, worldFrame, true, false);
+      for (RevoluteJoint joint : jointMap.keySet())
+         tau_cc.put(joint, joint.getTau());
+      // mass matrix times desired accelerations term
+      createInverseDynamicsCalculatorAndCompute(elevator, 0.0, worldFrame, false, true);
+      for (RevoluteJoint joint : jointMap.keySet())
+         tau_qdd.put(joint, joint.getTau());
+
+      for (RevoluteJoint joint : jointMap.keySet())
+         joint.setTau(tau_qdd.get(joint) + tau_cc.get(joint) + tau_gravity.get(joint));
+      
+      copyTorques(jointMap);
+      doRobotDynamics(robot);
+      assertAccelerationsEqual(jointMap);
+   }
+
+   @Test
+   public void testDoingNothing()
+   {
+      Robot robot = new Robot("robot");
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+      LinkedHashMap<RevoluteJoint, PinJoint> jointMap = new LinkedHashMap<RevoluteJoint, PinJoint>();
+      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new Transform3D());
+      RigidBody elevator = new RigidBody("elevator", elevatorFrame);
+      double gravity = -9.8;
+
+      int numberOfJoints = 100;
+      createRandomTreeRobotAndSetJointPositionsAndVelocities(robot, jointMap, worldFrame, elevator, numberOfJoints, gravity, true, true, random);
+
+      if (EXPLORE_AND_PRINT)
+      {
+         exploreAndPrintRobot(robot);
+         exploreAndPrintInverseDynamicsMechanism(elevator);
+      }
+
+      createInverseDynamicsCalculatorAndCompute(elevator, 0.0, worldFrame, false, false);
+      
+      double epsilon = 1e-12;
+      for (RevoluteJoint joint : jointMap.keySet())
+      {
+         double tau = joint.getTau();
+         assertEquals(0.0, tau, epsilon);
+      }
+   }
    
    @Test
    public void testGravityCompensationForChain()
@@ -195,7 +267,7 @@ public class InverseDynamicsCalculatorTest
       doRobotDynamics(robot);
       assertZeroAccelerations(jointMap);
    }
-   
+
    @Test
    public void testChainWithGravity()
    {
@@ -237,7 +309,12 @@ public class InverseDynamicsCalculatorTest
    private InverseDynamicsCalculator createInverseDynamicsCalculatorAndCompute(RigidBody elevator, double gravity, ReferenceFrame worldFrame, boolean doVelocityTerms, boolean doAcceleration)
    {
       TwistCalculator twistCalculator = new TwistCalculator(worldFrame, elevator);
-      InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, -gravity);
+      ReferenceFrame inertialFrame = ReferenceFrame.getWorldFrame();
+      SpatialAccelerationVector rootAcceleration = ScrewTools.createGravitationalSpatialAcceleration(twistCalculator.getRootBody(), -gravity);
+      LinkedHashMap<RigidBody, Wrench> externalWrenches = new LinkedHashMap<RigidBody, Wrench>();
+      ArrayList<InverseDynamicsJoint> jointsToIgnore = new ArrayList<InverseDynamicsJoint>();
+      InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(inertialFrame, rootAcceleration, externalWrenches, jointsToIgnore, doVelocityTerms, doAcceleration, twistCalculator);
+//      InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, -gravity);
       twistCalculator.compute();
       inverseDynamicsCalculator.compute();
       return inverseDynamicsCalculator;
