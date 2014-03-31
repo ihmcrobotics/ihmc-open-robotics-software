@@ -28,7 +28,7 @@ public class DRCRobotModelFactory
          AtlasRobotVersion atlasRobotVersion = AtlasRobotVersion.valueOf(robotModelAsString);
          if (atlasRobotVersion != null)
          {
-            return new AtlasRobotModel(atlasRobotVersion);
+            return new AtlasRobotModel(atlasRobotVersion, DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT);
          }
       }
       catch (Exception e)

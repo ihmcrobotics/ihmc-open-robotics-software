@@ -1,9 +1,9 @@
 package us.ihmc.darpaRoboticsChallenge.obstacleCourseTests;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.SimulationDoneCriterion;
-import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import static org.junit.Assert.assertTrue;
+
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
@@ -15,7 +15,9 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
 import us.ihmc.commonWalkingControlModules.packets.ComHeightPacket;
+import us.ihmc.darpaRoboticsChallenge.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.DRCDemo01StartingLocation;
+import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
@@ -23,15 +25,16 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
-import static org.junit.Assert.assertTrue;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import com.yobotics.simulationconstructionset.SimulationDoneCriterion;
+import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class DRCObstacleCourseFlatTest
 {
    private static final boolean KEEP_SCS_UP = false;
-   private static final DRCRobotModel robotModel = new AtlasRobotModel();
+
+   private static final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT);
 
    private static final boolean createMovie = BambooTools.doMovieCreation();
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();

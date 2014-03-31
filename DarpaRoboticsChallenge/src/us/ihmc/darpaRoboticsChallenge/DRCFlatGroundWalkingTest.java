@@ -101,10 +101,13 @@ public class DRCFlatGroundWalkingTest
    @Test
    public void testAtlasFlatGroundWalking() throws SimulationExceededMaximumTimeException
    {
+	  final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.DRC_NO_HANDS;
+	  final boolean RUNNING_ON_REAL_ROBOT = DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT;
+	  
       BambooTools.reportTestStartedMessage();
       
 
-      DRCRobotModel robotModel = new AtlasRobotModel();
+      DRCRobotModel robotModel = new AtlasRobotModel(ATLAS_ROBOT_VERSION, RUNNING_ON_REAL_ROBOT);
       DRCRobotInterface robotInterface = new PlainDRCRobot(robotModel);
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = new SquaredUpDRCRobotInitialSetup(0.0);
 

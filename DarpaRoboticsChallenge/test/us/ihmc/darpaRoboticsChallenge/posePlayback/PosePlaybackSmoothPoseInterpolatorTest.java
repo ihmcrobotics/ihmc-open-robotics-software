@@ -1,22 +1,26 @@
 package us.ihmc.darpaRoboticsChallenge.posePlayback;
 
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.AtlasRobotModel;
+import us.ihmc.darpaRoboticsChallenge.AtlasRobotVersion;
+import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.utilities.ThreadTools;
-import static org.junit.Assert.assertTrue;
+
+import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class PosePlaybackSmoothPoseInterpolatorTest
 {
    private static final boolean SHOW_GUI = true;
-   private static final DRCRobotModel robotModel = new AtlasRobotModel();
+   
+   private static final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT);
 
 
    @Test

@@ -5,18 +5,24 @@ import boofcv.alg.geo.calibration.PlanarCalibrationTarget;
 import boofcv.factory.calib.FactoryPlanarCalibrationTarget;
 import boofcv.misc.BoofMiscOps;
 import boofcv.struct.calib.IntrinsicParameters;
+
 import com.yobotics.simulationconstructionset.IndexChangedListener;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicCoordinateSystem;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePose;
+
 import georegression.struct.point.Point2D_F64;
 import georegression.struct.point.Vector3D_F64;
 import georegression.struct.se.Se3_F64;
+
 import org.ddogleg.optimization.FactoryOptimization;
 import org.ddogleg.optimization.UnconstrainedLeastSquares;
 import org.ddogleg.optimization.UtilOptimize;
+
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
+import us.ihmc.darpaRoboticsChallenge.AtlasRobotVersion;
+import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.MatrixTools;
@@ -32,6 +38,7 @@ import javax.swing.*;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
+
 import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -45,10 +52,11 @@ import java.util.*;
 import static java.lang.Double.parseDouble;
 
 public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
-{
+{   
    public static String TARGET_TO_CAMERA_KEY = "targetToCamera";
    public static String CAMERA_IMAGE_KEY = "cameraImage";
    public static String CHESSBOARD_DETECTIONS_KEY = "chessboardDetections";
+   
 
    public static final boolean useLeftArm = false;
 
@@ -71,9 +79,9 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
    private PlanarCalibrationTarget calibGrid = FactoryPlanarCalibrationTarget.gridChess(
          DetectChessboardInKinematicsData.boardWidth, DetectChessboardInKinematicsData.boardHeight, 0.03);
 
-   public AtlasHeadLoopKinematicCalibrator()
+   public AtlasHeadLoopKinematicCalibrator(AtlasRobotVersion atlasVersion, boolean runningOnRealRobot)
    {
-      super();
+      super(atlasVersion, runningOnRealRobot);
       ypLeftEE = new YoFramePoint("leftEE", ReferenceFrame.getWorldFrame(), registry);
       ypRightEE = new YoFramePoint("rightEE", ReferenceFrame.getWorldFrame(), registry);
       yposeLeftEE = new YoFramePose("leftPoseEE", "", ReferenceFrame.getWorldFrame(), registry);
@@ -464,7 +472,9 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
 
    public static void main(String[] arg) throws InterruptedException, IOException
    {
-      AtlasHeadLoopKinematicCalibrator calib = new AtlasHeadLoopKinematicCalibrator();
+	  final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.DRC_NO_HANDS;
+	  final boolean RUNNING_ON_REAL_ROBOT = DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT;
+      AtlasHeadLoopKinematicCalibrator calib = new AtlasHeadLoopKinematicCalibrator(ATLAS_ROBOT_VERSION, RUNNING_ON_REAL_ROBOT);
       calib.loadData("data/armCalibratoin20131209/calibration_right");
       calib.optimizeData();
 

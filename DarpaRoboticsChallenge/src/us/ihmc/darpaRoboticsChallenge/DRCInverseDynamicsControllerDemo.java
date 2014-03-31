@@ -41,7 +41,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPositi
 
 public class DRCInverseDynamicsControllerDemo
 {
-   private static final DRCRobotModel defaultModelForGraphicSelector = new AtlasRobotModel();
+   private static final DRCRobotModel defaultModelForGraphicSelector = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT);
 
    private static final double ROBOT_FLOATING_HEIGHT = 0.3;
 

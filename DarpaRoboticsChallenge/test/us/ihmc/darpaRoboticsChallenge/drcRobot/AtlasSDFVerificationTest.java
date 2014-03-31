@@ -11,6 +11,8 @@ import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.bambooTools.BambooTools;
+import us.ihmc.darpaRoboticsChallenge.AtlasRobotVersion;
+import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
@@ -36,6 +38,8 @@ import static org.junit.Assert.assertTrue;
 public class AtlasSDFVerificationTest
 {
    private static final boolean KEEP_SCS_UP = false;
+   private static final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.DRC_NO_HANDS;
+   private static final boolean RUNNING_ON_REAL_ROBOT = DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT;
 
    private static final boolean CREATE_MOVIE = BambooTools.doMovieCreation();
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
@@ -88,7 +92,7 @@ public class AtlasSDFVerificationTest
    {
       BambooTools.reportTestStartedMessage();
 
-      DRCRobotModel selectedModel = new AtlasRobotModel();
+      DRCRobotModel selectedModel = new AtlasRobotModel(ATLAS_ROBOT_VERSION, RUNNING_ON_REAL_ROBOT);
       DRCRobotJointMap jointMap = selectedModel.getJointMap();
       JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(jointMap, false);
       SDFRobot sdfRobot = loader.createRobot(jointMap, true);

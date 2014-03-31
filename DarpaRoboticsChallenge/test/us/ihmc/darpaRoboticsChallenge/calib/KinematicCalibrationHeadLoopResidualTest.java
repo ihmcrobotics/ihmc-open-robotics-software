@@ -15,6 +15,8 @@ import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
+import us.ihmc.darpaRoboticsChallenge.AtlasRobotVersion;
+import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
@@ -40,14 +42,13 @@ import static org.junit.Assert.assertTrue;
  */
 public class KinematicCalibrationHeadLoopResidualTest
 {
-
    Random random = new Random(23234);
 
    IntrinsicParameters intrinsic;
    PlanarCalibrationTarget calibGrid = FactoryPlanarCalibrationTarget.gridChess(
          DetectChessboardInKinematicsData.boardWidth, DetectChessboardInKinematicsData.boardHeight, 0.03);
 
-   DRCRobotModel robotModel = new AtlasRobotModel();
+   DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT);
    DRCRobotJointMap jointMap = robotModel.getJointMap();
    JaxbSDFLoader robotLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
    SDFFullRobotModel fullRobotModel = robotLoader.createFullRobotModel(jointMap);
