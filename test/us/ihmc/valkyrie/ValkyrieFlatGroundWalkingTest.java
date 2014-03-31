@@ -16,10 +16,12 @@ import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSi
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
+import us.ihmc.darpaRoboticsChallenge.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCController;
 import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTrack;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
+import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotInterface;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
@@ -108,10 +110,13 @@ public class ValkyrieFlatGroundWalkingTest
    @Test
    public void testAtlasFlatGroundWalking() throws SimulationExceededMaximumTimeException
    {
+	  final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.DRC_NO_HANDS;
+	  final boolean RUNNING_ON_REAL_ROBOT = DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT;
+	   
       BambooTools.reportTestStartedMessage();
       
 
-      DRCRobotModel robotModel = new AtlasRobotModel();
+      DRCRobotModel robotModel = new AtlasRobotModel(ATLAS_ROBOT_VERSION, RUNNING_ON_REAL_ROBOT);
       DRCRobotInterface robotInterface = new PlainDRCRobot(robotModel);
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = new SquaredUpDRCRobotInitialSetup(0.0);
 
