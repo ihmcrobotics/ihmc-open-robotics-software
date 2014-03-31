@@ -22,7 +22,6 @@ public class AtlasPhysicalProperties extends DRCRobotPhysicalProperties
    public static final double shinLength = 0.374;
    public static final double thighLength = 0.422;
 
-   static
    {
       armJointLimits.put(ArmJointName.SHOULDER_PITCH, new Pair<Double, Double>(-2 * Math.PI, 2 * Math.PI));
       armJointLimits.put(ArmJointName.SHOULDER_ROLL, new Pair<Double, Double>(-2 * Math.PI, 2 * Math.PI));
