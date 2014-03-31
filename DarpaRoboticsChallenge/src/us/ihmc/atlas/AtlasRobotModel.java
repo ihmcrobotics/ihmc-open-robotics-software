@@ -26,16 +26,6 @@ public class AtlasRobotModel implements DRCRobotModel
    
    private final boolean runningOnRealRobot;
 
-   public AtlasRobotModel()
-   {
-      this(AtlasRobotVersion.DRC_NO_HANDS);
-   }
-
-   public AtlasRobotModel(AtlasRobotVersion atlasVersion)
-   {
-      this(atlasVersion, DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT);
-   }
-
    public AtlasRobotModel(AtlasRobotVersion atlasVersion, boolean runningOnRealRobot)
    {
       selectedVersion = atlasVersion;

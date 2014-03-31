@@ -37,7 +37,7 @@ public class DRCFlatGroundRewindabilityTest
    private static final double totalTimeToTest = 10.0;
    private static final double timeToTickAhead = 1.5;
    private static final double timePerTick = 0.01;
-   private static final DRCRobotModel robotModel = new AtlasRobotModel();
+   private static final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT);
 
    @Before
    public void setUp() throws Exception

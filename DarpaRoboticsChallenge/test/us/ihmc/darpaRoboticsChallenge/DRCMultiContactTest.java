@@ -121,13 +121,15 @@ public class DRCMultiContactTest {
  
    private AtlasMultiContact setupSimulation()
    {
+	  final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS;
+	  final boolean RUNNING_ON_REAL_ROBOT = DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT;
       AutomaticSimulationRunner automaticSimulationRunner = null;
       DRCGuiInitialSetup guiInitialSetup = createGUIInitialSetup();
 
       double timePerRecordTick = DRCConfigParameters.CONTROL_DT;
       int simulationDataBufferSize = 16000;
       
-      AtlasMultiContact drcMultiContact = new AtlasMultiContact(new AtlasRobotModel(AtlasRobotVersion.ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS), guiInitialSetup, automaticSimulationRunner, timePerRecordTick,
+      AtlasMultiContact drcMultiContact = new AtlasMultiContact(new AtlasRobotModel(ATLAS_ROBOT_VERSION, RUNNING_ON_REAL_ROBOT), guiInitialSetup, automaticSimulationRunner, timePerRecordTick,
               simulationDataBufferSize, MultiContactTask.DEFAULT);
       SimulationConstructionSet scs = drcMultiContact.getSimulationConstructionSet();
 

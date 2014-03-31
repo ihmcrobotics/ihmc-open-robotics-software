@@ -26,6 +26,8 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.Sim
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.TurningThenStraightFootstepGenerator;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
+import us.ihmc.darpaRoboticsChallenge.AtlasRobotVersion;
+import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
@@ -45,12 +47,15 @@ public class DRCRobotBasedFootstepGeneratorTest
    private static final double eps = 1e-7;
    private final static boolean VISUALIZE = false;
    private final static boolean SIDESTEP = false;
+   private static final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.DRC_NO_HANDS;
+   private static final boolean RUNNING_ON_REAL_ROBOT = DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT;
    public static final ReferenceFrame WORLD_FRAME = ReferenceFrames.getWorldFrame();
    private List<Footstep> footSteps = new ArrayList<Footstep>();
    private FullRobotModel fullRobotModel;
    private ReferenceFrames referenceFrames;
    private SideDependentList<ContactablePlaneBody> bipedFeet;
    private WalkingControllerParameters walkingParamaters;
+   
 
 
    @Before
@@ -163,7 +168,7 @@ public class DRCRobotBasedFootstepGeneratorTest
 
    private void setupRobotParameters()
    {
-      DRCRobotModel robotModel = new AtlasRobotModel();
+      DRCRobotModel robotModel = new AtlasRobotModel(ATLAS_ROBOT_VERSION, RUNNING_ON_REAL_ROBOT);
       DRCRobotJointMap jointMap = robotModel.getJointMap();
       JaxbSDFLoader jaxbSDFLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
       walkingParamaters = robotModel.getWalkingControlParamaters();

@@ -29,8 +29,8 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 import com.yobotics.simulationconstructionset.util.ground.BumpyGroundProfile;
 
 public class DRCFlatGroundWalkingTrack
-{
-   private static final DRCRobotModel defaultModelForGraphicSelector = new AtlasRobotModel();
+{   
+   private static final DRCRobotModel defaultModelForGraphicSelector = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT);
    
    private static final boolean USE_BUMPY_GROUND = false;
    

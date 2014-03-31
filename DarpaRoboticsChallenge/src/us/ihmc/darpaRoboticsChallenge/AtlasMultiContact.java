@@ -37,6 +37,9 @@ import com.yobotics.simulationconstructionset.util.inputdevices.MidiSliderBoard;
 
 public class AtlasMultiContact
 {
+   private static final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.DRC_NO_HANDS;
+   private static final boolean RUNNING_ON_REAL_ROBOT = DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT;
+   
    private final HumanoidRobotSimulation<SDFRobot> drcSimulation;
    private final MultiContactTestEnvironment environment;
    private final SimulationConstructionSet simulationConstructionSet;
@@ -174,7 +177,7 @@ public class AtlasMultiContact
 
       double timePerRecordTick = DRCConfigParameters.CONTROL_DT;
       int simulationDataBufferSize = 16000;
-      new AtlasMultiContact(new AtlasRobotModel(AtlasRobotVersion.ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS), guiInitialSetup, automaticSimulationRunner, timePerRecordTick,
+      new AtlasMultiContact(new AtlasRobotModel(ATLAS_ROBOT_VERSION, RUNNING_ON_REAL_ROBOT), guiInitialSetup, automaticSimulationRunner, timePerRecordTick,
                           simulationDataBufferSize, MultiContactTask.DEFAULT);
    }
 

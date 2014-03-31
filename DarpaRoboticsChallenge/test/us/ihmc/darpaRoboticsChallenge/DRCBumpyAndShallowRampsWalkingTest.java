@@ -45,7 +45,7 @@ public class DRCBumpyAndShallowRampsWalkingTest
 {
    private static final boolean ALWAYS_SHOW_GUI = false;
    private static final boolean KEEP_SCS_UP = false;
-   private static final DRCRobotModel robotModel = new AtlasRobotModel();
+   private static final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT);
 
    private static final boolean CREATE_MOVIE = BambooTools.doMovieCreation();
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();

@@ -11,6 +11,8 @@ import java.util.Map;
 import org.apache.tools.zip.ZipFile;
 
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
+import us.ihmc.darpaRoboticsChallenge.AtlasRobotVersion;
+import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -32,9 +34,9 @@ public class AtlasCalibrationDataViewer extends AtlasKinematicCalibrator
    Map<String, DoubleYoVariable> yoQout = new HashMap<>();
    Map<String, DoubleYoVariable> yoQdiff = new HashMap<>();
 
-   public AtlasCalibrationDataViewer()
+   public AtlasCalibrationDataViewer(AtlasRobotVersion atlasVersion, boolean runningOnRealRobot)
    {
-      super();
+      super(atlasVersion, runningOnRealRobot);
       ypLeftEE = new YoFramePoint("leftEE", ReferenceFrame.getWorldFrame(), registry);
       ypRightEE = new YoFramePoint("rightEE", ReferenceFrame.getWorldFrame(), registry);
       yposeLeftEE = new YoFramePose("leftPoseEE", "", ReferenceFrame.getWorldFrame(), registry);
@@ -162,7 +164,10 @@ public class AtlasCalibrationDataViewer extends AtlasKinematicCalibrator
     */
    public static void main(String[] args)
    {
-      AtlasWristLoopKinematicCalibrator calib = new AtlasWristLoopKinematicCalibrator();
+	  final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.DRC_NO_HANDS;
+	  final boolean RUNNING_ON_REAL_ROBOT = DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT;
+	  
+      AtlasWristLoopKinematicCalibrator calib = new AtlasWristLoopKinematicCalibrator(ATLAS_ROBOT_VERSION, RUNNING_ON_REAL_ROBOT);
       calib.loadData("data/manip_motions/log4.zip");
       calib.createQoutYoVariables();
 

@@ -35,7 +35,7 @@ import us.ihmc.utilities.test.JUnitTools;
 public class NumericalInverseKinematicsCalculatorWithRobotTest
 {
    private static final long seed = 1391092L;
-   private static final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_SANDIA_HANDS);
+   private static final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_SANDIA_HANDS, DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT);
    private static final Random randomNumberGenerator = new Random(seed);
    private static final ArrayList<Double> shoulderRollLimits = new ArrayList<Double>();
    private static final ArrayList<Double> elbowRollLimits = new ArrayList<Double>();
