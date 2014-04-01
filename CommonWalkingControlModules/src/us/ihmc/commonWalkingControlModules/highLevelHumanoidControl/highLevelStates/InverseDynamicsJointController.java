@@ -7,18 +7,26 @@ import java.util.Map;
 
 import javax.vecmath.Point3d;
 
+import org.apache.commons.lang.mutable.MutableDouble;
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolver;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TrajectoryBasedNumericalInverseKinematicsCalculator;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.YoOrientationProvider;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.plotting.Artifact;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -42,7 +50,10 @@ import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.GainCalculator;
 import com.yobotics.simulationconstructionset.util.PDController;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
 import com.yobotics.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePose;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionProvider;
@@ -59,7 +70,7 @@ public class InverseDynamicsJointController extends State<HighLevelState>
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    /** Specify if the feet are controlled in taskspace or in jointspace */
-   private static final boolean CONTROL_FEET_IN_TASKSPACE = false;
+   private static final boolean CONTROL_FEET_IN_TASKSPACE = true;
    
    /** Simply add an external wrench on each foot to compensate for the robot weight when true */
    private static final boolean STAND_ON_FEET = false;
@@ -87,7 +98,6 @@ public class InverseDynamicsJointController extends State<HighLevelState>
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final double totalMass, gravityZ;
-   private final FrameVector weightVector = new FrameVector();
 
    private final DoubleYoVariable percentOfGravityCompensation = new DoubleYoVariable("percentOfGravityCompensation", registry);
 
@@ -123,10 +133,39 @@ public class InverseDynamicsJointController extends State<HighLevelState>
    private final DoubleYoVariable gainScaling = new DoubleYoVariable(CONTROLLER_PREFIX + "gainScaling", registry);
    private final DoubleYoVariable footForceScaling = new DoubleYoVariable(CONTROLLER_PREFIX + "footForceScaling", registry);
 
-   public InverseDynamicsJointController(FullRobotModel fullRobotModel, TwistCalculator twistCalculator, double gravityZ, double controlDT)
+   private final DoubleYoVariable kpCoM = new DoubleYoVariable(CONTROLLER_PREFIX + "kpCoM", registry);
+   private final DoubleYoVariable kdCoM = new DoubleYoVariable(CONTROLLER_PREFIX + "kdCoM", registry);
+
+   private final FramePoint centerOfMass = new FramePoint();
+   private final FrameVector centerOfMassVelocity = new FrameVector();
+
+   private final CenterOfPressureResolver centerOfPressureResolver = new CenterOfPressureResolver();
+   private final FramePoint2d tempCoP2d = new FramePoint2d();
+   private final FramePoint tempCoP = new FramePoint();
+   private final SideDependentList<YoFramePoint> cops = new SideDependentList<>();
+
+   private final CommonWalkingReferenceFrames referenceFrames;
+   
+   private final BipedSupportPolygons bipedSupportPolygons;
+   private final SideDependentList<List<FramePoint>> footContactPoints = new SideDependentList<List<FramePoint>>();
+   
+   private final MomentumBasedController momentumBasedController;
+   
+   private final SideDependentList<BooleanYoVariable> mirroredLegGains = new SideDependentList<>();
+   
+   public InverseDynamicsJointController(MomentumBasedController momentumBasedController, BipedSupportPolygons bipedSupportPolygons, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       super(HighLevelState.INVERSE_DYNAMICS_JOINT_CONTROL);
 
+      this.referenceFrames = momentumBasedController.getReferenceFrames();
+      this.bipedSupportPolygons = bipedSupportPolygons;
+      this.momentumBasedController = momentumBasedController;
+      
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         footContactPoints.put(robotSide, momentumBasedController.getContactablePlaneFeet().get(robotSide).getContactPointsCopy());
+      }
+      
       gainScaling.set(0.0);
       gainScaling.addVariableChangedListener(new VariableChangedListener()
       {
@@ -137,9 +176,9 @@ public class InverseDynamicsJointController extends State<HighLevelState>
          }
       });
 
-      this.fullRobotModel = fullRobotModel;
+      this.fullRobotModel = momentumBasedController.getFullRobotModel();
 
-      this.gravityZ = gravityZ;
+      this.gravityZ = momentumBasedController.getGravityZ();
       this.percentOfGravityCompensation.set(0.0);
 
       this.footForceScaling.set(0.0);
@@ -155,7 +194,7 @@ public class InverseDynamicsJointController extends State<HighLevelState>
       rootJoint = fullRobotModel.getRootJoint();
       desiredRootJointAcceleration = new SpatialAccelerationVector(rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(), rootJoint.getFrameAfterJoint());
 
-      this.twistCalculator = twistCalculator;
+      this.twistCalculator = momentumBasedController.getTwistCalculator();
       SpatialAccelerationVector rootAcceleration = ScrewTools.createGravitationalSpatialAcceleration(twistCalculator.getRootBody(), 0.0);
       LinkedHashMap<RigidBody, Wrench> externalWrenches = new LinkedHashMap<RigidBody, Wrench>();
       this.inverseDynamicsCalculator = new InverseDynamicsCalculator(worldFrame, rootAcceleration, externalWrenches, new ArrayList<InverseDynamicsJoint>(),
@@ -176,6 +215,18 @@ public class InverseDynamicsJointController extends State<HighLevelState>
 
          RevoluteJoint[] legRevoluteJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(pelvis, feet.get(robotSide)), RevoluteJoint.class);
          legsRevoluteJoints.put(robotSide, legRevoluteJoints);
+         
+         YoFramePoint cop = new YoFramePoint(CONTROLLER_PREFIX + robotSide.getCamelCaseNameForMiddleOfExpression() + "CoPDesired", worldFrame, registry);
+         cops.put(robotSide, cop);
+         
+         if (dynamicGraphicObjectsListRegistry != null)
+         {
+            Artifact artifact = cop.createDynamicGraphicPosition(CONTROLLER_PREFIX + robotSide.getCamelCaseNameForMiddleOfExpression() + "CoP", 0.005, YoAppearance.Brown(), GraphicType.BALL_WITH_CROSS).createArtifact();
+            dynamicGraphicObjectsListRegistry.registerArtifact(CONTROLLER_PREFIX + "CoP", artifact);
+         }
+         
+         BooleanYoVariable copyGainsToOppositeSide = new BooleanYoVariable(CONTROLLER_PREFIX + "copyLegGainsTo" + robotSide.getOppositeSide().getCamelCaseNameForMiddleOfExpression() + "Side", registry);
+         mirroredLegGains.put(robotSide, copyGainsToOppositeSide);
       }
 
       for (int i = 0; i < allRevoluteJoints.length; i++)
@@ -225,6 +276,9 @@ public class InverseDynamicsJointController extends State<HighLevelState>
          allJointGains.set(1.0);
          allJointZetas.set(0.02);
       }
+
+      kpCoM.set(200.0);
+      kdCoM.set(100.0);
       
       if (CONTROL_FEET_IN_TASKSPACE)
       {
@@ -239,7 +293,7 @@ public class InverseDynamicsJointController extends State<HighLevelState>
 
             ConstantPoseTrajectoryGenerator constantPoseTrajectoryGenerator = new ConstantPoseTrajectoryGenerator(orientationProvider, positionProvider);
             
-            TrajectoryBasedNumericalInverseKinematicsCalculator footIKCalculator = new TrajectoryBasedNumericalInverseKinematicsCalculator(pelvis, foot, controlDT,
+            TrajectoryBasedNumericalInverseKinematicsCalculator footIKCalculator = new TrajectoryBasedNumericalInverseKinematicsCalculator(pelvis, foot, momentumBasedController.getControlDT(),
                   twistCalculator, new YoVariableRegistry("dummy"), null);
             footIKCalculator.setTrajectory(constantPoseTrajectoryGenerator, constantPoseTrajectoryGenerator, foot.getBodyFixedFrame());
 
@@ -382,9 +436,33 @@ public class InverseDynamicsJointController extends State<HighLevelState>
       fullRobotModel.getRootJoint().setDesiredAcceleration(desiredRootJointAcceleration);
    }
    
+   private final SideDependentList<MutableDouble> comDistanceFromFeet = new SideDependentList<>(new MutableDouble(), new MutableDouble());
+   private final FramePoint tempPoint = new FramePoint();
+   
    @Override
    public void doAction()
    {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         if (!mirroredLegGains.get(robotSide).getBooleanValue())
+            break;
+
+         for (int i = 0; i < legsRevoluteJoints.get(robotSide).length; i++)
+         {
+            RevoluteJoint jointThisSide = legsRevoluteJoints.get(robotSide)[i];
+            RevoluteJoint jointOppSide = legsRevoluteJoints.get(robotSide.getOppositeSide())[i];
+
+            double zetaThisSide = zetaMap.get(jointThisSide).getDoubleValue();
+            zetaMap.get(jointOppSide).set(zetaThisSide);
+
+            double kpThisSide = kpMap.get(jointThisSide).getDoubleValue();
+            kpMap.get(jointOppSide).set(kpThisSide);
+         }
+      }
+      
+      bipedSupportPolygons.update(footContactPoints);
+      momentumBasedController.callUpdatables();
+      
       computeGravityTorquesForViz();
 
       initializeIDCalcultor();
@@ -418,16 +496,52 @@ public class InverseDynamicsJointController extends State<HighLevelState>
 
       if (STAND_ON_FEET)
       {
+         ReferenceFrame centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            centerOfMass.setToZero(centerOfMassFrame);
+            ReferenceFrame footFrame = feet.get(robotSide).getBodyFixedFrame();
+            centerOfMass.changeFrame(footFrame);
+            tempPoint.setToZero(footFrame);
+            
+            comDistanceFromFeet.get(robotSide).setValue(centerOfMass.getXYplaneDistance(tempPoint));
+         }
+         
          for (RobotSide robotSide : RobotSide.values)
          {
             RigidBody foot = feet.get(robotSide);
+            ReferenceFrame footFrame = foot.getBodyFixedFrame();
+            ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
 
-            weightVector.set(worldFrame, 0.0, 0.0, totalMass * gravityZ / 2.0 * footForceScaling.getDoubleValue());
-            weightVector.changeFrame(foot.getBodyFixedFrame());
+            centerOfMass.setToZero(centerOfMassFrame);
+            centerOfMass.changeFrame(midFeetZUpFrame);
 
             Wrench footWrench = footWrenches.get(robotSide);
-            footWrench.setLinearPart(weightVector.getVector());
+            double percentOfLoad = comDistanceFromFeet.get(robotSide).doubleValue() / (comDistanceFromFeet.get(robotSide).doubleValue() + comDistanceFromFeet.get(robotSide.getOppositeSide()).doubleValue());
+            percentOfLoad = 1.0 - MathTools.clipToMinMax(percentOfLoad, 0.0, 1.0);
+            percentOfLoad = MathTools.clipToMinMax(2.0 * (percentOfLoad - 0.5) + 0.5, 0.0, 1.0);
+            double fz = totalMass * gravityZ * percentOfLoad * footForceScaling.getDoubleValue();
+            
+            footWrench.setToZero(footFrame, centerOfMassFrame);
+            footWrench.setLinearPartZ(fz);
+            footWrench.changeFrame(footFrame);
 
+            momentumBasedController.getCenterOfMassJacobian().packCenterOfMassVelocity(centerOfMassVelocity);
+            centerOfMass.changeFrame(midFeetZUpFrame);
+            centerOfMassVelocity.changeFrame(midFeetZUpFrame);
+            
+            footWrench.setAngularPartX((kpCoM.getDoubleValue() * centerOfMass.getY() + kdCoM.getDoubleValue() * centerOfMassVelocity.getY()) * footForceScaling.getDoubleValue());
+            footWrench.setAngularPartY(footWrench.getAngularPartY() - (kpCoM.getDoubleValue() * centerOfMass.getX() + kdCoM.getDoubleValue() * centerOfMassVelocity.getX()) * footForceScaling.getDoubleValue());
+            footWrench.setAngularPartZ(0.0);
+            
+            centerOfPressureResolver.resolveCenterOfPressureAndNormalTorque(tempCoP2d, footWrench, footFrame);
+            tempCoP.changeFrame(tempCoP2d.getReferenceFrame());
+            tempCoP.setXY(tempCoP2d);
+            tempCoP.setZ(0.0);
+            tempCoP.changeFrame(worldFrame);
+            tempCoP.setZ(0.0);
+            cops.get(robotSide).set(tempCoP);
+            
             inverseDynamicsCalculator.setExternalWrench(foot, footWrench);
          }
       }
@@ -637,8 +751,8 @@ public class InverseDynamicsJointController extends State<HighLevelState>
 
       private final int maxNumberOfDofs = 7;
 
-      private final double maxGains = USE_MASS_MATRIX ? 100.0 : 3.0;
-      private final double maxZetas = USE_MASS_MATRIX ? 1.0 : 0.3;
+      private final double maxGains = USE_MASS_MATRIX ? 100.0 : 10.0;
+      private final double maxZetas = USE_MASS_MATRIX ? 1.0 : 0.5;
 
       private final YoVariableRegistry registry;
 
@@ -703,7 +817,7 @@ public class InverseDynamicsJointController extends State<HighLevelState>
                setupJointSlidersAndKnobsForDesireds(legRevoluteJoints);
                finalizeConfiguration(currentMode, SliderBoardSubMode.Desireds);
             }
-            setupJointSlidersAndKnobsForGains(legRevoluteJoints);
+            setupJointSlidersAndKnobsForGains(robotSide, legRevoluteJoints);
             finalizeConfiguration(currentMode, SliderBoardSubMode.Gains);
          }
 
@@ -717,7 +831,7 @@ public class InverseDynamicsJointController extends State<HighLevelState>
             setupJointSlidersAndKnobsForDesireds(armRevoluteJoints);
             finalizeConfiguration(currentMode, SliderBoardSubMode.Desireds);
 
-            setupJointSlidersAndKnobsForGains(armRevoluteJoints);
+            setupJointSlidersAndKnobsForGains(null, armRevoluteJoints);
             finalizeConfiguration(currentMode, SliderBoardSubMode.Gains);
          }
 
@@ -728,7 +842,7 @@ public class InverseDynamicsJointController extends State<HighLevelState>
          setupJointSlidersAndKnobsForDesireds(spineAndNeckRevoluteJoints);
          finalizeConfiguration(currentMode, SliderBoardSubMode.Desireds);
 
-         setupJointSlidersAndKnobsForGains(spineAndNeckRevoluteJoints);
+         setupJointSlidersAndKnobsForGains(null, spineAndNeckRevoluteJoints);
          finalizeConfiguration(currentMode, SliderBoardSubMode.Gains);
 
          sliderInGainsMode.addVariableChangedListener(new VariableChangedListener()
@@ -756,15 +870,18 @@ public class InverseDynamicsJointController extends State<HighLevelState>
                
                if (CONTROL_FEET_IN_TASKSPACE)
                {
-                  if (sliderBoardMode.valueEquals(SliderBoardMode.WholeBody) || sliderBoardSubMode.valueEquals(SliderBoardSubMode.Gains))
+                  if ((!sliderBoardMode.valueEquals(SliderBoardMode.LeftLeg) && !sliderBoardMode.valueEquals(SliderBoardMode.RightLeg)) || sliderBoardSubMode.valueEquals(SliderBoardSubMode.Gains))
                   {
                      inMirroredMode.set(false, false);
                      controlMode.set(null, false);
                   }
                   else if (sliderBoardSubMode.valueEquals(SliderBoardSubMode.Desireds) && controlMode.getEnumValue() == null)
                   {
-                     inMirroredMode.set(false, false);
-                     controlMode.set(ControlMode.Normal, false);
+                     if (sliderBoardMode.valueEquals(SliderBoardMode.LeftLeg) || sliderBoardMode.valueEquals(SliderBoardMode.RightLeg))
+                     {
+                        inMirroredMode.set(false, false);
+                        controlMode.set(ControlMode.Normal, false);
+                     }
                   }
                }
 
@@ -886,7 +1003,7 @@ public class InverseDynamicsJointController extends State<HighLevelState>
          }
       }
 
-      private void setupJointSlidersAndKnobsForGains(RevoluteJoint[] revoluteJoints)
+      private void setupJointSlidersAndKnobsForGains(RobotSide robotSide, RevoluteJoint[] revoluteJoints)
       {
          for (int i = 0; i < revoluteJoints.length; i++)
          {
@@ -905,6 +1022,9 @@ public class InverseDynamicsJointController extends State<HighLevelState>
             double subtreeMass = TotalMassCalculator.computeSubTreeMass(revoluteJoint.getSuccessor());
             sliderBoardConfigurationManager.setSlider(i + 1, kp_varName, registry, 0.0, subtreeMass * maxGains);
             sliderBoardConfigurationManager.setKnob(i + 1, zeta_varName, registry, 0.0, maxZetas);
+
+            if (robotSide != null)
+               sliderBoardConfigurationManager.setButton(3, CONTROLLER_PREFIX + "copyLegGainsTo" + robotSide.getOppositeSide().getCamelCaseNameForMiddleOfExpression() + "Side", registry);
          }
       }
       
@@ -915,6 +1035,7 @@ public class InverseDynamicsJointController extends State<HighLevelState>
             sliderBoardConfigurationManager.setSlider(8, lastSliderVarName, registry, lastSliderMinValue, lastSliderMaxValue);
          sliderBoardConfigurationManager.setKnob(8, sliderBoardMode, 0.0, SliderBoardMode.values().length);
          sliderBoardConfigurationManager.setButton(1, sliderInGainsMode);
+
          StringBuilder configurationName = new StringBuilder();
          for (T mode : modes)
             configurationName.append(mode.toString());

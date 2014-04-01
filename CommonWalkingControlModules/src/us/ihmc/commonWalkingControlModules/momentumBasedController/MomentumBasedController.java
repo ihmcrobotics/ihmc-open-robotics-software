@@ -530,7 +530,7 @@ public class MomentumBasedController
       }
    }
 
-   private void callUpdatables()
+   public void callUpdatables()
    {
       double time = yoTime.getDoubleValue();
       for (Updatable updatable : updatables)

@@ -97,7 +97,7 @@ public class DRCInverseDynamicsControllerDemo
       drcSimulation.getRobot().setController(controller);
       controller.initialize();
       
-      new InverseDynamicsJointController.GravityCompensationSliderBoard(getSimulationConstructionSet(), drcController.getControllerModel(), getSimulationConstructionSet().getRootRegistry());
+      new InverseDynamicsJointController.GravityCompensationSliderBoard(getSimulationConstructionSet(), drcController.getControllerModel(), getSimulationConstructionSet().getRootRegistry(), "desiredHeight", 0.5, 2.0);
       
       if (automaticSimulationRunner != null)
       {
@@ -164,6 +164,7 @@ public class DRCInverseDynamicsControllerDemo
 
       private final DoubleYoVariable holdPelvisKp = new DoubleYoVariable("holdPelvisKp", registry);
       private final DoubleYoVariable holdPelvisKv = new DoubleYoVariable("holdPelvisKv", registry);
+      private final DoubleYoVariable desiredHeight = new DoubleYoVariable("desiredHeight", registry);
       private final double robotMass, robotWeight;
       
       private final SDFRobot robot;
@@ -219,12 +220,16 @@ public class DRCInverseDynamicsControllerDemo
       public void initialize()
       {
          robot.update();
-         
+         desiredHeight.set(0.0);
          for (int i = 0; i < efp_offsetFromRootJoint.size(); i++)
          {
             externalForcePoints.get(i).getYoPosition().getPoint3d(initialPositions.get(i));
+            desiredHeight.add(initialPositions.get(i).z / initialPositions.size());
             efp_positionViz.get(i).update();
          }
+         
+         for (int i = 0; i < efp_offsetFromRootJoint.size(); i++)
+            initialPositions.get(i).setZ(desiredHeight.getDoubleValue());
          
          doControl();
       }
@@ -238,10 +243,13 @@ public class DRCInverseDynamicsControllerDemo
       {
          for (int i = 0; i < efp_offsetFromRootJoint.size(); i++)
          {
+            initialPositions.get(i).setZ(desiredHeight.getDoubleValue());
+            
             ExternalForcePoint efp = externalForcePoints.get(i);
             efp.getYoPosition().getPoint3d(proportionalTerm);
             proportionalTerm.sub(initialPositions.get(i));
             proportionalTerm.scale(-holdPelvisKp.getDoubleValue());
+            proportionalTerm.setZ(Math.max(proportionalTerm.getZ(), 0.0));
             
             efp.getYoVelocity().get(derivativeTerm);
             derivativeTerm.scale(- holdPelvisKv.getDoubleValue());
@@ -249,7 +257,7 @@ public class DRCInverseDynamicsControllerDemo
             pdControlOutput.add(proportionalTerm, derivativeTerm);
             
             efp.setForce(pdControlOutput);
-            efp.fz.add(robotWeight / efp_offsetFromRootJoint.size());
+//            efp.fz.add(robotWeight / efp_offsetFromRootJoint.size());
 
             efp_positionViz.get(i).update();
          }
