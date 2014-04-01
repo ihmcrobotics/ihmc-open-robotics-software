@@ -1,96 +1,128 @@
 LeftHipRotator:
-    kp: 94.48818897637796
-    kd: 2.3622047244094517
+    kp: 50.0
+    kd: 2.0
+    ki: 0.0
 LeftHipAdductor:
-    kp: 157.48031496062993
-    kd: 5.511811023622052
+    kp: 75.0
+    kd: 3.0
+    ki: 0.0    
 LeftHipExtensor:
-    kp: 677.1653543307086
-    kd: 2.0
+    kp: 300.0
+    kd: 1.0
+    ki: 0.0    
 LeftKneeExtensor:
-    kp: 456.6929133858268
-    kd: 3.5
+    kp: 200.0
+    kd: 1.5
+    ki: 0.0    
 LeftAnkleExtensor:
-    kp: 1000.0
+    kp: 100.0
     kd: 0.0
+    ki: 0.0    
 LeftAnkle:
-    kp: 503.93700787401576
+    kp: 100.0
     kd: 0.0
+    ki: 0.0    
 RightHipRotator:
-    kp: 94.48818897637796
-    kd: 2.3622047244094517
-RightHipAdductor:
-    kp: 157.48031496062993
-    kd: 5.511811023622052
-RightHipExtensor:
-    kp: 677.1653543307086
+    kp: 50.0
     kd: 2.0
+    ki: 0.0    
+RightHipAdductor:
+    kp: 75.0
+    kd: 3.0
+    ki: 0.0    
+RightHipExtensor:
+    kp: 300.0
+    kd: 1.0
+    ki: 0.0    
 RightKneeExtensor:
-    kp: 456.6929133858268
-    kd: 3.5
+    kp: 200.0
+    kd: 1.5
+    ki: 0.0    
 RightAnkleExtensor:
-    kp: 1000.0
+    kp: 100.0
     kd: 0.0
+    ki: 0.0    
 RightAnkle:
-    kp: 503.93700787401576
+    kp: 100.0
     kd: 0.0
+    ki: 0.0    
 WaistRotator:
     kp: 75.0
     kd: 0.8
+    ki: 0.0
 WaistExtensor:
-    kp: 500.0
+    kp: 100.0
     kd: 1.6
+    ki: 0.0    
 WaistLateralExtensor:
-    kp: 150.0
+    kp: 100.0
     kd: 1.2
+    ki: 0.0    
 LeftShoulderExtensor:
     kp: 100.0
     kd: 1.6
+    ki: 0.0    
 LeftShoulderAdductor:
     kp: 110.0
     kd: 2.4
+    ki: 0.0    
 LeftShoulderSupinator:
     kp: 50.0
     kd: 1.6
+    ki: 0.0    
 LeftElbowExtensor:
     kp: 100.0
     kd: 1.6
+    ki: 0.0    
 LeftForearmSupinator:
     kp: 0.0
     kd: 0.0
+    ki: 0.0    
 LeftWristExtensor:
     kp: 0.0
     kd: 0.0
+    ki: 0.0    
 LeftWrist:
     kp: 0.0
     kd: 0.0
+    ki: 0.0    
 LowerNeckExtensor:
     kp: 0.0
     kd: 0.0
+    ki: 0.0    
 NeckRotator:
     kp: 0.0
     kd: 0.0
+    ki: 0.0    
 UpperNeckExtensor:
     kp: 0.0
     kd: 0.0
+    ki: 0.0    
 RightShoulderExtensor:
     kp: 100.0
     kd: 1.6
+    ki: 0.0    
 RightShoulderAdductor:
     kp: 110.0
     kd: 2.4
+    ki: 0.0    
 RightShoulderSupinator:
     kp: 50.0
     kd: 1.6
+    ki: 0.0    
 RightElbowExtensor:
     kp: 100.0
     kd: 1.6
+    ki: 0.0    
 RightForearmSupinator:
     kp: 0.0
     kd: 0.0
+    ki: 0.0    
 RightWristExtensor:
     kp: 0.0
     kd: 0.0
+    ki: 0.0    
 RightWrist:
     kp: 0.0
     kd: 0.0
+    ki: 0.0
