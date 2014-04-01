@@ -100,14 +100,12 @@ public class DesiredHandPoseProvider implements ObjectConsumer<HandPosePacket>
          }
          
          Map<OneDoFJoint, Double> finalDesiredJointAngleMap = finalDesiredJointAngleMaps.get(robotSide);
-         int i = -1;
-         //XXX: this is an ugly hack that Nathan implemented to fix Bamboo on 4/1/14 and needs to fix ASAP!!!
-         if(object.getJointAngles() == null)
-        	 object.jontAngles = new double[fullRobotModel.getRobotSpecificJointNames().getArmJointNames().length];
-         for(ArmJointName jointName : fullRobotModel.getRobotSpecificJointNames().getArmJointNames())
-         {
-        	 finalDesiredJointAngleMap.put(fullRobotModel.getArmJoint(robotSide, jointName), object.getJointAngles()[++i]);
-         }
+         finalDesiredJointAngleMap.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_PITCH), object.shoulderPitch);
+         finalDesiredJointAngleMap.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_ROLL), object.shoulderRoll);
+         finalDesiredJointAngleMap.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH), object.elbowPitch);
+         finalDesiredJointAngleMap.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_ROLL), object.elbowRoll);
+         finalDesiredJointAngleMap.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.WRIST_PITCH), object.wristPitch);
+         finalDesiredJointAngleMap.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.WRIST_ROLL), object.wristRoll);
       }
 
       return desiredHandPoses.get(robotSide);
