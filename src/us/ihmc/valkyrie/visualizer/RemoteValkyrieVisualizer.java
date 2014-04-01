@@ -27,7 +27,8 @@ public class RemoteValkyrieVisualizer
       ValkyrieJointMap jointMap = new ValkyrieJointMap();
       JaxbSDFLoader robotLoader = ValkyrieSDFLoader.loadValkyrieRobot(false);
 
-      SliderBoardFactory sliderBoardFactory = ValkyrieSliderBoard.getIDControllerSliderBoardFactory();
+//      SliderBoardFactory sliderBoardFactory = ValkyrieSliderBoard.getIDControllerSliderBoardFactory();
+      SliderBoardFactory sliderBoardFactory = new StandPrepSliderBoardFactory();
 
       SCSYoVariablesUpdatedListener scsYoVariablesUpdatedListener = new ValkyrieSliderBoardControllerListener(robotLoader, jointMap, bufferSize, sliderBoardFactory);
 
