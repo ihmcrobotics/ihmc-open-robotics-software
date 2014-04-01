@@ -28,6 +28,8 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
  */
 public class HandPosePacketTransformerTest
 {
+	private static final int NUMBER_OF_ARM_JOINTS = 6;
+	
    @Test
    public void testTransformHandPosePacket()
    {
@@ -55,15 +57,13 @@ public class HandPosePacketTransformerTest
          Point3d point3d = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
          double trajectoryTime = RandomTools.generateRandomDouble(random, 1.0, 10.0);
 
-         double randomShoulderPitchAngle = RandomTools.generateRandomDouble(random, -2 * Math.PI, 2 * Math.PI);
-         double randomShoulderRollAngle = RandomTools.generateRandomDouble(random, -2 * Math.PI, 2 * Math.PI);
-         double randomElbowPitchAngle = RandomTools.generateRandomDouble(random, -2 * Math.PI, 2 * Math.PI);
-         double randomElbowRollAngle = RandomTools.generateRandomDouble(random, -2 * Math.PI, 2 * Math.PI);
-         double randomWristPitchAngle = RandomTools.generateRandomDouble(random, -2 * Math.PI, 2 * Math.PI);
-         double randomWristRollAngle = RandomTools.generateRandomDouble(random, -2 * Math.PI, 2 * Math.PI);
+         double[] jointAngles = new double[NUMBER_OF_ARM_JOINTS];
+         for(int j = 0; j < NUMBER_OF_ARM_JOINTS; j++)
+         {
+        	 jointAngles[j] = RandomTools.generateRandomDouble(random, -2 * Math.PI, 2 * Math.PI);
+         }
 
-         HandPosePacket starting = new HandPosePacket(robotSide, frame, point3d, quat, i % 2 == 1, trajectoryTime, randomShoulderPitchAngle,
-                                      randomShoulderRollAngle, randomElbowPitchAngle, randomElbowRollAngle, randomWristPitchAngle, randomWristRollAngle);
+         HandPosePacket starting = new HandPosePacket(robotSide, frame, point3d, quat, i % 2 == 1, trajectoryTime, jointAngles);
 
          transform3D = RandomTools.generateRandomTransform(random);
 
