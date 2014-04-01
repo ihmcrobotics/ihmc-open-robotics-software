@@ -5,10 +5,21 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.vecmath.Point3d;
+
+import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TrajectoryBasedNumericalInverseKinematicsCalculator;
+import us.ihmc.commonWalkingControlModules.trajectories.OrientationProvider;
+import us.ihmc.commonWalkingControlModules.trajectories.PoseTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.trajectories.YoOrientationProvider;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
+import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
@@ -32,7 +43,10 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.GainCalculator;
 import com.yobotics.simulationconstructionset.util.PDController;
 import com.yobotics.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePose;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
+import com.yobotics.simulationconstructionset.util.trajectory.PositionProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.YoPositionProvider;
 
 /**
  * Simple controller using an inverse dynamics calculator. Mainly used to check gravity compensation, and simple controls while having the robot hanging in the air.
@@ -44,11 +58,14 @@ public class InverseDynamicsJointController extends State<HighLevelState>
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
+   /** Specify if the feet are controlled in taskspace or in jointspace */
+   private static final boolean CONTROL_FEET_IN_TASKSPACE = false;
+   
    /** Simply add an external wrench on each foot to compensate for the robot weight when true */
    private static final boolean STAND_ON_FEET = false;
 
    /** Specify if the controller uses the mass matrix for the PD controllers */
-   private static final boolean USE_MASS_MATRIX = true;
+   private static final boolean USE_MASS_MATRIX = false;
 
    /** Compensate for Coriolis and centrifugal terms */
    private static final boolean COMPENSATE_BIAS = false;
@@ -58,7 +75,10 @@ public class InverseDynamicsJointController extends State<HighLevelState>
 
    private final FullRobotModel fullRobotModel;
    private final SixDoFJoint rootJoint;
+   
+   private final RigidBody pelvis;
    private final SideDependentList<RigidBody> feet = new SideDependentList<>();
+   private final SideDependentList<RevoluteJoint[]> legsRevoluteJoints = new SideDependentList<>();
 
    private final InverseDynamicsJoint[] allJoints;
    private final RevoluteJoint[] allRevoluteJoints;
@@ -87,12 +107,23 @@ public class InverseDynamicsJointController extends State<HighLevelState>
    private final LinkedHashMap<RevoluteJoint, DoubleYoVariable> qdd_dMap = new LinkedHashMap<>();
    private final LinkedHashMap<RevoluteJoint, DoubleYoVariable> tau_G_Map = new LinkedHashMap<>();
 
+   private final SideDependentList<YoFramePose> desiredFootPoses = CONTROL_FEET_IN_TASKSPACE ? new SideDependentList<YoFramePose>() : null;
+   private final SideDependentList<TrajectoryBasedNumericalInverseKinematicsCalculator> footIKCalculators = 
+         CONTROL_FEET_IN_TASKSPACE ? new SideDependentList<TrajectoryBasedNumericalInverseKinematicsCalculator>() : null;
+   
+   private final BooleanYoVariable initializeMirrorDesireds;
+   private final YoFramePose desiredMirroredFootPose;
+   private final FramePose tempFramePose = new FramePose();
+   
+   private final Point3d mirroredXYZ = new Point3d();
+   private final double[] mirroredYawPitchRoll = new double[]{0.0, 0.0, 0.0};
+
    private final LinkedHashMap<RevoluteJoint, DoubleYoVariable> individualJointGainScalingMap = new LinkedHashMap<>();
 
    private final DoubleYoVariable gainScaling = new DoubleYoVariable(CONTROLLER_PREFIX + "gainScaling", registry);
    private final DoubleYoVariable footForceScaling = new DoubleYoVariable(CONTROLLER_PREFIX + "footForceScaling", registry);
 
-   public InverseDynamicsJointController(FullRobotModel fullRobotModel, TwistCalculator twistCalculator, double gravityZ)
+   public InverseDynamicsJointController(FullRobotModel fullRobotModel, TwistCalculator twistCalculator, double gravityZ, double controlDT)
    {
       super(HighLevelState.INVERSE_DYNAMICS_JOINT_CONTROL);
 
@@ -128,18 +159,23 @@ public class InverseDynamicsJointController extends State<HighLevelState>
       SpatialAccelerationVector rootAcceleration = ScrewTools.createGravitationalSpatialAcceleration(twistCalculator.getRootBody(), 0.0);
       LinkedHashMap<RigidBody, Wrench> externalWrenches = new LinkedHashMap<RigidBody, Wrench>();
       this.inverseDynamicsCalculator = new InverseDynamicsCalculator(worldFrame, rootAcceleration, externalWrenches, new ArrayList<InverseDynamicsJoint>(),
-            COMPENSATE_BIAS, USE_MASS_MATRIX, twistCalculator);
+            COMPENSATE_BIAS, true, twistCalculator);
 
       this.totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
 
       allJoints = ScrewTools.computeSupportAndSubtreeJoints(rootJoint.getSuccessor());
       allRevoluteJoints = ScrewTools.filterJoints(allJoints, RevoluteJoint.class);
 
+      pelvis = fullRobotModel.getPelvis();
+      
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBody foot = fullRobotModel.getFoot(robotSide);
          feet.put(robotSide, foot);
          footWrenches.put(robotSide, new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame()));
+
+         RevoluteJoint[] legRevoluteJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(pelvis, feet.get(robotSide)), RevoluteJoint.class);
+         legsRevoluteJoints.put(robotSide, legRevoluteJoints);
       }
 
       for (int i = 0; i < allRevoluteJoints.length; i++)
@@ -188,6 +224,35 @@ public class InverseDynamicsJointController extends State<HighLevelState>
       {
          allJointGains.set(1.0);
          allJointZetas.set(0.02);
+      }
+      
+      if (CONTROL_FEET_IN_TASKSPACE)
+      {
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            YoFramePose desiredFootPose = new YoFramePose(CONTROLLER_PREFIX + "desried" + robotSide.getCamelCaseNameForMiddleOfExpression() + "Foot", "", pelvis.getBodyFixedFrame(), registry);
+            desiredFootPoses.put(robotSide, desiredFootPose);
+
+            RigidBody foot = feet.get(robotSide);
+            PositionProvider positionProvider = new YoPositionProvider(desiredFootPose.getPosition());
+            OrientationProvider orientationProvider = new YoOrientationProvider(desiredFootPose.getOrientation());
+
+            ConstantPoseTrajectoryGenerator constantPoseTrajectoryGenerator = new ConstantPoseTrajectoryGenerator(orientationProvider, positionProvider);
+            
+            TrajectoryBasedNumericalInverseKinematicsCalculator footIKCalculator = new TrajectoryBasedNumericalInverseKinematicsCalculator(pelvis, foot, controlDT,
+                  twistCalculator, new YoVariableRegistry("dummy"), null);
+            footIKCalculator.setTrajectory(constantPoseTrajectoryGenerator, constantPoseTrajectoryGenerator, foot.getBodyFixedFrame());
+
+            footIKCalculators.put(robotSide, footIKCalculator);
+         }
+         
+         initializeMirrorDesireds = new BooleanYoVariable(CONTROLLER_PREFIX + "initializeMirrorDesireds", registry);
+         desiredMirroredFootPose = new YoFramePose(CONTROLLER_PREFIX + "desriedMirroredFoot", "", pelvis.getBodyFixedFrame(), registry);
+      }
+      else
+      {
+         initializeMirrorDesireds = null;
+         desiredMirroredFootPose = null;
       }
       
       setupVariableChangedListeners();
@@ -252,6 +317,40 @@ public class InverseDynamicsJointController extends State<HighLevelState>
          kpScaledUpdater.variableChanged(null);
          kdUpdater.variableChanged(null);
       }
+      
+      if (CONTROL_FEET_IN_TASKSPACE)
+      {
+         initializeMirrorDesireds.addVariableChangedListener(new VariableChangedListener()
+         {
+            @Override
+            public void variableChanged(YoVariable v)
+            {
+               if (initializeMirrorDesireds.getBooleanValue())
+                  initializeMirrorDesireds.set(false, false);
+               else
+                  return;
+
+               desiredFootPoses.get(RobotSide.LEFT).getFramePoseIncludingFrame(tempFramePose);
+               desiredMirroredFootPose.set(tempFramePose, false);
+            }
+         });
+         
+         desiredMirroredFootPose.attachVariableChangedListener(new VariableChangedListener()
+         {
+            @Override
+            public void variableChanged(YoVariable v)
+            {
+               for (RobotSide robotSide : RobotSide.values)
+               {
+                  desiredMirroredFootPose.getPosition().getPoint(mirroredXYZ);
+                  desiredFootPoses.get(robotSide).setXYZ(mirroredXYZ.x, robotSide.negateIfRightSide(mirroredXYZ.y), mirroredXYZ.z);
+                  
+                  desiredMirroredFootPose.getOrientation().getYawPitchRoll(mirroredYawPitchRoll);
+                  desiredFootPoses.get(robotSide).setYawPitchRoll(robotSide.negateIfRightSide(mirroredYawPitchRoll[0]), mirroredYawPitchRoll[1], robotSide.negateIfRightSide(mirroredYawPitchRoll[2]));
+               }
+            }
+         });
+      }
    }
 
    private <T> VariableChangedListener createMapUpdater(final Map<T, DoubleYoVariable> mapToUpdate, final DoubleYoVariable refVariable)
@@ -282,7 +381,7 @@ public class InverseDynamicsJointController extends State<HighLevelState>
       desiredRootJointAcceleration.setLinearPart(desiredVerticalAccelerationVector.getVector());
       fullRobotModel.getRootJoint().setDesiredAcceleration(desiredRootJointAcceleration);
    }
-
+   
    @Override
    public void doAction()
    {
@@ -290,6 +389,23 @@ public class InverseDynamicsJointController extends State<HighLevelState>
 
       initializeIDCalcultor();
 
+      if (CONTROL_FEET_IN_TASKSPACE)
+      {
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            TrajectoryBasedNumericalInverseKinematicsCalculator footIKCalculator = footIKCalculators.get(robotSide);
+            footIKCalculator.compute(0.0);
+            DenseMatrix64F desiredJointAngles = footIKCalculator.getDesiredJointAngles();
+
+            RevoluteJoint[] legRevoluteJoints = legsRevoluteJoints.get(robotSide);
+            for (int i = 0; i < legRevoluteJoints.length; i++)
+            {
+               RevoluteJoint legJoint = legRevoluteJoints[i];
+               desiredJointPositions.get(legJoint).set(desiredJointAngles.get(i, 0));
+            }
+         }
+      }
+      
       doPDControl();
 
       for (int i = 0; i < allRevoluteJoints.length; i++)
@@ -375,6 +491,18 @@ public class InverseDynamicsJointController extends State<HighLevelState>
          DoubleYoVariable q_d = desiredJointPositions.get(revoluteJoint);
          q_d.set(revoluteJoint.getQ());
       }
+      
+      if (!CONTROL_FEET_IN_TASKSPACE)
+         return;
+      
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         FramePose currentFootPose = new FramePose(feet.get(robotSide).getBodyFixedFrame());
+         currentFootPose.changeFrame(pelvis.getBodyFixedFrame());
+         
+         desiredFootPoses.get(robotSide).set(currentFootPose);
+         footIKCalculators.get(robotSide).initialize();
+      }
    }
 
    @Override
@@ -386,25 +514,120 @@ public class InverseDynamicsJointController extends State<HighLevelState>
    {
       return registry;
    }
+   
+   private class ConstantPoseTrajectoryGenerator implements PoseTrajectoryGenerator
+   {
+      private final OrientationProvider orientationProvider;
+      private final PositionProvider positionProvider;
+      
+      private final ReferenceFrame referenceFrame;
+
+      public ConstantPoseTrajectoryGenerator(OrientationProvider orientationProvider, PositionProvider positionProvider)
+      {
+         FrameOrientation orientation = new FrameOrientation();
+         orientationProvider.get(orientation);
+         FramePoint position = new FramePoint();
+         positionProvider.get(position);
+         
+         position.checkReferenceFrameMatch(orientation);
+         
+         this.referenceFrame = position.getReferenceFrame();
+         this.orientationProvider = orientationProvider;
+         this.positionProvider = positionProvider;
+      }
+      
+      @Override
+      public void initialize()
+      {
+      }
+
+      @Override
+      public void compute(double time)
+      {
+      }
+
+      @Override
+      public boolean isDone()
+      {
+         return false;
+      }
+
+      @Override
+      public void get(FramePoint positionToPack)
+      {
+         positionProvider.get(positionToPack);
+      }
+
+      @Override
+      public void packVelocity(FrameVector velocityToPack)
+      {
+         velocityToPack.setToZero(referenceFrame);
+      }
+
+      @Override
+      public void packAcceleration(FrameVector accelerationToPack)
+      {
+         accelerationToPack.setToNaN(referenceFrame);
+      }
+
+      @Override
+      public void packLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+      {
+         get(positionToPack);
+         packVelocity(velocityToPack);
+         packAcceleration(accelerationToPack);
+      }
+
+      @Override
+      public void get(FrameOrientation orientationToPack)
+      {
+         orientationProvider.get(orientationToPack);
+      }
+
+      @Override
+      public void packAngularVelocity(FrameVector angularVelocityToPack)
+      {
+         angularVelocityToPack.setToZero(referenceFrame);
+      }
+
+      @Override
+      public void packAngularAcceleration(FrameVector angularAccelerationToPack)
+      {
+         angularAccelerationToPack.setToZero(referenceFrame);
+      }
+
+      @Override
+      public void packAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
+      {
+         get(orientationToPack);
+         packAngularVelocity(angularVelocityToPack);
+         packAngularAcceleration(angularAccelerationToPack);
+      }
+   }
 
    public static class GravityCompensationSliderBoard
    {
       private enum SliderBoardMode
       {
-         WholeBody, LeftLegDesireds, RightLegDesireds, LeftArmDesireds, RightArmDesireds, SpineNeckDesireds;
+         WholeBody, LeftLeg, RightLeg, LeftArm, RightArm, SpineNeck;
 
-         public static final SideDependentList<SliderBoardMode> legDesireds = new SideDependentList<>(LeftLegDesireds, RightLegDesireds);
+         public static final SideDependentList<SliderBoardMode> legs = new SideDependentList<>(LeftLeg, RightLeg);
 
-         public static final SideDependentList<SliderBoardMode> armDesireds = new SideDependentList<>(LeftArmDesireds, RightArmDesireds);
+         public static final SideDependentList<SliderBoardMode> arms = new SideDependentList<>(LeftArm, RightArm);
       };
 
       private enum SliderBoardSubMode
       {
          Gains, Desireds
       }
+      
+      private enum ControlMode {Normal, Mirrored}
 
       private final EnumYoVariable<SliderBoardMode> sliderBoardMode;
+      private final EnumYoVariable<SliderBoardSubMode> sliderBoardSubMode;
       private final BooleanYoVariable sliderInGainsMode;
+      private final EnumYoVariable<ControlMode> controlMode;
+      private final BooleanYoVariable inMirroredMode;
 
       private final SliderBoardConfigurationManager sliderBoardConfigurationManager;
 
@@ -424,7 +647,7 @@ public class InverseDynamicsJointController extends State<HighLevelState>
          this(scs, fullRobotModel, registry, null, 0.0, 0.0);
       }
 
-      public GravityCompensationSliderBoard(SimulationConstructionSet scs, FullRobotModel fullRobotModel, YoVariableRegistry registry,
+      public GravityCompensationSliderBoard(SimulationConstructionSet scs, FullRobotModel fullRobotModel, final YoVariableRegistry registry,
             String varNameForLastSlider, double varMinValue, double varMaxValue)
       {
          this.registry = registry;
@@ -434,8 +657,18 @@ public class InverseDynamicsJointController extends State<HighLevelState>
          lastSliderMaxValue = varMaxValue;
 
          sliderBoardMode = new EnumYoVariable<SliderBoardMode>("sliderBoardMode", registry, SliderBoardMode.class);
-         final EnumYoVariable<SliderBoardSubMode> sliderBoardSubMode = new EnumYoVariable<SliderBoardSubMode>("sliderBoardSubMode", registry, SliderBoardSubMode.class);
+         sliderBoardSubMode = new EnumYoVariable<SliderBoardSubMode>("sliderBoardSubMode", registry, SliderBoardSubMode.class);
          sliderInGainsMode = new BooleanYoVariable("sliderInGainsMode", registry);
+         if (CONTROL_FEET_IN_TASKSPACE)
+         {
+            controlMode = new EnumYoVariable<ControlMode>("controlMode", "", registry, ControlMode.class, true);
+            inMirroredMode = new BooleanYoVariable("sliderInMirroredMode", registry);
+         }
+         else
+         {
+            controlMode = null;
+            inMirroredMode = null;
+         }
          sliderBoardConfigurationManager = new SliderBoardConfigurationManager(scs);
 
          sliderBoardConfigurationManager.setSlider(1, "percentOfGravityCompensation", registry, 0.0, 1.0);
@@ -454,19 +687,29 @@ public class InverseDynamicsJointController extends State<HighLevelState>
          RigidBody pelvis = fullRobotModel.getPelvis();
          for (RobotSide robotSide : RobotSide.values)
          {
-            currentMode = SliderBoardMode.legDesireds.get(robotSide);
+            currentMode = SliderBoardMode.legs.get(robotSide);
             RigidBody foot = fullRobotModel.getFoot(robotSide);
             RevoluteJoint[] legRevoluteJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(pelvis, foot), RevoluteJoint.class);
 
-            setupJointSlidersAndKnobsForDesireds(legRevoluteJoints);
-            finalizeConfiguration(currentMode, SliderBoardSubMode.Desireds);
+            if (CONTROL_FEET_IN_TASKSPACE)
+            {
+               setupTaskpaceDesiredsJointGainScaling(robotSide, legRevoluteJoints);
+               finalizeConfiguration(currentMode, SliderBoardSubMode.Desireds, ControlMode.Normal);
+               setupTaskpaceMirroredDesiredsJointGainScaling(legRevoluteJoints);
+               finalizeConfiguration(currentMode, SliderBoardSubMode.Desireds, ControlMode.Mirrored);
+            }
+            else
+            {
+               setupJointSlidersAndKnobsForDesireds(legRevoluteJoints);
+               finalizeConfiguration(currentMode, SliderBoardSubMode.Desireds);
+            }
             setupJointSlidersAndKnobsForGains(legRevoluteJoints);
             finalizeConfiguration(currentMode, SliderBoardSubMode.Gains);
          }
 
          for (RobotSide robotSide : RobotSide.values)
          {
-            currentMode = SliderBoardMode.armDesireds.get(robotSide);
+            currentMode = SliderBoardMode.arms.get(robotSide);
             RigidBody hand = fullRobotModel.getHand(robotSide);
             RigidBody chest = fullRobotModel.getChest();
             RevoluteJoint[] armRevoluteJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(chest, hand), RevoluteJoint.class);
@@ -478,7 +721,7 @@ public class InverseDynamicsJointController extends State<HighLevelState>
             finalizeConfiguration(currentMode, SliderBoardSubMode.Gains);
          }
 
-         currentMode = SliderBoardMode.SpineNeckDesireds;
+         currentMode = SliderBoardMode.SpineNeck;
          RigidBody head = fullRobotModel.getHead();
          RevoluteJoint[] spineAndNeckRevoluteJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(pelvis, head), RevoluteJoint.class);
 
@@ -505,19 +748,121 @@ public class InverseDynamicsJointController extends State<HighLevelState>
             @Override
             public void variableChanged(YoVariable v)
             {
-               sliderBoardConfigurationManager.loadConfiguration(sliderBoardMode.getEnumValue().toString() + sliderBoardSubMode.getEnumValue().toString());
+               if (sliderBoardMode.valueEquals(SliderBoardMode.WholeBody))
+               {
+                  sliderInGainsMode.set(true, false);
+                  sliderBoardSubMode.set(SliderBoardSubMode.Gains, false);
+               }
+               
+               if (CONTROL_FEET_IN_TASKSPACE)
+               {
+                  if (sliderBoardMode.valueEquals(SliderBoardMode.WholeBody) || sliderBoardSubMode.valueEquals(SliderBoardSubMode.Gains))
+                  {
+                     inMirroredMode.set(false, false);
+                     controlMode.set(null, false);
+                  }
+                  else if (sliderBoardSubMode.valueEquals(SliderBoardSubMode.Desireds) && controlMode.getEnumValue() == null)
+                  {
+                     inMirroredMode.set(false, false);
+                     controlMode.set(ControlMode.Normal, false);
+                  }
+               }
 
-               if (sliderBoardMode.getEnumValue() == SliderBoardMode.WholeBody && !sliderInGainsMode.getBooleanValue())
-                  sliderInGainsMode.set(true);
+               loadConfiguration(sliderBoardMode, sliderBoardSubMode, controlMode);
             }
          };
          sliderBoardSubMode.addVariableChangedListener(variableChangedListener);
+         sliderBoardSubMode.set(SliderBoardSubMode.Gains, false);
+
          sliderBoardMode.addVariableChangedListener(variableChangedListener);
-         sliderBoardSubMode.set(SliderBoardSubMode.Gains);
-         sliderBoardMode.set(SliderBoardMode.WholeBody);
+         sliderBoardMode.set(SliderBoardMode.WholeBody, false);
+         
+         if (CONTROL_FEET_IN_TASKSPACE)
+         {
+            inMirroredMode.addVariableChangedListener(new VariableChangedListener()
+            {
+               @Override
+               public void variableChanged(YoVariable v)
+               {
+                  if (inMirroredMode.getBooleanValue())
+                     controlMode.set(ControlMode.Mirrored);
+                  else
+                     controlMode.set(ControlMode.Normal);
+               }
+            });
+            controlMode.addVariableChangedListener(variableChangedListener);
+            controlMode.addVariableChangedListener(new VariableChangedListener()
+            {
+               @SuppressWarnings("deprecation")
+               @Override
+               public void variableChanged(YoVariable v)
+               {
+                  registry.getVariable(CONTROLLER_PREFIX + "initializeMirrorDesireds").setValueFromDouble(1.0);
+               }
+            });
+            controlMode.set(null, false);
+         }
          variableChangedListener.variableChanged(null);
       }
 
+      private void setupTaskpaceDesiredsJointGainScaling(RobotSide robotSide, RevoluteJoint[] revoluteJoints)
+      {
+         String varPrefix = CONTROLLER_PREFIX + "desried" + robotSide.getCamelCaseNameForMiddleOfExpression() + "Foot";
+         String[] axisSuffix = new String[]{"X", "Y", "Z", "Yaw", "Pitch", "Roll"};
+         
+         int i = 0;
+         double quarterPi = Math.PI / 4.0;
+         sliderBoardConfigurationManager.setSlider(++i, varPrefix + axisSuffix[i-1], registry, -0.5, 0.5);
+         sliderBoardConfigurationManager.setSlider(++i, varPrefix + axisSuffix[i-1], registry, -0.5, 0.5);
+         sliderBoardConfigurationManager.setSlider(++i, varPrefix + axisSuffix[i-1], registry, -1.5, -0.5);
+         sliderBoardConfigurationManager.setSlider(++i, varPrefix + axisSuffix[i-1], registry, -quarterPi, quarterPi);
+         sliderBoardConfigurationManager.setSlider(++i, varPrefix + axisSuffix[i-1], registry, -quarterPi, quarterPi);
+         sliderBoardConfigurationManager.setSlider(++i, varPrefix + axisSuffix[i-1], registry, -quarterPi, quarterPi);
+
+         sliderBoardConfigurationManager.setButton(2, inMirroredMode);
+         
+         for (int j = 0; j < revoluteJoints.length; j++)
+         {
+            if (j > maxNumberOfDofs)
+            {
+               System.err.println("Too many joints for the slider board. Last joint configured: " + revoluteJoints[j - 1].getName());
+               break;
+            }
+
+            String jointGainScalingVarName = CONTROLLER_PREFIX + revoluteJoints[j].getName() + "_gainScaling";
+            sliderBoardConfigurationManager.setKnob(j + 1, jointGainScalingVarName, registry, 0.0, 1.0);
+         }
+      }
+
+      private void setupTaskpaceMirroredDesiredsJointGainScaling(RevoluteJoint[] revoluteJoints)
+      {
+         String varPrefix = CONTROLLER_PREFIX + "desriedMirroredFoot";
+         String[] axisSuffix = new String[]{"X", "Y", "Z", "Yaw", "Pitch", "Roll"};
+         
+         int i = 0;
+         double quarterPi = Math.PI / 4.0;
+         sliderBoardConfigurationManager.setSlider(++i, varPrefix + axisSuffix[i-1], registry, -0.5, 0.5);
+         sliderBoardConfigurationManager.setSlider(++i, varPrefix + axisSuffix[i-1], registry, -0.5, 0.5);
+         sliderBoardConfigurationManager.setSlider(++i, varPrefix + axisSuffix[i-1], registry, -1.5, -0.5);
+         sliderBoardConfigurationManager.setSlider(++i, varPrefix + axisSuffix[i-1], registry, -quarterPi, quarterPi);
+         sliderBoardConfigurationManager.setSlider(++i, varPrefix + axisSuffix[i-1], registry, -quarterPi, quarterPi);
+         sliderBoardConfigurationManager.setSlider(++i, varPrefix + axisSuffix[i-1], registry, -quarterPi, quarterPi);
+
+         sliderBoardConfigurationManager.setButton(2, inMirroredMode);
+         
+         for (int j = 0; j < revoluteJoints.length; j++)
+         {
+            if (j > maxNumberOfDofs)
+            {
+               System.err.println("Too many joints for the slider board. Last joint configured: " + revoluteJoints[j - 1].getName());
+               break;
+            }
+
+            String jointGainScalingVarName = CONTROLLER_PREFIX + revoluteJoints[j].getName() + "_gainScaling";
+            sliderBoardConfigurationManager.setKnob(j + 1, jointGainScalingVarName, registry, 0.0, 1.0);
+         }
+      }
+      
       private void setupJointSlidersAndKnobsForDesireds(RevoluteJoint[] revoluteJoints)
       {
          for (int i = 0; i < revoluteJoints.length; i++)
@@ -562,15 +907,30 @@ public class InverseDynamicsJointController extends State<HighLevelState>
             sliderBoardConfigurationManager.setKnob(i + 1, zeta_varName, registry, 0.0, maxZetas);
          }
       }
-
-      private void finalizeConfiguration(SliderBoardMode currentMode, SliderBoardSubMode currentSubMode)
+      
+      @SafeVarargs
+      private final <T> void finalizeConfiguration(T... modes)
       {
          if (lastSliderVarName != null)
             sliderBoardConfigurationManager.setSlider(8, lastSliderVarName, registry, lastSliderMinValue, lastSliderMaxValue);
          sliderBoardConfigurationManager.setKnob(8, sliderBoardMode, 0.0, SliderBoardMode.values().length);
          sliderBoardConfigurationManager.setButton(1, sliderInGainsMode);
-         sliderBoardConfigurationManager.saveConfiguration(currentMode.toString() + currentSubMode.toString());
+         StringBuilder configurationName = new StringBuilder();
+         for (T mode : modes)
+            configurationName.append(mode.toString());
+         sliderBoardConfigurationManager.saveConfiguration(configurationName.toString());
          sliderBoardConfigurationManager.clearControls();
+      }
+      
+      private void loadConfiguration(EnumYoVariable<?>... modes)
+      {
+         StringBuilder configurationName = new StringBuilder();
+         for (EnumYoVariable<?> mode : modes)
+         {
+            if (mode != null && mode.getEnumValue() != null)
+               configurationName.append(mode.getEnumValue().toString());
+         }
+         sliderBoardConfigurationManager.loadConfiguration(configurationName.toString());
       }
    }
 }
