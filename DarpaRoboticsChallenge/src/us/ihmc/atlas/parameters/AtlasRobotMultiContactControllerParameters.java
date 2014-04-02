@@ -1,4 +1,4 @@
-package us.ihmc.atlas;
+package us.ihmc.atlas.parameters;
 
 import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.*;
 

@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.initialSetup;
+package us.ihmc.atlas.initialSetup;
 
 import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.forcedSideDependentJointNames;
 import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.jointNames;
@@ -21,6 +21,7 @@ import java.util.EnumMap;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
+import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 

@@ -1,4 +1,4 @@
-package us.ihmc.atlas;
+package us.ihmc.atlas.parameters;
 
 import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCSimulatedSensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorFilterParameters;

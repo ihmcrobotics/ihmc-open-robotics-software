@@ -3,7 +3,8 @@ package us.ihmc.darpaRoboticsChallenge;
 import java.io.IOException;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.atlas.AtlasDrivingControllerParameters;
+import us.ihmc.atlas.initialSetup.VRCTask1InVehicleHovering;
+import us.ihmc.atlas.parameters.AtlasDrivingControllerParameters;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -12,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepTimingParamet
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelState;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.PlainDRCRobot;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.initialSetup.VRCTask1InVehicleHovering;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;

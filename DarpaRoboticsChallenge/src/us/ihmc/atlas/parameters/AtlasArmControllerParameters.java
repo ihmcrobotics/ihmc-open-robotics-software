@@ -1,4 +1,4 @@
-package us.ihmc.atlas;
+package us.ihmc.atlas.parameters;
 
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;

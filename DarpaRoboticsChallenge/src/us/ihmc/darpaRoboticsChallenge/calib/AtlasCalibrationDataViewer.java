@@ -10,8 +10,8 @@ import java.util.Map;
 
 import org.apache.tools.zip.ZipFile;
 
+import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
-import us.ihmc.darpaRoboticsChallenge.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
 import us.ihmc.robotSide.RobotSide;

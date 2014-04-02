@@ -8,6 +8,7 @@ import javax.xml.bind.JAXBException;
 
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.atlas.AtlasRobotModel;
+import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;

@@ -2,6 +2,7 @@ package us.ihmc.darpaRoboticsChallenge;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.AtlasRobotModel;
+import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.visualization.SliderBoardFactory;
 import us.ihmc.atlas.visualization.WalkControllerSliderBoard;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;

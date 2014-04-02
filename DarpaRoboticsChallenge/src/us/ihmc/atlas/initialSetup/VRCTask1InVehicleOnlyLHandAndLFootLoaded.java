@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.initialSetup;
+package us.ihmc.atlas.initialSetup;
 
 import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.back_bkx;
 import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.back_bky;
@@ -35,6 +35,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
+import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 
 public class VRCTask1InVehicleOnlyLHandAndLFootLoaded implements DRCRobotInitialSetup<SDFRobot>
 {

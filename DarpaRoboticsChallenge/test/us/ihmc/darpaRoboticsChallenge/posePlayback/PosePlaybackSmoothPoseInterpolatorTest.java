@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.darpaRoboticsChallenge.AtlasRobotVersion;
+import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;

@@ -15,6 +15,7 @@ import org.junit.Test;
 
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.atlas.AtlasRobotModel;
+import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
@@ -26,7 +27,6 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.Sim
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.TurningThenStraightFootstepGenerator;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
-import us.ihmc.darpaRoboticsChallenge.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
