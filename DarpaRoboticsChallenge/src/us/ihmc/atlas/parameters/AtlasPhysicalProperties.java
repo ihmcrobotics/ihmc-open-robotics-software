@@ -1,4 +1,4 @@
-package us.ihmc.atlas;
+package us.ihmc.atlas.parameters;
 
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;

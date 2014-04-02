@@ -4,8 +4,8 @@ import com.yobotics.simulationconstructionset.DataBuffer;
 import com.yobotics.simulationconstructionset.IndexChangedListener;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePose;
 
+import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
-import us.ihmc.darpaRoboticsChallenge.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FramePose;
