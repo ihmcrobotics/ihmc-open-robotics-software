@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -104,8 +105,11 @@ public class InverseDynamicsJointController extends State<HighLevelState>
    private final SpatialAccelerationVector desiredRootJointAcceleration;
    private final FrameVector desiredVerticalAccelerationVector = new FrameVector();
 
-   private final DoubleYoVariable allJointGains = new DoubleYoVariable(CONTROLLER_PREFIX + "allJointGains", registry);
-   private final DoubleYoVariable allJointZetas = new DoubleYoVariable(CONTROLLER_PREFIX + "allJointZetas", registry);
+   private final DoubleYoVariable allLowerBodyGains = new DoubleYoVariable(CONTROLLER_PREFIX + "allLowerBodyGains", registry);
+   private final DoubleYoVariable allLowerBodyZetas = new DoubleYoVariable(CONTROLLER_PREFIX + "allLowerBodyZetas", registry);
+
+   private final DoubleYoVariable allUpperBodyGains = new DoubleYoVariable(CONTROLLER_PREFIX + "allUpperBodyGains", registry);
+   private final DoubleYoVariable allUpperBodyZetas = new DoubleYoVariable(CONTROLLER_PREFIX + "allUpperBodyZetas", registry);
 
    private final LinkedHashMap<RevoluteJoint, PDController> pdControllers = new LinkedHashMap<>();
    private final LinkedHashMap<RevoluteJoint, DoubleYoVariable> desiredJointPositions = new LinkedHashMap<>();
@@ -116,6 +120,11 @@ public class InverseDynamicsJointController extends State<HighLevelState>
    private final LinkedHashMap<RevoluteJoint, DoubleYoVariable> tau_d_PDCtrlMap = new LinkedHashMap<>();
    private final LinkedHashMap<RevoluteJoint, DoubleYoVariable> qdd_dMap = new LinkedHashMap<>();
    private final LinkedHashMap<RevoluteJoint, DoubleYoVariable> tau_G_Map = new LinkedHashMap<>();
+   
+   private final LinkedHashMap<RevoluteJoint, DoubleYoVariable> kpLowerBodyMap = new LinkedHashMap<>();
+   private final LinkedHashMap<RevoluteJoint, DoubleYoVariable> kpUpperBodyMap = new LinkedHashMap<>();
+   private final LinkedHashMap<RevoluteJoint, DoubleYoVariable> zetaLowerBodyMap = new LinkedHashMap<>();
+   private final LinkedHashMap<RevoluteJoint, DoubleYoVariable> zetaUpperBodyMap = new LinkedHashMap<>();
 
    private final SideDependentList<YoFramePose> desiredFootPoses = CONTROL_FEET_IN_TASKSPACE ? new SideDependentList<YoFramePose>() : null;
    private final SideDependentList<TrajectoryBasedNumericalInverseKinematicsCalculator> footIKCalculators = 
@@ -266,15 +275,39 @@ public class InverseDynamicsJointController extends State<HighLevelState>
          individualJointGainScalingMap.put(revoluteJoint, individualJointGainScaling);
       }
       
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         for (RevoluteJoint revoluteJoint : legsRevoluteJoints.get(robotSide))
+         {
+            kpLowerBodyMap.put(revoluteJoint, kpMap.get(revoluteJoint));
+            zetaLowerBodyMap.put(revoluteJoint, zetaMap.get(revoluteJoint));
+         }
+      }
+      
+      ArrayList<RevoluteJoint> upperBodyRevoluteJoints = new ArrayList<>();
+      upperBodyRevoluteJoints.addAll(Arrays.asList(allRevoluteJoints));
+      for (RobotSide robotSide : RobotSide.values)
+         upperBodyRevoluteJoints.removeAll(Arrays.asList(legsRevoluteJoints.get(robotSide)));
+      
+      for (RevoluteJoint revoluteJoint : upperBodyRevoluteJoints)
+      {
+         kpUpperBodyMap.put(revoluteJoint, kpMap.get(revoluteJoint));
+         zetaUpperBodyMap.put(revoluteJoint, zetaMap.get(revoluteJoint));
+      }
+      
       if (USE_MASS_MATRIX)
       {
-         allJointGains.set(2.0);
-         allJointZetas.set(0.02);
+         allLowerBodyGains.set(2.0);
+         allLowerBodyZetas.set(0.02);
+         allUpperBodyGains.set(2.0);
+         allUpperBodyZetas.set(0.02);
       }
       else
       {
-         allJointGains.set(1.0);
-         allJointZetas.set(0.02);
+         allLowerBodyGains.set(1.0);
+         allLowerBodyZetas.set(0.02);
+         allUpperBodyGains.set(1.0);
+         allUpperBodyZetas.set(0.02);
       }
 
       kpCoM.set(200.0);
@@ -314,12 +347,16 @@ public class InverseDynamicsJointController extends State<HighLevelState>
 
    private void setupVariableChangedListeners()
    {
-      allJointGains.addVariableChangedListener(createMapUpdater(kpMap, allJointGains));
-      allJointZetas.addVariableChangedListener(createMapUpdater(zetaMap, allJointZetas));
+      allLowerBodyGains.addVariableChangedListener(createMapUpdater(kpLowerBodyMap, allLowerBodyGains));
+      allLowerBodyZetas.addVariableChangedListener(createMapUpdater(zetaLowerBodyMap, allLowerBodyZetas));
+      allUpperBodyGains.addVariableChangedListener(createMapUpdater(kpUpperBodyMap, allUpperBodyGains));
+      allUpperBodyZetas.addVariableChangedListener(createMapUpdater(zetaUpperBodyMap, allUpperBodyZetas));
       gainScaling.addVariableChangedListener(createMapUpdater(individualJointGainScalingMap, gainScaling));
 
-      allJointGains.notifyVariableChangedListeners();
-      allJointZetas.notifyVariableChangedListeners();
+      allLowerBodyGains.notifyVariableChangedListeners();
+      allLowerBodyZetas.notifyVariableChangedListeners();
+      allUpperBodyGains.notifyVariableChangedListeners();
+      allUpperBodyZetas.notifyVariableChangedListeners();
       gainScaling.notifyVariableChangedListeners();
 
       for (int i = 0; i < allRevoluteJoints.length; i++)
@@ -606,6 +643,9 @@ public class InverseDynamicsJointController extends State<HighLevelState>
          q_d.set(revoluteJoint.getQ());
       }
       
+      inverseDynamicsCalculator.reset();
+      inverseDynamicsCalculator.compute();
+
       if (!CONTROL_FEET_IN_TASKSPACE)
          return;
       
@@ -787,12 +827,14 @@ public class InverseDynamicsJointController extends State<HighLevelState>
 
          sliderBoardConfigurationManager.setSlider(1, "percentOfGravityCompensation", registry, 0.0, 1.0);
          sliderBoardConfigurationManager.setSlider(2, CONTROLLER_PREFIX + "gainScaling", registry, 0.0, 1.0);
-         sliderBoardConfigurationManager.setSlider(3, CONTROLLER_PREFIX + "allJointGains", registry, 0.0, maxGains);
-         sliderBoardConfigurationManager.setSlider(4, CONTROLLER_PREFIX + "allJointZetas", registry, 0.0, maxZetas);
+         sliderBoardConfigurationManager.setSlider(3, CONTROLLER_PREFIX + "allLowerBodyGains", registry, 0.0, maxGains);
+         sliderBoardConfigurationManager.setSlider(4, CONTROLLER_PREFIX + "allLowerBodyZetas", registry, 0.0, maxZetas);
+         sliderBoardConfigurationManager.setSlider(5, CONTROLLER_PREFIX + "allUpperBodyGains", registry, 0.0, maxGains);
+         sliderBoardConfigurationManager.setSlider(6, CONTROLLER_PREFIX + "allUpperBodyZetas", registry, 0.0, maxZetas);
 
          if (STAND_ON_FEET)
          {
-            sliderBoardConfigurationManager.setSlider(5, CONTROLLER_PREFIX + "footForceScaling", registry, 0.0, 1.0);
+            sliderBoardConfigurationManager.setSlider(7, CONTROLLER_PREFIX + "footForceScaling", registry, 0.0, 1.0);
          }
 
          SliderBoardMode currentMode = SliderBoardMode.WholeBody;
