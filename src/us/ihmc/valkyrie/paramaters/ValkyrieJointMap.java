@@ -1,13 +1,11 @@
 package us.ihmc.valkyrie.paramaters;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
 import javax.media.j3d.Transform3D;
-import javax.vecmath.Point2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
