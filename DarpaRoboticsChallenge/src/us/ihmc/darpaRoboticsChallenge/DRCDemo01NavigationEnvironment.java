@@ -13,6 +13,7 @@ import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceTexture;
+import us.ihmc.userInterface.modifiableObjects.UIResourceGetter;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.math.geometry.Box3d;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
@@ -1189,6 +1190,18 @@ public class DRCDemo01NavigationEnvironment implements
 
 			addRock(normal, centroidHeight, vertices);
 		}
+		
+		Graphics3DObject linkGraphics = new Graphics3DObject();
+
+//      linkGraphics.rotate(Math.PI / 2, Axis.Y);
+//      linkGraphics.rotate(Math.toRadians(-courseAngleDeg), Axis.X);
+      linkGraphics.translate(new Vector3d(2, 2, 0));
+		
+    
+      linkGraphics.addModelFile(UIResourceGetter.getResource("models/QAPlanGrid.3DS"));
+
+
+      combinedTerrainObject.addStaticLinkGraphics(linkGraphics);// new
 	}
 
 	private double[] rotateAroundOrigin(double[] xy, double angdeg) {
