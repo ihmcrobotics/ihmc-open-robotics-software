@@ -10,10 +10,13 @@ public class SensorFilterParameters
    private final double jointVelocitySlopTimeForBacklashCompensation;
    private final double updateDT;
 
+   /** Required for Valkyrie as no filtering is done on-board */ 
+   private final boolean useTwoPolesForIMUFiltering;
+
    public SensorFilterParameters(double jointPositionFilterFrequencyInHertz, double jointVelocityFilterFrequencyInHertz,
                                  double orientationFilterFrequencyInHertz, double angularVelocityFilterFrequencyInHertz,
                                  double linearAccelerationFilterFrequencyInHertz, double jointVelocitySlopTimeForBacklashCompensation,
-                                 double updateDT)
+                                 double updateDT, boolean useTwoPolesForIMUFiltering)
    {
       this.jointPositionFilterFrequencyInHertz = jointPositionFilterFrequencyInHertz;
       this.jointVelocityFilterFrequencyInHertz = jointVelocityFilterFrequencyInHertz;
@@ -22,6 +25,8 @@ public class SensorFilterParameters
       this.linearAccelerationFilterFrequencyInHertz = linearAccelerationFilterFrequencyInHertz;
       this.jointVelocitySlopTimeForBacklashCompensation = jointVelocitySlopTimeForBacklashCompensation;
       this.updateDT = updateDT;
+      
+      this.useTwoPolesForIMUFiltering = useTwoPolesForIMUFiltering;
    }
 
    public double getJointPositionFilterFrequencyInHertz()
@@ -57,5 +62,10 @@ public class SensorFilterParameters
    public double getEstimatorDT()
    {
       return updateDT;
+   }
+
+   public boolean getUseTwoPolesForIMUFiltering()
+   {
+      return useTwoPolesForIMUFiltering;
    }
 }
