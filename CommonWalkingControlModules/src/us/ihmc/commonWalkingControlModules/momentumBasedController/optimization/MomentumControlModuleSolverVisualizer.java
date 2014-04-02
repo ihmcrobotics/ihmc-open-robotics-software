@@ -1,12 +1,10 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-
-import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
-
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
+import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 
 public class MomentumControlModuleSolverVisualizer implements MomentumControlModuleSolverListener
 {
@@ -16,17 +14,17 @@ public class MomentumControlModuleSolverVisualizer implements MomentumControlMod
    
    private final DoubleYoVariable largestCheckJQEqualsZeroNumber = new DoubleYoVariable("largestCheckJQEqualsZeroNumber", registry);
    
-   private final DenseMatrix64F centroidalMomentumMatrixCopy = new DenseMatrix64F();
-   private final DenseMatrix64F momentumDotEquationRightHandSideCopy = new DenseMatrix64F();
-   private final DenseMatrix64F momentumSubspaceCopy = new DenseMatrix64F();
-   private final DenseMatrix64F jPrimaryCopy = new DenseMatrix64F();
-   private final DenseMatrix64F pPrimaryCopy = new DenseMatrix64F();
-   private final DenseMatrix64F primaryMotionConstraintCheckCopy = new DenseMatrix64F();
-   private final DenseMatrix64F checkJQEqualsZeroAfterSetConstraintCopy = new DenseMatrix64F();
-   private final DenseMatrix64F jSecondaryCopy = new DenseMatrix64F();
-   private final DenseMatrix64F pSecondaryCopy = new DenseMatrix64F();
-   private final DenseMatrix64F weightMatrixSecondaryCopy = new DenseMatrix64F();
-   private final DenseMatrix64F jointAccelerationsCopy = new DenseMatrix64F();
+   private final DenseMatrix64F centroidalMomentumMatrixCopy = new DenseMatrix64F(1,1);
+   private final DenseMatrix64F momentumDotEquationRightHandSideCopy = new DenseMatrix64F(1,1);
+   private final DenseMatrix64F momentumSubspaceCopy = new DenseMatrix64F(1,1);
+   private final DenseMatrix64F jPrimaryCopy = new DenseMatrix64F(1,1);
+   private final DenseMatrix64F pPrimaryCopy = new DenseMatrix64F(1,1);
+   private final DenseMatrix64F primaryMotionConstraintCheckCopy = new DenseMatrix64F(1,1);
+   private final DenseMatrix64F checkJQEqualsZeroAfterSetConstraintCopy = new DenseMatrix64F(1,1);
+   private final DenseMatrix64F jSecondaryCopy = new DenseMatrix64F(1,1);
+   private final DenseMatrix64F pSecondaryCopy = new DenseMatrix64F(1,1);
+   private final DenseMatrix64F weightMatrixSecondaryCopy = new DenseMatrix64F(1,1);
+   private final DenseMatrix64F jointAccelerationsCopy = new DenseMatrix64F(1,1);
    private double optimizationValue;
    
    public MomentumControlModuleSolverVisualizer(YoVariableRegistry parentRegistry)

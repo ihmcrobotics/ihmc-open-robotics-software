@@ -1,20 +1,18 @@
 package us.ihmc.commonWalkingControlModules.kinematics;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import org.ejml.UtilEjml;
 import org.ejml.alg.dense.linsol.svd.SolvePseudoInverseSvd;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.DecompositionFactory;
-import org.ejml.factory.SingularValueDecomposition;
+import org.ejml.interfaces.decomposition.SingularValueDecomposition;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.SingularOps;
-
 import us.ihmc.utilities.CheckTools;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.screwTheory.JacobianSolver;
-
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 /*
  * Use DampedLeastSquaresJacobianSolver in combination with NullspaceCalculator instead

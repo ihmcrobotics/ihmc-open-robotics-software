@@ -23,7 +23,7 @@ import georegression.struct.point.Point3D_F64;
 import georegression.struct.point.Vector3D_F64;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.DecompositionFactory;
-import org.ejml.factory.SingularValueDecomposition;
+import org.ejml.interfaces.decomposition.SingularValueDecomposition;
 
 import java.util.List;
 
