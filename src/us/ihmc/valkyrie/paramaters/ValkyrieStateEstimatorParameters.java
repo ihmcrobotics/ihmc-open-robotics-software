@@ -30,6 +30,8 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    private final double pointPositionXYMeasurementStandardDeviation;
    private final double pointPositionZMeasurementStandardDeviation;
 
+   private final boolean useTwoPolesForIMUFiltering;
+
    private final SensorFilterParameters sensorFilterParameters;
 
    private final PointMeasurementNoiseParameters pointMeasurementNoiseParameters;
@@ -69,8 +71,10 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
       pointPositionXYMeasurementStandardDeviation = 0.1;
       pointPositionZMeasurementStandardDeviation = 0.1;
 
+      useTwoPolesForIMUFiltering = runningOnRealRobot;
+
       sensorFilterParameters = new SensorFilterParameters(jointPositionFilterFrequencyHz, jointVelocityFilterFrequencyHz, orientationFilterFrequencyHz,
-            angularVelocityFilterFrequencyHz, linearAccelerationFilterFrequencyHz, jointVelocitySlopTimeForBacklashCompensation, estimatorDT);
+            angularVelocityFilterFrequencyHz, linearAccelerationFilterFrequencyHz, jointVelocitySlopTimeForBacklashCompensation, estimatorDT, useTwoPolesForIMUFiltering);
 
       pointMeasurementNoiseParameters = new PointMeasurementNoiseParameters(pointVelocityXYMeasurementStandardDeviation,
             pointVelocityZMeasurementStandardDeviation, pointPositionXYMeasurementStandardDeviation, pointPositionZMeasurementStandardDeviation);
