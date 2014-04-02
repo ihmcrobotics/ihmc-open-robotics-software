@@ -1,24 +1,18 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.vecmath.Vector3d;
-
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFrameVector;
+import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolver;
+import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredJointAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredPointAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredRateOfChangeOfMomentumCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredSpatialAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.*;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWrenchDistributor;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWrenchDistributorInputData;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWrenchDistributorOutputData;
@@ -29,25 +23,13 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.GeometricJacobian;
-import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
-import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.ScrewTools;
-import us.ihmc.utilities.screwTheory.SixDoFJoint;
-import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
-import us.ihmc.utilities.screwTheory.SpatialForceVector;
-import us.ihmc.utilities.screwTheory.TotalMassCalculator;
-import us.ihmc.utilities.screwTheory.TotalWrenchCalculator;
-import us.ihmc.utilities.screwTheory.TwistCalculator;
-import us.ihmc.utilities.screwTheory.Wrench;
+import us.ihmc.utilities.screwTheory.*;
 
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFrameVector;
-import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
+import javax.vecmath.Vector3d;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class OldMomentumControlModule implements MomentumControlModule
 {

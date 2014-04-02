@@ -1,26 +1,23 @@
 package us.ihmc.kalman;
 
-import static com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools.*;
-import static org.ejml.ops.CommonOps.addEquals;
-import static org.ejml.ops.CommonOps.sub;
-import static org.ejml.ops.CommonOps.subEquals;
-import static us.ihmc.utilities.CheckTools.checkMatrixDimensions;
-
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.IntegerYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import org.ejml.alg.dense.mult.MatrixMatrixMult;
 import org.ejml.alg.dense.mult.MatrixVectorMult;
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolver;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.factory.SingularMatrixException;
+import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.MatrixFeatures;
-
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools.*;
+import static org.ejml.ops.CommonOps.*;
+import static us.ihmc.utilities.CheckTools.checkMatrixDimensions;
 
 
 /**

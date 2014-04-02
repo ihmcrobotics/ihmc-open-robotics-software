@@ -2,7 +2,6 @@ package us.ihmc.imageProcessing.sfm.d2;
 
 import boofcv.abst.feature.detect.interest.ConfigGeneralDetector;
 import boofcv.abst.feature.disparity.StereoDisparitySparse;
-import boofcv.abst.feature.tracker.PkltConfig;
 import boofcv.abst.feature.tracker.PointTracker;
 import boofcv.abst.feature.tracker.PointTrackerTwoPass;
 import boofcv.abst.sfm.d2.ImageMotion2D;
@@ -10,6 +9,7 @@ import boofcv.abst.sfm.d3.MonocularPlaneVisualOdometry;
 import boofcv.abst.sfm.d3.MonocularPlaneVisualOdometryScaleInput;
 import boofcv.abst.sfm.d3.StereoVisualOdometry;
 import boofcv.abst.sfm.d3.StereoVisualOdometryScaleInput;
+import boofcv.alg.tracker.klt.PkltConfig;
 import boofcv.factory.feature.disparity.FactoryStereoDisparity;
 import boofcv.factory.feature.tracker.FactoryPointTracker;
 import boofcv.factory.feature.tracker.FactoryPointTrackerTwoPass;
@@ -29,15 +29,12 @@ public class FactoryEstimateCarMotion2D
 {
    public static EstimateCarMotion2D monoOverhead() {
 
-      PkltConfig<ImageFloat32,ImageFloat32> config =
-            PkltConfig.createDefault(ImageFloat32.class, ImageFloat32.class);
+      PkltConfig config = new PkltConfig();
       config.pyramidScaling = new int[]{1,2,4,8};
       config.templateRadius = 3;
-      config.typeInput = ImageFloat32.class;
-      config.typeDeriv = ImageFloat32.class;
       ConfigGeneralDetector configDetector = new ConfigGeneralDetector(600,3,1);
 
-      PointTracker<ImageFloat32> tracker = FactoryPointTracker.klt(config, configDetector);
+      PointTracker<ImageFloat32> tracker = FactoryPointTracker.klt(config, configDetector,ImageFloat32.class, ImageFloat32.class);
 
       int ransacIterations = 300;
       double inlierGroundTol = 0.2;
@@ -56,11 +53,12 @@ public class FactoryEstimateCarMotion2D
    public static EstimateCarMotion2D monoPlaneInfinity(double scale) {
 
       // specify how the image features are going to be tracked
-      PkltConfig<ImageFloat32, ImageFloat32> configKlt = PkltConfig.createDefault(ImageFloat32.class, ImageFloat32.class);
-      configKlt.pyramidScaling = new int[] {1, 2, 4, 8};
+      PkltConfig configKlt = new PkltConfig();
+      configKlt.pyramidScaling = new int[]{1,2,4,8};
       configKlt.templateRadius = 5;
 
-      PointTrackerTwoPass<ImageFloat32> tracker = FactoryPointTrackerTwoPass.klt(configKlt, new ConfigGeneralDetector(-1, 3, 150));
+      PointTrackerTwoPass<ImageFloat32> tracker = FactoryPointTrackerTwoPass.klt(configKlt, new ConfigGeneralDetector(-1, 3, 150),
+            ImageFloat32.class, ImageFloat32.class);
 
       // declares the algorithm
       MonocularPlaneVisualOdometry<ImageFloat32> vo = FactoryVisualOdometry.monoPlaneInfinity(100, 2, 1.5, 200, tracker,
@@ -75,11 +73,12 @@ public class FactoryEstimateCarMotion2D
 
    public static EstimateCarMotion2D stereo01( double scale ) {
       // specify how the image features are going to be tracked
-      PkltConfig<ImageFloat32, ImageFloat32> configKlt = PkltConfig.createDefault(ImageFloat32.class, ImageFloat32.class);
-      configKlt.pyramidScaling = new int[] {1, 2, 4, 8};
+      PkltConfig configKlt = new PkltConfig();
+      configKlt.pyramidScaling = new int[]{1,2,4,8};
       configKlt.templateRadius = 5;
 
-      PointTrackerTwoPass<ImageFloat32> tracker = FactoryPointTrackerTwoPass.klt(configKlt, new ConfigGeneralDetector(-1, 3, 150));
+      PointTrackerTwoPass<ImageFloat32> tracker = FactoryPointTrackerTwoPass.klt(configKlt, new ConfigGeneralDetector(-1, 3, 150),
+            ImageFloat32.class, ImageFloat32.class);
 
       // computes the depth of each point
       StereoDisparitySparse<ImageFloat32> disparity = FactoryStereoDisparity.regionSparseWta(0, 10, 3, 3, 20, 0.15, true, ImageFloat32.class);

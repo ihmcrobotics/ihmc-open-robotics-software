@@ -1,20 +1,9 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-
-import javax.media.j3d.Transform3D;
-import javax.vecmath.Vector3d;
-
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolver;
 import org.ejml.factory.LinearSolverFactory;
+import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixFeatures;
 import org.ejml.ops.RandomMatrices;
@@ -22,7 +11,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.MatrixTools;
@@ -30,28 +18,16 @@ import us.ihmc.utilities.math.NullspaceCalculator;
 import us.ihmc.utilities.math.geometry.CenterOfMassReferenceFrame;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.GeometricJacobian;
-import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
-import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
-import us.ihmc.utilities.screwTheory.Momentum;
-import us.ihmc.utilities.screwTheory.MomentumCalculator;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
-import us.ihmc.utilities.screwTheory.RevoluteJoint;
-import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.ScrewTestTools;
+import us.ihmc.utilities.screwTheory.*;
 import us.ihmc.utilities.screwTheory.ScrewTestTools.RandomFloatingChain;
-import us.ihmc.utilities.screwTheory.ScrewTools;
-import us.ihmc.utilities.screwTheory.SixDoFJoint;
-import us.ihmc.utilities.screwTheory.SpatialAccelerationCalculator;
-import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
-import us.ihmc.utilities.screwTheory.SpatialForceVector;
-import us.ihmc.utilities.screwTheory.SpatialMotionVector;
-import us.ihmc.utilities.screwTheory.Twist;
-import us.ihmc.utilities.screwTheory.TwistCalculator;
-import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.utilities.test.JUnitTools;
 
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import javax.media.j3d.Transform3D;
+import javax.vecmath.Vector3d;
+import java.util.*;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 
 //TODO: tests where MomentumSolver is called multiple times in a row

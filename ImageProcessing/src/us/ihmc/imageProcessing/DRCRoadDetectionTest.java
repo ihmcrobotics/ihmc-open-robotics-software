@@ -14,6 +14,7 @@ import boofcv.core.image.ConvertBufferedImage;
 import boofcv.factory.feature.detect.interest.FactoryInterestPoint;
 import boofcv.factory.feature.detect.line.FactoryDetectLineAlgs;
 import boofcv.gui.binary.VisualizeBinaryData;
+import boofcv.struct.ConnectRule;
 import boofcv.struct.image.*;
 import georegression.struct.line.LineParametric2D_F32;
 import georegression.struct.point.Point2D_F32;
@@ -219,16 +220,16 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 
       for (int i = 0; i < erodeCount; i++)
       {
-         binary = BinaryImageOps.erode8(binary, null);
+         binary = BinaryImageOps.erode8(binary, 1,null);
       }
 
       for (int i = 0; i < dilateCount; i++)
       {
-         binary = BinaryImageOps.dilate8(binary, null);
+         binary = BinaryImageOps.dilate8(binary,1, null);
       }
 
       // Detect blobs inside the binary image and assign labels to them
-      List<Contour> blobContours = BinaryImageOps.contour(binary, 4, blobs);
+      List<Contour> blobContours = BinaryImageOps.contour(binary, ConnectRule.FOUR, blobs);
 
       boundingBoxes = findBlobBoundingBoxes(blobContours);
 
@@ -356,17 +357,17 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
 
       for (int i = 0; i < 1; i++)
       {
-         binary = BinaryImageOps.erode8(binary, null);
+         binary = BinaryImageOps.erode8(binary,1, null);
       }
 
       for (int i = 0; i < 2; i++)
       {
-         binary = BinaryImageOps.dilate8(binary, null);
+         binary = BinaryImageOps.dilate8(binary,1, null);
       }
 
 
       // Detect blobs inside the binary image and assign labels to them
-      List<Contour> blobContours = BinaryImageOps.contour(binary, 4, blobs);
+      List<Contour> blobContours = BinaryImageOps.contour(binary, ConnectRule.FOUR, blobs);
 
       int numBlobs = filterBlobsNotTouchingEdges(blobs, blobContours.size());
 

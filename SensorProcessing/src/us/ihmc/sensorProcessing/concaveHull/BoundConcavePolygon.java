@@ -29,7 +29,7 @@ import georegression.struct.point.Vector3D_F64;
 import org.ddogleg.struct.FastQueue;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.DecompositionFactory;
-import org.ejml.factory.EigenDecomposition;
+import org.ejml.interfaces.decomposition.EigenDecomposition;
 
 import java.util.ArrayList;
 import java.util.List;

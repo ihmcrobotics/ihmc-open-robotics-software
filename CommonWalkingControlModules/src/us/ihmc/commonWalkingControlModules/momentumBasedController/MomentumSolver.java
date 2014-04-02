@@ -1,36 +1,18 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools;
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.DecompositionFactory;
-import org.ejml.factory.LinearSolver;
-import org.ejml.factory.SingularValueDecomposition;
+import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
-
-import org.ejml.ops.NormOps;
 import us.ihmc.utilities.CheckTools;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.NullspaceCalculator;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.CentroidalMomentumMatrix;
-import us.ihmc.utilities.screwTheory.GeometricJacobian;
-import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
-import us.ihmc.utilities.screwTheory.Momentum;
-import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.ScrewTools;
-import us.ihmc.utilities.screwTheory.SixDoFJoint;
-import us.ihmc.utilities.screwTheory.SpatialForceVector;
-import us.ihmc.utilities.screwTheory.SpatialMotionVector;
-import us.ihmc.utilities.screwTheory.TwistCalculator;
+import us.ihmc.utilities.screwTheory.*;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools;
+import java.util.*;
 
 public class MomentumSolver implements MomentumSolverInterface
 {
