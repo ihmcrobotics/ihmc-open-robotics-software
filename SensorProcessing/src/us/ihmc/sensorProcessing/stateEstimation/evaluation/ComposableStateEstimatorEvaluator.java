@@ -65,9 +65,11 @@ public class ComposableStateEstimatorEvaluator
       double angularVelocityFilterFrequencyInHertz = 12.0;
       double linearAccelerationFilterFrequencyInHertz = 12.0;
       double jointVelocitySlopTimeForBacklashCompensation = 0.007;
+      boolean useTwoPolesForIMUFiltering = false;
+      
       final SensorFilterParameters sensorFilterParameters = new SensorFilterParameters(jointPositionFilterFrequencyInHertz, jointVelocityFilterFrequencyInHertz,
             orientationFilterFrequencyInHertz, angularVelocityFilterFrequencyInHertz, linearAccelerationFilterFrequencyInHertz,
-            jointVelocitySlopTimeForBacklashCompensation, controlDT);
+            jointVelocitySlopTimeForBacklashCompensation, controlDT, useTwoPolesForIMUFiltering);
       
       SensorReaderFactory simulatedSensorHolderAndReaderFromRobotFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(robot,
             simulatedSensorNoiseParameters, sensorFilterParameters, imuMounts, new ArrayList<WrenchCalculatorInterface>(), registry);
