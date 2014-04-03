@@ -2,12 +2,19 @@ package us.ihmc.valkyrie.kinematics;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
+import com.yobotics.simulationconstructionset.util.math.filter.FilteredVelocityYoVariable;
 
 public class ValkyrieJoint
 {
+   private static final double DT = 0.002;
+   private static final double ALPHA = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(16.0, DT);
+   
    private final String name;
    private final DoubleYoVariable position;
    private final DoubleYoVariable velocity;
+   private final FilteredVelocityYoVariable fd_velocity;
+   private final AlphaFilteredYoVariable filt_velocity;
    private final DoubleYoVariable effort;
 
    private final DoubleYoVariable desiredPosition;
@@ -19,6 +26,8 @@ public class ValkyrieJoint
       this.name = name;
       position = new DoubleYoVariable(name + "_q", registry);
       velocity = new DoubleYoVariable(name + "_qd", registry);
+      fd_velocity = new FilteredVelocityYoVariable(name + "_fd_qd", "", ALPHA, position, DT, registry);
+      filt_velocity = new AlphaFilteredYoVariable(name + "_filt_qd", registry, ALPHA, fd_velocity);
       effort = new DoubleYoVariable(name + "_tau", registry);
 
       desiredPosition = new DoubleYoVariable(name + "_q_d", registry);
@@ -29,6 +38,8 @@ public class ValkyrieJoint
    public void setPosition(double q)
    {
       this.position.set(q);
+      fd_velocity.update();
+      filt_velocity.update();
    }
 
    public void setVelocity(double qd)
@@ -48,7 +59,7 @@ public class ValkyrieJoint
 
    public double getVelocity()
    {
-      return velocity.getDoubleValue();
+      return filt_velocity.getDoubleValue();
    }
 
    public double getEffort()
