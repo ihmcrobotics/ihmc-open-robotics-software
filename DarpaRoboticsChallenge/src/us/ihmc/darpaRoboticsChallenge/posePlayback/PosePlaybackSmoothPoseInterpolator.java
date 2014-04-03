@@ -121,6 +121,9 @@ public class PosePlaybackSmoothPoseInterpolator
 
    public boolean isDone()
    {
+      if (sequence == null)
+         return false;
+      
       return (poseSequenceIndex.getIntegerValue() >= sequence.getNumberOfPoses() - 1);
    }
    

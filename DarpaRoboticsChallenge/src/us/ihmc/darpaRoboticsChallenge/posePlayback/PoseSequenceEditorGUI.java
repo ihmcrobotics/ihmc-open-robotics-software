@@ -20,6 +20,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class PoseSequenceEditorGUI extends JFrame
 {
+   private static final long serialVersionUID = 8890174114593028871L;
    private final PoseSequenceSelectorPanel poseSequenceSelectorPanel;
    private final ButtonPanel buttonPanel;
 
@@ -29,46 +30,47 @@ public class PoseSequenceEditorGUI extends JFrame
       setSize(1400, 600);
       poseSequenceSelectorPanel = new PoseSequenceSelectorPanel(robotModel);
       buttonPanel = new ButtonPanel();
-      
+
       buttonPanelInit();
    }
 
-   public PoseSequenceEditorGUI(YoVariableRegistry registry,PosePlaybackAllJointsController posePlaybackController,SDFRobot sdfRobot,DRCRobotMidiSliderBoardPositionManipulation sliderBoard)
+   public PoseSequenceEditorGUI(YoVariableRegistry registry, PosePlaybackAllJointsController posePlaybackController, SDFRobot sdfRobot, DRCRobotMidiSliderBoardPositionManipulation sliderBoard)
    {
       super("Pose sequence editor");
       setSize(1400, 600);
-      poseSequenceSelectorPanel = new PoseSequenceSelectorPanel(registry,posePlaybackController,sdfRobot,sliderBoard);
+      poseSequenceSelectorPanel = new PoseSequenceSelectorPanel(registry, posePlaybackController, sdfRobot, sliderBoard);
       buttonPanel = new ButtonPanel();
-      
-      buttonPanelInit();       
+
+      buttonPanelInit();
    }
-   
+
    private void buttonPanelInit()
    {
       getContentPane().add(new JointNameKey(), BorderLayout.NORTH);
       getContentPane().add(poseSequenceSelectorPanel, BorderLayout.CENTER);
       getContentPane().add(buttonPanel, BorderLayout.SOUTH);
    }
-   
-   private class ButtonPanel extends JPanel implements ActionListener 
-   { 
+
+   private class ButtonPanel extends JPanel implements ActionListener
+   {
+      private static final long serialVersionUID = 5462601984021392064L;
       private JButton selectNewPoseSequence, selectPoseSequence, deleteRow, updateSCS, setRowWithSlider, save, switchSideDependentValues, copyAndInsertRow,
             insertInterpolation;
-      
+
       public ButtonPanel()
       {
          JPanel buttonPanel = new JPanel();
-         
+
          selectNewPoseSequence = new JButton("Select new pose sequence");
          selectPoseSequence = new JButton("Select pose sequence to append");
-         deleteRow = new JButton("Delete"); 
+         deleteRow = new JButton("Delete");
          updateSCS = new JButton("Update SCS");
          setRowWithSlider = new JButton("Set row with slider");
          save = new JButton("Save");
          copyAndInsertRow = new JButton("Copy/insert row");
          switchSideDependentValues = new JButton("Switch side dependent values");
          insertInterpolation = new JButton("Insert interpolated row");
-         
+
          buttonPanel.add(selectNewPoseSequence);
          buttonPanel.add(selectPoseSequence);
          buttonPanel.add(copyAndInsertRow);
@@ -78,7 +80,7 @@ public class PoseSequenceEditorGUI extends JFrame
          buttonPanel.add(setRowWithSlider);
          buttonPanel.add(switchSideDependentValues);
          buttonPanel.add(save);
-         
+
          selectNewPoseSequence.addActionListener(this);
          copyAndInsertRow.addActionListener(this);
          insertInterpolation.addActionListener(this);
@@ -88,7 +90,7 @@ public class PoseSequenceEditorGUI extends JFrame
          setRowWithSlider.addActionListener(this);
          save.addActionListener(this);
          switchSideDependentValues.addActionListener(this);
-                  
+
          setLayout(new BorderLayout());
          add(buttonPanel, BorderLayout.SOUTH);
 
@@ -96,47 +98,49 @@ public class PoseSequenceEditorGUI extends JFrame
 
       public void actionPerformed(ActionEvent e)
       {
-         if(e.getSource().equals(selectPoseSequence))
+         if (e.getSource().equals(selectPoseSequence))
             poseSequenceSelectorPanel.addSequenceFromFile();
-         
-         else if(e.getSource().equals(deleteRow))
+
+         else if (e.getSource().equals(deleteRow))
             poseSequenceSelectorPanel.deleteSelectedRows();
-         
-         else if(e.getSource().equals(updateSCS))
+
+         else if (e.getSource().equals(updateSCS))
             poseSequenceSelectorPanel.updateSCS();
-         
-         else if(e.getSource().equals(setRowWithSlider))
+
+         else if (e.getSource().equals(setRowWithSlider))
             poseSequenceSelectorPanel.setRowWithSlider();
-         
-         else if(e.getSource().equals(save))
+
+         else if (e.getSource().equals(save))
             poseSequenceSelectorPanel.save();
-         
-         else if(e.getSource().equals(selectNewPoseSequence))
+
+         else if (e.getSource().equals(selectNewPoseSequence))
             poseSequenceSelectorPanel.newSequenceFromFile();
-         
-         else if(e.getSource().equals(copyAndInsertRow))
+
+         else if (e.getSource().equals(copyAndInsertRow))
             poseSequenceSelectorPanel.copyAndInsertRow();
-         
-         else if(e.getSource().equals(insertInterpolation))
+
+         else if (e.getSource().equals(insertInterpolation))
             poseSequenceSelectorPanel.insertInterpolation();
-         
-         else if(e.getSource().equals(switchSideDependentValues))
+
+         else if (e.getSource().equals(switchSideDependentValues))
             poseSequenceSelectorPanel.switchSideDependentValues();
       }
    }
-   
+
    public void setSequence(PosePlaybackRobotPoseSequence seq)
    {
       poseSequenceSelectorPanel.setSequence(seq);
    }
-   
+
    public void addSequence(PosePlaybackRobotPoseSequence seq)
    {
       poseSequenceSelectorPanel.addSequence(seq);
    }
-   
+
    private class JointNameKey extends JPanel
    {
+      private static final long serialVersionUID = -986320074350226999L;
+
       public JointNameKey()
       {
          String key = "Joint name    =   (left, right)   +   (ankle, elbow, hip, knee, neck, shoulder, spine, wrist)   +   (yaw, pitch, roll)";
@@ -145,14 +149,13 @@ public class PoseSequenceEditorGUI extends JFrame
       }
    }
 
-   
    public static void main(String[] args)
    {
       // Flag to set robot model
       JSAP jsap = new JSAP();
       FlaggedOption robotModel = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(true).setStringParser(JSAP.STRING_PARSER);
       robotModel.setHelp("Robot models: " + DRCRobotModelFactory.robotModelsToString());
-      
+
       DRCRobotModel model;
       try
       {
@@ -176,10 +179,9 @@ public class PoseSequenceEditorGUI extends JFrame
          e.printStackTrace();
          return;
       }
-      
+
       PoseSequenceEditorGUI scriptedEditorGUI = new PoseSequenceEditorGUI(model);
       scriptedEditorGUI.setDefaultCloseOperation(EXIT_ON_CLOSE);
       scriptedEditorGUI.setVisible(true);
    }
 }
-

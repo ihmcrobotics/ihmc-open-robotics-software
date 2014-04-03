@@ -12,13 +12,13 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedSensorReader;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
-import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotModelFactory;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.configuration.LocalCloudMachines;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
+import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -40,9 +40,7 @@ import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.ModularRobotController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicCoordinateSystem;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
 public class PosePlaybackSCSBridge
@@ -73,20 +71,19 @@ public class PosePlaybackSCSBridge
    private final YoFramePoint rightAnklePosition = new YoFramePoint("rightAnklePosition", ReferenceFrame.getWorldFrame(), registry);
    private final SideDependentList<YoFramePoint> anklePositions = new SideDependentList<YoFramePoint>(leftAnklePosition, rightAnklePosition);
 
-   private final EnumYoVariable leftPalmPoseClassification = new EnumYoVariable("leftPalmPose", "", registry, PalmPoseClassification.class, true);
-   private final EnumYoVariable rightPalmPoseClassification = new EnumYoVariable("rightPalmPose", "", registry, PalmPoseClassification.class, true);
-   private final SideDependentList<EnumYoVariable> palmPoseClassifications = new SideDependentList<EnumYoVariable>(leftPalmPoseClassification,
-         rightPalmPoseClassification);
+   private final EnumYoVariable<PalmPoseClassification> leftPalmPoseClassification = new EnumYoVariable<PalmPoseClassification>("leftPalmPose", "", registry, PalmPoseClassification.class, true);
+   private final EnumYoVariable<PalmPoseClassification> rightPalmPoseClassification = new EnumYoVariable<PalmPoseClassification>("rightPalmPose", "", registry, PalmPoseClassification.class, true);
+   private final SideDependentList<EnumYoVariable<PalmPoseClassification>> palmPoseClassifications = new SideDependentList<EnumYoVariable<PalmPoseClassification>>(leftPalmPoseClassification, rightPalmPoseClassification);
 
    private PosePlaybackRobotPose previousPose;
 
-   private final SideDependentList<DynamicGraphicCoordinateSystem> feetCoordinateSystems;
+   private final SideDependentList<DynamicGraphicCoordinateSystem> feetCoordinateSystems = new SideDependentList<DynamicGraphicCoordinateSystem>();
 
    private final YoFramePoint leftWristPosition = new YoFramePoint("leftWristPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint rightWristPosition = new YoFramePoint("rightWristPosition", ReferenceFrame.getWorldFrame(), registry);
    private final SideDependentList<YoFramePoint> wristPositions = new SideDependentList<YoFramePoint>(leftWristPosition, rightWristPosition);
 
-   private final SideDependentList<DynamicGraphicCoordinateSystem> handCoordinateSystems;
+   private final SideDependentList<DynamicGraphicCoordinateSystem> handCoordinateSystems = new SideDependentList<>();
 
    private final PoseSequenceEditorGUI poseSequenceEditorGUI;
 
@@ -108,8 +105,7 @@ public class PosePlaybackSCSBridge
       sdfRobot = loader.createRobot(jointMap, false);
       SDFFullRobotModel fullRobotModel = loader.createFullRobotModel(jointMap);
 
-      ReferenceFrames referenceFrames = new ReferenceFrames(fullRobotModel, jointMap, jointMap.getAnkleHeight());
-      SDFPerfectSimulatedSensorReader reader = new SDFPerfectSimulatedSensorReader(sdfRobot, fullRobotModel, referenceFrames);
+      SDFPerfectSimulatedSensorReader reader = new SDFPerfectSimulatedSensorReader(sdfRobot, fullRobotModel, null);
       ModularRobotController controller = new ModularRobotController("Reader");
       controller.setRawSensorReader(reader);
 
@@ -117,70 +113,41 @@ public class PosePlaybackSCSBridge
       scs.setDT(controlDT, 1);
       scs.addYoVariableRegistry(registry);
 
-      DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList(getClass().getSimpleName());
-      DynamicGraphicPosition centerOfMassViz = new DynamicGraphicPosition("centerOfMass", centerOfMassPosition, 0.03, YoAppearance.Gold());
-      DynamicGraphicPosition centerOfMass2dViz = new DynamicGraphicPosition("centerOfMass2d", centerOfMassPosition2d, 0.03, YoAppearance.Gold());
+      String listName = getClass().getSimpleName();
+      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, centerOfMassPosition.createDynamicGraphicPosition("centerOfMass", 0.03, YoAppearance.Gold()));
+      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, centerOfMassPosition2d.createDynamicGraphicPosition("centerOfMass2d", 0.03, YoAppearance.Gold()));
+      
+      SideDependentList<AppearanceDefinition> appearance = new SideDependentList<>(YoAppearance.Red(), YoAppearance.Green());
+      
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
 
-      DynamicGraphicPosition leftAnkleViz = new DynamicGraphicPosition("leftAnkleViz", leftAnklePosition, 0.05, YoAppearance.Red());
-      DynamicGraphicPosition rightAnkleViz = new DynamicGraphicPosition("rightAnkleViz", rightAnklePosition, 0.05, YoAppearance.Green());
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, anklePositions.get(robotSide).createDynamicGraphicPosition(sidePrefix + "AnkleViz", 0.05, appearance.get(robotSide)));
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, wristPositions.get(robotSide).createDynamicGraphicPosition(sidePrefix + "WristViz", 0.05, appearance.get(robotSide)));
+         
+         DynamicGraphicCoordinateSystem footCoordinateSystem = new DynamicGraphicCoordinateSystem(sidePrefix + "Foot", "", registry, 0.25);
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, footCoordinateSystem);
+         feetCoordinateSystems.put(robotSide, footCoordinateSystem);
 
-      DynamicGraphicPosition leftWristViz = new DynamicGraphicPosition("leftWristViz", leftWristPosition, 0.05, YoAppearance.Red());
-      DynamicGraphicPosition rightWristViz = new DynamicGraphicPosition("rightWristViz", rightWristPosition, 0.05, YoAppearance.Green());
-
-      DynamicGraphicCoordinateSystem leftFootCoordinateSystem = new DynamicGraphicCoordinateSystem("leftFoot", "", registry, 0.25);
-      DynamicGraphicCoordinateSystem rightFootCoordinateSystem = new DynamicGraphicCoordinateSystem("rightFoot", "", registry, 0.25);
-      feetCoordinateSystems = new SideDependentList<DynamicGraphicCoordinateSystem>(leftFootCoordinateSystem, rightFootCoordinateSystem);
-
-      DynamicGraphicCoordinateSystem leftHandCoordinateSystem = new DynamicGraphicCoordinateSystem("leftHand", "", registry, 0.25);
-      DynamicGraphicCoordinateSystem rightHandCoordinateSystem = new DynamicGraphicCoordinateSystem("rightHand", "", registry, 0.25);
-      handCoordinateSystems = new SideDependentList<DynamicGraphicCoordinateSystem>(leftHandCoordinateSystem, rightHandCoordinateSystem);
-
-      dynamicGraphicObjectsList.add(centerOfMassViz);
-      dynamicGraphicObjectsList.add(centerOfMass2dViz);
-
-      dynamicGraphicObjectsList.add(leftAnkleViz);
-      dynamicGraphicObjectsList.add(rightAnkleViz);
-
-      dynamicGraphicObjectsList.add(leftFootCoordinateSystem);
-      dynamicGraphicObjectsList.add(rightFootCoordinateSystem);
-
-      dynamicGraphicObjectsList.add(leftWristViz);
-      dynamicGraphicObjectsList.add(rightWristViz);
-
-      dynamicGraphicObjectsList.add(leftHandCoordinateSystem);
-      dynamicGraphicObjectsList.add(rightHandCoordinateSystem);
-
-      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
+         DynamicGraphicCoordinateSystem handCoordinateSystem = new DynamicGraphicCoordinateSystem(sidePrefix + "Hand", "", registry, 0.25);
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, handCoordinateSystem);
+         handCoordinateSystems.put(robotSide, handCoordinateSystem);
+      }
+      
       dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
 
       SDFFullRobotModel fullRobotModelForSlider = loader.createFullRobotModel(jointMap);
-      ReferenceFrames referenceFramesForSlider = new ReferenceFrames(fullRobotModelForSlider, jointMap, jointMap.getAnkleHeight());
-      DRCRobotMidiSliderBoardPositionManipulation sliderBoard = new DRCRobotMidiSliderBoardPositionManipulation(scs, sdfRobot, referenceFramesForSlider,
-            fullRobotModelForSlider, dynamicGraphicObjectsListRegistry);
+      DRCRobotMidiSliderBoardPositionManipulation sliderBoard = new DRCRobotMidiSliderBoardPositionManipulation(scs, sdfRobot, fullRobotModelForSlider, dynamicGraphicObjectsListRegistry);
 
-      CaptureSnapshotListener captureSnapshotListener = new CaptureSnapshotListener(referenceFrames, fullRobotModel, controller);
-      sliderBoard.addCaptureSnapshotListener(captureSnapshotListener);
-
-      SaveSequenceListener saveSequenceListener = new SaveSequenceListener();
-      sliderBoard.addSaveSequenceRequestedListener(saveSequenceListener);
-
-      LoadSequenceFromFileListener loadSequenceListener = new LoadSequenceFromFileListener();
-      sliderBoard.addLoadSequenceRequestedListener(loadSequenceListener);
-
-      ClearSequenceListener clearSequenceListener = new ClearSequenceListener();
-      sliderBoard.addClearSequenceRequestedListener(clearSequenceListener);
-
-      LoadFrameByFrameSequenceListener loadFrameByFrameSequenceListener = new LoadFrameByFrameSequenceListener();
-      sliderBoard.addLoadFrameByFrameSequenceRequestedListener(loadFrameByFrameSequenceListener);
-      
-      LoadLastSequenceListener loadLastSequenceListener = new LoadLastSequenceListener();
-      sliderBoard.addLoadLastSequenceRequestedListener(loadLastSequenceListener);
-      
-      PlayPoseFromFrameByFrameSequenceListener playPoseFromFrameByFrameSequenceListener = new PlayPoseFromFrameByFrameSequenceListener();
-      sliderBoard.addPlayPoseFromFrameByFrameSequenceRequestedListener(playPoseFromFrameByFrameSequenceListener);
-
-      ResetToBasePoseListener resetToBasePoseListener = new ResetToBasePoseListener();
-      sliderBoard.addResetToBasePoseRequestedListener(resetToBasePoseListener);
+      sliderBoard.addCaptureSnapshotListener(new CaptureSnapshotListener(fullRobotModel, controller));
+      sliderBoard.addSaveSequenceRequestedListener(new SaveSequenceListener());
+      sliderBoard.addLoadSequenceRequestedListener(new LoadSequenceFromFileListener());
+      sliderBoard.addClearSequenceRequestedListener(new ClearSequenceListener());
+      sliderBoard.addLoadFrameByFrameSequenceRequestedListener(new LoadFrameByFrameSequenceListener());
+      sliderBoard.addLoadLastSequenceRequestedListener(new LoadLastSequenceListener());
+      sliderBoard.addPlayPoseFromFrameByFrameSequenceRequestedListener(new PlayPoseFromFrameByFrameSequenceListener());
+      sliderBoard.addResetToBasePoseRequestedListener(new ResetToBasePoseListener());
 
       poseSequenceEditorGUI = new PoseSequenceEditorGUI(registry, posePlaybackController, sdfRobot, sliderBoard);
       poseSequenceEditorGUI.setVisible(true);
@@ -230,12 +197,10 @@ public class PosePlaybackSCSBridge
    {
       private final FullRobotModel fullRobotModel;
 
-      private final ReferenceFrames referenceFrames;
       private final ModularRobotController controller;
 
-      public CaptureSnapshotListener(ReferenceFrames referenceFrames, SDFFullRobotModel fullRobotModel, ModularRobotController controller)
+      public CaptureSnapshotListener(SDFFullRobotModel fullRobotModel, ModularRobotController controller)
       {
-         this.referenceFrames = referenceFrames;
          this.fullRobotModel = fullRobotModel;
          this.controller = controller;
       }
@@ -311,7 +276,6 @@ public class PosePlaybackSCSBridge
       {
          sdfRobot.update();
          controller.doControl();
-         referenceFrames.updateFrames();
          fullRobotModel.updateFrames();
 
          for (RobotSide robotSide : RobotSide.values())

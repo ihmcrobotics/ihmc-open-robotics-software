@@ -3,10 +3,11 @@ package us.ihmc.darpaRoboticsChallenge.posePlayback;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
-import java.util.Map;
 
 import javax.media.j3d.Transform3D;
+import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedOutputWriter;
@@ -14,10 +15,9 @@ import us.ihmc.SdfLoader.SDFPerfectSimulatedSensorReader;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
+import us.ihmc.commonWalkingControlModules.partNamesAndTorques.NeckJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineJointName;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
-import us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap;
-import us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMapCorrelation;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
@@ -29,15 +29,18 @@ import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.utilities.screwTheory.RigidBody;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
+import com.yobotics.simulationconstructionset.FloatingJoint;
+import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.VariableChangedListener;
 import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicCoordinateSystem;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicLineSegment;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
@@ -49,16 +52,19 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePose;
 
 public class DRCRobotMidiSliderBoardPositionManipulation
 {
-   private final SideDependentList<String> sideString = new SideDependentList<String>("q_l_", "q_r_");
-   private final LinkedHashMap<SpineJointName, String> spineJointStringNames = new LinkedHashMap<SpineJointName, String>();
-   private final LinkedHashMap<SpineJointName, Double> spineJointLowerLimits = new LinkedHashMap<SpineJointName, Double>();
-   private final LinkedHashMap<SpineJointName, Double> spineJointUpperLimits = new LinkedHashMap<SpineJointName, Double>();
-   private final LinkedHashMap<LegJointName, String> legJointStringNames = new LinkedHashMap<LegJointName, String>();
-   private final SideDependentList<Map<LegJointName, Double>> legJointLowerLimits = SideDependentList.createListOfHashMaps();
-   private final SideDependentList<Map<LegJointName, Double>> legJointUpperLimits = SideDependentList.createListOfHashMaps();
-   private final LinkedHashMap<ArmJointName, String> armJointStringNames = new LinkedHashMap<ArmJointName, String>();
-   private final SideDependentList<Map<ArmJointName, Double>> armJointLowerLimits = SideDependentList.createListOfHashMaps();
-   private final SideDependentList<Map<ArmJointName, Double>> armJointUpperLimits = SideDependentList.createListOfHashMaps();
+   private final ArrayList<OneDegreeOfFreedomJoint> allSCSJoints = new ArrayList<>();
+
+   private final ArrayList<NeckJointName> neckJointNames = new ArrayList<>();
+   private final EnumMap<NeckJointName, OneDegreeOfFreedomJoint> neckSCSJoints = new EnumMap<>(NeckJointName.class);
+   
+   private final ArrayList<SpineJointName> spineJointNames = new ArrayList<>();
+   private final EnumMap<SpineJointName, OneDegreeOfFreedomJoint> spineSCSJoints = new EnumMap<SpineJointName, OneDegreeOfFreedomJoint>(SpineJointName.class);
+
+   private final SideDependentList<ArrayList<LegJointName>> legJointNames = new SideDependentList<>(new ArrayList<LegJointName>(), new ArrayList<LegJointName>());
+   private final SideDependentList<EnumMap<LegJointName, OneDegreeOfFreedomJoint>> legSCSJoints = SideDependentList.createListOfEnumMaps(LegJointName.class);
+   
+   private final SideDependentList<ArrayList<ArmJointName>> armJointNames = new SideDependentList<>(new ArrayList<ArmJointName>(), new ArrayList<ArmJointName>());
+   private final SideDependentList<EnumMap<ArmJointName, OneDegreeOfFreedomJoint>> armSCSJoints = SideDependentList.createListOfEnumMaps(ArmJointName.class);
    private final double fingerJointLimit = 1.57079632679;
 
    private final YoVariableRegistry registry = new YoVariableRegistry("SliderBoardRegistry");
@@ -72,8 +78,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
    private final BooleanYoVariable isLoadSequenceRequested = new BooleanYoVariable("isLoadSequenceRequested", dontRecordRegistry);
    private final BooleanYoVariable isClearSequenceRequested = new BooleanYoVariable("isClearSequenceRequested", dontRecordRegistry);
    private final BooleanYoVariable isLoadFrameByFrameSequenceRequested = new BooleanYoVariable("isLoadFrameByFrameSequenceRequested", dontRecordRegistry);
-   private final BooleanYoVariable isPlayPoseFromFrameByFrameSequenceRequested = new BooleanYoVariable("isPlayPoseFromFrameByFrameSequenceRequested",
-         dontRecordRegistry);
+   private final BooleanYoVariable isPlayPoseFromFrameByFrameSequenceRequested = new BooleanYoVariable("isPlayPoseFromFrameByFrameSequenceRequested", dontRecordRegistry);
    private final BooleanYoVariable isSymmetricModeRequested = new BooleanYoVariable("isSymmetricModeRequested", dontRecordRegistry);
    private final BooleanYoVariable isResetToBasePoseRequested = new BooleanYoVariable("isResetToBasePoseRequested", dontRecordRegistry);
    private final BooleanYoVariable isLoadLastSequenceRequested = new BooleanYoVariable("isLoadLastSequenceRequested", dontRecordRegistry);
@@ -92,10 +97,8 @@ public class DRCRobotMidiSliderBoardPositionManipulation
    private final BooleanYoVariable isSupportBaseControlTargetRequested = new BooleanYoVariable("isSupportBaseControlTargetRequested", dontRecordRegistry);
    private final BooleanYoVariable isSupportBaseTargetToggleRequested = new BooleanYoVariable("isSupportBaseTargetToggleRequested", dontRecordRegistry);
 
-   private final SideDependentList<BooleanYoVariable> isLegControlRequested = new SideDependentList<BooleanYoVariable>(isLeftLegControlRequested,
-         isRightLegControlRequested);
-   private final SideDependentList<BooleanYoVariable> isArmControlRequested = new SideDependentList<BooleanYoVariable>(isLeftArmControlRequested,
-         isRightArmControlRequested);
+   private final SideDependentList<BooleanYoVariable> isLegControlRequested = new SideDependentList<BooleanYoVariable>(isLeftLegControlRequested, isRightLegControlRequested);
+   private final SideDependentList<BooleanYoVariable> isArmControlRequested = new SideDependentList<BooleanYoVariable>(isLeftArmControlRequested, isRightArmControlRequested);
 
    private final SimulationConstructionSet scs;
    private final MidiSliderBoard sliderBoard;
@@ -111,7 +114,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
 
    private boolean symmetricMode = false;
    private RobotSide symmetricControlSide;
-   private final DoubleYoVariable q_qs, q_qx, q_qy, q_qz;
+   private final DoubleYoVariable q_qs, q_qx, q_qy, q_qz, q_x, q_y, q_z;
    private Quat4d qprev;
 
    //   private final DoubleYoVariable BaseControlPoint = new DoubleYoVariable("BaseControlPoint", registry);
@@ -123,33 +126,69 @@ public class DRCRobotMidiSliderBoardPositionManipulation
    private final ArrayList<DynamicGraphicObject> baseControlTargetPointsList = new ArrayList<DynamicGraphicObject>();
    private final ArrayList<DynamicGraphicObject> baseControlTargetLinesList = new ArrayList<DynamicGraphicObject>();
 
-   public DRCRobotMidiSliderBoardPositionManipulation(SimulationConstructionSet scs)
+   private final SideDependentList<SliderBodyPart> legBodyParts = new SideDependentList<DRCRobotMidiSliderBoardPositionManipulation.SliderBodyPart>(SliderBodyPart.LEFT_LEG, SliderBodyPart.RIGHT_LEG);
+   private final SideDependentList<SliderBodyPart> armBodyParts = new SideDependentList<DRCRobotMidiSliderBoardPositionManipulation.SliderBodyPart>(SliderBodyPart.LEFT_ARM, SliderBodyPart.RIGHT_ARM);
+
+   private final SideDependentList<NumericalInverseKinematicsCalculator> legInverseKinematicsCalculators = new SideDependentList<NumericalInverseKinematicsCalculator>();
+   private final SideDependentList<NumericalInverseKinematicsCalculator> armInverseKinematicsCalculators = new SideDependentList<NumericalInverseKinematicsCalculator>();
+
+   private final SideDependentList<YoFramePose> feetIKs = new SideDependentList<>();
+   private final SideDependentList<YoFramePose> handIKs = new SideDependentList<>();
+
+   private final SDFRobot sdfRobot;
+   private final SDFFullRobotModel fullRobotModel;
+   private final SDFPerfectSimulatedSensorReader reader;
+   private final SDFPerfectSimulatedOutputWriter writer;
+
+   private enum SliderBodyPart
    {
-      this(scs, null, null, null, null);
+      LEFT_LEG, RIGHT_LEG, LEFT_ARM, RIGHT_ARM, PELVIS, CHEST;
    }
 
-   public DRCRobotMidiSliderBoardPositionManipulation(SimulationConstructionSet scs, SDFRobot sdfRobot, ReferenceFrames referenceFrames,
-         SDFFullRobotModel fullRobotModel, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   private enum SliderSpace
+   {
+      JOINT, CARTESIAN
+   }
+   
+   private final BooleanYoVariable controlFingers = new BooleanYoVariable("controlFingers", registry);
+
+   public DRCRobotMidiSliderBoardPositionManipulation(SimulationConstructionSet scs, SDFRobot sdfRobot, SDFFullRobotModel fullRobotModel, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   {
+      this(false, scs, sdfRobot, fullRobotModel, dynamicGraphicObjectsListRegistry);
+   }
+   
+   public DRCRobotMidiSliderBoardPositionManipulation(boolean controlFingers, SimulationConstructionSet scs, SDFRobot sdfRobot, SDFFullRobotModel fullRobotModel, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       this.scs = scs;
+      this.fullRobotModel = fullRobotModel;
+      this.sdfRobot = sdfRobot;
+      this.reader = new SDFPerfectSimulatedSensorReader(sdfRobot, fullRobotModel, null);
+      this.writer = new SDFPerfectSimulatedOutputWriter(sdfRobot, fullRobotModel);
 
-      if (sdfRobot != null)
-         setupForInverseKinematics(sdfRobot, referenceFrames, fullRobotModel, dynamicGraphicObjectsListRegistry);
+      this.controlFingers.set(controlFingers);
+      
+      sdfRobot.getAllOneDegreeOfFreedomJoints(allSCSJoints);
+      
 
       sliderSpace.set(SliderSpace.JOINT);
       sliderBodyPart.set(SliderBodyPart.LEFT_LEG);
 
       scs.addYoVariableRegistry(registry);
       sliderBoard = new MidiSliderBoard(scs);
-      init();
 
       UpdateInverseKinematicsListener updateInverseKinematicsListener = new UpdateInverseKinematicsListener();
       sliderBoard.attachVariableChangedListener(updateInverseKinematicsListener);
 
-      q_qs = (DoubleYoVariable) scs.getVariable("q_qs");
-      q_qx = (DoubleYoVariable) scs.getVariable("q_qx");
-      q_qy = (DoubleYoVariable) scs.getVariable("q_qy");
-      q_qz = (DoubleYoVariable) scs.getVariable("q_qz");
+      FloatingJoint rootJoint = sdfRobot.getRootJoint();
+      q_x = rootJoint.getQx();
+      q_y = rootJoint.getQy();
+      q_z = rootJoint.getQz();
+      q_qs = rootJoint.getQuaternionQs();
+      q_qx = rootJoint.getQuaternionQx();
+      q_qy = rootJoint.getQuaternionQy();
+      q_qz = rootJoint.getQuaternionQz();
+
+      init();
 
       ChangeCurrentPartBeingControlledListener listener = new ChangeCurrentPartBeingControlledListener();
 
@@ -166,9 +205,12 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       q_pitch.addVariableChangedListener(pelvisListener);
       q_roll.addVariableChangedListener(pelvisListener);
 
-      for (RobotSide robotSide : RobotSide.values)
+      if (this.controlFingers.getBooleanValue())
       {
-         q_hands.get(robotSide).addVariableChangedListener(new HandListener(robotSide));
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            q_hands.get(robotSide).addVariableChangedListener(new HandListener(robotSide));
+         }
       }
 
       isLeftLegControlRequested.set(true);
@@ -180,7 +222,47 @@ public class DRCRobotMidiSliderBoardPositionManipulation
             symmetricMode = isSymmetricModeRequested.getBooleanValue();
          }
       });
+      
+      RigidBody pelvis = fullRobotModel.getPelvis();
+      RigidBody chest = fullRobotModel.getChest();
+      
+      double tolerance = 1e-8;
+      double maxStepSize = 1.0;
+      double minRandomSearchScalar = -0.5;
+      double maxRandomSearchScalar = 1.0;
+      int maxIterations = 10;
+      
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBody foot = fullRobotModel.getFoot(robotSide);
+         RigidBody hand = fullRobotModel.getHand(robotSide);
+         
+         GeometricJacobian legJacobian = new GeometricJacobian(pelvis, foot, foot.getBodyFixedFrame());
+         GeometricJacobian armJacobian = new GeometricJacobian(chest, hand, hand.getBodyFixedFrame());
+         
+         NumericalInverseKinematicsCalculator legInverseKinematicsCalculator = new NumericalInverseKinematicsCalculator(legJacobian, tolerance, maxIterations, maxStepSize, minRandomSearchScalar, maxRandomSearchScalar);
+         NumericalInverseKinematicsCalculator armInverseKinematicsCalculator = new NumericalInverseKinematicsCalculator(armJacobian, tolerance, maxIterations, maxStepSize, minRandomSearchScalar, maxRandomSearchScalar);
+         
+         legInverseKinematicsCalculators.put(robotSide, legInverseKinematicsCalculator);
+         armInverseKinematicsCalculators.put(robotSide, armInverseKinematicsCalculator);
+      }
 
+      String listName = "InverseKinematics";
+      double scale = 0.2;
+      
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
+         YoFramePose footIK = new YoFramePose(sidePrefix + "FootIK", "", ReferenceFrames.getWorldFrame(), registry);
+         feetIKs.put(robotSide, footIK);
+         
+         YoFramePose handIK = new YoFramePose(sidePrefix + "HandIK", "", ReferenceFrames.getWorldFrame(), registry);
+         handIKs.put(robotSide, handIK);
+
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, footIK.createDynamicGraphicCoordinateSystem(sidePrefix + "FootViz", scale));
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, handIK.createDynamicGraphicCoordinateSystem(sidePrefix + "HandViz", scale));
+      }
+      
       setupSymmetricModeListeners();
 
       setupSupportPolygonDisplayAndControl(dynamicGraphicObjectsListRegistry);
@@ -215,137 +297,49 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       addSupportBaseControlTargetGraphics(dynamicGraphicObjectsListRegistry);
    }
 
-   public void addCaptureSnapshotListener(VariableChangedListener variableChangedListener)
-   {
-      isCaptureSnapshotRequested.addVariableChangedListener(variableChangedListener);
-   }
-
-   public void addSaveSequenceRequestedListener(VariableChangedListener variableChangedListener)
-   {
-      isSaveSequenceRequested.addVariableChangedListener(variableChangedListener);
-   }
-
-   public void addLoadSequenceRequestedListener(VariableChangedListener variableChangedListener)
-   {
-      isLoadSequenceRequested.addVariableChangedListener(variableChangedListener);
-   }
-
-   public void addClearSequenceRequestedListener(VariableChangedListener variableChangedListener)
-   {
-      isClearSequenceRequested.addVariableChangedListener(variableChangedListener);
-   }
-
-   public void addLoadFrameByFrameSequenceRequestedListener(VariableChangedListener variableChangedListener)
-   {
-      isLoadFrameByFrameSequenceRequested.addVariableChangedListener(variableChangedListener);
-   }
-   
-   public void addLoadLastSequenceRequestedListener(VariableChangedListener variableChangedListener)
-   {
-      isLoadLastSequenceRequested.addVariableChangedListener(variableChangedListener);
-   }
-
-   public void addPlayPoseFromFrameByFrameSequenceRequestedListener(VariableChangedListener variableChangedListener)
-   {
-      isPlayPoseFromFrameByFrameSequenceRequested.addVariableChangedListener(variableChangedListener);
-   }
-
-   public void addResetToBasePoseRequestedListener(VariableChangedListener variableChangedListener)
-   {
-      isResetToBasePoseRequested.addVariableChangedListener(variableChangedListener);
-   }
-
    private void init()
    {
-      String prefix = "q_back_";
-      spineJointStringNames.put(SpineJointName.SPINE_YAW, prefix + "lbz");
-      spineJointStringNames.put(SpineJointName.SPINE_PITCH, prefix + "mby");
-      spineJointStringNames.put(SpineJointName.SPINE_ROLL, prefix + "ubx");
-
-      spineJointLowerLimits.put(SpineJointName.SPINE_YAW, -0.610865);
-      spineJointLowerLimits.put(SpineJointName.SPINE_PITCH, -1.2);
-      spineJointLowerLimits.put(SpineJointName.SPINE_ROLL, -0.790809);
-
-      spineJointUpperLimits.put(SpineJointName.SPINE_YAW, 0.610865);
-      spineJointUpperLimits.put(SpineJointName.SPINE_PITCH, 1.28);
-      spineJointUpperLimits.put(SpineJointName.SPINE_ROLL, 0.790809);
-
-      String legPrefix = "leg_";
-      legJointStringNames.put(LegJointName.HIP_YAW, legPrefix + "uhz");
-      legJointStringNames.put(LegJointName.HIP_ROLL, legPrefix + "mhx");
-      legJointStringNames.put(LegJointName.HIP_PITCH, legPrefix + "lhy");
-      legJointStringNames.put(LegJointName.KNEE, legPrefix + "kny");
-      legJointStringNames.put(LegJointName.ANKLE_PITCH, legPrefix + "uay");
-      legJointStringNames.put(LegJointName.ANKLE_ROLL, legPrefix + "lax");
-
-      double hipYawMax = 1.14;
-      double hipYawMin = -0.32;
-
-      SideDependentList<Double> hipYawLowerLimit = new SideDependentList<Double>(hipYawMin, -hipYawMin);
-      SideDependentList<Double> hipYawUpperLimit = new SideDependentList<Double>(hipYawMax, -hipYawMax);
-
-      double hipRollMax = 0.495;
-      double hipRollMin = -0.47;
-
-      SideDependentList<Double> hipRollLowerLimit = new SideDependentList<Double>(hipRollMin, -hipRollMin);
-      SideDependentList<Double> hipRollUpperLimit = new SideDependentList<Double>(hipRollMax, -hipRollMax);
-
-      for (RobotSide robotSide : RobotSide.values())
+      for (NeckJointName jointName : NeckJointName.values())
       {
-         legJointLowerLimits.get(robotSide).put(LegJointName.HIP_YAW, hipYawLowerLimit.get(robotSide));
-         legJointLowerLimits.get(robotSide).put(LegJointName.HIP_ROLL, hipRollLowerLimit.get(robotSide));
-         legJointLowerLimits.get(robotSide).put(LegJointName.HIP_PITCH, -1.75);
-         legJointLowerLimits.get(robotSide).put(LegJointName.KNEE, 0.0);
-         legJointLowerLimits.get(robotSide).put(LegJointName.ANKLE_PITCH, -0.698);
-         legJointLowerLimits.get(robotSide).put(LegJointName.ANKLE_ROLL, -0.436);
+         OneDoFJoint neckJoint = fullRobotModel.getNeckJoint(jointName);
+         if (neckJoint == null)
+            continue;
 
-         legJointUpperLimits.get(robotSide).put(LegJointName.HIP_YAW, hipYawUpperLimit.get(robotSide));
-         legJointUpperLimits.get(robotSide).put(LegJointName.HIP_ROLL, hipRollUpperLimit.get(robotSide));
-         legJointUpperLimits.get(robotSide).put(LegJointName.HIP_PITCH, 0.524);
-         legJointUpperLimits.get(robotSide).put(LegJointName.KNEE, 2.45);
-         legJointUpperLimits.get(robotSide).put(LegJointName.ANKLE_PITCH, 0.698);
-         legJointUpperLimits.get(robotSide).put(LegJointName.ANKLE_ROLL, 0.436);
+         neckJointNames.add(jointName);
+         neckSCSJoints.put(jointName, sdfRobot.getOneDoFJoint(neckJoint.getName()));
       }
 
-      String armPrefix = "arm_";
-      armJointStringNames.put(ArmJointName.SHOULDER_PITCH, armPrefix + "usy");
-      armJointStringNames.put(ArmJointName.SHOULDER_ROLL, armPrefix + "shx");
-      armJointStringNames.put(ArmJointName.ELBOW_PITCH, armPrefix + "ely");
-      armJointStringNames.put(ArmJointName.ELBOW_ROLL, armPrefix + "elx");
-      armJointStringNames.put(ArmJointName.WRIST_PITCH, armPrefix + "uwy");
-      armJointStringNames.put(ArmJointName.WRIST_ROLL, armPrefix + "mwx");
-
-      double shoulderRollMax = 1.74533;
-      double shoulderRollMin = -1.39626;
-
-      SideDependentList<Double> shoulderRollLowerLimit = new SideDependentList<Double>(shoulderRollMin, -shoulderRollMin);
-      SideDependentList<Double> shoulderRollUpperLimit = new SideDependentList<Double>(shoulderRollMax, -shoulderRollMax);
-
-      double elbowRollMin = 0.0;
-      double elbowRollMax = 2.35619;
-      SideDependentList<Double> elbowRollLowerLimit = new SideDependentList<Double>(elbowRollMin, -elbowRollMin);
-      SideDependentList<Double> elbowRollUpperLimit = new SideDependentList<Double>(elbowRollMax, -elbowRollMax);
-
-      double wristRollMin = -0.436;
-      double wristRollMax = 1.571;
-      SideDependentList<Double> wristRollLowerLimit = new SideDependentList<Double>(wristRollMin, -wristRollMin);
-      SideDependentList<Double> wristRollUpperLimit = new SideDependentList<Double>(wristRollMax, -wristRollMax);
-
-      for (RobotSide robotSide : RobotSide.values())
+      for (SpineJointName jointName : SpineJointName.values())
       {
-         armJointLowerLimits.get(robotSide).put(ArmJointName.SHOULDER_PITCH, -1.9635);
-         armJointLowerLimits.get(robotSide).put(ArmJointName.SHOULDER_ROLL, shoulderRollLowerLimit.get(robotSide));
-         armJointLowerLimits.get(robotSide).put(ArmJointName.ELBOW_PITCH, 0.0);
-         armJointLowerLimits.get(robotSide).put(ArmJointName.ELBOW_ROLL, elbowRollLowerLimit.get(robotSide));
-         armJointLowerLimits.get(robotSide).put(ArmJointName.WRIST_PITCH, -1.571);
-         armJointLowerLimits.get(robotSide).put(ArmJointName.WRIST_ROLL, wristRollLowerLimit.get(robotSide));
+         OneDoFJoint spineJoint = fullRobotModel.getSpineJoint(jointName);
+         if (spineJoint == null)
+            continue;
 
-         armJointUpperLimits.get(robotSide).put(ArmJointName.SHOULDER_PITCH, 1.9635);
-         armJointUpperLimits.get(robotSide).put(ArmJointName.SHOULDER_ROLL, shoulderRollUpperLimit.get(robotSide));
-         armJointUpperLimits.get(robotSide).put(ArmJointName.ELBOW_PITCH, 3.14159);
-         armJointUpperLimits.get(robotSide).put(ArmJointName.ELBOW_ROLL, elbowRollUpperLimit.get(robotSide));
-         armJointUpperLimits.get(robotSide).put(ArmJointName.WRIST_PITCH, 1.571);
-         armJointUpperLimits.get(robotSide).put(ArmJointName.WRIST_ROLL, wristRollUpperLimit.get(robotSide));
+         spineJointNames.add(jointName);
+         spineSCSJoints.put(jointName, sdfRobot.getOneDoFJoint(spineJoint.getName()));
+      }
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         for (LegJointName jointName : LegJointName.values())
+         {
+            OneDoFJoint legJoint = fullRobotModel.getLegJoint(robotSide, jointName);
+            if (legJoint == null)
+               continue;
+            
+            legJointNames.get(robotSide).add(jointName);
+            legSCSJoints.get(robotSide).put(jointName, sdfRobot.getOneDoFJoint(legJoint.getName()));
+         }
+
+         for (ArmJointName jointName : ArmJointName.values())
+         {
+            OneDoFJoint armJoint = fullRobotModel.getArmJoint(robotSide, jointName);
+            if (armJoint == null)
+               continue;
+            
+            armJointNames.get(robotSide).add(jointName);
+            armSCSJoints.get(robotSide).put(jointName, sdfRobot.getOneDoFJoint(armJoint.getName()));
+         }
       }
 
       resetSliderBoard();
@@ -353,72 +347,31 @@ public class DRCRobotMidiSliderBoardPositionManipulation
 
    private void resetSliderBoard()
    {
-      LinkedHashMap<SpineJointName, Double> spineJointPositions = new LinkedHashMap<SpineJointName, Double>();
-      for (SpineJointName spineJointName : spineJointStringNames.keySet())
-      {
-         double q = ((DoubleYoVariable) scs.getVariable(spineJointStringNames.get(spineJointName))).getDoubleValue();
-         spineJointPositions.put(spineJointName, q);
-      }
-      SideDependentList<Map<ArmJointName, Double>> armJointPositions = SideDependentList.createListOfHashMaps();
-      SideDependentList<Map<LegJointName, Double>> legJointPositions = SideDependentList.createListOfHashMaps();
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         String prefix = sideString.get(robotSide);
-         LinkedHashMap<ArmJointName, Double> armTemp = new LinkedHashMap<ArmJointName, Double>();
-         for (ArmJointName armJointName : armJointStringNames.keySet())
-         {
-            double q = ((DoubleYoVariable) scs.getVariable(prefix + armJointStringNames.get(armJointName))).getDoubleValue();
-            armTemp.put(armJointName, q);
-         }
-         armJointPositions.put(robotSide, armTemp);
-
-         EnumMap<LegJointName, Double> legTemp = new EnumMap<LegJointName, Double>(LegJointName.class);
-         for (LegJointName legJointName : legJointStringNames.keySet())
-         {
-            double q = ((DoubleYoVariable) scs.getVariable(prefix + legJointStringNames.get(legJointName))).getDoubleValue();
-            legTemp.put(legJointName, q);
-         }
-         legJointPositions.put(robotSide, legTemp);
-      }
-
-      double q_x = ((DoubleYoVariable) scs.getVariable("q_x")).getDoubleValue();
-      double q_y = ((DoubleYoVariable) scs.getVariable("q_y")).getDoubleValue();
-      double q_z = ((DoubleYoVariable) scs.getVariable("q_z")).getDoubleValue();
-      double q_qs = ((DoubleYoVariable) scs.getVariable("q_qs")).getDoubleValue();
-      double q_qx = ((DoubleYoVariable) scs.getVariable("q_qx")).getDoubleValue();
-      double q_qy = ((DoubleYoVariable) scs.getVariable("q_qy")).getDoubleValue();
-      double q_qz = ((DoubleYoVariable) scs.getVariable("q_qz")).getDoubleValue();
-
+      LinkedHashMap<OneDegreeOfFreedomJoint, Double> savedJointAngles = new LinkedHashMap<>();
+      
+      for (OneDegreeOfFreedomJoint joint : allSCSJoints)
+         savedJointAngles.put(joint, joint.getQ().getDoubleValue());
+      
+      double temp_q_x = q_x.getDoubleValue();
+      double temp_q_y = q_y.getDoubleValue();
+      double temp_q_z = q_z.getDoubleValue();
+      double temp_q_qs = q_qs.getDoubleValue();
+      double temp_q_qx = q_qx.getDoubleValue();
+      double temp_q_qy = q_qy.getDoubleValue();
+      double temp_q_qz = q_qz.getDoubleValue();
+      
       sliderBoard.reset();
 
-      for (SpineJointName spineJointName : spineJointStringNames.keySet())
-      {
-         double q = spineJointPositions.get(spineJointName);
-         ((DoubleYoVariable) scs.getVariable(spineJointStringNames.get(spineJointName))).set(q);
-      }
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         String prefix = sideString.get(robotSide);
-         for (ArmJointName armJointName : armJointStringNames.keySet())
-         {
-            double q = armJointPositions.get(robotSide).get(armJointName);
-            ((DoubleYoVariable) scs.getVariable(prefix + armJointStringNames.get(armJointName))).set(q);
-         }
-         for (LegJointName legJointName : legJointStringNames.keySet())
-         {
-            double q = legJointPositions.get(robotSide).get(legJointName);
-            ((DoubleYoVariable) scs.getVariable(prefix + legJointStringNames.get(legJointName))).set(q);
-         }
-      }
-
-      ((DoubleYoVariable) scs.getVariable("q_x")).set(q_x);
-      ((DoubleYoVariable) scs.getVariable("q_y")).set(q_y);
-      ((DoubleYoVariable) scs.getVariable("q_z")).set(q_z);
-      ((DoubleYoVariable) scs.getVariable("q_qs")).set(q_qs);
-      ((DoubleYoVariable) scs.getVariable("q_qx")).set(q_qx);
-      ((DoubleYoVariable) scs.getVariable("q_qy")).set(q_qy);
-      ((DoubleYoVariable) scs.getVariable("q_qz")).set(q_qz);
+      for (OneDegreeOfFreedomJoint joint : allSCSJoints)
+         joint.setQ(savedJointAngles.get(joint));
+      
+      q_x.set(temp_q_x);
+      q_y.set(temp_q_y);
+      q_z.set(temp_q_z);
+      q_qs.set(temp_q_qs);
+      q_qx.set(temp_q_qx);
+      q_qy.set(temp_q_qy);
+      q_qz.set(temp_q_qz);
 
       int buttonChannel = 1;
       sliderBoard.setButton(buttonChannel++, isCaptureSnapshotRequested);
@@ -446,8 +399,10 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       sliderBoard.setButton(buttonChannel++, isLeftLegControlRequested);
       sliderBoard.setButton(buttonChannel++, isRightLegControlRequested);      
       
-      setUpFingerKnobs();
-
+      if (controlFingers.getBooleanValue())
+      {
+         setUpFingerKnobs();
+      }
    }
 
    private void setUpFingerKnobs()
@@ -477,43 +432,69 @@ public class DRCRobotMidiSliderBoardPositionManipulation
 
    private void setupSymmetricModeListeners()
    {
+      final Matrix3d oppositeSignForYawAndRollOnly = new Matrix3d();
+      oppositeSignForYawAndRollOnly.setIdentity();
+      oppositeSignForYawAndRollOnly.setM00(-1.0);
+      oppositeSignForYawAndRollOnly.setM22(-1.0);
+      
+      final Vector3d unitVectorThisSide = new Vector3d();
+      final Vector3d unitVectorOtherSide = new Vector3d();
+      
       //main joints
-      for(int thisSideIndex=0;thisSideIndex<ROSAtlasJointMap.numberOfJoints;thisSideIndex++)
+      for (RobotSide robotSide : RobotSide.values)
       {
-         int otherSideIndex=ROSAtlasJointMapCorrelation.oppositeSideIndex[thisSideIndex];
-         if( thisSideIndex !=  otherSideIndex)
+         for (ArmJointName jointName : armSCSJoints.get(robotSide).keySet())
          {
-            YoVariable thisVariable         = scs.getVariable("q_" + ROSAtlasJointMap.jointNames[thisSideIndex]);
-            YoVariable oppositeSideVariable = scs.getVariable("q_" + ROSAtlasJointMap.jointNames[otherSideIndex]);
-            boolean setToOppositeSign = ROSAtlasJointMapCorrelation.symmetricSignChange[thisSideIndex];
-            RobotSide robotSide;
-            if(ROSAtlasJointMap.jointNames[thisSideIndex].startsWith("l_"))
-               robotSide=RobotSide.LEFT;
-            else
-               robotSide=RobotSide.RIGHT;               
-            SymmetricModeListener symmetricModeListener = new SymmetricModeListener((DoubleYoVariable) oppositeSideVariable, robotSide, setToOppositeSign);
-            thisVariable.addVariableChangedListener(symmetricModeListener);            
+            OneDegreeOfFreedomJoint thisJoint = armSCSJoints.get(robotSide).get(jointName);
+            OneDegreeOfFreedomJoint otherJoint = armSCSJoints.get(robotSide.getOppositeSide()).get(jointName);
+            
+            unitVectorThisSide.set(thisJoint.getUnitVector());
+            unitVectorOtherSide.set(otherJoint.getUnitVector());
+            
+            oppositeSignForYawAndRollOnly.transform(unitVectorThisSide);
+            double sign = unitVectorOtherSide.dot(unitVectorThisSide);
+
+            SymmetricModeListener symmetricModeListener = new SymmetricModeListener(otherJoint.getQ(), robotSide, sign);
+            thisJoint.getQ().addVariableChangedListener(symmetricModeListener);
+         }
+
+         for (LegJointName jointName : legSCSJoints.get(robotSide).keySet())
+         {
+            OneDegreeOfFreedomJoint thisJoint = legSCSJoints.get(robotSide).get(jointName);
+            OneDegreeOfFreedomJoint otherJoint = legSCSJoints.get(robotSide.getOppositeSide()).get(jointName);
+            
+            unitVectorThisSide.set(thisJoint.getUnitVector());
+            unitVectorOtherSide.set(otherJoint.getUnitVector());
+            
+            oppositeSignForYawAndRollOnly.transform(unitVectorThisSide);
+            double sign = unitVectorOtherSide.dot(unitVectorThisSide);
+
+            SymmetricModeListener symmetricModeListener = new SymmetricModeListener(otherJoint.getQ(), robotSide, sign);
+            thisJoint.getQ().addVariableChangedListener(symmetricModeListener);
          }
       }
       
       //fingers
-      for (RobotSide robotSide : RobotSide.values)
+      if (controlFingers.getBooleanValue())
       {
-         String thisSidePrefix     = handSideString.get(robotSide);
-         String oppositeSidePrefix = handSideString.get(robotSide.getOppositeSide());
-         boolean setToOppositeSign = false;         
-         for (int f = 0; f <= 3; f++)
+         for (RobotSide robotSide : RobotSide.values)
          {
-            for (int j = 0; j <= 2; j++)
+            String thisSidePrefix = handSideString.get(robotSide);
+            String oppositeSidePrefix = handSideString.get(robotSide.getOppositeSide());
+            
+            for (int f = 0; f <= 3; f++)
             {
-               YoVariable thisVariable         = scs.getVariable(thisSidePrefix     + f + "_j" + j);
-               YoVariable oppositeSideVariable = scs.getVariable(oppositeSidePrefix + f + "_j" + j);
-               SymmetricModeListener symmetricModeListener = new SymmetricModeListener((DoubleYoVariable) oppositeSideVariable, robotSide, setToOppositeSign);
-               thisVariable.addVariableChangedListener(symmetricModeListener);
+               for (int j = 0; j <= 2; j++)
+               {
+                  YoVariable thisVariable = scs.getVariable(thisSidePrefix + f + "_j" + j);
+                  YoVariable oppositeSideVariable = scs.getVariable(oppositeSidePrefix + f + "_j" + j);
+                  SymmetricModeListener symmetricModeListener = new SymmetricModeListener((DoubleYoVariable) oppositeSideVariable, robotSide, 1.0);
+                  thisVariable.addVariableChangedListener(symmetricModeListener);
+               }
             }
          }
       }
-      
+
       //TODO setup listeners to move the targets when in cartesian mode. currently just changing joint listeners is unreliable.
       //TODO do joint symmetry in joint mode and cartesian symmetry about global XZ plane in cartesian mode.
 
@@ -525,17 +506,16 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       symmetricControlSide = robotSide;
 
       int sliderChannel = 1;
-      String prefix = sideString.get(robotSide);
 
       switch (sliderSpace.getEnumValue())
       {
       case JOINT:
       {
-         for (LegJointName legJointName : legJointStringNames.keySet())
+         for (LegJointName legJointName : legJointNames.get(robotSide))
          {
-            Double min = legJointLowerLimits.get(robotSide).get(legJointName);
-            Double max = legJointUpperLimits.get(robotSide).get(legJointName);
-            sliderBoard.setSlider(sliderChannel++, prefix + legJointStringNames.get(legJointName), scs, min, max);
+            OneDegreeOfFreedomJoint legSCSJoint = legSCSJoints.get(robotSide).get(legJointName);
+            OneDoFJoint legIDJoint = fullRobotModel.getLegJoint(robotSide, legJointName);
+            sliderBoard.setSlider(sliderChannel++, legSCSJoint.getQ(), legIDJoint.getJointLimitLower(), legIDJoint.getJointLimitUpper());
          }
          break;
       }
@@ -570,22 +550,24 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       symmetricControlSide = robotSide;
 
       int sliderChannel = 1;
-      String prefix = sideString.get(robotSide);
 
       switch (sliderSpace.getEnumValue())
       {
       case JOINT:
       {
-         for (ArmJointName armJointName : armJointStringNames.keySet())
+         for (ArmJointName armJointName : armJointNames.get(robotSide))
          {
-            Double min = armJointLowerLimits.get(robotSide).get(armJointName);
-            Double max = armJointUpperLimits.get(robotSide).get(armJointName);
-            sliderBoard.setSlider(sliderChannel++, prefix + armJointStringNames.get(armJointName), scs, min, max);
+            OneDegreeOfFreedomJoint armSCSJoint = armSCSJoints.get(robotSide).get(armJointName);
+            OneDoFJoint armIDJoint = fullRobotModel.getArmJoint(robotSide, armJointName);
+            sliderBoard.setSlider(sliderChannel++, armSCSJoint.getQ(), armIDJoint.getJointLimitLower(), armIDJoint.getJointLimitUpper());
          }
 
-         sliderBoard.setSlider(sliderChannel++, q_hands.get(robotSide), -fingerJointLimit, fingerJointLimit);//all fingers open/close
-         sliderBoard.setSlider(sliderChannel++, handSideString.get(robotSide) + "3_j0", scs, -fingerJointLimit, fingerJointLimit);//thumb back and forth
-
+         if (controlFingers.getBooleanValue())
+         {
+            sliderBoard.setSlider(sliderChannel++, q_hands.get(robotSide), -fingerJointLimit, fingerJointLimit);//all fingers open/close
+            sliderBoard.setSlider(sliderChannel++, handSideString.get(robotSide) + "3_j0", scs, -fingerJointLimit, fingerJointLimit);//thumb back and forth
+         }
+         
          break;
       }
       case CARTESIAN:
@@ -644,11 +626,19 @@ public class DRCRobotMidiSliderBoardPositionManipulation
    {
       int sliderChannel = 1;
 
-      for (SpineJointName spineJointName : spineJointStringNames.keySet())
-         sliderBoard.setSlider(sliderChannel++, spineJointStringNames.get(spineJointName), scs, spineJointLowerLimits.get(spineJointName),
-               spineJointUpperLimits.get(spineJointName));
-      //neck
-      sliderBoard.setSlider(sliderChannel++, "q_neck_ry", scs, -0.610865, 1.134460);
+      for (SpineJointName spineJointName : spineJointNames)
+      {
+         OneDegreeOfFreedomJoint spineSCSJoint = spineSCSJoints.get(spineJointName);
+         OneDoFJoint spineIDJoint = fullRobotModel.getSpineJoint(spineJointName);
+         sliderBoard.setSlider(sliderChannel++, spineSCSJoint.getQ(), spineIDJoint.getJointLimitLower(), spineIDJoint.getJointLimitUpper());
+      }
+
+      for (NeckJointName neckJointName : neckJointNames)
+      {
+         OneDegreeOfFreedomJoint neckSCSJoint = neckSCSJoints.get(neckJointName);
+         OneDoFJoint neckIDJoint = fullRobotModel.getNeckJoint(neckJointName);
+         sliderBoard.setSlider(sliderChannel++, neckSCSJoint.getQ(), neckIDJoint.getJointLimitLower(), neckIDJoint.getJointLimitUpper());
+      }
    }
 
    private void setupSlidersForSupportBaseControl()
@@ -657,8 +647,9 @@ public class DRCRobotMidiSliderBoardPositionManipulation
 
       for (int i = 0; i < baseControlPoints.length; i++)
       {
-         sliderBoard.setSlider(sliderChannel++, "baseControlPoint" + i + "X", scs, baseControlPoints[i].getX() - 2, baseControlPoints[i].getX() + 2);
-         sliderBoard.setSlider(sliderChannel++, "baseControlPoint" + i + "Y", scs, baseControlPoints[i].getY() - 2, baseControlPoints[i].getY() + 2);
+         YoFramePoint baseControlPoint = baseControlPoints[i];
+         sliderBoard.setSlider(sliderChannel++, baseControlPoint.getYoX(), baseControlPoint.getX() - 2, baseControlPoint.getX() + 2);
+         sliderBoard.setSlider(sliderChannel++, baseControlPoint.getYoY(), baseControlPoint.getY() - 2, baseControlPoint.getY() + 2);
       }
    }
 
@@ -668,15 +659,15 @@ public class DRCRobotMidiSliderBoardPositionManipulation
 
       for (int i = 0; i < baseControlTargetPoints.length; i++)
       {
-         sliderBoard.setSlider(sliderChannel++, "baseControlTargetPoint" + i + "X", scs, baseControlTargetPoints[i].getX() - 2, baseControlTargetPoints[i].getX() + 2);
-         sliderBoard.setSlider(sliderChannel++, "baseControlTargetPoint" + i + "Y", scs, baseControlTargetPoints[i].getY() - 2, baseControlTargetPoints[i].getY() + 2);
+         YoFramePoint baseControlTargetPoint = baseControlTargetPoints[i];
+         sliderBoard.setSlider(sliderChannel++, baseControlTargetPoint.getYoX(), baseControlTargetPoint.getX() - 2, baseControlTargetPoint.getX() + 2);
+         sliderBoard.setSlider(sliderChannel++, baseControlTargetPoint.getYoY(), baseControlTargetPoint.getY() - 2, baseControlTargetPoint.getY() + 2);
       }
    }
 
    private void placeCartesianTargetsAtActuals()
    {
       reader.read();
-      referenceFrames.updateFrames();
 
       for (RobotSide robotSide : RobotSide.values())
       {
@@ -904,7 +895,6 @@ public class DRCRobotMidiSliderBoardPositionManipulation
             return;
 
          reader.read();
-         referenceFrames.updateFrames();
          sdfRobot.update();
 
          if (sliderSpace.getEnumValue() == SliderSpace.CARTESIAN)
@@ -931,7 +921,6 @@ public class DRCRobotMidiSliderBoardPositionManipulation
             writer.updateRobotConfigurationBasedOnFullRobotModel();
          }
       }
-
    }
 
    private class SymmetricModeListener implements VariableChangedListener
@@ -940,11 +929,11 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       private final RobotSide robotSide;
       private final double respectiveSign;
 
-      public SymmetricModeListener(DoubleYoVariable variableToSet, RobotSide robotSide, boolean setToOppositeSign)
+      public SymmetricModeListener(DoubleYoVariable variableToSet, RobotSide robotSide, double sign)
       {
          this.variableToSet = variableToSet;
          this.robotSide = robotSide;
-         this.respectiveSign = setToOppositeSign ? -1.0 : 1.0;
+         this.respectiveSign = sign;
       }
 
       public void variableChanged(YoVariable yoVariable)
@@ -979,6 +968,9 @@ public class DRCRobotMidiSliderBoardPositionManipulation
 
       public void variableChanged(YoVariable v)
       {
+         if (!controlFingers.getBooleanValue())
+            return;
+         
          double q_val = q_hands.get(robotSide).getDoubleValue();
          for (int f = 0; f <= 3; f++)
          {
@@ -1011,100 +1003,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
    {
       return registry;
    }
-
-   private final SideDependentList<SliderBodyPart> legBodyParts = new SideDependentList<DRCRobotMidiSliderBoardPositionManipulation.SliderBodyPart>(
-         SliderBodyPart.LEFT_LEG, SliderBodyPart.RIGHT_LEG);
-   private final SideDependentList<SliderBodyPart> armBodyParts = new SideDependentList<DRCRobotMidiSliderBoardPositionManipulation.SliderBodyPart>(
-         SliderBodyPart.LEFT_ARM, SliderBodyPart.RIGHT_ARM);
-
-   private SideDependentList<NumericalInverseKinematicsCalculator> legInverseKinematicsCalculators, armInverseKinematicsCalculators;
-
-   private YoFramePose leftFootIK, rightFootIK, leftHandIK, rightHandIK;
-   private SideDependentList<YoFramePose> feetIKs, handIKs;
-
-   private SDFRobot sdfRobot;
-   private ReferenceFrames referenceFrames;
-   private SDFFullRobotModel fullRobotModel;
-   private SDFPerfectSimulatedSensorReader reader;
-   private SDFPerfectSimulatedOutputWriter writer;
-
-   private enum SliderBodyPart
-   {
-      LEFT_LEG, RIGHT_LEG, LEFT_ARM, RIGHT_ARM, PELVIS, CHEST;
-   }
-
-   private enum SliderSpace
-   {
-      JOINT, CARTESIAN
-   }
-
-   private void setupForInverseKinematics(SDFRobot sdfRobot, ReferenceFrames referenceFrames, SDFFullRobotModel fullRobotModel,
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
-   {
-      if (this.sdfRobot != null)
-         throw new RuntimeException("Already set up for Inverse Kinematics");
-
-      this.sdfRobot = sdfRobot;
-      this.referenceFrames = referenceFrames;
-      this.fullRobotModel = fullRobotModel;
-      this.reader = new SDFPerfectSimulatedSensorReader(sdfRobot, fullRobotModel, referenceFrames);
-      this.writer = new SDFPerfectSimulatedOutputWriter(sdfRobot, fullRobotModel);
-
-      GeometricJacobian leftFootJacobian = new GeometricJacobian(fullRobotModel.getPelvis(), fullRobotModel.getFoot(RobotSide.LEFT), fullRobotModel.getFoot(
-            RobotSide.LEFT).getBodyFixedFrame());
-      GeometricJacobian rightFootJacobian = new GeometricJacobian(fullRobotModel.getPelvis(), fullRobotModel.getFoot(RobotSide.RIGHT), fullRobotModel.getFoot(
-            RobotSide.RIGHT).getBodyFixedFrame());
-      GeometricJacobian leftHandJacobian = new GeometricJacobian(fullRobotModel.getChest(), fullRobotModel.getHand(RobotSide.LEFT), fullRobotModel.getHand(
-            RobotSide.LEFT).getBodyFixedFrame());
-      GeometricJacobian rightHandJacobian = new GeometricJacobian(fullRobotModel.getChest(), fullRobotModel.getHand(RobotSide.RIGHT), fullRobotModel.getHand(
-            RobotSide.RIGHT).getBodyFixedFrame());
-
-      double tolerance = 1e-8;
-      double maxStepSize = 1.0;
-      double minRandomSearchScalar = -0.5;
-      double maxRandomSearchScalar = 1.0;
-      int maxIterations = 10;
-
-      NumericalInverseKinematicsCalculator leftLegInverseKinematicsCalculator = new NumericalInverseKinematicsCalculator(leftFootJacobian, tolerance,
-            maxIterations, maxStepSize, minRandomSearchScalar, maxRandomSearchScalar);
-      NumericalInverseKinematicsCalculator rightLegInverseKinematicsCalculator = new NumericalInverseKinematicsCalculator(rightFootJacobian, tolerance,
-            maxIterations, maxStepSize, minRandomSearchScalar, maxRandomSearchScalar);
-      NumericalInverseKinematicsCalculator leftArmInverseKinematicsCalculator = new NumericalInverseKinematicsCalculator(leftHandJacobian, tolerance,
-            maxIterations, maxStepSize, minRandomSearchScalar, maxRandomSearchScalar);
-      NumericalInverseKinematicsCalculator rightArmInverseKinematicsCalculator = new NumericalInverseKinematicsCalculator(rightHandJacobian, tolerance,
-            maxIterations, maxStepSize, minRandomSearchScalar, maxRandomSearchScalar);
-
-      legInverseKinematicsCalculators = new SideDependentList<NumericalInverseKinematicsCalculator>(leftLegInverseKinematicsCalculator,
-            rightLegInverseKinematicsCalculator);
-      armInverseKinematicsCalculators = new SideDependentList<NumericalInverseKinematicsCalculator>(leftArmInverseKinematicsCalculator,
-            rightArmInverseKinematicsCalculator);
-
-      leftFootIK = new YoFramePose("leftFootIK", "", ReferenceFrames.getWorldFrame(), registry);
-      rightFootIK = new YoFramePose("rightFootIK", "", ReferenceFrames.getWorldFrame(), registry);
-
-      feetIKs = new SideDependentList<YoFramePose>(leftFootIK, rightFootIK);
-
-      leftHandIK = new YoFramePose("leftHandIK", "", ReferenceFrames.getWorldFrame(), registry);
-      rightHandIK = new YoFramePose("rightHandIK", "", ReferenceFrames.getWorldFrame(), registry);
-
-      handIKs = new SideDependentList<YoFramePose>(leftHandIK, rightHandIK);
-
-      double scale = 0.2;
-      DynamicGraphicCoordinateSystem leftFootViz = new DynamicGraphicCoordinateSystem("leftFootViz", leftFootIK, scale);
-      DynamicGraphicCoordinateSystem rightFootViz = new DynamicGraphicCoordinateSystem("rightFootViz", rightFootIK, scale);
-
-      DynamicGraphicCoordinateSystem leftHandViz = new DynamicGraphicCoordinateSystem("leftHandViz", leftHandIK, scale);
-      DynamicGraphicCoordinateSystem rightHandViz = new DynamicGraphicCoordinateSystem("rightHandViz", rightHandIK, scale);
-
-      DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList("InverseKinematics");
-      dynamicGraphicObjectsList.add(leftFootViz);
-      dynamicGraphicObjectsList.add(rightFootViz);
-      dynamicGraphicObjectsList.add(leftHandViz);
-      dynamicGraphicObjectsList.add(rightHandViz);
-
-      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
-   }
-
+   
    private void addSupportBaseControlGraphics(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       addSupportBaseGraphics(dynamicGraphicObjectsListRegistry,baseControlPoints,baseControlPointsList,baseControlLinesList,"baseControl",YoAppearance.Green());
@@ -1140,4 +1039,43 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       dynamicGraphicObjectsList.hideDynamicGraphicObjects();
    }
 
+   public void addCaptureSnapshotListener(VariableChangedListener variableChangedListener)
+   {
+      isCaptureSnapshotRequested.addVariableChangedListener(variableChangedListener);
+   }
+
+   public void addSaveSequenceRequestedListener(VariableChangedListener variableChangedListener)
+   {
+      isSaveSequenceRequested.addVariableChangedListener(variableChangedListener);
+   }
+
+   public void addLoadSequenceRequestedListener(VariableChangedListener variableChangedListener)
+   {
+      isLoadSequenceRequested.addVariableChangedListener(variableChangedListener);
+   }
+
+   public void addClearSequenceRequestedListener(VariableChangedListener variableChangedListener)
+   {
+      isClearSequenceRequested.addVariableChangedListener(variableChangedListener);
+   }
+
+   public void addLoadFrameByFrameSequenceRequestedListener(VariableChangedListener variableChangedListener)
+   {
+      isLoadFrameByFrameSequenceRequested.addVariableChangedListener(variableChangedListener);
+   }
+   
+   public void addLoadLastSequenceRequestedListener(VariableChangedListener variableChangedListener)
+   {
+      isLoadLastSequenceRequested.addVariableChangedListener(variableChangedListener);
+   }
+
+   public void addPlayPoseFromFrameByFrameSequenceRequestedListener(VariableChangedListener variableChangedListener)
+   {
+      isPlayPoseFromFrameByFrameSequenceRequested.addVariableChangedListener(variableChangedListener);
+   }
+
+   public void addResetToBasePoseRequestedListener(VariableChangedListener variableChangedListener)
+   {
+      isResetToBasePoseRequested.addVariableChangedListener(variableChangedListener);
+   }
 }
