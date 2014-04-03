@@ -70,9 +70,10 @@ public class ACSELLStateEstimatorParameters implements StateEstimatorParameters
       pointPositionZMeasurementStandardDeviation = 0.1;
 
       boolean useTwoPolesForIMUFiltering = false;
+      boolean doFiniteDifferenceForJointVelocities = false;
       
       sensorFilterParameters = new SensorFilterParameters(jointPositionFilterFrequencyHz, jointVelocityFilterFrequencyHz, orientationFilterFrequencyHz,
-            angularVelocityFilterFrequencyHz, linearAccelerationFilterFrequencyHz, jointVelocitySlopTimeForBacklashCompensation, estimatorDT, useTwoPolesForIMUFiltering);
+            angularVelocityFilterFrequencyHz, linearAccelerationFilterFrequencyHz, jointVelocitySlopTimeForBacklashCompensation, estimatorDT, useTwoPolesForIMUFiltering, doFiniteDifferenceForJointVelocities);
 
       pointMeasurementNoiseParameters = new PointMeasurementNoiseParameters(pointVelocityXYMeasurementStandardDeviation,
             pointVelocityZMeasurementStandardDeviation, pointPositionXYMeasurementStandardDeviation, pointPositionZMeasurementStandardDeviation);
