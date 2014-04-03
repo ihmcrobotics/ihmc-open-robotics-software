@@ -1,16 +1,20 @@
 package us.ihmc.darpaRoboticsChallenge.handControl.sandia;
 
+import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 
+import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultBoundedRangeModel;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -46,26 +50,28 @@ public class SandiaHandManualControlUI extends AbstractNodeMain implements Actio
 
    private ConnectedNode connectedNode;
 
-   private JFrame frame = new JFrame("Sandia Hand Manual Controle");
+   private JFrame frame = new JFrame("Sandia Hand Manual Control");
 
    private GridBagConstraints c;
 
-   private JPanel panel, handSelectionPanel, fingerSelectionPanel, sliderPanel, actionButtonPanel;
+   private JPanel panel, leftPanel, middlePanel, rightPanel, handSelectionPanel, controlTypeSelectionPanel, graspTypeSelectionPanel, fingerSelectionPanel,
+                  sliderPanel, actionButtonPanel, graspTypePanel;
 
-   private JLabel handLabel, fingerLabel, baseJointLabel, firstJointLabel, secondJointLabel;
+   private JLabel handLabel, controlTypeLabel, graspTypeLabel, fingerLabel, baseJointLabel, firstJointLabel, secondJointLabel;
 
-   private ButtonGroup leftOrRight;
-   private JRadioButton leftRadioButton, rightRadioButton;
+   private ButtonGroup leftOrRight, controlType, graspType;
+   private JRadioButton leftRadioButton, rightRadioButton, fullHandRadioButton, individualFingerRadioButton, cylindricalGraspRadioButton,
+                        circularGraspRadioButton, prismaticGraspRadioButton;
 
-   private JComboBox fingerComboBox;
+   private JCheckBox thumbCheckBox, indexCheckBox, middleCheckBox, ringCheckBox;
 
-   private JSlider baseJointSlider, firstJointSlider, secondJointSlider;
+   private JSlider baseJointSlider, firstJointSlider, secondJointSlider, controlAllSlider;
 
    private JButton sendCommandButton, resetButton;
 
    public SandiaHandManualControlUI()
    {
-      //      Butts
+      // Butts
    }
 
    public GraphName getDefaultNodeName()
@@ -103,7 +109,7 @@ public class SandiaHandManualControlUI extends AbstractNodeMain implements Actio
    {
       c = new GridBagConstraints();
 
-      setupPanel();
+      addPanels();
 
       frame.add(panel);
       frame.setVisible(true);
@@ -130,33 +136,64 @@ public class SandiaHandManualControlUI extends AbstractNodeMain implements Actio
       thumbJointCommand = thumbJointPublisher.newMessage();
    }
 
-   private void setupPanel()
+   private void addPanels()
    {
       panel = new JPanel(new GridBagLayout());
 
-      setuphandSelectionPanel();
-      setupfingerSelectionPanel();
-      setupSliderPanel();
-      setupActionButtonPanel();
+      Insets insets = new Insets(5, 5, 5, 5);
+      c.insets = insets;
+
+      setupLeftPanel();
+      setupMiddlePanel();
+      setupRightPanel();
+
+//    setupActionButtonPanel();
 
       c.ipadx = 100;
       c.ipady = 20;
 
       c.gridx = 0;
       c.gridy = 0;
-      panel.add(handSelectionPanel, c);
-
-      c.gridy = 1;
-      panel.add(fingerSelectionPanel, c);
-
-      c.gridy = 2;
-      panel.add(sliderPanel, c);
-
-      c.gridy = 3;
-      panel.add(actionButtonPanel, c);
+      panel.add(leftPanel, c);
+      
+      ++c.gridx;
+      panel.add(middlePanel, c);
    }
 
-   private void setuphandSelectionPanel()
+   private void setupLeftPanel()
+   {
+      leftPanel = new JPanel(new GridBagLayout());
+      leftPanel.setBorder(BorderFactory.createEtchedBorder());
+
+      setupHandSelectionPanel();
+      setupControlTypeSelectionPanel();
+
+      c.gridx = 0;
+      c.gridy = 0;
+      leftPanel.add(handSelectionPanel, c);
+
+      c.gridy++;
+      leftPanel.add(controlTypeSelectionPanel, c);
+   }
+
+   private void setupMiddlePanel()
+   {
+      middlePanel = new JPanel(new GridBagLayout());
+
+      setupFingerSelectionPanel();
+      setupSliderPanel();
+      
+      c.gridx = 0;
+      c.gridy = 0;
+      middlePanel.add(fingerSelectionPanel, c);
+      
+   }
+
+   private void setupRightPanel()
+   {
+   }
+
+   private void setupHandSelectionPanel()
    {
       handSelectionPanel = new JPanel(new GridBagLayout());
 
@@ -164,7 +201,7 @@ public class SandiaHandManualControlUI extends AbstractNodeMain implements Actio
 
       leftRadioButton = new JRadioButton("Left");
       rightRadioButton = new JRadioButton("Right");
-      rightRadioButton.setSelected(true);
+      leftRadioButton.setSelected(true);
 
       leftOrRight = new ButtonGroup();
       leftOrRight.add(leftRadioButton);
@@ -174,29 +211,80 @@ public class SandiaHandManualControlUI extends AbstractNodeMain implements Actio
       c.gridy = 0;
       handSelectionPanel.add(handLabel, c);
 
-      c.gridx = 1;
+      ++c.gridy;
       handSelectionPanel.add(leftRadioButton, c);
 
-      c.gridx = 2;
+      ++c.gridy;
       handSelectionPanel.add(rightRadioButton, c);
    }
 
-   private void setupfingerSelectionPanel()
+   private void setupControlTypeSelectionPanel()
    {
-      fingerSelectionPanel = new JPanel(new GridBagLayout());
+      controlTypeSelectionPanel = new JPanel(new GridBagLayout());
 
-      fingerLabel = new JLabel("Select Finger:");
+      controlTypeLabel = new JLabel("Select Control Type:");
 
-      fingerComboBox = new JComboBox(SandiaFingerName.values());
-      fingerComboBox.setSelectedIndex(0);
+      individualFingerRadioButton = new JRadioButton("Individual Fingers");
+      fullHandRadioButton = new JRadioButton("Full Hand");
+      individualFingerRadioButton.setSelected(true);
+
+      controlType = new ButtonGroup();
+      controlType.add(individualFingerRadioButton);
+      controlType.add(fullHandRadioButton);
 
       c.gridx = 0;
       c.gridy = 0;
+      controlTypeSelectionPanel.add(controlTypeLabel, c);
+
+      ++c.gridy;
+      controlTypeSelectionPanel.add(individualFingerRadioButton, c);
+
+      ++c.gridy;
+      controlTypeSelectionPanel.add(fullHandRadioButton, c);
+   }
+
+   private void setupFingerSelectionPanel()
+   {
+      fingerSelectionPanel = new JPanel(new GridBagLayout());
+
+      fingerLabel = new JLabel("Select Fingers:");
+      
+      thumbCheckBox = new JCheckBox("Thumb");
+      indexCheckBox = new JCheckBox("Index");
+      middleCheckBox = new JCheckBox("Middle");
+      ringCheckBox = new JCheckBox("Ring");
+      
+      JPanel leftFingerCheckBoxPanel = new JPanel(new GridBagLayout());
+      JPanel rightFingerCheckBoxPanel = new JPanel(new GridBagLayout());
+      
+      c.gridx = 0;
+      c.gridy = 0;
+      leftFingerCheckBoxPanel.add(thumbCheckBox, c);
+      thumbCheckBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+      rightFingerCheckBoxPanel.add(middleCheckBox, c);
+      middleCheckBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+      
+      ++c.gridy;
+      leftFingerCheckBoxPanel.add(indexCheckBox, c);
+      indexCheckBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+      rightFingerCheckBoxPanel.add(ringCheckBox, c);
+      ringCheckBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+      
+      JPanel fingerCheckBoxPanel = new JPanel(new GridBagLayout());
+      
+      c.gridx = 0;
+      c.gridy = 0;
+      fingerCheckBoxPanel.add(leftFingerCheckBoxPanel, c);
+      
+      ++c.gridx;
+      fingerCheckBoxPanel.add(rightFingerCheckBoxPanel, c);
+      
+      c.gridx = 0;
+      c.gridy = 0;
       fingerSelectionPanel.add(fingerLabel, c);
-
-      c.gridx = 1;
-      fingerSelectionPanel.add(fingerComboBox, c);
-
+      
+      ++c.gridy;
+      fingerSelectionPanel.add(fingerCheckBoxPanel, c);
    }
 
    private void setupSliderPanel()
@@ -259,13 +347,13 @@ public class SandiaHandManualControlUI extends AbstractNodeMain implements Actio
          double firstJointPosition = (double) firstJointSlider.getValue() / (double) sliderBounds;
          double secondJointPosition = (double) secondJointSlider.getValue() / (double) sliderBounds;
 
-         double[] position = new double[] { baseJointPosition, firstJointPosition, secondJointPosition };
+         double[] position = new double[] {baseJointPosition, firstJointPosition, secondJointPosition};
 
-         osrf_msgs.JointCommands tempJointCommand = jointCommands.get(fingerComboBox.getSelectedItem());
-         Publisher<JointCommands> tempJointPublisher = fingerPublishers.get(fingerComboBox.getSelectedItem());
+//         osrf_msgs.JointCommands tempJointCommand = jointCommands.get(fingerComboBox.getSelectedItem());
+//         Publisher<JointCommands> tempJointPublisher = fingerPublishers.get(fingerComboBox.getSelectedItem());
 
-         tempJointCommand.setPosition(position);
-         tempJointPublisher.publish(tempJointCommand);
+//         tempJointCommand.setPosition(position);
+//         tempJointPublisher.publish(tempJointCommand);
       }
 
       if (((JButton) event.getSource()).getText().contains("Reset"))
@@ -279,16 +367,17 @@ public class SandiaHandManualControlUI extends AbstractNodeMain implements Actio
 
    public static void main(String[] args) throws URISyntaxException
    {
-      URI master;
-      if (args.length > 0)
-         master = new URI(args[0]);
-      else
-         master = new URI(MASTER_URI);
+//    URI master;
+//    if (args.length > 0)
+//       master = new URI(args[0]);
+//    else
+//       master = new URI(MASTER_URI);
+//
+//    NodeConfiguration nodeConfiguration = RosTools.createNodeConfiguration(master);
+//    NodeMainExecutor nodeMainExecutor = DefaultNodeMainExecutor.newDefault();
+//    nodeMainExecutor.execute(new SandiaHandManualControlUI(), nodeConfiguration);
 
-      SandiaHandManualControlUI manualControlUI = new SandiaHandManualControlUI();
-      NodeConfiguration nodeConfiguration = RosTools.createNodeConfiguration(master);
-      NodeMainExecutor nodeMainExecutor = DefaultNodeMainExecutor.newDefault();
-      nodeMainExecutor.execute(manualControlUI, nodeConfiguration);
+      new SandiaHandManualControlUI().setupFrame();
    }
 
 }
