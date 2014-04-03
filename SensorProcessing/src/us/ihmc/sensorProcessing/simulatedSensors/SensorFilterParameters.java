@@ -12,11 +12,13 @@ public class SensorFilterParameters
 
    /** Required for Valkyrie as no filtering is done on-board */ 
    private final boolean useTwoPolesForIMUFiltering;
+   
+   private final boolean doFiniteDifferenceForJointVelocities;
 
    public SensorFilterParameters(double jointPositionFilterFrequencyInHertz, double jointVelocityFilterFrequencyInHertz,
                                  double orientationFilterFrequencyInHertz, double angularVelocityFilterFrequencyInHertz,
                                  double linearAccelerationFilterFrequencyInHertz, double jointVelocitySlopTimeForBacklashCompensation,
-                                 double updateDT, boolean useTwoPolesForIMUFiltering)
+                                 double updateDT, boolean useTwoPolesForIMUFiltering, boolean doFiniteDifferenceForJointVelocities)
    {
       this.jointPositionFilterFrequencyInHertz = jointPositionFilterFrequencyInHertz;
       this.jointVelocityFilterFrequencyInHertz = jointVelocityFilterFrequencyInHertz;
@@ -27,6 +29,7 @@ public class SensorFilterParameters
       this.updateDT = updateDT;
       
       this.useTwoPolesForIMUFiltering = useTwoPolesForIMUFiltering;
+      this.doFiniteDifferenceForJointVelocities = doFiniteDifferenceForJointVelocities;
    }
 
    public double getJointPositionFilterFrequencyInHertz()
@@ -67,5 +70,10 @@ public class SensorFilterParameters
    public boolean getUseTwoPolesForIMUFiltering()
    {
       return useTwoPolesForIMUFiltering;
+   }
+
+   public boolean getDoFiniteDifferenceForJointVelocities()
+   {
+      return doFiniteDifferenceForJointVelocities;
    }
 }
