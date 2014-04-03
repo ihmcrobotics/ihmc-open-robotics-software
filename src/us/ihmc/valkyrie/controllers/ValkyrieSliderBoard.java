@@ -184,10 +184,9 @@ public class ValkyrieSliderBoard
                                  generalizedSDFRobotModel.getJointHolder(jointName).getUpperLimit());
                            sliderBoardConfigurationManager.setSlider(2, "kp_" + pdControllerBaseName, registry, 0.0, 2000.0);
                            sliderBoardConfigurationManager.setSlider(3, "kd_" + pdControllerBaseName, registry, 0.0, 600.0);
-                           sliderBoardConfigurationManager.setSlider(4, pdControllerBaseName + "_transitionFactor", registry, 0.0, 1.0);
-                           sliderBoardConfigurationManager.setSlider(5, pdControllerBaseName + "_tauDesired", registry, -100.0, 100.0);
+                           sliderBoardConfigurationManager.setSlider(4, "ki_" + pdControllerBaseName, registry, 0.0, 600.0);
+                           sliderBoardConfigurationManager.setSlider(5, pdControllerBaseName + "_transitionFactor", registry, 0.0, 1.0);
 
-                           sliderBoardConfigurationManager.setButton(1, pdControllerBaseName + "_useFunctionGenerator", registry);
                            sliderBoardConfigurationManager.setSlider(6, pdControllerBaseName + "_functionGeneratorAmplitude", registry, 0, 200);
                            sliderBoardConfigurationManager.setSlider(7, pdControllerBaseName + "_functionGeneratorFrequency", registry, 0, 50);
                            sliderBoardConfigurationManager.setSlider(8, pdControllerBaseName + "_functionGeneratorOffset", registry, -100, 100);
