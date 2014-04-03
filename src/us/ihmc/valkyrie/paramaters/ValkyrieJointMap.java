@@ -4,10 +4,8 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
-
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
-
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
@@ -326,50 +324,4 @@ public class ValkyrieJointMap extends DRCRobotJointMap
    {
       return ValkyriePhysicalProperties.ankleToSoleFrameTransforms;
    }
-//
-//   @Override
-//   public SideDependentList<ArrayList<Point2d>> getFootGroundContactPointsInSoleFrameForController()
-//   {
-//      return contactPointParameters.getControllerContactPointsInSoleFrame();
-//   }
-
-//	@Override
-//	public Transform3D getPelvisContactPointTransform() {
-//		return contactPointParameters.getPelvisContactPointTransform();
-//	}
-//	
-//	@Override
-//	public List<Point2d> getPelvisContactPoints() {
-//		return contactPointParameters.getPelvisContactPoints();
-//	}
-//	
-//	@Override
-//	public Transform3D getPelvisBackContactPointTransform() {
-//		return contactPointParameters.getPelvisBackContactPointTransform();
-//	}
-//	
-//	@Override
-//	public List<Point2d> getPelvisBackContactPoints() {
-//		return contactPointParameters.getPelvisBackContactPoints();
-//	}
-//	
-//	@Override
-//	public Transform3D getChestBackContactPointTransform() {
-//		return contactPointParameters.getChestBackContactPointTransform();
-//	}
-//	
-//	@Override
-//	public List<Point2d> getChestBackContactPoints() {
-//		return contactPointParameters.getChestBackContactPoints();
-//	}
-//	
-//	@Override
-//	public SideDependentList<Transform3D> getThighContactPointTransforms() {
-//		return contactPointParameters.getThighContactPointTransforms();
-//	}
-//	
-//	@Override
-//	public SideDependentList<List<Point2d>> getThighContactPoints() {
-//		return contactPointParameters.getThighContactPoints();
-//	}
 }

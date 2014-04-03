@@ -30,7 +30,6 @@ public class ValkyrieOrderedJointMap
    public final static int LowerNeckExtensor = 22;
    public final static int NeckRotator = 23;
    public final static int UpperNeckExtensor = 24;
-//   public final static int Ibeo_Joint = 25;
    public final static int RightShoulderExtensor = 25;
    public final static int RightShoulderAdductor = 26;
    public final static int RightShoulderSupinator = 27;
@@ -70,7 +69,6 @@ public class ValkyrieOrderedJointMap
       jointNames[LowerNeckExtensor] = "LowerNeckExtensor";
       jointNames[NeckRotator] = "NeckRotator";
       jointNames[UpperNeckExtensor] = "UpperNeckExtensor";
-//      jointNames[Ibeo_Joint] = "Ibeo_Joint";
       jointNames[RightShoulderExtensor] = "RightShoulderExtensor";
       jointNames[RightShoulderAdductor] = "RightShoulderAdductor";
       jointNames[RightShoulderSupinator] = "RightShoulderSupinator";
