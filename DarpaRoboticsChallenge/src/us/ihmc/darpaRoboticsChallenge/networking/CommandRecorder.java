@@ -5,12 +5,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.media.j3d.Transform3D;
+import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.EndOfScriptCommand;
 import us.ihmc.darpaRoboticsChallenge.scriptEngine.ScriptEngineSettings;
 import us.ihmc.darpaRoboticsChallenge.scriptEngine.ScriptFileSaver;
 import us.ihmc.utilities.FileTools;
-import us.ihmc.utilities.net.NetClassList;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.TimestampProvider;
 
 public class CommandRecorder
@@ -18,7 +19,8 @@ public class CommandRecorder
    private final TimestampProvider timestampProvider;
 
    private boolean isRecording = false;
-   private long startTime = Long.MIN_VALUE;;
+   private long startTime = Long.MIN_VALUE;
+   private ReferenceFrame recordFrame;
    private Transform3D recordTransform = new Transform3D();
 
    private ScriptFileSaver scriptFileSaver;
@@ -30,7 +32,7 @@ public class CommandRecorder
    }
 
 
-   public synchronized void startRecording(String originalFilename, Transform3D recordTransform)
+   public synchronized void startRecording(String originalFilename, ReferenceFrame recordFrame)
    {
       try
       {
@@ -51,7 +53,7 @@ public class CommandRecorder
 
          scriptFileSaver = new ScriptFileSaver(path, false);
          startTime = timestampProvider.getTimestamp();
-         this.recordTransform.set(recordTransform);
+         this.recordFrame = recordFrame;
          isRecording = true;
          System.out.println("CommandRecorder: Started recording to " + proposedFilename);
       }
@@ -95,6 +97,13 @@ public class CommandRecorder
 
          try
          {
+            
+            if(recordFrame!=null)
+            {
+               recordFrame.update();
+               recordTransform = new Transform3D(ReferenceFrame.getWorldFrame().getTransformToDesiredFrame(recordFrame));
+               
+            }
             scriptFileSaver.recordObject(timestamp, object, recordTransform);
          }
          catch (IOException e)
