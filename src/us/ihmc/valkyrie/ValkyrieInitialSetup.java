@@ -32,21 +32,21 @@ public class ValkyrieInitialSetup implements DRCRobotInitialSetup<SDFRobot>
    @Override
    public void initializeRobot(SDFRobot robot, DRCRobotJointMap jointMap)
    {
-      robot.getOneDoFJoint("RightHipExtensor").setQ(-0.4);
-      robot.getOneDoFJoint("RightKneeExtensor").setQ(-0.8);
-      robot.getOneDoFJoint("RightAnkleExtensor").setQ(-0.4);
+      robot.getOneDegreeOfFreedomJoint("RightHipExtensor").setQ(-0.4);
+      robot.getOneDegreeOfFreedomJoint("RightKneeExtensor").setQ(-0.8);
+      robot.getOneDegreeOfFreedomJoint("RightAnkleExtensor").setQ(-0.4);
       
-      robot.getOneDoFJoint("LeftHipExtensor").setQ(-0.4);
-      robot.getOneDoFJoint("LeftKneeExtensor").setQ(-0.8);
-      robot.getOneDoFJoint("LeftAnkleExtensor").setQ(-0.4);
+      robot.getOneDegreeOfFreedomJoint("LeftHipExtensor").setQ(-0.4);
+      robot.getOneDegreeOfFreedomJoint("LeftKneeExtensor").setQ(-0.8);
+      robot.getOneDegreeOfFreedomJoint("LeftAnkleExtensor").setQ(-0.4);
       
-      robot.getOneDoFJoint("LeftShoulderAdductor").setQ(-0.18);
-      robot.getOneDoFJoint("LeftShoulderExtensor").setQ(0.3);
-      robot.getOneDoFJoint("LeftElbowExtensor").setQ(-1.0);
+      robot.getOneDegreeOfFreedomJoint("LeftShoulderAdductor").setQ(-0.18);
+      robot.getOneDegreeOfFreedomJoint("LeftShoulderExtensor").setQ(0.3);
+      robot.getOneDegreeOfFreedomJoint("LeftElbowExtensor").setQ(-1.0);
 
-      robot.getOneDoFJoint("RightShoulderAdductor").setQ(-0.18);
-      robot.getOneDoFJoint("RightShoulderExtensor").setQ(0.3);
-      robot.getOneDoFJoint("RightElbowExtensor").setQ(-1.0);
+      robot.getOneDegreeOfFreedomJoint("RightShoulderAdductor").setQ(-0.18);
+      robot.getOneDegreeOfFreedomJoint("RightShoulderExtensor").setQ(0.3);
+      robot.getOneDegreeOfFreedomJoint("RightElbowExtensor").setQ(-1.0);
       
       robot.update();
       robot.getRootJointToWorldTransform(rootToWorld);
