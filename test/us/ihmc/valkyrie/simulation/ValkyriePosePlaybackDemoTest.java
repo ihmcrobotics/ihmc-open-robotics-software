@@ -114,7 +114,8 @@ public class ValkyriePosePlaybackDemoTest
       drcPosePlaybackDemo.setupPosePlaybackController(posePlaybackPacket, true);
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
-      
+
+      scs.getVariable("PosePlayback_startPosePlayback").setValueFromDouble(1.0);
       blockingSimulationRunner.simulateAndBlock(numberOfPoses * trajectoryTime + 0.5);
 
       createMovie(scs);
@@ -137,7 +138,8 @@ public class ValkyriePosePlaybackDemoTest
       drcPosePlaybackDemo.setupPosePlaybackController(posePlaybackPacket, true);
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
-      
+
+      scs.getVariable("PosePlayback_startPosePlayback").setValueFromDouble(1.0);
       blockingSimulationRunner.simulateAndBlock(numberOfPoses * trajectoryTime + 0.5);
 
       createMovie(scs);
@@ -165,7 +167,8 @@ public class ValkyriePosePlaybackDemoTest
       drcPosePlaybackDemo.setupPosePlaybackController(posePlaybackPacket, true);
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
-      
+
+      scs.getVariable("PosePlayback_startPosePlayback").setValueFromDouble(1.0);
       blockingSimulationRunner.simulateAndBlock(numberOfPoses * trajectoryTime + 0.5);
 
       createMovie(scs);
