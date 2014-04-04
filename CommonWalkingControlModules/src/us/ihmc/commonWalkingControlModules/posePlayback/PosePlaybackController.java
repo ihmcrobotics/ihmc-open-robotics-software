@@ -38,9 +38,8 @@ public class PosePlaybackController extends State<HighLevelState>
    private final DoubleYoVariable currentPoseTrajectoryTime;
    private final LinkedHashMap<OneDoFJoint, PDController> jointPDControllers;
 
-   private List<Double> trajectoryTimes;
-   private List<Map<OneDoFJoint, Double>> listOfPosesToPlayback;
-
+   private PlaybackPoseSequence playbackPoseSequence;
+   
    private final DoubleYoVariable yoTime;
    private final DoubleYoVariable poseSwitchTime = new DoubleYoVariable(CONTROLLER_PREFIX + "_poseSwitchTime", registry);
    private final DoubleYoVariable timeInCurrentPose = new DoubleYoVariable(CONTROLLER_PREFIX + "_timeInCurrentPose", registry);
@@ -71,8 +70,7 @@ public class PosePlaybackController extends State<HighLevelState>
       
       startPosePlayback.set(false);
 
-      trajectoryTimes = null;
-      listOfPosesToPlayback = null;
+      playbackPoseSequence = null;
 
       allOneDoFJoints = new ArrayList<>(Arrays.asList(fullRobotModel.getOneDoFJoints()));
       jointTrajectories = new LinkedHashMap<>(allOneDoFJoints.size());
@@ -116,11 +114,7 @@ public class PosePlaybackController extends State<HighLevelState>
 
    public void setupForPosePlayblack(PosePlaybackPacket posePlaybackPacket)
    {
-      trajectoryTimes = posePlaybackPacket.getTrajectoryTimes();
-      listOfPosesToPlayback = posePlaybackPacket.getListOfPosesToPlayback();
-
-      if (trajectoryTimes.size() != listOfPosesToPlayback.size())
-         throw new RuntimeException("Should be of the length.");
+      playbackPoseSequence = posePlaybackPacket.getPlaybackPoseSequence();
 
       Map<OneDoFJoint, Double> jointKps = posePlaybackPacket.getJointKps();
       Map<OneDoFJoint, Double> jointKds = posePlaybackPacket.getJointKds();
@@ -136,6 +130,8 @@ public class PosePlaybackController extends State<HighLevelState>
          if (kd == null) kd = 0.0;
          pdController.setDerivativeGain(kd);
       }
+      
+      outputScaling.set(posePlaybackPacket.getInitialGainScaling());
       
       initialize();
    }
@@ -158,7 +154,7 @@ public class PosePlaybackController extends State<HighLevelState>
          timeInCurrentPose.add(controlDT);
       }
 
-      if (timeInCurrentPose.getDoubleValue() > currentPoseTrajectoryTime.getDoubleValue() && currentPoseIndex.getIntegerValue() < trajectoryTimes.size() - 1)
+      if (timeInCurrentPose.getDoubleValue() > currentPoseTrajectoryTime.getDoubleValue() && currentPoseIndex.getIntegerValue() < playbackPoseSequence.size() - 1)
       {
          poseSwitchTime.set(yoTime.getDoubleValue());
          timeInCurrentPose.set(0.0);
@@ -188,8 +184,12 @@ public class PosePlaybackController extends State<HighLevelState>
    
    private void updateTrajectoryGenerators(boolean setInitialDesiredAngleToActualJointAngle)
    {
-      currentPoseTrajectoryTime.set(trajectoryTimes.get(currentPoseIndex.getIntegerValue()));
-
+      ArrayList<PlaybackPose> poseSequence = playbackPoseSequence.getPoseSequence();
+      PlaybackPose playbackPose = poseSequence.get(currentPoseIndex.getIntegerValue());
+      
+      double playBackDuration = playbackPose.getPlayBackDuration();
+      currentPoseTrajectoryTime.set(playBackDuration);
+      
       for (int i = 0; i < allOneDoFJoints.size(); i++)
       {
          OneDoFJoint oneDoFJoint = allOneDoFJoints.get(i);
@@ -200,7 +200,8 @@ public class PosePlaybackController extends State<HighLevelState>
          else
             jointInitialDesiredAngle.set(jointTrajectories.get(oneDoFJoint).getValue());
          
-         Double finalDesiredAngle = listOfPosesToPlayback.get(currentPoseIndex.getIntegerValue()).get(oneDoFJoint);
+         Double finalDesiredAngle = playbackPose.getJointAngle(oneDoFJoint);
+         
          if (finalDesiredAngle == null)
             finalDesiredAngle = oneDoFJoint.getQ();
 

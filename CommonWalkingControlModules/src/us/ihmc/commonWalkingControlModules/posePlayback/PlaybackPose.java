@@ -42,6 +42,7 @@ public class PlaybackPose
 
    public PlaybackPose(LinkedHashMap<OneDoFJoint, Double> playbackPoseMap)
    {
+      if (playbackPoseMap == null) throw new RuntimeException("playbackPoseMap == null");
       this.playbackPoseMap = playbackPoseMap;
    }
 
@@ -80,6 +81,8 @@ public class PlaybackPose
 
    public PlaybackPose(LinkedHashMap<OneDoFJoint, Double> playbackPoseMap, double playBackDelayBeforePose, double playbackDuration)
    {
+      if (playbackPoseMap == null) throw new RuntimeException("playbackPoseMap == null");
+
       this.playbackPoseMap = playbackPoseMap;
       this.playBackDelayBeforePose = playBackDelayBeforePose;
       this.playBackDuration = playbackDuration;
@@ -123,8 +126,9 @@ public class PlaybackPose
       return new PlaybackPose(playbackPoseMap);
    }
 
-   public double getJointAngle(OneDoFJoint oneDoFJoint)
+   public Double getJointAngle(OneDoFJoint oneDoFJoint)
    {
+      if (!playbackPoseMap.containsKey(oneDoFJoint)) return null;
       return playbackPoseMap.get(oneDoFJoint);
    }
 
