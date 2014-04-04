@@ -1,6 +1,7 @@
 package us.ihmc.valkyrie.simulation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +54,7 @@ public class ValkyriePosePlaybackDemoTest
    private BlockingSimulationRunner blockingSimulationRunner;
    private DRCController drcController;
    private RobotVisualizer robotVisualizer;
+   private final Random random = new Random(6519651L);
    
    @Before
    public void showMemoryUsageBeforeTest()
@@ -98,6 +100,56 @@ public class ValkyriePosePlaybackDemoTest
    @Test
    public void testPosePlaybackControllerWithRandomPoses() throws SimulationExceededMaximumTimeException
    {
+      DRCPosePlaybackDemo drcPosePlaybackDemo = setupPosePlaybackSim();
+      
+      drcController = drcPosePlaybackDemo.getDRCController();
+      SimulationConstructionSet scs = drcPosePlaybackDemo.getSimulationConstructionSet();
+      
+      int numberOfPoses = 5;
+      double trajectoryTime = 1.0;
+      FullRobotModel fullRobotModel = drcPosePlaybackDemo.getControllerModel();
+      List<OneDoFJoint> jointToControl = Arrays.asList(fullRobotModel.getOneDoFJoints());
+      PosePlaybackPacket posePlaybackPacket = createRandomPosePlaybackPacket(jointToControl, numberOfPoses, trajectoryTime);
+      drcPosePlaybackDemo.setupPosePlaybackController(posePlaybackPacket, true);
+
+      blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
+      
+      blockingSimulationRunner.simulateAndBlock(numberOfPoses * trajectoryTime + 0.5);
+
+      createMovie(scs);
+      BambooTools.reportTestFinishedMessage();
+   }
+
+   @Test
+   public void testPosePlaybackControllerWithRandomPosesWithSomeJointsUncontrolled() throws SimulationExceededMaximumTimeException
+   {
+      DRCPosePlaybackDemo drcPosePlaybackDemo = setupPosePlaybackSim();
+      
+      drcController = drcPosePlaybackDemo.getDRCController();
+      SimulationConstructionSet scs = drcPosePlaybackDemo.getSimulationConstructionSet();
+      
+      int numberOfPoses = 5;
+      double trajectoryTime = 1.0;
+      FullRobotModel fullRobotModel = drcPosePlaybackDemo.getControllerModel();
+      ArrayList<OneDoFJoint> jointToControl = new ArrayList<>(Arrays.asList(fullRobotModel.getOneDoFJoints()));
+      int numberOfUncontrolledJoints = RandomTools.generateRandomInt(random, 2, jointToControl.size() / 2);
+      for (int i = 0; i < numberOfUncontrolledJoints; i++)
+      {
+         jointToControl.remove(RandomTools.generateRandomInt(random, 1, jointToControl.size()) - 1);
+      }
+      PosePlaybackPacket posePlaybackPacket = createRandomPosePlaybackPacket(jointToControl, numberOfPoses, trajectoryTime);
+      drcPosePlaybackDemo.setupPosePlaybackController(posePlaybackPacket, true);
+
+      blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
+      
+      blockingSimulationRunner.simulateAndBlock(numberOfPoses * trajectoryTime + 0.5);
+
+      createMovie(scs);
+      BambooTools.reportTestFinishedMessage();
+   }
+
+   private DRCPosePlaybackDemo setupPosePlaybackSim()
+   {
       ValkyrieRobotModel valkyrieRobotModel = new ValkyrieRobotModel();
       ValkyrieRobotInterface valkyrieRobotInterface = new ValkyrieRobotInterface();
 
@@ -114,21 +166,7 @@ public class ValkyriePosePlaybackDemoTest
       scsInitialSetup.setInitializeEstimatorToActual(true);
       
       DRCPosePlaybackDemo drcPosePlaybackDemo = new DRCPosePlaybackDemo(valkyrieRobotInterface, robotInitialSetup, guiInitialSetup, scsInitialSetup, automaticSimulationRunner, DRCConfigParameters.CONTROL_DT, 16000, valkyrieRobotModel);
-      
-      drcController = drcPosePlaybackDemo.getDRCController();
-      SimulationConstructionSet scs = drcPosePlaybackDemo.getSimulationConstructionSet();
-      
-      int numberOfPoses = 5;
-      double trajectoryTime = 1.0;
-      PosePlaybackPacket posePlaybackPacket = createRandomPosePlaybackPacket(drcPosePlaybackDemo.getControllerModel(), numberOfPoses, trajectoryTime);
-      drcPosePlaybackDemo.setupPosePlaybackController(posePlaybackPacket, true);
-
-      blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
-      
-      blockingSimulationRunner.simulateAndBlock(numberOfPoses * trajectoryTime + 0.5);
-
-      createMovie(scs);
-      BambooTools.reportTestFinishedMessage();
+      return drcPosePlaybackDemo;
    }
 
    private void createMovie(SimulationConstructionSet scs)
@@ -139,11 +177,10 @@ public class ValkyriePosePlaybackDemoTest
       }
    }
 
-   private PosePlaybackPacket createRandomPosePlaybackPacket(final FullRobotModel fullRobotModel, final int numberOfPoses, final double trajectoryTime)
+   private PosePlaybackPacket createRandomPosePlaybackPacket(final List<OneDoFJoint> jointToControl, final int numberOfPoses, final double trajectoryTime)
    {
       PosePlaybackPacket posePlaybackPacket = new PosePlaybackPacket()
       {
-         private final Random random = new Random(16581L);
          private final ArrayList<Double> trajectoryTimes = new ArrayList<>(numberOfPoses);
          private final List<Map<OneDoFJoint, Double>> listOfPosesToPlayback = new ArrayList<>(numberOfPoses);
          private final LinkedHashMap<OneDoFJoint, Double> jointKps = new LinkedHashMap<>(numberOfPoses);
@@ -154,13 +191,13 @@ public class ValkyriePosePlaybackDemoTest
                trajectoryTimes.add(trajectoryTime);
                
                LinkedHashMap<OneDoFJoint, Double> pose = new LinkedHashMap<>();
-               for (OneDoFJoint joint : fullRobotModel.getOneDoFJoints())
+               for (OneDoFJoint joint : jointToControl)
                {
                   pose.put(joint, RandomTools.generateRandomDouble(random, joint.getJointLimitLower(), joint.getJointLimitUpper()));
                }
                listOfPosesToPlayback.add(pose);
                
-               for (OneDoFJoint joint : fullRobotModel.getOneDoFJoints())
+               for (OneDoFJoint joint : jointToControl)
                {
                   double mass = TotalMassCalculator.computeSubTreeMass(joint.getSuccessor());
                   jointKps.put(joint, 4.0 * mass);
