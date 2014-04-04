@@ -8,11 +8,14 @@ import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelState;
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.IntegerYoVariable;
+import com.yobotics.simulationconstructionset.VariableChangedListener;
+import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.PDController;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
@@ -44,12 +47,29 @@ public class PosePlaybackController extends State<HighLevelState>
    private final IntegerYoVariable currentPoseIndex = new IntegerYoVariable(CONTROLLER_PREFIX + "_currentPoseIndex", registry);
 
    private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable(CONTROLLER_PREFIX + "_hasBeenInitialized", registry);
+   private final BooleanYoVariable startPosePlayback = new BooleanYoVariable(CONTROLLER_PREFIX + "_startPosePlayback", registry);
 
-   public PosePlaybackController(FullRobotModel fullRobotModel, DoubleYoVariable yoTime)
+   private final DoubleYoVariable outputScaling = new DoubleYoVariable(CONTROLLER_PREFIX + "_outputScaling", registry);
+   
+   private final double controlDT;
+
+   public PosePlaybackController(FullRobotModel fullRobotModel, DoubleYoVariable yoTime, double controlDT)
    {
       super(controllerState);
 
       this.yoTime = yoTime;
+      this.controlDT = controlDT;
+      
+      outputScaling.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void variableChanged(YoVariable v)
+         {
+            outputScaling.set(MathTools.clipToMinMax(outputScaling.getDoubleValue(), 0.0, 1.0));
+         }
+      });
+      
+      startPosePlayback.set(false);
 
       trajectoryTimes = null;
       listOfPosesToPlayback = null;
@@ -133,7 +153,10 @@ public class PosePlaybackController extends State<HighLevelState>
          return;
       }
       
-      timeInCurrentPose.set(yoTime.getDoubleValue() - poseSwitchTime.getDoubleValue());
+      if (startPosePlayback.getBooleanValue())
+      {
+         timeInCurrentPose.add(controlDT);
+      }
 
       if (timeInCurrentPose.getDoubleValue() > currentPoseTrajectoryTime.getDoubleValue() && currentPoseIndex.getIntegerValue() < trajectoryTimes.size() - 1)
       {
@@ -157,7 +180,8 @@ public class PosePlaybackController extends State<HighLevelState>
          double desiredRate = jointTrajectory.getVelocity();
 
          double tauDesired = jointPDControllers.get(oneDoFJoint).compute(currentPosition, desiredPosition, currentRate, desiredRate);
-
+         tauDesired *= outputScaling.getDoubleValue();
+         
          oneDoFJoint.setTau(tauDesired);
       }
    }
