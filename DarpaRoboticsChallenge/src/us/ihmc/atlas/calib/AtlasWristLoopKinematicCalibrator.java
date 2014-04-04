@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.calib;
+package us.ihmc.atlas.calib;
 
 import com.yobotics.simulationconstructionset.DataBuffer;
 import com.yobotics.simulationconstructionset.IndexChangedListener;

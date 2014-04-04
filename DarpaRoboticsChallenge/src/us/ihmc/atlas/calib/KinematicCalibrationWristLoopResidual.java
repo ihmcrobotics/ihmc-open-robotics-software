@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.calib;
+package us.ihmc.atlas.calib;
 
 import org.ddogleg.optimization.functions.FunctionNtoM;
 import us.ihmc.SdfLoader.SDFFullRobotModel;

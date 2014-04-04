@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.calib;
+package us.ihmc.atlas.calib;
 
 import boofcv.alg.geo.PerspectiveOps;
 import boofcv.alg.geo.calibration.PlanarCalibrationTarget;
@@ -15,6 +15,10 @@ import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.atlas.calib.AtlasHeadLoopKinematicCalibrator;
+import us.ihmc.atlas.calib.CalibUtil;
+import us.ihmc.atlas.calib.DetectChessboardInKinematicsData;
+import us.ihmc.atlas.calib.KinematicCalibrationHeadLoopResidual;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
 import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
@@ -48,7 +52,7 @@ public class KinematicCalibrationHeadLoopResidualTest
    PlanarCalibrationTarget calibGrid = FactoryPlanarCalibrationTarget.gridChess(
          DetectChessboardInKinematicsData.boardWidth, DetectChessboardInKinematicsData.boardHeight, 0.03);
 
-   DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT);
+   private static final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT);
    DRCRobotJointMap jointMap = robotModel.getJointMap();
    JaxbSDFLoader robotLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
    SDFFullRobotModel fullRobotModel = robotLoader.createFullRobotModel(jointMap);
@@ -69,7 +73,7 @@ public class KinematicCalibrationHeadLoopResidualTest
 
    public KinematicCalibrationHeadLoopResidualTest()
    {
-      intrinsic = ConfigurationLoader.loadXML("/us/ihmc/darpaRoboticsChallenge/calib/intrinsic_ros.xml");
+      intrinsic = ConfigurationLoader.loadXML("/us/ihmc/atlas/calib/intrinsic_ros.xml");
 
       Vector3d tran = new Vector3d(targetToEE_param[0], targetToEE_param[1], targetToEE_param[2]);
       AxisAngle4d axisY = new AxisAngle4d(new Vector3d(0, 1, 0), targetToEE_param[3]);

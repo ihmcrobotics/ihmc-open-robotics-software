@@ -1,9 +1,12 @@
-package us.ihmc.darpaRoboticsChallenge.calib;
+package us.ihmc.atlas.calib;
 
 import boofcv.io.image.UtilImageIO;
 import boofcv.struct.calib.IntrinsicParameters;
 import georegression.struct.se.Se3_F64;
+
 import org.junit.Test;
+
+import us.ihmc.atlas.calib.AtlasArmKinematicsCalibration;
 
 import java.awt.image.BufferedImage;
 

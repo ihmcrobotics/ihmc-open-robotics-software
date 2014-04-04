@@ -33,13 +33,12 @@ import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimu
 import com.yobotics.simulationconstructionset.util.simulationRunner.SimulationRewindabilityVerifier;
 import com.yobotics.simulationconstructionset.util.simulationRunner.VariableDifference;
 
-public class DRCFlatGroundRewindabilityTest
+public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestInterface
 {
    private static final boolean SHOW_GUI = false;
    private static final double totalTimeToTest = 10.0;
    private static final double timeToTickAhead = 1.5;
    private static final double timePerTick = 0.01;
-   private static final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT);
 
    @Before
    public void setUp() throws Exception
@@ -141,7 +140,7 @@ public class DRCFlatGroundRewindabilityTest
       boolean cheatWithGroundHeightAtForFootstep = false;
 
       GroundProfile groundProfile = new FlatGroundProfile();
-
+      DRCRobotModel robotModel = getRobotModel();
       WalkingControllerParameters drcControlParameters = robotModel.getWalkingControlParamaters();
       ArmControllerParameters armControllerParameters = robotModel.getArmControllerParameters();
 
