@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.packets.DesiredHighLevelStateProvider
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
+import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
 
 public class HighLevelHumanoidControllerManager implements RobotController
@@ -59,6 +60,12 @@ public class HighLevelHumanoidControllerManager implements RobotController
       
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
+   }
+   
+   public void addControllerState(State<HighLevelState> highLevelState, YoVariableRegistry controllerRegistry)
+   {
+      this.stateMachine.addState(highLevelState);
+      this.registry.addChild(controllerRegistry);
    }
 
    public YoVariableRegistry getYoVariableRegistry()
