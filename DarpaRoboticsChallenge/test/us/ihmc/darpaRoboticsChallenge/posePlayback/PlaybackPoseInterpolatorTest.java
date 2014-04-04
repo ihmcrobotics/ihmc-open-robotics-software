@@ -14,7 +14,9 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPose;
+import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseInterpolator;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
+import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceReader;
 import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
@@ -24,7 +26,7 @@ import us.ihmc.utilities.ThreadTools;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
-public class PosePlaybackSmoothPoseInterpolatorTest
+public class PlaybackPoseInterpolatorTest
 {
    private static final boolean SHOW_GUI = true;
    
@@ -51,6 +53,7 @@ public class PosePlaybackSmoothPoseInterpolatorTest
    public void testRandomExample()
    {
       DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT);
+//      DRCRobotModel robotModel = new ValkyrieRobotModel(AtlasRobotVersion.DRC_NO_HANDS, DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT);
 
       DRCRobotJointMap jointMap = robotModel.getJointMap();
       JaxbSDFLoader sdfLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap, false);
@@ -92,7 +95,7 @@ public class PosePlaybackSmoothPoseInterpolatorTest
 
       PlaybackPoseSequence sequence = new PlaybackPoseSequence(fullRobotModel);
       Reader reader = new StringReader(stringBuffer.toString());
-      PlaybackPoseSequence.appendFromFile(sequence, reader);
+      PlaybackPoseSequenceReader.appendFromFile(sequence, reader);
 
       //sequence.writeToOutputStream(fullRobotModel, System.out);
 
@@ -124,7 +127,7 @@ public class PosePlaybackSmoothPoseInterpolatorTest
       SDFRobot sdfRobot = sdfLoader.createRobot(jointMap, false);
       
       PlaybackPoseSequence sequence = new PlaybackPoseSequence(fullRobotModel);
-      PlaybackPoseSequence.appendFromFile(sequence, "testSequence2.poseSequence");
+      PlaybackPoseSequenceReader.appendFromFile(sequence, "testSequence2.poseSequence");
       playASequence(sdfRobot, sequence);
    }
 
@@ -140,7 +143,7 @@ public class PosePlaybackSmoothPoseInterpolatorTest
       SDFRobot sdfRobot = sdfLoader.createRobot(jointMap, false);
       
       PlaybackPoseSequence sequence = new PlaybackPoseSequence(fullRobotModel);
-      PlaybackPoseSequence.appendFromFile(sequence, "tenPoses.poseSequence");
+      PlaybackPoseSequenceReader.appendFromFile(sequence, "tenPoses.poseSequence");
 
       System.out.println(sequence);
       playASequence(sdfRobot, sequence);
@@ -150,7 +153,7 @@ public class PosePlaybackSmoothPoseInterpolatorTest
    private void playASequence(SDFRobot sdfRobot, PlaybackPoseSequence sequence)
    {
       YoVariableRegistry registry = new YoVariableRegistry("PosePlaybackSmoothPoseInterpolatorTest");
-      PosePlaybackSmoothPoseInterpolator interpolator = new PosePlaybackSmoothPoseInterpolator(registry);
+      PlaybackPoseInterpolator interpolator = new PlaybackPoseInterpolator(registry);
 
       double simulateDT = 0.005;
       

@@ -19,6 +19,8 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPose;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
+import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceReader;
+import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceWriter;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
@@ -141,7 +143,7 @@ public class PoseSequenceSelectorPanel extends JPanel
 
       if (selectedFile != null)
       {
-         PlaybackPoseSequence.appendFromFile(sequence, selectedFile);
+         PlaybackPoseSequenceReader.appendFromFile(sequence, selectedFile);
          updateTableBasedOnPoseSequence();
       }
    }
@@ -153,7 +155,7 @@ public class PoseSequenceSelectorPanel extends JPanel
       if (selectedFile != null)
       {
          sequence.clear();
-         PlaybackPoseSequence.appendFromFile(sequence, selectedFile);
+         PlaybackPoseSequenceReader.appendFromFile(sequence, selectedFile);
          updateTableBasedOnPoseSequence();
       }
    }
@@ -234,7 +236,7 @@ public class PoseSequenceSelectorPanel extends JPanel
    public void save()
    {
       updatePoseSequenceBasedOnTable();
-      PlaybackPoseSequence.promptWriteToFile(sequence);
+      PlaybackPoseSequenceWriter.promptWriteToFile(sequence);
    }
 
    private void updateTableBasedOnPoseSequence()

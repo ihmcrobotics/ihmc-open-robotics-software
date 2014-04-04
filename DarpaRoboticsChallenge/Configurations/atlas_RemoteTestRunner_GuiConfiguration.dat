@@ -29,9 +29,9 @@
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>5.70589520030302</Camera X>
- <Camera Y>-1.7729524385269915</Camera Y>
- <Camera Z>1.2777902432759864</Camera Z>
+ <Camera X>0.0</Camera X>
+ <Camera Y>-6.0</Camera Y>
+ <Camera Z>1.0</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
