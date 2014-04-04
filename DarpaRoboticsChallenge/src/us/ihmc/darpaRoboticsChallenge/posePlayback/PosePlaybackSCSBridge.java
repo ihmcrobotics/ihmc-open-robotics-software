@@ -13,7 +13,10 @@ import us.ihmc.SdfLoader.SDFPerfectSimulatedSensorReader;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPose;
+import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseInterpolator;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
+import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceReader;
+import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceWriter;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.configuration.LocalCloudMachines;
@@ -61,7 +64,7 @@ public class PosePlaybackSCSBridge
    private double frameByframeTime;
    private boolean playOnlyOnePose = false;
 
-   private final PosePlaybackSmoothPoseInterpolator interpolator;
+   private final PlaybackPoseInterpolator interpolator;
    private final YoVariableRegistry registry = new YoVariableRegistry("PlaybackPoseSCSBridge");
 
    // private final BooleanYoVariable plotBalls = new BooleanYoVariable("plotBalls", registry);
@@ -97,7 +100,7 @@ public class PosePlaybackSCSBridge
 
    public PosePlaybackSCSBridge(DRCRobotModel robotModel) throws IOException
    {
-      interpolator = new PosePlaybackSmoothPoseInterpolator(registry);
+      interpolator = new PlaybackPoseInterpolator(registry);
 
       DRCRobotJointMap jointMap = robotModel.getJointMap();
       JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
@@ -404,7 +407,7 @@ public class PosePlaybackSCSBridge
          if (((BooleanYoVariable) yoVariable).getBooleanValue())
          {
             System.out.println("saving file");
-            PlaybackPoseSequence.promptWriteToFile(posePlaybackRobotPoseSequence);
+            PlaybackPoseSequenceWriter.promptWriteToFile(posePlaybackRobotPoseSequence);
          }
       }
    }
@@ -481,7 +484,7 @@ public class PosePlaybackSCSBridge
       File selectedFile = chooser.getSelectedFile();
 
       sequence.clear();
-      PlaybackPoseSequence.appendFromFile(sequence, selectedFile);
+      PlaybackPoseSequenceReader.appendFromFile(sequence, selectedFile);
 
       initPlayback(sequence);
 

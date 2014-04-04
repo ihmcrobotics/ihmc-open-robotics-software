@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.posePlayback;
+package us.ihmc.commonWalkingControlModules.posePlayback;
 
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPose;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
@@ -9,7 +9,7 @@ import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.trajectory.YoPolynomial;
 
-public class PosePlaybackSmoothPoseInterpolator
+public class PlaybackPoseInterpolator
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -30,7 +30,7 @@ public class PosePlaybackSmoothPoseInterpolator
    private PlaybackPoseSequence sequence;
    private boolean hasBeganInterpolating = false;
 
-   public PosePlaybackSmoothPoseInterpolator(YoVariableRegistry parentRegistry)
+   public PlaybackPoseInterpolator(YoVariableRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
 
