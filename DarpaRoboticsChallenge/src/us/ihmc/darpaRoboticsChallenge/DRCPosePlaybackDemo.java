@@ -7,51 +7,41 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.atlas.visualization.SliderBoardFactory;
-import us.ihmc.atlas.visualization.WalkControllerSliderBoard;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepTimingParameters;
+import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.PolyvalentHighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.InverseDynamicsJointController;
+import us.ihmc.commonWalkingControlModules.posePlayback.PosePlaybackPacket;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControllerFactory;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.PlainDRCRobot;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.graphics3DAdapter.GroundProfile;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.Pair;
 
-import com.martiansoftware.jsap.JSAPException;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
-import com.yobotics.simulationconstructionset.util.FlatGroundProfile;
 import com.yobotics.simulationconstructionset.util.GainCalculator;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 
-public class DRCInverseDynamicsControllerDemo
+public class DRCPosePlaybackDemo
 {
-   private static final DRCRobotModel defaultModelForGraphicSelector = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT);
-
-   private static final double ROBOT_FLOATING_HEIGHT = 0.3;
-
-   private static final HighLevelState INVERSE_DYNAMICS_JOINT_CONTROL = HighLevelState.INVERSE_DYNAMICS_JOINT_CONTROL;
+   private static final HighLevelState JOINT_PD_CONTROL = HighLevelState.JOINT_PD_CONTROL;
    
    private final HumanoidRobotSimulation<SDFRobot> drcSimulation;
    private final DRCController drcController;
+   private final PolyvalentHighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory;
 
-   public DRCInverseDynamicsControllerDemo(DRCRobotInterface robotInterface, DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
+   public DRCPosePlaybackDemo(DRCRobotInterface robotInterface, DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
                                     DRCSCSInitialSetup scsInitialSetup, AutomaticSimulationRunner automaticSimulationRunner,
                                     double timePerRecordTick, int simulationDataBufferSize, DRCRobotModel model)
    {
@@ -75,8 +65,8 @@ public class DRCInverseDynamicsControllerDemo
 
       FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulation(walkingControlParameters);
       
-      PolyvalentHighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory = new PolyvalentHighLevelHumanoidControllerFactory(null,
-            footstepTimingParameters, walkingControlParameters, walkingControlParameters, armControlParameters, false, false, false, INVERSE_DYNAMICS_JOINT_CONTROL);
+      highLevelHumanoidControllerFactory = new PolyvalentHighLevelHumanoidControllerFactory(null,
+            footstepTimingParameters, walkingControlParameters, walkingControlParameters, armControlParameters, false, false, false, JOINT_PD_CONTROL);
 
       SideDependentList<String> footForceSensorNames = new SideDependentList<>();
       for(RobotSide robotSide : RobotSide.values)
@@ -99,8 +89,6 @@ public class DRCInverseDynamicsControllerDemo
       drcSimulation.getRobot().setController(controller);
       controller.initialize();
       
-      new InverseDynamicsJointController.GravityCompensationSliderBoard(simulationConstructionSet, drcController.getControllerModel(), simulationConstructionSet.getRootRegistry(), "desiredHeight", 0.5, 2.0);
-      
       if (automaticSimulationRunner != null)
       {
          drcSimulation.start(automaticSimulationRunner);
@@ -110,48 +98,25 @@ public class DRCInverseDynamicsControllerDemo
          drcSimulation.start(null);
       }
    }
-
+   
+   public FullRobotModel getControllerModel()
+   {
+      return drcController.getControllerModel();
+   }
+   
+   public DRCController getDRCController()
+   {
+      return drcController;
+   }
+   
    public SimulationConstructionSet getSimulationConstructionSet()
    {
       return drcSimulation.getSimulationConstructionSet();
    }
-
-   public DRCController getDrcController()
+   
+   public void setupPosePlaybackController(PosePlaybackPacket posePlaybackPacket, boolean transitionRequested)
    {
-      return drcController;
-   }
-
-   public static void main(String[] args) throws JSAPException
-   {
-      DRCRobotModel model = null;
-      
-      model = DRCRobotModelFactory.selectModelFromFlag(args);
-      
-      if (model == null)
-         model = DRCRobotModelFactory.selectModelFromGraphicSelector(defaultModelForGraphicSelector);
-      
-      if (model == null)
-         throw new RuntimeException("No robot model selected");
-      
-      AutomaticSimulationRunner automaticSimulationRunner = null;
-
-      SliderBoardFactory sliderBoardFactory = WalkControllerSliderBoard.getFactory();
-      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false, sliderBoardFactory);
-
-      DRCRobotInterface robotInterface = new PlainDRCRobot(model);
-      
-      final double groundHeight = 0.0;
-      GroundProfile groundProfile = new FlatGroundProfile(groundHeight);
-
-      DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotInterface.getSimulateDT());
-      scsInitialSetup.setDrawGroundProfile(true);
-      scsInitialSetup.setInitializeEstimatorToActual(true);
-      
-      double initialYaw = 0.0;
-      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = model.getDefaultRobotInitialSetup(groundHeight + ROBOT_FLOATING_HEIGHT, initialYaw);
-
-      new DRCInverseDynamicsControllerDemo(robotInterface, robotInitialSetup, guiInitialSetup, scsInitialSetup, automaticSimulationRunner,
-            DRCConfigParameters.CONTROL_DT, 16000, model);
+      highLevelHumanoidControllerFactory.setupPosePlayBackController(posePlaybackPacket, true);
    }
 
    private class HoldRobotInTheAir implements RobotController
@@ -251,7 +216,7 @@ public class DRCInverseDynamicsControllerDemo
             efp.getYoPosition().getPoint3d(proportionalTerm);
             proportionalTerm.sub(initialPositions.get(i));
             proportionalTerm.scale(-holdPelvisKp.getDoubleValue());
-            proportionalTerm.setZ(Math.max(proportionalTerm.getZ(), 0.0));
+//            proportionalTerm.setZ(Math.max(proportionalTerm.getZ(), 0.0));
             
             efp.getYoVelocity().get(derivativeTerm);
             derivativeTerm.scale(- holdPelvisKv.getDoubleValue());
@@ -259,7 +224,7 @@ public class DRCInverseDynamicsControllerDemo
             pdControlOutput.add(proportionalTerm, derivativeTerm);
             
             efp.setForce(pdControlOutput);
-//            efp.fz.add(robotWeight / efp_offsetFromRootJoint.size());
+            efp.fz.add(robotWeight / efp_offsetFromRootJoint.size());
 
             efp_positionViz.get(i).update();
          }

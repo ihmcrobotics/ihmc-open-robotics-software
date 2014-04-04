@@ -54,9 +54,6 @@ public class PosePlaybackController extends State<HighLevelState>
       trajectoryTimes = null;
       listOfPosesToPlayback = null;
 
-      if (trajectoryTimes.size() != listOfPosesToPlayback.size())
-         throw new RuntimeException("Should be of the length.");
-
       allOneDoFJoints = new ArrayList<>(Arrays.asList(fullRobotModel.getOneDoFJoints()));
       jointTrajectories = new LinkedHashMap<>(allOneDoFJoints.size());
       jointInitialDesiredAngles = new LinkedHashMap<>(allOneDoFJoints.size());
@@ -101,7 +98,10 @@ public class PosePlaybackController extends State<HighLevelState>
    {
       trajectoryTimes = posePlaybackPacket.getTrajectoryTimes();
       listOfPosesToPlayback = posePlaybackPacket.getListOfPosesToPlayback();
-      
+
+      if (trajectoryTimes.size() != listOfPosesToPlayback.size())
+         throw new RuntimeException("Should be of the length.");
+
       Map<OneDoFJoint, Double> jointKps = posePlaybackPacket.getJointKps();
       Map<OneDoFJoint, Double> jointKds = posePlaybackPacket.getJointKds();
 
@@ -131,7 +131,7 @@ public class PosePlaybackController extends State<HighLevelState>
       
       timeInCurrentPose.set(yoTime.getDoubleValue() - poseSwitchTime.getDoubleValue());
 
-      if (timeInCurrentPose.getDoubleValue() > currentPoseTrajectoryTime.getDoubleValue())
+      if (timeInCurrentPose.getDoubleValue() > currentPoseTrajectoryTime.getDoubleValue() && currentPoseIndex.getIntegerValue() < trajectoryTimes.size() - 1)
       {
          poseSwitchTime.set(yoTime.getDoubleValue());
          timeInCurrentPose.set(0.0);
