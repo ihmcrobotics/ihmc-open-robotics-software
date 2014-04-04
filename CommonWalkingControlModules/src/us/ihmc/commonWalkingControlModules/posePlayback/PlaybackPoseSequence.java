@@ -15,9 +15,9 @@ public class PlaybackPoseSequence
       this.fullRobotModel = fullRobotModel;
    }
 
-   public void addPose(PlaybackPose posePlaybackRobotPose)
+   public void addPose(PlaybackPose playbackPose)
    {
-      poseSequence.add(posePlaybackRobotPose);
+      poseSequence.add(playbackPose);
    }
 
    public FullRobotModel getFullRobotModel()
@@ -74,13 +74,18 @@ public class PlaybackPoseSequence
 
    public PlaybackPoseSequence copy()
    {
-      PlaybackPoseSequence posePlaybackRobotPoseSequence = new PlaybackPoseSequence(fullRobotModel);
+      PlaybackPoseSequence playbackPoseSequence = new PlaybackPoseSequence(fullRobotModel);
       for (PlaybackPose pose : poseSequence)
       {
-         posePlaybackRobotPoseSequence.addPose(pose.copy());
+         playbackPoseSequence.addPose(pose.copy());
       }
 
-      return posePlaybackRobotPoseSequence;
+      return playbackPoseSequence;
+   }
+
+   public int size()
+   {
+      return poseSequence.size();
    }
 
 
