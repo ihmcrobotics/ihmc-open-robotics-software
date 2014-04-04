@@ -37,9 +37,9 @@ public class BonoInitialSetup implements DRCRobotInitialSetup<SDFRobot>
       {
          String prefix = robotSide.getSideNameFirstLetter().toLowerCase();
 
-         robot.getOneDoFJoint(prefix + "_leg_lhy").setQ(-0.4);
-         robot.getOneDoFJoint(prefix + "_leg_kny").setQ(1.0);
-         robot.getOneDoFJoint(prefix + "_leg_uay").setQ(robotSide.negateIfRightSide(-0.76));
+         robot.getOneDegreeOfFreedomJoint(prefix + "_leg_lhy").setQ(-0.4);
+         robot.getOneDegreeOfFreedomJoint(prefix + "_leg_kny").setQ(1.0);
+         robot.getOneDegreeOfFreedomJoint(prefix + "_leg_uay").setQ(robotSide.negateIfRightSide(-0.76));
       }
 
       robot.update();
