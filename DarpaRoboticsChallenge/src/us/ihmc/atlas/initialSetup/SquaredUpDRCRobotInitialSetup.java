@@ -64,14 +64,14 @@ public class SquaredUpDRCRobotInitialSetup implements DRCRobotInitialSetup<SDFRo
    protected void setLegJointPositions(SDFRobot robot)
    {
       try{
-         robot.getOneDoFJoint(jointNames[l_leg_hpy]).setQ(-0.4);
-         robot.getOneDoFJoint(jointNames[r_leg_hpy]).setQ(-0.4);
+         robot.getOneDegreeOfFreedomJoint(jointNames[l_leg_hpy]).setQ(-0.4);
+         robot.getOneDegreeOfFreedomJoint(jointNames[r_leg_hpy]).setQ(-0.4);
    
-         robot.getOneDoFJoint(jointNames[l_leg_kny]).setQ(0.8);
-         robot.getOneDoFJoint(jointNames[r_leg_kny]).setQ(0.8);
+         robot.getOneDegreeOfFreedomJoint(jointNames[l_leg_kny]).setQ(0.8);
+         robot.getOneDegreeOfFreedomJoint(jointNames[r_leg_kny]).setQ(0.8);
    
-         robot.getOneDoFJoint(jointNames[l_leg_aky]).setQ(-0.4);
-         robot.getOneDoFJoint(jointNames[r_leg_aky]).setQ(-0.4);
+         robot.getOneDegreeOfFreedomJoint(jointNames[l_leg_aky]).setQ(-0.4);
+         robot.getOneDegreeOfFreedomJoint(jointNames[r_leg_aky]).setQ(-0.4);
       } catch(Exception e)
       {
          System.err.println("Hard Coded joint positions for wrong model! FIXME - SquaredUpDrcRobotInitialSetUp");

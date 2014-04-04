@@ -43,27 +43,27 @@ public class VRCTask1InVehicleInitialSetup implements DRCRobotInitialSetup<SDFRo
       double kneeBend = 1.22; //Math.PI / 2.0;
 
       // Avoid singularities at startup
-      robot.getOneDoFJoint(jointNames[l_arm_shx]).setQ(-1.57);
+      robot.getOneDegreeOfFreedomJoint(jointNames[l_arm_shx]).setQ(-1.57);
 
-      robot.getOneDoFJoint(jointNames[r_arm_shx]).setQ(1.57);
+      robot.getOneDegreeOfFreedomJoint(jointNames[r_arm_shx]).setQ(1.57);
 
-      robot.getOneDoFJoint(jointNames[l_arm_ely]).setQ(1.57);
-      robot.getOneDoFJoint(jointNames[l_arm_elx]).setQ(1.57);
+      robot.getOneDegreeOfFreedomJoint(jointNames[l_arm_ely]).setQ(1.57);
+      robot.getOneDegreeOfFreedomJoint(jointNames[l_arm_elx]).setQ(1.57);
 
-      robot.getOneDoFJoint(jointNames[r_arm_ely]).setQ(1.57);
-      robot.getOneDoFJoint(jointNames[r_arm_elx]).setQ(-1.57);
+      robot.getOneDegreeOfFreedomJoint(jointNames[r_arm_ely]).setQ(1.57);
+      robot.getOneDegreeOfFreedomJoint(jointNames[r_arm_elx]).setQ(-1.57);
 
-      robot.getOneDoFJoint(jointNames[l_arm_wry]).setQ(0);
-      robot.getOneDoFJoint(jointNames[r_arm_wry]).setQ(0);
+      robot.getOneDegreeOfFreedomJoint(jointNames[l_arm_wry]).setQ(0);
+      robot.getOneDegreeOfFreedomJoint(jointNames[r_arm_wry]).setQ(0);
 
-      robot.getOneDoFJoint(jointNames[l_leg_hpy]).setQ(hipBend + thighPitch);
-      robot.getOneDoFJoint(jointNames[r_leg_hpy]).setQ(hipBend + thighPitch);
+      robot.getOneDegreeOfFreedomJoint(jointNames[l_leg_hpy]).setQ(hipBend + thighPitch);
+      robot.getOneDegreeOfFreedomJoint(jointNames[r_leg_hpy]).setQ(hipBend + thighPitch);
 
-      robot.getOneDoFJoint(jointNames[l_leg_kny]).setQ(kneeBend);
-      robot.getOneDoFJoint(jointNames[r_leg_kny]).setQ(kneeBend);
+      robot.getOneDegreeOfFreedomJoint(jointNames[l_leg_kny]).setQ(kneeBend);
+      robot.getOneDegreeOfFreedomJoint(jointNames[r_leg_kny]).setQ(kneeBend);
 
-      robot.getOneDoFJoint(jointNames[l_leg_aky]).setQ(thighPitch + 0.3);  //0.087 + thighPitch);
-      robot.getOneDoFJoint(jointNames[r_leg_aky]).setQ(thighPitch + 0.3); //0.087 + thighPitch);
+      robot.getOneDegreeOfFreedomJoint(jointNames[l_leg_aky]).setQ(thighPitch + 0.3);  //0.087 + thighPitch);
+      robot.getOneDegreeOfFreedomJoint(jointNames[r_leg_aky]).setQ(thighPitch + 0.3); //0.087 + thighPitch);
 
       offset.setX(-0.07);
       offset.setY(0.28);

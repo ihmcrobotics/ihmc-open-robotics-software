@@ -1,5 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.posePlayback;
 
+import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPose;
 import us.ihmc.utilities.math.TimeTools;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -38,7 +39,7 @@ public class PosePlaybackSmoothPoseInterpolator
    public void startSequencePlayback(PosePlaybackRobotPoseSequence sequence, double startTime)
    {
       this.sequence = sequence;
-      PosePlaybackRobotPose pose = sequence.getPose(0);
+      PlaybackPose pose = sequence.getPose(0);
 
       setMorphDuration(pose.getPlayBackDuration());
       setTimeDelayAfterPose(pose.getPlayBackDelayBeforePose()); //TODO: before or after pose?
@@ -66,7 +67,7 @@ public class PosePlaybackSmoothPoseInterpolator
       yoPolynomial.setCubic(time, time + duration, 0.0, 0.0, 1.0, 0.0);
    }
 
-   public PosePlaybackRobotPose getPose(double time)
+   public PlaybackPose getPose(double time)
    {
       double timeIntoPose = time - poseStartTime.getDoubleValue();
 
@@ -76,11 +77,11 @@ public class PosePlaybackSmoothPoseInterpolator
          return sequence.getFinalPose();
       }
 
-      PosePlaybackRobotPose poseOne = sequence.getPose(index);
-      PosePlaybackRobotPose poseTwo = sequence.getPose(poseSequenceIndex.getIntegerValue() + 1);
+      PlaybackPose poseOne = sequence.getPose(index);
+      PlaybackPose poseTwo = sequence.getPose(poseSequenceIndex.getIntegerValue() + 1);
 
       poseMorphPercentage.set(timeIntoPose / poseMorphDuration.getDoubleValue());
-      PosePlaybackRobotPose morphedPose = PosePlaybackRobotPose.morph(poseOne, poseTwo, poseMorphPercentage.getDoubleValue());
+      PlaybackPose morphedPose = PlaybackPose.morph(poseOne, poseTwo, poseMorphPercentage.getDoubleValue());
 
       if (poseMorphPercentage.getDoubleValue() >= 1.0 && timeIntoPose >= transitionTime(poseTwo))
       {
@@ -95,7 +96,7 @@ public class PosePlaybackSmoothPoseInterpolator
       return morphedPose;
    }
    
-   private double transitionTime(PosePlaybackRobotPose poseToTransitionInto)
+   private double transitionTime(PlaybackPose poseToTransitionInto)
    {
       return poseMorphDuration.getDoubleValue() + timeDelayAfterPose.getDoubleValue()
             + TimeTools.milliSecondsToSeconds((long) poseToTransitionInto.getPlayBackDelayBeforePose());

@@ -12,20 +12,20 @@ public class PushUpDRCRobotInitialSetup implements DRCRobotInitialSetup<SDFRobot
       double handRotation = Math.PI / 2.0;
       double bodyPitch = Math.PI / 2.0 - 0.4;
       
-      robot.getOneDoFJoint("l_arm_ely").setQ(handRotation);
-      robot.getOneDoFJoint("l_arm_elx").setQ(elbowBend);
+      robot.getOneDegreeOfFreedomJoint("l_arm_ely").setQ(handRotation);
+      robot.getOneDegreeOfFreedomJoint("l_arm_elx").setQ(elbowBend);
 
-      robot.getOneDoFJoint("r_arm_ely").setQ(handRotation);
-      robot.getOneDoFJoint("r_arm_elx").setQ(-elbowBend);
+      robot.getOneDegreeOfFreedomJoint("r_arm_ely").setQ(handRotation);
+      robot.getOneDegreeOfFreedomJoint("r_arm_elx").setQ(-elbowBend);
 
-      robot.getOneDoFJoint("l_arm_wry").setQ(-handRotation);
-      robot.getOneDoFJoint("r_arm_wry").setQ(-handRotation);
+      robot.getOneDegreeOfFreedomJoint("l_arm_wry").setQ(-handRotation);
+      robot.getOneDegreeOfFreedomJoint("r_arm_wry").setQ(-handRotation);
       
-      robot.getOneDoFJoint("l_arm_wrx").setQ(bodyPitch);
-      robot.getOneDoFJoint("r_arm_wrx").setQ(-bodyPitch);
+      robot.getOneDegreeOfFreedomJoint("l_arm_wrx").setQ(bodyPitch);
+      robot.getOneDegreeOfFreedomJoint("r_arm_wrx").setQ(-bodyPitch);
       
-      robot.getOneDoFJoint("l_leg_aky").setQ(-0.3);
-      robot.getOneDoFJoint("r_leg_aky").setQ(-0.3);
+      robot.getOneDegreeOfFreedomJoint("l_leg_aky").setQ(-0.3);
+      robot.getOneDegreeOfFreedomJoint("r_leg_aky").setQ(-0.3);
 
       robot.setOrientation(0.0, bodyPitch , 0.0);
    }

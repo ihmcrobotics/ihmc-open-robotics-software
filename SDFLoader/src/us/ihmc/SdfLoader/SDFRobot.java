@@ -44,6 +44,7 @@ import com.yobotics.simulationconstructionset.IMUMount;
 import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.Link;
 import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
+import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJointHolder;
 import com.yobotics.simulationconstructionset.PinJoint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SliderJoint;
@@ -53,7 +54,7 @@ import com.yobotics.simulationconstructionset.simulatedSensors.SimulatedLIDARSen
 import com.yobotics.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorNoiseParameters;
 import com.yobotics.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorUpdateParameters;
 
-public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an SDFHumanoidRobot
+public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder, HumanoidRobot    // TODO: make an SDFHumanoidRobot
 {
   
    private static final boolean DEBUG = false;
@@ -230,7 +231,7 @@ public class SDFRobot extends Robot implements HumanoidRobot    // TODO: make an
       rootJoint.setVelocity(velocity);
    }
 
-   public OneDegreeOfFreedomJoint getOneDoFJoint(String name)
+   public OneDegreeOfFreedomJoint getOneDegreeOfFreedomJoint(String name)
    {
       return oneDoFJoints.get(name);
    }

@@ -13,6 +13,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPose;
 import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
@@ -90,7 +91,7 @@ public class PosePlaybackSmoothPoseInterpolatorTest
 
       PosePlaybackRobotPoseSequence sequence = new PosePlaybackRobotPoseSequence(fullRobotModel);
       Reader reader = new StringReader(stringBuffer.toString());
-      sequence.appendFromFile(fullRobotModel, reader);
+      PosePlaybackRobotPoseSequence.appendFromFile(sequence, reader);
 
       //sequence.writeToOutputStream(fullRobotModel, System.out);
 
@@ -122,7 +123,7 @@ public class PosePlaybackSmoothPoseInterpolatorTest
       SDFRobot sdfRobot = sdfLoader.createRobot(jointMap, false);
       
       PosePlaybackRobotPoseSequence sequence = new PosePlaybackRobotPoseSequence(fullRobotModel);
-      sequence.appendFromFile(fullRobotModel, "testSequence2.poseSequence");
+      PosePlaybackRobotPoseSequence.appendFromFile(sequence, "testSequence2.poseSequence");
       playASequence(sdfRobot, sequence);
    }
 
@@ -138,7 +139,7 @@ public class PosePlaybackSmoothPoseInterpolatorTest
       SDFRobot sdfRobot = sdfLoader.createRobot(jointMap, false);
       
       PosePlaybackRobotPoseSequence sequence = new PosePlaybackRobotPoseSequence(fullRobotModel);
-      sequence.appendFromFile(fullRobotModel, "tenPoses.poseSequence");
+      PosePlaybackRobotPoseSequence.appendFromFile(sequence, "tenPoses.poseSequence");
 
       System.out.println(sequence);
       playASequence(sdfRobot, sequence);
@@ -168,13 +169,13 @@ public class PosePlaybackSmoothPoseInterpolatorTest
       interpolator.startSequencePlayback(sequence, startTime);
 
 
-      PosePlaybackRobotPose previousPose = null;
+      PlaybackPose previousPose = null;
       while (!interpolator.isDone())
       {
          time = time + simulateDT;
          scs.setTime(time);
 
-         PosePlaybackRobotPose pose = interpolator.getPose(time);
+         PlaybackPose pose = interpolator.getPose(time);
 
 //         System.out.println(pose);
 
@@ -196,7 +197,7 @@ public class PosePlaybackSmoothPoseInterpolatorTest
    }
 
 
-   private void assertSmallPoseDifference(PosePlaybackRobotPose pose, PosePlaybackRobotPose previousPose)
+   private void assertSmallPoseDifference(PlaybackPose pose, PlaybackPose previousPose)
    {
       if (pose == null)
          return;

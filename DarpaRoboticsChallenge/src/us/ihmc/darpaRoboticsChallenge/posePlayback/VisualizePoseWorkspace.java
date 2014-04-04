@@ -9,6 +9,7 @@ import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
+import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPose;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
@@ -95,7 +96,7 @@ public class VisualizePoseWorkspace
    {
       private final SDFRobot sdfRobot;
       private final SimulationConstructionSet scs;
-      private PosePlaybackRobotPose previousPose;
+      private PlaybackPose previousPose;
 
       public CaptureSnapshotListener(SDFRobot sdfRobot, SimulationConstructionSet scs)
       {
@@ -107,7 +108,7 @@ public class VisualizePoseWorkspace
 
       public void variableChanged(YoVariable yoVariable)
       {
-         PosePlaybackRobotPose pose = new PosePlaybackRobotPose(fullRobotModelForSlider, sdfRobot);
+         PlaybackPose pose = new PlaybackPose(fullRobotModelForSlider, sdfRobot);
 
          if (previousPose != null)
          {
@@ -128,7 +129,7 @@ public class VisualizePoseWorkspace
          for (double time = 0.0; time < morphTime; time = time + dt)
          {
             double morphPercentage = time / morphTime;
-            PosePlaybackRobotPose morphedPose;
+            PlaybackPose morphedPose;
 
             if (previousPose == null)
             {
@@ -136,7 +137,7 @@ public class VisualizePoseWorkspace
             }
             else
             {
-               morphedPose = PosePlaybackRobotPose.morph(previousPose, pose, morphPercentage);
+               morphedPose = PlaybackPose.morph(previousPose, pose, morphPercentage);
             }
 
             posePlaybackController.setPlaybackPose(morphedPose);
@@ -165,7 +166,7 @@ public class VisualizePoseWorkspace
       private final SDFRobot sdfRobot;
       private final FullRobotModel fullRobotModel;
       private final SimulationConstructionSet scs;
-      private PosePlaybackRobotPose previousPose;
+      private PlaybackPose previousPose;
 
       public LoadSequenceListener(FullRobotModel fullRobotModel, SDFRobot sdfRobot, SimulationConstructionSet scs)
       {
@@ -191,7 +192,7 @@ public class VisualizePoseWorkspace
          File selectedFile = chooser.getSelectedFile();
 
          PosePlaybackRobotPoseSequence sequence = new PosePlaybackRobotPoseSequence(fullRobotModelForSlider);
-         sequence.appendFromFile(fullRobotModel, selectedFile);
+         PosePlaybackRobotPoseSequence.appendFromFile(sequence, selectedFile);
 
          double startTime = 0.0;
          double time = startTime;
@@ -203,7 +204,7 @@ public class VisualizePoseWorkspace
          {
             time = time + dt;
 
-            PosePlaybackRobotPose morphedPose = interpolator.getPose(time);
+            PlaybackPose morphedPose = interpolator.getPose(time);
 
             posePlaybackController.setPlaybackPose(morphedPose);
             scs.setTime(time);
@@ -228,7 +229,7 @@ public class VisualizePoseWorkspace
       public void variableChanged(YoVariable yoVariable)
       {
          System.out.println("saving file");
-         posePlaybackRobotPoseSequence.promptWriteToFile();
+         PosePlaybackRobotPoseSequence.promptWriteToFile(posePlaybackRobotPoseSequence);
       }
    }
 

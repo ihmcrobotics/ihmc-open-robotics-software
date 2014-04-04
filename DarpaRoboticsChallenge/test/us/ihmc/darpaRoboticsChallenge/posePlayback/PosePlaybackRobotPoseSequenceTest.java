@@ -38,7 +38,7 @@ public class PosePlaybackRobotPoseSequenceTest
                                                   trajectoryTime);
 
       ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-      sequence.writeToOutputStream(fullRobotModel, outputStream);
+      PosePlaybackRobotPoseSequence.writeToOutputStream(sequence, outputStream);
 
       String outputAsString = outputStream.toString();
 
@@ -47,7 +47,7 @@ public class PosePlaybackRobotPoseSequenceTest
       PosePlaybackRobotPoseSequence sequenceTwo = new PosePlaybackRobotPoseSequence(fullRobotModel);
 
       StringReader reader = new StringReader(outputAsString);
-      sequenceTwo.appendFromFile(fullRobotModel, reader);
+      PosePlaybackRobotPoseSequence.appendFromFile(sequenceTwo, reader);
 
       double jointEpsilon = 1e-7;
       double timeEpsilon = 1e-7;
