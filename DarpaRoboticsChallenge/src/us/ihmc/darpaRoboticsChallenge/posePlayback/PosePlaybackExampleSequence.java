@@ -6,6 +6,7 @@ import java.util.Random;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPose;
+import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -33,9 +34,9 @@ public class PosePlaybackExampleSequence
       -0.8547244094488189, 0.0, 0.0, 0.0, 0.0, -0.7283629133858267, 0.0, 0.0, 0.0, 0.0, 0.0, 0.7063789763779529, 0.0, 0.0, 0.0, 0.0
    };
 
-   public static PosePlaybackRobotPoseSequence createExamplePoseSequenceMoveArm(FullRobotModel fullRobotModel, double poseDelay, double trajectoryTime)
+   public static PlaybackPoseSequence createExamplePoseSequenceMoveArm(FullRobotModel fullRobotModel, double poseDelay, double trajectoryTime)
    {
-      PosePlaybackRobotPoseSequence sequence = new PosePlaybackRobotPoseSequence(fullRobotModel);
+      PlaybackPoseSequence sequence = new PlaybackPoseSequence(fullRobotModel);
 
       double[] elbowAngles = new double[]{0.0, 0.37, 0.1};
 
@@ -101,9 +102,9 @@ public class PosePlaybackExampleSequence
 //    return sequence;
 // }
 
-   public static PosePlaybackRobotPoseSequence createRandomPlaybackPoseSequence(Random random, FullRobotModel fullRobotModel, int numberOfPoses, double poseDelay, double trajectoryTime)
+   public static PlaybackPoseSequence createRandomPlaybackPoseSequence(Random random, FullRobotModel fullRobotModel, int numberOfPoses, double poseDelay, double trajectoryTime)
    {
-      PosePlaybackRobotPoseSequence sequence = new PosePlaybackRobotPoseSequence(fullRobotModel);
+      PlaybackPoseSequence sequence = new PlaybackPoseSequence(fullRobotModel);
 
       for (int i = 0; i < numberOfPoses; i++)
       {

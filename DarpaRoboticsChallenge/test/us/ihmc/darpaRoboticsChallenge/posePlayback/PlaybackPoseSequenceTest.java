@@ -12,12 +12,13 @@ import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
 import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 
-public class PosePlaybackRobotPoseSequenceTest
+public class PlaybackPoseSequenceTest
 {
    @Test
    public void testReadAndWriteWithRandomSequence()
@@ -34,20 +35,20 @@ public class PosePlaybackRobotPoseSequenceTest
       double trajectoryTime = 1.0;
 
       Random random = new Random(1776L);
-      PosePlaybackRobotPoseSequence sequence = PosePlaybackExampleSequence.createRandomPlaybackPoseSequence(random, fullRobotModel, numberOfPoses, delay,
+      PlaybackPoseSequence sequence = PosePlaybackExampleSequence.createRandomPlaybackPoseSequence(random, fullRobotModel, numberOfPoses, delay,
                                                   trajectoryTime);
 
       ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-      PosePlaybackRobotPoseSequence.writeToOutputStream(sequence, outputStream);
+      PlaybackPoseSequence.writeToOutputStream(sequence, outputStream);
 
       String outputAsString = outputStream.toString();
 
 //      System.out.println(outputAsString);
 
-      PosePlaybackRobotPoseSequence sequenceTwo = new PosePlaybackRobotPoseSequence(fullRobotModel);
+      PlaybackPoseSequence sequenceTwo = new PlaybackPoseSequence(fullRobotModel);
 
       StringReader reader = new StringReader(outputAsString);
-      PosePlaybackRobotPoseSequence.appendFromFile(sequenceTwo, reader);
+      PlaybackPoseSequence.appendFromFile(sequenceTwo, reader);
 
       double jointEpsilon = 1e-7;
       double timeEpsilon = 1e-7;

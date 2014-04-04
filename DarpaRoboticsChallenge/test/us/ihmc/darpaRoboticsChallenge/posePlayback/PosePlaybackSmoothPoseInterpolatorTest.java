@@ -14,6 +14,7 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPose;
+import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
 import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
@@ -42,7 +43,7 @@ public class PosePlaybackSmoothPoseInterpolatorTest
       double delay = 0.3;
       double trajectoryTime = 1.0;
       
-      PosePlaybackRobotPoseSequence sequence = PosePlaybackExampleSequence.createExamplePoseSequenceMoveArm(fullRobotModel, delay, trajectoryTime);
+      PlaybackPoseSequence sequence = PosePlaybackExampleSequence.createExamplePoseSequenceMoveArm(fullRobotModel, delay, trajectoryTime);
       playASequence(sdfRobot, sequence);
    }
    
@@ -62,7 +63,7 @@ public class PosePlaybackSmoothPoseInterpolatorTest
       double trajectoryTime = 1.0;
       
       Random random = new Random(1776L);
-      PosePlaybackRobotPoseSequence sequence = PosePlaybackExampleSequence.createRandomPlaybackPoseSequence(random, fullRobotModel, numberOfPoses, delay, trajectoryTime);
+      PlaybackPoseSequence sequence = PosePlaybackExampleSequence.createRandomPlaybackPoseSequence(random, fullRobotModel, numberOfPoses, delay, trajectoryTime);
 
       //sequence.writeToOutputStream(fullRobotModel, System.out);
 
@@ -89,9 +90,9 @@ public class PosePlaybackSmoothPoseInterpolatorTest
       stringBuffer.append("0.300    1.000    -0.212   -0.408   0.465    0.330    0.979    3.128    0.277    0.886    -0.812   -0.314   -1.167   -1.106   1.316    3.033    -1.422   2.905    -0.448   0.047    -0.188   -1.058   0.260    0.491    -0.379   -0.036   0.290    -1.365   1.373    -0.302   0.118\n");    
       stringBuffer.append("0.300    1.000    0.059    0.096    0.068    -0.214   0.040    2.465    0.200    0.150    0.327    -0.260   1.340    0.219    -0.716   1.272    -0.095   1.491    -0.649   0.344    -0.352   -1.660   0.996    0.497    0.659    -1.067   0.208    0.269    0.826    -0.745   -0.694\n");   
 
-      PosePlaybackRobotPoseSequence sequence = new PosePlaybackRobotPoseSequence(fullRobotModel);
+      PlaybackPoseSequence sequence = new PlaybackPoseSequence(fullRobotModel);
       Reader reader = new StringReader(stringBuffer.toString());
-      PosePlaybackRobotPoseSequence.appendFromFile(sequence, reader);
+      PlaybackPoseSequence.appendFromFile(sequence, reader);
 
       //sequence.writeToOutputStream(fullRobotModel, System.out);
 
@@ -122,8 +123,8 @@ public class PosePlaybackSmoothPoseInterpolatorTest
       SDFFullRobotModel fullRobotModel = sdfLoader.createFullRobotModel(jointMap);
       SDFRobot sdfRobot = sdfLoader.createRobot(jointMap, false);
       
-      PosePlaybackRobotPoseSequence sequence = new PosePlaybackRobotPoseSequence(fullRobotModel);
-      PosePlaybackRobotPoseSequence.appendFromFile(sequence, "testSequence2.poseSequence");
+      PlaybackPoseSequence sequence = new PlaybackPoseSequence(fullRobotModel);
+      PlaybackPoseSequence.appendFromFile(sequence, "testSequence2.poseSequence");
       playASequence(sdfRobot, sequence);
    }
 
@@ -138,15 +139,15 @@ public class PosePlaybackSmoothPoseInterpolatorTest
       SDFFullRobotModel fullRobotModel = sdfLoader.createFullRobotModel(jointMap);
       SDFRobot sdfRobot = sdfLoader.createRobot(jointMap, false);
       
-      PosePlaybackRobotPoseSequence sequence = new PosePlaybackRobotPoseSequence(fullRobotModel);
-      PosePlaybackRobotPoseSequence.appendFromFile(sequence, "tenPoses.poseSequence");
+      PlaybackPoseSequence sequence = new PlaybackPoseSequence(fullRobotModel);
+      PlaybackPoseSequence.appendFromFile(sequence, "tenPoses.poseSequence");
 
       System.out.println(sequence);
       playASequence(sdfRobot, sequence);
    }
 
 
-   private void playASequence(SDFRobot sdfRobot, PosePlaybackRobotPoseSequence sequence)
+   private void playASequence(SDFRobot sdfRobot, PlaybackPoseSequence sequence)
    {
       YoVariableRegistry registry = new YoVariableRegistry("PosePlaybackSmoothPoseInterpolatorTest");
       PosePlaybackSmoothPoseInterpolator interpolator = new PosePlaybackSmoothPoseInterpolator(registry);

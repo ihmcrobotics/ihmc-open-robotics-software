@@ -13,6 +13,7 @@ import us.ihmc.SdfLoader.SDFPerfectSimulatedSensorReader;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPose;
+import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.configuration.LocalCloudMachines;
@@ -53,8 +54,8 @@ public class PosePlaybackSCSBridge
 
    private final PosePlaybackAllJointsController posePlaybackController;
    private final PosePlaybackSender posePlaybackSender;
-   private PosePlaybackRobotPoseSequence posePlaybackRobotPoseSequence;
-   private PosePlaybackRobotPoseSequence lastLoadedPoseSequence;
+   private PlaybackPoseSequence posePlaybackRobotPoseSequence;
+   private PlaybackPoseSequence lastLoadedPoseSequence;
    
    private int frameByframePoseNumber;
    private double frameByframeTime;
@@ -105,7 +106,7 @@ public class PosePlaybackSCSBridge
       
       posePlaybackController = new PosePlaybackAllJointsController(fullRobotModel, registry);
       posePlaybackSender = new PosePlaybackSender(posePlaybackController, ipAddress);
-      posePlaybackRobotPoseSequence = new PosePlaybackRobotPoseSequence(fullRobotModel);
+      posePlaybackRobotPoseSequence = new PlaybackPoseSequence(fullRobotModel);
 
       SDFPerfectSimulatedSensorReader reader = new SDFPerfectSimulatedSensorReader(sdfRobot, fullRobotModel, null);
       ModularRobotController controller = new ModularRobotController("Reader");
@@ -338,7 +339,7 @@ public class PosePlaybackSCSBridge
 
          System.out.println("Load Sequence");
 
-         boolean selectedFileSuccessful = initPlaybackFromFile(fullRobotModel, new PosePlaybackRobotPoseSequence(fullRobotModel));
+         boolean selectedFileSuccessful = initPlaybackFromFile(fullRobotModel, new PlaybackPoseSequence(fullRobotModel));
          if (!selectedFileSuccessful)
             return;
 
@@ -403,7 +404,7 @@ public class PosePlaybackSCSBridge
          if (((BooleanYoVariable) yoVariable).getBooleanValue())
          {
             System.out.println("saving file");
-            PosePlaybackRobotPoseSequence.promptWriteToFile(posePlaybackRobotPoseSequence);
+            PlaybackPoseSequence.promptWriteToFile(posePlaybackRobotPoseSequence);
          }
       }
    }
@@ -463,7 +464,7 @@ public class PosePlaybackSCSBridge
       new PosePlaybackSCSBridge(model);
    }
 
-   private boolean initPlaybackFromFile(FullRobotModel fullRobotModel, PosePlaybackRobotPoseSequence sequence)
+   private boolean initPlaybackFromFile(FullRobotModel fullRobotModel, PlaybackPoseSequence sequence)
    {
       boolean successful = true;
       JFileChooser chooser = new JFileChooser(new File("PoseSequences"));
@@ -480,14 +481,14 @@ public class PosePlaybackSCSBridge
       File selectedFile = chooser.getSelectedFile();
 
       sequence.clear();
-      PosePlaybackRobotPoseSequence.appendFromFile(sequence, selectedFile);
+      PlaybackPoseSequence.appendFromFile(sequence, selectedFile);
 
       initPlayback(sequence);
 
       return successful;
    }
 
-   private void initPlayback(PosePlaybackRobotPoseSequence sequence)
+   private void initPlayback(PlaybackPoseSequence sequence)
    {
       double startTime = 0.0;
       frameByframeTime = startTime;

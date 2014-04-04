@@ -18,6 +18,7 @@ import us.ihmc.SdfLoader.SDFPerfectSimulatedSensorReader;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPose;
+import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
@@ -39,7 +40,7 @@ public class PoseSequenceSelectorPanel extends JPanel
 
    private final JTable table;
    private final DefaultTableModel tableModel;
-   private final PosePlaybackRobotPoseSequence sequence;
+   private final PlaybackPoseSequence sequence;
 
    public PoseSequenceSelectorPanel(DRCRobotModel robotModel)
    {
@@ -53,7 +54,7 @@ public class PoseSequenceSelectorPanel extends JPanel
       fullRobotModel = loader.createFullRobotModel(jointMap);
       sdfRobot = loader.createRobot(jointMap, false);
 
-      sequence = new PosePlaybackRobotPoseSequence(fullRobotModel);
+      sequence = new PlaybackPoseSequence(fullRobotModel);
       
       posePlaybackController = new PosePlaybackAllJointsController(fullRobotModel, registry);
 
@@ -119,7 +120,7 @@ public class PoseSequenceSelectorPanel extends JPanel
       this.fullRobotModel = fullRobotModel;
       this.sliderBoard = sliderBoard;
 
-      sequence = new PosePlaybackRobotPoseSequence(fullRobotModel);
+      sequence = new PlaybackPoseSequence(fullRobotModel);
 
       String[] columnNames = new String[] { "#", "sy", "sp", "sr", "neck", "lhy", "lhr", "lhp", "lk", "lap", "lar", "rhy", "rhr", "rhp", "rk", "rap", "rar",
             "lsp", "lsr", "lep", "ler", "lwp", "lwr", "rsp", "rsr", "rep", "rer", "rwp", "rwr", "pause" };
@@ -140,7 +141,7 @@ public class PoseSequenceSelectorPanel extends JPanel
 
       if (selectedFile != null)
       {
-         PosePlaybackRobotPoseSequence.appendFromFile(sequence, selectedFile);
+         PlaybackPoseSequence.appendFromFile(sequence, selectedFile);
          updateTableBasedOnPoseSequence();
       }
    }
@@ -152,7 +153,7 @@ public class PoseSequenceSelectorPanel extends JPanel
       if (selectedFile != null)
       {
          sequence.clear();
-         PosePlaybackRobotPoseSequence.appendFromFile(sequence, selectedFile);
+         PlaybackPoseSequence.appendFromFile(sequence, selectedFile);
          updateTableBasedOnPoseSequence();
       }
    }
@@ -174,7 +175,7 @@ public class PoseSequenceSelectorPanel extends JPanel
       return selectedFile;
    }
 
-   public void addSequence(PosePlaybackRobotPoseSequence seq)
+   public void addSequence(PlaybackPoseSequence seq)
    {
       for (PlaybackPose pose : seq.getPoseSequence())
       {
@@ -183,7 +184,7 @@ public class PoseSequenceSelectorPanel extends JPanel
       updateTableBasedOnPoseSequence();
    }
 
-   public void setSequence(PosePlaybackRobotPoseSequence seq)
+   public void setSequence(PlaybackPoseSequence seq)
    {
       sequence.clear();
       addSequence(seq);
@@ -233,7 +234,7 @@ public class PoseSequenceSelectorPanel extends JPanel
    public void save()
    {
       updatePoseSequenceBasedOnTable();
-      PosePlaybackRobotPoseSequence.promptWriteToFile(sequence);
+      PlaybackPoseSequence.promptWriteToFile(sequence);
    }
 
    private void updateTableBasedOnPoseSequence()
