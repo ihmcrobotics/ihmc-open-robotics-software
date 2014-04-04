@@ -33,6 +33,7 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.TotalMassCalculator;
 import us.ihmc.valkyrie.ValkyrieRobotInterface;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
+import us.ihmc.valkyrie.posePlayback.ValkyrieWarmupPoseSequencePacket;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.time.GlobalTimer;
@@ -96,6 +97,29 @@ public class ValkyriePosePlaybackDemoTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
+
+   @Test
+   public void testPosePlaybackControllerWithWarmupPacket() throws SimulationExceededMaximumTimeException
+   {
+      DRCPosePlaybackDemo drcPosePlaybackDemo = setupPosePlaybackSim();
+      
+      drcController = drcPosePlaybackDemo.getDRCController();
+      SimulationConstructionSet scs = drcPosePlaybackDemo.getSimulationConstructionSet();
+      
+      int numberOfPoses = 5;
+      double trajectoryTime = 1.0;
+      FullRobotModel fullRobotModel = drcPosePlaybackDemo.getControllerModel();
+      List<OneDoFJoint> jointToControl = Arrays.asList(fullRobotModel.getOneDoFJoints());
+      PosePlaybackPacket posePlaybackPacket = new ValkyrieWarmupPoseSequencePacket(fullRobotModel);
+      drcPosePlaybackDemo.setupPosePlaybackController(posePlaybackPacket, true);
+
+      blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
+      
+      blockingSimulationRunner.simulateAndBlock(numberOfPoses * trajectoryTime + 0.5);
+
+      createMovie(scs);
+      BambooTools.reportTestFinishedMessage();
+   }
 
    @Test
    public void testPosePlaybackControllerWithRandomPoses() throws SimulationExceededMaximumTimeException
