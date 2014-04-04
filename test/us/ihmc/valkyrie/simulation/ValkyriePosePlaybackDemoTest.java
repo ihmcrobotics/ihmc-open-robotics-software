@@ -15,6 +15,8 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
+import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPose;
+import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
 import us.ihmc.commonWalkingControlModules.posePlayback.PosePlaybackPacket;
 import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
@@ -110,7 +112,7 @@ public class ValkyriePosePlaybackDemoTest
       double trajectoryTime = 1.0;
       FullRobotModel fullRobotModel = drcPosePlaybackDemo.getControllerModel();
       List<OneDoFJoint> jointToControl = Arrays.asList(fullRobotModel.getOneDoFJoints());
-      PosePlaybackPacket posePlaybackPacket = new ValkyrieWarmupPoseSequencePacket(fullRobotModel);
+      PosePlaybackPacket posePlaybackPacket = new ValkyrieWarmupPoseSequencePacket(fullRobotModel, 1.0);
       drcPosePlaybackDemo.setupPosePlaybackController(posePlaybackPacket, true);
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
@@ -131,10 +133,11 @@ public class ValkyriePosePlaybackDemoTest
       SimulationConstructionSet scs = drcPosePlaybackDemo.getSimulationConstructionSet();
       
       int numberOfPoses = 5;
+      double delayTime = 0.25;
       double trajectoryTime = 1.0;
       FullRobotModel fullRobotModel = drcPosePlaybackDemo.getControllerModel();
       List<OneDoFJoint> jointToControl = Arrays.asList(fullRobotModel.getOneDoFJoints());
-      PosePlaybackPacket posePlaybackPacket = createRandomPosePlaybackPacket(jointToControl, numberOfPoses, trajectoryTime);
+      PosePlaybackPacket posePlaybackPacket = createRandomPosePlaybackPacket(fullRobotModel, jointToControl, numberOfPoses, delayTime, trajectoryTime);
       drcPosePlaybackDemo.setupPosePlaybackController(posePlaybackPacket, true);
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
@@ -155,6 +158,7 @@ public class ValkyriePosePlaybackDemoTest
       SimulationConstructionSet scs = drcPosePlaybackDemo.getSimulationConstructionSet();
       
       int numberOfPoses = 5;
+      double delayTime = 0.25;
       double trajectoryTime = 1.0;
       FullRobotModel fullRobotModel = drcPosePlaybackDemo.getControllerModel();
       ArrayList<OneDoFJoint> jointToControl = new ArrayList<>(Arrays.asList(fullRobotModel.getOneDoFJoints()));
@@ -163,7 +167,7 @@ public class ValkyriePosePlaybackDemoTest
       {
          jointToControl.remove(RandomTools.generateRandomInt(random, 1, jointToControl.size()) - 1);
       }
-      PosePlaybackPacket posePlaybackPacket = createRandomPosePlaybackPacket(jointToControl, numberOfPoses, trajectoryTime);
+      PosePlaybackPacket posePlaybackPacket = createRandomPosePlaybackPacket(fullRobotModel, jointToControl, numberOfPoses, delayTime, trajectoryTime);
       drcPosePlaybackDemo.setupPosePlaybackController(posePlaybackPacket, true);
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
@@ -204,25 +208,28 @@ public class ValkyriePosePlaybackDemoTest
       }
    }
 
-   private PosePlaybackPacket createRandomPosePlaybackPacket(final List<OneDoFJoint> jointToControl, final int numberOfPoses, final double trajectoryTime)
+   private PosePlaybackPacket createRandomPosePlaybackPacket(final FullRobotModel fullRobotModel, final List<OneDoFJoint> jointToControl, final int numberOfPoses, final double delayBeforePoses, final double trajectoryTime)
    {
       PosePlaybackPacket posePlaybackPacket = new PosePlaybackPacket()
       {
-         private final ArrayList<Double> trajectoryTimes = new ArrayList<>(numberOfPoses);
-         private final List<Map<OneDoFJoint, Double>> listOfPosesToPlayback = new ArrayList<>(numberOfPoses);
+         private final PlaybackPoseSequence playbackPoseSequence = new PlaybackPoseSequence(fullRobotModel);
+         
          private final LinkedHashMap<OneDoFJoint, Double> jointKps = new LinkedHashMap<>(numberOfPoses);
          private final LinkedHashMap<OneDoFJoint, Double> jointKds = new LinkedHashMap<>(numberOfPoses);
          {
             for (int i = 0; i < numberOfPoses; i ++)
-            {
-               trajectoryTimes.add(trajectoryTime);
-               
+            {               
                LinkedHashMap<OneDoFJoint, Double> pose = new LinkedHashMap<>();
                for (OneDoFJoint joint : jointToControl)
                {
                   pose.put(joint, RandomTools.generateRandomDouble(random, joint.getJointLimitLower(), joint.getJointLimitUpper()));
                }
-               listOfPosesToPlayback.add(pose);
+               
+               PlaybackPose playbackPose = new PlaybackPose(pose);
+               playbackPose.setPlayBackDuration(trajectoryTime);
+               playbackPose.setPlaybackDelayBeforePose(delayBeforePoses);
+               
+               playbackPoseSequence.addPose(playbackPose);
                
                for (OneDoFJoint joint : jointToControl)
                {
@@ -233,17 +240,7 @@ public class ValkyriePosePlaybackDemoTest
             }
          }
          
-         @Override
-         public List<Double> getTrajectoryTimes()
-         {
-            return trajectoryTimes;
-         }
-         
-         @Override
-         public List<Map<OneDoFJoint, Double>> getListOfPosesToPlayback()
-         {
-            return listOfPosesToPlayback;
-         }
+        
          
          @Override
          public Map<OneDoFJoint, Double> getJointKps()
@@ -255,6 +252,18 @@ public class ValkyriePosePlaybackDemoTest
          public Map<OneDoFJoint, Double> getJointKds()
          {
             return jointKds;
+         }
+
+         @Override
+         public PlaybackPoseSequence getPlaybackPoseSequence()
+         {
+            return playbackPoseSequence;
+         }
+
+         @Override
+         public double getInitialGainScaling()
+         {
+            return 1.0;
          }
       };
       
