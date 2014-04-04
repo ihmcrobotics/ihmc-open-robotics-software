@@ -11,6 +11,7 @@ import javax.swing.JPanel;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
+import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModelFactory;
 
@@ -128,12 +129,12 @@ public class PoseSequenceEditorGUI extends JFrame
       }
    }
 
-   public void setSequence(PosePlaybackRobotPoseSequence seq)
+   public void setSequence(PlaybackPoseSequence seq)
    {
       poseSequenceSelectorPanel.setSequence(seq);
    }
 
-   public void addSequence(PosePlaybackRobotPoseSequence seq)
+   public void addSequence(PlaybackPoseSequence seq)
    {
       poseSequenceSelectorPanel.addSequence(seq);
    }

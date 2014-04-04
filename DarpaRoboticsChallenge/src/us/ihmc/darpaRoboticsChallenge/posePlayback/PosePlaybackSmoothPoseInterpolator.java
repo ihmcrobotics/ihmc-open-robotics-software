@@ -1,6 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.posePlayback;
 
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPose;
+import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
 import us.ihmc.utilities.math.TimeTools;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -26,7 +27,7 @@ public class PosePlaybackSmoothPoseInterpolator
 
    private final YoPolynomial yoPolynomial = new YoPolynomial("posePolynomial", numberOfCoefficients, registry);
 
-   private PosePlaybackRobotPoseSequence sequence;
+   private PlaybackPoseSequence sequence;
    private boolean hasBeganInterpolating = false;
 
    public PosePlaybackSmoothPoseInterpolator(YoVariableRegistry parentRegistry)
@@ -36,7 +37,7 @@ public class PosePlaybackSmoothPoseInterpolator
 //      poseMorphDuration.set(defaultPoseMorphDuration);
    }
 
-   public void startSequencePlayback(PosePlaybackRobotPoseSequence sequence, double startTime)
+   public void startSequencePlayback(PlaybackPoseSequence sequence, double startTime)
    {
       this.sequence = sequence;
       PlaybackPose pose = sequence.getPose(0);

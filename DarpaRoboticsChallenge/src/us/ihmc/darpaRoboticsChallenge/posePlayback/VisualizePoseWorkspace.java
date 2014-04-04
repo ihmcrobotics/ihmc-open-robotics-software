@@ -10,6 +10,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPose;
+import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
@@ -37,7 +38,7 @@ public class VisualizePoseWorkspace
    
    private final PosePlaybackAllJointsController posePlaybackController;
    private final PosePlaybackSender posePlaybackSender;
-   private PosePlaybackRobotPoseSequence posePlaybackRobotPoseSequence;
+   private PlaybackPoseSequence posePlaybackRobotPoseSequence;
 
    private final PosePlaybackSmoothPoseInterpolator interpolator;
    private final YoVariableRegistry registry = new YoVariableRegistry("PlaybackPoseSCSBridge");
@@ -64,7 +65,7 @@ public class VisualizePoseWorkspace
 
       posePlaybackController = new PosePlaybackAllJointsController(fullRobotModelForSlider, registry);
       posePlaybackSender = new PosePlaybackSender(posePlaybackController, ipAddress);
-      posePlaybackRobotPoseSequence = new PosePlaybackRobotPoseSequence(fullRobotModelForSlider);
+      posePlaybackRobotPoseSequence = new PlaybackPoseSequence(fullRobotModelForSlider);
       
       CaptureSnapshotListener captureSnapshotListener = new CaptureSnapshotListener(sdfRobot, scs);
       sliderBoard.addCaptureSnapshotListener(captureSnapshotListener);
@@ -191,8 +192,8 @@ public class VisualizePoseWorkspace
 
          File selectedFile = chooser.getSelectedFile();
 
-         PosePlaybackRobotPoseSequence sequence = new PosePlaybackRobotPoseSequence(fullRobotModelForSlider);
-         PosePlaybackRobotPoseSequence.appendFromFile(sequence, selectedFile);
+         PlaybackPoseSequence sequence = new PlaybackPoseSequence(fullRobotModelForSlider);
+         PlaybackPoseSequence.appendFromFile(sequence, selectedFile);
 
          double startTime = 0.0;
          double time = startTime;
@@ -229,7 +230,7 @@ public class VisualizePoseWorkspace
       public void variableChanged(YoVariable yoVariable)
       {
          System.out.println("saving file");
-         PosePlaybackRobotPoseSequence.promptWriteToFile(posePlaybackRobotPoseSequence);
+         PlaybackPoseSequence.promptWriteToFile(posePlaybackRobotPoseSequence);
       }
    }
 
