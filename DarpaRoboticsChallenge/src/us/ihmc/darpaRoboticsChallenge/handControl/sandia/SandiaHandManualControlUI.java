@@ -54,18 +54,18 @@ public class SandiaHandManualControlUI extends AbstractNodeMain implements Actio
 
    private GridBagConstraints c;
 
-   private JPanel panel, leftPanel, middlePanel, rightPanel, handSelectionPanel, controlTypeSelectionPanel, graspTypeSelectionPanel, fingerSelectionPanel,
-                  sliderPanel, actionButtonPanel, graspTypePanel;
+   private JPanel panel, leftPanel, middlePanel, rightPanel, handSelectionPanel, controlTypeSelectionPanel, fingerSelectionPanel,
+                  sliderPanel, actionButtonPanel, graspTypePanel, graspControlPanel;
 
-   private JLabel handLabel, controlTypeLabel, graspTypeLabel, fingerLabel, baseJointLabel, firstJointLabel, secondJointLabel;
+   private JLabel handLabel, controlTypeLabel, graspSelectionLabel, fingerLabel, baseJointLabel, firstJointLabel, secondJointLabel, graspControlLabel;
 
    private ButtonGroup leftOrRight, controlType, graspType;
    private JRadioButton leftRadioButton, rightRadioButton, fullHandRadioButton, individualFingerRadioButton, cylindricalGraspRadioButton,
-                        circularGraspRadioButton, prismaticGraspRadioButton;
+                        sphericalGraspRadioButton, prismaticGraspRadioButton;
 
    private JCheckBox thumbCheckBox, indexCheckBox, middleCheckBox, ringCheckBox;
 
-   private JSlider baseJointSlider, firstJointSlider, secondJointSlider, controlAllSlider;
+   private JSlider baseJointSlider, firstJointSlider, secondJointSlider, graspControlSlider;
 
    private JButton sendCommandButton, resetButton;
 
@@ -112,9 +112,9 @@ public class SandiaHandManualControlUI extends AbstractNodeMain implements Actio
       addPanels();
 
       frame.add(panel);
-      frame.setVisible(true);
       frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
       frame.pack();
+      frame.setVisible(true);
    }
 
    private void setupPublishers()
@@ -140,16 +140,15 @@ public class SandiaHandManualControlUI extends AbstractNodeMain implements Actio
    {
       panel = new JPanel(new GridBagLayout());
 
-      Insets insets = new Insets(5, 5, 5, 5);
-      c.insets = insets;
-
       setupLeftPanel();
       setupMiddlePanel();
       setupRightPanel();
 
-//    setupActionButtonPanel();
+      setupActionButtonPanel();
 
-      c.ipadx = 100;
+      c.insets = new Insets(5, 5, 5, 5);
+      c.fill = GridBagConstraints.BOTH;
+      c.ipadx = 50;
       c.ipady = 20;
 
       c.gridx = 0;
@@ -158,6 +157,9 @@ public class SandiaHandManualControlUI extends AbstractNodeMain implements Actio
       
       ++c.gridx;
       panel.add(middlePanel, c);
+      
+      ++c.gridx;
+      panel.add(rightPanel, c);
    }
 
    private void setupLeftPanel()
@@ -179,6 +181,7 @@ public class SandiaHandManualControlUI extends AbstractNodeMain implements Actio
    private void setupMiddlePanel()
    {
       middlePanel = new JPanel(new GridBagLayout());
+      middlePanel.setBorder(BorderFactory.createEtchedBorder());
 
       setupFingerSelectionPanel();
       setupSliderPanel();
@@ -187,10 +190,24 @@ public class SandiaHandManualControlUI extends AbstractNodeMain implements Actio
       c.gridy = 0;
       middlePanel.add(fingerSelectionPanel, c);
       
+      ++c.gridy;
+      middlePanel.add(sliderPanel, c);
    }
 
    private void setupRightPanel()
    {
+	   rightPanel = new JPanel(new GridBagLayout());
+	   rightPanel.setBorder(BorderFactory.createEtchedBorder());
+	   
+	   setupGraspSelectionPanel();
+	   setupGraspControlPanel();
+	   
+	   c.gridx = 0;
+	   c.gridy = 0;
+	   rightPanel.add(graspTypePanel, c);
+	   
+	   ++c.gridy;
+	   rightPanel.add(graspControlPanel, c);
    }
 
    private void setupHandSelectionPanel()
@@ -257,6 +274,7 @@ public class SandiaHandManualControlUI extends AbstractNodeMain implements Actio
       JPanel leftFingerCheckBoxPanel = new JPanel(new GridBagLayout());
       JPanel rightFingerCheckBoxPanel = new JPanel(new GridBagLayout());
       
+      c.anchor = GridBagConstraints.WEST;
       c.gridx = 0;
       c.gridy = 0;
       leftFingerCheckBoxPanel.add(thumbCheckBox, c);
@@ -281,6 +299,7 @@ public class SandiaHandManualControlUI extends AbstractNodeMain implements Actio
       
       c.gridx = 0;
       c.gridy = 0;
+      c.anchor = GridBagConstraints.CENTER;
       fingerSelectionPanel.add(fingerLabel, c);
       
       ++c.gridy;
@@ -290,7 +309,7 @@ public class SandiaHandManualControlUI extends AbstractNodeMain implements Actio
    private void setupSliderPanel()
    {
       sliderPanel = new JPanel(new GridBagLayout());
-
+      
       baseJointLabel = new JLabel("Base Joint:");
       baseJointSlider = new JSlider(new DefaultBoundedRangeModel(0, 1, sliderMin, sliderMax));
 
@@ -299,8 +318,6 @@ public class SandiaHandManualControlUI extends AbstractNodeMain implements Actio
 
       secondJointLabel = new JLabel("Second Joint:");
       secondJointSlider = new JSlider(new DefaultBoundedRangeModel(0, 1, sliderMin, sliderMax));
-
-      c.ipady = 10;
 
       c.gridx = 0;
       c.gridy = 0;
@@ -319,6 +336,60 @@ public class SandiaHandManualControlUI extends AbstractNodeMain implements Actio
       sliderPanel.add(secondJointLabel, c);
       c.gridx = 1;
       sliderPanel.add(secondJointSlider, c);
+   }
+   
+   private void setupGraspSelectionPanel()
+   {
+	   graspTypePanel = new JPanel(new GridBagLayout());
+	   
+	   graspSelectionLabel = new JLabel("Select Grasp Type:");
+	   
+	   cylindricalGraspRadioButton = new JRadioButton("Cylindrical");
+	   sphericalGraspRadioButton = new JRadioButton("Spherical");
+	   prismaticGraspRadioButton = new JRadioButton("Prismatic");
+	   cylindricalGraspRadioButton.setSelected(true);
+	   
+	   graspType = new ButtonGroup();
+	   graspType.add(cylindricalGraspRadioButton);
+	   graspType.add(sphericalGraspRadioButton);
+	   graspType.add(prismaticGraspRadioButton);
+	   
+	   JPanel graspSelectionPanel = new JPanel(new GridBagLayout());
+	   
+	   c.anchor = GridBagConstraints.WEST;
+	   c.gridx = 0;
+	   c.gridy = 0;
+	   graspSelectionPanel.add(cylindricalGraspRadioButton, c);
+	   
+	   ++c.gridy;
+	   graspSelectionPanel.add(sphericalGraspRadioButton, c);
+	   
+	   ++c.gridy;
+	   graspSelectionPanel.add(prismaticGraspRadioButton, c);
+	   
+	   c.anchor = GridBagConstraints.CENTER;
+	   c.gridx = 0;
+	   c.gridy = 0;
+	   graspTypePanel.add(graspSelectionLabel, c);
+	   
+	   ++c.gridy;
+	   graspTypePanel.add(graspSelectionPanel, c);
+   }
+   
+   private void setupGraspControlPanel()
+   {
+	   graspControlPanel = new JPanel(new GridBagLayout());
+	   
+	   graspControlLabel = new JLabel("Grasp Control");
+	   graspControlSlider = new JSlider(new DefaultBoundedRangeModel(0, 1, 0, 10));
+	   
+	   c.anchor = GridBagConstraints.CENTER;
+	   c.gridx = 0;
+	   c.gridy = 0;
+	   graspControlPanel.add(graspControlLabel, c);
+	   
+	   ++c.gridx;
+	   graspControlPanel.add(graspControlSlider, c);
    }
 
    private void setupActionButtonPanel()
