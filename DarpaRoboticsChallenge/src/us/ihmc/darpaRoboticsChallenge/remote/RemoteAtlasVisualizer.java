@@ -5,10 +5,10 @@ import us.ihmc.atlas.visualization.SliderBoardControllerListener;
 import us.ihmc.atlas.visualization.SliderBoardFactory;
 import us.ihmc.atlas.visualization.WalkControllerSliderBoard;
 import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.DRCRobotModelFactory;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModelFactory;
 import us.ihmc.robotDataCommunication.YoVariableClient;
 
 import com.martiansoftware.jsap.FlaggedOption;

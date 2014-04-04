@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.packets.ComHeightPacket;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.darpaRoboticsChallenge.*;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.AsyncContinuousExecutor;
@@ -26,6 +27,7 @@ import us.ihmc.utilities.TimerTaskScheduler;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
+
 import java.util.ArrayList;
 import java.util.Random;
 
