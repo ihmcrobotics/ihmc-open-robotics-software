@@ -307,7 +307,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
             continue;
 
          neckJointNames.add(jointName);
-         neckSCSJoints.put(jointName, sdfRobot.getOneDoFJoint(neckJoint.getName()));
+         neckSCSJoints.put(jointName, sdfRobot.getOneDegreeOfFreedomJoint(neckJoint.getName()));
       }
 
       for (SpineJointName jointName : SpineJointName.values())
@@ -317,7 +317,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
             continue;
 
          spineJointNames.add(jointName);
-         spineSCSJoints.put(jointName, sdfRobot.getOneDoFJoint(spineJoint.getName()));
+         spineSCSJoints.put(jointName, sdfRobot.getOneDegreeOfFreedomJoint(spineJoint.getName()));
       }
 
       for (RobotSide robotSide : RobotSide.values)
@@ -329,7 +329,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
                continue;
             
             legJointNames.get(robotSide).add(jointName);
-            legSCSJoints.get(robotSide).put(jointName, sdfRobot.getOneDoFJoint(legJoint.getName()));
+            legSCSJoints.get(robotSide).put(jointName, sdfRobot.getOneDegreeOfFreedomJoint(legJoint.getName()));
          }
 
          for (ArmJointName jointName : ArmJointName.values())
@@ -339,7 +339,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
                continue;
             
             armJointNames.get(robotSide).add(jointName);
-            armSCSJoints.get(robotSide).put(jointName, sdfRobot.getOneDoFJoint(armJoint.getName()));
+            armSCSJoints.get(robotSide).put(jointName, sdfRobot.getOneDegreeOfFreedomJoint(armJoint.getName()));
          }
       }
 

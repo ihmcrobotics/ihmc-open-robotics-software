@@ -12,6 +12,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedSensorReader;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
+import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPose;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.configuration.LocalCloudMachines;
@@ -75,7 +76,7 @@ public class PosePlaybackSCSBridge
    private final EnumYoVariable<PalmPoseClassification> rightPalmPoseClassification = new EnumYoVariable<PalmPoseClassification>("rightPalmPose", "", registry, PalmPoseClassification.class, true);
    private final SideDependentList<EnumYoVariable<PalmPoseClassification>> palmPoseClassifications = new SideDependentList<EnumYoVariable<PalmPoseClassification>>(leftPalmPoseClassification, rightPalmPoseClassification);
 
-   private PosePlaybackRobotPose previousPose;
+   private PlaybackPose previousPose;
 
    private final SideDependentList<DynamicGraphicCoordinateSystem> feetCoordinateSystems = new SideDependentList<DynamicGraphicCoordinateSystem>();
 
@@ -208,7 +209,7 @@ public class PosePlaybackSCSBridge
 
       public void variableChanged(YoVariable yoVariable)
       {
-         PosePlaybackRobotPose pose = new PosePlaybackRobotPose(fullRobotModel, sdfRobot);
+         PlaybackPose pose = new PlaybackPose(fullRobotModel, sdfRobot);
 
 //         if (previousPose != null)
 //         {
@@ -228,7 +229,7 @@ public class PosePlaybackSCSBridge
 
          double dt = 0.01;
          double morphTime = 1.0;
-         PosePlaybackRobotPose morphedPose = pose;
+         PlaybackPose morphedPose = pose;
          for (double time = 0.0; time < morphTime; time = time + dt)
          {
             double morphPercentage = time / morphTime;
@@ -240,7 +241,7 @@ public class PosePlaybackSCSBridge
             }
             else
             {
-               morphedPose = PosePlaybackRobotPose.morph(previousPose, pose, morphPercentage);
+               morphedPose = PlaybackPose.morph(previousPose, pose, morphPercentage);
             }
 
             if (promptForTimeDelay)
@@ -402,7 +403,7 @@ public class PosePlaybackSCSBridge
          if (((BooleanYoVariable) yoVariable).getBooleanValue())
          {
             System.out.println("saving file");
-            posePlaybackRobotPoseSequence.promptWriteToFile();
+            PosePlaybackRobotPoseSequence.promptWriteToFile(posePlaybackRobotPoseSequence);
          }
       }
    }
@@ -479,7 +480,7 @@ public class PosePlaybackSCSBridge
       File selectedFile = chooser.getSelectedFile();
 
       sequence.clear();
-      sequence.appendFromFile(fullRobotModel, selectedFile);
+      PosePlaybackRobotPoseSequence.appendFromFile(sequence, selectedFile);
 
       initPlayback(sequence);
 
@@ -501,7 +502,7 @@ public class PosePlaybackSCSBridge
 
    private void playLoadedSequence()
    {
-      PosePlaybackRobotPose morphedPose = interpolator.getPose(frameByframeTime);
+      PlaybackPose morphedPose = interpolator.getPose(frameByframeTime);
       while (!interpolator.isDone())
       {
          frameByframeTime = frameByframeTime + controlDT;

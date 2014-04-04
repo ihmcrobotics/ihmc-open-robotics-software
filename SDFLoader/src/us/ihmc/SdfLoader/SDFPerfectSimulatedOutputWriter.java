@@ -52,7 +52,7 @@ public class SDFPerfectSimulatedOutputWriter implements RawOutputWriter
       for (OneDoFJoint revoluteJoint : revoluteJointsArray)
       {
          String name = revoluteJoint.getName();
-         OneDegreeOfFreedomJoint oneDoFJoint = robot.getOneDoFJoint(name);
+         OneDegreeOfFreedomJoint oneDoFJoint = robot.getOneDegreeOfFreedomJoint(name);
          
          Pair<OneDegreeOfFreedomJoint,OneDoFJoint> jointPair = new Pair<OneDegreeOfFreedomJoint, OneDoFJoint>(oneDoFJoint, revoluteJoint);
          this.revoluteJoints.add(jointPair);

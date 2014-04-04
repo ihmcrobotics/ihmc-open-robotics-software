@@ -51,44 +51,44 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
       for (RobotSide robotSide : RobotSide.values)
       {
          String prefix = FormattingTools.lowerCaseFirstLetter(robotSide.getSideNameFirstLetter());
-         robot.getOneDoFJoint(prefix + "_leg_hpy").setQ(legInitialJointPositions.get(LegJointName.HIP_PITCH));
-         robot.getOneDoFJoint(prefix + "_leg_kny").setQ(legInitialJointPositions.get(LegJointName.KNEE));
-         robot.getOneDoFJoint(prefix + "_leg_aky").setQ(legInitialJointPositions.get(LegJointName.ANKLE_PITCH));
+         robot.getOneDegreeOfFreedomJoint(prefix + "_leg_hpy").setQ(legInitialJointPositions.get(LegJointName.HIP_PITCH));
+         robot.getOneDegreeOfFreedomJoint(prefix + "_leg_kny").setQ(legInitialJointPositions.get(LegJointName.KNEE));
+         robot.getOneDegreeOfFreedomJoint(prefix + "_leg_aky").setQ(legInitialJointPositions.get(LegJointName.ANKLE_PITCH));
 
-         robot.getOneDoFJoint(prefix + "_arm_wry").setQ(armInitialJointPositions.get(robotSide).get(ArmJointName.WRIST_PITCH));
-         robot.getOneDoFJoint(prefix + "_arm_wrx").setQ(armInitialJointPositions.get(robotSide).get(ArmJointName.WRIST_ROLL));
-         robot.getOneDoFJoint(prefix + "_arm_shy").setQ(armInitialJointPositions.get(robotSide).get(ArmJointName.SHOULDER_PITCH));
-         robot.getOneDoFJoint(prefix + "_arm_shx").setQ(armInitialJointPositions.get(robotSide).get(ArmJointName.SHOULDER_ROLL));
-         robot.getOneDoFJoint(prefix + "_arm_ely").setQ(armInitialJointPositions.get(robotSide).get(ArmJointName.ELBOW_PITCH));
-         robot.getOneDoFJoint(prefix + "_arm_elx").setQ(armInitialJointPositions.get(robotSide).get(ArmJointName.ELBOW_ROLL));
+         robot.getOneDegreeOfFreedomJoint(prefix + "_arm_wry").setQ(armInitialJointPositions.get(robotSide).get(ArmJointName.WRIST_PITCH));
+         robot.getOneDegreeOfFreedomJoint(prefix + "_arm_wrx").setQ(armInitialJointPositions.get(robotSide).get(ArmJointName.WRIST_ROLL));
+         robot.getOneDegreeOfFreedomJoint(prefix + "_arm_shy").setQ(armInitialJointPositions.get(robotSide).get(ArmJointName.SHOULDER_PITCH));
+         robot.getOneDegreeOfFreedomJoint(prefix + "_arm_shx").setQ(armInitialJointPositions.get(robotSide).get(ArmJointName.SHOULDER_ROLL));
+         robot.getOneDegreeOfFreedomJoint(prefix + "_arm_ely").setQ(armInitialJointPositions.get(robotSide).get(ArmJointName.ELBOW_PITCH));
+         robot.getOneDegreeOfFreedomJoint(prefix + "_arm_elx").setQ(armInitialJointPositions.get(robotSide).get(ArmJointName.ELBOW_ROLL));
       }
 
       for (RobotSide robotSide : RobotSide.values)
       {
          String prefix = robotSide.getCamelCaseNameForStartOfExpression();
-         robot.getOneDoFJoint(prefix + "_f0_j1").setQ(0.985);//1.46);
-         robot.getOneDoFJoint(prefix + "_f1_j1").setQ(1.066);//1.46);
-         robot.getOneDoFJoint(prefix + "_f2_j1").setQ(1.163);//1.46);
-         robot.getOneDoFJoint(prefix + "_f3_j1").setQ(0.660);
+         robot.getOneDegreeOfFreedomJoint(prefix + "_f0_j1").setQ(0.985);//1.46);
+         robot.getOneDegreeOfFreedomJoint(prefix + "_f1_j1").setQ(1.066);//1.46);
+         robot.getOneDegreeOfFreedomJoint(prefix + "_f2_j1").setQ(1.163);//1.46);
+         robot.getOneDegreeOfFreedomJoint(prefix + "_f3_j1").setQ(0.660);
 
-         robot.getOneDoFJoint(prefix + "_f0_j2").setQ(1.002);//0.4);
-         robot.getOneDoFJoint(prefix + "_f1_j2").setQ(0.951);//0.4);
-         robot.getOneDoFJoint(prefix + "_f2_j2").setQ(0.883);//0.4);
-         robot.getOneDoFJoint(prefix + "_f3_j2").setQ(0.837);
+         robot.getOneDegreeOfFreedomJoint(prefix + "_f0_j2").setQ(1.002);//0.4);
+         robot.getOneDegreeOfFreedomJoint(prefix + "_f1_j2").setQ(0.951);//0.4);
+         robot.getOneDegreeOfFreedomJoint(prefix + "_f2_j2").setQ(0.883);//0.4);
+         robot.getOneDegreeOfFreedomJoint(prefix + "_f3_j2").setQ(0.837);
       }
       switch(SELECTED_METHOD)
       {
       case FACING_LHAND_GRABBING_RHAND_SEAT:
       case SIDE_LHAND_GRABBING_FRONT_BAR_RHAND_ON_SEAT:
-         robot.getOneDoFJoint("right_f0_j1").setQ(-1.4672);
-         robot.getOneDoFJoint("right_f1_j1").setQ(-1.4672);
-         robot.getOneDoFJoint("right_f2_j1").setQ(-1.4672);
-         robot.getOneDoFJoint("right_f3_j1").setQ(0.0);
+         robot.getOneDegreeOfFreedomJoint("right_f0_j1").setQ(-1.4672);
+         robot.getOneDegreeOfFreedomJoint("right_f1_j1").setQ(-1.4672);
+         robot.getOneDegreeOfFreedomJoint("right_f2_j1").setQ(-1.4672);
+         robot.getOneDegreeOfFreedomJoint("right_f3_j1").setQ(0.0);
          
-         robot.getOneDoFJoint("right_f0_j2").setQ(-1.4706);
-         robot.getOneDoFJoint("right_f1_j2").setQ(-1.4706);
-         robot.getOneDoFJoint("right_f2_j2").setQ(-1.4706);
-         robot.getOneDoFJoint("right_f3_j2").setQ(0.0);
+         robot.getOneDegreeOfFreedomJoint("right_f0_j2").setQ(-1.4706);
+         robot.getOneDegreeOfFreedomJoint("right_f1_j2").setQ(-1.4706);
+         robot.getOneDegreeOfFreedomJoint("right_f2_j2").setQ(-1.4706);
+         robot.getOneDegreeOfFreedomJoint("right_f3_j2").setQ(0.0);
       }
       
       robot.update();

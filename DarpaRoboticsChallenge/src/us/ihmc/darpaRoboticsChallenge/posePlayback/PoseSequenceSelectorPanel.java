@@ -17,6 +17,7 @@ import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedSensorReader;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
+import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPose;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
@@ -139,7 +140,7 @@ public class PoseSequenceSelectorPanel extends JPanel
 
       if (selectedFile != null)
       {
-         sequence.appendFromFile(fullRobotModel, selectedFile);
+         PosePlaybackRobotPoseSequence.appendFromFile(sequence, selectedFile);
          updateTableBasedOnPoseSequence();
       }
    }
@@ -151,7 +152,7 @@ public class PoseSequenceSelectorPanel extends JPanel
       if (selectedFile != null)
       {
          sequence.clear();
-         sequence.appendFromFile(fullRobotModel, selectedFile);
+         PosePlaybackRobotPoseSequence.appendFromFile(sequence, selectedFile);
          updateTableBasedOnPoseSequence();
       }
    }
@@ -175,7 +176,7 @@ public class PoseSequenceSelectorPanel extends JPanel
 
    public void addSequence(PosePlaybackRobotPoseSequence seq)
    {
-      for (PosePlaybackRobotPose pose : seq.getPoseSequence())
+      for (PlaybackPose pose : seq.getPoseSequence())
       {
          sequence.addPose(pose);
       }
@@ -212,7 +213,7 @@ public class PoseSequenceSelectorPanel extends JPanel
       if (selectedRow == -1)
          return;
 
-      PosePlaybackRobotPose selectedPose = sequence.getPoseSequence().get(selectedRow);
+      PlaybackPose selectedPose = sequence.getPoseSequence().get(selectedRow);
 
       selectedPose.setRobotAtPose(sdfRobot);
    }
@@ -223,7 +224,7 @@ public class PoseSequenceSelectorPanel extends JPanel
       if (selectedRow == -1)
          return;
 
-      PosePlaybackRobotPose pose = new PosePlaybackRobotPose(fullRobotModel, sdfRobot);
+      PlaybackPose pose = new PlaybackPose(fullRobotModel, sdfRobot);
       pose.setPlaybackDelayBeforePose(getTimeDelayFromRow(selectedRow));
       sequence.getPoseSequence().set(selectedRow, pose);
       updateTableBasedOnPoseSequence();
@@ -232,20 +233,20 @@ public class PoseSequenceSelectorPanel extends JPanel
    public void save()
    {
       updatePoseSequenceBasedOnTable();
-      sequence.promptWriteToFile();
+      PosePlaybackRobotPoseSequence.promptWriteToFile(sequence);
    }
 
    private void updateTableBasedOnPoseSequence()
    {
       tableModel.setRowCount(0);
 
-      ArrayList<PosePlaybackRobotPose> poseSequence = sequence.getPoseSequence();
+      ArrayList<PlaybackPose> poseSequence = sequence.getPoseSequence();
       for (int i = 0; i < poseSequence.size(); i++)
       {
          Object[] row = new Object[30];
          row[0] = i;
 
-         PosePlaybackRobotPose pose = poseSequence.get(i);
+         PlaybackPose pose = poseSequence.get(i);
          double[] jointAngles = pose.getJointAngles();
          for (int j = 0; j < jointAngles.length; j++)
          {

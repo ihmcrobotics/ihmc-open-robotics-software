@@ -122,7 +122,7 @@ public class DRCSimulationFactory
 
       for (String name : jointMap.getForceSensorNames())
       {
-         forceTorqueSensorJoints.add(simulatedRobot.getOneDoFJoint(name));
+         forceTorqueSensorJoints.add(simulatedRobot.getOneDegreeOfFreedomJoint(name));
       }
 
       ArrayList<WrenchCalculatorInterface> wrenchProviders = new ArrayList<WrenchCalculatorInterface>();
@@ -226,7 +226,7 @@ public class DRCSimulationFactory
 	         {
 	            try
 	            {
-	               simulatedRobot.getOneDoFJoint(ROSSandiaJointMap.handNames.get(robotSide)[i]).setDamping(
+	               simulatedRobot.getOneDegreeOfFreedomJoint(ROSSandiaJointMap.handNames.get(robotSide)[i]).setDamping(
 	                     DRCRobotDampingParameters.getSandiaHandDamping(robotSide, i));
 	            }
 	            catch (NullPointerException e)

@@ -5,6 +5,7 @@ import java.util.Random;
 
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
+import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPose;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -45,7 +46,7 @@ public class PosePlaybackExampleSequence
          OneDoFJoint leftElbowPitch = fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.ELBOW_PITCH);
          pose.put(leftElbowPitch, elbowAngles[i]);
 
-         PosePlaybackRobotPose posePlaybackRobotPose = new PosePlaybackRobotPose(pose, poseDelay, trajectoryTime);
+         PlaybackPose posePlaybackRobotPose = new PlaybackPose(pose, poseDelay, trajectoryTime);
          sequence.addPose(posePlaybackRobotPose);
       }
       
@@ -112,7 +113,7 @@ public class PosePlaybackExampleSequence
       return sequence;
    }
 
-   public static PosePlaybackRobotPose createRandomPosePlaybackRobotPose(Random random, FullRobotModel fullRobotModel, double poseDelay, double trajectoryTime)
+   public static PlaybackPose createRandomPosePlaybackRobotPose(Random random, FullRobotModel fullRobotModel, double poseDelay, double trajectoryTime)
    {
       LinkedHashMap<OneDoFJoint, Double> pose = new LinkedHashMap<>();
 
@@ -127,6 +128,6 @@ public class PosePlaybackExampleSequence
          pose.put(joint, RandomTools.generateRandomDouble(random, jointLimitLower, jointLimitUpper));
       }
 
-      return new PosePlaybackRobotPose(pose, poseDelay, trajectoryTime);
+      return new PlaybackPose(pose, poseDelay, trajectoryTime);
    }
 }
