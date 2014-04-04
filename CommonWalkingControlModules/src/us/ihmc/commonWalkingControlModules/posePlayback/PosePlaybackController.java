@@ -109,8 +109,12 @@ public class PosePlaybackController extends State<HighLevelState>
       {
          OneDoFJoint oneDoFJoint = allOneDoFJoints.get(i);
          PDController pdController = jointPDControllers.get(oneDoFJoint);
-         pdController.setProportionalGain(jointKps.get(oneDoFJoint));
-         pdController.setDerivativeGain(jointKds.get(oneDoFJoint));
+         Double kp = jointKps.get(oneDoFJoint);
+         if (kp == null) kp = 0.0;
+         pdController.setProportionalGain(kp);
+         Double kd = jointKds.get(oneDoFJoint);
+         if (kd == null) kd = 0.0;
+         pdController.setDerivativeGain(kd);
       }
       
       initialize();
