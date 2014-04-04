@@ -11,8 +11,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.initialSetup.SquaredUpDRCRobotInitialSetup;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
@@ -43,16 +41,15 @@ import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimu
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import com.yobotics.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
 
-public class DRCBumpyAndShallowRampsWalkingTest
+public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTestInterface
 {
    private static final boolean ALWAYS_SHOW_GUI = false;
    private static final boolean KEEP_SCS_UP = false;
-   private static final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT);
 
    private static final boolean CREATE_MOVIE = BambooTools.doMovieCreation();
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
-
    private static final boolean SHOW_GUI = ALWAYS_SHOW_GUI || checkNothingChanged || CREATE_MOVIE;
+   private DRCRobotModel robotModel;
 
    private BlockingSimulationRunner blockingSimulationRunner;
    private DRCController drcController;
@@ -62,6 +59,7 @@ public class DRCBumpyAndShallowRampsWalkingTest
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+      robotModel = getRobotModel();
    }
    
    @After

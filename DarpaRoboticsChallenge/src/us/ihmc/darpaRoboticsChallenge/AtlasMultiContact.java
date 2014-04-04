@@ -45,7 +45,7 @@ public class AtlasMultiContact
    private final MultiContactTestEnvironment environment;
    private final SimulationConstructionSet simulationConstructionSet;
    private final DRCController drcController;
-   static enum  MultiContactTask {DEFAULT, PUSHUP} ;
+   public static enum  MultiContactTask {DEFAULT, PUSHUP} ;
    
    
    public AtlasMultiContact(AtlasRobotModel robotModel, DRCGuiInitialSetup guiInitialSetup, AutomaticSimulationRunner automaticSimulationRunner,

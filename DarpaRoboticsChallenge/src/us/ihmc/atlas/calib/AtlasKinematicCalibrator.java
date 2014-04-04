@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.calib;
+package us.ihmc.atlas.calib;
 
 import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;

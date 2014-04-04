@@ -20,8 +20,8 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
 import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
+import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -32,10 +32,9 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.test.JUnitTools;
 //~--- JDK imports ------------------------------------------------------------
 
-public class NumericalInverseKinematicsCalculatorWithRobotTest
+public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implements MultiRobotTestInterface
 {
    private static final long seed = 1391092L;
-   private static final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_SANDIA_HANDS, DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT);
    private static final Random randomNumberGenerator = new Random(seed);
    private static final ArrayList<Double> shoulderRollLimits = new ArrayList<Double>();
    private static final ArrayList<Double> elbowRollLimits = new ArrayList<Double>();
@@ -57,7 +56,7 @@ public class NumericalInverseKinematicsCalculatorWithRobotTest
    private GeometricJacobian leftHandJacobian;
    private InverseKinematicsCalculator inverseKinematicsCalculator;
    private double bruteForceResolution;
-
+   
    private enum InverseKinematicsSolver
    {
       TWAN_SOLVER, PETER_SOLVER, MAARTEN_SOLVER;
@@ -73,7 +72,7 @@ public class NumericalInverseKinematicsCalculatorWithRobotTest
    public NumericalInverseKinematicsCalculatorWithRobotTest()
    {
       InverseKinematicsSolver inverseKinameticSolverToUse = InverseKinematicsSolver.MAARTEN_SOLVER;
-      DRCRobotJointMap jointMap = robotModel.getJointMap();
+      DRCRobotJointMap jointMap = getRobotModel().getJointMap();
       JaxbSDFLoader jaxbSDFLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap, true);
       SDFFullRobotModelFactory fullRobotModelFactory = new SDFFullRobotModelFactory(jaxbSDFLoader.getGeneralizedSDFRobotModel(jointMap.getModelName()),
             jointMap);

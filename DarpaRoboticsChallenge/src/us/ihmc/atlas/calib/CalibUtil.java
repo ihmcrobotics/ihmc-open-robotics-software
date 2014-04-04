@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.calib;
+package us.ihmc.atlas.calib;
 
 import georegression.geometry.RotationMatrixGenerator;
 import georegression.struct.so.Rodrigues_F64;
