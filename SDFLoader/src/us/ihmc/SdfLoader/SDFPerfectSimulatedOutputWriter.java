@@ -27,7 +27,7 @@ public class SDFPerfectSimulatedOutputWriter implements RawOutputWriter
       this.robot = robot;
    }
    
-   public SDFPerfectSimulatedOutputWriter(SDFRobot robot, SDFFullRobotModel fullRobotModel)
+   public SDFPerfectSimulatedOutputWriter(SDFRobot robot, FullRobotModel fullRobotModel)
    {
       this.name = robot.getName() + "SimulatedSensorReader";
       this.robot = robot;

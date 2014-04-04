@@ -1,0 +1,6 @@
+root*false*false
+root.atlas*false*false
+root.PlaybackPoseSCSBridge*false*false
+root.PlaybackPoseSCSBridge.PosePlaybackSmoothPoseInterpolator*false*false
+root.PlaybackPoseSCSBridge.PosePlaybackAllJointsController*false*false
+root.SliderBoardRegistry*false*false

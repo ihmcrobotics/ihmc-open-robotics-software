@@ -10,6 +10,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModelFactory;
 
@@ -34,11 +35,11 @@ public class PoseSequenceEditorGUI extends JFrame
       buttonPanelInit();
    }
 
-   public PoseSequenceEditorGUI(YoVariableRegistry registry, PosePlaybackAllJointsController posePlaybackController, SDFRobot sdfRobot, DRCRobotMidiSliderBoardPositionManipulation sliderBoard)
+   public PoseSequenceEditorGUI(YoVariableRegistry registry, PosePlaybackAllJointsController posePlaybackController, SDFRobot sdfRobot, FullRobotModel fullRobotModel, DRCRobotMidiSliderBoardPositionManipulation sliderBoard)
    {
       super("Pose sequence editor");
       setSize(1400, 600);
-      poseSequenceSelectorPanel = new PoseSequenceSelectorPanel(registry, posePlaybackController, sdfRobot, sliderBoard);
+      poseSequenceSelectorPanel = new PoseSequenceSelectorPanel(registry, posePlaybackController, sdfRobot, fullRobotModel, sliderBoard);
       buttonPanel = new ButtonPanel();
 
       buttonPanelInit();

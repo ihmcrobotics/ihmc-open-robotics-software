@@ -18,8 +18,8 @@ public class PosePlaybackSmoothPoseInterpolator
    private final IntegerYoVariable poseSequenceIndex = new IntegerYoVariable("poseSequenceIndex", registry);
    
    private boolean lastPoseIncrementedSequence = false;
-   private final double defaultPoseMorphDuration = 1.0;
-   private final double defaultTimeDelayAfterPose = 1.0;
+//   private final double defaultPoseMorphDuration = 1.0;
+//   private final double defaultTimeDelayAfterPose = 1.0;
 
    private final int numberOfCoefficients = 4;    // Cubic
 
@@ -32,20 +32,17 @@ public class PosePlaybackSmoothPoseInterpolator
    {
       parentRegistry.addChild(registry);
 
-      poseMorphDuration.set(defaultPoseMorphDuration);
+//      poseMorphDuration.set(defaultPoseMorphDuration);
    }
 
    public void startSequencePlayback(PosePlaybackRobotPoseSequence sequence, double startTime)
    {
-      startSequencePlayback(sequence, startTime, defaultPoseMorphDuration, defaultTimeDelayAfterPose);
-   }
-
-   public void startSequencePlayback(PosePlaybackRobotPoseSequence sequence, double startTime, double poseMorphDuration, double delayAfterPose)
-   {
       this.sequence = sequence;
+      PosePlaybackRobotPose pose = sequence.getPose(0);
 
-      setMorphDuration(poseMorphDuration);
-      setTimeDelayAfterPose(delayAfterPose);
+      setMorphDuration(pose.getPlayBackDuration());
+      setTimeDelayAfterPose(pose.getPlayBackDelayBeforePose()); //TODO: before or after pose?
+      
       setupPolynomialSpline(startTime, this.poseMorphDuration.getDoubleValue());
 
       poseStartTime.set(startTime);
