@@ -8,6 +8,7 @@ import javax.swing.JFileChooser;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
@@ -31,6 +32,8 @@ public class VisualizePoseWorkspace
 {
    private static final String ipAddress = "localhost"; //DRCConfigParameters.CLOUD_MINION5_IP;
 
+   private final SDFFullRobotModel fullRobotModelForSlider;
+   
    private final PosePlaybackAllJointsController posePlaybackController;
    private final PosePlaybackSender posePlaybackSender;
    private PosePlaybackRobotPoseSequence posePlaybackRobotPoseSequence;
@@ -51,24 +54,24 @@ public class VisualizePoseWorkspace
 
       interpolator = new PosePlaybackSmoothPoseInterpolator(registry);
 
-      posePlaybackController = new PosePlaybackAllJointsController(registry);
-      posePlaybackSender = new PosePlaybackSender(posePlaybackController, ipAddress);
-      posePlaybackRobotPoseSequence = new PosePlaybackRobotPoseSequence();
-
       SimulationConstructionSet scs = new SimulationConstructionSet(sdfRobot);
       scs.addYoVariableRegistry(registry);
       dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
 
-      SDFFullRobotModel fullRobotModelForSlider = loader.createFullRobotModel(jointMap);
+      fullRobotModelForSlider = loader.createFullRobotModel(jointMap);
       DRCRobotMidiSliderBoardPositionManipulation sliderBoard = new DRCRobotMidiSliderBoardPositionManipulation(scs, sdfRobot, fullRobotModelForSlider, dynamicGraphicObjectsListRegistry);
 
+      posePlaybackController = new PosePlaybackAllJointsController(fullRobotModelForSlider, registry);
+      posePlaybackSender = new PosePlaybackSender(posePlaybackController, ipAddress);
+      posePlaybackRobotPoseSequence = new PosePlaybackRobotPoseSequence(fullRobotModelForSlider);
+      
       CaptureSnapshotListener captureSnapshotListener = new CaptureSnapshotListener(sdfRobot, scs);
       sliderBoard.addCaptureSnapshotListener(captureSnapshotListener);
 
       SaveSequenceListener saveSequenceListener = new SaveSequenceListener();
       sliderBoard.addSaveSequenceRequestedListener(saveSequenceListener);
 
-      LoadSequenceListener loadSequenceListener = new LoadSequenceListener(sdfRobot, scs);
+      LoadSequenceListener loadSequenceListener = new LoadSequenceListener(fullRobotModelForSlider, sdfRobot, scs);
       sliderBoard.addLoadSequenceRequestedListener(loadSequenceListener);
 
   
@@ -104,7 +107,7 @@ public class VisualizePoseWorkspace
 
       public void variableChanged(YoVariable yoVariable)
       {
-         PosePlaybackRobotPose pose = new PosePlaybackRobotPose(sdfRobot);
+         PosePlaybackRobotPose pose = new PosePlaybackRobotPose(fullRobotModelForSlider, sdfRobot);
 
          if (previousPose != null)
          {
@@ -160,11 +163,13 @@ public class VisualizePoseWorkspace
    private class LoadSequenceListener implements VariableChangedListener
    {
       private final SDFRobot sdfRobot;
+      private final FullRobotModel fullRobotModel;
       private final SimulationConstructionSet scs;
       private PosePlaybackRobotPose previousPose;
 
-      public LoadSequenceListener(SDFRobot sdfRobot, SimulationConstructionSet scs)
+      public LoadSequenceListener(FullRobotModel fullRobotModel, SDFRobot sdfRobot, SimulationConstructionSet scs)
       {
+         this.fullRobotModel = fullRobotModel;
          this.sdfRobot = sdfRobot;
          this.scs = scs;
       }
@@ -185,8 +190,8 @@ public class VisualizePoseWorkspace
 
          File selectedFile = chooser.getSelectedFile();
 
-         PosePlaybackRobotPoseSequence sequence = new PosePlaybackRobotPoseSequence();
-         sequence.appendFromFile(selectedFile);
+         PosePlaybackRobotPoseSequence sequence = new PosePlaybackRobotPoseSequence(fullRobotModelForSlider);
+         sequence.appendFromFile(fullRobotModel, selectedFile);
 
          double startTime = 0.0;
          double time = startTime;

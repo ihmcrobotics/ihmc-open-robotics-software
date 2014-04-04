@@ -1,17 +1,5 @@
 <GraphGroup>
 	<Cols>1</Cols>
-	<Graph>
-		<Variables>root.atlas.t</Variables>
-		<GraphConfiguration>
-			<Name>config1</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
 </GraphGroup>
 <Entry Boxes></Entry Boxes>
 
@@ -29,9 +17,9 @@
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>5.875421631562024</Camera X>
- <Camera Y>1.1713344333675098</Camera Y>
- <Camera Z>1.1171037580414862</Camera Z>
+ <Camera X>5.605740118546393</Camera X>
+ <Camera Y>-1.2695133371125173</Camera Y>
+ <Camera Z>1.1246320239367895</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -55,8 +43,8 @@
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>0.07232421959200241</Fix X>
-<Fix Y>-0.4044045773870584</Fix Y>
-<Fix Z>1.0838321910058828</Fix Z>
+<Fix X>0.07272573412577366</Fix X>
+<Fix Y>0.0020245335953961163</Fix Y>
+<Fix Z>1.1292341146007647</Fix Z>
 </Fix Position>
 </Canvas 1>

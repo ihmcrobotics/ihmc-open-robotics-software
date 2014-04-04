@@ -88,6 +88,7 @@ public class PosePlaybackSCSBridge
    private final PoseSequenceEditorGUI poseSequenceEditorGUI;
 
    private final SDFRobot sdfRobot;
+   private final SDFFullRobotModel fullRobotModel;
    private final SimulationConstructionSet scs;
 
    // private final BagOfBalls balls = new BagOfBalls(500, 0.01, YoAppearance.AliceBlue(), registry, dynamicGraphicObjectsListRegistry);
@@ -96,14 +97,14 @@ public class PosePlaybackSCSBridge
    {
       interpolator = new PosePlaybackSmoothPoseInterpolator(registry);
 
-      posePlaybackController = new PosePlaybackAllJointsController(registry);
-      posePlaybackSender = new PosePlaybackSender(posePlaybackController, ipAddress);
-      posePlaybackRobotPoseSequence = new PosePlaybackRobotPoseSequence();
-
       DRCRobotJointMap jointMap = robotModel.getJointMap();
       JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
       sdfRobot = loader.createRobot(jointMap, false);
-      SDFFullRobotModel fullRobotModel = loader.createFullRobotModel(jointMap);
+      fullRobotModel = loader.createFullRobotModel(jointMap);
+      
+      posePlaybackController = new PosePlaybackAllJointsController(fullRobotModel, registry);
+      posePlaybackSender = new PosePlaybackSender(posePlaybackController, ipAddress);
+      posePlaybackRobotPoseSequence = new PosePlaybackRobotPoseSequence(fullRobotModel);
 
       SDFPerfectSimulatedSensorReader reader = new SDFPerfectSimulatedSensorReader(sdfRobot, fullRobotModel, null);
       ModularRobotController controller = new ModularRobotController("Reader");
@@ -142,14 +143,14 @@ public class PosePlaybackSCSBridge
 
       sliderBoard.addCaptureSnapshotListener(new CaptureSnapshotListener(fullRobotModel, controller));
       sliderBoard.addSaveSequenceRequestedListener(new SaveSequenceListener());
-      sliderBoard.addLoadSequenceRequestedListener(new LoadSequenceFromFileListener());
+      sliderBoard.addLoadSequenceRequestedListener(new LoadSequenceFromFileListener(fullRobotModel));
       sliderBoard.addClearSequenceRequestedListener(new ClearSequenceListener());
       sliderBoard.addLoadFrameByFrameSequenceRequestedListener(new LoadFrameByFrameSequenceListener());
       sliderBoard.addLoadLastSequenceRequestedListener(new LoadLastSequenceListener());
       sliderBoard.addPlayPoseFromFrameByFrameSequenceRequestedListener(new PlayPoseFromFrameByFrameSequenceListener());
       sliderBoard.addResetToBasePoseRequestedListener(new ResetToBasePoseListener());
 
-      poseSequenceEditorGUI = new PoseSequenceEditorGUI(registry, posePlaybackController, sdfRobot, sliderBoard);
+      poseSequenceEditorGUI = new PoseSequenceEditorGUI(registry, posePlaybackController, sdfRobot, fullRobotModelForSlider, sliderBoard);
       poseSequenceEditorGUI.setVisible(true);
 
       scs.startOnAThread();
@@ -207,7 +208,7 @@ public class PosePlaybackSCSBridge
 
       public void variableChanged(YoVariable yoVariable)
       {
-         PosePlaybackRobotPose pose = new PosePlaybackRobotPose(sdfRobot);
+         PosePlaybackRobotPose pose = new PosePlaybackRobotPose(fullRobotModel, sdfRobot);
 
 //         if (previousPose != null)
 //         {
@@ -322,6 +323,13 @@ public class PosePlaybackSCSBridge
 
    private class LoadSequenceFromFileListener implements VariableChangedListener
    {
+      private final FullRobotModel fullRobotModel;
+      
+      public LoadSequenceFromFileListener(FullRobotModel fullRobotModel)
+      { 
+         this.fullRobotModel = fullRobotModel;
+      }
+      
       public void variableChanged(YoVariable yoVariable)
       {
          if (!((BooleanYoVariable) yoVariable).getBooleanValue())
@@ -329,7 +337,7 @@ public class PosePlaybackSCSBridge
 
          System.out.println("Load Sequence");
 
-         boolean selectedFileSuccessful = initPlaybackFromFile(new PosePlaybackRobotPoseSequence());
+         boolean selectedFileSuccessful = initPlaybackFromFile(fullRobotModel, new PosePlaybackRobotPoseSequence(fullRobotModel));
          if (!selectedFileSuccessful)
             return;
 
@@ -365,7 +373,7 @@ public class PosePlaybackSCSBridge
 
          System.out.println("Load Sequence for Frame by Frame Play Back");
 
-         boolean selectedFileSuccessful = initPlaybackFromFile(posePlaybackRobotPoseSequence);
+         boolean selectedFileSuccessful = initPlaybackFromFile(fullRobotModel, posePlaybackRobotPoseSequence);
          if (!selectedFileSuccessful)
             return;
 
@@ -454,7 +462,7 @@ public class PosePlaybackSCSBridge
       new PosePlaybackSCSBridge(model);
    }
 
-   private boolean initPlaybackFromFile(PosePlaybackRobotPoseSequence sequence)
+   private boolean initPlaybackFromFile(FullRobotModel fullRobotModel, PosePlaybackRobotPoseSequence sequence)
    {
       boolean successful = true;
       JFileChooser chooser = new JFileChooser(new File("PoseSequences"));
@@ -471,7 +479,7 @@ public class PosePlaybackSCSBridge
       File selectedFile = chooser.getSelectedFile();
 
       sequence.clear();
-      sequence.appendFromFile(selectedFile);
+      sequence.appendFromFile(fullRobotModel, selectedFile);
 
       initPlayback(sequence);
 

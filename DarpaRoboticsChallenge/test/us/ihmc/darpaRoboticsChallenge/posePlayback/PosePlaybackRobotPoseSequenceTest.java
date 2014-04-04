@@ -2,95 +2,57 @@ package us.ihmc.darpaRoboticsChallenge.posePlayback;
 
 import static org.junit.Assert.assertTrue;
 
-import java.util.ArrayList;
+import java.io.ByteArrayOutputStream;
+import java.io.StringReader;
+import java.util.Random;
 
 import org.junit.Test;
+
+import us.ihmc.SdfLoader.JaxbSDFLoader;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.atlas.AtlasRobotModel;
+import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
+import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 
 public class PosePlaybackRobotPoseSequenceTest
 {
    @Test
-   public void testSimpleReadAndWrite()
+   public void testReadAndWriteWithRandomSequence()
    {
-      String firstFileWrite = "firstFileWrite";
-      String secondFileWrite = "secondFileWrite";
-      
-      PosePlaybackRobotPoseSequence poseSequenceWrite = new PosePlaybackRobotPoseSequence();
+      DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT);
 
-      double[][] poses = {
-            { 0.0, 0.0, 0.0, 0.0, 0.0, 0.10748031496062997, -0.8547244094488189, 0.0, 0.0, 0.0, -0.2165354330708662, 0.0, -0.8547244094488189, 0.0, 0.0, 0.0,
-                  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 },
-            { 0.0, 0.0, 0.0, 0.0, 0.0, 0.10748031496062997, -0.8547244094488189, 0.0, 0.0, 0.0, -0.2165354330708662, 0.0, -0.8547244094488189, 0.0, 0.0, 0.0,
-                  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 },
-            { 0.0, 0.8113385826771654, 0.0, 0.0, 0.0, 0.10748031496062997, -0.8547244094488189, 0.0, 0.0, 0.0, -0.2165354330708662, 0.0, -0.8547244094488189,
-                  0.0, 0.0, 0.0, 0.0, -0.7283629133858267, 0.0, 0.0, 0.0, 0.0, 0.0, 0.7063789763779529, 0.0, 0.0, 0.0, 0.0 },
-            { 0.0, 0.8113385826771654, 0.0, 0.0, 0.5307086614173226, 0.10748031496062997, -0.8547244094488189, 0.0, 0.0, 0.0, -0.32000000000000006, 0.0,
-                  -0.8547244094488189, 0.0, 0.0, 0.0, 0.0, -0.7283629133858267, 0.0, 0.0, 0.0, 0.0, 0.0, 0.7063789763779529, 0.0, 0.0, 0.0, 0.0 } };
-      
-      for(double[] pose : poses)
-      {
-         poseSequenceWrite.addPose(pose);
-      }
-      
-      poseSequenceWrite.writeToFile(firstFileWrite);
+      DRCRobotJointMap jointMap = robotModel.getJointMap();
+      JaxbSDFLoader sdfLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap, false);
 
-      //create the object
-      PosePlaybackRobotPoseSequence poseSequenceFirstRead = new PosePlaybackRobotPoseSequence();
-      
-      //read data from file into the object
-      poseSequenceFirstRead.appendFromFile(firstFileWrite);
-      
-      assertTrue(poseSequencesAreEqual(poseSequenceWrite, poseSequenceFirstRead));
-      
-      double[] additionalPose = new double[] { 3.14, 0.0, 0.0, 0.0, 0.0, 0.10748031496062997, -0.8547244094488189, 0.0, 0.0, 0.0, -0.2165354330708662, 0.0,
-            -0.8547244094488189, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.5 };
-      
-      poseSequenceFirstRead.addPose(additionalPose);
-      
-      //write to file
-      poseSequenceFirstRead.writeToFile(secondFileWrite);
-      
-      //copy to another sequence and verify read works after appending file
-      PosePlaybackRobotPoseSequence poseSequenceSecondRead = new PosePlaybackRobotPoseSequence();
-      
-      poseSequenceSecondRead.appendFromFile(secondFileWrite);
-      
-      assertTrue(poseSequencesAreEqual(poseSequenceFirstRead, poseSequenceSecondRead));
+      SDFFullRobotModel fullRobotModel = sdfLoader.createFullRobotModel(jointMap);
+
+      int numberOfPoses = 5;
+      double delay = 0.3;
+      double trajectoryTime = 1.0;
+
+      Random random = new Random(1776L);
+      PosePlaybackRobotPoseSequence sequence = PosePlaybackExampleSequence.createRandomPlaybackPoseSequence(random, fullRobotModel, numberOfPoses, delay,
+                                                  trajectoryTime);
+
+      ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+      sequence.writeToOutputStream(fullRobotModel, outputStream);
+
+      String outputAsString = outputStream.toString();
+
+//      System.out.println(outputAsString);
+
+      PosePlaybackRobotPoseSequence sequenceTwo = new PosePlaybackRobotPoseSequence(fullRobotModel);
+
+      StringReader reader = new StringReader(outputAsString);
+      sequenceTwo.appendFromFile(fullRobotModel, reader);
+
+      double jointEpsilon = 1e-7;
+      double timeEpsilon = 1e-7;
+      assertTrue(sequence.epsilonEquals(sequenceTwo, jointEpsilon, timeEpsilon));
+
    }
-   
-   @Test
-   private boolean poseSequencesAreEqual(PosePlaybackRobotPoseSequence expected, PosePlaybackRobotPoseSequence actual)
-   {
-      ArrayList<PosePlaybackRobotPose> expectedPose = expected.getPoseSequence();
-      ArrayList<PosePlaybackRobotPose> actualPose = actual.getPoseSequence();
-      
-      // check that number of poses is equal
-      if(expectedPose.size() != actualPose.size())
-      {
-         System.err.println("Number of poses does not match between read/write compare");
-         return false;
-      }
-      
-      for(int i = 0; i < expectedPose.size(); i++)
-      {
-         double[] expectedAngles = expectedPose.get(i).getJointAngles();
-         double[] actualAngles = actualPose.get(i).getJointAngles();
-         
-         if(expectedAngles.length != actualAngles.length)
-         {
-            System.err.println("Number of joint angles does not match between read/write compare");
-            return false;
-         }
-         
-         for(int j = 0; j < expectedAngles.length; j++)
-         {
-            if(Math.abs(expectedAngles[j] - actualAngles[j]) > 0.00051) // numbers are rounded to nearest third decimal, the additional 0.00001 is the epsilon error
-            {
-               System.err.println("Joint angle values do not match between read/write compare, within rounding error");
-               return false;
-            }
-         }
-      }
-      
-      return true;
-   }
+
 }
