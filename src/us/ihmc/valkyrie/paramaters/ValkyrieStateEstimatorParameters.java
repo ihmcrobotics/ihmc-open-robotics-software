@@ -169,13 +169,13 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    @Override
    public double getPelvisPositionFusingFrequency()
    {
-      return 11.7893; // alpha = 0.8 with dt = 0.003
+      return Double.POSITIVE_INFINITY;
    }
 
    @Override
    public double getPelvisLinearVelocityFusingFrequency()
    {
-      return 0.4261; // alpha = 0.992 with dt = 0.003
+      return Double.POSITIVE_INFINITY;
    }
 
    @Override
@@ -218,5 +218,11 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    public double getFootVelocityThresholdToEnableIMUDriftCompensation()
    {
       return 0.03;
+   }
+
+   @Override
+   public boolean trustCoPAsNonSlippingContactPoint()
+   {
+      return false;
    }
 }
