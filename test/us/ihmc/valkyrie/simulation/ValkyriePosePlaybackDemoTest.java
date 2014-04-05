@@ -47,7 +47,7 @@ import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimu
 public class ValkyriePosePlaybackDemoTest
 {
    private static final boolean ALWAYS_SHOW_GUI = false;
-   private static final boolean KEEP_SCS_UP = false;
+   private static final boolean KEEP_SCS_UP = true;
 
    private static final boolean CREATE_MOVIE = BambooTools.doMovieCreation();
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
@@ -112,7 +112,8 @@ public class ValkyriePosePlaybackDemoTest
       double trajectoryTime = 1.0;
       FullRobotModel fullRobotModel = drcPosePlaybackDemo.getControllerModel();
       List<OneDoFJoint> jointToControl = Arrays.asList(fullRobotModel.getOneDoFJoints());
-      PosePlaybackPacket posePlaybackPacket = new ValkyrieWarmupPoseSequencePacket(fullRobotModel, 1.0);
+//      PosePlaybackPacket posePlaybackPacket = new ValkyrieWarmupPoseSequencePacket(fullRobotModel, 1.0);
+      PosePlaybackPacket posePlaybackPacket = new ValkyrieWarmupPoseSequencePacket("valkercise01.poseSequence", fullRobotModel, 1.0);
       drcPosePlaybackDemo.setupPosePlaybackController(posePlaybackPacket, true);
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);

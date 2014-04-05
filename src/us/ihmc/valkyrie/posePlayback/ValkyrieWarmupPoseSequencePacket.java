@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPose;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
+import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceReader;
 import us.ihmc.commonWalkingControlModules.posePlayback.PosePlaybackPacket;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -28,7 +29,7 @@ public class ValkyrieWarmupPoseSequencePacket implements PosePlaybackPacket
    public ValkyrieWarmupPoseSequencePacket(FullRobotModel fullRobotModel, double initialGainScaling)
    {
       @SuppressWarnings("unchecked")
-      Map<String, Map<String, Double>> gainMap = (Map<String, Map<String, Double>>) YamlWithIncludesLoader.load(ValkyrieConfigurationRoot.class, "standPrep", "gains.yaml");
+      Map<String, Map<String, Double>> gainMap = (Map<String, Map<String, Double>>) YamlWithIncludesLoader.load(ValkyrieConfigurationRoot.class, "standPrep", "gains_0403.yaml");
 
       this.initialGainScaling = initialGainScaling;
       playbackPoseSequence = new PlaybackPoseSequence(fullRobotModel);
@@ -61,6 +62,24 @@ public class ValkyrieWarmupPoseSequencePacket implements PosePlaybackPacket
          playbackPose.setPlayBackDuration(trajectoryTime);
          
          playbackPoseSequence.addPose(playbackPose);
+      }
+   }
+   
+   
+   public ValkyrieWarmupPoseSequencePacket(String filename, FullRobotModel fullRobotModel, double initialGainScaling)
+   {
+      @SuppressWarnings("unchecked")
+      Map<String, Map<String, Double>> gainMap = (Map<String, Map<String, Double>>) YamlWithIncludesLoader.load(ValkyrieConfigurationRoot.class, "standPrep", "gains.yaml");
+
+      this.initialGainScaling = initialGainScaling;
+      playbackPoseSequence = PlaybackPoseSequenceReader.readFromFile(fullRobotModel, filename);
+      
+      for (OneDoFJoint joint : fullRobotModel.getOneDoFJoints())
+      {
+         Map<String, Double> jointGains = gainMap.get(joint.getName());
+         
+         kps.put(joint, jointGains.get("kp"));
+         kds.put(joint, jointGains.get("kd"));
       }
    }
 
