@@ -1,30 +1,33 @@
 package us.ihmc.valkyrie.controllers;
 
-import com.yobotics.simulationconstructionset.*;
-import com.yobotics.simulationconstructionset.util.math.functionGenerator.YoFunctionGenerator;
-import com.yobotics.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
 import us.ihmc.atlas.visualization.SliderBoardFactory;
+import us.ihmc.atlas.visualization.WalkControllerSliderBoard;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.CommonNames;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.InverseDynamicsJointController;
-
-import com.yobotics.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
-
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
 import us.ihmc.valkyrie.kinematics.urdf.Interface;
 import us.ihmc.valkyrie.kinematics.urdf.Transmission;
 import us.ihmc.valkyrie.kinematics.urdf.URDFRobotRoot;
 import us.ihmc.valkyrie.paramaters.ValkyrieJointMap;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import com.yobotics.simulationconstructionset.EnumYoVariable;
+import com.yobotics.simulationconstructionset.IntegerYoVariable;
+import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import com.yobotics.simulationconstructionset.VariableChangedListener;
+import com.yobotics.simulationconstructionset.YoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
+import com.yobotics.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
 
 /**
  * Created by dstephen on 2/28/14.
@@ -65,7 +68,7 @@ public class ValkyrieSliderBoard
             break;
 
          case WALKING :
-            setupSliderBoardForWalking(registry, generalizedSDFRobotModel, sliderBoardConfigurationManager);
+            new WalkControllerSliderBoard(scs, registry, generalizedSDFRobotModel);
 
             break;
 
@@ -171,8 +174,8 @@ public class ValkyrieSliderBoard
                            // knobs
                            sliderBoardConfigurationManager.setKnob(1, selectedJoint, 0,
                                    ValkyrieSliderBoardController.ValkyrieSliderBoardSelectableJoints.values().length - 1);
-                           sliderBoardConfigurationManager.setKnob(3, turboName + "_lowLevelKp", registry, 0.0, 12.0);
-                           sliderBoardConfigurationManager.setKnob(4, turboName + "_lowLevelKd", registry, 0.0, 2.0);
+                           sliderBoardConfigurationManager.setKnob(3, turboName + "_lowLevelKp", registry, 0.0, 6.0);
+                           sliderBoardConfigurationManager.setKnob(4, turboName + "_lowLevelKd", registry, 0.0, .06);
                            sliderBoardConfigurationManager.setKnob(5, turboName + "_forceAlpha", registry, 0.0, 1.0);
                            sliderBoardConfigurationManager.setKnob(6, turboName + "_forceDotAlpha", registry, 0.0, 1.0);
                            sliderBoardConfigurationManager.setKnob(7, turboName + "_parallelDamping", registry, 0.0, 10.0);
@@ -207,8 +210,8 @@ public class ValkyrieSliderBoard
                               sliderBoardConfigurationManager.setKnob(1, selectedJoint, 0,
                                       ValkyrieSliderBoardController.ValkyrieSliderBoardSelectableJoints.values().length - 1);
                               sliderBoardConfigurationManager.setKnob(2, turboIndexMonitor, 0, 1);
-                              sliderBoardConfigurationManager.setKnob(3, turboName + "_lowLevelKp", registry, 0.0, 2.0);
-                              sliderBoardConfigurationManager.setKnob(4, turboName + "_lowLevelKd", registry, 0.0, 0.01);
+                              sliderBoardConfigurationManager.setKnob(3, turboName + "_lowLevelKp", registry, 0.0, 0.1);
+                              sliderBoardConfigurationManager.setKnob(4, turboName + "_lowLevelKd", registry, 0.0, 0.001);
                               sliderBoardConfigurationManager.setKnob(5, turboName + "_forceAlpha", registry, 0.0, 1.0);
                               sliderBoardConfigurationManager.setKnob(6, turboName + "_forceDotAlpha", registry, 0.0, 1.0);
                               sliderBoardConfigurationManager.setKnob(7, turboName + "_parallelDamping", registry, 0.0, 10.0);
@@ -220,10 +223,11 @@ public class ValkyrieSliderBoard
                                       generalizedSDFRobotModel.getJointHolder(jointName).getUpperLimit());
                               sliderBoardConfigurationManager.setSlider(2, "kp_" + pdControllerBaseName, registry, 0.0, 2000.0);
                               sliderBoardConfigurationManager.setSlider(3, "kd_" + pdControllerBaseName, registry, 0.0, 600.0);
-                              sliderBoardConfigurationManager.setSlider(4, pdControllerBaseName + "_transitionFactor", registry, 0.0, 1.0);
-                              sliderBoardConfigurationManager.setSlider(5, pdControllerBaseName + "_tauDesired", registry, -100.0, 100.0);
+                              sliderBoardConfigurationManager.setSlider(4, "ki_" + pdControllerBaseName, registry, 0.0, 600.0);                              
+                              sliderBoardConfigurationManager.setSlider(5, pdControllerBaseName + "_transitionFactor", registry, 0.0, 1.0);
+//                              sliderBoardConfigurationManager.setSlider(5, pdControllerBaseName + "_tauDesired", registry, -100.0, 100.0);
 
-                              sliderBoardConfigurationManager.setButton(1, pdControllerBaseName + "_useFunctionGenerator", registry);
+//                              sliderBoardConfigurationManager.setButton(1, pdControllerBaseName + "_useFunctionGenerator", registry);
                               sliderBoardConfigurationManager.setSlider(6, pdControllerBaseName + "_functionGeneratorAmplitude", registry, 0, 200);
                               sliderBoardConfigurationManager.setSlider(7, pdControllerBaseName + "_functionGeneratorFrequency", registry, 0, 50);
                               sliderBoardConfigurationManager.setSlider(8, pdControllerBaseName + "_functionGeneratorOffset", registry, -100, 100);
@@ -369,14 +373,6 @@ public class ValkyrieSliderBoard
       });
    }
 
-   private void setupSliderBoardForWalking(YoVariableRegistry registry, GeneralizedSDFRobotModel generalizedSDFRobotModel,
-           final SliderBoardConfigurationManager sliderBoardConfigurationManager)
-   {
-      sliderBoardConfigurationManager.setSlider(1, "percentOfGravityCompensation", registry, 0.0, 1.0);
-      sliderBoardConfigurationManager.setSlider(2, "gravityComp_gainScaling", registry, 0.0, 1.0);
-      sliderBoardConfigurationManager.setSlider(8, "transitionFactor", registry, 0.0, 1.0);
-   }
-
    private static final SliderBoardFactory turboDriverPositionControlFactory = new SliderBoardFactory()
    {
       @Override
@@ -429,7 +425,7 @@ public class ValkyrieSliderBoard
    };
 
    // FIXME: Implement this
-   public static SliderBoardFactory getDefaultSliderBoardFactory()
+   public static SliderBoardFactory getWalkingSliderBoardFactory()
    {
       return walkingFactory;
    }
@@ -441,7 +437,7 @@ public class ValkyrieSliderBoard
       {
          SDFFullRobotModelFactory fullRobotModelFactory = new SDFFullRobotModelFactory(generalizedSDFRobotModel, new ValkyrieJointMap());
          SDFFullRobotModel fullRobotModel = fullRobotModelFactory.create();
-         new InverseDynamicsJointController.GravityCompensationSliderBoard(scs, fullRobotModel, registry, "transitionFactor", 0.0, 1.0);
+         new InverseDynamicsJointController.GravityCompensationSliderBoard(scs, fullRobotModel, registry, CommonNames.doIHMCControlRatio.toString(), 0.0, 1.0);
       }
    };
 

@@ -51,78 +51,78 @@ WaistRotator:
     kd: 21.72
     ki: 0.0
 WaistExtensor:
-    kp: 10.0
-    kd: 0.0
+    kp: 800.0
+    kd: 18.89
     ki: 0.0    
 WaistLateralExtensor:
-    kp: 10.0
-    kd: 0.0
-    ki: 0.0    
+    kp: 960.0
+    kd: 18.98
+    ki: 0.0  
 LeftShoulderExtensor:
-    kp: 0.0
-    kd: 0.0
+   kp: 100.0
+    kd: 10.0
     ki: 0.0    
 LeftShoulderAdductor:
-    kp: 0.0
-    kd: 0.0
+   kp: 100.0
+    kd: 10.0
     ki: 0.0    
 LeftShoulderSupinator:
-    kp: 0.0
-    kd: 0.0
+   kp: 100.0
+    kd: 10.0
     ki: 0.0    
 LeftElbowExtensor:
-    kp: 0.0
-    kd: 0.0
+   kp: 100.0
+    kd: 10.0
     ki: 0.0    
 LeftForearmSupinator:
-    kp: 0.0
-    kd: 0.0
+   kp: 100.0
+    kd: 10.0
     ki: 0.0    
 LeftWristExtensor:
-    kp: 0.0
-    kd: 0.0
+   kp: 100.0
+    kd: 10.0
     ki: 0.0    
 LeftWrist:
-    kp: 0.0
+    kp: 10.0
     kd: 0.0
     ki: 0.0    
 LowerNeckExtensor:
-    kp: 0.0
+    kp: 10.0
     kd: 0.0
     ki: 0.0    
 NeckRotator:
-    kp: 0.0
+    kp: 10.0
     kd: 0.0
     ki: 0.0    
 UpperNeckExtensor:
-    kp: 0.0
+    kp: 10.0
     kd: 0.0
     ki: 0.0    
 RightShoulderExtensor:
-    kp: 0.0
-    kd: 0.0
+    kp: 100.0
+    kd: 10.0
     ki: 0.0    
 RightShoulderAdductor:
-    kp: 0.0
-    kd: 0.0
+   kp: 100.0
+    kd: 10.0
     ki: 0.0    
 RightShoulderSupinator:
-    kp: 0.0
-    kd: 0.0
+   kp: 100.0
+    kd: 10.0
     ki: 0.0    
 RightElbowExtensor:
-    kp: 0.0
-    kd: 0.0
+   kp: 100.0
+    kd: 10.0
     ki: 0.0    
 RightForearmSupinator:
-    kp: 0.0
-    kd: 0.0
+   kp: 100.0
+    kd: 10.0
     ki: 0.0    
 RightWristExtensor:
-    kp: 0.0
-    kd: 0.0
+   kp: 100.0
+    kd: 10.0
     ki: 0.0    
 RightWrist:
-    kp: 0.0
-    kd: 0.0
+   kp: 100.0
+    kd: 10.0
     ki: 0.0

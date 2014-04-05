@@ -27,6 +27,6 @@ RightElbowExtensor: -1.7
 RightForearmSupinator: 0.0
 RightWristExtensor: 0.0
 RightWrist: 0.0
-LowerNeckExtensor: 0.0
+LowerNeckExtensor: -0.1
 NeckRotator: 0.0
-UpperNeckExtensor: 0.05
+UpperNeckExtensor: 0.15
