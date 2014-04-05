@@ -19,6 +19,8 @@ public interface StateEstimatorParameters
 
    public abstract double getEstimatorDT();
    
+   public abstract boolean trustCoPAsNonSlippingContactPoint();
+   
    // Parameters related to the kinematics based state estimator
    public abstract double getKinematicsPelvisPositionFilterFreqInHertz();
    public abstract double getKinematicsPelvisLinearVelocityFilterFreqInHertz();

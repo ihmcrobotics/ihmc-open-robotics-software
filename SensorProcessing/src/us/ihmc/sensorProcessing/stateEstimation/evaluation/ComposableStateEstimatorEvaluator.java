@@ -234,6 +234,11 @@ public class ComposableStateEstimatorEvaluator
          {
             return 0;
          }
+
+         public boolean trustCoPAsNonSlippingContactPoint()
+         {
+            return true;
+         }
       };
       
       SensorAndEstimatorAssembler sensorAndEstimatorAssembler = new SensorAndEstimatorAssembler(stateEstimatorDataFromControllerSource,
