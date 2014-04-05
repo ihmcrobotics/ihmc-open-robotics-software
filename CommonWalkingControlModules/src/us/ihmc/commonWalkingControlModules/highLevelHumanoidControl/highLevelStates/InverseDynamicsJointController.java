@@ -33,6 +33,7 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RevoluteJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
@@ -66,6 +67,8 @@ import com.yobotics.simulationconstructionset.util.trajectory.YoPositionProvider
  */
 public class InverseDynamicsJointController extends State<HighLevelState>
 {
+   private static final HighLevelState controllerState = HighLevelState.INGRESS_EGRESS;
+   
    private static final String CONTROLLER_PREFIX = "gravityComp_";
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -164,7 +167,7 @@ public class InverseDynamicsJointController extends State<HighLevelState>
    
    public InverseDynamicsJointController(MomentumBasedController momentumBasedController, BipedSupportPolygons bipedSupportPolygons, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      super(HighLevelState.INVERSE_DYNAMICS_JOINT_CONTROL);
+      super(controllerState);
 
       this.referenceFrames = momentumBasedController.getReferenceFrames();
       this.bipedSupportPolygons = bipedSupportPolygons;
@@ -459,6 +462,21 @@ public class InverseDynamicsJointController extends State<HighLevelState>
       };
       variableChangedListener.variableChanged(null);
       return variableChangedListener;
+   }
+
+   public void setPDControllerGains(Map<OneDoFJoint, Double> positionControlKpGains, Map<OneDoFJoint, Double> positionControlKdGains)
+   {
+      for (int i = 0; i < allRevoluteJoints.length; i++)
+      {
+         RevoluteJoint joint = allRevoluteJoints[i];
+         Double kp = positionControlKpGains == null ? 0.0 : positionControlKpGains.get(joint);
+         Double kd = positionControlKdGains == null ? 0.0 : positionControlKdGains.get(joint);
+         
+         if (kp != null)
+            kpScaledMap.get(joint).set(kp);
+         if (kd != null)
+            kdMap.get(joint).set(kd);
+      }
    }
 
    private void initializeIDCalcultor()

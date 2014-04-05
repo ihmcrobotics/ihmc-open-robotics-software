@@ -50,6 +50,7 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromController;
+import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.DampedLeastSquaresSolver;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
@@ -67,9 +68,7 @@ import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.GainCalculator;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
-import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
-import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
+import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParameters;
 
 public class MultiContactTestHumanoidControllerFactory implements HighLevelHumanoidControllerFactory
@@ -221,29 +220,11 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
          multiContactBehavior.setHandInContact(robotSide, true);
       }
 
-      // Creation of the "highest level" state machine.
-      StateMachine<HighLevelState> highLevelStateMachine = new StateMachine<HighLevelState>("highLevelStateMachine", "switchTimeName", HighLevelState.class,
-                                                              yoTime, registry);
-
-      // Creating a dummy StateTransition to remain in the multi-contact controller
-      StateTransition<HighLevelState> noStateTransition = new StateTransition<HighLevelState>(null, new StateTransitionCondition()
-      {
-         public boolean checkCondition()
-         {
-            return false;
-         }
-      });
-
-      multiContactBehavior.addStateTransition(noStateTransition);
-      highLevelStateMachine.addState(multiContactBehavior);
-
-      ArrayList<YoVariableRegistry> multiContactControllerRegistry = new ArrayList<YoVariableRegistry>();
-      multiContactControllerRegistry.add(multiContactBehavior.getYoVariableRegistry());
-      multiContactControllerRegistry.add(momentumBasedController.getYoVariableRegistry());    // TODO: no sure if that should be done here or inside the multiContactBehavior controller...
+      ArrayList<Pair<State<HighLevelState>, YoVariableRegistry>> highLevelBehaviors = new ArrayList<>();
+      highLevelBehaviors.add(new Pair<State<HighLevelState>, YoVariableRegistry>(multiContactBehavior, multiContactBehavior.getYoVariableRegistry()));
 
       // This is the "highest level" controller that enables switching between the different controllers (walking, multi-contact, driving, etc.)
-      HighLevelHumanoidControllerManager ret = new HighLevelHumanoidControllerManager(highLevelStateMachine, HighLevelState.MULTI_CONTACT,
-                                                  multiContactControllerRegistry, momentumBasedController, null, null);
+      HighLevelHumanoidControllerManager ret = new HighLevelHumanoidControllerManager(HighLevelState.MULTI_CONTACT, highLevelBehaviors, momentumBasedController, null);
 
       return ret;
    }
