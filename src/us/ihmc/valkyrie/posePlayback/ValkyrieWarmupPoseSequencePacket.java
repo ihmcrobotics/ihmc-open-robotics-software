@@ -29,7 +29,7 @@ public class ValkyrieWarmupPoseSequencePacket implements PosePlaybackPacket
    public ValkyrieWarmupPoseSequencePacket(FullRobotModel fullRobotModel, double initialGainScaling)
    {
       @SuppressWarnings("unchecked")
-      Map<String, Map<String, Double>> gainMap = (Map<String, Map<String, Double>>) YamlWithIncludesLoader.load(ValkyrieConfigurationRoot.class, "standPrep", "gains_0403.yaml");
+      Map<String, Map<String, Double>> gainMap = (Map<String, Map<String, Double>>) YamlWithIncludesLoader.load(ValkyrieConfigurationRoot.class, "standPrep", "gains.yaml");
 
       this.initialGainScaling = initialGainScaling;
       playbackPoseSequence = new PlaybackPoseSequence(fullRobotModel);
