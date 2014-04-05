@@ -93,19 +93,17 @@ public class PosePlaybackSCSBridge
    private final PoseSequenceEditorGUI poseSequenceEditorGUI;
 
    private final SDFRobot sdfRobot;
-   private final SDFFullRobotModel fullRobotModel;
+   private final FullRobotModel fullRobotModel;
    private final SimulationConstructionSet scs;
 
    // private final BagOfBalls balls = new BagOfBalls(500, 0.01, YoAppearance.AliceBlue(), registry, dynamicGraphicObjectsListRegistry);
 
-   public PosePlaybackSCSBridge(DRCRobotModel robotModel) throws IOException
+   public PosePlaybackSCSBridge(SDFRobot sdfRobot, FullRobotModel fullRobotModel, FullRobotModel fullRobotModelForSlider) throws IOException
    {
+      this.sdfRobot = sdfRobot;
+      this.fullRobotModel = fullRobotModel;
+      
       interpolator = new PlaybackPoseInterpolator(registry);
-
-      DRCRobotJointMap jointMap = robotModel.getJointMap();
-      JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
-      sdfRobot = loader.createRobot(jointMap, false);
-      fullRobotModel = loader.createFullRobotModel(jointMap);
       
       posePlaybackController = new PosePlaybackAllJointsController(fullRobotModel, registry);
       posePlaybackSender = new PosePlaybackSender(posePlaybackController, ipAddress);
@@ -143,7 +141,7 @@ public class PosePlaybackSCSBridge
       
       dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
 
-      SDFFullRobotModel fullRobotModelForSlider = loader.createFullRobotModel(jointMap);
+      
       DRCRobotMidiSliderBoardPositionManipulation sliderBoard = new DRCRobotMidiSliderBoardPositionManipulation(scs, sdfRobot, fullRobotModelForSlider, dynamicGraphicObjectsListRegistry);
 
       sliderBoard.addCaptureSnapshotListener(new CaptureSnapshotListener(fullRobotModel, controller));
@@ -205,7 +203,7 @@ public class PosePlaybackSCSBridge
 
       private final ModularRobotController controller;
 
-      public CaptureSnapshotListener(SDFFullRobotModel fullRobotModel, ModularRobotController controller)
+      public CaptureSnapshotListener(FullRobotModel fullRobotModel, ModularRobotController controller)
       {
          this.fullRobotModel = fullRobotModel;
          this.controller = controller;
@@ -464,7 +462,13 @@ public class PosePlaybackSCSBridge
          return;
       }
       
-      new PosePlaybackSCSBridge(model);
+      DRCRobotJointMap jointMap = model.getJointMap();
+      JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
+      SDFRobot sdfRobot = loader.createRobot(jointMap, false);
+      FullRobotModel fullRobotModel = loader.createFullRobotModel(jointMap);
+      SDFFullRobotModel fullRobotModelForSlider = loader.createFullRobotModel(jointMap);
+      
+      new PosePlaybackSCSBridge(sdfRobot, fullRobotModel, fullRobotModelForSlider);
    }
 
    private boolean initPlaybackFromFile(FullRobotModel fullRobotModel, PlaybackPoseSequence sequence)
