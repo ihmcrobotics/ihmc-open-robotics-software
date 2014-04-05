@@ -86,8 +86,10 @@ public class DRCPosePlaybackDemo
       
       SimulationConstructionSet simulationConstructionSet = drcSimulation.getSimulationConstructionSet();
       
-      HoldRobotInTheAir controller = new HoldRobotInTheAir(drcSimulation.getRobot(), simulationConstructionSet, drcController.getControllerModel());
-      drcSimulation.getRobot().setController(controller);
+      SDFRobot robot = drcSimulation.getRobot();
+      //System.out.println(robot);
+      HoldRobotInTheAir controller = new HoldRobotInTheAir(robot, simulationConstructionSet, drcController.getControllerModel());
+      robot.setController(controller);
       controller.initialize();
       
       if (automaticSimulationRunner != null)
