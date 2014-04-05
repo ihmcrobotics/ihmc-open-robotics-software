@@ -117,7 +117,7 @@ public class DRCPosePlaybackDemo
    
    public void setupPosePlaybackController(PosePlaybackPacket posePlaybackPacket, boolean transitionRequested)
    {
-      highLevelHumanoidControllerFactory.setupPosePlayBackController(posePlaybackPacket, true);
+      highLevelHumanoidControllerFactory.createPosePlayBackController(posePlaybackPacket, true);
    }
 
    private class HoldRobotInTheAir implements RobotController
