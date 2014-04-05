@@ -215,11 +215,7 @@ public class PelvisIMUBasedLinearStateCalculator
    public void updatePelvisLinearVelocity(FrameVector rootJointLinearVelocityPrevValue, FrameVector rootJointLinearVelocityToPack)
    {
       if (!isEstimationEnabled())
-      {
-         rootJointLinearVelocityToPack.set(rootJointLinearVelocityPrevValue);
-         System.out.println("IMU estimation for pelvis linear velocity is disabled. Not updating the pelvis velocity.");
-         return;
-      }
+         throw new RuntimeException("IMU estimation module for pelvis linear velocity is disabled.");
       
       if (useOldHackishAccelIntegrationWorkingForAtlas.getBooleanValue())
       {
@@ -278,9 +274,12 @@ public class PelvisIMUBasedLinearStateCalculator
 
    public void updatePelvisPosition(FramePoint rootJointPositionPrevValue, FramePoint rootJointPositionToPack)
    {
+      if (!isEstimationEnabled())
+         throw new RuntimeException("IMU estimation module for pelvis linear velocity is disabled.");
+
       rootJointLinearVelocity.getFrameVectorAndChangeFrameOfPackedVector(tempRootJointVelocityIntegrated);
       tempRootJointVelocityIntegrated.scale(estimatorDT);
-      
+
       rootJointPosition.set(rootJointPositionPrevValue);
       rootJointPosition.add(tempRootJointVelocityIntegrated);
       rootJointPosition.getFramePointAndChangeFrameOfPackedPoint(rootJointPositionToPack);

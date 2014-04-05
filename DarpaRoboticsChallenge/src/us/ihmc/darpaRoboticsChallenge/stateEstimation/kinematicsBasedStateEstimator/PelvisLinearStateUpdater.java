@@ -185,6 +185,7 @@ public class PelvisLinearStateUpdater
       kinematicsBasedLinearStateCalculator.setAlphaPelvisLinearVelocity(alphaFilter);
       kinematicsBasedLinearStateCalculator.setPelvisLinearVelocityBacklashParameters(alphaFilter, stateEstimatorParameters.getSensorFilterParameters()
             .getJointVelocitySlopTimeForBacklashCompensation());
+      kinematicsBasedLinearStateCalculator.setTrustCoPAsNonSlippingContactPoint(stateEstimatorParameters.trustCoPAsNonSlippingContactPoint());
       kinematicsBasedLinearStateCalculator.setAlphaCenterOfPressure(computeAlphaGivenBreakFrequencyProperly(stateEstimatorParameters.getCoPFilterFreqInHertz(), estimatorDT));
 
       imuBasedLinearStateCalculator = new PelvisIMUBasedLinearStateCalculator(inverseDynamicsStructure, angularVelocitySensorConfigurations, linearAccelerationSensorConfigurations, estimatorDT, gravitationalAcceleration, registry);
