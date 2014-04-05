@@ -55,7 +55,7 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
       }
       else
       {
-         defaultFilterBreakFrequency = 16.0;
+         defaultFilterBreakFrequency = Double.POSITIVE_INFINITY; //16.0;
       }
 
       jointPositionFilterFrequencyHz = defaultFilterBreakFrequency;
