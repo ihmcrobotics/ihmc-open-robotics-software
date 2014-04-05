@@ -3,6 +3,7 @@ package us.ihmc.valkyrie.visualizer;
 
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.atlas.visualization.SliderBoardFactory;
+import us.ihmc.atlas.visualization.WalkControllerSliderBoard;
 import us.ihmc.robotDataCommunication.YoVariableClient;
 import us.ihmc.robotDataCommunication.visualizer.SCSYoVariablesUpdatedListener;
 import us.ihmc.valkyrie.ValkyrieSDFLoader;
@@ -27,8 +28,9 @@ public class RemoteValkyrieVisualizer
       ValkyrieJointMap jointMap = new ValkyrieJointMap();
       JaxbSDFLoader robotLoader = ValkyrieSDFLoader.loadValkyrieRobot(false);
 
-//      SliderBoardFactory sliderBoardFactory = ValkyrieSliderBoard.getIDControllerSliderBoardFactory();
-      SliderBoardFactory sliderBoardFactory = new StandPrepSliderBoardFactory();
+    SliderBoardFactory sliderBoardFactory = ValkyrieSliderBoard.getWalkingSliderBoardFactory();
+//    SliderBoardFactory sliderBoardFactory = ValkyrieSliderBoard.getIDControllerSliderBoardFactory();
+//      SliderBoardFactory sliderBoardFactory = new StandPrepSliderBoardFactory();
 
       SCSYoVariablesUpdatedListener scsYoVariablesUpdatedListener = new ValkyrieSliderBoardControllerListener(robotLoader, jointMap, bufferSize, sliderBoardFactory);
 
