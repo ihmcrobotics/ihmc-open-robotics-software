@@ -216,4 +216,10 @@ public class ACSELLStateEstimatorParameters implements StateEstimatorParameters
    {
       return 0.03;
    }
+
+   @Override
+   public boolean trustCoPAsNonSlippingContactPoint()
+   {
+      return true;
+   }
 }
