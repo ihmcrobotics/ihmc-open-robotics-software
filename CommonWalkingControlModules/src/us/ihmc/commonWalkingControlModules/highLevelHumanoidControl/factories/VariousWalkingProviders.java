@@ -388,7 +388,8 @@ public class VariousWalkingProviders
 
       LinkedHashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = new LinkedHashMap<Footstep, TrajectoryParameters>();
 
-      FootstepPathCoordinator footstepPathCoordinator = null;
+      FootstepProvider footstepPovider = new UserDesiredFootstepProvider(bipedFeet, referenceFrames.getAnkleZUpReferenceFrames(), registry);
+      
       DesiredHighLevelStateProvider highLevelStateProvider = null; 
       DesiredHeadOrientationProvider headOrientationProvider = new UserDesiredHeadOrientationProvider(referenceFrames.getPelvisZUpFrame(), registry); 
       DesiredComHeightProvider desiredComHeightProvider = null;
@@ -407,7 +408,7 @@ public class VariousWalkingProviders
 
       ControlStatusProducer controlStatusProducer = new SystemErrControlStatusProducer();
       
-      VariousWalkingProviders variousProvidersFactory = new VariousWalkingProviders(footstepPathCoordinator, mapFromFootstepsToTrajectoryParameters,
+      VariousWalkingProviders variousProvidersFactory = new VariousWalkingProviders(footstepPovider, mapFromFootstepsToTrajectoryParameters,
             headOrientationProvider, desiredComHeightProvider, pelvisPoseProvider, handPoseProvider, handLoadBearingProvider, chestOrientationProvider,
             footPoseProvider, footLoadBearingProvider, highLevelStateProvider, thighLoadBearingProvider, pelvisLoadBearingProvider, armJointAngleProvider,
             reinitializeWalkingControllerProvider, controlStatusProducer);
