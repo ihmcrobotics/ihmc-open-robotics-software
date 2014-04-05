@@ -175,7 +175,7 @@ public class PosePlaybackController extends State<HighLevelState>
          double currentRate = oneDoFJoint.getQd();
          double desiredRate = jointTrajectory.getVelocity();
 
-         double tauDesired = jointPDControllers.get(oneDoFJoint).compute(currentPosition, desiredPosition, currentRate, desiredRate);
+         double tauDesired = jointPDControllers.get(oneDoFJoint).computeForAngles(currentPosition, desiredPosition, currentRate, desiredRate);
          tauDesired *= outputScaling.getDoubleValue();
          
          oneDoFJoint.setTau(tauDesired);
