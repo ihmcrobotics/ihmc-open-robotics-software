@@ -174,13 +174,13 @@ public class ValkyrieSliderBoard
                            // knobs
                            sliderBoardConfigurationManager.setKnob(1, selectedJoint, 0,
                                    ValkyrieSliderBoardController.ValkyrieSliderBoardSelectableJoints.values().length - 1);
-                           sliderBoardConfigurationManager.setKnob(3, turboName + "_lowLevelKp", registry, 0.0, 6.0);
-                           sliderBoardConfigurationManager.setKnob(4, turboName + "_lowLevelKd", registry, 0.0, .06);
+                           sliderBoardConfigurationManager.setKnob(3, turboName + "_lowLevelKp", registry, 0.0, 60.0);
+                           sliderBoardConfigurationManager.setKnob(4, turboName + "_lowLevelKd", registry, 0.0, .5);
                            sliderBoardConfigurationManager.setKnob(5, turboName + "_forceAlpha", registry, 0.0, 1.0);
                            sliderBoardConfigurationManager.setKnob(6, turboName + "_forceDotAlpha", registry, 0.0, 1.0);
                            sliderBoardConfigurationManager.setKnob(7, turboName + "_parallelDamping", registry, 0.0, 10.0);
                            sliderBoardConfigurationManager.setKnob(8, "requestedFunctionGeneratorMode", registry, 0, YoFunctionGeneratorMode.values().length - 1);
-
+                           sliderBoardConfigurationManager.setKnob(9, turboName + "_effortFF", registry, -0.1, 0.1);
                            // sliders
                            sliderBoardConfigurationManager.setSlider(1, pdControllerBaseName + "_q_d", registry,
                                  generalizedSDFRobotModel.getJointHolder(jointName).getLowerLimit(),
@@ -216,7 +216,7 @@ public class ValkyrieSliderBoard
                               sliderBoardConfigurationManager.setKnob(6, turboName + "_forceDotAlpha", registry, 0.0, 1.0);
                               sliderBoardConfigurationManager.setKnob(7, turboName + "_parallelDamping", registry, 0.0, 10.0);
                               sliderBoardConfigurationManager.setKnob(8, "requestedFunctionGeneratorMode", registry, 0, YoFunctionGeneratorMode.values().length - 1);
-
+                              sliderBoardConfigurationManager.setKnob(9, turboName + "_effortFF", registry, -0.01, 0.01);
                               // sliders
                               sliderBoardConfigurationManager.setSlider(1, pdControllerBaseName + "_q_d", registry,
                                       generalizedSDFRobotModel.getJointHolder(jointName).getLowerLimit(),
