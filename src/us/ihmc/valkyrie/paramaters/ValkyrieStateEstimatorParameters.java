@@ -15,6 +15,9 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    private final boolean useKinematicsBasedStateEstimator = true;
    private final boolean assumePerfectIMU = true;
 
+   private final double kinematicsPelvisLinearVelocityFilterFreqInHertz;
+   private final double kinematicsPelvisPositionFilterFreqInHertz;
+   
    private final double jointVelocitySlopTimeForBacklashCompensation;
 
    private final double jointPositionFilterFrequencyHz;
@@ -80,6 +83,9 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
 
       pointMeasurementNoiseParameters = new PointMeasurementNoiseParameters(pointVelocityXYMeasurementStandardDeviation,
             pointVelocityZMeasurementStandardDeviation, pointPositionXYMeasurementStandardDeviation, pointPositionZMeasurementStandardDeviation);
+      
+      kinematicsPelvisPositionFilterFreqInHertz = Double.POSITIVE_INFINITY;
+      kinematicsPelvisLinearVelocityFilterFreqInHertz = 16.0;
    }
 
    @Override
@@ -127,13 +133,13 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    @Override
    public double getKinematicsPelvisPositionFilterFreqInHertz()
    {
-      return Double.POSITIVE_INFINITY;
+      return kinematicsPelvisPositionFilterFreqInHertz;
    }
-
+   
    @Override
    public double getKinematicsPelvisLinearVelocityFilterFreqInHertz()
    {
-      return 16.0;
+      return kinematicsPelvisLinearVelocityFilterFreqInHertz;
    }
 
    @Override
