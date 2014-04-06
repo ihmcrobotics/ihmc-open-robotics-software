@@ -64,7 +64,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
     * Returns a new instance of the WalkingControllerParameters as it is mutable
     */
    @Override
-   public WalkingControllerParameters getWalkingControlParamaters()
+   public WalkingControllerParameters getWalkingControlParameters()
    {
       return new ValkyrieWalkingControllerParameters(runningOnRealRobot);
    }

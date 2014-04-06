@@ -46,7 +46,7 @@ public class ValkyrieFlatGroundWalkingTrack
       boolean useVelocityAndHeadingScript = true;
       boolean cheatWithGroundHeightAtForFootstep = false;
 
-      WalkingControllerParameters drcControlParameters = robotModel.getWalkingControlParamaters();
+      WalkingControllerParameters drcControlParameters = robotModel.getWalkingControlParameters();
       ArmControllerParameters armControlParameters = robotModel.getArmControllerParameters();
       
       new DRCFlatGroundWalkingTrack(drcControlParameters, armControlParameters, robotInterface, robotInitialSetup, guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript,
