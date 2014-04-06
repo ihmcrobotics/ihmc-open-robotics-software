@@ -61,7 +61,7 @@ public class DRCPosePlaybackDemo
          dynamicGraphicObjectsListRegistry = null;
       YoVariableRegistry registry = new YoVariableRegistry("adjustableParabolicTrajectoryDemoSimRegistry");
       
-      WalkingControllerParameters walkingControlParameters = model.getWalkingControlParamaters();
+      WalkingControllerParameters walkingControlParameters = model.getWalkingControlParameters();
       ArmControllerParameters armControlParameters = model.getArmControllerParameters();
 
       FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulation(walkingControlParameters);

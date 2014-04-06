@@ -166,7 +166,7 @@ public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTe
    {
       DRCRobotJointMap jointMap = getRobotModel().getJointMap();
       JaxbSDFLoader jaxbSDFLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
-      walkingParamaters = getRobotModel().getWalkingControlParamaters();
+      walkingParamaters = getRobotModel().getWalkingControlParameters();
       fullRobotModel = jaxbSDFLoader.createFullRobotModel(jointMap);
       referenceFrames = new ReferenceFrames(fullRobotModel, jointMap, jointMap.getAnkleHeight());
       bipedFeet = DRCOperatorUserInterface.setupBipedFeet(referenceFrames, fullRobotModel, walkingParamaters);

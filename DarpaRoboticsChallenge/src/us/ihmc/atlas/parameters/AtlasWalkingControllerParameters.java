@@ -493,12 +493,12 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
 
    public double getDefaultTransferTime()
    {
-      return DRCConfigParameters.DEFAULT_TRANSFER_TIME;
+      return runningOnRealRobot ? 1.5 : 0.25;
    }
 
    public double getDefaultSwingTime()
    {
-      return DRCConfigParameters.DEFAULT_SWING_TIME;
+      return runningOnRealRobot ? 1.5 : 0.60;
    }
 
    public double getPelvisPitchUpperLimit()

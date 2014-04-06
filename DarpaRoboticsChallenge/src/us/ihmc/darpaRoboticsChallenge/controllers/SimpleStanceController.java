@@ -422,7 +422,7 @@ public class SimpleStanceController implements RobotController
 
       DRCRobotInitialSetup<SDFRobot> intialSetup = new SquaredUpDRCRobotInitialSetup();
       intialSetup.initializeRobot(robot, jointMap);
-      WalkingControllerParameters walkingControlParams = model.getWalkingControlParamaters();
+      WalkingControllerParameters walkingControlParams = model.getWalkingControlParameters();
       double footForward =  walkingControlParams.getFoot_forward();
       double footBack = walkingControlParams.getFoot_back();
       double footWidth = walkingControlParams.getFoot_width();

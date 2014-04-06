@@ -179,7 +179,7 @@ public class DRCFlatGroundWalkingTrack
       boolean useVelocityAndHeadingScript = true;
       boolean cheatWithGroundHeightAtForFootstep = false;
 
-      WalkingControllerParameters drcControlParameters = model.getWalkingControlParamaters();
+      WalkingControllerParameters drcControlParameters = model.getWalkingControlParameters();
       ArmControllerParameters armControlParameters = model.getArmControllerParameters();
       
       new DRCFlatGroundWalkingTrack(drcControlParameters, armControlParameters, robotInterface, robotInitialSetup, guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript,

@@ -141,7 +141,7 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
 
       GroundProfile groundProfile = new FlatGroundProfile();
       DRCRobotModel robotModel = getRobotModel();
-      WalkingControllerParameters drcControlParameters = robotModel.getWalkingControlParamaters();
+      WalkingControllerParameters drcControlParameters = robotModel.getWalkingControlParameters();
       ArmControllerParameters armControllerParameters = robotModel.getArmControllerParameters();
 
       AutomaticSimulationRunner automaticSimulationRunner = null;

@@ -37,7 +37,7 @@ public class HandPoseCalcaulatorFromArmJointAngles
       SDFFullRobotModelFactory fullRobotModelFactory = new SDFFullRobotModelFactory(jaxbSDFLoader.getGeneralizedSDFRobotModel(jointMap.getModelName()),
                                                           jointMap);
 
-      drcRobotWalkingControllerParameters = robotModel.getWalkingControlParamaters();
+      drcRobotWalkingControllerParameters = robotModel.getWalkingControlParameters();
       fullRobotModel = fullRobotModelFactory.create();
 
       for (RobotSide robotSide : RobotSide.values())

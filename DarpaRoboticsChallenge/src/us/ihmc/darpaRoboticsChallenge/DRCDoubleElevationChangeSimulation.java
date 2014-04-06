@@ -69,7 +69,7 @@ public class DRCDoubleElevationChangeSimulation
       boolean useVelocityAndHeadingScript = false;
       boolean cheatWithGroundHeightAtForFootstep = false;
 
-      WalkingControllerParameters drcControlParameters = model.getWalkingControlParamaters();
+      WalkingControllerParameters drcControlParameters = model.getWalkingControlParameters();
       ArmControllerParameters armControllerParameters = model.getArmControllerParameters();
       
       DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(drcControlParameters, armControllerParameters, robotInterface, 

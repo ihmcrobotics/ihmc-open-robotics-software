@@ -146,7 +146,7 @@ public class DRCHighLevelPositionControlDemo
       double initialYaw = 0.0;
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = model.getDefaultRobotInitialSetup(groundHeight + ROBOT_FLOATING_HEIGHT, initialYaw);
 
-      WalkingControllerParameters drcControlParameters = model.getWalkingControlParamaters();
+      WalkingControllerParameters drcControlParameters = model.getWalkingControlParameters();
       ArmControllerParameters armControlParameters = model.getArmControllerParameters();
       
       new DRCHighLevelPositionControlDemo(drcControlParameters, armControlParameters, robotInterface, robotInitialSetup, guiInitialSetup, scsInitialSetup,

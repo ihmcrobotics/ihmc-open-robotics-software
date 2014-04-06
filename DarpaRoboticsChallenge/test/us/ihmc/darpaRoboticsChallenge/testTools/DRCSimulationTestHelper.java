@@ -55,7 +55,7 @@ public class DRCSimulationTestHelper
          DRCRobotModel robotModel)
    {
       networkObjectCommunicator = new ScriptedFootstepDataListObjectCommunicator("Team");
-      this.walkingControlParameters = robotModel.getWalkingControlParamaters();
+      this.walkingControlParameters = robotModel.getWalkingControlParameters();
       this.checkNothingChanged = checkNothingChanged;
       this.createMovie = createMovie;
       if (createMovie) showGUI = true;

@@ -201,7 +201,7 @@ public class DRCFlatGroundWalkingTest
       if (cheatWithGroundHeightAtForFootstep)
          scsInitialSetup.setInitializeEstimatorToActual(true);
 
-      WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControlParamaters();
+      WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControlParameters();
       ArmControllerParameters armControllerParameters = robotModel.getArmControllerParameters();
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
       
