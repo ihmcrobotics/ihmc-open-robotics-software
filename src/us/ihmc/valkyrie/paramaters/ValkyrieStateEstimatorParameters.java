@@ -1,6 +1,6 @@
 package us.ihmc.valkyrie.paramaters;
 
-import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCSimulatedSensorNoiseParameters;
+import static us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCSimulatedSensorNoiseParameters.*;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorFilterParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.PointMeasurementNoiseParameters;
@@ -40,9 +40,8 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
 
    private final PointMeasurementNoiseParameters pointMeasurementNoiseParameters;
 
-   //      DRCSimulatedSensorNoiseParameters.createNoiseParametersForEstimatorJerryTuning();
-   private final SensorNoiseParameters sensorNoiseParameters = DRCSimulatedSensorNoiseParameters
-         .createNoiseParametersForEstimatorJerryTuningSeptember2013();
+//   private final SensorNoiseParameters sensorNoiseParameters = createNoiseParametersForEstimatorJerryTuning();
+   private final SensorNoiseParameters sensorNoiseParameters = createNoiseParametersForEstimatorJerryTuningSeptember2013();
 
    public ValkyrieStateEstimatorParameters(boolean runningOnRealRobot, double estimatorDT)
    {
@@ -50,30 +49,20 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
 
       this.estimatorDT = estimatorDT;
 
-      final double defaultFilterBreakFrequency;
+      jointPositionFilterFrequencyHz = runningOnRealRobot ? Double.POSITIVE_INFINITY : Double.POSITIVE_INFINITY;
+      jointVelocityFilterFrequencyHz = runningOnRealRobot ? Double.POSITIVE_INFINITY : Double.POSITIVE_INFINITY;
 
-      if (!runningOnRealRobot)
-      {
-         defaultFilterBreakFrequency = Double.POSITIVE_INFINITY;
-      }
-      else
-      {
-         defaultFilterBreakFrequency = Double.POSITIVE_INFINITY; //16.0;
-      }
-
-      jointPositionFilterFrequencyHz = defaultFilterBreakFrequency;
-      jointVelocityFilterFrequencyHz = defaultFilterBreakFrequency;
-      orientationFilterFrequencyHz = defaultFilterBreakFrequency;
-      angularVelocityFilterFrequencyHz = defaultFilterBreakFrequency;
-      linearAccelerationFilterFrequencyHz = defaultFilterBreakFrequency;
+      orientationFilterFrequencyHz        = runningOnRealRobot ? Double.POSITIVE_INFINITY : Double.POSITIVE_INFINITY;
+      angularVelocityFilterFrequencyHz    = runningOnRealRobot ? Double.POSITIVE_INFINITY : Double.POSITIVE_INFINITY;
+      linearAccelerationFilterFrequencyHz = runningOnRealRobot ? Double.POSITIVE_INFINITY : Double.POSITIVE_INFINITY;
 
       jointVelocitySlopTimeForBacklashCompensation = 0.03;
 
       pointVelocityXYMeasurementStandardDeviation = 2.0;
-      pointVelocityZMeasurementStandardDeviation = 2.0;
+      pointVelocityZMeasurementStandardDeviation  = 2.0;
 
       pointPositionXYMeasurementStandardDeviation = 0.1;
-      pointPositionZMeasurementStandardDeviation = 0.1;
+      pointPositionZMeasurementStandardDeviation  = 0.1;
 
       useTwoPolesForIMUFiltering = runningOnRealRobot;
       doFiniteDifferenceForJointVelocities = false;
