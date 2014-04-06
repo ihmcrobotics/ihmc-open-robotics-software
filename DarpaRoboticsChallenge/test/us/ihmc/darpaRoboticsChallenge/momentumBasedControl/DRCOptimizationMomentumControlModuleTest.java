@@ -24,8 +24,6 @@ import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedSensorReader;
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.initialSetup.SquaredUpDRCRobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
@@ -41,7 +39,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModule;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
@@ -356,6 +353,8 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
       momentumOptimizationSettings.setDampedLeastSquaresFactor(lambda);
       momentumOptimizationSettings.setRhoPlaneContactRegularization(wRho);
       momentumOptimizationSettings.setRhoMin(rhoMin);
+      momentumOptimizationSettings.setRateOfChangeOfRhoPlaneContactRegularization(0.01);
+      momentumOptimizationSettings.setRhoPenalizerPlaneContactRegularization(0.01);
 
       return momentumOptimizationSettings;
    }
