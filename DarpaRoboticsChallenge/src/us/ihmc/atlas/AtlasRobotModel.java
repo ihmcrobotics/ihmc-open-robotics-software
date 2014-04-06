@@ -13,7 +13,6 @@ import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactPointInformation;
-import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParamaters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -43,7 +42,7 @@ public class AtlasRobotModel implements DRCRobotModel
       return new AtlasArmControllerParameters(runningOnRealRobot);
    }
 
-   public WalkingControllerParameters getWalkingControlParamaters()
+   public WalkingControllerParameters getWalkingControlParameters()
    {
       return new AtlasWalkingControllerParameters(runningOnRealRobot);
    }

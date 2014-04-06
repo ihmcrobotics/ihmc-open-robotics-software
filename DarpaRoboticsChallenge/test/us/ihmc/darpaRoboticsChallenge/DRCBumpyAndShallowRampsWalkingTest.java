@@ -112,7 +112,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
 
       if (checkNothingChanged) maximumWalkTime = 3.0;
       
-      WalkingControllerParameters drcControlParameters = robotModel.getWalkingControlParamaters();
+      WalkingControllerParameters drcControlParameters = robotModel.getWalkingControlParameters();
       ArmControllerParameters armControllerParameters = robotModel.getArmControllerParameters();
       
 //      drcControlParameters.setNominalHeightAboveAnkle(drcControlParameters.nominalHeightAboveAnkle() - 0.03);    // Need to do this or the leg goes straight and the robot falls.
@@ -195,7 +195,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       boolean cheatWithGroundHeightAtForFootstep = true;
       boolean useLoadOfContactPointsForTheFeet = true;
       
-      WalkingControllerParameters drcControlParameters = robotModel.getWalkingControlParamaters();
+      WalkingControllerParameters drcControlParameters = robotModel.getWalkingControlParameters();
       ArmControllerParameters armControllerParameters = robotModel.getArmControllerParameters();
       
 //      drcControlParameters.setNominalHeightAboveAnkle(drcControlParameters.nominalHeightAboveAnkle() - 0.03);    // Need to do this or the leg goes straight and the robot falls.
@@ -325,7 +325,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       GroundProfile groundProfile = createBumpyGroundProfile();
       boolean drawGroundProfile = true;
       
-      WalkingControllerParameters drcControlParameters = robotModel.getWalkingControlParamaters();
+      WalkingControllerParameters drcControlParameters = robotModel.getWalkingControlParameters();
       ArmControllerParameters armControllerParameters = robotModel.getArmControllerParameters();
       DRCFlatGroundWalkingTrack track = setupSimulationTrack(drcControlParameters, armControllerParameters, groundProfile, drawGroundProfile,
             useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, useLoadOfContactPointsForTheFeet);

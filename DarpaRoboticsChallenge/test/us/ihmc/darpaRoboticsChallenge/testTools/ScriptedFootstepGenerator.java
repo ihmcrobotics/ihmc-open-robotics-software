@@ -17,7 +17,6 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepD
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.commonWalkingControlModules.trajectories.SimpleTwoWaypointTrajectoryParameters;
-import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -121,18 +120,9 @@ public class ScriptedFootstepGenerator
    {
       double footForward, footBack, footWidth;
 
-      if (DRCConfigParameters.USE_GFE_ROBOT_MODEL)
-      {
-         footForward = walkingControllerParameters.getFoot_forward();
-         footBack = walkingControllerParameters.getFoot_back();
-         footWidth = walkingControllerParameters.getFoot_width();
-      }
-      else
-      {
-         footForward = 0.17;
-         footBack = 0.07;
-         footWidth = 0.12;
-      }
+      footForward = walkingControllerParameters.getFoot_forward();
+      footBack = walkingControllerParameters.getFoot_back();
+      footWidth = walkingControllerParameters.getFoot_width();
 
       SideDependentList<ContactablePlaneBody> bipedFeet = new SideDependentList<ContactablePlaneBody>();
 

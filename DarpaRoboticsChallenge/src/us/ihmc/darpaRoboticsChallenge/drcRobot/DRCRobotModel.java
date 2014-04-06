@@ -22,7 +22,7 @@ public interface DRCRobotModel
 
    public ArmControllerParameters getArmControllerParameters();
 
-   public WalkingControllerParameters getWalkingControlParamaters();
+   public WalkingControllerParameters getWalkingControlParameters();
 
    public StateEstimatorParameters getStateEstimatorParameters(double estimatorDT);
 

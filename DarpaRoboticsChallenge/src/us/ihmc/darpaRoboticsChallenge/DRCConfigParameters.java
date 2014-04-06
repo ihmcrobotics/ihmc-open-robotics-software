@@ -12,28 +12,7 @@ public class DRCConfigParameters
 // When false and desired hand pose from the GUI is in world, the robot will hold the desired hand pose in world when walking. BE CAREFUL with that option! 
    public static final boolean HOLD_HANDS_IN_CHEST_FRAME_WHEN_WALKING = true;
    
-   public static final double DEFAULT_SWING_TIME;
-   public static final double DEFAULT_TRANSFER_TIME;
-   
-   static
-   {
-      if (DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT)
-      {
-         DEFAULT_SWING_TIME = 1.5;
-         DEFAULT_TRANSFER_TIME = 1.5;
-      }
-      else 
-      {
-         DEFAULT_SWING_TIME = 0.6;
-         DEFAULT_TRANSFER_TIME = 0.25;
-      }
-   }
-   
-
    public static final boolean CORRUPT_SIMULATION_MODEL = false;
-
-   public static final boolean USE_DUMMY_DRIVNG = false;
-   public static final boolean RESTART_FOR_FANCY_CONTROL = true;    // Enable for testing standup
 
    public static final boolean ALLOW_LAG_SIMULATION = true;
    public static final boolean ENABLE_LAG_SIMULATION_ON_START = false;
@@ -86,9 +65,6 @@ public class DRCConfigParameters
    public static final double CONTROL_DT = 0.006;
    public static final double ATLAS_ONBOARD_SAMPLINGFREQ = 1000.0;
    public static final double ATLAS_ONBOARD_DT = 1.0 / ATLAS_ONBOARD_SAMPLINGFREQ;
-
-   // Set whether or not to use GFE Robot Model
-   public static final boolean USE_GFE_ROBOT_MODEL = false;
 
    // Video Source IDs
    public static final int MULTISENSE_LEFT_CAMERA = 1;
@@ -172,14 +148,6 @@ public class DRCConfigParameters
    public static final boolean USE_SLIDER_FOR_POSE_PLAYBACK = false;
    public static final boolean USE_SUPER_DUPER_HIGH_RESOLUTION_FOR_COMMS = false;
 
-   // State Estimator
-   public static final boolean USE_STATE_ESTIMATOR = true;
-   public static final boolean INTRODUCE_FILTERED_GAUSSIAN_POSITIONING_ERROR = false;
-   public static final double NOISE_FILTER_ALPHA = 1e-1;
-   public static final double POSITION_NOISE_STD = 0.01;
-   public static final double QUATERNION_NOISE_STD = 0.01;
-
- 
    // LIDAR Configuration - LIDAR filtering parameters now in LidarFilterParameters
    public static final double LIDAR_SPINDLE_VELOCITY = 5.1;
    
@@ -237,9 +205,6 @@ public class DRCConfigParameters
    public static final double OCTREE_RESOLUTION_WHEN_NOT_USING_RESOLUTION_SPHERE = 0.025;
    public static final double FOOTSTEP_FITTING_BUFFER_SIZE = -0.01;
 
-   public static final int JOINT_CONFIGURATION_RATE_IN_MS = 10;
-
-   public static final boolean USE_TABS_IN_UI = true;
    public static final boolean DO_AUTOMATED_STANDPREP = true;
 
    // Hand Controller
