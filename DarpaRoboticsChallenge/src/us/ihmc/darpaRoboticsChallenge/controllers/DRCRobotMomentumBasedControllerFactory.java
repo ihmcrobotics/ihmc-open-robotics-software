@@ -15,8 +15,7 @@ import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
-import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.sensors.WrenchBasedFootSwitch;
+import us.ihmc.commonWalkingControlModules.sensors.WrenchBasedFootSwitch;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.sensors.ForceSensorData;
@@ -118,11 +117,4 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
 
       return footSwitches;
    }
-
-   @Override
-   public double getControlDT()
-   {
-      return DRCConfigParameters.CONTROL_DT;
-   }
-
 }
