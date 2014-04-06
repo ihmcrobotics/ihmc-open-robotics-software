@@ -43,7 +43,7 @@ public class BonoRobotModel implements DRCRobotModel
    }
 
    @Override
-   public WalkingControllerParameters getWalkingControlParamaters()
+   public WalkingControllerParameters getWalkingControlParameters()
    {
       return new ACSELLWalkingControllerParameters(runningOnRealRobot);
    }
