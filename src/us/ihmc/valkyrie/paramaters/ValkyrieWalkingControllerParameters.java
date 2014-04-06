@@ -492,7 +492,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
 
    public boolean isRunningOnRealRobot()
    {
-      return false;
+      return runningOnRealRobot;
    }
 
    public double getDefaultTransferTime()
@@ -531,8 +531,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
 
    public double getToe_width()
    {
-      // TODO Auto-generated method stub
-      return 0;
+      return ValkyriePhysicalProperties.footWidth;
    }
 
    public double getFoot_length()
