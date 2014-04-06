@@ -497,12 +497,12 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
 
    public double getDefaultTransferTime()
    {
-      return 0.25;
+      return runningOnRealRobot ? 1.5 : 0.25;
    }
 
    public double getDefaultSwingTime()
    {
-      return 0.6;
+      return runningOnRealRobot ? 1.5 : 0.60;
    }
 
    public double getPelvisPitchUpperLimit()
