@@ -69,7 +69,7 @@ public class DRCSimulationFactory
 
       double estimateDT = DRCConfigParameters.ESTIMATOR_DT;
       double simulateDT = robotInterface.getSimulateDT();
-      double controlDT = controllerFactory.getControlDT();
+      double controlDT = DRCConfigParameters.CONTROL_DT;
       StateEstimatorParameters stateEstimatorParameters = drcRobotModel.getStateEstimatorParameters(estimateDT);
       
       int estimationTicksPerControlTick = (int) (estimateDT / simulateDT);
