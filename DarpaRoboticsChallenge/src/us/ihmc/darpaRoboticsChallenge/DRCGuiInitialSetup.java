@@ -7,12 +7,12 @@ import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.atlas.visualization.SliderBoardFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.initialSetup.GuiInitialSetup;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.NullGraphics3DAdapter;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.jme.JMEGraphics3dAdapter;
-import us.ihmc.projectM.R2Sim02.initialSetup.GuiInitialSetup;
 
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;

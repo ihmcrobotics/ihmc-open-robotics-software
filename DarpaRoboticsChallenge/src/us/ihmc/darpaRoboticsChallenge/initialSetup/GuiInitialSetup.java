@@ -1,0 +1,21 @@
+package us.ihmc.darpaRoboticsChallenge.initialSetup;
+
+import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
+
+import com.yobotics.simulationconstructionset.Robot;
+import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+
+/*
+ * GUI Initial Setup
+ * Implementations of this interface are designed to configure settings in SCS (the graphical interface).  
+ * This includes cameras, buttons, VarGroups, slider boards and link graphics.
+ */
+
+public interface GuiInitialSetup
+{
+   public abstract void initializeGUI(SimulationConstructionSet scs, Robot robot);
+
+   public abstract Graphics3DAdapter getGraphics3DAdapter();
+
+   public abstract boolean isGuiShown();
+}
