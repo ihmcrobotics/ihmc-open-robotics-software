@@ -19,27 +19,44 @@ public interface DRCRobotModel
    {
       ATLAS, VALKYRIE, ACSELL
    }
-   
+
    public ArmControllerParameters getArmControllerParameters();
+
    public WalkingControllerParameters getWalkingControlParamaters();
+
    public StateEstimatorParameters getStateEstimatorParameters(double estimatorDT);
+
    public DRCRobotPhysicalProperties getPhysicalProperties();
+
    public DRCRobotJointMap getJointMap();
+
    public boolean hasIRobotHands();
+
    public boolean hasArmExtensions();
+
    public boolean hasHookHands();
+
    public Transform getOffsetHandFromWrist(RobotSide side);
+
    public DRCHandModel getHandModel();
+
    public RobotType getType();
+
    public String getModelName();
+
    public String getSdfFile();
+
    public InputStream getSdfFileAsStream();
+
    public String[] getResourceDirectories();
-   public DRCRobotInitialSetup<SDFRobot> getDefaultRobotInitialSetup(
-		double groundHeight, double initialYaw);
+
+   public DRCRobotInitialSetup<SDFRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw);
+
    public WalkingControllerParameters getMultiContactControllerParameters();
+
    public DRCRobotContactPointParamaters getContactPointParamaters(boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsToFeetOnly);
+
    public ContactPointInformation getContactPointInformation(boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsToFeetOnly);
    //TODO: RobotBoundingBoxes.java
-   
+
 }
