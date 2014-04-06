@@ -58,13 +58,21 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
       scs.setupCamera(behindPelvis);
 
       DRCRobotJointMap jointMap = robotModel.getJointMap();
-      CameraConfiguration camera5 = new CameraConfiguration(jointMap.getLeftCameraName());
-      camera5.setCameraMount(jointMap.getLeftCameraName());
-      scs.setupCamera(camera5);
+      String leftCameraName = jointMap.getLeftCameraName();
+      if (leftCameraName != null)
+      {
+         CameraConfiguration camera5 = new CameraConfiguration(leftCameraName);
+         camera5.setCameraMount(leftCameraName);
+         scs.setupCamera(camera5);
+      }
       
-      CameraConfiguration camera6 = new CameraConfiguration(jointMap.getRightCameraName());
-      camera6.setCameraMount(jointMap.getRightCameraName());
-      scs.setupCamera(camera6);
+      String rightCameraName = jointMap.getRightCameraName();
+      if (rightCameraName != null)
+      {
+         CameraConfiguration camera6 = new CameraConfiguration(rightCameraName);
+         camera6.setCameraMount(rightCameraName);
+         scs.setupCamera(camera6);
+      }
       
       scs.setGroundVisible(groundProfileVisible);
       
