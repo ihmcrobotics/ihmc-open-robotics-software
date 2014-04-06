@@ -182,4 +182,8 @@ public class CameraConfiguration
       return fieldOfViewVar;
    }
 
+   public String toString()
+   {
+      return name;
+   }
 }
