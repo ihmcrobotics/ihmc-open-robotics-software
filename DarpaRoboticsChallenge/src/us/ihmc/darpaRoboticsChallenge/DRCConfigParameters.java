@@ -88,10 +88,7 @@ public class DRCConfigParameters
    public static final double ATLAS_ONBOARD_DT = 1.0 / ATLAS_ONBOARD_SAMPLINGFREQ;
 
    // Set whether or not to use GFE Robot Model
-   public static final boolean USE_GFE_ROBOT_MODEL = true;
-
-   // Convenience field
-   public static final boolean USE_R2_ROBOT_MODEL = !USE_GFE_ROBOT_MODEL;
+   public static final boolean USE_GFE_ROBOT_MODEL = false;
 
    // Video Source IDs
    public static final int MULTISENSE_LEFT_CAMERA = 1;
