@@ -39,6 +39,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.plotting.DynamicGraphicPositionArtifact;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
+import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFrameVector;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 import com.yobotics.simulationconstructionset.util.math.filter.GlitchFilteredBooleanYoVariable;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
@@ -67,6 +68,8 @@ public class PelvisLinearStateUpdater
    
    private final YoFramePoint yoCenterOfMassPosition = new YoFramePoint("estimatedCenterOfMassPosition", worldFrame, registry);
    private final YoFrameVector yoCenterOfMassVelocity = new YoFrameVector("estimatedCenterOfMassVelocity", worldFrame, registry);
+   private final DoubleYoVariable alphaCoMVelocity = new DoubleYoVariable("alphaCoMVelocity", registry);
+   private final AlphaFilteredYoFrameVector yoCenterOfMassVelocityFD = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector("estimatedCenterOfMassVelocityFD", "", registry, alphaCoMVelocity, yoCenterOfMassPosition);
 
    private final DoubleYoVariable alphaIMUAgainstKinematicsForVelocity = new DoubleYoVariable("alphaIMUAgainstKinematicsForVelocity", registry);
    private final DoubleYoVariable alphaIMUAgainstKinematicsForPosition = new DoubleYoVariable("alphaIMUAgainstKinematicsForPosition", registry);
@@ -605,6 +608,7 @@ public class PelvisLinearStateUpdater
       centerOfMassCalculator.packCenterOfMass(centerOfMassPosition);
       centerOfMassPosition.changeFrame(worldFrame);
       yoCenterOfMassPosition.set(centerOfMassPosition);
+      yoCenterOfMassVelocityFD.update();
 
       centerOfMassJacobianBody.compute();
       centerOfMassVelocity.setToZero(rootJointFrame);
