@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import us.ihmc.sensorProcessing.encoder.SimulatedEncoder;
 import us.ihmc.sensorProcessing.encoder.processors.EncoderProcessor;
 import us.ihmc.sensorProcessing.encoder.processors.JerryEncoderProcessor;
+import us.ihmc.sensorProcessing.encoder.processors.JerryEncoderProcessorNoYoVariablesWrapper;
 import us.ihmc.sensorProcessing.encoder.processors.NaiveEncoderProcessor;
 import us.ihmc.sensorProcessing.encoder.processors.NonlinearObserverEncoderProcessor;
 import us.ihmc.sensorProcessing.encoder.processors.PolynomialFittingEncoderProcessor;
@@ -67,6 +68,7 @@ public class EncoderProcessorComparer
       encoderProcessors.put(new PolynomialFittingEncoderProcessor("PolyFit532", rawTicks, time, distancePerTick, 5, 3, 2, registry), "PolyFit532");
       encoderProcessors.put(new PolynomialFittingEncoderProcessor("PolyFit820", rawTicks, time, distancePerTick, 8, 2, 0, registry), "PolyFit820");
       encoderProcessors.put(new JerryEncoderProcessor("Jerry", rawTicks, time, distancePerTick, dt, registry), "Jerry");
+      encoderProcessors.put(new JerryEncoderProcessorNoYoVariablesWrapper("JerryNoYo", rawTicks, time, distancePerTick, dt), "JerryNoYo");
 
 
       for (EncoderProcessor encoderProcessor : encoderProcessors.keySet())
@@ -138,10 +140,11 @@ public class EncoderProcessorComparer
    public static void main(String[] args)
    {
       double maxTime = 2.0;
-      double dt = 2.4e-3;    // 7.2e-3; //2.0e-3;    // 7.2e-3;    // 7.2e-3;    // 1e-5;
+      double dt = 2.0e-3;    // 7.2e-3; //2.0e-3;    // 7.2e-3;    // 7.2e-3;    // 1e-5;
+//      double dt = 1.0/5000.0; //2.0e-3;    // 7.2e-3; //2.0e-3;    // 7.2e-3;    // 7.2e-3;    // 1e-5;
 
       // Do everything in meters.
-      double encoderCountsPerMeter = 2000.0 / 2.54 * 100.0;    // 100.0;    // 78740.1575;    // 100.0 // (2000 counts / inch) * (1.0 inches / 2.54 cm) * (100.0 cm / 1.0 m)
+      double encoderCountsPerMeter = 0.02 * 2000.0 / 2.54 * 100.0;    // 100.0;    // 78740.1575;    // 100.0 // (2000 counts / inch) * (1.0 inches / 2.54 cm) * (100.0 cm / 1.0 m)
 
       System.out.println("encoderCountsPerMeter = " + encoderCountsPerMeter);
       System.out.println("meters per count = " + 1.0 / encoderCountsPerMeter);
