@@ -74,7 +74,7 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
             pointVelocityZMeasurementStandardDeviation, pointPositionXYMeasurementStandardDeviation, pointPositionZMeasurementStandardDeviation);
       
       kinematicsPelvisPositionFilterFreqInHertz = Double.POSITIVE_INFINITY;
-      kinematicsPelvisLinearVelocityFilterFreqInHertz = 16.0;
+      kinematicsPelvisLinearVelocityFilterFreqInHertz = 50.0; //16.0;
    }
 
    @Override
