@@ -1,7 +1,8 @@
 package us.ihmc.sensorProcessing.encoder.processors;
 
 
-public class JerryEncoderProcessorNoYoVariables //extends AbstractEncoderProcessor
+
+public class JerryEncoderProcessorNoYoVariables
 {
    private static final double
 
@@ -29,34 +30,13 @@ public class JerryEncoderProcessorNoYoVariables //extends AbstractEncoderProcess
    private double maxPriorRate;
 
    private double averagePriorRate;
+   private double distancePerTick;
 
-   public JerryEncoderProcessorNoYoVariables(double distancePerTick, double dt)
+   public JerryEncoderProcessorNoYoVariables(double dt, double distancePerTick)
    {
-//      super(name, rawTicks, time, distancePerTick, registry);
-
       this.dt = dt;
- 
-
-//      this.minPriorRate = new double(name + "minPriorRate", registry);
-//      this.maxPriorRate = new double(name + "maxPriorRate", registry);
-//
-//
-//      this.maxPossibleRate = new double(name + "maxPossibleRate", registry);
-//      this.averagePriorRate = new double(name + "averagePriorRate", registry);
-//
-//      this.previousRawTicksTwoBack = new int(name + "prevRawPos2", registry);
-//      this.previousRawTicks = new int(name + "prevRawPos", registry);
-//      this.previousTime = new double(name + "prevTime", registry);
-//
-//      this.previousProcessedTicks = new int(name + "prevPos", registry);
-//      this.previousProcessedTicksTwoBack = new int(name + "prevPos2", registry);
-//      this.previousTimeTwoBack = new double(name + "prevTime2", registry);
+      this.distancePerTick = distancePerTick;
    }
-
-//   public void initialize()
-//   {
-//      update();
-//   }
 
    public void update(int rawTicks, double time)
    {
@@ -71,12 +51,8 @@ public class JerryEncoderProcessorNoYoVariables //extends AbstractEncoderProcess
       if (positionChanged)
       {
          double positionChange = processedTicks - previousProcessedTicks;
-         double positionChangeInt = (int) positionChange;
+         int positionChangeInt = (int) positionChange;
          double timeChange = time - previousTime;
-
-//       int positionChangeInt = processedTicks - previousProcessedTicksTwoBack;
-//       double positionChange = (double) positionChangeInt;
-//       double timeChange = time - previousTimeTwoBack;
 
          if (positionChangeInt >= 2)
          {
@@ -408,5 +384,15 @@ public class JerryEncoderProcessorNoYoVariables //extends AbstractEncoderProcess
    }
 
    private enum EncoderState {Start, ForwardOne, ForwardTwo, BackwardOne, BackwardTwo;}
+
+   public double getQ()
+   {
+      return processedTicks * distancePerTick;
+   }
+
+   public double getQd()
+   {
+      return processedTickRate * distancePerTick;
+   }
 
 }

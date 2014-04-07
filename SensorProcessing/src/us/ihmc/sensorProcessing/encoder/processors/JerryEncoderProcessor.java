@@ -12,7 +12,8 @@ public class JerryEncoderProcessor extends AbstractEncoderProcessor
 
 //    ALPHA = 0.15, BETA = 0.15, GAMMA = 0.15;
 //    ALPHA = 0.3, BETA = 0.3, GAMMA = 0.3; //0.1; //0.15;
-//    ALPHA = 1.0, BETA = 1.0, GAMMA = 1.0; //0.1; //0.15;
+//   ALPHA = 1.0, BETA = 1.0, GAMMA = 1.0; //0.1; //0.15;
+//   ALPHA = 0.8, BETA = 0.8, GAMMA = 0.0; //0.1; //0.15;
 
       ALPHA = 0.5, BETA = 0.5, GAMMA = 0.15;    // 0.1; //0.15;
 
@@ -69,7 +70,7 @@ public class JerryEncoderProcessor extends AbstractEncoderProcessor
       if (positionChanged)
       {
          double positionChange = processedTicks.getDoubleValue() - previousProcessedTicks.getIntegerValue();
-         double positionChangeInt = (int) positionChange;
+         int positionChangeInt = (int) positionChange;
          double timeChange = time.getDoubleValue() - previousTime.getDoubleValue();
 
 //       int positionChangeInt = processedTicks.getIntegerValue() - previousProcessedTicksTwoBack.getIntegerValue();
