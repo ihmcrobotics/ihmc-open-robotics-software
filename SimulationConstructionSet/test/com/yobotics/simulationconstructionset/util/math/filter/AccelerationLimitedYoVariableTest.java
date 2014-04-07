@@ -32,17 +32,20 @@ public class AccelerationLimitedYoVariableTest
       DoubleYoVariable variable = new DoubleYoVariable("variable", registry);
 
       AccelerationLimitedYoVariable smoothedYoVariable = new AccelerationLimitedYoVariable("smoothedVariable", registry, maxRate, maxAcceleration, dt);
-      smoothedYoVariable.setGainsByPolePlacement(2.0 * Math.PI * 16.0, 1.0);
-      smoothedYoVariable.setMaximumAcceleration(200.0);
-      smoothedYoVariable.setMaximumRate(6.0);
+      
+      double breakFrequencyHertz = 20.0; //16.0;
+      smoothedYoVariable.setGainsByPolePlacement(2.0 * Math.PI * breakFrequencyHertz, 1.0);
+      smoothedYoVariable.setMaximumAcceleration(400.0);
+      smoothedYoVariable.setMaximumRate(12.0);
       
       
-      YoFunctionGenerator functionGenerator = new YoFunctionGenerator("functionGenerator", registry);
-      functionGenerator.setMode(YoFunctionGeneratorMode.CHIRP_LINEAR);
+      YoFunctionGenerator functionGenerator = new YoFunctionGenerator("functionGenerator", registry);    
+      functionGenerator.setMode(YoFunctionGeneratorMode.CHIRP_LINEAR);      
+//      functionGenerator.setMode(YoFunctionGeneratorMode.DC);      
       functionGenerator.setChirpFrequencyMaxHz(30.0);
       functionGenerator.setResetTime(20.0);
       
-      double maximumOmega0 = 240.0/8.0;
+      double maximumOmega0 = 200.0/6.0; //240.0/8.0;
       System.out.println("maximumOmega0 = " + maximumOmega0 + " = " + maximumOmega0/(2.0*Math.PI) + " hertz.");
 
       smoothedYoVariable.update(0.0);
