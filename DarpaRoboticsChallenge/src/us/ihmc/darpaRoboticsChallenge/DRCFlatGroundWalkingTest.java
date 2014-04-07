@@ -7,11 +7,8 @@ import java.util.ArrayList;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
@@ -36,7 +33,7 @@ import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimu
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import com.yobotics.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
 
-public class DRCFlatGroundWalkingTest
+public abstract class DRCFlatGroundWalkingTest
 {
    private static final boolean ALWAYS_SHOW_GUI = false;
    public static final boolean KEEP_SCS_UP = false;
@@ -95,17 +92,6 @@ public class DRCFlatGroundWalkingTest
       AsyncContinuousExecutor.cancelAndReset();
       
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
-   }
-
-   @Test
-   public void testAtlasFlatGroundWalking() throws SimulationExceededMaximumTimeException
-   {
-      BambooTools.reportTestStartedMessage();
-
-      String runName = "AtlasFlatGroundWalkingTest";
-      DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, false);
-      
-      setupAndTestFlatGroundSimulationTrack(robotModel, runName);
    }
 
    protected void setupAndTestFlatGroundSimulationTrack(DRCRobotModel robotModel, String runName) throws SimulationExceededMaximumTimeException
