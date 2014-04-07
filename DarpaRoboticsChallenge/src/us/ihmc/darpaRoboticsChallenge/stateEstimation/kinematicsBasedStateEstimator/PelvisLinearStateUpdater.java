@@ -39,8 +39,8 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.plotting.DynamicGraphicPositionArtifact;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
-import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFrameVector;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
+import com.yobotics.simulationconstructionset.util.math.filter.FilteredVelocityYoFrameVector;
 import com.yobotics.simulationconstructionset.util.math.filter.GlitchFilteredBooleanYoVariable;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
@@ -69,7 +69,7 @@ public class PelvisLinearStateUpdater
    private final YoFramePoint yoCenterOfMassPosition = new YoFramePoint("estimatedCenterOfMassPosition", worldFrame, registry);
    private final YoFrameVector yoCenterOfMassVelocity = new YoFrameVector("estimatedCenterOfMassVelocity", worldFrame, registry);
    private final DoubleYoVariable alphaCoMVelocity = new DoubleYoVariable("alphaCoMVelocity", registry);
-   private final AlphaFilteredYoFrameVector yoCenterOfMassVelocityFD = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector("estimatedCenterOfMassVelocityFD", "", registry, alphaCoMVelocity, yoCenterOfMassPosition);
+   private final FilteredVelocityYoFrameVector yoCenterOfMassVelocityFD;
 
    private final DoubleYoVariable alphaIMUAgainstKinematicsForVelocity = new DoubleYoVariable("alphaIMUAgainstKinematicsForVelocity", registry);
    private final DoubleYoVariable alphaIMUAgainstKinematicsForPosition = new DoubleYoVariable("alphaIMUAgainstKinematicsForPosition", registry);
@@ -157,6 +157,8 @@ public class PelvisLinearStateUpdater
       this.centerOfMassJacobianBody = new CenterOfMassJacobian(ScrewTools.computeSupportAndSubtreeSuccessors(elevator),
               ScrewTools.computeSubtreeJoints(rootBody), rootJointFrame);
 
+      yoCenterOfMassVelocityFD = FilteredVelocityYoFrameVector.createFilteredVelocityYoFrameVector("estimatedCenterOfMassVelocityFD", "", alphaCoMVelocity, estimatorDT, registry, yoCenterOfMassPosition);
+      
       setupBunchOfVariables();
       
       forceZInPercentThresholdToFilterFoot.addVariableChangedListener(new VariableChangedListener()
