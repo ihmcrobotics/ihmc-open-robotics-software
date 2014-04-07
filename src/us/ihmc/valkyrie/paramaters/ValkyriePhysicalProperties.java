@@ -1,8 +1,6 @@
 package us.ihmc.valkyrie.paramaters;
 
 
-import java.util.EnumMap;
-
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
@@ -16,10 +14,10 @@ import us.ihmc.utilities.Pair;
 public class ValkyriePhysicalProperties extends DRCRobotPhysicalProperties
 {
    public static final double ankleHeight = 0.082;
-   public static final double footForward = 0.23;
-   public static final double footBack = 0.07;
-   public static final double footLength = footBack + footForward;
-   public static final double footWidth = 0.128;
+   public static final double footLength = 0.25;
+   public static final double footBack = 0.058;
+   public static final double footForward = footLength - footBack;
+   public static final double footWidth = 0.15;
    public static final double thighLength = 0.431;
    public static final double shinLength = 0.406;
    public static final double pelvisToFoot = 0.887 + 0.3;
