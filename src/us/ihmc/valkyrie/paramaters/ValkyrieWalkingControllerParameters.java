@@ -298,7 +298,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    public double getCaptureKi()
    {
       if (!runningOnRealRobot) return 4.0;
-      return 4.0;
+      return 0.0; //4.0;
    }
 
    public double getCaptureKiBleedoff()
@@ -309,19 +309,19 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    public double getCaptureFilterBreakFrequencyInHz()
    {
       if (!runningOnRealRobot) return 16.0;
-      return 16.0;
+      return 50.0; //16.0;
    }
 
    public double getCMPRateLimit()
    {
       if (!runningOnRealRobot) return 60.0;
-      return 6.0;
+      return 60.0; //6.0;
    }
 
    public double getCMPAccelerationLimit()
    {
       if (!runningOnRealRobot) return 2000.0;
-      return 200.0;
+      return 2000.0; //200.0;
    }
    
    public double getKpCoMHeight()
@@ -352,13 +352,13 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    public double getMaxAccelerationPelvisOrientation()
    {
       if (!runningOnRealRobot) return 18.0;
-      return 12.0; 
+      return 24.0; //12.0; 
    }
 
    public double getMaxJerkPelvisOrientation()
    {
       if (!runningOnRealRobot) return 270.0;
-      return 180.0; 
+      return 360.0; //180.0;
    }
 
    public double getKpHeadOrientation()
@@ -393,13 +393,13 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    public double getMaxAccelerationUpperBody()
    {
       if (!runningOnRealRobot) return 18.0;
-      return 6.0;
+      return 12.0; //6.0;
    }
 
    public double getMaxJerkUpperBody()
    {
       if (!runningOnRealRobot) return 270.0;
-      return 60.0;
+      return 180.0; //60.0;
    }
 
    public double getSwingKpXY()
