@@ -7,6 +7,7 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactPointInformation;
+import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCContactPointInformationFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParamaters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
@@ -14,8 +15,11 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
+import us.ihmc.valkyrie.io.ValkyrieOutputWriter;
+import us.ihmc.valkyrie.io.ValkyrieOutputWriterWithAccelerationIntegration;
 import us.ihmc.valkyrie.models.ModelRoot;
 import us.ihmc.valkyrie.paramaters.ValkyrieArmControllerParameters;
 import us.ihmc.valkyrie.paramaters.ValkyrieContactPointParamaters;
@@ -192,6 +196,21 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public ContactPointInformation getContactPointInformation(boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsToFeetOnly)
    {
       return DRCContactPointInformationFactory.createContactPointInformation(getJointMap(),getContactPointParamaters(addLoadsOfContactPoints, addLoadsOfContactPointsToFeetOnly)) ;
+   }
+
+   @Override
+   public DRCOutputWriter getOutputWriterWithAccelerationIntegration(DRCOutputWriter valkyrieOutputWriter, double controlDT, boolean runningOnRealRobot)
+   {
+      ValkyrieOutputWriterWithAccelerationIntegration valkyrieOutputWriterWithAccelerationIntegration =
+            new ValkyrieOutputWriterWithAccelerationIntegration(valkyrieOutputWriter, controlDT, runningOnRealRobot);
+
+      valkyrieOutputWriterWithAccelerationIntegration.setAlphaDesiredVelocity(0.98);
+      valkyrieOutputWriterWithAccelerationIntegration.setAlphaDesiredPosition(0.0);
+      valkyrieOutputWriterWithAccelerationIntegration.setVelocityGains(15.0);
+      valkyrieOutputWriterWithAccelerationIntegration.setPositionGains(0.0);
+
+
+      return valkyrieOutputWriterWithAccelerationIntegration;
    }
 
 }
