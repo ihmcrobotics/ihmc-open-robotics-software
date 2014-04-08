@@ -33,7 +33,7 @@ public class ValkyrieJoint
 
    public ValkyrieJoint(String name, YoVariableRegistry registry)
    {
-      this(name, null, null, null, null, registry);
+      this(name, new DoubleYoVariable(name + "_test_alpha", registry), new BooleanYoVariable(name + "_test_useTwoPoleFiltering", registry), new BooleanYoVariable(name + "_test_useBacklashComp", registry), new DoubleYoVariable(name + "_test_slopTimeForBacklashComp", registry), registry);
    }
    
    public ValkyrieJoint(String name, DoubleYoVariable alpha, BooleanYoVariable useTwoPoleFiltering, BooleanYoVariable useBacklashComp, DoubleYoVariable slopTimeForBacklashComp, YoVariableRegistry registry)
