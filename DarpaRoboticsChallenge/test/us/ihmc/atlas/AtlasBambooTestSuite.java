@@ -3,6 +3,7 @@ package us.ihmc.atlas;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
+import us.ihmc.AtlasFlatGroundWalkingTest;
 import us.ihmc.atlas.controllers.AtlasFootstepGeneratorTest;
 import us.ihmc.atlas.momentumBasedControl.AtlasOptimizationMomentumControlModuleTest;
 import us.ihmc.atlas.networking.AtlasNetworkingCommandReaderTest;
@@ -20,7 +21,8 @@ import us.ihmc.utilities.test.JUnitTestSuiteConstructor;
    AtlasOptimizationMomentumControlModuleTest.class,
    AtlasNetworkingCommandReaderTest.class,
    AtlasNumericalInverseKinematicsCalculatorWithRobotTest.class,
-   AtlasMultiContactTest.class
+   AtlasMultiContactTest.class,
+   AtlasFlatGroundWalkingTest.class
 })
 public class AtlasBambooTestSuite
 {
