@@ -107,7 +107,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DEFAULT;
 
       String scriptName = "scripts/ExerciseAndJUnitScripts/SimpleFlatGroundScript.xml";
-      String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(this.getClass(), scriptName);
+      String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(DRCObstacleCourseFlatTest.class, scriptName);
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCSimpleFlatGroundScriptTest", fileName, selectedLocation,
               checkNothingChanged, createMovie, false, getRobotModel());
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -132,7 +132,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DEFAULT;
 
       String scriptName = "scripts/ExerciseAndJUnitScripts/SimpleFlatGroundScript.xml";
-      String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(this.getClass(), scriptName);
+      String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(DRCObstacleCourseFlatTest.class, scriptName);
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCSimpleFlatGroundScriptTest", fileName, selectedLocation, checkNothingChanged, createMovie, false, getRobotModel());
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       SDFRobot robot = drcSimulationTestHelper.getRobot();
@@ -168,7 +168,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DEFAULT;
 
       String scriptName = "scripts/ExerciseAndJUnitScripts/LongStepsMaxHeightPauseAndRestart_LeftFootTest.xml";
-      String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(this.getClass(), scriptName);
+      String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(DRCObstacleCourseFlatTest.class, scriptName);
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCLongStepsMaxHeightPauseAndRestartTest", fileName, selectedLocation,
               checkNothingChanged, createMovie, false, getRobotModel());
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -194,7 +194,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DEFAULT;
 
       String scriptName = "scripts/ExerciseAndJUnitScripts/LongSideStepsLeft.xml";
-      String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(this.getClass(), scriptName);
+      String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(DRCObstacleCourseFlatTest.class, scriptName);
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCSideStepsWithSlippingTest", fileName, selectedLocation,
               checkNothingChanged, createMovie, false, getRobotModel());
 
@@ -232,7 +232,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DEFAULT;
 
       String scriptName = "scripts/ExerciseAndJUnitScripts/LongSideStepsLeft.xml";
-      String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(this.getClass(), scriptName);
+      String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(DRCObstacleCourseFlatTest.class, scriptName);
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCSideStepsWithSlippingTest", fileName, selectedLocation,
               checkNothingChanged, createMovie, false, getRobotModel());
 
