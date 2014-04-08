@@ -17,17 +17,17 @@ import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceRead
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceWriter;
 import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
+import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 
-public class PlaybackPoseSequenceTest
+public abstract class PlaybackPoseSequenceTest implements MultiRobotTestInterface
 {
    @Test
    public void testReadAndWriteWithRandomSequence()
    {
-      DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT);
 
-      DRCRobotJointMap jointMap = robotModel.getJointMap();
+      DRCRobotJointMap jointMap = getRobotModel().getJointMap();
       JaxbSDFLoader sdfLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap, false);
 
       SDFFullRobotModel fullRobotModel = sdfLoader.createFullRobotModel(jointMap);

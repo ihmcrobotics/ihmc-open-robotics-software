@@ -11,14 +11,12 @@ import org.junit.Test;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPose;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseInterpolator;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceReader;
-import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
+import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.utilities.ThreadTools;
@@ -26,7 +24,7 @@ import us.ihmc.utilities.ThreadTools;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
-public class PlaybackPoseInterpolatorTest
+public abstract class PlaybackPoseInterpolatorTest implements MultiRobotTestInterface
 {
    private static final boolean SHOW_GUI = true;
    
@@ -34,7 +32,7 @@ public class PlaybackPoseInterpolatorTest
    @Test
    public void testMoveElbowExample()
    {
-      DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT);
+      DRCRobotModel robotModel = getRobotModel();
 
       DRCRobotJointMap jointMap = robotModel.getJointMap();
       JaxbSDFLoader sdfLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap, false);
@@ -52,8 +50,7 @@ public class PlaybackPoseInterpolatorTest
    @Test
    public void testRandomExample()
    {
-      DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT);
-//      DRCRobotModel robotModel = new ValkyrieRobotModel(AtlasRobotVersion.DRC_NO_HANDS, DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT);
+      DRCRobotModel robotModel = getRobotModel();
 
       DRCRobotJointMap jointMap = robotModel.getJointMap();
       JaxbSDFLoader sdfLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap, false);
@@ -77,7 +74,7 @@ public class PlaybackPoseInterpolatorTest
    @Test
    public void testFromExample()
    {
-      DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT);
+      DRCRobotModel robotModel = getRobotModel();
 
       DRCRobotJointMap jointMap = robotModel.getJointMap();
       JaxbSDFLoader sdfLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap, false);
@@ -118,7 +115,7 @@ public class PlaybackPoseInterpolatorTest
    @Test
    public void testLoadingAndPlayingASequence()
    {
-      DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT);
+      DRCRobotModel robotModel = getRobotModel();
 
       DRCRobotJointMap jointMap = robotModel.getJointMap();
       JaxbSDFLoader sdfLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap, false);
@@ -134,7 +131,7 @@ public class PlaybackPoseInterpolatorTest
    @Test
    public void testLoadingAndPlayingAnotherSequence()
    {
-      DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT);
+      DRCRobotModel robotModel = getRobotModel();
 
       DRCRobotJointMap jointMap = robotModel.getJointMap();
       JaxbSDFLoader sdfLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap, false);
