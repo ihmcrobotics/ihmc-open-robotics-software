@@ -80,6 +80,10 @@ public class DRCSimulationFactory
       setupJointDamping(simulatedRobot, drcRobotModel);
 
       DRCOutputWriter drcOutputWriter = new DRCSimulationOutputWriter(simulatedRobot, registry, dynamicGraphicObjectsListRegistry, robotVisualizer);
+      if (DRCLocalConfigParameters.INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES)
+      {
+         drcOutputWriter = drcRobotModel.getOutputWriterWithAccelerationIntegration(drcOutputWriter, controlDT, false);
+      }
       
       if (DRCConfigParameters.LIMIT_CONTROLLER_OUTPUT_TORQUES)
       {
