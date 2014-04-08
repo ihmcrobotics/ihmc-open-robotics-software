@@ -1,6 +1,7 @@
 package us.ihmc.SdfLoader;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -460,6 +461,12 @@ public class SDFFullRobotModel implements FullRobotModel
       OneDoFJoint[] oneDoFJointsAsArray = new OneDoFJoint[oneDoFJoints.size()];
       oneDoFJoints.values().toArray(oneDoFJointsAsArray);
       return oneDoFJointsAsArray;
+   }
+   
+   public void getOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
+   {
+      Collection<OneDoFJoint> values = oneDoFJoints.values();
+      oneDoFJointsToPack.addAll(values);
    }
    
    public Map<String, OneDoFJoint> getOneDoFJointsAsMap()
