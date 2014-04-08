@@ -63,7 +63,7 @@ public class ValkyrieJoint
             throw new RuntimeException("Ooops");
          
          bl_velocity = new BacklashCompensatingVelocityYoVariable(name + "_bl_qd", "", alpha, position, DT, slopTimeForBacklashComp, registry);
-         filt_bl_velocity = new AlphaFilteredYoVariable(name + "_filt_bl_qd", registry, alpha, fd_velocity);
+         filt_bl_velocity = new AlphaFilteredYoVariable(name + "_filt_bl_qd", registry, alpha, bl_velocity);
       }
       else
       {
