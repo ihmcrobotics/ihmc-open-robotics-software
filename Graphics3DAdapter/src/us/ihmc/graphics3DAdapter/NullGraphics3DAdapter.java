@@ -203,21 +203,6 @@ public class NullGraphics3DAdapter implements Graphics3DAdapter
 
    }
 
-   public MultiRayTracer getMultiRayTracer()
-   {
-      return new MultiRayTracer()
-      {
-         public long scan(TimestampProvider timestampProvider, ArrayList<Ray3d> rays, double[] doubleToPack)
-         {
-            return 0;
-         }
-
-         public void setChildrenToIntersect(String[] childrenToIntersect)
-         {
-         }
-      };
-   }
-
    public void addSelectedListener(SelectedListener selectedListener)
    {
 
@@ -268,6 +253,12 @@ public class NullGraphics3DAdapter implements Graphics3DAdapter
             return null;
          }
       };
+   }
+
+   @Override
+   public GPULidar createGPULidar(GPULidarCallback callback, int horizontalRays, double fov, double near, double far)
+   {
+      return null;
    }
 
 }

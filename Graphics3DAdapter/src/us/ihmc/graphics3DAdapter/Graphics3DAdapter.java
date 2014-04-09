@@ -25,8 +25,6 @@ public interface Graphics3DAdapter
    public Object getGraphicsConch();
    public void setGroundVisible(boolean isVisible);
    
-   public MultiRayTracer getMultiRayTracer();
-   
    public void addSelectedListener(SelectedListener selectedListener);
    public void addKeyListener(KeyListener keyListener);
    public void addMouseListener(MouseListener mouseListener);
@@ -41,4 +39,6 @@ public interface Graphics3DAdapter
    public void freezeFrame(Graphics3DNode rootJoint);
 
    public ContextManager getContextManager();
+   
+   public GPULidar createGPULidar(GPULidarCallback callback, int horizontalRays, double fov, double near, double far);
 }

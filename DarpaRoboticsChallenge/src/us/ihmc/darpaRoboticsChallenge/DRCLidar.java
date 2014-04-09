@@ -1,32 +1,31 @@
 package us.ihmc.darpaRoboticsChallenge;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
+import javax.media.j3d.Transform3D;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
+import us.ihmc.graphics3DAdapter.GPULidar;
+import us.ihmc.graphics3DAdapter.GPULidarCallback;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
+import us.ihmc.utilities.lidar.polarLidar.LidarScan;
 import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
+import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.net.TimestampProvider;
 
-import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
-import com.yobotics.simulationconstructionset.simulatedSensors.FastPolarRayCastLIDAR;
-import com.yobotics.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorNoiseParameters;
-import com.yobotics.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorUpdateParameters;
+import com.yobotics.simulationconstructionset.simulatedSensors.LidarMount;
 
 public class DRCLidar
 {
-   private static final boolean PRINT_ALL_POSSIBLE_JOINT_NAMES = false;
 
-   static
+   public static LidarMount getLidarSensor(SDFRobot robot)
    {
-      if (DRCConfigParameters.STREAM_POLAR_LIDAR)
-         System.out.println("DRCLidar: PolarLidar is ON. This lidar passes less data, and also includes the transforms from when the data was produced.");
-   }
-
-   public static FastPolarRayCastLIDAR getLidarSensor(SDFRobot robot)
-   {
-      ArrayList<FastPolarRayCastLIDAR> lidarSensors = robot.getSensors(FastPolarRayCastLIDAR.class);
+      ArrayList<LidarMount> lidarSensors = robot.getSensors(LidarMount.class);
       if (lidarSensors.size() == 0)
       {
          System.err.println("DRCLidar: No LIDAR units found on SDF Robot.");
@@ -50,48 +49,52 @@ public class DRCLidar
          TimestampProvider timestampProvider, boolean startLidar)
    {
       Graphics3DAdapter graphics3dAdapter = sdfRobotSimulation.getSimulationConstructionSet().getGraphics3dAdapter();
-      SimulatedLIDARSensorUpdateParameters updateParameters = new SimulatedLIDARSensorUpdateParameters();
-      updateParameters.setObjectCommunicator(objectCommunicator);
-      if (DRCConfigParameters.STREAM_POLAR_LIDAR)
-      {
-         System.out.println("DRCLidar: Setting up lidar.");
-         FastPolarRayCastLIDAR polarLidar = getLidarSensor(sdfRobotSimulation.getRobot());
-         
-         if (polarLidar != null)
-         {
-            polarLidar.setWorld(graphics3dAdapter);
-            polarLidar.setNodesToIntersect(DRCConfigParameters.SCS_LIDAR_NODES_TO_INTERSECT);
-            if (DRCConfigParameters.OVERRIDE_DRC_LIDAR_CONFIG)
-            {
-               boolean rotatingLidar = true;
-               if(jointMap.getLidarJointName() == null || jointMap.getLidarJointName() == "")
-               {
-                  rotatingLidar = false;
-               }
-
-               LidarScanParameters largeScan = new LidarScanParameters(DRCConfigParameters.LIDAR_POINTS_PER_SWEEP, DRCConfigParameters.LIDAR_SWEEP_MIN_YAW,
-                     DRCConfigParameters.LIDAR_SWEEP_MAX_YAW, DRCConfigParameters.LIDAR_ANGLE_INCREMENT, DRCConfigParameters.LIDAR_TIME_INCREMENT,
-                     DRCConfigParameters.LIDAR_SWEEPS_PER_SCAN, DRCConfigParameters.LIDAR_SCAN_MIN_ROLL, DRCConfigParameters.LIDAR_SCAN_MAX_ROLL,
-                     DRCConfigParameters.LIDAR_MIN_DISTANCE, DRCConfigParameters.LIDAR_MAX_DISTANCE, DRCConfigParameters.LIDAR_SCAN_TIME, true, rotatingLidar);
-               polarLidar.setScan(largeScan);
-               updateParameters.setUpdateRate(DRCConfigParameters.LIDAR_UPDATE_RATE_OVERRIDE);
-            }
-            if (PRINT_ALL_POSSIBLE_JOINT_NAMES)
-               System.out.println("DRCLidar availiable joints: " + sdfRobotSimulation.getRobot().getOneDoFJoints());
-            OneDegreeOfFreedomJoint neckJoint = sdfRobotSimulation.getRobot().getOneDegreeOfFreedomJoint(jointMap.getHighestNeckPitchJointName());
-            polarLidar.setSimulationNeckJoint(neckJoint);
-            polarLidar.setLidarDaemonParameters(updateParameters);
-            SimulatedLIDARSensorNoiseParameters noiseParameters = new SimulatedLIDARSensorNoiseParameters();
-            noiseParameters.setGaussianNoiseStandardDeviation(DRCConfigParameters.LIDAR_NOISE_LEVEL_OVERRIDE);
-            polarLidar.setNoiseParameters(noiseParameters);
-            if (startLidar)
-            {
-               System.out.println("Streaming Lidar");
-               polarLidar.startLidarDaemonThread(timestampProvider);
-            }
-         }
-      }
+      
+      LidarMount lidarMount = getLidarSensor(sdfRobotSimulation.getRobot());
+      
+      LidarScanParameters lidarScanParameters = lidarMount.getLidarScanParameters();
+      int horizontalRays = lidarScanParameters.pointsPerSweep;
+      float fov = lidarScanParameters.sweepYawMax - lidarScanParameters.sweepYawMin;
+      float near = lidarScanParameters.minRange;
+      float far = lidarScanParameters.maxRange;
+      
+      
+      DRCLidarCallback callback = new DRCLidarCallback(objectCommunicator, lidarScanParameters);
+      GPULidar lidar = graphics3dAdapter.createGPULidar(callback, horizontalRays, fov, near, far);
+      lidarMount.setLidar(lidar);
 
    }
 
+   
+   public static class DRCLidarCallback implements GPULidarCallback
+   {
+      private final Executor pool = Executors.newSingleThreadExecutor();
+
+      private final ObjectCommunicator objectCommunicator;
+      private final LidarScanParameters lidarScanParameters;
+      
+      public DRCLidarCallback(ObjectCommunicator objectCommunicator, LidarScanParameters lidarScanParameters)
+      {
+         this.objectCommunicator = objectCommunicator;
+         this.lidarScanParameters = lidarScanParameters;
+      }
+      
+      @Override
+      public void scan(float[] scan, Transform3D lidarTransform, double time)
+      {
+         Transform3D transform = new Transform3D(lidarTransform);
+         final LidarScan lidarScan = new LidarScan(new LidarScanParameters(lidarScanParameters, TimeTools.secondsToNanoSeconds(time)), transform, transform,
+               Arrays.copyOf(scan, scan.length));
+         pool.execute(new Runnable()
+         {            
+            @Override
+            public void run()
+            {
+               objectCommunicator.consumeObject(lidarScan);     
+            }
+         });
+      }
+      
+   }
+   
 }
