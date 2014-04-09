@@ -23,7 +23,6 @@ public interface ViewportAdapter
    public abstract double getPhysicalWidth();
    public abstract double getPhysicalHeight();
    public abstract void setupOffscreenView(int width, int height);
-   public abstract double[][] getZBuffer();
    public abstract Point3d getWorldCoordinatesFromScreenCoordinates(float f, float g, double z);
    public abstract void addContextSwitchedListener(ContextSwitchedListener contextSwitchedListener);
 

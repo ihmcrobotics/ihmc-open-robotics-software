@@ -98,8 +98,6 @@ public class DRCConfigParameters
    public static final String MULTISENSE_LEFT_CAMERA_TOPIC;
    public static final String MULTISENSE_RIGHT_CAMERA_TOPIC;
 
-   public static final int GAZEBO_VER = DRCLocalConfigParameters.GAZEBO_VER;
-
    public static boolean LIDAR_ADJUSTMENT_ACTIVE = false;
 
    static
@@ -116,25 +114,13 @@ public class DRCConfigParameters
       }
       else
       {
-         if (GAZEBO_VER >= 3)
-         {
-            MULTISENSE_CAMERA_STRING_BASE = "/multisense_sl/camera";
+         MULTISENSE_CAMERA_STRING_BASE = "/multisense_sl/camera";
 
-            // ROS Topics
-            FISHEYE_RIGHT_CAMERA_TOPIC = "/l_situational_awareness_camera/image_raw/compressed";
-            FISHEYE_LEFT_CAMERA_TOPIC = "/r_situational_awareness_camera/image_raw/compressed";
-            MULTISENSE_LEFT_CAMERA_TOPIC = MULTISENSE_CAMERA_STRING_BASE + "/left/image_rect_color/compressed";
-            MULTISENSE_RIGHT_CAMERA_TOPIC = MULTISENSE_CAMERA_STRING_BASE + "/right/image_rect_color/compressed";
-         }
-         else
-         {
-            MULTISENSE_CAMERA_STRING_BASE = "/multisense_sl/camera";
-            FISHEYE_RIGHT_CAMERA_TOPIC = "/blackfly/camera/right/compressed";
-            FISHEYE_LEFT_CAMERA_TOPIC = "/blackfly/camera/left/compressed";
-            MULTISENSE_LEFT_CAMERA_TOPIC = MULTISENSE_CAMERA_STRING_BASE + "/left/image_rect_color/compressed";
-            MULTISENSE_RIGHT_CAMERA_TOPIC = MULTISENSE_CAMERA_STRING_BASE + "/right/image_rect_color/compressed";
-         }
-
+         // ROS Topics
+         FISHEYE_RIGHT_CAMERA_TOPIC = "/l_situational_awareness_camera/image_raw/compressed";
+         FISHEYE_LEFT_CAMERA_TOPIC = "/r_situational_awareness_camera/image_raw/compressed";
+         MULTISENSE_LEFT_CAMERA_TOPIC = MULTISENSE_CAMERA_STRING_BASE + "/left/image_rect_color/compressed";
+         MULTISENSE_RIGHT_CAMERA_TOPIC = MULTISENSE_CAMERA_STRING_BASE + "/right/image_rect_color/compressed";
       }
    }
 
@@ -151,51 +137,6 @@ public class DRCConfigParameters
    // LIDAR Configuration - LIDAR filtering parameters now in LidarFilterParameters
    public static final double LIDAR_SPINDLE_VELOCITY = 5.1;
    
-   /** LIDAR near scan configuration - enable or disable positioning the rotation origin on the near scan point cloud */
-   public static final boolean LIDAR_ENABLE_NEAR_SCAN_MOUSE_COLLISIONS = DRCLocalConfigParameters.LIDAR_ENABLE_NEAR_SCAN_MOUSE_COLLISIONS; 
-
-   // the useful children are "Static Link Graphic" and "atlas", but you don't really need atlas. ~30% faster without atlas.
-   public static final String[] SCS_LIDAR_NODES_TO_INTERSECT = new String[] {"Static Link Graphic"};
-
-   public static final boolean STREAM_POLAR_LIDAR = true;
-   public static final int LIDAR_UPDATE_RATE_OVERRIDE = 30;
-   public static final int LIDAR_SWEEPS_PER_SCAN = 1;
-
-   public static final int LIDAR_POINTS_PER_SWEEP;
-   public static final float LIDAR_SWEEP_MAX_YAW;
-   public static final float LIDAR_SWEEP_MIN_YAW;
-
-   static
-   {
-      if (DRCLocalConfigParameters.USING_REAL_HEAD)
-      {
-         final float crc = -.0010908f;
-         LIDAR_POINTS_PER_SWEEP = 1081;
-         LIDAR_SWEEP_MIN_YAW = -2.356194f + crc;
-         LIDAR_SWEEP_MAX_YAW = 2.356194f + crc;
-
-      }
-      else
-      {
-         LIDAR_POINTS_PER_SWEEP = 720;
-         LIDAR_SWEEP_MIN_YAW = -1.570796f;
-         LIDAR_SWEEP_MAX_YAW = 1.570796f;
-      }
-   }
-
-   public static final boolean OVERRIDE_DRC_LIDAR_CONFIG = true;
-   public static final float LIDAR_MIN_DISTANCE = 0.2f;
-   public static final float LIDAR_MAX_DISTANCE = 10.0f;
-
-   public static final float LIDAR_SCAN_MAX_ROLL = 0.0f;    // rolls the LIDAR to
-
-   // simulate a faster update rate.
-   public static final float LIDAR_SCAN_MIN_ROLL = 0.0f;
-   public static final float LIDAR_ANGLE_INCREMENT = (float) Math.toRadians(0.25);
-   public static final float LIDAR_TIME_INCREMENT = 0.0f;
-   public static final float LIDAR_SCAN_TIME = 0.0f;
-   public static final double LIDAR_NOISE_LEVEL_OVERRIDE = 0.005;    // DRCGazebo
-
    // will simulate with: 0.005
    public static final boolean DEBUG_GAZEBO_LIDAR = false;
 

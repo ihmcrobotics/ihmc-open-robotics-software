@@ -30,7 +30,6 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.InertiaTools;
 import us.ihmc.utilities.Pair;
-import us.ihmc.utilities.lidar.polarLidar.geometry.LIDARScanDefinition;
 import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -48,8 +47,7 @@ import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJointHolder;
 import com.yobotics.simulationconstructionset.PinJoint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SliderJoint;
-import com.yobotics.simulationconstructionset.simulatedSensors.FastPolarRayCastLIDAR;
-import com.yobotics.simulationconstructionset.simulatedSensors.RayTraceLIDARSensor;
+import com.yobotics.simulationconstructionset.simulatedSensors.LidarMount;
 import com.yobotics.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorLimitationParameters;
 import com.yobotics.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorNoiseParameters;
 import com.yobotics.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorUpdateParameters;
@@ -57,9 +55,7 @@ import com.yobotics.simulationconstructionset.simulatedSensors.SimulatedLIDARSen
 public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder, HumanoidRobot    // TODO: make an SDFHumanoidRobot
 {
   
-   private static final boolean DEBUG = false;
    private static final boolean SHOW_CONTACT_POINTS = true;
-   private static final boolean USE_POLAR_LIDAR_MODEL = true;
    private static final boolean SHOW_COM_REFERENCE_FRAMES = true;
    private static final boolean SHOW_SENSOR_REFERENCE_FRAMES = false;
 
@@ -362,10 +358,6 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder, Hu
       scsJoint.setLink(createLink(joint.getChild(), visualTransform, useCollisionMeshes));
       scsParentJoint.addJoint(scsJoint);
 
-      if (DEBUG)
-         if ("hokuyo_joint".equals(scsJoint.getName()))
-            System.out.println("hokuyo joint's parent is : " + scsParentJoint.getName());
-
       addSensors(scsJoint, joint.getChild());
 
       if (!asNullJoint && lastSimulatedJoints.contains(joint.getName()))
@@ -504,10 +496,6 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder, Hu
          {
             if ("ray".equals(sensor.getType()) || "gpu_ray".equals(sensor.getType()))
             {
-               if (DEBUG)
-                  System.out.println("SDFRobot has a lidar!");
-               if (DEBUG)
-                  System.out.println("SDFRobot: the lidar is attached to link: " + scsJoint.getName());
                Ray sdfRay = sensor.getRay();
                if (sdfRay == null)
                {
@@ -547,9 +535,11 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder, Hu
                      }
                   }
 
-                  LidarScanParameters polarDefinition = new LidarScanParameters(sdfSamples, (float) sdfMinAngle, (float) sdfMaxAngle, 0.0f, 0.0f, 1, 0.0f,
-                                                           0.0f, (float) sdfMinRange, (float) sdfMaxRange, 0.0f, false,false);
-                  LIDARScanDefinition lidarScanDefinition = LIDARScanDefinition.PlanarSweep(sdfMaxAngle - sdfMinAngle, sdfSamples);
+                  System.err.println("[SDFRobot]: FIXME: Setting LIDAR angle to 0.5 pi due to current GPULidar limitations");
+                  sdfMinAngle = -0.25 * Math.PI;
+                  sdfMaxAngle = 0.25 * Math.PI;
+                  
+                  LidarScanParameters polarDefinition = new LidarScanParameters(sdfSamples, (float) sdfMinAngle, (float) sdfMaxAngle, 0.0f, (float) sdfMinRange, (float) sdfMaxRange, 0.0f);
                   Transform3D transform3d = SDFConversionsHelper.poseToTransform(sensor.getPose());
 
                   SimulatedLIDARSensorNoiseParameters noiseParameters = new SimulatedLIDARSensorNoiseParameters();
@@ -565,25 +555,10 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder, Hu
                   updateParameters.setAlwaysOn(sdfAlwaysOn);
                   updateParameters.setUpdateRate(sdfUpdateRate);
 
-                  // updateParameters.setServerPort() We can't know the server port in SDF Uploaders, so this must be specified afterwords, but searching the robot tree and assigning numbers.
 
-                  if (!USE_POLAR_LIDAR_MODEL)
-                  {
-                     RayTraceLIDARSensor scsLidar = new RayTraceLIDARSensor(transform3d, lidarScanDefinition);
-                     scsLidar.setNoiseParameters(noiseParameters);
-                     scsLidar.setSensorLimitationParameters(limitationParameters);
-                     scsLidar.setLidarDaemonParameters(updateParameters);
-                     scsJoint.addSensor(scsLidar);
-                  }
-                  else
-                  {
-                     FastPolarRayCastLIDAR scsLidar = new FastPolarRayCastLIDAR(transform3d, polarDefinition);
-                     scsLidar.setNoiseParameters(noiseParameters);
-                     scsLidar.setSensorLimitationParameters(limitationParameters);
-                     scsLidar.setLidarDaemonParameters(updateParameters);
-                     scsJoint.addSensor(scsLidar);
-                  }
-
+                  LidarMount lidarMount = new LidarMount(transform3d, polarDefinition);
+                  scsJoint.addSensor(lidarMount);
+                  
                }
             }
 
