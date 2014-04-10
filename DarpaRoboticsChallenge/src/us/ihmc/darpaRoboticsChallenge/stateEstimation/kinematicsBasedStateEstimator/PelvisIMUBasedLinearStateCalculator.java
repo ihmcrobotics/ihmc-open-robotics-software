@@ -141,7 +141,7 @@ public class PelvisIMUBasedLinearStateCalculator
       return imuBasedStateEstimationEnabled.getBooleanValue();
    }
    
-   public void setAlhaGravityEstimation(double alphaFilter)
+   public void setAlphaGravityEstimation(double alphaFilter)
    {
       alphaGravityEstimation.set(alphaFilter);
    }
