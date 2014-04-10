@@ -52,4 +52,6 @@ public interface StateEstimatorParameters
    public abstract double getFootVelocityUsedForImuDriftFilterFreqInHertz();
    
    public abstract double getFootVelocityThresholdToEnableIMUDriftCompensation();
+
+   public abstract boolean useTwistForPelvisLinearStateEstimation();
 }

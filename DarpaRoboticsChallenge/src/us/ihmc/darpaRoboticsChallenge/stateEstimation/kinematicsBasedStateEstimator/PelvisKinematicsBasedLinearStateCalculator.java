@@ -182,6 +182,11 @@ public class PelvisKinematicsBasedLinearStateCalculator
    {
       alphaCoPFilter.set(alphaFilter);
    }
+   
+   public void enableTwistEstimation(boolean enable)
+   {
+      useTwistToComputeRootJointLinearVelocity.set(enable);
+   }
 
    private void reset()
    {

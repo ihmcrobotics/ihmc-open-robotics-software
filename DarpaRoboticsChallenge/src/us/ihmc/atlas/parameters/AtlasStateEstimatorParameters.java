@@ -225,4 +225,10 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
    {
       return true;
    }
+
+   @Override
+   public boolean useTwistForPelvisLinearStateEstimation()
+   {
+      return false;
+   }
 }

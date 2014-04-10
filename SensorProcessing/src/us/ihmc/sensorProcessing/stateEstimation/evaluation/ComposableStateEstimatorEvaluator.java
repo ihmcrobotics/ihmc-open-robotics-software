@@ -239,6 +239,11 @@ public class ComposableStateEstimatorEvaluator
          {
             return true;
          }
+
+         public boolean useTwistForPelvisLinearStateEstimation()
+         {
+            return false;
+         }
       };
       
       SensorAndEstimatorAssembler sensorAndEstimatorAssembler = new SensorAndEstimatorAssembler(stateEstimatorDataFromControllerSource,
