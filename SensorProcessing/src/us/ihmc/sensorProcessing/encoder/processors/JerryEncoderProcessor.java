@@ -27,12 +27,19 @@ public class JerryEncoderProcessor extends AbstractEncoderProcessor
 
    private final DoubleYoVariable maxPossibleRate;
    private final DoubleYoVariable minPriorRate, maxPriorRate, averagePriorRate;
+   private int updateCount=0;
+   private final int slowUpdateFactor;
+   public JerryEncoderProcessor(String name, IntegerYoVariable rawTicks, DoubleYoVariable time, double distancePerTick, double dt,YoVariableRegistry registry)
+   {
+      this( name,  rawTicks,  time,  distancePerTick,  dt, 1, registry);
+   }
 
-   public JerryEncoderProcessor(String name, IntegerYoVariable rawTicks, DoubleYoVariable time, double distancePerTick, double dt, YoVariableRegistry registry)
+   public JerryEncoderProcessor(String name, IntegerYoVariable rawTicks, DoubleYoVariable time, double distancePerTick, double dt, int slowUpdateFactor,YoVariableRegistry registry)
    {
       super(name, rawTicks, time, distancePerTick, registry);
 
-      this.dt = dt;
+      this.slowUpdateFactor = slowUpdateFactor;
+      this.dt = dt*slowUpdateFactor;
 
       this.state = EnumYoVariable.create(name + "state", EncoderState.class, registry);
 
@@ -58,6 +65,13 @@ public class JerryEncoderProcessor extends AbstractEncoderProcessor
    }
 
    public void update()
+   {
+      if(updateCount==0)
+         performUpdate();
+      
+      updateCount = (updateCount+1) % slowUpdateFactor;           
+   }
+   public void performUpdate()
    {
       boolean positionChanged = rawTicks.getIntegerValue() != previousRawTicks.getIntegerValue();
 
@@ -230,20 +244,17 @@ public class JerryEncoderProcessor extends AbstractEncoderProcessor
                {
 //                this.processedTickRate.set(minPriorRate.getDoubleValue() + ALPHA * (averagePriorRate.getDoubleValue() - minPriorRate.getDoubleValue()));
                   this.processedTickRate.set(processedTickRate.getDoubleValue() + ALPHA * (minPriorRate.getDoubleValue() - processedTickRate.getDoubleValue()));
-                  this.processedTickRate.set(processedTickRate.getDoubleValue()
-                                             + GAMMA * (averagePriorRate.getDoubleValue() - processedTickRate.getDoubleValue()));
+                  this.processedTickRate.set(processedTickRate.getDoubleValue() + GAMMA * (averagePriorRate.getDoubleValue() - processedTickRate.getDoubleValue()));
                }
                else if (processedTickRate.getDoubleValue() > maxPriorRate.getDoubleValue())
                {
 //                this.processedTickRate.set(maxPriorRate.getDoubleValue() + BETA * (averagePriorRate.getDoubleValue() - maxPriorRate.getDoubleValue()));
                   this.processedTickRate.set(processedTickRate.getDoubleValue() + BETA * (maxPriorRate.getDoubleValue() - processedTickRate.getDoubleValue()));
-                  this.processedTickRate.set(processedTickRate.getDoubleValue()
-                                             + GAMMA * (averagePriorRate.getDoubleValue() - processedTickRate.getDoubleValue()));
+                  this.processedTickRate.set(processedTickRate.getDoubleValue() + GAMMA * (averagePriorRate.getDoubleValue() - processedTickRate.getDoubleValue()));
                }
                else
                {
-                  this.processedTickRate.set(processedTickRate.getDoubleValue()
-                                             + GAMMA * (averagePriorRate.getDoubleValue() - processedTickRate.getDoubleValue()));
+                  this.processedTickRate.set(processedTickRate.getDoubleValue() + GAMMA * (averagePriorRate.getDoubleValue() - processedTickRate.getDoubleValue()));
                }
             }
 
