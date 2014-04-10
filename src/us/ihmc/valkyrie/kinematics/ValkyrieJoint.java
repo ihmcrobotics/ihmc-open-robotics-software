@@ -33,7 +33,7 @@ public class ValkyrieJoint
 
    public ValkyrieJoint(String name, YoVariableRegistry registry)
    {
-      this(name, new DoubleYoVariable(name + "_test_alpha", registry), new BooleanYoVariable(name + "_test_useTwoPoleFiltering", registry), new BooleanYoVariable(name + "_test_useBacklashComp", registry), new DoubleYoVariable(name + "_test_slopTimeForBacklashComp", registry), registry);
+      this(name, null, null, null, null, registry);
    }
    
    public ValkyrieJoint(String name, DoubleYoVariable alpha, BooleanYoVariable useTwoPoleFiltering, BooleanYoVariable useBacklashComp, DoubleYoVariable slopTimeForBacklashComp, YoVariableRegistry registry)
@@ -81,15 +81,16 @@ public class ValkyrieJoint
    public void setPosition(double q)
    {
       this.position.set(q);
-      fd_velocity.update();
-      filt_velocity.update();
-      bl_velocity.update();
-      filt_bl_velocity.update();
-      this.velocity.set(filt_velocity.getDoubleValue());
+      if (fd_velocity != null) fd_velocity.update();
+      if (filt_velocity != null) filt_velocity.update();
+      if (bl_velocity != null) bl_velocity.update();
+      if (filt_bl_velocity != null) filt_bl_velocity.update();
+//      this.velocity.set(filt_velocity.getDoubleValue());
    }
 
    public void setVelocity(double qd)
    {
+      this.velocity.set(qd);
    }
 
    public void setEffort(double effort)
@@ -121,6 +122,7 @@ public class ValkyrieJoint
          else
             return fd_velocity.getDoubleValue();
       }
+//      return velocity.getDoubleValue();
    }
 
    public double getEffort()
