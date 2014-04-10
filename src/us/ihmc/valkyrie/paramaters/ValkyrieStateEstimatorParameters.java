@@ -140,13 +140,13 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    @Override
    public boolean useAccelerometerForEstimation()
    {
-      return false;
+      return true;
    }
 
    @Override
    public boolean useHackishAccelerationIntegration()
    {
-      return false;
+      return true;
    }
 
    @Override
@@ -164,13 +164,13 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    @Override
    public double getPelvisPositionFusingFrequency()
    {
-      return Double.POSITIVE_INFINITY;
+      return 11.7893; // alpha = 0.8 with dt = 0.003
    }
 
    @Override
    public double getPelvisLinearVelocityFusingFrequency()
    {
-      return Double.POSITIVE_INFINITY;
+      return 0.4261; // alpha = 0.992 with dt = 0.003
    }
 
    @Override
@@ -217,6 +217,12 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
 
    @Override
    public boolean trustCoPAsNonSlippingContactPoint()
+   {
+      return false;
+   }
+
+   @Override
+   public boolean useTwistForPelvisLinearStateEstimation()
    {
       return false;
    }
