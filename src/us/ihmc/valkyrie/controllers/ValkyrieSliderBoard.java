@@ -178,7 +178,7 @@ public class ValkyrieSliderBoard
                            sliderBoardConfigurationManager.setKnob(4, turboName + "_lowLevelKd", registry, 0.0, .5);
                            sliderBoardConfigurationManager.setKnob(5, turboName + "_forceAlpha", registry, 0.0, 1.0);
                            sliderBoardConfigurationManager.setKnob(6, turboName + "_forceDotAlpha", registry, 0.0, 1.0);
-                           sliderBoardConfigurationManager.setKnob(7, turboName + "_parallelDamping", registry, 0.0, 10.0);
+                           sliderBoardConfigurationManager.setKnob(7, turboName + "_parallelDamping", registry, -10.0, 0.0);
                            sliderBoardConfigurationManager.setKnob(8, "requestedFunctionGeneratorMode", registry, 0, YoFunctionGeneratorMode.values().length - 1);
                            sliderBoardConfigurationManager.setKnob(9, turboName + "_effortFF", registry, -0.1, 0.1);
                            // sliders
@@ -214,7 +214,7 @@ public class ValkyrieSliderBoard
                               sliderBoardConfigurationManager.setKnob(4, turboName + "_lowLevelKd", registry, 0.0, 0.001);
                               sliderBoardConfigurationManager.setKnob(5, turboName + "_forceAlpha", registry, 0.0, 1.0);
                               sliderBoardConfigurationManager.setKnob(6, turboName + "_forceDotAlpha", registry, 0.0, 1.0);
-                              sliderBoardConfigurationManager.setKnob(7, turboName + "_parallelDamping", registry, 0.0, 10.0);
+                              sliderBoardConfigurationManager.setKnob(7, turboName + "_parallelDamping", registry, -10.0, 0.0);
                               sliderBoardConfigurationManager.setKnob(8, "requestedFunctionGeneratorMode", registry, 0, YoFunctionGeneratorMode.values().length - 1);
                               sliderBoardConfigurationManager.setKnob(9, turboName + "_effortFF", registry, -0.01, 0.01);
                               // sliders
