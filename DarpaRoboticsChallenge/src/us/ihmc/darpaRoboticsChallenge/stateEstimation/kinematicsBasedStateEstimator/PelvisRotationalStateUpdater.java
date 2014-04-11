@@ -165,7 +165,7 @@ public class PelvisRotationalStateUpdater
       measurementFrameAngularVelocityInWorld.set(angularVelocityMeasurementLinkRelativeToWorld);
 
       rootJoint.packJointTwist(twistRootBodyRelativeToWorld);
-      twistRootBodyRelativeToWorld.setAngularPart(angularVelocityRootJointFrameRelativeToWorld.getVector());
+      twistRootBodyRelativeToWorld.setAngularPart(angularVelocityRootJointFrameRelativeToWorld);
       rootJoint.setJointTwist(twistRootBodyRelativeToWorld);
       twistCalculator.compute();
    }
