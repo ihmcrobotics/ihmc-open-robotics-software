@@ -27,16 +27,16 @@ public class ValkyrieJoint
    private final DoubleYoVariable desiredEffort;
    
    private final BooleanYoVariable useTwoPoleFiltering;
+   private final BooleanYoVariable useEncoderProcessing;
    
    private final BooleanYoVariable useBacklashComp;
-   private final DoubleYoVariable slopTimeForBacklashComp;
 
    public ValkyrieJoint(String name, YoVariableRegistry registry)
    {
-      this(name, null, null, null, null, registry);
+      this(name, null, null, null, null, null,registry);
    }
    
-   public ValkyrieJoint(String name, DoubleYoVariable alpha, BooleanYoVariable useTwoPoleFiltering, BooleanYoVariable useBacklashComp, DoubleYoVariable slopTimeForBacklashComp, YoVariableRegistry registry)
+   public ValkyrieJoint(String name, DoubleYoVariable alpha, BooleanYoVariable useTwoPoleFiltering, BooleanYoVariable useBacklashComp, DoubleYoVariable slopTimeForBacklashComp, BooleanYoVariable useEncoderProcessor, YoVariableRegistry registry)
    {
       this.name = name;
       position = new DoubleYoVariable(name + "_q", registry);
@@ -44,7 +44,7 @@ public class ValkyrieJoint
       
       this.useTwoPoleFiltering = useTwoPoleFiltering;
       this.useBacklashComp = useBacklashComp;
-      this.slopTimeForBacklashComp = slopTimeForBacklashComp;
+      this.useEncoderProcessing = useEncoderProcessor;
       
       if (alpha != null)
       {
@@ -85,7 +85,6 @@ public class ValkyrieJoint
       if (filt_velocity != null) filt_velocity.update();
       if (bl_velocity != null) bl_velocity.update();
       if (filt_bl_velocity != null) filt_bl_velocity.update();
-//      this.velocity.set(filt_velocity.getDoubleValue());
    }
 
    public void setVelocity(double qd)
@@ -108,6 +107,10 @@ public class ValkyrieJoint
       boolean useTwoPoleFiltering = this.useTwoPoleFiltering != null && this.useTwoPoleFiltering.getBooleanValue();
       boolean useBacklashComp = this.useBacklashComp != null && this.useBacklashComp.getBooleanValue();
       
+      
+      if (useEncoderProcessing != null && useEncoderProcessing.getBooleanValue())
+         return velocity.getDoubleValue();
+
       if (useBacklashComp)
       {
          if (useTwoPoleFiltering)
@@ -122,7 +125,6 @@ public class ValkyrieJoint
          else
             return fd_velocity.getDoubleValue();
       }
-//      return velocity.getDoubleValue();
    }
 
    public double getEffort()
