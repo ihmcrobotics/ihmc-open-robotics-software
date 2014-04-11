@@ -1,14 +1,10 @@
 package us.ihmc.valkyrie.visualizer;
 
-
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.atlas.visualization.SliderBoardFactory;
-import us.ihmc.atlas.visualization.WalkControllerSliderBoard;
 import us.ihmc.robotDataCommunication.YoVariableClient;
-import us.ihmc.robotDataCommunication.visualizer.SCSYoVariablesUpdatedListener;
 import us.ihmc.valkyrie.ValkyrieSDFLoader;
 import us.ihmc.valkyrie.configuration.ValkyrieNetworkParameters;
-import us.ihmc.valkyrie.controllers.StandPrepSliderBoardFactory;
 import us.ihmc.valkyrie.controllers.ValkyrieSliderBoard;
 import us.ihmc.valkyrie.paramaters.ValkyrieJointMap;
 
@@ -28,11 +24,15 @@ public class RemoteValkyrieVisualizer
       ValkyrieJointMap jointMap = new ValkyrieJointMap();
       JaxbSDFLoader robotLoader = ValkyrieSDFLoader.loadValkyrieRobot(false);
 
-    SliderBoardFactory sliderBoardFactory = ValkyrieSliderBoard.getWalkingSliderBoardFactory();
+      SliderBoardFactory sliderBoardFactory = ValkyrieSliderBoard.getWalkingSliderBoardFactory();
 //    SliderBoardFactory sliderBoardFactory = ValkyrieSliderBoard.getIDControllerSliderBoardFactory();
 //      SliderBoardFactory sliderBoardFactory = new StandPrepSliderBoardFactory();
 
-      SCSYoVariablesUpdatedListener scsYoVariablesUpdatedListener = new ValkyrieSliderBoardControllerListener(robotLoader, jointMap, bufferSize, sliderBoardFactory);
+      ValkyrieSliderBoardControllerListener scsYoVariablesUpdatedListener = new ValkyrieSliderBoardControllerListener(robotLoader, jointMap, bufferSize,
+            sliderBoardFactory);
+
+      int numberOfTicksBeforeUpdatingGraphs = 30;
+      scsYoVariablesUpdatedListener.updateGraphsLessFrequently(true, numberOfTicksBeforeUpdatingGraphs);
 
       YoVariableClient client = new YoVariableClient(host, port, scsYoVariablesUpdatedListener, "remote", false);
       client.start();
@@ -43,10 +43,10 @@ public class RemoteValkyrieVisualizer
       int bufferSize = 16384;
       JSAP jsap = new JSAP();
 
-      FlaggedOption hostOption =
-         new FlaggedOption("host").setStringParser(JSAP.STRING_PARSER).setRequired(false).setLongFlag("host").setShortFlag('L').setDefault(defaultHost);
-      FlaggedOption portOption = new FlaggedOption("port").setStringParser(JSAP.INTEGER_PARSER).setRequired(false).setLongFlag("port").setShortFlag(
-                                     'p').setDefault(String.valueOf(defaultPort));
+      FlaggedOption hostOption = new FlaggedOption("host").setStringParser(JSAP.STRING_PARSER).setRequired(false).setLongFlag("host").setShortFlag('L')
+            .setDefault(defaultHost);
+      FlaggedOption portOption = new FlaggedOption("port").setStringParser(JSAP.INTEGER_PARSER).setRequired(false).setLongFlag("port").setShortFlag('p')
+            .setDefault(String.valueOf(defaultPort));
 
       jsap.registerParameter(hostOption);
       jsap.registerParameter(portOption);
@@ -68,8 +68,5 @@ public class RemoteValkyrieVisualizer
          System.err.println();
          System.exit(1);
       }
-
-
-
    }
 }
