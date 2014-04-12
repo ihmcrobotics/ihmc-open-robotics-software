@@ -61,7 +61,7 @@ public class SDFJoint
       this.pose = pose;
    }
 
-   public String getThread_pitch()
+   public String getThreadPitch()
    {
       return threadPitch;
    }
