@@ -15,8 +15,10 @@ import javax.vecmath.Vector3d;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 import us.ihmc.SdfLoader.xmlDescription.AbstractSDFMesh;
+import us.ihmc.SdfLoader.xmlDescription.SDFGeometry;
 import us.ihmc.SdfLoader.xmlDescription.SDFGeometry.HeightMap.Blend;
 import us.ihmc.SdfLoader.xmlDescription.SDFGeometry.HeightMap.Texture;
+import us.ihmc.SdfLoader.xmlDescription.SDFGeometry.Mesh;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.ModelFileType;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
@@ -87,65 +89,67 @@ public class SDFGraphics3DObject extends Graphics3DObject
                }
             }
             
-            if(sdfVisual.getGeometry().getMesh() != null)
+            SDFGeometry geometry = sdfVisual.getGeometry();
+            Mesh mesh = geometry.getMesh();
+            if(mesh != null)
             {
-               String uri = convertToFullPath(resourceDirectories, sdfVisual.getGeometry().getMesh().getUri());
-               if(sdfVisual.getGeometry().getMesh().getScale() != null)
+               String uri = convertToFullPath(resourceDirectories, mesh.getUri());
+               if(mesh.getScale() != null)
                {
-                  Vector3d scale = SDFConversionsHelper.stringToVector3d(sdfVisual.getGeometry().getMesh().getScale());
+                  Vector3d scale = SDFConversionsHelper.stringToVector3d(mesh.getScale());
                   scale(scale);
                }
                String submesh = null;
                boolean centerSubmesh = false;
-               if(sdfVisual.getGeometry().getMesh().getSubmesh() != null)
+               if(mesh.getSubmesh() != null)
                {
-                  submesh = sdfVisual.getGeometry().getMesh().getSubmesh().getName().trim();
-                  centerSubmesh = sdfVisual.getGeometry().getMesh().getSubmesh().getCenter().trim().equals("1");
+                  submesh = mesh.getSubmesh().getName().trim();
+                  centerSubmesh = mesh.getSubmesh().getCenter().trim().equals("1");
                }
                addMesh(uri, submesh, centerSubmesh, visualPose, appearance, resourceDirectories);
             }
-            else if(sdfVisual.getGeometry().getCylinder() != null)
+            else if(geometry.getCylinder() != null)
             {
-               double length = Double.parseDouble(sdfVisual.getGeometry().getCylinder().getLength());
-               double radius = Double.parseDouble(sdfVisual.getGeometry().getCylinder().getRadius()); 
+               double length = Double.parseDouble(geometry.getCylinder().getLength());
+               double radius = Double.parseDouble(geometry.getCylinder().getRadius()); 
                translate(0.0, 0.0, -length/2.0);
                addCylinder(length, radius, getDefaultAppearanceIfNull(appearance));
             }
-            else if(sdfVisual.getGeometry().getBox() != null)
+            else if(geometry.getBox() != null)
             {
-               String[] boxDimensions = sdfVisual.getGeometry().getBox().getSize().split(" ");            
+               String[] boxDimensions = geometry.getBox().getSize().split(" ");            
                double bx = Double.parseDouble(boxDimensions[0]);
                double by = Double.parseDouble(boxDimensions[1]);
                double bz = Double.parseDouble(boxDimensions[2]);
                translate(0.0, 0.0, -bz/2.0);
                addCube(bx, by, bz, getDefaultAppearanceIfNull(appearance));
             }
-            else if(sdfVisual.getGeometry().getSphere() != null)
+            else if(geometry.getSphere() != null)
             {
-               double radius = Double.parseDouble(sdfVisual.getGeometry().getSphere().getRadius());
+               double radius = Double.parseDouble(geometry.getSphere().getRadius());
                addSphere(radius, getDefaultAppearanceIfNull(appearance));
             }
-            else if(sdfVisual.getGeometry().getPlane() != null)
+            else if(geometry.getPlane() != null)
             {
-               Vector3d normal = SDFConversionsHelper.stringToNormalizedVector3d(sdfVisual.getGeometry().getPlane().getNormal());
-               Vector2d size = SDFConversionsHelper.stringToVector2d(sdfVisual.getGeometry().getPlane().getSize());
+               Vector3d normal = SDFConversionsHelper.stringToNormalizedVector3d(geometry.getPlane().getNormal());
+               Vector2d size = SDFConversionsHelper.stringToVector2d(geometry.getPlane().getSize());
                
                AxisAngle4d planeRotation = GeometryTools.getRotationBasedOnNormal(normal);
                rotate(planeRotation);
                addCube(size.x, size.y, 0.005, getDefaultAppearanceIfNull(appearance));
             }
-            else if(sdfVisual.getGeometry().getHeightMap() != null)
+            else if(geometry.getHeightMap() != null)
             {
-               String URI = convertToFullPath(resourceDirectories, sdfVisual.getGeometry().getHeightMap().getUri());
-               SDFHeightMap heightMap = new SDFHeightMap(URI, sdfVisual.getGeometry().getHeightMap());
+               String URI = convertToFullPath(resourceDirectories, geometry.getHeightMap().getUri());
+               SDFHeightMap heightMap = new SDFHeightMap(URI, geometry.getHeightMap());
                
                
                AppearanceDefinition app = DEFAULT_APPEARANCE;
-               if(sdfVisual.getGeometry().getHeightMap().getTextures() != null)
+               if(geometry.getHeightMap().getTextures() != null)
                {
                   double width = heightMap.getXMax() - heightMap.getXMin();
                   HeightBasedTerrainBlend sdfTerrainBlend = new HeightBasedTerrainBlend(heightMap);
-                  for(Texture text : sdfVisual.getGeometry().getHeightMap().getTextures())
+                  for(Texture text : geometry.getHeightMap().getTextures())
                   {
                      double size = Double.parseDouble(text.getSize());
                      double scale = width/size;
@@ -153,7 +157,7 @@ public class SDFGraphics3DObject extends Graphics3DObject
                            convertToFullPath(resourceDirectories, text.getNormal()));
                   }
                   
-                  for(Blend blend : sdfVisual.getGeometry().getHeightMap().getBlends())
+                  for(Blend blend : geometry.getHeightMap().getBlends())
                   {
                      sdfTerrainBlend.addBlend(Double.parseDouble(blend.getMinHeight()), Double.parseDouble(blend.getFadeDist()));
                   }
@@ -166,7 +170,7 @@ public class SDFGraphics3DObject extends Graphics3DObject
             else
             {
                System.err.println("Visual for " + sdfVisual.getName() + " not implemented yet");
-               System.err.println("Defined visual" + ToStringBuilder.reflectionToString(sdfVisual.getGeometry()));
+               System.err.println("Defined visual" + ToStringBuilder.reflectionToString(geometry));
                
             }
    
@@ -212,8 +216,15 @@ public class SDFGraphics3DObject extends Graphics3DObject
          String fullPath;
          try
          {
-            URI meshURI = new URI(meshPath);
-            fullPath = resourceDirectory + File.separator + meshURI.getAuthority() + meshURI.getPath();
+            if (resourceDirectory != "")
+            {
+               URI meshURI = new URI(meshPath);
+               fullPath = resourceDirectory + File.separator + meshURI.getAuthority() + meshURI.getPath();
+            }
+            else
+            {
+               fullPath = meshPath;
+            }
          }
          catch (URISyntaxException e)
          {
