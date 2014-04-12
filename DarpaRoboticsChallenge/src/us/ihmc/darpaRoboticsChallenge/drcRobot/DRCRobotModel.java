@@ -18,7 +18,7 @@ public interface DRCRobotModel
 {
    public enum RobotType
    {
-      ATLAS, VALKYRIE, ACSELL
+      ATLAS, VALKYRIE, ACSELL, R2
    }
 
    public ArmControllerParameters getArmControllerParameters();
