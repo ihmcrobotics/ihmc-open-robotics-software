@@ -21,6 +21,12 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract double getFootForwardOffset();
 
    public abstract double getFootBackwardOffset();
+   
+   public abstract double getFootWidth();
+   
+   public abstract double getToeWidth();
+   
+   public abstract double getFootLength();
 
    public abstract double getAnkleHeight();
 
@@ -141,12 +147,6 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract double getPelvisPitchLowerLimit();
 
    public abstract boolean isPelvisPitchReversed();
-
-   public abstract double getFoot_width();
-
-   public abstract double getToe_width();
-
-   public abstract double getFoot_length();
 
    public abstract double getFoot_start_toetaper_from_back();
 

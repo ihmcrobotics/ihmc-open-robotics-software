@@ -516,17 +516,17 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       return false;
    }
 
-   public double getFoot_width()
+   public double getFootWidth()
    {
       return AtlasPhysicalProperties.foot_width;
    }
 
-   public double getToe_width()
+   public double getToeWidth()
    {
       return AtlasPhysicalProperties.toe_width;
    }
 
-   public double getFoot_length()
+   public double getFootLength()
    {
       return AtlasPhysicalProperties.foot_length;
    }
@@ -539,7 +539,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    public double getSideLengthOfBoundingBoxForFootstepHeight()
    {
       return (1 + 0.3) * 2 * Math.sqrt(getFootForwardOffset() * getFootForwardOffset()
-            + 0.25 * getFoot_width() * getFoot_width());
+            + 0.25 * getFootWidth() * getFootWidth());
    }
    
    public SideDependentList<Transform3D> getDesiredHandPosesWithRespectToChestFrame()
