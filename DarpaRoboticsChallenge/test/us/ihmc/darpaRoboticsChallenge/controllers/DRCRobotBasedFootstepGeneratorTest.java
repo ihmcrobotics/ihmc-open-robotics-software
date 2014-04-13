@@ -140,7 +140,7 @@ public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTe
    {
       for (Footstep footstep : footSteps)
       {
-         assertEquals(walkingParamaters.getAnkle_height(), footstep.getPoseCopy().getZ(), eps);
+         assertEquals(walkingParamaters.getAnkleHeight(), footstep.getPoseCopy().getZ(), eps);
       }
    }
 

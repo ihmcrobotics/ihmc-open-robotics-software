@@ -515,10 +515,6 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    {
       return false;
    }
-   public double getAnkle_height()
-   {
-      return AtlasPhysicalProperties.ankleHeight;
-   }
 
    public double getFoot_width()
    {
