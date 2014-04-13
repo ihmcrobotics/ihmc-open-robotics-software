@@ -535,25 +535,15 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       return ValkyriePhysicalProperties.footBack + ValkyriePhysicalProperties.footForward;
    }
 
-   public double getFoot_back()
-   {
-      return ValkyriePhysicalProperties.footBack;
-   }
-
    public double getFoot_start_toetaper_from_back()
    {
       // TODO Auto-generated method stub
       return 0;
    }
 
-   public double getFoot_forward()
-   {
-      return ValkyriePhysicalProperties.footForward;
-   }
-
    public double getSideLengthOfBoundingBoxForFootstepHeight()
    {
-      return (1 + 0.3) * 2 * Math.sqrt(getFoot_forward() * getFoot_forward()
+      return (1 + 0.3) * 2 * Math.sqrt(getFootForwardOffset() * getFootForwardOffset()
             + 0.25 * getFoot_width() * getFoot_width());
    }
 }
