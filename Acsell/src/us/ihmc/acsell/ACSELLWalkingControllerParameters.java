@@ -496,13 +496,6 @@ public class ACSELLWalkingControllerParameters implements WalkingControllerParam
    }
 
    @Override
-   public double getAnkle_height()
-   {
-      // TODO Auto-generated method stub
-      return BonoPhysicalProperties.ankleHeight;
-   }
-
-   @Override
    public double getFoot_width()
    {
       // TODO Auto-generated method stub
