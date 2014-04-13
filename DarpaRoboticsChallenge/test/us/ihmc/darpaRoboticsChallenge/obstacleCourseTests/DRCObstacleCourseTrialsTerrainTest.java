@@ -24,6 +24,7 @@ import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimu
 
 public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTestInterface
 {
+private Class thisClass = DRCObstacleCourseTrialsTerrainTest.class;
    private static final boolean KEEP_SCS_UP = false;
 
    private static final boolean createMovie = BambooTools.doMovieCreation();
@@ -64,7 +65,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       BambooTools.reportTestStartedMessage();
 
       String scriptName = "scripts/ExerciseAndJUnitScripts/DRCTrialsSlopeLeftFootPose.xml";
-      String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(this.getClass(), scriptName);
+      String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(thisClass, scriptName);
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DRC_TRIALS_TRAINING_WALKING;
       
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCSlopeTest", fileName, selectedLocation, checkNothingChanged, createMovie,
@@ -90,7 +91,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       BambooTools.reportTestStartedMessage();
 
       String scriptName = "scripts/ExerciseAndJUnitScripts/DRCTrialsSlopeLeftFootPose.xml";
-      String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(this.getClass(), scriptName);
+      String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(thisClass, scriptName);
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DRC_TRIALS_TRAINING_WALKING;
       
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCSlopeTest", fileName, selectedLocation, checkNothingChanged, createMovie,
@@ -128,7 +129,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       BambooTools.reportTestStartedMessage();
 
       String scriptName = "scripts/ExerciseAndJUnitScripts/DRCTrialsZigzagHurdlesLeftFootPose.xml";
-      String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(this.getClass(), scriptName);
+      String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(thisClass, scriptName);
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.IN_FRONT_OF_ZIGZAG_BLOCKS;
       
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCZigzagHurdlesTest", fileName, selectedLocation, checkNothingChanged,
@@ -154,7 +155,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       BambooTools.reportTestStartedMessage();
 
       String scriptName = "scripts/ExerciseAndJUnitScripts/DRCTrialsZigzagHurdlesLeftFootPose.xml";
-      String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(this.getClass(), scriptName);
+      String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(thisClass, scriptName);
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.IN_FRONT_OF_ZIGZAG_BLOCKS;
       
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCZigzagHurdlesTest", fileName, selectedLocation, checkNothingChanged,
@@ -192,7 +193,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       BambooTools.reportTestStartedMessage();
 
       String scriptName = "scripts/ExerciseAndJUnitScripts/DRCTrialsCinderblockFieldPartOneLeftFootPose.xml";
-      String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(this.getClass(), scriptName);
+      String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(thisClass, scriptName);
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.IN_FRONT_OF_CINDERBLOCK_FIELD;
       
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCCinderblockFieldPartOneTest", fileName, selectedLocation,
@@ -218,7 +219,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       BambooTools.reportTestStartedMessage();
 
       String scriptName = "scripts/ExerciseAndJUnitScripts/DRCTrialsCinderblockFieldPartTwoLeftFootPose.xml";
-      String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(this.getClass(), scriptName);
+      String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(thisClass, scriptName);
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.IN_FRONT_OF_SLANTED_CINDERBLOCK_FIELD;
       
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCCinderblockfieldPartTwoTest", fileName, selectedLocation,
@@ -244,7 +245,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       BambooTools.reportTestStartedMessage();
 
       String scriptName = "scripts/ExerciseAndJUnitScripts/DRCTrialsUpFlatCinderblocks.xml";
-      String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(this.getClass(), scriptName);
+      String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(thisClass, scriptName);
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.IN_FRONT_OF_CINDERBLOCK_FIELD;
       
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCFlatCinderblockTest", fileName, selectedLocation, checkNothingChanged,
@@ -269,7 +270,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       BambooTools.reportTestStartedMessage();
 
       String scriptName = "scripts/ExerciseAndJUnitScripts/DRCTrialsUpSlantedCinderblocks.xml";
-      String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(this.getClass(), scriptName);
+      String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(thisClass, scriptName);
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.IN_FRONT_OF_SLANTED_CINDERBLOCK_FIELD;
       
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCSlantedCinderblockTest", fileName, selectedLocation, checkNothingChanged,
@@ -295,7 +296,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       BambooTools.reportTestStartedMessage();
 
       String scriptName = "scripts/ExerciseAndJUnitScripts/DRCTrialsCinderblockFieldBoth.xml";
-      String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(this.getClass(), scriptName);
+      String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(thisClass, scriptName);
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.IN_FRONT_OF_CINDERBLOCK_FIELD;
       
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCSlantedCinderblockTest", fileName, selectedLocation, checkNothingChanged,

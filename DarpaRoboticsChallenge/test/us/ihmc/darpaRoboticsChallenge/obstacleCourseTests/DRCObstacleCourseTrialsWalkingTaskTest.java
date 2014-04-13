@@ -21,6 +21,7 @@ import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimu
 
 public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRobotTestInterface
 {
+	private Class thisClass = DRCObstacleCourseTrialsWalkingTaskTest.class;
    private static final boolean KEEP_SCS_UP = false;
 
 
@@ -60,7 +61,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       BambooTools.reportTestStartedMessage();
 
       String scriptName = "scripts/ExerciseAndJUnitScripts/TwoCinderBlocksStepOn_LeftFootTest.xml"; 
-      String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(this.getClass(), scriptName);
+      String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(thisClass, scriptName);
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.IN_FRONT_OF_TWO_HIGH_CINDERBLOCKS;
 
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCObstacleCourseTrialsCinderBlocksTest", fileName, selectedLocation, checkNothingChanged, showGUI, createMovie, getRobotModel());
@@ -88,7 +89,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       BambooTools.reportTestStartedMessage();
 
       String scriptName = "scripts/ExerciseAndJUnitScripts/TwoCinderBlocksStepOver_LeftFootTest.xml"; 
-      String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(this.getClass(), scriptName);
+      String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(thisClass, scriptName);
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.IN_FRONT_OF_TWO_HIGH_CINDERBLOCKS;
 
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCObstacleCourseTrialsCinderBlocksTest", fileName, selectedLocation, checkNothingChanged, showGUI, createMovie, getRobotModel());
