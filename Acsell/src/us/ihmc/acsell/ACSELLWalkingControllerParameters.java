@@ -464,7 +464,7 @@ public class ACSELLWalkingControllerParameters implements WalkingControllerParam
 
    public boolean isRunningOnRealRobot()
    {
-      return false;
+      return runningOnRealRobot;
    }
 
    public double getDefaultTransferTime()
