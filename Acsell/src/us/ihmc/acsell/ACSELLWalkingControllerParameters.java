@@ -517,24 +517,10 @@ public class ACSELLWalkingControllerParameters implements WalkingControllerParam
    }
 
    @Override
-   public double getFoot_back()
-   {
-      // TODO Auto-generated method stub
-      return BonoPhysicalProperties.footBack;
-   }
-
-   @Override
    public double getFoot_start_toetaper_from_back()
    {
       // TODO Auto-generated method stub
       return 0;
-   }
-
-   @Override
-   public double getFoot_forward()
-   {
-      // TODO Auto-generated method stub
-      return BonoPhysicalProperties.footForward;
    }
 
    @Override
