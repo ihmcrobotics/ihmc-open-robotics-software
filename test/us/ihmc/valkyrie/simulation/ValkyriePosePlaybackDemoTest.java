@@ -23,7 +23,9 @@ import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCController;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCPosePlaybackDemo;
+import us.ihmc.darpaRoboticsChallenge.DRCRobotInterface;
 import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.PlainDRCRobot;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.GroundProfile;
 import us.ihmc.utilities.AsyncContinuousExecutor;
@@ -33,7 +35,6 @@ import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.TotalMassCalculator;
-import us.ihmc.valkyrie.ValkyrieRobotInterface;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.posePlayback.ValkyrieWarmupPoseSequencePacket;
 
@@ -185,7 +186,7 @@ public class ValkyriePosePlaybackDemoTest
    private DRCPosePlaybackDemo setupPosePlaybackSim()
    {
       ValkyrieRobotModel valkyrieRobotModel = new ValkyrieRobotModel();
-      ValkyrieRobotInterface valkyrieRobotInterface = new ValkyrieRobotInterface();
+      DRCRobotInterface valkyrieRobotInterface = new PlainDRCRobot(valkyrieRobotModel);
 
       AutomaticSimulationRunner automaticSimulationRunner = null;
 
