@@ -1,12 +1,8 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import java.util.Arrays;
-
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.initialSetup.SquaredUpDRCRobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
-import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModelFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.PlainDRCRobot;
@@ -69,13 +65,9 @@ public class DRCDoubleElevationChangeSimulation
       boolean useVelocityAndHeadingScript = false;
       boolean cheatWithGroundHeightAtForFootstep = false;
 
-      WalkingControllerParameters drcControlParameters = model.getWalkingControlParameters();
-      ArmControllerParameters armControllerParameters = model.getArmControllerParameters();
-      
-      DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(drcControlParameters, armControllerParameters, robotInterface, 
-            robotInitialSetup, guiInitialSetup, scsInitialSetup, 
-            useVelocityAndHeadingScript, automaticSimulationRunner, DRCConfigParameters.CONTROL_DT, 16000,
-            cheatWithGroundHeightAtForFootstep,model);
+      DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInterface, robotInitialSetup, guiInitialSetup, scsInitialSetup, 
+                                                               useVelocityAndHeadingScript, automaticSimulationRunner, DRCConfigParameters.CONTROL_DT, 16000,
+                                                               cheatWithGroundHeightAtForFootstep,model);
       
       ((BooleanYoVariable) drcFlatGroundWalkingTrack.getSimulationConstructionSet().getVariable("walk")).set(true);
       ((DoubleYoVariable) drcFlatGroundWalkingTrack.getSimulationConstructionSet().getVariable("desiredVelocityX")).set(1.0);

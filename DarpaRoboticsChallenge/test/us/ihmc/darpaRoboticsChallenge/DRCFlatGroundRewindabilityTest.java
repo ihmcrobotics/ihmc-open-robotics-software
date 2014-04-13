@@ -10,13 +10,9 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.initialSetup.SquaredUpDRCRobotInitialSetup;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
-import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.PlainDRCRobot;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
@@ -141,8 +137,6 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
 
       GroundProfile groundProfile = new FlatGroundProfile();
       DRCRobotModel robotModel = getRobotModel();
-      WalkingControllerParameters drcControlParameters = robotModel.getWalkingControlParameters();
-      ArmControllerParameters armControllerParameters = robotModel.getArmControllerParameters();
 
       AutomaticSimulationRunner automaticSimulationRunner = null;
       DRCGuiInitialSetup guiInitialSetup = createGUIInitialSetup();
@@ -154,7 +148,7 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
       DRCRobotInterface robotInterface = new PlainDRCRobot(robotModel);
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotInterface.getSimulateDT());
 
-      DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(drcControlParameters, armControllerParameters, robotInterface, robotInitialSetup,
+      DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInterface, robotInitialSetup,
                                                                guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript, automaticSimulationRunner,
                                                                timePerRecordTick, simulationDataBufferSize,
             cheatWithGroundHeightAtForFootstep,robotModel);

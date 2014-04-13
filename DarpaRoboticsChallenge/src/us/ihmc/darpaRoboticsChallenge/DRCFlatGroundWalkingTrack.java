@@ -43,11 +43,13 @@ public class DRCFlatGroundWalkingTrack
    private final DRCController drcController;
    private final YoVariableServer robotVisualizer;
 
-   public DRCFlatGroundWalkingTrack(WalkingControllerParameters drcControlParameters, ArmControllerParameters armControllerParameters, 
-                                    DRCRobotInterface robotInterface, DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
+   public DRCFlatGroundWalkingTrack(DRCRobotInterface robotInterface, DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
                                     DRCSCSInitialSetup scsInitialSetup, boolean useVelocityAndHeadingScript, AutomaticSimulationRunner automaticSimulationRunner,
                                     double timePerRecordTick, int simulationDataBufferSize, boolean cheatWithGroundHeightAtForFootstep, DRCRobotModel model)
    {
+      WalkingControllerParameters walkingControlParameters = model.getWalkingControlParameters();
+      ArmControllerParameters armControllerParameters = model.getArmControllerParameters();
+
 //    scsInitialSetup = new DRCSCSInitialSetup(TerrainType.FLAT);
       scsInitialSetup.setSimulationDataBufferSize(simulationDataBufferSize);
 
@@ -66,9 +68,9 @@ public class DRCFlatGroundWalkingTrack
 
       boolean useFastTouchdowns = false;
 
-      FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulation(drcControlParameters);
+      FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulation(walkingControlParameters);
       FlatGroundWalkingHighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory =
-         new FlatGroundWalkingHighLevelHumanoidControllerFactory(footstepTimingParameters, drcControlParameters, armControllerParameters, useVelocityAndHeadingScript, useFastTouchdowns);
+         new FlatGroundWalkingHighLevelHumanoidControllerFactory(footstepTimingParameters, walkingControlParameters, armControllerParameters, useVelocityAndHeadingScript, useFastTouchdowns);
 
       if (cheatWithGroundHeightAtForFootstep)
       {
@@ -179,10 +181,7 @@ public class DRCFlatGroundWalkingTrack
       boolean useVelocityAndHeadingScript = true;
       boolean cheatWithGroundHeightAtForFootstep = false;
 
-      WalkingControllerParameters drcControlParameters = model.getWalkingControlParameters();
-      ArmControllerParameters armControlParameters = model.getArmControllerParameters();
-      
-      new DRCFlatGroundWalkingTrack(drcControlParameters, armControlParameters, robotInterface, robotInitialSetup, guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript,
+      new DRCFlatGroundWalkingTrack(robotInterface, robotInitialSetup, guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript,
                                     automaticSimulationRunner, DRCConfigParameters.CONTROL_DT, 16000, cheatWithGroundHeightAtForFootstep, model);
    }
 
