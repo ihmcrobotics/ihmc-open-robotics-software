@@ -329,7 +329,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
    {
       double footForward = walkingControlParamaters.getFootForwardOffset();
       double footBack = walkingControlParamaters.getFootBackwardOffset();
-      double footWidth = walkingControlParamaters.getFoot_width();
+      double footWidth = walkingControlParamaters.getFootWidth();
 
       SideDependentList<ContactablePlaneBody> bipedFeet = new SideDependentList<ContactablePlaneBody>();
       for (RobotSide robotSide : RobotSide.values)

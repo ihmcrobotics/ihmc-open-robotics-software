@@ -425,7 +425,7 @@ public class SimpleStanceController implements RobotController
       WalkingControllerParameters walkingControlParams = model.getWalkingControlParameters();
       double footForward =  walkingControlParams.getFootForwardOffset();
       double footBack = walkingControlParams.getFootBackwardOffset();
-      double footWidth = walkingControlParams.getFoot_width();
+      double footWidth = walkingControlParams.getFootWidth();
 
       double controlDT = 0.005;
       InverseDynamicsJoint[] jointsToOptimize = createJointsToOptimize(fullRobotModel);
