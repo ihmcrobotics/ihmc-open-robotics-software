@@ -520,10 +520,6 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       return true;
    }
 
-   public double getAnkle_height()
-   {
-      return ValkyriePhysicalProperties.ankleHeight;
-   }
    public double getFoot_width()
    {
       return ValkyriePhysicalProperties.footWidth;
