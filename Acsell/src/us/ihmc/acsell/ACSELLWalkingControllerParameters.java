@@ -496,21 +496,21 @@ public class ACSELLWalkingControllerParameters implements WalkingControllerParam
    }
 
    @Override
-   public double getFoot_width()
+   public double getFootWidth()
    {
       // TODO Auto-generated method stub
       return BonoPhysicalProperties.footWidth;
    }
 
    @Override
-   public double getToe_width()
+   public double getToeWidth()
    {
       // TODO Auto-generated method stub
       return 0;
    }
 
    @Override
-   public double getFoot_length()
+   public double getFootLength()
    {
       // TODO Auto-generated method stub
       return BonoPhysicalProperties.footForward + BonoPhysicalProperties.footBack;
