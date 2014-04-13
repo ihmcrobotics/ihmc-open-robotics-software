@@ -11,8 +11,6 @@ import org.junit.Before;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
-import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.PlainDRCRobot;
