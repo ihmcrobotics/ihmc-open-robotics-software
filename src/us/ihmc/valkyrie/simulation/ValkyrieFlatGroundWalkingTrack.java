@@ -4,8 +4,6 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.visualization.SliderBoardFactory;
 import us.ihmc.atlas.visualization.WalkControllerSliderBoard;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
-import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTrack;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
@@ -46,10 +44,7 @@ public class ValkyrieFlatGroundWalkingTrack
       boolean useVelocityAndHeadingScript = true;
       boolean cheatWithGroundHeightAtForFootstep = false;
 
-      WalkingControllerParameters drcControlParameters = robotModel.getWalkingControlParameters();
-      ArmControllerParameters armControlParameters = robotModel.getArmControllerParameters();
-      
-      new DRCFlatGroundWalkingTrack(drcControlParameters, armControlParameters, robotInterface, robotInitialSetup, guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript,
+      new DRCFlatGroundWalkingTrack(robotInterface, robotInitialSetup, guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript,
                                     automaticSimulationRunner, DRCConfigParameters.CONTROL_DT, 16000, cheatWithGroundHeightAtForFootstep, robotModel);
    }
 
