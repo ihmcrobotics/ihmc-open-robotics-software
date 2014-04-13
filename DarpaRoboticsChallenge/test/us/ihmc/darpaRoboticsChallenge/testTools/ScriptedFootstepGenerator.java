@@ -120,8 +120,8 @@ public class ScriptedFootstepGenerator
    {
       double footForward, footBack, footWidth;
 
-      footForward = walkingControllerParameters.getFoot_forward();
-      footBack = walkingControllerParameters.getFoot_back();
+      footForward = walkingControllerParameters.getFootForwardOffset();
+      footBack = walkingControllerParameters.getFootBackwardOffset();
       footWidth = walkingControllerParameters.getFoot_width();
 
       SideDependentList<ContactablePlaneBody> bipedFeet = new SideDependentList<ContactablePlaneBody>();

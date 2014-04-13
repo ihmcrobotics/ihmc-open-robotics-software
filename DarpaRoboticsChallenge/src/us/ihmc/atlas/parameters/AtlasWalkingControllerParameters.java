@@ -531,24 +531,14 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       return AtlasPhysicalProperties.foot_length;
    }
 
-   public double getFoot_back()
-   {
-      return AtlasPhysicalProperties.foot_back;
-   }
-
    public double getFoot_start_toetaper_from_back()
    {
       return AtlasPhysicalProperties.foot_start_toetaper_from_back;
    }
 
-   public double getFoot_forward()
-   {
-      return AtlasPhysicalProperties.foot_forward;
-   }
-   
    public double getSideLengthOfBoundingBoxForFootstepHeight()
    {
-      return (1 + 0.3) * 2 * Math.sqrt(getFoot_forward() * getFoot_forward()
+      return (1 + 0.3) * 2 * Math.sqrt(getFootForwardOffset() * getFootForwardOffset()
             + 0.25 * getFoot_width() * getFoot_width());
    }
    

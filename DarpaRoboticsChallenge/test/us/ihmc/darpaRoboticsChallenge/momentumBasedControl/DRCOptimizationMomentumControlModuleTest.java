@@ -327,8 +327,8 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
 
    private SideDependentList<ContactablePlaneBody> createFeet(SDFFullRobotModel fullRobotModel, ReferenceFrames referenceFrames, WalkingControllerParameters walkingControlParamaters)
    {
-      double footForward = walkingControlParamaters.getFoot_forward();
-      double footBack = walkingControlParamaters.getFoot_back();
+      double footForward = walkingControlParamaters.getFootForwardOffset();
+      double footBack = walkingControlParamaters.getFootBackwardOffset();
       double footWidth = walkingControlParamaters.getFoot_width();
 
       SideDependentList<ContactablePlaneBody> bipedFeet = new SideDependentList<ContactablePlaneBody>();
