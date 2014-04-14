@@ -11,8 +11,8 @@ import org.ros.message.MessageFactory;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.service.ServiceResponseListener;
 
+import us.ihmc.atlas.AtlasDampingParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotDampingParameters;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosServiceClient;
 import us.ihmc.utilities.ros.RosStringPublisher;
@@ -23,7 +23,6 @@ import atlas_msgs.SetJointDamping;
 import atlas_msgs.SetJointDampingRequest;
 import atlas_msgs.SetJointDampingResponse;
 import cern.colt.Arrays;
-import dynamic_reconfigure.Config;
 import dynamic_reconfigure.DoubleParameter;
 import dynamic_reconfigure.Reconfigure;
 import dynamic_reconfigure.ReconfigureRequest;
@@ -113,7 +112,7 @@ public class RosAtlasSettingsSetter
       final double[] dampingParameters = new double[AtlasOrderedJointMap.numberOfJoints];
       for (int i = 0; i < dampingParameters.length; i++)
       {
-         dampingParameters[i] = DRCRobotDampingParameters.getAtlasDampingForPositionControl(i);
+         dampingParameters[i] = AtlasDampingParameters.getAtlasDampingForPositionControl(i);
       }
 
       request.setDampingCoefficients(dampingParameters);
@@ -142,7 +141,7 @@ public class RosAtlasSettingsSetter
       final double[] dampingParameters = new double[AtlasOrderedJointMap.numberOfJoints];
       for (int i = 0; i < dampingParameters.length; i++)
       {
-         dampingParameters[i] = DRCRobotDampingParameters.getAtlasDamping(i);
+         dampingParameters[i] = AtlasDampingParameters.getAtlasDamping(i);
       }
 
       request.setDampingCoefficients(dampingParameters);
@@ -171,12 +170,12 @@ public class RosAtlasSettingsSetter
       final double[] dampingParameters = new double[AtlasOrderedJointMap.numberOfJoints]; // Message reuse on OSRF side, it is 28 (number of atlas joints) long
       for (int i = 0; i < ROSSandiaJointMap.numberOfJointsPerHand; i++)
       {
-         dampingParameters[i] = DRCRobotDampingParameters.getSandiaHandDamping(RobotSide.LEFT, i);
+         dampingParameters[i] = AtlasDampingParameters.getSandiaHandDamping(RobotSide.LEFT, i);
       }
       
       for (int i = 0; i < ROSSandiaJointMap.numberOfJointsPerHand; i++)
       {
-         dampingParameters[i + ROSSandiaJointMap.numberOfJointsPerHand] = DRCRobotDampingParameters.getSandiaHandDamping(RobotSide.RIGHT, i);
+         dampingParameters[i + ROSSandiaJointMap.numberOfJointsPerHand] = AtlasDampingParameters.getSandiaHandDamping(RobotSide.RIGHT, i);
       }
 
       request.setDampingCoefficients(dampingParameters);

@@ -15,19 +15,15 @@ import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
 import us.ihmc.darpaRoboticsChallenge.controllers.EstimationLinkHolder;
 import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.BlockingThreadSynchronizer;
 import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadSynchronizer;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotDampingParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.ScsInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCSimulationOutputWriter;
-import us.ihmc.darpaRoboticsChallenge.ros.ROSSandiaJointMap;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCSimulatedSensorNoiseParameters;
 import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCStateEstimatorInterface;
-import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.simulatedSensors.GroundContactPointBasedWrenchCalculator;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
@@ -215,30 +211,8 @@ public class DRCSimulationFactory
    }
 
    private static void setupJointDamping(SDFRobot simulatedRobot, DRCRobotModel robotModel)
-   {
-//      for (int i = 0; i < ROSAtlasJointMap.numberOfJoints; i++)
-//      {
-//         simulatedRobot.getOneDoFJoint(ROSAtlasJointMap.jointNames[i]).setDamping(DRCRobotDampingParameters.getAtlasDamping(i));
-//      }
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-    	 {
-    		 if(robotModel.getHandModel() == DRCHandModel.SANDIA)
-	         for (int i = 0; i < ROSSandiaJointMap.numberOfJointsPerHand; i++)
-	         {
-	            try
-	            {
-	               simulatedRobot.getOneDegreeOfFreedomJoint(ROSSandiaJointMap.handNames.get(robotSide)[i]).setDamping(
-	                     DRCRobotDampingParameters.getSandiaHandDamping(robotSide, i));
-	            }
-	            catch (NullPointerException e)
-	            {
-	               System.err.println("NullPointerException for the joint: " + ROSSandiaJointMap.handNames.get(robotSide)[i]);
-	            }
-	         }
-    	 }
-      }
+   {      
+      robotModel.setJointDamping(simulatedRobot);
    }
 
    private static void initializeEstimatorToActual(DRCStateEstimatorInterface drcStateEstimator, DRCRobotInitialSetup<SDFRobot> robotInitialSetup, SDFRobot simulatedRobot, DRCRobotJointMap jointMap)

@@ -156,4 +156,10 @@ public class AtlasRobotModel implements DRCRobotModel
    {
       throw new RuntimeException("Implement me!");
    }
+
+   @Override
+   public void setJointDamping(SDFRobot simulatedRobot)
+   {
+      AtlasDampingParameters.setDampingParameters(simulatedRobot, getHandModel(), getJointMap());
+   }
 }
