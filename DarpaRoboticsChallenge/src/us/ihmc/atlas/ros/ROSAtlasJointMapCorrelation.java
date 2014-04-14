@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.ros;
+package us.ihmc.atlas.ros;
 
 public class ROSAtlasJointMapCorrelation extends AtlasOrderedJointMap 
 {

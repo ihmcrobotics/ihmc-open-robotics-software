@@ -1,10 +1,10 @@
 package us.ihmc.atlas.parameters;
 
-import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.back_bkx;
-import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.back_bky;
-import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.back_bkz;
-import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.jointNames;
-import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.neck_ry;
+import static us.ihmc.atlas.ros.AtlasOrderedJointMap.back_bkx;
+import static us.ihmc.atlas.ros.AtlasOrderedJointMap.back_bky;
+import static us.ihmc.atlas.ros.AtlasOrderedJointMap.back_bkz;
+import static us.ihmc.atlas.ros.AtlasOrderedJointMap.jointNames;
+import static us.ihmc.atlas.ros.AtlasOrderedJointMap.neck_ry;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

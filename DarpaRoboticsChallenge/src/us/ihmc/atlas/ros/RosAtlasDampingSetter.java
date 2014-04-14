@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.gazebo;
+package us.ihmc.atlas.ros;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -16,7 +16,6 @@ import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosServiceClient;
 import us.ihmc.utilities.ros.RosStringPublisher;
-import us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap;
 import us.ihmc.darpaRoboticsChallenge.ros.ROSSandiaJointMap;
 import us.ihmc.robotSide.RobotSide;
 import atlas_msgs.SetJointDamping;
@@ -28,7 +27,7 @@ import dynamic_reconfigure.Reconfigure;
 import dynamic_reconfigure.ReconfigureRequest;
 import dynamic_reconfigure.ReconfigureResponse;
 
-public class RosAtlasSettingsSetter
+public class RosAtlasDampingSetter
 {
    private final RosMainNode rosMainNode;
    private final RosStringPublisher modePublisher = new RosStringPublisher(true, "nominal");
@@ -40,12 +39,12 @@ public class RosAtlasSettingsSetter
    NodeConfiguration nodeConfig = NodeConfiguration.newPrivate();
    
    
-   public RosAtlasSettingsSetter(String rosMasterURI, final RosMainNode rosMainNode)
+   public RosAtlasDampingSetter(String rosMasterURI, final RosMainNode rosMainNode)
    {
       this.rosMainNode = rosMainNode;
    }
    
-   public RosAtlasSettingsSetter(String rosMasterURI)
+   public RosAtlasDampingSetter(String rosMasterURI)
    {
     try
     { 
@@ -156,7 +155,7 @@ public class RosAtlasSettingsSetter
 
    public static void main(String[] args)
    {
-      RosAtlasSettingsSetter rosAtlasSettingsSetter = new RosAtlasSettingsSetter(DRCConfigParameters.ROS_MASTER_URI);
+      RosAtlasDampingSetter rosAtlasSettingsSetter = new RosAtlasDampingSetter(DRCConfigParameters.ROS_MASTER_URI);
       rosAtlasSettingsSetter.setAtlasDampingParameters();
       System.exit(0);
    }

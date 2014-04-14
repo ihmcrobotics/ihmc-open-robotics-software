@@ -1,12 +1,12 @@
 package us.ihmc.atlas.initialSetup;
 
-import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.jointNames;
-import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.l_leg_aky;
-import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.l_leg_hpy;
-import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.l_leg_kny;
-import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.r_leg_aky;
-import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.r_leg_hpy;
-import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.r_leg_kny;
+import static us.ihmc.atlas.ros.AtlasOrderedJointMap.jointNames;
+import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_aky;
+import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_hpy;
+import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_kny;
+import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_leg_aky;
+import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_leg_hpy;
+import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_leg_kny;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
