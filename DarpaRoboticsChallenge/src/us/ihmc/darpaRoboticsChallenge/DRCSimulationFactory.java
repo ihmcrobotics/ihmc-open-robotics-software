@@ -23,7 +23,6 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.ScsInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCSimulationOutputWriter;
-import us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap;
 import us.ihmc.darpaRoboticsChallenge.ros.ROSSandiaJointMap;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCSimulatedSensorNoiseParameters;
@@ -189,7 +188,7 @@ public class DRCSimulationFactory
          DRCStateEstimatorInterface drcStateEstimator = robotController.getDRCStateEstimator();
          StateEstimator stateEstimator = drcStateEstimator.getStateEstimator();
 
-         Joint estimationJoint = getEstimationJoint(simulatedRobot);
+         Joint estimationJoint = getEstimationJoint(simulatedRobot,drcRobotModel.getJointMap());
 
          StateEstimatorErrorCalculatorController stateEstimatorErrorCalculatorController = new StateEstimatorErrorCalculatorController(stateEstimator,
                simulatedRobot, estimationJoint, stateEstimatorParameters.getAssumePerfectIMU(), stateEstimatorParameters.useKinematicsBasedStateEstimator());
@@ -199,12 +198,12 @@ public class DRCSimulationFactory
       return new Pair<HumanoidRobotSimulation<SDFRobot>, DRCController>(humanoidRobotSimulation, robotController);
    }
 
-   private static Joint getEstimationJoint(SDFRobot simulatedRobot)
+   private static Joint getEstimationJoint(SDFRobot simulatedRobot, DRCRobotJointMap jointMap)
    {
       Joint estimationJoint;
       if (EstimationLinkHolder.usingChestLink())
       {
-         estimationJoint = simulatedRobot.getJoint(ROSAtlasJointMap.jointNames[ROSAtlasJointMap.back_bkx]);
+         estimationJoint = simulatedRobot.getJoint(jointMap.getNameOfJointBeforeChest()); // used to be: AtlasOrderedJointMap.jointNames[AtlasOrderedJointMap.back_bkx]);
          if (estimationJoint == null)
             throw new RuntimeException("Couldn't find chest joint!");
       }
@@ -254,7 +253,7 @@ public class DRCSimulationFactory
 
       simulatedRobot.computeCenterOfMass(initialCoMPosition);
 
-      Joint estimationJoint = getEstimationJoint(simulatedRobot);
+      Joint estimationJoint = getEstimationJoint(simulatedRobot,jointMap);
 
       Transform3D estimationLinkTransform3D = estimationJoint.getJointTransform3D();
       Quat4d initialEstimationLinkOrientation = new Quat4d();

@@ -16,7 +16,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotDampingParameters;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosServiceClient;
 import us.ihmc.utilities.ros.RosStringPublisher;
-import us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap;
+import us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap;
 import us.ihmc.darpaRoboticsChallenge.ros.ROSSandiaJointMap;
 import us.ihmc.robotSide.RobotSide;
 import atlas_msgs.SetJointDamping;
@@ -110,7 +110,7 @@ public class RosAtlasSettingsSetter
 
       SetJointDampingRequest request = atlasDampingClient.getMessage();
 
-      final double[] dampingParameters = new double[ROSAtlasJointMap.numberOfJoints];
+      final double[] dampingParameters = new double[AtlasOrderedJointMap.numberOfJoints];
       for (int i = 0; i < dampingParameters.length; i++)
       {
          dampingParameters[i] = DRCRobotDampingParameters.getAtlasDampingForPositionControl(i);
@@ -139,7 +139,7 @@ public class RosAtlasSettingsSetter
 
       SetJointDampingRequest request = atlasDampingClient.getMessage();
 
-      final double[] dampingParameters = new double[ROSAtlasJointMap.numberOfJoints];
+      final double[] dampingParameters = new double[AtlasOrderedJointMap.numberOfJoints];
       for (int i = 0; i < dampingParameters.length; i++)
       {
          dampingParameters[i] = DRCRobotDampingParameters.getAtlasDamping(i);
@@ -168,7 +168,7 @@ public class RosAtlasSettingsSetter
 
       SetJointDampingRequest request = sandiaHandDampingClient.getMessage();
 
-      final double[] dampingParameters = new double[ROSAtlasJointMap.numberOfJoints]; // Message reuse on OSRF side, it is 28 (number of atlas joints) long
+      final double[] dampingParameters = new double[AtlasOrderedJointMap.numberOfJoints]; // Message reuse on OSRF side, it is 28 (number of atlas joints) long
       for (int i = 0; i < ROSSandiaJointMap.numberOfJointsPerHand; i++)
       {
          dampingParameters[i] = DRCRobotDampingParameters.getSandiaHandDamping(RobotSide.LEFT, i);

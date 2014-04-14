@@ -1,4 +1,4 @@
-package us.ihmc;
+package us.ihmc.atlas;
 
 import org.junit.Test;
 

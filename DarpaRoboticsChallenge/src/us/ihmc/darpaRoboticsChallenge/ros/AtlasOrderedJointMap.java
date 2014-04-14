@@ -8,7 +8,7 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
-public class ROSAtlasJointMap
+public class AtlasOrderedJointMap
 {
    /*
     * Copied from

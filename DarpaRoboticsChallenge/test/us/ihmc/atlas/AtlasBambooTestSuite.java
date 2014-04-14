@@ -3,12 +3,10 @@ package us.ihmc.atlas;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
-import us.ihmc.AtlasFlatGroundWalkingTest;
 import us.ihmc.atlas.controllers.AtlasFootstepGeneratorTest;
 import us.ihmc.atlas.momentumBasedControl.AtlasOptimizationMomentumControlModuleTest;
 import us.ihmc.atlas.networkProcessor.downlinkSerializers.AtlasJointConfigurationDataSerializerTest;
 import us.ihmc.atlas.networking.AtlasNetworkingCommandReaderTest;
-import us.ihmc.atlas.posePlayback.AtlasPlaybackPoseInterpolatorTest;
 import us.ihmc.atlas.posePlayback.AtlasPlaybackPoseSequenceTest;
 import us.ihmc.atlas.ros.AtlasCommandMessageTest;
 import us.ihmc.atlas.ros.AtlasStateMessageTest;

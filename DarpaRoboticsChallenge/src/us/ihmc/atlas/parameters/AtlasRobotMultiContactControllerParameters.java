@@ -1,6 +1,6 @@
 package us.ihmc.atlas.parameters;
 
-import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.*;
+import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.*;
 
 
 public class AtlasRobotMultiContactControllerParameters extends AtlasWalkingControllerParameters

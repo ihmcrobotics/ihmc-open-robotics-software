@@ -1,11 +1,11 @@
 package us.ihmc.darpaRoboticsChallenge.ros;
 
-public class ROSAtlasJointMapCorrelation extends ROSAtlasJointMap 
+public class ROSAtlasJointMapCorrelation extends AtlasOrderedJointMap 
 {
    //This class identifies joint angle correlation indices between left and right side joint angles
    // It also identifies whether same angles between different sides must change the sign.
    // Indices are based on ROSAtlasJointMap
-   public final static int[] oppositeSideIndex = new int[ROSAtlasJointMap.numberOfJoints];
+   public final static int[] oppositeSideIndex = new int[AtlasOrderedJointMap.numberOfJoints];
    static
    {
       oppositeSideIndex[back_bkz] = back_bkz;
@@ -39,7 +39,7 @@ public class ROSAtlasJointMapCorrelation extends ROSAtlasJointMap
 
    }
 
-   public final static boolean[] symmetricSignChange = new boolean[ROSAtlasJointMap.numberOfJoints];
+   public final static boolean[] symmetricSignChange = new boolean[AtlasOrderedJointMap.numberOfJoints];
    //If symetricSignChange[i]==true, then symmetric angles are opposite signs.
    static
    {
