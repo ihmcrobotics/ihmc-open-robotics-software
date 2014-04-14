@@ -8,7 +8,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import javax.imageio.ImageIO;
 
-import us.ihmc.atlas.ros.AtlasOrderedJointMap;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.driving.DRCStereoListener;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.CameraDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
@@ -25,12 +25,14 @@ public class ArmCalibrationHelper implements DRCStereoListener
    private BufferedImage lastLeftEyeImage;
    private long imageTimestamp;
    private double imageFov;
+   private final DRCRobotJointMap jointMap;
 
    private DRCJointConfigurationData lastJointConfigurationData;
 
    public ArmCalibrationHelper(ObjectCommunicator fieldComputerClient, DRCNetworkProcessorNetworkingManager networkingManager,
-         CameraDataReceiver cameraDataReceiver)
+         CameraDataReceiver cameraDataReceiver, DRCRobotJointMap jointMap)
    {
+      this.jointMap = jointMap;
       cameraDataReceiver.registerCameraListener(this);
       networkingManager.getControllerCommandHandler().setArmCalibrationHelper(this);
       fieldComputerClient.attachListener(DRCJointConfigurationData.class, new JointAngleConsumer());
@@ -121,7 +123,7 @@ public class ArmCalibrationHelper implements DRCStereoListener
          PrintWriter qWriter = new PrintWriter(q);
          PrintWriter qoutWriter = new PrintWriter(qout);
 
-         String[] jointNames = AtlasOrderedJointMap.jointNames;
+         String[] jointNames = jointMap.getOrderedJointNames();
          for (int i = 0; i < jointNames.length; i++)
          {
             qWriter.print(jointNames[i]);
