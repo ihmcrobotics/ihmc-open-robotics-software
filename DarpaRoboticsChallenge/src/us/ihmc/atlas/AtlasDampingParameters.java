@@ -1,11 +1,14 @@
-package us.ihmc.darpaRoboticsChallenge.drcRobot;
+package us.ihmc.atlas;
 
+import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
+import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandModel;
 import us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap;
 import us.ihmc.darpaRoboticsChallenge.ros.ROSSandiaJointMap;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 
-public class DRCRobotDampingParameters
+public class AtlasDampingParameters
 {
    private final static double[] atlasDampingParameters = new double[AtlasOrderedJointMap.numberOfJoints];
    private final static double[] atlasPositionControlDampingParameters = new double[AtlasOrderedJointMap.numberOfJoints];
@@ -125,5 +128,31 @@ public class DRCRobotDampingParameters
          }
       }
       throw new RuntimeException("Joint not found: " + name);
+   }
+   
+   public static void setDampingParameters(SDFRobot simulatedRobot, DRCHandModel handModel, DRCRobotJointMap jointMap)
+   {
+      String[] orderedJointNames = jointMap.getOrderedJointNames();
+      for (int i = 0; i < orderedJointNames.length; i++)
+      {
+         simulatedRobot.getOneDegreeOfFreedomJoint(orderedJointNames[i]).setDamping(getAtlasDamping(i));
+      }
+      
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         if(handModel == DRCHandModel.SANDIA)
+            for (int i = 0; i < ROSSandiaJointMap.numberOfJointsPerHand; i++)
+            {
+               try
+               {
+                  simulatedRobot.getOneDegreeOfFreedomJoint(ROSSandiaJointMap.handNames.get(robotSide)[i]).setDamping(
+                        AtlasDampingParameters.getSandiaHandDamping(robotSide, i));
+               }
+               catch (NullPointerException e)
+               {
+                  System.err.println("NullPointerException for the joint: " + ROSSandiaJointMap.handNames.get(robotSide)[i]);
+               }
+            }
+      }
    }
 }

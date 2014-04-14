@@ -61,5 +61,6 @@ public interface DRCRobotModel
    //TODO: RobotBoundingBoxes.java
    
    public DRCOutputWriter getOutputWriterWithAccelerationIntegration(DRCOutputWriter drcOutputWriter, double controlDT, boolean runningOnRealRobot);
-
+   
+   public void setJointDamping(SDFRobot simulatedRobot);
 }
