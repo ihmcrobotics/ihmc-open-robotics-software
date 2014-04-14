@@ -24,7 +24,7 @@ public class OneStepCaptureRegionCalculator
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final int MAX_CAPTURE_REGION_POLYGON_POINTS = 26;
    private static final int KINEMATIC_LIMIT_POINTS = 10;
-   private double reachableRegionCutoffAngle = 0.70;
+   private double reachableRegionCutoffAngle = 0.80;
    
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
@@ -60,7 +60,6 @@ public class OneStepCaptureRegionCalculator
    {
       this.kineamaticStepRange = kineamaticStepRange;
       this.ankleZUpFrames = ankleZUpFrames;
-      System.out.println(midFootAnkleXOffset);
       
       // calculate the reachable regions
       ArrayList<FramePoint2d> reachableRegionPoints = new ArrayList<FramePoint2d>(MAX_CAPTURE_REGION_POLYGON_POINTS - 2);
@@ -75,8 +74,8 @@ public class OneStepCaptureRegionCalculator
                   ((double)(MAX_CAPTURE_REGION_POLYGON_POINTS - 2));
             double x = kineamaticStepRange * Math.cos(angle) + midFootAnkleXOffset;
             double y = kineamaticStepRange * Math.sin(angle);
-            if(Math.abs(y) < footWidth/2.0)
-               y = sign*footWidth/2.0;
+//            if(Math.abs(y) < footWidth/2.0)
+//               y = sign*footWidth/2.0;
             reachableRegionPoints.add(new FramePoint2d(ankleZUpFrames.get(side), x, y));
          }
          reachableRegionPoints.add(new FramePoint2d(ankleZUpFrames.get(side), midFootAnkleXOffset, sign * footWidth / 2.0));
