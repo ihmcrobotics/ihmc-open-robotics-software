@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge;
+package us.ihmc.atlas;
 
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
@@ -9,8 +9,6 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Point2d;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.initialSetup.MultiContactDRCRobotInitialSetup;
 import us.ihmc.atlas.initialSetup.PushUpDRCRobotInitialSetup;
 import us.ihmc.atlas.parameters.AtlasRobotMultiContactControllerParameters;
@@ -21,6 +19,14 @@ import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MultiContactTestHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
+import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
+import us.ihmc.darpaRoboticsChallenge.DRCController;
+import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
+import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
+import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
+import us.ihmc.darpaRoboticsChallenge.DRCSimulationFactory;
+import us.ihmc.darpaRoboticsChallenge.HumanoidRobotSimulation;
+import us.ihmc.darpaRoboticsChallenge.MultiContactTestEnvironment;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.HandContactParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;

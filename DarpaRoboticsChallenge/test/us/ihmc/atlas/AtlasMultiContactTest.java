@@ -7,11 +7,10 @@ import org.junit.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.atlas.AtlasMultiContact.MultiContactTask;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
-import us.ihmc.darpaRoboticsChallenge.AtlasMultiContact;
-import us.ihmc.darpaRoboticsChallenge.AtlasMultiContact.MultiContactTask;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCController;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
