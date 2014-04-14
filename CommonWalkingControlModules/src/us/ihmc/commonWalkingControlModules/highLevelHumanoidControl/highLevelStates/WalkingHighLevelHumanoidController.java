@@ -12,11 +12,13 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector2d;
 import com.yobotics.simulationconstructionset.util.statemachines.*;
 import com.yobotics.simulationconstructionset.util.trajectory.*;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoFramePoint2dInPolygonCoordinate;
 import us.ihmc.commonWalkingControlModules.calculators.EquivalentConstantCoPCalculator;
+import us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkOnTheEdgesManager;
@@ -37,6 +39,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumContr
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ReinitializeWalkingControllerProvider;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
+import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.HeelSwitch;
 import us.ihmc.commonWalkingControlModules.sensors.ToeSwitch;
@@ -55,6 +58,7 @@ import us.ihmc.utilities.screwTheory.Twist;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -186,6 +190,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final AverageOrientationCalculator averageOrientationCalculator = new AverageOrientationCalculator();
 
    private final ICPAndMomentumBasedController icpAndMomentumBasedController;
+   private final OneStepCaptureRegionCalculator captureRegionCalculator;
    private final EnumYoVariable<RobotSide> upcomingSupportLeg;
    private final EnumYoVariable<RobotSide> supportLeg;
    private final BipedSupportPolygons bipedSupportPolygons;
@@ -416,6 +421,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       {
          doubleSupportDesiredICP = null;
       }
+      
+      captureRegionCalculator = new OneStepCaptureRegionCalculator(momentumBasedController.getReferenceFrames(),
+                                                                   walkingControllerParameters,
+                                                                   registry,
+                                                                   dynamicGraphicObjectsListRegistry);
 
       resetIntegratorsAfterSwing.set(true);
    }
@@ -1157,6 +1167,14 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          double swingTimeRemaining = swingTimeCalculationProvider.getValue() - stateMachine.timeInCurrentState();
 
          FramePoint2d transferToFootstepLocation = transferToFootstep.getFramePoint2dCopy();
+         
+         captureRegionCalculator.calculateCaptureRegion(swingSide,
+                                                        swingTimeRemaining,
+                                                        capturePoint2d,
+                                                        icpAndMomentumBasedController.getOmega0(),
+                                                        computeFootPolygon(supportSide, referenceFrames.getAnkleZUpFrame(supportSide)));
+//         FrameConvexPolygon2d captureRegion = captureRegionCalculator.getCaptureRegion();
+         
          moveICPToInsideOfFootAtEndOfSwing(supportSide, transferToFootstepLocation, swingTimeCalculationProvider.getValue(), swingTimeRemaining,
                                            desiredICPLocal);
 
@@ -1334,6 +1352,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          if (DEBUG)
             System.out.println("WalkingHighLevelController: leavingDoubleSupportState");
 
+         captureRegionCalculator.hideCaptureRegion();
          upcomingFootstepList.notifyComplete();
          previousSupportSide.set(swingSide.getOppositeSide());
 
