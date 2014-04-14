@@ -164,7 +164,7 @@ public class DRCSimulationFactory
 
       DRCController robotController = new DRCController(robotInterface.getFullRobotModelFactory(), controllerFactory, sensorReaderFactory, drcOutputWriter,
             jointMap, lidarControllerInterface, gravity, controlDT, dataProducer, robotInterface.getTimeStampProvider(),
-            dynamicGraphicObjectsListRegistry, guiSetterUpperRegistry, registry, null, threadFactory, threadSynchronizer, stateEstimatorParameters, drcRobotModel.getPhysicalProperties(), drcRobotModel.getContactPointParamaters(false, false));
+            dynamicGraphicObjectsListRegistry, guiSetterUpperRegistry, registry, threadFactory, threadSynchronizer, stateEstimatorParameters, drcRobotModel.getPhysicalProperties(), drcRobotModel.getContactPointParamaters(false, false));
       robotController.initialize();
 
       final HumanoidRobotSimulation<SDFRobot> humanoidRobotSimulation = new HumanoidRobotSimulation<SDFRobot>(simulatedRobot, controller,

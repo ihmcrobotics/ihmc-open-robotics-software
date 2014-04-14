@@ -5,7 +5,7 @@ import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
-import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.*;
+import static us.ihmc.atlas.ros.AtlasOrderedJointMap.*;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
