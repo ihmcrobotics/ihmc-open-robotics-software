@@ -100,13 +100,14 @@ public class OneStepCaptureRegionCalculator
    private final FrameVector2d lastKinematicExtremeDirection = new FrameVector2d(worldFrame);
    private final ArrayList<FramePoint> captureRegionPoints = new ArrayList<FramePoint>();
    private FramePoint2d capturePoint = new FramePoint2d(worldFrame);
+   private FrameConvexPolygon2d supportFootPolygon = new FrameConvexPolygon2d(worldFrame);
    private FrameConvexPolygon2d captureRegion = new FrameConvexPolygon2d(worldFrame);
    
    public void calculateCaptureRegion(RobotSide swingSide,
                                       double swingTimeRemaining,
                                       FramePoint2d icp,
                                       double omega0,
-                                      FrameConvexPolygon2d supportFootPolygon)
+                                      FrameConvexPolygon2d footPolygon)
    {
       globalTimer.startTimer();
       // 1. Set up all needed variables and reference frames for the calculation:
@@ -117,6 +118,7 @@ public class OneStepCaptureRegionCalculator
       lastKinematicExtremeDirection.changeFrame(supportAnkleZUp);
       predictedICP.changeFrame(supportAnkleZUp);
       projectedLine.changeFrame(supportAnkleZUp);
+      supportFootPolygon = footPolygon.changeFrameCopy(supportAnkleZUp);
       
       swingTimeRemaining = MathTools.clipToMinMax(swingTimeRemaining, 0.0, Double.POSITIVE_INFINITY);
       supportFootPolygon.getCentroid(footCentroid);
