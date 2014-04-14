@@ -3,7 +3,6 @@ package us.ihmc.darpaRoboticsChallenge;
 import javax.media.j3d.Transform3D;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.SDFJointNameMap;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
@@ -41,16 +40,15 @@ public class DRCPoseCommunicator implements RawOutputWriter
    private final int numberOfJoints;
 
    public DRCPoseCommunicator(SDFFullRobotModel estimatorModel, JointConfigurationGatherer jointConfigurationGathererAndProducer,
-         SDFJointNameMap jointNameMap, ObjectCommunicator networkProcessorCommunicator, TimestampProvider timestampProvider,
-         DRCRobotJointMap jointMap)
+         ObjectCommunicator networkProcessorCommunicator, TimestampProvider timestampProvider, DRCRobotJointMap jointMap)
    {
       numberOfJoints = jointMap.getOrderedJointNames().length;
       this.networkProcessorCommunicator = networkProcessorCommunicator;
       this.jointConfigurationGathererAndProducer = jointConfigurationGathererAndProducer;
       this.timeProvider = timestampProvider;
 
-      lidarFrame = estimatorModel.getLidarBaseFrame(jointNameMap.getLidarSensorName());
-      cameraFrame = estimatorModel.getCameraFrame(jointNameMap.getLeftCameraName());
+      lidarFrame = estimatorModel.getLidarBaseFrame(jointMap.getLidarSensorName());
+      cameraFrame = estimatorModel.getCameraFrame(jointMap.getLeftCameraName());
       rootFrame = estimatorModel.getRootJoint().getFrameAfterJoint();
 
       stateRingBuffer = new ConcurrentRingBuffer<State>(State.builder, 8);
