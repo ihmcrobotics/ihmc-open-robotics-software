@@ -181,8 +181,8 @@ public class FootstepGeneratorVisualizer
 
       SimplePathParameters pathType = new SimplePathParameters(0.4, 0.2, 0.0, Math.PI * 0.8, Math.PI * 0.15, 0.35);
 
-      TurningThenStraightFootstepGenerator generator = new TurningThenStraightFootstepGenerator(bipedFeet, startPose, endPoint,
-            pathType, RobotSide.LEFT);
+      TurningThenStraightFootstepGenerator generator = new TurningThenStraightFootstepGenerator(bipedFeet, endPoint, pathType,
+            RobotSide.LEFT);
       List<Footstep> footsteps = generator.generateDesiredFootstepList();
 
       return footsteps;

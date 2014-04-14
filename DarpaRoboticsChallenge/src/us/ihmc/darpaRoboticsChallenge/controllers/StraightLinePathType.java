@@ -148,20 +148,4 @@ public enum StraightLinePathType
 
       return length;
    }
-
-   public boolean moveRearFootFirst()
-   {
-      switch (this)
-      {
-         case LEFT_SHUFFLE :
-         case RIGHT_SHUFFLE :
-            return false;
-
-         case STRAIGHT :
-         case REVERSE :
-         default :
-            return true;
-      }
-   }
-   
 }

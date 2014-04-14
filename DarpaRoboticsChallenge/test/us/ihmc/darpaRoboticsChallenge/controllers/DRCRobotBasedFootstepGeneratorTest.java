@@ -106,8 +106,7 @@ public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTe
    {
       SimplePathParameters pathType = new SimplePathParameters(0.4, 0.2, pathOrientation, Math.PI / 6, Math.PI * 0.15, 0.35);
 
-      TurningThenStraightFootstepGenerator footstepGenerator = new TurningThenStraightFootstepGenerator(bipedFeet, startPose, endPoint, pathType,
-                                                                  RobotSide.RIGHT);
+      TurningThenStraightFootstepGenerator footstepGenerator = new TurningThenStraightFootstepGenerator(bipedFeet, endPoint, pathType, RobotSide.RIGHT);
 
       footSteps = footstepGenerator.generateDesiredFootstepList();
    }

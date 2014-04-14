@@ -149,7 +149,7 @@ public class DesiredFootstepVisualizer
       return footFrames;
    }
 
-   private SideDependentList<? extends ContactablePlaneBody> getBipedFeet()
+   private SideDependentList<ContactablePlaneBody> getBipedFeet()
    {
       return bipedFeet;
    }
@@ -287,7 +287,7 @@ public class DesiredFootstepVisualizer
 
       DesiredFootstepVisualizer desiredFootstepVisualizer = new DesiredFootstepVisualizer(parentRegistry, dynamicGraphicObjectsListRegistry);
 
-      SideDependentList<? extends ContactablePlaneBody> bipedFeet = desiredFootstepVisualizer.getBipedFeet();
+      SideDependentList<ContactablePlaneBody> bipedFeet = desiredFootstepVisualizer.getBipedFeet();
 
       RobotSide initialStanceSide = RobotSide.LEFT;
       RobotSide swingLegSide = initialStanceSide.getOppositeSide();
@@ -297,8 +297,8 @@ public class DesiredFootstepVisualizer
       FramePose2d startPose = new FramePose2d(ReferenceFrame.getWorldFrame());
       FramePoint2d endPoint = new FramePoint2d(ReferenceFrame.getWorldFrame(), 10.0, 0.0);
 
-      TurningThenStraightFootstepGenerator footstepGenerator = new TurningThenStraightFootstepGenerator(bipedFeet, startPose, endPoint,
-            pathType, initialStanceSide);
+      TurningThenStraightFootstepGenerator footstepGenerator = new TurningThenStraightFootstepGenerator(bipedFeet, endPoint, pathType,
+            initialStanceSide);
 
       List<Footstep> footsteps = footstepGenerator.generateDesiredFootstepList();
 
