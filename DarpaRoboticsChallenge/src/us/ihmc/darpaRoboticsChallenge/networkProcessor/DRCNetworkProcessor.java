@@ -110,7 +110,7 @@ public class DRCNetworkProcessor
          
          if(DRCConfigParameters.CALIBRATE_ARM_MODE)
          {
-            new ArmCalibrationHelper(fieldComputerClient, networkingManager, cameraReceiver);
+            new ArmCalibrationHelper(fieldComputerClient, networkingManager, cameraReceiver,jointMap);
          }
       }
       else
@@ -143,7 +143,7 @@ public class DRCNetworkProcessor
       
       if(DRCConfigParameters.CALIBRATE_ARM_MODE)
       {
-         new ArmCalibrationHelper(fieldComputerClient, networkingManager, cameraReceiver);
+         new ArmCalibrationHelper(fieldComputerClient, networkingManager, cameraReceiver,jointMap);
       }
       
       connect();
