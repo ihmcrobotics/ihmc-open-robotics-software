@@ -12,7 +12,7 @@ import us.ihmc.darpaRoboticsChallenge.driving.DRCStereoListener;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.CameraDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
 import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.DRCJointConfigurationData;
-import us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap;
+import us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.net.ObjectConsumer;
 
@@ -121,7 +121,7 @@ public class ArmCalibrationHelper implements DRCStereoListener
          PrintWriter qWriter = new PrintWriter(q);
          PrintWriter qoutWriter = new PrintWriter(qout);
 
-         String[] jointNames = ROSAtlasJointMap.jointNames;
+         String[] jointNames = AtlasOrderedJointMap.jointNames;
          for (int i = 0; i < jointNames.length; i++)
          {
             qWriter.print(jointNames[i]);

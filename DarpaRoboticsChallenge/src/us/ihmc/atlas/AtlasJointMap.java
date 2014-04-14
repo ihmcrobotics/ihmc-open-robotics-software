@@ -1,22 +1,22 @@
 package us.ihmc.atlas;
 
-import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.back_bkx;
-import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.back_bky;
-import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.back_bkz;
-import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.forcedSideDependentJointNames;
-import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.jointNames;
-import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_arm_elx;
-import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_arm_ely;
-import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_arm_shx;
-import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_arm_shy;
-import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_arm_wrx;
-import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_arm_wry;
-import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_leg_akx;
-import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_leg_aky;
-import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_leg_hpx;
-import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_leg_hpy;
-import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_leg_hpz;
-import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_leg_kny;
+import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.back_bkx;
+import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.back_bky;
+import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.back_bkz;
+import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.forcedSideDependentJointNames;
+import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.jointNames;
+import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.l_arm_elx;
+import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.l_arm_ely;
+import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.l_arm_shx;
+import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.l_arm_shy;
+import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.l_arm_wrx;
+import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.l_arm_wry;
+import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.l_leg_akx;
+import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.l_leg_aky;
+import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.l_leg_hpx;
+import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.l_leg_hpy;
+import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.l_leg_hpz;
+import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.l_leg_kny;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -38,7 +38,7 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineJointName;
 import us.ihmc.darpaRoboticsChallenge.IncorrectDrcRobotModelException;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap;
+import us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.Pair;
@@ -344,7 +344,7 @@ public class AtlasJointMap extends DRCRobotJointMap
    @Override
    public String[] getOrderedJointNames()
    {
-      return ROSAtlasJointMap.jointNames;
+      return AtlasOrderedJointMap.jointNames;
    }
    
    @Override

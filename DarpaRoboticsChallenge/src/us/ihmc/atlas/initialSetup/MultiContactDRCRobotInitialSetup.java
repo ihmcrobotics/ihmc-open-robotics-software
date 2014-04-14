@@ -1,20 +1,20 @@
 package us.ihmc.atlas.initialSetup;
 
-import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.forcedSideDependentJointNames;
-import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.jointNames;
-import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_arm_elx;
-import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_arm_ely;
-import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_arm_shx;
-import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_arm_shy;
-import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_arm_wrx;
-import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_arm_wry;
-import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_leg_hpx;
-import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_leg_hpy;
-import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_leg_hpz;
-import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.l_leg_kny;
-import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.r_leg_hpx;
-import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.r_leg_hpy;
-import static us.ihmc.darpaRoboticsChallenge.ros.ROSAtlasJointMap.r_leg_kny;
+import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.forcedSideDependentJointNames;
+import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.jointNames;
+import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.l_arm_elx;
+import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.l_arm_ely;
+import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.l_arm_shx;
+import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.l_arm_shy;
+import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.l_arm_wrx;
+import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.l_arm_wry;
+import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.l_leg_hpx;
+import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.l_leg_hpy;
+import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.l_leg_hpz;
+import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.l_leg_kny;
+import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.r_leg_hpx;
+import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.r_leg_hpy;
+import static us.ihmc.darpaRoboticsChallenge.ros.AtlasOrderedJointMap.r_leg_kny;
 
 import java.util.EnumMap;
 
