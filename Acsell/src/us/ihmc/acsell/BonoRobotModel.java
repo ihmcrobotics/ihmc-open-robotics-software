@@ -164,4 +164,10 @@ public class BonoRobotModel implements DRCRobotModel
       throw new RuntimeException("Implement me!");
    }
 
+   @Override
+   public void setJointDamping(SDFRobot simulatedRobot)
+   {
+      System.err.println("Joint Damping not setup for Bono. BonoRobotModel setJointDamping!");
+   }
+
 }
