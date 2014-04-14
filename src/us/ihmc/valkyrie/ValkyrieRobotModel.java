@@ -213,4 +213,11 @@ public class ValkyrieRobotModel implements DRCRobotModel
       return valkyrieOutputWriterWithAccelerationIntegration;
    }
 
+   //For Sim Only
+   @Override
+   public void setJointDamping(SDFRobot simulatedRobot)
+   {
+      System.err.println("Joint Damping not setup for Valkyrie. ValkyrieRobotModel setJointDamping!");
+   }
+
 }
