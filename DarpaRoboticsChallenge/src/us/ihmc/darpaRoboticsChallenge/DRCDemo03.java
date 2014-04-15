@@ -3,8 +3,6 @@ package us.ihmc.darpaRoboticsChallenge;
 import java.io.IOException;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.atlas.initialSetup.VRCTask1InVehicleHovering;
-import us.ihmc.atlas.parameters.AtlasDrivingControllerParameters;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -12,7 +10,6 @@ import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepTimingParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelState;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModelFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.PlainDRCRobot;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
@@ -23,15 +20,11 @@ import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.net.LocalObjectCommunicator;
 import us.ihmc.utilities.net.ObjectCommunicator;
 
-import com.martiansoftware.jsap.FlaggedOption;
-import com.martiansoftware.jsap.JSAP;
-import com.martiansoftware.jsap.JSAPException;
-import com.martiansoftware.jsap.JSAPResult;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
 
-public class DRCDemo03
+public abstract class DRCDemo03
 {
    private static final boolean START_NETWORK = true;
    private static final boolean SHOW_HEIGHTMAP = false;
@@ -39,10 +32,10 @@ public class DRCDemo03
    private final DRCDemoEnvironmentWithBoxAndSteeringWheel environment;
 
    public DRCDemo03(DRCGuiInitialSetup guiInitialSetup, AutomaticSimulationRunner automaticSimulationRunner, double timePerRecordTick,
-                    int simulationDataBufferSize, DRCRobotModel robotModel)
+                    int simulationDataBufferSize, DRCRobotModel robotModel, DRCRobotInitialSetup<SDFRobot> robotInitialSetup, WalkingControllerParameters drivingControllerParameters)
    {
       DRCSCSInitialSetup scsInitialSetup;
-      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = new VRCTask1InVehicleHovering(0.0); // new VRCTask1InVehicleInitialSetup(-0.03); // DrivingDRCRobotInitialSetup();
+      
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
       
       environment = new DRCDemoEnvironmentWithBoxAndSteeringWheel(dynamicGraphicObjectsListRegistry);
@@ -63,7 +56,6 @@ public class DRCDemo03
       ObjectCommunicator drcNetworkProcessorServer = new LocalObjectCommunicator();
       GlobalDataProducer dataProducer = new GlobalDataProducer(drcNetworkProcessorServer);
 
-      WalkingControllerParameters drivingControllerParameters = new AtlasDrivingControllerParameters();
       ArmControllerParameters armControllerParameters = robotModel.getArmControllerParameters();
 //      DRCRobotJointMap jointMap = robotInterface.getJointMap();
       HighLevelState initialBehavior = HighLevelState.DRIVING;
@@ -142,47 +134,7 @@ public class DRCDemo03
 //    sim.addStaticLinkGraphics(seatGraphics);
 // }
 
-   public static void main(String[] args) throws JSAPException
-   {
-      // Flag to set robot model
-      JSAP jsap = new JSAP();
-      FlaggedOption robotModel = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(true).setStringParser(JSAP.STRING_PARSER);
-      robotModel.setHelp("Robot models: " + DRCRobotModelFactory.robotModelsToString());
-      
-      DRCRobotModel model;
-      try
-      {
-         jsap.registerParameter(robotModel);
-
-         JSAPResult config = jsap.parse(args);
-
-         if (config.success())
-         {
-            model = DRCRobotModelFactory.CreateDRCRobotModel(config.getString("robotModel"));
-         }
-         else
-         {
-            System.out.println("Enter a robot model.");
-            return;
-         }
-      }
-      catch (Exception e)
-      {
-         System.out.println("Robot model not found");
-         e.printStackTrace();
-         return;
-      }
-      
-      AutomaticSimulationRunner automaticSimulationRunner = null;
-
-      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false);
-
-      double timePerRecordTick = DRCConfigParameters.CONTROL_DT;
-      int simulationDataBufferSize = 16000;
-//      String ipAddress = null;
-//      int portNumber = -1;
-      new DRCDemo03(guiInitialSetup, automaticSimulationRunner, timePerRecordTick, simulationDataBufferSize, model);
-   }
+   
 
    public SimulationConstructionSet getSimulationConstructionSet()
    {

@@ -21,7 +21,7 @@ import java.awt.image.ComponentColorModel;
 import java.awt.image.DataBuffer;
 
 /**
- * Modified from {@link us.ihmc.darpaRoboticsChallenge.DRCGazeboDrivingInterface}.
+ * Modified from {@link us.ihmc.atlas.AtlasGazeboDrivingInterface}.
  *
  * @author Peter Abeles
  */
