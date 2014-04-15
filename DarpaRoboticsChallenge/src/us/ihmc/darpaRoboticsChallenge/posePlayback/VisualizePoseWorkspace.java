@@ -19,37 +19,26 @@ import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModelFactory;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.utilities.ThreadTools;
 
 import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPResult;
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.VariableChangedListener;
 import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class VisualizePoseWorkspace
 {
-   private static final String ipAddress = "localhost"; //DRCConfigParameters.CLOUD_MINION5_IP;
-
    private final SDFFullRobotModel fullRobotModelForSlider;
    
-   private final PosePlaybackAllJointsController posePlaybackController;
-   private final PosePlaybackSender posePlaybackSender;
    private PlaybackPoseSequence posePlaybackRobotPoseSequence;
 
    private final PlaybackPoseInterpolator interpolator;
    private final YoVariableRegistry registry = new YoVariableRegistry("PlaybackPoseSCSBridge");
 
-   private final BooleanYoVariable plotBalls = new BooleanYoVariable("plotBalls", registry);
    private DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
-   
-   private final BagOfBalls balls = new BagOfBalls(500, 0.01, YoAppearance.AliceBlue(), registry, dynamicGraphicObjectsListRegistry);
    
    public VisualizePoseWorkspace(DRCRobotModel robotModel) throws IOException
    {
@@ -66,8 +55,6 @@ public class VisualizePoseWorkspace
       fullRobotModelForSlider = loader.createFullRobotModel(jointMap);
       DRCRobotMidiSliderBoardPositionManipulation sliderBoard = new DRCRobotMidiSliderBoardPositionManipulation(scs, sdfRobot, fullRobotModelForSlider, dynamicGraphicObjectsListRegistry);
 
-      posePlaybackController = new PosePlaybackAllJointsController(fullRobotModelForSlider, registry);
-      posePlaybackSender = new PosePlaybackSender(posePlaybackController, ipAddress);
       posePlaybackRobotPoseSequence = new PlaybackPoseSequence(fullRobotModelForSlider);
       
       CaptureSnapshotListener captureSnapshotListener = new CaptureSnapshotListener(sdfRobot, scs);
@@ -83,17 +70,6 @@ public class VisualizePoseWorkspace
       
       
       scs.startOnAThread();
-
-      try
-      {
-         posePlaybackSender.connect();
-         posePlaybackSender.waitUntilConnected();
-      }
-      catch (Exception e)
-      {
-         System.err.println("Didn't connect to posePlaybackSender!");
-      }
-
    }
 
    private class CaptureSnapshotListener implements VariableChangedListener
@@ -132,31 +108,8 @@ public class VisualizePoseWorkspace
          double morphTime = 1.0;
          for (double time = 0.0; time < morphTime; time = time + dt)
          {
-            double morphPercentage = time / morphTime;
-            PlaybackPose morphedPose;
-
-            if (previousPose == null)
-            {
-               morphedPose = pose;
-            }
-            else
-            {
-               morphedPose = PlaybackPose.morph(previousPose, pose, morphPercentage);
-            }
-
-            posePlaybackController.setPlaybackPose(morphedPose);
             scs.setTime(time);
             scs.tickAndUpdate();
-
-            try
-            {
-               if (posePlaybackSender.isConnected())
-                  posePlaybackSender.writeData();
-               ThreadTools.sleep((long) (dt * 1000));
-            }
-            catch (IOException e)
-            {
-            }
          }
 
          previousPose = pose;
@@ -167,15 +120,10 @@ public class VisualizePoseWorkspace
 
    private class LoadSequenceListener implements VariableChangedListener
    {
-      private final SDFRobot sdfRobot;
-      private final FullRobotModel fullRobotModel;
       private final SimulationConstructionSet scs;
-      private PlaybackPose previousPose;
 
       public LoadSequenceListener(FullRobotModel fullRobotModel, SDFRobot sdfRobot, SimulationConstructionSet scs)
       {
-         this.fullRobotModel = fullRobotModel;
-         this.sdfRobot = sdfRobot;
          this.scs = scs;
       }
 
@@ -208,21 +156,8 @@ public class VisualizePoseWorkspace
          {
             time = time + dt;
 
-            PlaybackPose morphedPose = interpolator.getPose(time);
-
-            posePlaybackController.setPlaybackPose(morphedPose);
             scs.setTime(time);
             scs.tickAndUpdate();
-
-            try
-            {
-               if (posePlaybackSender.isConnected())
-                  posePlaybackSender.writeData();
-               ThreadTools.sleep((long) (dt * 1000));
-            }
-            catch (IOException e)
-            {
-            }
          }
       }
    }

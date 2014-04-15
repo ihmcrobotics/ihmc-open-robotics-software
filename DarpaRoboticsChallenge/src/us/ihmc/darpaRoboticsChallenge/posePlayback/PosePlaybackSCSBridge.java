@@ -19,7 +19,6 @@ import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceRead
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceWriter;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
-import us.ihmc.darpaRoboticsChallenge.configuration.LocalCloudMachines;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModelFactory;
@@ -38,7 +37,6 @@ import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPResult;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
-import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.VariableChangedListener;
 import com.yobotics.simulationconstructionset.YoVariable;
@@ -50,13 +48,10 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
 public class PosePlaybackSCSBridge
 {
-   private static final String ipAddress = LocalCloudMachines.CLOUDMINION_2.getIp();
    private static final double controlDT = DRCConfigParameters.CONTROL_DT;
 
    private static final boolean promptForTimeDelay = false;
 
-   private final PosePlaybackAllJointsController posePlaybackController;
-   private final PosePlaybackSender posePlaybackSender;
    private PlaybackPoseSequence posePlaybackRobotPoseSequence;
    private PlaybackPoseSequence lastLoadedPoseSequence;
    
@@ -75,10 +70,6 @@ public class PosePlaybackSCSBridge
    private final YoFramePoint leftAnklePosition = new YoFramePoint("leftAnklePosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint rightAnklePosition = new YoFramePoint("rightAnklePosition", ReferenceFrame.getWorldFrame(), registry);
    private final SideDependentList<YoFramePoint> anklePositions = new SideDependentList<YoFramePoint>(leftAnklePosition, rightAnklePosition);
-
-   private final EnumYoVariable<PalmPoseClassification> leftPalmPoseClassification = new EnumYoVariable<PalmPoseClassification>("leftPalmPose", "", registry, PalmPoseClassification.class, true);
-   private final EnumYoVariable<PalmPoseClassification> rightPalmPoseClassification = new EnumYoVariable<PalmPoseClassification>("rightPalmPose", "", registry, PalmPoseClassification.class, true);
-   private final SideDependentList<EnumYoVariable<PalmPoseClassification>> palmPoseClassifications = new SideDependentList<EnumYoVariable<PalmPoseClassification>>(leftPalmPoseClassification, rightPalmPoseClassification);
 
    private PlaybackPose previousPose;
 
@@ -105,8 +96,6 @@ public class PosePlaybackSCSBridge
       
       interpolator = new PlaybackPoseInterpolator(registry);
       
-      posePlaybackController = new PosePlaybackAllJointsController(fullRobotModel, registry);
-      posePlaybackSender = new PosePlaybackSender(posePlaybackController, ipAddress);
       posePlaybackRobotPoseSequence = new PlaybackPoseSequence(fullRobotModel);
 
       SDFPerfectSimulatedSensorReader reader = new SDFPerfectSimulatedSensorReader(sdfRobot, fullRobotModel, null);
@@ -153,7 +142,7 @@ public class PosePlaybackSCSBridge
       sliderBoard.addPlayPoseFromFrameByFrameSequenceRequestedListener(new PlayPoseFromFrameByFrameSequenceListener());
       sliderBoard.addResetToBasePoseRequestedListener(new ResetToBasePoseListener());
 
-      poseSequenceEditorGUI = new PoseSequenceEditorGUI(registry, posePlaybackController, sdfRobot, fullRobotModelForSlider, sliderBoard);
+      poseSequenceEditorGUI = new PoseSequenceEditorGUI(registry, sdfRobot, fullRobotModelForSlider, sliderBoard);
       poseSequenceEditorGUI.setVisible(true);
 
       scs.startOnAThread();
@@ -161,17 +150,6 @@ public class PosePlaybackSCSBridge
       CenterOfMassGraphicUpdater centerOfMassGraphicUpdater = new CenterOfMassGraphicUpdater();
       Thread thread = new Thread(centerOfMassGraphicUpdater);
       thread.start();
-
-      try
-      {
-         posePlaybackSender.connect();
-         posePlaybackSender.waitUntilConnected();
-      }
-      catch (Exception e)
-      {
-         System.err.println("Didn't connect to posePlaybackSender!");
-      }
-
    }
 
    private class CenterOfMassGraphicUpdater implements Runnable
@@ -249,27 +227,12 @@ public class PosePlaybackSCSBridge
             if (promptForTimeDelay)
             {
                String requestedPlaybackDelay = JOptionPane.showInputDialog("Playback delay before this transition in milliseconds?");
-               double playBackDelayPoseTransition = (requestedPlaybackDelay == "") ? PosePlaybackAtlasDefaultParameters.defaultPlaybackTransitionDelayMillis
-                     : Double.parseDouble(requestedPlaybackDelay);
+               double playBackDelayPoseTransition = Double.parseDouble(requestedPlaybackDelay);
                pose.setPlaybackDelayBeforePose(playBackDelayPoseTransition);
             }
-
             
-            posePlaybackController.setPlaybackPose(morphedPose);
             scs.setTime(time);
             scs.tickAndUpdate();
-
-            try
-            {
-               if (posePlaybackSender.isConnected())
-                  posePlaybackSender.writeData();
-               else
-                  morphedPose.setRobotAtPose(sdfRobot);
-               ThreadTools.sleep((long) (dt * 1000));
-            }
-            catch (IOException e)
-            {
-            }
          }
          morphedPose.setRobotAtPose(sdfRobot);
 
@@ -313,12 +276,6 @@ public class PosePlaybackSCSBridge
             palmFrame.update();
 
             handCoordinateSystems.get(robotSide).setToReferenceFrame(palmFrame);
-
-            PalmPoseClassification classifcation = PalmPoseClassifier.getClassification(robotSide, handFrame, fullRobotModel.getChest().getBodyFixedFrame());
-            palmPoseClassifications.get(robotSide).set(classifcation);
-
-            //            PoseReferenceFrame toDisplay = PalmPoseClassifier.getPoseReferenceFrame(RobotSide.RIGHT, PalmPoseClassification.PALM_IN);
-            //            handCoordinateSystems.get(robotSide).setToReferenceFrame(toDisplay);
          }
       }
 
@@ -426,7 +383,6 @@ public class PosePlaybackSCSBridge
          if (sdfRobot != null && previousPose != null)
          {
             previousPose.setRobotAtPose(sdfRobot);
-            posePlaybackController.setPlaybackPose(previousPose);
          }
       }
    }
@@ -518,25 +474,10 @@ public class PosePlaybackSCSBridge
          morphedPose = interpolator.getPose(frameByframeTime);
          previousPose = morphedPose;
 
-         posePlaybackController.setPlaybackPose(morphedPose);
          scs.setTime(frameByframeTime);
          scs.tickAndUpdate();
          //morphedPose.setRobotAtPose(sdfRobot);//don't update scs while playing back and connected to gazebo to avoid slider actuation delays
 
-         try
-         {
-            if (posePlaybackSender.isConnected())
-            {
-               posePlaybackSender.writeData();
-            }
-            else
-               morphedPose.setRobotAtPose(sdfRobot);// playing back to scs only if not connected to gazebo to see what's happening
-         }
-         catch (IOException e)
-         {
-         }
-
-         if (interpolator.didLastPoseIncrementSequence() || (frameByframePoseNumber == 0))
          {
             System.out.println("pose #: " + frameByframePoseNumber++ + " \t pausing for " + interpolator.getNextTransitionTimeDelay());
             if (playOnlyOnePose)

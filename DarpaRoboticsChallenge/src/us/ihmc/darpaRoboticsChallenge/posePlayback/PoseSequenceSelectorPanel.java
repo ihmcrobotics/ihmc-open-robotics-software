@@ -35,7 +35,6 @@ public class PoseSequenceSelectorPanel extends JPanel
    private static final long serialVersionUID = 7616401668436177628L;
 
    private final YoVariableRegistry registry;
-   private final PosePlaybackAllJointsController posePlaybackController;
    private final SDFRobot sdfRobot;
    private final FullRobotModel fullRobotModel;
    private final DRCRobotMidiSliderBoardPositionManipulation sliderBoard;
@@ -58,8 +57,6 @@ public class PoseSequenceSelectorPanel extends JPanel
 
       sequence = new PlaybackPoseSequence(fullRobotModel);
       
-      posePlaybackController = new PosePlaybackAllJointsController(fullRobotModel, registry);
-
       ReferenceFrames referenceFrames = new ReferenceFrames(fullRobotModel, jointMap, jointMap.getAnkleHeight());
       SDFPerfectSimulatedSensorReader reader = new SDFPerfectSimulatedSensorReader(sdfRobot, fullRobotModel, referenceFrames);
       ModularRobotController controller = new ModularRobotController("Reader");
@@ -112,12 +109,11 @@ public class PoseSequenceSelectorPanel extends JPanel
       add(scrollPane);
    }
 
-   public PoseSequenceSelectorPanel(YoVariableRegistry registry, PosePlaybackAllJointsController posePlaybackController, SDFRobot sdfRobot, FullRobotModel fullRobotModel, DRCRobotMidiSliderBoardPositionManipulation sliderBoard)
+   public PoseSequenceSelectorPanel(YoVariableRegistry registry, SDFRobot sdfRobot, FullRobotModel fullRobotModel, DRCRobotMidiSliderBoardPositionManipulation sliderBoard)
    {
       super(new GridLayout(1, 0));
 
       this.registry = registry;
-      this.posePlaybackController = posePlaybackController;
       this.sdfRobot = sdfRobot;
       this.fullRobotModel = fullRobotModel;
       this.sliderBoard = sliderBoard;
