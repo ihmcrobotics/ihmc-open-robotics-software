@@ -49,7 +49,14 @@ public class CaptureRegionVisualizer
       captureRegionPolygon = captureRegionCalculator.getCaptureRegion().changeFrameAndProjectToXYPlaneCopy(worldFrame);
       if (yoCaptureRegionPolygon != null)
       {
-         yoCaptureRegionPolygon.setFrameConvexPolygon2d(captureRegionPolygon);
+         try
+         {
+            yoCaptureRegionPolygon.setFrameConvexPolygon2d(captureRegionPolygon);
+         }
+         catch (Exception e)
+         {
+            System.out.println(e);
+         }
       }
    }
 }
