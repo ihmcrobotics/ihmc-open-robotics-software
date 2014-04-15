@@ -14,7 +14,6 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedOutputWriter;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedSensorReader;
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.atlas.initialSetup.SquaredUpDRCRobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
@@ -420,7 +419,7 @@ public class SimpleStanceController implements RobotController
       SDFRobot robot = jaxbSDFLoader.createRobot(jointMap, false);
       ReferenceFrames referenceFrames = new ReferenceFrames(fullRobotModel, jointMap, jointMap.getAnkleHeight());
 
-      DRCRobotInitialSetup<SDFRobot> intialSetup = new SquaredUpDRCRobotInitialSetup();
+      DRCRobotInitialSetup<SDFRobot> intialSetup = model.getDefaultRobotInitialSetup(0, 0);
       intialSetup.initializeRobot(robot, jointMap);
       WalkingControllerParameters walkingControlParams = model.getWalkingControlParameters();
       double footForward =  walkingControlParams.getFootForwardOffset();

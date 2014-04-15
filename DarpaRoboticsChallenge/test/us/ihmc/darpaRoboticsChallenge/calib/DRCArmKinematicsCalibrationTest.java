@@ -1,4 +1,4 @@
-package us.ihmc.atlas.calib;
+package us.ihmc.darpaRoboticsChallenge.calib;
 
 import boofcv.io.image.UtilImageIO;
 import boofcv.struct.calib.IntrinsicParameters;
@@ -6,7 +6,7 @@ import georegression.struct.se.Se3_F64;
 
 import org.junit.Test;
 
-import us.ihmc.atlas.calib.AtlasArmKinematicsCalibration;
+import us.ihmc.darpaRoboticsChallenge.calib.DRCArmKinematicsCalibration;
 
 import java.awt.image.BufferedImage;
 
@@ -15,7 +15,7 @@ import static org.junit.Assert.*;
 /**
  * @author Peter Abeles
  */
-public class AtlasArmKinematicsCalibrationTest
+public class DRCArmKinematicsCalibrationTest
 {
 
    @Test
@@ -26,7 +26,7 @@ public class AtlasArmKinematicsCalibrationTest
       if (image == null)
          fail("can't find the test image.");
 
-      AtlasArmKinematicsCalibration alg = new AtlasArmKinematicsCalibration(null);
+      DRCArmKinematicsCalibration alg = new DRCArmKinematicsCalibration(null);
 
       // if param has not been set it should fail
       assertFalse(alg.estimateCameraPose(image));
