@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
-import us.ihmc.commonWalkingControlModules.captureRegion.CaptureRegionCalculator;
+import us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculator;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -9,9 +9,9 @@ import us.ihmc.utilities.math.geometry.FramePose;
 
 public class BasicReachableScorer implements StepLocationScorer
 {
-   protected final CaptureRegionCalculator captureRegionCalculator;
+   protected final OneStepCaptureRegionCalculator captureRegionCalculator;
 
-   public BasicReachableScorer(CaptureRegionCalculator captureRegionCalculator)
+   public BasicReachableScorer(OneStepCaptureRegionCalculator captureRegionCalculator)
    {
       this.captureRegionCalculator = captureRegionCalculator;
    }

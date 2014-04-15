@@ -239,4 +239,14 @@ public class OneStepCaptureRegionCalculator
    {
       this.reachableRegions = reachableRegions;
    }
+   
+   public FrameConvexPolygon2d getReachableRegion(RobotSide robotSide)
+   {
+      return reachableRegions.get(robotSide);
+   }
+   
+   public double getKinematicStepRange()
+   {
+      return kineamaticStepRange;
+   }
 }

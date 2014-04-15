@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import javax.vecmath.Point2d;
 
-import us.ihmc.commonWalkingControlModules.captureRegion.CaptureRegionCalculator;
+import us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculator;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.BoundingBox2d;
@@ -47,7 +47,7 @@ public class WeightedDistanceScorer extends BasicReachableScorer
    private double yWeight = GreatDX / GreatDY;
 
 
-   public WeightedDistanceScorer(CaptureRegionCalculator captureRegionCalculator, SideDependentList<ReferenceFrame> footZUpFrames,
+   public WeightedDistanceScorer(OneStepCaptureRegionCalculator captureRegionCalculator, SideDependentList<ReferenceFrame> footZUpFrames,
                                  DoubleYoVariable stanceWidth, DoubleYoVariable stanceLength, DoubleYoVariable stepAngle, DoubleYoVariable stepDistance)
    {
       super(captureRegionCalculator);
