@@ -1,4 +1,4 @@
-package us.ihmc.atlas.visualization;
+package us.ihmc.darpaRoboticsChallenge.visualization;
 
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.CommonNames;
