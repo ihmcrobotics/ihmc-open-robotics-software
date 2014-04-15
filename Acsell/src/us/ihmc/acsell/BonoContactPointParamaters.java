@@ -9,8 +9,6 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
-import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParamaters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.robotSide.RobotSide;
@@ -38,42 +36,22 @@ public class BonoContactPointParamaters extends DRCRobotContactPointParamaters
    private final SideDependentList<List<Point2d>> thighContactPoints = new SideDependentList<List<Point2d>>();
    private final List<Pair<String, Vector3d>> jointNameGroundContactPointMap = new ArrayList<Pair<String, Vector3d>>();
    private final SideDependentList<ArrayList<Point2d>> controllerContactPointsInSoleFrame = new SideDependentList<>();
-   
-   private final SideDependentList<List<Pair<String, Vector3d>>> footGroundContactPoints = new SideDependentList<List<Pair<String, Vector3d>>>();
-   private final SideDependentList<List<Pair<String, Vector3d>>> handGroundContactPoints = new SideDependentList<List<Pair<String, Vector3d>>>();
-   private final SideDependentList<List<Pair<String, Vector3d>>> thighGroundContactPoints = new SideDependentList<List<Pair<String, Vector3d>>>();
-   
-   public static final ArrayList<Point2d> ground_contact_point_offset_from_foot = new ArrayList<Point2d>();
 
-   static
-   {
-      ground_contact_point_offset_from_foot.add(new Point2d(-AtlasPhysicalProperties.foot_back, -(AtlasPhysicalProperties.foot_width / 2.0)));
-      ground_contact_point_offset_from_foot.add(new Point2d(-AtlasPhysicalProperties.foot_back, AtlasPhysicalProperties.foot_width / 2.0));
-      ground_contact_point_offset_from_foot.add(new Point2d(AtlasPhysicalProperties.foot_forward, -(AtlasPhysicalProperties.toe_width / 2.0)));
-      ground_contact_point_offset_from_foot.add(new Point2d(AtlasPhysicalProperties.foot_forward, AtlasPhysicalProperties.toe_width / 2.0));
-      //Added contact points between corners
-      if (DRCConfigParameters.USE_SIX_CONTACT_POINTS_PER_FOOT)
-      {
-         ground_contact_point_offset_from_foot.add(new Point2d(AtlasPhysicalProperties.foot_start_toetaper_from_back-AtlasPhysicalProperties.foot_back, -(AtlasPhysicalProperties.foot_width / 2.0)));
-         ground_contact_point_offset_from_foot.add(new Point2d(AtlasPhysicalProperties.foot_start_toetaper_from_back-AtlasPhysicalProperties.foot_back, AtlasPhysicalProperties.foot_width / 2.0));
-      }
-   }
-   
    public BonoContactPointParamaters(DRCRobotJointMap jointMap)
    {
       Vector3d t0 = new Vector3d(0.0, 0.0, -pelvisBoxSizeZ / 2.0);
       t0.add(pelvisBoxOffset);
       pelvisContactPointTransform.setTranslation(t0);
-      
+
       pelvisContacts.add(new Point2d(pelvisBoxSizeX / 2.0, pelvisBoxSizeY / 2.0));
       pelvisContacts.add(new Point2d(pelvisBoxSizeX / 2.0, -pelvisBoxSizeY / 2.0));
       pelvisContacts.add(new Point2d(-pelvisBoxSizeX / 2.0, pelvisBoxSizeY / 2.0));
       pelvisContacts.add(new Point2d(-pelvisBoxSizeX / 2.0, -pelvisBoxSizeY / 2.0));
-      
+
       Matrix3d r0 = new Matrix3d();
       RotationFunctions.setYawPitchRoll(r0, 0.0, Math.PI / 2.0, 0.0);
       pelvisBackContactPointTransform.set(r0);
-      
+
       Vector3d t1 = new Vector3d(-pelvisBoxSizeX / 2.0, 0.0, 0.0);
       t1.add(pelvisBoxOffset);
       pelvisBackContactPointTransform.setTranslation(t1);
@@ -81,32 +59,20 @@ public class BonoContactPointParamaters extends DRCRobotContactPointParamaters
       pelvisBackContacts.add(new Point2d(-pelvisBoxSizeZ / 2.0, -pelvisBoxSizeY / 2.0));
       pelvisBackContacts.add(new Point2d(pelvisBoxSizeZ / 2.0, pelvisBoxSizeY / 2.0));
       pelvisBackContacts.add(new Point2d(pelvisBoxSizeZ / 2.0, -pelvisBoxSizeY / 2.0));
-      
+
       Matrix3d r1 = new Matrix3d();
       RotationFunctions.setYawPitchRoll(r1, 0.0, Math.PI / 2.0, 0.0);
       chestBackContactPointTransform.set(r1);
-      
+
       Vector3d t2 = new Vector3d(-chestBoxSizeX / 2.0, 0.0, 0.0);
       t2.add(chestBoxOffset);
       chestBackContactPointTransform.setTranslation(t2);
-      
+
       chestBackContacts.add(new Point2d(0.0, chestBoxSizeY / 2.0));
       chestBackContacts.add(new Point2d(0.0, -chestBoxSizeY / 2.0));
       chestBackContacts.add(new Point2d(chestBoxSizeZ / 2.0, chestBoxSizeY / 2.0));
       chestBackContacts.add(new Point2d(chestBoxSizeZ / 2.0, -chestBoxSizeY / 2.0));
-      
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         footGroundContactPoints.put(robotSide, new ArrayList<Pair<String, Vector3d>>());
-         ArrayList<Point2d> contactPointOffsetList = ground_contact_point_offset_from_foot;
 
-         for (Point2d footv3d : contactPointOffsetList)
-         {
-            // add ankle joint contact points on each corner of the foot
-            footGroundContactPoints.get(robotSide).add(new Pair<String, Vector3d>(jointMap.getJointBeforeFootName(robotSide), new Vector3d(footv3d.getX(), footv3d.getY(), -AtlasPhysicalProperties.ankleHeight)));
-         }
-      }
-      
       for (RobotSide robotSide : RobotSide.values)
       {
          Transform3D thighContactPointTransform = new Transform3D();
@@ -115,46 +81,46 @@ public class BonoContactPointParamaters extends DRCRobotContactPointParamaters
          thighContactPointTransform.setTranslation(new Vector3d(-0.1179, robotSide.negateIfRightSide(0.02085), -0.08));
          thighContactPointTransforms.put(robotSide, thighContactPointTransform);
       }
-      
-      double[] xOffsets = new double[] {0.0, 0.1};// {0.0, 0.2};
-      double[] yOffsets = new double[] {0.0, 0.0};
+
+      double[] xOffsets = new double[] { 0.0, 0.1 };// {0.0, 0.2};
+      double[] yOffsets = new double[] { 0.0, 0.0 };
       for (RobotSide robotSide : RobotSide.values)
       {
          ArrayList<Point2d> offsetsForSide = new ArrayList<Point2d>();
-         
+
          for (int i = 0; i < 2; i++)
          {
             double xOffset = xOffsets[i];
             double yOffset = robotSide.negateIfRightSide(yOffsets[i]);
-            
+
             offsetsForSide.add(new Point2d(xOffset, yOffset));
          }
-         
+
          thighContactPoints.put(robotSide, offsetsForSide);
       }
       for (RobotSide robotSide : RobotSide.values)
       {
-        controllerContactPointsInSoleFrame.put(robotSide, new ArrayList<Point2d>());
-        Transform3D ankleToSoleFrame = BonoPhysicalProperties.getAnkleToSoleFrameTransform(robotSide);
-        
+         controllerContactPointsInSoleFrame.put(robotSide, new ArrayList<Point2d>());
+         Transform3D ankleToSoleFrame = BonoPhysicalProperties.getAnkleToSoleFrameTransform(robotSide);
+
          ArrayList<Pair<String, Point2d>> footGroundContactPoints = new ArrayList<>();
          footGroundContactPoints.add(new Pair<String, Point2d>(jointMap.getJointBeforeFootName(robotSide), new Point2d(BonoPhysicalProperties.footForward, -BonoPhysicalProperties.footWidth / 2.0)));
          footGroundContactPoints.add(new Pair<String, Point2d>(jointMap.getJointBeforeFootName(robotSide), new Point2d(BonoPhysicalProperties.footForward, BonoPhysicalProperties.footWidth / 2.0)));
          footGroundContactPoints.add(new Pair<String, Point2d>(jointMap.getJointBeforeFootName(robotSide), new Point2d(-BonoPhysicalProperties.footBack, -BonoPhysicalProperties.footWidth / 2.0)));
          footGroundContactPoints.add(new Pair<String, Point2d>(jointMap.getJointBeforeFootName(robotSide), new Point2d(-BonoPhysicalProperties.footBack, BonoPhysicalProperties.footWidth / 2.0)));
-   
-         
-         for(Pair<String, Point2d> gc : footGroundContactPoints)
+
+         for (Pair<String, Point2d> gc : footGroundContactPoints)
          {
             controllerContactPointsInSoleFrame.get(robotSide).add(gc.second());
-            
+
             Point3d gcOffset = new Point3d(gc.second().getX(), gc.second().getY(), 0.0);
             ankleToSoleFrame.transform(gcOffset);
             jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(gc.first(), new Vector3d(gcOffset)));
          }
       }
+      System.out.println();
    }
-   
+
    @Override
    public Transform3D getPelvisContactPointTransform()
    {
@@ -198,21 +164,17 @@ public class BonoContactPointParamaters extends DRCRobotContactPointParamaters
    }
 
    @Override
-   public SideDependentList<List<Point2d>>  getThighContactPoints()
+   public SideDependentList<List<Point2d>> getThighContactPoints()
    {
       return thighContactPoints;
    }
-   
-   public SideDependentList<ArrayList<Point2d>> getControllerContactPointsInSoleFrame() {
-      return controllerContactPointsInSoleFrame;
-   }
-   
+
    @Override
    public List<Pair<String, Vector3d>> getJointNameGroundContactPointMap()
    {
       return jointNameGroundContactPointMap;
    }
-   
+
    @Override
    public SideDependentList<ArrayList<Point2d>> getFootGroundContactPointsInSoleFrameForController()
    {
@@ -222,10 +184,10 @@ public class BonoContactPointParamaters extends DRCRobotContactPointParamaters
    @Override
    public List<Pair<String, Vector3d>> getFootContactPoints(RobotSide robotSide)
    {
-      return footGroundContactPoints.get(robotSide);
+      return null;
    }
 
-   @Override 
+   @Override
    public List<Pair<String, Vector3d>> getThighContactPoints(RobotSide robotSide)
    {
       // TODO Auto-generated method stub
@@ -238,5 +200,4 @@ public class BonoContactPointParamaters extends DRCRobotContactPointParamaters
       // TODO Auto-generated method stub
       return null;
    }
-
 }
