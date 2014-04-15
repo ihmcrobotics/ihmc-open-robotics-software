@@ -11,7 +11,7 @@ import us.ihmc.utilities.math.geometry.TransformTools;
 
 public class BonoPhysicalProperties extends DRCRobotPhysicalProperties
 {
-   public static final double ankleHeight = 0.038;
+   public static final double ankleHeight = 0.00;
    public static final double footForward = 0.202;
    public static final double footBack = 0.05;
    public static final double footWidth = 0.152;
@@ -24,7 +24,7 @@ public class BonoPhysicalProperties extends DRCRobotPhysicalProperties
    static {
       for(RobotSide robotSide : RobotSide.values())
       {
-         Transform3D ankleToSoleFrameTransform = TransformTools.yawPitchDegreesTransform(new Vector3d(0.0, 0.0, -ankleHeight), 0.0, 10.0);
+         Transform3D ankleToSoleFrameTransform = TransformTools.yawPitchDegreesTransform(new Vector3d(0.0, 0.0, -ankleHeight), 0.0, Math.toDegrees(0.18704));
          ankleToSoleFrameTransforms.put(robotSide, ankleToSoleFrameTransform);
       }
    }

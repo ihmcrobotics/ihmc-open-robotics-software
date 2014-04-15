@@ -8,7 +8,6 @@ import java.util.Set;
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFJointNameMap.JointRole;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
@@ -84,7 +83,7 @@ public class BonoJointMap extends DRCRobotJointMap
       {
          jointRoles.put(legJoint, JointRole.LEG);
       }
-      contactPointParamaters = new ACSELLContactPointParamaters(this);
+      contactPointParamaters = new BonoContactPointParamaters(this);
    }
 
    @Override
