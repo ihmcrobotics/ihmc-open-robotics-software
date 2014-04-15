@@ -1,7 +1,7 @@
 package us.ihmc.valkyrie.visualizer;
 
 import us.ihmc.SdfLoader.JaxbSDFLoader;
-import us.ihmc.atlas.visualization.SliderBoardFactory;
+import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
 import us.ihmc.robotDataCommunication.YoVariableClient;
 import us.ihmc.valkyrie.ValkyrieSDFLoader;
 import us.ihmc.valkyrie.configuration.ValkyrieNetworkParameters;
