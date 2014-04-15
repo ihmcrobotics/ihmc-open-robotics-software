@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedFootInterfa
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.captureRegion.CapturePointCalculatorInterface;
 import us.ihmc.commonWalkingControlModules.captureRegion.CaptureRegionCalculator;
+import us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.DoubleAndSingleSupportDurationUpdater;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
@@ -21,6 +22,7 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
@@ -38,7 +40,7 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
    private final DoubleAndSingleSupportDurationUpdater doubleAndSingleSupportDurationUpdater;
 
    private final CapturePointCalculatorInterface capturePointCalculator;
-   private final CaptureRegionCalculator captureRegionCalculator;
+   private final OneStepCaptureRegionCalculator captureRegionCalculator;
    private final CouplingRegistry couplingRegistry;
 
    private ArrayList<Updatable> updatables;
@@ -52,7 +54,7 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
            BipedFootInterface rightFoot, BipedFeetUpdater bipedFeetUpdater, Updatable footPolygonVisualizer,
            DesiredHeadingControlModule desiredHeadingControlModule, DesiredVelocityControlModule desiredVelocityControlModule,
            DesiredFootstepCalculator desiredFootstepCalculator, DoubleAndSingleSupportDurationUpdater doubleAndSingleSupportDurationUpdater,
-           CapturePointCalculatorInterface capturePointCalculator, CaptureRegionCalculator captureRegionCalculator, CouplingRegistry couplingRegistry,
+           CapturePointCalculatorInterface capturePointCalculator, OneStepCaptureRegionCalculator captureRegionCalculator, CouplingRegistry couplingRegistry,
            double initialDesiredHeading)
    {
       this.processedSensors = processedSensors;
@@ -119,10 +121,14 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
       if (supportLeg != null)
       {
          // TODO: also compute capture regions in double support
-
+         FramePoint2d capturePoint2d = capturePointInMidfeetZUp.toFramePoint2d();
          FrameConvexPolygon2d supportFoot = bipedSupportPolygons.getFootPolygonInAnkleZUp(supportLeg);
-         FrameConvexPolygon2d captureRegion = captureRegionCalculator.calculateCaptureRegion(supportLeg, supportFoot,
-                                                 couplingRegistry.getEstimatedSwingTimeRemaining());
+         double gravity = -processedSensors.getGravityInWorldFrame().getZ();
+         double comHeight = processedSensors.getCenterOfMassPositionInFrame(referenceFrames.getMidFeetZUpFrame()).getZ();
+         double omega0 = Math.sqrt(gravity/comHeight);
+         captureRegionCalculator.calculateCaptureRegion
+               (supportLeg.getOppositeSide(), couplingRegistry.getEstimatedSwingTimeRemaining(), capturePoint2d, omega0 ,supportFoot);
+         FrameConvexPolygon2d captureRegion = captureRegionCalculator.getCaptureRegion();
          couplingRegistry.setCaptureRegion(captureRegion);
 
          // Desired Footstep
