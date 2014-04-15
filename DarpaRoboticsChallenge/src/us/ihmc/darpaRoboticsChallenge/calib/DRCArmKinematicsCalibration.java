@@ -1,4 +1,4 @@
-package us.ihmc.atlas.calib;
+package us.ihmc.darpaRoboticsChallenge.calib;
 
 import boofcv.abst.calib.ConfigChessboard;
 import boofcv.abst.calib.PlanarCalibrationDetector;
@@ -21,7 +21,7 @@ import java.awt.image.BufferedImage;
  *
  * @author Peter Abeles
  */
-public class AtlasArmKinematicsCalibration
+public class DRCArmKinematicsCalibration
 {
    FullRobotModel robotModel;
 
@@ -37,7 +37,7 @@ public class AtlasArmKinematicsCalibration
 
    Se3_F64 targetToOrigin = new Se3_F64();
 
-   public AtlasArmKinematicsCalibration(FullRobotModel robotModel)
+   public DRCArmKinematicsCalibration(FullRobotModel robotModel)
    {
       this.robotModel = robotModel;
    }
