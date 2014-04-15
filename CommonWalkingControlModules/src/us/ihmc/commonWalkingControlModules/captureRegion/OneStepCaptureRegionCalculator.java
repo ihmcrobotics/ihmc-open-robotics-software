@@ -33,8 +33,12 @@ public class OneStepCaptureRegionCalculator
    private CaptureRegionVisualizer captureRegionVisualizer = null;
    private FrameConvexPolygon2d captureRegionPolygon = new FrameConvexPolygon2d(worldFrame);
    
-   // necessary variables and providers for the capture region calculation:
-   private final SideDependentList<FrameConvexPolygon2d> reachableRegions;
+   // necessary variables for the reachable region calculation:
+   private final double midFootAnkleXOffset;
+   private final double footWidth;
+   // necessary variables for the capture region calculation:
+   private SideDependentList<FrameConvexPolygon2d> reachableRegions;
+
    private final SideDependentList<ReferenceFrame> ankleZUpFrames;
    private final double kineamaticStepRange;
    
@@ -60,8 +64,21 @@ public class OneStepCaptureRegionCalculator
    {
       this.kineamaticStepRange = kineamaticStepRange;
       this.ankleZUpFrames = ankleZUpFrames;
+      this.midFootAnkleXOffset = midFootAnkleXOffset;
+      this.footWidth = footWidth;
       
-      // calculate the reachable regions
+      calculateReachableRegions();
+      
+      // set up registry and visualizer
+      parentRegistry.addChild(registry);
+      if(dynamicGraphicObjectsListRegistry != null && VISUALIZE) 
+      {
+         captureRegionVisualizer = new CaptureRegionVisualizer(this, dynamicGraphicObjectsListRegistry, registry);
+      }
+   }
+   
+   private void calculateReachableRegions()
+   {
       ArrayList<FramePoint2d> reachableRegionPoints = new ArrayList<FramePoint2d>(MAX_CAPTURE_REGION_POLYGON_POINTS - 2);
       reachableRegions = new SideDependentList<FrameConvexPolygon2d>();
       for(RobotSide side : RobotSide.values)
@@ -81,13 +98,6 @@ public class OneStepCaptureRegionCalculator
          reachableRegionPoints.add(new FramePoint2d(ankleZUpFrames.get(side), midFootAnkleXOffset, sign * footWidth / 2.0));
          FrameConvexPolygon2d reachableRegion = new FrameConvexPolygon2d(reachableRegionPoints);
          reachableRegions.set(side, reachableRegion);
-      }
-      
-      // set up registry and visualizer
-      parentRegistry.addChild(registry);
-      if(dynamicGraphicObjectsListRegistry != null && VISUALIZE) 
-      {
-         captureRegionVisualizer = new CaptureRegionVisualizer(this, dynamicGraphicObjectsListRegistry, registry);
       }
    }
    
@@ -155,7 +165,7 @@ public class OneStepCaptureRegionCalculator
          {
             globalTimer.stopTimer();
             captureRegionPolygon = null;
-            throw new RuntimeException("No capture region");
+            return;
          }
          captureRegionPoints.add(kinematicExtreme.toFramePoint());
          
@@ -183,23 +193,26 @@ public class OneStepCaptureRegionCalculator
       }
       
       // 6. Intersect the capture region with the reachable region
-      captureRegion.updateByProjectionOntoXYPlane(captureRegionPoints, supportAnkleZUp);
-      captureRegion = captureRegion.intersectionWith(reachableRegions.get(swingSide.getOppositeSide()));
+      if(captureRegion != null)
+      {
+         // This causes the capture region to always be null if it is null once.
+         // This assumes that once there is no capture region the robot will fall for sure.
+         captureRegion.updateByProjectionOntoXYPlane(captureRegionPoints, supportAnkleZUp);
+         captureRegion = captureRegion.intersectionWith(reachableRegions.get(swingSide.getOppositeSide()));
+      }
       
       globalTimer.stopTimer();
       captureRegionPolygon = captureRegion;
-      if(captureRegionPolygon == null)
-      {
-         throw new RuntimeException("No capture region");
-      }
       updateVisualizer();
    }
    
    private void updateVisualizer()
    {
-      if(captureRegionVisualizer != null)
+      if(captureRegionVisualizer != null && captureRegionPolygon != null)
       {
          captureRegionVisualizer.update();
+      } else {
+         hideCaptureRegion();
       }
    }
    
@@ -219,5 +232,11 @@ public class OneStepCaptureRegionCalculator
    public void setReachableRegionCutoffAngle(double reachableRegionCutoffAngle)
    {
       this.reachableRegionCutoffAngle = reachableRegionCutoffAngle;
+      calculateReachableRegions();
+   }
+   
+   public void setReachableRegions(SideDependentList<FrameConvexPolygon2d> reachableRegions)
+   {
+      this.reachableRegions = reachableRegions;
    }
 }
