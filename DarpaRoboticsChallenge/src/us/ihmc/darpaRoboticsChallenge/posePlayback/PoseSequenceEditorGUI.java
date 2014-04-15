@@ -36,11 +36,11 @@ public class PoseSequenceEditorGUI extends JFrame
       buttonPanelInit();
    }
 
-   public PoseSequenceEditorGUI(YoVariableRegistry registry, PosePlaybackAllJointsController posePlaybackController, SDFRobot sdfRobot, FullRobotModel fullRobotModel, DRCRobotMidiSliderBoardPositionManipulation sliderBoard)
+   public PoseSequenceEditorGUI(YoVariableRegistry registry, SDFRobot sdfRobot, FullRobotModel fullRobotModel, DRCRobotMidiSliderBoardPositionManipulation sliderBoard)
    {
       super("Pose sequence editor");
       setSize(1400, 600);
-      poseSequenceSelectorPanel = new PoseSequenceSelectorPanel(registry, posePlaybackController, sdfRobot, fullRobotModel, sliderBoard);
+      poseSequenceSelectorPanel = new PoseSequenceSelectorPanel(registry, sdfRobot, fullRobotModel, sliderBoard);
       buttonPanel = new ButtonPanel();
 
       buttonPanelInit();
