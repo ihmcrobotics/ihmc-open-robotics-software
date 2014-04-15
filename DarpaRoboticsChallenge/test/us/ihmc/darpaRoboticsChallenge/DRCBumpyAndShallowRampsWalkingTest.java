@@ -11,7 +11,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.atlas.initialSetup.SquaredUpDRCRobotInitialSetup;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
@@ -387,7 +386,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       double timePerRecordTick = DRCConfigParameters.CONTROL_DT;
       int simulationDataBufferSize = 16000;
 
-      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = new SquaredUpDRCRobotInitialSetup(0.0);
+      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
       DRCRobotInterface robotInterface = new PlainDRCRobot(robotModel);
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotInterface.getSimulateDT(), useLoadOfContactPointsForTheFeet);
       scsInitialSetup.setDrawGroundProfile(drawGroundProfile);

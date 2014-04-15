@@ -828,7 +828,7 @@ public class InverseDynamicsJointController extends State<HighLevelState>
          lastSliderMinValue = varMinValue;
          lastSliderMaxValue = varMaxValue;
 
-         sliderBoardMode = new EnumYoVariable<SliderBoardMode>("sliderBoardMode", registry, SliderBoardMode.class);
+         sliderBoardMode = new EnumYoVariable<SliderBoardMode>("GravityCompensationSliderBoard", registry, SliderBoardMode.class);
          sliderBoardSubMode = new EnumYoVariable<SliderBoardSubMode>("sliderBoardSubMode", registry, SliderBoardSubMode.class);
          sliderInGainsMode = new BooleanYoVariable("sliderInGainsMode", registry);
          if (CONTROL_FEET_IN_TASKSPACE)

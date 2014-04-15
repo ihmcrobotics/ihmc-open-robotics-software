@@ -10,7 +10,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.atlas.initialSetup.SquaredUpDRCRobotInitialSetup;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -144,7 +143,7 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
       double timePerRecordTick = DRCConfigParameters.CONTROL_DT;
       int simulationDataBufferSize = 16000;
 
-      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = new SquaredUpDRCRobotInitialSetup(0.0);
+      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
       DRCRobotInterface robotInterface = new PlainDRCRobot(robotModel);
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotInterface.getSimulateDT());
 

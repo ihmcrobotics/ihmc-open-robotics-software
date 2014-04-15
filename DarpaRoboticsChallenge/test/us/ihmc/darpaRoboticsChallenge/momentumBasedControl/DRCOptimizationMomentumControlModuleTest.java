@@ -24,7 +24,6 @@ import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedSensorReader;
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.atlas.initialSetup.SquaredUpDRCRobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
@@ -85,7 +84,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
       SDFRobot robot = jaxbSDFLoader.createRobot(jointMap, false);
       ReferenceFrames referenceFrames = new ReferenceFrames(fullRobotModel, jointMap, jointMap.getAnkleHeight());
 
-      DRCRobotInitialSetup<SDFRobot> intialSetup = new SquaredUpDRCRobotInitialSetup();
+      DRCRobotInitialSetup<SDFRobot> intialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
       initializeRobot(fullRobotModel, robot, referenceFrames, intialSetup, jointMap);
 
       SixDoFJoint rootJoint = fullRobotModel.getRootJoint();
@@ -169,7 +168,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
       SDFRobot robot = jaxbSDFLoader.createRobot(jointMap, false);
       ReferenceFrames referenceFrames = new ReferenceFrames(fullRobotModel, jointMap, jointMap.getAnkleHeight());
 
-      DRCRobotInitialSetup<SDFRobot> intialSetup = new SquaredUpDRCRobotInitialSetup();
+      DRCRobotInitialSetup<SDFRobot> intialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
       initializeRobot(fullRobotModel, robot, referenceFrames, intialSetup, jointMap);
 
       SixDoFJoint rootJoint = fullRobotModel.getRootJoint();
