@@ -118,7 +118,6 @@ public class BonoContactPointParamaters extends DRCRobotContactPointParamaters
             jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(gc.first(), new Vector3d(gcOffset)));
          }
       }
-      System.out.println();
    }
 
    @Override
