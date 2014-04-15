@@ -6,7 +6,7 @@ import java.util.List;
 import javax.vecmath.Point2d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.commonWalkingControlModules.captureRegion.CaptureRegionCalculator;
+import us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculator;
 import us.ihmc.commonWalkingControlModules.captureRegion.SteppingStonesCaptureRegionIntersectionCalculator;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
@@ -79,7 +79,7 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
 
    // Constructors
    public SteppingStonesDesiredFootstepCalculator(SideDependentList<? extends ContactablePlaneBody> contactableBodies, SteppingStones steppingStones,
-           CouplingRegistry couplingRegistry, CommonWalkingReferenceFrames commonWalkingReferenceFrames, CaptureRegionCalculator captureRegionCalculator,
+           CouplingRegistry couplingRegistry, CommonWalkingReferenceFrames commonWalkingReferenceFrames, OneStepCaptureRegionCalculator captureRegionCalculator,
            YoVariableRegistry yoVariableRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       percentNominalToAdjusted.set(1.0);
@@ -90,7 +90,7 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
 
       double defaultStepWidth = 0.22;
       stanceWidth.set(defaultStepWidth);
-      double defaultStanceLength = captureRegionCalculator.getKinematicRangeFromContactReferencePoint() * 0.5;    // 0.7;//0.40;
+      double defaultStanceLength = captureRegionCalculator.getKinematicStepRange() * 0.5;    // 0.7;//0.40;
       stanceLength.set(defaultStanceLength);
       stepAngle.set(Math.atan(stanceWidth.getDoubleValue() / stanceLength.getDoubleValue()));    // 0.4
       stepDistance.set(Math.sqrt((stanceWidth.getDoubleValue() * stanceWidth.getDoubleValue())
