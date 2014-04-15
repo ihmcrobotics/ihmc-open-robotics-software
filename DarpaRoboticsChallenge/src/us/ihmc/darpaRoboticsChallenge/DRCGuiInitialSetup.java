@@ -106,7 +106,7 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
       JaxbSDFLoader robotLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
       GeneralizedSDFRobotModel generalizedSDFRobotModel = robotLoader.getGeneralizedSDFRobotModel(jointMap.getModelName());
       
-      if (DRCLocalConfigParameters.MAKE_SLIDER_BOARD && sliderBoardFactory != null)//&& robotModel.getType() == RobotType.ATLAS
+      if (DRCLocalConfigParameters.MAKE_SLIDER_BOARD && sliderBoardFactory != null)
          sliderBoardFactory.makeSliderBoard(scs, scs.getRootRegistry(), generalizedSDFRobotModel);
    }
 
