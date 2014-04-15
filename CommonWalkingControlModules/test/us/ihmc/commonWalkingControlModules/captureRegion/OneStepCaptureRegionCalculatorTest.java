@@ -237,13 +237,13 @@ public class OneStepCaptureRegionCalculatorTest
       ReferenceFrame supportAnkleFrame = ankleZUpFrames.get(swingSide.getOppositeSide());
       double sign = swingSide == RobotSide.LEFT ? 1.0 : -1.0;
       
-      testPointsInside.add(new FramePoint2d(supportAnkleFrame, kineamaticStepRange*0.95 + midFootAnkleXOffset, sign*0.1));
-      testPointsInside.add(new FramePoint2d(supportAnkleFrame, -kineamaticStepRange*0.95 + midFootAnkleXOffset, sign*0.1));
+      testPointsInside.add(new FramePoint2d(supportAnkleFrame, kineamaticStepRange*0.95 + midFootAnkleXOffset, sign*(0.1 + footWidth/2.0)));
+      testPointsInside.add(new FramePoint2d(supportAnkleFrame, -kineamaticStepRange*0.95 + midFootAnkleXOffset, sign*(0.1 + footWidth/2.0)));
       testPointsInside.add(new FramePoint2d(supportAnkleFrame,  midFootAnkleXOffset, sign*kineamaticStepRange*0.95));
       
-      testPointsOutside.add(new FramePoint2d(supportAnkleFrame, kineamaticStepRange*1.05 + midFootAnkleXOffset, sign*0.1));
-      testPointsOutside.add(new FramePoint2d(supportAnkleFrame, -kineamaticStepRange*1.05 + midFootAnkleXOffset, sign*0.1));
-      testPointsOutside.add(new FramePoint2d(supportAnkleFrame, midFootAnkleXOffset, -sign*0.1));
+      testPointsOutside.add(new FramePoint2d(supportAnkleFrame, kineamaticStepRange*1.05 + midFootAnkleXOffset, sign*(0.1 + footWidth/2.0)));
+      testPointsOutside.add(new FramePoint2d(supportAnkleFrame, -kineamaticStepRange*1.05 + midFootAnkleXOffset, sign*(0.1 + footWidth/2.0)));
+      testPointsOutside.add(new FramePoint2d(supportAnkleFrame, midFootAnkleXOffset, -sign*(0.1 - footWidth/2.0)));
       testPointsOutside.add(new FramePoint2d(supportAnkleFrame, midFootAnkleXOffset, sign*kineamaticStepRange*1.05));
       
       for(int i = 0; i < testPointsInside.size(); i++)
