@@ -7,8 +7,6 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -19,34 +17,26 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.InverseDynamicsJointController;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModelFactory;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.PlainDRCRobot;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
-import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
-import us.ihmc.graphics3DAdapter.GroundProfile;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.Pair;
 
-import com.martiansoftware.jsap.JSAPException;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
-import com.yobotics.simulationconstructionset.util.FlatGroundProfile;
 import com.yobotics.simulationconstructionset.util.GainCalculator;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 
 public class DRCInverseDynamicsControllerDemo
 {
-   private static final DRCRobotModel defaultModelForGraphicSelector = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT);
 
-   private static final double ROBOT_FLOATING_HEIGHT = 0.3;
+   
 
    private static final HighLevelState INVERSE_DYNAMICS_JOINT_CONTROL = HighLevelState.INVERSE_DYNAMICS_JOINT_CONTROL;
    
@@ -123,38 +113,7 @@ public class DRCInverseDynamicsControllerDemo
       return drcController;
    }
 
-   public static void main(String[] args) throws JSAPException
-   {
-      DRCRobotModel model = null;
-      
-      model = DRCRobotModelFactory.selectModelFromFlag(args);
-      
-      if (model == null)
-         model = DRCRobotModelFactory.selectModelFromGraphicSelector(defaultModelForGraphicSelector);
-      
-      if (model == null)
-         throw new RuntimeException("No robot model selected");
-      
-      AutomaticSimulationRunner automaticSimulationRunner = null;
-
-      SliderBoardFactory sliderBoardFactory = WalkControllerSliderBoard.getFactory();
-      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false, sliderBoardFactory);
-
-      DRCRobotInterface robotInterface = new PlainDRCRobot(model);
-      
-      final double groundHeight = 0.0;
-      GroundProfile groundProfile = new FlatGroundProfile(groundHeight);
-
-      DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotInterface.getSimulateDT());
-      scsInitialSetup.setDrawGroundProfile(true);
-      scsInitialSetup.setInitializeEstimatorToActual(true);
-      
-      double initialYaw = 0.0;
-      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = model.getDefaultRobotInitialSetup(groundHeight + ROBOT_FLOATING_HEIGHT, initialYaw);
-
-      new DRCInverseDynamicsControllerDemo(robotInterface, robotInitialSetup, guiInitialSetup, scsInitialSetup, automaticSimulationRunner,
-            DRCConfigParameters.CONTROL_DT, 16000, model);
-   }
+   
 
    private class HoldRobotInTheAir implements RobotController
    {

@@ -32,7 +32,8 @@ public abstract class DRCDemo03
    private final DRCDemoEnvironmentWithBoxAndSteeringWheel environment;
 
    public DRCDemo03(DRCGuiInitialSetup guiInitialSetup, AutomaticSimulationRunner automaticSimulationRunner, double timePerRecordTick,
-                    int simulationDataBufferSize, DRCRobotModel robotModel, DRCRobotInitialSetup<SDFRobot> robotInitialSetup, WalkingControllerParameters drivingControllerParameters)
+                    int simulationDataBufferSize, DRCRobotModel robotModel, DRCRobotInitialSetup<SDFRobot> robotInitialSetup, WalkingControllerParameters drivingControllerParameters, 
+                    WalkingControllerParameters drcRobotMultiContactParameters)
    {
       DRCSCSInitialSetup scsInitialSetup;
       
@@ -61,8 +62,9 @@ public abstract class DRCDemo03
       HighLevelState initialBehavior = HighLevelState.DRIVING;
       FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulation(drivingControllerParameters);
 
+      
       ControllerFactory controllerFactory = DRCObstacleCourseSimulation.createDRCMultiControllerFactory(null, dataProducer, footstepTimingParameters, drivingControllerParameters, 
-            armControllerParameters, robotInterface.getJointMap(),initialBehavior,robotModel);
+            armControllerParameters, drcRobotMultiContactParameters,initialBehavior,robotModel);
 
       
       Pair<HumanoidRobotSimulation<SDFRobot>, DRCController> humanoidSimulation = DRCSimulationFactory.createSimulation(controllerFactory, environment, robotInterface, robotInitialSetup, scsInitialSetup,
