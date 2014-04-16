@@ -2,6 +2,8 @@ package us.ihmc.atlas.initialSetup;
 
 import javax.vecmath.Vector3d;
 
+import us.ihmc.darpaRoboticsChallenge.initialSetup.AdditionalOffsetSquaredUpDRCDemo01InitialSetup;
+
 public class SquaredUpDRCDemo01RobotOnPlatformsInitialSetup extends AdditionalOffsetSquaredUpDRCDemo01InitialSetup
 {
    private static final Vector3d firstPlatform = new Vector3d(-2.0, -3.6, 0.05);
