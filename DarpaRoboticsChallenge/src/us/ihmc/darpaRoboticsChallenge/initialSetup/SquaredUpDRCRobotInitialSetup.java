@@ -1,20 +1,10 @@
-package us.ihmc.atlas.initialSetup;
-
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.jointNames;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_aky;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_hpy;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_kny;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_leg_aky;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_leg_hpy;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_leg_kny;
+package us.ihmc.darpaRoboticsChallenge.initialSetup;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 
 public class SquaredUpDRCRobotInitialSetup implements DRCRobotInitialSetup<SDFRobot>
 {
@@ -63,19 +53,19 @@ public class SquaredUpDRCRobotInitialSetup implements DRCRobotInitialSetup<SDFRo
 
    protected void setLegJointPositions(SDFRobot robot)
    {
-      try{
-         robot.getOneDegreeOfFreedomJoint(jointNames[l_leg_hpy]).setQ(-0.4);
-         robot.getOneDegreeOfFreedomJoint(jointNames[r_leg_hpy]).setQ(-0.4);
-   
-         robot.getOneDegreeOfFreedomJoint(jointNames[l_leg_kny]).setQ(0.8);
-         robot.getOneDegreeOfFreedomJoint(jointNames[r_leg_kny]).setQ(0.8);
-   
-         robot.getOneDegreeOfFreedomJoint(jointNames[l_leg_aky]).setQ(-0.4);
-         robot.getOneDegreeOfFreedomJoint(jointNames[r_leg_aky]).setQ(-0.4);
-      } catch(Exception e)
-      {
-         System.err.println("Hard Coded joint positions for wrong model! FIXME - SquaredUpDrcRobotInitialSetUp");
-      }
+//      try{
+//         robot.getOneDegreeOfFreedomJoint(jointNames[l_leg_hpy]).setQ(-0.4);
+//         robot.getOneDegreeOfFreedomJoint(jointNames[r_leg_hpy]).setQ(-0.4);
+//   
+//         robot.getOneDegreeOfFreedomJoint(jointNames[l_leg_kny]).setQ(0.8);
+//         robot.getOneDegreeOfFreedomJoint(jointNames[r_leg_kny]).setQ(0.8);
+//   
+//         robot.getOneDegreeOfFreedomJoint(jointNames[l_leg_aky]).setQ(-0.4);
+//         robot.getOneDegreeOfFreedomJoint(jointNames[r_leg_aky]).setQ(-0.4);
+//      } catch(Exception e)
+//      {
+//         System.err.println("Hard Coded joint positions for wrong model! FIXME - SquaredUpDrcRobotInitialSetUp");
+//      }
    }
 
    public void getOffset(Vector3d offsetToPack)

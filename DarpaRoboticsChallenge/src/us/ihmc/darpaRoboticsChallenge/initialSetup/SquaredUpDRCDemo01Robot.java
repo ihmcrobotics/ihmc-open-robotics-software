@@ -1,4 +1,4 @@
-package us.ihmc.atlas.initialSetup;
+package us.ihmc.darpaRoboticsChallenge.initialSetup;
 
 import javax.vecmath.Vector3d;
 
