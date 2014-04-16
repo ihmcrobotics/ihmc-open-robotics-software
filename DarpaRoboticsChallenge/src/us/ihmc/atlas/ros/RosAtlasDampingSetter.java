@@ -16,7 +16,6 @@ import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosServiceClient;
 import us.ihmc.utilities.ros.RosStringPublisher;
-import us.ihmc.darpaRoboticsChallenge.ros.ROSSandiaJointMap;
 import us.ihmc.robotSide.RobotSide;
 import atlas_msgs.SetJointDamping;
 import atlas_msgs.SetJointDampingRequest;
