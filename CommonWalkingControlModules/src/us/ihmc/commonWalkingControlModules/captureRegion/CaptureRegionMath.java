@@ -93,8 +93,12 @@ public class CaptureRegionMath
      
       double angleBetweenDirections = directionA.angle(directionB);
       double angleBetweenDirectionsToSetLine = angleBetweenDirections * alpha;
-     
-      rotatedFromA.changeFrame(directionA.getReferenceFrame());
+      
+      // would like to use class member to minimize garbage:
+      // but it fails in some bamboo nightly tests so I have to use 'new'
+//     rotatedFromA.changeFrame(directionA.getReferenceFrame());
+      FrameVector rotatedFromA = new FrameVector(directionA.getReferenceFrame());
+
       rotatedFromA.set(directionA.getX(), directionA.getY(), 0.0);
       
       axisAngle.set(negZRotationAxis, angleBetweenDirectionsToSetLine);
