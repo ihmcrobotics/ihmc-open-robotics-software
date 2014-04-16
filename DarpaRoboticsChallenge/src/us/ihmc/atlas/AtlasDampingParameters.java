@@ -2,9 +2,9 @@ package us.ihmc.atlas;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.ros.AtlasOrderedJointMap;
+import us.ihmc.atlas.ros.ROSSandiaJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandModel;
-import us.ihmc.darpaRoboticsChallenge.ros.ROSSandiaJointMap;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 
