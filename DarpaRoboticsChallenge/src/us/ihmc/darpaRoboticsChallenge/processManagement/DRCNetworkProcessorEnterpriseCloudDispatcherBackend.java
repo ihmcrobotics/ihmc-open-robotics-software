@@ -2,10 +2,10 @@ package us.ihmc.darpaRoboticsChallenge.processManagement;
 
 import com.martiansoftware.jsap.*;
 
+import us.ihmc.atlas.AtlasRobotModelFactory;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModelFactory;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.fixedPointRepresentation.UnsignedByteTools;
@@ -59,7 +59,7 @@ public class DRCNetworkProcessorEnterpriseCloudDispatcherBackend implements Runn
             {
                case 0x00 :
                   commandServer.read(1);
-                  robotModel = DRCRobotModelFactory.getAvailableRobotModels()[UnsignedByteTools.toInt(buffer[1])];
+                  robotModel = AtlasRobotModelFactory.getAvailableRobotModels()[UnsignedByteTools.toInt(buffer[1])];
                   spawnNetworkProcessor();
 
                   break;

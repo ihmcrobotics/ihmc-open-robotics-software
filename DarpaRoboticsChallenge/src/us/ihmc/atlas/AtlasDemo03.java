@@ -10,7 +10,6 @@ import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCDemo03;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModelFactory;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 
 import com.martiansoftware.jsap.FlaggedOption;
@@ -32,7 +31,7 @@ public class AtlasDemo03 extends DRCDemo03
       // Flag to set robot model
       JSAP jsap = new JSAP();
       FlaggedOption robotModel = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(true).setStringParser(JSAP.STRING_PARSER);
-      robotModel.setHelp("Robot models: " + DRCRobotModelFactory.robotModelsToString());
+      robotModel.setHelp("Robot models: " + AtlasRobotModelFactory.robotModelsToString());
       
       DRCRobotModel model;
       try
@@ -43,7 +42,7 @@ public class AtlasDemo03 extends DRCDemo03
 
          if (config.success())
          {
-            model = DRCRobotModelFactory.CreateDRCRobotModel(config.getString("robotModel"));
+            model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"));
          }
          else
          {

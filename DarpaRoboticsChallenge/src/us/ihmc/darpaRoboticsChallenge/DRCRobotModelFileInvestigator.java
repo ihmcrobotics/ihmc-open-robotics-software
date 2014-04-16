@@ -5,9 +5,9 @@ import java.io.PrintWriter;
 
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.atlas.AtlasRobotModelFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModelFactory;
 
 public class DRCRobotModelFileInvestigator
 {
@@ -36,9 +36,9 @@ public class DRCRobotModelFileInvestigator
 
    public void writeAllModelFiles()
    {
-      for (String st : DRCRobotModelFactory.getAvailableRobotModels())
+      for (String st : AtlasRobotModelFactory.getAvailableRobotModels())
       {
-         writeModelFile(DRCRobotModelFactory.CreateDRCRobotModel(st));
+         writeModelFile(AtlasRobotModelFactory.createDRCRobotModel(st));
       }
    }
 

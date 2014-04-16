@@ -9,7 +9,6 @@ import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotInterface;
 import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModelFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.PlainDRCRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.SimulatedModelCorruptorDRCRobotInterface;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
@@ -30,10 +29,10 @@ public class AtlasFlatGroundWalkingTrack
    public static void main(String[] args) throws JSAPException
    {
       DRCRobotModel model = null;
-      model = DRCRobotModelFactory.selectModelFromFlag(args);
+      model = AtlasRobotModelFactory.selectModelFromFlag(args);
       
       if (model == null)
-         model = DRCRobotModelFactory.selectModelFromGraphicSelector(defaultModelForGraphicSelector);
+         model = AtlasRobotModelFactory.selectModelFromGraphicSelector(defaultModelForGraphicSelector);
 
       if (model == null)
           throw new RuntimeException("No robot model selected");
