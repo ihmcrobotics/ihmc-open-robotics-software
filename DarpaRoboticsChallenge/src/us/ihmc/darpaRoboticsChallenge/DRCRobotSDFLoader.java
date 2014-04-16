@@ -7,12 +7,8 @@ import java.util.ArrayList;
 import javax.xml.bind.JAXBException;
 
 import us.ihmc.SdfLoader.JaxbSDFLoader;
-import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 
 public class DRCRobotSDFLoader
 {
@@ -65,17 +61,4 @@ public class DRCRobotSDFLoader
 
       return jaxbSDFLoader;
    }
-
-   public static void main(String[] args)
-   {
-	  DRCRobotModel selectedModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT);
-      DRCRobotJointMap jointMap = selectedModel.getJointMap();
-      JaxbSDFLoader loader = loadDRCRobot(jointMap, false);
-      System.out.println(loader.createRobot(jointMap, true).getName());
-      
-      SimulationConstructionSet scs = new SimulationConstructionSet(loader.createRobot(jointMap, false));
-      scs.startOnAThread();
-
-   }
-
 }
