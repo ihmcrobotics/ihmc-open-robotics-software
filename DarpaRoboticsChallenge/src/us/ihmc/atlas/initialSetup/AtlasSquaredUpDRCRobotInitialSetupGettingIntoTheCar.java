@@ -34,7 +34,7 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
 
    private static final Methods SELECTED_METHOD = Methods.SIDE_BOTH_HANDS_GRABBING_TOP_AND_FRONT_BARS;
 
-   private final double groundZ;
+   private double groundZ;
 
    public AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar()
    {
@@ -372,8 +372,36 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
       }
    }
 
+   public void setOffset(Vector3d offset)
+   {
+   }
+
+   @Override
+   public void setInitialYaw(double yaw)
+   {
+   }
+
+   @Override
+   public void setInitialGroundHeight(double groundHeight)
+   {
+      groundZ = groundHeight;
+   }
+
+   @Override
+   public double getInitialYaw()
+   {
+      return 0;
+   }
+
+   @Override
+   public double getInitialGroundHeight()
+   {
+      return groundZ;
+   }
+
+   @Override
    public void getOffset(Vector3d offsetToPack)
    {
-      offsetToPack.set(new Vector3d(pelvisInitialPose.getX(), pelvisInitialPose.getY(), pelvisInitialPose.getZ()));
+      
    }
 }

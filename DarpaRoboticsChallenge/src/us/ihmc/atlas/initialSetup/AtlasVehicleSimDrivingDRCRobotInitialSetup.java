@@ -26,7 +26,7 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 public class AtlasVehicleSimDrivingDRCRobotInitialSetup implements DRCRobotInitialSetup<SDFRobot>
 {
 
-   private final double groundZ;
+   private double groundZ;
    private final Transform3D rootToWorld = new Transform3D();
    private final Vector3d offset = new Vector3d();
 
@@ -70,5 +70,38 @@ public class AtlasVehicleSimDrivingDRCRobotInitialSetup implements DRCRobotIniti
       offset.setZ(groundZ + 1.04);
       robot.setPositionInWorld(offset);
       robot.setOrientation(Math.PI / 2.0, forwardLean, 0.0);
+   }
+   
+   public void getOffset(Vector3d offsetToPack)
+   {
+      offsetToPack.set(offset);
+   }
+
+   public void setOffset(Vector3d offset)
+   {
+      this.offset.set(offset);
+   }
+
+   @Override
+   public void setInitialYaw(double yaw)
+   {
+   }
+
+   @Override
+   public void setInitialGroundHeight(double groundHeight)
+   {
+      groundZ = groundHeight;
+   }
+
+   @Override
+   public double getInitialYaw()
+   {
+      return 0;
+   }
+
+   @Override
+   public double getInitialGroundHeight()
+   {
+      return groundZ;
    }
 }

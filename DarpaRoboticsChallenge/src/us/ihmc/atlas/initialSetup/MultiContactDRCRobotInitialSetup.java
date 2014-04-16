@@ -18,6 +18,8 @@ import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_leg_kny;
 
 import java.util.EnumMap;
 
+import javax.vecmath.Vector3d;
+
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
@@ -74,5 +76,35 @@ public class MultiContactDRCRobotInitialSetup implements DRCRobotInitialSetup<SD
       defaultArmPosition.get(RobotSide.RIGHT).put(ArmJointName.WRIST_ROLL, 0.0);
 
       return defaultArmPosition;
+   }
+   
+   public void getOffset(Vector3d offsetToPack)
+   {
+   }
+
+   public void setOffset(Vector3d offset)
+   {
+   }
+
+   @Override
+   public void setInitialYaw(double yaw)
+   {
+   }
+
+   @Override
+   public void setInitialGroundHeight(double groundHeight)
+   {
+   }
+
+   @Override
+   public double getInitialYaw()
+   {
+      return 0;
+   }
+
+   @Override
+   public double getInitialGroundHeight()
+   {
+      return 0;
    }
 }

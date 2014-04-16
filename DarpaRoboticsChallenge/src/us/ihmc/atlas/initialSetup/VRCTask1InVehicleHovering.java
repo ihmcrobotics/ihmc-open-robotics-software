@@ -39,7 +39,7 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 public class VRCTask1InVehicleHovering implements DRCRobotInitialSetup<SDFRobot>
 {
 
-   private final double groundZ;
+   private double groundZ;
 
    public VRCTask1InVehicleHovering(double groundZ)
    {
@@ -100,5 +100,36 @@ public class VRCTask1InVehicleHovering implements DRCRobotInitialSetup<SDFRobot>
 
       robot.setPositionInWorld(new Vector3d(-0.096, 0.3726, 1.1064));
       robot.setOrientation(new Quat4d(-0.0076, -0.0814, 0.0747, 0.9938));
+   }
+   
+   public void getOffset(Vector3d offsetToPack)
+   {
+   }
+
+   public void setOffset(Vector3d offset)
+   {
+   }
+
+   @Override
+   public void setInitialYaw(double yaw)
+   {
+   }
+
+   @Override
+   public void setInitialGroundHeight(double groundHeight)
+   {
+      groundZ = groundHeight;
+   }
+
+   @Override
+   public double getInitialYaw()
+   {
+      return 0;
+   }
+
+   @Override
+   public double getInitialGroundHeight()
+   {
+      return groundZ;
    }
 }
