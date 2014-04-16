@@ -1,10 +1,11 @@
-package us.ihmc.acsell;
+package us.ihmc.acsell.controlParameters;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.media.j3d.Transform3D;
 
+import us.ihmc.acsell.parameters.BonoPhysicalProperties;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.robotSide.RobotSide;
@@ -14,7 +15,7 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 /**
  * Created by dstephen on 2/14/14.
  */
-public class ACSELLWalkingControllerParameters implements WalkingControllerParameters
+public class BonoWalkingControllerParameters implements WalkingControllerParameters
 {
 
    private final SideDependentList<Transform3D> handControlFramesWithRespectToFrameAfterWrist = new SideDependentList<>();
@@ -22,12 +23,12 @@ public class ACSELLWalkingControllerParameters implements WalkingControllerParam
 
    private final boolean runningOnRealRobot;
    
-   public ACSELLWalkingControllerParameters()
+   public BonoWalkingControllerParameters()
    {
       this(false);
    }
    
-   public ACSELLWalkingControllerParameters(boolean runningOnRealRobot)
+   public BonoWalkingControllerParameters(boolean runningOnRealRobot)
    {
       this.runningOnRealRobot = runningOnRealRobot;
       
@@ -95,10 +96,7 @@ public class ACSELLWalkingControllerParameters implements WalkingControllerParam
 
    public String[] getAllowableChestOrientationControlJointNames()
    {
-//      if(model == DRCRobotModel.BONO)
-         return new String[] {"back_mby"};
-//      else
-//         return new String[0];
+      return new String[] {"back_mby"};
    }
 
    public boolean checkOrbitalEnergyCondition()
@@ -106,49 +104,24 @@ public class ACSELLWalkingControllerParameters implements WalkingControllerParam
       return false;
    }
 
-   // USE THESE FOR Real Atlas Robot and sims when controlling pelvis height instead of CoM.
    private final double minimumHeightAboveGround = 0.595 + 0.03;
    private double nominalHeightAboveGround = 0.675 + 0.03;
    private final double maximumHeightAboveGround = 0.735 + 0.03;
    private final double additionalOffsetHeightBono = 0.05;
 
-   // USE THESE FOR DRC Atlas Model TASK 2 UNTIL WALKING WORKS BETTER WITH OTHERS.
-   //   private final double minimumHeightAboveGround = 0.785;
-   //   private double nominalHeightAboveGround = 0.865;
-   //   private final double maximumHeightAboveGround = 0.925;
-
-   //   // USE THESE FOR VRC Atlas Model TASK 2 UNTIL WALKING WORKS BETTER WITH OTHERS.
-   //   private double minimumHeightAboveGround = 0.68;
-   //   private double nominalHeightAboveGround = 0.76;
-   //   private double maximumHeightAboveGround = 0.82;
-
-   //   // USE THESE FOR IMPROVING WALKING, BUT DONT CHECK THEM IN UNTIL IT IMPROVED WALKING THROUGH MUD.
-   //   private double minimumHeightAboveGround = 0.68;
-   //   private double nominalHeightAboveGround = 0.80;  // NOTE: used to be 0.76, jojo
-   //   private double maximumHeightAboveGround = 0.84;  // NOTE: used to be 0.82, jojo
-
    public double minimumHeightAboveAnkle()
    {
-//      if(model == DRCRobotModel.BONO)
-         return minimumHeightAboveGround + additionalOffsetHeightBono;
-//      else
-//         return minimumHeightAboveGround;
+      return minimumHeightAboveGround + additionalOffsetHeightBono;
    }
 
    public double nominalHeightAboveAnkle()
    {
-//      if(model == DRCRobotModel.BONO)
-         return nominalHeightAboveGround + additionalOffsetHeightBono;
-//      else
-//         return nominalHeightAboveGround;
+      return nominalHeightAboveGround + additionalOffsetHeightBono;
    }
 
    public double maximumHeightAboveAnkle()
    {
-//      if(model == DRCRobotModel.BONO)
-         return maximumHeightAboveGround + additionalOffsetHeightBono;
-//      else
-//         return maximumHeightAboveGround;
+      return maximumHeightAboveGround + additionalOffsetHeightBono;
    }
 
    public void setNominalHeightAboveAnkle(double nominalHeightAboveAnkle)
@@ -203,42 +176,22 @@ public class ACSELLWalkingControllerParameters implements WalkingControllerParam
 
    public double getFootForwardOffset()
    {
-//      if (model == DRCRobotModel.AXL)
-//         return AxlJointMap.footForward;
-//      else if (model == DRCRobotModel.BONO)
-         return BonoPhysicalProperties.footForward;
-//      else
-//         throw new RuntimeException("Should not get there");
+      return BonoPhysicalProperties.footForward;
    }
 
    public double getFootBackwardOffset()
    {
-//      if (model == DRCRobotModel.AXL)
-//         return AxlJointMap.footBack;
-//      else if (model == DRCRobotModel.BONO)
-         return BonoPhysicalProperties.footBack;
-//      else
-//         throw new RuntimeException("Should not get there");
+      return BonoPhysicalProperties.footBack;
    }
 
    public double getAnkleHeight()
    {
-//      if (model == DRCRobotModel.AXL)
-//         return AxlJointMap.ankleHeight;
-//      else if (model == DRCRobotModel.BONO)
-         return BonoPhysicalProperties.ankleHeight;
-//      else
-//         throw new RuntimeException("Should not get there");
+      return BonoPhysicalProperties.ankleHeight;
    }
 
    public double getLegLength()
    {
-//      if (model == DRCRobotModel.AXL)
-//         return AxlJointMap.legLength;
-//      else if (model == DRCRobotModel.BONO)
-         return BonoPhysicalProperties.legLength;
-//      else
-//         throw new RuntimeException("Should not get there");
+      return BonoPhysicalProperties.legLength;
    }
 
    public double getMinLegLengthBeforeCollapsingSingleSupport()
@@ -259,12 +212,12 @@ public class ACSELLWalkingControllerParameters implements WalkingControllerParam
 
    public double getDesiredStepForward()
    {
-      return 0.5; //0.35;
+      return 0.3; //0.5; //0.35;
    }
 
    public double getMaxStepLength()
    {
-      return 0.6; //0.5; //0.35;
+      return 0.4; //0.6; //0.5; //0.35;
    }
 
    public double getMinStepWidth()
@@ -274,7 +227,7 @@ public class ACSELLWalkingControllerParameters implements WalkingControllerParam
 
    public double getMaxStepWidth()
    {
-      return 0.5; //0.4;
+      return 0.4; //0.5; //0.4;
    }
 
    public double getStepPitch()
@@ -309,7 +262,7 @@ public class ACSELLWalkingControllerParameters implements WalkingControllerParam
 
    public double getCMPRateLimit()
    {
-      return 50.0;
+      return 60.0;
    }
 
    public double getCMPAccelerationLimit()
@@ -329,7 +282,7 @@ public class ACSELLWalkingControllerParameters implements WalkingControllerParam
 
    public double getKpPelvisOrientation()
    {
-      return 200.0; //100.0;
+      return 100.0;
    }
 
    public double getZetaPelvisOrientation()
@@ -364,7 +317,7 @@ public class ACSELLWalkingControllerParameters implements WalkingControllerParam
 
    public double getKpUpperBody()
    {
-      return 300.0; //100.0;
+      return 100.0;
    }
 
    public double getZetaUpperBody()
@@ -469,12 +422,12 @@ public class ACSELLWalkingControllerParameters implements WalkingControllerParam
 
    public double getDefaultTransferTime()
    {
-      return 0.25;
+      return 1.5; //0.25;
    }
 
    public double getDefaultSwingTime()
    {
-      return 0.6;
+      return 1.5; //0.6;
    }
 
    @Override
@@ -498,21 +451,18 @@ public class ACSELLWalkingControllerParameters implements WalkingControllerParam
    @Override
    public double getFootWidth()
    {
-      // TODO Auto-generated method stub
       return BonoPhysicalProperties.footWidth;
    }
 
    @Override
    public double getToeWidth()
    {
-      // TODO Auto-generated method stub
-      return 0;
+      return BonoPhysicalProperties.footWidth;
    }
 
    @Override
    public double getFootLength()
    {
-      // TODO Auto-generated method stub
       return BonoPhysicalProperties.footForward + BonoPhysicalProperties.footBack;
    }
 

@@ -1,4 +1,4 @@
-package us.ihmc.acsell;
+package us.ihmc.acsell.parameters;
 
 import us.ihmc.robotSide.SideDependentList;
 

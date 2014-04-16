@@ -1,4 +1,4 @@
-package us.ihmc.acsell;
+package us.ihmc.acsell.controlParameters;
 
 import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCSimulatedSensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorFilterParameters;
@@ -6,7 +6,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.PointMeasurementNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 
-public class ACSELLStateEstimatorParameters implements StateEstimatorParameters
+public class BonoStateEstimatorParameters implements StateEstimatorParameters
 {
    private final boolean runningOnRealRobot;
 
@@ -38,7 +38,7 @@ public class ACSELLStateEstimatorParameters implements StateEstimatorParameters
    private final SensorNoiseParameters sensorNoiseParameters = DRCSimulatedSensorNoiseParameters
          .createNoiseParametersForEstimatorJerryTuningSeptember2013();
 
-   public ACSELLStateEstimatorParameters(boolean runningOnRealRobot, double estimatorDT)
+   public BonoStateEstimatorParameters(boolean runningOnRealRobot, double estimatorDT)
    {
       this.runningOnRealRobot = runningOnRealRobot;
 

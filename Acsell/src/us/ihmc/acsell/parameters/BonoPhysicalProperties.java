@@ -1,4 +1,4 @@
-package us.ihmc.acsell;
+package us.ihmc.acsell.parameters;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
@@ -24,7 +24,7 @@ public class BonoPhysicalProperties extends DRCRobotPhysicalProperties
    static {
       for(RobotSide robotSide : RobotSide.values())
       {
-         Transform3D ankleToSoleFrameTransform = TransformTools.yawPitchDegreesTransform(new Vector3d(0.0, 0.0, -ankleHeight), 0.0, Math.toDegrees(0.18704));
+         Transform3D ankleToSoleFrameTransform = TransformTools.yawPitchDegreesTransform(new Vector3d(0.0, 0.0, -ankleHeight), 0.0, Math.toDegrees(0.0*0.18704));
          ankleToSoleFrameTransforms.put(robotSide, ankleToSoleFrameTransform);
       }
    }

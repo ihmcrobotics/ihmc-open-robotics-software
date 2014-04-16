@@ -1,20 +1,20 @@
-package us.ihmc.acsell;
+package us.ihmc.acsell.controlParameters;
 
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 
 /**
  * Created by dstephen on 2/14/14.
  */
-public class ACSELLArmControlParameters implements ArmControllerParameters
+public class BonoArmControlParameters implements ArmControllerParameters
 {
    private final boolean runningOnRealRobot;
    
-   public ACSELLArmControlParameters()
+   public BonoArmControlParameters()
    {
       this(false);
    }
    
-   public ACSELLArmControlParameters(boolean runningOnRealRobot)
+   public BonoArmControlParameters(boolean runningOnRealRobot)
    {
       this.runningOnRealRobot = runningOnRealRobot;
    }

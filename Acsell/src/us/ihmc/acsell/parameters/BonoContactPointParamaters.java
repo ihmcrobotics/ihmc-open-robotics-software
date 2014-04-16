@@ -1,4 +1,4 @@
-package us.ihmc.acsell;
+package us.ihmc.acsell.parameters;
 
 import java.util.ArrayList;
 import java.util.List;
