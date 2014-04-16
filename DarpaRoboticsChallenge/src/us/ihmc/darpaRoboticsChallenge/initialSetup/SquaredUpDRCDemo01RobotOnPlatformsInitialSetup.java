@@ -1,8 +1,6 @@
-package us.ihmc.atlas.initialSetup;
+package us.ihmc.darpaRoboticsChallenge.initialSetup;
 
 import javax.vecmath.Vector3d;
-
-import us.ihmc.darpaRoboticsChallenge.initialSetup.AdditionalOffsetSquaredUpDRCDemo01InitialSetup;
 
 public class SquaredUpDRCDemo01RobotOnPlatformsInitialSetup extends AdditionalOffsetSquaredUpDRCDemo01InitialSetup
 {
