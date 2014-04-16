@@ -18,8 +18,8 @@ import com.yobotics.simulationconstructionset.GroundContactPoint;
  */
 public class BonoInitialSetup implements DRCRobotInitialSetup<SDFRobot>
 {
-   private final double groundZ;
-   private final double initialYaw;
+   private double groundZ;
+   private double initialYaw;
    private final Transform3D rootToWorld = new Transform3D();
    private final Vector3d offset = new Vector3d();
    private final Quat4d rotation = new Quat4d();
@@ -65,5 +65,39 @@ public class BonoInitialSetup implements DRCRobotInitialSetup<SDFRobot>
       robot.setOrientation(frameOrientation.getQuaternion());
 
       robot.update();
+   }
+   
+   public void getOffset(Vector3d offsetToPack)
+   {
+      offsetToPack.set(offset);
+   }
+
+   public void setOffset(Vector3d offset)
+   {
+      this.offset.set(offset);
+   }
+
+   @Override
+   public void setInitialYaw(double yaw)
+   {
+      initialYaw = yaw;
+   }
+
+   @Override
+   public void setInitialGroundHeight(double groundHeight)
+   {
+      groundZ = groundHeight;
+   }
+
+   @Override
+   public double getInitialYaw()
+   {
+      return initialYaw;
+   }
+
+   @Override
+   public double getInitialGroundHeight()
+   {
+      return groundZ;
    }
 }
