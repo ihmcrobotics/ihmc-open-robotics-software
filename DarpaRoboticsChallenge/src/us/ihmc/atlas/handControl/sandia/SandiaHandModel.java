@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.handControl.sandia;
+package us.ihmc.atlas.handControl.sandia;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
