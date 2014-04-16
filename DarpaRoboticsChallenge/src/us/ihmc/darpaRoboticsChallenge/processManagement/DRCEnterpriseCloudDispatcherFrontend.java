@@ -5,10 +5,10 @@ import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
 
+import us.ihmc.atlas.AtlasRobotModelFactory;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModelFactory;
 import us.ihmc.darpaRoboticsChallenge.userInterface.DRCOperatorUserInterface;
 import us.ihmc.utilities.fixedPointRepresentation.UnsignedByteTools;
 import us.ihmc.utilities.gui.IHMCSwingTools;
@@ -533,8 +533,8 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
                else
                {
             	  String modelAsString = selectRobotModelRadioButtonGroup.getSelection().getActionCommand();
-                  DRCRobotModel model = DRCRobotModelFactory.CreateDRCRobotModel(modelAsString);
-                  netProcClient.write(new byte[] {UnsignedByteTools.fromInt(0x00), UnsignedByteTools.fromInt(DRCRobotModelFactory.getOrdinalOfModel(modelAsString))});
+                  DRCRobotModel model = AtlasRobotModelFactory.createDRCRobotModel(modelAsString);
+                  netProcClient.write(new byte[] {UnsignedByteTools.fromInt(0x00), UnsignedByteTools.fromInt(AtlasRobotModelFactory.getOrdinalOfModel(modelAsString))});
                }
             }
             catch (DisconnectedException e)
@@ -607,7 +607,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
             	  String modelAsString = selectRobotModelRadioButtonGroup.getSelection().getActionCommand();
                   int leftHandIP = Integer.parseInt(leftHandField.getText());
                   int rightHandIP = Integer.parseInt(rightHandField.getText());
-                  controllerClient.write(new byte[] {UnsignedByteTools.fromInt(0x00), UnsignedByteTools.fromInt(DRCRobotModelFactory.getOrdinalOfModel(modelAsString)),
+                  controllerClient.write(new byte[] {UnsignedByteTools.fromInt(0x00), UnsignedByteTools.fromInt(AtlasRobotModelFactory.getOrdinalOfModel(modelAsString)),
                                                      UnsignedByteTools.fromInt(leftHandIP), UnsignedByteTools.fromInt(rightHandIP)});
                }
                else if (selectControllerRadioButtonGroup.getSelection().getActionCommand().contains(RED_TEAM_ACTION_COMMAND))
@@ -615,7 +615,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
             	   String modelAsString = selectRobotModelRadioButtonGroup.getSelection().getActionCommand();
                   int leftHandIP = Integer.parseInt(leftHandField.getText());
                   int rightHandIP = Integer.parseInt(rightHandField.getText());
-                  controllerClient.write(new byte[] {UnsignedByteTools.fromInt(0x01), UnsignedByteTools.fromInt(DRCRobotModelFactory.getOrdinalOfModel(modelAsString)),
+                  controllerClient.write(new byte[] {UnsignedByteTools.fromInt(0x01), UnsignedByteTools.fromInt(AtlasRobotModelFactory.getOrdinalOfModel(modelAsString)),
                                                      UnsignedByteTools.fromInt(leftHandIP), UnsignedByteTools.fromInt(rightHandIP)});
                }
             }
@@ -658,14 +658,14 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
 
    private void setupSelectRobotModelPanel()
    {
-      selectRobotModelPanel = new JPanel(new GridLayout(DRCRobotModelFactory.getAvailableRobotModels().length + 1, 1));
+      selectRobotModelPanel = new JPanel(new GridLayout(AtlasRobotModelFactory.getAvailableRobotModels().length + 1, 1));
       robotModelScrollPane = new JScrollPane(selectRobotModelPanel);
 
       selectRobotModelRadioButtonGroup = new ButtonGroup();
 
       selectRobotModelPanel.add(new JLabel("<html><body style=\"margin-left: 32px;\"><h2>Select Robot Model</h2></body></html>"));
 
-      for (String st : DRCRobotModelFactory.getAvailableRobotModels())
+      for (String st : AtlasRobotModelFactory.getAvailableRobotModels())
       {
          JRadioButton nextButton = new JRadioButton(st);
          nextButton.setActionCommand(st);

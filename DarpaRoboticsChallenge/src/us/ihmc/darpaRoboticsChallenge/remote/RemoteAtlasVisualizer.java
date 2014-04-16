@@ -1,11 +1,11 @@
 package us.ihmc.darpaRoboticsChallenge.remote;
 
 import us.ihmc.SdfLoader.JaxbSDFLoader;
+import us.ihmc.atlas.AtlasRobotModelFactory;
 import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModelFactory;
 import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardControllerListener;
 import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
 import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
@@ -52,7 +52,7 @@ public class RemoteAtlasVisualizer
       FlaggedOption portOption = new FlaggedOption("port").setStringParser(JSAP.INTEGER_PARSER).setRequired(false).setLongFlag("port").setShortFlag('p')
             .setDefault(String.valueOf(defaultPort));
       FlaggedOption robotModel = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(true).setStringParser(JSAP.STRING_PARSER);
-      robotModel.setHelp("Robot models: " + DRCRobotModelFactory.robotModelsToString());
+      robotModel.setHelp("Robot models: " + AtlasRobotModelFactory.robotModelsToString());
       
       jsap.registerParameter(hostOption);
       jsap.registerParameter(portOption);
@@ -64,7 +64,7 @@ public class RemoteAtlasVisualizer
       {
          String host = config.getString("host");
          int port = config.getInt("port");
-         DRCRobotModel model = DRCRobotModelFactory.CreateDRCRobotModel(config.getString("robotModel"));
+         DRCRobotModel model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"));
          
          new RemoteAtlasVisualizer(host, port, bufferSize, model);         
       }

@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.drcRobot;
+package us.ihmc.atlas;
 
 import java.awt.BorderLayout;
 import java.util.Arrays;
@@ -8,21 +8,20 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 
 import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
 
-public class DRCRobotModelFactory
+public class AtlasRobotModelFactory
 {
    private static String[] AvailableRobotModels = { "ATLAS_NO_HANDS_ADDED_MASS", "ATLAS_SANDIA_HANDS",
          "ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS", "DRC_NO_HANDS", "DRC_HANDS", "DRC_EXTENDED_HANDS", "DRC_HOOKS", "DRC_TASK_HOSE", "DRC_EXTENDED_HOOKS" };
 
-   public static DRCRobotModel CreateDRCRobotModel(String robotModelAsString)
+   public static AtlasRobotModel createDRCRobotModel(String robotModelAsString)
    {
       robotModelAsString = robotModelAsString.toUpperCase().trim();
       try
@@ -62,7 +61,7 @@ public class DRCRobotModelFactory
       return -1;
    }
 
-   public static DRCRobotModel selectModelFromGraphicSelector(DRCRobotModel defaultOption)
+   public static AtlasRobotModel selectModelFromGraphicSelector(DRCRobotModel defaultOption)
    {
       JPanel userPromptPanel = new JPanel(new BorderLayout());
       JPanel comboBoxPanel = new JPanel(new BorderLayout());
@@ -89,7 +88,7 @@ public class DRCRobotModelFactory
       else if (selectedOption == JOptionPane.OK_OPTION)
       {
          String groundTypeString = robotTypeComboBox.getSelectedItem().toString();
-         DRCRobotModel model = CreateDRCRobotModel(groundTypeString);
+         AtlasRobotModel model = createDRCRobotModel(groundTypeString);
          return model;
       }
       else
@@ -111,7 +110,7 @@ public class DRCRobotModelFactory
          JSAPResult config = jsap.parse(args);
 
          if (config.success())
-            return CreateDRCRobotModel(config.getString("robotModel"));
+            return createDRCRobotModel(config.getString("robotModel"));
       }
       catch (JSAPException e)
       {
