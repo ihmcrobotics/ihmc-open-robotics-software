@@ -1,8 +1,12 @@
-package us.ihmc.acsell;
+package us.ihmc.acsell.parameters;
 
 import java.io.InputStream;
 
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.acsell.controlParameters.BonoArmControlParameters;
+import us.ihmc.acsell.controlParameters.BonoStateEstimatorParameters;
+import us.ihmc.acsell.controlParameters.BonoWalkingControllerParameters;
+import us.ihmc.acsell.initialSetup.BonoInitialSetup;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactPointInformation;
@@ -40,19 +44,19 @@ public class BonoRobotModel implements DRCRobotModel
    @Override
    public ArmControllerParameters getArmControllerParameters()
    {
-      return new ACSELLArmControlParameters(runningOnRealRobot);
+      return new BonoArmControlParameters(runningOnRealRobot);
    }
 
    @Override
    public WalkingControllerParameters getWalkingControlParameters()
    {
-      return new ACSELLWalkingControllerParameters(runningOnRealRobot);
+      return new BonoWalkingControllerParameters(runningOnRealRobot);
    }
 
    @Override
    public StateEstimatorParameters getStateEstimatorParameters(double estimatorDT)
    {
-      return new ACSELLStateEstimatorParameters(runningOnRealRobot, estimatorDT);
+      return new BonoStateEstimatorParameters(runningOnRealRobot, estimatorDT);
    }
 
    @Override
@@ -106,15 +110,14 @@ public class BonoRobotModel implements DRCRobotModel
    @Override
    public String getSdfFile()
    {
-      return "models/axl/axl_description/bono/robots/bono.sdf";
+      return "../models/axl/axl_description/bono/robots/bono.sdf";
    }
 
    public String[] getResourceDirectories()
    {
-
       if (resourceDirectories == null)
       {
-         resourceDirectories = new String[] { thisClass.getResource("models/axl/axl_description").getFile() };
+         resourceDirectories = new String[] { thisClass.getResource("../models/axl/axl_description").getFile() };
       }
       return resourceDirectories;
    }
@@ -143,7 +146,7 @@ public class BonoRobotModel implements DRCRobotModel
    @Override
    public WalkingControllerParameters getMultiContactControllerParameters()
    {
-      return new ACSELLWalkingControllerParameters();
+      return new BonoWalkingControllerParameters();
    }
    //XXX: fix this
    @Override

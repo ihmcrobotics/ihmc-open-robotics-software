@@ -2,12 +2,13 @@ package us.ihmc.acsell;
 
 import org.junit.Test;
 
+import us.ihmc.acsell.parameters.BonoRobotModel;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTest;
 
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
-public class AcsellFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
+public class BonoFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
 {
    @Test
    public void testBONOFlatGroundWalking() throws SimulationExceededMaximumTimeException

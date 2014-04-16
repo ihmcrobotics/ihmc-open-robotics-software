@@ -248,7 +248,7 @@
       </axis>
     </joint>
     <link name='l_uglut'>
-      <pose>0.20574 0.091542 0.079553 1.2403e-16 2.5206e-16 -2.0784e-17</pose>
+      <pose>0.20574 0.091542 0.079553 0 0 0</pose>
       <inertial>
         <pose>-0.0426282 0.0148448 -0.0235814 0 -0 0</pose>
         <mass>2.64478</mass>
@@ -295,7 +295,7 @@
       <child>l_uglut</child>
       <parent>pelvis</parent>
       <axis>
-        <xyz>1 -2.0784e-17 -2.5206e-16</xyz>
+        <xyz>1 0 0</xyz>
         <limit>
           <lower>-0.4887</lower>
           <upper>0.6109</upper>
@@ -308,7 +308,7 @@
       </axis>
     </joint>
     <link name='l_lglut'>
-      <pose>0.20655 0.215902 0.038659 -5.7998e-16 2.96063e-16 1.38776e-16</pose>
+      <pose>0.20655 0.215902 0.038659 0 0 0</pose>
       <inertial>
         <pose>-0.014067 -0.0160667 -0.0101813 0 -0 0</pose>
         <mass>4.17753</mass>
@@ -355,7 +355,7 @@
       <child>l_lglut</child>
       <parent>l_uglut</parent>
       <axis>
-        <xyz>2.96063e-16 5.7998e-16 1</xyz>
+        <xyz>0 0 1</xyz>
         <limit>
           <lower>-0.384</lower>
           <upper>0.6109</upper>
@@ -368,7 +368,7 @@
       </axis>
     </joint>
     <link name='l_uleg'>
-      <pose>0.142034 0.171441 -0.085551 -5.46204e-16 -5.5517e-17 1.25575e-16</pose>
+      <pose>0.142034 0.171441 -0.085551 0 0 0</pose>
       <inertial>
         <pose>-0.011383 0.0230256 -0.148618 0 -0 0</pose>
         <mass>6.54749</mass>
@@ -415,7 +415,7 @@
       <child>l_uleg</child>
       <parent>l_lglut</parent>
       <axis>
-        <xyz>-1.25575e-16 1 -5.46204e-16</xyz>
+        <xyz>0 1 0</xyz>
         <limit>
           <lower>-1.7453</lower>
           <upper>0.5236</upper>
@@ -428,7 +428,7 @@
       </axis>
     </joint>
     <link name='l_lleg'>
-      <pose>0.142034 0.146045 -0.462491 -2.46954e-16 4.35205e-14 -1.5485e-17</pose>
+      <pose>0.142034 0.146045 -0.462491 0 0 0</pose>
       <inertial>
         <pose>-3.81812e-05 0.000142499 -0.0421689 0 -0 0</pose>
         <mass>5.65326</mass>
@@ -475,7 +475,7 @@
       <child>l_lleg</child>
       <parent>l_uleg</parent>
       <axis>
-        <xyz>1.5485e-17 1 -2.46954e-16</xyz>
+        <xyz>0 1 0</xyz>
         <limit>
           <lower>0</lower>
           <upper>2.4435</upper>
@@ -488,9 +488,9 @@
       </axis>
     </joint>
     <link name='l_talus'>
-      <pose>0.142034 0.146045 -0.884131 2.40702e-16 0.18704 -7.66866e-17</pose>
+      <pose>0.142034 0.146045 -0.884131 0 0 0</pose>
       <inertial>
-        <pose>-5.55112e-17 0 -4.51027e-09 0 -0 0</pose>
+        <pose>0 0 -4.51027e-09 0 -0 0</pose>
         <mass>0.0101873</mass>
         <inertia>
           <ixx>1.09856e-06</ixx>
@@ -535,7 +535,7 @@
       <child>l_talus</child>
       <parent>l_lleg</parent>
       <axis>
-        <xyz>1.21445e-16 1 2.36504e-16</xyz>
+        <xyz>0 1 0</xyz>
         <limit>
           <lower>-0.6981</lower>
           <upper>0.6981</upper>
@@ -548,7 +548,7 @@
       </axis>
     </joint>
     <link name='l_foot'>
-      <pose>0.13613 0.146045 -0.915327 -2.70758e-16 0.18704 -1.86125e-16</pose>
+      <pose>0.13613 0.146045 -0.915327 0 0 0</pose>
       <inertial>
         <pose>0.0800324 1.76351e-06 0.00241346 0 -0 0</pose>
         <mass>1.1693</mass>
@@ -596,7 +596,7 @@
       <child>l_foot</child>
       <parent>l_talus</parent>
       <axis>
-        <xyz>0.982559 -1.82879e-16 -0.185951</xyz>
+        <xyz>0.982559 0 -0.185951</xyz>
         <limit>
           <lower>-0.4363</lower>
           <upper>0.4363</upper>
@@ -609,7 +609,7 @@
       </axis>
     </joint>
     <link name='ll_ankle_pulley'>
-      <pose>0.142034 0.244953 -0.551391 -6.55426e-16 0.27027 3.73317e-16</pose>
+      <pose>0.142034 0.244953 -0.551391 0 0.27027 0</pose>
       <inertial>
         <pose>0.0223284 -2.07815e-09 0.0107718 0 -0 0</pose>
         <mass>0.396823</mass>
@@ -656,7 +656,7 @@
       <child>ll_ankle_pulley</child>
       <parent>l_lleg</parent>
       <axis>
-        <xyz>-5.4831e-16 1 -6.31634e-16</xyz>
+        <xyz>0 1 0</xyz>
         <limit>
           <lower>-0.7</lower>
           <upper>0.7</upper>
@@ -668,10 +668,10 @@
         </dynamics>
       </axis>
     </joint>
-	<!--<link name='ll_push_rod'>
+    <!--<link name='ll_push_rod'>
       <pose>0.264408 0.244941 -0.585355 -0.146755 -0.127492 0.0336241</pose>
       <inertial>
-        <pose>-1.34374e-05 5.55112e-17 -0.183738 0 -0 0</pose>
+        <pose>-1.34374e-05 0 -0.183738 0 -0 0</pose>
         <mass>0.0911423</mass>
         <inertia>
           <ixx>0.000858413</ixx>
@@ -720,7 +720,7 @@
       </axis>
     </joint>-->
     <link name='lr_ankle_pulley'>
-      <pose>0.142034 0.047137 -0.551391 -3.07696e-16 0.27109 -2.96561e-16</pose>
+      <pose>0.142034 0.047137 -0.551391 0 0.27109 0</pose>
       <inertial>
         <pose>0.022326 1.5027e-07 0.0107722 0 -0 0</pose>
         <mass>0.396809</mass>
@@ -767,7 +767,7 @@
       <child>lr_ankle_pulley</child>
       <parent>l_lleg</parent>
       <axis>
-        <xyz>2.14166e-16 1 -2.96459e-16</xyz>
+        <xyz>0 1 0</xyz>
         <limit>
           <lower>-0.7</lower>
           <upper>0.7</upper>
@@ -831,17 +831,17 @@
       </axis>
     </joint>-->
     <link name='r_uglut'>
-      <pose>0.20574 -0.089857 0.078644 -0.021299 -3.711e-17 -4.2483e-17</pose>
+      <pose>0.20574 -0.091542 0.079553 0 0 0</pose>
       <inertial>
-        <pose>-0.0430925 -0.0143488 -0.0235224 0 -0 0</pose>
-        <mass>2.6389</mass>
+        <pose>-0.0426282 0.0148448 -0.0235814 0 -0 0</pose>
+        <mass>2.64478</mass>
         <inertia>
-          <ixx>0.00735054</ixx>
-          <ixy>0.00233234</ixy>
-          <ixz>0.00302639</ixz>
-          <iyy>0.016666</iyy>
-          <iyz>0.00157004</iyz>
-          <izz>0.0143813</izz>
+          <ixx>0.00738359</ixx>
+          <ixy>0.00230055</ixy>
+          <ixz>0.00311533</ixz>
+          <iyy>0.0167445</iyy>
+          <iyz>0.00149097</iyz>
+          <izz>0.014468</izz>
         </inertia>
       </inertial>
       <collision name='r_uglut_collision'>
@@ -878,7 +878,7 @@
       <child>r_uglut</child>
       <parent>pelvis</parent>
       <axis>
-        <xyz>1 -4.2483e-17 3.711e-17</xyz>
+        <xyz>1 0 0</xyz>
         <limit>
           <lower>-0.6109</lower>
           <upper>0.4887</upper>
@@ -891,17 +891,17 @@
       </axis>
     </joint>
     <link name='r_lglut'>
-      <pose>0.199353 -0.220209 0.0405175 -0.021223 -0.00179734 -0.0844739</pose>
+      <pose>0.20655 -0.215902 0.038659 0 0 0</pose>
       <inertial>
-        <pose>-0.0143055 0.0158854 -0.0100999 0 -0 0</pose>
-        <mass>4.21161</mass>
+        <pose>-0.014067 -0.0160667 -0.0101813 0 -0 0</pose>
+        <mass>4.17753</mass>
         <inertia>
-          <ixx>0.0203797</ixx>
-          <ixy>-0.00309425</ixy>
-          <ixz>0.00325837</ixz>
-          <iyy>0.0215324</iyy>
-          <iyz>-0.00367922</iyz>
-          <izz>0.0142208</izz>
+          <ixx>0.0203259</ixx>
+          <ixy>-0.0030959</ixy>
+          <ixz>0.00340487</ixz>
+          <iyy>0.0215216</iyy>
+          <iyz>-0.0036707</iyz>
+          <izz>0.0142014</izz>
         </inertia>
       </inertial>
       <collision name='r_lglut_collision'>
@@ -938,7 +938,7 @@
       <child>r_lglut</child>
       <parent>r_uglut</parent>
       <axis>
-        <xyz>-2.62052e-16 0.0212974 0.999773</xyz>
+        <xyz>0 0 1</xyz>
         <limit>
           <lower>-0.6109</lower>
           <upper>0.384</upper>
@@ -951,17 +951,17 @@
       </axis>
     </joint>
     <link name='r_uleg'>
-      <pose>0.138819 -0.173118 -0.0847238 -0.0212345 0.0329028 -0.0852107</pose>
+      <pose>0.142034 -0.171441 -0.085551 0 0 0</pose>
       <inertial>
-        <pose>-0.0100874 -0.022636 -0.1484 0 -0 0</pose>
-        <mass>6.51484</mass>
+        <pose>-0.011383 -0.0230256 -0.148618 0 -0 0</pose>
+        <mass>6.54749</mass>
         <inertia>
-          <ixx>0.115696</ixx>
-          <ixy>0.00192718</ixy>
-          <ixz>-0.000607357</ixz>
-          <iyy>0.100676</iyy>
-          <iyz>-0.0200432</iyz>
-          <izz>0.0388653</izz>
+          <ixx>0.115965</ixx>
+          <ixy>0.00173132</ixy>
+          <ixz>-0.000332797</ixz>
+          <iyy>0.100856</iyy>
+          <iyz>-0.0200895</iyz>
+          <izz>0.0385135</izz>
         </inertia>
       </inertial>
       <collision name='r_uleg_collision'>
@@ -998,7 +998,7 @@
       <child>r_uleg</child>
       <parent>r_lglut</parent>
       <axis>
-        <xyz>0.0843925 0.996207 -0.0212214</xyz>
+        <xyz>0 1 0</xyz>
         <limit>
           <lower>-1.7453</lower>
           <upper>0.5236</upper>
@@ -1011,17 +1011,17 @@
       </axis>
     </joint>
     <link name='r_lleg'>
-      <pose>0.127929 -0.154734 -0.461914 -0.0212408 -0.0409295 -0.0836428</pose>
+      <pose>0.142034 -0.146045 -0.462491 0 0 0</pose>
       <inertial>
-        <pose>-0.00166354 -0.000144087 -0.0422342 0 -0 0</pose>
-        <mass>5.64804</mass>
+        <pose>-3.81812e-05 -0.000142499 -0.0421689 0 -0 0</pose>
+        <mass>5.65326</mass>
         <inertia>
-          <ixx>0.0631946</ixx>
-          <ixy>-9.11036e-05</ixy>
-          <ixz>0.00197105</ixz>
-          <iyy>0.0655542</iyy>
-          <iyz>-0.000104684</iyz>
-          <izz>0.0145947</izz>
+          <ixx>0.0632904</ixx>
+          <ixy>8.90562e-05</ixy>
+          <ixz>2.60478e-06</ixz>
+          <iyy>0.0655868</iyy>
+          <iyz>-0.000108081</iyz>
+          <izz>0.014557</izz>
         </inertia>
       </inertial>
       <collision name='r_lleg_collision'>
@@ -1058,7 +1058,7 @@
       <child>r_lleg</child>
       <parent>r_uleg</parent>
       <axis>
-        <xyz>0.0843925 0.996207 -0.0212214</xyz>
+        <xyz>0 1 0</xyz>
         <limit>
           <lower>0</lower>
           <upper>2.4435</upper>
@@ -1071,16 +1071,16 @@
       </axis>
     </joint>
     <link name='r_talus'>
-      <pose>0.12732 -0.163789 -0.883453 0.0214723 -0.152616 3.05381</pose>
+      <pose>0.142034 -0.146045 -0.884131 0 0 0</pose>
       <inertial>
-        <pose>0 -2.77556e-17 -4.51027e-09 0 -0 0</pose>
+        <pose>0 0 4.51027e-09 0 -0 0</pose>
         <mass>0.0101873</mass>
         <inertia>
           <ixx>1.09856e-06</ixx>
-          <ixy>1.11281e-12</ixy>
-          <ixz>1.20437e-21</ixz>
+          <ixy>-1.11281e-12</ixy>
+          <ixz>-3.97047e-22</ixz>
           <iyy>1.09856e-06</iyy>
-          <iyz>3.50725e-22</iyz>
+          <iyz>-6.35361e-22</iyz>
           <izz>1.92639e-06</izz>
         </inertia>
       </inertial>
@@ -1118,7 +1118,7 @@
       <child>r_talus</child>
       <parent>r_lleg</parent>
       <axis>
-        <xyz>-0.0843998 -0.996206 0.0212211</xyz>
+        <xyz>0 1 0</xyz>
         <limit>
           <lower>-0.6981</lower>
           <upper>0.6981</upper>
@@ -1131,17 +1131,17 @@
       </axis>
     </joint>
     <link name='r_foot'>
-      <pose>0.122484 -0.163691 -0.914832 -0.0102792 0.152617 -0.0877768</pose>
+      <pose>0.13613 -0.146045 -0.915327 0 0 0</pose>
       <inertial>
-        <pose>0.0800324 2.68374e-09 0.00241346 0 -0 0</pose>
+        <pose>0.0800324 1.76351e-06 0.00241346 0 -0 0</pose>
         <mass>1.1693</mass>
         <inertia>
-          <ixx>0.00248158</ixx>
-          <ixy>-2.52785e-10</ixy>
+          <ixx>0.00248137</ixx>
+          <ixy>-1.83533e-07</ixy>
           <ixz>0.0001353</ixz>
           <iyy>0.00705006</iyy>
-          <iyz>1.41753e-10</iyz>
-          <izz>0.00937679</izz>
+          <iyz>-6.05438e-08</iyz>
+          <izz>0.00937658</izz>
         </inertia>
       </inertial>
       <collision name='r_foot_collision'>
@@ -1179,7 +1179,7 @@
       <child>r_foot</child>
       <parent>r_talus</parent>
       <axis>
-        <xyz>0.984572 -0.0866452 -0.152025</xyz>
+        <xyz>0.982559 0 -0.185951</xyz>
         <limit>
           <lower>-0.4363</lower>
           <upper>0.4363</upper>
@@ -1192,17 +1192,17 @@
       </axis>
     </joint>
     <link name='rl_ankle_pulley'>
-      <pose>0.13615 -0.0580837 -0.552893 -0.0217414 0.218791 -0.0892317</pose>
+      <pose>0.142034 -0.244953 -0.551391 0 0.27027 0</pose>
       <inertial>
-        <pose>0.0223283 2.02185e-08 0.0107717 0 -0 0</pose>
+        <pose>0.0223284 2.07815e-09 0.0107718 0 -0 0</pose>
         <mass>0.396823</mass>
         <inertia>
-          <ixx>0.000280973</ixx>
-          <ixy>-1.74464e-07</ixy>
-          <ixz>-9.54709e-05</ixz>
+          <ixx>0.000280972</ixx>
+          <ixy>1.74912e-07</ixy>
+          <ixz>-9.54676e-05</ixz>
           <iyy>0.00104171</iyy>
-          <iyz>3.97673e-07</iyz>
-          <izz>0.000840841</izz>
+          <iyz>-3.97635e-07</iyz>
+          <izz>0.000840843</izz>
         </inertia>
       </inertial>
       <collision name='rl_ankle_pulley_collision'>
@@ -1239,7 +1239,7 @@
       <child>rl_ankle_pulley</child>
       <parent>r_lleg</parent>
       <axis>
-        <xyz>0.0843925 0.996207 -0.0212214</xyz>
+        <xyz>0 1 0</xyz>
         <limit>
           <lower>-0.7</lower>
           <upper>0.7</upper>
@@ -1252,16 +1252,16 @@
       </axis>
     </joint>
     <!--<link name='rl_push_rod'>
-      <pose>0.259616 -0.0691433 -0.580515 -0.161808 -0.13408 -0.0997506</pose>
+      <pose>0.264408 -0.244941 -0.585355 0.146755 -0.127492 -0.0336241</pose>
       <inertial>
-        <pose>-1.34374e-05 -2.77556e-17 -0.183738 0 -0 0</pose>
+        <pose>-1.34374e-05 0 -0.183738 0 -0 0</pose>
         <mass>0.0911423</mass>
         <inertia>
           <ixx>0.000858413</ixx>
-          <ixy>-1.35525e-20</ixy>
+          <ixy>3.38813e-21</ixy>
           <ixz>1.03565e-07</ixz>
           <iyy>0.000858398</iyy>
-          <iyz>-1.50348e-20</iyz>
+          <iyz>-1.02491e-19</iyz>
           <izz>7.36624e-06</izz>
         </inertia>
       </inertial>
@@ -1299,21 +1299,21 @@
       <child>rl_push_rod</child>
       <parent>rl_ankle_pulley</parent>
       <axis>
-        <xyz>0.119713 0.979887 -0.159657</xyz>
+        <xyz>-0.0146743 -0.989317 -0.145042</xyz>
       </axis>
     </joint>-->
     <link name='rr_ankle_pulley'>
-      <pose>0.119456 -0.255149 -0.548695 -0.0217855 0.227709 -0.0894308</pose>
+      <pose>0.142034 -0.047137 -0.551391 0 0.27109 0</pose>
       <inertial>
-        <pose>0.0223259 7.12255e-08 0.0107724 0 -0 0</pose>
+        <pose>0.022326 -1.5027e-07 0.0107722 0 -0 0</pose>
         <mass>0.396809</mass>
         <inertia>
-          <ixx>0.000280965</ixx>
-          <ixy>-1.70081e-07</ixy>
-          <ixz>-9.54536e-05</ixz>
-          <iyy>0.00104163</iyy>
-          <iyz>-4.00807e-07</iyz>
-          <izz>0.000840772</izz>
+          <ixx>0.000280966</ixx>
+          <ixy>1.6818e-07</ixy>
+          <ixz>-9.54571e-05</ixz>
+          <iyy>0.00104164</iyy>
+          <iyz>4.01097e-07</iyz>
+          <izz>0.000840774</izz>
         </inertia>
       </inertial>
       <collision name='rr_ankle_pulley_collision'>
@@ -1350,7 +1350,7 @@
       <child>rr_ankle_pulley</child>
       <parent>r_lleg</parent>
       <axis>
-        <xyz>0.0843925 0.996207 -0.0212214</xyz>
+        <xyz>0 1 0</xyz>
         <limit>
           <lower>-0.7</lower>
           <upper>0.7</upper>
@@ -1363,16 +1363,16 @@
       </axis>
     </joint>
     <!--<link name='rr_push_rod'>
-      <pose>0.242671 -0.266187 -0.577422 0.132076 -0.119833 -0.173127</pose>
+      <pose>0.26438 -0.0471489 -0.585456 -0.148973 -0.127271 0.0354501</pose>
       <inertial>
-        <pose>-1.34374e-05 5.55112e-17 -0.183738 0 -0 0</pose>
+        <pose>-1.34374e-05 0 -0.183738 0 -0 0</pose>
         <mass>0.0911423</mass>
         <inertia>
           <ixx>0.000858413</ixx>
-          <ixy>1.27055e-20</ixy>
+          <ixy>3.38813e-21</ixy>
           <ixz>1.03565e-07</ixz>
           <iyy>0.000858398</iyy>
-          <iyz>-1.18585e-19</iyz>
+          <iyz>-1.79995e-21</iyz>
           <izz>7.36624e-06</izz>
         </inertia>
       </inertial>
@@ -1410,7 +1410,7 @@
       <child>rr_push_rod</child>
       <parent>rr_ankle_pulley</parent>
       <axis>
-        <xyz>1 0 0</xyz>
+        <xyz>-0.0162229 0.98897 0.147223</xyz>
       </axis>
     </joint>-->
     <!--<joint name='rr_push_rod_bottom' type='ball'>

@@ -1,6 +1,7 @@
-package us.ihmc.acsell;
+package us.ihmc.acsell.simulation;
 
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.acsell.parameters.BonoRobotModel;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTrack;

@@ -1,4 +1,4 @@
-package us.ihmc.acsell;
+package us.ihmc.acsell.initialSetup;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Quat4d;
@@ -38,8 +38,8 @@ public class BonoInitialSetup implements DRCRobotInitialSetup<SDFRobot>
          String prefix = robotSide.getSideNameFirstLetter().toLowerCase();
 
          robot.getOneDegreeOfFreedomJoint(prefix + "_leg_lhy").setQ(-0.4);
-         robot.getOneDegreeOfFreedomJoint(prefix + "_leg_kny").setQ(1.0);
-         robot.getOneDegreeOfFreedomJoint(prefix + "_leg_uay").setQ((-0.76));
+         robot.getOneDegreeOfFreedomJoint(prefix + "_leg_kny").setQ(0.8);
+         robot.getOneDegreeOfFreedomJoint(prefix + "_leg_uay").setQ((-0.4));
       }
 
       robot.update();

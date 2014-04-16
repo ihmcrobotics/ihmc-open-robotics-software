@@ -1,4 +1,4 @@
-package us.ihmc.acsell;
+package us.ihmc.acsell.parameters;
 
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -131,7 +131,7 @@ public class BonoJointMap extends DRCRobotJointMap
    @Override
    public double getPelvisToFoot()
    {
-      return AxlPhysicalProperties.pelvisToFoot;
+      return BonoPhysicalProperties.pelvisToFoot;
    }
 
    @Override
@@ -299,7 +299,7 @@ public class BonoJointMap extends DRCRobotJointMap
    @Override
    public SideDependentList<String> getJointBeforeThighNames()
    {
-      return AxlOrderedJointNames.getJointBeforeThighNames();
+      return BonoOrderedJointNames.getJointBeforeThighNames();
    }
 
    protected LinkedHashMap<String, Pair<RobotSide, LegJointName>> getLegJointNamesMap()
