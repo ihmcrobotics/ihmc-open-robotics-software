@@ -1,5 +1,7 @@
 package us.ihmc.atlas.initialSetup;
 
+import javax.vecmath.Vector3d;
+
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
@@ -28,5 +30,35 @@ public class PushUpDRCRobotInitialSetup implements DRCRobotInitialSetup<SDFRobot
       robot.getOneDegreeOfFreedomJoint("r_leg_aky").setQ(-0.3);
 
       robot.setOrientation(0.0, bodyPitch , 0.0);
+   }
+   
+   public void getOffset(Vector3d offsetToPack)
+   {
+   }
+
+   public void setOffset(Vector3d offset)
+   {
+   }
+
+   @Override
+   public void setInitialYaw(double yaw)
+   {
+   }
+
+   @Override
+   public void setInitialGroundHeight(double groundHeight)
+   {
+   }
+
+   @Override
+   public double getInitialYaw()
+   {
+      return 0;
+   }
+
+   @Override
+   public double getInitialGroundHeight()
+   {
+      return 0;
    }
 }

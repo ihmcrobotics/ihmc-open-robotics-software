@@ -3,7 +3,7 @@ package us.ihmc.atlas;
 import java.io.InputStream;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.atlas.initialSetup.DRCSimDRCRobotInitialSetup;
+import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
 import us.ihmc.atlas.parameters.AtlasArmControllerParameters;
 import us.ihmc.atlas.parameters.AtlasContactPointParamaters;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
@@ -130,7 +130,7 @@ public class AtlasRobotModel implements DRCRobotModel
 
    public DRCRobotInitialSetup<SDFRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw)
    {
-      return new DRCSimDRCRobotInitialSetup(groundHeight, initialYaw);
+      return new AtlasSimInitialSetup(groundHeight, initialYaw);
    }
 
    @Override

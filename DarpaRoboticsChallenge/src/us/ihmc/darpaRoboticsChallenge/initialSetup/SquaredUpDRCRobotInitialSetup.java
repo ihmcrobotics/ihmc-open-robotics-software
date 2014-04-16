@@ -15,7 +15,7 @@ import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_leg_kny;
 
 public class SquaredUpDRCRobotInitialSetup implements DRCRobotInitialSetup<SDFRobot>
 {
-   private final double groundZ;
+   private double groundZ;
    private final Transform3D rootToWorld = new Transform3D();
    private final Vector3d offset = new Vector3d();
 
@@ -60,19 +60,19 @@ public class SquaredUpDRCRobotInitialSetup implements DRCRobotInitialSetup<SDFRo
 
    protected void setLegJointPositions(SDFRobot robot)
    {
-      try{
-         robot.getOneDegreeOfFreedomJoint(jointNames[l_leg_hpy]).setQ(-0.4);
-         robot.getOneDegreeOfFreedomJoint(jointNames[r_leg_hpy]).setQ(-0.4);
-   
-         robot.getOneDegreeOfFreedomJoint(jointNames[l_leg_kny]).setQ(0.8);
-         robot.getOneDegreeOfFreedomJoint(jointNames[r_leg_kny]).setQ(0.8);
-   
-         robot.getOneDegreeOfFreedomJoint(jointNames[l_leg_aky]).setQ(-0.4);
-         robot.getOneDegreeOfFreedomJoint(jointNames[r_leg_aky]).setQ(-0.4);
-      } catch(Exception e)
-      {
-         System.err.println("Hard Coded joint positions for wrong model! FIXME - SquaredUpDrcRobotInitialSetUp");
-      }
+//      try{
+//         robot.getOneDegreeOfFreedomJoint(jointNames[l_leg_hpy]).setQ(-0.4);
+//         robot.getOneDegreeOfFreedomJoint(jointNames[r_leg_hpy]).setQ(-0.4);
+//   
+//         robot.getOneDegreeOfFreedomJoint(jointNames[l_leg_kny]).setQ(0.8);
+//         robot.getOneDegreeOfFreedomJoint(jointNames[r_leg_kny]).setQ(0.8);
+//   
+//         robot.getOneDegreeOfFreedomJoint(jointNames[l_leg_aky]).setQ(-0.4);
+//         robot.getOneDegreeOfFreedomJoint(jointNames[r_leg_aky]).setQ(-0.4);
+//      } catch(Exception e)
+//      {
+//         System.err.println("Hard Coded joint positions for wrong model! FIXME - SquaredUpDrcRobotInitialSetUp");
+//      }
    }
 
    public void getOffset(Vector3d offsetToPack)
@@ -83,5 +83,26 @@ public class SquaredUpDRCRobotInitialSetup implements DRCRobotInitialSetup<SDFRo
    public void setOffset(Vector3d offset)
    {
       this.offset.set(offset);
+   }
+
+   public void setInitialYaw(double yaw)
+   {
+   }
+
+   public void setInitialGroundHeight(double groundHeight)
+   {
+      groundZ = groundHeight;
+   }
+
+   @Override
+   public double getInitialYaw()
+   {
+      return 0;
+   }
+
+   @Override
+   public double getInitialGroundHeight()
+   {
+      return groundZ;
    }
 }

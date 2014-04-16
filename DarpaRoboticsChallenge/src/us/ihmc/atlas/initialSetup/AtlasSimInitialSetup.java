@@ -39,20 +39,20 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.GroundContactPoint;
 
-public class DRCSimDRCRobotInitialSetup implements DRCRobotInitialSetup<SDFRobot>
+public class AtlasSimInitialSetup implements DRCRobotInitialSetup<SDFRobot>
 {
-   private final double groundZ;
-   private final double initialYaw;
+   private double groundZ;
+   private double initialYaw;
    private final Transform3D rootToWorld = new Transform3D();
    private final Vector3d offset = new Vector3d();
    private final Quat4d rotation = new Quat4d();
 
-   public DRCSimDRCRobotInitialSetup()
+   public AtlasSimInitialSetup()
    {
       this(0.0, 0.0);
    }
 
-   public DRCSimDRCRobotInitialSetup(double groundZ, double initialYaw)
+   public AtlasSimInitialSetup(double groundZ, double initialYaw)
    {
       this.groundZ = groundZ;
       this.initialYaw = initialYaw;
@@ -126,5 +126,29 @@ public class DRCSimDRCRobotInitialSetup implements DRCRobotInitialSetup<SDFRobot
    public void setOffset(Vector3d offset)
    {
       this.offset.set(offset);
+   }
+
+   @Override
+   public void setInitialYaw(double yaw)
+   {
+      initialYaw = yaw;
+   }
+
+   @Override
+   public void setInitialGroundHeight(double groundHeight)
+   {
+      groundZ = groundHeight;
+   }
+
+   @Override
+   public double getInitialYaw()
+   {
+      return initialYaw;
+   }
+
+   @Override
+   public double getInitialGroundHeight()
+   {
+      return groundZ;
    }
 }
