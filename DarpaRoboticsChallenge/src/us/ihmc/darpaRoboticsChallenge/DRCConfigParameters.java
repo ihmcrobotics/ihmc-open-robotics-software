@@ -43,7 +43,7 @@ public class DRCConfigParameters
    // Limit the controller to use only a certain percentage of maximum torque that the robot can provide
    public static final double MAX_TORQUE_TO_USE_IN_PERCENT = 1.2;
 
-   public static final boolean USE_PERFECT_SENSORS = false;
+   public static final boolean USE_PERFECT_SENSORS = true;
 
    // Add more contact points on the feet
    public static boolean CREATE_LOAD_OF_CONTACT_POINTS_FEET = false;
