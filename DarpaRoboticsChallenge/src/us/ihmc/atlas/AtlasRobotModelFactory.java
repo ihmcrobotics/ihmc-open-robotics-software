@@ -97,7 +97,7 @@ public class AtlasRobotModelFactory
       }
    }
 
-   public static DRCRobotModel selectModelFromFlag(String[] args)
+   public static AtlasRobotModel selectModelFromFlag(String[] args)
    {
       // Add flag to set robot model
       JSAP jsap = new JSAP();

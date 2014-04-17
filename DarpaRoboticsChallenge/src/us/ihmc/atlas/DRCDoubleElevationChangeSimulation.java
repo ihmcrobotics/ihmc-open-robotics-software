@@ -1,8 +1,12 @@
-package us.ihmc.darpaRoboticsChallenge;
+package us.ihmc.atlas;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.atlas.AtlasRobotModelFactory;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
+import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
+import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTrack;
+import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
+import us.ihmc.darpaRoboticsChallenge.DRCRobotInterface;
+import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.PlainDRCRobot;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
