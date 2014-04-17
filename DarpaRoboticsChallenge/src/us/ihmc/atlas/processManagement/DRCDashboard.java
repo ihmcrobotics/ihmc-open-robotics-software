@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.processManagement;
+package us.ihmc.atlas.processManagement;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -52,6 +52,8 @@ import org.apache.commons.lang.WordUtils;
 import us.ihmc.atlas.AtlasObstacleCourseDemo;
 import us.ihmc.darpaRoboticsChallenge.DRCDemo01StartingLocation;
 import us.ihmc.darpaRoboticsChallenge.configuration.LocalCloudMachines;
+import us.ihmc.darpaRoboticsChallenge.processManagement.DRCDashboardTypes;
+import us.ihmc.darpaRoboticsChallenge.processManagement.GazeboRemoteSimulationAdapter;
 import us.ihmc.darpaRoboticsChallenge.processManagement.DRCDashboardTypes.DRCPluginTasks;
 import us.ihmc.darpaRoboticsChallenge.processManagement.DRCDashboardTypes.DRCROSTasks;
 import us.ihmc.darpaRoboticsChallenge.userInterface.DRCOperatorUserInterface;
