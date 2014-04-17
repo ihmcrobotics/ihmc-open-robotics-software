@@ -2,16 +2,7 @@ package us.ihmc.utilities.kinematics;
 
 //~--- non-JDK imports --------------------------------------------------------
 
-import static org.junit.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.Random;
-
-import javax.media.j3d.Transform3D;
-
 import org.junit.Test;
-
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
@@ -27,6 +18,13 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.test.JUnitTools;
+
+import javax.media.j3d.Transform3D;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.Random;
+
+import static org.junit.Assert.assertTrue;
 //~--- JDK imports ------------------------------------------------------------
 
 public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implements MultiRobotTestInterface
@@ -68,7 +66,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
 
    public NumericalInverseKinematicsCalculatorWithRobotTest()
    {
-      InverseKinematicsSolver inverseKinameticSolverToUse = InverseKinematicsSolver.MAARTEN_SOLVER;
+      InverseKinematicsSolver inverseKinameticSolverToUse = InverseKinematicsSolver.PETER_SOLVER;
       DRCRobotJointMap jointMap = getRobotModel().getJointMap();
       JaxbSDFLoader jaxbSDFLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap, true);
       SDFFullRobotModelFactory fullRobotModelFactory = new SDFFullRobotModelFactory(jaxbSDFLoader.getGeneralizedSDFRobotModel(jointMap.getModelName()),
@@ -119,8 +117,8 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
          FramePoint handEndEffectorPositionIK = getHandEndEffectorPosition();
          FrameOrientation handEndEffectorOrientationIK = getHandEndEffectorOrientation();
 
-         JUnitTools.assertFramePointEquals(handEndEffectorPositionFK, handEndEffectorPositionIK, 0.1);
-         JUnitTools.assertFrameOrientationEquals(handEndEffectorOrientationFK, handEndEffectorOrientationIK, 0.1);
+         JUnitTools.assertFramePointEquals(handEndEffectorPositionFK, handEndEffectorPositionIK, 0.25);
+         JUnitTools.assertFrameOrientationEquals(handEndEffectorOrientationFK, handEndEffectorOrientationIK, 0.2);
       }
 
       System.out.println("Average Solving Time: " + getAvarageArray(solvingTime) + " ms");
