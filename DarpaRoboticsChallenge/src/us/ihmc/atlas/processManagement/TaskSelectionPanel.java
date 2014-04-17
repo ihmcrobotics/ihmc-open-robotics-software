@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.processManagement;
+package us.ihmc.atlas.processManagement;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -10,7 +10,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import us.ihmc.atlas.AtlasRobotModelFactory;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.processManagement.DRCDashboardTypes;
 import us.ihmc.darpaRoboticsChallenge.processManagement.DRCDashboardTypes.DRCROSTasks;
 
 public class TaskSelectionPanel extends JPanel

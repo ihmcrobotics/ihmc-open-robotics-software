@@ -5,13 +5,6 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.jointNames;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_aky;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_hpy;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_kny;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_leg_aky;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_leg_hpy;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_leg_kny;
 
 public class SquaredUpDRCRobotInitialSetup implements DRCRobotInitialSetup<SDFRobot>
 {

@@ -1,7 +1,55 @@
 package us.ihmc.darpaRoboticsChallenge.processManagement;
 
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.TimerTask;
+
+import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTree;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.DefaultTreeModel;
+
 import org.apache.commons.lang.WordUtils;
-import us.ihmc.darpaRoboticsChallenge.DRCDemo01;
+
+import us.ihmc.atlas.AtlasObstacleCourseDemo;
 import us.ihmc.darpaRoboticsChallenge.DRCDemo01StartingLocation;
 import us.ihmc.darpaRoboticsChallenge.configuration.LocalCloudMachines;
 import us.ihmc.darpaRoboticsChallenge.processManagement.DRCDashboardTypes.DRCPluginTasks;
@@ -11,19 +59,6 @@ import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.gui.IHMCSwingTools;
 import us.ihmc.utilities.processManagement.JavaProcessSpawner;
-
-import javax.swing.*;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeCellRenderer;
-import javax.swing.tree.DefaultTreeModel;
-import java.awt.*;
-import java.awt.event.*;
-import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.TimerTask;
 
 public class DRCDashboard
 {
@@ -1185,7 +1220,7 @@ public class DRCDashboard
 
       if (gazeboMachine == null)
       {
-         scsSpawner.spawn(DRCDemo01.class, javaArgs, null);
+         scsSpawner.spawn(AtlasObstacleCourseDemo.class, javaArgs, null);
       }
       else
       {
@@ -1209,7 +1244,7 @@ public class DRCDashboard
             if (estimatorCheckBox.isEnabled() && estimatorCheckBox.isSelected())
             {
                ThreadTools.sleep(8000);
-               scsSpawner.spawn(DRCDemo01.class, javaArgs, new String[]
+               scsSpawner.spawn(AtlasObstacleCourseDemo.class, javaArgs, new String[]
                {
                   "--sim", "--env", newTask, "--gazebo", "--gazeboHost", gazeboMachine.getIp(), "--initialize-estimator", "--start",
                   startingLocationsList.getSelectedValue().toString()
@@ -1218,7 +1253,7 @@ public class DRCDashboard
             else
             {
                ThreadTools.sleep(8000);
-               scsSpawner.spawn(DRCDemo01.class, javaArgs, new String[]
+               scsSpawner.spawn(AtlasObstacleCourseDemo.class, javaArgs, new String[]
                {
                   "--sim", "--env", newTask, "--gazebo", "--gazeboHost", gazeboMachine.getIp(), "--start", startingLocationsList.getSelectedValue().toString()
                });

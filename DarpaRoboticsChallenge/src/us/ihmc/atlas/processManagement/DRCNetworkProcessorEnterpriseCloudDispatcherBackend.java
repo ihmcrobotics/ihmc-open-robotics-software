@@ -1,23 +1,26 @@
-package us.ihmc.darpaRoboticsChallenge.processManagement;
-
-import com.martiansoftware.jsap.*;
-
-import us.ihmc.atlas.AtlasRobotModelFactory;
-import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
-import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.fixedPointRepresentation.UnsignedByteTools;
-import us.ihmc.utilities.net.tcpServer.DisconnectedException;
-import us.ihmc.utilities.net.tcpServer.ReconnectingTCPServer;
-import us.ihmc.utilities.processManagement.JavaProcessSpawner;
+package us.ihmc.atlas.processManagement;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+
+import us.ihmc.atlas.AtlasNetworkProcessor;
+import us.ihmc.atlas.AtlasRobotModelFactory;
+import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
+import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
+import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.fixedPointRepresentation.UnsignedByteTools;
+import us.ihmc.utilities.net.tcpServer.DisconnectedException;
+import us.ihmc.utilities.net.tcpServer.ReconnectingTCPServer;
+import us.ihmc.utilities.processManagement.JavaProcessSpawner;
+
+import com.martiansoftware.jsap.FlaggedOption;
+import com.martiansoftware.jsap.JSAP;
+import com.martiansoftware.jsap.JSAPException;
+import com.martiansoftware.jsap.JSAPResult;
+import com.martiansoftware.jsap.Switch;
 
 public class DRCNetworkProcessorEnterpriseCloudDispatcherBackend implements Runnable
 {
@@ -144,7 +147,7 @@ public class DRCNetworkProcessorEnterpriseCloudDispatcherBackend implements Runn
    {
       if (!networkProcessorSpawner.hasRunningProcesses())
       {
-         networkProcessorSpawner.spawn(DRCNetworkProcessor.class, javaArgs, new String[] {"--ros-uri", rosMasterURI, "--scs-ip", scsMachineIPAddress, "-m", robotModel});
+         networkProcessorSpawner.spawn(AtlasNetworkProcessor.class, javaArgs, new String[] {"--ros-uri", rosMasterURI, "--scs-ip", scsMachineIPAddress, "-m", robotModel});
 
          try
          {

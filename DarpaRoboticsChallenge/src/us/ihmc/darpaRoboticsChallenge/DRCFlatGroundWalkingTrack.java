@@ -1,7 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.atlas.RemoteAtlasVisualizer;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -63,7 +62,7 @@ public class DRCFlatGroundWalkingTrack
 
       if (START_YOVARIABLE_SERVER)
       {
-         robotVisualizer = new YoVariableServer(robotInterface.getRobot().getRobotsYoVariableRegistry(), RemoteAtlasVisualizer.defaultPort, DRCConfigParameters.ESTIMATOR_DT, dynamicGraphicObjectsListRegistry);
+         robotVisualizer = new YoVariableServer(robotInterface.getRobot().getRobotsYoVariableRegistry(), DRCLocalConfigParameters.DEFAULT_YOVARIABLE_SERVER_PORT, DRCConfigParameters.ESTIMATOR_DT, dynamicGraphicObjectsListRegistry);
       }
       else
       {
