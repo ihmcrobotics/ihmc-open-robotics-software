@@ -1,7 +1,6 @@
-package us.ihmc.darpaRoboticsChallenge.remote;
+package us.ihmc.atlas;
 
 import us.ihmc.SdfLoader.JaxbSDFLoader;
-import us.ihmc.atlas.AtlasRobotModelFactory;
 import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;

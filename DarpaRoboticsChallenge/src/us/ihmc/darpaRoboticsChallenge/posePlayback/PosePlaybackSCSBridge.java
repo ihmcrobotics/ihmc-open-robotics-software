@@ -7,11 +7,8 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.vecmath.Point3d;
 
-import us.ihmc.SdfLoader.JaxbSDFLoader;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedSensorReader;
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.atlas.AtlasRobotModelFactory;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPose;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseInterpolator;
@@ -19,9 +16,6 @@ import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceReader;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceWriter;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
@@ -33,9 +27,6 @@ import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
-import com.martiansoftware.jsap.FlaggedOption;
-import com.martiansoftware.jsap.JSAP;
-import com.martiansoftware.jsap.JSAPResult;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.VariableChangedListener;
@@ -385,46 +376,6 @@ public class PosePlaybackSCSBridge
             previousPose.setRobotAtPose(sdfRobot);
          }
       }
-   }
-
-   public static void main(String[] args) throws IOException
-   {
-      // Flag to set robot model
-      JSAP jsap = new JSAP();
-      FlaggedOption robotModel = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(true).setStringParser(JSAP.STRING_PARSER);
-      robotModel.setHelp("Robot models: " + AtlasRobotModelFactory.robotModelsToString());
-      
-      DRCRobotModel model;
-      try
-      {
-         jsap.registerParameter(robotModel);
-
-         JSAPResult config = jsap.parse(args);
-
-         if (config.success())
-         {
-            model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"));
-         }
-         else
-         {
-            System.out.println("Enter a robot model.");
-            return;
-         }
-      }
-      catch (Exception e)
-      {
-         System.out.println("Robot model not found");
-         e.printStackTrace();
-         return;
-      }
-      
-      DRCRobotJointMap jointMap = model.getJointMap();
-      JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
-      SDFRobot sdfRobot = loader.createRobot(jointMap, false);
-      FullRobotModel fullRobotModel = loader.createFullRobotModel(jointMap);
-      SDFFullRobotModel fullRobotModelForSlider = loader.createFullRobotModel(jointMap);
-      
-      new PosePlaybackSCSBridge(sdfRobot, fullRobotModel, fullRobotModelForSlider);
    }
 
    private boolean initPlaybackFromFile(FullRobotModel fullRobotModel, PlaybackPoseSequence sequence)

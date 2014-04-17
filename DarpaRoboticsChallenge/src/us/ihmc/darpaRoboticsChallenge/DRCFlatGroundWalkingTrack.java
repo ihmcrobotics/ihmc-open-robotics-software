@@ -1,6 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge;
 
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.atlas.RemoteAtlasVisualizer;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -10,7 +11,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Fl
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.remote.RemoteAtlasVisualizer;
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
