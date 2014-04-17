@@ -24,6 +24,7 @@ import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.TimerTaskScheduler;
+import us.ihmc.utilities.net.ObjectCommunicator;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -60,7 +61,6 @@ public class DRCSimulationTestHelper
       this.createMovie = createMovie;
       if (createMovie) showGUI = true;
       
-      boolean startOutsidePen = false;
       boolean automaticallyStartSimulation = false;
       boolean startDRCNetworkProcessor = false;
 
@@ -69,8 +69,9 @@ public class DRCSimulationTestHelper
       SliderBoardFactory sliderBoardFactory = WalkControllerSliderBoard.getFactory();
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false, sliderBoardFactory);
       
-      drcSimulation = DRCDemo01.startDRCSim(scriptFilename, networkObjectCommunicator, selectedLocation, guiInitialSetup, initializeEstimatorToActual,
-            startOutsidePen, automaticallyStartSimulation, startDRCNetworkProcessor, createLoadOfContactPointForTheFeet, robotModel);
+      drcSimulation = DRCObstacleCourseDemo.startDRCSim(scriptFilename, networkObjectCommunicator, selectedLocation, guiInitialSetup, initializeEstimatorToActual,
+            automaticallyStartSimulation, startDRCNetworkProcessor, createLoadOfContactPointForTheFeet, robotModel);
+           
       
       blockingSimulationRunner = new BlockingSimulationRunner(drcSimulation.getSimulationConstructionSet(), 60.0 * 10.0);
 

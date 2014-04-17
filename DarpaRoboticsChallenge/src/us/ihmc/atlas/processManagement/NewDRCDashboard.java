@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.processManagement;
+package us.ihmc.atlas.processManagement;
 
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -7,6 +7,12 @@ import java.awt.Insets;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+
+import us.ihmc.darpaRoboticsChallenge.processManagement.DragAndDropTreePanel;
+import us.ihmc.darpaRoboticsChallenge.processManagement.GazeboRemoteSimulationAdapter;
+import us.ihmc.darpaRoboticsChallenge.processManagement.ImagePanel;
+import us.ihmc.darpaRoboticsChallenge.processManagement.LaunchSCSAndUIPanel;
+import us.ihmc.darpaRoboticsChallenge.processManagement.LocalCloudListPanel;
 
 public class NewDRCDashboard
 {
