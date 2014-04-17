@@ -32,13 +32,13 @@ public class CaptureRegionMath
    }
    
    /**
-    * (Function taken from the CaptureRegionCalculator class.)
-    * Takes a line and a circle and computes the intersection. If there is no intersection returns null.
+    * Takes a line and a circle and computes the intersection. If there is no intersection sets NaN.
     */
-   public static FramePoint2d solveIntersectionOfRayAndCircle(FramePoint2d pointA,
+   public static void solveIntersectionOfRayAndCircle(FramePoint2d pointA,
                                                               FramePoint2d pointB,
                                                               FrameVector2d vector,
-                                                              double R)
+                                                              double R,
+                                                              FramePoint2d pointToPack)
    {
       // Look at JPratt Notes February 18, 2009 for details on the following:
       
@@ -61,14 +61,15 @@ public class CaptureRegionMath
       double insideSqrt = B * B - 4 * A * C;
       
       if (insideSqrt < 0.0)
-      return null;
+      {
+         pointToPack.set(Double.NaN, Double.NaN);
+         return;
+      }
       
       double l2 = (-B + Math.sqrt(insideSqrt)) / (2.0 * A);
       
-      FramePoint2d ret = new FramePoint2d();
-      ret.set(pointA.getReferenceFrame(), pointB.getX() + l2 * vector.getX(), pointB.getY() + l2 * vector.getY());
-      
-      return ret;
+      pointToPack.changeFrame(pointA.getReferenceFrame());
+      pointToPack.set(pointB.getX() + l2 * vector.getX(), pointB.getY() + l2 * vector.getY());
    }
    
    private static final Vector3d negZRotationAxis = new Vector3d(0.0, 0.0, -1.0);
@@ -76,16 +77,16 @@ public class CaptureRegionMath
    private static final FrameVector rotatedFromA = new FrameVector(worldFrame);
    private static final AxisAngle4d axisAngle = new AxisAngle4d();
    /**
-   * (Function taken from the CaptureRegionCalculator class.)
    * Will return a point on a circle around the origin. The point will be in between the given directions and at
    * a position specified by the alpha value. E.g. an alpha value of 0.5 will result in the point being in the
    * middle of the given directions.
    */
-   public static FramePoint2d getPointBetweenVectorsAtDistanceFromOriginCircular(FrameVector2d directionA,
+   public static void getPointBetweenVectorsAtDistanceFromOriginCircular(FrameVector2d directionA,
                                                                                  FrameVector2d directionB,
                                                                                  double alpha,
                                                                                  double radius,
-                                                                                 FramePoint2d midpoint)
+                                                                                 FramePoint2d midpoint,
+                                                                                 FramePoint2d pointToPack)
    {
       directionA.checkReferenceFrameMatch(directionB.getReferenceFrame());
       directionA.checkReferenceFrameMatch(midpoint.getReferenceFrame());
@@ -107,12 +108,9 @@ public class CaptureRegionMath
      
       rotatedFromA.normalize();
       rotatedFromA.scale(radius);
-     
-      FramePoint2d ret = new FramePoint2d();
-      ret.changeFrame(rotatedFromA.getReferenceFrame());
-      ret.set(rotatedFromA.getX(), rotatedFromA.getY());
-      ret.add(midpoint);
-     
-      return ret;
+      
+      pointToPack.changeFrame(rotatedFromA.getReferenceFrame());
+      pointToPack.set(rotatedFromA.getX(), rotatedFromA.getY());
+      pointToPack.add(midpoint);
    }
 }
