@@ -44,8 +44,10 @@ public class AtlasSimInitialSetup implements DRCRobotInitialSetup<SDFRobot>
    private double groundZ;
    private double initialYaw;
    private final Transform3D rootToWorld = new Transform3D();
+   private final Vector3d positionInWorld = new Vector3d();
    private final Vector3d offset = new Vector3d();
    private final Quat4d rotation = new Quat4d();
+   private boolean robotInitialized = false;
 
    public AtlasSimInitialSetup()
    {
@@ -60,62 +62,61 @@ public class AtlasSimInitialSetup implements DRCRobotInitialSetup<SDFRobot>
 
    public void initializeRobot(SDFRobot robot, DRCRobotJointMap jointMap)
    {
-      // Avoid singularities at startup
-           
-      robot.getOneDegreeOfFreedomJoint(jointNames[l_leg_hpz]).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointNames[l_leg_hpx]).setQ(0.062);
-      robot.getOneDegreeOfFreedomJoint(jointNames[l_leg_hpy]).setQ(-0.233);
-      robot.getOneDegreeOfFreedomJoint(jointNames[l_leg_kny]).setQ(0.518);
-      robot.getOneDegreeOfFreedomJoint(jointNames[l_leg_aky]).setQ(-0.276);
-      robot.getOneDegreeOfFreedomJoint(jointNames[l_leg_akx]).setQ(-0.062);
-      
-      
-      robot.getOneDegreeOfFreedomJoint(jointNames[r_leg_hpz]).setQ(0.0);
-      robot.getOneDegreeOfFreedomJoint(jointNames[r_leg_hpx]).setQ(-0.062);
-      robot.getOneDegreeOfFreedomJoint(jointNames[r_leg_hpy]).setQ(-0.233);
-      robot.getOneDegreeOfFreedomJoint(jointNames[r_leg_kny]).setQ(0.518);
-      robot.getOneDegreeOfFreedomJoint(jointNames[r_leg_aky]).setQ(-0.276);
-      robot.getOneDegreeOfFreedomJoint(jointNames[r_leg_akx]).setQ(0.062);
-
-      
-      robot.getOneDegreeOfFreedomJoint(jointNames[l_arm_shy]).setQ(0.300);
-      robot.getOneDegreeOfFreedomJoint(jointNames[l_arm_shx]).setQ(-1.30);
-      robot.getOneDegreeOfFreedomJoint(jointNames[l_arm_ely]).setQ(2.00);
-      robot.getOneDegreeOfFreedomJoint(jointNames[l_arm_elx]).setQ(0.498);
-      robot.getOneDegreeOfFreedomJoint(jointNames[l_arm_wry]).setQ(0.000);
-      robot.getOneDegreeOfFreedomJoint(jointNames[l_arm_wrx]).setQ(-0.004);
-      
-      robot.getOneDegreeOfFreedomJoint(jointNames[r_arm_shy]).setQ(0.300);
-      robot.getOneDegreeOfFreedomJoint(jointNames[r_arm_shx]).setQ(1.30);
-      robot.getOneDegreeOfFreedomJoint(jointNames[r_arm_ely]).setQ(2.00);
-      robot.getOneDegreeOfFreedomJoint(jointNames[r_arm_elx]).setQ(-0.498);
-      robot.getOneDegreeOfFreedomJoint(jointNames[r_arm_wry]).setQ(0.000);
-      robot.getOneDegreeOfFreedomJoint(jointNames[r_arm_wrx]).setQ(0.004);
-      
-      robot.update();
-      robot.getRootJointToWorldTransform(rootToWorld);
-      rootToWorld.get(rotation, offset);
-
-    GroundContactPoint gc1 = robot.getFootGroundContactPoints(RobotSide.LEFT).get(0);
-    double pelvisToFoot = offset.getZ() - gc1.getPositionPoint().getZ();
-
-      // Hardcoded for gazebo integration
-//      double pelvisToFoot = 0.887;
-
-
-      offset.setZ(groundZ + pelvisToFoot);
-
-//    offset.add(robot.getPositionInWorld());
-      robot.setPositionInWorld(offset);
-      
-      FrameOrientation frameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), rotation);
-      double[] yawPitchRoll = frameOrientation.getYawPitchRoll();
-      yawPitchRoll[0] = initialYaw;
-      frameOrientation.setYawPitchRoll(yawPitchRoll);
-      
-      robot.setOrientation(frameOrientation.getQuaternion());
-      
-      robot.update();
+      if(!robotInitialized)
+      {
+         // Avoid singularities at startup
+         robot.getOneDegreeOfFreedomJoint(jointNames[l_leg_hpz]).setQ(0.0);
+         robot.getOneDegreeOfFreedomJoint(jointNames[l_leg_hpx]).setQ(0.062);
+         robot.getOneDegreeOfFreedomJoint(jointNames[l_leg_hpy]).setQ(-0.233);
+         robot.getOneDegreeOfFreedomJoint(jointNames[l_leg_kny]).setQ(0.518);
+         robot.getOneDegreeOfFreedomJoint(jointNames[l_leg_aky]).setQ(-0.276);
+         robot.getOneDegreeOfFreedomJoint(jointNames[l_leg_akx]).setQ(-0.062);
+         
+         robot.getOneDegreeOfFreedomJoint(jointNames[r_leg_hpz]).setQ(0.0);
+         robot.getOneDegreeOfFreedomJoint(jointNames[r_leg_hpx]).setQ(-0.062);
+         robot.getOneDegreeOfFreedomJoint(jointNames[r_leg_hpy]).setQ(-0.233);
+         robot.getOneDegreeOfFreedomJoint(jointNames[r_leg_kny]).setQ(0.518);
+         robot.getOneDegreeOfFreedomJoint(jointNames[r_leg_aky]).setQ(-0.276);
+         robot.getOneDegreeOfFreedomJoint(jointNames[r_leg_akx]).setQ(0.062);
+         
+         robot.getOneDegreeOfFreedomJoint(jointNames[l_arm_shy]).setQ(0.300);
+         robot.getOneDegreeOfFreedomJoint(jointNames[l_arm_shx]).setQ(-1.30);
+         robot.getOneDegreeOfFreedomJoint(jointNames[l_arm_ely]).setQ(2.00);
+         robot.getOneDegreeOfFreedomJoint(jointNames[l_arm_elx]).setQ(0.498);
+         robot.getOneDegreeOfFreedomJoint(jointNames[l_arm_wry]).setQ(0.000);
+         robot.getOneDegreeOfFreedomJoint(jointNames[l_arm_wrx]).setQ(-0.004);
+         
+         robot.getOneDegreeOfFreedomJoint(jointNames[r_arm_shy]).setQ(0.300);
+         robot.getOneDegreeOfFreedomJoint(jointNames[r_arm_shx]).setQ(1.30);
+         robot.getOneDegreeOfFreedomJoint(jointNames[r_arm_ely]).setQ(2.00);
+         robot.getOneDegreeOfFreedomJoint(jointNames[r_arm_elx]).setQ(-0.498);
+         robot.getOneDegreeOfFreedomJoint(jointNames[r_arm_wry]).setQ(0.000);
+         robot.getOneDegreeOfFreedomJoint(jointNames[r_arm_wrx]).setQ(0.004);
+         
+         robot.update();
+         robot.getRootJointToWorldTransform(rootToWorld);
+         rootToWorld.get(rotation, positionInWorld);
+         
+         GroundContactPoint gc1 = robot.getFootGroundContactPoints(RobotSide.LEFT).get(0);
+         double pelvisToFoot = positionInWorld.getZ() - gc1.getPositionPoint().getZ();
+         
+         // Hardcoded for gazebo integration
+         //      double pelvisToFoot = 0.887;
+         
+         positionInWorld.setZ(groundZ + pelvisToFoot);
+         positionInWorld.add(offset);
+         
+         robot.setPositionInWorld(positionInWorld);
+         
+         FrameOrientation frameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), rotation);
+         double[] yawPitchRoll = frameOrientation.getYawPitchRoll();
+         yawPitchRoll[0] = initialYaw;
+         frameOrientation.setYawPitchRoll(yawPitchRoll);
+         
+         robot.setOrientation(frameOrientation.getQuaternion());
+         robot.update();
+         robotInitialized = true;
+      }
    }
 
    public void getOffset(Vector3d offsetToPack)
