@@ -4,7 +4,7 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.ros.AtlasOrderedJointMap;
 import us.ihmc.atlas.ros.ROSSandiaJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
-import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandModel;
+import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandType;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 
@@ -130,7 +130,7 @@ public class AtlasDampingParameters
       throw new RuntimeException("Joint not found: " + name);
    }
    
-   public static void setDampingParameters(SDFRobot simulatedRobot, DRCHandModel handModel, DRCRobotJointMap jointMap)
+   public static void setDampingParameters(SDFRobot simulatedRobot, DRCHandType handModel, DRCRobotJointMap jointMap)
    {
       String[] orderedJointNames = jointMap.getOrderedJointNames();
       for (int i = 0; i < orderedJointNames.length; i++)
@@ -140,7 +140,7 @@ public class AtlasDampingParameters
       
       for (RobotSide robotSide : RobotSide.values)
       {
-         if(handModel == DRCHandModel.SANDIA)
+         if(handModel == DRCHandType.SANDIA)
             for (int i = 0; i < ROSSandiaJointMap.numberOfJointsPerHand; i++)
             {
                try

@@ -1,10 +1,9 @@
 package us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
+import java.util.HashMap;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.darpaRoboticsChallenge.handControl.iRobot.iRobotHandModel.iRobotHandJointNameMinimal;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.net.ObjectConsumer;
@@ -15,22 +14,29 @@ import com.yobotics.simulationconstructionset.graphics.GraphicsUpdatable;
 
 public class HandJointAngleProvider implements ObjectConsumer<HandJointAnglePacket>
 {
-   private final SideDependentList<EnumMap<iRobotHandJointNameMinimal, OneDoFJoint>> handJoints = new SideDependentList<EnumMap<iRobotHandJointNameMinimal, OneDoFJoint>>();
+   private final SideDependentList<HashMap<HandJointName, OneDoFJoint>> handJoints = new SideDependentList<HashMap<HandJointName, OneDoFJoint>>();
 
    private final Object lock = new Object();
    private ArrayList<GraphicsUpdatable> graphicsToUpdate = new ArrayList<GraphicsUpdatable>();
+   private HandModel handModel;
 
-   public HandJointAngleProvider(SDFFullRobotModel fullRobotModel)
+   public HandJointAngleProvider(SDFFullRobotModel fullRobotModel, HandModel handModel)
    {
-      for (RobotSide side : RobotSide.values())
-      {
-         final EnumMap<iRobotHandJointNameMinimal, OneDoFJoint> joints = new EnumMap<iRobotHandJointNameMinimal, OneDoFJoint>(iRobotHandJointNameMinimal.class);
+      this.handModel = handModel;
 
-         for (iRobotHandJointNameMinimal jointName : iRobotHandJointNameMinimal.values())
+      if (handModel != null)
+      {
+         for (RobotSide side : RobotSide.values())
          {
-            joints.put(jointName, fullRobotModel.getOneDoFJointByName(side.getLowerCaseName() + "_" + jointName.toLowerCase()));
+            final HashMap<HandJointName, OneDoFJoint> joints = new HashMap<HandJointName, OneDoFJoint>();
+
+            for (HandJointName jointName : handModel.getHandJointNames())
+            {
+               joints.put(jointName, fullRobotModel.getOneDoFJointByName(side.getLowerCaseName() + "_" + jointName.toLowerCase()));
+            }
+
+            handJoints.put(side, joints);
          }
-         handJoints.put(side, joints);
       }
    }
 
@@ -43,22 +49,22 @@ public class HandJointAngleProvider implements ObjectConsumer<HandJointAnglePack
    {
       synchronized (lock)
       {
-         EnumMap<iRobotHandJointNameMinimal, OneDoFJoint> joints = handJoints.get(object.getRobotSide());
-         if(joints != null)
+         HashMap<HandJointName, OneDoFJoint> joints = handJoints.get(object.getRobotSide());
+         if (joints != null)
          {
-            for (iRobotHandJointNameMinimal jointName : iRobotHandJointNameMinimal.values())
+            for (HandJointName jointName : handModel.getHandJointNames())
             {
-               if(jointName != null)
-               {                  
+               if (jointName != null)
+               {
                   OneDoFJoint oneDoFJoint = joints.get(jointName);
-                  if(oneDoFJoint != null)
+                  if (oneDoFJoint != null)
                   {
                      oneDoFJoint.setQ(object.getJointAngle(jointName));
                   }
                }
             }
-            
-   
+
+
             for (GraphicsUpdatable graphicsUpdatable : graphicsToUpdate)
             {
                graphicsUpdatable.update();

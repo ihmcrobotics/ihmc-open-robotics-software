@@ -6,7 +6,8 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactPointInformation;
-import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandModel;
+import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandType;
+import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
 import us.ihmc.robotSide.RobotSide;
@@ -39,7 +40,7 @@ public interface DRCRobotModel
 
    public Transform getOffsetHandFromWrist(RobotSide side);
 
-   public DRCHandModel getHandModel();
+   public DRCHandType getHandType();
 
    public RobotType getType();
 
@@ -63,4 +64,6 @@ public interface DRCRobotModel
    public DRCOutputWriter getOutputWriterWithAccelerationIntegration(DRCOutputWriter drcOutputWriter, double controlDT, boolean runningOnRealRobot);
    
    public void setJointDamping(SDFRobot simulatedRobot);
+   
+   public HandModel getHandModel();
 }

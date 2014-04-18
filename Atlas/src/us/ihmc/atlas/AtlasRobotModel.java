@@ -17,9 +17,11 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParamaters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
-import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandModel;
+import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandType;
+import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
+import us.ihmc.iRobotHandControl.iRobotHandModel;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 
@@ -65,7 +67,7 @@ public class AtlasRobotModel implements DRCRobotModel
 
    public boolean hasIRobotHands()
    {
-      return selectedVersion.getHandModel() == DRCHandModel.IROBOT;
+      return selectedVersion.getHandModel() == DRCHandType.IROBOT;
    }
 
    public boolean hasArmExtensions()
@@ -75,10 +77,10 @@ public class AtlasRobotModel implements DRCRobotModel
 
    public boolean hasHookHands()
    {
-      return selectedVersion.getHandModel() == DRCHandModel.HOOK;
+      return selectedVersion.getHandModel() == DRCHandType.HOOK;
    }
 
-   public DRCHandModel getHandModel()
+   public DRCHandType getHandType()
    {
       return selectedVersion.getHandModel();
    }
@@ -160,6 +162,15 @@ public class AtlasRobotModel implements DRCRobotModel
    @Override
    public void setJointDamping(SDFRobot simulatedRobot)
    {
-      AtlasDampingParameters.setDampingParameters(simulatedRobot, getHandModel(), getJointMap());
+      AtlasDampingParameters.setDampingParameters(simulatedRobot, getHandType(), getJointMap());
+   }
+
+   @Override
+   public HandModel getHandModel()
+   {
+	   if(hasIRobotHands())
+		   return new iRobotHandModel();
+	   else
+		   return null;
    }
 }

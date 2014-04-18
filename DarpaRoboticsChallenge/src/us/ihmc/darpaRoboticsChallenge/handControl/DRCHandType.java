@@ -1,5 +1,5 @@
 package us.ihmc.darpaRoboticsChallenge.handControl;
 
-public enum DRCHandModel {
+public enum DRCHandType {
 	NONE, IROBOT, SANDIA, HOOK
 }
