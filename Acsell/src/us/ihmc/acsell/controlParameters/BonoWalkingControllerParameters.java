@@ -18,8 +18,8 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 public class BonoWalkingControllerParameters implements WalkingControllerParameters
 {
 
-   private final SideDependentList<Transform3D> handControlFramesWithRespectToFrameAfterWrist = new SideDependentList<>();
-   private final SideDependentList<Transform3D> handPosesWithRespectToChestFrame = new SideDependentList<>();
+   private final SideDependentList<Transform3D> handControlFramesWithRespectToFrameAfterWrist = new SideDependentList<Transform3D>();
+   private final SideDependentList<Transform3D> handPosesWithRespectToChestFrame = new SideDependentList<Transform3D>();
 
    private final boolean runningOnRealRobot;
    
@@ -46,17 +46,17 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
 
    public Map<OneDoFJoint, Double> getDefaultArmJointPositions(FullRobotModel fullRobotModel, RobotSide robotSide)
    {
-      return new LinkedHashMap<>();
+      return new LinkedHashMap<OneDoFJoint, Double>();
    }
 
    public Map<OneDoFJoint, Double> getMinTaskspaceArmJointPositions(FullRobotModel fullRobotModel, RobotSide robotSide)
    {
-      return new LinkedHashMap<>();
+      return new LinkedHashMap<OneDoFJoint, Double>();
    }
 
    public Map<OneDoFJoint, Double> getMaxTaskspaceArmJointPositions(FullRobotModel fullRobotModel, RobotSide robotSide)
    {
-      return new LinkedHashMap<>();
+      return new LinkedHashMap<OneDoFJoint, Double>();
    }
 
    public boolean stayOnToes()
@@ -430,50 +430,42 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
       return 1.5; //0.6;
    }
 
-   @Override
    public double getPelvisPitchUpperLimit()
    {
       return 0;
    }
 
-   @Override
    public double getPelvisPitchLowerLimit()
    {
       return 0;
    }
 
-   @Override
    public boolean isPelvisPitchReversed()
    {
       return false;
    }
 
-   @Override
    public double getFootWidth()
    {
       return BonoPhysicalProperties.footWidth;
    }
 
-   @Override
    public double getToeWidth()
    {
       return BonoPhysicalProperties.footWidth;
    }
 
-   @Override
    public double getFootLength()
    {
       return BonoPhysicalProperties.footForward + BonoPhysicalProperties.footBack;
    }
 
-   @Override
    public double getFoot_start_toetaper_from_back()
    {
       // TODO Auto-generated method stub
       return 0;
    }
 
-   @Override
    public double getSideLengthOfBoundingBoxForFootstepHeight()
    {
       // TODO Auto-generated method stub
