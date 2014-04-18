@@ -3,6 +3,7 @@ package us.ihmc.atlas.posePlayback;
 import java.io.Reader;
 import java.io.StringReader;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.JaxbSDFLoader;
@@ -27,6 +28,8 @@ public class AtlasPlaybackPoseInterpolatorTest extends PlaybackPoseInterpolatorT
       return new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT);
    }
    
+   //this is not a jUnit test. This is a playable pose sequence. Start the sim and press play. Remove @ignore and run locally. 
+   @Ignore
    @Test
    public void testFromExample()
    {
