@@ -159,12 +159,6 @@ public class ValkyrieRobotModel implements DRCRobotModel
       return valModelRoot.getResourceAsStream(getSdfFile());
    }
 
-   @Override
-   public RobotType getType()
-   {
-      return RobotType.VALKYRIE;
-   }
-
    public String toString()
    {
       return robotName;
