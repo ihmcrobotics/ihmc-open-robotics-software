@@ -17,11 +17,6 @@ import com.jme3.math.Transform;
 
 public interface DRCRobotModel
 {
-   public enum RobotType
-   {
-      ATLAS, VALKYRIE, ACSELL, R2
-   }
-
    public ArmControllerParameters getArmControllerParameters();
 
    public WalkingControllerParameters getWalkingControlParameters();
@@ -41,8 +36,6 @@ public interface DRCRobotModel
    public Transform getOffsetHandFromWrist(RobotSide side);
 
    public DRCHandType getHandType();
-
-   public RobotType getType();
 
    public String getModelName();
 
