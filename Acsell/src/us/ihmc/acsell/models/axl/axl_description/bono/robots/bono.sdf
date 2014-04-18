@@ -596,7 +596,7 @@
       <child>l_foot</child>
       <parent>l_talus</parent>
       <axis>
-        <xyz>0.982559 0 -0.185951</xyz>
+        <xyz>1 0 0</xyz>
         <limit>
           <lower>-0.4363</lower>
           <upper>0.4363</upper>
@@ -1179,7 +1179,7 @@
       <child>r_foot</child>
       <parent>r_talus</parent>
       <axis>
-        <xyz>0.982559 0 -0.185951</xyz>
+        <xyz>1 0 0</xyz>
         <limit>
           <lower>-0.4363</lower>
           <upper>0.4363</upper>
