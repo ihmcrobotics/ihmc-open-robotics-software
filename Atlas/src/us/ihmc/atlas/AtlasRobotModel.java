@@ -119,12 +119,6 @@ public class AtlasRobotModel implements DRCRobotModel
       return selectedVersion.getOffsetFromWrist(side);
    }
 
-   @Override
-   public RobotType getType()
-   {
-      return RobotType.ATLAS;
-   }
-
    public String toString()
    {
       return selectedVersion.toString();
