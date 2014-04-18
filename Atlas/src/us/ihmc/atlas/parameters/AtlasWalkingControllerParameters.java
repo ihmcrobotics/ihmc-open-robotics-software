@@ -226,7 +226,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
 
    public double getFootBackwardOffset()
    {
-      return foot_backward;
+      return AtlasPhysicalProperties.foot_back;
    }
    
    public double getAnkleHeight()
