@@ -252,11 +252,11 @@ public class VideoDataPlayer
       
       ffMpeg.setStarttime(startTime);
       ffMpeg.setEndtime(endTime);
-      ffMpeg.setInputFile("'"+videoFile.getAbsolutePath()+"'");
+      ffMpeg.setInputFile("\""+videoFile.getAbsolutePath()+"\"");
       ffMpeg.setVideoCodec("h264");
       ffMpeg.setAudioCodec("aac");
       ffMpeg.enableExperimentalCodecs(true);
-      ffMpeg.setOutputFile("'"+selectedFile.getAbsolutePath()+"'");
+      ffMpeg.setOutputFile("\""+selectedFile.getAbsolutePath()+"\"");
       
       PipedCommandExecutor executor = new PipedCommandExecutor(ffMpeg);
       try
