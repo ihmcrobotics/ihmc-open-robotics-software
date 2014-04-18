@@ -128,12 +128,6 @@ public class BonoRobotModel implements DRCRobotModel
       return thisClass.getResourceAsStream(getSdfFile());
    }
 
-   @Override
-   public RobotType getType()
-   {
-      return RobotType.ACSELL;
-   }
-
    public String toString()
    {
       return "BONO";
