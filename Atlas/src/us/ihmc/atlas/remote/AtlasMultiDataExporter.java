@@ -80,7 +80,7 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
       DRCRobotModel model = new AtlasRobotModel(ATLAS_ROBOT_VERSION, RUNNING_ON_REAL_ROBOT);
       DRCRobotJointMap jointMap = model.getJointMap();
       JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
-   	  boolean showGUIAndSaveSCSVideo = true;
+   	  boolean showGUIAndSaveSCSVideo = false;
       
       String[] cameraName;
       double[] simulationCameraHeight;
@@ -96,14 +96,21 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
       
       // variables to export (starts from 1: vars[0] is reserved for timeVariable)
       jointNamesInOrder = jointMap.getOrderedJointNames();
-      int consideredVariablesPerJoint = 3;
+      int consideredVariablesPerJoint = 10;
       vars = new String[jointNamesInOrder.length * consideredVariablesPerJoint + 1];
       int i = 1;
       for (String jointName :jointNamesInOrder)
       {
-         vars[i] = jointName + "_q"; i++;
-         vars[i] = jointName + "_qd"; i++;
-         vars[i] = jointName + "_tau"; i++;
+          vars[i] = "ll_" + jointName + "_q"; i++;
+          vars[i] = "ll_" + jointName + "_qd"; i++;
+          vars[i] = "ll_" + jointName + "_q_bef"; i++;
+          vars[i] = "ll_" + jointName + "_qd_bef"; i++;
+          vars[i] = "ll_" + jointName + "_q_aft"; i++;
+          vars[i] = "ll_" + jointName + "_qd_aft"; i++;
+          vars[i] = "ll_" + jointName + "_q_befcomp"; i++;
+          vars[i] = "ll_" + jointName + "_q_aftcomp"; i++;
+          vars[i] = "ll_" + jointName + "_q_filt"; i++;
+          vars[i] = "ll_" + jointName + "_qd_filt"; i++;
       }
       
       // select the file with export parameters
