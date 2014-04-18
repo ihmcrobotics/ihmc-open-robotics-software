@@ -8,6 +8,7 @@ import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DummyController;
+import us.ihmc.iRobotHandControl.IRobotControlThreadManager;
 import us.ihmc.utilities.net.LocalObjectCommunicator;
 import us.ihmc.utilities.net.ObjectCommunicator;
 
@@ -74,7 +75,7 @@ public class AtlasNetworkProcessor
                 "WARNING WARNING WARNING :: Simulating DRC Controller - WILL NOT WORK ON REAL ROBOT. Do not use -d argument when running on real robot.");
             ObjectCommunicator objectCommunicator = new LocalObjectCommunicator();
 
-            new DummyController(rosMasterURI, objectCommunicator, model);
+            new DummyController(rosMasterURI, objectCommunicator, model, new IRobotControlThreadManager(objectCommunicator));
             new DRCNetworkProcessor(new URI(rosMasterURI), objectCommunicator, model);
          }
          else

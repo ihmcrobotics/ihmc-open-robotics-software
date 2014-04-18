@@ -4,7 +4,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
-import us.ihmc.iRobotHandControl.IRobotHandSensorData;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.net.ObjectCommunicator;
@@ -21,7 +20,7 @@ public class HandJointAngleCommunicator implements RawOutputWriter
 
    private final ObjectCommunicator networkProcessorCommunicator;
    private final ConcurrentRingBuffer<HandJointAnglePacket> packetRingBuffer;
-   private final double[][] fingers = new double[3][];
+   private double[][] fingers = new double[3][];
    private final AtomicBoolean connected = new AtomicBoolean();
    private final RobotSide side;
    private HandJointAnglePacket currentPacket;
@@ -81,11 +80,13 @@ public class HandJointAngleCommunicator implements RawOutputWriter
       return getName();
    }
 
-   public void updateHandAngles(IRobotHandSensorData sensorDataFromHand)
+   public void updateHandAngles(HandSensorData sensorDataFromHand)
    {
-      fingers[0] = sensorDataFromHand.getIndexJointAngles();
-      fingers[1] = sensorDataFromHand.getMiddleJointAngles();
-      fingers[2] = sensorDataFromHand.getThumbJointAngles();
+//      fingers[0] = sensorDataFromHand.getIndexJointAngles();
+//      fingers[1] = sensorDataFromHand.getMiddleJointAngles();
+//      fingers[2] = sensorDataFromHand.getThumbJointAngles();
+	   fingers = sensorDataFromHand.getFingerJointAngles();
+	   
       connected.set(true);
    }
 

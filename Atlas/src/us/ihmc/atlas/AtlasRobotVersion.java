@@ -6,7 +6,7 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 
-import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandModel;
+import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandType;
 import us.ihmc.darpaRoboticsChallenge.models.ModelRoot;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -18,26 +18,26 @@ public enum AtlasRobotVersion {
 	private static String[] resourceDirectories;
 	private final SideDependentList<Transform> offsetHandFromWrist = new SideDependentList<Transform>(); 
 	
-	public DRCHandModel getHandModel() {
+	public DRCHandType getHandModel() {
 		switch (this) 
 		{
 		case DRC_HANDS:
 		case DRC_EXTENDED_HANDS:
 		case DRC_TASK_HOSE:
-			return DRCHandModel.IROBOT;
+			return DRCHandType.IROBOT;
 
 		case ATLAS_SANDIA_HANDS:
-			return DRCHandModel.SANDIA;
+			return DRCHandType.SANDIA;
 
 		case DRC_HOOKS:
-			return DRCHandModel.HOOK;
+			return DRCHandType.HOOK;
 			
 		case ATLAS_NO_HANDS_ADDED_MASS:
 		case DRC_NO_HANDS:
 		case ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS:
 		case DRC_EXTENDED_HOOKS:
 		default:
-			return DRCHandModel.NONE;
+			return DRCHandType.NONE;
 		}
 	}
 
@@ -53,15 +53,15 @@ public enum AtlasRobotVersion {
 	}
 	
 	public boolean hasIrobotHands() {
-		return getHandModel() == DRCHandModel.IROBOT;
+		return getHandModel() == DRCHandType.IROBOT;
 	}
 	
 	public boolean hasHookHands() {
-		return getHandModel() == DRCHandModel.HOOK;
+		return getHandModel() == DRCHandType.HOOK;
 	}
 	
 	public boolean hasSandiaHands() {
-		return getHandModel() == DRCHandModel.SANDIA;
+		return getHandModel() == DRCHandType.SANDIA;
 	}
 
 	public String getSdfFile() {

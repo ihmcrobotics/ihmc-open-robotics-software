@@ -15,7 +15,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParamaters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.HandContactParameters;
-import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandModel;
+import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandType;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.Pair;
@@ -183,7 +183,7 @@ public class AtlasContactPointParamaters extends DRCRobotContactPointParamaters
             footGroundContactPoints.get(robotSide).add(new Pair<String, Vector3d>(jointMap.getJointBeforeFootName(robotSide), new Vector3d(footv3d.getX(), footv3d.getY(), -AtlasPhysicalProperties.ankleHeight)));
          }
 
-         if (selectedVersion.getHandModel() == DRCHandModel.SANDIA && addLoadsOfContactPoints)
+         if (selectedVersion.getHandModel() == DRCHandType.SANDIA && addLoadsOfContactPoints)
          {
             // add finger joint contact points offset to the middle of palm-facing side of the finger segment
             String longPrefix = (robotSide == RobotSide.LEFT) ? "left_" : "right_";
