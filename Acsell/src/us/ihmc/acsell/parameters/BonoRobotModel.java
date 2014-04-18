@@ -15,7 +15,8 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParamaters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
-import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandModel;
+import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandType;
+import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
 import us.ihmc.robotSide.RobotSide;
@@ -90,9 +91,9 @@ public class BonoRobotModel implements DRCRobotModel
    }
 
    @Override
-   public DRCHandModel getHandModel()
+   public DRCHandType getHandType()
    {
-      return DRCHandModel.NONE;
+      return DRCHandType.NONE;
    }
 
    @Override
@@ -171,6 +172,12 @@ public class BonoRobotModel implements DRCRobotModel
    public void setJointDamping(SDFRobot simulatedRobot)
    {
       System.err.println("Joint Damping not setup for Bono. BonoRobotModel setJointDamping!");
+   }
+
+   @Override
+   public HandModel getHandModel()
+   {
+	   return null;
    }
 
 }
