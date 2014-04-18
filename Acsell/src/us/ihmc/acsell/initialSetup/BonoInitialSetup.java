@@ -30,7 +30,6 @@ public class BonoInitialSetup implements DRCRobotInitialSetup<SDFRobot>
       this.initialYaw = initialYaw;
    }
 
-   @Override
    public void initializeRobot(SDFRobot robot, DRCRobotJointMap jointMap)
    {
       for(RobotSide robotSide : RobotSide.values())
@@ -77,25 +76,21 @@ public class BonoInitialSetup implements DRCRobotInitialSetup<SDFRobot>
       this.offset.set(offset);
    }
 
-   @Override
    public void setInitialYaw(double yaw)
    {
       initialYaw = yaw;
    }
 
-   @Override
    public void setInitialGroundHeight(double groundHeight)
    {
       groundZ = groundHeight;
    }
 
-   @Override
    public double getInitialYaw()
    {
       return initialYaw;
    }
 
-   @Override
    public double getInitialGroundHeight()
    {
       return groundZ;
