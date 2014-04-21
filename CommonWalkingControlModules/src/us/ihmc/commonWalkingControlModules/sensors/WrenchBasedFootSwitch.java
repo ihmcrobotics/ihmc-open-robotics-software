@@ -174,7 +174,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
    {
       readSensorData(footWrench);
 
-      yoFootForceInFoot.getFrameVectorAndChangeFrameOfPackedVector(footForce);
+      yoFootForceInFoot.getFrameTupleIncludingFrame(footForce);
 
       footForce.clipToMinMax(0.0, Double.MAX_VALUE);
 
@@ -216,7 +216,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
    public void computeAndPackCoP(FramePoint2d copToPack)
    {
       updateCoP();
-      copToPack.setAndChangeFrame(resolvedCoP);
+      copToPack.setIncludingFrame(resolvedCoP);
    }
 
    public void updateCoP()
