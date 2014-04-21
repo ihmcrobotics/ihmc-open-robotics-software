@@ -133,8 +133,8 @@ public class ParabolicVelocityInstantaneousCapturePointTrajectory implements Ins
    
    private void packCoP(FramePoint2d point2Pack, double time, double finalTime, double omega0)
    {
-      point2Pack.setAndChangeFrame(finalDesiredICP.getFramePoint2dCopy());
-      tempPointInitialDesired.setAndChangeFrame(initialDesiredICP.getFramePoint2dCopy());
+      point2Pack.setIncludingFrame(finalDesiredICP.getFramePoint2dCopy());
+      tempPointInitialDesired.setIncludingFrame(initialDesiredICP.getFramePoint2dCopy());
 
       // See ParabolicVelocityICPTrajectoryGenerator.nb in /mathematica
       point2Pack.scale(time * (-6.0 * finalTime + time *(6.0 - 2.0 * time * omega0 + 3.0 * finalTime * omega0)));
@@ -163,16 +163,16 @@ public class ParabolicVelocityInstantaneousCapturePointTrajectory implements Ins
       
       double parameter = parameterGenerator.getValue();
       double parameterDot = parameterGenerator.getVelocity();
-      tempPointInitialDesired.setAndChangeFrame(initialDesiredICP.getFramePoint2dCopy());
-      tempPointFinalDesired.setAndChangeFrame(finalDesiredICP.getFramePoint2dCopy());
+      tempPointInitialDesired.setIncludingFrame(initialDesiredICP.getFramePoint2dCopy());
+      tempPointFinalDesired.setIncludingFrame(finalDesiredICP.getFramePoint2dCopy());
       
-      desiredPosition.setAndChangeFrame(tempPointInitialDesired);
+      desiredPosition.setIncludingFrame(tempPointInitialDesired);
       desiredPosition.scale(1.0 - parameter);
       tempPointFinalDesired.scale(parameter);
       desiredPosition.add(tempPointFinalDesired);
       
       tempPointFinalDesired.scale(parameterDot/parameter);
-      desiredVelocity.setAndChangeFrame(tempPointInitialDesired);
+      desiredVelocity.setIncludingFrame(tempPointInitialDesired);
       desiredVelocity.scale(-parameterDot);
       desiredVelocity.add(tempPointFinalDesired);      
    }

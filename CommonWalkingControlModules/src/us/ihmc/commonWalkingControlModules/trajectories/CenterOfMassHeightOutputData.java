@@ -17,12 +17,12 @@ public class CenterOfMassHeightOutputData
 
    public void getDesiredCenterOfMassHeightSlope(FrameVector2d slopeToPack)
    {
-      slopeToPack.setAndChangeFrame(desiredCenterOfMassHeightSlope);
+      slopeToPack.setIncludingFrame(desiredCenterOfMassHeightSlope);
    }
 
    public void getDesiredCenterOfMassHeightSecondDerivative(FrameVector2d secondDerivativeToPack)
    {
-      secondDerivativeToPack.setAndChangeFrame(desiredCenterOfMassHeightSecondDerivative);
+      secondDerivativeToPack.setIncludingFrame(desiredCenterOfMassHeightSecondDerivative);
    }
    
    public void setDesiredCenterOfMassHeight(double desiredCenterOfMassHeight)

@@ -243,14 +243,14 @@ public class SmartCMPProjector
 
       if (isCapturePointInside)
       {
-         moveAwayFromEdge.setAndChangeFrame(icpToCMPIntersections[0]);
-         otherEdge.setAndChangeFrame(icpAwayFromCMPIntersections[0]);
+         moveAwayFromEdge.setIncludingFrame(icpToCMPIntersections[0]);
+         otherEdge.setIncludingFrame(icpAwayFromCMPIntersections[0]);
       }
       else
       {
          order(capturePoint, intersections);
-         moveAwayFromEdge.setAndChangeFrame(intersections[1]);
-         otherEdge.setAndChangeFrame(intersections[0]);
+         moveAwayFromEdge.setIncludingFrame(intersections[1]);
+         otherEdge.setIncludingFrame(intersections[0]);
       }
 
       insideEdgeDirection.setToZero(otherEdge.getReferenceFrame());
@@ -306,7 +306,7 @@ public class SmartCMPProjector
       insideEdgeDirection.normalize();
       insideEdgeDirection.scale(distanceToMove);
 
-      desiredCMP.setAndChangeFrame(moveAwayFromEdge);
+      desiredCMP.setIncludingFrame(moveAwayFromEdge);
       desiredCMP.add(insideEdgeDirection);
 
       if (VISUALIZE)

@@ -55,7 +55,7 @@ public class CenterOfPressureResolver
          normalTorqueAtCenterOfPressure = torqueAtZeroInPlaneFrame.getZ();
       }
       
-      centerOfPressureToPack.set(centerOfPressurePlaneFrame, vector12x, vector12y);
+      centerOfPressureToPack.setIncludingFrame(centerOfPressurePlaneFrame, vector12x, vector12y);
       return normalTorqueAtCenterOfPressure;
    }
   

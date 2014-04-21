@@ -287,7 +287,7 @@ public class CommonCouplingRegistry implements CouplingRegistry
    
    public void setDesiredCapturePoint(FramePoint2d desiredCapturePoint)
    {
-      this.desiredICP.set(desiredCapturePoint.getReferenceFrame(), desiredCapturePoint.getX(), desiredCapturePoint.getY());
+      this.desiredICP.setIncludingFrame(desiredCapturePoint.getReferenceFrame(), desiredCapturePoint.getX(), desiredCapturePoint.getY());
    }
 
    public FramePoint2d getDesiredCapturePointInFrame(ReferenceFrame desiredFrame)

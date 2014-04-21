@@ -343,12 +343,12 @@ public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePoint
       FramePoint2d desiredCenterOfPressure = new FramePoint2d(capturePoint);
       
       // feed forward part
-      tempControl.setAndChangeFrame(desiredCapturePointVelocity);
+      tempControl.setIncludingFrame(desiredCapturePointVelocity);
       tempControl.scale(1.0 / omega0.getDoubleValue());
       desiredCenterOfPressure.sub(tempControl);
       
       // feedback part
-      tempControl.setAndChangeFrame(capturePoint);
+      tempControl.setIncludingFrame(capturePoint);
       tempControl.sub(desiredCapturePoint);
       tempControl.scale(captureKp);
       desiredCenterOfPressure.add(tempControl);
