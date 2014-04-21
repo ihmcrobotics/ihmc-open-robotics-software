@@ -60,7 +60,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
    {
       if (normalContactVector == null)
       {
-         this.contactNormalFrameVector.set(planeFrame, 0.0, 0.0, 1.0);
+         this.contactNormalFrameVector.setIncludingFrame(planeFrame, 0.0, 0.0, 1.0);
       }
       else
       {

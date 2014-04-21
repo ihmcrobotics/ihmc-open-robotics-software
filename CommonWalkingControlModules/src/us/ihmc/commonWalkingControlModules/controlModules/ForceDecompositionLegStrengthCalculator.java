@@ -126,13 +126,13 @@ public class ForceDecompositionLegStrengthCalculator implements LegStrengthCalcu
       {
          FramePoint2d vtp2d = virtualToePoints.get(robotSide);
          vtp2d.changeFrame(midFeetZUpFrame);
-         vtps.get(robotSide).set(vtp2d.getReferenceFrame(), vtp2d.getX(), vtp2d.getY(), 0.0);
+         vtps.get(robotSide).setIncludingFrame(vtp2d.getReferenceFrame(), vtp2d.getX(), vtp2d.getY(), 0.0);
       }
 
       coPDesired.changeFrame(midFeetZUpFrame);
-      desiredCoP.set(coPDesired.getReferenceFrame(), coPDesired.getX(), coPDesired.getY(), 0.0);
+      desiredCoP.setIncludingFrame(coPDesired.getReferenceFrame(), coPDesired.getX(), coPDesired.getY(), 0.0);
 
-      endEffector.set(endEffectorFrame, 0.0, 0.0, 0.0);
+      endEffector.setIncludingFrame(endEffectorFrame, 0.0, 0.0, 0.0);
       endEffector.changeFrame(midFeetZUpFrame);
    }
 
@@ -144,7 +144,7 @@ public class ForceDecompositionLegStrengthCalculator implements LegStrengthCalcu
    
    private void updateVectors()
    {
-      zUnitVector.set(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0);
+      zUnitVector.setIncludingFrame(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0);
       zUnitVector.changeFrame(vtpAndEndEffectorXYPlaneFrame);
 
       for (RobotSide robotSide : RobotSide.values)

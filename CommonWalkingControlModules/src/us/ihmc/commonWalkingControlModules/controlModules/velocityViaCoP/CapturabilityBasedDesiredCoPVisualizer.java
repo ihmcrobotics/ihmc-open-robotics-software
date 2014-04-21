@@ -106,7 +106,7 @@ public class CapturabilityBasedDesiredCoPVisualizer
    
    public void setDesiredCapturePoint(FramePoint2d desiredCapturePoint2d)
    {
-      tempPoint.set(desiredCapturePoint2d.getReferenceFrame(), desiredCapturePoint2d.getX(), desiredCapturePoint2d.getY(), 0.0);
+      tempPoint.setIncludingFrame(desiredCapturePoint2d.getReferenceFrame(), desiredCapturePoint2d.getX(), desiredCapturePoint2d.getY(), 0.0);
       tempPoint.changeFrame(world);
       this.desiredCapturePoint.set(tempPoint);
       hideGuideLine();
@@ -114,7 +114,7 @@ public class CapturabilityBasedDesiredCoPVisualizer
 
    public void setFinalDesiredCapturePoint(FramePoint2d finalDesiredCapturePoint2d)
    {
-      tempPoint.set(finalDesiredCapturePoint2d.getReferenceFrame(), finalDesiredCapturePoint2d.getX(), finalDesiredCapturePoint2d.getY(), 0.0);
+      tempPoint.setIncludingFrame(finalDesiredCapturePoint2d.getReferenceFrame(), finalDesiredCapturePoint2d.getX(), finalDesiredCapturePoint2d.getY(), 0.0);
       tempPoint.changeFrame(world);
       this.finalDesiredCapturePoint.set(tempPoint);
       hideGuideLine();

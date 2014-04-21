@@ -157,7 +157,7 @@ public class PointPositionRotateSteeringWheelBehavior
          tempPoint.changeFrame(steeringWheelFrame);
          double radius = Math.hypot(tempPoint.getX(), tempPoint.getY());
          double steeringWheelTangentialForce = steeringWheelExternalTorque / radius;
-         force.set(xTangentialFrame, steeringWheelTangentialForce, 0.0, 0.0);
+         force.setIncludingFrame(xTangentialFrame, steeringWheelTangentialForce, 0.0, 0.0);
 
          wrench.setToZero(hand.getBodyFixedFrame(), force.getReferenceFrame());
          wrench.setLinearPart(force.getVector());
@@ -167,7 +167,7 @@ public class PointPositionRotateSteeringWheelBehavior
 
       private void updateXTangentialFrame()
       {
-         z.set(steeringWheelFrame, 0.0, 0.0, 1.0);
+         z.setIncludingFrame(steeringWheelFrame, 0.0, 0.0, 1.0);
 
          tempPoint.setToZero(creepyGripHandPositionControlFrame);
          tempPoint.changeFrame(steeringWheelFrame);

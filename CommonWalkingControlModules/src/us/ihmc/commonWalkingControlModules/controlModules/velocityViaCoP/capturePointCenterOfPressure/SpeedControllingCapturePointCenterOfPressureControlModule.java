@@ -404,7 +404,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       double y = desiredCoP.getY();
       double z = 0.0;
 
-      desiredCenterOfPressureToPack.set(desiredCoP.getReferenceFrame(), x, y, z);
+      desiredCenterOfPressureToPack.setIncludingFrame(desiredCoP.getReferenceFrame(), x, y, z);
    }
 
    public void setParametersForR2()

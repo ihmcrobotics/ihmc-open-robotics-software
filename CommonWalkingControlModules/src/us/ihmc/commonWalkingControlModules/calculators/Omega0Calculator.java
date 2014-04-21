@@ -46,7 +46,7 @@ public class Omega0Calculator implements Omega0CalculatorInterface
          for (int i = 0; i < 2; i++)
          {
             FramePoint2d cop2d = cop2ds.get(i);
-            cops.get(i).set(cop2d.getReferenceFrame(), cop2d.getX(), cop2d.getY(), 0.0);
+            cops.get(i).setIncludingFrame(cop2d.getReferenceFrame(), cop2d.getX(), cop2d.getY(), 0.0);
             cops.get(i).changeFrame(copToCoPFrame.getParent());
          }
 

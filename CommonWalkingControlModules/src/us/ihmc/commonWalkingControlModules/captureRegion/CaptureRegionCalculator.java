@@ -338,7 +338,7 @@ public class CaptureRegionCalculator
          copExtremeInSupportAnkleZUp.setAndChangeFrame(copExtreme);
          copExtremeInSupportAnkleZUp.changeFrame(supportAnkleZUpFrame);
          
-         copExtreme3d.set(copExtreme.getReferenceFrame(), copExtreme.getX(), copExtreme.getY(), 0.0);
+         copExtreme3d.setIncludingFrame(copExtreme.getReferenceFrame(), copExtreme.getX(), copExtreme.getY(), 0.0);
 
          FramePoint predictedExtremeCapturePoint = capturePointCalculator.computePredictedCapturePoint(supportLeg, swingTimeRemaining + SWING_TIME_TO_ADD_FOR_CAPTURING_SAFETY_FACTOR, copExtreme3d);
          
