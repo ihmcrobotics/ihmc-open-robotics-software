@@ -153,7 +153,7 @@ public class ICPAndMomentumBasedController
       CapturePointCalculator.computeCapturePoint(capturePoint2d, centerOfMassPosition2d, centerOfMassVelocity2d, getOmega0());
       
       ReferenceFrame midFeetZUpFrame = momentumBasedController.getReferenceFrames().getMidFeetZUpFrame();
-      capturePointOffsetHack2d.set(midFeetZUpFrame, 0.0, capturePointOffsetY.getDoubleValue());
+      capturePointOffsetHack2d.setIncludingFrame(midFeetZUpFrame, 0.0, capturePointOffsetY.getDoubleValue());
       capturePointOffsetHack2d.changeFrame(capturePoint2d.getReferenceFrame());
       capturePoint2d.add(capturePointOffsetHack2d);
       
@@ -257,7 +257,7 @@ public class ICPAndMomentumBasedController
    
    public void getDesiredICP(FramePoint2d pointToPack)
    {
-      this.desiredICP.getFramePoint2d(pointToPack);
+      this.desiredICP.getFrameTuple2d(pointToPack);
    }
 
    public YoFrameVector2d getDesiredICPVelocity()
