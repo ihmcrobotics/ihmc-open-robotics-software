@@ -90,7 +90,7 @@ public class ParabolicPositionTrajectoryGenerator implements PositionTrajectoryG
       double parameter = minimumJerkTrajectory.getPosition();
       parameter = MathTools.clipToMinMax(parameter, 0.0, 1.0);
       parabolicTrajectoryGenerator.packVelocity(tempVector, parameter);
-      velocityToPack.setAndChangeFrame(tempVector);
+      velocityToPack.setIncludingFrame(tempVector);
       velocityToPack.scale(minimumJerkTrajectory.getVelocity());
    }
 
