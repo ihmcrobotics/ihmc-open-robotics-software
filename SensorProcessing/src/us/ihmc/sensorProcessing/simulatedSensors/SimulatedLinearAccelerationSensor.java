@@ -48,7 +48,7 @@ public class SimulatedLinearAccelerationSensor extends SimulatedSensor<Vector3d>
       linearAccelerationFrameVector.changeFrame(gravitationalAcceleration.getReferenceFrame());
       linearAccelerationFrameVector.add(gravitationalAcceleration);
       linearAccelerationFrameVector.changeFrame(measurementFrame);
-      linearAccelerationFrameVector.getVector(linearAcceleration);
+      linearAccelerationFrameVector.get(linearAcceleration);
       yoFrameVectorPerfect.set(linearAcceleration);
 
       corrupt(linearAcceleration);

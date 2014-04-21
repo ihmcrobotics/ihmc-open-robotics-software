@@ -63,7 +63,7 @@ public class AngularAccelerationProcessModelElement extends AbstractProcessModel
          angularAccelerationInputData.checkReferenceFrameMatch(estimationFrame);
       }
 
-      angularAccelerationInputData.getVector(angularAccelerationVector3d);
+      angularAccelerationInputData.get(angularAccelerationVector3d);
       angularAcceleration.setIncludingFrame(estimationFrame, angularAccelerationVector3d);
       angularAccelerationStatePort.setData(angularAcceleration);
    }
