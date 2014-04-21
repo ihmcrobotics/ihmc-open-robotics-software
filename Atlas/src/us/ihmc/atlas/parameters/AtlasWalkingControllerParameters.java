@@ -142,8 +142,6 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    private double nominalHeightAboveGround = 0.675 + 0.03; 
    private final double maximumHeightAboveGround = 0.735 + 0.03;
 
-   private double foot_backward; 
-   
 // USE THESE FOR DRC Atlas Model TASK 2 UNTIL WALKING WORKS BETTER WITH OTHERS.
 //   private final double minimumHeightAboveGround = 0.785;                                       
 //   private double nominalHeightAboveGround = 0.865; 
