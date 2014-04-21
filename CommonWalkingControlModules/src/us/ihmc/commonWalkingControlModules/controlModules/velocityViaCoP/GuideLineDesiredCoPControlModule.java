@@ -159,7 +159,7 @@ public class GuideLineDesiredCoPControlModule implements DesiredCoPControlModule
       AlphaFilteredYoFramePoint2d filteredDesiredCoPSingleSupport = filteredDesiredCoPsSingleSupport.get(supportLeg);
       desiredCoP2d.changeFrame(filteredDesiredCoPSingleSupport.getReferenceFrame());
       filteredDesiredCoPSingleSupport.update(desiredCoP2d);
-      filteredDesiredCoPSingleSupport.getFramePoint2d(desiredCoP2d);
+      filteredDesiredCoPSingleSupport.getFrameTuple2d(desiredCoP2d);
       desiredCoP2d.changeFrame(world);
       finalDesiredCoPInWorld.set(desiredCoP2d);
 
@@ -196,7 +196,7 @@ public class GuideLineDesiredCoPControlModule implements DesiredCoPControlModule
 
       desiredCoP2d.changeFrame(filteredDesiredCoPDoubleSupport.getReferenceFrame());
       this.filteredDesiredCoPDoubleSupport.update(desiredCoP2d);
-      filteredDesiredCoPDoubleSupport.getFramePoint2d(desiredCoP2d);
+      filteredDesiredCoPDoubleSupport.getFrameTuple2d(desiredCoP2d);
       
       FrameConvexPolygon2d supportPolygon = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();
       supportPolygon.orthogonalProjection(desiredCoP2d);

@@ -110,7 +110,7 @@ public class ICPProportionalController
       alphaICPVelocityFeedForward.set(1.0);
       correctICPFeedForward(capturePoint, desiredCapturePoint, finalDesiredCapturePoint, desiredCapturePointVelocity);
       // feed forward part
-      tempControl.setAndChangeFrame(desiredCapturePointVelocity);
+      tempControl.setIncludingFrame(desiredCapturePointVelocity);
       tempControl.scale(alphaICPVelocityFeedForward.getDoubleValue() / omega0);
       
       
@@ -120,7 +120,7 @@ public class ICPProportionalController
       icpError.set(capturePoint);
       icpError.sub(desiredCapturePoint);
       
-      icpError.getFrameVector2d(tempControl);
+      icpError.getFrameTuple2d(tempControl);
       double epsilonZeroICPVelocity = 1e-5;
       if (desiredCapturePointVelocity.lengthSquared() > MathTools.square(epsilonZeroICPVelocity))
       {
@@ -146,7 +146,7 @@ public class ICPProportionalController
       
       tempControl.add(icpDamping);
       
-      icpError.getFrameVector2d(tempICPErrorIntegrated);
+      icpError.getFrameTuple2d(tempICPErrorIntegrated);
       tempICPErrorIntegrated.scale(controlDT);
       tempICPErrorIntegrated.scale(captureKi.getDoubleValue());
       
@@ -164,7 +164,7 @@ public class ICPProportionalController
          icpErrorIntegrated.set(0.0, 0.0);
       }
       
-      icpErrorIntegrated.getFrameVector2d(icpIntegral);
+      icpErrorIntegrated.getFrameTuple2d(icpIntegral);
       tempControl.add(icpIntegral);
       
       feedbackPart.set(tempControl);
@@ -204,7 +204,7 @@ public class ICPProportionalController
       
       filteredCMPOutput.update();
       rateLimitedCMPOutput.update();
-      rateLimitedCMPOutput.getFramePoint2d(desiredCMP);
+      rateLimitedCMPOutput.getFrameTuple2d(desiredCMP);
       
       return desiredCMP;
    }
@@ -214,13 +214,13 @@ public class ICPProportionalController
    {
       if (!finalDesiredCapturePoint.containsNaN())
       {
-         desICPToFinalDesICPVector.setAndChangeFrame(desiredCapturePoint);
+         desICPToFinalDesICPVector.setIncludingFrame(desiredCapturePoint);
          desICPToFinalDesICPVector.sub(finalDesiredCapturePoint);
          boolean isDesICPMovingTowardsFinalDesICP = desiredCapturePointVelocity.dot(desICPToFinalDesICPVector) > 0.0;
          if (!isDesICPMovingTowardsFinalDesICP && desiredCapturePointVelocity.lengthSquared() > 1e-3 && finalDesiredCapturePoint.distance(desiredCapturePoint) > 0.01)
          {
             desiredICPToFinalDesiredICPSegment.setAndChangeFrame(finalDesiredCapturePoint, desiredCapturePoint);
-            icpProjected.setAndChangeFrame(capturePoint);
+            icpProjected.setIncludingFrame(capturePoint);
             desiredICPToFinalDesiredICPSegment.orthogonalProjection(icpProjected);
 
             double percentageAlongLineSegment = MathTools.clipToMinMax(desiredICPToFinalDesiredICPSegment.percentageAlongLineSegment(icpProjected), 0.0, 1.0);
@@ -269,7 +269,7 @@ public class ICPProportionalController
 
       public void setXAxis(FrameVector2d xAxis)
       {
-         this.xAxis.setAndChangeFrame(xAxis);
+         this.xAxis.setIncludingFrame(xAxis);
          this.xAxis.changeFrame(parentFrame);
          this.xAxis.normalize();
          update();
