@@ -19,8 +19,8 @@ public class PointPositionDataObject
       this.isPointPositionValid = isPointPositionValid;
       positionOfMeasurementPointInWorldFrame.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
 
-      measurementPointInBodyFrame.getPoint(this.measurementPointInBodyFrame);
-      positionOfMeasurementPointInWorldFrame.getPoint(this.positionOfMeasurementPointInWorldFrame);
+      measurementPointInBodyFrame.get(this.measurementPointInBodyFrame);
+      positionOfMeasurementPointInWorldFrame.get(this.positionOfMeasurementPointInWorldFrame);
    }
 
    public Point3d getMeasurementPointInWorldFrame()
