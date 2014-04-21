@@ -112,22 +112,22 @@ public class SimulatedIMURawSensorReaderTest
    
    private void generateAppliedVelocity()
    {
-      randomLinearVelocity.set(bodyFrame, Math.random()-0.5, Math.random()-0.5, Math.random()-0.5);
+      randomLinearVelocity.setIncludingFrame(bodyFrame, Math.random()-0.5, Math.random()-0.5, Math.random()-0.5);
       randomLinearVelocity.scale(10);
       //randomLinearVelocity.set(0.0, 0.0, 0.0);  // for debugging
       
-      randomAngularVelocity.set(bodyFrame, Math.random()-0.5, Math.random()-0.5, Math.random()-0.5);
+      randomAngularVelocity.setIncludingFrame(bodyFrame, Math.random()-0.5, Math.random()-0.5, Math.random()-0.5);
       randomAngularVelocity.scale(10);
       //randomAngularVelocity.set(0.0, 0.0, 1.0);  // for debugging
    }
    
    private void generateAppliedAcceleration()
    {
-      randomLinearAcceleration.set(bodyFrame, Math.random()-0.5, Math.random()-0.5, Math.random()-0.5);
+      randomLinearAcceleration.setIncludingFrame(bodyFrame, Math.random()-0.5, Math.random()-0.5, Math.random()-0.5);
       randomLinearAcceleration.scale(40);
       //randomLinearAcceleration.set(0.0, 0.0, 0.0); // for debugging
       
-      randomAngularAcceleration.set(bodyFrame, Math.random()-0.5, Math.random()-0.5, Math.random()-0.5);
+      randomAngularAcceleration.setIncludingFrame(bodyFrame, Math.random()-0.5, Math.random()-0.5, Math.random()-0.5);
       randomAngularAcceleration.scale(20);
       //randomAngularAcceleration.set(0.0, 0.0, 0.0); // for debugging
    }

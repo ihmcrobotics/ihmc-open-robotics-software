@@ -10,7 +10,7 @@ public class CoMHeightTimeDerivativesData
 
    public void getComHeight(FramePoint framePointToPack)
    {
-      framePointToPack.set(frameOfCenterOfMassHeight, 0.0, 0.0, comHeight);
+      framePointToPack.setIncludingFrame(frameOfCenterOfMassHeight, 0.0, 0.0, comHeight);
    }
 
    public void setComHeight(ReferenceFrame referenceFrame, double comHeight)

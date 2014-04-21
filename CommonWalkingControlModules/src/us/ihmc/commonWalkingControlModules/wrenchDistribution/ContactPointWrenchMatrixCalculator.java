@@ -82,7 +82,7 @@ public class ContactPointWrenchMatrixCalculator
          for (FramePoint2d contactPoint2d : contactPoints2d)
          {
             // torque part of A
-            tempContactPoint.set(contactPoint2d.getReferenceFrame(), contactPoint2d.getX(), contactPoint2d.getY(), 0.0);
+            tempContactPoint.setIncludingFrame(contactPoint2d.getReferenceFrame(), contactPoint2d.getX(), contactPoint2d.getY(), 0.0);
             tempContactPoint.changeFrame(centerOfMassFrame);
 
             for (FrameVector supportVector : normalizedSupportVectors)

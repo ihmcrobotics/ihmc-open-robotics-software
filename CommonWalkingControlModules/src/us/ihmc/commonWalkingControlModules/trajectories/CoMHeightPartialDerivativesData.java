@@ -21,7 +21,7 @@ public class CoMHeightPartialDerivativesData
    
    public void getCoMHeight(FramePoint framePointToPack)
    {
-      framePointToPack.set(frameOfCoMHeight, 0.0, 0.0, comHeight);
+      framePointToPack.setIncludingFrame(frameOfCoMHeight, 0.0, 0.0, comHeight);
    }
    
    public void setCoMHeight(ReferenceFrame referenceFrame, double comHeight)

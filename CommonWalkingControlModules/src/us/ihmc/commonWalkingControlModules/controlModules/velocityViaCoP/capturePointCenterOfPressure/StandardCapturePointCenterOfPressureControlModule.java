@@ -460,7 +460,7 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
       double y = centerOfPressureDesiredWorld.getY();
       double z = centerOfPressureDesiredWorld.getZ();
 
-      desiredCenterOfPressureToPack.set(centerOfPressureDesiredWorld.getReferenceFrame(), x, y, z);
+      desiredCenterOfPressureToPack.setIncludingFrame(centerOfPressureDesiredWorld.getReferenceFrame(), x, y, z);
    }
 
    public YoFramePoint getCenterOfPressureDesiredAnkleZUp(RobotSide robotSide)

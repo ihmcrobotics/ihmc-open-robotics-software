@@ -180,7 +180,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
          for (RobotSide robotSide : RobotSide.values)
          {
             footSwitches.get(robotSide).computeAndPackCoP(tempRawCoP2d);
-            tempRawCoP.set(tempRawCoP2d.getReferenceFrame(), tempRawCoP2d.getX(), tempRawCoP2d.getY(), 0.0);
+            tempRawCoP.setIncludingFrame(tempRawCoP2d.getReferenceFrame(), tempRawCoP2d.getX(), tempRawCoP2d.getY(), 0.0);
             tempRawCoP.changeFrame(worldFrame);
             footRawCoPPositionsInWorld.get(robotSide).set(tempRawCoP);
             

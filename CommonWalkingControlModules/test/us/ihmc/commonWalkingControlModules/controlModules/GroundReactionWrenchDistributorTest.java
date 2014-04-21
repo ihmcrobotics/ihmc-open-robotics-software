@@ -1266,13 +1266,13 @@ public class GroundReactionWrenchDistributorTest
 
       for (FramePoint2d contactPoint : plane.getContactFramePoints2dInContactCopy())
       {
-         tempContactPoint.set(contactPoint.getReferenceFrame(), contactPoint.getX(), contactPoint.getY(), 0.0);
+         tempContactPoint.setIncludingFrame(contactPoint.getReferenceFrame(), contactPoint.getX(), contactPoint.getY(), 0.0);
          tempContactPoint.changeFrame(centerOfMassFrame);
 
          for (FrameVector supportVector : normalizedSupportVectors)
          {
             double scale = RandomTools.generateRandomDouble(random, 10.0, 50.0);
-            tempSupportVector.set(centerOfMassFrame, supportVector.getX(), supportVector.getY(), supportVector.getZ());
+            tempSupportVector.setIncludingFrame(centerOfMassFrame, supportVector.getX(), supportVector.getY(), supportVector.getZ());
             tempSupportVector.scale(scale);
 
             tempCrossVector.cross(tempContactPoint, tempSupportVector);
@@ -1314,13 +1314,13 @@ public class GroundReactionWrenchDistributorTest
 
          for (FramePoint2d contactPoint : contactState.getContactFramePoints2dInContactCopy())
          {
-            tempContactPoint.set(contactPoint.getReferenceFrame(), contactPoint.getX(), contactPoint.getY(), 0.0);
+            tempContactPoint.setIncludingFrame(contactPoint.getReferenceFrame(), contactPoint.getX(), contactPoint.getY(), 0.0);
             tempContactPoint.changeFrame(centerOfMassFrame);
 
             for (FrameVector supportVector : normalizedSupportVectors)
             {
                double scale = RandomTools.generateRandomDouble(random, 10.0, 50.0);
-               tempSupportVector.set(centerOfMassFrame, supportVector.getX(), supportVector.getY(), supportVector.getZ());
+               tempSupportVector.setIncludingFrame(centerOfMassFrame, supportVector.getX(), supportVector.getY(), supportVector.getZ());
                tempSupportVector.scale(scale);
 
                tempCrossVector.cross(tempContactPoint, tempSupportVector);

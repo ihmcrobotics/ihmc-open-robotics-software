@@ -111,7 +111,7 @@ public class EqConstCoPAndGuideLineCapturePointCoPControlModule implements Captu
       double y = desiredCenterOfPressure.getY();
       double z = 0.0;
 
-      desiredCenterOfPressureToPack.set(desiredCenterOfPressure.getReferenceFrame(), x, y, z);
+      desiredCenterOfPressureToPack.setIncludingFrame(desiredCenterOfPressure.getReferenceFrame(), x, y, z);
    }
 
    private void computeDesiredCoP(FrameConvexPolygon2d supportPolygon, FramePoint2d currentCapturePoint2d, FramePoint2d desiredFinalCapturePoint, double finalTime,

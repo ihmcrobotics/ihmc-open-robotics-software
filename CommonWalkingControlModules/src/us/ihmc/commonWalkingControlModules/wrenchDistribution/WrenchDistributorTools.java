@@ -43,7 +43,7 @@ public class WrenchDistributorTools
    public static void computePseudoCMP3d(FramePoint pseudoCMP3dToPack, FramePoint centerOfMass, FramePoint2d cmp, double fZ, double totalMass, double omega0)
    {
       double zCMP = centerOfMass.getZ() - fZ / (totalMass * MathTools.square(omega0));
-      pseudoCMP3dToPack.set(cmp.getReferenceFrame(), cmp.getX(), cmp.getY(), 0.0);
+      pseudoCMP3dToPack.setIncludingFrame(cmp.getReferenceFrame(), cmp.getX(), cmp.getY(), 0.0);
       pseudoCMP3dToPack.changeFrame(centerOfMass.getReferenceFrame());
       pseudoCMP3dToPack.setZ(zCMP);
    }
@@ -83,7 +83,7 @@ public class WrenchDistributorTools
       double y = mu * Math.sin(angle);
       double z = 1.0;
 
-      normalizedSupportVectorToPack.set(contactPlaneFrame, x, y, z);
+      normalizedSupportVectorToPack.setIncludingFrame(contactPlaneFrame, x, y, z);
       normalizedSupportVectorToPack.normalize();
    }
 
