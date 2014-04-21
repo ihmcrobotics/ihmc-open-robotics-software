@@ -84,11 +84,11 @@ public class PointPositionMeasurementModelElement extends AbstractMeasurementMod
       estimationFrame.getTransformToDesiredFrame(tempTransform, ReferenceFrame.getWorldFrame());
       tempTransform.get(rotationFromEstimationToWorld);
 
-      tempCenterOfMassPosition.setAndChangeFrame(centerOfMassPositionPort.getData());
+      tempCenterOfMassPosition.setIncludingFrame(centerOfMassPositionPort.getData());
       tempCenterOfMassPosition.changeFrame(estimationFrame);
 
       ReferenceFrame referenceFrame = referenceFrameMap.getFrameByName(pointPositionMeasurementInputPort.getData().getBodyFixedReferenceFrameName());
-      tempFramePoint.setAndChangeFrame(referenceFrame, pointPositionMeasurementInputPort.getData().getMeasurementPointInBodyFrame());
+      tempFramePoint.setIncludingFrame(referenceFrame, pointPositionMeasurementInputPort.getData().getMeasurementPointInBodyFrame());
 
       tempFramePoint.changeFrame(estimationFrame);
       tempFramePoint.sub(tempCenterOfMassPosition);
@@ -103,7 +103,7 @@ public class PointPositionMeasurementModelElement extends AbstractMeasurementMod
    {
       PointPositionDataObject data = pointPositionMeasurementInputPort.getData();
       ReferenceFrame referenceFrame = referenceFrameMap.getFrameByName(pointPositionMeasurementInputPort.getData().getBodyFixedReferenceFrameName());
-      tempFramePoint.setAndChangeFrame(referenceFrame, data.getMeasurementPointInBodyFrame());
+      tempFramePoint.setIncludingFrame(referenceFrame, data.getMeasurementPointInBodyFrame());
       tempFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
 
       residualVector.set(data.getMeasurementPointInWorldFrame());

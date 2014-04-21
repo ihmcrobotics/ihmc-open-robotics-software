@@ -112,11 +112,11 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
    private final FramePoint tempCenterOfMassPosition = new FramePoint();
    private void computeAngularVelocityStateOutputBlock(Matrix3d rotationFromPelvisToWorld)
    {
-      tempCenterOfMassPosition.setAndChangeFrame(centerOfMassPositionPort.getData());
+      tempCenterOfMassPosition.setIncludingFrame(centerOfMassPositionPort.getData());
       tempCenterOfMassPosition.changeFrame(estimationFrame);
 
       ReferenceFrame referenceFrame = referenceFrameNameMap.getFrameByName(pointVelocityMeasurementInputPort.getData().getBodyFixedReferenceFrameName());
-      tempFramePoint.setAndChangeFrame(referenceFrame, pointVelocityMeasurementInputPort.getData().getMeasurementPointInBodyFrame());
+      tempFramePoint.setIncludingFrame(referenceFrame, pointVelocityMeasurementInputPort.getData().getMeasurementPointInBodyFrame());
       
       tempFramePoint.changeFrame(estimationFrame);
       tempFramePoint.sub(tempCenterOfMassPosition);
@@ -133,7 +133,7 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
       computeVelocityOfStationaryPoint(tempFrameVector);
       tempFrameVector.changeFrame(estimationFrame);
 
-      tempCenterOfMassVelocity.setAndChangeFrame(centerOfMassVelocityPort.getData());
+      tempCenterOfMassVelocity.setIncludingFrame(centerOfMassVelocityPort.getData());
       tempCenterOfMassVelocity.changeFrame(estimationFrame);
       tempFrameVector.sub(tempCenterOfMassVelocity);
       tempFrameVector.scale(-1.0);
@@ -147,9 +147,9 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
    {
       computeVelocityOfStationaryPoint(tempFrameVector);
       tempFrameVector.changeFrame(ReferenceFrame.getWorldFrame());
-      tempFrameVector2.setAndChangeFrame(ReferenceFrame.getWorldFrame(), pointVelocityMeasurementInputPort.getData().getVelocityOfMeasurementPointInWorldFrame());
+      tempFrameVector2.setIncludingFrame(ReferenceFrame.getWorldFrame(), pointVelocityMeasurementInputPort.getData().getVelocityOfMeasurementPointInWorldFrame());
 
-      residualVector.setAndChangeFrame(tempFrameVector2);
+      residualVector.setIncludingFrame(tempFrameVector2);
       residualVector.sub(tempFrameVector);
 
       MatrixTools.insertTuple3dIntoEJMLVector(residualVector.getVector(), residual, 0);
@@ -174,7 +174,7 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
       }
       tempTwist.changeFrame(tempTwist.getBaseFrame());
       ReferenceFrame referenceFrame = referenceFrameNameMap.getFrameByName(pointVelocityMeasurementInputPort.getData().getBodyFixedReferenceFrameName());
-      tempFramePoint.setAndChangeFrame(referenceFrame, pointVelocityMeasurementInputPort.getData().getMeasurementPointInBodyFrame());
+      tempFramePoint.setIncludingFrame(referenceFrame, pointVelocityMeasurementInputPort.getData().getMeasurementPointInBodyFrame());
       tempFramePoint.changeFrame(tempTwist.getBaseFrame());
       tempTwist.packVelocityOfPointFixedInBodyFrame(stationaryPointVelocityToPack, tempFramePoint);
    }
