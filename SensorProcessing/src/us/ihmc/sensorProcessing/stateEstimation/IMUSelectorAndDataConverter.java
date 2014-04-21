@@ -164,7 +164,7 @@ public class IMUSelectorAndDataConverter extends AbstractControlFlowElement
       tempAngularVelocityMeasurementLink.changeFrame(estimationFrame);
       relativeAngularVelocity.add(tempAngularVelocityMeasurementLink);
 
-      tempAngularVelocityEstimationLink.setAndChangeFrame(relativeAngularVelocity); // just a copy for clarity
+      tempAngularVelocityEstimationLink.setIncludingFrame(relativeAngularVelocity); // just a copy for clarity
       
       // Introduce simulated IMU drift
       tempAngularVelocityEstimationLink.setZ(tempAngularVelocityEstimationLink.getZ() + imuSimulatedDriftYawVelocity.getDoubleValue());

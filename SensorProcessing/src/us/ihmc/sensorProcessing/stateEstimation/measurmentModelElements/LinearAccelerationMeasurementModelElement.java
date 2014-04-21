@@ -143,10 +143,10 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
       twistCalculator.packRelativeTwist(twistOfMeasurementFrameWithRespectToEstimation, estimationLink, measurementLink);
 
       // r^{p} 
-      rPTemp.setAndChangeFrame(centerOfMassPositionPort.getData());
+      rPTemp.setIncludingFrame(centerOfMassPositionPort.getData());
       rPTemp.changeFrame(estimationFrame);
 
-      rdTemp.setAndChangeFrame(centerOfMassVelocityPort.getData());
+      rdTemp.setIncludingFrame(centerOfMassVelocityPort.getData());
       computeRpd(rPdTemp, twistCalculator, rPTemp, rdTemp);
       jacobianAssembler.preCompute(estimatedMeasurement.getVector());
 
@@ -164,7 +164,7 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
       twistOfEstimationLink.changeFrame(estimationFrame);
       
       // \dot{r}^{p} = R_{w}^{p} \dot{r} - \tilde{\omega}r^{p} - v_{p}^{p,w}
-      rPdToPack.setAndChangeFrame(rd);
+      rPdToPack.setIncludingFrame(rd);
       rPdToPack.changeFrame(estimationFrame);
       twistOfEstimationLink.packAngularPart(tempFrameVector);
       tempFrameVector.cross(tempFrameVector, rP);
@@ -274,7 +274,7 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
       phiJVd.add(tempMatrix);
 
       // dPWIdPhi
-      tempFrameVector.setAndChangeFrame(rP);
+      tempFrameVector.setIncludingFrame(rP);
       tempFramePoint.setToZero(measurementFrame);
       tempFramePoint.changeFrame(estimationFrame);
       tempFrameVector.sub(tempFramePoint);
@@ -296,7 +296,7 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
       omegaJOmega.set(rotationFromEstimationToWorld);
 
       // dVWWMdOmega
-      tempFramePoint.setAndChangeFrame(centerOfMassPositionPort.getData());
+      tempFramePoint.setIncludingFrame(centerOfMassPositionPort.getData());
       tempFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
       MatrixTools.toTildeForm(tempMatrix, tempFramePoint.getPoint());
       omegaJV.mul(tempMatrix, rotationFromEstimationToWorld);
@@ -351,9 +351,9 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
    private void computeAngularAccelerationBlock(Matrix3d rotationFromEstimationToMeasurement)
    {
       // r
-      tempFramePoint.setAndChangeFrame(centerOfMassPositionPort.getData());
+      tempFramePoint.setIncludingFrame(centerOfMassPositionPort.getData());
       tempFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
-      tempFrameVector.setAndChangeFrame(tempFramePoint);
+      tempFrameVector.setIncludingFrame(tempFramePoint);
 
       // r - p_{i}^{w}
       tempFramePoint.setToZero(measurementFrame);

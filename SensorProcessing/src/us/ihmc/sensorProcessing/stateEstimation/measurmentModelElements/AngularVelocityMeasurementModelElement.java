@@ -91,7 +91,7 @@ public class AngularVelocityMeasurementModelElement extends AbstractMeasurementM
       tempTwist.packAngularPart(relativeAngularVelocity);
       relativeAngularVelocity.changeFrame(measurementFrame);
 
-      predictedAngularVelocityMeasurementTemp.setAndChangeFrame(angularVelocityStatePort.getData());
+      predictedAngularVelocityMeasurementTemp.setIncludingFrame(angularVelocityStatePort.getData());
       predictedAngularVelocityMeasurementTemp.changeFrame(measurementFrame);
       predictedAngularVelocityMeasurementTemp.add(relativeAngularVelocity);
       predictedAngularVelocityMeasurementTemp.add(biasStatePort.getData());

@@ -103,7 +103,7 @@ public class OrientationStateRobotModelUpdater extends AbstractControlFlowElemen
       SixDoFJoint rootJoint = inverseDynamicsStructure.getRootJoint();
       RigidBody estimationLink = inverseDynamicsStructure.getEstimationLink();
 
-      tempEstimationLinkAngularVelocity.setAndChangeFrame(angularVelocityEstimationLink);
+      tempEstimationLinkAngularVelocity.setIncludingFrame(angularVelocityEstimationLink);
 
       // T_{root}^{root, estimation}
       twistCalculator.packRelativeTwist(tempRootToEstimationTwist, estimationLink, rootJoint.getSuccessor());
