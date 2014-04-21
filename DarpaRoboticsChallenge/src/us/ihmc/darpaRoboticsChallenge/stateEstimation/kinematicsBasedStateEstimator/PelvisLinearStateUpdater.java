@@ -284,7 +284,7 @@ public class PelvisLinearStateUpdater
       
       centerOfMassCalculator.compute();
       centerOfMassCalculator.packCenterOfMass(tempPosition);
-      tempFrameVector.setAndChangeFrame(tempPosition);
+      tempFrameVector.setIncludingFrame(tempPosition);
       tempFrameVector.changeFrame(worldFrame);
 
       rootJointPosition.set(centerOfMassPosition);
@@ -391,10 +391,10 @@ public class PelvisLinearStateUpdater
 
    private void updateRootJoint()
    {
-      yoRootJointPosition.getPoint3d(tempRootJointTranslation);
+      yoRootJointPosition.get(tempRootJointTranslation);
       rootJoint.setPosition(tempRootJointTranslation);
 
-      tempVelocity.setAndChangeFrame(rootJointVelocity);
+      tempVelocity.setIncludingFrame(rootJointVelocity);
       rootJoint.packJointTwist(rootJointTwist);
       tempVelocity.changeFrame(rootJointTwist.getExpressedInFrame());
       rootJointTwist.setLinearPart(tempVelocity);
@@ -623,7 +623,7 @@ public class PelvisLinearStateUpdater
 
    public void initializeCoMPositionToActual(Point3d initialCoMPosition)
    {
-      centerOfMassPosition.set(worldFrame, initialCoMPosition);
+      centerOfMassPosition.setIncludingFrame(worldFrame, initialCoMPosition);
       yoCenterOfMassPosition.set(initialCoMPosition);
    }
 
@@ -635,21 +635,21 @@ public class PelvisLinearStateUpdater
    
    public void getEstimatedPelvisPosition(FramePoint pelvisPositionToPack)
    {
-      yoRootJointPosition.getFramePointAndChangeFrameOfPackedPoint(pelvisPositionToPack);
+      yoRootJointPosition.getFrameTupleIncludingFrame(pelvisPositionToPack);
    }
 
    public void getEstimatedPelvisLinearVelocity(FrameVector pelvisLinearVelocityToPack)
    {
-      yoRootJointVelocity.getFrameVectorAndChangeFrameOfPackedVector(pelvisLinearVelocityToPack);
+      yoRootJointVelocity.getFrameTupleIncludingFrame(pelvisLinearVelocityToPack);
    }
 
    public void getEstimatedCoMPosition(FramePoint comPositionToPack)
    {
-      yoCenterOfMassPosition.getFramePointAndChangeFrameOfPackedPoint(comPositionToPack);
+      yoCenterOfMassPosition.getFrameTupleIncludingFrame(comPositionToPack);
    }
 
    public void getEstimatedCoMVelocity(FrameVector comVelocityToPack)
    {
-      yoCenterOfMassVelocity.getFrameVectorAndChangeFrameOfPackedVector(comVelocityToPack);
+      yoCenterOfMassVelocity.getFrameTupleIncludingFrame(comVelocityToPack);
    }
 }

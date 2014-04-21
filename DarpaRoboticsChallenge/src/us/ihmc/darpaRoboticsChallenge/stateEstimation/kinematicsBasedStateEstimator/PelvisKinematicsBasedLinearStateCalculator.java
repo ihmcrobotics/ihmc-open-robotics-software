@@ -219,19 +219,19 @@ public class PelvisKinematicsBasedLinearStateCalculator
    {
       double scaleFactor = 1.0 / numberOfTrustedSides;
 
-      footToRootJointPositions.get(trustedSide).getFramePoint(tempPosition);
+      footToRootJointPositions.get(trustedSide).getFrameTuple(tempPosition);
       tempPosition.scale(scaleFactor);
       rootJointPosition.add(tempPosition);
-      footPositionsInWorld.get(trustedSide).getFramePoint(tempPosition);
+      footPositionsInWorld.get(trustedSide).getFrameTuple(tempPosition);
       tempPosition.scale(scaleFactor);
       rootJointPosition.add(tempPosition);
 
-      footToRootJointVelocities.get(trustedSide).getFrameVector(tempVelocity);
+      footToRootJointVelocities.get(trustedSide).getFrameTuple(tempVelocity);
       tempVelocity.scale(scaleFactor);
       rootJointLinearVelocity.add(tempVelocity);
 
       YoFramePoint2d copPosition2d = copsFilteredInFootFrame.get(trustedSide);
-      tempFramePoint.set(copPosition2d.getReferenceFrame(), copPosition2d.getX(), copPosition2d.getY(), 0.0);
+      tempFramePoint.setIncludingFrame(copPosition2d.getReferenceFrame(), copPosition2d.getX(), copPosition2d.getY(), 0.0);
       tempFramePoint.changeFrame(rootJointToFootTwists.get(trustedSide).getBaseFrame());
       rootJointToFootTwists.get(trustedSide).changeFrame(rootJointToFootTwists.get(trustedSide).getBaseFrame());
       rootJointToFootTwists.get(trustedSide).packVelocityOfPointFixedInBodyFrame(tempVelocity, tempFramePoint);
@@ -298,9 +298,9 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
       copsRawInFootFrame.get(trustedSide).set(tempCoP);
 
-      tempCoPOffset.set(footFrame, copFilteredInFootFrame.getX(), copFilteredInFootFrame.getY(), 0.0);
+      tempCoPOffset.setIncludingFrame(footFrame, copFilteredInFootFrame.getX(), copFilteredInFootFrame.getY(), 0.0);
       copFilteredInFootFrame.update();
-      tempCoPOffset.set(footFrame, copFilteredInFootFrame.getX() - tempCoPOffset.getX(), copFilteredInFootFrame.getY() - tempCoPOffset.getY(), 0.0);
+      tempCoPOffset.setIncludingFrame(footFrame, copFilteredInFootFrame.getX() - tempCoPOffset.getX(), copFilteredInFootFrame.getY() - tempCoPOffset.getY(), 0.0);
 
       tempCoPOffset.changeFrame(worldFrame);
       copPositionsInWorld.get(trustedSide).add(tempCoPOffset);
@@ -313,7 +313,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
    private void correctFootPositionsUsingCoP(RobotSide trustedSide)
    {
       AlphaFilteredYoFramePoint2d copFilteredInFootFrame = copsFilteredInFootFrame.get(trustedSide);
-      tempCoPOffset.set(copFilteredInFootFrame.getReferenceFrame(), copFilteredInFootFrame.getX(), copFilteredInFootFrame.getY(), 0.0);
+      tempCoPOffset.setIncludingFrame(copFilteredInFootFrame.getReferenceFrame(), copFilteredInFootFrame.getX(), copFilteredInFootFrame.getY(), 0.0);
 
       tempCoPOffset.changeFrame(worldFrame);
 
@@ -335,7 +335,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
          tempFramePoint.setToZero(rootJointFrame);
          tempFramePoint.changeFrame(footFrames.get(robotSide));
 
-         tempFrameVector.setAndChangeFrame(tempFramePoint);
+         tempFrameVector.setIncludingFrame(tempFramePoint);
          tempFrameVector.changeFrame(worldFrame);
 
          footToRootJointPositions.get(robotSide).update(tempFrameVector);
@@ -389,29 +389,29 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
    public void getPelvisPosition(FramePoint positionToPack)
    {
-      rootJointPosition.getFramePointAndChangeFrameOfPackedPoint(positionToPack);
+      rootJointPosition.getFrameTupleIncludingFrame(positionToPack);
    }
 
    public void getPelvisVelocity(FrameVector linearVelocityToPack)
    {
       if (useTwistToComputeRootJointLinearVelocity.getBooleanValue())
-         rootJointLinearVelocityTwist.getFrameVectorAndChangeFrameOfPackedVector(linearVelocityToPack);
+         rootJointLinearVelocityTwist.getFrameTupleIncludingFrame(linearVelocityToPack);
       else
-         rootJointLinearVelocityBacklashKinematics.getFrameVectorAndChangeFrameOfPackedVector(linearVelocityToPack);
+         rootJointLinearVelocityBacklashKinematics.getFrameTupleIncludingFrame(linearVelocityToPack);
    }
 
    public void getFootToPelvisPosition(FramePoint positionToPack, RobotSide robotSide)
    {
-      footToRootJointPositions.get(robotSide).getFramePointAndChangeFrameOfPackedPoint(positionToPack);
+      footToRootJointPositions.get(robotSide).getFrameTupleIncludingFrame(positionToPack);
    }
 
    public void getFootToPelvisVelocity(FrameVector linearVelocityToPack, RobotSide robotSide)
    {
-      footToRootJointVelocities.get(robotSide).getFrameVectorAndChangeFrameOfPackedVector(linearVelocityToPack);
+      footToRootJointVelocities.get(robotSide).getFrameTupleIncludingFrame(linearVelocityToPack);
    }
 
    public void getFootToPelvisAcceleration(FrameVector linearAccelerationToPack, RobotSide robotSide)
    {
-      footToRootJointAccelerations.get(robotSide).getFrameVectorAndChangeFrameOfPackedVector(linearAccelerationToPack);
+      footToRootJointAccelerations.get(robotSide).getFrameTupleIncludingFrame(linearAccelerationToPack);
    }
 }
