@@ -231,7 +231,7 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
          FrameVector groundReactionForce = forces.get(contactState);
          if (groundReactionForce != null)
          {            
-            groundReactionForce.setAndChangeFrame(groundReactionForceTerminalPoint);
+            groundReactionForce.setIncludingFrame(groundReactionForceTerminalPoint);
             FramePoint footCoP = centersOfPressureOnSole3d.get(robotSide);
             footCoP.changeFrame(groundReactionForce.getReferenceFrame());
             groundReactionForce.sub(footCoP);

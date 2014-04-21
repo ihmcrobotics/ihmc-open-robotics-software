@@ -331,7 +331,7 @@ public class DrivingFootControlModule
       twistCalculator.packRelativeTwist(currentTwist, elevator, foot);
       currentTwist.packAngularPart(currentAngularVelocity);
       currentTwist.changeFrame(elevator.getBodyFixedFrame());
-      toePointInBase.setAndChangeFrame(toePoint);
+      toePointInBase.setIncludingFrame(toePoint);
       toePointInBase.changeFrame(elevator.getBodyFixedFrame());
       currentTwist.packVelocityOfPointFixedInBodyFrame(currentVelocity, toePointInBase);
    }
@@ -379,7 +379,7 @@ public class DrivingFootControlModule
       public void doAction()
       {
          wrench.setToZero(foot.getBodyFixedFrame(), toePointFrame);
-         tempVector.setAndChangeFrame(forceToCompensate);
+         tempVector.setIncludingFrame(forceToCompensate);
          tempVector.changeFrame(toePointFrame);
          wrench.setLinearPart(tempVector.getVector());
          wrench.changeFrame(foot.getBodyFixedFrame());

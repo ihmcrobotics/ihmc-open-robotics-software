@@ -181,7 +181,7 @@ public class PlaneContactWrenchMatrixCalculator
       double angle = k * supportVectorAngleIncrement;
       double mu = planeContactState.getCoefficientOfFriction();
 
-      tempFramePoint.setAndChangeFrame(contactPoint.getPosition());
+      tempFramePoint.setIncludingFrame(contactPoint.getPosition());
 
       // Compute the linear part considering a normal contact vector pointing up
       tempLinearPart.set(Math.cos(angle) * mu, Math.sin(angle) * mu, 1);

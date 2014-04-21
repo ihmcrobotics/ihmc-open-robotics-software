@@ -24,7 +24,7 @@ public class DesiredFootstepCalculatorTools
       Vector3d tempVector = new Vector3d();
       for (FramePoint footPoint : footPoints)
       {
-         tempFramePoint.setAndChangeFrame(footPoint);
+         tempFramePoint.setIncludingFrame(footPoint);
          tempFramePoint.changeFrame(contactableBody.getBodyFrame());
          tempVector.set(tempFramePoint.getPoint());
          footToWorldRotation.transform(tempVector);
@@ -44,14 +44,14 @@ public class DesiredFootstepCalculatorTools
       Vector3d tempVector = new Vector3d();
       for (FramePoint footPoint : footPoints)
       {
-         tempFramePoint.setAndChangeFrame(footPoint);
+         tempFramePoint.setIncludingFrame(footPoint);
          tempFramePoint.changeFrame(contactableBody.getBodyFrame());
          tempVector.set(tempFramePoint.getPoint());
          footToWorldRotation.transform(tempVector);
 
          if (tempVector.getZ() < minZ)
          {
-            minZPoint.setAndChangeFrame(tempFramePoint);
+            minZPoint.setIncludingFrame(tempFramePoint);
             minZ = tempVector.getZ();
          }
       }
@@ -68,7 +68,7 @@ public class DesiredFootstepCalculatorTools
       Vector3d tempVector = new Vector3d();
       for (FramePoint footPoint : footPoints)
       {
-         tempFramePoint.setAndChangeFrame(footPoint);
+         tempFramePoint.setIncludingFrame(footPoint);
          tempFramePoint.changeFrame(contactableBody.getBodyFrame());
          tempVector.set(tempFramePoint.getPoint());    // foot point w.r.t. ankle in foot frame
          footToWorldRotation.transform(tempVector);    // foot point w.r.t. ankle in world frame
@@ -98,7 +98,7 @@ public class DesiredFootstepCalculatorTools
       boolean pointFound = false;
       for (FramePoint footPoint : footPoints)
       {
-         tempFramePoint.setAndChangeFrame(footPoint);
+         tempFramePoint.setIncludingFrame(footPoint);
          tempFramePoint.changeFrame(bodyFrame);
          tempFramePoint.changeFrameUsingTransform(ReferenceFrame.getWorldFrame(), footToWorldTransform);
          tempFramePoint.changeFrame(frame);
@@ -125,7 +125,7 @@ public class DesiredFootstepCalculatorTools
       boolean pointFound = false;
       for (FramePoint footPoint : footPoints)
       {
-         tempFramePoint.setAndChangeFrame(footPoint);
+         tempFramePoint.setIncludingFrame(footPoint);
          tempFramePoint.changeFrame(contactableBody.getBodyFrame());
          tempFramePoint.changeFrameUsingTransform(ReferenceFrame.getWorldFrame(), footToWorldTransform);
          tempFramePoint.changeFrame(frame);
@@ -185,7 +185,7 @@ public class DesiredFootstepCalculatorTools
 
       public int compare(FramePoint o1, FramePoint o2)
       {
-         differenceVector.setAndChangeFrame(o1);
+         differenceVector.setIncludingFrame(o1);
          differenceVector.sub(o2);
          double dotProduct = searchDirection.dot(differenceVector);
 

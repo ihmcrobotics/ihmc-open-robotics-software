@@ -73,7 +73,7 @@ public class PointPositionHandControlState extends State<IndividualHandControlSt
    @Override
    public void doAction()
    {
-      point.setAndChangeFrame(pointInBody);
+      point.setIncludingFrame(pointInBody);
       point.changeFrame(base.getBodyFixedFrame());
 
       updateCurrentVelocity(point);
@@ -123,7 +123,7 @@ public class PointPositionHandControlState extends State<IndividualHandControlSt
    {
       this.positionTrajectoryGenerator = positionTrajectoryGenerator;
       this.positionController = positionController;
-      this.pointInBody.setAndChangeFrame(pointInBody);
+      this.pointInBody.setIncludingFrame(pointInBody);
       this.jacobianId = jacobianId;
       this.base = momentumBasedController.getJacobian(jacobianId).getBase();
       this.endEffector = momentumBasedController.getJacobian(jacobianId).getEndEffector();

@@ -171,7 +171,7 @@ public class PointPositionRotateSteeringWheelBehavior
 
          tempPoint.setToZero(creepyGripHandPositionControlFrame);
          tempPoint.changeFrame(steeringWheelFrame);
-         y.setAndChangeFrame(tempPoint);
+         y.setIncludingFrame(tempPoint);
 
          x.setToZero(steeringWheelFrame);
          x.cross(y, z);
