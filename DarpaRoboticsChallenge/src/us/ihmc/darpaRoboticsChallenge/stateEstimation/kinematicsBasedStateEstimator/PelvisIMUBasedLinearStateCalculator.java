@@ -81,7 +81,7 @@ public class PelvisIMUBasedLinearStateCalculator
       enableEstimationOfGravity.set(false);
       gravityEstimation.reset();
       gravityEstimation.update(Math.abs(gravitationalAcceleration));
-      gravity.set(worldFrame, 0.0, 0.0, gravityEstimation.getDoubleValue());
+      gravity.setIncludingFrame(worldFrame, 0.0, 0.0, gravityEstimation.getDoubleValue());
       
       if (linearAccelerationSensorConfigurations.size() == 0)
       {
@@ -157,10 +157,10 @@ public class PelvisIMUBasedLinearStateCalculator
       if (!isEstimationEnabled())
          return;
 
-      linearAccelerationMeasurement.set(measurementFrame, linearAccelerationSensorConfiguration.getOutputPort().getData());
+      linearAccelerationMeasurement.setIncludingFrame(measurementFrame, linearAccelerationSensorConfiguration.getOutputPort().getData());
       if (enableEstimationOfGravity.getBooleanValue())
          gravityEstimation.update(linearAccelerationMeasurement.length());
-      gravity.set(worldFrame, 0.0, 0.0, gravityEstimation.getDoubleValue());
+      gravity.setIncludingFrame(worldFrame, 0.0, 0.0, gravityEstimation.getDoubleValue());
 
       // Update acceleration in world (minus gravity)
       linearAccelerationMeasurement.changeFrame(worldFrame);
@@ -169,21 +169,21 @@ public class PelvisIMUBasedLinearStateCalculator
 
       // Update acceleration in local frame (minus gravity)
       gravity.changeFrame(measurementFrame);
-      linearAccelerationMeasurement.set(measurementFrame, linearAccelerationSensorConfiguration.getOutputPort().getData());
+      linearAccelerationMeasurement.setIncludingFrame(measurementFrame, linearAccelerationSensorConfiguration.getOutputPort().getData());
       linearAccelerationMeasurement.sub(gravity);
       yoLinearAccelerationMeasurement.set(linearAccelerationMeasurement);
       
       // Estimate IMU linear velocity in world
-      yoLinearAccelerationMeasurementInWorld.getFrameVectorAndChangeFrameOfPackedVector(linearAccelerationMeasurement);
+      yoLinearAccelerationMeasurementInWorld.getFrameTupleIncludingFrame(linearAccelerationMeasurement);
       linearAccelerationMeasurement.scale(estimatorDT);
       yoMeasurementFrameLinearVelocityInWorld.add(linearAccelerationMeasurement);
       
       // Do fancy stuff to estimate the IMU linear velocity in the measurement frame
       // omega_{measurementFrame}^{measurementFrame, world}
-      angularVelocityMeasurement.set(measurementFrame, angularVelocitySensorConfiguration.getOutputPort().getData());
+      angularVelocityMeasurement.setIncludingFrame(measurementFrame, angularVelocitySensorConfiguration.getOutputPort().getData());
 
       // vdot_{measurementFrame}^{measurementFrame, world}
-      yoLinearAccelerationMeasurement.getFrameVectorAndChangeFrameOfPackedVector(linearAccelerationMeasurement);
+      yoLinearAccelerationMeasurement.getFrameTupleIncludingFrame(linearAccelerationMeasurement);
       // vdot_{measurementFrame}^{measurementFrame, world} * estimatorDT
       linearAccelerationMeasurement.scale(estimatorDT);
       
@@ -222,11 +222,11 @@ public class PelvisIMUBasedLinearStateCalculator
          measurementFrameLinearVelocityPrevValue.setToZero(measurementFrame);
          updateLinearAccelerationMeasurement(measurementFrameLinearVelocityPrevValue);
          
-         yoLinearAccelerationMeasurementInWorld.getFrameVectorAndChangeFrameOfPackedVector(linearAccelerationMeasurement);
+         yoLinearAccelerationMeasurementInWorld.getFrameTupleIncludingFrame(linearAccelerationMeasurement);
          linearAccelerationMeasurement.scale(estimatorDT);
          rootJointLinearVelocity.set(rootJointLinearVelocityPrevValue);
          rootJointLinearVelocity.add(linearAccelerationMeasurement);
-         rootJointLinearVelocity.getFrameVectorAndChangeFrameOfPackedVector(rootJointLinearVelocityToPack);
+         rootJointLinearVelocity.getFrameTupleIncludingFrame(rootJointLinearVelocityToPack);
          
          return;
       }
@@ -253,8 +253,8 @@ public class PelvisIMUBasedLinearStateCalculator
       twistMeasurementLinkRelativeToWorld.packLinearPart(measurementFrameLinearVelocityPrevValue);
       updateLinearAccelerationMeasurement(measurementFrameLinearVelocityPrevValue);
       
-      yoMeasurementFrameLinearVelocity.getFrameVectorAndChangeFrameOfPackedVector(linearVelocityMeasurementFrameRelativeToWorld);
-      angularVelocityMeasurement.set(measurementFrame, angularVelocitySensorConfiguration.getOutputPort().getData());
+      yoMeasurementFrameLinearVelocity.getFrameTupleIncludingFrame(linearVelocityMeasurementFrameRelativeToWorld);
+      angularVelocityMeasurement.setIncludingFrame(measurementFrame, angularVelocitySensorConfiguration.getOutputPort().getData());
       twistMeasurementLinkRelativeToWorld.setLinearPart(linearVelocityMeasurementFrameRelativeToWorld);
       twistMeasurementLinkRelativeToWorld.setAngularPart(angularVelocityMeasurement);
 
@@ -277,11 +277,11 @@ public class PelvisIMUBasedLinearStateCalculator
       if (!isEstimationEnabled())
          throw new RuntimeException("IMU estimation module for pelvis linear velocity is disabled.");
 
-      rootJointLinearVelocity.getFrameVectorAndChangeFrameOfPackedVector(tempRootJointVelocityIntegrated);
+      rootJointLinearVelocity.getFrameTupleIncludingFrame(tempRootJointVelocityIntegrated);
       tempRootJointVelocityIntegrated.scale(estimatorDT);
 
       rootJointPosition.set(rootJointPositionPrevValue);
       rootJointPosition.add(tempRootJointVelocityIntegrated);
-      rootJointPosition.getFramePointAndChangeFrameOfPackedPoint(rootJointPositionToPack);
+      rootJointPosition.getFrameTupleIncludingFrame(rootJointPositionToPack);
    }
 }
