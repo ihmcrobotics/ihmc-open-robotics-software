@@ -499,7 +499,7 @@ public class JointSpaceTrajectoryGenerator
       {
          for (int i = 0; i < viaPoints.length; i++)
          {
-            framePointInWorld.setAndChangeFrame(viaPoints[i].getFramePointCopy());
+            framePointInWorld.setIncludingFrame(viaPoints[i].getFramePointCopy());
             framePointInWorld.changeFrame(ReferenceFrame.getWorldFrame());
             viaPointsInWorldFrame[i].set(framePointInWorld);
          }
@@ -512,7 +512,7 @@ public class JointSpaceTrajectoryGenerator
       hipYawSpline.compute(tOfPoint, 0, yawResult);
       intermediateOrientation.setYawPitchRoll(yawResult[0][0], pitch, roll);
 
-      viaPointInPelvisFrame.setAndChangeFrame(point);
+      viaPointInPelvisFrame.setIncludingFrame(point);
       
       
       double timeRemaining = tOfPoint - currentTimeInSwing;

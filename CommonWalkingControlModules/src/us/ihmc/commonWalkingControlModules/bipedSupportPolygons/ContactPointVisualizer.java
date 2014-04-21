@@ -84,7 +84,7 @@ public class ContactPointVisualizer
    {
       if (contactPoint.isInContact())
       {
-         tempFramePoint.setAndChangeFrame(contactPoint.getPosition());
+         tempFramePoint.setIncludingFrame(contactPoint.getPosition());
          tempFramePoint.changeFrame(worldFrame);
          contactPointsWorld.get(i).set(tempFramePoint);
          normalVectors.get(i).set(tempFrameVector);

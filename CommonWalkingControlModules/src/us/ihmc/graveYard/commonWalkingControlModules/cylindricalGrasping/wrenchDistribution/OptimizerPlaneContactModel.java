@@ -74,7 +74,7 @@ public class OptimizerPlaneContactModel implements OptimizerContactModel
 
          i++;
 
-         tempFramePoint.setAndChangeFrame(contactPoint.getPosition());
+         tempFramePoint.setIncludingFrame(contactPoint.getPosition());
 
          for (int j = 0; j < VECTORS; j++)
          {
@@ -108,7 +108,7 @@ public class OptimizerPlaneContactModel implements OptimizerContactModel
    {
       this.mu = coefficientOfFriction;
       numberOfPointsInContact = contactPoints.size();
-      tempContactNormalVector.setAndChangeFrame(normalContactVector);
+      tempContactNormalVector.setIncludingFrame(normalContactVector);
       tempContactNormalVector.changeFrame(contactPoints.get(0).getReferenceFrame());
       tempContactNormalVector.normalize();
       GeometryTools.getRotationBasedOnNormal(normalContactVectorRotation, tempContactNormalVector.getVector());
@@ -120,7 +120,7 @@ public class OptimizerPlaneContactModel implements OptimizerContactModel
 
       for (int i = 0; i < numberOfPointsInContact; i++)
       {
-         tempFramePoint.setAndChangeFrame(contactPoints.get(i));
+         tempFramePoint.setIncludingFrame(contactPoints.get(i));
 
          for (int j = 0; j < VECTORS; j++)
          {

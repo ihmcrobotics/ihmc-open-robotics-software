@@ -46,10 +46,10 @@ public class StraightLineGroundTrajectoryGenerator implements GroundTrajectoryGe
       ReferenceFrame groundPlaneFrame = ankleZUpFrames.get(swingSide.getOppositeSide());
       
       
-      startPoint.setAndChangeFrame(startPointIn);
+      startPoint.setIncludingFrame(startPointIn);
       startPoint.changeFrame(groundPlaneFrame);
       
-      endPoint.setAndChangeFrame(endPointIn);
+      endPoint.setIncludingFrame(endPointIn);
       endPoint.changeFrame(groundPlaneFrame);
       
       double deltaX = endPoint.getX() - startPoint.getX();

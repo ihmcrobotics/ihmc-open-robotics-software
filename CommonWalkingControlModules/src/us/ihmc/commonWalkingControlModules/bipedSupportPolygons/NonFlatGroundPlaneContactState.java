@@ -109,7 +109,7 @@ public class NonFlatGroundPlaneContactState implements PlaneContactState
          if (counter >= contactPointListToPack.size())
             contactPointListToPack.add(new FramePoint());
          
-         contactPointListToPack.get(counter).setAndChangeFrame(contactPoint.getPosition());
+         contactPointListToPack.get(counter).setIncludingFrame(contactPoint.getPosition());
       }
       
       for (int i = contactPointListToPack.size() - 1; i >= counter; i--)
@@ -165,7 +165,7 @@ public class NonFlatGroundPlaneContactState implements PlaneContactState
 
    public void getContactNormalFrameVector(FrameVector frameVectorToPack)
    {
-	   frameVectorToPack.setAndChangeFrame(contactNormalFrameVector);
+	   frameVectorToPack.setIncludingFrame(contactNormalFrameVector);
    }
    
    public List<ContactPoint> getContactPoints()

@@ -64,7 +64,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       }
       else
       {
-         this.contactNormalFrameVector.setAndChangeFrame(normalContactVector);
+         this.contactNormalFrameVector.setIncludingFrame(normalContactVector);
       }
    }
 
@@ -104,7 +104,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
          if (counter >= contactPointListToPack.size())
             contactPointListToPack.add(new FramePoint());
          
-         contactPointListToPack.get(counter).setAndChangeFrame(contactPoint.getPosition());
+         contactPointListToPack.get(counter).setIncludingFrame(contactPoint.getPosition());
          counter++;
       }
       
@@ -229,7 +229,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
 
    public void getContactNormalFrameVector(FrameVector frameVectorToPack)
    {
-	   frameVectorToPack.setAndChangeFrame(contactNormalFrameVector);
+	   frameVectorToPack.setIncludingFrame(contactNormalFrameVector);
    }
 
    public void clear()

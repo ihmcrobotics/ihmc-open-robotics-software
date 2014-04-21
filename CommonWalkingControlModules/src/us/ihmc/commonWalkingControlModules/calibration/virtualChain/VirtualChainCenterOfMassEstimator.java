@@ -91,7 +91,7 @@ public class VirtualChainCenterOfMassEstimator implements CenterOfMassEstimator
 
       for (int i = 0; i < virtualChainParameterVectors.size(); i++)
       {
-         tempFrameVector.setAndChangeFrame(virtualChainParameterVectors.get(i));
+         tempFrameVector.setIncludingFrame(virtualChainParameterVectors.get(i));
          tempFrameVector.changeFrame(baseFrame);
          ret.add(tempFrameVector);
       }

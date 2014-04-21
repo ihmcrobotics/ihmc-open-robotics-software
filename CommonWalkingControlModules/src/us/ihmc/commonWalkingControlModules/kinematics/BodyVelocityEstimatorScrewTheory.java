@@ -60,7 +60,7 @@ public class BodyVelocityEstimatorScrewTheory implements BodyVelocityEstimator
 
    public void packBodyVelocity(FrameVector bodyVelocityToPack)
    {
-      bodyVelocityToPack.setAndChangeFrame(this.bodyLinearVelocity);
+      bodyVelocityToPack.setIncludingFrame(this.bodyLinearVelocity);
    }
 
    private final Twist jointTwist = new Twist();

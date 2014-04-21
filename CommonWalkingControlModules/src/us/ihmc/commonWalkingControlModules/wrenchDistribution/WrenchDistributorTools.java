@@ -60,7 +60,7 @@ public class WrenchDistributorTools
    public static void computeForce(FrameVector forceToPack, FramePoint centerOfMass, FramePoint cmp, double fZ)
    {
       cmp.changeFrame(centerOfMass.getReferenceFrame());
-      forceToPack.setAndChangeFrame(centerOfMass);
+      forceToPack.setIncludingFrame(centerOfMass);
       forceToPack.sub(cmp);
       forceToPack.scale(fZ / forceToPack.getZ());
    }

@@ -13,8 +13,8 @@ public class OrientationTrajectoryData
    public void set(FrameOrientation orientation, FrameVector angularVelocity, FrameVector angularAcceleration)
    {
       this.orientation.setIncludingFrame(orientation);
-      this.angularVelocity.setAndChangeFrame(angularVelocity);
-      this.angularAcceleration.setAndChangeFrame(angularAcceleration);
+      this.angularVelocity.setIncludingFrame(angularVelocity);
+      this.angularAcceleration.setIncludingFrame(angularAcceleration);
    }
 
    public FrameOrientation getOrientation()

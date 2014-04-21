@@ -309,7 +309,7 @@ public class TrajectoryBasedNumericalInverseKinematicsCalculator
 
       frameToControlPoseOfForIk.update();
 
-      currentPosition.setAndChangeFrame(endEffectorPositionInFrameToControlPoseOf);
+      currentPosition.setIncludingFrame(endEffectorPositionInFrameToControlPoseOf);
       currentPosition.changeFrame(baseFrameForIK);
 
       currentPosition.getPoint(currentPoint);
