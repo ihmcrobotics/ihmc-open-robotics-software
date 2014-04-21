@@ -96,7 +96,7 @@ public class AngularVelocityMeasurementModelElement extends AbstractMeasurementM
       predictedAngularVelocityMeasurementTemp.add(relativeAngularVelocity);
       predictedAngularVelocityMeasurementTemp.add(biasStatePort.getData());
 
-      angularVelocityResidual.set(measurementFrame, measuredAngularVelocityVector3d);
+      angularVelocityResidual.setIncludingFrame(measurementFrame, measuredAngularVelocityVector3d);
       angularVelocityResidual.sub(predictedAngularVelocityMeasurementTemp);
       MatrixTools.insertTuple3dIntoEJMLVector(angularVelocityResidual.getVector(), residual, 0);
 

@@ -51,8 +51,8 @@ public class SimulatedPointVelocitySensorFromRobot extends SimulatedSensor<Tuple
       corrupt(pointVelocity);
       yoFrameVectorNoisy.set(pointVelocity);
       
-      measurementPointInBodyFrame.set(bodyFrame, kinematicPoint.getOffsetCopy());
-      velocityOfMeasurementPointInWorldFrame.set(ReferenceFrame.getWorldFrame(), pointVelocity);
+      measurementPointInBodyFrame.setIncludingFrame(bodyFrame, kinematicPoint.getOffsetCopy());
+      velocityOfMeasurementPointInWorldFrame.setIncludingFrame(ReferenceFrame.getWorldFrame(), pointVelocity);
       
       boolean isPointVelocityValid = true;
       pointVelocityDataObject.set(rigidBody, measurementPointInBodyFrame, velocityOfMeasurementPointInWorldFrame, isPointVelocityValid);

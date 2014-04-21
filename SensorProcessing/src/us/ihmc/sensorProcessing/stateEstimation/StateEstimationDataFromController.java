@@ -61,14 +61,14 @@ public class StateEstimationDataFromController extends AbstractControlFlowElemen
    public void setDesiredCenterOfMassAcceleration(FrameVector desiredCenterOfMassAcceleration)
    {
       checkReferenceFrameMatchByName(centerOfMassAccelerationFrame, desiredCenterOfMassAcceleration.getReferenceFrame());
-      this.desiredCenterOfMassAcceleration.set(centerOfMassAccelerationFrame, desiredCenterOfMassAcceleration.getVector());
+      this.desiredCenterOfMassAcceleration.setIncludingFrame(centerOfMassAccelerationFrame, desiredCenterOfMassAcceleration.getVector());
       desiredCenterOfMassAccelerationOutputPort.setData(this.desiredCenterOfMassAcceleration);
    }
 
    public void setDesiredAngularAcceleration(FrameVector desiredAngularAcceleration)
    {
       checkReferenceFrameMatchByName(angularAccelerationEstimationFrame, desiredAngularAcceleration.getReferenceFrame());
-      this.desiredAngularAcceleration.set(angularAccelerationEstimationFrame, desiredAngularAcceleration.getVector());
+      this.desiredAngularAcceleration.setIncludingFrame(angularAccelerationEstimationFrame, desiredAngularAcceleration.getVector());
       desiredAngularAccelerationOutputPort.setData(this.desiredAngularAcceleration);
    }
    
