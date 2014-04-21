@@ -548,7 +548,7 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
 			FrameVector spinePitchAngularAcceleration = new FrameVector(expressedInFrame);
 		    SpatialAccelerationVector spinePitchAccelToPack = new SpatialAccelerationVector();
 		    spinePitchIDjoint.packJointAcceleration(spinePitchAccelToPack);
-		    spinePitchAngularAcceleration.set(spinePitchAccelToPack.getExpressedInFrame(), spinePitchAccelToPack.getAngularPartCopy());
+		    spinePitchAngularAcceleration.setIncludingFrame(spinePitchAccelToPack.getExpressedInFrame(), spinePitchAccelToPack.getAngularPartCopy());
 		    spinePitchAngularAcceleration.changeFrame(expressedInFrame);
 			return spinePitchAngularAcceleration;
 		}

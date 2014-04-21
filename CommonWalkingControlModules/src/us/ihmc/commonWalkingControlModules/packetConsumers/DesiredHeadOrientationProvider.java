@@ -68,7 +68,7 @@ public class DesiredHeadOrientationProvider
       LookAtPacket object = lookAtPacket.getAndSet(null);
       if(object != null)
       {
-         pointToTrack.set(lookAtFrame, object.getLookAtPoint());
+         pointToTrack.setIncludingFrame(lookAtFrame, object.getLookAtPoint());
          desiredJointForExtendedNeckPitchRangeAngle.set(0.0);
          return true;
       }

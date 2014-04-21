@@ -171,7 +171,7 @@ public class DesiredCoMAccelerationsFromRobotStealerController implements RobotC
          if (CORRUPT_DESIRED_ACCELERATIONS)
             signalCorruptor.corrupt(desiredAngularAcceleration);
 
-         desiredAngularAccelerationFrameVector.set(estimationFrame, desiredAngularAcceleration);
+         desiredAngularAccelerationFrameVector.setIncludingFrame(estimationFrame, desiredAngularAcceleration);
          
          desiredCoMAndAngularAccelerationDataSource.setDesiredAngularAcceleration(desiredAngularAccelerationFrameVector);
       }

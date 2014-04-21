@@ -73,7 +73,7 @@ public class AngularVelocityProcessModelElement extends AbstractProcessModelElem
             angularAccelerationData.checkReferenceFrameMatch(estimationFrame);
          }
          
-         angularAcceleration.set(estimationFrame, angularAccelerationVector3d);
+         angularAcceleration.setIncludingFrame(estimationFrame, angularAccelerationVector3d);
 //         angularAcceleration.changeFrame(estimationFrame);
          angularVelocityDelta.set(angularAcceleration);
          angularVelocityDelta.scale(dt);

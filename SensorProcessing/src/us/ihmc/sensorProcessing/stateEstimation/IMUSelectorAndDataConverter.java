@@ -160,7 +160,7 @@ public class IMUSelectorAndDataConverter extends AbstractControlFlowElement
       tempRelativeTwistOrientationMeasFrameToEstFrame.packAngularPart(relativeAngularVelocity);
       relativeAngularVelocity.changeFrame(estimationFrame);
 
-      tempAngularVelocityMeasurementLink.set(angularVelocityMeasurementFrame, measuredAngularVelocityVector3d); 
+      tempAngularVelocityMeasurementLink.setIncludingFrame(angularVelocityMeasurementFrame, measuredAngularVelocityVector3d); 
       tempAngularVelocityMeasurementLink.changeFrame(estimationFrame);
       relativeAngularVelocity.add(tempAngularVelocityMeasurementLink);
 

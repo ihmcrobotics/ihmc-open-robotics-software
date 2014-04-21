@@ -152,7 +152,7 @@ public class PelvisRotationalStateUpdater
       twistRootJointFrameRelativeToMeasurementLink.packAngularPart(angularVelocityRootJointFrameRelativeToMeasurementLink);
 
       // omega_{measurementLink}^{measurementFrame, world}
-      angularVelocityMeasurementLinkRelativeToWorld.set(angularVelocityMeasurementFrame, selectedAngularVelocitySensorConfiguration.getOutputPort().getData()); 
+      angularVelocityMeasurementLinkRelativeToWorld.setIncludingFrame(angularVelocityMeasurementFrame, selectedAngularVelocitySensorConfiguration.getOutputPort().getData()); 
       measurementFrameAngularVelocity.set(angularVelocityMeasurementLinkRelativeToWorld);
 
       // omega_{measurementLink}^{rootJointFrame, world}
