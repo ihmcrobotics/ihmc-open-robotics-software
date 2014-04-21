@@ -200,8 +200,8 @@ public class TrajectoryBasedNumericalInverseKinematicsCalculator
 
       updateTrajectories(time);
 
-      desiredVelocity.getVector(desiredVelocityVector);
-      desiredAngularVelocity.getVector(desiredAngularVelocityVector);
+      desiredVelocity.get(desiredVelocityVector);
+      desiredAngularVelocity.get(desiredAngularVelocityVector);
 
       linearError.scale(ikPositionErrorGain.getDoubleValue());
       angularError.scale(ikOrientationErrorGain.getDoubleValue());
@@ -312,8 +312,8 @@ public class TrajectoryBasedNumericalInverseKinematicsCalculator
       currentPosition.setIncludingFrame(endEffectorPositionInFrameToControlPoseOf);
       currentPosition.changeFrame(baseFrameForIK);
 
-      currentPosition.getPoint(currentPoint);
-      desiredPosition.getPoint(desiredPositionPoint);
+      currentPosition.get(currentPoint);
+      desiredPosition.get(desiredPositionPoint);
 
       linearError.sub(desiredPositionPoint, currentPoint);
 
