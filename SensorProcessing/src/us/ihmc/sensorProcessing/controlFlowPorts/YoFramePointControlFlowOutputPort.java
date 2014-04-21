@@ -22,7 +22,7 @@ public class YoFramePointControlFlowOutputPort extends ControlFlowOutputPort<Fra
    @Override
    public FramePoint getData()
    {
-      yoFramePoint.getFramePoint(super.getData());
+      yoFramePoint.getFrameTuple(super.getData());
 
       return super.getData();
    }
