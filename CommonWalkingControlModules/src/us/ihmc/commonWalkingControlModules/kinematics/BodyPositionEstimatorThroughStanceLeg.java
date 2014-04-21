@@ -86,7 +86,7 @@ public class BodyPositionEstimatorThroughStanceLeg implements BodyPositionEstima
       
       tempBodyPosition.setToZero(bodyFrame);
       tempBodyPosition.changeFrame(ankleZUpFrame);
-      tempBodyPositionVector.setAndChangeFrame(tempBodyPosition);
+      tempBodyPositionVector.setIncludingFrame(tempBodyPosition);
       tempBodyPositionVector.changeFrame(world);
       bodyPositionThroughStanceLeg.set(filteredAnklePositionFix);
       bodyPositionThroughStanceLeg.add(tempBodyPositionVector);
@@ -94,7 +94,7 @@ public class BodyPositionEstimatorThroughStanceLeg implements BodyPositionEstima
 
    public void packBodyPosition(FramePoint bodyPositionToPack)
    {
-      bodyPositionThroughStanceLeg.getFramePoint(bodyPositionToPack);
+      bodyPositionThroughStanceLeg.getFrameTuple(bodyPositionToPack);
    }
    
    private void updateAnklePositionInWorld()
