@@ -140,7 +140,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
    
    public void getDesiredCMP(FramePoint2d desiredCMPToPack)
    {
-      controlledCMP.getFramePoint2dAndChangeFrame(desiredCMPToPack);
+      controlledCMP.getFrameTuple2dIncludingFrame(desiredCMPToPack);
    }
 
    public ControlFlowOutputPort<MomentumRateOfChangeData> getMomentumRateOfChangeOutputPort()

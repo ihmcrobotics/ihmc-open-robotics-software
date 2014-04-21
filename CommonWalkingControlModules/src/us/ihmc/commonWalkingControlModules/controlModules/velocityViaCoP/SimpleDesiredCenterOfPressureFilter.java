@@ -128,7 +128,7 @@ public class SimpleDesiredCenterOfPressureFilter implements DesiredCenterOfPress
    {
       desiredCenterOfPressure.changeFrame(filteredDesiredCoP.getReferenceFrame());
       filteredDesiredCoP.update(desiredCenterOfPressure);
-      filteredDesiredCoP.getFramePoint2dAndChangeFrame(returnedFilteredDesiredCoP);
+      filteredDesiredCoP.getFrameTuple2dIncludingFrame(returnedFilteredDesiredCoP);
       returnedFilteredDesiredCoP.changeFrame(supportPolygon.getReferenceFrame());
       supportPolygon.orthogonalProjection(returnedFilteredDesiredCoP);
 

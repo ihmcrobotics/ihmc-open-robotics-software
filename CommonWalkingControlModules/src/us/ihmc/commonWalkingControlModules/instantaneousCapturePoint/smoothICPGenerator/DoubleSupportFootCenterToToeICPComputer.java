@@ -336,7 +336,7 @@ public class DoubleSupportFootCenterToToeICPComputer
          if (comeToStop.getBooleanValue())
          {
             // will be midpoint of feet from computeConstantCentersOfPressure
-            constantFootCenterCentersOfPressure.get(0).getPoint(doubleSupportEndICP);
+            constantFootCenterCentersOfPressure.get(0).get(doubleSupportEndICP);
             doubleSupportEndICPVelocity.set(0, 0, 0);
          }
          else

@@ -9,6 +9,9 @@ import javax.vecmath.Vector3d;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
+
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.test.JUnitTools;
 
@@ -148,17 +151,23 @@ public class KinematicPointTest
 	@Test
 	public void testGetYoPosition()
 	{
-		assertEquals("(0.0, 0.0, 0.0)", kinematicPoint.getYoPosition().toString());
-		kinematicPoint.getYoPosition().set(new Point3d(5.0, 5.1, 5.2));
-		assertEquals("(5.0, 5.1, 5.2)", kinematicPoint.getYoPosition().toString());
+		YoFramePoint yoPosition = kinematicPoint.getYoPosition();
+		String frameName = yoPosition.getReferenceFrame().getName();
+
+		assertEquals("(0.0, 0.0, 0.0)-" + frameName, yoPosition.toString());
+		yoPosition.set(new Point3d(5.0, 5.1, 5.2));
+		assertEquals("(5.0, 5.1, 5.2)-" + frameName, yoPosition.toString());
 	}
 	
 	@Test
 	public void testGetYoVelocity()
 	{
-		assertEquals("(0.0, 0.0, 0.0): World", kinematicPoint.getYoVelocity().toString());
-		kinematicPoint.getYoVelocity().set(new Vector3d(5.0, 5.1, 5.2));
-		assertEquals("(5.0, 5.1, 5.2): World", kinematicPoint.getYoVelocity().toString());
+		YoFrameVector yoVelocity = kinematicPoint.getYoVelocity();
+		String frameName = yoVelocity.getReferenceFrame().getName();
+		
+      assertEquals("(0.0, 0.0, 0.0)-" + frameName, yoVelocity.toString());
+		yoVelocity.set(new Vector3d(5.0, 5.1, 5.2));
+		assertEquals("(5.0, 5.1, 5.2)-" + frameName, yoVelocity.toString());
 	}
 	
 	

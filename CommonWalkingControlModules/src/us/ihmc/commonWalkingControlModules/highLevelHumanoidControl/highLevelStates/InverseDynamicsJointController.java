@@ -436,7 +436,7 @@ public class InverseDynamicsJointController extends State<HighLevelState>
             {
                for (RobotSide robotSide : RobotSide.values)
                {
-                  desiredMirroredFootPose.getPosition().getPoint(mirroredXYZ);
+                  desiredMirroredFootPose.getPosition().get(mirroredXYZ);
                   desiredFootPoses.get(robotSide).setXYZ(mirroredXYZ.x, robotSide.negateIfRightSide(mirroredXYZ.y), mirroredXYZ.z);
                   
                   desiredMirroredFootPose.getOrientation().getYawPitchRoll(mirroredYawPitchRoll);
@@ -485,7 +485,7 @@ public class InverseDynamicsJointController extends State<HighLevelState>
       for (InverseDynamicsJoint joint : allJoints)
          joint.setDesiredAccelerationToZero();
 
-      desiredVerticalAccelerationVector.set(worldFrame, 0.0, 0.0, percentOfGravityCompensation.getDoubleValue() * gravityZ);
+      desiredVerticalAccelerationVector.setIncludingFrame(worldFrame, 0.0, 0.0, percentOfGravityCompensation.getDoubleValue() * gravityZ);
       desiredVerticalAccelerationVector.changeFrame(rootJoint.getFrameAfterJoint());
       desiredRootJointAcceleration.setLinearPart(desiredVerticalAccelerationVector.getVector());
       fullRobotModel.getRootJoint().setDesiredAcceleration(desiredRootJointAcceleration);
