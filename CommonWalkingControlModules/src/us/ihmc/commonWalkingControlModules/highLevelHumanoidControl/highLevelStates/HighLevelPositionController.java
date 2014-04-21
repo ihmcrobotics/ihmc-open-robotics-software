@@ -327,7 +327,7 @@ public class HighLevelPositionController extends State<HighLevelState>
          zeroDesiredLinearAcceleration.setToZero(endEffectorControlFrame);
          zeroDesiredAngularAcceleration.setToZero(endEffectorControlFrame);
 
-         yoDesiredPositions.get(endEffector).getFramePointAndChangeFrameOfPackedPoint(desiredPosition);
+         yoDesiredPositions.get(endEffector).getFrameTupleIncludingFrame(desiredPosition);
          yoDesiredOrientations.get(endEffector).getFrameOrientation(desiredOrientation);
 
          spatialAccelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, zeroDesiredLinearVelocity, zeroDesiredAngularVelocity,
