@@ -186,7 +186,7 @@ public class DRCInverseDynamicsControllerDemo
          desiredHeight.set(0.0);
          for (int i = 0; i < efp_offsetFromRootJoint.size(); i++)
          {
-            externalForcePoints.get(i).getYoPosition().getPoint3d(initialPositions.get(i));
+            externalForcePoints.get(i).getYoPosition().get(initialPositions.get(i));
             desiredHeight.add(initialPositions.get(i).z / initialPositions.size());
             efp_positionViz.get(i).update();
          }
@@ -209,7 +209,7 @@ public class DRCInverseDynamicsControllerDemo
             initialPositions.get(i).setZ(desiredHeight.getDoubleValue());
             
             ExternalForcePoint efp = externalForcePoints.get(i);
-            efp.getYoPosition().getPoint3d(proportionalTerm);
+            efp.getYoPosition().get(proportionalTerm);
             proportionalTerm.sub(initialPositions.get(i));
             proportionalTerm.scale(-holdPelvisKp.getDoubleValue());
             proportionalTerm.setZ(Math.max(proportionalTerm.getZ(), 0.0));
