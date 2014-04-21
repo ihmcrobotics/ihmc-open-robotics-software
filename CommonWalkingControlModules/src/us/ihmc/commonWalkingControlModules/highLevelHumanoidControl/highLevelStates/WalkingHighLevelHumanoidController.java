@@ -1,17 +1,11 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
-import com.yobotics.simulationconstructionset.*;
-import com.yobotics.simulationconstructionset.util.GainCalculator;
-import com.yobotics.simulationconstructionset.util.PDController;
-import com.yobotics.simulationconstructionset.util.errorHandling.WalkingStatusReporter;
-import com.yobotics.simulationconstructionset.util.errorHandling.WalkingStatusReporter.ErrorType;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector2d;
-import com.yobotics.simulationconstructionset.util.statemachines.*;
-import com.yobotics.simulationconstructionset.util.trajectory.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import javax.media.j3d.Transform3D;
+import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
@@ -27,7 +21,13 @@ import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffecto
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.LegSingularityAndKneeCollapseAvoidanceControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.*;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepUtils;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsDataVisualizer;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.UpcomingFootstepList;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingManagers;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPBasedMomentumRateOfChangeControlModule;
@@ -39,29 +39,77 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumContr
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ReinitializeWalkingControllerProvider;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
-import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.HeelSwitch;
 import us.ihmc.commonWalkingControlModules.sensors.ToeSwitch;
-import us.ihmc.commonWalkingControlModules.trajectories.*;
+import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightPartialDerivativesData;
+import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesCalculator;
+import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
+import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesSmoother;
+import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.trajectories.CoMXYTimeDerivativesData;
+import us.ihmc.commonWalkingControlModules.trajectories.ContactStatesAndUpcomingFootstepData;
+import us.ihmc.commonWalkingControlModules.trajectories.CurrentOrientationProvider;
+import us.ihmc.commonWalkingControlModules.trajectories.FlatThenPolynomialCoMHeightTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.trajectories.MaximumConstantJerkFinalToeOffAngleComputer;
+import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.trajectories.OrientationProvider;
+import us.ihmc.commonWalkingControlModules.trajectories.OrientationTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.trajectories.PoseTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.trajectories.SettableOrientationProvider;
+import us.ihmc.commonWalkingControlModules.trajectories.SimpleTwoWaypointTrajectoryParameters;
+import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculationProvider;
+import us.ihmc.commonWalkingControlModules.trajectories.TransferTimeCalculationProvider;
+import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointTrajectoryUtils;
+import us.ihmc.commonWalkingControlModules.trajectories.WalkOnTheEdgesProviders;
 import us.ihmc.commonWalkingControlModules.trajectories.WalkOnTheEdgesProviders.ToeOffMotionType;
+import us.ihmc.commonWalkingControlModules.trajectories.WrapperForPositionAndOrientationTrajectoryGenerators;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.kinematics.AverageOrientationCalculator;
 import us.ihmc.utilities.math.MathTools;
-import us.ihmc.utilities.math.geometry.*;
+import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
+import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.FrameVector2d;
+import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.Twist;
 
-import javax.media.j3d.Transform3D;
-import javax.vecmath.Vector3d;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.EnumYoVariable;
+import com.yobotics.simulationconstructionset.VariableChangedListener;
+import com.yobotics.simulationconstructionset.YoVariable;
+import com.yobotics.simulationconstructionset.util.GainCalculator;
+import com.yobotics.simulationconstructionset.util.PDController;
+import com.yobotics.simulationconstructionset.util.errorHandling.WalkingStatusReporter;
+import com.yobotics.simulationconstructionset.util.errorHandling.WalkingStatusReporter.ErrorType;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector2d;
+import com.yobotics.simulationconstructionset.util.statemachines.State;
+import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
+import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
+import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionAction;
+import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
+import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGenerator;
+import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
+import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParameters;
+import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParametersProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryWaypointGenerationMethod;
+import com.yobotics.simulationconstructionset.util.trajectory.YoPositionProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.YoVariableDoubleProvider;
 
 public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoidControlPattern
 {
@@ -767,7 +815,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          desiredICPLocal.setToZero(desiredICP.getReferenceFrame());
          desiredICPVelocityLocal.setToZero(desiredICPVelocity.getReferenceFrame());
          ecmpLocal.setToZero(worldFrame);
-         capturePoint.getFramePoint2dAndChangeFrameOfPackedPoint(capturePoint2d);
+         capturePoint.getFrameTuple2dIncludingFrame(capturePoint2d);
 
          instantaneousCapturePointPlanner.getICPPositionAndVelocity(desiredICPLocal, desiredICPVelocityLocal, ecmpLocal, capturePoint2d,
                  yoTime.getDoubleValue());
@@ -1158,7 +1206,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          desiredICPVelocityLocal.setToZero(desiredICPVelocity.getReferenceFrame());
          ecmpLocal.setToZero(worldFrame);
 
-         capturePoint.getFramePoint2dAndChangeFrameOfPackedPoint(capturePoint2d);
+         capturePoint.getFrameTuple2dIncludingFrame(capturePoint2d);
 
          instantaneousCapturePointPlanner.getICPPositionAndVelocity(desiredICPLocal, desiredICPVelocityLocal, ecmpLocal, capturePoint2d,
                  yoTime.getDoubleValue());
@@ -1426,8 +1474,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             if (!icpTrajectoryIsDone)
                return false;
 
-            capturePoint.getFramePoint2dAndChangeFrameOfPackedPoint(capturePoint2d);
-            desiredICP.getFramePoint2dAndChangeFrame(desiredICP2d);
+            capturePoint.getFrameTuple2dIncludingFrame(capturePoint2d);
+            desiredICP.getFrameTuple2dIncludingFrame(desiredICP2d);
 
             double distanceFromDesiredToActual = capturePoint2d.distance(desiredICP2d);
             boolean closeEnough = distanceFromDesiredToActual < maxICPErrorBeforeSingleSupport.getDoubleValue();
@@ -1848,8 +1896,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       comVelocity.changeFrame(worldFrame);
 
       // TODO: use current omega0 instead of previous
-      comXYVelocity.set(comVelocity.getReferenceFrame(), comVelocity.getX(), comVelocity.getY());
-      comXYAcceleration.setAndChangeFrame(desiredICPVelocity);
+      comXYVelocity.setIncludingFrame(comVelocity.getReferenceFrame(), comVelocity.getX(), comVelocity.getY());
+      comXYAcceleration.setIncludingFrame(desiredICPVelocity);
       comXYAcceleration.sub(comXYVelocity);
       comXYAcceleration.scale(icpAndMomentumBasedController.getOmega0());    // MathTools.square(omega0.getDoubleValue()) * (com.getX() - copX);
 
@@ -2003,12 +2051,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       EndEffectorControlModule footEndEffectorControlModule = footEndEffectorControlModules.get(robotSide);
       if (footEndEffectorControlModule.isInFlatSupportState())
       {
-         footNormalContactVector.set(feet.get(robotSide).getPlaneFrame(), 0.0, 0.0, 1.0);
+         footNormalContactVector.setIncludingFrame(feet.get(robotSide).getPlaneFrame(), 0.0, 0.0, 1.0);
          footNormalContactVector.changeFrame(worldFrame);
       }
       else
       {
-         footNormalContactVector.set(worldFrame, 0.0, 0.0, 1.0);
+         footNormalContactVector.setIncludingFrame(worldFrame, 0.0, 0.0, 1.0);
       }
 
       footEndEffectorControlModule.setContactState(ConstraintType.TOES, footNormalContactVector);
@@ -2016,22 +2064,22 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private void setTouchdownOnHeelContactState(RobotSide robotSide)
    {
-      footNormalContactVector.set(worldFrame, 0.0, 0.0, 1.0);
+      footNormalContactVector.setIncludingFrame(worldFrame, 0.0, 0.0, 1.0);
       footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.HEEL_TOUCHDOWN, footNormalContactVector);
    }
 
    private void setTouchdownOnToesContactState(RobotSide robotSide)
    {
-      footNormalContactVector.set(worldFrame, 0.0, 0.0, 1.0);
+      footNormalContactVector.setIncludingFrame(worldFrame, 0.0, 0.0, 1.0);
       footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.TOES_TOUCHDOWN, footNormalContactVector);
    }
 
    private void setFlatFootContactState(RobotSide robotSide)
    {
       if (USE_WORLDFRAME_SURFACE_NORMAL_WHEN_FULLY_CONSTRAINED)
-         footNormalContactVector.set(worldFrame, 0.0, 0.0, 1.0);
+         footNormalContactVector.setIncludingFrame(worldFrame, 0.0, 0.0, 1.0);
       else
-         footNormalContactVector.set(feet.get(robotSide).getPlaneFrame(), 0.0, 0.0, 1.0);
+         footNormalContactVector.setIncludingFrame(feet.get(robotSide).getPlaneFrame(), 0.0, 0.0, 1.0);
       footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.FULL, footNormalContactVector);
    }
 
@@ -2161,13 +2209,13 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       ReferenceFrame supportAnkleFrame = referenceFrames.getAnkleZUpFrame(supportSide);
       desiredICPToMove.changeFrame(supportAnkleFrame);
-      stanceAnkleToOriginalICPVector.setAndChangeFrame(desiredICPToMove);
+      stanceAnkleToOriginalICPVector.setIncludingFrame(desiredICPToMove);
 
 
-      stanceToSwingPoint.setAndChangeFrame(upcomingFootstepLocation);
+      stanceToSwingPoint.setIncludingFrame(upcomingFootstepLocation);
       stanceToSwingPoint.changeFrame(supportAnkleFrame);
 
-      stanceToSwingVector.setAndChangeFrame(stanceToSwingPoint);
+      stanceToSwingVector.setIncludingFrame(stanceToSwingPoint);
       double stanceToSwingDistance = stanceToSwingVector.length();
       if (stanceToSwingDistance < 0.001)
       {

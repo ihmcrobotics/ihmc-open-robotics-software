@@ -36,8 +36,8 @@ public class YoPointPositionDataObject extends PointPositionDataObject
       bodyFixedReferenceFrameName = measurementPointInBodyFrame.getReferenceFrame().getName();
       this.isPointPositionValid = isPointPositionValid;
       
-      measurementPointInBodyFrame.getPoint(this.measurementPointInBodyFrame);
-      positionOfMeasurementPointInWorldFrame.getPoint(this.positionOfMeasurementPointInWorldFrame);
+      measurementPointInBodyFrame.get(this.measurementPointInBodyFrame);
+      positionOfMeasurementPointInWorldFrame.get(this.positionOfMeasurementPointInWorldFrame);
 
       yoMeasurementPointInBodyFrame.set(measurementPointInBodyFrame);
       yoMeasurementPointInWorldFrame.set(positionOfMeasurementPointInWorldFrame);
@@ -46,14 +46,14 @@ public class YoPointPositionDataObject extends PointPositionDataObject
    @Override
    public Point3d getMeasurementPointInWorldFrame()
    {
-      yoMeasurementPointInWorldFrame.getPoint(positionOfMeasurementPointInWorldFrame);
+      yoMeasurementPointInWorldFrame.get(positionOfMeasurementPointInWorldFrame);
       return super.getMeasurementPointInWorldFrame();
    }
 
    @Override
    public Point3d getMeasurementPointInBodyFrame()
    {
-      yoMeasurementPointInBodyFrame.getPoint(measurementPointInBodyFrame);
+      yoMeasurementPointInBodyFrame.get(measurementPointInBodyFrame);
       return super.getMeasurementPointInBodyFrame();
    }
    

@@ -45,8 +45,8 @@ public class YoPointVelocityDataObject extends PointVelocityDataObject
       this.rigidBodyName = rigidBody.getName();
       this.bodyFixedReferenceFrameName = measurementPointInBodyFrame.getReferenceFrame().getName();
       this.isPointVelocityValid = isPointVelocityValid;
-      measurementPointInBodyFrame.getPoint(this.measurementPointInBodyFrame);
-      velocityOfMeasurementPointInWorldFrame.getVector(this.velocityOfMeasurementPointInWorldFrame);
+      measurementPointInBodyFrame.get(this.measurementPointInBodyFrame);
+      velocityOfMeasurementPointInWorldFrame.get(this.velocityOfMeasurementPointInWorldFrame);
 
       yoMeasurementPointInBodyFrame.set(measurementPointInBodyFrame);
       yoVelocityOfMeasurementPointInWorldFrame.set(velocityOfMeasurementPointInWorldFrame);
@@ -55,7 +55,7 @@ public class YoPointVelocityDataObject extends PointVelocityDataObject
    @Override
    public Vector3d getVelocityOfMeasurementPointInWorldFrame()
    {
-      yoVelocityOfMeasurementPointInWorldFrame.getVector(velocityOfMeasurementPointInWorldFrame);
+      yoVelocityOfMeasurementPointInWorldFrame.get(velocityOfMeasurementPointInWorldFrame);
 
       return velocityOfMeasurementPointInWorldFrame;
    }
@@ -63,7 +63,7 @@ public class YoPointVelocityDataObject extends PointVelocityDataObject
    @Override
    public Point3d getMeasurementPointInBodyFrame()
    {
-      yoMeasurementPointInBodyFrame.getPoint(measurementPointInBodyFrame);
+      yoMeasurementPointInBodyFrame.get(measurementPointInBodyFrame);
 
       return measurementPointInBodyFrame;
    }
