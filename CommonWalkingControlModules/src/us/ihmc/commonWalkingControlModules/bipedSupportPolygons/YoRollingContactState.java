@@ -61,7 +61,7 @@ public class YoRollingContactState implements PlaneContactState, ModifiableConta
       
       for (int i = 0; i < contactFramePoints.size(); i++)
       {
-         tempFramePoint.setAndChangeFrame(contactFramePoints.get(i));
+         tempFramePoint.setIncludingFrame(contactFramePoints.get(i));
          tempFramePoint.changeFrame(updatableContactFrame);
          YoContactPoint contactPoint = new YoContactPoint(namePrefix, i, tempFramePoint, this, parentRegistry);
          contactPoints.add(contactPoint);

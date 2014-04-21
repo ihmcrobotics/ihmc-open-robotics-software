@@ -335,7 +335,7 @@ public class CaptureRegionCalculator
             estimatedCOPExtremes[i].set(copExtremeInWorld.getX(), copExtremeInWorld.getY(), 0.0);
 
          FramePoint2d copExtreme = extremesOfFeasibleCOP.get(i);
-         copExtremeInSupportAnkleZUp.setAndChangeFrame(copExtreme);
+         copExtremeInSupportAnkleZUp.setIncludingFrame(copExtreme);
          copExtremeInSupportAnkleZUp.changeFrame(supportAnkleZUpFrame);
          
          copExtreme3d.setIncludingFrame(copExtreme.getReferenceFrame(), copExtreme.getX(), copExtreme.getY(), 0.0);

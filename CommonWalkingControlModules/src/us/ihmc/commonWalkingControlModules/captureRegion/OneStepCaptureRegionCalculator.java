@@ -128,7 +128,7 @@ public class OneStepCaptureRegionCalculator
          this.supportFootPolygon = footPolygon.changeFrameCopy(supportAnkleZUp);
          previousSwingSide = swingSide;
       }
-      capturePoint.setAndChangeFrame(icp);
+      capturePoint.setIncludingFrame(icp);
       capturePoint.changeFrame(supportAnkleZUp);
       footCentroid.changeFrame(supportAnkleZUp);
       firstKinematicExtremeDirection.changeFrame(supportAnkleZUp);

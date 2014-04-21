@@ -96,15 +96,15 @@ public class InstantaneousCapturePointPlannerWithTimeFreezer implements Instanta
    
    private double computeDistanceFromFreezeLine(FramePoint2d icpPostionToPack, FrameVector2d icpVelocityToPack, FramePoint2d actualICP)
    {
-      normalizedVelocityVector.setAndChangeFrame(icpVelocityToPack);
+      normalizedVelocityVector.setIncludingFrame(icpVelocityToPack);
       normalizedVelocityVector.normalize();
             
-      vectorFromDesiredToActualICP.setAndChangeFrame(actualICP);
+      vectorFromDesiredToActualICP.setIncludingFrame(actualICP);
       vectorFromDesiredToActualICP.sub(icpPostionToPack);
       
       double distance = vectorFromDesiredToActualICP.dot(normalizedVelocityVector);
       
-      deltaICP.setAndChangeFrame(normalizedVelocityVector);
+      deltaICP.setIncludingFrame(normalizedVelocityVector);
       deltaICP.scale(distance);
       return -distance;
    }

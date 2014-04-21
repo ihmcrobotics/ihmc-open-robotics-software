@@ -479,7 +479,7 @@ public class MomentumBasedController
             return;
          }
          
-         copDesired.setAndChangeFrame(cop);
+         copDesired.setIncludingFrame(cop);
          footSwitches.get(robotSide).computeAndPackCoP(copActual);
          
          if (copActual.containsNaN())
