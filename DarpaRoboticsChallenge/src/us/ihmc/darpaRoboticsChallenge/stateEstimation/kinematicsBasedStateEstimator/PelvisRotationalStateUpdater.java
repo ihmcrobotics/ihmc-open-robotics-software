@@ -186,6 +186,6 @@ public class PelvisRotationalStateUpdater
 
    public void getEstimatedAngularVelocity(FrameVector estimatedAngularVelocityToPack)
    {
-      estimatedAngularVelocityToPack.setAndChangeFrame(angularVelocityRootJointFrameRelativeToWorld);
+      estimatedAngularVelocityToPack.setIncludingFrame(angularVelocityRootJointFrameRelativeToWorld);
    }
 }
