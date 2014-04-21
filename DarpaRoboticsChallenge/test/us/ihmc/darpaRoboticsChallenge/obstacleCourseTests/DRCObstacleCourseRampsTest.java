@@ -7,12 +7,12 @@ import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataListCorruptor;
+import us.ihmc.commonWalkingControlModules.packets.ComHeightPacket;
 import us.ihmc.darpaRoboticsChallenge.DRCDemo01StartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
@@ -33,6 +33,9 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
    private static final boolean showGUI = KEEP_SCS_UP || createMovie;
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
+   
+   // The default height seems to be a bit too low for the ramp
+   private final ComHeightPacket comHeightPacket = new ComHeightPacket(0.05);
 
    @Before
    public void showMemoryUsageBeforeTest()
@@ -147,6 +150,8 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
+
+      drcSimulationTestHelper.sendComHeightPacketToListeners(comHeightPacket);
 
       setupCameraForWalkingOverRamp(simulationConstructionSet);
       ThreadTools.sleep(1000);
