@@ -256,7 +256,7 @@ public class IMUDriftCompensator
          footOrientationInWorld.set(footOrientation);
          
          YoFrameVector footAxisAngleInWorld = footAxisAnglesInWorld.get(robotSide);
-         footAxisAngleInWorld.getFrameVector(footAxisAnglesPrevValue.get(robotSide));
+         footAxisAngleInWorld.getFrameTuple(footAxisAnglesPrevValue.get(robotSide));
          footOrientationInWorld.get(footAxisAngle);
          footAxisAngleInWorld.set(footAxisAngle.getX(), footAxisAngle.getY(), footAxisAngle.getZ());
          footAxisAngleInWorld.scale(footAxisAngle.getAngle());
