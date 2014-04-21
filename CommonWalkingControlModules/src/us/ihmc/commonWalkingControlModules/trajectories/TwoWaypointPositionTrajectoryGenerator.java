@@ -181,17 +181,17 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
    public void get(FramePoint positionToPack)
    {
-      desiredPosition.getFramePointAndChangeFrameOfPackedPoint(positionToPack);
+      desiredPosition.getFrameTupleIncludingFrame(positionToPack);
    }
 
    public void packVelocity(FrameVector velocityToPack)
    {
-      desiredVelocity.getFrameVectorAndChangeFrameOfPackedVector(velocityToPack);
+      desiredVelocity.getFrameTupleIncludingFrame(velocityToPack);
    }
 
    public void packAcceleration(FrameVector accelerationToPack)
    {
-      desiredAcceleration.getFrameVectorAndChangeFrameOfPackedVector(accelerationToPack);
+      desiredAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
    }
 
    private void setStepTime()

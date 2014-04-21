@@ -116,15 +116,15 @@ public class StraightUpThenParabolicCartesianTrajectoryGenerator implements Cart
          double parameterdd = straightUpParameterTrajectory.getAcceleration();
          parameter = MathTools.clipToMinMax(parameter, 0.0, 1.0);
 
-         straightUpVector.getFrameVectorAndChangeFrameOfPackedVector(tempVector);
+         straightUpVector.getFrameTupleIncludingFrame(tempVector);
          tempVector.scale(parameter);
-         initialPosition.getFramePointAndChangeFrameOfPackedPoint(positionToPack);
+         initialPosition.getFrameTupleIncludingFrame(positionToPack);
          positionToPack.add(tempVector);
 
-         straightUpVector.getFrameVectorAndChangeFrameOfPackedVector(velocityToPack);
+         straightUpVector.getFrameTupleIncludingFrame(velocityToPack);
          velocityToPack.scale(parameterd);
 
-         straightUpVector.getFrameVectorAndChangeFrameOfPackedVector(accelerationToPack);
+         straightUpVector.getFrameTupleIncludingFrame(accelerationToPack);
          accelerationToPack.scale(parameterdd);
       }
       else
@@ -151,7 +151,7 @@ public class StraightUpThenParabolicCartesianTrajectoryGenerator implements Cart
          parabolicTrajectoryGenerator.packPosition(positionToPack, parameter);
 
          parabolicTrajectoryGenerator.packVelocity(tempVector, parameter);
-         velocityToPack.setAndChangeFrame(tempVector);
+         velocityToPack.setIncludingFrame(tempVector);
          velocityToPack.scale(parameterd);
 
          parabolicTrajectoryGenerator.packAcceleration(accelerationToPack);
