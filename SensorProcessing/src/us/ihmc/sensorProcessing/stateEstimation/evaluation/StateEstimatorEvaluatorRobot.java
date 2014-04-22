@@ -1,24 +1,16 @@
 package us.ihmc.sensorProcessing.stateEstimation.evaluation;
 
-import java.util.ArrayList;
+import com.yobotics.simulationconstructionset.*;
+import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.utilities.Axis;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
-
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.utilities.Axis;
-
-import com.yobotics.simulationconstructionset.ExternalForcePoint;
-import com.yobotics.simulationconstructionset.FloatingJoint;
-import com.yobotics.simulationconstructionset.IMUMount;
-import com.yobotics.simulationconstructionset.KinematicPoint;
-import com.yobotics.simulationconstructionset.Link;
-import com.yobotics.simulationconstructionset.PinJoint;
-import com.yobotics.simulationconstructionset.Robot;
+import java.util.ArrayList;
 
 public class StateEstimatorEvaluatorRobot extends Robot
 {
@@ -48,7 +40,7 @@ public class StateEstimatorEvaluatorRobot extends Robot
       bodyLink = new Link("body");
       bodyLink.setMassAndRadiiOfGyration(10.0, 0.1, 0.2, 0.3);
 
-      ExternalForcePoint externalForcePoint = new ExternalForcePoint("ef_rootJoint", this);
+      ExternalForcePoint externalForcePoint = new ExternalForcePoint("ef_rootJoint", this.getRobotsYoVariableRegistry());
       rootJoint.addExternalForcePoint(externalForcePoint);
 
       Graphics3DObject bodyLinkGraphics = new Graphics3DObject();
@@ -62,12 +54,12 @@ public class StateEstimatorEvaluatorRobot extends Robot
       imu0Offset.setTranslation(offsetVector0);
 
       IMUMount imuMount0 = new IMUMount("imuMount0", imu0Offset, this);
-      KinematicPoint kinematicPoint0 = new KinematicPoint("kp0", offsetVector0, this);
+      KinematicPoint kinematicPoint0 = new KinematicPoint("kp0", offsetVector0, this.getRobotsYoVariableRegistry());
       rootJoint.addKinematicPoint(kinematicPoint0);
       rootJoint.addIMUMount(imuMount0);
 
       Vector3d velocityPointOffsetVector0 = new Vector3d(0.0, 0.0, 0.2);
-      KinematicPoint positionAndVelocityPoint0 = new KinematicPoint("vp0", velocityPointOffsetVector0, this);
+      KinematicPoint positionAndVelocityPoint0 = new KinematicPoint("vp0", velocityPointOffsetVector0, this.getRobotsYoVariableRegistry());
       rootJoint.addKinematicPoint(positionAndVelocityPoint0);
       
       this.addRootJoint(rootJoint);
@@ -100,7 +92,7 @@ public class StateEstimatorEvaluatorRobot extends Robot
 
          imu1Offset.setTranslation(offsetVector1);
 
-         KinematicPoint kinematicPoint1 = new KinematicPoint("kp1", offsetVector1, this);
+         KinematicPoint kinematicPoint1 = new KinematicPoint("kp1", offsetVector1, this.getRobotsYoVariableRegistry());
          pinJoint1.addKinematicPoint(kinematicPoint1);
          IMUMount imuMount1 = new IMUMount("imuMount1", imu1Offset, this);
          pinJoint1.addIMUMount(imuMount1);
@@ -132,13 +124,13 @@ public class StateEstimatorEvaluatorRobot extends Robot
 
          imu2Offset.setTranslation(offsetVector2);
 
-         KinematicPoint kinematicPoint2 = new KinematicPoint("kp2", offsetVector2, this);
+         KinematicPoint kinematicPoint2 = new KinematicPoint("kp2", offsetVector2, this.getRobotsYoVariableRegistry());
          pinJoint2.addKinematicPoint(kinematicPoint2);
          IMUMount imuMount2 = new IMUMount("imuMount2", imu2Offset, this);
          pinJoint2.addIMUMount(imuMount2);
 
          Vector3d velocityPointOffsetVector2 = new Vector3d(0.1, 0.2, 0.3);
-         KinematicPoint positionAndVelocityPoint2 = new KinematicPoint("vp2", velocityPointOffsetVector2, this);
+         KinematicPoint positionAndVelocityPoint2 = new KinematicPoint("vp2", velocityPointOffsetVector2, this.getRobotsYoVariableRegistry());
          pinJoint2.addKinematicPoint(positionAndVelocityPoint2);
          
 

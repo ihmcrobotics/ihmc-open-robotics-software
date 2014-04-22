@@ -1,25 +1,22 @@
 package us.ihmc.commonWalkingControlModules.calculators;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
-import org.ejml.data.DenseMatrix64F;
-import org.junit.Test;
-
-import us.ihmc.sensorProcessing.simulatedSensors.GroundContactPointBasedWrenchCalculator;
-import us.ihmc.utilities.Axis;
-
 import com.yobotics.simulationconstructionset.GroundContactPoint;
 import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 import com.yobotics.simulationconstructionset.PinJoint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
+import org.ejml.data.DenseMatrix64F;
+import org.junit.Test;
+import us.ihmc.sensorProcessing.simulatedSensors.GroundContactPointBasedWrenchCalculator;
+import us.ihmc.utilities.Axis;
+
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class GroundContactPointBasedWrenchCalculatorTest
 {
@@ -32,8 +29,8 @@ public class GroundContactPointBasedWrenchCalculatorTest
       double epsilon = 1e-7;
       Robot robot = new Robot("testRobot");
       
-      GroundContactPoint point0 = new GroundContactPoint("point0", new Vector3d(), robot);
-      GroundContactPoint point1 = new GroundContactPoint("point1", new Vector3d(), robot);
+      GroundContactPoint point0 = new GroundContactPoint("point0", new Vector3d(), robot.getRobotsYoVariableRegistry());
+      GroundContactPoint point1 = new GroundContactPoint("point1", new Vector3d(), robot.getRobotsYoVariableRegistry());
 
       List<GroundContactPoint> contactPoints = new ArrayList<GroundContactPoint>();
       contactPoints.add(point0);

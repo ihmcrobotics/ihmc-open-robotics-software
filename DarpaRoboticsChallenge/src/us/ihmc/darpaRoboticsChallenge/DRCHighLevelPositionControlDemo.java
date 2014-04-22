@@ -1,10 +1,10 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import java.util.ArrayList;
-
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import com.yobotics.simulationconstructionset.*;
+import com.yobotics.simulationconstructionset.robotController.RobotController;
+import com.yobotics.simulationconstructionset.util.GainCalculator;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
@@ -22,15 +22,9 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.Pair;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.ExternalForcePoint;
-import com.yobotics.simulationconstructionset.Joint;
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.robotController.RobotController;
-import com.yobotics.simulationconstructionset.util.GainCalculator;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+import java.util.ArrayList;
 
 public class DRCHighLevelPositionControlDemo
 {
@@ -72,7 +66,7 @@ public class DRCHighLevelPositionControlDemo
       
       ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, DRCConfigParameters.contactTresholdForceForSCS, footForceSensorNames);
       Pair<HumanoidRobotSimulation<SDFRobot>, DRCController> humanoidSimulation = DRCSimulationFactory.createSimulation(controllerFactory, null,
-            robotInterface, robotInitialSetup, scsInitialSetup, guiInitialSetup, null, null, dynamicGraphicObjectsListRegistry, model);
+            robotInterface, robotInitialSetup, scsInitialSetup, guiInitialSetup, null, null, dynamicGraphicObjectsListRegistry, false,model);
       drcSimulation = humanoidSimulation.first();
       drcController = humanoidSimulation.second();
 
@@ -154,7 +148,7 @@ public class DRCHighLevelPositionControlDemo
             initialPositions.add(new Vector3d());
             
             String linkName = jointToAddExternalForcePoints.getLink().getName();
-            ExternalForcePoint efp = new ExternalForcePoint("efp_" + linkName + "_" + String.valueOf(i) + "_", efp_offsetFromRootJoint.get(i), robot);
+            ExternalForcePoint efp = new ExternalForcePoint("efp_" + linkName + "_" + String.valueOf(i) + "_", efp_offsetFromRootJoint.get(i), robot.getRobotsYoVariableRegistry());
             externalForcePoints.add(efp);
             jointToAddExternalForcePoints.addExternalForcePoint(efp);
             

@@ -1,7 +1,8 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import java.io.IOException;
-
+import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
@@ -20,9 +21,7 @@ import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.net.LocalObjectCommunicator;
 import us.ihmc.utilities.net.ObjectCommunicator;
 
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
+import java.io.IOException;
 
 public abstract class DRCDemo03
 {
@@ -68,7 +67,7 @@ public abstract class DRCDemo03
 
       
       Pair<HumanoidRobotSimulation<SDFRobot>, DRCController> humanoidSimulation = DRCSimulationFactory.createSimulation(controllerFactory, environment, robotInterface, robotInitialSetup, scsInitialSetup,
-              guiInitialSetup, dataProducer, null, dynamicGraphicObjectsListRegistry,robotModel);
+              guiInitialSetup, dataProducer, null, dynamicGraphicObjectsListRegistry,false,robotModel);
       drcSimulation = humanoidSimulation.first();
 
       SimulationConstructionSet simulationConstructionSet = drcSimulation.getSimulationConstructionSet();

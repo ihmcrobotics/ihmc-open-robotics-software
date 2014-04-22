@@ -1,16 +1,15 @@
 package com.yobotics.simulationconstructionset.simulatedSensors;
 
-import javax.media.j3d.Transform3D;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
-
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.FloatingJoint;
 import com.yobotics.simulationconstructionset.Link;
 import com.yobotics.simulationconstructionset.Robot;
+import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
+import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
+
+import javax.media.j3d.Transform3D;
+import javax.vecmath.Vector3d;
 
 
 public class SingleRigidBodyRobot extends Robot
@@ -40,7 +39,7 @@ public class SingleRigidBodyRobot extends Robot
       bodyJoint.setLink(link1); // associate link1 with the joint pin1
       this.addRootJoint(bodyJoint);
       
-      forcePoint = new ExternalForcePoint("forcePoint", new Vector3d(), this);
+      forcePoint = new ExternalForcePoint("forcePoint", new Vector3d(), this.getRobotsYoVariableRegistry());
       bodyJoint.addExternalForcePoint(forcePoint);
    }
 

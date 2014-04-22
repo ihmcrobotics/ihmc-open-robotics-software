@@ -1,16 +1,10 @@
 package us.ihmc.IMUKalmanFilter.TestCases;
 
-import javax.media.j3d.Transform3D;
-import javax.vecmath.Vector3d;
-
+import com.yobotics.simulationconstructionset.*;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.ExternalForcePoint;
-import com.yobotics.simulationconstructionset.FloatingJoint;
-import com.yobotics.simulationconstructionset.Link;
-import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import javax.media.j3d.Transform3D;
+import javax.vecmath.Vector3d;
 
 public class TestIMUKalmanFilterRobot extends Robot
 {
@@ -54,7 +48,7 @@ public class TestIMUKalmanFilterRobot extends Robot
       link.setMass(1.0);
       link.setMomentOfInertia(1.0, 1.0, 1.0);
 
-      ExternalForcePoint ef_body = new ExternalForcePoint("ef_body", new Vector3d(), this);
+      ExternalForcePoint ef_body = new ExternalForcePoint("ef_body", new Vector3d(), this.getRobotsYoVariableRegistry());
       rootJoint.addExternalForcePoint(ef_body);
 
       rootJoint.setLink(link);

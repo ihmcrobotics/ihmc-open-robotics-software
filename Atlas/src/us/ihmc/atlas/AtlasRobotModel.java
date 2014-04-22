@@ -1,15 +1,10 @@
 package us.ihmc.atlas;
 
-import java.io.InputStream;
-
+import com.jme3.math.Transform;
+import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
-import us.ihmc.atlas.parameters.AtlasArmControllerParameters;
-import us.ihmc.atlas.parameters.AtlasContactPointParamaters;
-import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
-import us.ihmc.atlas.parameters.AtlasRobotMultiContactControllerParameters;
-import us.ihmc.atlas.parameters.AtlasStateEstimatorParameters;
-import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
+import us.ihmc.atlas.parameters.*;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactPointInformation;
@@ -25,7 +20,7 @@ import us.ihmc.iRobotHandControl.iRobotHandModel;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 
-import com.jme3.math.Transform;
+import java.io.InputStream;
 
 public class AtlasRobotModel implements DRCRobotModel
 {
@@ -133,6 +128,12 @@ public class AtlasRobotModel implements DRCRobotModel
    public WalkingControllerParameters getMultiContactControllerParameters()
    {
       return new AtlasRobotMultiContactControllerParameters();
+   }
+
+   @Override
+   public ScsCollisionConfigure getPhysicsConfigure( SDFRobot robotModel )
+   {
+      return new AtlasPhysicsEngineConfiguration(getJointMap(),robotModel);
    }
 
    @Override

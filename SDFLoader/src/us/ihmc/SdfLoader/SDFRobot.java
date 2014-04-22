@@ -1,18 +1,10 @@
 package us.ihmc.SdfLoader;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Set;
-
-import javax.media.j3d.Transform3D;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
+import com.yobotics.simulationconstructionset.*;
+import com.yobotics.simulationconstructionset.simulatedSensors.LidarMount;
+import com.yobotics.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorLimitationParameters;
+import com.yobotics.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorNoiseParameters;
+import com.yobotics.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorUpdateParameters;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Camera;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.IMU;
@@ -34,23 +26,12 @@ import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
-import com.yobotics.simulationconstructionset.CameraMount;
-import com.yobotics.simulationconstructionset.DummyOneDegreeOfFreedomJoint;
-import com.yobotics.simulationconstructionset.ExternalForcePoint;
-import com.yobotics.simulationconstructionset.FloatingJoint;
-import com.yobotics.simulationconstructionset.GroundContactPoint;
-import com.yobotics.simulationconstructionset.IMUMount;
-import com.yobotics.simulationconstructionset.Joint;
-import com.yobotics.simulationconstructionset.Link;
-import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
-import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJointHolder;
-import com.yobotics.simulationconstructionset.PinJoint;
-import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.SliderJoint;
-import com.yobotics.simulationconstructionset.simulatedSensors.LidarMount;
-import com.yobotics.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorLimitationParameters;
-import com.yobotics.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorNoiseParameters;
-import com.yobotics.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorUpdateParameters;
+import javax.media.j3d.Transform3D;
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
+import java.util.*;
 
 public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder, HumanoidRobot    // TODO: make an SDFHumanoidRobot
 {
@@ -149,10 +130,10 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder, Hu
             Vector3d gcOffset = jointContactPoint.second();
 
             GroundContactPoint groundContactPoint = new GroundContactPoint("gc_" + SDFConversionsHelper.sanitizeJointName(jointName) + "_" + count++, gcOffset,
-                                                       this);
+                                                       this.getRobotsYoVariableRegistry());
 
             ExternalForcePoint externalForcePoint = new ExternalForcePoint("ef_" + SDFConversionsHelper.sanitizeJointName(jointName) + "_" + count++, gcOffset,
-                                                       this);
+                                                       this.getRobotsYoVariableRegistry());
 
             Joint joint;
             if (jointName.equals(rootJoint.getName()))

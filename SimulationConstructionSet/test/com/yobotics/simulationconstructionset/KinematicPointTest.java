@@ -1,19 +1,17 @@
 package com.yobotics.simulationconstructionset;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
+import org.junit.Before;
+import org.junit.Test;
+import us.ihmc.utilities.Axis;
+import us.ihmc.utilities.test.JUnitTools;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import org.junit.Before;
-import org.junit.Test;
-
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
-
-import us.ihmc.utilities.Axis;
-import us.ihmc.utilities.test.JUnitTools;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 
 public class KinematicPointTest 
@@ -27,7 +25,7 @@ public class KinematicPointTest
 	{
 		offset = new Vector3d(1.0, 2.0, 3.0);
 		robot = new Robot("testRobot");
-		kinematicPoint = new KinematicPoint("testPoint", offset, robot);
+		kinematicPoint = new KinematicPoint("testPoint", offset, robot.getRobotsYoVariableRegistry());
 	}
 	 
 	@Test
@@ -49,7 +47,7 @@ public class KinematicPointTest
 	public void testSetOffsetJointWithBothVectorAndXYAndZValuesAsParameters()
 	{
 	   Robot robot = new Robot("testRobot");
-      KinematicPoint kinematicPoint = new KinematicPoint("testPoint", robot);
+      KinematicPoint kinematicPoint = new KinematicPoint("testPoint", robot.getRobotsYoVariableRegistry());
       
 		assertTrue(0.0 == kinematicPoint.getOffsetCopy().getX());
 		assertTrue(0.0 == kinematicPoint.getOffsetCopy().getY());
@@ -176,7 +174,7 @@ public class KinematicPointTest
 	{
 	   Robot robot = new Robot("testRobot");
 	   
-	   KinematicPoint kinematicPoint = new KinematicPoint("kp_test", robot);
+	   KinematicPoint kinematicPoint = new KinematicPoint("kp_test", robot.getRobotsYoVariableRegistry());
 	   
 	   Vector3d offset = new Vector3d(0.1, 0.2, 0.3);
 	   kinematicPoint.setOffsetJoint(offset);

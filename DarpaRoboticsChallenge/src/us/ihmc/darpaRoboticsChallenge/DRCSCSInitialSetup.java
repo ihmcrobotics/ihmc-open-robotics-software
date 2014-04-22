@@ -1,7 +1,19 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import java.util.ArrayList;
-
+import com.yobotics.simulationconstructionset.DynamicIntegrationMethod;
+import com.yobotics.simulationconstructionset.Robot;
+import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.physics.HandleCollision;
+import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
+import com.yobotics.simulationconstructionset.physics.ScsCollisionDetector;
+import com.yobotics.simulationconstructionset.physics.ScsPhysics;
+import com.yobotics.simulationconstructionset.physics.collision.SpringCollisionHandler;
+import com.yobotics.simulationconstructionset.physics.collision.bullet.JBulletCollisionDetector;
+import com.yobotics.simulationconstructionset.physics.visualize.DefaultCollisionVisualize;
+import com.yobotics.simulationconstructionset.util.LinearGroundContactModel;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.ground.steppingStones.SteppingStones;
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
 import us.ihmc.commonWalkingControlModules.terrain.CommonTerrain;
 import us.ihmc.commonWalkingControlModules.terrain.TerrainType;
@@ -9,12 +21,7 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.ScsInitialSetup;
 import us.ihmc.graphics3DAdapter.GroundProfile;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 
-import com.yobotics.simulationconstructionset.DynamicIntegrationMethod;
-import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.util.LinearGroundContactModel;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.ground.steppingStones.SteppingStones;
+import java.util.ArrayList;
 
 public class DRCSCSInitialSetup implements ScsInitialSetup
 {
@@ -58,6 +65,17 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
    public DRCSCSInitialSetup(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, double simulateDT)
    {
       this(commonAvatarEnvironmentInterface, simulateDT, false);
+   }
+
+   public ScsPhysics createPhysics(ScsCollisionConfigure collisionConfigure, YoVariableRegistry registry)
+   {
+      ScsCollisionDetector collision = new JBulletCollisionDetector(10000);
+      HandleCollision handler = new SpringCollisionHandler(1,1000,10.0,registry);
+      collision.initialize(handler);
+
+      DefaultCollisionVisualize visualize = new DefaultCollisionVisualize();
+
+      return new ScsPhysics(collisionConfigure,collision,visualize);
    }
 
    public void initializeRobot(Robot robot, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
