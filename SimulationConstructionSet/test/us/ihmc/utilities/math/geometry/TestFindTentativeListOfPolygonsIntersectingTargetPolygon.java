@@ -318,7 +318,7 @@ public class TestFindTentativeListOfPolygonsIntersectingTargetPolygon extends Te
       for (int i = 0; i < convexPolygon2ds.size(); i++)
       {
          ConvexPolygon2d convexPolygon2d = convexPolygon2ds.get(i);
-         boundingBoxes.add(convexPolygon2d.boundingBox);
+         boundingBoxes.add(convexPolygon2d.getBoundingBox());
       }
 
       ArrayList<Object> convexPolygon2dObjects = new ArrayList<Object>(convexPolygon2ds);
@@ -351,7 +351,7 @@ public class TestFindTentativeListOfPolygonsIntersectingTargetPolygon extends Te
       {
          intersectingBoundingBoxes.clear();
          ConvexPolygon2d convexPolygon2d = captureRegionPolygon.get(i);
-         intersectingBoundingBoxes = kdTree.getIntersectingBoundingBoxes(convexPolygon2d.boundingBox);
+         intersectingBoundingBoxes = kdTree.getIntersectingBoundingBoxes(convexPolygon2d.getBoundingBox());
       }
 
       endTime = System.currentTimeMillis();
