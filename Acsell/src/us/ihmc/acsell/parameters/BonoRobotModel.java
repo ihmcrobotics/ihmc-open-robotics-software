@@ -23,6 +23,7 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 
 import com.jme3.math.Transform;
+import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
 
 public class BonoRobotModel implements DRCRobotModel
 {
@@ -154,5 +155,10 @@ public class BonoRobotModel implements DRCRobotModel
    public HandModel getHandModel()
    {
 	   return null;
+   }
+
+   public ScsCollisionConfigure getPhysicsConfigure(SDFRobot robotModel)
+   {
+      return null;
    }
 }
