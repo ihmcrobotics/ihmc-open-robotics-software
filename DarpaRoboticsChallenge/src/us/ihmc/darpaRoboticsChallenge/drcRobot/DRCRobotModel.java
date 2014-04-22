@@ -1,7 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.drcRobot;
 
-import java.io.InputStream;
-
+import com.jme3.math.Transform;
+import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -13,7 +13,7 @@ import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 
-import com.jme3.math.Transform;
+import java.io.InputStream;
 
 public interface DRCRobotModel
 {
@@ -48,6 +48,8 @@ public interface DRCRobotModel
    public DRCRobotInitialSetup<SDFRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw);
 
    public WalkingControllerParameters getMultiContactControllerParameters();
+
+   public ScsCollisionConfigure getPhysicsConfigure( SDFRobot robotModel );
 
    public DRCRobotContactPointParamaters getContactPointParamaters(boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsToFeetOnly);
 

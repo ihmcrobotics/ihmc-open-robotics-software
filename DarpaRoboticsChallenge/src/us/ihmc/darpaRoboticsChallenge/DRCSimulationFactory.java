@@ -1,11 +1,11 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import java.util.ArrayList;
-
-import javax.media.j3d.Transform3D;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
+import com.yobotics.simulationconstructionset.*;
+import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
+import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
+import com.yobotics.simulationconstructionset.robotController.ModularRobotController;
+import com.yobotics.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
@@ -37,17 +37,10 @@ import us.ihmc.util.ThreadFactory;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 
-import com.yobotics.simulationconstructionset.GroundContactPoint;
-import com.yobotics.simulationconstructionset.IMUMount;
-import com.yobotics.simulationconstructionset.Joint;
-import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
-import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.UnreasonableAccelerationException;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
-import com.yobotics.simulationconstructionset.robotController.ModularRobotController;
-import com.yobotics.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import javax.media.j3d.Transform3D;
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
+import java.util.ArrayList;
 
 public class DRCSimulationFactory
 {
@@ -56,7 +49,7 @@ public class DRCSimulationFactory
    public static Pair<HumanoidRobotSimulation<SDFRobot>, DRCController> createSimulation(ControllerFactory controllerFactory,
          CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, DRCRobotInterface robotInterface, DRCRobotInitialSetup<SDFRobot> robotInitialSetup,
          ScsInitialSetup scsInitialSetup, DRCGuiInitialSetup guiInitialSetup, GlobalDataProducer dataProducer, RobotVisualizer robotVisualizer,
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, DRCRobotModel drcRobotModel)
+         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, boolean useNewPhysics, DRCRobotModel drcRobotModel)
    {
       GUISetterUpperRegistry guiSetterUpperRegistry = new GUISetterUpperRegistry();
 
@@ -126,14 +119,22 @@ public class DRCSimulationFactory
 
       ArrayList<WrenchCalculatorInterface> wrenchProviders = new ArrayList<WrenchCalculatorInterface>();
 
-      for (OneDegreeOfFreedomJoint sensorJoint : forceTorqueSensorJoints)
-      {
-         ArrayList<GroundContactPoint> groundContactPoints = new ArrayList<GroundContactPoint>();
-         sensorJoint.recursiveGetAllGroundContactPoints(groundContactPoints);
-         GroundContactPointBasedWrenchCalculator groundContactPointBasedWrenchCalculator = new GroundContactPointBasedWrenchCalculator(groundContactPoints,
-               sensorJoint);
-         wrenchProviders.add(groundContactPointBasedWrenchCalculator);
-      }
+      ScsCollisionConfigure collisionConfigure = null;
+//      if( !useNewPhysics )
+//      {
+         for (OneDegreeOfFreedomJoint sensorJoint : forceTorqueSensorJoints)
+         {
+            ArrayList<GroundContactPoint> groundContactPoints = new ArrayList<GroundContactPoint>();
+            sensorJoint.recursiveGetAllGroundContactPoints(groundContactPoints);
+            GroundContactPointBasedWrenchCalculator groundContactPointBasedWrenchCalculator = new GroundContactPointBasedWrenchCalculator(groundContactPoints,
+                  sensorJoint);
+            wrenchProviders.add(groundContactPointBasedWrenchCalculator);
+         }
+
+//      } else {
+//           collisionConfigure = drcRobotModel.getPhysicsConfigure(simulatedRobot);
+//         throw new RuntimeException("Need to implement");
+//      }
 
       SensorReaderFactory sensorReaderFactory; // this is the connection between the ModularRobotController and the DRCController below
       ModularRobotController controller = new ModularRobotController("SensorReaders");
@@ -169,7 +170,7 @@ public class DRCSimulationFactory
 
       final HumanoidRobotSimulation<SDFRobot> humanoidRobotSimulation = new HumanoidRobotSimulation<SDFRobot>(simulatedRobot, controller,
             estimationTicksPerControlTick, commonAvatarEnvironmentInterface, simulatedRobot.getAllExternalForcePoints(), robotInitialSetup, scsInitialSetup,
-            guiInitialSetup, guiSetterUpperRegistry, dynamicGraphicObjectsListRegistry, drcRobotModel);
+            guiInitialSetup, guiSetterUpperRegistry, dynamicGraphicObjectsListRegistry, drcRobotModel,collisionConfigure);
 
       //TODO: Can only do this if we have a simulation...
       if (scsInitialSetup.getInitializeEstimatorToActual())

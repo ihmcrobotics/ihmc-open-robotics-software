@@ -5,7 +5,6 @@ import com.yobotics.simulationconstructionset.time.GlobalTimer;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import com.yobotics.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
-
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -24,11 +23,9 @@ import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.TimerTaskScheduler;
-import us.ihmc.utilities.net.ObjectCommunicator;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
-
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -70,7 +67,7 @@ public class DRCSimulationTestHelper
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false, sliderBoardFactory);
       
       drcSimulation = DRCObstacleCourseDemo.startDRCSim(scriptFilename, networkObjectCommunicator, selectedLocation, guiInitialSetup, initializeEstimatorToActual,
-            automaticallyStartSimulation, startDRCNetworkProcessor, createLoadOfContactPointForTheFeet, robotModel);
+            automaticallyStartSimulation, startDRCNetworkProcessor, createLoadOfContactPointForTheFeet, false,robotModel);
            
       
       blockingSimulationRunner = new BlockingSimulationRunner(drcSimulation.getSimulationConstructionSet(), 60.0 * 10.0);
