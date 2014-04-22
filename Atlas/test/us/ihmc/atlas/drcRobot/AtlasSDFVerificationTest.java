@@ -123,7 +123,7 @@ public class AtlasSDFVerificationTest
    private void pinRobotInAir(SDFRobot sdfRobot)
    {
       sdfRobot.setPositionInWorld(new Vector3d(sdfRobot.getPositionInWorld().x, sdfRobot.getPositionInWorld().y, sdfRobot.getPositionInWorld().z + 0.5));
-      ExternalForcePoint fp = new ExternalForcePoint("gravityCompensation", sdfRobot);
+      ExternalForcePoint fp = new ExternalForcePoint("gravityCompensation", sdfRobot.getRobotsYoVariableRegistry());
       fp.setForce(0, 0, -sdfRobot.getGravityZ() * sdfRobot.computeCenterOfMass(new Point3d()) / 2);
 
       sdfRobot.getJoint("l_arm_shx").addExternalForcePoint(fp);
