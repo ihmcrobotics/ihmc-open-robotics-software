@@ -515,7 +515,7 @@ public class InverseDynamicsJointController extends State<HighLevelState>
          }
       }
       
-      bipedSupportPolygons.update(footContactPoints);
+      bipedSupportPolygons.update(footContactPoints, true);
       momentumBasedController.callUpdatables();
       
       computeGravityTorquesForViz();
