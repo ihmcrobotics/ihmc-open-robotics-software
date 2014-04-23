@@ -256,4 +256,9 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
    {
       return rigidBody;
    }
+
+   public String toString()
+   {
+      return "Body: " + rigidBody.getName() + ", in contact: " + inContact() + ", nunber of CPs: " + getTotalNumberOfContactPoints();
+   }
 }
