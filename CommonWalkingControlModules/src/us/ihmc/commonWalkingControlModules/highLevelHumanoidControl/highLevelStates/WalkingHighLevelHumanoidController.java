@@ -2097,7 +2097,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private FrameConvexPolygon2d computeFootPolygon(RobotSide robotSide, ReferenceFrame referenceFrame)
    {
       momentumBasedController.getContactPoints(feet.get(robotSide), tempContactPoints);
-      tempFootPolygon.updateByProjectionOntoXYPlane(tempContactPoints, referenceFrame);
+      tempFootPolygon.setIncludingFrameByProjectionOntoXYPlane(referenceFrame, tempContactPoints);
 
       return tempFootPolygon;
    }
