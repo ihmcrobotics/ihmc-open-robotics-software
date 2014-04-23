@@ -102,11 +102,16 @@ public class MeshDataGenerator
 
    public static MeshDataHolder Polygon(ArrayList<Point3d> polygonPoints)
    {
-      Point3f[] points = new Point3f[polygonPoints.size()];
-      int i = 0;
-      for (Point3d point3d : polygonPoints)
+      return Polygon(polygonPoints, polygonPoints.size());
+   }
+
+
+   public static MeshDataHolder Polygon(ArrayList<Point3d> polygonPoints, int numberOfVertices)
+   {
+      Point3f[] points = new Point3f[numberOfVertices];
+      for (int i = 0; i < numberOfVertices; i++)
       {
-         points[i++] = new Point3f(point3d);
+         points[i] = new Point3f(polygonPoints.get(i));
       }
 
       return Polygon(points);
