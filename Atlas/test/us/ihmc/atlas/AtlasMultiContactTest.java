@@ -1,12 +1,9 @@
 package us.ihmc.atlas;
 
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.AtlasMultiContact.MultiContactTask;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
@@ -27,7 +24,8 @@ import com.yobotics.simulationconstructionset.time.GlobalTimer;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
-public class AtlasMultiContactTest {
+public class AtlasMultiContactTest
+{
    private static final boolean ALWAYS_SHOW_GUI = true;
    private static final boolean KEEP_SCS_UP = false;
 
@@ -43,7 +41,7 @@ public class AtlasMultiContactTest {
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
-   
+
    @After
    public void destroySimulationAndRecycleMemory()
    {
@@ -74,10 +72,9 @@ public class AtlasMultiContactTest {
       GlobalTimer.clearTimers();
       TimerTaskScheduler.cancelAndReset();
       AsyncContinuousExecutor.cancelAndReset();
-      
+
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-
 
    @Test
    public void testMultiContactLocomotion() throws SimulationExceededMaximumTimeException
@@ -91,30 +88,26 @@ public class AtlasMultiContactTest {
       SimulationConstructionSet scs = drcMultiContact.getSimulationConstructionSet();
       drcController = drcMultiContact.getDRCController();
 
-
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
-
 
       DoubleYoVariable desiredComZ = (DoubleYoVariable) scs.getVariable("desiredCoMZ");
       DoubleYoVariable errorComZ = (DoubleYoVariable) scs.getVariable("comPositionErrorZ");
 
       blockingSimulationRunner.simulateAndBlock(prepDuration);
 
-
       double timeIncrement = 1;
 
       while (scs.getTime() - prepDuration < testDuration)
       {
          blockingSimulationRunner.simulateAndBlock(timeIncrement);
-         desiredComZ.set(scs.getTime()/testDuration);
-         
-         
-         System.out.println("time " + scs.getTime() + " desired " + desiredComZ.getDoubleValue() + " error "+ errorComZ.getDoubleValue());
+         desiredComZ.set(scs.getTime() / testDuration);
+
+         System.out.println("time " + scs.getTime() + " desired " + desiredComZ.getDoubleValue() + " error " + errorComZ.getDoubleValue());
          if (Math.abs(errorComZ.getDoubleValue()) > 0.06)
          {
-        	 //Re-enable this when demo is fixed
-//            fail("Math.abs(comError.getDoubleValue()) > 0.06: " + errorComZ.getDoubleValue() + " at t = " + scs.getTime());
-        	  System.out.println("Math.abs(errorComZ.getDoubleValue()) > 0.06: " + errorComZ.getDoubleValue() + " at t = " + scs.getTime());
+            //Re-enable this when demo is fixed
+            //            fail("Math.abs(comError.getDoubleValue()) > 0.06: " + errorComZ.getDoubleValue() + " at t = " + scs.getTime());
+            System.out.println("Math.abs(errorComZ.getDoubleValue()) > 0.06: " + errorComZ.getDoubleValue() + " at t = " + scs.getTime());
          }
       }
 
@@ -123,19 +116,18 @@ public class AtlasMultiContactTest {
 
    }
 
- 
    private AtlasMultiContact setupSimulation()
    {
-	  final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS;
-	  final boolean RUNNING_ON_REAL_ROBOT = DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT;
+      final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS;
+      final boolean RUNNING_ON_REAL_ROBOT = DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT;
       AutomaticSimulationRunner automaticSimulationRunner = null;
       DRCGuiInitialSetup guiInitialSetup = createGUIInitialSetup();
 
       double timePerRecordTick = DRCConfigParameters.CONTROL_DT;
       int simulationDataBufferSize = 16000;
-      
-      AtlasMultiContact drcMultiContact = new AtlasMultiContact(new AtlasRobotModel(ATLAS_ROBOT_VERSION, RUNNING_ON_REAL_ROBOT), guiInitialSetup, automaticSimulationRunner, timePerRecordTick,
-              simulationDataBufferSize, MultiContactTask.DEFAULT);
+
+      AtlasMultiContact drcMultiContact = new AtlasMultiContact(new AtlasRobotModel(ATLAS_ROBOT_VERSION, RUNNING_ON_REAL_ROBOT), guiInitialSetup,
+            automaticSimulationRunner, timePerRecordTick, simulationDataBufferSize, MultiContactTask.DEFAULT);
       SimulationConstructionSet scs = drcMultiContact.getSimulationConstructionSet();
 
       setupCameraForUnitTest(scs);
