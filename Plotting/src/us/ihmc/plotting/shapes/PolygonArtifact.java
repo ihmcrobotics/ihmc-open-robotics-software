@@ -57,12 +57,7 @@ public class PolygonArtifact extends Artifact
       FILL_POLYGON = fill;
       this.color = color;
 
-      this.points.clear();
-      
-      for (int i = 0; i < convexPolygon2d.getNumberOfVertices(); i++)
-      {
-         points.add(new Point2d(convexPolygon2d.getVertex(i)));
-      }
+      setPoints(convexPolygon2d);
    }
 
    public PolygonArtifact(String id, boolean fill, Color color, BoundingBox2d boundingBox2d)
@@ -90,6 +85,13 @@ public class PolygonArtifact extends Artifact
    {
       this.points.clear();
       this.points.addAll(points);
+   }
+
+   public void setPoints(ConvexPolygon2d polygon)
+   {
+      this.points.clear();
+      for (int i = 0; i < polygon.getNumberOfVertices(); i++)
+         this.points.add(polygon.getVertex(i));
    }
 
    public void addPoint(Point2d point)
