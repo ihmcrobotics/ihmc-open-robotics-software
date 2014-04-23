@@ -726,7 +726,7 @@ public class SmartCMPProjectorTest
 
       public void addConvexPolygon(FrameConvexPolygon2d supportPolygon)
       {
-         DynamicGraphicPolygon dynamicGraphicPolygon = new DynamicGraphicPolygon("polygon", supportPolygon.getConvexPolygon2dCopy(), "polygon", "", registry,
+         DynamicGraphicPolygon dynamicGraphicPolygon = new DynamicGraphicPolygon("polygon", supportPolygon.getConvexPolygon2d(), "polygon", "", registry,
                1.0, YoAppearance.Red());
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("Polygon", dynamicGraphicPolygon);
 
