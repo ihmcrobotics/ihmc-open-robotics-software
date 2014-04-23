@@ -32,6 +32,7 @@ import us.ihmc.graphics3DAdapter.input.SelectedListener;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.InertiaTools;
+import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 
 public class Graphics3DObject
 {
@@ -863,7 +864,7 @@ public class Graphics3DObject
    {
       return addPolygon(polygonPoints, YoAppearance.Black());
    }
-   
+
    /**
     * Creates a polygon centered at the current coordinate system with the given vertices.
     * The points this shape is composed of must be coplanar and the order matters.  Randomly
@@ -878,6 +879,28 @@ public class Graphics3DObject
       MeshDataHolder meshData = MeshDataGenerator.Polygon(polygonPoints);
       
       return addMeshData(meshData, yoAppearance);
+   }
+
+   /**
+    * Creates a polygon centered at the current coordinate system with the given vertices.
+    * The points this shape is composed of must be coplanar and the order matters.  Randomly
+    * inserting points will produce unpredictable results, clockwise direction determines the
+    * side that is drawn.
+    * @param convexPolygon2d ConvexPolygon2d containing the points.
+    * @param appearance Appearance to be used with the new polygon.  See {@link YoAppearance YoAppearance} for implementations.
+    */
+   public Graphics3DAddMeshDataInstruction addPolygon(ConvexPolygon2d convexPolygon2d, AppearanceDefinition yoAppearance)
+   {
+      MeshDataHolder meshData = MeshDataGenerator.Polygon(convexPolygon2d);
+      
+      return addMeshData(meshData, yoAppearance);
+   }
+
+   public Graphics3DAddMeshDataInstruction addPolygon(ConvexPolygon2d convexPolygon2d)
+   {
+      MeshDataHolder meshData = MeshDataGenerator.Polygon(convexPolygon2d);
+      
+      return addMeshData(meshData, YoAppearance.Black());
    }
 
    /**
@@ -914,7 +937,19 @@ public class Graphics3DObject
       return addPolygon(polygonPoints, yoAppearance);
    }
    
+
+   public Graphics3DAddMeshDataInstruction addExtrudedPolygon(ConvexPolygon2d convexPolygon2d, double height)
+   {
+      return addExtrudedPolygon(convexPolygon2d, height, YoAppearance.Black());
+   }
    
+   public Graphics3DAddMeshDataInstruction addExtrudedPolygon(ConvexPolygon2d convexPolygon2d, double height, AppearanceDefinition appearance)
+   {
+      MeshDataHolder meshData = MeshDataGenerator.ExtrudedPolygon(convexPolygon2d, height);
+      
+      return addMeshData(meshData, appearance);
+   }
+
    public Graphics3DAddMeshDataInstruction addExtrudedPolygon(List<Point2d> polygonPoints, double height)
    {
       return addExtrudedPolygon(polygonPoints, height, YoAppearance.Black());

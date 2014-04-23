@@ -8,6 +8,8 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
 import javax.vecmath.TexCoord2f;
 
+import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
+
 public class MeshDataGenerator
 {
 
@@ -118,6 +120,19 @@ public class MeshDataGenerator
    }
 
 
+   public static MeshDataHolder Polygon(ConvexPolygon2d convexPolygon)
+   {
+      Point3f[] points = new Point3f[convexPolygon.getNumberOfVertices()];
+      for (int i = 0; i < convexPolygon.getNumberOfVertices(); i++)
+      {
+         Point2d vertex = convexPolygon.getVertex(i);
+         points[i] = new Point3f((float) vertex.x, (float) vertex.y, 0.0f);
+      }
+
+      return Polygon(points);
+   }
+
+
    public static MeshDataHolder Polygon(Point3f[] polygonPoints)
    {
       // Assume convexity and ccw.
@@ -139,7 +154,18 @@ public class MeshDataGenerator
       return Polygon(points);
    }
 
-   
+
+   public static MeshDataHolder ExtrudedPolygon(ConvexPolygon2d convexPolygon2d, double extrusionHeight)
+   {
+      Point2d[] points = new Point2d[convexPolygon2d.getNumberOfVertices()];
+      for (int i = 0; i < convexPolygon2d.getNumberOfVertices(); i++)
+      {
+         points[i] = new Point2d(convexPolygon2d.getVertex(i));
+      }
+
+      return ExtrudedPolygon(points, extrusionHeight);
+   }
+
    public static MeshDataHolder ExtrudedPolygon(List<Point2d> polygonPoints, double extrusionHeight)
    {
       Point2d[] points = new Point2d[polygonPoints.size()];

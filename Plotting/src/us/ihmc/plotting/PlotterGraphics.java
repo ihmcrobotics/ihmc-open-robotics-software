@@ -150,22 +150,14 @@ public class PlotterGraphics
 
    public void drawPolygon(Graphics graphics, ConvexPolygon2d polygon)
    {
-      ArrayList<Point2d> listOfPoints = polygon.getClockwiseOrderedListOfPointsCopy();
-
-      drawPolygon(graphics, listOfPoints);
-   }
-
-
-   public void drawPolygon(Graphics graphics, ArrayList<Point2d> polygonPoints)
-   {
-      int nPoints = polygonPoints.size();
+      int nPoints = polygon.getNumberOfVertices();
 
       int[] xPoints = new int[nPoints];
       int[] yPoints = new int[nPoints];
 
       for (int i = 0; i < nPoints; i++)
       {
-         Point2d point2d = polygonPoints.get(i);
+         Point2d point2d = polygon.getVertex(i);
 
          xPoints[i] = xDoubleToInt(point2d.x);
          yPoints[i] = yDoubleToInt(point2d.y);
@@ -173,8 +165,6 @@ public class PlotterGraphics
 
       graphics.drawPolygon(xPoints, yPoints, nPoints);
    }
-
-
 
    public void drawPolygon(Graphics graphics, Point2d[] polygonPoints)
    {
