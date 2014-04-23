@@ -163,15 +163,18 @@ public class ICPAndMomentumBasedController
 
 
    private final SideDependentList<List<FramePoint>> footContactPoints = new SideDependentList<List<FramePoint>>(new ArrayList<FramePoint>(), new ArrayList<FramePoint>());
+//   private final SideDependentList<PlaneContactState> footContactStates = new SideDependentList<PlaneContactState>();
    
    protected void updateBipedSupportPolygons(BipedSupportPolygons bipedSupportPolygons)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
          momentumBasedController.getContactPoints(bipedFeet.get(robotSide), footContactPoints.get(robotSide));
+//         footContactStates.put(robotSide, momentumBasedController.getContactState(bipedFeet.get(robotSide)));
       }
 
-      bipedSupportPolygons.update(footContactPoints);
+      bipedSupportPolygons.update(footContactPoints, true);
+//      bipedSupportPolygons.update(footContactStates);
    }
 
    private final class Omega0Updater implements Updatable
