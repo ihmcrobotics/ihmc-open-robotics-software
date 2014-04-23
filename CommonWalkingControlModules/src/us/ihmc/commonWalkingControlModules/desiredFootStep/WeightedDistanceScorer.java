@@ -71,7 +71,7 @@ public class WeightedDistanceScorer extends BasicReachableScorer
       FrameConvexPolygon2d reachableRegion = captureRegionCalculator.getReachableRegion(supportLeg);
       Point2d minPoint = new Point2d();
       Point2d maxPoint = new Point2d();
-      BoundingBox2d boundingBox = reachableRegion.getBoundingBox();
+      BoundingBox2d boundingBox = reachableRegion.getBoundingBoxCopy();
 
       boundingBox.getMinPoint(minPoint);
       boundingBox.getMaxPoint(maxPoint);

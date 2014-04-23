@@ -208,9 +208,20 @@ public class PlotterGraphics
 
    public void fillPolygon(Graphics graphics, ConvexPolygon2d polygon)
    {
-      ArrayList<Point2d> listOfPoints = polygon.getClockwiseOrderedListOfPointsCopy();
+      int nPoints = polygon.getNumberOfVertices();
 
-      fillPolygon(graphics, listOfPoints);
+      int[] xPoints = new int[nPoints];
+      int[] yPoints = new int[nPoints];
+
+      for (int i = 0; i < nPoints; i++)
+      {
+         Point2d point2d = polygon.getVertex(i);
+
+         xPoints[i] = xDoubleToInt(point2d.x);
+         yPoints[i] = yDoubleToInt(point2d.y);
+      }
+
+      graphics.fillPolygon(xPoints, yPoints, nPoints);
    }
 
 
