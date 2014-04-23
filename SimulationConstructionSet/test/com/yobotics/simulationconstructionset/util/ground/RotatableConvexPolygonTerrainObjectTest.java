@@ -53,7 +53,7 @@ public class RotatableConvexPolygonTerrainObjectTest
    @Test
    public void testHeightAt()
    {
-      Point2d centroid = convexPolygon.getCentroidCopy();
+      Point2d centroid = convexPolygon.getCentroid();
       assertEquals(centroidHeight, flatTopFaceOctagon3d.heightAt(centroid.getX(), centroid.getY(), centroidHeight), epsilon);
       double expectedY;
       for (double[] point : pointList)
