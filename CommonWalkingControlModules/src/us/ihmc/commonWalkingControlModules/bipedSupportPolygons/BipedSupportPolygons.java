@@ -164,7 +164,7 @@ public class BipedSupportPolygons
             }
             else
             {
-               this.footPolygonsInAnkleZUp.get(robotSide).updateByProjectionOntoXYPlane(contactPointsForSide, ankleZUpFrames.get(robotSide));
+               this.footPolygonsInAnkleZUp.get(robotSide).setIncludingFrameByProjectionOntoXYPlane(ankleZUpFrames.get(robotSide), contactPointsForSide);
                this.footPolygonsInMidFeetZUp.get(robotSide).updateByProjectionOntoXYPlane(contactPointsForSide, midFeetZUp);
             }
 

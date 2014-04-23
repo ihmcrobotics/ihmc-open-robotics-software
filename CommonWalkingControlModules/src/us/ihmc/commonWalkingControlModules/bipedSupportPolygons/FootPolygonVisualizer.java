@@ -80,7 +80,7 @@ public class FootPolygonVisualizer implements Updatable
             contactState.getContactFramePointsInContact(contactPoints.get(contactState));
             if (contactPoints.get(contactState).size() > 0)
             {
-               footPolygon.updateByProjectionOntoXYPlane(contactPoints.get(contactState), worldFrame);
+               footPolygon.setIncludingFrameByProjectionOntoXYPlane(worldFrame, contactPoints.get(contactState));
                yoFootPolygon.setFrameConvexPolygon2d(footPolygon);
             }
             else
