@@ -73,17 +73,13 @@ public class TestFindTentativeListOfPolygonsIntersectingTargetPolygon extends Te
          ConvexPolygon2d polygon = new ConvexPolygon2d(points);
          convexPolygon2ds.add(polygon);
 
-         points = polygon.getClockwiseOrderedListOfPointsCopy();
-
-         polygon1.add(new PolygonArtifact("polygon" + i, false, Color.BLACK, points));
+         polygon1.add(new PolygonArtifact("polygon" + i, false, Color.BLACK, polygon));
       }
 
       ArrayList<Point2d> points = generateRandomCircularPoints(-50.0, 50.0, -50.0, 50.0, 7);
       ConvexPolygon2d captureRegionPolygon = new ConvexPolygon2d(points);
 
-      points = captureRegionPolygon.getClockwiseOrderedListOfPointsCopy();
-
-      polygon1.add(new PolygonArtifact("captureRegionPolygon", false, Color.red, points));
+      polygon1.add(new PolygonArtifact("captureRegionPolygon", false, Color.red, captureRegionPolygon));
 
       ConvexPolygon2dIntersectionSetCalculator convexPolygon2dIntersectionSetCalculator = new ConvexPolygon2dIntersectionSetCalculator(convexPolygon2ds);
       steppintStonesIntersectingCaptureRegion = convexPolygon2dIntersectionSetCalculator.findIntersectionPolygonList(captureRegionPolygon);
@@ -92,9 +88,7 @@ public class TestFindTentativeListOfPolygonsIntersectingTargetPolygon extends Te
       {
          for (int i = 0; i < steppintStonesIntersectingCaptureRegion.size(); i++)
          {
-            points = steppintStonesIntersectingCaptureRegion.get(i).getClockwiseOrderedListOfPointsCopy();
-
-            polygon1.add(new PolygonArtifact("steppintStonesIntersectingCaptureRegion" + i, true, Color.green, points));
+            polygon1.add(new PolygonArtifact("steppintStonesIntersectingCaptureRegion" + i, true, Color.green, steppintStonesIntersectingCaptureRegion.get(i)));
          }
       }
 
@@ -189,9 +183,7 @@ public class TestFindTentativeListOfPolygonsIntersectingTargetPolygon extends Te
 
       for (int i = 0; i < steppintStonesIntersectingCaptureRegion.size(); i++)
       {
-         ArrayList<Point2d> points3 = steppintStonesIntersectingCaptureRegion.get(i).getClockwiseOrderedListOfPointsCopy();
-
-         polygon1.add(new PolygonArtifact("steppintStonesIntersectingCaptureRegion" + i, true, Color.green, points3));
+         polygon1.add(new PolygonArtifact("steppintStonesIntersectingCaptureRegion" + i, true, Color.green, steppintStonesIntersectingCaptureRegion.get(i)));
       }
 
       displayPolygons(plotterpanel, polygon1);
@@ -227,8 +219,7 @@ public class TestFindTentativeListOfPolygonsIntersectingTargetPolygon extends Te
       for (int i = 0; i < 117; i++)
       {
          convexPolygon2ds.add(steppingStones.getConvexPolygons().get(i));
-         points = steppingStones.getConvexPolygons().get(i).getClockwiseOrderedListOfPointsCopy();
-         polygon1.add(new PolygonArtifact("polygon" + i, false, Color.BLACK, points));
+         polygon1.add(new PolygonArtifact("polygon" + i, false, Color.BLACK, steppingStones.getConvexPolygons().get(i)));
       }
 
       points.clear();
@@ -245,9 +236,8 @@ public class TestFindTentativeListOfPolygonsIntersectingTargetPolygon extends Te
 
       for (int i = 0; i < steppintStonesIntersectingCaptureRegion.size(); i++)
       {
-         points = steppintStonesIntersectingCaptureRegion.get(i).getClockwiseOrderedListOfPointsCopy();
-
-         polygon1.add(new PolygonArtifact("steppintStonesIntersectingCaptureRegion" + i, true, Color.green, points));
+         ConvexPolygon2d convexPolygon2d2 = steppintStonesIntersectingCaptureRegion.get(i);
+         polygon1.add(new PolygonArtifact("steppintStonesIntersectingCaptureRegion" + i, true, Color.green, convexPolygon2d2));
       }
 
       displayPolygons(plotterpanel, polygon1);
