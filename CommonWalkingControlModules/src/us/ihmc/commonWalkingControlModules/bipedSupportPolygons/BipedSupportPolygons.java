@@ -41,6 +41,8 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameLineSegmen
  */
 public class BipedSupportPolygons
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
    private static boolean VISUALIZE = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry("BipedSupportPolygons");
@@ -78,8 +80,8 @@ public class BipedSupportPolygons
       this.midFeetZUp = midFeetZUpFrame;
       this.useConnectingEdges = useConnectingEdges;
 
-      supportPolygonViz = new YoFrameConvexPolygon2d("combinedPolygon", "", ReferenceFrame.getWorldFrame(), 30, registry);
-      footToFootSegmentViz = new YoFrameLineSegment2d("footToFoot", "", ReferenceFrame.getWorldFrame(), registry);
+      supportPolygonViz = new YoFrameConvexPolygon2d("combinedPolygon", "", worldFrame, 30, registry);
+      footToFootSegmentViz = new YoFrameLineSegment2d("footToFoot", "", worldFrame, registry);
 
       DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList("VTP Calculator");
       ArtifactList artifactList = new ArtifactList("VTP Calculator");
@@ -163,8 +165,6 @@ public class BipedSupportPolygons
             supportSide = robotSide;
             neitherFootIsSupportingFoot = false;
 
-            if (!recycleMemory) // TODO stupid bug there for TaiChiControllerGeneratorTest
-               footPolygonsInAnkleZUp.put(robotSide, new FrameConvexPolygon2d());
             footPolygonsInAnkleZUp.get(robotSide).setIncludingFrameByProjectionOntoXYPlane(ankleZUpFrames.get(robotSide), contactPointsForSide);
             footPolygonsInMidFeetZUp.get(robotSide).setIncludingFrameByProjectionOntoXYPlane(midFeetZUp, contactPointsForSide);
 
@@ -232,7 +232,7 @@ public class BipedSupportPolygons
 
    private void visualize()
    {
-      supportPolygonViz.setFrameConvexPolygon2d(supportPolygonInMidFeetZUp.changeFrameCopy(ReferenceFrame.getWorldFrame()));
-      footToFootSegmentViz.setFrameLineSegment2d(footToFootLineSegmentInMidFeetZUp.changeFrameCopy(ReferenceFrame.getWorldFrame()));
+      supportPolygonViz.setFrameConvexPolygon2d(supportPolygonInMidFeetZUp.changeFrameCopy(worldFrame));
+      footToFootSegmentViz.setFrameLineSegment2d(footToFootLineSegmentInMidFeetZUp.changeFrameCopy(worldFrame));
    }
 }
