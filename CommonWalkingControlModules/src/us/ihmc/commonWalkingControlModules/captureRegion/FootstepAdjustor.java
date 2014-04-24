@@ -97,8 +97,7 @@ public class FootstepAdjustor
     */
    private void projectFootstepInCaptureRegion(Footstep footstep, FrameConvexPolygon2d captureRegion)
    {
-      FramePoint nextStep = footstep.getPosition();
-      nextStep2d.setIncludingFrame(nextStep.getReferenceFrame(), nextStep.getX(), nextStep.getY());
+      footstep.getPosition().getFramePoint2d(nextStep2d);
       nextStep2d.changeFrame(captureRegion.getReferenceFrame());
       captureRegion.orthogonalProjection(nextStep2d);
       nextStep2d.changeFrame(footstep.getReferenceFrame());
@@ -123,8 +122,7 @@ public class FootstepAdjustor
       List<FramePoint> expectedContactPoints = footstep.getExpectedContactPoints();
       for(int i = 0; i < expectedContactPoints.size(); i++)
       {
-         FramePoint pointToMove3d = expectedContactPoints.get(i);
-         pointToMove.setIncludingFrame(pointToMove3d.getReferenceFrame(), pointToMove3d.getX(), pointToMove3d.getY());
+         expectedContactPoints.get(i).getFramePoint2d(pointToMove);
          pointToMove.changeFrameAndProjectToXYPlane(desiredFrame);
          
          // shrink the polygon for safety by pulling all the corner points towards the center
