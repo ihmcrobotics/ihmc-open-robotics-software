@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlane
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoFramePoint2dInPolygonCoordinate;
 import us.ihmc.commonWalkingControlModules.calculators.EquivalentConstantCoPCalculator;
+import us.ihmc.commonWalkingControlModules.captureRegion.FootstepAdjustor;
 import us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
@@ -239,6 +240,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final ICPAndMomentumBasedController icpAndMomentumBasedController;
    private final OneStepCaptureRegionCalculator captureRegionCalculator;
+   private final FootstepAdjustor footstepAdjustor;
    private final EnumYoVariable<RobotSide> upcomingSupportLeg;
    private final EnumYoVariable<RobotSide> supportLeg;
    private final BipedSupportPolygons bipedSupportPolygons;
@@ -474,6 +476,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                                                                    walkingControllerParameters,
                                                                    registry,
                                                                    dynamicGraphicObjectsListRegistry);
+      footstepAdjustor = new FootstepAdjustor(registry, dynamicGraphicObjectsListRegistry);
 
       resetIntegratorsAfterSwing.set(true);
    }
@@ -1186,6 +1189,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       private final FrameVector2d desiredICPVelocityLocal = new FrameVector2d();
       private final FramePoint2d ecmpLocal = new FramePoint2d();
       private final FramePoint2d capturePoint2d = new FramePoint2d();
+      
+      private Footstep nextFootstep;
 
       public SingleSupportState(RobotSide robotSide)
       {
@@ -1221,7 +1226,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                                                         capturePoint2d,
                                                         icpAndMomentumBasedController.getOmega0(),
                                                         computeFootPolygon(supportSide, referenceFrames.getAnkleZUpFrame(supportSide)));
-//         FrameConvexPolygon2d captureRegion = captureRegionCalculator.getCaptureRegion();
+         if(footstepAdjustor.adjustFootstep(nextFootstep, captureRegionCalculator.getCaptureRegion()))
+         {
+            // The nextFootstep has changed and atlas feels bad
+         }
          
          moveICPToInsideOfFootAtEndOfSwing(supportSide, transferToFootstepLocation, swingTimeCalculationProvider.getValue(), swingTimeRemaining,
                                            desiredICPLocal);
@@ -1260,7 +1268,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          footSwitches.get(swingSide).reset();
 
-         Footstep nextFootstep = upcomingFootstepList.getNextFootstep();
+         nextFootstep = upcomingFootstepList.getNextFootstep();
          transferToFootstep.set(nextFootstep.getPosition2dCopy());
 
          boolean nextFootstepHasBeenReplaced = false;
