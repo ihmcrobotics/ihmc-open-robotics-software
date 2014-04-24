@@ -62,10 +62,11 @@ public class BipedSupportPolygons
    private FrameLineSegment2d connectingEdge1, connectingEdge2;
 
    // 'Sweet spots', the spots inside each of the footPolygons where capture point placement leads to really good balance. Typically the middle of the foot or so:
-   private final SideDependentList<FramePoint2d> sweetSpots = new SideDependentList<FramePoint2d>();
+   private final SideDependentList<FramePoint2d> sweetSpotsInAnkleZUp = new SideDependentList<FramePoint2d>();
+   private final SideDependentList<FramePoint2d> sweetSpotsInMidFeetZUp = new SideDependentList<FramePoint2d>();
 
    // Line segment from one sweet spot to the other:
-   private FrameLineSegment2d footToFootLineSegmentInMidFeetZUp;
+   private final FrameLineSegment2d footToFootLineSegmentInMidFeetZUp;
 
    // In order to deal with intersecting polygons, it is much harder to calculate the connecting edges
    // So let's not use the connecting edges unles we need
@@ -94,7 +95,11 @@ public class BipedSupportPolygons
       {
          footPolygonsInAnkleZUp.put(robotSide, new FrameConvexPolygon2d());
          footPolygonsInMidFeetZUp.put(robotSide, new FrameConvexPolygon2d());
+         sweetSpotsInAnkleZUp.put(robotSide, new FramePoint2d());
+         sweetSpotsInMidFeetZUp.put(robotSide, new FramePoint2d());
       }
+      
+      footToFootLineSegmentInMidFeetZUp = new FrameLineSegment2d(midFeetZUp);
       
       if (dynamicGraphicObjectsListRegistry != null)
       {
@@ -142,7 +147,12 @@ public class BipedSupportPolygons
 
    public FramePoint2d getSweetSpotCopy(RobotSide robotSide)
    {
-      return new FramePoint2d(sweetSpots.get(robotSide));
+      return new FramePoint2d(sweetSpotsInAnkleZUp.get(robotSide));
+   }
+
+   public FramePoint2d getSweetSpot(RobotSide robotSide)
+   {
+      return sweetSpotsInAnkleZUp.get(robotSide);
    }
 
    public void update(SideDependentList<List<FramePoint>> contactPoints)
@@ -168,7 +178,8 @@ public class BipedSupportPolygons
             footPolygonsInAnkleZUp.get(robotSide).setIncludingFrameByProjectionOntoXYPlane(ankleZUpFrames.get(robotSide), contactPointsForSide);
             footPolygonsInMidFeetZUp.get(robotSide).setIncludingFrameByProjectionOntoXYPlane(midFeetZUp, contactPointsForSide);
 
-            sweetSpots.set(robotSide, footPolygonsInAnkleZUp.get(robotSide).getCentroidCopy()); // Sweet spots are the centroids of the foot polygons.
+            sweetSpotsInAnkleZUp.get(robotSide).setIncludingFrame(footPolygonsInAnkleZUp.get(robotSide).getCentroid()); // Sweet spots are the centroids of the foot polygons.
+            sweetSpotsInMidFeetZUp.get(robotSide).setIncludingFrame(footPolygonsInMidFeetZUp.get(robotSide).getCentroid()); // Sweet spots are the centroids of the foot polygons.
          }
          else
          {
@@ -214,8 +225,8 @@ public class BipedSupportPolygons
          connectingEdge2 = null;
       }
 
-      this.footToFootLineSegmentInMidFeetZUp = new FrameLineSegment2d(sweetSpots.get(RobotSide.LEFT).changeFrameAndProjectToXYPlaneCopy(midFeetZUp), sweetSpots
-            .get(RobotSide.RIGHT).changeFrameAndProjectToXYPlaneCopy(midFeetZUp));
+      footToFootLineSegmentInMidFeetZUp.setFirstEndPoint(sweetSpotsInMidFeetZUp.get(RobotSide.LEFT));
+      footToFootLineSegmentInMidFeetZUp.setSecondEndPoint(sweetSpotsInMidFeetZUp.get(RobotSide.RIGHT));
 
       timer.stopTimer();
 
