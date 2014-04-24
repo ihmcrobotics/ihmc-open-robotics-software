@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VirtualToePoi
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.MemoryTools;
+import us.ihmc.utilities.math.geometry.ConvexPolygonTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2dAndConnectingEdges;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -502,7 +503,7 @@ public class GeometricVirtualToePointCalculatorTest
 
    private FrameConvexPolygon2dAndConnectingEdges createAndCombinePolygons(FrameConvexPolygon2d leftFootPolygon, FrameConvexPolygon2d rightFootPolygon)
    {
-      FrameConvexPolygon2dAndConnectingEdges supportPolygonAndEdges = FrameConvexPolygon2d.combineDisjointPolygons(leftFootPolygon, rightFootPolygon);
+      FrameConvexPolygon2dAndConnectingEdges supportPolygonAndEdges = ConvexPolygonTools.combineDisjointPolygons(leftFootPolygon, rightFootPolygon);
 
       if (supportPolygonAndEdges == null) throw new RuntimeException("supportPolygonAndEdges == null. Most likely that the feet are overlapping!");
       return supportPolygonAndEdges;

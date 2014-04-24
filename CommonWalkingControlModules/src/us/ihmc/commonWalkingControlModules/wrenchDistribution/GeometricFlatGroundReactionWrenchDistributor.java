@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.NewGeometricVirtualToe
 import us.ihmc.commonWalkingControlModules.controlModules.TeeterTotterLegStrengthCalculator;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.math.geometry.ConvexPolygonTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2dAndConnectingEdges;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
@@ -131,7 +132,7 @@ public class GeometricFlatGroundReactionWrenchDistributor implements GroundReact
       FrameConvexPolygon2d leftFootPolygon = footConvexPolygons.get(RobotSide.LEFT);
       FrameConvexPolygon2d rightFootPolygon = footConvexPolygons.get(RobotSide.RIGHT);
       
-      FrameConvexPolygon2dAndConnectingEdges supportPolygonAndConnectingEdges = FrameConvexPolygon2d.combineDisjointPolygons(leftFootPolygon, rightFootPolygon);
+      FrameConvexPolygon2dAndConnectingEdges supportPolygonAndConnectingEdges = ConvexPolygonTools.combineDisjointPolygons(leftFootPolygon, rightFootPolygon);
       
       FrameConvexPolygon2d supportPolygon = supportPolygonAndConnectingEdges.getFrameConvexPolygon2d();
       FrameLineSegment2d connectingEdge1 = supportPolygonAndConnectingEdges.getConnectingEdge1();

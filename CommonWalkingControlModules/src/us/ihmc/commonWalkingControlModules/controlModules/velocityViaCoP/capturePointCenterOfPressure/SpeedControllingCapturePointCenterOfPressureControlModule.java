@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.CapturePointCenterOfPressureControlModule;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.math.geometry.ConvexPolygonTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLine2d;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
@@ -261,7 +262,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       FramePoint2d centerOfPressureDesired = null;
       
       
-      FrameConvexPolygon2d somewhatSmallerPolygon = FrameConvexPolygon2d.shrinkConstantDistanceInto(0.004, supportPolygon);
+      FrameConvexPolygon2d somewhatSmallerPolygon = ConvexPolygonTools.shrinkConstantDistanceInto(0.004, supportPolygon);
       
       if ((desiredVelocity == null) || (desiredVelocity.length() == 0.0))
       {
@@ -346,7 +347,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       }
 
 
-      FrameConvexPolygon2d footPolygon = FrameConvexPolygon2d.shrinkConstantDistanceInto(resizeFootPolygonBy .getDoubleValue(), supportPolygons.getFootPolygonInAnkleZUp(supportLeg));
+      FrameConvexPolygon2d footPolygon = ConvexPolygonTools.shrinkConstantDistanceInto(resizeFootPolygonBy .getDoubleValue(), supportPolygons.getFootPolygonInAnkleZUp(supportLeg));
       
       
       FramePoint2d currentCapturePoint2d = currentCapturePoint.toFramePoint2d();
