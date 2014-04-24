@@ -29,9 +29,8 @@ public class RemoteAtlasVisualizer
       JaxbSDFLoader robotLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
 //      SDFRobot robot = robotLoader.createRobot(jointMap, false);
 //      SliderBoardFactory sliderBoardFactory = GainControllerSliderBoard.getFactory();
-      SliderBoardFactory sliderBoardFactory = WalkControllerSliderBoard.getFactory();
-//      SliderBoardFactory sliderBoardFactory = PositionControllerSliderBoard.getFactory();
-//      SliderBoardFactory sliderBoardFactory = JointAngleOffsetSliderBoard.getFactory();
+//      SliderBoardFactory sliderBoardFactory = WalkControllerSliderBoard.getFactory();
+      SliderBoardFactory sliderBoardFactory = JointAngleOffsetSliderBoard.getFactory();
 
       SliderBoardControllerListener scsYoVariablesUpdatedListener = new SliderBoardControllerListener(robotLoader, jointMap, bufferSize, sliderBoardFactory);
       scsYoVariablesUpdatedListener.addButton("requestStop", 1.0);
