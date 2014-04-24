@@ -80,7 +80,7 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
       DRCRobotModel model = new AtlasRobotModel(ATLAS_ROBOT_VERSION, RUNNING_ON_REAL_ROBOT);
       DRCRobotJointMap jointMap = model.getJointMap();
       JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
-   	  boolean showGUIAndSaveSCSVideo = false;
+   	  boolean showGUIAndSaveSCSVideo = true;
       
       String[] cameraName;
       double[] simulationCameraHeight;
@@ -97,8 +97,9 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
       // variables to export (starts from 1: vars[0] is reserved for timeVariable)
       jointNamesInOrder = jointMap.getOrderedJointNames();
       int consideredVariablesPerJoint = 10;
-      vars = new String[jointNamesInOrder.length * consideredVariablesPerJoint + 1];
-      int i = 1;
+      vars = new String[jointNamesInOrder.length * consideredVariablesPerJoint + 2];
+      vars[1] = "controllerTime";
+      int i = 2;
       for (String jointName :jointNamesInOrder)
       {
           vars[i] = "ll_" + jointName + "_q"; i++;
