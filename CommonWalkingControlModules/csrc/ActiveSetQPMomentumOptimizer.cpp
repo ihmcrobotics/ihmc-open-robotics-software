@@ -1,0 +1,207 @@
+#include "ActiveSetQPMomentumOptimizer.h"
+
+#define USE_ACTIVE_SET
+//#define DUMP_TO_FILE
+
+#ifdef USE_ACTIVE_SET
+#include "ActiveSetQP/fastQP.h"
+#else
+#include "ActiveSetQP/eiquadprog.hpp"
+#endif
+
+#include <Eigen/Dense>
+#include <Eigen/Core>
+#include <vector>
+#include <set>
+#include <iostream>
+#include <fstream>
+#define nRho us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_ActiveSetQPMomentumOptimizer_nRho
+#define nWrench us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_ActiveSetQPMomentumOptimizer_nWrench 
+
+typedef Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> MatrixXdR;
+
+#define J2E(X, R, C)  double * c ## X = (double*)env->GetPrimitiveArrayCritical(X, &isCopy);   \
+				Eigen::Map<MatrixXdR > (e ## X)(c ## X, R, C);
+
+#define J2E_FREE(X) env->ReleasePrimitiveArrayCritical(X, c ## X, 0);
+
+int nDoF=-1;
+jboolean isCopy=JNI_FALSE;
+#ifdef USE_ACTIVE_SET
+	std::set<int> active;
+#endif
+using namespace Eigen;
+
+JNIEXPORT void JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_ActiveSetQPMomentumOptimizer_initializeNative (JNIEnv *env, jobject obj, jint _nDoF)
+{
+	nDoF = _nDoF;
+	std::cerr << "ActiveSetQPMomentumOptimizer Library initialized nDoF = " << nDoF << std::endl;
+	std::cerr << "Compiled at " __TIME__ << std::endl;
+#ifdef USE_ACTIVE_SET
+	active.clear();
+#endif
+}
+
+JNIEXPORT void JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_ActiveSetQPMomentumOptimizer_resetActiveSet
+  (JNIEnv *, jobject)
+{
+#ifdef USE_ACTIVE_SET
+	active.clear();
+#endif
+}
+
+int solveEigen(
+		MatrixXd A, MatrixXd  b, MatrixXd  C, 
+		MatrixXd Js, MatrixXd  ps, MatrixXd  Ws, 
+		MatrixXd WRho, MatrixXd  Lambda, 
+		MatrixXd WRhoSmoother, 
+		MatrixXd rhoPrevMean, MatrixXd  WRhoCoPPenalty, 
+		MatrixXd QRho, MatrixXd  c, MatrixXd  rhoMin, 
+		Eigen::Map<MatrixXdR>&  vd, Eigen::Map<MatrixXdR>& rho)
+{
+
+	/*
+	 *       [vd  ]'[ A' C A + Js' Ws Js + Lambda     0               ] [vd  ]  + 2 [vd  ]' [ -A' C b - Js' Ws ps             0                  ]    +  b' C b + ps' Ws ps + Pprev' Wpsm Pprev + Ppavg' Wpcop Ppavg 
+	 *       [rho ] [              0                Wp + Wpsm + Wpcop ] [rho ]      [rho ]  [         0            -Wpsm Pprev - Wpcop Ppavg     ] 
+	 *
+	 *       min_x 0.5 x'Q x  + f'x  + g
+	 *       st [-A QRho ] [vd  ]  = c
+	 *                     [rho ]
+	 *          -I rho <= -rhoMin
+	 */
+
+	//Objective
+	//Q
+	std::vector<MatrixXd *> QblkDiag;
+	MatrixXd Qblk1 = A.transpose()*C.diagonal().asDiagonal()*A + Js.transpose()*Ws.diagonal().asDiagonal()*Js + Lambda;
+	MatrixXd Qblk2 = WRho.diagonal() + WRhoSmoother.diagonal() + WRhoCoPPenalty.diagonal();
+	QblkDiag.push_back(&Qblk1);
+	QblkDiag.push_back(&Qblk2);
+
+	MatrixXd Q(nDoF+nRho,nDoF+nRho);
+	Q << Qblk1, MatrixXd::Zero(nDoF,nRho), MatrixXd::Zero(nRho,nDoF), MatrixXd(Qblk2.asDiagonal()); //Qblk2;
+	//f
+	VectorXd f(nRho+nDoF);
+	f << (- A.transpose() * C.diagonal().asDiagonal() * b - Js.transpose()*Ws.diagonal().asDiagonal()*ps),
+	  	 (- MatrixXd(WRhoSmoother.diagonal().asDiagonal())*rho - WRhoCoPPenalty.diagonal().asDiagonal()*rhoPrevMean);
+
+	MatrixXd g = b.transpose()*C.diagonal().asDiagonal()*b + ps.transpose()*Ws.diagonal().asDiagonal()*ps 
+		+ rho.transpose()*WRhoSmoother.diagonal().asDiagonal()*rho + rhoPrevMean.transpose()*WRhoCoPPenalty*rhoPrevMean;
+
+	//Equality
+	MatrixXd Aeq(nWrench, nDoF+nRho);
+	Aeq << -A, QRho;
+	MatrixXd & beq = c;
+
+	//Inequality
+	MatrixXd Ain(nRho, nDoF+nRho);
+	Ain << MatrixXd::Zero(nRho,nDoF), -MatrixXd::Identity(nRho,nRho);
+	VectorXd bin = -rhoMin;
+
+
+	//final Call
+	VectorXd x(nRho+nDoF);
+	x.head(nDoF) =  vd;
+	x.tail(nRho) = rho;
+
+
+#define REG  1e-9
+#ifdef  USE_ACTIVE_SET
+	for(int i=0;i<QblkDiag.size();i++)
+	{
+		if(QblkDiag[i]->cols()==1)
+			QblkDiag[i]->operator+=(VectorXd::Constant(QblkDiag[i]->rows(),REG));
+		else
+			QblkDiag[i]->diagonal() += VectorXd::Ones(QblkDiag[i]->rows())*REG;
+	}
+	Q.diagonal() += VectorXd::Ones(nRho+nDoF)*REG;
+#else
+	Aeq = MatrixXd(Aeq.transpose());
+	beq = -beq;
+	Ain = -MatrixXd(Ain.transpose());
+	Q.diagonal() += VectorXd::Ones(nRho+nDoF)*REG;
+#endif
+
+#ifdef DUMP_TO_FILE
+	std::ofstream ofP("/tmp/P.txt");
+	ofP << "Q" << std::endl   << Q << std::endl;
+	ofP << "f" << std::endl << f << std::endl;
+	ofP << "Aeq" << std::endl << Aeq << std::endl;
+	ofP << "beq" << std::endl << beq << std::endl;
+	ofP << "Ain" << std::endl << Ain << std::endl;
+	ofP << "bin" << std::endl << bin << std::endl;
+	ofP << "x0" << std::endl << x << std::endl;
+	ofP.close();
+#endif
+
+#ifdef USE_ACTIVE_SET
+	double ret=fastQP(QblkDiag, f,  Aeq, beq, Ain, bin, active, x);
+#else
+	double ret=solve_quadprog(Q, f,  Aeq, beq, Ain, bin, x);
+#endif
+
+	vd = x.head(nDoF);
+	rho = x.tail(nRho);
+
+#ifdef DUMP_TO_FILE
+	std::ofstream of("/tmp/Q.txt");
+	of << "A" << std::endl    << A << std::endl;
+	of << "b" << std::endl    << b << std::endl;
+	of << "C" << std::endl    << C << std::endl;
+
+	of << "Js" << std::endl   << Js << std::endl;
+	of << "ps" << std::endl   << ps << std::endl;
+	of << "Ws" << std::endl   << Ws << std::endl;
+
+	of << "WRho" << std::endl << WRho.diagonal()<< std::endl;
+	of << "Lambda" << std::endl   << Lambda.diagonal() << std::endl;
+
+	of << "Wpsm" << std::endl << WRhoSmoother.diagonal() << std::endl;
+
+	of << "rhoPrevMean" << std::endl << rhoPrevMean << std::endl;
+	of << "Wpcop" << std::endl << WRhoCoPPenalty.diagonal()<< std::endl;
+	
+	of << "Qrho" << std::endl << QRho << std::endl;
+	of << "c" << std::endl << c << std::endl;
+	of << "rhoMin" << std::endl << rhoMin << std::endl;
+
+
+	of << "vd" << std::endl << vd << std::endl;
+	of << "rho" << std::endl << rho << std::endl;
+
+	of << "optVal" << std::endl << g(0,0)+2*ret << std::endl;
+	of.close();
+#endif
+	return ret;
+}
+
+JNIEXPORT jint JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_ActiveSetQPMomentumOptimizer_solveNative (JNIEnv *env, jobject obj, 
+		jdoubleArray A, jdoubleArray b, jdoubleArray C, 
+		jdoubleArray Js, jdoubleArray ps, jdoubleArray Ws, 
+		jdoubleArray WRho, jdoubleArray Lambda, 
+		jdoubleArray WRhoSmoother, 
+		jdoubleArray rhoPrevMean, jdoubleArray WRhoCoPPenalty, 
+		jdoubleArray QRho, jdoubleArray c, jdoubleArray rhoMin, 
+		jdoubleArray vd, jdoubleArray rho)
+{
+	double ret;
+	J2E(A, nWrench, nDoF);  J2E(b,nWrench,1);  J2E(C,nWrench,nWrench); 
+	J2E(Js,nDoF,nDoF);  J2E(ps,nDoF,1);  J2E(Ws,nDoF,nDoF); 
+	J2E(WRho,nRho,nRho);  J2E(Lambda,nDoF,nDoF); 
+	J2E(WRhoSmoother,nRho,nRho); 
+	J2E(rhoPrevMean,nRho,1);  J2E(WRhoCoPPenalty,nRho,nRho); 
+	J2E(QRho,nWrench,nRho);  J2E(c,nWrench,1);  J2E(rhoMin,nRho,1); 
+	 J2E(vd,nDoF,1); J2E(rho,nRho,1); 
+
+	ret = solveEigen(eA,  eb,  eC, eJs,  eps,  eWs, eWRho,  eLambda, eWRhoSmoother, erhoPrevMean,  eWRhoCoPPenalty, eQRho,  ec,  erhoMin, evd, erho);
+
+	J2E_FREE(A);  J2E_FREE(b);  J2E_FREE(C); 
+	J2E_FREE(Js);  J2E_FREE(ps);  J2E_FREE(Ws); 
+	J2E_FREE(WRho);  J2E_FREE(Lambda); 
+	J2E_FREE(WRhoSmoother); 
+	J2E_FREE(rhoPrevMean);  J2E_FREE(WRhoCoPPenalty); 
+	J2E_FREE(QRho);  J2E_FREE(c);  J2E_FREE(rhoMin); 
+	J2E_FREE(vd); J2E_FREE(rho);  
+
+	return ret;
+}

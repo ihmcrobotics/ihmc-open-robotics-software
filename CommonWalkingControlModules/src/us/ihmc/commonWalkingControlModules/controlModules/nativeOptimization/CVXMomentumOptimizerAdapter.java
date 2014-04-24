@@ -1,11 +1,17 @@
 package us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization;
 
+import java.io.FileOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+
 import org.ejml.data.DenseMatrix64F;
+
 
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.PlaneContactWrenchMatrixCalculator;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
 
-public class MomentumOptimizerAdapter
+public class CVXMomentumOptimizerAdapter implements MomentumOptimizerInterface
 {
    private CVXMomentumOptimizerWithGRFPenalizedSmootherNative momentumOptimizerWithGRFPenalizedSmootherNative;
    private CVXMomentumOptimizerWithGRFPenalizedSmootherNativeInput momentumOptimizerWithGRFPenalizedSmootherNativeInput;
@@ -20,7 +26,7 @@ public class MomentumOptimizerAdapter
    private DenseMatrix64F outputRho, outputJointAccelerations;
    private double outputOptVal;
 
-   public MomentumOptimizerAdapter(int nDoF)
+   public CVXMomentumOptimizerAdapter(int nDoF)
    {
       rhoSize = CVXMomentumOptimizerWithGRFPenalizedSmootherNative.rhoSize;
       nSupportVectors = CVXMomentumOptimizerWithGRFPenalizedSmootherNative.nSupportVectors;
@@ -86,23 +92,31 @@ public class MomentumOptimizerAdapter
       momentumOptimizerWithGRFPenalizedSmootherNativeInput.setCenterOfPressurePenalizedRegularization(wrenchMatrixCalculator.getWRhoPenalizer());
    }
 
-   public void solve() throws NoConvergenceException
+   
+   public int solve() throws NoConvergenceException
    {
+      CVXMomentumOptimizerWithGRFPenalizedSmootherNativeOutput momentumOptimizerWithGRFPenalizedSmootherNativeOutput;
       rhoPrevious.set(outputRho);
+      int ret=-999;
 
       try
       {
-         momentumOptimizerWithGRFPenalizedSmootherNative.solve(momentumOptimizerWithGRFPenalizedSmootherNativeInput);
+         ret=momentumOptimizerWithGRFPenalizedSmootherNative.solve(momentumOptimizerWithGRFPenalizedSmootherNativeInput);
       }
       finally
       {
-         CVXMomentumOptimizerWithGRFPenalizedSmootherNativeOutput momentumOptimizerWithGRFPenalizedSmootherNativeOutput =
-               momentumOptimizerWithGRFPenalizedSmootherNative.getOutput();
+         momentumOptimizerWithGRFPenalizedSmootherNativeOutput=momentumOptimizerWithGRFPenalizedSmootherNative.getOutput();
          outputRho = momentumOptimizerWithGRFPenalizedSmootherNativeOutput.getRho();
          outputJointAccelerations = momentumOptimizerWithGRFPenalizedSmootherNativeOutput.getJointAccelerations();
          outputOptVal = momentumOptimizerWithGRFPenalizedSmootherNativeOutput.getOptVal();
       }
+      
+      if (ret<0)
+         throw new NoConvergenceException();
+      
+      return ret;
    }
+   
 
    public DenseMatrix64F getOutputRho()
    {

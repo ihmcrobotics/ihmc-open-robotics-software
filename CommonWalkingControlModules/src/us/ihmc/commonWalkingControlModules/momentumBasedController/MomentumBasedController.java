@@ -107,8 +107,8 @@ public class MomentumBasedController
 
    private final YoFrameVector admissibleDesiredGroundReactionTorque;
    private final YoFrameVector admissibleDesiredGroundReactionForce;
-   private final YoFrameVector groundReactionTorqueCheck;
-   private final YoFrameVector groundReactionForceCheck;
+//   private final YoFrameVector groundReactionTorqueCheck;
+//   private final YoFrameVector groundReactionForceCheck;
 
    private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> preRateLimitedDesiredAccelerations = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
    private final LinkedHashMap<OneDoFJoint, RateLimitedYoVariable> rateLimitedDesiredAccelerations = new LinkedHashMap<OneDoFJoint, RateLimitedYoVariable>();
@@ -197,8 +197,8 @@ public class MomentumBasedController
       this.admissibleDesiredGroundReactionTorque = new YoFrameVector("admissibleDesiredGroundReactionTorque", centerOfMassFrame, registry);
       this.admissibleDesiredGroundReactionForce = new YoFrameVector("admissibleDesiredGroundReactionForce", centerOfMassFrame, registry);
 
-      this.groundReactionTorqueCheck = new YoFrameVector("groundReactionTorqueCheck", centerOfMassFrame, registry);
-      this.groundReactionForceCheck = new YoFrameVector("groundReactionForceCheck", centerOfMassFrame, registry);
+//      this.groundReactionTorqueCheck = new YoFrameVector("groundReactionTorqueCheck", centerOfMassFrame, registry);
+//      this.groundReactionForceCheck = new YoFrameVector("groundReactionForceCheck", centerOfMassFrame, registry);
 
       if (updatables != null)
       {
@@ -402,9 +402,9 @@ public class MomentumBasedController
       admissibleDesiredGroundReactionTorque.set(admissibleGroundReactionWrench.getAngularPartX(), admissibleGroundReactionWrench.getAngularPartY(), admissibleGroundReactionWrench.getAngularPartZ());
       admissibleDesiredGroundReactionForce.set(admissibleGroundReactionWrench.getLinearPartX(), admissibleGroundReactionWrench.getLinearPartY(), admissibleGroundReactionWrench.getLinearPartZ());
 
-      SpatialForceVector groundReactionWrenchCheck = inverseDynamicsCalculator.computeTotalExternalWrench(centerOfMassFrame);
-      groundReactionTorqueCheck.set(groundReactionWrenchCheck.getAngularPartCopy());
-      groundReactionForceCheck.set(groundReactionWrenchCheck.getLinearPartCopy());
+//      SpatialForceVector groundReactionWrenchCheck = inverseDynamicsCalculator.computeTotalExternalWrench(centerOfMassFrame);
+//      groundReactionTorqueCheck.set(groundReactionWrenchCheck.getAngularPartCopy());
+//      groundReactionForceCheck.set(groundReactionWrenchCheck.getLinearPartCopy());
 
       if (desiredCoMAndAngularAccelerationGrabber != null)
          this.desiredCoMAndAngularAccelerationGrabber.set(inverseDynamicsCalculator.getSpatialAccelerationCalculator(), desiredCentroidalMomentumRate);

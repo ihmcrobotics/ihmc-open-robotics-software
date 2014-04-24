@@ -28,7 +28,8 @@ public class CoMBasedMomentumRateOfChangeControlModule extends AbstractControlFl
       this.momentumRateOfChangeData = new MomentumRateOfChangeData(centerOfMassFrame);
       this.centerOfMassFrame = centerOfMassFrame;
       this.centerOfMassJacobian = centerOfMassJacobian;
-      this.comPositionController = new EuclideanPositionController("com", centerOfMassFrame, dt, registry);
+      boolean visualizeCom=false;
+      this.comPositionController = new EuclideanPositionController("com", centerOfMassFrame, dt, visualizeCom, registry);
       momentumRateOfChangeOutputPort.setData(momentumRateOfChangeData);
       parentRegistry.addChild(registry);
    }
