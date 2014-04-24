@@ -163,6 +163,8 @@ public class BipedSupportPolygons
             supportSide = robotSide;
             neitherFootIsSupportingFoot = false;
 
+            if (!recycleMemory) // TODO stupid bug there for TaiChiControllerGeneratorTest
+               footPolygonsInAnkleZUp.put(robotSide, new FrameConvexPolygon2d());
             footPolygonsInAnkleZUp.get(robotSide).setIncludingFrameByProjectionOntoXYPlane(ankleZUpFrames.get(robotSide), contactPointsForSide);
             footPolygonsInMidFeetZUp.get(robotSide).setIncludingFrameByProjectionOntoXYPlane(midFeetZUp, contactPointsForSide);
 
