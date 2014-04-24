@@ -36,6 +36,7 @@ public class ArmCalibrationHelper implements DRCStereoListener
       cameraDataReceiver.registerCameraListener(this);
       networkingManager.getControllerCommandHandler().setArmCalibrationHelper(this);
       fieldComputerClient.attachListener(DRCJointConfigurationData.class, new JointAngleConsumer());
+      startPeriodicRecording();
    }
    
    public void startPeriodicRecording()
