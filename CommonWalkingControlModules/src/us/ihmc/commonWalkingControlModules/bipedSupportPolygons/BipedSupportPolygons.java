@@ -5,6 +5,7 @@ import java.util.List;
 
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.math.geometry.ConvexPolygonTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2dAndConnectingEdges;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
@@ -180,7 +181,7 @@ public class BipedSupportPolygons
       {
          if (useConnectingEdges)
          {
-            FrameConvexPolygon2dAndConnectingEdges supportPolygonAndEdgesInMidFeetZUp = FrameConvexPolygon2d.combineDisjointPolygons(
+            FrameConvexPolygon2dAndConnectingEdges supportPolygonAndEdgesInMidFeetZUp = ConvexPolygonTools.combineDisjointPolygons(
                   footPolygonsInMidFeetZUp.get(RobotSide.LEFT), footPolygonsInMidFeetZUp.get(RobotSide.RIGHT));
 
             if (supportPolygonAndEdgesInMidFeetZUp == null)
