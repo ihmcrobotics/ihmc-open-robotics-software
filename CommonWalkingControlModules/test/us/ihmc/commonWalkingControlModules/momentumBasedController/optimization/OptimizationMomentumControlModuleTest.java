@@ -432,7 +432,7 @@ public class OptimizationMomentumControlModuleTest
 
       for (RevoluteJoint revoluteJoint : desiredJointAccelerations.keySet())
       {
-         assertEquals(revoluteJoint.getQddDesired(), desiredJointAccelerations.get(revoluteJoint), 1e-9);
+         assertEquals(revoluteJoint.getQddDesired(), desiredJointAccelerations.get(revoluteJoint), 1e-5);
       }
 
       assertWrenchesSumUpToMomentumDot(externalWrenchSolution.values(), momentumRateOfChangeOut, gravityZ, totalMass, centerOfMassFrame,

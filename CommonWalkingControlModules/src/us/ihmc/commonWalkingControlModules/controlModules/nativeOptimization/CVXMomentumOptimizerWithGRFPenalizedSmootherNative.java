@@ -62,7 +62,6 @@ public class CVXMomentumOptimizerWithGRFPenalizedSmootherNative
 
    private static final Object solveConch = new Object();
 
-
    private static final DoubleBuffer ADoubleBuffer;
    private static final DoubleBuffer bDoubleBuffer;
    private static final DoubleBuffer CDoubleBuffer;
@@ -134,9 +133,9 @@ public class CVXMomentumOptimizerWithGRFPenalizedSmootherNative
       cvxMomentumOptimizerWithGRFPenalizedSmootherNativeOutput = new CVXMomentumOptimizerWithGRFPenalizedSmootherNativeOutput(nDoF, rhoSize);
    }
 
-   public void solve(CVXMomentumOptimizerWithGRFPenalizedSmootherNativeInput cvxMomentumOptimizerWithGRFPenalizedSmootherNativeInput)
+   public int solve(CVXMomentumOptimizerWithGRFPenalizedSmootherNativeInput cvxMomentumOptimizerWithGRFPenalizedSmootherNativeInput)
          throws NoConvergenceException
-         {
+   {
       double[] A = cvxMomentumOptimizerWithGRFPenalizedSmootherNativeInput.getA();
       double[] b = cvxMomentumOptimizerWithGRFPenalizedSmootherNativeInput.getB();
       double[] C = cvxMomentumOptimizerWithGRFPenalizedSmootherNativeInput.getC();
@@ -155,19 +154,18 @@ public class CVXMomentumOptimizerWithGRFPenalizedSmootherNative
       double[] rhoPreviousMean = cvxMomentumOptimizerWithGRFPenalizedSmootherNativeInput.getRhoPreviousMean();
       double[] WRhoCoPPenalty = cvxMomentumOptimizerWithGRFPenalizedSmootherNativeInput.getWRhoCoPPenalty();
 
-      solve(A, b, C, Js, ps, Ws, Lambda, Qrho, c, rhoMin, WRho, rhoPrevious, WRhoSmoother, rhoPreviousMean, WRhoCoPPenalty);
+      return solve(A, b, C, Js, ps, Ws, Lambda, Qrho, c, rhoMin, WRho, rhoPrevious, WRhoSmoother, rhoPreviousMean, WRhoCoPPenalty);
 
-         }
+   }
 
    public CVXMomentumOptimizerWithGRFPenalizedSmootherNativeOutput getOutput()
    {
       return cvxMomentumOptimizerWithGRFPenalizedSmootherNativeOutput;
    }
 
-   private void solve(double[] A, double[] b, double[] C, double[] Js, double[] ps, double[] Ws, double[] Lambda, double[] Qrho, double[] c, double[] rhoMin,
-         double[] WRho, double[] rhoPrevious, double[] WRhoSmoother, double[] rhoPreviousMean, double[] WRhoCoPPenalty)
-               throws NoConvergenceException
-               {
+   int solve(double[] A, double[] b, double[] C, double[] Js, double[] ps, double[] Ws, double[] Lambda, double[] Qrho, double[] c, double[] rhoMin,
+         double[] WRho, double[] rhoPrevious, double[] WRhoSmoother, double[] rhoPreviousMean, double[] WRhoCoPPenalty) throws NoConvergenceException
+   {
       int numberOfIterations;
       synchronized (solveConch)
       {
@@ -207,7 +205,8 @@ public class CVXMomentumOptimizerWithGRFPenalizedSmootherNative
       {
          throw new NoConvergenceException();
       }
-               }
+      return numberOfIterations;
+   }
 
    public static void main(String[] args) throws NoConvergenceException
    {
