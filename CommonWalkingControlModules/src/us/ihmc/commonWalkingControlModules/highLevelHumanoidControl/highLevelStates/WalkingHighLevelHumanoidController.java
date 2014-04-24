@@ -1706,16 +1706,16 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       Footstep transferFromFootstep = createFootstepFromFootAndContactablePlaneBody(referenceFrames.getFootFrame(swingSide.getOppositeSide()),
                                          feet.get(swingSide.getOppositeSide()));
 
-      FrameConvexPolygon2d footPolygon;
+      final FrameConvexPolygon2d footPolygon = new FrameConvexPolygon2d();
       ContactablePlaneBody contactableBody = feet.get(swingSide);
       if (walkOnTheEdgesManager.stayOnToes())
       {
          List<FramePoint> contactPoints = getToePoints(contactableBody);
-         footPolygon = FrameConvexPolygon2d.constructByProjectionOntoXYPlane(contactPoints, referenceFrames.getSoleFrame(swingSide));
+         footPolygon.setIncludingFrameByProjectionOntoXYPlane(referenceFrames.getSoleFrame(swingSide), contactPoints);
       }
       else
       {
-         footPolygon = new FrameConvexPolygon2d(contactableBody.getContactPoints2d());
+         footPolygon.setIncludingFrame(contactableBody.getContactPoints2d());
       }
 
       TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForSingleSupport(transferToFootstep, swingSide,
