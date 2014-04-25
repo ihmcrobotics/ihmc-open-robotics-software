@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModuleInterfaces;
 
-import java.util.ArrayList;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -18,15 +16,14 @@ public class FrictionBasedDoubleSupportForceDistributor implements DoubleSupport
 
    private final YoVariableRegistry registry = new YoVariableRegistry("VirtualSupportActuators");
    private final BipedSupportPolygons bipedSupportPolygons;
-   
+
    private final DoubleYoVariable leftYawStrength = new DoubleYoVariable("leftYawStrength", registry);
    private final DoubleYoVariable rightYawStrength = new DoubleYoVariable("rightYawStrength", registry);
    private final SideDependentList<DoubleYoVariable> yawStrengths = new SideDependentList<DoubleYoVariable>(leftYawStrength, rightYawStrength);
 
    private final ReferenceFrame pelvisFrame;
 
-   public FrictionBasedDoubleSupportForceDistributor(ReferenceFrame pelvisFrame, BipedSupportPolygons bipedSupportPolygons,
-         YoVariableRegistry parentRegistry)
+   public FrictionBasedDoubleSupportForceDistributor(ReferenceFrame pelvisFrame, BipedSupportPolygons bipedSupportPolygons, YoVariableRegistry parentRegistry)
    {
       this.bipedSupportPolygons = bipedSupportPolygons;
       this.pelvisFrame = pelvisFrame;
@@ -35,13 +32,13 @@ public class FrictionBasedDoubleSupportForceDistributor implements DoubleSupport
 
    private void calculateYawStrengths(SideDependentList<FramePoint2d> virtualToePoints, SideDependentList<Double> legStrengths)
    {
-      if(virtualToePoints == null)
+      if (virtualToePoints == null)
       {
          leftYawStrength.set(legStrengths.get(RobotSide.LEFT));
          rightYawStrength.set(legStrengths.get(RobotSide.RIGHT));
          return;
       }
-      
+
       SideDependentList<Double> minDistance = new SideDependentList<Double>();
 
       for (RobotSide robotSide : RobotSide.values)
@@ -51,33 +48,29 @@ public class FrictionBasedDoubleSupportForceDistributor implements DoubleSupport
          FramePoint2d vtp = virtualToePoints.get(robotSide);
 
          FrameConvexPolygon2d footPolygon = bipedSupportPolygons.getFootPolygonInAnkleZUp(robotSide);
-         ArrayList<FramePoint2d> footCorners = footPolygon.getClockwiseOrderedListOfFramePoints();
-         for (int i = 0; i < footCorners.size(); i++)
+         for (int i = 0; i < footPolygon.getNumberOfVertices(); i++)
          {
-               FramePoint2d point = footCorners.get(i);
-               point.changeFrame(vtp.getReferenceFrame());
+            FramePoint2d point = footPolygon.getFrameVertex(i);
+            point.changeFrame(vtp.getReferenceFrame());
 
-               double dist = point.distance(vtp);
+            double dist = point.distance(vtp);
 
-               if (dist < minDistance.get(robotSide))
-               {
-                  minDistance.set(robotSide, dist);
-               }
+            if (dist < minDistance.get(robotSide))
+            {
+               minDistance.set(robotSide, dist);
+            }
          }
-
       }
 
       double leftLegWeight = minDistance.get(RobotSide.LEFT) * legStrengths.get(RobotSide.LEFT);
       double rightLegWeight = minDistance.get(RobotSide.RIGHT) * legStrengths.get(RobotSide.RIGHT);
       double totalWeight = leftLegWeight + rightLegWeight;
 
-      if(totalWeight < 1e-12)
+      if (totalWeight < 1e-12)
          totalWeight = 1e-12;
-   
+
       leftYawStrength.set(leftLegWeight / totalWeight);
       rightYawStrength.set(rightLegWeight / totalWeight);
-   
-
    }
 
    public void packForcesAndTorques(SideDependentList<Double> zForcesInPelvisFrameToPack, SideDependentList<FrameVector> torquesInPelvisFrameToPack,
@@ -85,7 +78,7 @@ public class FrictionBasedDoubleSupportForceDistributor implements DoubleSupport
          SideDependentList<FramePoint2d> virtualToePoints)
    {
       calculateYawStrengths(virtualToePoints, legStrengths);
-      
+
       for (RobotSide robotSide : RobotSide.values)
       {
          double legStrength = legStrengths.get(robotSide);
@@ -93,16 +86,12 @@ public class FrictionBasedDoubleSupportForceDistributor implements DoubleSupport
          zForcesInPelvisFrameToPack.put(robotSide, zForceInPelvisFrameTotal * legStrength);
 
          FrameVector torque = torqueInPelvisFrameTotal.changeFrameCopy(pelvisFrame);
-         
+
          torque.setX(torque.getX() * legStrength);
          torque.setY(torque.getY() * legStrength);
          torque.setZ(torque.getZ() * yawStrengths.get(robotSide).getDoubleValue());
-         
 
          torquesInPelvisFrameToPack.set(robotSide, torque);
       }
-
-
    }
-
 }

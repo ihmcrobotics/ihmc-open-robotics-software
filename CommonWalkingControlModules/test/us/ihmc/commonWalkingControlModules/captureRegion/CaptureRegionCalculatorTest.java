@@ -3,8 +3,6 @@ package us.ihmc.commonWalkingControlModules.captureRegion;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.ArrayList;
-
 import javax.media.j3d.Transform3D;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -122,14 +120,11 @@ public class CaptureRegionCalculatorTest
 
       FrameConvexPolygon2d expectedCaptureRegion = new FrameConvexPolygon2d(ReferenceFrame.getWorldFrame(), expectedPointList);
 
-      ArrayList<FramePoint2d> expectedVertices = expectedCaptureRegion.getClockwiseOrderedListOfFramePoints();
-      ArrayList<FramePoint2d> actualVertices = captureRegion.getClockwiseOrderedListOfFramePoints();
-
-      assertEquals(expectedVertices.size(), actualVertices.size());
+      assertEquals(expectedCaptureRegion.getNumberOfVertices(), captureRegion.getNumberOfVertices());
       
-      for (int i=0; i<expectedVertices.size(); i++)
+      for (int i=0; i<expectedCaptureRegion.getNumberOfVertices(); i++)
       {
-         FramePoint2d expectedVertex = expectedVertices.get(i);
+         FramePoint2d expectedVertex = expectedCaptureRegion.getFrameVertex(i);
          
          FramePoint2d actualVertex = captureRegion.getClosestVertexCopy(expectedVertex);
                   
