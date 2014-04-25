@@ -210,7 +210,6 @@ public class BipedSupportPolygons
          {
             supportPolygonInMidFeetZUp.setIncludingFrame(footPolygonsInMidFeetZUp.get(RobotSide.LEFT), footPolygonsInMidFeetZUp.get(RobotSide.RIGHT));
          }
-
       }
       else
       {
