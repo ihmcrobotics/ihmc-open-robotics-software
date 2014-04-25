@@ -100,12 +100,18 @@ public class DesiredHandPoseProvider implements ObjectConsumer<HandPosePacket>
          }
          
          Map<OneDoFJoint, Double> finalDesiredJointAngleMap = finalDesiredJointAngleMaps.get(robotSide);
-         finalDesiredJointAngleMap.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_PITCH), object.shoulderPitch);
-         finalDesiredJointAngleMap.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_ROLL), object.shoulderRoll);
-         finalDesiredJointAngleMap.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH), object.elbowPitch);
-         finalDesiredJointAngleMap.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_ROLL), object.elbowRoll);
-         finalDesiredJointAngleMap.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.WRIST_PITCH), object.wristPitch);
-         finalDesiredJointAngleMap.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.WRIST_ROLL), object.wristRoll);
+//         finalDesiredJointAngleMap.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_PITCH), object.shoulderPitch);
+//         finalDesiredJointAngleMap.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_ROLL), object.shoulderRoll);
+//         finalDesiredJointAngleMap.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH), object.elbowPitch);
+//         finalDesiredJointAngleMap.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_ROLL), object.elbowRoll);
+//         finalDesiredJointAngleMap.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.WRIST_PITCH), object.wristPitch);
+//         finalDesiredJointAngleMap.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.WRIST_ROLL), object.wristRoll);
+         
+         for(ArmJointName armJoint: fullRobotModel.getRobotSpecificJointNames().getArmJointNames())
+         {
+            int i = -1;
+            finalDesiredJointAngleMap.put(fullRobotModel.getArmJoint(robotSide, armJoint), object.getJointAngles()[++i]);
+         }
       }
 
       return desiredHandPoses.get(robotSide);
