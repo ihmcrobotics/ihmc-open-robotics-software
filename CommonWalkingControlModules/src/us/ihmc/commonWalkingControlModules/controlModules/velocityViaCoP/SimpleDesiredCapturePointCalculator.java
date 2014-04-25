@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules.velocityViaCoP;
 
-import java.util.ArrayList;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.SingleSupportCondition;
@@ -206,15 +204,13 @@ public class SimpleDesiredCapturePointCalculator implements DesiredCapturePointC
             // Shrunken to the smallest possible polygon, the desired CP becomes the center of the polygon.
             return supportPolygon.getCentroidCopy();
          }
-         ArrayList<FramePoint2d> pointsOnPolygon = motionPolygon.getClockwiseOrderedListOfFramePoints();
-
-         double numberOfPoints = pointsOnPolygon.size();
+         double numberOfPoints = motionPolygon.getNumberOfVertices();
 
          double totalLength = 0;
          for (int i = 0; i < numberOfPoints; i++)
          {
             int nextPoint = i >= (numberOfPoints - 1) ? 0 : i + 1;
-            totalLength += pointsOnPolygon.get(i).distance(pointsOnPolygon.get(nextPoint));
+            totalLength += motionPolygon.getFrameVertex(i).distance(motionPolygon.getFrameVertex(nextPoint));
          }
 
          
@@ -223,15 +219,14 @@ public class SimpleDesiredCapturePointCalculator implements DesiredCapturePointC
          double lengthPassed = 0;
          for (int i = 0; i < numberOfPoints; i++)
          {
-            int nextPoint = i >= (numberOfPoints - 1) ? 0 : i + 1;
-            double distance = pointsOnPolygon.get(i).distance(pointsOnPolygon.get(nextPoint));
+            double distance = motionPolygon.getFrameVertex(i).distance(motionPolygon.getNextFrameVertex(i));
             if ((lengthPassed + distance) > distanceInPolygon)
             {
-               FrameVector2d edge = new FrameVector2d(pointsOnPolygon.get(i), pointsOnPolygon.get(nextPoint));
+               FrameVector2d edge = new FrameVector2d(motionPolygon.getFrameVertex(i), motionPolygon.getNextFrameVertex(i));
                edge.normalize();
                edge.scale(distanceInPolygon - lengthPassed);
 
-               FramePoint2d desiredCapturePoint = new FramePoint2d(pointsOnPolygon.get(i));
+               FramePoint2d desiredCapturePoint = new FramePoint2d(motionPolygon.getFrameVertex(i));
                desiredCapturePoint.add(edge);
 
                return desiredCapturePoint;

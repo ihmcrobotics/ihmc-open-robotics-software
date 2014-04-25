@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
 import java.awt.Color;
-import java.util.ArrayList;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VirtualToePointCalculator;
@@ -46,7 +45,7 @@ public class ToeOffVirtualToePointCalculator implements VirtualToePointCalculato
    private final YoFrameConvexPolygon2d vtpConvexPolygon = new YoFrameConvexPolygon2d("vtpConvexPolygon", "", worldFrame, 6, registry);
 
    private final DoubleYoVariable minICPToEdgeY = new DoubleYoVariable("minICPToEdgeY", registry);
-   
+
    private final DoubleYoVariable pullBackSupportLine = new DoubleYoVariable("pullBackSupportLine", registry);
 
    private final ReferenceFrame midFeetZUpFrame;
@@ -57,7 +56,7 @@ public class ToeOffVirtualToePointCalculator implements VirtualToePointCalculato
          double footWidth, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       SimpleDesiredCapturePointCalculator.USEUPCOMINGSWINGTOEASSWEETSPOT = true; // TODO: AAAAAAAAAAAAAAAAAAAARRRRRRRRRRRRRGHHHHHHHHHHHHHHHH
-      
+
       this.referenceFrames = referenceFrames;
       this.couplingRegistry = couplingRegistry;
       midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
@@ -115,7 +114,8 @@ public class ToeOffVirtualToePointCalculator implements VirtualToePointCalculato
       parentRegistry.addChild(registry);
    }
 
-   public void packVirtualToePoints(SideDependentList<FramePoint2d> virtualToePoints, BipedSupportPolygons bipedSupportPolygons, FramePoint2d copDesired, RobotSide upcomingSupportLeg)
+   public void packVirtualToePoints(SideDependentList<FramePoint2d> virtualToePoints, BipedSupportPolygons bipedSupportPolygons, FramePoint2d copDesired,
+         RobotSide upcomingSupportLeg)
    {
       // Find trailing leg
       RobotSide upcomingSwingLeg = upcomingSupportLeg.getOppositeSide();
@@ -123,7 +123,6 @@ public class ToeOffVirtualToePointCalculator implements VirtualToePointCalculato
       // Create new support polygon
       FrameConvexPolygon2d footPolygonInMidFeetZUp = bipedSupportPolygons.getFootPolygonInMidFeetZUp(upcomingSupportLeg);
       FramePoint[] toePointsForFeet = toePoints.get(upcomingSwingLeg);
-
 
       // Choose toe points to use
       FramePoint upcomingSupportFootPosition = footPoints.get(upcomingSupportLeg).changeFrameCopy(toePointsForFeet[0].getReferenceFrame());
@@ -147,8 +146,6 @@ public class ToeOffVirtualToePointCalculator implements VirtualToePointCalculato
 
       FramePoint2d insideToe2d = insideToe.toFramePoint2d();
       FramePoint2d outsideToe2d = outsideToe.toFramePoint2d();
-      
-      
 
       // Check if iCP is in support polygon
       FramePoint2d icp = couplingRegistry.getCapturePointInFrame(midFeetZUpFrame).toFramePoint2d();
@@ -247,66 +244,63 @@ public class ToeOffVirtualToePointCalculator implements VirtualToePointCalculato
       //         }
 
       FrameLineSegment2d toeLine = new FrameLineSegment2d(insideToe2d, outsideToe2d);
-      ArrayList<FramePoint2d> hullPoints = footPolygonInMidFeetZUp.getClockwiseOrderedListOfFramePoints();
-      hullPoints.add(insideToe2d);
-      hullPoints.add(outsideToe2d);
 
-      FrameConvexPolygon2d adjustedSupportPolygon = new FrameConvexPolygon2d(hullPoints);
+      FrameConvexPolygon2d adjustedSupportPolygon = new FrameConvexPolygon2d();
+      adjustedSupportPolygon.clear(footPolygonInMidFeetZUp.getReferenceFrame());
+      adjustedSupportPolygon.addVertices(footPolygonInMidFeetZUp);
+      adjustedSupportPolygon.addVertex(insideToe2d);
+      adjustedSupportPolygon.addVertex(outsideToe2d);
+      adjustedSupportPolygon.update();
       vtpConvexPolygon.setFrameConvexPolygon2d(adjustedSupportPolygon.changeFrameCopy(worldFrame));
-
-      hullPoints = adjustedSupportPolygon.getClockwiseOrderedListOfFramePoints();
 
       FrameLine2d connectingEdgeA = null;
       FrameLine2d connectingEdgeB = null;
 
       // TODO: Improve algorithm to find connecting edges to handle all corner cases.
       double epsilon = 1e-6;
-      boolean prevEqualsInsideToe = insideToe2d.epsilonEquals(hullPoints.get(hullPoints.size() - 1), epsilon);
-      boolean prevEqualsOutsideToe = outsideToe2d.epsilonEquals(hullPoints.get(hullPoints.size() - 1), epsilon);
-      boolean equalsInsideToe = insideToe2d.epsilonEquals(hullPoints.get(0), epsilon);
-      boolean equalsOutsideToe = outsideToe2d.epsilonEquals(hullPoints.get(0), epsilon);
+      int numberOfPoints = adjustedSupportPolygon.getNumberOfVertices();
+      boolean prevEqualsInsideToe = insideToe2d.epsilonEquals(adjustedSupportPolygon.getFrameVertex(numberOfPoints - 1), epsilon);
+      boolean prevEqualsOutsideToe = outsideToe2d.epsilonEquals(adjustedSupportPolygon.getFrameVertex(numberOfPoints - 1), epsilon);
+      boolean equalsInsideToe = insideToe2d.epsilonEquals(adjustedSupportPolygon.getFrameVertex(0), epsilon);
+      boolean equalsOutsideToe = outsideToe2d.epsilonEquals(adjustedSupportPolygon.getFrameVertex(0), epsilon);
 
       boolean placeVTPOnOutsideToe = false, placeVTPOnInsideToe = false;
-      for (int i = 0; i < hullPoints.size(); i++)
+      for (int i = 0; i < numberOfPoints; i++)
       {
-         int nextI = i + 1;
-         if (nextI >= hullPoints.size())
-            nextI = 0;
-         int prevI = i - 1;
-         if (prevI < 0)
-         {
-            prevI = hullPoints.size() - 1;
-         }
-
-         boolean nextEqualsInsideToe = insideToe2d.epsilonEquals(hullPoints.get(nextI), epsilon);
-         boolean nextEqualsOutsideToe = outsideToe2d.epsilonEquals(hullPoints.get(nextI), epsilon);
+         boolean nextEqualsInsideToe = insideToe2d.epsilonEquals(adjustedSupportPolygon.getNextFrameVertex(i), epsilon);
+         boolean nextEqualsOutsideToe = outsideToe2d.epsilonEquals(adjustedSupportPolygon.getNextFrameVertex(i), epsilon);
 
          if (equalsInsideToe)
          {
             if (prevEqualsOutsideToe)
             {
-               connectingEdgeA = new FrameLine2d(insideToe2d, hullPoints.get(nextI));
-            } else if (nextEqualsOutsideToe)
+               connectingEdgeA = new FrameLine2d(insideToe2d, adjustedSupportPolygon.getNextFrameVertex(i));
+            }
+            else if (nextEqualsOutsideToe)
             {
-               connectingEdgeA = new FrameLine2d(insideToe2d, hullPoints.get(prevI));
-            } else
+               connectingEdgeA = new FrameLine2d(insideToe2d, adjustedSupportPolygon.getPreviousFrameVertex(i));
+            }
+            else
             {
-               connectingEdgeA = new FrameLine2d(insideToe2d, hullPoints.get(prevI));
-               connectingEdgeB = new FrameLine2d(insideToe2d, hullPoints.get(nextI));
+               connectingEdgeA = new FrameLine2d(insideToe2d, adjustedSupportPolygon.getPreviousFrameVertex(i));
+               connectingEdgeB = new FrameLine2d(insideToe2d, adjustedSupportPolygon.getNextFrameVertex(i));
                placeVTPOnInsideToe = true;
             }
-         } else if (equalsOutsideToe)
+         }
+         else if (equalsOutsideToe)
          {
             if (prevEqualsInsideToe)
             {
-               connectingEdgeB = new FrameLine2d(outsideToe2d, hullPoints.get(nextI));
-            } else if (nextEqualsInsideToe)
+               connectingEdgeB = new FrameLine2d(outsideToe2d, adjustedSupportPolygon.getNextFrameVertex(i));
+            }
+            else if (nextEqualsInsideToe)
             {
-               connectingEdgeB = new FrameLine2d(outsideToe2d, hullPoints.get(prevI));
-            } else
+               connectingEdgeB = new FrameLine2d(outsideToe2d, adjustedSupportPolygon.getPreviousFrameVertex(i));
+            }
+            else
             {
-               connectingEdgeA = new FrameLine2d(outsideToe2d, hullPoints.get(nextI));
-               connectingEdgeB = new FrameLine2d(outsideToe2d, hullPoints.get(prevI));
+               connectingEdgeA = new FrameLine2d(outsideToe2d, adjustedSupportPolygon.getNextFrameVertex(i));
+               connectingEdgeB = new FrameLine2d(outsideToe2d, adjustedSupportPolygon.getPreviousFrameVertex(i));
                placeVTPOnOutsideToe = true;
             }
          }
@@ -333,10 +327,12 @@ public class ToeOffVirtualToePointCalculator implements VirtualToePointCalculato
       if (intersections == null)
       {
          upcomingSupportFootVTP = footPolygonInMidFeetZUp.getClosestVertexCopy(controlLine);
-      } else if (intersections.length == 1)
+      }
+      else if (intersections.length == 1)
       {
          upcomingSupportFootVTP = intersections[0];
-      } else
+      }
+      else
       {
          FrameLineSegment2d footLine = new FrameLineSegment2d(intersections);
          upcomingSupportFootVTP = footLine.pointBetweenEndPointsGivenParameter(0.5);
@@ -346,10 +342,12 @@ public class ToeOffVirtualToePointCalculator implements VirtualToePointCalculato
       if (placeVTPOnInsideToe)
       {
          toePoint2d = insideToe2d;
-      } else if (placeVTPOnOutsideToe)
+      }
+      else if (placeVTPOnOutsideToe)
       {
          toePoint2d = outsideToe2d;
-      } else
+      }
+      else
       {
          toePoint2d = toeLine.intersectionWith(controlLine);
       }
@@ -387,7 +385,7 @@ public class ToeOffVirtualToePointCalculator implements VirtualToePointCalculato
    public void setupForDebugViz(boolean debugViz, boolean removeDebugVizEachTime)
    {
       System.err.println("Not implemented!");
-      
+
    }
 
    public void packVirtualToePoints(SideDependentList<FramePoint2d> originalVirtualToePoints, FramePoint2d copDesired,
@@ -395,7 +393,6 @@ public class ToeOffVirtualToePointCalculator implements VirtualToePointCalculato
    {
       throw new RuntimeException("Not implemented!");
 
-      
    }
 
 }
