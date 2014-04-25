@@ -1177,6 +1177,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       desiredPelvisOrientation.set(averageOrientation);
    }
 
+   private final BooleanYoVariable replan = new BooleanYoVariable("replanTrajectory", registry);
    private class SingleSupportState extends State<WalkingState>
    {
       private final RobotSide swingSide;
@@ -1226,11 +1227,16 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                                                         capturePoint2d,
                                                         icpAndMomentumBasedController.getOmega0(),
                                                         computeFootPolygon(supportSide, referenceFrames.getAnkleZUpFrame(supportSide)));
-         if(footstepAdjustor.adjustFootstep(nextFootstep, captureRegionCalculator.getCaptureRegion()))
+         if(footstepAdjustor.adjustFootstep(nextFootstep, captureRegionCalculator.getCaptureRegion()) || replan.getBooleanValue())
          {
             // The nextFootstep has changed and atlas feels bad
-            //updateFootstepParameters();
-            footEndEffectorControlModules.get(swingSide).replanTrajectorie(stateMachine.timeInCurrentState(), nextFootstep.getPosition());
+//            FramePoint2d newPosition = captureRegionCalculator.getCaptureRegion().getCentroidCopy();
+//            newPosition.changeFrame(nextFootstep.getReferenceFrame());
+//            nextFootstep.setPositionChangeOnlyXY(newPosition);
+            
+//            updateFootstepParameters();
+//            footEndEffectorControlModules.get(swingSide).replanTrajectorie(stateMachine.timeInCurrentState(), nextFootstep.getPosition());
+            replan.set(false);
          }
          
          moveICPToInsideOfFootAtEndOfSwing(supportSide, transferToFootstepLocation, swingTimeCalculationProvider.getValue(), swingTimeRemaining,
@@ -1265,6 +1271,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       @Override
       public void doTransitionIntoAction()
       {
+         replan.set(false);
+         
          hasICPPlannerFinished.set(false);
          trailingLeg.set(null);
 

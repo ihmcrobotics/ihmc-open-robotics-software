@@ -243,4 +243,10 @@ public class FifthOrderWaypointPositionTrajectoryGenerator implements PositionTr
       packVelocity(velocityToPack);
       packAcceleration(accelerationToPack);
    }
+   
+   @Override
+   public void updateTrajectory(FramePoint replanInitialPosition, FramePoint replanFinalPosition, FrameVector replanInitialVelocity, double replanInitialTime)
+   {
+      throw new RuntimeException("not implemented");
+   }
 }
