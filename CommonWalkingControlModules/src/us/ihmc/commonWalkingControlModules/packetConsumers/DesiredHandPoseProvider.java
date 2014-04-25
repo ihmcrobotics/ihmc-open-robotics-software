@@ -110,7 +110,10 @@ public class DesiredHandPoseProvider implements ObjectConsumer<HandPosePacket>
          for(ArmJointName armJoint: fullRobotModel.getRobotSpecificJointNames().getArmJointNames())
          {
             int i = -1;
-            finalDesiredJointAngleMap.put(fullRobotModel.getArmJoint(robotSide, armJoint), object.getJointAngles()[++i]);
+            if(object.getJointAngles() != null)
+            	finalDesiredJointAngleMap.put(fullRobotModel.getArmJoint(robotSide, armJoint), object.getJointAngles()[++i]);
+            else
+            	finalDesiredJointAngleMap.put(fullRobotModel.getArmJoint(robotSide, armJoint), 0.0);
          }
       }
 
