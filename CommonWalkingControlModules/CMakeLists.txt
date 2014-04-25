@@ -11,13 +11,14 @@ ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 set(CMAKE_BUILD_TYPE MinSizeRel)
 
 
-
-set(JDK "C:/Program Files/Java/jdk1.7.0_45")
-set(JAVA_AWT_INCLUDE_PATH "${JDK}/include")
-set(JAVA_AWT_LIBRARY "${JDK}/jawt.lib")
-set(JAVA_INCLUDE_PATH "${JDK}/include")
-set(JAVA_INCLUDE_PATH2 "${JDK}/include/win32")
-set(JAVA_JVM_LIBRARY "${JDK}/lib/jvm.lib")
+if(WIN32)
+	set(JDK "C:/Program Files/Java/jdk1.7.0_45")
+	set(JAVA_AWT_INCLUDE_PATH "${JDK}/include")
+	set(JAVA_AWT_LIBRARY "${JDK}/jawt.lib")
+	set(JAVA_INCLUDE_PATH "${JDK}/include")
+	set(JAVA_INCLUDE_PATH2 "${JDK}/include/win32")
+	set(JAVA_JVM_LIBRARY "${JDK}/lib/jvm.lib")
+endif()
 find_package(JNI REQUIRED)
 
 add_subdirectory(csrc)
