@@ -29,9 +29,9 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisPoseProv
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.ChangeableConfigurationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.SettableOrientationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePositionTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.trajectories.UpdatablePoseTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.WrapperForPositionAndOrientationTrajectoryGenerators;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -294,7 +294,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
                                                                                          footTrajectoryTimeProvider, initialConfigurationProvider,
                                                                                          desiredConfigurationProvider, registry);
 
-         PoseTrajectoryGenerator poseTrajectoryGenerator = new WrapperForPositionAndOrientationTrajectoryGenerators(positionTrajectoryGenerator, orientationTrajectoryGenerator);
+         UpdatablePoseTrajectoryGenerator poseTrajectoryGenerator = new WrapperForPositionAndOrientationTrajectoryGenerators(positionTrajectoryGenerator, orientationTrajectoryGenerator);
 
          initialFootConfigurationProviders.put(robotSide, initialConfigurationProvider);
          desiredFootConfigurationProviders.put(robotSide, desiredConfigurationProvider);

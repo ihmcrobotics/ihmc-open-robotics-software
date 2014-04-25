@@ -56,7 +56,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.MaximumConstantJerkFinal
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.trajectories.PoseTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.trajectories.UpdatablePoseTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.SettableOrientationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.SimpleTwoWaypointTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculationProvider;
@@ -538,7 +538,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                                                                                  + "SwingFootOrientation", worldFrame, swingTimeCalculationProvider,
                                                                                     initialOrientationProvider, finalFootOrientationProvider, registry);
 
-         PoseTrajectoryGenerator swingPoseTrajectoryGenerator = new WrapperForPositionAndOrientationTrajectoryGenerators(swingPositionTrajectoryGenerator,
+         UpdatablePoseTrajectoryGenerator swingPoseTrajectoryGenerator = new WrapperForPositionAndOrientationTrajectoryGenerators(swingPositionTrajectoryGenerator,
                                                                    swingOrientationTrajectoryGenerator);
 
          DoubleTrajectoryGenerator footTouchdownPitchTrajectoryGenerator = walkOnTheEdgesProviders.getFootTouchdownPitchTrajectoryGenerator(robotSide);
@@ -1229,6 +1229,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          if(footstepAdjustor.adjustFootstep(nextFootstep, captureRegionCalculator.getCaptureRegion()))
          {
             // The nextFootstep has changed and atlas feels bad
+            //updateFootstepParameters();
+            footEndEffectorControlModules.get(swingSide).replanTrajectorie(stateMachine.timeInCurrentState(), nextFootstep.getPosition());
          }
          
          moveICPToInsideOfFootAtEndOfSwing(supportSide, transferToFootstepLocation, swingTimeCalculationProvider.getValue(), swingTimeRemaining,
@@ -1269,6 +1271,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          footSwitches.get(swingSide).reset();
 
          nextFootstep = upcomingFootstepList.getNextFootstep();
+         updateFootstepParameters();
+      }
+      
+      private void updateFootstepParameters()
+      {
          transferToFootstep.set(nextFootstep.getPosition2dCopy());
 
          boolean nextFootstepHasBeenReplaced = false;
