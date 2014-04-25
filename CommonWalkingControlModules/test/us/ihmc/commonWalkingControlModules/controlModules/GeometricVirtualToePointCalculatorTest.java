@@ -414,7 +414,13 @@ public class GeometricVirtualToePointCalculatorTest
 
       translate.setIdentity();
       translate.setTranslation(translationVector);
-      return footPolygon.changeFrameUsingTransformCopy(footPolygon.getReferenceFrame(), translate, true);
+      
+      FrameConvexPolygon2d translatedFootPolygon = new FrameConvexPolygon2d(footPolygon.getReferenceFrame());
+      translatedFootPolygon.clear();
+      translatedFootPolygon.addVertices(footPolygon);
+      translatedFootPolygon.applyTransform(translate);
+      translatedFootPolygon.update();
+      return translatedFootPolygon;
    }
 
    private final Transform3D translate = new Transform3D();
@@ -441,7 +447,11 @@ public class GeometricVirtualToePointCalculatorTest
       allThree.mul(rotate);
       allThree.mul(undoTranslate);
 
-      FrameConvexPolygon2d rotatedLeftFootPolygon = footPolygon.changeFrameUsingTransformCopy(footPolygon.getReferenceFrame(), allThree, true);
+      FrameConvexPolygon2d rotatedLeftFootPolygon = new FrameConvexPolygon2d(footPolygon.getReferenceFrame());
+      rotatedLeftFootPolygon.clear();
+      rotatedLeftFootPolygon.addVertices(footPolygon);
+      rotatedLeftFootPolygon.applyTransform(allThree);
+      rotatedLeftFootPolygon.update();
       return rotatedLeftFootPolygon;
    }
 
