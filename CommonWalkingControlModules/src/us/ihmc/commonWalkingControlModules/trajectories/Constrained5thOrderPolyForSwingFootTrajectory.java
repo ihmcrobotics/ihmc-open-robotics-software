@@ -9,16 +9,16 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
  *
  */
 
-public class ConstrainedCubicForSwingFootTrajectory
+public class Constrained5thOrderPolyForSwingFootTrajectory
 {
    private final YoVariableRegistry registry;
    
-   private final DoubleYoVariable X0, Xf, T0, Tf, HMAX;
-   private double C0, C1, C2, C3;
+   private final DoubleYoVariable X0, Xf, Vf, T0, Tf, HMAX;
+   private double C0, C1, C2, C3, C4, C5;
 
    public double pos, vel, acc;
 
-   public ConstrainedCubicForSwingFootTrajectory(String name, YoVariableRegistry parentRegistry)
+   public Constrained5thOrderPolyForSwingFootTrajectory(String name, YoVariableRegistry parentRegistry)
    {
       this.registry = new YoVariableRegistry(getClass().getSimpleName());
       parentRegistry.addChild(this.registry);
@@ -28,6 +28,7 @@ public class ConstrainedCubicForSwingFootTrajectory
       HMAX = new DoubleYoVariable(name + "_hmax", registry);
 
       Xf = new DoubleYoVariable(name + "_xf", registry);
+      Vf = new DoubleYoVariable(name + "_vf", registry);
       Tf = new DoubleYoVariable(name + "_tf", registry);
    }
 
@@ -58,10 +59,11 @@ public class ConstrainedCubicForSwingFootTrajectory
    }
 
 
-   public void setParams(double X0, double HMAX, double Xf, double T0, double Tf)
+   public void setParams(double X0, double HMAX, double Xf, double Vf, double T0, double Tf)
    {
       this.HMAX.set(HMAX);
       this.X0.set(X0);
+      this.Vf.set(Vf);
       this.Xf.set(Xf);
       this.T0.set(T0);
       this.Tf.set(Tf);
@@ -73,19 +75,31 @@ public class ConstrainedCubicForSwingFootTrajectory
       double tf = Tf.getDoubleValue();
       double x0 = X0.getDoubleValue();
       double xf = Xf.getDoubleValue();
+      double vf = Vf.getDoubleValue();
       double hmax = HMAX.getDoubleValue();
       
-      double factor = 1/(Math.pow(t0-tf, 3));
+      double factor = 1/(Math.pow(t0-tf, 5));
       
-      C0 = -factor*(4*hmax*Math.pow(t0,2)*tf - 4*hmax*t0*Math.pow(tf,2) + Math.pow(t0,2)*tf*x0 + 2*t0*Math.pow(tf,2)*x0 + 
-            Math.pow(tf,3)*x0 - Math.pow(t0,3)*xf - 2*Math.pow(t0,2)*tf*xf - t0*Math.pow(tf,2)*xf);
+      C0 = factor*(16*hmax*Math.pow(t0,2)*(t0 - tf)*Math.pow(tf,2) + Math.pow((t0 + 
+            tf),2)*(tf*(Math.pow(t0,2)*(-t0 + tf)*vf + (7*t0 - tf)*tf*x0) + 
+                  Math.pow(t0,2)*(t0 - 7*tf)*xf));
       
-      C1 = -factor*(-4*hmax*Math.pow(t0,2) + 4*hmax*Math.pow(tf,2) - Math.pow(t0,2)*x0 - 6*t0*tf*x0 - 5*Math.pow(tf,2)*x0 + 
-            5*Math.pow(t0,2)*xf + 6*t0*tf*xf + Math.pow(tf,2)*xf);
+      C1 = factor*(t0*(t0 + tf)*(32*hmax*tf*(-t0 + tf) + Math.pow(t0,3)*vf + 6*Math.pow(t0,2)*tf*vf - 
+            2*Math.pow(tf,2)*(tf*vf + 23*x0 - 7*xf) + t0*tf*(-5*tf*vf - 14*x0 + 46*xf)));
       
-      C2 = -factor*(4*(hmax*t0 - hmax*tf + t0*x0 + 2*tf*x0 - 2*t0*xf - tf*xf));
+      C2 = factor*(16*hmax*(t0 - tf)*(Math.pow(t0,2) + 4*t0*tf + Math.pow(tf,2)) - 6*Math.pow(t0,4)*vf + 
+            t0*Math.pow(tf,2)*(11*tf*vf + 129*x0 - 81*xf) + 
+            3*Math.pow(t0,2)*tf*(3*tf*vf + 27*x0 - 43*xf) + 
+            Math.pow(t0,3)*(-15*tf*vf + 7*x0 - 23*xf) + Math.pow(tf,3)*(tf*vf + 23*x0 - 7*xf));
       
-      C3 = factor*(4*(x0 - xf));
+      C3 = factor*(32*hmax*(-Math.pow(t0,2) + Math.pow(tf,2)) + 13*Math.pow(t0,3)*vf + 
+            Math.pow(tf,2)*(-5*tf*vf - 66*x0 + 34*xf) + Math.pow(t0,2)*(9*tf*vf - 34*x0 + 66*xf) + 
+            t0*tf*(-17*tf*vf - 140*x0 + 140*xf));
+      
+      C4 = factor*(4*(4*hmax*(t0 - tf) - 3*Math.pow(t0,2)*vf + t0*(tf*vf + 13*x0 - 17*xf) + 
+            tf*(2*tf*vf + 17*x0 - 13*xf)));
+      
+      C5 = factor*(4*(t0*vf - tf*vf - 6*x0 + 6*xf));
    }
 
    public void computeTrajectory(double time)
@@ -110,9 +124,9 @@ public class ConstrainedCubicForSwingFootTrajectory
       }
       else
       {
-         pos = C0 + C1*time + C2*Math.pow(time,2) + C3*Math.pow(time,3);
-         vel = C1 + 2*C2*time + 3*C3*Math.pow(time,2);
-         acc = 2*C2 + 6*C3*time;
+         pos = C0 + C1*time + C2*Math.pow(time,2) + C3*Math.pow(time,3) + C4*Math.pow(time,4) + C5*Math.pow(time,5);
+         vel = C1 + 2*C2*time + 3*C3*Math.pow(time,2) + 4*C4*Math.pow(time,3) + 5*C5*Math.pow(time,4);
+         acc = 2*C2 + 6*C3*time + 12*C4*Math.pow(time,2) + 20*C5*Math.pow(time,3);
       }
    }
 }

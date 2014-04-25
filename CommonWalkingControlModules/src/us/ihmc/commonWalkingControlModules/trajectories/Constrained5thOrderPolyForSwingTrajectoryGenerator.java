@@ -3,26 +3,31 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredVelocityControlModule;
 import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.VectorProvider;
 
-public class ConstrainedCubicForSwingTrajectoryGenerator
+public class Constrained5thOrderPolyForSwingTrajectoryGenerator
 {
    private final PositionProvider initialPositionProvider;
    private final PositionProvider finalDesiredPositionProvider;
+   private final VectorProvider finalDesiredVelocityProvider;
    
    private final YoFramePoint initialPosition3D;
    private final YoFramePoint finalDesiredPosition3D;
+   private final YoFrameVector finalDesiredVelocity3D;
    
    private final DoubleYoVariable initialPosition1D;
    private final DoubleYoVariable finalDesiredPosition1D;
+   private final DoubleYoVariable finalDesiredVelocity1D;
    
    private final DoubleYoVariable desiredPosition1D;
    private final DoubleYoVariable desiredVelocity1D;
@@ -30,22 +35,20 @@ public class ConstrainedCubicForSwingTrajectoryGenerator
    
    
    private final double stepTime;
-   private final double initialTime;
+   private double initialTime;
    
    private final WalkingControllerParameters walkingControllerParameters; 
    
-   private boolean isInitialized = false;
-   
-   private final ConstrainedCubicForSwingFootTrajectory swingFootTrajectory;
+   private final Constrained5thOrderPolyForSwingFootTrajectory swingFootTrajectory;
    
    private final ReferenceFrame referenceFrame;
    
    private final YoVariableRegistry registry;
    
-   public ConstrainedCubicForSwingTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, DoubleYoVariable initialTime,
+   public Constrained5thOrderPolyForSwingTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, double initialTime,
          DoubleProvider stepTimeProvider,PositionProvider initialPositionProvider, PositionProvider finalDesiredPositionProvider, 
-         YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
-         WalkingControllerParameters walkingControllerParameters, boolean visualize)
+         VectorProvider finalDesiredVelocityProvider, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+         WalkingControllerParameters walkingControllerParameters)
    {
       this.registry = new YoVariableRegistry(getClass().getSimpleName());
       parentRegistry.addChild(this.registry);
@@ -54,32 +57,36 @@ public class ConstrainedCubicForSwingTrajectoryGenerator
       
       this.initialPositionProvider = initialPositionProvider;
       this.finalDesiredPositionProvider = finalDesiredPositionProvider;
-      //@TODO make this less hacky. Will need to create a PositionProvider2D and a VectorProvider2D I think.
+      this.finalDesiredVelocityProvider = finalDesiredVelocityProvider;
+      
       this.initialPosition3D = new YoFramePoint(namePrefix + "InitialPosition", this.referenceFrame, this.registry);
       this.finalDesiredPosition3D = new YoFramePoint(namePrefix + "FinalDesiredPosition", this.referenceFrame, this.registry);
+      this.finalDesiredVelocity3D = new YoFrameVector(namePrefix + "FinalDesiredVelocity", this.referenceFrame, this.registry);
       
       this.initialPosition1D = new DoubleYoVariable(namePrefix + "InitialPosition", this.registry);
       this.finalDesiredPosition1D = new DoubleYoVariable(namePrefix + "FinalDesiredPosition", this.registry);
+      this.finalDesiredVelocity1D = new DoubleYoVariable(namePrefix + "FinalDesiredVelocity", this.registry);
       
       this.desiredPosition1D = new DoubleYoVariable(namePrefix + "DesiredPositionZ", this.registry);
       this.desiredVelocity1D = new DoubleYoVariable(namePrefix + "DesiredVelocityZ", this.registry);
       this.desiredAcceleration1D = new DoubleYoVariable(namePrefix + "DesiredAccelerationZ", this.registry);
       
       this.stepTime = stepTimeProvider.getValue();
-      this.initialTime = initialTime.getDoubleValue();
+      this.initialTime = initialTime;
       
       this.walkingControllerParameters = walkingControllerParameters;
       
-      swingFootTrajectory = new ConstrainedCubicForSwingFootTrajectory(namePrefix + "swingFootTrajectoryZ", this.registry);
+      swingFootTrajectory = new Constrained5thOrderPolyForSwingFootTrajectory(namePrefix + "swingFootTrajectoryZ", this.registry);
    }
    
    public void initialize()
    {
       setInitialAndFinalPositionsAndVelocities();
       
-      swingFootTrajectory.setParams(initialPosition1D.getDoubleValue(), 0.1, finalDesiredPosition1D.getDoubleValue(), initialTime, stepTime);
+      //@TODO Get desired max step height from walking parameters.
+      swingFootTrajectory.setParams(initialPosition1D.getDoubleValue(), initialPosition1D.getDoubleValue()+0.15, finalDesiredPosition1D.getDoubleValue(), 
+                                    finalDesiredVelocity1D.getDoubleValue(), initialTime, stepTime);
       
-      isInitialized = true;
    }
 
    public double getDesiredPosition()
@@ -99,17 +106,22 @@ public class ConstrainedCubicForSwingTrajectoryGenerator
    
    private void setInitialAndFinalPositionsAndVelocities()
    {
+      // Is this all necessary? Seems like I am doing too much here....
       FramePoint tempInitialPosition = new FramePoint(referenceFrame);
       FramePoint tempFinalPosition = new FramePoint(referenceFrame);
+      FrameVector tempFinalVelocity = new FrameVector(referenceFrame);
 
       initialPositionProvider.get(tempInitialPosition);
       finalDesiredPositionProvider.get(tempFinalPosition);
+      finalDesiredVelocityProvider.get(tempFinalVelocity);
 
       tempInitialPosition.changeFrame(referenceFrame);
       tempFinalPosition.changeFrame(referenceFrame);
+      tempFinalVelocity.changeFrame(referenceFrame);
       
       initialPosition3D.set(tempInitialPosition);
       finalDesiredPosition3D.set(tempFinalPosition);
+      finalDesiredVelocity3D.set(tempFinalVelocity);
       
       initialPosition3D.setX(initialPosition3D.getX());
       initialPosition3D.setY(initialPosition3D.getY());
@@ -119,16 +131,17 @@ public class ConstrainedCubicForSwingTrajectoryGenerator
       finalDesiredPosition3D.setY(finalDesiredPosition3D.getY());
       finalDesiredPosition3D.setY(finalDesiredPosition3D.getZ());
       
+      finalDesiredVelocity3D.setX(finalDesiredVelocity3D.getX());
+      finalDesiredVelocity3D.setY(finalDesiredVelocity3D.getY());
+      finalDesiredVelocity3D.setZ(finalDesiredVelocity3D.getZ());
+      
       initialPosition1D.set(initialPosition3D.getZ());
       finalDesiredPosition1D.set(finalDesiredPosition3D.getZ());
+      finalDesiredVelocity1D.set(finalDesiredVelocity3D.getZ());
    }
    
    public void compute(double time)
    {
-      if(!isInitialized)
-      {
-         initialize();
-      }
       
       swingFootTrajectory.computeTrajectory(time);
       
