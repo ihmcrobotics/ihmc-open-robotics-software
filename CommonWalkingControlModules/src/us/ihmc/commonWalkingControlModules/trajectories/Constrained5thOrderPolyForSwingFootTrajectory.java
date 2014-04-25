@@ -67,6 +67,8 @@ public class Constrained5thOrderPolyForSwingFootTrajectory
       this.Xf.set(Xf);
       this.T0.set(T0);
       this.Tf.set(Tf);
+      
+      computeConstants();
    }
 
    private void computeConstants()
@@ -104,8 +106,6 @@ public class Constrained5thOrderPolyForSwingFootTrajectory
 
    public void computeTrajectory(double time)
    {
-      computeConstants();
-
       if (time < T0.getDoubleValue())
       {
          pos = X0.getDoubleValue();
