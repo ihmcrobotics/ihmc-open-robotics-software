@@ -7,7 +7,6 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.ConvexPolygonTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
-import us.ihmc.utilities.math.geometry.FrameConvexPolygon2dAndConnectingEdges;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -55,11 +54,12 @@ public class BipedSupportPolygons
    private final SideDependentList<FrameConvexPolygon2d> footPolygonsInAnkleZUp = new SideDependentList<FrameConvexPolygon2d>();
    private final SideDependentList<FrameConvexPolygon2d> footPolygonsInMidFeetZUp = new SideDependentList<FrameConvexPolygon2d>();
    private final FrameConvexPolygon2d supportPolygonInMidFeetZUp = new FrameConvexPolygon2d();
+   private final FrameConvexPolygon2d supportPolygonInWorld = new FrameConvexPolygon2d();
    private final YoFrameConvexPolygon2d supportPolygonViz;
    private final YoFrameLineSegment2d footToFootSegmentViz;
 
    // Connecting edges between the two foot polygons to create the support polygon when in double support; null in single support
-   private FrameLineSegment2d connectingEdge1, connectingEdge2;
+   private final FrameLineSegment2d connectingEdge1, connectingEdge2;
 
    // 'Sweet spots', the spots inside each of the footPolygons where capture point placement leads to really good balance. Typically the middle of the foot or so:
    private final SideDependentList<FramePoint2d> sweetSpotsInAnkleZUp = new SideDependentList<FramePoint2d>();
@@ -67,6 +67,7 @@ public class BipedSupportPolygons
 
    // Line segment from one sweet spot to the other:
    private final FrameLineSegment2d footToFootLineSegmentInMidFeetZUp;
+   private final FrameLineSegment2d footToFootLineSegmentInWorld;
 
    // In order to deal with intersecting polygons, it is much harder to calculate the connecting edges
    // So let's not use the connecting edges unles we need
@@ -98,9 +99,12 @@ public class BipedSupportPolygons
          sweetSpotsInAnkleZUp.put(robotSide, new FramePoint2d());
          sweetSpotsInMidFeetZUp.put(robotSide, new FramePoint2d());
       }
-      
+
       footToFootLineSegmentInMidFeetZUp = new FrameLineSegment2d(midFeetZUp);
-      
+      footToFootLineSegmentInWorld = new FrameLineSegment2d(worldFrame);
+      connectingEdge1 = new FrameLineSegment2d(midFeetZUp);
+      connectingEdge2 = new FrameLineSegment2d(midFeetZUp);
+
       if (dynamicGraphicObjectsListRegistry != null)
       {
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
@@ -159,13 +163,17 @@ public class BipedSupportPolygons
    {
       update(contactPoints, true);
    }
-   
+
    public void update(SideDependentList<List<FramePoint>> contactPoints, boolean recycleMemory)
-   {      
+   {
       timer.startTimer();
       boolean inDoubleSupport = true;
       boolean neitherFootIsSupportingFoot = true;
       RobotSide supportSide = null;
+
+      connectingEdge1.setToNaN();
+      connectingEdge2.setToNaN();
+      
       for (RobotSide robotSide : RobotSide.values)
       {
          List<FramePoint> contactPointsForSide = contactPoints.get(robotSide);
@@ -194,17 +202,16 @@ public class BipedSupportPolygons
       {
          if (useConnectingEdges)
          {
-            FrameConvexPolygon2dAndConnectingEdges supportPolygonAndEdgesInMidFeetZUp = ConvexPolygonTools.combineDisjointPolygons(
-                  footPolygonsInMidFeetZUp.get(RobotSide.LEFT), footPolygonsInMidFeetZUp.get(RobotSide.RIGHT));
+            boolean success = ConvexPolygonTools.combineDisjointPolygons(footPolygonsInMidFeetZUp.get(RobotSide.LEFT),
+                  footPolygonsInMidFeetZUp.get(RobotSide.RIGHT), supportPolygonInMidFeetZUp, connectingEdge1, connectingEdge2);
 
-            if (supportPolygonAndEdgesInMidFeetZUp == null)
-               System.err.println("Feet polygons overlap. Crashing!!!");
+            if (!success)
+            {
+               System.err.println("Feet polygons overlap!!!");
 
-            // If feet are overlapping, then supportPolygonAndEdgesInMidFeetZUp = null...
-            supportPolygonInMidFeetZUp.setIncludingFrame(supportPolygonAndEdgesInMidFeetZUp.getFrameConvexPolygon2d());
-
-            connectingEdge1 = supportPolygonAndEdgesInMidFeetZUp.getConnectingEdge1();
-            connectingEdge2 = supportPolygonAndEdgesInMidFeetZUp.getConnectingEdge2();
+               // If feet are overlapping, then combine polygons in less efficient way (it was set to null before)
+               supportPolygonInMidFeetZUp.setIncludingFrame(footPolygonsInMidFeetZUp.get(RobotSide.LEFT), footPolygonsInMidFeetZUp.get(RobotSide.RIGHT));
+            }
          }
          else
          {
@@ -219,13 +226,16 @@ public class BipedSupportPolygons
          }
 
          supportPolygonInMidFeetZUp.setIncludingFrame(footPolygonsInMidFeetZUp.get(supportSide));
-
-         connectingEdge1 = null;
-         connectingEdge2 = null;
       }
 
       footToFootLineSegmentInMidFeetZUp.setFirstEndPoint(sweetSpotsInMidFeetZUp.get(RobotSide.LEFT));
       footToFootLineSegmentInMidFeetZUp.setSecondEndPoint(sweetSpotsInMidFeetZUp.get(RobotSide.RIGHT));
+
+      supportPolygonInWorld.setIncludingFrame(supportPolygonInMidFeetZUp);
+      supportPolygonInWorld.changeFrame(worldFrame);
+
+      footToFootLineSegmentInWorld.setAndChangeFrame(footToFootLineSegmentInMidFeetZUp);
+      footToFootLineSegmentInWorld.changeFrame(worldFrame);
 
       timer.stopTimer();
 
@@ -242,7 +252,7 @@ public class BipedSupportPolygons
 
    private void visualize()
    {
-      supportPolygonViz.setFrameConvexPolygon2d(supportPolygonInMidFeetZUp.changeFrameCopy(worldFrame));
-      footToFootSegmentViz.setFrameLineSegment2d(footToFootLineSegmentInMidFeetZUp.changeFrameCopy(worldFrame));
+      supportPolygonViz.setFrameConvexPolygon2d(supportPolygonInWorld);
+      footToFootSegmentViz.setFrameLineSegment2d(footToFootLineSegmentInWorld);
    }
 }
