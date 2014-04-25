@@ -1,12 +1,14 @@
 cmake_minimum_required(VERSION 2.6)
 project(CommonWalkingControlModules)
-
-include_directories(${JNI_INCLUDE_DIRS}) 
-
 if(WIN32)
 	set(CMAKE_C_FLAGS_MINSIZEREL "${CMAKE_C_FLAGS_MINSIZEREL} /MT")
 	set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /MT")
+	set(CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} /MT")
+	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
 endif(WIN32)
+
+
+include_directories(${JNI_INCLUDE_DIRS}) 
 
 add_library(LeeGoswamiForceOptimizer SHARED LeeGoswamiForceOptimizerNative.c leeGoswamiForceOptimizer/util.c leeGoswamiForceOptimizer/solver.c leeGoswamiForceOptimizer/matrix_support.c leeGoswamiForceOptimizer/ldl.c)
 if(NOT WIN32)
