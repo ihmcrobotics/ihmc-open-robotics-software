@@ -43,7 +43,6 @@ import us.ihmc.commonWalkingControlModules.packets.DesiredHighLevelStateProvider
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FingerForceSensors;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
-import us.ihmc.commonWalkingControlModules.wrenchDistribution.ContactPointGroundReactionWrenchDistributor;
 import us.ihmc.graveYard.commonWalkingControlModules.vrc.TorusManipulationProvider;
 import us.ihmc.graveYard.commonWalkingControlModules.vrc.TorusPoseProvider;
 import us.ihmc.robotSide.RobotSide;
@@ -135,13 +134,13 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
          contactablePlaneBodiesAndBases.put(contactablePlaneBody, fullRobotModel.getChest());
       }
 
-      ContactPointGroundReactionWrenchDistributor groundReactionWrenchDistributor =
-         new ContactPointGroundReactionWrenchDistributor(referenceFrames.getCenterOfMassFrame(), registry);
-      double[] diagonalCWeights = new double[]
-      {
-         1.0, 1.0, 1.0, 1.0, 1.0, 1.0
-      };
-      groundReactionWrenchDistributor.setWeights(diagonalCWeights, 1.0, 0.001);
+//      ContactPointGroundReactionWrenchDistributor groundReactionWrenchDistributor =
+//         new ContactPointGroundReactionWrenchDistributor(referenceFrames.getCenterOfMassFrame(), registry);
+//      double[] diagonalCWeights = new double[]
+//      {
+//         1.0, 1.0, 1.0, 1.0, 1.0, 1.0
+//      };
+//      groundReactionWrenchDistributor.setWeights(diagonalCWeights, 1.0, 0.001);
 
       CoMBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule =
          new CoMBasedMomentumRateOfChangeControlModule(controlDT, referenceFrames.getCenterOfMassFrame(), centerOfMassJacobian, registry);
