@@ -97,9 +97,17 @@ public class TestFindTentativeListOfPolygonsIntersectingTargetPolygon extends Te
       int count = 0;
       for (int i = 0; i < convexPolygon2ds.size(); i++)
       {
-         intersectingPolygon2ds.add(ConvexPolygonTools.computeIntersectionOfPolygons(convexPolygon2ds.get(i), captureRegionPolygon));
-         if (intersectingPolygon2ds.get(i) != null)
+         ConvexPolygon2d intersection = new ConvexPolygon2d();
+         boolean success = ConvexPolygonTools.computeIntersectionOfPolygons(convexPolygon2ds.get(i), captureRegionPolygon, intersection);
+         if (success)
+         {
+            intersectingPolygon2ds.add(intersection);
             count++;
+         }
+         else
+         {
+            intersectingPolygon2ds.add(null);
+         }
       }
 
       if (count != steppintStonesIntersectingCaptureRegion.size())
@@ -245,9 +253,17 @@ public class TestFindTentativeListOfPolygonsIntersectingTargetPolygon extends Te
       int count = 0;
       for (int i = 0; i < convexPolygon2ds.size(); i++)
       {
-         intersectingPolygon2ds.add(ConvexPolygonTools.computeIntersectionOfPolygons(convexPolygon2ds.get(i), captureRegionPolygon));
-         if (intersectingPolygon2ds.get(i) != null)
+         ConvexPolygon2d intersection = new ConvexPolygon2d();
+         boolean success = ConvexPolygonTools.computeIntersectionOfPolygons(convexPolygon2ds.get(i), captureRegionPolygon, intersection);
+         if (success)
+         {
+            intersectingPolygon2ds.add(intersection);
             count++;
+         }
+         else
+         {
+            intersectingPolygon2ds.add(null);
+         }
       }
 
       if (count != steppintStonesIntersectingCaptureRegion.size())

@@ -1747,11 +1747,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       if (walkOnTheEdgesManager.stayOnToes())
       {
          List<FramePoint> contactPoints = getToePoints(contactableBody);
-         footPolygon.setIncludingFrameByProjectionOntoXYPlane(referenceFrames.getSoleFrame(swingSide), contactPoints);
+         footPolygon.setIncludingFrameByProjectionOntoXYPlaneAndUpdate(referenceFrames.getSoleFrame(swingSide), contactPoints);
       }
       else
       {
-         footPolygon.setIncludingFrame(contactableBody.getContactPoints2d());
+         footPolygon.setIncludingFrameAndUpdate(contactableBody.getContactPoints2d());
       }
 
       TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForSingleSupport(transferToFootstep, swingSide,
@@ -2133,7 +2133,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private FrameConvexPolygon2d computeFootPolygon(RobotSide robotSide, ReferenceFrame referenceFrame)
    {
       momentumBasedController.getContactPoints(feet.get(robotSide), tempContactPoints);
-      tempFootPolygon.setIncludingFrameByProjectionOntoXYPlane(referenceFrame, tempContactPoints);
+      tempFootPolygon.setIncludingFrameByProjectionOntoXYPlaneAndUpdate(referenceFrame, tempContactPoints);
 
       return tempFootPolygon;
    }

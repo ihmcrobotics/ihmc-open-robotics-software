@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import javax.media.j3d.Transform3D;
@@ -488,7 +487,7 @@ public class WalkOnTheEdgesManager
    private FrameConvexPolygon2d getOnToesTriangleCopy(FramePoint2d finalDesiredICP, ContactablePlaneBody supportFoot)
    {
       List<FramePoint> toePoints = getToePointsCopy(supportFoot);
-      Collection<FramePoint2d> points = new ArrayList<FramePoint2d>();
+      ArrayList<FramePoint2d> points = new ArrayList<FramePoint2d>();
       for (FramePoint toePoint : toePoints)
       {
          toePoint.changeFrame(worldFrame);

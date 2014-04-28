@@ -12,6 +12,8 @@ import org.apache.commons.lang.mutable.MutableDouble;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolver;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TrajectoryBasedNumericalInverseKinematicsCalculator;
@@ -159,7 +161,7 @@ public class InverseDynamicsJointController extends State<HighLevelState>
    private final CommonWalkingReferenceFrames referenceFrames;
    
    private final BipedSupportPolygons bipedSupportPolygons;
-   private final SideDependentList<List<FramePoint>> footContactPoints = new SideDependentList<List<FramePoint>>();
+   private final SideDependentList<PlaneContactState> footContactStates = new SideDependentList<>();
    
    private final MomentumBasedController momentumBasedController;
    
@@ -175,7 +177,8 @@ public class InverseDynamicsJointController extends State<HighLevelState>
       
       for (RobotSide robotSide : RobotSide.values)
       {
-         footContactPoints.put(robotSide, momentumBasedController.getContactablePlaneFeet().get(robotSide).getContactPointsCopy());
+         ContactablePlaneBody contactableFoot = momentumBasedController.getContactablePlaneFeet().get(robotSide);
+         footContactStates.put(robotSide, momentumBasedController.getContactState(contactableFoot));
       }
       
       gainScaling.set(0.0);
@@ -515,7 +518,7 @@ public class InverseDynamicsJointController extends State<HighLevelState>
          }
       }
       
-      bipedSupportPolygons.update(footContactPoints, true);
+      bipedSupportPolygons.updateUsingContactStates(footContactStates);
       momentumBasedController.callUpdatables();
       
       computeGravityTorquesForViz();

@@ -65,7 +65,7 @@ public class FootstepAdjustor
       // If there are stepping stones then intersect them with the capture region.
       if(steppingStones == null)
       {
-         desiredSteppingRegion.setIncludingFrame(captureRegion);
+         desiredSteppingRegion.setIncludingFrameAndUpdate(captureRegion);
       } else {
          updateDesiredSteppingRegion(captureRegion, steppingStones, footstep, desiredSteppingRegion);
       }
@@ -143,7 +143,7 @@ public class FootstepAdjustor
                                             Footstep footstep, FrameConvexPolygon2d polygonToPack)
    {
       // TODO
-      polygonToPack.setIncludingFrame(captureRegion);
+      polygonToPack.setIncludingFrameAndUpdate(captureRegion);
    }
    
    public void setSteppingStones(SteppingStones steppingStones)
