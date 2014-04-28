@@ -1,28 +1,10 @@
 package us.ihmc.graphics3DAdapter.graphics;
 
-import java.awt.image.BufferedImage;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.media.j3d.Transform3D;
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddExtusionInstruction;
-import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddHeightMapInstruction;
-import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddMeshDataInstruction;
-import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddModelFileInstruction;
-import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DInstruction;
-import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DPrimitiveInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.*;
 import us.ihmc.graphics3DAdapter.graphics.instructions.primitives.Graphics3DIdentityInstruction;
 import us.ihmc.graphics3DAdapter.graphics.instructions.primitives.Graphics3DRotateInstruction;
 import us.ihmc.graphics3DAdapter.graphics.instructions.primitives.Graphics3DScaleInstruction;
@@ -33,6 +15,13 @@ import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.InertiaTools;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
+
+import javax.media.j3d.Transform3D;
+import javax.vecmath.*;
+import java.awt.image.BufferedImage;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Graphics3DObject
 {
@@ -78,10 +67,10 @@ public class Graphics3DObject
     *
     * @param graphics3DObject Graphics3DObject to combine with.
     */
-   public void combine(Graphics3DObject Graphics3DObject)
+   public void combine(Graphics3DObject graphics3DObject)
    {
       this.identity();
-      this.graphics3DInstructions.addAll(Graphics3DObject.getGraphics3DInstructions());
+      this.graphics3DInstructions.addAll(graphics3DObject.getGraphics3DInstructions());
    }
    
    public void combine(Graphics3DObject Graphics3DObject, Vector3d offset)
@@ -182,7 +171,7 @@ public class Graphics3DObject
     * as described by the translations and rotations applied since its creation at the joint
     * origin.
     *
-    * @param roationAngle the angle to rotate around the specified axis in radians.
+    * @param rotationAngle the angle to rotate around the specified axis in radians.
     * @param rotationAxis Vector3d describing the axis of rotation.
     */
    public void rotate(double rotationAngle, Vector3d rotationAxis)
@@ -429,8 +418,15 @@ public class Graphics3DObject
     */
    public Graphics3DAddMeshDataInstruction addCube(double lx, double ly, double lz, AppearanceDefinition cubeApp)
    {
-      MeshDataHolder meshData = MeshDataGenerator.Cube(lx, ly, lz);
+      MeshDataHolder meshData = MeshDataGenerator.Cube(lx, ly, lz, false);
       
+      return addMeshData(meshData, cubeApp);
+   }
+
+   public Graphics3DAddMeshDataInstruction addCube(double lx, double ly, double lz, boolean centered , AppearanceDefinition cubeApp)
+   {
+      MeshDataHolder meshData = MeshDataGenerator.Cube(lx, ly, lz,centered);
+
       return addMeshData(meshData, cubeApp);
    }
 
@@ -537,9 +533,9 @@ public class Graphics3DObject
     * Again, x, y and z are red, white and blue.
     * <br /><br /><img src="doc-files/LinkGraphics.addEllipsoid1.jpg">
     *
-    * @param xRad x direction radius in meters
-    * @param yRad y direction radius in meters
-    * @param zRad z direction radius in meters
+    * @param xRadius x direction radius in meters
+    * @param yRadius y direction radius in meters
+    * @param zRadius z direction radius in meters
     */
    public Graphics3DAddMeshDataInstruction addEllipsoid(double xRadius, double yRadius, double zRadius)
    {
@@ -557,9 +553,9 @@ public class Graphics3DObject
     * Again, x, y and z are red, white and blue.
     * <br /><br /><img src="doc-files/LinkGraphics.addEllipsoid2.jpg">
     *
-    * @param xRad x direction radius in meters
-    * @param yRad y direction radius in meters
-    * @param zRad z direction radius in meters
+    * @param xRadius x direction radius in meters
+    * @param yRadius y direction radius in meters
+    * @param zRadius z direction radius in meters
     * @param ellipsoidApp Appearance to be used with the new ellipsoid.  See {@link YoAppearance YoAppearance} for implementations.
     */
    public Graphics3DAddMeshDataInstruction addEllipsoid(double xRadius, double yRadius, double zRadius, AppearanceDefinition ellipsoidApp)
@@ -872,7 +868,7 @@ public class Graphics3DObject
     * side that is drawn.
     *
     * @param polygonPoints ArrayList containing the points.
-    * @param appearance Appearance to be used with the new polygon.  See {@link YoAppearance YoAppearance} for implementations.
+    * @param yoAppearance Appearance to be used with the new polygon.  See {@link YoAppearance YoAppearance} for implementations.
     */
    public Graphics3DAddMeshDataInstruction addPolygon(ArrayList<Point3d> polygonPoints, AppearanceDefinition yoAppearance)
    {
@@ -887,7 +883,7 @@ public class Graphics3DObject
     * inserting points will produce unpredictable results, clockwise direction determines the
     * side that is drawn.
     * @param convexPolygon2d ConvexPolygon2d containing the points.
-    * @param appearance Appearance to be used with the new polygon.  See {@link YoAppearance YoAppearance} for implementations.
+    * @param yoAppearance Appearance to be used with the new polygon.  See {@link YoAppearance YoAppearance} for implementations.
     */
    public Graphics3DAddMeshDataInstruction addPolygon(ConvexPolygon2d convexPolygon2d, AppearanceDefinition yoAppearance)
    {
@@ -923,7 +919,7 @@ public class Graphics3DObject
     * side that is drawn.
     *
     * @param polygonPoints Array containing the points
-    * @param appearance Appearance to be used with the new polygon.  See {@link YoAppopearance YoAppearance} for implementations.
+    * @param yoAppearance Appearance to be used with the new polygon.  See {@link AppearanceDefinition} for implementations.
     */
    public Graphics3DAddMeshDataInstruction addPolygon(Point3d[] polygonPoints, AppearanceDefinition yoAppearance)
    {

@@ -120,21 +120,18 @@ public class DRCSimulationFactory
       ArrayList<WrenchCalculatorInterface> wrenchProviders = new ArrayList<WrenchCalculatorInterface>();
 
       ScsCollisionConfigure collisionConfigure = null;
-//      if( !useNewPhysics )
-//      {
-         for (OneDegreeOfFreedomJoint sensorJoint : forceTorqueSensorJoints)
-         {
-            ArrayList<GroundContactPoint> groundContactPoints = new ArrayList<GroundContactPoint>();
-            sensorJoint.recursiveGetAllGroundContactPoints(groundContactPoints);
-            GroundContactPointBasedWrenchCalculator groundContactPointBasedWrenchCalculator = new GroundContactPointBasedWrenchCalculator(groundContactPoints,
-                  sensorJoint);
-            wrenchProviders.add(groundContactPointBasedWrenchCalculator);
-         }
+      for (OneDegreeOfFreedomJoint sensorJoint : forceTorqueSensorJoints)
+      {
+         ArrayList<GroundContactPoint> groundContactPoints = new ArrayList<GroundContactPoint>();
+         sensorJoint.recursiveGetAllGroundContactPoints(groundContactPoints);
+         GroundContactPointBasedWrenchCalculator groundContactPointBasedWrenchCalculator = new GroundContactPointBasedWrenchCalculator(groundContactPoints,
+               sensorJoint);
+         wrenchProviders.add(groundContactPointBasedWrenchCalculator);
+      }
 
-//      } else {
-//           collisionConfigure = drcRobotModel.getPhysicsConfigure(simulatedRobot);
-//         throw new RuntimeException("Need to implement");
-//      }
+      if( useNewPhysics ) {
+         collisionConfigure = drcRobotModel.getPhysicsConfigure(simulatedRobot);
+      }
 
       SensorReaderFactory sensorReaderFactory; // this is the connection between the ModularRobotController and the DRCController below
       ModularRobotController controller = new ModularRobotController("SensorReaders");

@@ -1,14 +1,13 @@
 package us.ihmc.graphics3DAdapter.graphics;
 
-import java.util.ArrayList;
-import java.util.List;
+import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
 import javax.vecmath.TexCoord2f;
-
-import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MeshDataGenerator
 {
@@ -566,25 +565,28 @@ public class MeshDataGenerator
       return new MeshDataHolder(points, textPoints, polygonIndices, pStripCounts);
    }
 
-   public static MeshDataHolder Cube(double lx, double ly, double lz)
+   public static MeshDataHolder Cube(double lx, double ly, double lz, boolean centered )
    {
-      return (Cube((float) lx, (float) ly, (float) lz));
+      return (Cube((float) lx, (float) ly, (float) lz,centered));
    }
 
-   public static MeshDataHolder Cube(float lx, float ly, float lz)
+   public static MeshDataHolder Cube(float lx, float ly, float lz, boolean centered )
    {
       Point3f points[] = new Point3f[8];
 
       TexCoord2f textPoints[] = new TexCoord2f[8];
 
-      points[0] = new Point3f(-lx / 2.0f, -ly / 2.0f, 0.0f);
-      points[1] = new Point3f(lx / 2.0f, -ly / 2.0f, 0.0f);
-      points[2] = new Point3f(lx / 2.0f, ly / 2.0f, 0.0f);
-      points[3] = new Point3f(-lx / 2.0f, ly / 2.0f, 0.0f);
-      points[4] = new Point3f(-lx / 2.0f, -ly / 2.0f, lz);
-      points[5] = new Point3f(lx / 2.0f, -ly / 2.0f, lz);
-      points[6] = new Point3f(lx / 2.0f, ly / 2.0f, lz);
-      points[7] = new Point3f(-lx / 2.0f, ly / 2.0f, lz);
+      float za = centered ? -lz/2f : 0;
+      float zb = centered ? lz/2f : lz;
+
+      points[0] = new Point3f(-lx / 2.0f, -ly / 2.0f, za);
+      points[1] = new Point3f(lx / 2.0f, -ly / 2.0f, za);
+      points[2] = new Point3f(lx / 2.0f, ly / 2.0f, za);
+      points[3] = new Point3f(-lx / 2.0f, ly / 2.0f, za);
+      points[4] = new Point3f(-lx / 2.0f, -ly / 2.0f, zb);
+      points[5] = new Point3f(lx / 2.0f, -ly / 2.0f, zb);
+      points[6] = new Point3f(lx / 2.0f, ly / 2.0f, zb);
+      points[7] = new Point3f(-lx / 2.0f, ly / 2.0f, zb);
 
       textPoints[0] = new TexCoord2f(0.0f, 0.0f);
       textPoints[1] = new TexCoord2f(1.0f, 0.0f);
