@@ -5,6 +5,7 @@ import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
 import us.ihmc.atlas.parameters.*;
+import us.ihmc.atlas.physics.AtlasPhysicsEngineConfiguration;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactPointInformation;

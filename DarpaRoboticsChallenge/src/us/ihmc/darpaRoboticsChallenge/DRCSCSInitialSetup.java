@@ -69,7 +69,7 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
 
    public ScsPhysics createPhysics(ScsCollisionConfigure collisionConfigure, YoVariableRegistry registry)
    {
-      ScsCollisionDetector collision = new JBulletCollisionDetector(10000);
+      ScsCollisionDetector collision = new JBulletCollisionDetector(registry,10000);
       HandleCollision handler = new SpringCollisionHandler(1,1000,10.0,registry);
       collision.initialize(handler);
 
