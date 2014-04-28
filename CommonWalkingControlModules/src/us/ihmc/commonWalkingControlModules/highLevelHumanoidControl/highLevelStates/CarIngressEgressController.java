@@ -58,7 +58,7 @@ import com.yobotics.simulationconstructionset.util.trajectory.ThirdOrderPolynomi
 public class CarIngressEgressController extends AbstractHighLevelHumanoidControlPattern
 {
    public final static HighLevelState controllerState = HighLevelState.INGRESS_EGRESS;
-   private final static MomentumControlModuleType MOMENTUM_CONTROL_MODULE_TO_USE = MomentumControlModuleType.OPTIMIZATION;
+   private final static MomentumControlModuleType MOMENTUM_CONTROL_MODULE_TO_USE = MomentumControlModuleType.OPT_NULLSPACE;
    private final static double DELAY_TIME_BEFORE_TRUSTING_CONTACTS = 1.1;
 
    private final DesiredFootPoseProvider footPoseProvider;

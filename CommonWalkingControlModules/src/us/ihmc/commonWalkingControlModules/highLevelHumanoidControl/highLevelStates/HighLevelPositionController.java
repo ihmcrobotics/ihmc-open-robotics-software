@@ -43,7 +43,7 @@ import com.yobotics.simulationconstructionset.util.statemachines.State;
 public class HighLevelPositionController extends State<HighLevelState>
 {
    private final static HighLevelState controllerState = HighLevelState.TASKSPACE_POSITION_CONTROL;
-   private final static MomentumControlModuleType MOMENTUM_CONTROL_MODULE_TO_USE = MomentumControlModuleType.OPTIMIZATION;
+   private final static MomentumControlModuleType MOMENTUM_CONTROL_MODULE_TO_USE = MomentumControlModuleType.OPT_NULLSPACE;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    

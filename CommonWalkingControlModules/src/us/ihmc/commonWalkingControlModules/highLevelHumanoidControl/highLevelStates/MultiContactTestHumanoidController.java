@@ -38,7 +38,7 @@ import com.yobotics.simulationconstructionset.util.trajectory.ConstantDoubleProv
 public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoidControlPattern
 {
    public final static HighLevelState controllerState = HighLevelState.MULTI_CONTACT;
-   private final static MomentumControlModuleType MOMENTUM_CONTROL_MODULE_TO_USE = MomentumControlModuleType.OPTIMIZATION;
+   private final static MomentumControlModuleType MOMENTUM_CONTROL_MODULE_TO_USE = MomentumControlModuleType.OPT_NULLSPACE;
 
    private final YoFramePoint desiredCoMPosition = new YoFramePoint("desiredCoM", worldFrame, registry);
 
