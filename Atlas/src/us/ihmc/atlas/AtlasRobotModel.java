@@ -169,4 +169,10 @@ public class AtlasRobotModel implements DRCRobotModel
 	   else
 		   return null;
    }
+
+   @Override
+   public WalkingControllerParameters getDrivingControllerParameters()
+   {
+      return new AtlasDrivingControllerParameters();
+   }
 }

@@ -161,8 +161,9 @@ public class DRCSimulationFactory
       ThreadSynchronizer threadSynchronizer = new BlockingThreadSynchronizer();
 
       DRCController robotController = new DRCController(robotInterface.getFullRobotModelFactory(), controllerFactory, sensorReaderFactory, drcOutputWriter,
-            jointMap, lidarControllerInterface, gravity, controlDT, dataProducer, robotInterface.getTimeStampProvider(),
-            dynamicGraphicObjectsListRegistry, guiSetterUpperRegistry, registry, threadFactory, threadSynchronizer, stateEstimatorParameters, drcRobotModel.getPhysicalProperties(), drcRobotModel.getContactPointParamaters(false, false));
+            lidarControllerInterface, gravity, controlDT, dataProducer, robotInterface.getTimeStampProvider(),
+            dynamicGraphicObjectsListRegistry, guiSetterUpperRegistry, registry, threadFactory, threadSynchronizer, 
+            drcRobotModel, drcRobotModel.getContactPointParamaters(false, false), estimateDT);
       robotController.initialize();
 
       final HumanoidRobotSimulation<SDFRobot> humanoidRobotSimulation = new HumanoidRobotSimulation<SDFRobot>(simulatedRobot, controller,

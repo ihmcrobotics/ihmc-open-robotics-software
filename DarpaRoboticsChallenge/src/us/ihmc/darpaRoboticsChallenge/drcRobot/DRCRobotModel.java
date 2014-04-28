@@ -49,6 +49,8 @@ public interface DRCRobotModel
 
    public WalkingControllerParameters getMultiContactControllerParameters();
 
+   public WalkingControllerParameters getDrivingControllerParameters();
+   
    public ScsCollisionConfigure getPhysicsConfigure( SDFRobot robotModel );
 
    public DRCRobotContactPointParamaters getContactPointParamaters(boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsToFeetOnly);
