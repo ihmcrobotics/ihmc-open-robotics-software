@@ -106,9 +106,6 @@ public class DesiredHandPoseProvider implements ObjectConsumer<HandPosePacket>
          {
             if(object.getJointAngles() != null)
             	finalDesiredJointAngleMap.put(fullRobotModel.getArmJoint(robotSide, armJoint), object.getJointAngles()[++i]);
-            else
-            	//XXX: Nathan added this dirty hack to fixbamboo and should feel ashamed that he left it here.
-            	finalDesiredJointAngleMap.put(fullRobotModel.getArmJoint(robotSide, armJoint), 0.0);
          }
       }
 
