@@ -57,13 +57,6 @@ public class HandPosePacketTransformerTest
          Point3d point3d = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
          double trajectoryTime = RandomTools.generateRandomDouble(random, 1.0, 10.0);
 
-//         double randomShoulderPitchAngle = RandomTools.generateRandomDouble(random, -2 * Math.PI, 2 * Math.PI);
-//         double randomShoulderRollAngle = RandomTools.generateRandomDouble(random, -2 * Math.PI, 2 * Math.PI);
-//         double randomElbowPitchAngle = RandomTools.generateRandomDouble(random, -2 * Math.PI, 2 * Math.PI);
-//         double randomElbowRollAngle = RandomTools.generateRandomDouble(random, -2 * Math.PI, 2 * Math.PI);
-//         double randomWristPitchAngle = RandomTools.generateRandomDouble(random, -2 * Math.PI, 2 * Math.PI);
-//         double randomWristRollAngle = RandomTools.generateRandomDouble(random, -2 * Math.PI, 2 * Math.PI);
-         
          double[] randomJointAngles = new double[numberOfArmJoints];
          randomJointAngles = RandomTools.generateRandomDoubleArray(random, numberOfArmJoints, -2 * Math.PI, 2 * Math.PI);
 
