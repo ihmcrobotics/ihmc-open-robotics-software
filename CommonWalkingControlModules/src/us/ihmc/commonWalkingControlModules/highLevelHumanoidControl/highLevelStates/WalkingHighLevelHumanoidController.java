@@ -1236,7 +1236,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 //            nextFootstep.setPositionChangeOnlyXY(newPosition);
 //            
 //            updateFootstepParameters();
-            footEndEffectorControlModules.get(swingSide).replanTrajectory(stateMachine.timeInCurrentState(), nextFootstep.getPosition());
+//            footEndEffectorControlModules.get(swingSide).replanTrajectory(stateMachine.timeInCurrentState(), nextFootstep.getPosition());
+//            
+//            TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForSingleSupport(nextFootstep, swingSide);
+//            instantaneousCapturePointPlanner.reInitializeSingleSupport(transferToAndNextFootstepsData, yoTime.getDoubleValue());
+//            
             footstepWasProjectedInCaptureRegion.set(true);
             projectFootstepToCaptureRegion.set(false);
          }
@@ -1282,13 +1286,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          footSwitches.get(swingSide).reset();
 
          nextFootstep = upcomingFootstepList.getNextFootstep();
-         updateFootstepParameters();
-      }
-      
-      private void updateFootstepParameters()
-      {
-         transferToFootstep.set(nextFootstep.getPosition2dCopy());
-
+         
          boolean nextFootstepHasBeenReplaced = false;
          Footstep oldNextFootstep = nextFootstep;
 
@@ -1333,7 +1331,26 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          {
             setFlatFootContactState(supportSide);
          }
-
+         
+         updateFootstepParameters();
+         
+         double stepPitch = nextFootstep.getOrientationInFrame(worldFrame).getYawPitchRoll()[1];
+         walkOnTheEdgesProviders.setToeOffInitialAngle(swingSide, stepPitch);
+         
+         TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForSingleSupport(nextFootstep, swingSide);
+         instantaneousCapturePointPlanner.initializeSingleSupport(transferToAndNextFootstepsData, yoTime.getDoubleValue());
+         
+         if (walkingControllerParameters.resetDesiredICPToCurrentAtStartOfSwing())
+         {
+            desiredICP.set(capturePoint.getFramePoint2dCopy());    // TODO: currently necessary for stairs because of the omega0 jump, but should get rid of this
+         }
+      }
+      
+      private void updateFootstepParameters()
+      {
+         transferToFootstep.set(nextFootstep.getPosition2dCopy());
+         RobotSide supportSide = swingSide.getOppositeSide();
+         
          swingFootFinalPositionProvider.set(nextFootstep.getPositionInFrame(worldFrame));
 
          SideDependentList<Transform3D> footToWorldTransform = new SideDependentList<Transform3D>();
@@ -1378,24 +1395,16 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          finalPelvisOrientationProvider.setOrientation(finalPelvisOrientation);
          pelvisOrientationTrajectoryGenerator.initialize();
 
-         double stepPitch = nextFootstep.getOrientationInFrame(worldFrame).getYawPitchRoll()[1];
-         walkOnTheEdgesProviders.setToeOffInitialAngle(swingSide, stepPitch);
-
          FramePoint centerOfMass = new FramePoint(referenceFrames.getCenterOfMassFrame());
          centerOfMass.changeFrame(worldFrame);
-         ContactablePlaneBody supportFoot = feet.get(supportSide);
-         Transform3D supportFootToWorldTransform = footToWorldTransform.get(supportSide);
-         double footHeight = DesiredFootstepCalculatorTools.computeMinZPointInFrame(supportFootToWorldTransform, supportFoot, worldFrame).getZ();
-         double comHeight = centerOfMass.getZ() - footHeight;
+         //ContactablePlaneBody supportFoot = feet.get(supportSide);
+         //Transform3D supportFootToWorldTransform = footToWorldTransform.get(supportSide);
+         //double footHeight = DesiredFootstepCalculatorTools.computeMinZPointInFrame(supportFootToWorldTransform, supportFoot, worldFrame).getZ();
+         //double comHeight = centerOfMass.getZ() - footHeight;
          icpAndMomentumBasedController.computeCapturePoint();
 
-         if (walkingControllerParameters.resetDesiredICPToCurrentAtStartOfSwing())
-         {
-            desiredICP.set(capturePoint.getFramePoint2dCopy());    // TODO: currently necessary for stairs because of the omega0 jump, but should get rid of this
-         }
-
          TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForSingleSupport(nextFootstep, swingSide);
-         FramePoint2d finalDesiredICP = getSingleSupportFinalDesiredICPForWalking(transferToAndNextFootstepsData, swingSide);
+         //FramePoint2d finalDesiredICP = getSingleSupportFinalDesiredICPForWalking(transferToAndNextFootstepsData, swingSide);
 
          setContactStateForSwing(swingSide);
          setSupportLeg(supportSide);
@@ -1426,6 +1435,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          if (DEBUG)
             System.out.println("WalkingHighLevelController: leavingDoubleSupportState");
 
+         footstepWasProjectedInCaptureRegion.set(false);
          captureRegionCalculator.hideCaptureRegion();
          upcomingFootstepList.notifyComplete();
          previousSupportSide.set(swingSide.getOppositeSide());
