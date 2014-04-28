@@ -241,7 +241,7 @@ public class DesiredFootstepVisualizer
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         tempFootPolygonInWorld.setIncludingFrameByProjectionOntoXYPlane(worldFrame, bipedFeet.get(robotSide).getContactPointsCopy());
+         tempFootPolygonInWorld.setIncludingFrameByProjectionOntoXYPlaneAndUpdate(worldFrame, bipedFeet.get(robotSide).getContactPointsCopy());
 
          feetPolygonsInWorld.get(robotSide).setFrameConvexPolygon2d(tempFootPolygonInWorld);
       }

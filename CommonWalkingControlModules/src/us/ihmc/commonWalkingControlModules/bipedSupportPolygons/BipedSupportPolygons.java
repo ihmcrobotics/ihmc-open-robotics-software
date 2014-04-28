@@ -161,11 +161,6 @@ public class BipedSupportPolygons
 
    public void update(SideDependentList<List<FramePoint>> contactPoints)
    {
-      update(contactPoints, true);
-   }
-
-   public void update(SideDependentList<List<FramePoint>> contactPoints, boolean recycleMemory)
-   {
       timer.startTimer();
       boolean inDoubleSupport = true;
       boolean neitherFootIsSupportingFoot = true;
@@ -173,7 +168,7 @@ public class BipedSupportPolygons
 
       connectingEdge1.setToNaN();
       connectingEdge2.setToNaN();
-      
+
       for (RobotSide robotSide : RobotSide.values)
       {
          List<FramePoint> contactPointsForSide = contactPoints.get(robotSide);
@@ -183,8 +178,8 @@ public class BipedSupportPolygons
             supportSide = robotSide;
             neitherFootIsSupportingFoot = false;
 
-            footPolygonsInAnkleZUp.get(robotSide).setIncludingFrameByProjectionOntoXYPlane(ankleZUpFrames.get(robotSide), contactPointsForSide);
-            footPolygonsInMidFeetZUp.get(robotSide).setIncludingFrameByProjectionOntoXYPlane(midFeetZUp, contactPointsForSide);
+            footPolygonsInAnkleZUp.get(robotSide).setIncludingFrameByProjectionOntoXYPlaneAndUpdate(ankleZUpFrames.get(robotSide), contactPointsForSide);
+            footPolygonsInMidFeetZUp.get(robotSide).setIncludingFrameByProjectionOntoXYPlaneAndUpdate(midFeetZUp, contactPointsForSide);
 
             sweetSpotsInAnkleZUp.get(robotSide).setIncludingFrame(footPolygonsInAnkleZUp.get(robotSide).getCentroid()); // Sweet spots are the centroids of the foot polygons.
             sweetSpotsInMidFeetZUp.get(robotSide).setIncludingFrame(footPolygonsInMidFeetZUp.get(robotSide).getCentroid()); // Sweet spots are the centroids of the foot polygons.
@@ -195,54 +190,106 @@ public class BipedSupportPolygons
          }
       }
 
+      updateSupportPolygon(inDoubleSupport, neitherFootIsSupportingFoot, supportSide);
+
+      timer.stopTimer();
+
+      if (VISUALIZE)
+         visualize();
+   }
+
+   public void updateUsingContactStates(SideDependentList<PlaneContactState> contactStates)
+   {
+      timer.startTimer();
+      boolean inDoubleSupport = true;
+      boolean neitherFootIsSupportingFoot = true;
+      RobotSide supportSide = null;
+
+      connectingEdge1.setToNaN();
+      connectingEdge2.setToNaN();
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         PlaneContactState contactState = contactStates.get(robotSide);
+         if (contactState.inContact())
+         {
+            supportSide = robotSide;
+            neitherFootIsSupportingFoot = false;
+
+            FrameConvexPolygon2d footPolygonInAnkleZUp = footPolygonsInAnkleZUp.get(robotSide);
+            FrameConvexPolygon2d footPolygonInMidFeetZUp = footPolygonsInMidFeetZUp.get(robotSide);
+
+            footPolygonInAnkleZUp.clear(ankleZUpFrames.get(robotSide));
+            footPolygonInMidFeetZUp.clear(midFeetZUp);
+
+            for (int i = 0; i < contactState.getTotalNumberOfContactPoints(); i++)
+            {
+               ContactPoint contactPoint = contactState.getContactPoints().get(i);
+               if (!contactPoint.isInContact())
+                  continue;
+
+               footPolygonInAnkleZUp.addVertexByProjectionOntoXYPlane(contactPoint.getPosition());
+               footPolygonInMidFeetZUp.addVertexByProjectionOntoXYPlane(contactPoint.getPosition());
+            }
+
+            footPolygonInAnkleZUp.update();
+            footPolygonInMidFeetZUp.update();
+
+            sweetSpotsInAnkleZUp.get(robotSide).setIncludingFrame(footPolygonInAnkleZUp.getCentroid()); // Sweet spots are the centroids of the foot polygons.
+            sweetSpotsInMidFeetZUp.get(robotSide).setIncludingFrame(footPolygonInMidFeetZUp.getCentroid()); // Sweet spots are the centroids of the foot polygons.
+         }
+         else
+         {
+            inDoubleSupport = false;
+         }
+      }
+
+      updateSupportPolygon(inDoubleSupport, neitherFootIsSupportingFoot, supportSide);
+
+      timer.stopTimer();
+
+      if (VISUALIZE)
+         visualize();
+   }
+
+   private void updateSupportPolygon(boolean inDoubleSupport, boolean neitherFootIsSupportingFoot, RobotSide supportSide)
+   {
       // Get the support polygon. If in double support, it is the combined polygon.
       // FIXME: Assumes the individual feet polygons are disjoint for faster computation. Will crash if the feet overlap.
       // If in single support, then the support polygon is just the foot polygon of the supporting foot.
+      if (neitherFootIsSupportingFoot)
+         throw new RuntimeException("neither foot is a supporting foot!");
+
+      boolean useDumbCombination = !useConnectingEdges;
+
       if (inDoubleSupport)
       {
          if (useConnectingEdges)
          {
-            boolean success = ConvexPolygonTools.combineDisjointPolygons(footPolygonsInMidFeetZUp.get(RobotSide.LEFT),
+            useDumbCombination = !ConvexPolygonTools.combineDisjointPolygons(footPolygonsInMidFeetZUp.get(RobotSide.LEFT),
                   footPolygonsInMidFeetZUp.get(RobotSide.RIGHT), supportPolygonInMidFeetZUp, connectingEdge1, connectingEdge2);
-
-            if (!success)
-            {
+            if (useDumbCombination)
                System.err.println("Feet polygons overlap!!!");
-
-               // If feet are overlapping, then combine polygons in less efficient way (it was set to null before)
-               supportPolygonInMidFeetZUp.setIncludingFrame(footPolygonsInMidFeetZUp.get(RobotSide.LEFT), footPolygonsInMidFeetZUp.get(RobotSide.RIGHT));
-            }
          }
-         else
+
+         if (useDumbCombination)
          {
-            supportPolygonInMidFeetZUp.setIncludingFrame(footPolygonsInMidFeetZUp.get(RobotSide.LEFT), footPolygonsInMidFeetZUp.get(RobotSide.RIGHT));
+            supportPolygonInMidFeetZUp.setIncludingFrameAndUpdate(footPolygonsInMidFeetZUp.get(RobotSide.LEFT), footPolygonsInMidFeetZUp.get(RobotSide.RIGHT));
          }
       }
       else
       {
-         if (neitherFootIsSupportingFoot)
-         {
-            throw new RuntimeException("neither foot is a supporting foot!");
-         }
-
-         supportPolygonInMidFeetZUp.setIncludingFrame(footPolygonsInMidFeetZUp.get(supportSide));
+         supportPolygonInMidFeetZUp.setIncludingFrameAndUpdate(footPolygonsInMidFeetZUp.get(supportSide));
       }
 
       footToFootLineSegmentInMidFeetZUp.setFirstEndPoint(sweetSpotsInMidFeetZUp.get(RobotSide.LEFT));
       footToFootLineSegmentInMidFeetZUp.setSecondEndPoint(sweetSpotsInMidFeetZUp.get(RobotSide.RIGHT));
 
-      supportPolygonInWorld.setIncludingFrame(supportPolygonInMidFeetZUp);
+      supportPolygonInWorld.setIncludingFrameAndUpdate(supportPolygonInMidFeetZUp);
       supportPolygonInWorld.changeFrame(worldFrame);
 
       footToFootLineSegmentInWorld.setAndChangeFrame(footToFootLineSegmentInMidFeetZUp);
       footToFootLineSegmentInWorld.changeFrame(worldFrame);
-
-      timer.stopTimer();
-
-      if (VISUALIZE)
-      {
-         visualize();
-      }
    }
 
    public String toString()

@@ -203,7 +203,7 @@ public class OneStepCaptureRegionCalculator
       {
          // This causes the capture region to always be null if it is null once.
          // This assumes that once there is no capture region the robot will fall for sure.
-         captureRegion.setIncludingFrameByProjectionOntoXYPlane(supportAnkleZUp, captureRegionPoints);
+         captureRegion.setIncludingFrameByProjectionOntoXYPlaneAndUpdate(supportAnkleZUp, captureRegionPoints);
          captureRegion = captureRegion.intersectionWith(reachableRegions.get(swingSide.getOppositeSide()));
       }
       

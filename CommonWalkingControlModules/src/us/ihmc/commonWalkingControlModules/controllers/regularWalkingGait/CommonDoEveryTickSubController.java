@@ -115,7 +115,7 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
 
       BipedSupportPolygons bipedSupportPolygons = couplingRegistry.getBipedSupportPolygons();
 
-      bipedSupportPolygons.update(new SideDependentList<List<FramePoint>>(leftFoot.computeFootPoints(), rightFoot.computeFootPoints()), recycleBipedFeetMemory);
+      bipedSupportPolygons.update(new SideDependentList<List<FramePoint>>(leftFoot.computeFootPoints(), rightFoot.computeFootPoints()));
       doUpdatables(processedSensors.getTime());
 
       if (supportLeg != null)
