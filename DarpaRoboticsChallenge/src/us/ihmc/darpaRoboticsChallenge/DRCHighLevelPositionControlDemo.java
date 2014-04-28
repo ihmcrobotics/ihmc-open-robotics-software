@@ -150,7 +150,7 @@ public class DRCHighLevelPositionControlDemo
             String linkName = jointToAddExternalForcePoints.getLink().getName();
             ExternalForcePoint efp = new ExternalForcePoint("efp_" + linkName + "_" + String.valueOf(i) + "_", efp_offsetFromRootJoint.get(i), robot.getRobotsYoVariableRegistry());
             externalForcePoints.add(efp);
-            jointToAddExternalForcePoints.addExternalForcePoint(efp);
+            jointToAddExternalForcePoints.physics.addExternalForcePoint(efp);
             
             efp_positionViz.add(efp.getYoPosition().createDynamicGraphicPosition(efp.getName(), 0.05, YoAppearance.Red()));
          }

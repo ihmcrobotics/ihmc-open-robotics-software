@@ -1,19 +1,13 @@
 package us.ihmc.commonWalkingControlModules.calibration.virtualChain;
 
-import java.util.ArrayList;
-
-import javax.vecmath.Vector3d;
-
+import com.yobotics.simulationconstructionset.*;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RevoluteJointReferenceFrame;
 import us.ihmc.utilities.screwTheory.SixDoFJointReferenceFrame;
 
-import com.yobotics.simulationconstructionset.FloatingJoint;
-import com.yobotics.simulationconstructionset.Joint;
-import com.yobotics.simulationconstructionset.Link;
-import com.yobotics.simulationconstructionset.PinJoint;
-import com.yobotics.simulationconstructionset.Robot;
+import javax.vecmath.Vector3d;
+import java.util.ArrayList;
 
 public class VirtualChainConstructorFromARobot
 {
@@ -113,7 +107,7 @@ public class VirtualChainConstructorFromARobot
       {
          PinJoint pinJoint = (PinJoint) joint;
          Vector3d jointAxis = new Vector3d();
-         pinJoint.getJointAxis(jointAxis);
+         pinJoint.physics.getJointAxis(jointAxis);
          
          ReferenceFrame translationFrame = ReferenceFrame.constructBodyFrameWithUnchangingTranslationFromParent(joint.getName()+"Translation", parentFrame, offsetFromParent);
         

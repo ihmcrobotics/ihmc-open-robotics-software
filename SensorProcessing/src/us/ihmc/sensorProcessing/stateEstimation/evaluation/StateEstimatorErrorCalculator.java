@@ -1,17 +1,5 @@
 package us.ihmc.sensorProcessing.stateEstimation.evaluation;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.sensorProcessing.stateEstimation.StateEstimator;
-import us.ihmc.utilities.math.geometry.AngleTools;
-import us.ihmc.utilities.math.geometry.FrameOrientation;
-import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
-
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.Robot;
@@ -19,6 +7,13 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameQuaternion;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimator;
+import us.ihmc.utilities.math.geometry.*;
+
+import javax.vecmath.AxisAngle4d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
 
 
 public class StateEstimatorErrorCalculator
@@ -99,7 +94,7 @@ public class StateEstimatorErrorCalculator
       
       Vector3d estimatedAngularVelocity = estimatedAngularVelocityFrameVector.getVectorCopy();
       Vector3d actualAngularVelocity = new Vector3d();
-      estimationJoint.getAngularVelocityInBody(actualAngularVelocity);
+      estimationJoint.physics.getAngularVelocityInBody(actualAngularVelocity);
 
       perfectAngularVelocity.set(actualAngularVelocity);
       
@@ -194,7 +189,7 @@ public class StateEstimatorErrorCalculator
       Vector3d actualVelocity = new Vector3d();
       Vector3d linearVelocityError = new Vector3d();
 
-      estimationJoint.getLinearVelocityInWorld(actualVelocity, new Vector3d());
+      estimationJoint.physics.getLinearVelocityInWorld(actualVelocity, new Vector3d());
       perfectPelvisLinearVelocity.set(actualVelocity);
       
       orientationEstimator.getEstimatedPelvisLinearVelocity(estimatedPelvisVelocityFrameVector);

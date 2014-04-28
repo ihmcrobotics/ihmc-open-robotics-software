@@ -1,8 +1,18 @@
 package us.ihmc.SdfLoader.sdfWriter;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import com.yobotics.simulationconstructionset.*;
+import us.ihmc.SdfLoader.xmlDescription.*;
+import us.ihmc.SdfLoader.xmlDescription.SDFGeometry.Mesh;
+import us.ihmc.SdfLoader.xmlDescription.SDFJoint.Axis;
+import us.ihmc.SdfLoader.xmlDescription.SDFJoint.Axis.Dynamics;
+import us.ihmc.SdfLoader.xmlDescription.SDFJoint.Axis.Limit;
+import us.ihmc.SdfLoader.xmlDescription.SDFLink.Inertial;
+import us.ihmc.SdfLoader.xmlDescription.SDFSensor.IMU;
+import us.ihmc.SdfLoader.xmlDescription.SDFSensor.IMU.IMUNoise;
+import us.ihmc.SdfLoader.xmlDescription.SDFSensor.IMU.IMUNoise.NoiseParameters;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddModelFileInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DPrimitiveInstruction;
+import us.ihmc.utilities.math.geometry.TransformTools;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
@@ -11,32 +21,9 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.PropertyException;
-
-import us.ihmc.SdfLoader.xmlDescription.SDFGeometry;
-import us.ihmc.SdfLoader.xmlDescription.SDFGeometry.Mesh;
-import us.ihmc.SdfLoader.xmlDescription.SDFInertia;
-import us.ihmc.SdfLoader.xmlDescription.SDFJoint;
-import us.ihmc.SdfLoader.xmlDescription.SDFJoint.Axis;
-import us.ihmc.SdfLoader.xmlDescription.SDFJoint.Axis.Dynamics;
-import us.ihmc.SdfLoader.xmlDescription.SDFJoint.Axis.Limit;
-import us.ihmc.SdfLoader.xmlDescription.SDFLink;
-import us.ihmc.SdfLoader.xmlDescription.SDFLink.Inertial;
-import us.ihmc.SdfLoader.xmlDescription.SDFModel;
-import us.ihmc.SdfLoader.xmlDescription.SDFRoot;
-import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
-import us.ihmc.SdfLoader.xmlDescription.SDFSensor.IMU;
-import us.ihmc.SdfLoader.xmlDescription.SDFSensor.IMU.IMUNoise;
-import us.ihmc.SdfLoader.xmlDescription.SDFSensor.IMU.IMUNoise.NoiseParameters;
-import us.ihmc.SdfLoader.xmlDescription.SDFVisual;
-import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddModelFileInstruction;
-import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DPrimitiveInstruction;
-import us.ihmc.utilities.math.geometry.TransformTools;
-
-import com.yobotics.simulationconstructionset.Joint;
-import com.yobotics.simulationconstructionset.Link;
-import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
-import com.yobotics.simulationconstructionset.PinJoint;
-import com.yobotics.simulationconstructionset.Robot;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class SDFRobotWriter
 {
@@ -150,7 +137,7 @@ public abstract class SDFRobotWriter
       Axis sdfJointAxis = new Axis();
 
       Vector3d scsJointAxis = new Vector3d();
-      scsJoint.getJointAxis(scsJointAxis);
+      scsJoint.physics.getJointAxis(scsJointAxis);
 
       String xyz = String.valueOf(scsJointAxis.x) + " " + String.valueOf(scsJointAxis.y) + " " + String.valueOf(scsJointAxis.z);
       sdfJointAxis.setXyz(xyz);
