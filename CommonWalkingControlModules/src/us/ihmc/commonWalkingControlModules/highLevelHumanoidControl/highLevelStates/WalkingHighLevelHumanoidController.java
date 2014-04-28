@@ -121,7 +121,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private static final boolean USE_WORLDFRAME_SURFACE_NORMAL_WHEN_FULLY_CONSTRAINED = true;
 
    private final static HighLevelState controllerState = HighLevelState.WALKING;
-   private final static MomentumControlModuleType MOMENTUM_CONTROL_MODULE_TO_USE = MomentumControlModuleType.OPTIMIZATION;
+   private final static MomentumControlModuleType MOMENTUM_CONTROL_MODULE_TO_USE = MomentumControlModuleType.OPT_NULLSPACE;
 
    private final static double DELAY_TIME_BEFORE_TRUSTING_CONTACTS = 0.12;
 

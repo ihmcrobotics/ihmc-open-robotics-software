@@ -35,7 +35,7 @@ public class MomentumControlModuleBridge implements MomentumControlModule
    private final YoVariableRegistry registry = new YoVariableRegistry("MomentumControlModuleBridge");
 
    private static final boolean LISTEN_IN_ON_SOLVER = false;
-   private static final boolean TRY_BOTH_AND_COMPARE = false;
+   private static final boolean TRY_ALL_AND_COMPARE = false;
    private static final boolean SHOW_MOMENTUM_MODULE_GUI =  false; //true;
    
    private final MomentumModuleSolutionComparer momentumModuleSolutionComparer;
@@ -43,23 +43,22 @@ public class MomentumControlModuleBridge implements MomentumControlModule
 
    public enum MomentumControlModuleType 
    {
-      OPTIMIZATION, OLD;
-      public MomentumControlModuleType getOther()
-      {
-         if (this == OPTIMIZATION) return OLD;
-         return OPTIMIZATION;
-      }
+     OPT_NULLSPACE, OLD;
    };
 
-   private final EnumMap<MomentumControlModuleType, MomentumControlModule> momentumControlModules = new EnumMap<MomentumControlModuleType,
-                                                                                                       MomentumControlModule>(MomentumControlModuleType.class);
-   private final EnumYoVariable<MomentumControlModuleType> momentumControlModuleInUse =
-      new EnumYoVariable<MomentumControlModuleType>("momentumControlModuleInUse", registry, MomentumControlModuleType.class);
+   
+   private final EnumMap<MomentumControlModuleType, MomentumControlModule> momentumControlModules = 
+         new EnumMap<MomentumControlModuleType, MomentumControlModule>(MomentumControlModuleType.class);
+   private final EnumYoVariable<MomentumControlModuleType> activeMomentumControlModuleType = 
+         new EnumYoVariable<MomentumControlModuleType>("activeMomentumControlModuleType", registry, MomentumControlModuleType.class);
+   private final EnumYoVariable<MomentumControlModuleType> referenceMomentumControlModuleType = 
+         new EnumYoVariable<MomentumControlModuleType>("referenceMomentumControlModuleType", "null is TRY_ALL_TO_COMPARE=false", registry, MomentumControlModuleType.class, true);
+   private final EnumYoVariable<MomentumControlModuleType> requestMomentumControlModuleType=
+           new EnumYoVariable<MomentumControlModuleBridge.MomentumControlModuleType>("requestedMomentumControlModuleType","null is making no request", registry, MomentumControlModuleType.class, true);
 
-   private final BooleanYoVariable swapMomentumControlModuleInUse = new BooleanYoVariable("swapMomentumControlModuleInUse", registry);
    private final BooleanYoVariable ignoreZDDot = new BooleanYoVariable("ignoreZDDot", registry);
    
-   private MomentumControlModule activeMomentumControlModule, inactiveMomentumControlModule;
+   private MomentumControlModule activeMomentumControlModule, referenceMomentumControlModule;
 
    private final MomentumModuleDataObject momentumModuleDataObject = new MomentumModuleDataObject();
    private final AllMomentumModuleListener allMomentumModuleListener;
@@ -88,33 +87,66 @@ public class MomentumControlModuleBridge implements MomentumControlModule
          optimizationMomentumControlModule.setMomentumControlModuleSolverListener(momentumControlModuleSolverListener);
       }
       
-      if (TRY_BOTH_AND_COMPARE) momentumModuleSolutionComparer = new MomentumModuleSolutionComparer(centerOfMassFrame, registry);
-      else momentumModuleSolutionComparer = null;
-      
-      this.momentumControlModules.put(MomentumControlModuleType.OPTIMIZATION, optimizationMomentumControlModule);
-      this.momentumControlModules.put(MomentumControlModuleType.OLD, oldMomentumControlModule);
+      requestMomentumControlModuleType.set(null);
 
-      // By default use OptimizationMomentumControlModule, can be changed via setMomentumControlModuleToUse method
-//      setMomentumControlModuleToUse(MomentumControlModuleType.OLD);
-      setMomentumControlModuleToUse(MomentumControlModuleType.OPTIMIZATION);
+      
+      //add controllers
+      momentumControlModules.put(MomentumControlModuleType.OPT_NULLSPACE, optimizationMomentumControlModule);
+      momentumControlModules.put(MomentumControlModuleType.OLD, oldMomentumControlModule);
+
+      setMomentumControlModuleToUse(MomentumControlModuleType.OPT_NULLSPACE);
+
+      if (TRY_ALL_AND_COMPARE) 
+      {
+         momentumModuleSolutionComparer = new MomentumModuleSolutionComparer(centerOfMassFrame, registry);
+         setMomentumControlModuleToUse(MomentumControlModuleType.OLD);
+         for(MomentumControlModuleType m : momentumControlModules.keySet())
+         {
+           if(momentumControlModules.get(m)==null) 
+           {
+              System.err.println(getClass().getSimpleName()+": Not all controllers are valid for comparison."+
+                    "controller "+ m.name() + " is null."+
+                    "please fix the controllers or disable TRY_ALL_AND_COMAPRE");
+           }
+         }
+      }
+      else 
+      {
+         momentumModuleSolutionComparer = null;
+      }
 
       parentRegistry.addChild(registry);
    }
 
-   public void swapMomentumControlModuleToUse()
-   {
-      setMomentumControlModuleToUse(momentumControlModuleInUse.getEnumValue().getOther());
-   }
    
-   public void setMomentumControlModuleToUse(MomentumControlModuleType momentumControlModuleToUse)
+   public void setMomentumControlModuleToUse(MomentumControlModuleType momentumControlModuleTypeToUse)
    {
-      momentumControlModuleInUse.set(momentumControlModuleToUse);
-      activeMomentumControlModule = momentumControlModules.get(momentumControlModuleToUse);
-
-      if (TRY_BOTH_AND_COMPARE)
+      if(momentumControlModules.get(momentumControlModuleTypeToUse)==null)
       {
-         inactiveMomentumControlModule = momentumControlModules.get(momentumControlModuleToUse.getOther());
+         throw new RuntimeException("Requested ControllerModule is null ...");
       }
+
+      MomentumControlModuleType prevModuleType = activeMomentumControlModuleType.getEnumValue();
+      activeMomentumControlModule = momentumControlModules.get(momentumControlModuleTypeToUse);
+      activeMomentumControlModuleType.set(momentumControlModuleTypeToUse);
+
+      if (TRY_ALL_AND_COMPARE)
+      {
+         if(prevModuleType==null)
+            prevModuleType = activeMomentumControlModuleType.getEnumValue();
+
+         if(referenceMomentumControlModuleType.getEnumValue()!=null && prevModuleType!=activeMomentumControlModuleType.getEnumValue())
+         {
+            referenceMomentumControlModuleType.set(prevModuleType);
+            referenceMomentumControlModule = momentumControlModules.get(prevModuleType);
+         }
+      }
+      else
+      {
+         referenceMomentumControlModuleType.set(null);
+         referenceMomentumControlModule=null;
+      }
+      
       
       for (MomentumControlModule momentumControlModule : momentumControlModules.values())
       {
@@ -137,18 +169,29 @@ public class MomentumControlModuleBridge implements MomentumControlModule
          momentumModuleGUI.initialize();
       }
       
-      if (TRY_BOTH_AND_COMPARE)
+      if (TRY_ALL_AND_COMPARE)
       {
-         inactiveMomentumControlModule.initialize();
+         referenceMomentumControlModule.initialize();
       }
    }
 
    public void reset()
    {
-      if (swapMomentumControlModuleInUse.getBooleanValue())
+      if (requestMomentumControlModuleType.getEnumValue()!=null && requestMomentumControlModuleType.getEnumValue() != activeMomentumControlModuleType.getEnumValue())
       {
-         swapMomentumControlModuleInUse.set(false);
-         swapMomentumControlModuleToUse();
+         try{
+                 setMomentumControlModuleToUse(requestMomentumControlModuleType.getEnumValue());
+         }
+         catch(RuntimeException e)
+         {
+            System.err.println("Requested ControllerModule is null, revert...");
+            requestMomentumControlModuleType.set(activeMomentumControlModuleType.getEnumValue());
+            return;
+         }
+         finally
+         {
+            requestMomentumControlModuleType.set(null);
+         }
       }
       
       activeMomentumControlModule.reset();
@@ -160,9 +203,9 @@ public class MomentumControlModuleBridge implements MomentumControlModule
          momentumModuleGUI.reset();
       }
       
-      if (TRY_BOTH_AND_COMPARE)
+      if (TRY_ALL_AND_COMPARE)
       {
-         inactiveMomentumControlModule.reset();
+         referenceMomentumControlModule.reset();
       }
    }
 
@@ -170,9 +213,9 @@ public class MomentumControlModuleBridge implements MomentumControlModule
    {
       activeMomentumControlModule.resetGroundReactionWrenchFilter();
       
-      if (TRY_BOTH_AND_COMPARE)
+      if (TRY_ALL_AND_COMPARE)
       {
-         inactiveMomentumControlModule.resetGroundReactionWrenchFilter();
+         referenceMomentumControlModule.resetGroundReactionWrenchFilter();
       }
    }
 
@@ -180,7 +223,7 @@ public class MomentumControlModuleBridge implements MomentumControlModule
    {
       MomentumRateOfChangeData momentumRateOfChangeData = desiredRateOfChangeOfMomentumCommand.getMomentumRateOfChangeData();
       DenseMatrix64F momentumMultipliers = momentumRateOfChangeData.getMomentumMultipliers();
-      DenseMatrix64F momentumSubspace = momentumRateOfChangeData.getMomentumSubspace();
+//      DenseMatrix64F momentumSubspace = momentumRateOfChangeData.getMomentumSubspace();
       
 //      System.out.println("momentumMultipliers = " + momentumMultipliers);
 //      System.out.println("momentumSubspace = " + momentumSubspace);
@@ -208,25 +251,29 @@ public class MomentumControlModuleBridge implements MomentumControlModule
       }
       
       momentumModuleDataObject.setDesiredRateOfChangeOfMomentum(desiredRateOfChangeOfMomentumCommand);
-      if (allMomentumModuleListener != null) allMomentumModuleListener.desiredRateOfChangeOfMomentumWasSet(desiredRateOfChangeOfMomentumCommand);
+      if (allMomentumModuleListener != null) 
+         allMomentumModuleListener.desiredRateOfChangeOfMomentumWasSet(desiredRateOfChangeOfMomentumCommand);
    }
 
    public void setDesiredJointAcceleration(DesiredJointAccelerationCommand desiredJointAccelerationCommand)
    {
       momentumModuleDataObject.setDesiredJointAcceleration(desiredJointAccelerationCommand);
-      if (allMomentumModuleListener != null) allMomentumModuleListener.desiredJointAccelerationWasSet(desiredJointAccelerationCommand);
+      if (allMomentumModuleListener != null) 
+         allMomentumModuleListener.desiredJointAccelerationWasSet(desiredJointAccelerationCommand);
    }
 
    public void setDesiredSpatialAcceleration(DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand)
    {
       momentumModuleDataObject.setDesiredSpatialAcceleration(desiredSpatialAccelerationCommand);
-      if (allMomentumModuleListener != null) allMomentumModuleListener.desiredSpatialAccelerationWasSet(desiredSpatialAccelerationCommand);
+      if (allMomentumModuleListener != null) 
+         allMomentumModuleListener.desiredSpatialAccelerationWasSet(desiredSpatialAccelerationCommand);
    }
    
    public void setDesiredPointAcceleration(DesiredPointAccelerationCommand desiredPointAccelerationCommand)
    {
       momentumModuleDataObject.setDesiredPointAcceleration(desiredPointAccelerationCommand);
-      if (allMomentumModuleListener != null) allMomentumModuleListener.desiredPointAccelerationWasSet(desiredPointAccelerationCommand);
+      if (allMomentumModuleListener != null) 
+         allMomentumModuleListener.desiredPointAccelerationWasSet(desiredPointAccelerationCommand);
    }
 
    public void setExternalWrenchToCompensateFor(RigidBody rigidBody, Wrench wrench)
@@ -237,21 +284,25 @@ public class MomentumControlModuleBridge implements MomentumControlModule
    public MomentumModuleSolution compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates, RobotSide upcomingSupportSide)
            throws MomentumControlModuleException
    {
-      MomentumModuleSolution inactiveSolution = null;
-      
-      if (TRY_BOTH_AND_COMPARE)
-      {
-         setMomentumModuleDataObject(inactiveMomentumControlModule, momentumModuleDataObject);
-         inactiveSolution = inactiveMomentumControlModule.compute(contactStates, upcomingSupportSide);
-      
-         momentumModuleSolutionComparer.setMomentumModuleDataObject(momentumModuleDataObject);
-         if (this.isUsingOptimizationMomentumControlModule()) momentumModuleSolutionComparer.setOldSolution("Old Solution", inactiveSolution);
-         else momentumModuleSolutionComparer.setOptimizationSolution("Optimization Solution", inactiveSolution);
-      }
-      
+      //Note sensor data may be updated in other process, so the comparison of two computations may not be exact
+      //Here, we put the two setMomentumModuleDataObject closer intime so both module get closer input....
       setMomentumModuleDataObject(activeMomentumControlModule, momentumModuleDataObject);
+      if(TRY_ALL_AND_COMPARE)
+         setMomentumModuleDataObject(referenceMomentumControlModule, momentumModuleDataObject);
+
       MomentumModuleSolution activeSolution = activeMomentumControlModule.compute(contactStates, upcomingSupportSide);  
-  
+
+      if (TRY_ALL_AND_COMPARE)
+      {
+         momentumModuleSolutionComparer.setActiveSolution("Optimization Solution", activeSolution);
+
+         MomentumModuleSolution referenceSolution = referenceMomentumControlModule.compute(contactStates, upcomingSupportSide);
+         momentumModuleSolutionComparer.setReferenceSolution("Reference Solution", referenceSolution);
+
+         momentumModuleSolutionComparer.setMomentumModuleDataObject(momentumModuleDataObject);
+         momentumModuleSolutionComparer.displayComparison();
+      }
+
       if (allMomentumModuleListener != null)
       {
          allMomentumModuleListener.momentumModuleSolutionWasComputed(activeSolution);
@@ -263,22 +314,12 @@ public class MomentumControlModuleBridge implements MomentumControlModule
 //         momentumModuleGUI.setDesiredsAndSolution(momentumModuleDataObject, activeSolution);
       }
       
-      if (TRY_BOTH_AND_COMPARE)
-      {
-         if (this.isUsingOptimizationMomentumControlModule()) momentumModuleSolutionComparer.setOptimizationSolution("Optimization Solution", activeSolution);
-         else momentumModuleSolutionComparer.setOldSolution("Old Solution", activeSolution);
-         
-         momentumModuleSolutionComparer.displayComparison();
-      }
-
-      
       return activeSolution;
    }
 
    private static void setMomentumModuleDataObject(MomentumControlModule momentumControlModule, MomentumModuleDataObject momentumModuleDataObject)
    {
-      ArrayList<DesiredRateOfChangeOfMomentumCommand> desiredRateOfChangeOfMomentumCommands =
-         momentumModuleDataObject.getDesiredRateOfChangeOfMomentumCommands();
+      ArrayList<DesiredRateOfChangeOfMomentumCommand> desiredRateOfChangeOfMomentumCommands = momentumModuleDataObject.getDesiredRateOfChangeOfMomentumCommands();
       for (DesiredRateOfChangeOfMomentumCommand desiredRateOfChangeOfMomentumCommand : desiredRateOfChangeOfMomentumCommands)
       {
          setDesiredRateOfChangeOfMomentum(momentumControlModule, desiredRateOfChangeOfMomentumCommand);
