@@ -161,4 +161,9 @@ public class BonoRobotModel implements DRCRobotModel
    {
       return null;
    }
+
+   public WalkingControllerParameters getDrivingControllerParameters()
+   {
+      return null;
+   }
 }
