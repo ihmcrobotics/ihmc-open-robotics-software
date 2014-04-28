@@ -4,9 +4,7 @@ import com.yobotics.simulationconstructionset.*;
 import com.yobotics.simulationconstructionset.time.GlobalTimer;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import com.yobotics.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
-
 import org.junit.*;
-
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.AtlasRobotModel;
@@ -24,7 +22,6 @@ import us.ihmc.utilities.math.MathTools;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
-
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -126,8 +123,8 @@ public class AtlasSDFVerificationTest
       ExternalForcePoint fp = new ExternalForcePoint("gravityCompensation", sdfRobot.getRobotsYoVariableRegistry());
       fp.setForce(0, 0, -sdfRobot.getGravityZ() * sdfRobot.computeCenterOfMass(new Point3d()) / 2);
 
-      sdfRobot.getJoint("l_arm_shx").addExternalForcePoint(fp);
-      sdfRobot.getJoint("r_arm_shx").addExternalForcePoint(fp);
+      sdfRobot.getJoint("l_arm_shx").physics.addExternalForcePoint(fp);
+      sdfRobot.getJoint("r_arm_shx").physics.addExternalForcePoint(fp);
    }
 
 
