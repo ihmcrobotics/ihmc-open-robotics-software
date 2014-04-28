@@ -24,15 +24,11 @@ public class Constrained5thOrderPolyForSwingTrajectoryTest
       
       trajectory.setParams(X0,Hmax, Xf, Vf, T0, Tf);
       
-      System.out.print(X0);
-      System.out.print("\n");
-      
       trajectory.computeTrajectory(T0);
       assertTrue(Math.abs(trajectory.getPosition()-X0) < 0.000001);
       
       trajectory.computeTrajectory(Tf);
       assertTrue(Math.abs(trajectory.getPosition()-Xf) < 0.000001);
-      System.out.print(trajectory.getVelocity());
       assertTrue(Math.abs(trajectory.getVelocity()-Vf) < 0.000001);
       
       trajectory.computeTrajectory((Tf+T0)/2);
