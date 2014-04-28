@@ -156,11 +156,12 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
       DampedLeastSquaresSolver jacobianSolver = new DampedLeastSquaresSolver(SpatialMotionVector.SIZE);
       jacobianSolver.setAlpha(5e-2);
 
-      OldMomentumControlModule oldMomentumControlModule = new OldMomentumControlModule(fullRobotModel.getRootJoint(), gravityZ, groundReactionWrenchDistributor,
-                                                          referenceFrames.getCenterOfMassFrame(), controlDT, twistCalculator, jacobianSolver, registry,
-                                                          dynamicGraphicObjectsListRegistry);
-      double groundReactionWrenchBreakFrequencyHertz = 7.0;
-      oldMomentumControlModule.setGroundReactionWrenchBreakFrequencyHertz(groundReactionWrenchBreakFrequencyHertz);
+//      OldMomentumControlModule oldMomentumControlModule = new OldMomentumControlModule(fullRobotModel.getRootJoint(), gravityZ, groundReactionWrenchDistributor,
+//                                                          referenceFrames.getCenterOfMassFrame(), controlDT, twistCalculator, jacobianSolver, registry,
+//                                                          dynamicGraphicObjectsListRegistry);
+//      double groundReactionWrenchBreakFrequencyHertz = 7.0;
+//      oldMomentumControlModule.setGroundReactionWrenchBreakFrequencyHertz(groundReactionWrenchBreakFrequencyHertz);
+      OldMomentumControlModule oldMomentumControlModule = null;
 
       MomentumOptimizationSettings momentumOptimizationSettings = HighLevelHumanoidControllerFactoryHelper.createMomentumOptimizationSettings(fullRobotModel, lidarControllerInterface, registry);
       
