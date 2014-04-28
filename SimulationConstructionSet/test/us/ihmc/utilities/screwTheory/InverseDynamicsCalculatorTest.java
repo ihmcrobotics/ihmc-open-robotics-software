@@ -72,7 +72,7 @@ public class InverseDynamicsCalculatorTest
 
       ReferenceFrame bodyFixedFrame = body.getBodyFixedFrame();
       ExternalForcePoint externalForcePoint = new ExternalForcePoint("rootExternalForcePoint", comOffset, robot.getRobotsYoVariableRegistry());
-      rootJoint.addExternalForcePoint(externalForcePoint);
+      rootJoint.physics.addExternalForcePoint(externalForcePoint);
       externalForcePoint.fx.set(random.nextDouble());
       externalForcePoint.fy.set(random.nextDouble());
       externalForcePoint.fz.set(random.nextDouble());

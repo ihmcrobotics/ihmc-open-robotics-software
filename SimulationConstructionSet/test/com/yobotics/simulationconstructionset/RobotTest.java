@@ -56,7 +56,7 @@ public class RobotTest
       Link link22 = link22(link21);
       root2.setLink(link22);
       Vector3d jointAxis = new Vector3d();
-      pin1.getJointAxis(jointAxis);
+      pin1.physics.getJointAxis(jointAxis);
       PinJoint pin2 = new PinJoint("pin2", new Vector3d(), robot2, jointAxis);
       root2.addJoint(pin2);
       Link link12 = link12(link11, pin1);
@@ -152,7 +152,7 @@ public class RobotTest
 
       Vector3d externalForcePointOffset = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
       ExternalForcePoint externalForcePoint = new ExternalForcePoint("efp", externalForcePointOffset, robot.getRobotsYoVariableRegistry());
-      root1.addExternalForcePoint(externalForcePoint);
+      root1.physics.addExternalForcePoint(externalForcePoint);
       Vector3d force = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
       externalForcePoint.setForce(force);
 
@@ -349,7 +349,7 @@ public class RobotTest
       link.getMomentOfInertia(momentOfInertia);
 
       Vector3d jointAxis = new Vector3d();
-      pinJoint.getJointAxis(jointAxis);
+      pinJoint.physics.getJointAxis(jointAxis);
       Vector3d temp1 = new Vector3d(jointAxis);
       momentOfInertia.transform(temp1);
       double scalarInertiaAboutCoM = jointAxis.dot(temp1);    // jointAxis^T * momentOfInertia * jointAxis

@@ -1,25 +1,19 @@
 package us.ihmc.sensorProcessing.stateEstimation;
 
-import javax.vecmath.Vector3d;
-
+import com.yobotics.simulationconstructionset.Joint;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.robotController.RobotController;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import us.ihmc.sensorProcessing.signalCorruption.GaussianVectorCorruptor;
 import us.ihmc.sensorProcessing.simulatedSensors.InverseDynamicsJointsFromSCSRobotGenerator;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.CenterOfMassAccelerationCalculator;
-import us.ihmc.utilities.screwTheory.CenterOfMassCalculator;
-import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
-import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.SpatialAccelerationCalculator;
-import us.ihmc.utilities.screwTheory.TwistCalculator;
+import us.ihmc.utilities.screwTheory.*;
 
-import com.yobotics.simulationconstructionset.Joint;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.robotController.RobotController;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
+import javax.vecmath.Vector3d;
 
 public class DesiredCoMAccelerationsFromRobotStealerController implements RobotController
 {
@@ -166,7 +160,7 @@ public class DesiredCoMAccelerationsFromRobotStealerController implements RobotC
 
       public void run()
       {
-         estimationJoint.getAngularAccelerationsInBodyFrame(desiredAngularAcceleration);
+         estimationJoint.physics.getAngularAccelerationsInBodyFrame(desiredAngularAcceleration);
 
          if (CORRUPT_DESIRED_ACCELERATIONS)
             signalCorruptor.corrupt(desiredAngularAcceleration);

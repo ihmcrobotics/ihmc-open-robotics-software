@@ -123,7 +123,7 @@ public class DRCSimulationFactory
       for (OneDegreeOfFreedomJoint sensorJoint : forceTorqueSensorJoints)
       {
          ArrayList<GroundContactPoint> groundContactPoints = new ArrayList<GroundContactPoint>();
-         sensorJoint.recursiveGetAllGroundContactPoints(groundContactPoints);
+         sensorJoint.physics.recursiveGetAllGroundContactPoints(groundContactPoints);
          GroundContactPointBasedWrenchCalculator groundContactPointBasedWrenchCalculator = new GroundContactPointBasedWrenchCalculator(groundContactPoints,
                sensorJoint);
          wrenchProviders.add(groundContactPointBasedWrenchCalculator);
