@@ -472,10 +472,9 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
       return 0;
    }
 
-   @Override
    public double getSwingHeightMaxForPushRecoveryTrajectory()
    {
-      // TODO Auto-generated method stub
-      return 0;
+	   return 0.15;
    }
+
 }
