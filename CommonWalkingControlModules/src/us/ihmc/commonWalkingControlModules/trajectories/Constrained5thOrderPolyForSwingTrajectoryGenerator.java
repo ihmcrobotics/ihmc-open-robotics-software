@@ -83,8 +83,9 @@ public class Constrained5thOrderPolyForSwingTrajectoryGenerator
    {
       setInitialAndFinalPositionsAndVelocities();
       
+      double maxHeightOfSwingFoot = walkingControllerParameters.getSwingHeightMaxForPushRecoveryTrajectory();
       //@TODO Get desired max step height from walking parameters.
-      swingFootTrajectory.setParams(initialPosition1D.getDoubleValue(), initialPosition1D.getDoubleValue()+0.15, finalDesiredPosition1D.getDoubleValue(), 
+      swingFootTrajectory.setParams(initialPosition1D.getDoubleValue(), initialPosition1D.getDoubleValue()+maxHeightOfSwingFoot, finalDesiredPosition1D.getDoubleValue(), 
                                     finalDesiredVelocity1D.getDoubleValue(), initialTime, stepTime);
       
    }

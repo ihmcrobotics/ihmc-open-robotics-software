@@ -1236,7 +1236,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 //            nextFootstep.setPositionChangeOnlyXY(newPosition);
 //            
 //            updateFootstepParameters();
-//            footEndEffectorControlModules.get(swingSide).replanTrajectory(stateMachine.timeInCurrentState(), nextFootstep.getPosition());
+            footEndEffectorControlModules.get(swingSide).replanTrajectory(stateMachine.timeInCurrentState(), nextFootstep.getPosition());
 //            
 //            TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForSingleSupport(nextFootstep, swingSide);
 //            instantaneousCapturePointPlanner.reInitializeSingleSupport(transferToAndNextFootstepsData, yoTime.getDoubleValue());

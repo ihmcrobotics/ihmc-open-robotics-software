@@ -401,6 +401,11 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       return 100.0;
    }
    
+   public double getSwingHeightMaxForPushRecoveryTrajectory()
+   {
+      return 0.15;
+   }
+   
    public double getSwingKpZ()
    {
       return 200.0;
@@ -456,6 +461,11 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    {
       if (!runningOnRealRobot) return Double.POSITIVE_INFINITY;
       return 100.0;
+   }
+   
+   public double getSwingMaxHeightForPushRecoveryTrajectory()
+   {
+	   return 0.15;
    }
    
    public double getswingMaxOrientationJerk()
