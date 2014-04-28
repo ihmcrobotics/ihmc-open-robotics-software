@@ -31,8 +31,7 @@ public abstract class DRCDemo03
    private final DRCDemoEnvironmentWithBoxAndSteeringWheel environment;
 
    public DRCDemo03(DRCGuiInitialSetup guiInitialSetup, AutomaticSimulationRunner automaticSimulationRunner, double timePerRecordTick,
-                    int simulationDataBufferSize, DRCRobotModel robotModel, DRCRobotInitialSetup<SDFRobot> robotInitialSetup, WalkingControllerParameters drivingControllerParameters, 
-                    WalkingControllerParameters drcRobotMultiContactParameters)
+                    int simulationDataBufferSize, DRCRobotModel robotModel, DRCRobotInitialSetup<SDFRobot> robotInitialSetup)
    {
       DRCSCSInitialSetup scsInitialSetup;
       
@@ -56,14 +55,11 @@ public abstract class DRCDemo03
       ObjectCommunicator drcNetworkProcessorServer = new LocalObjectCommunicator();
       GlobalDataProducer dataProducer = new GlobalDataProducer(drcNetworkProcessorServer);
 
-      ArmControllerParameters armControllerParameters = robotModel.getArmControllerParameters();
-//      DRCRobotJointMap jointMap = robotInterface.getJointMap();
       HighLevelState initialBehavior = HighLevelState.DRIVING;
-      FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulation(drivingControllerParameters);
+      FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulation(robotModel.getDrivingControllerParameters());
 
       
-      ControllerFactory controllerFactory = DRCObstacleCourseSimulation.createDRCMultiControllerFactory(null, dataProducer, footstepTimingParameters, drivingControllerParameters, 
-            armControllerParameters, drcRobotMultiContactParameters,initialBehavior,robotModel);
+      ControllerFactory controllerFactory = DRCObstacleCourseSimulation.createDRCMultiControllerFactory(null, dataProducer, footstepTimingParameters,initialBehavior,robotModel);
 
       
       Pair<HumanoidRobotSimulation<SDFRobot>, DRCController> humanoidSimulation = DRCSimulationFactory.createSimulation(controllerFactory, environment, robotInterface, robotInitialSetup, scsInitialSetup,

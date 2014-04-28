@@ -55,10 +55,7 @@ public class AtlasHighLevelPositionControlDemo
       double initialYaw = 0.0;
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = model.getDefaultRobotInitialSetup(groundHeight + ROBOT_FLOATING_HEIGHT, initialYaw);
 
-      WalkingControllerParameters drcControlParameters = model.getWalkingControlParameters();
-      ArmControllerParameters armControlParameters = model.getArmControllerParameters();
-      
-      new DRCHighLevelPositionControlDemo(drcControlParameters, armControlParameters, robotInterface, robotInitialSetup, guiInitialSetup, scsInitialSetup,
+      new DRCHighLevelPositionControlDemo(robotInterface, robotInitialSetup, guiInitialSetup, scsInitialSetup,
                                     automaticSimulationRunner, DRCConfigParameters.CONTROL_DT, 16000, model);
    }
 }
