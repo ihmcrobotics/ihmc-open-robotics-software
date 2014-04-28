@@ -215,4 +215,10 @@ public class ValkyrieRobotModel implements DRCRobotModel
 	   return null;
    }
 
+   @Override
+   public WalkingControllerParameters getDrivingControllerParameters()
+   {
+      return getWalkingControlParameters();
+   }
+
 }
