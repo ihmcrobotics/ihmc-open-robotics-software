@@ -25,8 +25,8 @@
         </location>
         <orientation>
           <x>-0.0037574323369964626</x>
-          <y>0.0033228306097807885</y>
-          <z>-0.0608756921533691</z>
+          <y>0.003322830609780789</y>
+          <z>-0.060875692153369104</z>
           <w>0.9981327519943527</w>
         </orientation>
       </us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
@@ -58,6 +58,14 @@
     <elbowRoll>1.1815498240469207</elbowRoll>
     <wristPitch>0.009212873900293255</wristPitch>
     <wristRoll>-0.06333870967741939</wristRoll>
+    <jointAngles>
+      <double>0.34087579667644174</double>
+      <double>-1.3005548387096773</double>
+      <double>1.937774477028348</double>
+      <double>1.1815498240469207</double>
+      <double>0.009212873900293255</double>
+      <double>-0.06333870967741939</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>27938223</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
@@ -82,6 +90,14 @@
     <elbowRoll>-1.1815498240469207</elbowRoll>
     <wristPitch>0.0</wristPitch>
     <wristRoll>0.06794516129032258</wristRoll>
+    <jointAngles>
+      <double>0.34087579667644174</double>
+      <double>1.3005548387096775</double>
+      <double>1.9408454349951123</double>
+      <double>-1.1815498240469207</double>
+      <double>0.0</double>
+      <double>0.06794516129032258</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>9829488307</long>
   <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
@@ -132,6 +148,14 @@
     <elbowRoll>-0.27235653559710593</elbowRoll>
     <wristPitch>0.0</wristPitch>
     <wristRoll>0.8996754452369053</wristRoll>
+    <jointAngles>
+      <double>-1.0162892656297868</double>
+      <double>1.2115889379982026</double>
+      <double>0.8862111080745819</double>
+      <double>-0.27235653559710593</double>
+      <double>0.0</double>
+      <double>0.8996754452369053</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>64488477113</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
@@ -156,6 +180,14 @@
     <elbowRoll>-0.2574699382288534</elbowRoll>
     <wristPitch>0.5246144001462101</wristPitch>
     <wristRoll>0.8860046875305961</wristRoll>
+    <jointAngles>
+      <double>-1.1041569458047829</double>
+      <double>1.1992618534351907</double>
+      <double>0.0</double>
+      <double>-0.2574699382288534</double>
+      <double>0.5246144001462101</double>
+      <double>0.8860046875305961</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>77356587852</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
@@ -170,8 +202,8 @@
     <orientation>
       <x>0.219226532537659</x>
       <y>0.6412049863377861</y>
-      <z>-0.11132473709576499</z>
-      <w>0.7269131281230469</w>
+      <z>-0.111324737095765</z>
+      <w>0.7269131281230468</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
     <shoulderPitch>-1.0522539237770927</shoulderPitch>
@@ -180,6 +212,14 @@
     <elbowRoll>-0.4642027372626391</elbowRoll>
     <wristPitch>0.3016276647248404</wristPitch>
     <wristRoll>0.9548961582055819</wristRoll>
+    <jointAngles>
+      <double>-1.0522539237770927</double>
+      <double>1.2886429294218011</double>
+      <double>0.0</double>
+      <double>-0.4642027372626391</double>
+      <double>0.3016276647248404</double>
+      <double>0.9548961582055819</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>90364675183</long>
   <us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
@@ -196,9 +236,9 @@
       <z>0.7970258774616684</z>
     </position>
     <orientation>
-      <x>0.20014827553517842</x>
+      <x>0.20014827553517836</x>
       <y>0.6255521905062538</y>
-      <z>-0.0824312580644992</z>
+      <z>-0.08243125806449922</z>
       <w>0.7495533419624155</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
@@ -208,6 +248,14 @@
     <elbowRoll>-0.3316496729489291</elbowRoll>
     <wristPitch>0.2919133227917378</wristPitch>
     <wristRoll>0.972306462410443</wristRoll>
+    <jointAngles>
+      <double>-1.1758330507916497</double>
+      <double>1.1235740979362059</double>
+      <double>0.0</double>
+      <double>-0.3316496729489291</double>
+      <double>0.2919133227917378</double>
+      <double>0.972306462410443</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>112206959443</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
@@ -222,7 +270,7 @@
     <orientation>
       <x>0.1466116389401554</x>
       <y>0.3471776581036334</y>
-      <z>-0.03082627524691025</z>
+      <z>-0.030826275246910253</z>
       <w>0.9257550657681328</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
@@ -232,6 +280,14 @@
     <elbowRoll>1.6224234358697696</elbowRoll>
     <wristPitch>0.0</wristPitch>
     <wristRoll>-0.38020420014686623</wristRoll>
+    <jointAngles>
+      <double>0.47449722940961336</double>
+      <double>-1.2060254788736002</double>
+      <double>1.9901119156726694</double>
+      <double>1.6224234358697696</double>
+      <double>0.0</double>
+      <double>-0.38020420014686623</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>116980547049</long>
   <us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
@@ -268,6 +324,14 @@
     <elbowRoll>-0.19612081598886177</elbowRoll>
     <wristPitch>0.22923837891011692</wristPitch>
     <wristRoll>0.751848142418198</wristRoll>
+    <jointAngles>
+      <double>-1.097784530339618</double>
+      <double>1.1390377596278416</double>
+      <double>0.0</double>
+      <double>-0.19612081598886177</double>
+      <double>0.22923837891011692</double>
+      <double>0.751848142418198</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>147092059077</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
@@ -292,6 +356,14 @@
     <elbowRoll>-0.10876606955871891</elbowRoll>
     <wristPitch>0.17430474796457784</wristPitch>
     <wristRoll>0.43835584295500774</wristRoll>
+    <jointAngles>
+      <double>-1.0689626556246832</double>
+      <double>1.211263781556115</double>
+      <double>0.0</double>
+      <double>-0.10876606955871891</double>
+      <double>0.17430474796457784</double>
+      <double>0.43835584295500774</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>156076715185</long>
   <us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
@@ -339,6 +411,14 @@
     <elbowRoll>-0.8289513144035523</elbowRoll>
     <wristPitch>0.0</wristPitch>
     <wristRoll>1.1781</wristRoll>
+    <jointAngles>
+      <double>-0.9802951937119463</double>
+      <double>1.032329282369983</double>
+      <double>0.2240236241728663</double>
+      <double>-0.8289513144035523</double>
+      <double>0.0</double>
+      <double>1.1781</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>191012855863</long>
   <us.ihmc.graphics3DAdapter.camera.VideoControlPacket>
@@ -529,6 +609,14 @@
     <elbowRoll>0.0</elbowRoll>
     <wristPitch>2.787819396880158E-4</wristPitch>
     <wristRoll>0.3172294697077265</wristRoll>
+    <jointAngles>
+      <double>-0.6490647441236708</double>
+      <double>0.4119383884766598</double>
+      <double>0.226744834065959</double>
+      <double>0.0</double>
+      <double>2.787819396880158E-4</double>
+      <double>0.3172294697077265</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>243330496268</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
@@ -553,6 +641,14 @@
     <elbowRoll>-0.08222239165241464</elbowRoll>
     <wristPitch>0.0</wristPitch>
     <wristRoll>0.29801193495953976</wristRoll>
+    <jointAngles>
+      <double>-0.38064787802115546</double>
+      <double>0.09597311688643874</double>
+      <double>0.0</double>
+      <double>-0.08222239165241464</double>
+      <double>0.0</double>
+      <double>0.29801193495953976</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>259038910569</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
@@ -577,6 +673,14 @@
     <elbowRoll>-0.08212716322430412</elbowRoll>
     <wristPitch>0.0</wristPitch>
     <wristRoll>0.05110434405500591</wristRoll>
+    <jointAngles>
+      <double>-0.3484719110466982</double>
+      <double>0.2799836084216519</double>
+      <double>0.0452894996335558</double>
+      <double>-0.08212716322430412</double>
+      <double>0.0</double>
+      <double>0.05110434405500591</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>268380413415</long>
   <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
@@ -617,6 +721,14 @@
     <elbowRoll>-0.8714083343457484</elbowRoll>
     <wristPitch>0.0</wristPitch>
     <wristRoll>-0.09167958891218943</wristRoll>
+    <jointAngles>
+      <double>-0.9425711758354521</double>
+      <double>1.1674775181820496</double>
+      <double>0.6456854403966644</double>
+      <double>-0.8714083343457484</double>
+      <double>0.0</double>
+      <double>-0.09167958891218943</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>346011364939</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
@@ -641,6 +753,14 @@
     <elbowRoll>0.13051212396879383</elbowRoll>
     <wristPitch>0.7856666438592246</wristPitch>
     <wristRoll>-0.44466652495745673</wristRoll>
+    <jointAngles>
+      <double>-1.4261388179749368</double>
+      <double>-1.2684811113274304</double>
+      <double>0.0</double>
+      <double>0.13051212396879383</double>
+      <double>0.7856666438592246</double>
+      <double>-0.44466652495745673</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>356772701251</long>
   <us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
@@ -712,10 +832,10 @@
       <z>0.9194497169555476</z>
     </position>
     <orientation>
-      <x>0.7026679019750414</x>
-      <y>0.10248028888045217</y>
-      <z>-0.3200257673404649</z>
-      <w>0.6271675359607826</w>
+      <x>0.7026679019750413</x>
+      <y>0.10248028888045216</y>
+      <z>-0.32002576734046495</z>
+      <w>0.6271675359607825</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
     <shoulderPitch>-1.1594959361664785</shoulderPitch>
@@ -724,6 +844,14 @@
     <elbowRoll>1.2674654592705752</elbowRoll>
     <wristPitch>0.0</wristPitch>
     <wristRoll>-1.1781</wristRoll>
+    <jointAngles>
+      <double>-1.1594959361664785</double>
+      <double>-0.5531151606807332</double>
+      <double>1.9871115432245996</double>
+      <double>1.2674654592705752</double>
+      <double>0.0</double>
+      <double>-1.1781</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>433660059619</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
@@ -748,6 +876,14 @@
     <elbowRoll>0.5795992710311889</elbowRoll>
     <wristPitch>0.0</wristPitch>
     <wristRoll>-0.24002031725918244</wristRoll>
+    <jointAngles>
+      <double>-1.0492199117800423</double>
+      <double>-0.8329601395222468</double>
+      <double>2.9092781291334275</double>
+      <double>0.5795992710311889</double>
+      <double>0.0</double>
+      <double>-0.24002031725918244</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>444271310388</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
@@ -772,6 +908,14 @@
     <elbowRoll>0.0</elbowRoll>
     <wristPitch>0.8610921512653111</wristPitch>
     <wristRoll>0.35228561204626774</wristRoll>
+    <jointAngles>
+      <double>-1.3942520013706634</double>
+      <double>-0.7798979526234858</double>
+      <double>1.7619380681504375</double>
+      <double>0.0</double>
+      <double>0.8610921512653111</double>
+      <double>0.35228561204626774</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>470604634129</long>
   <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
@@ -818,6 +962,14 @@
     <elbowRoll>0.15019632215552836</elbowRoll>
     <wristPitch>3.14159</wristPitch>
     <wristRoll>1.1781</wristRoll>
+    <jointAngles>
+      <double>-1.5708</double>
+      <double>-0.10458980433773649</double>
+      <double>0.378380668563979</double>
+      <double>0.15019632215552836</double>
+      <double>3.14159</double>
+      <double>1.1781</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>496280021258</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
@@ -842,6 +994,14 @@
     <elbowRoll>0.0</elbowRoll>
     <wristPitch>0.3833649622754798</wristPitch>
     <wristRoll>1.055499200311078</wristRoll>
+    <jointAngles>
+      <double>-1.2152791184709328</double>
+      <double>-0.19074589826515334</double>
+      <double>2.2284839915568955</double>
+      <double>0.0</double>
+      <double>0.3833649622754798</double>
+      <double>1.055499200311078</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>501762637807</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
@@ -866,6 +1026,14 @@
     <elbowRoll>-1.5032203432020144</elbowRoll>
     <wristPitch>0.0</wristPitch>
     <wristRoll>0.30036594889156115</wristRoll>
+    <jointAngles>
+      <double>-0.47401534183079225</double>
+      <double>1.1511736256107836</double>
+      <double>0.7081462078975168</double>
+      <double>-1.5032203432020144</double>
+      <double>0.0</double>
+      <double>0.30036594889156115</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>504748863161</long>
   <com.yobotics.simulationconstructionset.simulatedSensors.LidarClearCommand>
@@ -894,6 +1062,14 @@
     <elbowRoll>-0.2634461064765731</elbowRoll>
     <wristPitch>0.5305634302829773</wristPitch>
     <wristRoll>-0.5023583995902073</wristRoll>
+    <jointAngles>
+      <double>-1.1990543851688427</double>
+      <double>1.2418889994806745</double>
+      <double>0.0</double>
+      <double>-0.2634461064765731</double>
+      <double>0.5305634302829773</double>
+      <double>-0.5023583995902073</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>544404569902</long>
   <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
@@ -929,6 +1105,14 @@
     <elbowRoll>-0.1834442250598979</elbowRoll>
     <wristPitch>0.49601914572973815</wristPitch>
     <wristRoll>-0.37012579160674636</wristRoll>
+    <jointAngles>
+      <double>-1.2762033996469406</double>
+      <double>1.1592716105307672</double>
+      <double>0.0</double>
+      <double>-0.1834442250598979</double>
+      <double>0.49601914572973815</double>
+      <double>-0.37012579160674636</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>557972779298</long>
   <us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
@@ -993,6 +1177,14 @@
     <elbowRoll>-0.12066753621224047</elbowRoll>
     <wristPitch>0.5220130114232902</wristPitch>
     <wristRoll>-0.350017282104958</wristRoll>
+    <jointAngles>
+      <double>-1.299744168776608</double>
+      <double>1.0900406036757198</double>
+      <double>0.0</double>
+      <double>-0.12066753621224047</double>
+      <double>0.5220130114232902</double>
+      <double>-0.350017282104958</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>585132787199</long>
   <us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
@@ -1025,6 +1217,14 @@
     <elbowRoll>-0.12980501278735443</elbowRoll>
     <wristPitch>0.5424078188231429</wristPitch>
     <wristRoll>-0.32123813935864864</wristRoll>
+    <jointAngles>
+      <double>-1.3250376351837152</double>
+      <double>1.1026577687284165</double>
+      <double>0.0</double>
+      <double>-0.12980501278735443</double>
+      <double>0.5424078188231429</double>
+      <double>-0.32123813935864864</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>600108754812</long>
   <us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
@@ -1058,6 +1258,14 @@
     <elbowRoll>-1.9118779147656335</elbowRoll>
     <wristPitch>0.0</wristPitch>
     <wristRoll>0.4772266698240851</wristRoll>
+    <jointAngles>
+      <double>0.07923668190394735</double>
+      <double>1.3842878843123212</double>
+      <double>1.2128764066194928</double>
+      <double>-1.9118779147656335</double>
+      <double>0.0</double>
+      <double>0.4772266698240851</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>636504483316</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
@@ -1070,10 +1278,10 @@
       <z>1.2367295907088824</z>
     </position>
     <orientation>
-      <x>-0.008948202016961188</x>
+      <x>-0.008948202016961187</x>
       <y>0.14496613022728658</y>
-      <z>-0.8743058333415104</z>
-      <w>0.46313503490083324</w>
+      <z>-0.8743058333415105</z>
+      <w>0.46313503490083335</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
     <shoulderPitch>-0.19449788697117387</shoulderPitch>
@@ -1082,6 +1290,14 @@
     <elbowRoll>-0.035805243120006984</elbowRoll>
     <wristPitch>3.14159</wristPitch>
     <wristRoll>0.11566654859337863</wristRoll>
+    <jointAngles>
+      <double>-0.19449788697117387</double>
+      <double>-0.07715122889734742</double>
+      <double>3.1150437102000272</double>
+      <double>-0.035805243120006984</double>
+      <double>3.14159</double>
+      <double>0.11566654859337863</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>640542344712</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
@@ -1094,7 +1310,7 @@
       <z>1.236405794996657</z>
     </position>
     <orientation>
-      <x>-0.01068515664048349</x>
+      <x>-0.01068515664048355</x>
       <y>0.15684549531322461</y>
       <z>-0.8729801063125204</z>
       <w>0.4617261656112832</w>
@@ -1106,6 +1322,14 @@
     <elbowRoll>-0.08219613521479398</elbowRoll>
     <wristPitch>0.0</wristPitch>
     <wristRoll>0.1843664364583917</wristRoll>
+    <jointAngles>
+      <double>-0.20139522254732703</double>
+      <double>-0.020668407445378373</double>
+      <double>0.0</double>
+      <double>-0.08219613521479398</double>
+      <double>0.0</double>
+      <double>0.1843664364583917</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>643483999643</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
@@ -1118,10 +1342,10 @@
       <z>1.2365363191747964</z>
     </position>
     <orientation>
-      <x>-0.009506337674212257</x>
+      <x>-0.009506337674212256</x>
       <y>0.15609150024623641</y>
-      <z>-0.8728868756526608</z>
-      <w>0.46218348673253046</w>
+      <z>-0.8728868756526609</z>
+      <w>0.46218348673253057</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
     <shoulderPitch>-0.20705694735894062</shoulderPitch>
@@ -1130,6 +1354,14 @@
     <elbowRoll>-0.08219907154792487</elbowRoll>
     <wristPitch>0.0</wristPitch>
     <wristRoll>0.18666708944075128</wristRoll>
+    <jointAngles>
+      <double>-0.20705694735894062</double>
+      <double>-0.02386034540301253</double>
+      <double>0.0</double>
+      <double>-0.08219907154792487</double>
+      <double>0.0</double>
+      <double>0.18666708944075128</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>649869077705</long>
   <us.ihmc.commonWalkingControlModules.packets.ArmJointAnglePacket>
@@ -1160,6 +1392,14 @@
     <elbowRoll>0.0</elbowRoll>
     <wristPitch>0.0</wristPitch>
     <wristRoll>0.0</wristRoll>
+    <jointAngles>
+      <double>0.0</double>
+      <double>0.0</double>
+      <double>0.0</double>
+      <double>0.0</double>
+      <double>0.0</double>
+      <double>0.0</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>664205352353</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
@@ -1172,6 +1412,14 @@
     <elbowRoll>0.0</elbowRoll>
     <wristPitch>0.0</wristPitch>
     <wristRoll>0.0</wristRoll>
+    <jointAngles>
+      <double>0.0</double>
+      <double>0.0</double>
+      <double>0.0</double>
+      <double>0.0</double>
+      <double>0.0</double>
+      <double>0.0</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>691276561501</long>
   <us.ihmc.commonWalkingControlModules.packets.ArmJointAnglePacket>
@@ -1199,7 +1447,7 @@
     <orientation>
       <x>0.442155620178756</x>
       <y>0.7015364133223566</y>
-      <z>-0.2176747186917212</z>
+      <z>-0.21767471869172117</z>
       <w>0.5147453595416119</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
@@ -1209,6 +1457,14 @@
     <elbowRoll>0.3114561273175583</elbowRoll>
     <wristPitch>1.7958969866206125</wristPitch>
     <wristRoll>0.28098772347361334</wristRoll>
+    <jointAngles>
+      <double>0.4258408236242641</double>
+      <double>-1.5472003322660617</double>
+      <double>0.2780948832740644</double>
+      <double>0.3114561273175583</double>
+      <double>1.7958969866206125</double>
+      <double>0.28098772347361334</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>742317949002</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
@@ -1233,6 +1489,14 @@
     <elbowRoll>2.177094685136936</elbowRoll>
     <wristPitch>0.0</wristPitch>
     <wristRoll>-0.7333575112000057</wristRoll>
+    <jointAngles>
+      <double>0.483835674646444</double>
+      <double>-0.9628117272911164</double>
+      <double>1.9236652378776504</double>
+      <double>2.177094685136936</double>
+      <double>0.0</double>
+      <double>-0.7333575112000057</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>775543003913</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
@@ -1257,6 +1521,14 @@
     <elbowRoll>-0.11431238210539124</elbowRoll>
     <wristPitch>0.8992909061192992</wristPitch>
     <wristRoll>-0.021111819758447597</wristRoll>
+    <jointAngles>
+      <double>-1.1377930678046742</double>
+      <double>1.4015911898767732</double>
+      <double>0.0</double>
+      <double>-0.11431238210539124</double>
+      <double>0.8992909061192992</double>
+      <double>-0.021111819758447597</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>784935782582</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
@@ -1281,6 +1553,14 @@
     <elbowRoll>-0.09782791382838554</elbowRoll>
     <wristPitch>0.9325487023606464</wristPitch>
     <wristRoll>-0.026339286757978617</wristRoll>
+    <jointAngles>
+      <double>-1.0282863374577027</double>
+      <double>1.301610315632729</double>
+      <double>0.0</double>
+      <double>-0.09782791382838554</double>
+      <double>0.9325487023606464</double>
+      <double>-0.026339286757978617</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>787340782406</long>
   <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
@@ -1349,6 +1629,14 @@
     <elbowRoll>-0.06350615288215149</elbowRoll>
     <wristPitch>0.0</wristPitch>
     <wristRoll>-0.022746179559480637</wristRoll>
+    <jointAngles>
+      <double>-0.8704453595389755</double>
+      <double>1.1744836087702855</double>
+      <double>1.0254851894437609</double>
+      <double>-0.06350615288215149</double>
+      <double>0.0</double>
+      <double>-0.022746179559480637</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>820152705355</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
@@ -1373,6 +1661,14 @@
     <elbowRoll>-0.07948867731566929</elbowRoll>
     <wristPitch>0.0</wristPitch>
     <wristRoll>0.06885954376203009</wristRoll>
+    <jointAngles>
+      <double>-0.9430514662519227</double>
+      <double>1.1944595930233155</double>
+      <double>0.006518518961692591</double>
+      <double>-0.07948867731566929</double>
+      <double>0.0</double>
+      <double>0.06885954376203009</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>831548721080</long>
   <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
@@ -1419,6 +1715,14 @@
     <elbowRoll>-0.08269100112555018</elbowRoll>
     <wristPitch>0.0</wristPitch>
     <wristRoll>0.0549571032349219</wristRoll>
+    <jointAngles>
+      <double>-0.797143061773927</double>
+      <double>1.124609089412477</double>
+      <double>0.15337274251029356</double>
+      <double>-0.08269100112555018</double>
+      <double>0.0</double>
+      <double>0.0549571032349219</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>847512751067</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
@@ -1443,6 +1747,14 @@
     <elbowRoll>-0.08356783344271101</elbowRoll>
     <wristPitch>0.0</wristPitch>
     <wristRoll>0.12383630111584203</wristRoll>
+    <jointAngles>
+      <double>-0.8548963227508573</double>
+      <double>1.062074644993873</double>
+      <double>0.13390295490958012</double>
+      <double>-0.08356783344271101</double>
+      <double>0.0</double>
+      <double>0.12383630111584203</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>850108791728</long>
   <us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
@@ -1506,6 +1818,14 @@
     <elbowRoll>-0.05065282324315662</elbowRoll>
     <wristPitch>0.0</wristPitch>
     <wristRoll>0.2735030258121688</wristRoll>
+    <jointAngles>
+      <double>-0.9228867574857026</double>
+      <double>0.9170342218784345</double>
+      <double>0.10895678270651396</double>
+      <double>-0.05065282324315662</double>
+      <double>0.0</double>
+      <double>0.2735030258121688</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>887080765704</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
@@ -1530,6 +1850,14 @@
     <elbowRoll>-0.5577700080826055</elbowRoll>
     <wristPitch>0.0</wristPitch>
     <wristRoll>0.6057359097939622</wristRoll>
+    <jointAngles>
+      <double>-0.9291720171863734</double>
+      <double>1.1067934165216482</double>
+      <double>0.11121542264354742</double>
+      <double>-0.5577700080826055</double>
+      <double>0.0</double>
+      <double>0.6057359097939622</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>894459842883</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
@@ -1554,6 +1882,14 @@
     <elbowRoll>-0.4221316353338788</elbowRoll>
     <wristPitch>0.0</wristPitch>
     <wristRoll>0.3679258513856967</wristRoll>
+    <jointAngles>
+      <double>-0.8671591983642177</double>
+      <double>1.1929635404894297</double>
+      <double>0.14756978259485393</double>
+      <double>-0.4221316353338788</double>
+      <double>0.0</double>
+      <double>0.3679258513856967</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>904018185897</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
@@ -1578,6 +1914,14 @@
     <elbowRoll>-0.6335373239020742</elbowRoll>
     <wristPitch>0.0</wristPitch>
     <wristRoll>0.43973955721575464</wristRoll>
+    <jointAngles>
+      <double>-0.867047793241051</double>
+      <double>1.3429468308738792</double>
+      <double>0.18937594735382457</double>
+      <double>-0.6335373239020742</double>
+      <double>0.0</double>
+      <double>0.43973955721575464</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>907876824132</long>
   <us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
@@ -1612,6 +1956,14 @@
     <elbowRoll>-1.2687266432723545</elbowRoll>
     <wristPitch>0.042457538461318424</wristPitch>
     <wristRoll>0.8861300927702866</wristRoll>
+    <jointAngles>
+      <double>-1.0080580917486666</double>
+      <double>1.5708</double>
+      <double>0.0845804834214736</double>
+      <double>-1.2687266432723545</double>
+      <double>0.042457538461318424</double>
+      <double>0.8861300927702866</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>931914165703</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
@@ -1636,6 +1988,14 @@
     <elbowRoll>-1.1605248071286876</elbowRoll>
     <wristPitch>3.14159</wristPitch>
     <wristRoll>-0.5938790592875554</wristRoll>
+    <jointAngles>
+      <double>-1.0311030276950208</double>
+      <double>0.5913471560360332</double>
+      <double>3.14159</double>
+      <double>-1.1605248071286876</double>
+      <double>3.14159</double>
+      <double>-0.5938790592875554</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>942612617285</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
@@ -1660,6 +2020,14 @@
     <elbowRoll>-0.08393411149444673</elbowRoll>
     <wristPitch>0.0</wristPitch>
     <wristRoll>0.33851809919120335</wristRoll>
+    <jointAngles>
+      <double>-1.037132960954449</double>
+      <double>1.220800219569324</double>
+      <double>0.12647783829929507</double>
+      <double>-0.08393411149444673</double>
+      <double>0.0</double>
+      <double>0.33851809919120335</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>950620677595</long>
   <us.ihmc.commonWalkingControlModules.packets.ArmJointAnglePacket>
@@ -1697,6 +2065,14 @@
     <elbowRoll>-0.0815230633340452</elbowRoll>
     <wristPitch>0.0</wristPitch>
     <wristRoll>0.2367230760231906</wristRoll>
+    <jointAngles>
+      <double>-0.9231492012980202</double>
+      <double>1.146776900224442</double>
+      <double>0.15340082689156218</double>
+      <double>-0.0815230633340452</double>
+      <double>0.0</double>
+      <double>0.2367230760231906</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>980996196104</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
@@ -1721,6 +2097,14 @@
     <elbowRoll>-0.08354118595275607</elbowRoll>
     <wristPitch>0.025410176599633336</wristPitch>
     <wristRoll>0.06071151905590762</wristRoll>
+    <jointAngles>
+      <double>-1.1417875540703577</double>
+      <double>1.5154598781442747</double>
+      <double>0.0</double>
+      <double>-0.08354118595275607</double>
+      <double>0.025410176599633336</double>
+      <double>0.06071151905590762</double>
+    </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>995708742164</long>
   <us.ihmc.commonWalkingControlModules.packets.ArmJointAnglePacket>
