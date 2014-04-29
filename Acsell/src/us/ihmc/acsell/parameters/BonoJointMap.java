@@ -117,12 +117,6 @@ public class BonoJointMap extends DRCRobotJointMap
    }
    
    @Override
-   public double getPelvisToFoot()
-   {
-      return BonoPhysicalProperties.pelvisToFoot;
-   }
-
-   @Override
    public String getLidarJointName()
    {
       return null;
