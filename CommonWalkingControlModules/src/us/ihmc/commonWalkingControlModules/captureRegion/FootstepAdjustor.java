@@ -56,7 +56,7 @@ public class FootstepAdjustor
       footstepChanged = false;
       
       // Check if there is a capture region
-      if(captureRegion == null)
+      if(captureRegion.isEmpty())
       {
          updateVisualizer();
          return footstepChanged;
