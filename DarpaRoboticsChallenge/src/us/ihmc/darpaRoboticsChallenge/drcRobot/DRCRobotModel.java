@@ -17,7 +17,7 @@ import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
 public interface DRCRobotModel
 {
    //TODO: RobotBoundingBoxes.java
-   //Controller Parameters
+
    public ArmControllerParameters getArmControllerParameters();
 
    public WalkingControllerParameters getWalkingControlParameters();
@@ -51,14 +51,4 @@ public interface DRCRobotModel
    public HandModel getHandModel();
    
    public Transform getOffsetHandFromWrist(RobotSide side);
-   
-   //XXX: Deprecated, should not be in DRCRobotModel
-   @Deprecated
-   public DRCHandType getHandType();
-   @Deprecated
-   public boolean hasIRobotHands();
-   @Deprecated
-   public boolean hasArmExtensions();
-   @Deprecated
-   public boolean hasHookHands();
 }
