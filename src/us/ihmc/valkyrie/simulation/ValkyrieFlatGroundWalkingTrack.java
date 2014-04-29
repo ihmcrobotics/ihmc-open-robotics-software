@@ -24,7 +24,7 @@ public class ValkyrieFlatGroundWalkingTrack
    {
       AutomaticSimulationRunner automaticSimulationRunner = null;
 
-      DRCRobotModel robotModel = new ValkyrieRobotModel();
+      DRCRobotModel robotModel = new ValkyrieRobotModel(false);
       SliderBoardFactory sliderBoardFactory = WalkControllerSliderBoard.getFactory();
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false, sliderBoardFactory);
 
