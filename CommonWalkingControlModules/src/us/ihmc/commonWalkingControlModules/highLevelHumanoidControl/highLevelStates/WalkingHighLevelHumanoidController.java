@@ -1231,16 +1231,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          if(footstepAdjustor.adjustFootstep(nextFootstep, captureRegionCalculator.getCaptureRegion()) || projectFootstepToCaptureRegion.getBooleanValue())
          {
             // The nextFootstep has changed and atlas feels bad
-//            FramePoint2d newPosition = captureRegionCalculator.getCaptureRegion().getCentroidCopy();
-//            newPosition.changeFrame(nextFootstep.getReferenceFrame());
-//            nextFootstep.setPositionChangeOnlyXY(newPosition);
-//            
-//            updateFootstepParameters();
+            updateFootstepParameters();
             footEndEffectorControlModules.get(swingSide).replanTrajectory(stateMachine.timeInCurrentState(), nextFootstep.getPosition());
-//            
-//            TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForSingleSupport(nextFootstep, swingSide);
-//            instantaneousCapturePointPlanner.reInitializeSingleSupport(transferToAndNextFootstepsData, yoTime.getDoubleValue());
-//            
+            
+            TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForSingleSupport(nextFootstep, swingSide);
+            instantaneousCapturePointPlanner.reInitializeSingleSupport(transferToAndNextFootstepsData, yoTime.getDoubleValue());
+            
             footstepWasProjectedInCaptureRegion.set(true);
             projectFootstepToCaptureRegion.set(false);
          }
