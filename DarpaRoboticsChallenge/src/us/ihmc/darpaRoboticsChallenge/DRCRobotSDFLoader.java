@@ -7,21 +7,10 @@ import java.util.ArrayList;
 import javax.xml.bind.JAXBException;
 
 import us.ihmc.SdfLoader.JaxbSDFLoader;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 
 public class DRCRobotSDFLoader
 {
-   public static JaxbSDFLoader loadDRCRobot(DRCRobotModel robotModel)
-   {
-      return loadDRCRobot(robotModel, false);
-   }
-   
-   public static JaxbSDFLoader loadDRCRobot(DRCRobotModel robotModel, boolean headless)
-   {
-      return loadDRCRobot(robotModel.getResourceDirectories(), robotModel.getSdfFileAsStream(), headless);
-   }
-   
+     
    public static JaxbSDFLoader loadDRCRobot(String[] resourceDirectories, InputStream sdfFile, boolean headless)
    {
       ArrayList<String> resources = new ArrayList<String>();
