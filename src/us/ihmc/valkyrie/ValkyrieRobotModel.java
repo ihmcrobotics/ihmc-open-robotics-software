@@ -6,9 +6,7 @@ import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactPointInformation;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCContactPointInformationFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParamaters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -38,7 +36,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private final DRCRobotPhysicalProperties physicalProperties;
    private DRCRobotJointMap jointMap;
    private final String robotName = "VALKYRIE";
-         private final String modelName = "V1";
+   private final String modelName = "V1";
    private StateEstimatorParameters stateEstimatorParamaters;
    private double estimatorDT;
    private JaxbSDFLoader loader;
@@ -98,23 +96,17 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
-   public String getModelName()
-   {
-      return modelName;
-   }
-
-   @Override
    public Transform getOffsetHandFromWrist(RobotSide side)
    {
       return new Transform();
    }
 
-   public String getSdfFile()
+   private String getSdfFile()
    {
       return "V1/sdf/V1_sim.sdf";
    }
 
-   public String[] getResourceDirectories()
+   private String[] getResourceDirectories()
    {
 
       if (resourceDirectories == null)
@@ -129,7 +121,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
       return resourceDirectories;
    }
 
-   public InputStream getSdfFileAsStream()
+   private InputStream getSdfFileAsStream()
    {
       return valModelRoot.getResourceAsStream(getSdfFile());
    }
@@ -165,12 +157,6 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public DRCRobotContactPointParamaters getContactPointParamaters(boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsToFeetOnly)
    {
       return new ValkyrieContactPointParamaters(getJointMap());
-   }
-
-   @Override
-   public ContactPointInformation getContactPointInformation(boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsToFeetOnly)
-   {
-      return DRCContactPointInformationFactory.createContactPointInformation(getJointMap(),getContactPointParamaters(addLoadsOfContactPoints, addLoadsOfContactPointsToFeetOnly)) ;
    }
 
    @Override
