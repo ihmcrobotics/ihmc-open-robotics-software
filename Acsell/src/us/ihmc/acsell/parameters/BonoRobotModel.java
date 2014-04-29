@@ -35,6 +35,7 @@ public class BonoRobotModel implements DRCRobotModel
    
    private final boolean runningOnRealRobot;
    private JaxbSDFLoader loader;
+   private JaxbSDFLoader headlessLoader;
    
    public BonoRobotModel()
    {
@@ -69,26 +70,6 @@ public class BonoRobotModel implements DRCRobotModel
    public DRCRobotJointMap getJointMap()
    {
       return new BonoJointMap();
-   }
-
-   public boolean hasIRobotHands()
-   {
-      return false;
-   }
-
-   public boolean hasArmExtensions()
-   {
-      return false;
-   }
-
-   public boolean hasHookHands()
-   {
-      return false;
-   }
-
-   public DRCHandType getHandType()
-   {
-      return DRCHandType.NONE;
    }
 
    public String getModelName()
@@ -172,6 +153,15 @@ public class BonoRobotModel implements DRCRobotModel
 
    public JaxbSDFLoader getJaxbSDFLoader(boolean headless)
    {
+      if(headless)
+      {
+         if(headlessLoader == null)
+         {
+            this.headlessLoader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSdfFileAsStream(), headless);
+         }
+         return headlessLoader;
+      }
+      
       if(loader == null)
       {
          this.loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSdfFileAsStream(), headless);
