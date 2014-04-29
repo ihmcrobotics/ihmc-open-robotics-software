@@ -28,6 +28,8 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePointInMul
 
 public class CommonCapturePointCalculator implements CapturePointCalculatorInterface
 {
+   public static final String CAPTURE_POINT_DYNAMIC_GRAPHIC_OBJECT_NAME = "Capture Point";
+   
    private final ArrayList<Artifact> artifactsToRecordHistory = new ArrayList<Artifact>();
 
    private final boolean CHECK_COLLINEAR = false;
@@ -67,7 +69,7 @@ public class CommonCapturePointCalculator implements CapturePointCalculatorInter
 
       if (dynamicGraphicObjectsListRegistry != null)
       {
-         DynamicGraphicPosition capturePointWorldGraphicPosition = new DynamicGraphicPosition("Capture Point",
+         DynamicGraphicPosition capturePointWorldGraphicPosition = new DynamicGraphicPosition(CAPTURE_POINT_DYNAMIC_GRAPHIC_OBJECT_NAME,
                  capturePointInMultipleFrames.getPointInFrame(ReferenceFrame.getWorldFrame()), 0.01, YoAppearance.Blue(),
                  DynamicGraphicPosition.GraphicType.ROTATED_CROSS);
          DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList("CapturePoint");
