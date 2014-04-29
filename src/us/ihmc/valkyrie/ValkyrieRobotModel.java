@@ -1,7 +1,6 @@
 package us.ihmc.valkyrie;
 
-import com.jme3.math.Transform;
-import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
+import java.io.InputStream;
 
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFRobot;
@@ -9,8 +8,11 @@ import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameter
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactPointInformation;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.*;
-import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandType;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCContactPointInformationFactory;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParamaters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
@@ -18,9 +20,15 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.valkyrie.io.ValkyrieOutputWriterWithAccelerationIntegration;
 import us.ihmc.valkyrie.models.ModelRoot;
-import us.ihmc.valkyrie.paramaters.*;
+import us.ihmc.valkyrie.paramaters.ValkyrieArmControllerParameters;
+import us.ihmc.valkyrie.paramaters.ValkyrieContactPointParamaters;
+import us.ihmc.valkyrie.paramaters.ValkyrieJointMap;
+import us.ihmc.valkyrie.paramaters.ValkyriePhysicalProperties;
+import us.ihmc.valkyrie.paramaters.ValkyrieStateEstimatorParameters;
+import us.ihmc.valkyrie.paramaters.ValkyrieWalkingControllerParameters;
 
-import java.io.InputStream;
+import com.jme3.math.Transform;
+import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
 
 public class ValkyrieRobotModel implements DRCRobotModel
 {
@@ -34,7 +42,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private StateEstimatorParameters stateEstimatorParamaters;
    private double estimatorDT;
    private JaxbSDFLoader loader;
-   
+   private JaxbSDFLoader headlessLoader;
 
    private final boolean runningOnRealRobot;
    
@@ -90,30 +98,6 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
-   public boolean hasIRobotHands()
-   {
-      return false;
-   }
-
-   @Override
-   public boolean hasArmExtensions()
-   {
-      return false;
-   }
-
-   @Override
-   public boolean hasHookHands()
-   {
-      return false;
-   }
-
-   @Override
-   public DRCHandType getHandType()
-   {
-      return DRCHandType.NONE;
-   }
-
-   @Override
    public String getModelName()
    {
       return modelName;
@@ -150,11 +134,13 @@ public class ValkyrieRobotModel implements DRCRobotModel
       return valModelRoot.getResourceAsStream(getSdfFile());
    }
 
+   @Override
    public String toString()
    {
       return robotName;
    }
 
+   @Override
    public DRCRobotInitialSetup<SDFRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw)
    {
       return new ValkyrieInitialSetup(groundHeight, initialYaw);
@@ -224,6 +210,15 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public JaxbSDFLoader getJaxbSDFLoader(boolean headless)
    {
+      if(headless)
+      {
+         if(headlessLoader == null)
+         {
+            this.headlessLoader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSdfFileAsStream(), headless);
+         }
+         return headlessLoader;
+      }
+      
       if(loader == null)
       {
          this.loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSdfFileAsStream(), headless);
