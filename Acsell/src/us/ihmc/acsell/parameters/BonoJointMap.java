@@ -46,16 +46,14 @@ public class BonoJointMap extends DRCRobotJointMap
    private final LinkedHashMap<String, Pair<RobotSide, LimbName>> limbNames = new LinkedHashMap<String, Pair<RobotSide, LimbName>>();
    private final LinkedHashMap<String, Pair<RobotSide, ArmJointName>> armJointNames = new LinkedHashMap<String, Pair<RobotSide, ArmJointName>>();
    private final LinkedHashMap<String, NeckJointName> neckJointNames = new LinkedHashMap<String, NeckJointName>();
-   private final BonoRobotModel robotModel;
    private final DRCRobotContactPointParamaters contactPointParamaters;
    private final String[] forceSensorNames;
    private final NeckJointName[] neckJoints = {};
    private final ArmJointName[] armJoints = {};
    
-   public BonoJointMap(BonoRobotModel robotModel)
+   public BonoJointMap()
    {
       super();
-      this.robotModel = robotModel;
       for (RobotSide robotSide : RobotSide.values())
       {
          String robotSideLowerCaseFirstLetter = robotSide.getSideNameFirstLetter().toLowerCase();
@@ -100,12 +98,6 @@ public class BonoJointMap extends DRCRobotJointMap
    public SideDependentList<Transform3D> getAnkleToSoleFrameTransform()
    {
       return BonoPhysicalProperties.ankleToSoleFrameTransforms;
-   }
-
-   @Override
-   public DRCRobotModel getSelectedModel()
-   {
-      return robotModel;
    }
 
    @Override
