@@ -14,7 +14,7 @@ public class AtlasSDFViewer
    {
      DRCRobotModel selectedModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT);
       DRCRobotJointMap jointMap = selectedModel.getJointMap();
-      JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(jointMap, false);
+      JaxbSDFLoader loader = selectedModel.getJaxbSDFLoader(false);
       System.out.println(loader.createRobot(jointMap, true).getName());
       
       SimulationConstructionSet scs = new SimulationConstructionSet(loader.createRobot(jointMap, false));

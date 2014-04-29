@@ -1,7 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.drcRobot;
 
-import com.jme3.math.Transform;
-import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
+import java.io.InputStream;
+import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -12,55 +12,61 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
-
-import java.io.InputStream;
+import com.jme3.math.Transform;
+import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
 
 public interface DRCRobotModel
 {
+   //TODO: RobotBoundingBoxes.java
+   //Controller Parameters
    public ArmControllerParameters getArmControllerParameters();
 
    public WalkingControllerParameters getWalkingControlParameters();
 
+   public WalkingControllerParameters getMultiContactControllerParameters();
+   
+   public WalkingControllerParameters getDrivingControllerParameters();
+   
    public StateEstimatorParameters getStateEstimatorParameters(double estimatorDT);
-
+   
+   //SDF Stuff
+   public String getSdfFile();
+   
+   public InputStream getSdfFileAsStream();
+   
+   public String[] getResourceDirectories();
+   
+   public JaxbSDFLoader getJaxbSDFLoader(boolean headless);
+   
    public DRCRobotPhysicalProperties getPhysicalProperties();
 
    public DRCRobotJointMap getJointMap();
 
-   public boolean hasIRobotHands();
-
-   public boolean hasArmExtensions();
-
-   public boolean hasHookHands();
-
-   public Transform getOffsetHandFromWrist(RobotSide side);
-
-   public DRCHandType getHandType();
-
    public String getModelName();
-
-   public String getSdfFile();
-
-   public InputStream getSdfFileAsStream();
-
-   public String[] getResourceDirectories();
 
    public DRCRobotInitialSetup<SDFRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw);
 
-   public WalkingControllerParameters getMultiContactControllerParameters();
-
-   public WalkingControllerParameters getDrivingControllerParameters();
-   
    public ScsCollisionConfigure getPhysicsConfigure( SDFRobot robotModel );
 
    public DRCRobotContactPointParamaters getContactPointParamaters(boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsToFeetOnly);
 
    public ContactPointInformation getContactPointInformation(boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsToFeetOnly);
-   //TODO: RobotBoundingBoxes.java
    
    public DRCOutputWriter getOutputWriterWithAccelerationIntegration(DRCOutputWriter drcOutputWriter, double controlDT, boolean runningOnRealRobot);
    
    public void setJointDamping(SDFRobot simulatedRobot);
    
    public HandModel getHandModel();
+   
+   public Transform getOffsetHandFromWrist(RobotSide side);
+   
+   //XXX: Deprecated, should not be in DRCRobotModel
+   @Deprecated
+   public DRCHandType getHandType();
+   @Deprecated
+   public boolean hasIRobotHands();
+   @Deprecated
+   public boolean hasArmExtensions();
+   @Deprecated
+   public boolean hasHookHands();
 }

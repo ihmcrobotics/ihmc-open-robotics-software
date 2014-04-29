@@ -24,7 +24,7 @@ public abstract class PlaybackPoseSequenceTest implements MultiRobotTestInterfac
    {
 
       DRCRobotJointMap jointMap = getRobotModel().getJointMap();
-      JaxbSDFLoader sdfLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap, false);
+      JaxbSDFLoader sdfLoader = getRobotModel().getJaxbSDFLoader(false);
 
       SDFFullRobotModel fullRobotModel = sdfLoader.createFullRobotModel(jointMap);
 

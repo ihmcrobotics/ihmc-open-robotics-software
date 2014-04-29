@@ -39,7 +39,7 @@ public class VisualizePoseWorkspace
    public VisualizePoseWorkspace(DRCRobotModel robotModel) throws IOException
    {
       DRCRobotJointMap jointMap = robotModel.getJointMap();
-      JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
+      JaxbSDFLoader loader = robotModel.getJaxbSDFLoader(false);
       SDFRobot sdfRobot = loader.createRobot(jointMap, false);
 
       interpolator = new PlaybackPoseInterpolator(registry);

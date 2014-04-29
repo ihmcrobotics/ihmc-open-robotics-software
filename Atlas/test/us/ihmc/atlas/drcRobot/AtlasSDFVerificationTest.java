@@ -91,7 +91,7 @@ public class AtlasSDFVerificationTest
 
       DRCRobotModel selectedModel = new AtlasRobotModel(ATLAS_ROBOT_VERSION, RUNNING_ON_REAL_ROBOT);
       DRCRobotJointMap jointMap = selectedModel.getJointMap();
-      JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(jointMap, false);
+      JaxbSDFLoader loader = selectedModel.getJaxbSDFLoader(false);
       SDFRobot sdfRobot = loader.createRobot(jointMap, true);
 
       pinRobotInAir(sdfRobot);

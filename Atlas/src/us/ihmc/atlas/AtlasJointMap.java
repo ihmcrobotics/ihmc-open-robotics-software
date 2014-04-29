@@ -59,6 +59,7 @@ public class AtlasJointMap extends DRCRobotJointMap
    public static final String bodyIMUSensor = "pelvis_imu_sensor";
    public static final String[] imuSensorsToUse = { bodyIMUSensor };
    
+   
    private final LegJointName[] legJoints =
    {
       LegJointName.HIP_YAW, LegJointName.HIP_ROLL, LegJointName.HIP_PITCH, LegJointName.KNEE, LegJointName.ANKLE_PITCH, LegJointName.ANKLE_ROLL
@@ -77,14 +78,14 @@ public class AtlasJointMap extends DRCRobotJointMap
    private final LinkedHashMap<String, NeckJointName> neckJointNames = new LinkedHashMap<String, NeckJointName>();
    private final LinkedHashMap<String, Pair<RobotSide, LimbName>> limbNames = new LinkedHashMap<String, Pair<RobotSide, LimbName>>();
    private final SideDependentList<String> jointBeforeFeetNames = new SideDependentList<String>();
-   private final DRCRobotModel selectedModel;
    private final AtlasContactPointParamaters contactPointParamaters;
+   private final AtlasRobotVersion atlasVersion;
    
    
-   public AtlasJointMap(AtlasRobotModel selectedModel)
+   public AtlasJointMap(AtlasRobotVersion atlasVersion)
    {
-      this.selectedModel = selectedModel;
 
+      this.atlasVersion = atlasVersion;
       for (RobotSide robotSide : RobotSide.values)
       {
          String[] forcedSideJointNames = forcedSideDependentJointNames.get(robotSide);
@@ -133,7 +134,7 @@ public class AtlasJointMap extends DRCRobotJointMap
          jointRoles.put(neckJoint, JointRole.NECK);
       }
 
-      contactPointParamaters = new AtlasContactPointParamaters(selectedModel.getAtlasVersion(), this, false, false);
+      contactPointParamaters = new AtlasContactPointParamaters(atlasVersion, this, false, false);
    }
    
    @Override
@@ -266,12 +267,6 @@ public class AtlasJointMap extends DRCRobotJointMap
    }
 
    @Override
-   public DRCRobotModel getSelectedModel()
-   {
-      return selectedModel;
-   }
-
-   @Override
    public String getLidarJointName()
    {
       return lidarJointName;
@@ -280,7 +275,7 @@ public class AtlasJointMap extends DRCRobotJointMap
    @Override
    public String getModelName()
    {
-      return selectedModel.getModelName();
+      return atlasVersion.getModelName();
    }
 
    @Override

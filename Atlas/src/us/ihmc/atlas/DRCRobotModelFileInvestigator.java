@@ -5,7 +5,6 @@ import java.io.PrintWriter;
 
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 
@@ -21,7 +20,7 @@ public class DRCRobotModelFileInvestigator
          PrintWriter printWriter = new PrintWriter(file);
 
          DRCRobotJointMap jointMap = model.getJointMap();
-         JaxbSDFLoader robotLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
+         JaxbSDFLoader robotLoader = model.getJaxbSDFLoader(false);
          final SDFRobot robot = robotLoader.createRobot(jointMap, false);
 
          printWriter.println(robot);

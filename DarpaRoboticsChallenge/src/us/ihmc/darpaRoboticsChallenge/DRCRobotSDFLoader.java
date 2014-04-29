@@ -12,41 +12,41 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 
 public class DRCRobotSDFLoader
 {
-   public static JaxbSDFLoader loadDRCRobot(DRCRobotJointMap jointMap)
+   public static JaxbSDFLoader loadDRCRobot(DRCRobotModel robotModel)
    {
-      return loadDRCRobot(jointMap, false);
+      return loadDRCRobot(robotModel, false);
    }
-
-   public static JaxbSDFLoader loadDRCRobot(DRCRobotJointMap jointMap, boolean headless)
+   
+   public static JaxbSDFLoader loadDRCRobot(DRCRobotModel robotModel, boolean headless)
    {
-      InputStream fileInputStream;
-      ArrayList<String> resourceDirectories = new ArrayList<String>();
+      return loadDRCRobot(robotModel.getResourceDirectories(), robotModel.getSdfFileAsStream(), headless);
+   }
+   
+   public static JaxbSDFLoader loadDRCRobot(String[] resourceDirectories, InputStream sdfFile, boolean headless)
+   {
+      ArrayList<String> resources = new ArrayList<String>();
       Class<DRCRobotSDFLoader> myClass = DRCRobotSDFLoader.class;
-      DRCRobotModel selectedModel = jointMap.getSelectedModel();
 
       if (!headless)
       {
-         resourceDirectories.add(myClass.getResource("models").getFile());
-         resourceDirectories.add(myClass.getResource("models/GFE/").getFile());
-         resourceDirectories.add(myClass.getResource("models/GFE/gazebo").getFile());
-    	  for(String resource : selectedModel.getResourceDirectories())
-    	  {
-    		  resourceDirectories.add(resource);
-    	  }
+         resources.add(myClass.getResource("models").getFile());
+         resources.add(myClass.getResource("models/GFE/").getFile());
+         resources.add(myClass.getResource("models/GFE/gazebo").getFile());
+        for(String resource : resourceDirectories)
+        {
+           resources.add(resource);
+        }
       }
-
-      fileInputStream = selectedModel.getSdfFileAsStream();
       
-      if(fileInputStream==null)
+      if(sdfFile==null)
       {
-    	  System.err.println("failed to load sdf file");
+        System.err.println("failed to load sdf file");
       }
-
 
       JaxbSDFLoader jaxbSDFLoader;
       try
       {
-         jaxbSDFLoader = new JaxbSDFLoader(fileInputStream, resourceDirectories);
+         jaxbSDFLoader = new JaxbSDFLoader(sdfFile, resources);
       }
       catch (FileNotFoundException e)
       {
@@ -61,4 +61,5 @@ public class DRCRobotSDFLoader
 
       return jaxbSDFLoader;
    }
+
 }

@@ -50,7 +50,7 @@ public class PoseSequenceSelectorPanel extends JPanel
 
 
       DRCRobotJointMap jointMap = robotModel.getJointMap();
-      JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
+      JaxbSDFLoader loader = robotModel.getJaxbSDFLoader(false);
 
       fullRobotModel = loader.createFullRobotModel(jointMap);
       sdfRobot = loader.createRobot(jointMap, false);
