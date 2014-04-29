@@ -6,9 +6,6 @@ import us.ihmc.robotSide.SideDependentList;
 
 public abstract class DRCRobotJointMap implements SDFJointNameMap
 {
-   // TODO Crap
-   public abstract double getAnkleHeight();
-
    // TODO SensorMap
    public abstract String[] getIMUSensorsToUse();
 

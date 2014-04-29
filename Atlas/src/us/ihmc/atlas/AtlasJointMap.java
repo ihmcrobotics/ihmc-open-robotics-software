@@ -249,12 +249,6 @@ public class AtlasJointMap extends DRCRobotJointMap
 //   }
 
    @Override
-   public double getAnkleHeight()
-   {
-      return AtlasPhysicalProperties.ankleHeight;
-   }
-
-   @Override
    public List<Pair<String, Vector3d>> getJointNameGroundContactPointMap()
    {
       return contactPointParamaters.getJointNameGroundContactPointMap();

@@ -25,6 +25,7 @@ import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -50,6 +51,7 @@ public class PoseSequenceSelectorPanel extends JPanel
 
 
       DRCRobotJointMap jointMap = robotModel.getJointMap();
+      DRCRobotPhysicalProperties physicalProperties = robotModel.getPhysicalProperties();
       JaxbSDFLoader loader = robotModel.getJaxbSDFLoader(false);
 
       fullRobotModel = loader.createFullRobotModel(jointMap);
@@ -57,7 +59,7 @@ public class PoseSequenceSelectorPanel extends JPanel
 
       sequence = new PlaybackPoseSequence(fullRobotModel);
       
-      ReferenceFrames referenceFrames = new ReferenceFrames(fullRobotModel, jointMap, jointMap.getAnkleHeight());
+      ReferenceFrames referenceFrames = new ReferenceFrames(fullRobotModel, jointMap, physicalProperties.getAnkleHeight());
       SDFPerfectSimulatedSensorReader reader = new SDFPerfectSimulatedSensorReader(sdfRobot, fullRobotModel, referenceFrames);
       ModularRobotController controller = new ModularRobotController("Reader");
       controller.setRawSensorReader(reader);

@@ -28,6 +28,7 @@ import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.darpaRoboticsChallenge.userInterface.DRCOperatorUserInterface;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -165,9 +166,10 @@ public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTe
    {
       DRCRobotJointMap jointMap = getRobotModel().getJointMap();
       JaxbSDFLoader jaxbSDFLoader = getRobotModel().getJaxbSDFLoader(false);
+      DRCRobotPhysicalProperties physicalProperties = getRobotModel().getPhysicalProperties();
       walkingParamaters = getRobotModel().getWalkingControlParameters();
       fullRobotModel = jaxbSDFLoader.createFullRobotModel(jointMap);
-      referenceFrames = new ReferenceFrames(fullRobotModel, jointMap, jointMap.getAnkleHeight());
+      referenceFrames = new ReferenceFrames(fullRobotModel, jointMap, physicalProperties.getAnkleHeight());
       bipedFeet = DRCOperatorUserInterface.setupBipedFeet(referenceFrames, fullRobotModel, walkingParamaters);
    }
 

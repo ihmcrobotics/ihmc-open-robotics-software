@@ -6,12 +6,12 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.commonWalkingControlModules.terrain.TerrainType;
-import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCSimulationVisualizer;
 import us.ihmc.darpaRoboticsChallenge.controllers.SimpleStanceController;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 
@@ -55,10 +55,11 @@ public class AtlasSimpleStanceController {
 	      }
 	      
 	      DRCRobotJointMap jointMap = model.getJointMap();
+	      DRCRobotPhysicalProperties physicalProperties = model.getPhysicalProperties();
 	      JaxbSDFLoader jaxbSDFLoader = model.getJaxbSDFLoader(false);
 	      SDFFullRobotModel fullRobotModel = jaxbSDFLoader.createFullRobotModel(jointMap);
 	      SDFRobot robot = jaxbSDFLoader.createRobot(jointMap, false);
-	      ReferenceFrames referenceFrames = new ReferenceFrames(fullRobotModel, jointMap, jointMap.getAnkleHeight());
+	      ReferenceFrames referenceFrames = new ReferenceFrames(fullRobotModel, jointMap, physicalProperties.getAnkleHeight());
 
 	      DRCRobotInitialSetup<SDFRobot> intialSetup = model.getDefaultRobotInitialSetup(0, 0);
 	      intialSetup.initializeRobot(robot, jointMap);
