@@ -89,12 +89,6 @@ public class BonoJointMap extends DRCRobotJointMap
       return "bono";
    }
 
-   @Override
-   public double getAnkleHeight()
-   {
-      return BonoPhysicalProperties.ankleHeight;
-   }
-
    public SideDependentList<Transform3D> getAnkleToSoleFrameTransform()
    {
       return BonoPhysicalProperties.ankleToSoleFrameTransforms;
