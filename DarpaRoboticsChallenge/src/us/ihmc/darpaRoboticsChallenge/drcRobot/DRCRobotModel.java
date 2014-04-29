@@ -1,6 +1,5 @@
 package us.ihmc.darpaRoboticsChallenge.drcRobot;
 
-import java.io.InputStream;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
@@ -28,14 +27,7 @@ public interface DRCRobotModel
    public WalkingControllerParameters getDrivingControllerParameters();
    
    public StateEstimatorParameters getStateEstimatorParameters(double estimatorDT);
-   
-   //SDF Stuff
-   public String getSdfFile();
-   
-   public InputStream getSdfFileAsStream();
-   
-   public String[] getResourceDirectories();
-   
+
    public JaxbSDFLoader getJaxbSDFLoader(boolean headless);
    
    public DRCRobotPhysicalProperties getPhysicalProperties();

@@ -94,19 +94,16 @@ public class AtlasRobotModel implements DRCRobotModel
       return selectedVersion;
    }
 
-   @Override
    public String getSdfFile()
    {
       return selectedVersion.getSdfFile();
    }
 
-   @Override
    public String[] getResourceDirectories()
    {
       return selectedVersion.getResourceDirectories();
    }
 
-   @Override
    public InputStream getSdfFileAsStream()
    {
       return selectedVersion.getSdfFileAsStream();
