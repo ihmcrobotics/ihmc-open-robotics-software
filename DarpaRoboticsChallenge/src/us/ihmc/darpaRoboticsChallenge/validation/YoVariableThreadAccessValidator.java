@@ -68,6 +68,7 @@ public class YoVariableThreadAccessValidator
       {
       case "AWT-EventQueue-0":
       case "SCS simulation thread":
+      case "CombinedVarPanelTimer":
          return;
       }
 
