@@ -47,9 +47,10 @@ public class FootstepAdjusterVisualizer
       yoNextFootstepPolygon.hide();
    }
    
-   public void update(boolean changed)
+   public void update()
    {
-      nextFootstepPolygon = footstepAdjustor.getTouchdownFootPolygon().changeFrameCopy(worldFrame); // garbage
+      nextFootstepPolygon.setIncludingFrameAndUpdate(footstepAdjustor.getTouchdownFootPolygon());
+      nextFootstepPolygon.changeFrameAndProjectToXYPlane(worldFrame);
       
       try
       {
