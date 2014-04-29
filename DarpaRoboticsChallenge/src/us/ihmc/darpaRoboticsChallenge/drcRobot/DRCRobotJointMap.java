@@ -9,8 +9,6 @@ public abstract class DRCRobotJointMap implements SDFJointNameMap
    // TODO Crap
    public abstract double getAnkleHeight();
 
-   public abstract double getPelvisToFoot();
-
    // TODO SensorMap
    public abstract String[] getIMUSensorsToUse();
 
