@@ -132,7 +132,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       isCoPPastThreshold.set(isCoPPastThreshold());
 
       // TODO: JEP 130508: CoP stuff seems jenky and broken. Don't use it for now.
-      hasFootHitGround.set(isForceMagnitudePastThreshold.getBooleanValue() && isCoPPastThreshold.getBooleanValue());
+      hasFootHitGround.set(isForceMagnitudePastThreshold.getBooleanValue());// && isCoPPastThreshold.getBooleanValue());
 //      hasFootHitGround.set(isForceMagnitudePastThreshold.getBooleanValue());
       filteredHasFootHitGround.update();
 
