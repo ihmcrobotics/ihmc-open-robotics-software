@@ -2,6 +2,7 @@ package us.ihmc.acsell.parameters;
 
 import java.io.InputStream;
 
+import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.acsell.controlParameters.BonoArmControlParameters;
 import us.ihmc.acsell.controlParameters.BonoStateEstimatorParameters;
@@ -10,6 +11,7 @@ import us.ihmc.acsell.initialSetup.BonoInitialSetup;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactPointInformation;
+import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCContactPointInformationFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParamaters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
@@ -32,6 +34,7 @@ public class BonoRobotModel implements DRCRobotModel
    private static String[] resourceDirectories;
    
    private final boolean runningOnRealRobot;
+   private JaxbSDFLoader loader;
    
    public BonoRobotModel()
    {
@@ -65,7 +68,7 @@ public class BonoRobotModel implements DRCRobotModel
 
    public DRCRobotJointMap getJointMap()
    {
-      return new BonoJointMap(this);
+      return new BonoJointMap();
    }
 
    public boolean hasIRobotHands()
@@ -165,5 +168,14 @@ public class BonoRobotModel implements DRCRobotModel
    public WalkingControllerParameters getDrivingControllerParameters()
    {
       return null;
+   }
+
+   public JaxbSDFLoader getJaxbSDFLoader(boolean headless)
+   {
+      if(loader == null)
+      {
+         this.loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSdfFileAsStream(), headless);
+      }
+      return loader;
    }
 }
