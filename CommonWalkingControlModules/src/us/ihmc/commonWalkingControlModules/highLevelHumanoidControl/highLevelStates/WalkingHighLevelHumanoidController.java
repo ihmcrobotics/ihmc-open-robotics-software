@@ -1237,6 +1237,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForSingleSupport(nextFootstep, swingSide);
             instantaneousCapturePointPlanner.reInitializeSingleSupport(transferToAndNextFootstepsData, yoTime.getDoubleValue());
             
+            
+            
             footstepWasProjectedInCaptureRegion.set(true);
             projectFootstepToCaptureRegion.set(false);
          }
