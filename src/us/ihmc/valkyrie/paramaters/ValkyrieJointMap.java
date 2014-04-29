@@ -63,12 +63,9 @@ public class ValkyrieJointMap extends DRCRobotJointMap
    private final SideDependentList<String> jointBeforeFeetNames = new SideDependentList<String>();
    
    private final ValkyrieContactPointParamaters contactPointParameters;
-   private final DRCRobotModel drcRobotModel;
 
    public ValkyrieJointMap()
    {
-      this.drcRobotModel = new ValkyrieRobotModel();
-
       for (RobotSide robotSide : RobotSide.values)
       {
          legJointNames
@@ -289,12 +286,6 @@ public class ValkyrieJointMap extends DRCRobotJointMap
    public String getModelName()
    {
       return "V1";
-   }
-
-   @Override
-   public DRCRobotModel getSelectedModel()
-   {
-      return drcRobotModel;
    }
 
    @Override

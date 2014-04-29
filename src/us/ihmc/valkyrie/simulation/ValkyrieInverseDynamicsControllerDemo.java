@@ -19,7 +19,7 @@ public class ValkyrieInverseDynamicsControllerDemo
 {
    public static void main(String[] args)
    {
-      DRCRobotModel model = new ValkyrieRobotModel();
+      DRCRobotModel model = new ValkyrieRobotModel(false);
       DRCRobotInterface robotInterface = new PlainDRCRobot(model);
       double groundHeight = 0.0;
       double initialYaw = 0.0;

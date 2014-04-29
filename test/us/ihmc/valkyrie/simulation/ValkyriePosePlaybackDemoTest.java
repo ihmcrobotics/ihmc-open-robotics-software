@@ -185,7 +185,7 @@ public class ValkyriePosePlaybackDemoTest
 
    private DRCPosePlaybackDemo setupPosePlaybackSim()
    {
-      ValkyrieRobotModel valkyrieRobotModel = new ValkyrieRobotModel();
+      ValkyrieRobotModel valkyrieRobotModel = new ValkyrieRobotModel(false);
       DRCRobotInterface valkyrieRobotInterface = new PlainDRCRobot(valkyrieRobotModel);
 
       AutomaticSimulationRunner automaticSimulationRunner = null;

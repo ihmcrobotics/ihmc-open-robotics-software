@@ -17,10 +17,10 @@ public class ValkyriePosePlaybackSCSBridge
 
    public static void main(String[] args) throws IOException
    {
-      DRCRobotModel robotModel = new ValkyrieRobotModel();
+      DRCRobotModel robotModel = new ValkyrieRobotModel(false);
       
       DRCRobotJointMap jointMap = robotModel.getJointMap();
-      JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
+      JaxbSDFLoader loader = robotModel.getJaxbSDFLoader(false);
       SDFRobot sdfRobot = loader.createRobot(jointMap, false);
       FullRobotModel fullRobotModel = loader.createFullRobotModel(jointMap);
       SDFFullRobotModel fullRobotModelForSlider = loader.createFullRobotModel(jointMap);

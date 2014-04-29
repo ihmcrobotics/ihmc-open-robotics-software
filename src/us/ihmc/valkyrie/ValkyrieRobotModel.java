@@ -2,10 +2,13 @@ package us.ihmc.valkyrie;
 
 import com.jme3.math.Transform;
 import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
+
+import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactPointInformation;
+import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.*;
 import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandType;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandModel;
@@ -30,20 +33,17 @@ public class ValkyrieRobotModel implements DRCRobotModel
          private final String modelName = "V1";
    private StateEstimatorParameters stateEstimatorParamaters;
    private double estimatorDT;
+   private JaxbSDFLoader loader;
    
 
    private final boolean runningOnRealRobot;
-   
-   public ValkyrieRobotModel()
-   {
-      this(false);
-   }
    
    public ValkyrieRobotModel(boolean runningOnRealRobot)
    {
       this.runningOnRealRobot = runningOnRealRobot;
       this.armControllerParameters = new ValkyrieArmControllerParameters(runningOnRealRobot);
       this.physicalProperties = new ValkyriePhysicalProperties();
+      
 //      this.jointMap = new ValkyrieJointMap(); 
    }
    
@@ -219,6 +219,16 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public WalkingControllerParameters getDrivingControllerParameters()
    {
       return getWalkingControlParameters();
+   }
+
+   @Override
+   public JaxbSDFLoader getJaxbSDFLoader(boolean headless)
+   {
+      if(loader == null)
+      {
+         this.loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSdfFileAsStream(), headless);
+      }
+      return loader;
    }
 
 }
