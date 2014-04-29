@@ -12,6 +12,8 @@ import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFJointNameMap;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaElipsoidsVisualizer;
+import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.valkyrie.paramaters.ValkyrieJointMap;
 
 import com.yobotics.simulationconstructionset.InverseDynamicsMechanismReferenceFrameVisualizer;
@@ -29,13 +31,14 @@ public class ValkyrieFullRobotModelVisualizer
 //      SDFFullRobotModel sdfFullRobotModel = robotInterface.getFullRobotModelFactory().create();
 //      GeneralizedSDFRobotModel generalizedSDFRobotModel = robotInterface.getGeneralizedSDFRobotModel();
       
-      SDFJointNameMap jointMap = new ValkyrieJointMap();
-      JaxbSDFLoader jaxbSDFLoader = ValkyrieSDFLoader.loadValkyrieRobot(false);
+      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT);
+      DRCRobotJointMap jointMap = robotModel.getJointMap();
+      JaxbSDFLoader valkyrieLoader = robotModel.getJaxbSDFLoader(false);
       
       
-      GeneralizedSDFRobotModel generalizedSDFRobotModel = jaxbSDFLoader.getGeneralizedSDFRobotModel(jointMap.getModelName());
+      GeneralizedSDFRobotModel generalizedSDFRobotModel = valkyrieLoader.getGeneralizedSDFRobotModel(jointMap.getModelName());
 //      jaxbSDFLoader.createRobot(jointMap, false);
-      SDFFullRobotModel sdfFullRobotModel = jaxbSDFLoader.createFullRobotModel(jointMap);
+      SDFFullRobotModel sdfFullRobotModel = valkyrieLoader.createFullRobotModel(jointMap);
       
 //      sdfFullRobotModel.getRootJoint().setRotation(0.5, 1.0, 0.8);
 //      for(OneDoFJoint joint : sdfFullRobotModel.getOneDoFJoints())

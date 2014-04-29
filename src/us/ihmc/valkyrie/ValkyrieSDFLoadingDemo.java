@@ -10,6 +10,8 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFJointNameMap;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaElipsoidsVisualizer;
+import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.valkyrie.paramaters.ValkyrieJointMap;
@@ -30,8 +32,10 @@ public class ValkyrieSDFLoadingDemo
 
    public ValkyrieSDFLoadingDemo()
    {
-      SDFJointNameMap jointMap = new ValkyrieJointMap();
-      JaxbSDFLoader loader = ValkyrieSDFLoader.loadValkyrieRobot(false);
+      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT);
+      DRCRobotJointMap jointMap = robotModel.getJointMap();
+      JaxbSDFLoader loader = robotModel.getJaxbSDFLoader(false);
+      
       SDFRobot valkyrieRobot = loader.createRobot(jointMap, false);
       valkyrieRobot.setPositionInWorld(new Vector3d());
       
