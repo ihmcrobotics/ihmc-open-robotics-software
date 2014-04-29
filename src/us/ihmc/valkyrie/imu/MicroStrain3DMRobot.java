@@ -1,24 +1,17 @@
 package us.ihmc.valkyrie.imu;
 
-import java.io.IOException;
-
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
+import com.yobotics.simulationconstructionset.*;
+import com.yobotics.simulationconstructionset.robotController.RobotController;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.valkyrie.configuration.ValkyrieSensorNames;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.FloatingJoint;
-import com.yobotics.simulationconstructionset.Link;
-import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.robotController.RobotController;
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
+import java.io.IOException;
 
 @SuppressWarnings("serial")
 public class MicroStrain3DMRobot extends Robot
@@ -81,8 +74,8 @@ public class MicroStrain3DMRobot extends Robot
    {
       Link p = new Link("ms3DMLink");
       p.setMass(MS3DM_MASS);
-      p.setComOffset(0.0, 0.0, 0.0);
-      p.setMomentOfInertia(0.1, 0.1, 0.1);
+      p.physics.setComOffset(0.0, 0.0, 0.0);
+      p.physics.setMomentOfInertia(0.1, 0.1, 0.1);
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addCoordinateSystem(0.1);
