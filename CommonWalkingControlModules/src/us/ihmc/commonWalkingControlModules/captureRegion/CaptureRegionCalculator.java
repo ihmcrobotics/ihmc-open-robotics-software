@@ -3,10 +3,7 @@ package us.ihmc.commonWalkingControlModules.captureRegion;
 import java.awt.Color;
 import java.util.ArrayList;
 
-import javax.media.j3d.Transform3D;
-import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point2d;
-import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
@@ -15,7 +12,6 @@ import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
-import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
@@ -515,34 +511,8 @@ public class CaptureRegionCalculator
 
    private static FramePoint2d solveIntersectionOfRayAndCircle(FramePoint2d pointA, FramePoint2d pointB, FrameVector2d vector, double R)
    {
-      // Look at JPratt Notes February 18, 2009 for details on the following:
-
-      pointA.checkReferenceFrameMatch(pointB);
-      pointA.checkReferenceFrameMatch(vector);
-
-      double Ax = pointA.getX();
-      double Ay = pointA.getY();
-
-      double Bx = pointB.getX();
-      double By = pointB.getY();
-
-      double vx = vector.getX();
-      double vy = vector.getY();
-
-      double A = (vx * vx + vy * vy);
-      double B = (2.0 * vx * (Bx - Ax) + 2.0 * vy * (By - Ay));
-      double C = (Bx - Ax) * (Bx - Ax) + (By - Ay) * (By - Ay) - R * R;
-
-      double insideSqrt = B * B - 4 * A * C;
-
-      if (insideSqrt < 0.0)
-         return null;
-
-      double l2 = (-B + Math.sqrt(insideSqrt)) / (2.0 * A);
-
-
-      FramePoint2d ret = new FramePoint2d(pointA.getReferenceFrame(), pointB.getX() + l2 * vector.getX(), pointB.getY() + l2 * vector.getY());
-
+      FramePoint2d ret = new FramePoint2d();
+      CaptureRegionMath.solveIntersectionOfRayAndCircle(pointA, pointB, vector, R, ret);
       return ret;
    }
 
@@ -586,24 +556,8 @@ public class CaptureRegionCalculator
    public static FramePoint2d getPointBetweenVectorsAtDistanceFromOriginCircular(FrameVector2d directionA, FrameVector2d directionB, double alphaFromAToB,
            double distance, FramePoint2d origin)
    {
-      directionA.checkReferenceFrameMatch(directionB.getReferenceFrame());
-      directionA.checkReferenceFrameMatch(origin.getReferenceFrame());
-      alphaFromAToB = MathTools.clipToMinMax(alphaFromAToB, 0.0, 1.0);
-
-      double angleBetweenDirections = directionA.angle(directionB);
-      double angleBetweenDirectionsToSetLine = angleBetweenDirections * alphaFromAToB;
-
-      FrameVector rotatedFromA = new FrameVector(directionA.getReferenceFrame(), directionA.getX(), directionA.getY(), 0.0);
-      Transform3D rotation = new Transform3D();
-      rotation.setRotation(new AxisAngle4d(new Vector3d(0.0, 0.0, -1.0), angleBetweenDirectionsToSetLine));
-      rotatedFromA.applyTransform(rotation);
-
-      rotatedFromA.normalize();
-      rotatedFromA.scale(distance);
-
-      FramePoint2d ret = new FramePoint2d(rotatedFromA.getReferenceFrame(), rotatedFromA.getX(), rotatedFromA.getY());
-      ret.add(origin);
-
+      FramePoint2d ret = new FramePoint2d();
+      CaptureRegionMath.getPointBetweenVectorsAtDistanceFromOriginCircular(directionA, directionB, alphaFromAToB, distance, origin, ret);
       return ret;
    }
 
