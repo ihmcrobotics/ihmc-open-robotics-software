@@ -47,6 +47,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
    private final BooleanYoVariable pastThreshold;
    private final BooleanYoVariable heelHitGround;
    private final BooleanYoVariable toeHitGround;
+   private final BooleanYoVariable swingTrajectoryWasReplanned;
    private final GlitchFilteredBooleanYoVariable pastThresholdFilter;
    private final GlitchFilteredBooleanYoVariable heelHitGroundFilter;
    private final GlitchFilteredBooleanYoVariable toeHitGroundFilter;
@@ -95,6 +96,8 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       alphaFootLoadFiltering.set(0.5);
       this.footLoadPercentage = new AlphaFilteredYoVariable(namePrefix + "FootLoadPercentage", registry, alphaFootLoadFiltering);
 
+      this.swingTrajectoryWasReplanned = new BooleanYoVariable(namePrefix + "SwingFootTrajectoryWasReplanned", registry);
+      this.swingTrajectoryWasReplanned.set(false);
 
       double copVisualizerSize = 0.025;
       this.footswitchCOPBagOfBalls = new BagOfBalls(1, copVisualizerSize, namePrefix + "FootswitchCOP", registry,
@@ -103,7 +106,9 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       this.pastThreshold = new BooleanYoVariable(namePrefix + "PastFootswitchThresold", registry);
       this.heelHitGround = new BooleanYoVariable(namePrefix + "HeelHitGround", registry);
       this.toeHitGround = new BooleanYoVariable(namePrefix + "ToeHitGround", registry);
+      
       int filterWindowSize = 3;
+      
       this.pastThresholdFilter = new GlitchFilteredBooleanYoVariable(namePrefix + "PastFootswitchThresholdFilter", registry, pastThreshold, filterWindowSize);
       this.heelHitGroundFilter = new GlitchFilteredBooleanYoVariable(namePrefix + "HeelHitGroundFilter", registry, heelHitGround, filterWindowSize);
       this.toeHitGroundFilter = new GlitchFilteredBooleanYoVariable(namePrefix + "ToeHitGroundFilter", registry, toeHitGround, filterWindowSize);
@@ -131,11 +136,19 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       isForceMagnitudePastThreshold.set(isForceMagnitudePastThreshold());
       isCoPPastThreshold.set(isCoPPastThreshold());
 
-      // TODO: JEP 130508: CoP stuff seems jenky and broken. Don't use it for now.
-      hasFootHitGround.set(isForceMagnitudePastThreshold.getBooleanValue());// && isCoPPastThreshold.getBooleanValue());
+      // If you have had to replan your swing foot trajectory due to a push, don't worry about cop being past threshold, just switch on touchdown
+      if(swingTrajectoryWasReplanned.getBooleanValue())
+      {
+    	  hasFootHitGround.set(isForceMagnitudePastThreshold.getBooleanValue());
+      }
+      else
+      {
+    	  hasFootHitGround.set(isForceMagnitudePastThreshold.getBooleanValue() && isCoPPastThreshold.getBooleanValue());
+      }
+      
 //      hasFootHitGround.set(isForceMagnitudePastThreshold.getBooleanValue());
       filteredHasFootHitGround.update();
-
+      
       return filteredHasFootHitGround.getBooleanValue();
    }
 
@@ -144,6 +157,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       pastThresholdFilter.set(false);
       heelHitGroundFilter.set(false);
       toeHitGroundFilter.set(false);
+      swingTrajectoryWasReplanned.set(false);
    }
 
    public void resetHeelSwitch()
@@ -217,6 +231,11 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
    {
       updateCoP();
       copToPack.setIncludingFrame(resolvedCoP);
+   }
+   
+   public void setSwingTrajectoryWasReplanned(boolean value)
+   {
+	   swingTrajectoryWasReplanned.set(value);
    }
 
    public void updateCoP()
