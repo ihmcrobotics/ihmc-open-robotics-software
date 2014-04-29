@@ -39,12 +39,12 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
          Link link = polledJoint.getLink();  
 
          Matrix3d momentOfInertia = new Matrix3d();
-         link.getMomentOfInertia(momentOfInertia);
+         link.physics.getMomentOfInertia(momentOfInertia);
          
          double mass = link.getMass();
          
          Vector3d comOffset = new Vector3d();
-         link.getComOffset(comOffset);
+         link.physics.getComOffset(comOffset);
                   
          RigidBody parentIDBody = getParentIDBody(polledJoint, elevator);
          

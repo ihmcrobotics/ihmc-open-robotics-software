@@ -61,7 +61,7 @@ public class InverseDynamicsCalculatorTest
       Link link = createRandomLink("link", false);
       rootJoint.setLink(link);
       Vector3d comOffset = new Vector3d();
-      link.getComOffset(comOffset);
+      link.physics.getComOffset(comOffset);
 
       RigidBody body = copyLinkAsRigidBody(link, rootInverseDynamicsJoint, "body");
 
@@ -413,9 +413,9 @@ public class InverseDynamicsCalculatorTest
             previousJoint.addJoint(currentJoint);
 
          Link currentBody = new Link("body" + i);
-         currentBody.setComOffset(comOffset);
+         currentBody.physics.setComOffset(comOffset);
          currentBody.setMass(mass);
-         currentBody.setMomentOfInertia(momentOfInertia);
+         currentBody.physics.setMomentOfInertia(momentOfInertia);
          currentJoint.setLink(currentBody);
          
          jointMap.put(currentIDJoint, currentJoint);
@@ -469,9 +469,9 @@ public class InverseDynamicsCalculatorTest
          ScrewTools.addRigidBody("bodyID" + i, currentIDJoint, momentOfInertia, mass, comOffset);
 
          Link currentBody = new Link("body" + i);
-         currentBody.setComOffset(comOffset);
+         currentBody.physics.setComOffset(comOffset);
          currentBody.setMass(mass);
-         currentBody.setMomentOfInertia(momentOfInertia);
+         currentBody.physics.setMomentOfInertia(momentOfInertia);
          currentJoint.setLink(currentBody);
          
          jointMap.put(currentIDJoint, currentJoint);
@@ -487,15 +487,15 @@ public class InverseDynamicsCalculatorTest
    {
       Link link = new Link(linkName);
 
-      link.setMomentOfInertia(random.nextDouble(), random.nextDouble(), random.nextDouble());
+      link.physics.setMomentOfInertia(random.nextDouble(), random.nextDouble(), random.nextDouble());
       link.setMass(random.nextDouble());
 
       Vector3d comOffset = useZeroCoMOffset ? new Vector3d() : new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
-      link.setComOffset(comOffset);
+      link.physics.setComOffset(comOffset);
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
       Matrix3d momentOfInertia = new Matrix3d();
-      link.getMomentOfInertia(momentOfInertia);
+      link.physics.getMomentOfInertia(momentOfInertia);
       double mass = link.getMass();
       
       linkGraphics.createInertiaEllipsoid(momentOfInertia, comOffset, mass, YoAppearance.Red());
@@ -507,9 +507,9 @@ public class InverseDynamicsCalculatorTest
    private RigidBody copyLinkAsRigidBody(Link link, InverseDynamicsJoint currentInverseDynamicsJoint, String bodyName)
    {
       Vector3d comOffset = new Vector3d();
-      link.getComOffset(comOffset);
+      link.physics.getComOffset(comOffset);
       Matrix3d momentOfInertia = new Matrix3d();
-      link.getMomentOfInertia(momentOfInertia);
+      link.physics.getMomentOfInertia(momentOfInertia);
       ReferenceFrame nextFrame = createOffsetFrame(currentInverseDynamicsJoint, comOffset, bodyName);
       nextFrame.update();
       RigidBodyInertia inertia = new RigidBodyInertia(nextFrame, momentOfInertia, link.getMass());

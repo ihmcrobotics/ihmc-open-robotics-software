@@ -86,7 +86,7 @@ public class VirtualChainConstructorFromARobot
       double mass = link.getMass();
       
       Vector3d comOffset = new Vector3d();
-      link.getComOffset(comOffset);
+      link.physics.getComOffset(comOffset);
       
       virtualChainTestObject.setMassHere(mass);
 

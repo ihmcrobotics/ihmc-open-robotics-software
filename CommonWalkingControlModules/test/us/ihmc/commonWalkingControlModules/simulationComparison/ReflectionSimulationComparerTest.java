@@ -1,31 +1,20 @@
 package us.ihmc.commonWalkingControlModules.simulationComparison;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import java.lang.reflect.Field;
-import java.util.Collection;
-
-import javax.vecmath.Vector3d;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
-import us.ihmc.utilities.MemoryTools;
-
-import com.yobotics.simulationconstructionset.FloatingJoint;
-import com.yobotics.simulationconstructionset.IntegerYoVariable;
-import com.yobotics.simulationconstructionset.Link;
-import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.UnreasonableAccelerationException;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.*;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.simulationTesting.ReflectionSimulationComparer;
 import com.yobotics.simulationconstructionset.util.simulationTesting.SimpleRewindabilityComparisonScript;
 import com.yobotics.simulationconstructionset.util.simulationTesting.SimulationComparisonScript;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import us.ihmc.utilities.MemoryTools;
+
+import javax.vecmath.Vector3d;
+import java.lang.reflect.Field;
+import java.util.Collection;
+
+import static org.junit.Assert.*;
 
 public class ReflectionSimulationComparerTest
 {
@@ -103,7 +92,7 @@ public class ReflectionSimulationComparerTest
       FloatingJoint floatingJoint0 = new FloatingJoint("floatingJoint", new Vector3d(), robot0);
       Link link0 = new Link("body");
       link0.setMass(1.0);
-      link0.setMomentOfInertia(0.1, 0.1, 0.1);
+      link0.physics.setMomentOfInertia(0.1, 0.1, 0.1);
       floatingJoint0.setLink(link0);
       robot0.addRootJoint(floatingJoint0);
       return robot0;

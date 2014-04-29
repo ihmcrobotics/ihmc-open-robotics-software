@@ -1,13 +1,12 @@
 package com.yobotics.simulationconstructionset;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
-
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.InertiaTools;
 import us.ihmc.utilities.ThreadTools;
+
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Vector3d;
 
 public class LinkTest
 {
@@ -46,7 +45,7 @@ public class LinkTest
       momentOfInertia = InertiaTools.rotate(rotation, momentOfInertia);
       rotation.transform(rotationAxis);
 
-      link.setMomentOfInertia(momentOfInertia);
+      link.physics.setMomentOfInertia(momentOfInertia);
       
       link.addEllipsoidFromMassProperties(YoAppearance.Gold());
       link.addEllipsoidFromMassProperties2(YoAppearance.Green());
