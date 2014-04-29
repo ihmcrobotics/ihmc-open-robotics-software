@@ -24,7 +24,7 @@ import com.yobotics.simulationconstructionset.util.ground.steppingStones.Steppin
  */
 public class FootstepAdjustor
 {
-   private static final boolean VISUALIZE = true;
+   private static final boolean VISUALIZE = false;
    private static final double SHRINK_TOUCHDOWN_POLYGON_FACTOR = 0.5;
    
    private final YoVariableRegistry registry = new YoVariableRegistry("FootstepAdjustor");
@@ -32,9 +32,6 @@ public class FootstepAdjustor
    private FootstepAdjusterVisualizer footstepAdjusterVisualizer = null;
    private SteppingStones steppingStones = null;
    
-   private boolean footstepChanged = false;
-   
-   @SuppressWarnings("unused")
    public FootstepAdjustor(YoVariableRegistry parentRegistry,
                            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
@@ -47,13 +44,14 @@ public class FootstepAdjustor
    
    private final FrameConvexPolygon2d touchdownFootPolygon = new FrameConvexPolygon2d();
    private final FrameConvexPolygon2d desiredSteppingRegion = new FrameConvexPolygon2d();
+   private final FrameConvexPolygon2d intersection = new FrameConvexPolygon2d();
    /**
     * This function takes a footstep and a captureRegion and if necessary projects the footstep
     * into the capture region. Returns true if the footstep was changed.
     */
    public boolean adjustFootstep(Footstep footstep, FrameConvexPolygon2d captureRegion)
    {
-      footstepChanged = false;
+      boolean footstepChanged = false;
       
       // Check if there is a capture region
       if(captureRegion.isEmpty())
@@ -72,7 +70,7 @@ public class FootstepAdjustor
       
       // Check if the desired footstep intersects the capture region.
       calculateTouchdownFootPolygon(footstep, desiredSteppingRegion.getReferenceFrame(), touchdownFootPolygon);
-      boolean nextStepInside = desiredSteppingRegion.intersectionWith(touchdownFootPolygon) == null ? false : true; // garbage
+      boolean nextStepInside = desiredSteppingRegion.intersectionWith(touchdownFootPolygon, intersection);
       
       if(nextStepInside)
       {
@@ -171,7 +169,7 @@ public class FootstepAdjustor
    {
       if(footstepAdjusterVisualizer != null)
       {
-         footstepAdjusterVisualizer.update(footstepChanged);
+         footstepAdjusterVisualizer.update();
       }
    }
    
