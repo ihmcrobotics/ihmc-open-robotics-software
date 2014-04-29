@@ -52,7 +52,7 @@ public class SingleRigidBodyRobot extends Robot
       Link ret = new Link("link1");
       ret.setMass(M1);
       ret.physics.setComOffset(0.0, 0.0, L1/2.0);
-      //ret.setComOffset(0.0, 0.0, 0.0);
+      //ret.physics.setComOffset(0.0, 0.0, 0.0);
       ret.physics.setMomentOfInertia(Iyy1, Iyy1, Iyy1/10.0);
 
       // create a LinkGraphics object to manipulate the visual representation of the link
