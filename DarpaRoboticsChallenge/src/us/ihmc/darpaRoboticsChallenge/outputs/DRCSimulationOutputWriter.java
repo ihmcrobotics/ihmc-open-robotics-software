@@ -33,8 +33,8 @@ public class DRCSimulationOutputWriter extends SDFPerfectSimulatedOutputWriter i
 
    double[] prevError;
 
-   public DRCSimulationOutputWriter(SDFRobot robot, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
-                                    RobotVisualizer robotVisualizer)
+   public DRCSimulationOutputWriter(SDFRobot robot, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+                                    RobotVisualizer robotVisualizer, YoVariableRegistry simulationRegistry)
    {
       super(robot);
       this.dynamicGraphicObjectsListRegistry = dynamicGraphicObjectsListRegistry;
@@ -42,8 +42,9 @@ public class DRCSimulationOutputWriter extends SDFPerfectSimulatedOutputWriter i
 
       rawJointTorques = new ObjectObjectMap<OneDoFJoint, DoubleYoVariable>();
       delayedJointTorques = new ObjectObjectMap<OneDoFJoint, DelayedDoubleYoVariable>();
+      
+      simulationRegistry.addChild(registry);
 
-      parentRegistry.addChild(registry);
    }
 
    @Override
@@ -146,6 +147,12 @@ public class DRCSimulationOutputWriter extends SDFPerfectSimulatedOutputWriter i
    @Override
    public void setForceSensorDataHolderForController(ForceSensorDataHolder forceSensorDataHolderForEstimator)
    {
+   }
+
+   @Override
+   public YoVariableRegistry getControllerYoVariableRegistry()
+   {
+      return null;
    }
 
 }

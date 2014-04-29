@@ -336,50 +336,6 @@ public class VariousWalkingProviders
       return variousWalkingProviders;
    }
 
-   public static VariousWalkingProviders createForBoxStepping(FullRobotModel fullRobotModel, WalkingControllerParameters walkingControllerParameters,
-           SideDependentList<? extends ContactablePlaneBody> bipedFeet, CommonWalkingReferenceFrames referenceFrames, double controlDT,
-           YoVariableRegistry registry, double leadingFootPitch, double boxLength, double boxWidth, double closeStanceWidth)
-   {
-      SimpleDesiredHeadingControlModule desiredHeadingControlModule = new SimpleDesiredHeadingControlModule(0.0, controlDT, registry);
-      desiredHeadingControlModule.setMaxHeadingDot(0.4);
-
-      BoxDesiredFootstepCalculator desiredFootstepCalculator = new BoxDesiredFootstepCalculator(bipedFeet, referenceFrames.getAnkleZUpReferenceFrames(),
-                                                                  desiredHeadingControlModule, registry, leadingFootPitch);
-      desiredFootstepCalculator.setBoxLength(boxLength);
-      desiredFootstepCalculator.setBoxWidth(boxWidth);
-      desiredFootstepCalculator.setCloseStanceWidth(closeStanceWidth);
-
-      FootstepProvider footstepProvider = new DesiredFootstepCalculatorFootstepProviderWrapper(desiredFootstepCalculator, registry);
-      DesiredHeadOrientationProvider headOrientationProvider = null;
-      DesiredComHeightProvider comHeightProvider = null;
-      DesiredHandPoseProvider handPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters, registry);
-
-
-      LinkedHashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = new LinkedHashMap<Footstep, TrajectoryParameters>();
-
-      DesiredHighLevelStateProvider highLevelStateProvider = null;
-      DesiredPelvisPoseProvider pelvisPoseProvider = null;
-      DesiredChestOrientationProvider chestOrientationProvider = null;
-      DesiredFootPoseProvider footPoseProvider = null;
-      ReinitializeWalkingControllerProvider reinitializeWalkingControllerProvider = null;
-
-      DesiredHandLoadBearingProvider handLoadBearingProvider = null;
-      DesiredFootStateProvider footLoadBearingProvider = null;
-      DesiredThighLoadBearingProvider thighLoadBearingProvider = null;
-      DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider = null;     
-      DesiredArmJointAngleProvider armJointAngleProvider = null;
-      
-      ControlStatusProducer controlStatusProducer = new SystemErrControlStatusProducer();
-      
-     
-      VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(footstepProvider, mapFromFootstepsToTrajectoryParameters,
-            headOrientationProvider, comHeightProvider, pelvisPoseProvider, handPoseProvider, handLoadBearingProvider, chestOrientationProvider,
-            footPoseProvider, footLoadBearingProvider, highLevelStateProvider, thighLoadBearingProvider, pelvisLoadBearingProvider, armJointAngleProvider,
-            reinitializeWalkingControllerProvider, controlStatusProducer);
-
-      return variousWalkingProviders;
-   }
-
    public static VariousWalkingProviders createUsingYoVariables(FullRobotModel fullRobotModel, WalkingControllerParameters walkingControllerParameters,
          CommonWalkingReferenceFrames referenceFrames, SideDependentList<ContactablePlaneBody> bipedFeet, ConstantTransferTimeCalculator transferTimeCalculator,
          ConstantSwingTimeCalculator swingTimeCalculator, YoVariableRegistry registry)

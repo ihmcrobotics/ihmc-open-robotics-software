@@ -1,7 +1,7 @@
 <GraphGroup>
 	<Cols>1</Cols>
 	<Graph>
-		<Variables>root.atlas.t</Variables>
+		<Variables>root.remoteatlas.t</Variables>
 		<GraphConfiguration>
 			<Name>config1</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -13,7 +13,7 @@
 		</GraphConfig>
 	</Graph>
 </GraphGroup>
-<Entry Boxes></Entry Boxes>
+<Entry Boxes>walk</Entry Boxes>
 
 <Number of ViewPorts>1</Number of ViewPorts>
  <Main Viewport> 
@@ -29,9 +29,9 @@ Plotter,
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>9.908031434784142</Camera X>
- <Camera Y>5.42041402212637</Camera Y>
- <Camera Z>3.818630847515801</Camera Z>
+ <Camera X>18.745632777776404</Camera X>
+ <Camera Y>-5.030978715297589</Camera Y>
+ <Camera Z>3.5734463201816804</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -55,8 +55,8 @@ Plotter,
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>0.4986306292942224</Fix X>
-<Fix Y>-1.0451607224707313</Fix Y>
-<Fix Z>-0.1844747551548096</Fix Z>
+<Fix X>0.0</Fix X>
+<Fix Y>0.0</Fix Y>
+<Fix Z>0.6</Fix Z>
 </Fix Position>
 </Canvas 1>

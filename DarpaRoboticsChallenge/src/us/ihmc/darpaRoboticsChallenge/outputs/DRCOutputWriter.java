@@ -1,12 +1,14 @@
 package us.ihmc.darpaRoboticsChallenge.outputs;
 
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
 
-import com.yobotics.simulationconstructionset.robotController.RobotControlElement;
-
-public interface DRCOutputWriter extends RobotControlElement
+public interface DRCOutputWriter
 {
+   public abstract void initialize();
+   
    public abstract void writeAfterController(long timestamp);
 
    public abstract void writeAfterEstimator(long timestamp);
@@ -18,4 +20,6 @@ public interface DRCOutputWriter extends RobotControlElement
    public abstract void setEstimatorModel(SDFFullRobotModel estimatorModel);
 
    public abstract void setForceSensorDataHolderForController(ForceSensorDataHolder forceSensorDataHolderForController);
+   
+   public abstract YoVariableRegistry getControllerYoVariableRegistry();
 }
