@@ -3,6 +3,7 @@ package us.ihmc.atlas;
 import com.jme3.math.Transform;
 import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
 
+import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
 import us.ihmc.atlas.parameters.*;
@@ -10,6 +11,7 @@ import us.ihmc.atlas.physics.AtlasPhysicsEngineConfiguration;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactPointInformation;
+import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParamaters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -29,11 +31,11 @@ public class AtlasRobotModel implements DRCRobotModel
    private final AtlasRobotVersion selectedVersion;
    
    private final boolean runningOnRealRobot;
+   private JaxbSDFLoader loader;
 
    public AtlasRobotModel(AtlasRobotVersion atlasVersion, boolean runningOnRealRobot)
    {
       selectedVersion = atlasVersion;
-      
       this.runningOnRealRobot = runningOnRealRobot;
    }
 
@@ -59,7 +61,7 @@ public class AtlasRobotModel implements DRCRobotModel
 
    public DRCRobotJointMap getJointMap()
    {
-      return new AtlasJointMap(this);
+      return new AtlasJointMap(selectedVersion);
    }
 
    public boolean hasIRobotHands()
@@ -175,5 +177,15 @@ public class AtlasRobotModel implements DRCRobotModel
    public WalkingControllerParameters getDrivingControllerParameters()
    {
       return new AtlasDrivingControllerParameters();
+   }
+
+   @Override
+   public JaxbSDFLoader getJaxbSDFLoader(boolean headless)
+   {
+      if(loader == null)
+      {
+         this.loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSdfFileAsStream(), headless);
+      }
+      return loader;
    }
 }

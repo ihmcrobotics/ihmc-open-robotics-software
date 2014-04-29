@@ -81,7 +81,7 @@ public class AtlasMultiContact
        else
           dynamicGraphicObjectsListRegistry = null;
 
-      environment = new MultiContactTestEnvironment(robotInitialSetup, jointMap, dynamicGraphicObjectsListRegistry, footContactSides, handContactSides);
+      environment = new MultiContactTestEnvironment(robotInitialSetup, robotModel, dynamicGraphicObjectsListRegistry, footContactSides, handContactSides);
       final PlainDRCRobot robotInterface = new PlainDRCRobot(robotModel);
       scsInitialSetup = new DRCSCSInitialSetup(environment, robotInterface.getSimulateDT());
       scsInitialSetup.setSimulationDataBufferSize(simulationDataBufferSize);

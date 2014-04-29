@@ -55,7 +55,7 @@ public class AtlasSimpleStanceController {
 	      }
 	      
 	      DRCRobotJointMap jointMap = model.getJointMap();
-	      JaxbSDFLoader jaxbSDFLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
+	      JaxbSDFLoader jaxbSDFLoader = model.getJaxbSDFLoader(false);
 	      SDFFullRobotModel fullRobotModel = jaxbSDFLoader.createFullRobotModel(jointMap);
 	      SDFRobot robot = jaxbSDFLoader.createRobot(jointMap, false);
 	      ReferenceFrames referenceFrames = new ReferenceFrames(fullRobotModel, jointMap, jointMap.getAnkleHeight());

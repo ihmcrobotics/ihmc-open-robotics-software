@@ -156,4 +156,9 @@ public enum AtlasRobotVersion {
 			offsetHandFromWrist.set(robotSide, new Transform(centerOfHandToWristTranslation, centerOfHandToWristRotation));
 		}
 	}
+
+   public String getModelName()
+   {
+      return "atlas";
+   }
 }

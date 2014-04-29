@@ -36,7 +36,7 @@ public class AtlasPlaybackPoseInterpolatorTest extends PlaybackPoseInterpolatorT
       DRCRobotModel robotModel = getRobotModel();
 
       DRCRobotJointMap jointMap = robotModel.getJointMap();
-      JaxbSDFLoader sdfLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap, false);
+      JaxbSDFLoader sdfLoader = robotModel.getJaxbSDFLoader(false);
       
       SDFFullRobotModel fullRobotModel = sdfLoader.createFullRobotModel(jointMap);
       SDFRobot sdfRobot = sdfLoader.createRobot(jointMap, false);

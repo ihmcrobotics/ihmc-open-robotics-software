@@ -7,8 +7,6 @@ import us.ihmc.robotSide.SideDependentList;
 public abstract class DRCRobotJointMap implements SDFJointNameMap
 {
    // TODO Crap
-   public abstract DRCRobotModel getSelectedModel();
-
    public abstract double getAnkleHeight();
 
    public abstract double getPelvisToFoot();

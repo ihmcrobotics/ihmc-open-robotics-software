@@ -51,7 +51,7 @@ public class AtlasPosePlaybackSCSBridge
       }
 
       DRCRobotJointMap jointMap = model.getJointMap();
-      JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(jointMap);
+      JaxbSDFLoader loader = model.getJaxbSDFLoader(false);
       SDFRobot sdfRobot = loader.createRobot(jointMap, false);
       FullRobotModel fullRobotModel = loader.createFullRobotModel(jointMap);
       SDFFullRobotModel fullRobotModelForSlider = loader.createFullRobotModel(jointMap);
