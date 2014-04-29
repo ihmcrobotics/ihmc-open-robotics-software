@@ -53,12 +53,12 @@ public class OneStepCaptureRegionCalculator
    
    public OneStepCaptureRegionCalculator(double midFootAnkleXOffset,
                                          double footWidth,
-                                         double kineamaticStepRange,
+                                         double kinematicStepRange,
                                          SideDependentList<ReferenceFrame> ankleZUpFrames,
                                          YoVariableRegistry parentRegistry,
                                          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      this.kinematicStepRange = kineamaticStepRange;
+      this.kinematicStepRange = kinematicStepRange;
       this.ankleZUpFrames = ankleZUpFrames;
       this.midFootAnkleXOffset = midFootAnkleXOffset;
       this.footWidth = footWidth;
