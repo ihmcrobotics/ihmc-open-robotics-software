@@ -68,7 +68,7 @@ public class AtlasPhysicsEngineConfiguration implements ScsCollisionConfigure
       FloatingJoint groundJoint = new FloatingJoint("ground", "ground", new Vector3d(), robot);
       Link linkGround = new Link("Ground Plane Hack");
       linkGround.setMass(1000);
-      linkGround.setMomentOfInertia(0.1 * 100, 0.1 * 100, 0.1 * 100);
+      linkGround.physics.setMomentOfInertia(0.1 * 100, 0.1 * 100, 0.1 * 100);
 
       factoryShape.addShape(linkGround,null,collisionGround,GROUP_GROUND,0xFFFFFFFF);
 

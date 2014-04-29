@@ -576,9 +576,9 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder, Hu
 
       rotationTransform.transform(CoMOffset);
 
-      scsLink.setComOffset(CoMOffset);
+      scsLink.physics.setComOffset(CoMOffset);
       scsLink.setMass(mass);
-      scsLink.setMomentOfInertia(inertia);
+      scsLink.physics.setMomentOfInertia(inertia);
 
       if (SHOW_COM_REFERENCE_FRAMES)
       {

@@ -8,24 +8,19 @@
  */
 package us.ihmc.systemidentification;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.util.ArrayList;
-
-import javax.swing.JFrame;
-import javax.swing.JScrollPane;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import com.yobotics.simulationconstructionset.DataBuffer;
+import com.yobotics.simulationconstructionset.Link;
+import com.yobotics.simulationconstructionset.Robot;
 import org.ddogleg.optimization.functions.FunctionNtoM;
-
 import us.ihmc.plotting.Plotter;
 import us.ihmc.plotting.PlotterPanel;
 import us.ihmc.plotting.shapes.CircleArtifact;
 
-import com.yobotics.simulationconstructionset.DataBuffer;
-import com.yobotics.simulationconstructionset.Link;
-import com.yobotics.simulationconstructionset.Robot;
+import javax.swing.*;
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+import java.awt.*;
+import java.util.ArrayList;
 
 
 /** Todo
@@ -98,7 +93,7 @@ public class ComCopResidual implements FunctionNtoM
    public Vector3d getCurrentLinkCom()
    {
       Vector3d comOffset = new Vector3d();
-      targetLink.getComOffset(comOffset);
+      targetLink.physics.getComOffset(comOffset);
       return comOffset;
    }
    
@@ -131,12 +126,12 @@ public class ComCopResidual implements FunctionNtoM
       if (lockComY)
       {
          Vector3d lastCom = new Vector3d();
-         targetLink.getComOffset(lastCom);
-         targetLink.setComOffset(inParameter[0],lastCom.y,inParameter[2]);
+         targetLink.physics.getComOffset(lastCom);
+         targetLink.physics.setComOffset(inParameter[0],lastCom.y,inParameter[2]);
       }
       else
       {
-         targetLink.setComOffset(new Vector3d(inParameter));
+         targetLink.physics.setComOffset(new Vector3d(inParameter));
       }
       ArrayList<Point3d> com = new ArrayList<>(selectedFrames.length);
       ArrayList<Point3d> cop = new ArrayList<>(selectedFrames.length);

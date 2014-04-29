@@ -1,29 +1,17 @@
 package us.ihmc.commonWalkingControlModules.simulationComparison;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import java.util.ArrayList;
-
-import javax.vecmath.Vector3d;
-
+import com.yobotics.simulationconstructionset.*;
+import com.yobotics.simulationconstructionset.util.simulationTesting.AllYoVariablesSimulationComparer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.MemoryTools;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.Joint;
-import com.yobotics.simulationconstructionset.Link;
-import com.yobotics.simulationconstructionset.PinJoint;
-import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.YoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.simulationTesting.AllYoVariablesSimulationComparer;
+import javax.vecmath.Vector3d;
+import java.util.ArrayList;
+
+import static org.junit.Assert.*;
 
 public class AllYoVariablesSimulationComparerTest 
 {
@@ -107,8 +95,8 @@ public class AllYoVariablesSimulationComparerTest
 	   {
 	      Link ret = new Link("link1");
 	      ret.setMass(1.0);
-	      ret.setComOffset(2.0, 0.0, 0.0);
-	      ret.setMomentOfInertia(0.0, 3.0, 0.0);
+	      ret.physics.setComOffset(2.0, 0.0, 0.0);
+	      ret.physics.setMomentOfInertia(0.0, 3.0, 0.0);
 
 	      return ret;
 	   }
@@ -117,8 +105,8 @@ public class AllYoVariablesSimulationComparerTest
 	   {
 	      Link ret = new Link("link2");
 	      ret.setMass(2.0);
-	      ret.setComOffset(2.0, 0.0, 0.0);
-	      ret.setMomentOfInertia(0.0, 5.0, 0.0);
+	      ret.physics.setComOffset(2.0, 0.0, 0.0);
+	      ret.physics.setMomentOfInertia(0.0, 5.0, 0.0);
 
 	      return ret;
 	   }

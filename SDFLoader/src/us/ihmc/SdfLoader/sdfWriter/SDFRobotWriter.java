@@ -274,7 +274,7 @@ public abstract class SDFRobotWriter
       Transform3D comOffsetInWorld = new Transform3D();
       scsLink.getParentJoint().getTransformToWorld(comOffsetInWorld);
       Vector3d com = new Vector3d();
-      scsLink.getComOffset(com);
+      scsLink.physics.getComOffset(com);
 
       Transform3D comOffset = TransformTools.createTranslationTransform(com);
       comOffsetInWorld.mul(comOffset);
@@ -289,7 +289,7 @@ public abstract class SDFRobotWriter
       SDFInertia sdfInertia = new SDFInertia();
 
       Matrix3d scsInertia = new Matrix3d();
-      scsLink.getMomentOfInertia(scsInertia);
+      scsLink.physics.getMomentOfInertia(scsInertia);
 
       sdfInertia.setIxx(String.valueOf(scsInertia.m00));
       sdfInertia.setIyy(String.valueOf(scsInertia.m11));

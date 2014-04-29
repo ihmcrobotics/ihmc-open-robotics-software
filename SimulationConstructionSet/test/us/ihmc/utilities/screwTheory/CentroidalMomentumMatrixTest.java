@@ -1,16 +1,11 @@
 package us.ihmc.utilities.screwTheory;
 
-import java.util.LinkedHashMap;
-import java.util.Random;
-
-import javax.media.j3d.Transform3D;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import com.yobotics.simulationconstructionset.FloatingJoint;
+import com.yobotics.simulationconstructionset.Link;
+import com.yobotics.simulationconstructionset.PinJoint;
+import com.yobotics.simulationconstructionset.Robot;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
-
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.CenterOfMassReferenceFrame;
@@ -18,10 +13,12 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.test.JUnitTools;
 
-import com.yobotics.simulationconstructionset.FloatingJoint;
-import com.yobotics.simulationconstructionset.Link;
-import com.yobotics.simulationconstructionset.PinJoint;
-import com.yobotics.simulationconstructionset.Robot;
+import javax.media.j3d.Transform3D;
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+import java.util.LinkedHashMap;
+import java.util.Random;
 
 public class CentroidalMomentumMatrixTest
 {
@@ -71,8 +68,8 @@ public class CentroidalMomentumMatrixTest
       FloatingJoint rootJoint = new FloatingJoint("rootJoint", new Vector3d(), robot);
       Link link = new Link("link");
       link.setMass(mass);
-      link.setMomentOfInertia(momentOfInertia);
-      link.setComOffset(comOffset);
+      link.physics.setMomentOfInertia(momentOfInertia);
+      link.physics.setComOffset(comOffset);
       rootJoint.setLink(link);
       robot.addRootJoint(rootJoint);
 

@@ -69,7 +69,7 @@ public class StateEstimatorEvaluatorRobot extends Robot
          PinJoint pinJoint1 = new PinJoint("pinJoint1", new Vector3d(), this, Axis.X);
          Link armLink1 = new Link("armLink1");
          armLink1.setMassAndRadiiOfGyration(0.3, 0.1, 0.1, 0.1);
-         armLink1.setComOffset(new Vector3d(0.0, 0.0, 0.5));
+         armLink1.physics.setComOffset(new Vector3d(0.0, 0.0, 0.5));
 
          Graphics3DObject armLink1Graphics = new Graphics3DObject();
 
@@ -102,7 +102,7 @@ public class StateEstimatorEvaluatorRobot extends Robot
          PinJoint pinJoint2 = new PinJoint("pinJoint2", new Vector3d(0.0, 0.0, 1.0), this, Axis.Z);
          Link armLink2 = new Link("armLink2");
          armLink2.setMassAndRadiiOfGyration(0.2, 0.1, 0.1, 0.1);
-         armLink2.setComOffset(new Vector3d(0.2, 0.0, 0.0));
+         armLink2.physics.setComOffset(new Vector3d(0.2, 0.0, 0.0));
 
          Graphics3DObject armLink2Graphics = new Graphics3DObject();
          armLink2Graphics.rotate(Math.PI / 2.0, Graphics3DObject.Y);
@@ -166,7 +166,7 @@ public class StateEstimatorEvaluatorRobot extends Robot
          PinJoint pinJoint1 = new PinJoint("pinJoint1", new Vector3d(), this, Axis.X);
          Link armLink1 = new Link("armLink1");
          armLink1.setMassAndRadiiOfGyration(0.001, 0.1, 0.1, 0.1);
-         armLink1.setComOffset(new Vector3d(0.0, 0.0, 0.0));
+         armLink1.physics.setComOffset(new Vector3d(0.0, 0.0, 0.0));
          pinJoint1.setLink(armLink1);
          rootJoint.addJoint(pinJoint1);
          
