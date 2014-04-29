@@ -17,7 +17,6 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParamaters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
-import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandType;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
@@ -72,22 +71,17 @@ public class BonoRobotModel implements DRCRobotModel
       return new BonoJointMap();
    }
 
-   public String getModelName()
-   {
-      return "bono";
-   }
-
    public Transform getOffsetHandFromWrist(RobotSide side)
    {
       return new Transform();
    }
 
-   public String getSdfFile()
+   private String getSdfFile()
    {
       return "../models/axl/axl_description/bono/robots/bono.sdf";
    }
 
-   public String[] getResourceDirectories()
+   private String[] getResourceDirectories()
    {
       if (resourceDirectories == null)
       {
@@ -96,7 +90,7 @@ public class BonoRobotModel implements DRCRobotModel
       return resourceDirectories;
    }
 
-   public InputStream getSdfFileAsStream()
+   private InputStream getSdfFileAsStream()
    {
       return thisClass.getResourceAsStream(getSdfFile());
    }
