@@ -15,7 +15,7 @@ public class AtlasPushInSingleSupportTest extends DRCPushInSingleSupportTest
    {
       BambooTools.reportTestStartedMessage();
 
-      String runName = "AtlasFlatGroundWalkingTest";
+      String runName = "AtlasPushDuringSwing";
       DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, false);
       
       setupAndTestPushInSingleSupport(robotModel, runName);
