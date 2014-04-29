@@ -414,7 +414,7 @@ public class RobotTest
       ret.setMass(random.nextDouble());
       ret.physics.setComOffset(0.0, 0.0, l2 / 2.0);
 
-//    ret.setComOffset(0.0, 0.0, 0.0);
+//    ret.physics.setComOffset(0.0, 0.0, 0.0);
       ret.physics.setMomentOfInertia(RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidEllipsoid(ret.getMass(), r2, r2, l2 / 2.0));
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
