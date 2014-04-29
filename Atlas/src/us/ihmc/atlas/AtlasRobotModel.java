@@ -31,6 +31,7 @@ public class AtlasRobotModel implements DRCRobotModel
    private final AtlasRobotVersion selectedVersion;
    
    private final boolean runningOnRealRobot;
+   private JaxbSDFLoader headlessLoader;
    private JaxbSDFLoader loader;
 
    public AtlasRobotModel(AtlasRobotVersion atlasVersion, boolean runningOnRealRobot)
@@ -39,26 +40,31 @@ public class AtlasRobotModel implements DRCRobotModel
       this.runningOnRealRobot = runningOnRealRobot;
    }
 
+   @Override
    public ArmControllerParameters getArmControllerParameters()
    {
       return new AtlasArmControllerParameters(runningOnRealRobot);
    }
 
+   @Override
    public WalkingControllerParameters getWalkingControlParameters()
    {
       return new AtlasWalkingControllerParameters(runningOnRealRobot);
    }
 
+   @Override
    public StateEstimatorParameters getStateEstimatorParameters(double estimatorDT)
    {
       return new AtlasStateEstimatorParameters(runningOnRealRobot, estimatorDT);
    }
 
+   @Override
    public DRCRobotPhysicalProperties getPhysicalProperties()
    {
       return new AtlasPhysicalProperties();
    }
 
+   @Override
    public DRCRobotJointMap getJointMap()
    {
       return new AtlasJointMap(selectedVersion);
@@ -84,6 +90,7 @@ public class AtlasRobotModel implements DRCRobotModel
       return selectedVersion.getHandModel();
    }
 
+   @Override
    public String getModelName()
    {
       return "atlas";
@@ -115,6 +122,7 @@ public class AtlasRobotModel implements DRCRobotModel
       return selectedVersion.getOffsetFromWrist(side);
    }
 
+   @Override
    public String toString()
    {
       return selectedVersion.toString();
@@ -164,7 +172,7 @@ public class AtlasRobotModel implements DRCRobotModel
    @Override
    public HandModel getHandModel()
    {
-	   if(hasIRobotHands())
+      if(selectedVersion.getHandModel() == DRCHandType.IROBOT)
 		   return new iRobotHandModel();
 	   else
 		   return null;
@@ -179,6 +187,15 @@ public class AtlasRobotModel implements DRCRobotModel
    @Override
    public JaxbSDFLoader getJaxbSDFLoader(boolean headless)
    {
+      if(headless)
+      {
+         if(headlessLoader == null)
+         {
+            this.headlessLoader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSdfFileAsStream(), headless);
+         }
+         return headlessLoader;
+      }
+      
       if(loader == null)
       {
          this.loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSdfFileAsStream(), headless);
