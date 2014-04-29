@@ -8,7 +8,6 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
-import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -30,12 +29,12 @@ public class OneStepCaptureRegionCalculator
    private final GlobalTimer globalTimer = new GlobalTimer(name + "Timer", registry);
    
    private CaptureRegionVisualizer captureRegionVisualizer = null;
-   private FrameConvexPolygon2d captureRegionPolygon = new FrameConvexPolygon2d(worldFrame);
+   private final FrameConvexPolygon2d captureRegionPolygon = new FrameConvexPolygon2d(worldFrame);
    
    // necessary variables for the reachable region and capture calculation:
    private final double midFootAnkleXOffset;
    private final double footWidth;
-   private final double kineamaticStepRange;
+   private final double kinematicStepRange;
    private final SideDependentList<ReferenceFrame> ankleZUpFrames;
    private final SideDependentList<FrameConvexPolygon2d> reachableRegions;
    
@@ -59,7 +58,7 @@ public class OneStepCaptureRegionCalculator
                                          YoVariableRegistry parentRegistry,
                                          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      this.kineamaticStepRange = kineamaticStepRange;
+      this.kinematicStepRange = kineamaticStepRange;
       this.ankleZUpFrames = ankleZUpFrames;
       this.midFootAnkleXOffset = midFootAnkleXOffset;
       this.footWidth = footWidth;
@@ -77,30 +76,31 @@ public class OneStepCaptureRegionCalculator
    
    private void calculateReachableRegions()
    {
-      ArrayList<FramePoint2d> reachableRegionPoints = new ArrayList<FramePoint2d>(MAX_CAPTURE_REGION_POLYGON_POINTS - 2);
       for(RobotSide side : RobotSide.values)
       {
-         reachableRegionPoints.clear();
+         FrameConvexPolygon2d reachableRegion = new FrameConvexPolygon2d();
+         reachableRegion.clear(ankleZUpFrames.get(side));
          double sign = side == RobotSide.RIGHT ? 1.0 : -1.0;
+
          for (int i = 0; i < MAX_CAPTURE_REGION_POLYGON_POINTS - 1; i++)
          {
             double angle = sign * reachableRegionCutoffAngle * Math.PI * ((double)i) / 
                   ((double)(MAX_CAPTURE_REGION_POLYGON_POINTS - 2));
-            double x = kineamaticStepRange * Math.cos(angle) + midFootAnkleXOffset;
-            double y = kineamaticStepRange * Math.sin(angle);
+            double x = kinematicStepRange * Math.cos(angle) + midFootAnkleXOffset;
+            double y = kinematicStepRange * Math.sin(angle);
             if(Math.abs(y) < footWidth/2.0)
                y = sign*footWidth/2.0;
-            reachableRegionPoints.add(new FramePoint2d(ankleZUpFrames.get(side), x, y));
+            reachableRegion.addVertex(ankleZUpFrames.get(side), x, y);
          }
-         reachableRegionPoints.add(new FramePoint2d(ankleZUpFrames.get(side), midFootAnkleXOffset, sign * footWidth / 2.0));
-         FrameConvexPolygon2d reachableRegion = new FrameConvexPolygon2d(reachableRegionPoints);
+         reachableRegion.addVertex(ankleZUpFrames.get(side), midFootAnkleXOffset, sign * footWidth / 2.0);
+         reachableRegion.update();
          reachableRegions.set(side, reachableRegion);
       }
    }
    
    // variables for the capture region calculation
    private RobotSide previousSwingSide;
-   private FrameConvexPolygon2d supportFootPolygon;
+   private final FrameConvexPolygon2d supportFootPolygon = new FrameConvexPolygon2d();
    private final FramePoint2d footCentroid = new FramePoint2d(worldFrame);
    private final FramePoint2d predictedICP = new FramePoint2d(worldFrame);
    private final FramePoint2d capturePoint = new FramePoint2d(worldFrame);
@@ -109,8 +109,7 @@ public class OneStepCaptureRegionCalculator
    private final FrameVector2d projectedLine = new FrameVector2d(worldFrame);
    private final FrameVector2d firstKinematicExtremeDirection = new FrameVector2d(worldFrame);
    private final FrameVector2d lastKinematicExtremeDirection = new FrameVector2d(worldFrame);
-   private final ArrayList<FramePoint> captureRegionPoints = new ArrayList<FramePoint>();
-   private FrameConvexPolygon2d captureRegion = new FrameConvexPolygon2d(worldFrame);
+   private final FrameConvexPolygon2d rawCaptureRegion = new FrameConvexPolygon2d(worldFrame);
    
    public void calculateCaptureRegion(RobotSide swingSide,
                                       double swingTimeRemaining,
@@ -125,7 +124,8 @@ public class OneStepCaptureRegionCalculator
       if (!swingSide.equals(previousSwingSide))
       {
          // change the support foot polygon only if the swing side changed to avoid garbage every tick.
-         this.supportFootPolygon = footPolygon.changeFrameCopy(supportAnkleZUp);
+         this.supportFootPolygon.setIncludingFrameAndUpdate(footPolygon);
+         this.supportFootPolygon.changeFrame(supportAnkleZUp);
          previousSwingSide = swingSide;
       }
       capturePoint.setIncludingFrame(icp);
@@ -138,7 +138,8 @@ public class OneStepCaptureRegionCalculator
       
       swingTimeRemaining = MathTools.clipToMinMax(swingTimeRemaining, 0.0, Double.POSITIVE_INFINITY);
       supportFootPolygon.getCentroid(footCentroid);
-      captureRegionPoints.clear();
+      rawCaptureRegion.clear(supportAnkleZUp);
+      captureRegionPolygon.clear(supportAnkleZUp);
       
       // 2. Get extreme CoP positions
       ArrayList<FramePoint2d> extremesOfFeasibleCOP =
@@ -147,33 +148,33 @@ public class OneStepCaptureRegionCalculator
       {
          // If the ICP is in the support polygon return the whole reachable region.
          globalTimer.stopTimer();
-         captureRegionPolygon = reachableRegions.get(swingSide.getOppositeSide());
+         captureRegionPolygon.setIncludingFrameAndUpdate(reachableRegions.get(swingSide.getOppositeSide()));
          updateVisualizer();
          return;
       }
       
-      // 3. For every possible extreme CoP predict the corresponding ICP give the remaining swing time
+      // 3. For every possible extreme CoP predict the corresponding ICP given the remaining swing time
       for (int i = 0; i < extremesOfFeasibleCOP.size(); i++)
       {
          FramePoint2d copExtreme = extremesOfFeasibleCOP.get(i);
          copExtreme.changeFrame(supportAnkleZUp);
          CaptureRegionMath.predictCapturePoint(capturePoint, copExtreme, swingTimeRemaining, omega0, predictedICP);
-         captureRegionPoints.add(predictedICP.toFramePoint());
+         rawCaptureRegion.addVertexChangeFrameAndProjectToXYPlane(predictedICP);
          
       // 4. Project the predicted ICP on a circle around the foot with the radius of the step range.
          projectedLine.set(predictedICP);
          projectedLine.sub(copExtreme);
          CaptureRegionMath.solveIntersectionOfRayAndCircle(footCentroid, predictedICP,
-                                                           projectedLine, kineamaticStepRange,
+                                                           projectedLine, kinematicStepRange,
                                                            kinematicExtreme);
 
          if (kinematicExtreme.containsNaN())
          {
             globalTimer.stopTimer();
-            captureRegionPolygon = null;
+            captureRegionPolygon.update();
             return;
          }
-         captureRegionPoints.add(kinematicExtreme.toFramePoint());
+         rawCaptureRegion.addVertexChangeFrameAndProjectToXYPlane(kinematicExtreme);
          
          if(i == 0)
          {
@@ -192,23 +193,26 @@ public class OneStepCaptureRegionCalculator
          CaptureRegionMath.getPointBetweenVectorsAtDistanceFromOriginCircular(firstKinematicExtremeDirection,
                                                                               lastKinematicExtremeDirection,
                                                                               alphaFromAToB,
-                                                                              kineamaticStepRange,
+                                                                              kinematicStepRange,
                                                                               footCentroid,
                                                                               additionalKinematicPoint);
-         captureRegionPoints.add(additionalKinematicPoint.toFramePoint());
+         rawCaptureRegion.addVertexAndChangeFrame(additionalKinematicPoint);
       }
       
       // 6. Intersect the capture region with the reachable region
-      if(captureRegion != null)
+      if(!rawCaptureRegion.isEmpty())
       {
          // This causes the capture region to always be null if it is null once.
          // This assumes that once there is no capture region the robot will fall for sure.
-         captureRegion.setIncludingFrameByProjectionOntoXYPlaneAndUpdate(supportAnkleZUp, captureRegionPoints);
-         captureRegion = captureRegion.intersectionWith(reachableRegions.get(swingSide.getOppositeSide()));
+         rawCaptureRegion.update();
+         rawCaptureRegion.intersectionWith(reachableRegions.get(swingSide.getOppositeSide()), captureRegionPolygon);
+         
       }
-      
+      else
+      {
+         captureRegionPolygon.update();
+      }
       globalTimer.stopTimer();
-      captureRegionPolygon = captureRegion;
       updateVisualizer();
    }
    
@@ -241,14 +245,6 @@ public class OneStepCaptureRegionCalculator
       calculateReachableRegions();
    }
    
-   public void setReachableRegions(SideDependentList<FrameConvexPolygon2d> reachableRegions)
-   {
-      for(RobotSide side : RobotSide.values)
-      {
-         this.reachableRegions.put(side, reachableRegions.get(side));
-      }
-   }
-   
    public FrameConvexPolygon2d getReachableRegion(RobotSide robotSide)
    {
       return reachableRegions.get(robotSide);
@@ -256,6 +252,6 @@ public class OneStepCaptureRegionCalculator
    
    public double getKinematicStepRange()
    {
-      return kineamaticStepRange;
+      return kinematicStepRange;
    }
 }
