@@ -94,8 +94,10 @@ public class YoVariableThreadAccessValidator
    {
       Thread currentThread = Thread.currentThread();
 
-      if (currentThread.getName().equals("AWT-EventQueue-0"))
+      switch (currentThread.getName())
       {
+      case "AWT-EventQueue-0":
+      case "SCS simulation thread":
          System.out.println("[" + getClass().getSimpleName() + "] Variable " + v.getName() + " was changed from the UI.");
          return;
       }
