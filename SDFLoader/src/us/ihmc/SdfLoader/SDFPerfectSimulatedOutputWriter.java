@@ -11,10 +11,8 @@ import us.ihmc.utilities.screwTheory.SixDoFJoint;
 
 import com.yobotics.simulationconstructionset.FloatingJoint;
 import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.robotController.RawOutputWriter;
 
-public class SDFPerfectSimulatedOutputWriter implements RawOutputWriter
+public class SDFPerfectSimulatedOutputWriter 
 {
    private final String name;
    protected final SDFRobot robot;
@@ -37,11 +35,6 @@ public class SDFPerfectSimulatedOutputWriter implements RawOutputWriter
 
    public void initialize()
    {
-   }
-
-   public YoVariableRegistry getYoVariableRegistry()
-   {
-      return null;
    }
    
    public void setFullRobotModel(FullRobotModel fullRobotModel)

@@ -12,6 +12,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.PlainDRCRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.SimulatedModelCorruptorDRCRobotInterface;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.darpaRoboticsChallenge.validation.YoVariableThreadAccessValidator;
 import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
 import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
 import us.ihmc.graphics3DAdapter.GroundProfile;
@@ -28,6 +29,8 @@ public class AtlasFlatGroundWalkingTrack
    
    public static void main(String[] args) throws JSAPException
    {
+      YoVariableThreadAccessValidator.registerAccessValidator();
+      
       DRCRobotModel model = null;
       model = AtlasRobotModelFactory.selectModelFromFlag(args);
       

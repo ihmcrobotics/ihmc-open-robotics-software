@@ -44,12 +44,12 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
    
    public SimulatedSensorHolderAndReaderFromRobotFactory(Robot robot, SensorNoiseParameters sensorNoiseParameters,
          SensorFilterParameters sensorFilterParameters, ArrayList<IMUMount> imuMounts,
-         ArrayList<WrenchCalculatorInterface> groundContactPointBasedWrenchCalculators, YoVariableRegistry registry)
+         ArrayList<WrenchCalculatorInterface> groundContactPointBasedWrenchCalculators, YoVariableRegistry estimatorRegistry, YoVariableRegistry simulationRegistry)
    {
-      this.registry = registry;
+      this.registry = estimatorRegistry;
       this.robot = robot;
       this.sensorNoiseParameters = sensorNoiseParameters;
-      this.simulatedSensorHolderAndReader = new SimulatedSensorHolderAndReader(sensorFilterParameters, registry); 
+      this.simulatedSensorHolderAndReader = new SimulatedSensorHolderAndReader(sensorFilterParameters, simulationRegistry); 
       
       this.estimateDT = sensorFilterParameters.getEstimatorDT();
       this.imuMounts = imuMounts;
