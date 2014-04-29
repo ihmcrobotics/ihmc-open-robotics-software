@@ -138,12 +138,6 @@ public class AtlasJointMap extends DRCRobotJointMap
    }
    
    @Override
-   public double getPelvisToFoot()
-   {
-      return AtlasPhysicalProperties.pelvisToFoot;
-   }
-
-   @Override
    public String getNameOfJointBeforeHand(RobotSide robotSide)
    {
       return forcedSideDependentJointNames.get(robotSide)[l_arm_wrx];

@@ -3,8 +3,11 @@ package us.ihmc.darpaRoboticsChallenge.initialSetup;
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
+import com.yobotics.simulationconstructionset.GroundContactPoint;
+
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
+import us.ihmc.robotSide.RobotSide;
 
 public class SquaredUpDRCRobotInitialSetup implements DRCRobotInitialSetup<SDFRobot>
 {
@@ -26,16 +29,21 @@ public class SquaredUpDRCRobotInitialSetup implements DRCRobotInitialSetup<SDFRo
    {
       setArmJointPositions(robot);
       setLegJointPositions(robot);
-      setPositionInWorld(robot, jointMap);
+      setPositionInWorld(robot);
    }
    
-   protected void setPositionInWorld(SDFRobot robot, DRCRobotJointMap jointMap)
+   protected void setPositionInWorld(SDFRobot robot)
    {
       robot.update();
       robot.getRootJointToWorldTransform(rootToWorld);
       rootToWorld.get(offset);
+      Vector3d positionInWorld = new Vector3d();
       
-      double pelvisToFoot = jointMap.getPelvisToFoot();
+      rootToWorld.get(positionInWorld);
+      
+      GroundContactPoint gc1 = robot.getFootGroundContactPoints(RobotSide.LEFT).get(0);
+      double pelvisToFoot = positionInWorld.getZ() - gc1.getPositionPoint().getZ();
+      
       offset.setZ(groundZ + pelvisToFoot);
       robot.setPositionInWorld(offset);
    }
