@@ -24,7 +24,7 @@ import com.yobotics.simulationconstructionset.util.ground.steppingStones.Steppin
  */
 public class FootstepAdjustor
 {
-   private static final boolean VISUALIZE = false;
+   private static final boolean VISUALIZE = true;
    private static final double SHRINK_TOUCHDOWN_POLYGON_FACTOR = 0.5;
    
    private final YoVariableRegistry registry = new YoVariableRegistry("FootstepAdjustor");
@@ -97,9 +97,15 @@ public class FootstepAdjustor
     */
    private void projectFootstepInCaptureRegion(Footstep footstep, FrameConvexPolygon2d captureRegion)
    {
-      footstep.getPosition().getFramePoint2d(nextStep2d);
-      nextStep2d.changeFrame(captureRegion.getReferenceFrame());
-      captureRegion.orthogonalProjection(nextStep2d);
+      // new position is projection to the border of the capture region
+//      footstep.getPosition().getFramePoint2d(nextStep2d);
+//      nextStep2d.changeFrame(captureRegion.getReferenceFrame());
+//      captureRegion.orthogonalProjection(nextStep2d);
+//      nextStep2d.changeFrame(footstep.getReferenceFrame());
+//      footstep.setPositionChangeOnlyXY(nextStep2d);
+      
+      // move the position of the footstep to the capture region centroid
+      nextStep2d.setIncludingFrame(captureRegion.getCentroid());
       nextStep2d.changeFrame(footstep.getReferenceFrame());
       footstep.setPositionChangeOnlyXY(nextStep2d);
       
