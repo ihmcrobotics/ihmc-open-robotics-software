@@ -74,7 +74,15 @@ public class CaptureRegionMath
    
    private static final Vector3d negZRotationAxis = new Vector3d(0.0, 0.0, -1.0);
    private static final Transform3D rotation = new Transform3D();
-   private static final FrameVector rotatedFromA = new FrameVector(worldFrame);
+
+   private static final ThreadLocal<FrameVector> tempFrameVector = new ThreadLocal<FrameVector>()
+   {
+      public FrameVector initialValue()
+      {
+         return new FrameVector(worldFrame);
+      }
+   };
+
    private static final AxisAngle4d axisAngle = new AxisAngle4d();
    /**
    * Will return a point on a circle around the origin. The point will be in between the given directions and at
@@ -95,10 +103,8 @@ public class CaptureRegionMath
       double angleBetweenDirections = directionA.angle(directionB);
       double angleBetweenDirectionsToSetLine = angleBetweenDirections * alpha;
       
-      // would like to use class member to minimize garbage:
-      // but it fails in some bamboo nightly tests so I have to use 'new'
-//     rotatedFromA.changeFrame(directionA.getReferenceFrame());
-      FrameVector rotatedFromA = new FrameVector(directionA.getReferenceFrame());
+      FrameVector rotatedFromA = tempFrameVector.get();
+      rotatedFromA.setToZero(directionA.getReferenceFrame());
 
       rotatedFromA.set(directionA.getX(), directionA.getY(), 0.0);
       
