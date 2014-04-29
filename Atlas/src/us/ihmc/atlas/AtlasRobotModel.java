@@ -1,16 +1,18 @@
 package us.ihmc.atlas;
 
-import com.jme3.math.Transform;
-import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
-
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
-import us.ihmc.atlas.parameters.*;
+import us.ihmc.atlas.parameters.AtlasArmControllerParameters;
+import us.ihmc.atlas.parameters.AtlasContactPointParamaters;
+import us.ihmc.atlas.parameters.AtlasDrivingControllerParameters;
+import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
+import us.ihmc.atlas.parameters.AtlasRobotMultiContactControllerParameters;
+import us.ihmc.atlas.parameters.AtlasStateEstimatorParameters;
+import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.atlas.physics.AtlasPhysicsEngineConfiguration;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactPointInformation;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParamaters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
@@ -24,7 +26,8 @@ import us.ihmc.iRobot.model.iRobotHandModel;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 
-import java.io.InputStream;
+import com.jme3.math.Transform;
+import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
 
 public class AtlasRobotModel implements DRCRobotModel
 {
@@ -90,30 +93,9 @@ public class AtlasRobotModel implements DRCRobotModel
       return selectedVersion.getHandModel();
    }
 
-   @Override
-   public String getModelName()
-   {
-      return "atlas";
-   }
-
    public AtlasRobotVersion getAtlasVersion()
    {
       return selectedVersion;
-   }
-
-   public String getSdfFile()
-   {
-      return selectedVersion.getSdfFile();
-   }
-
-   public String[] getResourceDirectories()
-   {
-      return selectedVersion.getResourceDirectories();
-   }
-
-   public InputStream getSdfFileAsStream()
-   {
-      return selectedVersion.getSdfFileAsStream();
    }
 
    @Override
@@ -128,6 +110,7 @@ public class AtlasRobotModel implements DRCRobotModel
       return selectedVersion.toString();
    }
 
+   @Override
    public DRCRobotInitialSetup<SDFRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw)
    {
       return new AtlasSimInitialSetup(groundHeight, initialYaw);
@@ -149,12 +132,6 @@ public class AtlasRobotModel implements DRCRobotModel
    public DRCRobotContactPointParamaters getContactPointParamaters(boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsToFeetOnly)
    {
       return new AtlasContactPointParamaters(selectedVersion,getJointMap(),addLoadsOfContactPoints,addLoadsOfContactPointsToFeetOnly);
-   }
-
-   @Override
-   public ContactPointInformation getContactPointInformation(boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsToFeetOnly)
-   {
-      return null;
    }
 
    @Override
@@ -191,14 +168,14 @@ public class AtlasRobotModel implements DRCRobotModel
       {
          if(headlessLoader == null)
          {
-            this.headlessLoader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSdfFileAsStream(), headless);
+            this.headlessLoader = DRCRobotSDFLoader.loadDRCRobot(selectedVersion.getResourceDirectories(), selectedVersion.getSdfFileAsStream(), headless);
          }
          return headlessLoader;
       }
       
       if(loader == null)
       {
-         this.loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSdfFileAsStream(), headless);
+         this.loader = DRCRobotSDFLoader.loadDRCRobot(selectedVersion.getResourceDirectories(), selectedVersion.getSdfFileAsStream(), headless);
       }
       return loader;
    }
