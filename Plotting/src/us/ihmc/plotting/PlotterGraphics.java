@@ -152,6 +152,9 @@ public class PlotterGraphics
    {
       int nPoints = polygon.getNumberOfVertices();
 
+      if (nPoints < 1)
+         return;
+      
       int[] xPoints = new int[nPoints];
       int[] yPoints = new int[nPoints];
 
@@ -209,6 +212,9 @@ public class PlotterGraphics
    public void fillPolygon(Graphics graphics, ConvexPolygon2d polygon)
    {
       int nPoints = polygon.getNumberOfVertices();
+      
+      if (nPoints < 1)
+         return;
 
       int[] xPoints = new int[nPoints];
       int[] yPoints = new int[nPoints];

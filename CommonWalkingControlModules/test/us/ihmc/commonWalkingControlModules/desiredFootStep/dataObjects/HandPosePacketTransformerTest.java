@@ -38,6 +38,7 @@ public class HandPosePacketTransformerTest
       Transform3D transform3D;
       HandPosePacket.Frame frame;
       RobotSide robotSide;
+      HandPosePacket.DataType dataType;
       for (int i = 0; i < numberOfTests; i++)
       {
          AxisAngle4d axisAngle = RandomTools.generateRandomRotation(random);
@@ -53,6 +54,11 @@ public class HandPosePacketTransformerTest
             robotSide = RobotSide.LEFT;
          else
             robotSide = RobotSide.RIGHT;
+         
+         if (i % 2 == 0)
+            dataType = HandPosePacket.DataType.HAND_POSE;
+         else
+            dataType = HandPosePacket.DataType.JOINT_ANGLES;
 
          Point3d point3d = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
          double trajectoryTime = RandomTools.generateRandomDouble(random, 1.0, 10.0);
@@ -60,7 +66,7 @@ public class HandPosePacketTransformerTest
          double[] randomJointAngles = new double[numberOfArmJoints];
          randomJointAngles = RandomTools.generateRandomDoubleArray(random, numberOfArmJoints, -2 * Math.PI, 2 * Math.PI);
 
-         HandPosePacket starting = new HandPosePacket(robotSide, frame, point3d, quat, i % 2 == 1, trajectoryTime, randomJointAngles);
+         HandPosePacket starting = new HandPosePacket(robotSide, frame, dataType, point3d, quat, i % 2 == 1, trajectoryTime, randomJointAngles);
 
          transform3D = RandomTools.generateRandomTransform(random);
 
