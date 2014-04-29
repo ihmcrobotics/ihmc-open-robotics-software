@@ -231,11 +231,6 @@ public class ValkyrieJointMap extends DRCRobotJointMap
       return jointBeforeFeetNames.get(robotSide);
    }
 
-   public double getAnkleHeight()
-   {
-      return ValkyriePhysicalProperties.ankleHeight;
-   }
-
    public List<Pair<String, Vector3d>> getJointNameGroundContactPointMap()
    {
       return contactPointParameters.getJointNameGroundContactPointMap();
