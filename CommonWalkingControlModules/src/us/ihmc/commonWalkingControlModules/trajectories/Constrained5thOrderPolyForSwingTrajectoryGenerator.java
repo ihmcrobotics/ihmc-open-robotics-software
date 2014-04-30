@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredVelocityControlModule;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -33,9 +32,13 @@ public class Constrained5thOrderPolyForSwingTrajectoryGenerator
    private final DoubleYoVariable desiredVelocity1D;
    private final DoubleYoVariable desiredAcceleration1D;
    
+   private boolean moveWithConstantVelocityAfterFinalTime;
    
    private final double stepTime;
    private double initialTime;
+   private double previousTime;
+   
+   double maxHeightOfSwingFoot;
    
    private final WalkingControllerParameters walkingControllerParameters; 
    
@@ -48,12 +51,14 @@ public class Constrained5thOrderPolyForSwingTrajectoryGenerator
    public Constrained5thOrderPolyForSwingTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, double initialTime,
          DoubleProvider stepTimeProvider,PositionProvider initialPositionProvider, PositionProvider finalDesiredPositionProvider, 
          VectorProvider finalDesiredVelocityProvider, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
-         WalkingControllerParameters walkingControllerParameters)
+         WalkingControllerParameters walkingControllerParameters, boolean moveWithConstantVelocityAfterFinalTime)
    {
       this.registry = new YoVariableRegistry(getClass().getSimpleName());
       parentRegistry.addChild(this.registry);
       
       this.referenceFrame = referenceFrame;
+      
+      this.moveWithConstantVelocityAfterFinalTime = moveWithConstantVelocityAfterFinalTime;
       
       this.initialPositionProvider = initialPositionProvider;
       this.finalDesiredPositionProvider = finalDesiredPositionProvider;
@@ -73,6 +78,7 @@ public class Constrained5thOrderPolyForSwingTrajectoryGenerator
       
       this.stepTime = stepTimeProvider.getValue();
       this.initialTime = initialTime;
+      this.previousTime = initialTime;
       
       this.walkingControllerParameters = walkingControllerParameters;
       
@@ -81,13 +87,19 @@ public class Constrained5thOrderPolyForSwingTrajectoryGenerator
    
    public void initialize()
    {
-      setInitialAndFinalPositionsAndVelocities();
+      setInitialAndFinalPositionsAndVelocities(); 
       
-      double maxHeightOfSwingFoot = walkingControllerParameters.getSwingHeightMaxForPushRecoveryTrajectory();
-      //@TODO Get desired max step height from walking parameters.
+      if(walkingControllerParameters != null)
+      {
+    	  maxHeightOfSwingFoot = walkingControllerParameters.getSwingHeightMaxForPushRecoveryTrajectory();  
+      }
+      else
+      {
+    	  maxHeightOfSwingFoot = 0.15; //Default value, needed for generic test without being 
+    	  							   //robot specific(i.e. needing a robot models walkingControllerParameters.
+      }
       swingFootTrajectory.setParams(initialPosition1D.getDoubleValue(), initialPosition1D.getDoubleValue()+maxHeightOfSwingFoot, finalDesiredPosition1D.getDoubleValue(), 
                                     finalDesiredVelocity1D.getDoubleValue(), initialTime, stepTime);
-      
    }
 
    public double getDesiredPosition()
@@ -143,11 +155,36 @@ public class Constrained5thOrderPolyForSwingTrajectoryGenerator
    
    public void compute(double time)
    {
+	   if(!moveWithConstantVelocityAfterFinalTime && time > stepTime)
+	   {
+		   // At time = finalTime, cap the desired position/velocity/acceleration at the finalDesiredValues.
+		   time = stepTime;
+		   
+		   swingFootTrajectory.computeTrajectory(time);
+		   
+		   desiredPosition1D.set(swingFootTrajectory.getPosition());
+		   desiredVelocity1D.set(swingFootTrajectory.getVelocity());
+		   desiredAcceleration1D.set(swingFootTrajectory.getAcceleration());
+	   }
+	   else if(moveWithConstantVelocityAfterFinalTime && time > stepTime)
+	   {
+		   // For whatever reason, time > finalTime, but the foot has not struck the ground(possibly due to IMU drift),
+		   // continue moving at your desiredFinalVelocity. For foot height, the foot would continue moving downward until an 
+		   // impact causes the state to switch.
+		   desiredPosition1D.set(desiredPosition1D.getDoubleValue() + finalDesiredVelocity1D.getDoubleValue()*(time - previousTime));
+		   desiredVelocity1D.set(finalDesiredVelocity1D.getDoubleValue());
+		   desiredAcceleration1D.set(0.0);
+	   }
+	   else
+	   {
+		   swingFootTrajectory.computeTrajectory(time);
+		   
+		   desiredPosition1D.set(swingFootTrajectory.getPosition());
+		   desiredVelocity1D.set(swingFootTrajectory.getVelocity());
+		   desiredAcceleration1D.set(swingFootTrajectory.getAcceleration());
+	   }
+	   
+	   previousTime = time;
       
-      swingFootTrajectory.computeTrajectory(time);
-      
-      desiredPosition1D.set(swingFootTrajectory.getPosition());
-      desiredVelocity1D.set(swingFootTrajectory.getVelocity());
-      desiredAcceleration1D.set(swingFootTrajectory.getAcceleration());
    }
 }

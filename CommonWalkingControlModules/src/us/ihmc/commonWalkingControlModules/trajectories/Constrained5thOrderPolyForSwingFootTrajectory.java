@@ -106,27 +106,8 @@ public class Constrained5thOrderPolyForSwingFootTrajectory
 
    public void computeTrajectory(double time)
    {
-      if (time < T0.getDoubleValue())
-      {
-         pos = X0.getDoubleValue();
-         vel = 0;
-         acc = 0;
-
-         return;
-      }
-      else if (time > Tf.getDoubleValue())
-      {
-         pos = Xf.getDoubleValue();
-         vel = 0;
-         acc = 0;
-
-         return;
-      }
-      else
-      {
-         pos = C0 + C1*time + C2*Math.pow(time,2) + C3*Math.pow(time,3) + C4*Math.pow(time,4) + C5*Math.pow(time,5);
-         vel = C1 + 2*C2*time + 3*C3*Math.pow(time,2) + 4*C4*Math.pow(time,3) + 5*C5*Math.pow(time,4);
-         acc = 2*C2 + 6*C3*time + 12*C4*Math.pow(time,2) + 20*C5*Math.pow(time,3);
-      }
+      pos = C0 + C1*time + C2*Math.pow(time,2) + C3*Math.pow(time,3) + C4*Math.pow(time,4) + C5*Math.pow(time,5);
+      vel = C1 + 2*C2*time + 3*C3*Math.pow(time,2) + 4*C4*Math.pow(time,3) + 5*C5*Math.pow(time,4);
+      acc = 2*C2 + 6*C3*time + 12*C4*Math.pow(time,2) + 20*C5*Math.pow(time,3);
    }
 }
