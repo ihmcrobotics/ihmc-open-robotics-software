@@ -6,7 +6,7 @@ import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSi
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTrack;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.DRCRobotInterface;
+import us.ihmc.darpaRoboticsChallenge.DRCSimulatedRobotInterface;
 import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.PlainDRCRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.SimulatedModelCorruptorDRCRobotInterface;
@@ -25,7 +25,7 @@ public class BonoFlatGroundWalkingTrack
       AutomaticSimulationRunner automaticSimulationRunner = null;
       SliderBoardFactory sliderBoardFactory = WalkControllerSliderBoard.getFactory();
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false, sliderBoardFactory);
-      DRCRobotInterface robotInterface = new PlainDRCRobot(robotModel);
+      DRCSimulatedRobotInterface robotInterface = new PlainDRCRobot(robotModel);
 
       if (DRCConfigParameters.CORRUPT_SIMULATION_MODEL)
       {
