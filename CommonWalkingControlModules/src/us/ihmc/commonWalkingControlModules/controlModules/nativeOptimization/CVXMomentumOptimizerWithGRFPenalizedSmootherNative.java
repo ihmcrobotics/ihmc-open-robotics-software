@@ -97,7 +97,22 @@ public class CVXMomentumOptimizerWithGRFPenalizedSmootherNative
 
    static
    {
-      System.loadLibrary("CVXMomentumOptimizerWithGRFPenalizedSmoother_msz");
+      try
+      {
+              System.loadLibrary("CVXMomentumOptimizerWithGRFPenalizedSmoother_msz");
+      }
+      catch(UnsatisfiedLinkError e)
+      {
+         System.out.println("Can't find MinSizeRel library, load the default one without suffix");
+         try{
+              System.loadLibrary("CVXMomentumOptimizerWithGRFPenalizedSmoother");
+         }
+         catch(UnsatisfiedLinkError e2)
+         {
+            throw(e2);
+         }
+         
+      }
 
       initialize();
 
