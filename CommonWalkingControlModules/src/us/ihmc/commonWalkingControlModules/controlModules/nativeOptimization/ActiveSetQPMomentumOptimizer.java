@@ -252,7 +252,7 @@ public class ActiveSetQPMomentumOptimizer implements MomentumOptimizerInterface,
    
    static void loadNativeLibrary()
    {
-      System.loadLibrary("ActiveSetQPMomentumOptimizer_msz"); 
+      System.loadLibrary("ActiveSetQPMomentumOptimizer_rel"); 
    }
 
    
