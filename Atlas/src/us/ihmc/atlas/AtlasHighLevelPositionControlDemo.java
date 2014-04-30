@@ -8,7 +8,7 @@ import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCHighLevelPositionControlDemo;
 import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.DRCRobotInterface;
+import us.ihmc.darpaRoboticsChallenge.DRCSimulatedRobotInterface;
 import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.PlainDRCRobot;
@@ -43,7 +43,7 @@ public class AtlasHighLevelPositionControlDemo
       SliderBoardFactory sliderBoardFactory = WalkControllerSliderBoard.getFactory();
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false, sliderBoardFactory);
 
-      DRCRobotInterface robotInterface = new PlainDRCRobot(model);
+      DRCSimulatedRobotInterface robotInterface = new PlainDRCRobot(model);
       
       final double groundHeight = 0.0;
       GroundProfile groundProfile = new FlatGroundProfile(groundHeight);

@@ -25,7 +25,7 @@ public class DRCFlatGroundWalkingTrack
    private final DRCController drcController;
    private final YoVariableServer robotVisualizer;
 
-   public DRCFlatGroundWalkingTrack(DRCRobotInterface robotInterface, DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
+   public DRCFlatGroundWalkingTrack(DRCSimulatedRobotInterface robotInterface, DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
                                     DRCSCSInitialSetup scsInitialSetup, boolean useVelocityAndHeadingScript, AutomaticSimulationRunner automaticSimulationRunner,
                                     double timePerRecordTick, int simulationDataBufferSize, boolean cheatWithGroundHeightAtForFootstep, DRCRobotModel model)
    {
@@ -71,7 +71,7 @@ public class DRCFlatGroundWalkingTrack
       SideDependentList<String> footForceSensorNames = new SideDependentList<>();
       for(RobotSide robotSide : RobotSide.values)
       {
-         footForceSensorNames.put(robotSide, robotInterface.getJointMap().getJointBeforeFootName(robotSide));
+         footForceSensorNames.put(robotSide, model.getJointMap().getJointBeforeFootName(robotSide));
       }
       
       ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, DRCConfigParameters.contactTresholdForceForSCS, footForceSensorNames);

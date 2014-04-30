@@ -50,13 +50,13 @@ public class DRCSimulationFactory
    private static final boolean COMPUTE_ESTIMATOR_ERROR = true;
 
    public static Pair<HumanoidRobotSimulation<SDFRobot>, DRCController> createSimulation(ControllerFactory controllerFactory,
-         CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, DRCRobotInterface robotInterface, DRCRobotInitialSetup<SDFRobot> robotInitialSetup,
+         CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, DRCSimulatedRobotInterface robotInterface, DRCRobotInitialSetup<SDFRobot> robotInitialSetup,
          ScsInitialSetup scsInitialSetup, DRCGuiInitialSetup guiInitialSetup, GlobalDataProducer dataProducer, RobotVisualizer robotVisualizer,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, boolean useNewPhysics, DRCRobotModel drcRobotModel)
    {
       GUISetterUpperRegistry guiSetterUpperRegistry = new GUISetterUpperRegistry();
 
-      DRCRobotJointMap jointMap = robotInterface.getJointMap();
+      DRCRobotJointMap jointMap = drcRobotModel.getJointMap();
 
       double estimateDT = DRCConfigParameters.ESTIMATOR_DT;
       double simulateDT = robotInterface.getSimulateDT();
