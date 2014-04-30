@@ -7,3 +7,4 @@ javah -classpath ../IHMCUtilities/classes:./classes -o csrc/CVXWithCylinderNativ
 javah -classpath ../IHMCUtilities/classes:./classes -o csrc/CylinderAndPlaneContactForceOptimizerNative.h us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CylinderAndPlaneContactForceOptimizerNative
 javah -classpath ../IHMCUtilities/classes:./classes -o csrc/CVXMomentumOptimizerWithGRFSmootherNative.h us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CVXMomentumOptimizerWithGRFSmootherNative
 javah -classpath ../IHMCUtilities/classes:./classes -o csrc/CVXMomentumOptimizerWithGRFPenalizedSmootherNative.h us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CVXMomentumOptimizerWithGRFPenalizedSmootherNative
+javah -cp ./classes/:../ThirdParty/ThirdPartyJars/EJML/EJML.jar -o csrc/ActiveSetQPMomentumOptimizer.h us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.ActiveSetQPMomentumOptimizer 

@@ -50,8 +50,14 @@ JNIEXPORT void JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_n
 #endif
 }
 
+bool myIsNAN(double x)
+{
+	return !(x==x);
+}
+
 int solveEigen(
 		MatrixXd A, MatrixXd  b, MatrixXd  C, 
+		MatrixXd Jp, MatrixXd  pp,
 		MatrixXd Js, MatrixXd  ps, MatrixXd  Ws, 
 		MatrixXd WRho, MatrixXd  Lambda, 
 		MatrixXd WRhoSmoother, 
@@ -61,13 +67,13 @@ int solveEigen(
 {
 
 	/*
-	 *       [vd  ]'[ A' C A + Js' Ws Js + Lambda     0               ] [vd  ]  + 2 [vd  ]' [ -A' C b - Js' Ws ps             0                  ]    +  b' C b + ps' Ws ps + Pprev' Wpsm Pprev + Ppavg' Wpcop Ppavg 
-	 *       [rho ] [              0                Wp + Wpsm + Wpcop ] [rho ]      [rho ]  [         0            -Wpsm Pprev - Wpcop Ppavg     ] 
+	 *       [vd  ]'[ A' C A + Js' Ws Js + Lambda     0               ] [vd  ]  + 2 [vd  ]' [ -A' C b - Js' Ws ps          ]    +  b' C b + ps' Ws ps + Pprev' Wpsm Pprev + Ppavg' Wpcop Ppavg 
+	 *       [rho ] [              0                Wp + Wpsm + Wpcop ] [rho ]      [rho ]  [-Wpsm Pprev - Wpcop Ppavg     ] 
 	 *
 	 *       min_x 0.5 x'Q x  + f'x  + g
-	 *       st [-A QRho ] [vd  ]  = c
-	 *                     [rho ]
-	 *          -I rho <= -rhoMin
+	 *       st [-A QRho ] [vd  ] = [c ]
+	 *          [Jp      ] [rho ] = [pp]
+	 *        [0 -I] rho <= -rhoMin
 	 */
 
 	//Objective
@@ -78,8 +84,10 @@ int solveEigen(
 	QblkDiag.push_back(&Qblk1);
 	QblkDiag.push_back(&Qblk2);
 
+#ifdef DUMP_TO_FILE
 	MatrixXd Q(nDoF+nRho,nDoF+nRho);
 	Q << Qblk1, MatrixXd::Zero(nDoF,nRho), MatrixXd::Zero(nRho,nDoF), MatrixXd(Qblk2.asDiagonal()); //Qblk2;
+#endif
 	//f
 	VectorXd f(nRho+nDoF);
 	f << (- A.transpose() * C.diagonal().asDiagonal() * b - Js.transpose()*Ws.diagonal().asDiagonal()*ps),
@@ -89,9 +97,29 @@ int solveEigen(
 		+ rho.transpose()*WRhoSmoother.diagonal().asDiagonal()*rho + rhoPrevMean.transpose()*WRhoCoPPenalty*rhoPrevMean;
 
 	//Equality
-	MatrixXd Aeq(nWrench, nDoF+nRho);
-	Aeq << -A, QRho;
-	MatrixXd & beq = c;
+	MatrixXd Aeq,beq;
+	if(myIsNAN(Jp(0,0)))
+	{
+		Aeq.resize(nWrench, nDoF+nRho);
+		Aeq << -A, QRho;
+		beq.resize(nWrench,nDoF+nRho);
+		beq = c;
+	}
+	else
+	{
+		/*  Aeq - 
+		 *    nDoF  nRho
+		 *  ----------------
+		 *  | -A  |  QRho |  nWrench
+		 *  ----------------
+		 *  | Jp     Zero |  nDoF
+		 *  ----------------
+		 */
+		Aeq.resize(nWrench+nDoF, nDoF+nRho);
+		Aeq << -A, QRho, Jp, MatrixXd::Zero(nDoF, nRho) ;
+		beq.resize(nWrench+nDoF,1);
+		beq << c, pp;
+	}
 
 	//Inequality
 	MatrixXd Ain(nRho, nDoF+nRho);
@@ -114,13 +142,17 @@ int solveEigen(
 		else
 			QblkDiag[i]->diagonal() += VectorXd::Ones(QblkDiag[i]->rows())*REG;
 	}
+#ifdef DUMP_TO_FILE
+	//use blkDiagQ in ActiveSet
 	Q.diagonal() += VectorXd::Ones(nRho+nDoF)*REG;
+#endif //DUMP_TO_FILE
+
 #else
 	Aeq = MatrixXd(Aeq.transpose());
 	beq = -beq;
 	Ain = -MatrixXd(Ain.transpose());
 	Q.diagonal() += VectorXd::Ones(nRho+nDoF)*REG;
-#endif
+#endif //USE_ACTIVE_SET
 
 #ifdef DUMP_TO_FILE
 	std::ofstream ofP("/tmp/P.txt");
@@ -135,9 +167,9 @@ int solveEigen(
 #endif
 
 #ifdef USE_ACTIVE_SET
-	double ret=fastQP(QblkDiag, f,  Aeq, beq, Ain, bin, active, x);
+	int ret=fastQP(QblkDiag, f,  Aeq, beq, Ain, bin, active, x);
 #else
-	double ret=solve_quadprog(Q, f,  Aeq, beq, Ain, bin, x);
+	int ret=solve_quadprog(Q, f,  Aeq, beq, Ain, bin, x);
 #endif
 
 	vd = x.head(nDoF);
@@ -148,6 +180,9 @@ int solveEigen(
 	of << "A" << std::endl    << A << std::endl;
 	of << "b" << std::endl    << b << std::endl;
 	of << "C" << std::endl    << C << std::endl;
+
+	of << "Jp" << std::endl   << Jp << std::endl;
+	of << "pp" << std::endl   << pp << std::endl;
 
 	of << "Js" << std::endl   << Js << std::endl;
 	of << "ps" << std::endl   << ps << std::endl;
@@ -177,6 +212,7 @@ int solveEigen(
 
 JNIEXPORT jint JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_ActiveSetQPMomentumOptimizer_solveNative (JNIEnv *env, jobject obj, 
 		jdoubleArray A, jdoubleArray b, jdoubleArray C, 
+		jdoubleArray Jp, jdoubleArray pp, 
 		jdoubleArray Js, jdoubleArray ps, jdoubleArray Ws, 
 		jdoubleArray WRho, jdoubleArray Lambda, 
 		jdoubleArray WRhoSmoother, 
@@ -186,6 +222,7 @@ JNIEXPORT jint JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_n
 {
 	double ret;
 	J2E(A, nWrench, nDoF);  J2E(b,nWrench,1);  J2E(C,nWrench,nWrench); 
+	J2E(Jp,nDoF,nDoF);  J2E(pp,nDoF,1); 
 	J2E(Js,nDoF,nDoF);  J2E(ps,nDoF,1);  J2E(Ws,nDoF,nDoF); 
 	J2E(WRho,nRho,nRho);  J2E(Lambda,nDoF,nDoF); 
 	J2E(WRhoSmoother,nRho,nRho); 
@@ -193,9 +230,10 @@ JNIEXPORT jint JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_n
 	J2E(QRho,nWrench,nRho);  J2E(c,nWrench,1);  J2E(rhoMin,nRho,1); 
 	 J2E(vd,nDoF,1); J2E(rho,nRho,1); 
 
-	ret = solveEigen(eA,  eb,  eC, eJs,  eps,  eWs, eWRho,  eLambda, eWRhoSmoother, erhoPrevMean,  eWRhoCoPPenalty, eQRho,  ec,  erhoMin, evd, erho);
+	ret = solveEigen(eA,  eb,  eC, eJp, epp, eJs,  eps,  eWs, eWRho,  eLambda, eWRhoSmoother, erhoPrevMean,  eWRhoCoPPenalty, eQRho,  ec,  erhoMin, evd, erho);
 
 	J2E_FREE(A);  J2E_FREE(b);  J2E_FREE(C); 
+	J2E_FREE(Jp);  J2E_FREE(pp); 
 	J2E_FREE(Js);  J2E_FREE(ps);  J2E_FREE(Ws); 
 	J2E_FREE(WRho);  J2E_FREE(Lambda); 
 	J2E_FREE(WRhoSmoother); 

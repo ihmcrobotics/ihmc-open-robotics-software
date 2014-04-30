@@ -87,6 +87,8 @@ if(NOT WIN32)
 		set_target_properties(ActiveSetQPMomentumOptimizer PROPERTIES SUFFIX .jnilib)
 	endif(APPLE)
 endif()
+add_subdirectory(ActiveSetQP)
+
 
 #INSTALL(TARGETS LeeGoswamiForceOptimizer LeeGoswamiCoPAndNormalTorqueOptimizer ContactPointWrenchOptimizer MomentumOptimizer CVXWithCylinder CylinderAndPlaneContactForceOptimizer CVXMomentumOptimizerWithGRFSmoother CVXMomentumOptimizerWithGRFPenalizedSmoother ActiveSetQPMomentumOptimizer RUNTIME DESTINATION lib LIBRARY DESTINATION lib)
 INSTALL(TARGETS CVXMomentumOptimizerWithGRFPenalizedSmoother ActiveSetQPMomentumOptimizer RUNTIME DESTINATION lib LIBRARY DESTINATION lib)
