@@ -23,7 +23,7 @@ import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCController;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCPosePlaybackDemo;
-import us.ihmc.darpaRoboticsChallenge.DRCRobotInterface;
+import us.ihmc.darpaRoboticsChallenge.DRCSimulatedRobotInterface;
 import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.PlainDRCRobot;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
@@ -186,7 +186,7 @@ public class ValkyriePosePlaybackDemoTest
    private DRCPosePlaybackDemo setupPosePlaybackSim()
    {
       ValkyrieRobotModel valkyrieRobotModel = new ValkyrieRobotModel(false);
-      DRCRobotInterface valkyrieRobotInterface = new PlainDRCRobot(valkyrieRobotModel);
+      DRCSimulatedRobotInterface valkyrieRobotInterface = new PlainDRCRobot(valkyrieRobotModel);
 
       AutomaticSimulationRunner automaticSimulationRunner = null;
 

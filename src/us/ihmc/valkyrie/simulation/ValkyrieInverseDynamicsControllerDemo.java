@@ -5,7 +5,7 @@ import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSi
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCInverseDynamicsControllerDemo;
-import us.ihmc.darpaRoboticsChallenge.DRCRobotInterface;
+import us.ihmc.darpaRoboticsChallenge.DRCSimulatedRobotInterface;
 import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.PlainDRCRobot;
@@ -20,7 +20,7 @@ public class ValkyrieInverseDynamicsControllerDemo
    public static void main(String[] args)
    {
       DRCRobotModel model = new ValkyrieRobotModel(false);
-      DRCRobotInterface robotInterface = new PlainDRCRobot(model);
+      DRCSimulatedRobotInterface robotInterface = new PlainDRCRobot(model);
       double groundHeight = 0.0;
       double initialYaw = 0.0;
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = model.getDefaultRobotInitialSetup(groundHeight + 0.3, initialYaw);
