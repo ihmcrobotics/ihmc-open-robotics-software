@@ -387,7 +387,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       int simulationDataBufferSize = 16000;
 
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
-      DRCRobotInterface robotInterface = new PlainDRCRobot(robotModel);
+      DRCSimulatedRobotInterface robotInterface = new PlainDRCRobot(robotModel);
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotInterface.getSimulateDT(), useLoadOfContactPointsForTheFeet);
       scsInitialSetup.setDrawGroundProfile(drawGroundProfile);
       

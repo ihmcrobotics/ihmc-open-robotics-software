@@ -33,7 +33,7 @@ public class DRCHighLevelPositionControlDemo
    private final HumanoidRobotSimulation<SDFRobot> drcSimulation;
    private final DRCController drcController;
 
-   public DRCHighLevelPositionControlDemo(DRCRobotInterface robotInterface, DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
+   public DRCHighLevelPositionControlDemo(DRCSimulatedRobotInterface robotInterface, DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
                                     DRCSCSInitialSetup scsInitialSetup, AutomaticSimulationRunner automaticSimulationRunner,
                                     double timePerRecordTick, int simulationDataBufferSize, DRCRobotModel model)
    {
@@ -62,7 +62,7 @@ public class DRCHighLevelPositionControlDemo
       SideDependentList<String> footForceSensorNames = new SideDependentList<>();
       for(RobotSide robotSide : RobotSide.values)
       {
-         footForceSensorNames.put(robotSide, robotInterface.getJointMap().getJointBeforeFootName(robotSide));
+         footForceSensorNames.put(robotSide, model.getJointMap().getJointBeforeFootName(robotSide));
       }
       
       ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, DRCConfigParameters.contactTresholdForceForSCS, footForceSensorNames);

@@ -144,7 +144,7 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
       int simulationDataBufferSize = 16000;
 
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
-      DRCRobotInterface robotInterface = new PlainDRCRobot(robotModel);
+      DRCSimulatedRobotInterface robotInterface = new PlainDRCRobot(robotModel);
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotInterface.getSimulateDT());
 
       DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInterface, robotInitialSetup,

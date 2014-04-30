@@ -2,17 +2,12 @@ package us.ihmc.darpaRoboticsChallenge.environment;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
-import us.ihmc.darpaRoboticsChallenge.DRCRobotInterface;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.HandContactParameters;
-
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.util.environments.SelectableObjectListener;
 
-public abstract class DRCWorld implements CommonAvatarEnvironmentInterface, DRCRobotInterface
+public abstract class DRCWorld 
 {
    private static final Class<DRCRobotSDFLoader> myClass = DRCRobotSDFLoader.class;
    protected final ArrayList<String> resourceDirectories = new ArrayList<String>();

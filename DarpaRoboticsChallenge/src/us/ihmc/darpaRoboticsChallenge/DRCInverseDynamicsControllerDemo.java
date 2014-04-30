@@ -37,7 +37,7 @@ public class DRCInverseDynamicsControllerDemo
    private final HumanoidRobotSimulation<SDFRobot> drcSimulation;
    private final DRCController drcController;
 
-   public DRCInverseDynamicsControllerDemo(DRCRobotInterface robotInterface, DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
+   public DRCInverseDynamicsControllerDemo(DRCSimulatedRobotInterface robotInterface, DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
                                     DRCSCSInitialSetup scsInitialSetup, AutomaticSimulationRunner automaticSimulationRunner,
                                     double timePerRecordTick, int simulationDataBufferSize, DRCRobotModel model)
    {
@@ -67,7 +67,7 @@ public class DRCInverseDynamicsControllerDemo
       SideDependentList<String> footForceSensorNames = new SideDependentList<>();
       for(RobotSide robotSide : RobotSide.values)
       {
-         footForceSensorNames.put(robotSide, robotInterface.getJointMap().getJointBeforeFootName(robotSide));
+         footForceSensorNames.put(robotSide, model.getJointMap().getJointBeforeFootName(robotSide));
       }
       
       ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, DRCConfigParameters.contactTresholdForceForSCS, footForceSensorNames);

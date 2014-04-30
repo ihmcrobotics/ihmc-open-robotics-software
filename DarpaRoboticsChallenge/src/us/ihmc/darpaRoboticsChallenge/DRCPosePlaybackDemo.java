@@ -36,7 +36,7 @@ public class DRCPosePlaybackDemo
    private final DRCController drcController;
    private final PolyvalentHighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory;
 
-   public DRCPosePlaybackDemo(DRCRobotInterface robotInterface, DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
+   public DRCPosePlaybackDemo(DRCSimulatedRobotInterface robotInterface, DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
                                     DRCSCSInitialSetup scsInitialSetup, AutomaticSimulationRunner automaticSimulationRunner,
                                     double timePerRecordTick, int simulationDataBufferSize, DRCRobotModel model)
    {
@@ -66,7 +66,7 @@ public class DRCPosePlaybackDemo
       SideDependentList<String> footForceSensorNames = new SideDependentList<>();
       for(RobotSide robotSide : RobotSide.values)
       {
-         footForceSensorNames.put(robotSide, robotInterface.getJointMap().getJointBeforeFootName(robotSide));
+         footForceSensorNames.put(robotSide, model.getJointMap().getJointBeforeFootName(robotSide));
       }
       
       ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, DRCConfigParameters.contactTresholdForceForSCS, footForceSensorNames);
