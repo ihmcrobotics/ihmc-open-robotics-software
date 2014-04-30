@@ -10,7 +10,7 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
-public class CaptureRegionMath
+public class CaptureRegionMathTools
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    
