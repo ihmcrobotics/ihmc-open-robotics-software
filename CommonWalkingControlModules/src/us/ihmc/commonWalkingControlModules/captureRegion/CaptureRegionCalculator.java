@@ -512,7 +512,7 @@ public class CaptureRegionCalculator
    private static FramePoint2d solveIntersectionOfRayAndCircle(FramePoint2d pointA, FramePoint2d pointB, FrameVector2d vector, double R)
    {
       FramePoint2d ret = new FramePoint2d();
-      CaptureRegionMath.solveIntersectionOfRayAndCircle(pointA, pointB, vector, R, ret);
+      CaptureRegionMathTools.solveIntersectionOfRayAndCircle(pointA, pointB, vector, R, ret);
       return ret;
    }
 
@@ -557,7 +557,7 @@ public class CaptureRegionCalculator
            double distance, FramePoint2d origin)
    {
       FramePoint2d ret = new FramePoint2d();
-      CaptureRegionMath.getPointBetweenVectorsAtDistanceFromOriginCircular(directionA, directionB, alphaFromAToB, distance, origin, ret);
+      CaptureRegionMathTools.getPointBetweenVectorsAtDistanceFromOriginCircular(directionA, directionB, alphaFromAToB, distance, origin, ret);
       return ret;
    }
 

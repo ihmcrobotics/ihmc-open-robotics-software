@@ -158,13 +158,13 @@ public class OneStepCaptureRegionCalculator
       {
          FramePoint2d copExtreme = extremesOfFeasibleCOP.get(i);
          copExtreme.changeFrame(supportAnkleZUp);
-         CaptureRegionMath.predictCapturePoint(capturePoint, copExtreme, swingTimeRemaining, omega0, predictedICP);
+         CaptureRegionMathTools.predictCapturePoint(capturePoint, copExtreme, swingTimeRemaining, omega0, predictedICP);
          rawCaptureRegion.addVertexChangeFrameAndProjectToXYPlane(predictedICP);
          
       // 4. Project the predicted ICP on a circle around the foot with the radius of the step range.
          projectedLine.set(predictedICP);
          projectedLine.sub(copExtreme);
-         CaptureRegionMath.solveIntersectionOfRayAndCircle(footCentroid, predictedICP,
+         CaptureRegionMathTools.solveIntersectionOfRayAndCircle(footCentroid, predictedICP,
                                                            projectedLine, kinematicStepRange,
                                                            kinematicExtreme);
 
@@ -190,7 +190,7 @@ public class OneStepCaptureRegionCalculator
       for (int i = 0; i < KINEMATIC_LIMIT_POINTS - 1; i++)
       {
          double alphaFromAToB = ((double) (i + 1)) / ((double) (KINEMATIC_LIMIT_POINTS + 1));
-         CaptureRegionMath.getPointBetweenVectorsAtDistanceFromOriginCircular(firstKinematicExtremeDirection,
+         CaptureRegionMathTools.getPointBetweenVectorsAtDistanceFromOriginCircular(firstKinematicExtremeDirection,
                                                                               lastKinematicExtremeDirection,
                                                                               alphaFromAToB,
                                                                               kinematicStepRange,
