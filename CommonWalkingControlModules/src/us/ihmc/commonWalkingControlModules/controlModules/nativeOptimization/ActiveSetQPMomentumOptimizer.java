@@ -11,6 +11,7 @@ import java.util.Arrays;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import sun.misc.Unsafe;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
 // javah -cp ../classes/:../../ThirdParty/ThirdPartyJars/EJML/EJML.jar -o ActiveSetQPMomentumOptimizer.h us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.ActiveSetQPMomentumOptimizer 
 
@@ -264,7 +265,14 @@ public class ActiveSetQPMomentumOptimizer implements MomentumOptimizerInterface,
          }
          catch(UnsatisfiedLinkError e2)
          {
-            throw(e2);
+            try
+            {
+                  System.loadLibrary("ActiveSetQPMomentumOptimizer_msz");
+            }
+            catch(UnsatisfiedLinkError e3)
+            {
+                    throw(e3);
+            }
          }
       }
    }
