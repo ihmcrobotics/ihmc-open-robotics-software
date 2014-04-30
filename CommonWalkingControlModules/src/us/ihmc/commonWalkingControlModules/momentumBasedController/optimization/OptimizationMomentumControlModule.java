@@ -5,6 +5,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
+import org.ejml.ops.NormOps;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
@@ -37,9 +39,11 @@ import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.utilities.screwTheory.Wrench;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.time.ExecutionTimer;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 /**
@@ -51,7 +55,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
    public enum QPSolverFlavor
    {
-      CVX, EIGEN, EIGEN_ACTIVESET
+      CVX, EIGEN, EIGEN_DIRECT, EIGEN_ACTIVESET, EIGEN_ACTIVESET_DIRECT
    };
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
@@ -72,6 +76,9 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
    private final BooleanYoVariable converged = new BooleanYoVariable("converged", registry);
    private final BooleanYoVariable hasNotConvergedInPast = new BooleanYoVariable("hasNotConvergedInPast", registry);
    private final IntegerYoVariable hasNotConvergedCounts = new IntegerYoVariable("hasNotConvergedCounts", registry);
+   private final ExecutionTimer probingTimer = new ExecutionTimer("probingTimer", 0, registry);
+   private final DoubleYoVariable primaryResNorm= new DoubleYoVariable("primaryResNorm", registry);
+   private DenseMatrix64F primaryResidual;
    
 
    private final EnumYoVariable<QPSolverFlavor> requestedQPSolver = new EnumYoVariable<>("requestedQPSolver", registry, QPSolverFlavor.class);
@@ -100,16 +107,21 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       
       //setup solvers
       momentumOptimizers.put(QPSolverFlavor.CVX, new CVXMomentumOptimizerAdapter(nDoF));
-      momentumOptimizers.put(QPSolverFlavor.EIGEN, 
+      ActiveSetQPMomentumOptimizer eigenQP = 
                  new ActiveSetQPMomentumOptimizer(nDoF)
                  {
-                    public int solve() throws NoConvergenceException
+                  private static final long serialVersionUID = 1L;
+
+                  public int solve() throws NoConvergenceException
                     {
                        resetActiveSet();
                        return super.solve();
                     }
-                 });
+                 };
+      momentumOptimizers.put(QPSolverFlavor.EIGEN, eigenQP);
+      momentumOptimizers.put(QPSolverFlavor.EIGEN_DIRECT, eigenQP);
       momentumOptimizers.put(QPSolverFlavor.EIGEN_ACTIVESET, new ActiveSetQPMomentumOptimizer(nDoF));
+      momentumOptimizers.put(QPSolverFlavor.EIGEN_ACTIVESET_DIRECT, new ActiveSetQPMomentumOptimizer(nDoF));
 
       //initialize default solver
       final QPSolverFlavor defaultSolver = QPSolverFlavor.CVX;
@@ -176,12 +188,32 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
            throws MomentumControlModuleException
 
    {
+      checkQPSolverSwitch();
+      
+      switch(currentQPSolver.getEnumValue())
+      {
+      case EIGEN_ACTIVESET_DIRECT:
+      case EIGEN_DIRECT:
+         return compute(contactStates, upcomingSupportLeg,false);
+      default:
+         return compute(contactStates, upcomingSupportLeg, true);
+      }
+   }
+   
+   public void checkQPSolverSwitch()
+   {
       if(currentQPSolver.getEnumValue()!=requestedQPSolver.getEnumValue())
       {
          momentumOptimizer = momentumOptimizers.get(requestedQPSolver.getEnumValue());
          currentQPSolver.set(requestedQPSolver.getEnumValue());
       }
+   }
       
+   private MomentumModuleSolution compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates, RobotSide upcomingSupportLeg,
+         boolean useNullSpaceProjection)
+           throws MomentumControlModuleException
+
+   {
       wrenchMatrixCalculator.setRhoMinScalar(momentumOptimizationSettings.getRhoMinScalar());
 
       hardMotionConstraintSolver.setAlpha(momentumOptimizationSettings.getDampedLeastSquaresFactor());
@@ -200,38 +232,62 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       bOriginal.set(b);
 
       //put C1 into C2, find solution w \in null(J), ie: vd = null(J)w + J\p
-      equalityConstraintEnforcer.setConstraint(jPrimary, pPrimary);
-      equalityConstraintEnforcer.constrainEquation(a, b);
+      if(useNullSpaceProjection)
+      {
+              equalityConstraintEnforcer.setConstraint(jPrimary, pPrimary);
+              equalityConstraintEnforcer.constrainEquation(a, b);
+      }
 
+
+      // -(\sum Wi) + Ad v
       wrenchMatrixCalculator.computeMatrices();
-
       DenseMatrix64F centroidalMomentumConvectiveTerm = centroidalMomentumHandler.getCentroidalMomentumConvectiveTerm();
       DenseMatrix64F wrenchEquationRightHandSide = externalWrenchHandler.computeWrenchEquationRightHandSide(centroidalMomentumConvectiveTerm, bOriginal, b);
 
-
-      /*
-       * TODO:
-       * IMPORTANT: the implementation below doesn't work properly, because lambda is supposed to act on the actual joint accelerations, not on the vector that is left
-       * after the hard constraints have been applied. We really need a solver that can handle hard constraints in addition to soft constraints without being
-       * too computationally expensive!
-       */
-      momentumOptimizationSettings.packDampedLeastSquaresFactorMatrix(dampedLeastSquaresFactorMatrix);
-
+      // Js vd = ps
       secondaryMotionConstraintHandler.compute();
       DenseMatrix64F jSecondary = secondaryMotionConstraintHandler.getJacobian();
       DenseMatrix64F pSecondary = secondaryMotionConstraintHandler.getRightHandSide();
       DenseMatrix64F weightMatrixSecondary = secondaryMotionConstraintHandler.getWeightMatrix();
+      if(useNullSpaceProjection)
+      {
+              equalityConstraintEnforcer.constrainEquation(jSecondary, pSecondary);
+      }
 
-      equalityConstraintEnforcer.constrainEquation(jSecondary, pSecondary);
+      //C
+      momentumOptimizationSettings.packDampedLeastSquaresFactorMatrix(dampedLeastSquaresFactorMatrix);
 
+      //Lambda
       DenseMatrix64F momentumDotWeight = momentumOptimizationSettings.getMomentumDotWeight(momentumRateOfChangeData.getMomentumSubspace());
 
-      momentumOptimizer.setInputs(a, b, wrenchMatrixCalculator, wrenchEquationRightHandSide, momentumDotWeight, dampedLeastSquaresFactorMatrix, jSecondary,
-                                  pSecondary, weightMatrixSecondary);
+      if(useNullSpaceProjection)
+      {
+              momentumOptimizer.setInputs(
+                    a, b, momentumDotWeight, 
+                    jSecondary, pSecondary, weightMatrixSecondary,
+                    wrenchMatrixCalculator.getWRho(), dampedLeastSquaresFactorMatrix, 
+                    wrenchMatrixCalculator.getWRhoSmoother(), wrenchMatrixCalculator.getRhoPreviousAverage(), wrenchMatrixCalculator.getWRhoPenalizer(),
+                    wrenchMatrixCalculator.getQRho(), wrenchEquationRightHandSide, 
+                    wrenchMatrixCalculator.getRhoMin());
+      }
+      else
+      {
+              momentumOptimizer.setInputs(
+                    a, b, momentumDotWeight, 
+                    jPrimary, pPrimary,
+                    jSecondary, pSecondary, weightMatrixSecondary,
+                    wrenchMatrixCalculator.getWRho(), dampedLeastSquaresFactorMatrix, 
+                    wrenchMatrixCalculator.getWRhoSmoother(), wrenchMatrixCalculator.getRhoPreviousAverage(), wrenchMatrixCalculator.getWRhoPenalizer(),
+                    wrenchMatrixCalculator.getQRho(), wrenchEquationRightHandSide, 
+                    wrenchMatrixCalculator.getRhoMin());
+      }
+              
       NoConvergenceException noConvergenceException = null;
       try
       {
+         probingTimer.startMeasurement(); 
          optimize();
+         probingTimer.stopMeasurement(); 
       }
       catch (NoConvergenceException e)
       {
@@ -242,8 +298,27 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
       externalWrenchHandler.computeExternalWrenches(groundReactionWrenches);
 
-
-      DenseMatrix64F jointAccelerations = equalityConstraintEnforcer.constrainResult(momentumOptimizer.getOutputJointAccelerations());
+      DenseMatrix64F jointAccelerations;
+      if(useNullSpaceProjection)
+      {
+         jointAccelerations = equalityConstraintEnforcer.constrainResult(momentumOptimizer.getOutputJointAccelerations());
+      }
+      else
+      {
+         jointAccelerations = momentumOptimizer.getOutputJointAccelerations();
+      }
+      
+      if(primaryResidual!=null && primaryResidual.numRows == pPrimary.numRows)
+      {
+         CommonOps.insert(pPrimary, primaryResidual, 0, 0);
+      }
+      else
+      {
+         primaryResidual = pPrimary.copy();
+         System.out.println("re-allocate primaryResidual to " + primaryResidual.numRows);
+      }
+      CommonOps.multAdd(-1, jPrimary, jointAccelerations, primaryResidual);
+      primaryResNorm.set(NormOps.normP1(primaryResidual));
 
       updateMomentumControlModuleSolverListener(jPrimary, pPrimary, a, b, jSecondary, pSecondary, weightMatrixSecondary, jointAccelerations);
 
@@ -287,6 +362,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
          throw e;
       }
    }
+   
 
    private void updateMomentumControlModuleSolverListener(DenseMatrix64F jPrimary, DenseMatrix64F pPrimary, DenseMatrix64F a, DenseMatrix64F b,
            DenseMatrix64F jSecondary, DenseMatrix64F pSecondary, DenseMatrix64F weightMatrixSecondary, DenseMatrix64F jointAccelerations)

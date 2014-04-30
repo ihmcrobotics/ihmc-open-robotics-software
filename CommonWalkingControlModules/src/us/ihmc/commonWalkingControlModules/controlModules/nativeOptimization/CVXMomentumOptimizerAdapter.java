@@ -1,12 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization;
 
-import java.io.FileOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-
 import org.ejml.data.DenseMatrix64F;
 
+import com.google.gdata.util.NotImplementedException;
 
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.PlaneContactWrenchMatrixCalculator;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
@@ -70,26 +66,44 @@ public class CVXMomentumOptimizerAdapter implements MomentumOptimizerInterface
       return nPlanes;
    }
 
-   public void setInputs(DenseMatrix64F a, DenseMatrix64F b, PlaneContactWrenchMatrixCalculator wrenchMatrixCalculator,
-                         DenseMatrix64F wrenchEquationRightHandSide, DenseMatrix64F momentumDotWeight, DenseMatrix64F dampedLeastSquaresFactorMatrix,
-                         DenseMatrix64F jSecondary, DenseMatrix64F pSecondary, DenseMatrix64F weightMatrixSecondary)
+   public void setInputs(
+         DenseMatrix64F a, DenseMatrix64F b, DenseMatrix64F momentumDotWeight, 
+                         DenseMatrix64F jSecondary, DenseMatrix64F pSecondary, DenseMatrix64F weightMatrixSecondary,
+                         DenseMatrix64F WRho, DenseMatrix64F Lambda,
+                         DenseMatrix64F WRhoSmoother, DenseMatrix64F rhoPrevAvg, DenseMatrix64F WRhoCop,
+                         DenseMatrix64F QRho, DenseMatrix64F c,
+                         DenseMatrix64F rhoMin
+                         )
    {
+      //A,b,c
       momentumOptimizerWithGRFPenalizedSmootherNativeInput.setCentroidalMomentumMatrix(a);
       momentumOptimizerWithGRFPenalizedSmootherNativeInput.setMomentumDotEquationRightHandSide(b);
-      momentumOptimizerWithGRFPenalizedSmootherNativeInput.setContactPointWrenchMatrix(wrenchMatrixCalculator.getQRho());
-      momentumOptimizerWithGRFPenalizedSmootherNativeInput.setRhoMin(wrenchMatrixCalculator.getRhoMin());
-      momentumOptimizerWithGRFPenalizedSmootherNativeInput.setRhoPrevious(rhoPrevious);
-      momentumOptimizerWithGRFPenalizedSmootherNativeInput.setWrenchEquationRightHandSide(wrenchEquationRightHandSide);
       momentumOptimizerWithGRFPenalizedSmootherNativeInput.setMomentumDotWeight(momentumDotWeight);
-      momentumOptimizerWithGRFPenalizedSmootherNativeInput.setJointAccelerationRegularization(dampedLeastSquaresFactorMatrix);
+
+      //Js ps Ws
       momentumOptimizerWithGRFPenalizedSmootherNativeInput.setSecondaryConstraintJacobian(jSecondary);
       momentumOptimizerWithGRFPenalizedSmootherNativeInput.setSecondaryConstraintRightHandSide(pSecondary);
       momentumOptimizerWithGRFPenalizedSmootherNativeInput.setSecondaryConstraintWeight(weightMatrixSecondary);
-      momentumOptimizerWithGRFPenalizedSmootherNativeInput.setGroundReactionForceRegularization(wrenchMatrixCalculator.getWRho());
-      momentumOptimizerWithGRFPenalizedSmootherNativeInput.setRateOfChangeOfGroundReactionForceRegularization(wrenchMatrixCalculator.getWRhoSmoother());
+
+      //Wrho, Lambda
+      momentumOptimizerWithGRFPenalizedSmootherNativeInput.setGroundReactionForceRegularization(WRho);
+      momentumOptimizerWithGRFPenalizedSmootherNativeInput.setJointAccelerationRegularization(Lambda);
+
+      //WRho, Rho_pavg , WRhoCop
+      momentumOptimizerWithGRFPenalizedSmootherNativeInput.setRateOfChangeOfGroundReactionForceRegularization(WRhoSmoother);
+      momentumOptimizerWithGRFPenalizedSmootherNativeInput.setRhoPreviousAverage(rhoPrevAvg);
+      momentumOptimizerWithGRFPenalizedSmootherNativeInput.setCenterOfPressurePenalizedRegularization(WRhoCop);
+
+      //QRho,c 
+      momentumOptimizerWithGRFPenalizedSmootherNativeInput.setContactPointWrenchMatrix(QRho);
+      momentumOptimizerWithGRFPenalizedSmootherNativeInput.setWrenchEquationRightHandSide(c);
       
-      momentumOptimizerWithGRFPenalizedSmootherNativeInput.setRhoPreviousAverage(wrenchMatrixCalculator.getRhoPreviousAverage());
-      momentumOptimizerWithGRFPenalizedSmootherNativeInput.setCenterOfPressurePenalizedRegularization(wrenchMatrixCalculator.getWRhoPenalizer());
+      //Rho_min
+      momentumOptimizerWithGRFPenalizedSmootherNativeInput.setRhoMin(rhoMin);
+      
+      //Wrho
+      momentumOptimizerWithGRFPenalizedSmootherNativeInput.setRhoPrevious(rhoPrevious);
+
    }
 
    
@@ -131,5 +145,14 @@ public class CVXMomentumOptimizerAdapter implements MomentumOptimizerInterface
    public double getOutputOptVal()
    {
       return outputOptVal;
+   }
+
+   @Override
+   public void setInputs(DenseMatrix64F a, DenseMatrix64F b, DenseMatrix64F momentumDotWeight, DenseMatrix64F jPrimary, DenseMatrix64F pPrimary,
+         DenseMatrix64F jSecondary, DenseMatrix64F pSecondary, DenseMatrix64F weightMatrixSecondary, DenseMatrix64F WRho, DenseMatrix64F Lambda,
+         DenseMatrix64F RhoSmoother, DenseMatrix64F rhoPrevAvg, DenseMatrix64F WRhoCop, DenseMatrix64F QRho, DenseMatrix64F c, DenseMatrix64F rhoMin)
+   {
+      throw new RuntimeException("Not implemented, current CVXGEN version do not take primary contraints");
+      
    }
 }

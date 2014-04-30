@@ -27,8 +27,10 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.Wrench;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.time.ExecutionTimer;
 
 public class MomentumControlModuleBridge implements MomentumControlModule
 {
@@ -55,6 +57,8 @@ public class MomentumControlModuleBridge implements MomentumControlModule
          new EnumYoVariable<MomentumControlModuleType>("referenceMomentumControlModuleType", "null is TRY_ALL_TO_COMPARE=false", registry, MomentumControlModuleType.class, true);
    private final EnumYoVariable<MomentumControlModuleType> requestMomentumControlModuleType=
            new EnumYoVariable<MomentumControlModuleBridge.MomentumControlModuleType>("requestedMomentumControlModuleType","null is making no request", registry, MomentumControlModuleType.class, true);
+   private final ExecutionTimer momentumControlModuleTimer = new ExecutionTimer("momentumControlModuleTimer", 0.0, registry);
+
 
    private final BooleanYoVariable ignoreZDDot = new BooleanYoVariable("ignoreZDDot", registry);
    
@@ -290,7 +294,9 @@ public class MomentumControlModuleBridge implements MomentumControlModule
       if(TRY_ALL_AND_COMPARE)
          setMomentumModuleDataObject(referenceMomentumControlModule, momentumModuleDataObject);
 
+      momentumControlModuleTimer.startMeasurement();
       MomentumModuleSolution activeSolution = activeMomentumControlModule.compute(contactStates, upcomingSupportSide);  
+      momentumControlModuleTimer.stopMeasurement();
 
       if (TRY_ALL_AND_COMPARE)
       {

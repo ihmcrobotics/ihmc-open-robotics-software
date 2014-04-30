@@ -8,7 +8,11 @@ IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
 #Compiles with -Os when using gcc, as recommended by http://cvxgen.com/speed.html
-set(CMAKE_BUILD_TYPE MinSizeRel)
+#set(CMAKE_BUILD_TYPE MinSizeRel)
+#set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_MINSIZEREL_POSTFIX _msz)
+set(CMAKE_RELEASE_POSTFIX _rel)
+set(CMAKE_DEBUG_POSTFIX _dbg)
 
 
 if(WIN32)
