@@ -1,22 +1,19 @@
 package us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.util.Arrays;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commonWalkingControlModules.wrenchDistribution.PlaneContactWrenchMatrixCalculator;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
 // javah -cp ../classes/:../../ThirdParty/ThirdPartyJars/EJML/EJML.jar -o ActiveSetQPMomentumOptimizer.h us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.ActiveSetQPMomentumOptimizer 
 
-public class ActiveSetQPMomentumOptimizer implements MomentumOptimizerInterface, Serializable
+public class ActiveSetQPMomentumOptimizer implements MomentumOptimizerInterface
 {
-   public static final long serialVersionUID = -3703185211823067947L;
+   static{
+      System.loadLibrary("ActiveSetQPMomentumOptimizer"); 
+   }
    static final int nPointsPerPlane = 4;
    static final int nSupportVectorsPerPoint=4;
    static final int nPlanes=4;
@@ -24,13 +21,9 @@ public class ActiveSetQPMomentumOptimizer implements MomentumOptimizerInterface,
    static final int nRho = nPlanes*nPointsPerPlane*nSupportVectorsPerPoint;
    final int nDoF;
    
-   boolean saveNoConvergeProblem=true;
-
-
    DenseMatrix64F
       A, b, C,    //quad(vd)
      Js, ps, Ws,  //quad(vd)
-     Jp, pp,  //quad(vd)
      
      WRho, Lambda, //reg
 
@@ -52,24 +45,8 @@ public class ActiveSetQPMomentumOptimizer implements MomentumOptimizerInterface,
 
          Js = new DenseMatrix64F(nDoF,nDoF);
          ps = new DenseMatrix64F(nDoF,1);
-         Jp = new DenseMatrix64F(nDoF, nDoF);
-         pp = new DenseMatrix64F(nDoF, 1);
          Ws = new DenseMatrix64F(nDoF, nDoF);
-         
-         loadNativeLibrary();
          initializeNative(nDoF);
-   }
-
-   public void setSaveNoConvergeProblem(boolean saveNoConvergeProblem)
-   {
-      this.saveNoConvergeProblem = saveNoConvergeProblem;
-   }
-   
-   public void dumpProblem(FileOutputStream of) throws IOException
-   {
-      ObjectOutputStream oos = new ObjectOutputStream(of);
-      oos.writeObject(this);
-      oos.close();
    }
 
 
@@ -113,9 +90,9 @@ public class ActiveSetQPMomentumOptimizer implements MomentumOptimizerInterface,
    }
 
    @Override
-   public void setInputs(DenseMatrix64F _a, DenseMatrix64F _b, DenseMatrix64F _momentumDotWeight, DenseMatrix64F _jSecondary, DenseMatrix64F _pSecondary,
-         DenseMatrix64F _weightMatrixSecondary, DenseMatrix64F _WRho, DenseMatrix64F _Lambda, DenseMatrix64F _WRhoSmoother, DenseMatrix64F _rhoPrevAvg,
-         DenseMatrix64F _WRhoCop, DenseMatrix64F _QRho, DenseMatrix64F _c, DenseMatrix64F _rhoMin)
+   public void setInputs(DenseMatrix64F _a, DenseMatrix64F _b, PlaneContactWrenchMatrixCalculator _wrenchMatrixCalculator,
+         DenseMatrix64F _wrenchEquationRightHandSide, DenseMatrix64F _momentumDotWeight, DenseMatrix64F _dampedLeastSquaresFactorMatrix,
+         DenseMatrix64F _jSecondary, DenseMatrix64F _pSecondary, DenseMatrix64F _weightMatrixSecondary)
    {
       A=_a;
       b=_b;
@@ -126,10 +103,7 @@ public class ActiveSetQPMomentumOptimizer implements MomentumOptimizerInterface,
       CommonOps.insert(_jSecondary, Js, 0, 0);
       CommonOps.insert(_pSecondary, ps, 0, 0);
       CommonOps.insert(_weightMatrixSecondary, Ws, 0, 0);
-      
-      Jp.set(0, 0, Double.NaN); //mark as not used
-      pp.set(0, 0, Double.NaN);
-//      Js=_jSecondary;
+//      Js.insuu=_jSecondary;
 //      ps=_pSecondary;
 //      Ws=_weightMatrixSecondary;
       /*
@@ -139,33 +113,18 @@ public class ActiveSetQPMomentumOptimizer implements MomentumOptimizerInterface,
          
       }*/
 
-      WRho=_WRho;
-      Lambda=_Lambda;
+      WRho=_wrenchMatrixCalculator.getWRho();
+      Lambda=_dampedLeastSquaresFactorMatrix;
       
-      WRhoSmoother =_WRhoSmoother;
+      WRhoSmoother = _wrenchMatrixCalculator.getWRhoSmoother();
 
-      rhoPrevMean = _rhoPrevAvg;
-      WRhoCoPPenalty = _WRhoCop;
+      rhoPrevMean = _wrenchMatrixCalculator.getRhoPreviousAverage();
+      WRhoCoPPenalty = _wrenchMatrixCalculator.getWRhoPenalizer();
 
-      QRho = _QRho; 
-      c = _c;
-      rhoMin = _rhoMin;
+      QRho = _wrenchMatrixCalculator.getQRho();       
+      c = _wrenchEquationRightHandSide;
+      rhoMin = _wrenchMatrixCalculator.getRhoMin();
 
-   }
-
-   @Override
-//   public void setInputs(DenseMatrix64F a, DenseMatrix64F b, PlaneContactWrenchMatrixCalculator wrenchMatrixCalculator,
-//         DenseMatrix64F wrenchEquationRightHandSide, DenseMatrix64F momentumDotWeight, DenseMatrix64F dampedLeastSquaresFactorMatrix, DenseMatrix64F jPrimary,
-//         DenseMatrix64F pPrimary, DenseMatrix64F jSecondary, DenseMatrix64F pSecondary, DenseMatrix64F weightMatrixSecondary)
-   public void setInputs(DenseMatrix64F a, DenseMatrix64F b, DenseMatrix64F momentumDotWeight, DenseMatrix64F jPrimary, DenseMatrix64F pPrimary,
-         DenseMatrix64F jSecondary, DenseMatrix64F pSecondary, DenseMatrix64F weightMatrixSecondary, DenseMatrix64F WRho, DenseMatrix64F Lambda,
-         DenseMatrix64F WRhoSmoother, DenseMatrix64F rhoPrevAvg, DenseMatrix64F WRhoCop, DenseMatrix64F QRho, DenseMatrix64F c, DenseMatrix64F rhoMin)
-   {
-      setInputs(a, b, momentumDotWeight, jSecondary, pSecondary,
-         weightMatrixSecondary, WRho, Lambda, WRhoSmoother, rhoPrevAvg,
-         WRhoCop, QRho, c, rhoMin);
-      CommonOps.insert(jPrimary, Jp, 0, 0);
-      CommonOps.insert(pPrimary, pp, 0, 0);
    }
    
    public native void initializeNative(int nDoF);
@@ -173,7 +132,6 @@ public class ActiveSetQPMomentumOptimizer implements MomentumOptimizerInterface,
    
    public native int solveNative(
          double[] A, double[] b, double[] C, 
-         double[] Jp, double[] pp,
          double[] Js, double[] ps, double[] Ws,
          double[] WRho, double[] Lambda,
          double[] WRhoSmoother, 
@@ -194,9 +152,8 @@ public class ActiveSetQPMomentumOptimizer implements MomentumOptimizerInterface,
    public int solve() throws NoConvergenceException
    {
 
-      int iter = solveNative(
+      return solveNative(
             A.getData(), b.getData(), C.getData(), 
-            Jp.getData(),pp.getData(),
             Js.getData(), ps.getData(), Ws.getData(), 
             WRho.getData(), Lambda.getData(), 
             WRhoSmoother.getData(), 
@@ -204,26 +161,6 @@ public class ActiveSetQPMomentumOptimizer implements MomentumOptimizerInterface,
             QRho.getData(), c.getData(), rhoMin.getData(), 
             vd.getData(), rho.getData()  // in/out
       );
-      if(iter <0)
-      {
-         if(saveNoConvergeProblem)
-         {
-                 String fileName = getClass().getSimpleName()+"_diverence"+System.nanoTime();
-                 try{
-                         FileOutputStream os = new FileOutputStream(fileName);
-                         dumpProblem(os);
-                         os.close();
-                         System.out.println("NoConvergence log saved to "+ fileName);
-                 }
-                 catch(IOException e)
-                 {
-                    System.err.println("Attempted to write a log to "+fileName+" but failed..");
-                 }
-         }
-
-         throw new NoConvergenceException();
-      }else
-         return iter;
    }
 
    @Override
@@ -244,28 +181,5 @@ public class ActiveSetQPMomentumOptimizer implements MomentumOptimizerInterface,
    {
       return optVal;
    }
-   
-   static void loadNativeLibrary()
-   {
-      System.loadLibrary("ActiveSetQPMomentumOptimizer"); 
-   }
-
-   
-   public static void main(String[] arg) throws IOException, ClassNotFoundException, NoConvergenceException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException
-   {
-      FileInputStream is = new FileInputStream("../ValkyrieHardwareDrivers/ActiveSetQPMomentumOptimizer_diverence1398789891417766000");
-      ObjectInputStream ois = new ObjectInputStream(is);
-      ActiveSetQPMomentumOptimizer solver = (ActiveSetQPMomentumOptimizer) ois.readObject();
-      ois.close();
-      is.close();
-
-      solver.setSaveNoConvergeProblem(false);
-      solver.initializeNative(solver.nDoF);
-      solver.solve();
-
-   }
-
-
-      
 
 }
