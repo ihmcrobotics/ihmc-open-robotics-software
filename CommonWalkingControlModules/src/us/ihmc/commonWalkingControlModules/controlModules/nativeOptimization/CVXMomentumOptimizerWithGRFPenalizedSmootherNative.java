@@ -97,7 +97,7 @@ public class CVXMomentumOptimizerWithGRFPenalizedSmootherNative
 
    static
    {
-      System.loadLibrary("CVXMomentumOptimizerWithGRFPenalizedSmoother");
+      System.loadLibrary("CVXMomentumOptimizerWithGRFPenalizedSmoother_msz");
 
       initialize();
 
