@@ -1,5 +1,7 @@
 package us.ihmc.microbenchmarks;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Random;
 
 import us.ihmc.utilities.math.TimeTools;
@@ -9,6 +11,7 @@ public class BenchmarkFieldOrArrayAccess
 
    private static final int ITERATIONS = 1000000;
    private static final int TESTS = 100;
+   private static final boolean USE_COMMON_STORAGE = true;
 
    public static void main(String[] args)
    {
@@ -16,13 +19,26 @@ public class BenchmarkFieldOrArrayAccess
    }
 
    private final long[] randomVariables = new long[ITERATIONS];
-
    private final Access[] testLongAccess = new Access[ITERATIONS];
+   
+   private final int[] accessArray = new int[ITERATIONS];
 
    public BenchmarkFieldOrArrayAccess()
    {
       Class<?>[] classes = { ArrayAccess.class, PrimitiveAccess.class };
 
+      
+      ArrayList<Integer> access = new ArrayList<Integer>();
+      for(int i = 0; i < ITERATIONS; i++)
+      {
+         access.add(i);
+      }
+      Collections.shuffle(access);
+      for(int i = 0; i < ITERATIONS; i++)
+      {
+         accessArray[i] = access.get(i);
+      }
+      
       String res = new String();
       for(Class<?> clazz : classes)
       {
@@ -78,6 +94,20 @@ public class BenchmarkFieldOrArrayAccess
             throw new RuntimeException(e);
          }
          random = new Random(); // Create trash between variables
+         
+      }
+      if(USE_COMMON_STORAGE)
+      {
+         
+         if(clazz == ArrayAccess.class)
+         {
+            long[] backingArray = new long[randomVariables.length];
+            for (int i = 0; i < randomVariables.length; i++)
+            {
+               ((ArrayAccess)testLongAccess[i]).setBackingArray(backingArray, i);
+            }
+         }
+         
       }
    }
 
@@ -85,7 +115,7 @@ public class BenchmarkFieldOrArrayAccess
    {
       for (int i = 0; i < randomVariables.length; i++)
       {
-         testLongAccess[i].setValue(randomVariables[i]);
+         testLongAccess[accessArray[i]].setValue(randomVariables[i]);
       }
 
    }
@@ -97,7 +127,7 @@ public class BenchmarkFieldOrArrayAccess
 
       for (int i = 0; i < randomVariables.length; i++)
       {
-         xor ^= testLongAccess[i].getValue();
+         xor ^= testLongAccess[accessArray[i]].getValue();
       }
 
       return xor;
@@ -140,6 +170,12 @@ public class BenchmarkFieldOrArrayAccess
       public long getValue()
       {
          return value[index];
+      }
+      
+      public void setBackingArray(long[] backingArray, int index)
+      {
+         this.value = backingArray;
+         this.index = index;
       }
    }
 }
