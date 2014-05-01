@@ -172,11 +172,6 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       return maximumHeightAboveGround;
    }
 
-   public void setNominalHeightAboveAnkle(double nominalHeightAboveAnkle)
-   {
-      this.nominalHeightAboveGround = nominalHeightAboveAnkle;
-   }
-
    public double getGroundReactionWrenchBreakFrequencyHertz()
    {
       return 7.0;
