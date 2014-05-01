@@ -55,7 +55,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
    public enum QPSolverFlavor
    {
-      CVX, EIGEN, EIGEN_DIRECT, EIGEN_ACTIVESET, EIGEN_ACTIVESET_DIRECT
+      CVX_NULL, EIGEN_NULL, EIGEN_DIRECT, EIGEN_ACTIVESET_NULL, EIGEN_ACTIVESET_DIRECT
    };
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
@@ -77,8 +77,10 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
    private final BooleanYoVariable hasNotConvergedInPast = new BooleanYoVariable("hasNotConvergedInPast", registry);
    private final IntegerYoVariable hasNotConvergedCounts = new IntegerYoVariable("hasNotConvergedCounts", registry);
    private final ExecutionTimer probingTimer = new ExecutionTimer("probingTimer", 0, registry);
+
+   private final boolean INSPECT_CONSTRAINTS=false;
    private final DoubleYoVariable primaryResNorm= new DoubleYoVariable("primaryResNorm", registry);
-   private DenseMatrix64F primaryResidual;
+   private final DoubleYoVariable secondaryResNorm= new DoubleYoVariable("secondaryResNorm", registry);
    
 
    private final EnumYoVariable<QPSolverFlavor> requestedQPSolver = new EnumYoVariable<>("requestedQPSolver", registry, QPSolverFlavor.class);
@@ -106,7 +108,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       nDoF = ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor);
       
       //setup solvers
-      momentumOptimizers.put(QPSolverFlavor.CVX, new CVXMomentumOptimizerAdapter(nDoF));
+      momentumOptimizers.put(QPSolverFlavor.CVX_NULL, new CVXMomentumOptimizerAdapter(nDoF));
       ActiveSetQPMomentumOptimizer eigenQP = 
                  new ActiveSetQPMomentumOptimizer(nDoF)
                  {
@@ -118,13 +120,13 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
                        return super.solve();
                     }
                  };
-      momentumOptimizers.put(QPSolverFlavor.EIGEN, eigenQP);
+      momentumOptimizers.put(QPSolverFlavor.EIGEN_NULL, eigenQP);
       momentumOptimizers.put(QPSolverFlavor.EIGEN_DIRECT, eigenQP);
-      momentumOptimizers.put(QPSolverFlavor.EIGEN_ACTIVESET, new ActiveSetQPMomentumOptimizer(nDoF));
+      momentumOptimizers.put(QPSolverFlavor.EIGEN_ACTIVESET_NULL, new ActiveSetQPMomentumOptimizer(nDoF));
       momentumOptimizers.put(QPSolverFlavor.EIGEN_ACTIVESET_DIRECT, new ActiveSetQPMomentumOptimizer(nDoF));
 
       //initialize default solver
-      final QPSolverFlavor defaultSolver = QPSolverFlavor.CVX;
+      final QPSolverFlavor defaultSolver = QPSolverFlavor.EIGEN_ACTIVESET_DIRECT;
       requestedQPSolver.set(defaultSolver);
       currentQPSolver.set(defaultSolver);
       momentumOptimizer = momentumOptimizers.get(defaultSolver);
@@ -195,8 +197,14 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       case EIGEN_ACTIVESET_DIRECT:
       case EIGEN_DIRECT:
          return compute(contactStates, upcomingSupportLeg,false);
+         
+      case CVX_NULL:
+      case EIGEN_ACTIVESET_NULL:
+      case EIGEN_NULL:
+         return compute(contactStates, upcomingSupportLeg,true);
+
       default:
-         return compute(contactStates, upcomingSupportLeg, true);
+         throw new RuntimeException("Unlisted solverFlavor, please added it in the case above");
       }
    }
    
@@ -308,17 +316,13 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
          jointAccelerations = momentumOptimizer.getOutputJointAccelerations();
       }
       
-      if(primaryResidual!=null && primaryResidual.numRows == pPrimary.numRows)
+      //check constraint quality
+      if(INSPECT_CONSTRAINTS)
       {
-         CommonOps.insert(pPrimary, primaryResidual, 0, 0);
+        primaryResNorm.set(LinearConstraintResNorm(jPrimary, pPrimary, jointAccelerations));
+        secondaryResNorm.set(LinearConstraintResNorm(jSecondary, pSecondary, jointAccelerations));
       }
-      else
-      {
-         primaryResidual = pPrimary.copy();
-         System.out.println("re-allocate primaryResidual to " + primaryResidual.numRows);
-      }
-      CommonOps.multAdd(-1, jPrimary, jointAccelerations, primaryResidual);
-      primaryResNorm.set(NormOps.normP1(primaryResidual));
+
 
       updateMomentumControlModuleSolverListener(jPrimary, pPrimary, a, b, jSecondary, pSecondary, weightMatrixSecondary, jointAccelerations);
 
@@ -337,6 +341,14 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       }
 
       return momentumModuleSolution;
+   }
+
+   private double LinearConstraintResNorm(DenseMatrix64F J, DenseMatrix64F p, DenseMatrix64F x)
+   {
+      DenseMatrix64F resVector = p.copy();
+      CommonOps.multAdd(-1, J, x, resVector);
+      double norm=NormOps.normP1(resVector);
+      return norm;
    }
 
    private void optimize() throws NoConvergenceException
