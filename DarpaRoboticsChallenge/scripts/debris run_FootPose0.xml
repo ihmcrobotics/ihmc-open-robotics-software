@@ -24,9 +24,9 @@
           <z>0.08117142326003202</z>
         </location>
         <orientation>
-          <x>-0.0037574323369964626</x>
-          <y>0.003322830609780789</y>
-          <z>-0.060875692153369104</z>
+          <x>-0.003757432336996462</x>
+          <y>0.0033228306097807894</y>
+          <z>-0.06087569215336911</z>
           <w>0.9981327519943527</w>
         </orientation>
       </us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
@@ -39,6 +39,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>LEFT</robotSide>
     <referenceFrame>WORLD</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>0.2853020104936148</x>
@@ -52,12 +53,6 @@
       <w>0.9293858219172465</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>0.34087579667644174</shoulderPitch>
-    <shoulderRoll>-1.3005548387096773</shoulderRoll>
-    <elbowPitch>1.937774477028348</elbowPitch>
-    <elbowRoll>1.1815498240469207</elbowRoll>
-    <wristPitch>0.009212873900293255</wristPitch>
-    <wristRoll>-0.06333870967741939</wristRoll>
     <jointAngles>
       <double>0.34087579667644174</double>
       <double>-1.3005548387096773</double>
@@ -71,6 +66,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>WORLD</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>0.2396293782001384</x>
@@ -84,12 +80,6 @@
       <w>0.9293860716726654</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>0.34087579667644174</shoulderPitch>
-    <shoulderRoll>1.3005548387096775</shoulderRoll>
-    <elbowPitch>1.9408454349951123</elbowPitch>
-    <elbowRoll>-1.1815498240469207</elbowRoll>
-    <wristPitch>0.0</wristPitch>
-    <wristRoll>0.06794516129032258</wristRoll>
     <jointAngles>
       <double>0.34087579667644174</double>
       <double>1.3005548387096775</double>
@@ -129,6 +119,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>0.4868441717830869</x>
@@ -142,12 +133,6 @@
       <w>0.730539148134709</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>-1.0162892656297868</shoulderPitch>
-    <shoulderRoll>1.2115889379982026</shoulderRoll>
-    <elbowPitch>0.8862111080745819</elbowPitch>
-    <elbowRoll>-0.27235653559710593</elbowRoll>
-    <wristPitch>0.0</wristPitch>
-    <wristRoll>0.8996754452369053</wristRoll>
     <jointAngles>
       <double>-1.0162892656297868</double>
       <double>1.2115889379982026</double>
@@ -161,6 +146,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>0.4809450031072324</x>
@@ -174,12 +160,6 @@
       <w>0.7305969888514404</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>-1.1041569458047829</shoulderPitch>
-    <shoulderRoll>1.1992618534351907</shoulderRoll>
-    <elbowPitch>0.0</elbowPitch>
-    <elbowRoll>-0.2574699382288534</elbowRoll>
-    <wristPitch>0.5246144001462101</wristPitch>
-    <wristRoll>0.8860046875305961</wristRoll>
     <jointAngles>
       <double>-1.1041569458047829</double>
       <double>1.1992618534351907</double>
@@ -193,6 +173,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>0.46982050028967426</x>
@@ -202,16 +183,10 @@
     <orientation>
       <x>0.219226532537659</x>
       <y>0.6412049863377861</y>
-      <z>-0.111324737095765</z>
-      <w>0.7269131281230468</w>
+      <z>-0.11132473709576499</z>
+      <w>0.7269131281230469</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>-1.0522539237770927</shoulderPitch>
-    <shoulderRoll>1.2886429294218011</shoulderRoll>
-    <elbowPitch>0.0</elbowPitch>
-    <elbowRoll>-0.4642027372626391</elbowRoll>
-    <wristPitch>0.3016276647248404</wristPitch>
-    <wristRoll>0.9548961582055819</wristRoll>
     <jointAngles>
       <double>-1.0522539237770927</double>
       <double>1.2886429294218011</double>
@@ -229,6 +204,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>0.5217588990831183</x>
@@ -236,18 +212,12 @@
       <z>0.7970258774616684</z>
     </position>
     <orientation>
-      <x>0.20014827553517836</x>
+      <x>0.20014827553517833</x>
       <y>0.6255521905062538</y>
-      <z>-0.08243125806449922</z>
+      <z>-0.0824312580644992</z>
       <w>0.7495533419624155</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>-1.1758330507916497</shoulderPitch>
-    <shoulderRoll>1.1235740979362059</shoulderRoll>
-    <elbowPitch>0.0</elbowPitch>
-    <elbowRoll>-0.3316496729489291</elbowRoll>
-    <wristPitch>0.2919133227917378</wristPitch>
-    <wristRoll>0.972306462410443</wristRoll>
     <jointAngles>
       <double>-1.1758330507916497</double>
       <double>1.1235740979362059</double>
@@ -261,6 +231,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>LEFT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>0.25223094987489847</x>
@@ -270,16 +241,10 @@
     <orientation>
       <x>0.1466116389401554</x>
       <y>0.3471776581036334</y>
-      <z>-0.030826275246910253</z>
+      <z>-0.030826275246910256</z>
       <w>0.9257550657681328</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>0.47449722940961336</shoulderPitch>
-    <shoulderRoll>-1.2060254788736002</shoulderRoll>
-    <elbowPitch>1.9901119156726694</elbowPitch>
-    <elbowRoll>1.6224234358697696</elbowRoll>
-    <wristPitch>0.0</wristPitch>
-    <wristRoll>-0.38020420014686623</wristRoll>
     <jointAngles>
       <double>0.47449722940961336</double>
       <double>-1.2060254788736002</double>
@@ -305,6 +270,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>0.49740173541311683</x>
@@ -318,12 +284,6 @@
       <w>0.760943314543787</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>-1.097784530339618</shoulderPitch>
-    <shoulderRoll>1.1390377596278416</shoulderRoll>
-    <elbowPitch>0.0</elbowPitch>
-    <elbowRoll>-0.19612081598886177</elbowRoll>
-    <wristPitch>0.22923837891011692</wristPitch>
-    <wristRoll>0.751848142418198</wristRoll>
     <jointAngles>
       <double>-1.097784530339618</double>
       <double>1.1390377596278416</double>
@@ -337,6 +297,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>0.46538623790234324</x>
@@ -350,12 +311,6 @@
       <w>0.7970464293584765</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>-1.0689626556246832</shoulderPitch>
-    <shoulderRoll>1.211263781556115</shoulderRoll>
-    <elbowPitch>0.0</elbowPitch>
-    <elbowRoll>-0.10876606955871891</elbowRoll>
-    <wristPitch>0.17430474796457784</wristPitch>
-    <wristRoll>0.43835584295500774</wristRoll>
     <jointAngles>
       <double>-1.0689626556246832</double>
       <double>1.211263781556115</double>
@@ -392,6 +347,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>0.5142742675795517</x>
@@ -405,12 +361,6 @@
       <w>0.8218360472895428</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>-0.9802951937119463</shoulderPitch>
-    <shoulderRoll>1.032329282369983</shoulderRoll>
-    <elbowPitch>0.2240236241728663</elbowPitch>
-    <elbowRoll>-0.8289513144035523</elbowRoll>
-    <wristPitch>0.0</wristPitch>
-    <wristRoll>1.1781</wristRoll>
     <jointAngles>
       <double>-0.9802951937119463</double>
       <double>1.032329282369983</double>
@@ -590,6 +540,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>0.35167017720385485</x>
@@ -603,12 +554,6 @@
       <w>0.8349716564332358</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>-0.6490647441236708</shoulderPitch>
-    <shoulderRoll>0.4119383884766598</shoulderRoll>
-    <elbowPitch>0.226744834065959</elbowPitch>
-    <elbowRoll>0.0</elbowRoll>
-    <wristPitch>2.787819396880158E-4</wristPitch>
-    <wristRoll>0.3172294697077265</wristRoll>
     <jointAngles>
       <double>-0.6490647441236708</double>
       <double>0.4119383884766598</double>
@@ -622,6 +567,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>0.106382291203994</x>
@@ -635,12 +581,6 @@
       <w>0.7656874123584732</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>-0.38064787802115546</shoulderPitch>
-    <shoulderRoll>0.09597311688643874</shoulderRoll>
-    <elbowPitch>0.0</elbowPitch>
-    <elbowRoll>-0.08222239165241464</elbowRoll>
-    <wristPitch>0.0</wristPitch>
-    <wristRoll>0.29801193495953976</wristRoll>
     <jointAngles>
       <double>-0.38064787802115546</double>
       <double>0.09597311688643874</double>
@@ -654,6 +594,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>0.09145273192075676</x>
@@ -667,12 +608,6 @@
       <w>0.7530092833706368</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>-0.3484719110466982</shoulderPitch>
-    <shoulderRoll>0.2799836084216519</shoulderRoll>
-    <elbowPitch>0.0452894996335558</elbowPitch>
-    <elbowRoll>-0.08212716322430412</elbowRoll>
-    <wristPitch>0.0</wristPitch>
-    <wristRoll>0.05110434405500591</wristRoll>
     <jointAngles>
       <double>-0.3484719110466982</double>
       <double>0.2799836084216519</double>
@@ -702,6 +637,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>0.49615144347000273</x>
@@ -715,12 +651,6 @@
       <w>0.9681610267452212</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>-0.9425711758354521</shoulderPitch>
-    <shoulderRoll>1.1674775181820496</shoulderRoll>
-    <elbowPitch>0.6456854403966644</elbowPitch>
-    <elbowRoll>-0.8714083343457484</elbowRoll>
-    <wristPitch>0.0</wristPitch>
-    <wristRoll>-0.09167958891218943</wristRoll>
     <jointAngles>
       <double>-0.9425711758354521</double>
       <double>1.1674775181820496</double>
@@ -734,6 +664,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>LEFT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>0.5567374727089707</x>
@@ -747,12 +678,6 @@
       <w>0.820598955449839</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>-1.4261388179749368</shoulderPitch>
-    <shoulderRoll>-1.2684811113274304</shoulderRoll>
-    <elbowPitch>0.0</elbowPitch>
-    <elbowRoll>0.13051212396879383</elbowRoll>
-    <wristPitch>0.7856666438592246</wristPitch>
-    <wristRoll>-0.44466652495745673</wristRoll>
     <jointAngles>
       <double>-1.4261388179749368</double>
       <double>-1.2684811113274304</double>
@@ -825,6 +750,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>LEFT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>0.5199289808648446</x>
@@ -833,17 +759,11 @@
     </position>
     <orientation>
       <x>0.7026679019750413</x>
-      <y>0.10248028888045216</y>
+      <y>0.10248028888045214</y>
       <z>-0.32002576734046495</z>
-      <w>0.6271675359607825</w>
+      <w>0.6271675359607826</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>-1.1594959361664785</shoulderPitch>
-    <shoulderRoll>-0.5531151606807332</shoulderRoll>
-    <elbowPitch>1.9871115432245996</elbowPitch>
-    <elbowRoll>1.2674654592705752</elbowRoll>
-    <wristPitch>0.0</wristPitch>
-    <wristRoll>-1.1781</wristRoll>
     <jointAngles>
       <double>-1.1594959361664785</double>
       <double>-0.5531151606807332</double>
@@ -857,6 +777,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>LEFT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>0.4269204145974399</x>
@@ -870,12 +791,6 @@
       <w>0.196933282064873</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>-1.0492199117800423</shoulderPitch>
-    <shoulderRoll>-0.8329601395222468</shoulderRoll>
-    <elbowPitch>2.9092781291334275</elbowPitch>
-    <elbowRoll>0.5795992710311889</elbowRoll>
-    <wristPitch>0.0</wristPitch>
-    <wristRoll>-0.24002031725918244</wristRoll>
     <jointAngles>
       <double>-1.0492199117800423</double>
       <double>-0.8329601395222468</double>
@@ -889,6 +804,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>LEFT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>0.5862890587076777</x>
@@ -902,12 +818,6 @@
       <w>0.32633265125864414</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>-1.3942520013706634</shoulderPitch>
-    <shoulderRoll>-0.7798979526234858</shoulderRoll>
-    <elbowPitch>1.7619380681504375</elbowPitch>
-    <elbowRoll>0.0</elbowRoll>
-    <wristPitch>0.8610921512653111</wristPitch>
-    <wristRoll>0.35228561204626774</wristRoll>
     <jointAngles>
       <double>-1.3942520013706634</double>
       <double>-0.7798979526234858</double>
@@ -943,6 +853,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>LEFT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>0.7758391208790756</x>
@@ -956,12 +867,6 @@
       <w>-0.07772972778796199</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>-1.5708</shoulderPitch>
-    <shoulderRoll>-0.10458980433773649</shoulderRoll>
-    <elbowPitch>0.378380668563979</elbowPitch>
-    <elbowRoll>0.15019632215552836</elbowRoll>
-    <wristPitch>3.14159</wristPitch>
-    <wristRoll>1.1781</wristRoll>
     <jointAngles>
       <double>-1.5708</double>
       <double>-0.10458980433773649</double>
@@ -975,6 +880,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>LEFT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>0.7959592727379903</x>
@@ -988,12 +894,6 @@
       <w>0.31175373889003694</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>-1.2152791184709328</shoulderPitch>
-    <shoulderRoll>-0.19074589826515334</shoulderRoll>
-    <elbowPitch>2.2284839915568955</elbowPitch>
-    <elbowRoll>0.0</elbowRoll>
-    <wristPitch>0.3833649622754798</wristPitch>
-    <wristRoll>1.055499200311078</wristRoll>
     <jointAngles>
       <double>-1.2152791184709328</double>
       <double>-0.19074589826515334</double>
@@ -1007,6 +907,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>-0.06722697625532303</x>
@@ -1020,12 +921,6 @@
       <w>0.8171312002159928</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>-0.47401534183079225</shoulderPitch>
-    <shoulderRoll>1.1511736256107836</shoulderRoll>
-    <elbowPitch>0.7081462078975168</elbowPitch>
-    <elbowRoll>-1.5032203432020144</elbowRoll>
-    <wristPitch>0.0</wristPitch>
-    <wristRoll>0.30036594889156115</wristRoll>
     <jointAngles>
       <double>-0.47401534183079225</double>
       <double>1.1511736256107836</double>
@@ -1043,6 +938,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>0.11587749562041805</x>
@@ -1056,12 +952,6 @@
       <w>0.879830597504259</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>-1.1990543851688427</shoulderPitch>
-    <shoulderRoll>1.2418889994806745</shoulderRoll>
-    <elbowPitch>0.0</elbowPitch>
-    <elbowRoll>-0.2634461064765731</elbowRoll>
-    <wristPitch>0.5305634302829773</wristPitch>
-    <wristRoll>-0.5023583995902073</wristRoll>
     <jointAngles>
       <double>-1.1990543851688427</double>
       <double>1.2418889994806745</double>
@@ -1086,6 +976,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>0.15142893961489756</x>
@@ -1099,12 +990,6 @@
       <w>0.8811640316944004</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>-1.2762033996469406</shoulderPitch>
-    <shoulderRoll>1.1592716105307672</shoulderRoll>
-    <elbowPitch>0.0</elbowPitch>
-    <elbowRoll>-0.1834442250598979</elbowRoll>
-    <wristPitch>0.49601914572973815</wristPitch>
-    <wristRoll>-0.37012579160674636</wristRoll>
     <jointAngles>
       <double>-1.2762033996469406</double>
       <double>1.1592716105307672</double>
@@ -1158,6 +1043,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>0.18138392721384466</x>
@@ -1171,12 +1057,6 @@
       <w>0.8910332639932762</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>-1.299744168776608</shoulderPitch>
-    <shoulderRoll>1.0900406036757198</shoulderRoll>
-    <elbowPitch>0.0</elbowPitch>
-    <elbowRoll>-0.12066753621224047</elbowRoll>
-    <wristPitch>0.5220130114232902</wristPitch>
-    <wristRoll>-0.350017282104958</wristRoll>
     <jointAngles>
       <double>-1.299744168776608</double>
       <double>1.0900406036757198</double>
@@ -1198,6 +1078,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>0.17936118626924547</x>
@@ -1211,12 +1092,6 @@
       <w>0.8921571327222422</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>-1.3250376351837152</shoulderPitch>
-    <shoulderRoll>1.1026577687284165</shoulderRoll>
-    <elbowPitch>0.0</elbowPitch>
-    <elbowRoll>-0.12980501278735443</elbowRoll>
-    <wristPitch>0.5424078188231429</wristPitch>
-    <wristRoll>-0.32123813935864864</wristRoll>
     <jointAngles>
       <double>-1.3250376351837152</double>
       <double>1.1026577687284165</double>
@@ -1239,6 +1114,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>-0.17578722627642196</x>
@@ -1252,12 +1128,6 @@
       <w>0.7954317909641904</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>0.07923668190394735</shoulderPitch>
-    <shoulderRoll>1.3842878843123212</shoulderRoll>
-    <elbowPitch>1.2128764066194928</elbowPitch>
-    <elbowRoll>-1.9118779147656335</elbowRoll>
-    <wristPitch>0.0</wristPitch>
-    <wristRoll>0.4772266698240851</wristRoll>
     <jointAngles>
       <double>0.07923668190394735</double>
       <double>1.3842878843123212</double>
@@ -1271,6 +1141,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>-0.6069736786354926</x>
@@ -1278,18 +1149,12 @@
       <z>1.2367295907088824</z>
     </position>
     <orientation>
-      <x>-0.008948202016961187</x>
+      <x>-0.008948202016961188</x>
       <y>0.14496613022728658</y>
-      <z>-0.8743058333415105</z>
-      <w>0.46313503490083335</w>
+      <z>-0.8743058333415104</z>
+      <w>0.46313503490083324</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>-0.19449788697117387</shoulderPitch>
-    <shoulderRoll>-0.07715122889734742</shoulderRoll>
-    <elbowPitch>3.1150437102000272</elbowPitch>
-    <elbowRoll>-0.035805243120006984</elbowRoll>
-    <wristPitch>3.14159</wristPitch>
-    <wristRoll>0.11566654859337863</wristRoll>
     <jointAngles>
       <double>-0.19449788697117387</double>
       <double>-0.07715122889734742</double>
@@ -1303,6 +1168,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>-0.6066755700392611</x>
@@ -1316,12 +1182,6 @@
       <w>0.4617261656112832</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>-0.20139522254732703</shoulderPitch>
-    <shoulderRoll>-0.020668407445378373</shoulderRoll>
-    <elbowPitch>0.0</elbowPitch>
-    <elbowRoll>-0.08219613521479398</elbowRoll>
-    <wristPitch>0.0</wristPitch>
-    <wristRoll>0.1843664364583917</wristRoll>
     <jointAngles>
       <double>-0.20139522254732703</double>
       <double>-0.020668407445378373</double>
@@ -1335,6 +1195,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>-0.6071265647300524</x>
@@ -1342,18 +1203,12 @@
       <z>1.2365363191747964</z>
     </position>
     <orientation>
-      <x>-0.009506337674212256</x>
+      <x>-0.009506337674212257</x>
       <y>0.15609150024623641</y>
-      <z>-0.8728868756526609</z>
-      <w>0.46218348673253057</w>
+      <z>-0.8728868756526608</z>
+      <w>0.46218348673253046</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>-0.20705694735894062</shoulderPitch>
-    <shoulderRoll>-0.02386034540301253</shoulderRoll>
-    <elbowPitch>0.0</elbowPitch>
-    <elbowRoll>-0.08219907154792487</elbowRoll>
-    <wristPitch>0.0</wristPitch>
-    <wristRoll>0.18666708944075128</wristRoll>
     <jointAngles>
       <double>-0.20705694735894062</double>
       <double>-0.02386034540301253</double>
@@ -1384,14 +1239,9 @@
   <long>664204706280</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>LEFT</robotSide>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>true</toHomePosition>
     <trajectoryTime>5.0</trajectoryTime>
-    <shoulderPitch>0.0</shoulderPitch>
-    <shoulderRoll>0.0</shoulderRoll>
-    <elbowPitch>0.0</elbowPitch>
-    <elbowRoll>0.0</elbowRoll>
-    <wristPitch>0.0</wristPitch>
-    <wristRoll>0.0</wristRoll>
     <jointAngles>
       <double>0.0</double>
       <double>0.0</double>
@@ -1404,14 +1254,9 @@
   <long>664205352353</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>true</toHomePosition>
     <trajectoryTime>5.0</trajectoryTime>
-    <shoulderPitch>0.0</shoulderPitch>
-    <shoulderRoll>0.0</shoulderRoll>
-    <elbowPitch>0.0</elbowPitch>
-    <elbowRoll>0.0</elbowRoll>
-    <wristPitch>0.0</wristPitch>
-    <wristRoll>0.0</wristRoll>
     <jointAngles>
       <double>0.0</double>
       <double>0.0</double>
@@ -1438,6 +1283,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>LEFT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>0.010571420602921044</x>
@@ -1451,12 +1297,6 @@
       <w>0.5147453595416119</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>0.4258408236242641</shoulderPitch>
-    <shoulderRoll>-1.5472003322660617</shoulderRoll>
-    <elbowPitch>0.2780948832740644</elbowPitch>
-    <elbowRoll>0.3114561273175583</elbowRoll>
-    <wristPitch>1.7958969866206125</wristPitch>
-    <wristRoll>0.28098772347361334</wristRoll>
     <jointAngles>
       <double>0.4258408236242641</double>
       <double>-1.5472003322660617</double>
@@ -1470,6 +1310,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>LEFT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>0.4400288087600994</x>
@@ -1483,12 +1324,6 @@
       <w>0.8515561219575181</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>0.483835674646444</shoulderPitch>
-    <shoulderRoll>-0.9628117272911164</shoulderRoll>
-    <elbowPitch>1.9236652378776504</elbowPitch>
-    <elbowRoll>2.177094685136936</elbowRoll>
-    <wristPitch>0.0</wristPitch>
-    <wristRoll>-0.7333575112000057</wristRoll>
     <jointAngles>
       <double>0.483835674646444</double>
       <double>-0.9628117272911164</double>
@@ -1502,6 +1337,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>0.14638614929362204</x>
@@ -1515,12 +1351,6 @@
       <w>0.8613906979873259</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>-1.1377930678046742</shoulderPitch>
-    <shoulderRoll>1.4015911898767732</shoulderRoll>
-    <elbowPitch>0.0</elbowPitch>
-    <elbowRoll>-0.11431238210539124</elbowRoll>
-    <wristPitch>0.8992909061192992</wristPitch>
-    <wristRoll>-0.021111819758447597</wristRoll>
     <jointAngles>
       <double>-1.1377930678046742</double>
       <double>1.4015911898767732</double>
@@ -1534,6 +1364,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>0.07906238901552132</x>
@@ -1547,12 +1378,6 @@
       <w>0.8421567540853111</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>-1.0282863374577027</shoulderPitch>
-    <shoulderRoll>1.301610315632729</shoulderRoll>
-    <elbowPitch>0.0</elbowPitch>
-    <elbowRoll>-0.09782791382838554</elbowRoll>
-    <wristPitch>0.9325487023606464</wristPitch>
-    <wristRoll>-0.026339286757978617</wristRoll>
     <jointAngles>
       <double>-1.0282863374577027</double>
       <double>1.301610315632729</double>
@@ -1610,6 +1435,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>-0.030819385755619377</x>
@@ -1623,12 +1449,6 @@
       <w>0.8085493184590408</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>-0.8704453595389755</shoulderPitch>
-    <shoulderRoll>1.1744836087702855</shoulderRoll>
-    <elbowPitch>1.0254851894437609</elbowPitch>
-    <elbowRoll>-0.06350615288215149</elbowRoll>
-    <wristPitch>0.0</wristPitch>
-    <wristRoll>-0.022746179559480637</wristRoll>
     <jointAngles>
       <double>-0.8704453595389755</double>
       <double>1.1744836087702855</double>
@@ -1642,6 +1462,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>-0.03078388050699865</x>
@@ -1655,12 +1476,6 @@
       <w>0.672741262224717</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>-0.9430514662519227</shoulderPitch>
-    <shoulderRoll>1.1944595930233155</shoulderRoll>
-    <elbowPitch>0.006518518961692591</elbowPitch>
-    <elbowRoll>-0.07948867731566929</elbowRoll>
-    <wristPitch>0.0</wristPitch>
-    <wristRoll>0.06885954376203009</wristRoll>
     <jointAngles>
       <double>-0.9430514662519227</double>
       <double>1.1944595930233155</double>
@@ -1696,6 +1511,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>-0.05215811420264327</x>
@@ -1709,12 +1525,6 @@
       <w>0.6892856930203871</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>-0.797143061773927</shoulderPitch>
-    <shoulderRoll>1.124609089412477</shoulderRoll>
-    <elbowPitch>0.15337274251029356</elbowPitch>
-    <elbowRoll>-0.08269100112555018</elbowRoll>
-    <wristPitch>0.0</wristPitch>
-    <wristRoll>0.0549571032349219</wristRoll>
     <jointAngles>
       <double>-0.797143061773927</double>
       <double>1.124609089412477</double>
@@ -1728,6 +1538,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>-0.04355102969206004</x>
@@ -1741,12 +1552,6 @@
       <w>0.6951412000289112</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>-0.8548963227508573</shoulderPitch>
-    <shoulderRoll>1.062074644993873</shoulderRoll>
-    <elbowPitch>0.13390295490958012</elbowPitch>
-    <elbowRoll>-0.08356783344271101</elbowRoll>
-    <wristPitch>0.0</wristPitch>
-    <wristRoll>0.12383630111584203</wristRoll>
     <jointAngles>
       <double>-0.8548963227508573</double>
       <double>1.062074644993873</double>
@@ -1799,6 +1604,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>-0.031439201133417916</x>
@@ -1812,12 +1618,6 @@
       <w>0.7024771074476627</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>-0.9228867574857026</shoulderPitch>
-    <shoulderRoll>0.9170342218784345</shoulderRoll>
-    <elbowPitch>0.10895678270651396</elbowPitch>
-    <elbowRoll>-0.05065282324315662</elbowRoll>
-    <wristPitch>0.0</wristPitch>
-    <wristRoll>0.2735030258121688</wristRoll>
     <jointAngles>
       <double>-0.9228867574857026</double>
       <double>0.9170342218784345</double>
@@ -1831,6 +1631,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>-0.03131570623562263</x>
@@ -1844,12 +1645,6 @@
       <w>0.7083378101561572</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>-0.9291720171863734</shoulderPitch>
-    <shoulderRoll>1.1067934165216482</shoulderRoll>
-    <elbowPitch>0.11121542264354742</elbowPitch>
-    <elbowRoll>-0.5577700080826055</elbowRoll>
-    <wristPitch>0.0</wristPitch>
-    <wristRoll>0.6057359097939622</wristRoll>
     <jointAngles>
       <double>-0.9291720171863734</double>
       <double>1.1067934165216482</double>
@@ -1863,6 +1658,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>-0.035897593679478756</x>
@@ -1876,12 +1672,6 @@
       <w>0.7006414770201682</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>-0.8671591983642177</shoulderPitch>
-    <shoulderRoll>1.1929635404894297</shoulderRoll>
-    <elbowPitch>0.14756978259485393</elbowPitch>
-    <elbowRoll>-0.4221316353338788</elbowRoll>
-    <wristPitch>0.0</wristPitch>
-    <wristRoll>0.3679258513856967</wristRoll>
     <jointAngles>
       <double>-0.8671591983642177</double>
       <double>1.1929635404894297</double>
@@ -1895,6 +1685,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>-0.043077061210112566</x>
@@ -1908,12 +1699,6 @@
       <w>0.7030191742000476</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>-0.867047793241051</shoulderPitch>
-    <shoulderRoll>1.3429468308738792</shoulderRoll>
-    <elbowPitch>0.18937594735382457</elbowPitch>
-    <elbowRoll>-0.6335373239020742</elbowRoll>
-    <wristPitch>0.0</wristPitch>
-    <wristRoll>0.43973955721575464</wristRoll>
     <jointAngles>
       <double>-0.867047793241051</double>
       <double>1.3429468308738792</double>
@@ -1937,6 +1722,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>-0.008337689143822269</x>
@@ -1950,12 +1736,6 @@
       <w>0.7230539008351545</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>-1.0080580917486666</shoulderPitch>
-    <shoulderRoll>1.5708</shoulderRoll>
-    <elbowPitch>0.0845804834214736</elbowPitch>
-    <elbowRoll>-1.2687266432723545</elbowRoll>
-    <wristPitch>0.042457538461318424</wristPitch>
-    <wristRoll>0.8861300927702866</wristRoll>
     <jointAngles>
       <double>-1.0080580917486666</double>
       <double>1.5708</double>
@@ -1969,6 +1749,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>0.016200165477683104</x>
@@ -1982,12 +1763,6 @@
       <w>0.7167855831332517</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>-1.0311030276950208</shoulderPitch>
-    <shoulderRoll>0.5913471560360332</shoulderRoll>
-    <elbowPitch>3.14159</elbowPitch>
-    <elbowRoll>-1.1605248071286876</elbowRoll>
-    <wristPitch>3.14159</wristPitch>
-    <wristRoll>-0.5938790592875554</wristRoll>
     <jointAngles>
       <double>-1.0311030276950208</double>
       <double>0.5913471560360332</double>
@@ -2001,6 +1776,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>0.014063400617305044</x>
@@ -2014,12 +1790,6 @@
       <w>0.6809240751285397</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>-1.037132960954449</shoulderPitch>
-    <shoulderRoll>1.220800219569324</shoulderRoll>
-    <elbowPitch>0.12647783829929507</elbowPitch>
-    <elbowRoll>-0.08393411149444673</elbowRoll>
-    <wristPitch>0.0</wristPitch>
-    <wristRoll>0.33851809919120335</wristRoll>
     <jointAngles>
       <double>-1.037132960954449</double>
       <double>1.220800219569324</double>
@@ -2046,6 +1816,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>-0.04781502947808525</x>
@@ -2059,12 +1830,6 @@
       <w>0.6741690281842</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>-0.9231492012980202</shoulderPitch>
-    <shoulderRoll>1.146776900224442</shoulderRoll>
-    <elbowPitch>0.15340082689156218</elbowPitch>
-    <elbowRoll>-0.0815230633340452</elbowRoll>
-    <wristPitch>0.0</wristPitch>
-    <wristRoll>0.2367230760231906</wristRoll>
     <jointAngles>
       <double>-0.9231492012980202</double>
       <double>1.146776900224442</double>
@@ -2078,6 +1843,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>0.08924200920088787</x>
@@ -2091,12 +1857,6 @@
       <w>0.6993598573041275</w>
     </orientation>
     <trajectoryTime>4.0</trajectoryTime>
-    <shoulderPitch>-1.1417875540703577</shoulderPitch>
-    <shoulderRoll>1.5154598781442747</shoulderRoll>
-    <elbowPitch>0.0</elbowPitch>
-    <elbowRoll>-0.08354118595275607</elbowRoll>
-    <wristPitch>0.025410176599633336</wristPitch>
-    <wristRoll>0.06071151905590762</wristRoll>
     <jointAngles>
       <double>-1.1417875540703577</double>
       <double>1.5154598781442747</double>
