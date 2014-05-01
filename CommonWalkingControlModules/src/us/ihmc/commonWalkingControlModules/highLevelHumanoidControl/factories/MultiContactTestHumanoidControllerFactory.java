@@ -43,12 +43,9 @@ import us.ihmc.commonWalkingControlModules.packets.DesiredHighLevelStateProvider
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FingerForceSensors;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
-import us.ihmc.graveYard.commonWalkingControlModules.vrc.TorusManipulationProvider;
-import us.ihmc.graveYard.commonWalkingControlModules.vrc.TorusPoseProvider;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
-import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromController;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.DampedLeastSquaresSolver;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -93,14 +90,11 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
       this.armControllerParameters = armControllerParameters;
    }
 
-   public RobotController create(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
-                                 Map<OneDoFJoint, Double> initialPositionControlKpGains, Map<OneDoFJoint, Double> initialPositionControlKdGains,
+   public RobotController create(FullRobotModel fullRobotModel, Map<OneDoFJoint, Double> initialPositionControlKpGains, Map<OneDoFJoint, Double> initialPositionControlKdGains,
                                  CommonWalkingReferenceFrames referenceFrames, FingerForceSensors fingerForceSensors, DoubleYoVariable yoTime, double gravityZ,
                                  TwistCalculator twistCalculator, CenterOfMassJacobian centerOfMassJacobian, SideDependentList<ContactablePlaneBody> feet,
-                                 double controlDT, SideDependentList<FootSwitchInterface> footSwitches,
-                                 LidarControllerInterface lidarControllerInterface, StateEstimationDataFromController stateEstimationDataFromControllerSink,
-                                 DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
-                                 YoVariableRegistry registry, GUISetterUpperRegistry guiSetterUpperRegistry,
+                                 double controlDT, SideDependentList<FootSwitchInterface> footSwitches, LidarControllerInterface lidarControllerInterface,
+                                 DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry registry, GUISetterUpperRegistry guiSetterUpperRegistry,
                                  ProcessedOutputsInterface processedOutputs, ForceSensorDataHolder forceSensorDataHolder)
    {
       LinkedHashMap<ContactablePlaneBody, RigidBody> contactablePlaneBodiesAndBases = new LinkedHashMap<ContactablePlaneBody, RigidBody>();
@@ -165,14 +159,14 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
       MomentumOptimizationSettings momentumOptimizationSettings = HighLevelHumanoidControllerFactoryHelper.createMomentumOptimizationSettings(fullRobotModel, lidarControllerInterface, registry);
       
       // The controllers do not extend the MomentumBasedController anymore. Instead, it is passed through the constructor.
-      MomentumBasedController momentumBasedController = new MomentumBasedController(estimationLink, estimationFrame, fullRobotModel, centerOfMassJacobian,
+      MomentumBasedController momentumBasedController = new MomentumBasedController(fullRobotModel, centerOfMassJacobian,
                                                            referenceFrames, footSwitches, yoTime, gravityZ, twistCalculator, feet, hands, null, null, null, controlDT,
-                                                           processedOutputs, momentumOptimizationSettings , oldMomentumControlModule, null, stateEstimationDataFromControllerSink,
+                                                           processedOutputs, momentumOptimizationSettings , oldMomentumControlModule, null,
                                                            dynamicGraphicObjectsListRegistry);
 
       DesiredHandPoseProvider handPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters, registry);
-      TorusPoseProvider torusPoseProvider = new TorusPoseProvider();
-      TorusManipulationProvider torusManipulationProvider = new TorusManipulationProvider();
+//      TorusPoseProvider torusPoseProvider = new TorusPoseProvider();
+//      TorusManipulationProvider torusManipulationProvider = new TorusManipulationProvider();
       DesiredFootPoseProvider footPoseProvider = new DesiredFootPoseProvider();
 
       DesiredHandLoadBearingProvider handLoadBearingProvider = null;

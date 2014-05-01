@@ -123,8 +123,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final static HighLevelState controllerState = HighLevelState.WALKING;
    private final static MomentumControlModuleType MOMENTUM_CONTROL_MODULE_TO_USE = MomentumControlModuleType.OPT_NULLSPACE;
 
-   private final static double DELAY_TIME_BEFORE_TRUSTING_CONTACTS = 0.12;
-
    private final double PELVIS_YAW_INITIALIZATION_TIME = 1.5;
 
    private final BooleanYoVariable alreadyBeenInDoubleSupportOnce;
@@ -659,7 +657,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       super.initialize();
 
       momentumBasedController.setMomentumControlModuleToUse(MOMENTUM_CONTROL_MODULE_TO_USE);
-      momentumBasedController.setDelayTimeBeforeTrustingContacts(DELAY_TIME_BEFORE_TRUSTING_CONTACTS);
 
       initializeContacts();
 
@@ -807,7 +804,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          if (doneFinishingSingleSupportTransfer.getBooleanValue() || (estimatedTimeRemainingForState < 0.02))
          {
-            upcomingFootstepList.checkForFootsteps(momentumBasedController.getPointPositionGrabber(), readyToGrabNextFootstep, upcomingSupportLeg, feet);
+            upcomingFootstepList.checkForFootsteps(readyToGrabNextFootstep, upcomingSupportLeg, feet);
             checkForSteppingOnOrOff(transferToSide);
          }
 
@@ -1139,10 +1136,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       {
          icpStandOffsetX.set(0.0);
          icpStandOffsetY.set(0.0);
-
-         // Before swinging a foot, relatch where all the other foot positions are.
-         // Otherwise there might be a jump.
-         momentumBasedController.requestResetEstimatorPositionsToCurrent();
 
          desiredECMPinSupportPolygon.set(false);
          walkOnTheEdgesManager.reset();

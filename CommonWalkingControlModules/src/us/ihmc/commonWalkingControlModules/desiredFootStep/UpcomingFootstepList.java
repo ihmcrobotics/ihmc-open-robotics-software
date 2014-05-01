@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.commonWalkingControlModules.stateEstimation.PointPositionGrabberInterface;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -39,8 +38,8 @@ public class UpcomingFootstepList
       parentRegistry.addChild(registry);
    }
 
-   public void checkForFootsteps(PointPositionGrabberInterface pointPositionGrabber, BooleanYoVariable readyToGrabNextFootstep,
-                                 EnumYoVariable<RobotSide> upcomingSupportLeg, SideDependentList<? extends ContactablePlaneBody> bipedFeet)
+   public void checkForFootsteps(BooleanYoVariable readyToGrabNextFootstep, EnumYoVariable<RobotSide> upcomingSupportLeg,
+                                 SideDependentList<? extends ContactablePlaneBody> bipedFeet)
    {
       if (footstepProvider == null) return;
 
@@ -68,11 +67,6 @@ public class UpcomingFootstepList
 //            System.out.println("Grabbed next footstep. upcomingSupportLeg = " + upcomingSupportLeg.getEnumValue());
 //            System.out.println("Grabbed next footstep. nextFootstepList.size() = " + nextFootstepList.size());
 //            System.out.println("Grabbed next footstep. nextFootstepIndex.getIntegerValue() = " + nextFootstepIndex.getIntegerValue());
-
-            if (pointPositionGrabber != null)
-            {
-               pointPositionGrabber.setExpectedFootstep(nextFootstep);
-            }
 
             nextFootstepList.add(nextFootstep);
             nextFootstepIndex.set(nextFootstepList.size() - 1);

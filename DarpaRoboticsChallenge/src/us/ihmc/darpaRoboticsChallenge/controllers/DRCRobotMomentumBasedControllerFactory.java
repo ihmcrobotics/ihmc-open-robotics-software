@@ -20,7 +20,6 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.sensors.ForceSensorData;
 import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
-import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromController;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
@@ -49,11 +48,10 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
    }
 
    @Override
-   public RobotController getController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
-                                        CommonWalkingReferenceFrames referenceFrames, double controlDT, double gravity, DoubleYoVariable yoTime,
+   public RobotController getController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, double controlDT, double gravity, DoubleYoVariable yoTime,
                                         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, GUISetterUpperRegistry guiSetterUpperRegistry, TwistCalculator twistCalculator,
                                         CenterOfMassJacobian centerOfMassJacobian, ForceSensorDataHolder forceSensorDataHolder, LidarControllerInterface lidarControllerInterface,
-                                        StateEstimationDataFromController stateEstimationDataFromControllerSink, GlobalDataProducer dataProducer, SideDependentList<ArrayList<Point2d>> contactPointsArrayList)
+                                        GlobalDataProducer dataProducer, SideDependentList<ArrayList<Point2d>> contactPointsArrayList)
    {
       YoVariableRegistry specificRegistry = new YoVariableRegistry("specific");
 
@@ -82,12 +80,10 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
       // TODO: Generalize setting up the gain maps.  No knowledge of the model at this stage in the game but this shouldn't be Atlas specific
 //      AtlasJointPDGains.createMaps(fullRobotModel, initialPositionControlKpGains, initialPositionControlKdGains);
 
-      RobotController highLevelHumanoidController = highLevelHumanoidControllerFactory.create(estimationLink, estimationFrame, fullRobotModel,
-            initialPositionControlKpGains, initialPositionControlKdGains,
-            referenceFrames, null, yoTime, gravityZ, twistCalculator, centerOfMassJacobian, bipedFeet,
-            controlDT, footSwitches, lidarControllerInterface, stateEstimationDataFromControllerSink,
-            dynamicGraphicObjectsListRegistry, specificRegistry, guiSetterUpperRegistry,
-            null, forceSensorDataHolder);
+      RobotController highLevelHumanoidController = highLevelHumanoidControllerFactory.create(fullRobotModel,
+            initialPositionControlKpGains, initialPositionControlKdGains, referenceFrames, null, yoTime, gravityZ, twistCalculator, centerOfMassJacobian,
+            bipedFeet, controlDT, footSwitches, lidarControllerInterface, dynamicGraphicObjectsListRegistry, specificRegistry, guiSetterUpperRegistry, null,
+            forceSensorDataHolder);
 
       highLevelHumanoidController.getYoVariableRegistry().addChild(specificRegistry);
 
