@@ -29,13 +29,13 @@ public class AtlasPhysicsEngineConfiguration implements ScsCollisionConfigure
    public static int GROUP_FEET = 0xFFFFFFFF;
 
    private DRCRobotJointMap jointMap;
-   private SDFRobot robotModel;
+   private SDFRobot sdfRobot;
    private AtlasPhysicalProperties properties = new AtlasPhysicalProperties();
 
-   public AtlasPhysicsEngineConfiguration(DRCRobotJointMap jointMap , SDFRobot robotModel )
+   public AtlasPhysicsEngineConfiguration(DRCRobotJointMap jointMap , SDFRobot sdfRobot )
    {
       this.jointMap = jointMap;
-      this.robotModel = robotModel;
+      this.sdfRobot = sdfRobot;
    }
 
    @Override
@@ -45,8 +45,8 @@ public class AtlasPhysicsEngineConfiguration implements ScsCollisionConfigure
       String leftFootJointName = jointMap.getJointBeforeFootName(RobotSide.LEFT);
       String rightFootJointName = jointMap.getJointBeforeFootName(RobotSide.RIGHT);
 
-      Joint leftFootJoint = robotModel.getJoint(leftFootJointName);
-      Joint rightFootJoint = robotModel.getJoint(rightFootJointName);
+      Joint leftFootJoint = sdfRobot.getJoint(leftFootJointName);
+      Joint rightFootJoint = sdfRobot.getJoint(rightFootJointName);
 
       Link leftLink = leftFootJoint.getLink();
       Link rightLink = rightFootJoint.getLink();

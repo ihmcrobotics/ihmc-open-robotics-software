@@ -123,9 +123,9 @@ public class AtlasRobotModel implements DRCRobotModel
    }
 
    @Override
-   public ScsCollisionConfigure getPhysicsConfigure( SDFRobot robotModel )
+   public ScsCollisionConfigure getPhysicsConfigure( SDFRobot sdfRobot )
    {
-      return new AtlasPhysicsEngineConfiguration(getJointMap(),robotModel);
+      return new AtlasPhysicsEngineConfiguration(getJointMap(),sdfRobot);
    }
 
    @Override
