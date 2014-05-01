@@ -21,7 +21,6 @@ import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
-import us.ihmc.utilities.math.geometry.FramePose2d;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
@@ -176,7 +175,7 @@ public class FootstepGeneratorVisualizer
          bipedFeet.set(robotSide, contactableBody);
       }
       
-      FramePose2d startPose = new FramePose2d(worldFrame, new Point2d(0.0, 0.0), Math.PI);
+//      FramePose2d startPose = new FramePose2d(worldFrame, new Point2d(0.0, 0.0), Math.PI);//should be done in bipedFeet instead
       FramePoint2d endPoint = new FramePoint2d(worldFrame, new Point2d(0.0, -3.0));
 
       SimplePathParameters pathType = new SimplePathParameters(0.4, 0.2, 0.0, Math.PI * 0.8, Math.PI * 0.15, 0.35);
