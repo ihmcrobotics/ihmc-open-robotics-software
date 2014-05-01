@@ -251,29 +251,22 @@ public class ActiveSetQPMomentumOptimizer implements MomentumOptimizerInterface,
       return optVal;
    }
    
+   
+   static String[] nativeLibraryCandidates = {"ActiveSetQPMomentumOptimizer_rel","ActiveSetQPMomentumOptimizer_msz","ActiveSetQPMomentumOptimizer"};
    static void loadNativeLibrary()
    {
-      try
+      for(int i=0;i<nativeLibraryCandidates.length;i++)
       {
-              System.loadLibrary("ActiveSetQPMomentumOptimizer_rel");
-      }
-      catch(UnsatisfiedLinkError e)
-      {
-         System.out.println("Can't find Release build library, load the default one without suffix");
-         try{
-              System.loadLibrary("ActiveSetQPMomentumOptimizer");
-         }
-         catch(UnsatisfiedLinkError e2)
-         {
-            try
-            {
-                  System.loadLibrary("ActiveSetQPMomentumOptimizer_msz");
-            }
-            catch(UnsatisfiedLinkError e3)
-            {
-                    throw(e3);
-            }
-         }
+              try
+              {
+                      System.loadLibrary(nativeLibraryCandidates[i]);
+                      break;
+              }
+              catch(UnsatisfiedLinkError e)
+              {
+                 if(i==(nativeLibraryCandidates.length-1))
+                       throw(e);
+              }
       }
    }
 
