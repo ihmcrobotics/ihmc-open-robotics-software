@@ -114,6 +114,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
          resourceDirectories = new String[] {
                valModelRoot.getResource("").getFile(),
                valModelRoot.getResource("V1/").getFile(),
+               valModelRoot.getResource("V1/sdf/").getFile(),
                valModelRoot.getResource("V1/meshes/").getFile(),
                valModelRoot.getResource("V1/meshes/2013_05_16/").getFile(),
                };
