@@ -31,26 +31,40 @@ import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
 public class ValkyrieRobotModel implements DRCRobotModel
 {
    private static Class<ModelRoot> valModelRoot = ModelRoot.class;
-   private static String[] resourceDirectories;
    private final ArmControllerParameters armControllerParameters;
+   private final WalkingControllerParameters walkingControllerParameters;
+   private final DRCRobotContactPointParamaters contactPointParamaters;
+   private StateEstimatorParameters stateEstimatorParamaters;
    private final DRCRobotPhysicalProperties physicalProperties;
-   private DRCRobotJointMap jointMap;
+   private final DRCRobotJointMap jointMap;
    private final String robotName = "VALKYRIE";
    private final String modelName = "V1";
-   private StateEstimatorParameters stateEstimatorParamaters;
+   private final String sdfFileName = "V1/sdf/V1_sim.sdf";
+   
+   
+   private final String[] resourceDirectories = {
+         valModelRoot.getResource("").getFile(),
+         valModelRoot.getResource("V1/").getFile(),
+         valModelRoot.getResource("V1/sdf/").getFile(),
+         valModelRoot.getResource("V1/meshes/").getFile(),
+         valModelRoot.getResource("V1/meshes/2013_05_16/").getFile(),
+         };
+   
    private double estimatorDT;
-   private JaxbSDFLoader loader;
-   private JaxbSDFLoader headlessLoader;
-
+   private final JaxbSDFLoader loader;
+   private final JaxbSDFLoader headlessLoader;
    private final boolean runningOnRealRobot;
    
    public ValkyrieRobotModel(boolean runningOnRealRobot)
    {
       this.runningOnRealRobot = runningOnRealRobot;
       this.armControllerParameters = new ValkyrieArmControllerParameters(runningOnRealRobot);
+      this.walkingControllerParameters = new ValkyrieWalkingControllerParameters(runningOnRealRobot);
+      this.contactPointParamaters = new ValkyrieContactPointParamaters(getJointMap());
       this.physicalProperties = new ValkyriePhysicalProperties();
-      
-//      this.jointMap = new ValkyrieJointMap(); 
+      this.jointMap = new ValkyrieJointMap();
+      this.headlessLoader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSdfFileAsStream(), true);
+      this.loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSdfFileAsStream(), false);
    }
    
    @Override
@@ -59,13 +73,10 @@ public class ValkyrieRobotModel implements DRCRobotModel
       return armControllerParameters;
    }
 
-   /**
-    * Returns a new instance of the WalkingControllerParameters as it is mutable
-    */
    @Override
    public WalkingControllerParameters getWalkingControlParameters()
    {
-      return new ValkyrieWalkingControllerParameters(runningOnRealRobot);
+      return walkingControllerParameters;
    }
 
    @Override
@@ -88,10 +99,6 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public DRCRobotJointMap getJointMap()
    {
-      if(jointMap == null)
-      {
-         jointMap = new ValkyrieJointMap(); 
-      }
       return jointMap;
    }
 
@@ -103,22 +110,11 @@ public class ValkyrieRobotModel implements DRCRobotModel
 
    private String getSdfFile()
    {
-      return "V1/sdf/V1_sim.sdf";
+      return sdfFileName;
    }
 
    private String[] getResourceDirectories()
    {
-
-      if (resourceDirectories == null)
-      {
-         resourceDirectories = new String[] {
-               valModelRoot.getResource("").getFile(),
-               valModelRoot.getResource("V1/").getFile(),
-               valModelRoot.getResource("V1/sdf/").getFile(),
-               valModelRoot.getResource("V1/meshes/").getFile(),
-               valModelRoot.getResource("V1/meshes/2013_05_16/").getFile(),
-               };
-      }
       return resourceDirectories;
    }
 
@@ -139,13 +135,10 @@ public class ValkyrieRobotModel implements DRCRobotModel
       return new ValkyrieInitialSetup(groundHeight, initialYaw);
    }
 
-   /**
-    * Returns a new instance of the WalkingControllerParameters as it is mutable
-    */
    @Override
    public WalkingControllerParameters getMultiContactControllerParameters()
    {
-      return new ValkyrieWalkingControllerParameters();
+      return walkingControllerParameters;
    }
 
    @Override
@@ -157,7 +150,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public DRCRobotContactPointParamaters getContactPointParamaters(boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsToFeetOnly)
    {
-      return new ValkyrieContactPointParamaters(getJointMap());
+      return contactPointParamaters;
    }
 
    @Override
@@ -170,7 +163,6 @@ public class ValkyrieRobotModel implements DRCRobotModel
       valkyrieOutputWriterWithAccelerationIntegration.setAlphaDesiredPosition(0.0);
       valkyrieOutputWriterWithAccelerationIntegration.setVelocityGains(15.0);
       valkyrieOutputWriterWithAccelerationIntegration.setPositionGains(0.0);
-
 
       return valkyrieOutputWriterWithAccelerationIntegration;
    }
@@ -199,16 +191,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    {
       if(headless)
       {
-         if(headlessLoader == null)
-         {
-            this.headlessLoader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSdfFileAsStream(), headless);
-         }
          return headlessLoader;
-      }
-      
-      if(loader == null)
-      {
-         this.loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSdfFileAsStream(), headless);
       }
       return loader;
    }
