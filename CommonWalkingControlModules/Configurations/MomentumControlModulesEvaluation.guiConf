@@ -61,7 +61,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.V1.controllerRegistry.DRCControllerDispatcherController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.OptimizationMomentumControlModule.primaryResNorm</Variables>
+		<Variables>root.V1.controllerRegistry.DRCControllerDispatcherController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.OptimizationMomentumControlModule.primaryResNorm,root.V1.controllerRegistry.DRCControllerDispatcherController.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.OptimizationMomentumControlModule.secondaryResNorm</Variables>
 		<GraphConfiguration>
 			<Name>config6</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -108,10 +108,10 @@ Plotter,
  <Position Y>0.0</Position Y>
  <Position Z>0.0</Position Z>
  <Track Booleans>
-<Track>true</Track>
+<Track>false</Track>
 <Track X>true</Track X>
 <Track Y>true</Track Y>
-<Track Z>true</Track Z>
+<Track Z>false</Track Z>
 </Track Booleans>
 </Track data>
 <Fix Position>

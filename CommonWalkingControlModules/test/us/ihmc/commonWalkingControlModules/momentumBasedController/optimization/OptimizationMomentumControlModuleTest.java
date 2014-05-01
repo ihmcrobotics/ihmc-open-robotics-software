@@ -79,7 +79,7 @@ public class OptimizationMomentumControlModuleTest
    @Test
    public void testMomentumAndJointSpaceConstraints() throws NoConvergenceException
    {
-      Random random = new Random(1223525L);
+      Random random = new Random(1223521L);
       Vector3d[] jointAxes = new Vector3d[]
       {
          X, Y, Z, Z, X, Y, X, Y
@@ -126,8 +126,8 @@ public class OptimizationMomentumControlModuleTest
                                        1e-3);
       assertWrenchesInFrictionCones(externalWrenchSolution, contactStates, coefficientOfFriction);
       JUnitTools.assertSpatialForceVectorEquals(momentumRateOfChangeIn, momentumRateOfChangeOut, 1e-3);
-      EjmlUnitTests.assertEquals(desiredJointAccelerations, jointAccelerationsBack, 1e-9);
-      assertRootJointWrenchZero(externalWrenchSolution, rootJoint, gravityZ, 1e-2);
+      EjmlUnitTests.assertEquals(desiredJointAccelerations, jointAccelerationsBack, 1e-3);
+      assertRootJointWrenchZero(externalWrenchSolution, rootJoint, gravityZ, 1e-3);
    }
 
    @Test
@@ -280,10 +280,10 @@ public class OptimizationMomentumControlModuleTest
 
       assertWrenchesSumUpToMomentumDot(externalWrenchSolution.values(), momentumRateOfChangeOut, gravityZ, totalMass, centerOfMassFrame,
                                        1e-3);
-      JUnitTools.assertSpatialForceVectorEquals(momentumRateOfChangeIn, momentumRateOfChangeOut, 1e-1);
+      JUnitTools.assertSpatialForceVectorEquals(momentumRateOfChangeIn, momentumRateOfChangeOut, 1e-3);
       assertWrenchesInFrictionCones(externalWrenchSolution, contactStates, coefficientOfFriction);
-      assertRootJointWrenchZero(externalWrenchSolution, rootJoint, gravityZ, 1e-2);
-      JUnitTools.assertFrameVectorEquals(desiredPointAccelerationBack, desiredPointAcceleration, 1e-9);
+      assertRootJointWrenchZero(externalWrenchSolution, rootJoint, gravityZ, 1e-3);
+      JUnitTools.assertFrameVectorEquals(desiredPointAccelerationBack, desiredPointAcceleration, 1e-3);
    }
 
    @Test
@@ -526,7 +526,7 @@ public class OptimizationMomentumControlModuleTest
       CommonOps.multTransA(nullspace, vdotTaskSpace, nullspaceMultiplierCheck);
       CommonOps.subEquals(nullspaceMultiplierCheck, nullspaceMultipliers);
 
-      assertTrue(MatrixFeatures.isConstantVal(nullspaceMultiplierCheck, 0.0, 1e-7));
+      assertTrue(MatrixFeatures.isConstantVal(nullspaceMultiplierCheck, 0.0, 1e-6));
 
       SpatialForceVector momentumRateOfChangeOut = momentumModuleSolution.getCentroidalMomentumRateSolution();
       Map<RigidBody, Wrench> externalWrenchSolution = momentumModuleSolution.getExternalWrenchSolution();
@@ -633,7 +633,7 @@ public class OptimizationMomentumControlModuleTest
       MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings(jointsToOptimizeFor, new YoVariableRegistry("test1"));
       momentumOptimizationSettings.setMomentumWeight(1.0, 1.0, 1.0, 1.0);
 
-//    momentumOptimizationSettings.setDampedLeastSquaresFactor(1e-11);
+    momentumOptimizationSettings.setDampedLeastSquaresFactor(0.0);
 //    momentumOptimizationSettings.setGroundReactionForceRegularization(1e-9);
       momentumOptimizationSettings.setRhoMin(0.0);
 
