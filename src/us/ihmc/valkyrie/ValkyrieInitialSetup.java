@@ -20,8 +20,10 @@ public class ValkyrieInitialSetup implements DRCRobotInitialSetup<SDFRobot>
    private double groundZ;
    private double initialYaw;
    private final Transform3D rootToWorld = new Transform3D();
+   private final Vector3d positionInWorld = new Vector3d();
    private final Vector3d offset = new Vector3d();
    private final Quat4d rotation = new Quat4d();
+   private boolean robotInitialized = false;
 
    public ValkyrieInitialSetup(double groundZ, double initialYaw)
    {
@@ -31,6 +33,16 @@ public class ValkyrieInitialSetup implements DRCRobotInitialSetup<SDFRobot>
 
    @Override
    public void initializeRobot(SDFRobot robot, DRCRobotJointMap jointMap)
+   {
+      if(!robotInitialized)
+      {
+         setActuatorPositions(robot);
+         positionRobotInWorld(robot);
+         robotInitialized = true;
+      }
+   }
+   
+   private void setActuatorPositions(SDFRobot robot)
    {
       robot.getOneDegreeOfFreedomJoint("RightHipExtensor").setQ(-0.4);
       robot.getOneDegreeOfFreedomJoint("RightKneeExtensor").setQ(-0.8);
@@ -43,15 +55,32 @@ public class ValkyrieInitialSetup implements DRCRobotInitialSetup<SDFRobot>
       robot.getOneDegreeOfFreedomJoint("LeftShoulderAdductor").setQ(-0.18);
       robot.getOneDegreeOfFreedomJoint("LeftShoulderExtensor").setQ(0.3);
       robot.getOneDegreeOfFreedomJoint("LeftElbowExtensor").setQ(-1.0);
-
+      
       robot.getOneDegreeOfFreedomJoint("RightShoulderAdductor").setQ(-0.18);
       robot.getOneDegreeOfFreedomJoint("RightShoulderExtensor").setQ(0.3);
       robot.getOneDegreeOfFreedomJoint("RightElbowExtensor").setQ(-1.0);
-      
       robot.update();
+   }
+   
+   private void positionRobotInWorld(SDFRobot robot)
+   {
       robot.getRootJointToWorldTransform(rootToWorld);
-      rootToWorld.get(rotation, offset);
-
+      rootToWorld.get(rotation, positionInWorld);
+      positionInWorld.setZ(groundZ + getPelvisToFoot(robot));
+      positionInWorld.add(offset);
+      robot.setPositionInWorld(positionInWorld);
+      
+      FrameOrientation frameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), rotation);
+      double[] yawPitchRoll = frameOrientation.getYawPitchRoll();
+      yawPitchRoll[0] = initialYaw;
+      frameOrientation.setYawPitchRoll(yawPitchRoll);
+      
+      robot.setOrientation(frameOrientation.getQuaternion());
+      robot.update();
+   }
+   
+   private double getPelvisToFoot(SDFRobot robot)
+   {
       List<GroundContactPoint> contactPoints = robot.getFootGroundContactPoints(RobotSide.LEFT);
       double height = Double.POSITIVE_INFINITY;
       for(GroundContactPoint gc : contactPoints)
@@ -61,25 +90,7 @@ public class ValkyrieInitialSetup implements DRCRobotInitialSetup<SDFRobot>
             height = gc.getPositionPoint().getZ();
          }
       }
-      GroundContactPoint gc1 = contactPoints.get(0);
-      double pelvisToFoot = offset.getZ() - height;
-
-      // Hardcoded for gazebo integration
-      //      double pelvisToFoot = 0.887;
-
-      offset.setZ(groundZ + pelvisToFoot);
-
-      //    offset.add(robot.getPositionInWorld());
-      robot.setPositionInWorld(offset);
-
-      FrameOrientation frameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), rotation);
-      double[] yawPitchRoll = frameOrientation.getYawPitchRoll();
-      yawPitchRoll[0] = initialYaw;
-      frameOrientation.setYawPitchRoll(yawPitchRoll);
-
-      robot.setOrientation(frameOrientation.getQuaternion());
-
-      robot.update();
+      return offset.getZ() - height;
    }
    
    public void getOffset(Vector3d offsetToPack)
