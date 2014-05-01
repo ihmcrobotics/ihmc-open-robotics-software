@@ -58,11 +58,11 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public ValkyrieRobotModel(boolean runningOnRealRobot)
    {
       this.runningOnRealRobot = runningOnRealRobot;
+      this.jointMap = new ValkyrieJointMap();
+      this.physicalProperties = new ValkyriePhysicalProperties();
       this.armControllerParameters = new ValkyrieArmControllerParameters(runningOnRealRobot);
       this.walkingControllerParameters = new ValkyrieWalkingControllerParameters(runningOnRealRobot);
-      this.contactPointParamaters = new ValkyrieContactPointParamaters(getJointMap());
-      this.physicalProperties = new ValkyriePhysicalProperties();
-      this.jointMap = new ValkyrieJointMap();
+      this.contactPointParamaters = new ValkyrieContactPointParamaters(jointMap);
       this.headlessLoader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSdfFileAsStream(), true);
       this.loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSdfFileAsStream(), false);
    }
