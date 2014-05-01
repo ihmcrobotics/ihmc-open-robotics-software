@@ -30,13 +30,9 @@ import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
-import us.ihmc.commonWalkingControlModules.stateEstimation.DesiredCoMAndAngularAccelerationGrabber;
-import us.ihmc.commonWalkingControlModules.stateEstimation.PointPositionGrabber;
-import us.ihmc.commonWalkingControlModules.stateEstimation.PointPositionGrabberInterface;
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
-import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromController;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -57,7 +53,6 @@ import us.ihmc.utilities.screwTheory.TotalWrenchCalculator;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.utilities.screwTheory.Wrench;
 
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -118,10 +113,6 @@ public class MomentumBasedController
    private final ProcessedOutputsInterface processedOutputs;
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
 
-   private final DesiredCoMAndAngularAccelerationGrabber desiredCoMAndAngularAccelerationGrabber;
-   private final BooleanYoVariable resetEstimatorPositionsToCurrent = new BooleanYoVariable("resetEstimatorPositionsToCurrent", registry);
-   private final PointPositionGrabberInterface pointPositionGrabber;
-
    private final MomentumControlModuleBridge momentumControlModuleBridge;
 
    private final SpatialForceVector gravitationalWrench;
@@ -144,14 +135,13 @@ public class MomentumBasedController
          new DoubleYoVariable("rightFootCoPErrorMagnitude", registry));
    private final DoubleYoVariable gainCoPX = new DoubleYoVariable("gainCoPX", registry);
    private final DoubleYoVariable gainCoPY = new DoubleYoVariable("gainCoPY", registry);
-   
-   public MomentumBasedController(RigidBody estimationLink, ReferenceFrame estimationFrame, FullRobotModel fullRobotModel,
-         CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames, SideDependentList<FootSwitchInterface> footSwitches,
-         DoubleYoVariable yoTime, double gravityZ, TwistCalculator twistCalculator, SideDependentList<ContactablePlaneBody> feet,
-         SideDependentList<ContactablePlaneBody> handsWithFingersBentBack, SideDependentList<ContactablePlaneBody> thighs, ContactablePlaneBody pelvis, ContactablePlaneBody pelvisBack, double controlDT,
+
+   public MomentumBasedController(FullRobotModel fullRobotModel, CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames,
+         SideDependentList<FootSwitchInterface> footSwitches, DoubleYoVariable yoTime, double gravityZ, TwistCalculator twistCalculator,
+         SideDependentList<ContactablePlaneBody> feet, SideDependentList<ContactablePlaneBody> handsWithFingersBentBack,
+         SideDependentList<ContactablePlaneBody> thighs, ContactablePlaneBody pelvis, ContactablePlaneBody pelvisBack, double controlDT,
          ProcessedOutputsInterface processedOutputs, MomentumOptimizationSettings momentumOptimizationSettings,
-         OldMomentumControlModule oldMomentumControlModule, ArrayList<Updatable> updatables,
-         StateEstimationDataFromController stateEstimationDataFromControllerSink, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+         OldMomentumControlModule oldMomentumControlModule, ArrayList<Updatable> updatables, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
       
@@ -238,24 +228,6 @@ public class MomentumBasedController
                contactablePlaneBody.getPlaneFrame(), contactablePlaneBody.getContactPoints2d(), coefficientOfFriction, registry);
          yoPlaneContactStates.put(contactablePlaneBody, contactState);
          yoPlaneContactStateList.add(contactState);
-      }
-
-      if (stateEstimationDataFromControllerSink != null)
-      {
-         this.desiredCoMAndAngularAccelerationGrabber = new DesiredCoMAndAngularAccelerationGrabber(stateEstimationDataFromControllerSink, estimationLink,
-               estimationFrame, totalMass, registry);
-
-         double touchdownTime = 0.12;
-         double minCoPDistance = 0.01;
-
-         this.pointPositionGrabber = new PointPositionGrabber(stateEstimationDataFromControllerSink, yoPlaneContactStates, registry, controlDT, touchdownTime,
-               minCoPDistance);
-         setDelayTimeBeforeTrustingContacts(touchdownTime);
-      }
-      else
-      {
-         this.desiredCoMAndAngularAccelerationGrabber = null;
-         this.pointPositionGrabber = null;
       }
 
       InverseDynamicsJoint[] joints = ScrewTools.computeSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
@@ -384,7 +356,6 @@ public class MomentumBasedController
          //throw new RuntimeException(momentumControlModuleException);
       }
 
-      SpatialForceVector desiredCentroidalMomentumRate = momentumModuleSolution.getCentroidalMomentumRateSolution();
       Map<RigidBody, Wrench> externalWrenches = momentumModuleSolution.getExternalWrenchSolution();
 
       for (RigidBody rigidBody : externalWrenches.keySet())
@@ -405,19 +376,6 @@ public class MomentumBasedController
 //      SpatialForceVector groundReactionWrenchCheck = inverseDynamicsCalculator.computeTotalExternalWrench(centerOfMassFrame);
 //      groundReactionTorqueCheck.set(groundReactionWrenchCheck.getAngularPartCopy());
 //      groundReactionForceCheck.set(groundReactionWrenchCheck.getLinearPartCopy());
-
-      if (desiredCoMAndAngularAccelerationGrabber != null)
-         this.desiredCoMAndAngularAccelerationGrabber.set(inverseDynamicsCalculator.getSpatialAccelerationCalculator(), desiredCentroidalMomentumRate);
-
-      if (pointPositionGrabber != null)
-      {
-         if (resetEstimatorPositionsToCurrent.getBooleanValue())
-         {
-            pointPositionGrabber.resetToCurrentLocations(yoPlaneContactStates, planeContactWrenchProcessor.getCops());
-            resetEstimatorPositionsToCurrent.set(false);
-         }
-         pointPositionGrabber.set(yoPlaneContactStates, planeContactWrenchProcessor.getCops());
-      }
 
       inverseDynamicsCalculator.compute();
 
@@ -507,11 +465,6 @@ public class MomentumBasedController
    }
 
    
-   public void requestResetEstimatorPositionsToCurrent()
-   {
-      this.resetEstimatorPositionsToCurrent.set(true);
-   }
-
    private void updateMomentumBasedControllerSpy()
    {
       if (momentumBasedControllerSpy != null)
@@ -613,7 +566,6 @@ public class MomentumBasedController
    {
       // When you initialize into this controller, reset the estimator positions to current. Otherwise it might be in a bad state 
       // where the feet are all jacked up. For example, after falling and getting back up.
-      resetEstimatorPositionsToCurrent.set(true);
       inverseDynamicsCalculator.compute();
       momentumControlModuleBridge.initialize();
       planeContactWrenchProcessor.initialize();
@@ -758,11 +710,6 @@ public class MomentumBasedController
       return referenceFrames;
    }
 
-   public PointPositionGrabberInterface getPointPositionGrabber()
-   {
-      return pointPositionGrabber;
-   }
-
    public DoubleYoVariable getYoTime()
    {
       return yoTime;
@@ -874,12 +821,6 @@ public class MomentumBasedController
    public void setMomentumControlModuleToUse(MomentumControlModuleType momentumControlModuleToUse)
    {
       momentumControlModuleBridge.setMomentumControlModuleToUse(momentumControlModuleToUse);
-   }
-
-   public void setDelayTimeBeforeTrustingContacts(double delayTimeBeforeTrustingContacts)
-   {
-      if (pointPositionGrabber != null)
-         pointPositionGrabber.setDelayTimeBeforeTrustingContacts(delayTimeBeforeTrustingContacts);
    }
 
    public int getOrCreateGeometricJacobian(RigidBody ancestor, RigidBody descendant, ReferenceFrame jacobianFrame)
