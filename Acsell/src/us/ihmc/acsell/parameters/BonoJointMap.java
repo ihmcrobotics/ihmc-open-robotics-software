@@ -28,11 +28,6 @@ public class BonoJointMap extends DRCRobotJointMap
    public static final String chestName = "utorso";
    public static final String pelvisName = "pelvis";
    public static final String headName = null;
-   public static final String lidarSensorName = null;
-   public static final String leftCameraName = null;
-   public static final String rightCameraName = null;
-   public static final String imuSensor = pelvisName + "_pelvisIMU";
-   public static final String[] imuSensorsToUse = {imuSensor};
    
    private final SpineJointName[] spineJoints = { SpineJointName.SPINE_ROLL, SpineJointName.SPINE_PITCH, SpineJointName.SPINE_YAW };
    private final LegJointName[] legJoints = { LegJointName.HIP_ROLL, LegJointName.HIP_YAW, LegJointName.HIP_PITCH, LegJointName.KNEE, LegJointName.ANKLE_ROLL,
@@ -42,12 +37,11 @@ public class BonoJointMap extends DRCRobotJointMap
    private final LinkedHashMap<String, Pair<RobotSide, LegJointName>> legJointNames = new LinkedHashMap<String, Pair<RobotSide, LegJointName>>();
    private final LinkedHashMap<String, SpineJointName> spineJointNames = new LinkedHashMap<String, SpineJointName>();
    private final SideDependentList<String> jointBeforeFeetNames = new SideDependentList<String>();
-   private final SideDependentList<String> feetForceSensorNames = new SideDependentList<String>();
    private final LinkedHashMap<String, Pair<RobotSide, LimbName>> limbNames = new LinkedHashMap<String, Pair<RobotSide, LimbName>>();
    private final LinkedHashMap<String, Pair<RobotSide, ArmJointName>> armJointNames = new LinkedHashMap<String, Pair<RobotSide, ArmJointName>>();
    private final LinkedHashMap<String, NeckJointName> neckJointNames = new LinkedHashMap<String, NeckJointName>();
    private final DRCRobotContactPointParamaters contactPointParamaters;
-   private final String[] forceSensorNames;
+   
    private final NeckJointName[] neckJoints = {};
    private final ArmJointName[] armJoints = {};
    
@@ -66,12 +60,11 @@ public class BonoJointMap extends DRCRobotJointMap
          limbNames.put(null, new Pair<RobotSide, LimbName>(robotSide, LimbName.ARM));
          limbNames.put(robotSideLowerCaseFirstLetter + "_foot", new Pair<RobotSide, LimbName>(robotSide, LimbName.LEG));
          jointBeforeFeetNames.put(robotSide, robotSideLowerCaseFirstLetter + "_leg_lax");
-         feetForceSensorNames.put(robotSide, jointBeforeFeetNames.get(robotSide));
       }     
       spineJointNames.put("back_lbx", SpineJointName.SPINE_ROLL);
       spineJointNames.put("back_mby", SpineJointName.SPINE_PITCH);
       spineJointNames.put("back_ubz", SpineJointName.SPINE_YAW);
-      forceSensorNames= new String[]{feetForceSensorNames.get(RobotSide.LEFT), feetForceSensorNames.get(RobotSide.RIGHT)};
+      
 
       for (String spineJoint : spineJointNames.keySet())
       {
@@ -84,11 +77,13 @@ public class BonoJointMap extends DRCRobotJointMap
       contactPointParamaters = new BonoContactPointParamaters(this);
    }
 
+   @Override
    public String getModelName()
    {
       return "bono";
    }
 
+   @Override
    public SideDependentList<Transform3D> getAnkleToSoleFrameTransform()
    {
       return BonoPhysicalProperties.ankleToSoleFrameTransforms;
@@ -100,72 +95,79 @@ public class BonoJointMap extends DRCRobotJointMap
       return BonoOrderedJointNames.jointNames;
    }
    
+   @Override
    public SpineJointName[] getSpineJointNames()
    {
       return spineJoints;
    }
    
+   @Override
    public List<Pair<String, Vector3d>> getJointNameGroundContactPointMap()
    {
       return contactPointParamaters.getJointNameGroundContactPointMap();
    }
-   
-   @Override
-   public String getLidarJointName()
-   {
-      return null;
-   }
 
+   @Override
    public JointRole getJointRole(String jointName)
    {
       return jointRoles.get(jointName);
    }
 
+   @Override
    public Pair<RobotSide, LegJointName> getLegJointName(String jointName)
    {
       return legJointNames.get(jointName);
    }
 
+   @Override
    public Pair<RobotSide, ArmJointName> getArmJointName(String jointName)
    {
       return armJointNames.get(jointName);
    }
 
+   @Override
    public NeckJointName getNeckJointName(String jointName)
    {
       return neckJointNames.get(jointName);
    }
 
+   @Override
    public SpineJointName getSpineJointName(String jointName)
    {
       return spineJointNames.get(jointName);
    }
 
+   @Override
    public Pair<RobotSide, LimbName> getLimbName(String limbName)
    {
       return limbNames.get(limbName);
    }
 
+   @Override
    public String getPelvisName()
    {
       return pelvisName;
    }
 
+   @Override
    public String getChestName()
    {
       return chestName;
    }
 
+   @Override
    public String getHeadName()
    {
       return headName;
    }
 
+   @Override
    public boolean isTorqueVelocityLimitsEnabled()
    {
       return false;
    }
 
+   @Override
    public Set<String> getLastSimulatedJoints()
    {
       HashSet<String> lastSimulatedJoints = new HashSet<String>();
@@ -183,52 +185,27 @@ public class BonoJointMap extends DRCRobotJointMap
    }
 
    @Override
-   public String[] getIMUSensorsToUse()
-   {
-      return imuSensorsToUse;
-   }
-
-   @Override
-   public String getLidarSensorName()
-   {
-      return lidarSensorName;
-   }
-
-   @Override
-   public String getLeftCameraName()
-   {
-      return leftCameraName;
-   }
-
-   public String getRightCameraName()
-   {
-      return rightCameraName;
-   }
-
    public String getJointBeforeFootName(RobotSide robotSide)
    {
       return jointBeforeFeetNames.get(robotSide);
    }
 
+   @Override
    public LegJointName[] getLegJointNames()
    {
       return legJoints;
    }
 
+   @Override
    public ArmJointName[] getArmJointNames()
    {
       return armJoints;
    }
-
+   
+   @Override
    public NeckJointName[] getNeckJointNames()
    {
       return neckJoints;
-   }
-
-   @Override
-   public String[] getForceSensorNames()
-   {
-      return forceSensorNames;
    }
 
    @Override
@@ -249,12 +226,6 @@ public class BonoJointMap extends DRCRobotJointMap
    public String getNameOfJointBeforeHand(RobotSide robotSide)
    {
       return null;
-   }
-
-   @Override
-   public SideDependentList<String> getFeetForceSensorNames()
-   {
-      return feetForceSensorNames;
    }
 
    @Override
