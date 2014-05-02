@@ -22,6 +22,8 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
  */
 public class YoVariableThreadAccessValidator
 {
+   private static final boolean DEBUG = false;
+   
    private final YoVariableRegistry root;
    private Thread accessorThread = null;
    
@@ -85,11 +87,14 @@ public class YoVariableThreadAccessValidator
          }
          catch(Exception e)
          {
-            e.printStackTrace();
+            if (DEBUG)
+            {
+               e.printStackTrace();
+            }
          }
       }
    }
-   
+
    private void testAccess(YoVariable v)
    {
       Thread currentThread = Thread.currentThread();
@@ -115,7 +120,10 @@ public class YoVariableThreadAccessValidator
          }
          catch(Exception e)
          {
-            e.printStackTrace();
+            if (DEBUG)
+            {
+               e.printStackTrace();
+            }
          }
       }
    }
