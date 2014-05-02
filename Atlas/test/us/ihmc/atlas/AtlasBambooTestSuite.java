@@ -8,16 +8,12 @@ import us.ihmc.atlas.momentumBasedControl.AtlasOptimizationMomentumControlModule
 import us.ihmc.atlas.networkProcessor.downlinkSerializers.AtlasJointConfigurationDataSerializerTest;
 import us.ihmc.atlas.networking.AtlasNetworkingCommandReaderTest;
 import us.ihmc.atlas.posePlayback.AtlasPlaybackPoseSequenceTest;
-import us.ihmc.atlas.ros.AtlasCommandMessageTest;
-import us.ihmc.atlas.ros.AtlasStateMessageTest;
 import us.ihmc.atlas.utilities.kinematics.AtlasNumericalInverseKinematicsCalculatorWithRobotTest;
 import us.ihmc.utilities.test.JUnitTestSuiteConstructor;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses(
 {
-   AtlasStateMessageTest.class,
-   AtlasCommandMessageTest.class,
    AtlasFootstepGeneratorTest.class, 
    AtlasOptimizationMomentumControlModuleTest.class,
    AtlasNetworkingCommandReaderTest.class,
