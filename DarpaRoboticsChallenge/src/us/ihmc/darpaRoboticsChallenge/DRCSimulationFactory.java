@@ -1,11 +1,10 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import com.yobotics.simulationconstructionset.*;
-import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
-import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
-import com.yobotics.simulationconstructionset.robotController.ModularRobotController;
-import com.yobotics.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import java.util.ArrayList;
+
+import javax.media.j3d.Transform3D;
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
@@ -18,6 +17,7 @@ import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.BlockingThreadSynch
 import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadSynchronizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.ScsInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
@@ -39,11 +39,18 @@ import us.ihmc.util.ThreadFactory;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 
-import javax.media.j3d.Transform3D;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
-import java.util.ArrayList;
+import com.yobotics.simulationconstructionset.GroundContactPoint;
+import com.yobotics.simulationconstructionset.IMUMount;
+import com.yobotics.simulationconstructionset.Joint;
+import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
+import com.yobotics.simulationconstructionset.Robot;
+import com.yobotics.simulationconstructionset.UnreasonableAccelerationException;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
+import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
+import com.yobotics.simulationconstructionset.robotController.ModularRobotController;
+import com.yobotics.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class DRCSimulationFactory
 {
@@ -56,7 +63,8 @@ public class DRCSimulationFactory
    {
       GUISetterUpperRegistry guiSetterUpperRegistry = new GUISetterUpperRegistry();
 
-      DRCRobotJointMap jointMap = drcRobotModel.getJointMap();
+      
+      DRCRobotSensorInformation sensorInformation = drcRobotModel.getSensorInformation();
 
       double estimateDT = DRCConfigParameters.ESTIMATOR_DT;
       double simulateDT = robotInterface.getSimulateDT();
@@ -110,7 +118,7 @@ public class DRCSimulationFactory
       {
          // Only add the main one now. Not the head one.
          //                   if (imuMount.getName().equals("head_imu_sensor")) imuMounts.add(imuMount);
-         for (String imuSensorName : jointMap.getIMUSensorsToUse())
+         for (String imuSensorName : sensorInformation.getIMUSensorsToUse())
          {
             if (imuMount.getName().equals(imuSensorName))
             {
@@ -122,7 +130,7 @@ public class DRCSimulationFactory
       ArrayList<OneDegreeOfFreedomJoint> forceTorqueSensorJoints = new ArrayList<OneDegreeOfFreedomJoint>();
       // TODO: Get from SDF file
 
-      for (String name : jointMap.getForceSensorNames())
+      for (String name : sensorInformation.getForceSensorNames())
       {
          forceTorqueSensorJoints.add(simulatedRobot.getOneDegreeOfFreedomJoint(name));
       }
