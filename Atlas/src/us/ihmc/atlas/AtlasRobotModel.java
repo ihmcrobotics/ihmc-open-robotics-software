@@ -168,7 +168,7 @@ public class AtlasRobotModel implements DRCRobotModel
       {
          if(headlessLoader == null)
          {
-            this.headlessLoader = DRCRobotSDFLoader.loadDRCRobot(selectedVersion.getResourceDirectories(), selectedVersion.getSdfFileAsStream(), headless);
+            this.headlessLoader = DRCRobotSDFLoader.loadDRCRobot(new String[]{}, selectedVersion.getSdfFileAsStream(), headless);
          }
          return headlessLoader;
       }
