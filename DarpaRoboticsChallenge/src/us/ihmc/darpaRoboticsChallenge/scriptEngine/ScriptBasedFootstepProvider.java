@@ -57,7 +57,7 @@ public class ScriptBasedFootstepProvider implements FootstepProvider
       this.scriptEventDuration = new DoubleYoVariable("scriptEventDuration", registry);
       
       this.scriptFileLoader = scriptFileLoader;
-      desiredHandPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters, registry);
+      desiredHandPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame());
       desiredComHeightProvider = new DesiredComHeightProvider();
    }
    

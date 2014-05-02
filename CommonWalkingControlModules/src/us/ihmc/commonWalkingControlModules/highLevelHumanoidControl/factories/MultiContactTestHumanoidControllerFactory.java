@@ -25,7 +25,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.commonWalkingControlModules.momentumBasedController.OldMomentumControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredArmJointAngleProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredChestOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootPoseProvider;
@@ -164,7 +163,7 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
                                                            processedOutputs, momentumOptimizationSettings , oldMomentumControlModule, null,
                                                            dynamicGraphicObjectsListRegistry);
 
-      DesiredHandPoseProvider handPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters, registry);
+      DesiredHandPoseProvider handPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame());
 //      TorusPoseProvider torusPoseProvider = new TorusPoseProvider();
 //      TorusManipulationProvider torusManipulationProvider = new TorusManipulationProvider();
       DesiredFootPoseProvider footPoseProvider = new DesiredFootPoseProvider();
@@ -182,13 +181,11 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
       DesiredHighLevelStateProvider highLevelStateProvider = null;
       ReinitializeWalkingControllerProvider reinitializeWalkingController = null;
       
-      DesiredArmJointAngleProvider armJointAngleProvider = null;
-      
       ControlStatusProducer controlStatusProducer = new SystemErrControlStatusProducer();
      
       VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(footstepProvider, mapFromFootstepsToTrajectoryParameters,
             headOrientationProvider, comHeightProvider, pelvisPoseProvider, handPoseProvider, handLoadBearingProvider, chestOrientationProvider, footPoseProvider, footLoadBearingProvider, highLevelStateProvider, thighLoadBearingProvider,
-            pelvisLoadBearingProvider, armJointAngleProvider, reinitializeWalkingController, controlStatusProducer);
+            pelvisLoadBearingProvider, reinitializeWalkingController, controlStatusProducer);
 
       VariousWalkingManagers variousWalkingManagers = VariousWalkingManagers.create(momentumBasedController, yoTime, variousWalkingProviders, walkingControllerParameters,
             armControllerParameters, registry, dynamicGraphicObjectsListRegistry);

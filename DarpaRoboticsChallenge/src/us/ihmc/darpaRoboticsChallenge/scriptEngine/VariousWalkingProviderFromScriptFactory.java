@@ -9,7 +9,6 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviderFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredArmJointAngleProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredChestOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootPoseProvider;
@@ -77,14 +76,12 @@ public class VariousWalkingProviderFromScriptFactory implements VariousWalkingPr
       DesiredThighLoadBearingProvider thighLoadBearingProvider = null; 
       DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider = null; 
       
-      DesiredArmJointAngleProvider armJointAngleProvider = null;
-      
       ControlStatusProducer controlStatusProducer = new SystemErrControlStatusProducer();
       
       VariousWalkingProviders variousProvidersFactory = new VariousWalkingProviders(footstepProvider, mapFromFootstepsToTrajectoryParameters,
             headOrientationProvider, desiredComHeightProvider, pelvisPoseProvider, handPoseProvider, handLoadBearingProvider,
             chestOrientationProvider, footPoseProvider, footLoadBearingProvider, highLevelStateProvider, thighLoadBearingProvider,
-            pelvisLoadBearingProvider, armJointAngleProvider, reinitializeWalkingControllerProvider, controlStatusProducer);
+            pelvisLoadBearingProvider, reinitializeWalkingControllerProvider, controlStatusProducer);
 
       return variousProvidersFactory;
    }
