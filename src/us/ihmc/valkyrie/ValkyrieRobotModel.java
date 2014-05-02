@@ -11,6 +11,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParamaters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
@@ -22,6 +23,7 @@ import us.ihmc.valkyrie.paramaters.ValkyrieArmControllerParameters;
 import us.ihmc.valkyrie.paramaters.ValkyrieContactPointParamaters;
 import us.ihmc.valkyrie.paramaters.ValkyrieJointMap;
 import us.ihmc.valkyrie.paramaters.ValkyriePhysicalProperties;
+import us.ihmc.valkyrie.paramaters.ValkyrieSensorInformation;
 import us.ihmc.valkyrie.paramaters.ValkyrieStateEstimatorParameters;
 import us.ihmc.valkyrie.paramaters.ValkyrieWalkingControllerParameters;
 
@@ -36,6 +38,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private final DRCRobotContactPointParamaters contactPointParamaters;
    private StateEstimatorParameters stateEstimatorParamaters;
    private final DRCRobotPhysicalProperties physicalProperties;
+   private DRCRobotSensorInformation sensorInformation;
    private final DRCRobotJointMap jointMap;
    private final String robotName = "VALKYRIE";
    private final String modelName = "V1";
@@ -60,6 +63,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
       this.runningOnRealRobot = runningOnRealRobot;
       this.jointMap = new ValkyrieJointMap();
       this.physicalProperties = new ValkyriePhysicalProperties();
+      this.sensorInformation = new ValkyrieSensorInformation();
       this.armControllerParameters = new ValkyrieArmControllerParameters(runningOnRealRobot);
       this.walkingControllerParameters = new ValkyrieWalkingControllerParameters(runningOnRealRobot);
       this.contactPointParamaters = new ValkyrieContactPointParamaters(jointMap);
@@ -194,6 +198,12 @@ public class ValkyrieRobotModel implements DRCRobotModel
          return headlessLoader;
       }
       return loader;
+   }
+
+   @Override
+   public DRCRobotSensorInformation getSensorInformation()
+   {
+      return sensorInformation;
    }
 
 }
