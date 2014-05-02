@@ -38,6 +38,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>LEFT</robotSide>
     <referenceFrame>WORLD</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>0.29351864736495564</x>
@@ -56,6 +57,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>WORLD</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>0.29190874623142077</x>
@@ -127,6 +129,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>LEFT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>0.883446655610144</x>
@@ -198,6 +201,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>1.201940820565631</x>
@@ -216,6 +220,7 @@
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>LEFT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
       <x>0.9723108829308951</x>
