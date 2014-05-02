@@ -14,17 +14,14 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.NeckJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineJointName;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.Pair;
-import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 public class ValkyrieJointMap extends DRCRobotJointMap 
 {
-   public static final String[] forceSensorNames = { "LeftAnkle", "RightAnkle", "LeftForearmSupinator", "RightForearmSupinator" };
+   
    public static final SideDependentList<String> jointBeforeThighNames = new SideDependentList<String>("LeftHipExtensor","RightHipExtensor");
-   public static final SideDependentList<String> feetForceSensorNames = new SideDependentList<String>("LeftAnkle", "RightAnkle");
    public static final String chestName = "v1Trunk";
    public static final String pelvisName = "v1Pelvis";
    public static final String pelvisPitchJointName = "WaistExtensor";
@@ -33,20 +30,7 @@ public class ValkyrieJointMap extends DRCRobotJointMap
    public static final String upperNeckPitchJointName = "UpperNeckExtensor";
    public static final String neckYawJointName = "NeckRotator";
    public static final String headName = "v1Head";
-   public static final String lidarSensorName = "/v1/Ibeo_sensor";
-   public static final String lidarJointName = "";
-   public static final String leftCameraName = "/v1/LeftHazardCamera___default__";
-   public static final String rightCameraName ="/v1/RightHazardCamera___default__";
-   public static final String rightTrunkIMUSensor = "v1Trunk_RightIMU";
-   public static final String leftTrunkIMUSensor = "v1Trunk_LeftIMU";
-   public static final String leftPelvisIMUSensor = "v1Pelvis_LeftIMU";
-   public static final String rightPelvisIMUSensor = "v1Pelvis_RightIMU";
-   public static final String fakePelvisIMUSensor = "v1Pelvis_SimulatedIMU";
-
-   // Use this until sim can handle multiple IMUs
-   // public static final String[] imuSensorsToUse = {leftPelvisIMUSensor, rightPelvisIMUSensor};
-   public static final String[] imuSensorsToUse = {leftPelvisIMUSensor};
-
+   
    private final LegJointName[] legJoints = { LegJointName.HIP_YAW, LegJointName.HIP_ROLL, LegJointName.HIP_PITCH, LegJointName.KNEE, LegJointName.ANKLE_PITCH,
          LegJointName.ANKLE_ROLL };
    private final ArmJointName[] armJoints = { ArmJointName.SHOULDER_PITCH, ArmJointName.SHOULDER_ROLL, ArmJointName.SHOULDER_YAW, ArmJointName.ELBOW_PITCH,
@@ -131,136 +115,131 @@ public class ValkyrieJointMap extends DRCRobotJointMap
       contactPointParameters = new ValkyrieContactPointParamaters(this);
    }
    
-   public String getHighestNeckPitchJointName()
-   {
-      return lowerNeckPitchJointName;
-   }
-   
-   public double getPelvisToFoot()
-   {
-      return ValkyriePhysicalProperties.pelvisToFoot;
-   }
-
-   public String getNameOfJointBeforeHand(RobotSide robotSide)
-   {
-      return robotSide.getCamelCaseNameForMiddleOfExpression() + "Wrist";
-   }
-
-   public String getNameOfJointBeforeThigh(RobotSide robotSide)
-   {
-      return robotSide.getCamelCaseNameForMiddleOfExpression() + "HipExtensor";
-   }
-
-   public String getNameOfJointBeforeChest()
-   {
-      return "WaistLateralExtensor";
-   }
 
    private String getRobotSidePrefix(RobotSide robotSide)
    {
       return (robotSide == RobotSide.LEFT) ? "v1Left" : "v1Right";
    }
+   
+   @Override
+   public String getHighestNeckPitchJointName()
+   {
+      return lowerNeckPitchJointName;
+   }
+   
+   @Override
+   public String getNameOfJointBeforeHand(RobotSide robotSide)
+   {
+      return robotSide.getCamelCaseNameForMiddleOfExpression() + "Wrist";
+   }
 
+   @Override
+   public String getNameOfJointBeforeThigh(RobotSide robotSide)
+   {
+      return robotSide.getCamelCaseNameForMiddleOfExpression() + "HipExtensor";
+   }
+
+   @Override
+   public String getNameOfJointBeforeChest()
+   {
+      return "WaistLateralExtensor";
+   }
+
+   @Override
    public Pair<RobotSide, LegJointName> getLegJointName(String jointName)
    {
       return legJointNames.get(jointName);
    }
 
+   @Override
    public Pair<RobotSide, ArmJointName> getArmJointName(String jointName)
    {
       return armJointNames.get(jointName);
    }
 
+   @Override
    public Pair<RobotSide, LimbName> getLimbName(String limbName)
    {
       return limbNames.get(limbName);
    }
 
+   @Override
    public JointRole getJointRole(String jointName)
    {
       return jointRoles.get(jointName);
    }
 
+   @Override
    public NeckJointName getNeckJointName(String jointName)
    {
       return neckJointNames.get(jointName);
    }
 
+   @Override
    public SpineJointName getSpineJointName(String jointName)
    {
       return spineJointNames.get(jointName);
    }
 
+   @Override
    public String getPelvisName()
    {
       return pelvisName;
    }
 
+   @Override
    public String getChestName()
    {
       return chestName;
    }
 
+   @Override
    public String getHeadName()
    {
       return headName;
    }
 
+   @Override
    public LegJointName[] getLegJointNames()
    {
       return legJoints;
    }
 
+   @Override
    public ArmJointName[] getArmJointNames()
    {
       return armJoints;
    }
 
+   @Override
    public SpineJointName[] getSpineJointNames()
    {
       return spineJoints;
    }
 
+   @Override
    public NeckJointName[] getNeckJointNames()
    {
       return neckJoints;
    }
 
+   @Override
    public String getJointBeforeFootName(RobotSide robotSide)
    {
       return jointBeforeFeetNames.get(robotSide);
    }
 
+   @Override
    public List<Pair<String, Vector3d>> getJointNameGroundContactPointMap()
    {
       return contactPointParameters.getJointNameGroundContactPointMap();
    }
 
+   @Override
    public boolean isTorqueVelocityLimitsEnabled()
    {
       return false;
    }
-
-   public String getLeftCameraName()
-   {
-      return leftCameraName;
-   }
-
-   public String getLidarSensorName()
-   {
-      return lidarSensorName;
-   }
-
-   public String getRightCameraName()
-   {
-      return rightCameraName;
-   }
-
-   public String[] getIMUSensorsToUse()
-   {
-      return imuSensorsToUse;
-   }
-   
 
    @Override
    public Set<String> getLastSimulatedJoints()
@@ -272,29 +251,11 @@ public class ValkyrieJointMap extends DRCRobotJointMap
    }
 
    @Override
-   public String getLidarJointName()
-   {
-      return lidarJointName;
-   }
-
-   @Override
    public String getModelName()
    {
       return "V1";
    }
 
-   @Override
-   public String[] getForceSensorNames()
-   {
-      return forceSensorNames;
-   }
-
-   @Override
-   public SideDependentList<String> getFeetForceSensorNames()
-   {
-      return feetForceSensorNames;
-   }
-   
    @Override
    public SideDependentList<String> getJointBeforeThighNames()
    {
