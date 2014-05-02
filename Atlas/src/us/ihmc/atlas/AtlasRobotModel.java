@@ -8,6 +8,7 @@ import us.ihmc.atlas.parameters.AtlasContactPointParamaters;
 import us.ihmc.atlas.parameters.AtlasDrivingControllerParameters;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.atlas.parameters.AtlasRobotMultiContactControllerParameters;
+import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.atlas.parameters.AtlasStateEstimatorParameters;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.atlas.physics.AtlasPhysicsEngineConfiguration;
@@ -18,6 +19,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParamaters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandType;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
@@ -37,10 +39,13 @@ public class AtlasRobotModel implements DRCRobotModel
    private JaxbSDFLoader headlessLoader;
    private JaxbSDFLoader loader;
 
+   private DRCRobotSensorInformation sensorInformation;
+
    public AtlasRobotModel(AtlasRobotVersion atlasVersion, boolean runningOnRealRobot)
    {
       selectedVersion = atlasVersion;
       this.runningOnRealRobot = runningOnRealRobot;
+      this.sensorInformation = new AtlasSensorInformation();
    }
 
    @Override
@@ -178,5 +183,11 @@ public class AtlasRobotModel implements DRCRobotModel
          this.loader = DRCRobotSDFLoader.loadDRCRobot(selectedVersion.getResourceDirectories(), selectedVersion.getSdfFileAsStream(), headless);
       }
       return loader;
+   }
+
+   @Override
+   public DRCRobotSensorInformation getSensorInformation()
+   {
+      return sensorInformation;
    }
 }

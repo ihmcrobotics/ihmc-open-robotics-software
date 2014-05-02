@@ -6,6 +6,8 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.messages.controller.RobotPoseData;
 import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.DRCJointConfigurationData;
 import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.JointConfigurationGatherer;
@@ -40,15 +42,17 @@ public class DRCPoseCommunicator implements RawOutputWriter
    private final int numberOfJoints;
 
    public DRCPoseCommunicator(SDFFullRobotModel estimatorModel, JointConfigurationGatherer jointConfigurationGathererAndProducer,
-         ObjectCommunicator networkProcessorCommunicator, TimestampProvider timestampProvider, DRCRobotJointMap jointMap)
+         ObjectCommunicator networkProcessorCommunicator, TimestampProvider timestampProvider, DRCRobotModel robotModel)
    {
+      DRCRobotJointMap jointMap = robotModel.getJointMap();
+      DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       numberOfJoints = jointMap.getOrderedJointNames().length;
       this.networkProcessorCommunicator = networkProcessorCommunicator;
       this.jointConfigurationGathererAndProducer = jointConfigurationGathererAndProducer;
       this.timeProvider = timestampProvider;
 
-      lidarFrame = estimatorModel.getLidarBaseFrame(jointMap.getLidarSensorName());
-      cameraFrame = estimatorModel.getCameraFrame(jointMap.getLeftCameraName());
+      lidarFrame = estimatorModel.getLidarBaseFrame(sensorInformation.getLidarSensorName());
+      cameraFrame = estimatorModel.getCameraFrame(sensorInformation.getLeftCameraName());
       rootFrame = estimatorModel.getRootJoint().getFrameAfterJoint();
 
       stateRingBuffer = new ConcurrentRingBuffer<State>(State.builder, 8);

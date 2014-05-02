@@ -6,6 +6,7 @@ import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.GuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
@@ -57,8 +58,8 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
       behindPelvis.setCameraTrackingVars("q_x", "q_y", "q_z");
       scs.setupCamera(behindPelvis);
 
-      DRCRobotJointMap jointMap = robotModel.getJointMap();
-      String leftCameraName = jointMap.getLeftCameraName();
+      DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
+      String leftCameraName = sensorInformation.getLeftCameraName();
       if (leftCameraName != null)
       {
          CameraConfiguration camera5 = new CameraConfiguration(leftCameraName);
@@ -66,7 +67,7 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
          scs.setupCamera(camera5);
       }
       
-      String rightCameraName = jointMap.getRightCameraName();
+      String rightCameraName = sensorInformation.getRightCameraName();
       if (rightCameraName != null)
       {
          CameraConfiguration camera6 = new CameraConfiguration(rightCameraName);
@@ -104,6 +105,7 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
       
       //TODO: Clean this up!
       JaxbSDFLoader robotLoader = robotModel.getJaxbSDFLoader(false);
+      DRCRobotJointMap jointMap = robotModel.getJointMap();
       GeneralizedSDFRobotModel generalizedSDFRobotModel = robotLoader.getGeneralizedSDFRobotModel(jointMap.getModelName());
       
       if (DRCLocalConfigParameters.MAKE_SLIDER_BOARD && sliderBoardFactory != null)

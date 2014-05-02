@@ -34,6 +34,8 @@ public interface DRCRobotModel
    public DRCRobotPhysicalProperties getPhysicalProperties();
 
    public DRCRobotJointMap getJointMap();
+   
+   public DRCRobotSensorInformation getSensorInformation();
 
    public DRCRobotInitialSetup<SDFRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw);
 

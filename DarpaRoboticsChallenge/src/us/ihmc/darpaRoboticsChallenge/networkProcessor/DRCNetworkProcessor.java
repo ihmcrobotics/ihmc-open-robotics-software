@@ -50,7 +50,7 @@ public class DRCNetworkProcessor
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
 
    private final SDFFullRobotModel fullRobotModel;
-   private final DRCRobotJointMap jointMap;
+//   private final DRCRobotJointMap jointMap;
    private final RobotBoundingBoxes robotBoundingBoxes;
 
    private static String scsMachineIPAddress = DRCLocalConfigParameters.ROBOT_CONTROLLER_IP_ADDRESS;
@@ -91,7 +91,7 @@ public class DRCNetworkProcessor
          networkingManager.getControllerCommandHandler().setIntrinsicServer(cameraInfoServer);
          
          new GazeboLidarDataReceiver(rosMainNode, robotPoseBuffer, networkingManager, fullRobotModel, robotBoundingBoxes,
-               jointMap, fieldComputerClient, rosNativeNetworkProcessor, ppsTimestampOffsetProvider);
+               robotModel.getSensorInformation(), fieldComputerClient, rosNativeNetworkProcessor, ppsTimestampOffsetProvider);
          
          new FishEyeDataReceiver(robotPoseBuffer, videoSettings, rosMainNode, networkingManager, DRCSensorParameters.DEFAULT_FIELD_OF_VIEW, ppsTimestampOffsetProvider);
          
@@ -102,7 +102,7 @@ public class DRCNetworkProcessor
          
          if(DRCConfigParameters.CALIBRATE_ARM_MODE)
          {
-            new ArmCalibrationHelper(fieldComputerClient, networkingManager, cameraReceiver,jointMap);
+            new ArmCalibrationHelper(fieldComputerClient, networkingManager, cameraReceiver,robotModel.getJointMap());
          }
       }
       else
@@ -130,12 +130,12 @@ public class DRCNetworkProcessor
       this(drcNetworkObjectCommunicator, robotModel);
       SCSCameraDataReceiver cameraReceiver = new SCSCameraDataReceiver(robotPoseBuffer, videoSettings, scsCommunicator, networkingManager,
             ppsTimestampOffsetProvider);
-      new SCSLidarDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, fullRobotModel, robotBoundingBoxes, jointMap, fieldComputerClient,
+      new SCSLidarDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, fullRobotModel, robotBoundingBoxes, robotModel.getSensorInformation(), fieldComputerClient,
             ppsTimestampOffsetProvider);
       
       if(DRCConfigParameters.CALIBRATE_ARM_MODE)
       {
-         new ArmCalibrationHelper(fieldComputerClient, networkingManager, cameraReceiver,jointMap);
+         new ArmCalibrationHelper(fieldComputerClient, networkingManager, cameraReceiver,robotModel.getJointMap());
       }
       
       connect();
@@ -159,9 +159,8 @@ public class DRCNetworkProcessor
       networkingManager = new DRCNetworkProcessorNetworkingManager(this.fieldComputerClient, timestampProvider, robotModel);
 
       //DRCRobotModel robotModel = DRCLocalConfigParameters.robotModelToUse;
-      jointMap = robotModel.getJointMap();
       JaxbSDFLoader loader = robotModel.getJaxbSDFLoader(true);
-      fullRobotModel = loader.createFullRobotModel(jointMap);
+      fullRobotModel = loader.createFullRobotModel(robotModel.getJointMap());
       
       DRCRobotDataReceiver drcRobotDataReceiver = new DRCRobotDataReceiver(robotModel, fullRobotModel);
       this.fieldComputerClient.attachListener(DRCJointConfigurationData.class, drcRobotDataReceiver);

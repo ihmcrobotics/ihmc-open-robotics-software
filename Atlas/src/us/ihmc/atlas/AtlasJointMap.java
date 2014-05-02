@@ -45,20 +45,10 @@ import us.ihmc.utilities.Pair;
 
 public class AtlasJointMap extends DRCRobotJointMap 
 {
-   public static final String[] forceSensorNames = { "l_leg_akx", "r_leg_akx", "l_arm_wrx", "r_arm_wrx" };
-   public static final SideDependentList<String> feetForceSensorNames = new SideDependentList<String>("l_leg_akx", "r_leg_akx");
    SideDependentList<String> jointBeforeThighNames = new SideDependentList<String>("l_leg_hpy","r_leg_hpy");
-   
    public static final String chestName = "utorso";
    public static final String pelvisName = "pelvis";
    public static final String headName = "head";
-   public static final String lidarJointName = "hokuyo_joint";
-   public static final String lidarSensorName = "head_hokuyo_sensor";
-   public static final String leftCameraName = "stereo_camera_left";
-   public static final String rightCameraName = "stereo_camera_right";
-   public static final String bodyIMUSensor = "pelvis_imu_sensor";
-   public static final String[] imuSensorsToUse = { bodyIMUSensor };
-   
    
    private final LegJointName[] legJoints =
    {
@@ -255,12 +245,6 @@ public class AtlasJointMap extends DRCRobotJointMap
    }
 
    @Override
-   public String getLidarJointName()
-   {
-      return lidarJointName;
-   }
-
-   @Override
    public String getModelName()
    {
       return atlasVersion.getModelName();
@@ -273,49 +257,12 @@ public class AtlasJointMap extends DRCRobotJointMap
    }
 
    @Override
-   public String getLeftCameraName()
-   {
-      return leftCameraName;
-   }
-
-   @Override
-   public String getLidarSensorName()
-   {
-      return lidarSensorName;
-   }
-
-   @Override
-   public String getRightCameraName()
-   {
-      return rightCameraName;
-   }
-   
-   @Override
-   public String[] getIMUSensorsToUse()
-   {
-      return imuSensorsToUse;
-   }
-
-   @Override
    public Set<String> getLastSimulatedJoints()
    {
       HashSet<String> lastSimulatedJoints = new HashSet<>();
       lastSimulatedJoints.add("l_arm_wrx");
       lastSimulatedJoints.add("r_arm_wrx");
       return lastSimulatedJoints;
-   }
-
-
-   @Override
-   public String[] getForceSensorNames()
-   {
-      return forceSensorNames;
-   }
-
-   @Override
-   public SideDependentList<String> getFeetForceSensorNames()
-   {
-      return feetForceSensorNames;
    }
 
    @Override

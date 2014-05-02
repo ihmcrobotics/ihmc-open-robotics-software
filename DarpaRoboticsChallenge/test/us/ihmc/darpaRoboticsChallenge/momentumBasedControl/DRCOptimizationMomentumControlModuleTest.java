@@ -43,6 +43,7 @@ import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -79,6 +80,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
       Random random = new Random(1252515L);
 
       DRCRobotModel robotModel = getRobotModel();
+      DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       DRCRobotJointMap jointMap = robotModel.getJointMap();
       DRCRobotPhysicalProperties physicalProperties = robotModel.getPhysicalProperties();
       
@@ -104,7 +106,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
 
       CenterOfMassReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", ReferenceFrame.getWorldFrame(), rootJoint.getSuccessor());
       centerOfMassFrame.update();
-      OneDoFJoint lidarJoint = fullRobotModel.getOneDoFJointByName(jointMap.getLidarJointName());
+      OneDoFJoint lidarJoint = fullRobotModel.getOneDoFJointByName(sensorInformation.getLidarJointName());
       InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerFactoryHelper.computeJointsToOptimizeFor(fullRobotModel, lidarJoint);
 
       double controlDT = 1e-4;
@@ -166,10 +168,12 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
       Random random = new Random(1252515L);
       DRCRobotModel robotModel = getRobotModel();
       DRCRobotJointMap jointMap = robotModel.getJointMap();
+      DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       DRCRobotPhysicalProperties physicalProperties = robotModel.getPhysicalProperties();
       JaxbSDFLoader jaxbSDFLoader = robotModel.getJaxbSDFLoader(false);
       SDFFullRobotModel fullRobotModel = jaxbSDFLoader.createFullRobotModel(jointMap);
       SDFRobot robot = jaxbSDFLoader.createRobot(jointMap, false);
+      
       ReferenceFrames referenceFrames = new ReferenceFrames(fullRobotModel, jointMap, physicalProperties.getAnkleHeight());
 
       DRCRobotInitialSetup<SDFRobot> intialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
@@ -190,7 +194,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
       LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> contactStates = createContactStates(feet, registry, coefficientOfFriction);
 
       CenterOfMassReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", ReferenceFrame.getWorldFrame(), rootJoint.getSuccessor());
-      OneDoFJoint lidarJoint = fullRobotModel.getOneDoFJointByName(jointMap.getLidarJointName());
+      OneDoFJoint lidarJoint = fullRobotModel.getOneDoFJointByName(sensorInformation.getLidarJointName());
       InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerFactoryHelper.computeJointsToOptimizeFor(fullRobotModel, lidarJoint);
 
       double controlDT = DRCConfigParameters.CONTROL_DT;
