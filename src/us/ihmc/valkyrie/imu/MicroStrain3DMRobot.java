@@ -1,17 +1,24 @@
 package us.ihmc.valkyrie.imu;
 
-import com.yobotics.simulationconstructionset.*;
-import com.yobotics.simulationconstructionset.robotController.RobotController;
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.math.geometry.RotationFunctions;
-import us.ihmc.valkyrie.configuration.ValkyrieSensorNames;
+import java.io.IOException;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
-import java.io.IOException;
+
+import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.math.geometry.RotationFunctions;
+import us.ihmc.valkyrie.paramaters.ValkyrieSensorInformation;
+
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.FloatingJoint;
+import com.yobotics.simulationconstructionset.Link;
+import com.yobotics.simulationconstructionset.Robot;
+import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.robotController.RobotController;
 
 @SuppressWarnings("serial")
 public class MicroStrain3DMRobot extends Robot
@@ -111,7 +118,8 @@ public class MicroStrain3DMRobot extends Robot
    
    public static void main(String[] args) throws IOException
    {
-      final MicrostrainUDPPacketListener listener = MicrostrainUDPPacketListener.createNonRealtimeListener(ValkyrieSensorNames.imuUSBSerialIds.get("v1Pelvis_LeftIMU"));
+      ValkyrieSensorInformation sensorInformation = new ValkyrieSensorInformation();
+      final MicrostrainUDPPacketListener listener = MicrostrainUDPPacketListener.createNonRealtimeListener(sensorInformation.getImuUSBSerialIds().get("v1Pelvis_LeftIMU"));
       
       final MicroStrain3DMRobot robot = new MicroStrain3DMRobot();
       RobotController controller = new RobotController()
