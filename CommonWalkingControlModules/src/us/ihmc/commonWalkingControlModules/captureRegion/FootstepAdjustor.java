@@ -25,7 +25,7 @@ import com.yobotics.simulationconstructionset.util.ground.steppingStones.Steppin
 public class FootstepAdjustor
 {
    private static final boolean VISUALIZE = false;
-   private static final double SHRINK_TOUCHDOWN_POLYGON_FACTOR = 0.5;
+   private static final double SHRINK_TOUCHDOWN_POLYGON_FACTOR = 1.0;//0.5;
    
    private final YoVariableRegistry registry = new YoVariableRegistry("FootstepAdjustor");
    
