@@ -9,6 +9,7 @@ import us.ihmc.utilities.test.JUnitTestSuiteConstructor;
 @Suite.SuiteClasses(
 {
    us.ihmc.valkyrie.ValkyrieFlatGroundWalkingTest.class,
+   us.ihmc.valkyrie.ValkyriePushInSingleSupportTest.class,
    us.ihmc.valkyrie.simulation.ValkyriePosePlaybackDemoTest.class
 })
 
