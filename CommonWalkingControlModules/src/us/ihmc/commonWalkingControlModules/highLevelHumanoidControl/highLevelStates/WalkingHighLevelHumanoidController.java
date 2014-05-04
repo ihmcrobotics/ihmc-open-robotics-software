@@ -1223,17 +1223,23 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                                                         computeFootPolygon(supportSide, referenceFrames.getAnkleZUpFrame(supportSide)));
          if(footstepAdjustor.adjustFootstep(nextFootstep, captureRegionCalculator.getCaptureRegion()) || projectFootstepToCaptureRegion.getBooleanValue())
          {
-            // The nextFootstep has changed and atlas feels bad
-//            updateFootstepParameters();
-//            footEndEffectorControlModules.get(swingSide).replanTrajectory(stateMachine.timeInCurrentState(), nextFootstep.getPosition());
-//            
-//            TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForSingleSupport(nextFootstep, swingSide);
-//            instantaneousCapturePointPlanner.reInitializeSingleSupport(transferToAndNextFootstepsData, yoTime.getDoubleValue());
-//            
-//            footSwitches.get(swingSide).setSwingTrajectoryWasReplanned(true);
-            
-            footstepWasProjectedInCaptureRegion.set(true);
-            projectFootstepToCaptureRegion.set(false);
+	        // The nextFootstep has changed and atlas feels bad
+        	
+        	if(footstepWasProjectedInCaptureRegion.getBooleanValue())
+        	{
+        		System.out.println("Can not replan again");
+        	} else {
+	            updateFootstepParameters();
+	            footEndEffectorControlModules.get(swingSide).replanTrajectory(stateMachine.timeInCurrentState(), nextFootstep.getPosition());
+	            
+	            TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForSingleSupport(nextFootstep, swingSide);
+	            instantaneousCapturePointPlanner.reInitializeSingleSupport(transferToAndNextFootstepsData, yoTime.getDoubleValue());
+	            
+	            footSwitches.get(swingSide).setSwingTrajectoryWasReplanned(true);
+	            
+	            footstepWasProjectedInCaptureRegion.set(true);
+	            projectFootstepToCaptureRegion.set(false);
+        	}
          }
          
          moveICPToInsideOfFootAtEndOfSwing(supportSide, transferToFootstepLocation, swingTimeCalculationProvider.getValue(), swingTimeRemaining,
