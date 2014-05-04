@@ -20,6 +20,7 @@ import us.ihmc.utilities.test.JUnitTestSuiteConstructor;
    AtlasNumericalInverseKinematicsCalculatorWithRobotTest.class,
    AtlasMultiContactTest.class,
    AtlasFlatGroundWalkingTest.class,
+   AtlasPushInSingleSupportTest.class,
    AtlasJointConfigurationDataSerializerTest.class,
    AtlasPlaybackPoseSequenceTest.class,
    
