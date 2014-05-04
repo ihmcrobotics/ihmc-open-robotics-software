@@ -63,7 +63,6 @@ import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculationProv
 import us.ihmc.commonWalkingControlModules.trajectories.TransferTimeCalculationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointTrajectoryUtils;
 import us.ihmc.commonWalkingControlModules.trajectories.WalkOnTheEdgesProviders;
-import us.ihmc.commonWalkingControlModules.trajectories.WalkOnTheEdgesProviders.ToeOffMotionType;
 import us.ihmc.commonWalkingControlModules.trajectories.WrapperForPositionAndOrientationTrajectoryGenerators;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
@@ -547,14 +546,14 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          BooleanYoVariable requestHoldPosition = requestSupportFootToHoldPosition.get(robotSide);
 
-         if (WalkOnTheEdgesProviders.TOEOFF_MOTION_TYPE_USED != ToeOffMotionType.FREE)
-         {
-            DoubleTrajectoryGenerator toeOffPitchTrajectoryGenerator = walkOnTheEdgesProviders.getToeOffPitchTrajectoryGenerators(robotSide);
-            endEffectorControlModule = new EndEffectorControlModule(controlDT, bipedFoot, jacobianId, robotSide, swingPoseTrajectoryGenerator,
-                    footTouchdownPitchTrajectoryGenerator, toeOffPitchTrajectoryGenerator, requestHoldPosition, walkingControllerParameters,
-                    dynamicGraphicObjectsListRegistry, momentumBasedController, registry);
-         }
-         else
+//         if (WalkOnTheEdgesProviders.TOEOFF_MOTION_TYPE_USED != ToeOffMotionType.FREE)
+//         {
+//            DoubleTrajectoryGenerator toeOffPitchTrajectoryGenerator = walkOnTheEdgesProviders.getToeOffPitchTrajectoryGenerators(robotSide);
+//            endEffectorControlModule = new EndEffectorControlModule(controlDT, bipedFoot, jacobianId, robotSide, swingPoseTrajectoryGenerator,
+//                    footTouchdownPitchTrajectoryGenerator, toeOffPitchTrajectoryGenerator, requestHoldPosition, walkingControllerParameters,
+//                    dynamicGraphicObjectsListRegistry, momentumBasedController, registry);
+//         }
+//         else
          {
             // Let the toe pitch motion free. It seems to work better.
             DoubleProvider maximumToeOffAngleProvider = walkOnTheEdgesProviders.getMaximumToeOffAngleProvider();
