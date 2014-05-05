@@ -1,7 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.controllers.concurrent;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.utilities.GenericCRC32;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJointDesiredAccelerationChecksum;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJointDesiredAccelerationCopier;
@@ -18,10 +18,10 @@ public class IntermediateControllerStateHolder
    private final InverseDynamicsJointDesiredAccelerationChecksum controllerChecksum;
    private final InverseDynamicsJointDesiredAccelerationChecksum estimatorChecksum;
    
-   public IntermediateControllerStateHolder(SDFFullRobotModelFactory fullRobotModelFactory, SDFFullRobotModel estimatorModel,
+   public IntermediateControllerStateHolder(DRCRobotModel robotModel, SDFFullRobotModel estimatorModel,
          SDFFullRobotModel controllerModel)
    {
-      SDFFullRobotModel intermediateModel = fullRobotModelFactory.create();
+      SDFFullRobotModel intermediateModel = robotModel.createFullRobotModel();
 
       controllerToIntermediateCopier = new InverseDynamicsJointDesiredAccelerationCopier(controllerModel.getElevator(), intermediateModel.getElevator());
       intermediateToEstimatorCopier = new InverseDynamicsJointDesiredAccelerationCopier(intermediateModel.getElevator(), estimatorModel.getElevator());
@@ -66,13 +66,13 @@ public class IntermediateControllerStateHolder
    public static class Builder implements us.ihmc.concurrent.Builder<IntermediateControllerStateHolder>
    {
 
-      private final SDFFullRobotModelFactory fullRobotModelFactory;
       private final SDFFullRobotModel estimatorModel;
       private final SDFFullRobotModel controllerModel;
+      private final DRCRobotModel robotModel;
 
-      public Builder(SDFFullRobotModelFactory fullRobotModelFactory, SDFFullRobotModel estimatorModel, SDFFullRobotModel controllerModel)
+      public Builder(DRCRobotModel robotModel, SDFFullRobotModel estimatorModel, SDFFullRobotModel controllerModel)
       {
-         this.fullRobotModelFactory = fullRobotModelFactory;
+         this.robotModel = robotModel;
          this.estimatorModel = estimatorModel;
          this.controllerModel = controllerModel;
       }
@@ -80,7 +80,7 @@ public class IntermediateControllerStateHolder
       @Override
       public IntermediateControllerStateHolder newInstance()
       {
-         return new IntermediateControllerStateHolder(fullRobotModelFactory, estimatorModel, controllerModel);
+         return new IntermediateControllerStateHolder(robotModel, estimatorModel, controllerModel);
       }
 
    }
