@@ -7,17 +7,14 @@ public class SDFFullRobotModelFactory implements FullRobotModelFactory
    private final GeneralizedSDFRobotModel generalizedSDFRobotModel;
    private final SDFJointNameMap sdfJointNameMap;
    
-
    public SDFFullRobotModelFactory(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap)
    {
       this.generalizedSDFRobotModel = generalizedSDFRobotModel;
       this.sdfJointNameMap = sdfJointNameMap;
    }
 
-
    public SDFFullRobotModel create()
    {
       return new SDFFullRobotModel(generalizedSDFRobotModel.getRootLinks().get(0), sdfJointNameMap);
    }
-
 }

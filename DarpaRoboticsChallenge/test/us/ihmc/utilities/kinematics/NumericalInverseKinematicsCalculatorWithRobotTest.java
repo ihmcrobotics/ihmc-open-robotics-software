@@ -67,12 +67,8 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
    public NumericalInverseKinematicsCalculatorWithRobotTest()
    {
       InverseKinematicsSolver inverseKinameticSolverToUse = InverseKinematicsSolver.PETER_SOLVER;
-      DRCRobotJointMap jointMap = getRobotModel().getJointMap();
-      JaxbSDFLoader jaxbSDFLoader = getRobotModel().getJaxbSDFLoader(false);
-      SDFFullRobotModelFactory fullRobotModelFactory = new SDFFullRobotModelFactory(jaxbSDFLoader.getGeneralizedSDFRobotModel(jointMap.getModelName()),
-            jointMap);
-
-      fullRobotModel = fullRobotModelFactory.create();
+      fullRobotModel = getRobotModel().createFullRobotModel();
+      
       worldFrame = ReferenceFrame.getWorldFrame();
       tolerance = 1e-5;
       maxStepSize = 1.0;
