@@ -477,4 +477,8 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
 	   return 0.15;
    }
 
+   public double getDesiredTouchdownVelocity()
+   {
+      return -0.3;
+   }
 }
