@@ -32,12 +32,8 @@ public class HandPoseCalcaulatorFromArmJointAngles
    public HandPoseCalcaulatorFromArmJointAngles(DRCRobotModel robotModel)
    {
       jointMap = robotModel.getJointMap();
-      JaxbSDFLoader jaxbSDFLoader = robotModel.getJaxbSDFLoader(false);
-      SDFFullRobotModelFactory fullRobotModelFactory = new SDFFullRobotModelFactory(jaxbSDFLoader.getGeneralizedSDFRobotModel(jointMap.getModelName()),
-                                                          jointMap);
-
       drcRobotWalkingControllerParameters = robotModel.getWalkingControlParameters();
-      fullRobotModel = fullRobotModelFactory.create();
+      fullRobotModel = robotModel.createFullRobotModel();
 
       for (RobotSide robotSide : RobotSide.values())
       {
