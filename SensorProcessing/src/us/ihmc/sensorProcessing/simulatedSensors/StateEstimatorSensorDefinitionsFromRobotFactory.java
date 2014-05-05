@@ -7,19 +7,15 @@ import java.util.Set;
 
 import javax.media.j3d.Transform3D;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-
 import us.ihmc.utilities.ForceSensorDefinition;
 import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.Wrench;
 
 import com.yobotics.simulationconstructionset.IMUMount;
 import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 import com.yobotics.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
- 
+
 public class StateEstimatorSensorDefinitionsFromRobotFactory
 {
    private final SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap;
@@ -59,12 +55,10 @@ public class StateEstimatorSensorDefinitionsFromRobotFactory
    {
       
       LinkedHashMap<WrenchCalculatorInterface,ForceSensorDefinition> forceSensorDefinitions = new LinkedHashMap<WrenchCalculatorInterface, ForceSensorDefinition>();
-      DenseMatrix64F selectionMatrix = new DenseMatrix64F(Wrench.SIZE, Wrench.SIZE);
-      CommonOps.setIdentity(selectionMatrix);
       for(WrenchCalculatorInterface groundContactPointBasedWrenchCalculator : groundContactPointBasedWrenchCalculators)
       {
          OneDegreeOfFreedomJoint forceTorqueSensorJoint = groundContactPointBasedWrenchCalculator.getJoint();
-         ForceSensorDefinition sensorDefinition = new ForceSensorDefinition(forceTorqueSensorJoint.getName(), selectionMatrix, forceTorqueSensorJoint.getName());
+         ForceSensorDefinition sensorDefinition = new ForceSensorDefinition(forceTorqueSensorJoint.getName(), forceTorqueSensorJoint.getName(), new Transform3D());
          forceSensorDefinitions.put(groundContactPointBasedWrenchCalculator, sensorDefinition);
          
       }

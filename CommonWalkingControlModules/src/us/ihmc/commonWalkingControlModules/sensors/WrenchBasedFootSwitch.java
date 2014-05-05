@@ -78,8 +78,8 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       this.contactThresholdForce.set(contactThresholdForce); 
 
 
-      yoFootForce = new YoFrameVector(namePrefix + "FootForce", forceSensorData.getForceSensorBodyFrame(), registry);
-      yoFootTorque = new YoFrameVector(namePrefix + "FootTorque", forceSensorData.getForceSensorBodyFrame(), registry);
+      yoFootForce = new YoFrameVector(namePrefix + "FootForce", forceSensorData.getMeasurementFrame(), registry);
+      yoFootTorque = new YoFrameVector(namePrefix + "FootTorque", forceSensorData.getMeasurementFrame(), registry);
       yoFootForceInFoot = new YoFrameVector(namePrefix + "FootForceInFootFrame", contactablePlaneBody.getBodyFrame(), registry);
       yoFootTorqueInFoot = new YoFrameVector(namePrefix + "FootTorqueInFootFrame", contactablePlaneBody.getBodyFrame(), registry);
 
@@ -122,7 +122,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       this.footSwitchCoPThresholdFraction = new DoubleYoVariable(namePrefix + "footSwitchCoPThresholdFraction", registry);
       this.footSwitchCoPThresholdFraction.set(footSwitchCoPThresholdFraction);
 
-      this.footWrench = new Wrench(forceSensorData.getForceSensorBodyFrame(), null);
+      this.footWrench = new Wrench(forceSensorData.getMeasurementFrame(), null);
 
       this.footMinX = computeMinX(contactablePlaneBody);
       this.footMaxX = computeMaxX(contactablePlaneBody);
