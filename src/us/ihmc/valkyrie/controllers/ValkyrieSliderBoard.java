@@ -12,6 +12,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.CommonNames;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.InverseDynamicsJointController;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
 import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
@@ -430,19 +431,18 @@ public class ValkyrieSliderBoard
       return walkingFactory;
    }
 
-   private static final SliderBoardFactory inverseDynamicsControllerSliderBoardFactory = new SliderBoardFactory()
+   public static SliderBoardFactory getIDControllerSliderBoardFactory(final DRCRobotModel robotModel)
    {
-      @Override
-      public void makeSliderBoard(SimulationConstructionSet scs, YoVariableRegistry registry, GeneralizedSDFRobotModel generalizedSDFRobotModel)
+      SliderBoardFactory inverseDynamicsControllerSliderBoardFactory = new SliderBoardFactory()
       {
-         SDFFullRobotModelFactory fullRobotModelFactory = new SDFFullRobotModelFactory(generalizedSDFRobotModel, new ValkyrieJointMap());
-         SDFFullRobotModel fullRobotModel = fullRobotModelFactory.create();
-         new InverseDynamicsJointController.GravityCompensationSliderBoard(scs, fullRobotModel, registry, CommonNames.doIHMCControlRatio.toString(), 0.0, 1.0);
-      }
-   };
-
-   public static SliderBoardFactory getIDControllerSliderBoardFactory()
-   {
+         @Override
+         public void makeSliderBoard(SimulationConstructionSet scs, YoVariableRegistry registry, GeneralizedSDFRobotModel generalizedSDFRobotModel)
+         {
+            SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
+            new InverseDynamicsJointController.GravityCompensationSliderBoard(scs, fullRobotModel, registry, CommonNames.doIHMCControlRatio.toString(), 0.0, 1.0);
+         }
+      };
+      
       return inverseDynamicsControllerSliderBoardFactory;
    }
 }
