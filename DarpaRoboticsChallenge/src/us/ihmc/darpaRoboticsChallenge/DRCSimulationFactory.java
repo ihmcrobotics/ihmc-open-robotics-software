@@ -25,7 +25,6 @@ import us.ihmc.darpaRoboticsChallenge.outputs.DRCSimulationOutputWriter;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCSimulatedSensorNoiseParameters;
 import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCStateEstimatorInterface;
-import us.ihmc.darpaRoboticsChallenge.validation.YoVariableThreadAccessValidator;
 import us.ihmc.sensorProcessing.simulatedSensors.GroundContactPointBasedWrenchCalculator;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
@@ -76,8 +75,8 @@ public class DRCSimulationFactory
       SDFRobot simulatedRobot = robotInterface.getRobot();
       YoVariableRegistry estimatorRegistry = new YoVariableRegistry("Estimator");
       YoVariableRegistry controllerRegistry = new YoVariableRegistry("controllerRegistry");
-      YoVariableThreadAccessValidator estimatorThreadValidator = new YoVariableThreadAccessValidator(estimatorRegistry);
-      YoVariableThreadAccessValidator controllerThreadValidator = new YoVariableThreadAccessValidator(controllerRegistry);
+//      YoVariableThreadAccessValidator estimatorThreadValidator = new YoVariableThreadAccessValidator(estimatorRegistry);
+//      YoVariableThreadAccessValidator controllerThreadValidator = new YoVariableThreadAccessValidator(controllerRegistry);
       
       YoVariableRegistry simulationRegistry = simulatedRobot.getRobotsYoVariableRegistry();
       simulationRegistry.addChild(estimatorRegistry);
@@ -208,8 +207,8 @@ public class DRCSimulationFactory
          simulatedRobot.setController(stateEstimatorErrorCalculatorController, estimationTicksPerControlTick);
       }
       
-      estimatorThreadValidator.start();
-      controllerThreadValidator.start();
+//      estimatorThreadValidator.start();
+//      controllerThreadValidator.start();
       
       return new Pair<HumanoidRobotSimulation<SDFRobot>, DRCController>(humanoidRobotSimulation, robotController);
    }
