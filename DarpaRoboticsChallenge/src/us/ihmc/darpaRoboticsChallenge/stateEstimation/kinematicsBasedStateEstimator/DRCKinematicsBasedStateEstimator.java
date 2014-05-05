@@ -14,7 +14,6 @@ import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCStateEstimatorInterface
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
-import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.simulatedSensors.JointAndIMUSensorMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
@@ -230,11 +229,6 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    public String getDescription()
    {
       return getName();
-   }
-
-   public void setForceSensorDataHolder(ForceSensorDataHolder forceSensorDataHolderForEstimator)
-   {
-      sensorReader.setForceSensorDataHolder(forceSensorDataHolderForEstimator);
    }
 
    public void getEstimatedOrientation(FrameOrientation estimatedOrientationToPack)

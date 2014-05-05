@@ -58,7 +58,7 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
 
    }
 
-   public void build(SixDoFJoint sixDoFJoint, IMUDefinition[] imuDefinition, boolean addLinearAccelerationSensors, YoVariableRegistry parentRegistry)
+   public void build(SixDoFJoint rootJoint, IMUDefinition[] imuDefinition, boolean addLinearAccelerationSensors, YoVariableRegistry parentRegistry)
    {
       ArrayList<Joint> rootJoints = robot.getRootJoints();
       if (rootJoints.size() > 1)
@@ -66,10 +66,10 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
          throw new RuntimeException("Robot has more than 1 rootJoint");
       }
 
-      final Joint rootJoint = rootJoints.get(0);
-      if (rootJoint instanceof FloatingJoint)
+      final Joint scsRootJoint = rootJoints.get(0);
+      if (scsRootJoint instanceof FloatingJoint)
       {
-         SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap = SCSToInverseDynamicsJointMap.createByName((FloatingJoint) rootJoint, sixDoFJoint);
+         SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap = SCSToInverseDynamicsJointMap.createByName((FloatingJoint) scsRootJoint, rootJoint);
          StateEstimatorSensorDefinitionsFromRobotFactory stateEstimatorSensorDefinitionsFromRobotFactory = new StateEstimatorSensorDefinitionsFromRobotFactory(
                scsToInverseDynamicsJointMap, imuMounts, groundContactPointBasedWrenchCalculators, addLinearAccelerationSensors);
          

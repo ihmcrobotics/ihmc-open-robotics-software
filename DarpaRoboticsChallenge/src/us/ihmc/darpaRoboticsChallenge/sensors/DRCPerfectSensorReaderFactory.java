@@ -36,17 +36,17 @@ public class DRCPerfectSensorReaderFactory implements SensorReaderFactory
       this.groundContactPointBasedWrenchCalculators = groundContactPointBasedWrenchCalculators;
    }
    
-   public void build(SixDoFJoint sixDoFJoint, IMUDefinition[] imuDefinitions, boolean addLinearAccelerationSensors, YoVariableRegistry parentRegistry)
+   public void build(SixDoFJoint rootJoint, IMUDefinition[] imuDefinitions, boolean addLinearAccelerationSensors, YoVariableRegistry parentRegistry)
    {
-      final Joint rootJoint = robot.getRootJoints().get(0);
-      SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap = SCSToInverseDynamicsJointMap.createByName((FloatingJoint) rootJoint, sixDoFJoint);
+      final Joint scsRootJoint = robot.getRootJoints().get(0);
+      SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap = SCSToInverseDynamicsJointMap.createByName((FloatingJoint) scsRootJoint, rootJoint);
 
       StateEstimatorSensorDefinitionsFromRobotFactory stateEstimatorSensorDefinitionsFromRobotFactory = new StateEstimatorSensorDefinitionsFromRobotFactory(
             scsToInverseDynamicsJointMap, new ArrayList<IMUMount>(), groundContactPointBasedWrenchCalculators, addLinearAccelerationSensors);
       this.stateEstimatorSensorDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getStateEstimatorSensorDefinitions();
       
       
-      SDFPerfectSimulatedSensorReader sdfPerfectSimulatedSensorReader = new SDFPerfectSimulatedSensorReader(robot, sixDoFJoint, null);
+      SDFPerfectSimulatedSensorReader sdfPerfectSimulatedSensorReader = new SDFPerfectSimulatedSensorReader(robot, rootJoint, null);
       this.perfectSensorReader.setSensorReader(sdfPerfectSimulatedSensorReader);
       
       Map<WrenchCalculatorInterface, ForceSensorDefinition> forceSensorDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory

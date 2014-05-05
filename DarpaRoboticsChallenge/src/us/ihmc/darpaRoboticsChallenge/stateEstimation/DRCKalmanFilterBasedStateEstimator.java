@@ -7,7 +7,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlane
 import us.ihmc.commonWalkingControlModules.sensors.WrenchBasedFootSwitch;
 import us.ihmc.controlFlow.ControlFlowGraph;
 import us.ihmc.robotSide.SideDependentList;
-import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.stateEstimation.JointAndIMUSensorDataSource;
@@ -119,11 +118,6 @@ public class DRCKalmanFilterBasedStateEstimator implements DRCStateEstimatorInte
    public void doControl()
    {
       controlFlowGraphExecutorController.doControl();
-   }
-
-   public void setForceSensorDataHolder(ForceSensorDataHolder forceSensorDataHolderForEstimator)
-   {
-      sensorReader.setForceSensorDataHolder(forceSensorDataHolderForEstimator);
    }
 
    public void startIMUDriftEstimation()
