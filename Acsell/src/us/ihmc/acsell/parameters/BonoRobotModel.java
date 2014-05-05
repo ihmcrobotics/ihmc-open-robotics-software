@@ -3,6 +3,7 @@ package us.ihmc.acsell.parameters;
 import java.io.InputStream;
 
 import us.ihmc.SdfLoader.JaxbSDFLoader;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.acsell.controlParameters.BonoArmControlParameters;
 import us.ihmc.acsell.controlParameters.BonoStateEstimatorParameters;
@@ -10,9 +11,7 @@ import us.ihmc.acsell.controlParameters.BonoWalkingControllerParameters;
 import us.ihmc.acsell.initialSetup.BonoInitialSetup;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactPointInformation;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCContactPointInformationFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParamaters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -47,6 +46,7 @@ public class BonoRobotModel implements DRCRobotModel
    {
      this.runningOnRealRobot = runningOnRealRobot;
      sensorInformation = new BonoSensorInformation();
+     this.headlessLoader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSdfFileAsStream(), true);
    }
 
    @Override
@@ -162,25 +162,32 @@ public class BonoRobotModel implements DRCRobotModel
    @Override
    public JaxbSDFLoader getJaxbSDFLoader(boolean headless)
    {
-      if(headless)
+      if(!headless)
       {
-         if(headlessLoader == null)
+         if(loader == null)
          {
-            this.headlessLoader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSdfFileAsStream(), headless);
+            this.loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSdfFileAsStream(), false);
          }
-         return headlessLoader;
+         return loader;
       }
-      
-      if(loader == null)
-      {
-         this.loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSdfFileAsStream(), headless);
-      }
-      return loader;
+      return headlessLoader;
    }
 
    @Override
    public DRCRobotSensorInformation getSensorInformation()
    {
       return sensorInformation;
+   }
+   
+   @Override
+   public SDFFullRobotModel createFullRobotModel()
+   {
+      return headlessLoader.createFullRobotModel(getJointMap());
+   }
+
+   @Override
+   public SDFRobot createSdfRobot(boolean createCollisionMeshes)
+   {
+      return headlessLoader.createRobot(getJointMap(), createCollisionMeshes);
    }
 }
