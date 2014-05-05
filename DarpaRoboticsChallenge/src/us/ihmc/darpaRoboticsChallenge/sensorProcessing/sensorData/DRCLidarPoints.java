@@ -1,4 +1,4 @@
-package us.ihmc.sensorProcessing.sensorData;
+package us.ihmc.darpaRoboticsChallenge.sensorProcessing.sensorData;
 
 import javax.vecmath.Point3d;
 
