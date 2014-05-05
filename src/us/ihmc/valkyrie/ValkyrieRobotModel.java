@@ -3,6 +3,7 @@ package us.ihmc.valkyrie;
 import java.io.InputStream;
 
 import us.ihmc.SdfLoader.JaxbSDFLoader;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -54,8 +55,8 @@ public class ValkyrieRobotModel implements DRCRobotModel
          };
    
    private double estimatorDT;
-   private final JaxbSDFLoader loader;
-   private final JaxbSDFLoader headlessLoader;
+   private JaxbSDFLoader loader;
+   private JaxbSDFLoader headlessLoader;
    private final boolean runningOnRealRobot;
    
    public ValkyrieRobotModel(boolean runningOnRealRobot)
@@ -68,7 +69,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
       this.walkingControllerParameters = new ValkyrieWalkingControllerParameters(runningOnRealRobot);
       this.contactPointParamaters = new ValkyrieContactPointParamaters(jointMap);
       this.headlessLoader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSdfFileAsStream(), true);
-      this.loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSdfFileAsStream(), false);
+      
    }
    
    @Override
@@ -193,17 +194,33 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public JaxbSDFLoader getJaxbSDFLoader(boolean headless)
    {
-      if(headless)
+      if(!headless)
       {
-         return headlessLoader;
+         if(loader == null)
+         {
+            this.loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSdfFileAsStream(), false);
+         }
+         return loader;
       }
-      return loader;
+      return headlessLoader;
    }
 
    @Override
    public DRCRobotSensorInformation getSensorInformation()
    {
       return sensorInformation;
+   }
+
+   @Override
+   public SDFFullRobotModel createFullRobotModel()
+   {
+      return headlessLoader.createFullRobotModel(getJointMap());
+   }
+
+   @Override
+   public SDFRobot createSdfRobot(boolean createCollisionMeshes)
+   {
+      return headlessLoader.createRobot(jointMap, createCollisionMeshes);
    }
 
 }
