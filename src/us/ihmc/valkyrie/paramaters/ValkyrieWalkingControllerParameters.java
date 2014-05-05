@@ -546,4 +546,9 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       return (1 + 0.3) * 2 * Math.sqrt(getFootForwardOffset() * getFootForwardOffset()
             + 0.25 * getFootWidth() * getFootWidth());
    }
+   
+   public double getDesiredTouchdownVelocity()
+   {
+      return -0.3;
+   }
 }
