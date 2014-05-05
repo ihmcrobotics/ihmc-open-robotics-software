@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.controllers.concurrent;
 import java.util.ArrayList;
 
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
-import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModelFactory;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
 import us.ihmc.utilities.ForceSensorDefinition;
 import us.ihmc.utilities.GenericCRC32;
@@ -32,11 +32,11 @@ public class IntermediateEstimatorStateHolder
    private final ForceSensorDataHolder intermediateForceSensorDataHolder;
    private final ForceSensorDataHolder controllerForceSensorDataHolder;
 
-   public IntermediateEstimatorStateHolder(FullRobotModelFactory intermediateFactory, RigidBody estimatorRootBody, RigidBody controllerRootBody,
+   public IntermediateEstimatorStateHolder(DRCRobotModel robotModel, RigidBody estimatorRootBody, RigidBody controllerRootBody,
          ArrayList<ForceSensorDefinition> forceSensorDefinitions, ForceSensorDataHolder estimatorForceSensorDataHolder,
          ForceSensorDataHolder controllerForceSensorDataHolder)
    {
-      FullRobotModel intermediateModel = intermediateFactory.create();
+      FullRobotModel intermediateModel = robotModel.createFullRobotModel();
       RigidBody intermediateRootBody = intermediateModel.getElevator();
 
       estimatorChecksum = new InverseDynamicsJointStateChecksum(estimatorRootBody, estimatorChecksumCalculator);
@@ -114,7 +114,7 @@ public class IntermediateEstimatorStateHolder
    public static class Builder implements us.ihmc.concurrent.Builder<IntermediateEstimatorStateHolder>
    {
 
-      private final FullRobotModelFactory intermediateFactory;
+      private final DRCRobotModel robotModel;
       private final RigidBody estimatorRootJoint;
       private final RigidBody controllerRootJoint;
 
@@ -122,11 +122,11 @@ public class IntermediateEstimatorStateHolder
       private final ForceSensorDataHolder estimatorForceSensorDataHolder;
       private final ForceSensorDataHolder controllerForceSensorDataHolder;
 
-      public Builder(FullRobotModelFactory intermediateFactory, RigidBody estimatorRootJoint, RigidBody controllerRootJoint,
+      public Builder(DRCRobotModel robotModel, RigidBody estimatorRootJoint, RigidBody controllerRootJoint,
             ArrayList<ForceSensorDefinition> forceSensorDefinitions, ForceSensorDataHolder estimatorForceSensorDataHolder,
             ForceSensorDataHolder controllerForceSensorDataHolder)
       {
-         this.intermediateFactory = intermediateFactory;
+         this.robotModel = robotModel;
          this.estimatorRootJoint = estimatorRootJoint;
          this.controllerRootJoint = controllerRootJoint;
          this.forceSensorDefinitions = forceSensorDefinitions;
@@ -137,7 +137,7 @@ public class IntermediateEstimatorStateHolder
       @Override
       public IntermediateEstimatorStateHolder newInstance()
       {
-         return new IntermediateEstimatorStateHolder(intermediateFactory, estimatorRootJoint, controllerRootJoint, forceSensorDefinitions,
+         return new IntermediateEstimatorStateHolder(robotModel, estimatorRootJoint, controllerRootJoint, forceSensorDefinitions,
                estimatorForceSensorDataHolder, controllerForceSensorDataHolder);
       }
 

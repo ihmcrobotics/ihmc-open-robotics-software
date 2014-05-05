@@ -1,6 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.drcRobot;
 
 import us.ihmc.SdfLoader.JaxbSDFLoader;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -48,4 +49,8 @@ public interface DRCRobotModel
    public HandModel getHandModel();
    
    public Transform getOffsetHandFromWrist(RobotSide side);
+
+   public SDFFullRobotModel createFullRobotModel();
+   
+   public SDFRobot createSdfRobot(boolean createCollisionMeshes);
 }

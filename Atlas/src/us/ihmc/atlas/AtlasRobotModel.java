@@ -1,6 +1,7 @@
 package us.ihmc.atlas;
 
 import us.ihmc.SdfLoader.JaxbSDFLoader;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
 import us.ihmc.atlas.parameters.AtlasArmControllerParameters;
@@ -46,6 +47,7 @@ public class AtlasRobotModel implements DRCRobotModel
       selectedVersion = atlasVersion;
       this.runningOnRealRobot = runningOnRealRobot;
       this.sensorInformation = new AtlasSensorInformation();
+      this.headlessLoader = DRCRobotSDFLoader.loadDRCRobot(selectedVersion.getResourceDirectories(), selectedVersion.getSdfFileAsStream(), true);
    }
 
    @Override
@@ -169,25 +171,32 @@ public class AtlasRobotModel implements DRCRobotModel
    @Override
    public JaxbSDFLoader getJaxbSDFLoader(boolean headless)
    {
-      if(headless)
+      if(!headless)
       {
-         if(headlessLoader == null)
+         if(loader == null)
          {
-            this.headlessLoader = DRCRobotSDFLoader.loadDRCRobot(new String[]{}, selectedVersion.getSdfFileAsStream(), headless);
+            this.loader = DRCRobotSDFLoader.loadDRCRobot(selectedVersion.getResourceDirectories(), selectedVersion.getSdfFileAsStream(), false);
          }
-         return headlessLoader;
+         return loader;
       }
-      
-      if(loader == null)
-      {
-         this.loader = DRCRobotSDFLoader.loadDRCRobot(selectedVersion.getResourceDirectories(), selectedVersion.getSdfFileAsStream(), headless);
-      }
-      return loader;
+      return headlessLoader;
    }
 
    @Override
    public DRCRobotSensorInformation getSensorInformation()
    {
       return sensorInformation;
+   }
+   
+   @Override
+   public SDFFullRobotModel createFullRobotModel()
+   {
+      return headlessLoader.createFullRobotModel(getJointMap());
+   }
+
+   @Override
+   public SDFRobot createSdfRobot(boolean createCollisionMeshes)
+   {
+      return headlessLoader.createRobot(getJointMap(), createCollisionMeshes);
    }
 }
