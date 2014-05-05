@@ -1,10 +1,10 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import com.yobotics.simulationconstructionset.*;
-import com.yobotics.simulationconstructionset.robotController.RobotController;
-import com.yobotics.simulationconstructionset.util.GainCalculator;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
+import java.util.ArrayList;
+
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
@@ -19,13 +19,18 @@ import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControlle
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.Pair;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-import java.util.ArrayList;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.ExternalForcePoint;
+import com.yobotics.simulationconstructionset.Joint;
+import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.robotController.RobotController;
+import com.yobotics.simulationconstructionset.util.GainCalculator;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 
 public class DRCInverseDynamicsControllerDemo
 {
@@ -64,11 +69,7 @@ public class DRCInverseDynamicsControllerDemo
       PolyvalentHighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory = new PolyvalentHighLevelHumanoidControllerFactory(null,
             footstepTimingParameters, walkingControlParameters, walkingControlParameters, armControlParameters, false, false, false, INVERSE_DYNAMICS_JOINT_CONTROL);
 
-      SideDependentList<String> footForceSensorNames = new SideDependentList<>();
-      for(RobotSide robotSide : RobotSide.values)
-      {
-         footForceSensorNames.put(robotSide, model.getJointMap().getJointBeforeFootName(robotSide));
-      }
+      SideDependentList<String> footForceSensorNames = model.getSensorInformation().getFeetForceSensorNames();
       
       ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, DRCConfigParameters.contactTresholdForceForSCS, footForceSensorNames);
       Pair<HumanoidRobotSimulation<SDFRobot>, DRCController> humanoidSimulation = DRCSimulationFactory.createSimulation(controllerFactory, null,
