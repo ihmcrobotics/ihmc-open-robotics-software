@@ -601,5 +601,10 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    {
       return handControlFramesWithRespectToFrameAfterWrist;
    }
+
+   public double getDesiredTouchdownVelocity()
+   {
+      return -0.3;
+   }
 }
 
