@@ -1,4 +1,4 @@
-package us.ihmc.sensorProcessing;
+package us.ihmc.darpaRoboticsChallenge.sensorProcessing;
 
 import boofcv.alg.transform.fft.GeneralPurposeFFT_F64_1D;
 
