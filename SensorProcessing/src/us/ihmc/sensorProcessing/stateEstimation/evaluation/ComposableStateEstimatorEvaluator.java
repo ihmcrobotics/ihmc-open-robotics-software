@@ -77,7 +77,7 @@ public class ComposableStateEstimatorEvaluator
       
       boolean addLinearAccelerationSensors = true;
       
-      simulatedSensorHolderAndReaderFromRobotFactory.build(inverseDynamicsStructure.getRootJoint(), null, addLinearAccelerationSensors, registry);
+      simulatedSensorHolderAndReaderFromRobotFactory.build(inverseDynamicsStructure.getRootJoint(), null, registry);
       
       SensorReader simulatedSensorHolderAndReader = simulatedSensorHolderAndReaderFromRobotFactory.getSensorReader();
       

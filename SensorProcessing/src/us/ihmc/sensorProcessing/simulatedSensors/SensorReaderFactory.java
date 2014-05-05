@@ -7,7 +7,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public interface SensorReaderFactory
 {
-   public abstract void build(SixDoFJoint rootJoint, IMUDefinition[] imuDefinitions, boolean addLinearAccelerationSensors, YoVariableRegistry parentRegistry);
+   public abstract void build(SixDoFJoint rootJoint, IMUDefinition[] imuDefinitions, YoVariableRegistry parentRegistry);
 
    public abstract SensorReader getSensorReader();
 

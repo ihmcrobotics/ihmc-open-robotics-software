@@ -58,7 +58,7 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
 
    }
 
-   public void build(SixDoFJoint rootJoint, IMUDefinition[] imuDefinition, boolean addLinearAccelerationSensors, YoVariableRegistry parentRegistry)
+   public void build(SixDoFJoint rootJoint, IMUDefinition[] imuDefinition, YoVariableRegistry parentRegistry)
    {
       ArrayList<Joint> rootJoints = robot.getRootJoints();
       if (rootJoints.size() > 1)
@@ -71,7 +71,7 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
       {
          SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap = SCSToInverseDynamicsJointMap.createByName((FloatingJoint) scsRootJoint, rootJoint);
          StateEstimatorSensorDefinitionsFromRobotFactory stateEstimatorSensorDefinitionsFromRobotFactory = new StateEstimatorSensorDefinitionsFromRobotFactory(
-               scsToInverseDynamicsJointMap, imuMounts, groundContactPointBasedWrenchCalculators, addLinearAccelerationSensors);
+               scsToInverseDynamicsJointMap, imuMounts, groundContactPointBasedWrenchCalculators);
          
          this.stateEstimatorSensorDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getStateEstimatorSensorDefinitions();
          this.imuDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getIMUDefinitions();
@@ -80,7 +80,7 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
          createAndAddOrientationSensors(imuDefinitions, registry);
          createAndAddAngularVelocitySensors(imuDefinitions, registry);
          createAndAddForceSensors(forceSensorDefinitions, registry);
-         if (addLinearAccelerationSensors) createAndAddLinearAccelerationSensors(imuDefinitions, registry);
+         createAndAddLinearAccelerationSensors(imuDefinitions, registry);
          createAndAddOneDoFPositionAndVelocitySensors(scsToInverseDynamicsJointMap);
       }
       else
