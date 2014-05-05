@@ -155,34 +155,11 @@ public class Constrained5thOrderPolyForSwingTrajectoryGenerator
    
    public void compute(double time)
    {
-	   if(!moveWithConstantVelocityAfterFinalTime && time > stepTime)
-	   {
-		   // At time = finalTime, cap the desired position/velocity/acceleration at the finalDesiredValues.
-		   time = stepTime;
+	   swingFootTrajectory.computeTrajectory(time);
 		   
-		   swingFootTrajectory.computeTrajectory(time);
-		   
-		   desiredPosition1D.set(swingFootTrajectory.getPosition());
-		   desiredVelocity1D.set(swingFootTrajectory.getVelocity());
-		   desiredAcceleration1D.set(swingFootTrajectory.getAcceleration());
-	   }
-	   else if(moveWithConstantVelocityAfterFinalTime && time > stepTime)
-	   {
-		   // For whatever reason, time > finalTime, but the foot has not struck the ground(possibly due to IMU drift),
-		   // continue moving at your desiredFinalVelocity. For foot height, the foot would continue moving downward until an 
-		   // impact causes the state to switch.
-		   desiredPosition1D.set(desiredPosition1D.getDoubleValue() + finalDesiredVelocity1D.getDoubleValue()*(time - previousTime));
-		   desiredVelocity1D.set(finalDesiredVelocity1D.getDoubleValue());
-		   desiredAcceleration1D.set(0.0);
-	   }
-	   else
-	   {
-		   swingFootTrajectory.computeTrajectory(time);
-		   
-		   desiredPosition1D.set(swingFootTrajectory.getPosition());
-		   desiredVelocity1D.set(swingFootTrajectory.getVelocity());
-		   desiredAcceleration1D.set(swingFootTrajectory.getAcceleration());
-	   }
+	   desiredPosition1D.set(swingFootTrajectory.getPosition());
+	   desiredVelocity1D.set(swingFootTrajectory.getVelocity());
+	   desiredAcceleration1D.set(swingFootTrajectory.getAcceleration());
 	   
 	   previousTime = time;
       
