@@ -2,9 +2,13 @@ package us.ihmc.valkyrie.paramaters;
 
 import java.util.HashMap;
 
+import javax.media.j3d.Transform3D;
+import javax.vecmath.Vector3d;
+
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.screwTheory.SpatialForceVector;
 
 public class ValkyrieSensorInformation implements DRCRobotSensorInformation
 {
@@ -12,6 +16,31 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    private static final String[] forceSensorNames = { "LeftAnkle", "RightAnkle", "LeftForearmSupinator", "RightForearmSupinator" };
    private static final SideDependentList<String> feetForceSensorNames = new SideDependentList<String>("LeftAnkle", "RightAnkle");
    private static final SideDependentList<String> urdfFeetForceSensorNames = new SideDependentList<>("/v1/LeftLeg6Axis_Offset", "/v1/RightLeg6Axis_Offset");
+
+   public static final boolean USE_JSC_FOOT_MASS_TARING = false;
+   public static final boolean USE_HOME_MADE_FOOT_SENSOR_TARRING = true;
+
+   private static final SideDependentList<SpatialForceVector> footForceSensorTareOffsets;
+   static
+   {
+      SpatialForceVector leftFootForceSensorTareOffset_20140406 = new SpatialForceVector(null, new double[] { 7.1, -23.7, 3.8, 186.2, 319.7, 1067.7 });
+      SpatialForceVector rightFootForceSensorTareOffset_20140406 = new SpatialForceVector(null, new double[] { -1.08, -2.79, -9.63, 38.05, 7.35, -109.3 });
+      
+      footForceSensorTareOffsets = new SideDependentList<SpatialForceVector>(leftFootForceSensorTareOffset_20140406, rightFootForceSensorTareOffset_20140406);
+   }
+
+   private static final SideDependentList<Transform3D> transformFromAnkleURDFFrameToZUpFrames = new SideDependentList<>();
+   static
+   {
+      Transform3D leftTransform = new Transform3D();
+      leftTransform.setEuler(new Vector3d(-Math.PI, Math.PI / 2.0, 0.0));
+      transformFromAnkleURDFFrameToZUpFrames.put(RobotSide.LEFT, leftTransform);
+
+      Transform3D rightTransform = new Transform3D();
+      rightTransform.setEuler(new Vector3d(0.0, Math.PI / 2.0, 0.0));
+      transformFromAnkleURDFFrameToZUpFrames.put(RobotSide.RIGHT, rightTransform);
+   }
+
    
    private static final SideDependentList<String> wristForceSensorNames = new SideDependentList<String>("LeftForearmSupinator", "RightForearmSupinator");
    private static final String lidarSensorName = "/v1/Ibeo_sensor";
@@ -99,4 +128,13 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
       return leftPelvisIMUSensor;
    }
 
+   public SpatialForceVector getFootForceSensorTareOffset(RobotSide robotSide)
+   {
+      return footForceSensorTareOffsets.get(robotSide);
+   }
+   
+   public Transform3D getTransformFromAnkleURDFFrameToZUpFrame(RobotSide robotSide)
+   {
+      return transformFromAnkleURDFFrameToZUpFrames.get(robotSide);
+   }
 }
