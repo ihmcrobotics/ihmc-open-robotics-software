@@ -1,6 +1,6 @@
 package us.ihmc.SdfLoader;
 
-import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModelFactory;
+import us.ihmc.utilities.humanoidRobot.model.FullRobotModelFactory;
 
 public class SDFFullRobotModelFactory implements FullRobotModelFactory
 {

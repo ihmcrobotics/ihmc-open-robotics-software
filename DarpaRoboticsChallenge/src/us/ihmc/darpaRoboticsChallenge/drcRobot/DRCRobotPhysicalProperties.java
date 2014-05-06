@@ -2,8 +2,8 @@ package us.ihmc.darpaRoboticsChallenge.drcRobot;
 
 import java.util.EnumMap;
 
-import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
 import us.ihmc.utilities.Pair;
+import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 
 public abstract class DRCRobotPhysicalProperties
 {

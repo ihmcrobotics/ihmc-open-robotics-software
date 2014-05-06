@@ -1,12 +1,12 @@
 package us.ihmc.commonWalkingControlModules.outputs;
 
-import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
-import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LowerBodyTorques;
-import us.ihmc.commonWalkingControlModules.partNamesAndTorques.NeckJointName;
-import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.UpperBodyTorques;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
+import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
+import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
+import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
 
 public interface ProcessedOutputsInterface
 {

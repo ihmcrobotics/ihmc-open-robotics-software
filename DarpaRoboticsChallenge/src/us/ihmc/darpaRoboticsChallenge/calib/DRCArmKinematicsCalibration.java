@@ -12,7 +12,8 @@ import boofcv.struct.calib.IntrinsicParameters;
 import boofcv.struct.image.ImageFloat32;
 import georegression.struct.se.Se3_F64;
 import org.ejml.data.DenseMatrix64F;
-import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
+
+import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 
 import java.awt.image.BufferedImage;
 
