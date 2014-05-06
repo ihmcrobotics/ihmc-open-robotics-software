@@ -26,6 +26,8 @@ public class DesiredJointAccelerationCalculatorInWorldFrame
    private final ReferenceFrame pelvisFrame;
    private final SpatialAccelerationVector accelerationOfFootWithRespectToPelvis = new SpatialAccelerationVector();
    private final DampedLeastSquaresSolver jacobianSolver;
+   private final LegJointName[] legJointNames;
+   private final LegJointVelocities jointVelocities;
 
    private final DesiredJointAccelerationCalculator desiredJointAccelerationCalculator;
 
@@ -46,6 +48,9 @@ public class DesiredJointAccelerationCalculatorInWorldFrame
       this.jacobianSolver = new DampedLeastSquaresSolver(swingLegJacobian.getGeometricJacobian().getNumberOfColumns());
       this.desiredJointAccelerationCalculator = new DesiredJointAccelerationCalculator(swingLegJacobian.getGeometricJacobian(), jacobianSolver);
       parentRegistry.addChild(registry);
+      
+      this.legJointNames = legJointNames;
+      jointVelocities = new LegJointVelocities(legJointNames, robotSide);
    }
 
    /**
@@ -82,7 +87,14 @@ public class DesiredJointAccelerationCalculatorInWorldFrame
 
    private Twist computeTwistOfPelvisWithRespectToFoot()
    {
-      LegJointVelocities jointVelocities = fullRobotModel.getLegJointVelocities(swingSide);
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         for (int i = 0; i < legJointNames.length; i++)
+         {
+            jointVelocities.setJointVelocity(legJointNames[i], fullRobotModel.getLegJoint(robotSide, legJointNames[i]).getQd());
+         }
+      }
+//      LegJointVelocities jointVelocities = fullRobotModel.getLegJointVelocities(swingSide);
       Twist twistOfPelvisWithRespectToFoot = swingLegJacobian.getTwistOfFootWithRespectToPelvisInFootFrame(jointVelocities);    // twist of foot with respect to body
       twistOfPelvisWithRespectToFoot.invert();    // twist of body with respect to foot
       twistOfPelvisWithRespectToFoot.changeFrame(pelvisFrame);
