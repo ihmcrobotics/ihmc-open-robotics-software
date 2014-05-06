@@ -17,7 +17,7 @@ import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectory
 import com.yobotics.simulationconstructionset.util.trajectory.VectorProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.YoSpline3D;
 
-public class SoftTouchdownPositionTrajectoryGenerator implements PositionTrajectoryGenerator
+public class SoftTouchdownTrajectoryGenerator
 {
    private final YoVariableRegistry registry;
    private final String namePostFix = getClass().getSimpleName();
@@ -46,7 +46,7 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
 
    private final YoSpline3D trajectory;
 
-   public SoftTouchdownPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, PositionProvider initialPositionProvider,
+   public SoftTouchdownTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, PositionProvider initialPositionProvider,
            VectorProvider velocityProvider, DoubleProvider startTimeProvider, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(namePrefix + namePostFix);
@@ -145,32 +145,19 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
    {
 	   replanningTrajectory.set(true);
    }
-
-   public void get(FramePoint positionToPack)
+   
+   public YoFramePoint getDesiredPosition()
    {
-      desiredPosition.getFrameTupleIncludingFrame(positionToPack);
-   }
-
-   public void packVelocity(FrameVector velocityToPack)
-   {
-      desiredVelocity.getFrameTupleIncludingFrame(velocityToPack);
-   }
-
-   public void packAcceleration(FrameVector accelerationToPack)
-   {
-      desiredAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
-   }
-
-   public void packLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
-   {
-      get(positionToPack);
-      packVelocity(velocityToPack);
-      packAcceleration(accelerationToPack);
+      return desiredPosition;
    }
    
-   @Override
-   public void updateTrajectory(FramePoint replanInitialPosition, FramePoint replanFinalPosition, FrameVector replanInitialVelocity, double replanInitialTime)
+   public YoFrameVector getDesiredVelocity()
    {
-      //throw new RuntimeException("not implemented");
+      return desiredVelocity;
+   }
+   
+   public YoFrameVector getDesiredAcceleration()
+   {
+      return desiredAcceleration;
    }
 }

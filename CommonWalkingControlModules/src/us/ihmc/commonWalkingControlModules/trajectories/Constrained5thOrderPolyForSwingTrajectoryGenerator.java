@@ -32,8 +32,6 @@ public class Constrained5thOrderPolyForSwingTrajectoryGenerator
    private final DoubleYoVariable desiredVelocity1D;
    private final DoubleYoVariable desiredAcceleration1D;
    
-   private boolean moveWithConstantVelocityAfterFinalTime;
-   
    private final double stepTime;
    private double initialTime;
    private double previousTime;
@@ -51,14 +49,12 @@ public class Constrained5thOrderPolyForSwingTrajectoryGenerator
    public Constrained5thOrderPolyForSwingTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, double initialTime,
          DoubleProvider stepTimeProvider,PositionProvider initialPositionProvider, PositionProvider finalDesiredPositionProvider, 
          VectorProvider finalDesiredVelocityProvider, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
-         WalkingControllerParameters walkingControllerParameters, boolean moveWithConstantVelocityAfterFinalTime)
+         WalkingControllerParameters walkingControllerParameters)
    {
       this.registry = new YoVariableRegistry(getClass().getSimpleName());
       parentRegistry.addChild(this.registry);
       
       this.referenceFrame = referenceFrame;
-      
-      this.moveWithConstantVelocityAfterFinalTime = moveWithConstantVelocityAfterFinalTime;
       
       this.initialPositionProvider = initialPositionProvider;
       this.finalDesiredPositionProvider = finalDesiredPositionProvider;
