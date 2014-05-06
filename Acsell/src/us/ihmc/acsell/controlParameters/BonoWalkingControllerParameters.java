@@ -224,6 +224,11 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    {
       return 0.15;
    }
+   
+   public double getFootSwitchCoPThresholdFraction()
+   {
+	   return 0.02;
+   }
 
    public double getMaxStepWidth()
    {
