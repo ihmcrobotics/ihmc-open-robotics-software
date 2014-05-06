@@ -48,31 +48,36 @@ public class OrientationStateVisualizer
 	private final FramePoint pelvisYaxisBase;
 	
 	public OrientationStateVisualizer(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
-	{	
-		String reducedSupportPolygonCaption = "ReducedSupportPolygon";
-	    yoreducedSupportPolygon = new YoFrameConvexPolygon2d(reducedSupportPolygonCaption, "", worldFrame, 8, registry);
-	    reducedSupportPolygon = new FrameConvexPolygon2d(worldFrame);
-	    reducedSupportPolygonArtifact = new DynamicGraphicYoPolygonArtifact(reducedSupportPolygonCaption, yoreducedSupportPolygon, REDUCED_SUPPORT_POLYGON_COLOR, false);
-	    dynamicGraphicObjectsListRegistry.registerArtifact(reducedSupportPolygonCaption, reducedSupportPolygonArtifact);
-	    
-		String pelvisXaxisCaption = "PelvisXaxis";
-		yoPelvisXaxis = new YoFrameVector2d(pelvisXaxisCaption, worldFrame, registry);
-		pelvisXaxis = new FrameVector(worldFrame, PELVIS_SYS_SCALING, 0, 0);
-		yoPelvisXaxisBase = new YoFramePoint2d(pelvisXaxisCaption + "Base", worldFrame, registry);
-		pelvisXaxisBase = new FramePoint(worldFrame, 0, 0, 0);
-		pelvisXaxisArtifact = new DynamicGraphicYoVectorArtifact(pelvisXaxisCaption, yoPelvisXaxisBase, yoPelvisXaxis, PELVIS_X_AXIS_COLOR);
-		dynamicGraphicObjectsListRegistry.registerArtifact(pelvisXaxisCaption, pelvisXaxisArtifact);
-		
-		String pelvisYaxisCaption = "PelvisYaxis";
-		yoPelvisYaxis = new YoFrameVector2d(pelvisYaxisCaption, worldFrame, registry);
-		pelvisYaxis = new FrameVector(worldFrame, 0, PELVIS_SYS_SCALING, 0);
-		yoPelvisYaxisBase = new YoFramePoint2d(pelvisYaxisCaption + "Base", worldFrame, registry);
-		pelvisYaxisBase = new FramePoint(worldFrame, 0, 0, 0);
-		pelvisYaxisArtifact = new DynamicGraphicYoVectorArtifact(pelvisYaxisCaption, yoPelvisYaxisBase, yoPelvisYaxis, PELVIS_Y_AXIS_COLOR);
-		dynamicGraphicObjectsListRegistry.registerArtifact(pelvisYaxisCaption, pelvisYaxisArtifact);
-		
-	    parentRegistry.addChild(registry);
-	}
+   {
+      String reducedSupportPolygonCaption = "ReducedSupportPolygon";
+      yoreducedSupportPolygon = new YoFrameConvexPolygon2d(reducedSupportPolygonCaption, "", worldFrame, 8, registry);
+      reducedSupportPolygon = new FrameConvexPolygon2d(worldFrame);
+      reducedSupportPolygonArtifact = new DynamicGraphicYoPolygonArtifact(reducedSupportPolygonCaption, yoreducedSupportPolygon, REDUCED_SUPPORT_POLYGON_COLOR,
+            false);
+
+      String pelvisXaxisCaption = "PelvisXaxis";
+      yoPelvisXaxis = new YoFrameVector2d(pelvisXaxisCaption, worldFrame, registry);
+      pelvisXaxis = new FrameVector(worldFrame, PELVIS_SYS_SCALING, 0, 0);
+      yoPelvisXaxisBase = new YoFramePoint2d(pelvisXaxisCaption + "Base", worldFrame, registry);
+      pelvisXaxisBase = new FramePoint(worldFrame, 0, 0, 0);
+      pelvisXaxisArtifact = new DynamicGraphicYoVectorArtifact(pelvisXaxisCaption, yoPelvisXaxisBase, yoPelvisXaxis, PELVIS_X_AXIS_COLOR);
+
+      String pelvisYaxisCaption = "PelvisYaxis";
+      yoPelvisYaxis = new YoFrameVector2d(pelvisYaxisCaption, worldFrame, registry);
+      pelvisYaxis = new FrameVector(worldFrame, 0, PELVIS_SYS_SCALING, 0);
+      yoPelvisYaxisBase = new YoFramePoint2d(pelvisYaxisCaption + "Base", worldFrame, registry);
+      pelvisYaxisBase = new FramePoint(worldFrame, 0, 0, 0);
+      pelvisYaxisArtifact = new DynamicGraphicYoVectorArtifact(pelvisYaxisCaption, yoPelvisYaxisBase, yoPelvisYaxis, PELVIS_Y_AXIS_COLOR);
+
+      if (dynamicGraphicObjectsListRegistry != null)
+      {
+         dynamicGraphicObjectsListRegistry.registerArtifact(reducedSupportPolygonCaption, reducedSupportPolygonArtifact);
+         dynamicGraphicObjectsListRegistry.registerArtifact(pelvisXaxisCaption, pelvisXaxisArtifact);
+         dynamicGraphicObjectsListRegistry.registerArtifact(pelvisYaxisCaption, pelvisYaxisArtifact);
+      }
+
+      parentRegistry.addChild(registry);
+   }
 	
 	public void updateReducedSupportPolygon(FrameConvexPolygon2d newReducedSupportPolygon)
 	{
