@@ -9,6 +9,7 @@ import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
+import us.ihmc.sensorProcessing.simulatedSensors.JointAndIMUSensorMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorFilterParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.sensorProcessing.stateEstimation.JointAndIMUSensorDataSource;
@@ -48,7 +49,8 @@ public class JointStateUpdaterTest
       
       try
       {
-         new JointStateUpdater(inverseDynamicsStructure, jointAndIMUSensorDataSource, registry);
+         JointAndIMUSensorMap sensorMap = jointAndIMUSensorDataSource.getSensorMap();
+         new JointStateUpdater(inverseDynamicsStructure, sensorMap, registry);
       }
       catch (Exception e)
       {
@@ -75,7 +77,8 @@ public class JointStateUpdaterTest
       JointStateUpdater jointStateUpdater;
       try
       {
-         jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, jointAndIMUSensorDataSource, registry);
+         JointAndIMUSensorMap sensorMap = jointAndIMUSensorDataSource.getSensorMap();
+         jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorMap, registry);
       }
       catch (Exception e)
       {
@@ -104,7 +107,8 @@ public class JointStateUpdaterTest
       JointStateUpdater jointStateUpdater;
       try
       {
-         jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, jointAndIMUSensorDataSource, registry);
+         JointAndIMUSensorMap sensorMap = jointAndIMUSensorDataSource.getSensorMap();
+         jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorMap, registry);
       }
       catch (Exception e)
       {
@@ -131,7 +135,8 @@ public class JointStateUpdaterTest
       ArrayList<RevoluteJoint> jointsWithVelocitySensor = new ArrayList<RevoluteJoint>(joints);
       JointAndIMUSensorDataSource jointAndIMUSensorDataSource = createJointSensorDataSource(registry, jointsWithPositionSensor, jointsWithVelocitySensor);
       
-      JointStateUpdater jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, jointAndIMUSensorDataSource, registry);
+      JointAndIMUSensorMap sensorMap = jointAndIMUSensorDataSource.getSensorMap();
+      JointStateUpdater jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorMap, registry);
       
       fillSensorsWithRandomPositionsAndVelocities(jointsWithPositionSensor, jointsWithVelocitySensor, jointAndIMUSensorDataSource);
       

@@ -5,8 +5,8 @@ import java.util.Map.Entry;
 
 import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.simulatedSensors.ControllerDispatcher;
+import us.ihmc.sensorProcessing.simulatedSensors.JointAndIMUSensorMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
-import us.ihmc.sensorProcessing.stateEstimation.JointAndIMUSensorDataSource;
 import us.ihmc.utilities.ForceSensorDefinition;
 import us.ihmc.utilities.math.TimeTools;
 
@@ -39,8 +39,9 @@ public class DRCPerfectSensorReader implements SensorReader, RobotController
       this.rawSensorReader = rawSensorReader;
    }
    
-   public void setJointAndIMUSensorDataSource(JointAndIMUSensorDataSource jointAndIMUSensorDataSource)
+   public JointAndIMUSensorMap getJointAndIMUSensorMap()
    {
+      throw new RuntimeException("Should not get there");
    }
 
    public void setControllerDispatcher(ControllerDispatcher controllerDispatcher)
@@ -111,5 +112,4 @@ public class DRCPerfectSensorReader implements SensorReader, RobotController
    {
       forceTorqueSensors.put(forceSensorDefinition, groundContactPointBasedWrenchCalculator);
    }
-
 }

@@ -35,27 +35,24 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
    
    private final ArrayList<IMUMount> imuMounts;
    private final ArrayList<WrenchCalculatorInterface> groundContactPointBasedWrenchCalculators;
-   
 
-   private final SimulatedSensorHolderAndReader simulatedSensorHolderAndReader;
-   private Map<IMUMount, IMUDefinition> imuDefinitions;
-   private Map<WrenchCalculatorInterface, ForceSensorDefinition> forceSensorDefinitions;
+   private SimulatedSensorHolderAndReader simulatedSensorHolderAndReader;
    private StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions;
+   private final SensorFilterParameters sensorFilterParameters;
    
    public SimulatedSensorHolderAndReaderFromRobotFactory(Robot robot, SensorNoiseParameters sensorNoiseParameters,
          SensorFilterParameters sensorFilterParameters, ArrayList<IMUMount> imuMounts,
-         ArrayList<WrenchCalculatorInterface> groundContactPointBasedWrenchCalculators, YoVariableRegistry estimatorRegistry, YoVariableRegistry simulationRegistry)
+         ArrayList<WrenchCalculatorInterface> groundContactPointBasedWrenchCalculators, YoVariableRegistry estimatorRegistry,
+         YoVariableRegistry simulationRegistry)
    {
       this.registry = estimatorRegistry;
       this.robot = robot;
       this.sensorNoiseParameters = sensorNoiseParameters;
-      this.simulatedSensorHolderAndReader = new SimulatedSensorHolderAndReader(sensorFilterParameters, simulationRegistry); 
+      this.sensorFilterParameters = sensorFilterParameters;
       
       this.estimateDT = sensorFilterParameters.getEstimatorDT();
       this.imuMounts = imuMounts;
       this.groundContactPointBasedWrenchCalculators = groundContactPointBasedWrenchCalculators;
-
-
    }
 
    public void build(SixDoFJoint rootJoint, IMUDefinition[] imuDefinition, YoVariableRegistry parentRegistry)
@@ -74,8 +71,9 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
                scsToInverseDynamicsJointMap, imuMounts, groundContactPointBasedWrenchCalculators);
          
          this.stateEstimatorSensorDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getStateEstimatorSensorDefinitions();
-         this.imuDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getIMUDefinitions();
-         this.forceSensorDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getForceSensorDefinitions();
+         Map<IMUMount, IMUDefinition> imuDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getIMUDefinitions();
+         Map<WrenchCalculatorInterface, ForceSensorDefinition> forceSensorDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getForceSensorDefinitions();
+         this.simulatedSensorHolderAndReader = new SimulatedSensorHolderAndReader(sensorFilterParameters, stateEstimatorSensorDefinitions, registry); 
          
          createAndAddOrientationSensors(imuDefinitions, registry);
          createAndAddAngularVelocitySensors(imuDefinitions, registry);

@@ -151,6 +151,7 @@ public class DRCSimulationFactory
       }
 
       SensorReaderFactory sensorReaderFactory; // this is the connection between the ModularRobotController and the DRCController below
+      SimulatedSensorHolderAndReaderFromRobotFactory simulatedSensorHolderAndReaderFromRobotFactory;
       ModularRobotController controller = new ModularRobotController("SensorReaders");
       if (DRCConfigParameters.USE_PERFECT_SENSORS)
       {
@@ -160,9 +161,8 @@ public class DRCSimulationFactory
       }
       else
       {
-         SimulatedSensorHolderAndReaderFromRobotFactory simulatedSensorHolderAndReaderFromRobotFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(
+         simulatedSensorHolderAndReaderFromRobotFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(
                simulatedRobot, sensorNoiseParameters, stateEstimatorParameters.getSensorFilterParameters(), imuMounts, wrenchProviders, estimatorRegistry, simulationRegistry);
-         controller.addRobotController(new RunnableRunnerController(simulatedSensorHolderAndReaderFromRobotFactory.getSensorReader()));
          sensorReaderFactory = simulatedSensorHolderAndReaderFromRobotFactory;
       }
 
@@ -182,6 +182,9 @@ public class DRCSimulationFactory
             dynamicGraphicObjectsListRegistry, guiSetterUpperRegistry, estimatorRegistry, controllerRegistry, threadFactory, threadSynchronizer, 
             drcRobotModel, drcRobotModel.getContactPointParamaters(false, false), estimateDT);
       robotController.initialize();
+
+      if (simulatedSensorHolderAndReaderFromRobotFactory != null)
+         controller.addRobotController(new RunnableRunnerController(simulatedSensorHolderAndReaderFromRobotFactory.getSensorReader()));
 
       final HumanoidRobotSimulation<SDFRobot> humanoidRobotSimulation = new HumanoidRobotSimulation<SDFRobot>(simulatedRobot, controller,
             estimationTicksPerControlTick, commonAvatarEnvironmentInterface, simulatedRobot.getAllExternalForcePoints(), robotInitialSetup, scsInitialSetup,
