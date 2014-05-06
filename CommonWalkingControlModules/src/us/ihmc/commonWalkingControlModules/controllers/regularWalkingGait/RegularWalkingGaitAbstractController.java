@@ -10,9 +10,18 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import us.ihmc.commonWalkingControlModules.configurations.BalanceOnOneLegConfiguration;
+import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
+import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
+import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmTorques;
+import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
+import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LowerBodyTorques;
+import us.ihmc.commonWalkingControlModules.partNamesAndTorques.NeckJointName;
+import us.ihmc.commonWalkingControlModules.partNamesAndTorques.NeckTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.RobotSpecificJointNames;
+import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineJointName;
+import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.UpperBodyTorques;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
@@ -78,13 +87,15 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
    private final DoubleYoVariable timeInMidSwing = new DoubleYoVariable("timeInMidSwing", childRegistry);
 
    private final String name;
+   private final FullRobotModel fullRobotModel;
 
-   public RegularWalkingGaitAbstractController(String name, RobotSpecificJointNames robotJointNames, DoubleYoVariable time,
+   public RegularWalkingGaitAbstractController(String name, RobotSpecificJointNames robotJointNames, FullRobotModel fullRobotModel, DoubleYoVariable time,
            ProcessedOutputsInterface processedOutputs, DoEveryTickSubController doEveryTickSubController, StanceSubController stanceSubController,
            SwingSubController swingSubController, UpperBodySubController upperBodySubController, CommonWalkingReferenceFrames referenceFrames,
            YoVariableRegistry controllerRegistry, RobotSide initialLoadingLeg)
    {
       this.name = name;
+      this.fullRobotModel = fullRobotModel;
       this.robotJointNames = robotJointNames;
       this.processedOutputs = processedOutputs;
 
@@ -180,6 +191,37 @@ public abstract class RegularWalkingGaitAbstractController implements RobotContr
    {
       processedOutputs.setLowerBodyTorques(lowerBodyTorques);
       processedOutputs.setUpperBodyTorques(upperBodyTorques);
+      
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         LegTorques legTorques = lowerBodyTorques.getLegTorques(robotSide);
+         for (LegJointName legJointName : legTorques.getLegJointNames())
+         {
+            double tau = lowerBodyTorques.getLegTorques(robotSide).getTorque(legJointName);
+            fullRobotModel.getLegJoint(robotSide, legJointName).setTau(tau);
+         }
+         
+         ArmTorques armTorques = upperBodyTorques.getArmTorques(robotSide);
+         for (ArmJointName armJointName : robotJointNames.getArmJointNames())
+         {
+            double tau = armTorques.getTorque(armJointName);
+            fullRobotModel.getArmJoint(robotSide, armJointName).setTau(tau);
+         }
+      }
+      
+      SpineTorques spineTorques = upperBodyTorques.getSpineTorques();
+      for (SpineJointName spineJointName : robotJointNames.getSpineJointNames())
+      {
+         double tau = spineTorques.getTorque(spineJointName);
+         fullRobotModel.getSpineJoint(spineJointName).setTau(tau);
+      }
+      
+      NeckTorques neckTorques = upperBodyTorques.getNeckTorques();
+      for (NeckJointName neckJointName : robotJointNames.getNeckJointNames())
+      {
+         double tau = neckTorques.getTorque(neckJointName);
+         fullRobotModel.getNeckJoint(neckJointName).setTau(tau);
+      }
    }
 
 

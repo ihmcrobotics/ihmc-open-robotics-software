@@ -26,7 +26,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.M
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumControlModuleException;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModule;
-import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
@@ -110,7 +109,6 @@ public class MomentumBasedController
    
    private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> desiredAccelerationYoVariables = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
 
-   private final ProcessedOutputsInterface processedOutputs;
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
 
    private final MomentumControlModuleBridge momentumControlModuleBridge;
@@ -140,8 +138,8 @@ public class MomentumBasedController
          SideDependentList<FootSwitchInterface> footSwitches, DoubleYoVariable yoTime, double gravityZ, TwistCalculator twistCalculator,
          SideDependentList<ContactablePlaneBody> feet, SideDependentList<ContactablePlaneBody> handsWithFingersBentBack,
          SideDependentList<ContactablePlaneBody> thighs, ContactablePlaneBody pelvis, ContactablePlaneBody pelvisBack, double controlDT,
-         ProcessedOutputsInterface processedOutputs, MomentumOptimizationSettings momentumOptimizationSettings,
-         OldMomentumControlModule oldMomentumControlModule, ArrayList<Updatable> updatables, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+         MomentumOptimizationSettings momentumOptimizationSettings, OldMomentumControlModule oldMomentumControlModule,
+         ArrayList<Updatable> updatables, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
       
@@ -171,7 +169,6 @@ public class MomentumBasedController
 
       RigidBody elevator = fullRobotModel.getElevator();
 
-      this.processedOutputs = processedOutputs;
       this.inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ);
 
       double totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
@@ -379,8 +376,6 @@ public class MomentumBasedController
 
       inverseDynamicsCalculator.compute();
 
-      if (processedOutputs != null)
-         fullRobotModel.setTorques(processedOutputs);
       updateYoVariables();
    }
 

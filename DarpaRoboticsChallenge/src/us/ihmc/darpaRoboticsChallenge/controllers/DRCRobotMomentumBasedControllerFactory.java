@@ -82,8 +82,7 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
 
       RobotController highLevelHumanoidController = highLevelHumanoidControllerFactory.create(fullRobotModel,
             initialPositionControlKpGains, initialPositionControlKdGains, referenceFrames, null, yoTime, gravityZ, twistCalculator, centerOfMassJacobian,
-            bipedFeet, controlDT, footSwitches, lidarControllerInterface, dynamicGraphicObjectsListRegistry, specificRegistry, guiSetterUpperRegistry, null,
-            forceSensorDataHolder);
+            bipedFeet, controlDT, footSwitches, lidarControllerInterface, dynamicGraphicObjectsListRegistry, specificRegistry, guiSetterUpperRegistry, forceSensorDataHolder);
 
       highLevelHumanoidController.getYoVariableRegistry().addChild(specificRegistry);
 
