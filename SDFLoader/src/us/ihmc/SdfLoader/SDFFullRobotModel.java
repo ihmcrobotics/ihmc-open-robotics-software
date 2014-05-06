@@ -20,7 +20,6 @@ import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Camera;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.IMU;
 import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
-import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.FingerName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
@@ -414,12 +413,6 @@ public class SDFFullRobotModel implements FullRobotModel
    public RigidBody getHead()
    {
       return head;
-   }
-
-   public void setTorques(ProcessedOutputsInterface processedOutputs)
-   {
-      // TODO Auto-generated method stub
-
    }
 
    public RigidBody getEndEffector(RobotSide robotSide, LimbName limbName)

@@ -24,7 +24,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.CoMBasedMomen
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.OldMomentumControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
-import us.ihmc.commonWalkingControlModules.outputs.ProcessedOutputsInterface;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredChestOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootPoseProvider;
@@ -94,7 +93,7 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
                                  TwistCalculator twistCalculator, CenterOfMassJacobian centerOfMassJacobian, SideDependentList<ContactablePlaneBody> feet,
                                  double controlDT, SideDependentList<FootSwitchInterface> footSwitches, LidarControllerInterface lidarControllerInterface,
                                  DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry registry, GUISetterUpperRegistry guiSetterUpperRegistry,
-                                 ProcessedOutputsInterface processedOutputs, ForceSensorDataHolder forceSensorDataHolder)
+                                 ForceSensorDataHolder forceSensorDataHolder)
    {
       LinkedHashMap<ContactablePlaneBody, RigidBody> contactablePlaneBodiesAndBases = new LinkedHashMap<ContactablePlaneBody, RigidBody>();
 
@@ -160,8 +159,7 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
       // The controllers do not extend the MomentumBasedController anymore. Instead, it is passed through the constructor.
       MomentumBasedController momentumBasedController = new MomentumBasedController(fullRobotModel, centerOfMassJacobian,
                                                            referenceFrames, footSwitches, yoTime, gravityZ, twistCalculator, feet, hands, null, null, null, controlDT,
-                                                           processedOutputs, momentumOptimizationSettings , oldMomentumControlModule, null,
-                                                           dynamicGraphicObjectsListRegistry);
+                                                           momentumOptimizationSettings, oldMomentumControlModule , null, dynamicGraphicObjectsListRegistry);
 
       DesiredHandPoseProvider handPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame());
 //      TorusPoseProvider torusPoseProvider = new TorusPoseProvider();
