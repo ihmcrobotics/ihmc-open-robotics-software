@@ -422,12 +422,12 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
 
    public double getDefaultTransferTime()
    {
-      return 1.5; //0.25;
+      return 0.25; // 1.5; //
    }
 
    public double getDefaultSwingTime()
    {
-      return 1.5; //0.6;
+      return 0.6; // 1.5; //
    }
 
    public double getPelvisPitchUpperLimit()
