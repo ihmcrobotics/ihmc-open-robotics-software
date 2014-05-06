@@ -23,7 +23,6 @@ import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.FingerName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointName;
-import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegJointVelocities;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.NeckJointName;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.RobotSpecificJointNames;
@@ -373,21 +372,6 @@ public class SDFFullRobotModel implements FullRobotModel
    public OneDoFJoint getNeckJoint(NeckJointName neckJointName)
    {
       return neckJoints.get(neckJointName);
-   }
-
-
-
-   public LegJointVelocities getLegJointVelocities(RobotSide robotSide)
-   {
-      LegJointName[] legJointNames = sdfJointNameMap.getLegJointNames();
-      LegJointVelocities ret = new LegJointVelocities(legJointNames, robotSide);
-      for (LegJointName legJointName : legJointNames)
-      {
-         double jointVelocity = getLegJoint(robotSide, legJointName).getQd();
-         ret.setJointVelocity(legJointName, jointVelocity);
-      }
-
-      return ret;
    }
 
    public RigidBody getPelvis()
