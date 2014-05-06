@@ -226,6 +226,11 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    {
       return ValkyriePhysicalProperties.footBack;
    }
+   
+   public double getFootSwitchCoPThresholdFraction()
+   {
+	   return 0.02;
+   }
 
    public double getAnkleHeight()
    {
