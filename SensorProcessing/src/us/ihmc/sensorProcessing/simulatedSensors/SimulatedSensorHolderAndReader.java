@@ -50,7 +50,7 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
 
    private final ObjectObjectMap<ForceSensorDefinition, WrenchCalculatorInterface> forceTorqueSensors = new ObjectObjectMap<ForceSensorDefinition, WrenchCalculatorInterface>();
 
-   private final JointAndIMUSensorDataSource jointAndIMUSensorDataSource;
+   private final JointAndIMUSensorDataSource sensorProcessing;
 
    private ForceSensorDataHolder forceSensorDataHolder;
 
@@ -65,9 +65,9 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
 
    private ObjectObjectMap<OneDoFJoint, BacklashCompensatingVelocityYoVariable> finiteDifferenceVelocities;
 
-   public SimulatedSensorHolderAndReader(SensorFilterParameters sensorFilterParameters, StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, YoVariableRegistry simulationRegistry)
+   public SimulatedSensorHolderAndReader(SensorFilterParameters sensorFilterParameters, StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, SensorNoiseParameters sensorNoiseParameters, YoVariableRegistry simulationRegistry)
    {
-      jointAndIMUSensorDataSource = new JointAndIMUSensorDataSource(stateEstimatorSensorDefinitions, sensorFilterParameters, simulationRegistry);
+      sensorProcessing = new JointAndIMUSensorDataSource(stateEstimatorSensorDefinitions, sensorFilterParameters, simulationRegistry);
       
       this.estimatorDT = sensorFilterParameters.getEstimatorDT();
       this.estimateDTinNs = TimeTools.secondsToNanoSeconds(estimatorDT);
@@ -127,7 +127,7 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
 
    public JointAndIMUSensorMap getJointAndIMUSensorMap()
    {
-      return jointAndIMUSensorDataSource.getSensorMap();
+      return sensorProcessing.getSensorMap();
    }
 
    public void run()
@@ -200,14 +200,14 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
                simulatedOneDoFJointPositionSensor.startComputation();
                simulatedOneDoFJointPositionSensor.waitUntilComputationIsDone();
                Double value = simulatedOneDoFJointPositionSensor.getJointPositionOutputPort().getData();
-               jointAndIMUSensorDataSource.setJointPositionSensorValue(jointPositionSensors.getFirst(i), value);
+               sensorProcessing.setJointPositionSensorValue(jointPositionSensors.getFirst(i), value);
 
                BacklashCompensatingVelocityYoVariable finiteDifferenceVelocity = finiteDifferenceVelocities.getSecond(i);
                finiteDifferenceVelocity.update(value);
 
                if (useFiniteDifferencesForVelocities.getBooleanValue())
                {
-                  jointAndIMUSensorDataSource.setJointVelocitySensorValue(jointVelocitySensors.getFirst(i), finiteDifferenceVelocity.getDoubleValue());
+                  sensorProcessing.setJointVelocitySensorValue(jointVelocitySensors.getFirst(i), finiteDifferenceVelocity.getDoubleValue());
                }
             }
 
@@ -219,7 +219,7 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
                   simulatedOneDoFJointVelocitySensor.startComputation();
                   simulatedOneDoFJointVelocitySensor.waitUntilComputationIsDone();
                   Double value = simulatedOneDoFJointVelocitySensor.getJointVelocityOutputPort().getData();
-                  jointAndIMUSensorDataSource.setJointVelocitySensorValue(jointVelocitySensors.getFirst(i), value);
+                  sensorProcessing.setJointVelocitySensorValue(jointVelocitySensors.getFirst(i), value);
                }
             }
 
@@ -229,7 +229,7 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
                orientationSensor.startComputation();
                orientationSensor.waitUntilComputationIsDone();
                Matrix3d value = orientationSensor.getOrientationOutputPort().getData();
-               jointAndIMUSensorDataSource.setOrientationSensorValue(orientationSensors.getFirst(i), value);
+               sensorProcessing.setOrientationSensorValue(orientationSensors.getFirst(i), value);
             }
 
             for (int i = 0; i < angularVelocitySensors.getLength(); i++)
@@ -238,7 +238,7 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
                angularVelocitySensor.startComputation();
                angularVelocitySensor.waitUntilComputationIsDone();
                Vector3d value = angularVelocitySensor.getAngularVelocityOutputPort().getData();
-               jointAndIMUSensorDataSource.setAngularVelocitySensorValue(angularVelocitySensors.getFirst(i), value);
+               sensorProcessing.setAngularVelocitySensorValue(angularVelocitySensors.getFirst(i), value);
             }
 
             for (int i = 0; i < linearAccelerationSensors.getLength(); i++)
@@ -248,7 +248,7 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
                linearAccelerationSensor.startComputation();
                linearAccelerationSensor.waitUntilComputationIsDone();
                Vector3d value = linearAccelerationSensor.getLinearAccelerationOutputPort().getData();
-               jointAndIMUSensorDataSource.setLinearAccelerationSensorValue(linearAccelerationSensors.getFirst(i), value);
+               sensorProcessing.setLinearAccelerationSensorValue(linearAccelerationSensors.getFirst(i), value);
             }
 
             if (forceSensorDataHolder != null)
@@ -261,8 +261,8 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
                }
             }
 
-            jointAndIMUSensorDataSource.startComputation();
-            jointAndIMUSensorDataSource.waitUntilComputationIsDone();
+            sensorProcessing.startComputation();
+            sensorProcessing.waitUntilComputationIsDone();
 
             step.increment();
 
