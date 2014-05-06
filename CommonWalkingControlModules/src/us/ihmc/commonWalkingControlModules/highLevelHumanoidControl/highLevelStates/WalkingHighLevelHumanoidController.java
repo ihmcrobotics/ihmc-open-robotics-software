@@ -118,7 +118,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private static final boolean DO_TRANSITION_WHEN_TIME_IS_UP = false;
    private static final boolean DESIREDICP_FROM_POLYGON_COORDINATE = false;
    private static final boolean USE_WORLDFRAME_SURFACE_NORMAL_WHEN_FULLY_CONSTRAINED = true;
-   private static final boolean ENABLE_PUSH_RECOVERY = false; 
+   
+   private final BooleanYoVariable enablePushRecovery = new BooleanYoVariable("enablePushRecovery", registry); 
 
    private final static HighLevelState controllerState = HighLevelState.WALKING;
    private final static MomentumControlModuleType MOMENTUM_CONTROL_MODULE_TO_USE = MomentumControlModuleType.OPT_NULLSPACE;
@@ -339,6 +340,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       setupManagers(variousWalkingManagers);
 
       doPrepareManipulationForLocomotion.set(walkingControllerParameters.doPrepareManipulationForLocomotion());
+      
+      enablePushRecovery.set(false);
 
       FootstepProvider footstepProvider = variousWalkingProviders.getFootstepProvider();
       HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = variousWalkingProviders.getMapFromFootstepsToTrajectoryParameters();
@@ -428,14 +431,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       this.pelvisOrientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator("pelvis", worldFrame, swingTimeCalculationProvider,
               initialPelvisOrientationProvider, finalPelvisOrientationProvider, registry);
       
-      if (ENABLE_PUSH_RECOVERY)
-      {
-         RobotSide initialSide = RobotSide.RIGHT;
-         Footstep initialFootstep = createFootstepFromFootAndContactablePlaneBody(referenceFrames.getFootFrame(initialSide.getOppositeSide()),
-               feet.get(initialSide.getOppositeSide()));
-         pushRecoveryModule = new PushRecoveryControlModule(dynamicGraphicObjectsListRegistry, registry, momentumBasedController, walkingControllerParameters,
-                readyToGrabNextFootstep, initialFootstep, icpAndMomentumBasedController);
-      }
+      RobotSide initialSide = RobotSide.RIGHT;
+      Footstep initialFootstep = createFootstepFromFootAndContactablePlaneBody(referenceFrames.getFootFrame(initialSide.getOppositeSide()),
+            feet.get(initialSide.getOppositeSide()));
+      pushRecoveryModule = new PushRecoveryControlModule(dynamicGraphicObjectsListRegistry, registry, momentumBasedController, walkingControllerParameters,
+            readyToGrabNextFootstep, initialFootstep, icpAndMomentumBasedController, enablePushRecovery);
 
       setUpStateMachine();
       readyToGrabNextFootstep.set(true);
@@ -641,18 +641,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                                                        new DoneWithDoubleSupportCondition(robotSide));
          doubleSupportState.addStateTransition(toTransfer);
       }
-      
-      if (ENABLE_PUSH_RECOVERY)
+
+      for (RobotSide robotSide : RobotSide.values)
       {
-         if (pushRecoveryModule.getDoubleSupportEnableState())
-         {
-            for (RobotSide robotSide : RobotSide.values)
-            {
-               StateTransition<WalkingState> toFalling = new StateTransition<WalkingState>(singleSupportStateEnums.get(robotSide),
-                     pushRecoveryModule.new IsFallingFromDoubleSupport(robotSide));
-               doubleSupportState.addStateTransition(toFalling);
-            }
-         }
+         StateTransition<WalkingState> toFalling = new StateTransition<WalkingState>(singleSupportStateEnums.get(robotSide),
+               pushRecoveryModule.new IsFallingFromDoubleSupport(robotSide));
+         doubleSupportState.addStateTransition(toFalling);
       }
    }
 
@@ -1147,7 +1141,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                     transferToAndNextFootstepsDataForDoubleSupport.getTransferToSide(), null, getContactStatesList());
          }
          
-         if (ENABLE_PUSH_RECOVERY)
+         if (enablePushRecovery.getBooleanValue())
          {
             pushRecoveryModule.setRecoverFromDoubleSupportFootStep(null);
             pushRecoveryModule.setRecoveringFromDoubleSupportState(false);
@@ -1239,7 +1233,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          FrameConvexPolygon2d footPolygon = computeFootPolygon(supportSide, referenceFrames.getAnkleZUpFrame(supportSide));
          double omega0 = icpAndMomentumBasedController.getOmega0();
          
-         if (ENABLE_PUSH_RECOVERY)
+         if (enablePushRecovery.getBooleanValue())
          {
             boolean footstepHasBeenAdjusted = pushRecoveryModule.checkAndUpdateFootstep(swingSide, swingTimeRemaining, capturePoint2d, nextFootstep, omega0,
                   footPolygon);
@@ -1259,7 +1253,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          moveICPToInsideOfFootAtEndOfSwing(supportSide, transferToFootstepLocation, swingTimeCalculationProvider.getValue(), swingTimeRemaining,
                                            desiredICPLocal);
          
-         if (ENABLE_PUSH_RECOVERY ? !pushRecoveryModule.getRecoveringFromDoubleSupportFall() : true)
+         if (enablePushRecovery.getBooleanValue() ? !pushRecoveryModule.getRecoveringFromDoubleSupportFall() : true)
          {
             desiredICP.set(desiredICPLocal);
             desiredICPVelocity.set(desiredICPVelocityLocal);
@@ -1314,7 +1308,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          footSwitches.get(swingSide).reset();
 
-         if (ENABLE_PUSH_RECOVERY ? pushRecoveryModule.getRecoveringFromDoubleSupportFall() : false)
+         if (enablePushRecovery.getBooleanValue() ? pushRecoveryModule.getRecoveringFromDoubleSupportFall() : false)
          {
             nextFootstep = pushRecoveryModule.getRecoverFromDoubleSupportFootStep();
          }
@@ -1473,7 +1467,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          
          upcomingFootstepList.notifyComplete();
          
-         if (ENABLE_PUSH_RECOVERY ? !pushRecoveryModule.getRecoveringFromDoubleSupportFall() : true)
+         if (enablePushRecovery.getBooleanValue() ? !pushRecoveryModule.getRecoveringFromDoubleSupportFall() : true)
          {
           previousSupportSide.set(swingSide.getOppositeSide());
          }
@@ -1483,7 +1477,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          // contactStates.get(swingFoot).setContactPoints(desiredFootstep.getExpectedContactPoints());
          // updateFootStateMachines(swingFoot);
 
-         if(ENABLE_PUSH_RECOVERY)
+         if(enablePushRecovery.getBooleanValue())
          {
          pushRecoveryModule.initialize();
          }
@@ -1700,7 +1694,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       public boolean checkCondition()
       {
-        if (ENABLE_PUSH_RECOVERY ? !pushRecoveryModule.getRecoveringFromDoubleSupportFall() : true)
+        if (enablePushRecovery.getBooleanValue() ? !pushRecoveryModule.getRecoveringFromDoubleSupportFall() : true)
         {
            Footstep nextFootstep = upcomingFootstepList.getNextFootstep();
             boolean readyToStopWalking = (upcomingFootstepList.isFootstepProviderEmpty() && (nextFootstep == null))
