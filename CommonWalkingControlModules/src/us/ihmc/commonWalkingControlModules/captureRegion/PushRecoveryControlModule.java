@@ -204,7 +204,7 @@ public class PushRecoveryControlModule
       return enablePushRecoveryFromDoubleSupport.getBooleanValue();
    }
 
-   public boolean getRecoveringFromDoubleSupportFall()
+   public boolean getIsRecoveringFromDoubleSupportFall()
    {
       return recoveringFromDoubleSupportFall;
    }
