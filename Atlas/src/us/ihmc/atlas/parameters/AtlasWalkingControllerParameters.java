@@ -221,6 +221,11 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    {
       return AtlasPhysicalProperties.foot_forward;
    }
+   
+   public double getFootSwitchCoPThresholdFraction()
+   {
+	   return 0.02;
+   }
 
    public double getFootBackwardOffset()
    {
