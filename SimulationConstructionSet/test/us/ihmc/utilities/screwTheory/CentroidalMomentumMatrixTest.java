@@ -68,8 +68,8 @@ public class CentroidalMomentumMatrixTest
       FloatingJoint rootJoint = new FloatingJoint("rootJoint", new Vector3d(), robot);
       Link link = new Link("link");
       link.setMass(mass);
-      link.physics.setMomentOfInertia(momentOfInertia);
-      link.physics.setComOffset(comOffset);
+      link.setMomentOfInertia(momentOfInertia);
+      link.setComOffset(comOffset);
       rootJoint.setLink(link);
       robot.addRootJoint(rootJoint);
 

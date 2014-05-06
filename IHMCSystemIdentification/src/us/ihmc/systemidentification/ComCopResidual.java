@@ -127,11 +127,11 @@ public class ComCopResidual implements FunctionNtoM
       {
          Vector3d lastCom = new Vector3d();
          targetLink.physics.getComOffset(lastCom);
-         targetLink.physics.setComOffset(inParameter[0],lastCom.y,inParameter[2]);
+         targetLink.setComOffset(inParameter[0],lastCom.y,inParameter[2]);
       }
       else
       {
-         targetLink.physics.setComOffset(new Vector3d(inParameter));
+         targetLink.setComOffset(new Vector3d(inParameter));
       }
       ArrayList<Point3d> com = new ArrayList<>(selectedFrames.length);
       ArrayList<Point3d> cop = new ArrayList<>(selectedFrames.length);

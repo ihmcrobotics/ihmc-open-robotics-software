@@ -45,7 +45,7 @@ public class LinkTest
       momentOfInertia = InertiaTools.rotate(rotation, momentOfInertia);
       rotation.transform(rotationAxis);
 
-      link.physics.setMomentOfInertia(momentOfInertia);
+      link.setMomentOfInertia(momentOfInertia);
       
       link.addEllipsoidFromMassProperties(YoAppearance.Gold());
       link.addEllipsoidFromMassProperties2(YoAppearance.Green());

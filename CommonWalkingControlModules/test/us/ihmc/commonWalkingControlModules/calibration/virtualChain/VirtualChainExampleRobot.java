@@ -70,21 +70,21 @@ public abstract class VirtualChainExampleRobot extends Robot implements RobotRan
          joint1 = new PinJoint("joint1", offset1, this, Axis.Y);
          Link link1 = new Link("link1");
          link1.setMassAndRadiiOfGyration(mass1, 0.01, 0.02, 0.03);
-         link1.physics.setComOffset(comOffset1);
+         link1.setComOffset(comOffset1);
          joint1.setLink(link1);
          this.addRootJoint(joint1);
 
          joint2 = new PinJoint("joint2", offset2, this, Axis.X);
          Link link2 = new Link("link2");
          link2.setMassAndRadiiOfGyration(mass2, 0.01, 0.02, 0.03);
-         link2.physics.setComOffset(comOffset2);
+         link2.setComOffset(comOffset2);
          joint2.setLink(link2);
          joint1.addJoint(joint2);
 
          joint3 = new PinJoint("joint3", offset3, this, Axis.Z);
          Link link3 = new Link("link3");
          link3.setMassAndRadiiOfGyration(mass3, 0.01, 0.02, 0.03);
-         link3.physics.setComOffset(comOffset3);
+         link3.setComOffset(comOffset3);
          joint3.setLink(link3);
          joint2.addJoint(joint3);
       }
@@ -171,21 +171,21 @@ public abstract class VirtualChainExampleRobot extends Robot implements RobotRan
          joint1 = new FloatingJoint("joint1", offset1, this);
          Link link1 = new Link("link1");
          link1.setMassAndRadiiOfGyration(mass1, 0.01, 0.02, 0.03);
-         link1.physics.setComOffset(comOffset1);
+         link1.setComOffset(comOffset1);
          joint1.setLink(link1);
          this.addRootJoint(joint1);
 
          joint2 = new PinJoint("joint2", offset2, this, Axis.X);
          Link link2 = new Link("link2");
          link2.setMassAndRadiiOfGyration(mass2, 0.01, 0.02, 0.03);
-         link2.physics.setComOffset(comOffset2);
+         link2.setComOffset(comOffset2);
          joint2.setLink(link2);
          joint1.addJoint(joint2);
 
          joint3 = new PinJoint("joint3", offset3, this, Axis.Z);
          Link link3 = new Link("link3");
          link3.setMassAndRadiiOfGyration(mass3, 0.01, 0.02, 0.03);
-         link3.physics.setComOffset(comOffset3);
+         link3.setComOffset(comOffset3);
          joint3.setLink(link3);
          joint2.addJoint(joint3);
       }

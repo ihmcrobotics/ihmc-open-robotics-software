@@ -95,8 +95,8 @@ public class AllYoVariablesSimulationComparerTest
 	   {
 	      Link ret = new Link("link1");
 	      ret.setMass(1.0);
-	      ret.physics.setComOffset(2.0, 0.0, 0.0);
-	      ret.physics.setMomentOfInertia(0.0, 3.0, 0.0);
+	      ret.setComOffset(2.0, 0.0, 0.0);
+	      ret.setMomentOfInertia(0.0, 3.0, 0.0);
 
 	      return ret;
 	   }
@@ -105,8 +105,8 @@ public class AllYoVariablesSimulationComparerTest
 	   {
 	      Link ret = new Link("link2");
 	      ret.setMass(2.0);
-	      ret.physics.setComOffset(2.0, 0.0, 0.0);
-	      ret.physics.setMomentOfInertia(0.0, 5.0, 0.0);
+	      ret.setComOffset(2.0, 0.0, 0.0);
+	      ret.setMomentOfInertia(0.0, 5.0, 0.0);
 
 	      return ret;
 	   }

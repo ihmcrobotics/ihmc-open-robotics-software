@@ -26,8 +26,8 @@ public class VelocityControlEvaluationRobot extends Robot
       
       Link pointMass = new Link("pointMass");
       pointMass.setMass(MASS);
-      pointMass.physics.setMomentOfInertia(0.0, 0.0, 0.0);
-      pointMass.physics.setComOffset(new Vector3d());
+      pointMass.setMomentOfInertia(0.0, 0.0, 0.0);
+      pointMass.setComOffset(new Vector3d());
       
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addSphere(0.03);

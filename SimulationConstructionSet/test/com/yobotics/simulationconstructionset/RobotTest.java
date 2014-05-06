@@ -220,8 +220,8 @@ public class RobotTest
       Link floatingBody = new Link("floatingBody");
       floatingBody.setMass(random.nextDouble());
 
-      floatingBody.physics.setComOffset(random.nextDouble(), random.nextDouble(), random.nextDouble());
-      floatingBody.physics.setMomentOfInertia(RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidEllipsoid(floatingBody.getMass(), random.nextDouble(),
+      floatingBody.setComOffset(random.nextDouble(), random.nextDouble(), random.nextDouble());
+      floatingBody.setMomentOfInertia(RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidEllipsoid(floatingBody.getMass(), random.nextDouble(),
               random.nextDouble(), random.nextDouble()));
       root1.setLink(floatingBody);
 
@@ -247,9 +247,9 @@ public class RobotTest
 	   FloatingJoint floatingJoint1 = new FloatingJoint("joint1", new Vector3d(),robot1);
 	   robot1.addRootJoint(floatingJoint1);
 	   Link onlyLink=new Link("SphericalLink");
-	   onlyLink.physics.setComOffset(new Vector3d(0.0, 0.0, 0.0));
+	   onlyLink.setComOffset(new Vector3d(0.0, 0.0, 0.0));
 	   onlyLink.setMass(1.0);
-	   onlyLink.physics.setMomentOfInertia(1.0, 1.0, 1.0);
+	   onlyLink.setMomentOfInertia(1.0, 1.0, 1.0);
 	   floatingJoint1.setLink(onlyLink);
 	   floatingJoint1.setPosition(new Point3d(1.0,1.0,1.0));
 	   floatingJoint1.setAngularVelocityInBody(new Vector3d(1.0,0.0,0.0));
@@ -386,8 +386,8 @@ public class RobotTest
       Link ret = new Link("link11");
       ret.setMass(random.nextDouble());
 
-      ret.physics.setComOffset(0.0, 0.0, -l1 / 2.0);
-      ret.physics.setMomentOfInertia(RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidEllipsoid(ret.getMass(), r1, r1, l1 / 2.0));
+      ret.setComOffset(0.0, 0.0, -l1 / 2.0);
+      ret.setMomentOfInertia(RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidEllipsoid(ret.getMass(), r1, r1, l1 / 2.0));
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addCoordinateSystem(COORDINATE_SYSTEM_LENGTH);
@@ -412,10 +412,10 @@ public class RobotTest
    {
       Link ret = new Link("link2");
       ret.setMass(random.nextDouble());
-      ret.physics.setComOffset(0.0, 0.0, l2 / 2.0);
+      ret.setComOffset(0.0, 0.0, l2 / 2.0);
 
-//    ret.physics.setComOffset(0.0, 0.0, 0.0);
-      ret.physics.setMomentOfInertia(RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidEllipsoid(ret.getMass(), r2, r2, l2 / 2.0));
+//    ret.setComOffset(0.0, 0.0, 0.0);
+      ret.setMomentOfInertia(RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidEllipsoid(ret.getMass(), r2, r2, l2 / 2.0));
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addCoordinateSystem(COORDINATE_SYSTEM_LENGTH);
@@ -428,11 +428,11 @@ public class RobotTest
    private static Link link22(Link link21)
    {
       Link ret = new Link("link22");
-      ret.physics.setComOffset(link21.physics.getComOffset());
+      ret.setComOffset(link21.physics.getComOffset());
       ret.setMass(link21.getMass());
       Matrix3d link2moi = new Matrix3d();
       link21.physics.getMomentOfInertia(link2moi);
-      ret.physics.setMomentOfInertia(link2moi);
+      ret.setMomentOfInertia(link2moi);
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addCoordinateSystem(COORDINATE_SYSTEM_LENGTH);
       createInertiaEllipsoid(ret, linkGraphics, YoAppearance.Aqua());
@@ -449,11 +449,11 @@ public class RobotTest
       Vector3d offset = new Vector3d();
       pin1.getOffset(offset);
       comOffset12.sub(offset);
-      ret.physics.setComOffset(comOffset12);
+      ret.setComOffset(comOffset12);
       ret.setMass(link11.getMass());
       Matrix3d link1moi = new Matrix3d();
       link11.physics.getMomentOfInertia(link1moi);
-      ret.physics.setMomentOfInertia(link1moi);
+      ret.setMomentOfInertia(link1moi);
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addCoordinateSystem(COORDINATE_SYSTEM_LENGTH);
       createInertiaEllipsoid(ret, linkGraphics, YoAppearance.Blue());
@@ -466,8 +466,8 @@ public class RobotTest
    {
       Link ret = new Link("floatingBody");
       ret.setMass(random.nextDouble());
-      ret.physics.setComOffset(random.nextDouble(), random.nextDouble(), random.nextDouble());
-      ret.physics.setMomentOfInertia(RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidEllipsoid(ret.getMass(), random.nextDouble(), random.nextDouble(),
+      ret.setComOffset(random.nextDouble(), random.nextDouble(), random.nextDouble());
+      ret.setMomentOfInertia(RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidEllipsoid(ret.getMass(), random.nextDouble(), random.nextDouble(),
               random.nextDouble()));
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
@@ -482,8 +482,8 @@ public class RobotTest
    {
       Link ret = new Link("floatingBody");
       ret.setMass(random.nextDouble());
-      ret.physics.setComOffset(random.nextDouble(), 0.0, random.nextDouble());
-      ret.physics.setMomentOfInertia(RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidEllipsoid(ret.getMass(), random.nextDouble(), random.nextDouble(),
+      ret.setComOffset(random.nextDouble(), 0.0, random.nextDouble());
+      ret.setMomentOfInertia(RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidEllipsoid(ret.getMass(), random.nextDouble(), random.nextDouble(),
               random.nextDouble()));
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
@@ -498,7 +498,7 @@ public class RobotTest
    {
       Link ret = new Link("massiveLink");
       ret.setMass(1e12);
-      ret.physics.setMomentOfInertia(1e8, 1e8, 1e8);
+      ret.setMomentOfInertia(1e8, 1e8, 1e8);
 
       return ret;
    }
@@ -552,15 +552,15 @@ public class RobotTest
       SliderJoint joint1 = new SliderJoint("joint1", jointOffset1, robot, Axis.X);
       Link link1 = new Link("link1");
       link1.setMass(mass1);
-      link1.physics.setMomentOfInertia(momentOfInertia1);
-      link1.physics.setComOffset(comOffset1);
+      link1.setMomentOfInertia(momentOfInertia1);
+      link1.setComOffset(comOffset1);
       joint1.setLink(link1);
       
       PinJoint joint2 = new PinJoint("joint2", jointOffset2, robot, Axis.X);
       Link link2 = new Link("link2");
       link2.setMass(mass2);
-      link2.physics.setMomentOfInertia(momentOfInertia2);
-      link2.physics.setComOffset(comOffset2);
+      link2.setMomentOfInertia(momentOfInertia2);
+      link2.setComOffset(comOffset2);
       joint2.setLink(link2);
       
       robot.addRootJoint(joint1);
@@ -618,8 +618,8 @@ public class RobotTest
       SliderJoint expectedJoint = new SliderJoint("expected", jointOffset, expectedRobot, Axis.X);
       Link expectedLink = new Link("expectedLink");
       expectedLink.setMass(totalMass);
-      expectedLink.physics.setComOffset(expectedCoMOffset);
-      expectedLink.physics.setMomentOfInertia(expectedMomentOfInertia);
+      expectedLink.setComOffset(expectedCoMOffset);
+      expectedLink.setMomentOfInertia(expectedMomentOfInertia);
       expectedJoint.setLink(expectedLink);
       expectedRobot.addRootJoint(expectedJoint);
       
@@ -705,8 +705,8 @@ public class RobotTest
       FloatingJoint rootJoint = new FloatingJoint("root", rootOffset, robot);
       Link rootLink = new Link("rootLink");
       rootLink.setMass(rootMass);
-      rootLink.physics.setComOffset(rootCoMOffset);
-      rootLink.physics.setMomentOfInertia(rootMomentOfInertia);
+      rootLink.setComOffset(rootCoMOffset);
+      rootLink.setMomentOfInertia(rootMomentOfInertia);
       
       rootJoint.setLink(rootLink);
       robot.addRootJoint(rootJoint);
@@ -731,15 +731,15 @@ public class RobotTest
       PinJoint joint1 = new PinJoint("joint1", jointOffset1, robot, Axis.X);
       Link link1 = new Link("link1");
       link1.setMass(mass1);
-      link1.physics.setMomentOfInertia(momentOfInertia1);
-      link1.physics.setComOffset(comOffset1);
+      link1.setMomentOfInertia(momentOfInertia1);
+      link1.setComOffset(comOffset1);
       joint1.setLink(link1);
       
       PinJoint joint2 = new PinJoint("joint2", jointOffset2, robot, Axis.X);
       Link link2 = new Link("link2");
       link2.setMass(mass2);
-      link2.physics.setMomentOfInertia(momentOfInertia2);
-      link2.physics.setComOffset(comOffset2);
+      link2.setMomentOfInertia(momentOfInertia2);
+      link2.setComOffset(comOffset2);
       joint2.setLink(link2);
       
       rootJoint.addJoint(joint1);
@@ -812,22 +812,22 @@ public class RobotTest
       PinJoint joint1 = new PinJoint("joint1", jointOffset1, robotOne, Axis.X);
       Link link1 = new Link("link1");
       link1.setMass(mass1);
-      link1.physics.setMomentOfInertia(momentOfInertia1);
-      link1.physics.setComOffset(comOffset1);
+      link1.setMomentOfInertia(momentOfInertia1);
+      link1.setComOffset(comOffset1);
       joint1.setLink(link1);
       
       PinJoint joint2 = new PinJoint("joint2", jointOffset2, robotOne, Axis.Y);
       Link link2 = new Link("link2");
       link2.setMass(mass2);
-      link2.physics.setMomentOfInertia(momentOfInertia2);
-      link2.physics.setComOffset(comOffset2);
+      link2.setMomentOfInertia(momentOfInertia2);
+      link2.setComOffset(comOffset2);
       joint2.setLink(link2);
       
       PinJoint joint3 = new PinJoint("joint3", jointOffset3, robotOne, Axis.Y);
       Link link3 = new Link("link3");
       link3.setMass(mass3);
-      link3.physics.setMomentOfInertia(momentOfInertia3);
-      link3.physics.setComOffset(comOffset3);
+      link3.setMomentOfInertia(momentOfInertia3);
+      link3.setComOffset(comOffset3);
       joint3.setLink(link3);
       
       robotOne.addRootJoint(joint1);
@@ -843,8 +843,8 @@ public class RobotTest
       momentOfInertia1.mul(0.789);
 
       link1.setMass(mass1);
-      link1.physics.setComOffset(comOffset1);
-      link1.physics.setMomentOfInertia(momentOfInertia1);
+      link1.setComOffset(comOffset1);
+      link1.setMomentOfInertia(momentOfInertia1);
       
       jointOffset2.scale(3.33);
       joint2.changeOffsetVector(jointOffset2);
@@ -855,8 +855,8 @@ public class RobotTest
       
       Link newLink2 = new Link(joint2.getLink().getName());
       newLink2.setMass(mass2);
-      newLink2.physics.setComOffset(comOffset2);
-      newLink2.physics.setMomentOfInertia(momentOfInertia2);
+      newLink2.setComOffset(comOffset2);
+      newLink2.setMomentOfInertia(momentOfInertia2);
       joint2.setLink(newLink2);
       
       jointOffset3.scale(0.33);
@@ -867,8 +867,8 @@ public class RobotTest
       momentOfInertia3.mul(4.789);
 
       link3.setMass(mass3);
-      link3.physics.setComOffset(comOffset3);
-      link3.physics.setMomentOfInertia(momentOfInertia3);
+      link3.setComOffset(comOffset3);
+      link3.setMomentOfInertia(momentOfInertia3);
       
       // Make an identical robot straight up, without changing link stuff:
       Robot robotTwo = new Robot("robotTwo");
@@ -876,22 +876,22 @@ public class RobotTest
       PinJoint joint1B = new PinJoint("joint1", jointOffset1, robotTwo, Axis.X);
       Link link1B = new Link("link1");
       link1B.setMass(mass1);
-      link1B.physics.setMomentOfInertia(momentOfInertia1);
-      link1B.physics.setComOffset(comOffset1);
+      link1B.setMomentOfInertia(momentOfInertia1);
+      link1B.setComOffset(comOffset1);
       joint1B.setLink(link1B);
       
       PinJoint joint2B = new PinJoint("joint2", jointOffset2, robotTwo, Axis.Y);
       Link link2B = new Link("link2");
       link2B.setMass(mass2);
-      link2B.physics.setMomentOfInertia(momentOfInertia2);
-      link2B.physics.setComOffset(comOffset2);
+      link2B.setMomentOfInertia(momentOfInertia2);
+      link2B.setComOffset(comOffset2);
       joint2B.setLink(link2B);
       
       PinJoint joint3B = new PinJoint("joint3", jointOffset3, robotTwo, Axis.Y);
       Link link3B = new Link("link3");
       link3B.setMass(mass3);
-      link3B.physics.setMomentOfInertia(momentOfInertia3);
-      link3B.physics.setComOffset(comOffset3);
+      link3B.setMomentOfInertia(momentOfInertia3);
+      link3B.setComOffset(comOffset3);
       joint3B.setLink(link3B);
       
       robotTwo.addRootJoint(joint1B);
