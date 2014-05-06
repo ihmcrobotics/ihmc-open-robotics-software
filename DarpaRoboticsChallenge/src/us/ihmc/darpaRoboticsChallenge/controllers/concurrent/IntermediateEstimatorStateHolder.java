@@ -2,11 +2,11 @@ package us.ihmc.darpaRoboticsChallenge.controllers.concurrent;
 
 import java.util.ArrayList;
 
-import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
 import us.ihmc.utilities.ForceSensorDefinition;
 import us.ihmc.utilities.GenericCRC32;
+import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJointStateChecksum;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJointStateCopier;
 import us.ihmc.utilities.screwTheory.RigidBody;

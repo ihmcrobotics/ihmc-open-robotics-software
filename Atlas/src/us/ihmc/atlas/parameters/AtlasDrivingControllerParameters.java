@@ -1,9 +1,9 @@
 package us.ihmc.atlas.parameters;
 
 
-import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
-import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.*;
 

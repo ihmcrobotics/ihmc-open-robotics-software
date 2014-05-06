@@ -6,8 +6,8 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
+import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 
 public class SDFNoisySimulatedSensorReader extends SDFPerfectSimulatedSensorReader
 {

@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.partNamesAndTorques;
 
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 
 public class LegJointPositions
 {

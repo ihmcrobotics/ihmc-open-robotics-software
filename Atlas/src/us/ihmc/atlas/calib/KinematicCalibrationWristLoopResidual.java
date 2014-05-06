@@ -2,8 +2,8 @@ package us.ihmc.atlas.calib;
 
 import org.ddogleg.optimization.functions.FunctionNtoM;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 

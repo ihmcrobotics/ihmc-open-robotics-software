@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModuleInterfaces;
 
-import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
+import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 
 
 public interface ArmReferenceForPDControlModule

@@ -1,8 +1,8 @@
 package us.ihmc.atlas.parameters;
 
-import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.utilities.Pair;
+import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.math.geometry.TransformTools;
 
 import javax.media.j3d.Transform3D;

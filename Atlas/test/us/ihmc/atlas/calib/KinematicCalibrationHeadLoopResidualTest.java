@@ -19,13 +19,13 @@ import us.ihmc.atlas.calib.AtlasHeadLoopKinematicCalibrator;
 import us.ihmc.atlas.calib.CalibUtil;
 import us.ihmc.atlas.calib.DetectChessboardInKinematicsData;
 import us.ihmc.atlas.calib.KinematicCalibrationHeadLoopResidual;
-import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LimbName;
 import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.imageProcessing.configuration.ConfigurationLoader;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import javax.media.j3d.Transform3D;

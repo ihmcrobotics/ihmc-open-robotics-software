@@ -3,12 +3,12 @@ package us.ihmc.darpaRoboticsChallenge.posePlayback;
 import java.util.LinkedHashMap;
 import java.util.Random;
 
-import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
-import us.ihmc.commonWalkingControlModules.partNamesAndTorques.ArmJointName;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPose;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.RandomTools;
+import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 public class PosePlaybackExampleSequence

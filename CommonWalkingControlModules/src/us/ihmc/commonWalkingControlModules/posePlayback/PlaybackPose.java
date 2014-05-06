@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Set;
 
-import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
+import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
