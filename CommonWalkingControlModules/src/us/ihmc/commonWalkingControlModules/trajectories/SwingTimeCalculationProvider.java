@@ -24,9 +24,13 @@ public class SwingTimeCalculationProvider implements DoubleProvider
       return swingTime.getDoubleValue();
    }
    
-   public void setSwingTime(double stepLength)
+   public void setSwingTimeByDistance(double stepLength)
    {
       swingTime.set(swingTimeCalculator.getSwingTime(stepLength));
    }
 
+   public void setSwingTime(double time)
+   {
+      swingTime.set(time);
+   }
 }

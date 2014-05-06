@@ -232,11 +232,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
       }
    }
 
-   protected void setupFootControlModules()
-   {
-      // TODO should find a default setup for the foot control modules
-   }
-
    protected OneDoFJoint setupJointForExtendedNeckPitchRange()
    {
       if (walkingControllerParameters.getJointNameForExtendedPitchRange() == null)
