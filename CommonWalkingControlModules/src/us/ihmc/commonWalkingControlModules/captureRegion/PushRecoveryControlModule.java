@@ -23,10 +23,10 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateTransition
 
 public class PushRecoveryControlModule
 {
-   private static final boolean ENABLE_RECOVERY_FROM_DOUBLESUPPORT = false;
    private static final double DOUBLESUPPORT_SUPPORT_POLYGON_SCALE = 0.95;
    private static final double FAST_SWING_TIME = 0.4;
 
+   private final BooleanYoVariable enablePushRecoveryFromDoubleSupport;
    private final ICPAndMomentumBasedController icpAndMomentumBasedController;
    private final MomentumBasedController momentumBasedController;
    private final OrientationStateVisualizer orientationStateVisualizer;
@@ -34,6 +34,7 @@ public class PushRecoveryControlModule
    private final OneStepCaptureRegionCalculator captureRegionCalculator;
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final BooleanYoVariable footstepWasProjectedInCaptureRegion;
+   private final BooleanYoVariable enablePushRecovery;
 
    private boolean recoveringFromDoubleSupportFall;
    private Footstep recoverFromDoubleSupportFallFootStep;
@@ -42,16 +43,21 @@ public class PushRecoveryControlModule
 
    public PushRecoveryControlModule(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry registry,
          MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters, BooleanYoVariable readyToGrabNextFootstep,
-         Footstep initialFootstep, ICPAndMomentumBasedController icpAndMomentumBasedController)
+         Footstep initialFootstep, ICPAndMomentumBasedController icpAndMomentumBasedController, BooleanYoVariable enablePushRecovery)
    {
       this.momentumBasedController = momentumBasedController;
       this.readyToGrabNextFootstep = readyToGrabNextFootstep;
       this.oldFootStep = initialFootstep;
       this.icpAndMomentumBasedController = icpAndMomentumBasedController;
+      this.enablePushRecovery = enablePushRecovery;
+      
+      this.enablePushRecoveryFromDoubleSupport = new BooleanYoVariable("enablePushRecoveryFromDoubleSupport", registry);
+      this.enablePushRecoveryFromDoubleSupport.set(false);
 
-      if (ENABLE_RECOVERY_FROM_DOUBLESUPPORT)
+      if (enablePushRecoveryFromDoubleSupport.getBooleanValue())
       {
-         // TODO find a way to set the swing time in the controller to the FAST_SWING_TIME or even less if necessary 
+         // TODO find a way to set the swing time in the controller to the FAST_SWING_TIME or even less if necessary
+         //      but maybe do not put in the constructor 
       }
 
       captureRegionCalculator = new OneStepCaptureRegionCalculator(momentumBasedController.getReferenceFrames(), walkingControllerParameters, registry,
@@ -96,56 +102,69 @@ public class PushRecoveryControlModule
       @Override
       public boolean checkCondition()
       {
-         midFeetZUp = icpAndMomentumBasedController.getBipedSupportPolygons().getSupportPolygonInMidFeetZUp().getReferenceFrame();
-
-         // get current robot status
-         reducedSupportPolygon.changeFrame(midFeetZUp);
-         reducedSupportPolygon.setAndUpdate(icpAndMomentumBasedController.getBipedSupportPolygons().getSupportPolygonInMidFeetZUp());
-         icpAndMomentumBasedController.getCapturePoint().getFrameTuple2dIncludingFrame(capturePoint2d);
-
-         capturePoint2d.changeFrame(midFeetZUp);
-         reducedSupportPolygon.applyTransform(scaleTransformation);
-
-         // update the visualization
-         fromWorldToPelvis = momentumBasedController.getFullRobotModel().getPelvis().getBodyFixedFrame().getTransformToDesiredFrame(worldFrame);
-         orientationStateVisualizer.updatePelvisReferenceFrame(fromWorldToPelvis);
-         orientationStateVisualizer.updateReducedSupportPolygon(reducedSupportPolygon);
-
-         if (!reducedSupportPolygon.isPointInside(capturePoint2d) && recoverFromDoubleSupportFallFootStep == null)
+         if (enablePushRecovery.getBooleanValue())
          {
-            System.out.println("Robot is falling from double support");
-            projectedCapturePoint.changeFrame(capturePoint2d.getReferenceFrame());
-            projectedCapturePoint.set(capturePoint2d.getX(), capturePoint2d.getY(), 0);
-            projectedCapturePoint.changeFrame(momentumBasedController.getFullRobotModel().getPelvis().getBodyFixedFrame());
-            capturePointYAxis = projectedCapturePoint.getY();
-            if (capturePointYAxis >= 0)
+            if (getDoubleSupportEnableState())
             {
-               swingSide = RobotSide.LEFT;
-            }
-            else
-            {
-               swingSide = RobotSide.RIGHT;
-            }
+               midFeetZUp = icpAndMomentumBasedController.getBipedSupportPolygons().getSupportPolygonInMidFeetZUp().getReferenceFrame();
 
-            if (transferToSide == swingSide)
-            {
+               // get current robot status
+               reducedSupportPolygon.changeFrame(midFeetZUp);
+               reducedSupportPolygon.setAndUpdate(icpAndMomentumBasedController.getBipedSupportPolygons().getSupportPolygonInMidFeetZUp());
+               icpAndMomentumBasedController.getCapturePoint().getFrameTuple2dIncludingFrame(capturePoint2d);
+
+               capturePoint2d.changeFrame(midFeetZUp);
+               reducedSupportPolygon.applyTransform(scaleTransformation);
+
+               // update the visualization
+               fromWorldToPelvis = momentumBasedController.getFullRobotModel().getPelvis().getBodyFixedFrame().getTransformToDesiredFrame(worldFrame);
+               orientationStateVisualizer.updatePelvisReferenceFrame(fromWorldToPelvis);
+               orientationStateVisualizer.updateReducedSupportPolygon(reducedSupportPolygon);
+
+               if (!reducedSupportPolygon.isPointInside(capturePoint2d) && recoverFromDoubleSupportFallFootStep == null)
+               {
+                  System.out.println("Robot is falling from double support");
+                  projectedCapturePoint.changeFrame(capturePoint2d.getReferenceFrame());
+                  projectedCapturePoint.set(capturePoint2d.getX(), capturePoint2d.getY(), 0);
+                  projectedCapturePoint.changeFrame(momentumBasedController.getFullRobotModel().getPelvis().getBodyFixedFrame());
+                  capturePointYAxis = projectedCapturePoint.getY();
+                  if (capturePointYAxis >= 0)
+                  {
+                     swingSide = RobotSide.LEFT;
+                  }
+                  else
+                  {
+                     swingSide = RobotSide.RIGHT;
+                  }
+
+                  if (transferToSide == swingSide)
+                  {
+                     return false;
+                  }
+
+                  captureRegionCalculator.calculateCaptureRegion(
+                        swingSide,
+                        FAST_SWING_TIME,
+                        capturePoint2d,
+                        icpAndMomentumBasedController.getOmega0(),
+                        computeFootPolygon(swingSide.getOppositeSide(),
+                              momentumBasedController.getReferenceFrames().getAnkleZUpFrame(swingSide.getOppositeSide())));
+
+                  footstepAdjustor.adjustFootstep(oldFootStep, captureRegionCalculator.getCaptureRegion());
+                  readyToGrabNextFootstep.set(false);
+                  momentumBasedController.getUpcomingSupportLeg().set(transferToSide.getOppositeSide());
+                  recoverFromDoubleSupportFallFootStep = oldFootStep;
+                  recoveringFromDoubleSupportFall = true;
+
+                  return true;
+               }
+
+               // we need this to reset the reference frame 
+               reducedSupportPolygon.changeFrame(worldFrame);
                return false;
             }
-
-            captureRegionCalculator.calculateCaptureRegion(swingSide, FAST_SWING_TIME, capturePoint2d, icpAndMomentumBasedController.getOmega0(),
-                  computeFootPolygon(swingSide.getOppositeSide(), momentumBasedController.getReferenceFrames().getAnkleZUpFrame(swingSide.getOppositeSide())));
-
-            footstepAdjustor.adjustFootstep(oldFootStep, captureRegionCalculator.getCaptureRegion());
-            readyToGrabNextFootstep.set(false);
-            momentumBasedController.getUpcomingSupportLeg().set(transferToSide.getOppositeSide());
-            recoverFromDoubleSupportFallFootStep = oldFootStep;
-            recoveringFromDoubleSupportFall = true;
-
-            return true;
          }
 
-         // we need this to reset the reference frame 
-         reducedSupportPolygon.changeFrame(worldFrame);
          return false;
       }
    }
@@ -153,16 +172,20 @@ public class PushRecoveryControlModule
    public boolean checkAndUpdateFootstep(RobotSide swingSide, double swingTimeRemaining, FramePoint2d capturePoint2d, Footstep nextFootstep, double omega0,
          FrameConvexPolygon2d footPolygon)
    {
-      if (footstepWasProjectedInCaptureRegion.getBooleanValue())
+      if (enablePushRecovery.getBooleanValue())
       {
-         // can not re-plan again
-         return false;
+         if (footstepWasProjectedInCaptureRegion.getBooleanValue())
+         {
+            // can not re-plan again
+            return false;
+         }
+
+         captureRegionCalculator.calculateCaptureRegion(swingSide, swingTimeRemaining, capturePoint2d, omega0, footPolygon);
+         footstepWasProjectedInCaptureRegion.set(footstepAdjustor.adjustFootstep(nextFootstep, captureRegionCalculator.getCaptureRegion()));
+
+         return footstepWasProjectedInCaptureRegion.getBooleanValue();
       }
-
-      captureRegionCalculator.calculateCaptureRegion(swingSide, swingTimeRemaining, capturePoint2d, omega0, footPolygon);
-      footstepWasProjectedInCaptureRegion.set(footstepAdjustor.adjustFootstep(nextFootstep, captureRegionCalculator.getCaptureRegion()));
-
-      return footstepWasProjectedInCaptureRegion.getBooleanValue();
+      return false;
    }
 
    private FrameConvexPolygon2d computeFootPolygon(RobotSide robotSide, ReferenceFrame referenceFrame)
@@ -178,7 +201,7 @@ public class PushRecoveryControlModule
 
    public boolean getDoubleSupportEnableState()
    {
-      return ENABLE_RECOVERY_FROM_DOUBLESUPPORT;
+      return enablePushRecoveryFromDoubleSupport.getBooleanValue();
    }
 
    public boolean getRecoveringFromDoubleSupportFall()
