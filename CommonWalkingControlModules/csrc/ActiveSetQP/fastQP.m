@@ -1,4 +1,4 @@
-function [x,active,fail] = fastQP(Qdiag,f,Aeq,beq,Ain,bin,active)
+function [x,active,fail] = fastQP(Q,f,Aeq,beq,Ain,bin,active)
     %min 1/2 * x'diag(Qdiag)'x + f'x s.t A x = b, Ain x <= bin 
     %using active set method.  Iterative solve a linearly constrained
     %quadratic minimization problem where linear constraints include
@@ -27,11 +27,18 @@ function [x,active,fail] = fastQP(Qdiag,f,Aeq,beq,Ain,bin,active)
     Aact = Ain(active,:);
     bact = bin(active,1);
 
-    %calculate a bunch of stuff that is constant during each iteration
-    QinvDiag = 1./(10^-8+Qdiag);
-    Qinv = diag(QinvDiag);
+    if isvector(Q)
+        Qdiag = Q;
+        %calculate a bunch of stuff that is constant during each iteration
+        QinvDiag = 1./(10^-8+Qdiag);
+        Qinv = diag(QinvDiag);        
+        minusQinvf = -QinvDiag.*f; 
+    else
+        Qinv = pinv(Q);
+        minusQinvf = -Qinv*f;
+        
+    end
     QinvAteq = Qinv*Aeq';
-    minusQinvf = -QinvDiag.*f; 
 
     while(1)
 
@@ -44,7 +51,7 @@ function [x,active,fail] = fastQP(Qdiag,f,Aeq,beq,Ain,bin,active)
         % [A,zeros(M+Mact,M+Mact)]];
         
         QinvAt= [QinvAteq,Qinv*Aact'];
-        lam = -(A*QinvAt)\[b+(f'*QinvAt)'];
+        lam = -pinv(A*QinvAt)*[b+(f'*QinvAt)'];
         x = minusQinvf - QinvAt*lam;   
         lamIneq = lam(M+1:end);
         
@@ -53,7 +60,7 @@ function [x,active,fail] = fastQP(Qdiag,f,Aeq,beq,Ain,bin,active)
             break; 
         end
  
-        violated = find( Ain*x-bin >= 10^-6);   
+        violated = find( Ain*x-bin >= eps);   
         if isempty(violated) && all(lamIneq >= 0)
             break; 
         end

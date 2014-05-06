@@ -6,14 +6,16 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.Arrays;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import sun.misc.Unsafe;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
 // javah -cp ../classes/:../../ThirdParty/ThirdPartyJars/EJML/EJML.jar -o ActiveSetQPMomentumOptimizer.h us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.ActiveSetQPMomentumOptimizer 
+
+import com.sun.jna.Library;
+import com.sun.jna.Native;
+
 
 public class ActiveSetQPMomentumOptimizer implements MomentumOptimizerInterface, Serializable
 {
@@ -44,9 +46,26 @@ public class ActiveSetQPMomentumOptimizer implements MomentumOptimizerInterface,
    public DenseMatrix64F vd, rho;
    public DenseMatrix64F prevVd, prevRho;
    double optVal;
+   final boolean useJNA;
    
-   public ActiveSetQPMomentumOptimizer(int _nDoF)
+   public interface JnaInterface extends Library
    {
+      int solveNative(
+            double[] A, double[] b, double[] C, 
+            double[] Jp, double[] pp,
+            double[] Js, double[] ps, double[] Ws,
+            double[] WRho, double[] Lambda,
+            double[] WRhoSmoother, 
+            double[] rhoPrevMean, double[] WRhoCoPPenalty,
+            double[] QRho, double[] c, double[] rhoMin,
+            double[] vd, double[] rho);
+      void initializeNative(int nDoF);
+      JnaInterface INSTANCE = (JnaInterface) Native.loadLibrary("ActiveSetQPMomentumOptimizer_rel", JnaInterface.class);
+   }
+   
+   public ActiveSetQPMomentumOptimizer(int _nDoF, boolean _useJNA)
+   {
+         useJNA = _useJNA;
          nDoF = _nDoF;
          vd = new DenseMatrix64F(nDoF,1);
          rho = new DenseMatrix64F(getRhoSize(),1);
@@ -60,8 +79,9 @@ public class ActiveSetQPMomentumOptimizer implements MomentumOptimizerInterface,
          pp = new DenseMatrix64F(nDoF, 1);
          Ws = new DenseMatrix64F(nDoF, nDoF);
          
-         loadNativeLibrary();
+         
          initializeNative(nDoF);
+         
    }
 
    public void setSaveNoConvergeProblem(boolean saveNoConvergeProblem)
@@ -163,8 +183,16 @@ public class ActiveSetQPMomentumOptimizer implements MomentumOptimizerInterface,
       CommonOps.insert(pPrimary, pp, 0, 0);
    }
    
-   public native void initializeNative(int nDoF);
-   public native void resetActiveSet();
+   private native void initializeNative(int nDoF);
+   public void initlaize(int nDoF)
+   {
+      if(useJNA)
+         JnaInterface.INSTANCE.initializeNative(nDoF);
+      else
+         initializeNative(nDoF);
+   }
+   
+   public native void resetActiveSetNative();
    
    public native int solveNative(
          double[] A, double[] b, double[] C, 
@@ -191,7 +219,10 @@ public class ActiveSetQPMomentumOptimizer implements MomentumOptimizerInterface,
 
       CommonOps.insert(rho, prevRho, 0, 0);
       CommonOps.insert(vd, prevVd, 0, 0);
-      int iter = solveNative(
+      int iter;
+      if(useJNA)
+      {
+         iter = JnaInterface.INSTANCE.solveNative(
             A.getData(), b.getData(), C.getData(), 
             Jp.getData(),pp.getData(),
             Js.getData(), ps.getData(), Ws.getData(), 
@@ -200,7 +231,21 @@ public class ActiveSetQPMomentumOptimizer implements MomentumOptimizerInterface,
             rhoPrevMean.getData(), WRhoCoPPenalty.getData(),
             QRho.getData(), c.getData(), rhoMin.getData(), 
             vd.getData(), rho.getData()  // in/out
-      );
+        );
+      }
+      else
+      {
+         iter = solveNative(
+            A.getData(), b.getData(), C.getData(), 
+            Jp.getData(),pp.getData(),
+            Js.getData(), ps.getData(), Ws.getData(), 
+            WRho.getData(), Lambda.getData(), 
+            WRhoSmoother.getData(), 
+            rhoPrevMean.getData(), WRhoCoPPenalty.getData(),
+            QRho.getData(), c.getData(), rhoMin.getData(), 
+            vd.getData(), rho.getData()  // in/out
+        );
+      }
       if(iter <0)
       {
          if(saveNoConvergeProblem)
@@ -218,7 +263,7 @@ public class ActiveSetQPMomentumOptimizer implements MomentumOptimizerInterface,
                  }
          }
 
-         throw new NoConvergenceException();
+         throw new NoConvergenceException(iter);
       }else
          return iter;
    }
@@ -244,14 +289,19 @@ public class ActiveSetQPMomentumOptimizer implements MomentumOptimizerInterface,
    
    
    static String[] nativeLibraryCandidates = {"ActiveSetQPMomentumOptimizer_rel","ActiveSetQPMomentumOptimizer_msz","ActiveSetQPMomentumOptimizer"};
-   static void loadNativeLibrary()
+   static
+   {
+      loadNativeLibraries();
+   }
+   
+   public static void loadNativeLibraries()
    {
       for(int i=0;i<nativeLibraryCandidates.length;i++)
       {
               try
               {
-                      System.loadLibrary(nativeLibraryCandidates[i]);
-                      break;
+                    System.loadLibrary(nativeLibraryCandidates[i]);
+                    break;
               }
               catch(UnsatisfiedLinkError e)
               {

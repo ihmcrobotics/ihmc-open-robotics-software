@@ -25,6 +25,8 @@ typedef Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> Matr
 
 #define J2E_FREE(X) env->ReleasePrimitiveArrayCritical(X, c ## X, 0);
 
+#define JNA2E(X, R, C)  Eigen::Map<MatrixXdR> (e ## X)(X, R, C);
+
 int nDoF=-1;
 jboolean isCopy=JNI_FALSE;
 #ifdef USE_ACTIVE_SET
@@ -33,6 +35,12 @@ jboolean isCopy=JNI_FALSE;
 using namespace Eigen;
 
 JNIEXPORT void JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_ActiveSetQPMomentumOptimizer_initializeNative (JNIEnv *env, jobject obj, jint _nDoF)
+{
+	std::cout << "use JNI" << std::endl;
+	initializeNative(_nDoF);
+}
+
+JNIEXPORT void initializeNative (int _nDoF)
 {
 	nDoF = _nDoF;
 	std::cerr << "ActiveSetQPMomentumOptimizer Library initialized nDoF = " << nDoF << std::endl;
@@ -44,6 +52,11 @@ JNIEXPORT void JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_n
 
 JNIEXPORT void JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_ActiveSetQPMomentumOptimizer_resetActiveSet
   (JNIEnv *, jobject)
+{
+	resetActiveSet();
+}
+
+JNIEXPORT void resetActiveSet()
 {
 #ifdef USE_ACTIVE_SET
 	active.clear();
@@ -220,7 +233,7 @@ JNIEXPORT jint JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_n
 		jdoubleArray QRho, jdoubleArray c, jdoubleArray rhoMin, 
 		jdoubleArray vd, jdoubleArray rho)
 {
-	double ret;
+	int ret;
 	J2E(A, nWrench, nDoF);  J2E(b,nWrench,1);  J2E(C,nWrench,nWrench); 
 	J2E(Jp,nDoF,nDoF);  J2E(pp,nDoF,1); 
 	J2E(Js,nDoF,nDoF);  J2E(ps,nDoF,1);  J2E(Ws,nDoF,nDoF); 
@@ -242,4 +255,28 @@ JNIEXPORT jint JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_n
 	J2E_FREE(vd); J2E_FREE(rho);  
 
 	return ret;
+}
+
+JNIEXPORT int solveNative(
+		double* A, double* b, double* C,
+		double* Jp, double* pp,
+		double* Js, double* ps, double* Ws,
+		double* WRho, double* Lambda,
+		double* WRhoSmoother,
+		double* rhoPrevMean, double* WRhoCoPPenalty,
+		double* QRho, double* c, double* rhoMin,
+		double* vd, double* rho)
+{
+	int ret;
+	JNA2E(A, nWrench, nDoF);  JNA2E(b,nWrench,1);  JNA2E(C,nWrench,nWrench);
+	JNA2E(Jp,nDoF,nDoF);  JNA2E(pp,nDoF,1);
+	JNA2E(Js,nDoF,nDoF);  JNA2E(ps,nDoF,1);  JNA2E(Ws,nDoF,nDoF);
+	JNA2E(WRho,nRho,nRho);  JNA2E(Lambda,nDoF,nDoF);
+	JNA2E(WRhoSmoother,nRho,nRho);
+	JNA2E(rhoPrevMean,nRho,1);  JNA2E(WRhoCoPPenalty,nRho,nRho);
+	JNA2E(QRho,nWrench,nRho);  JNA2E(c,nWrench,1);  JNA2E(rhoMin,nRho,1);
+	JNA2E(vd,nDoF,1); JNA2E(rho,nRho,1);
+
+	ret = solveEigen(eA,  eb,  eC, eJp, epp, eJs,  eps,  eWs, eWRho,  eLambda, eWRhoSmoother, erhoPrevMean,  eWRhoCoPPenalty, eQRho,  ec,  erhoMin, evd, erho);
+	return ret+100;
 }

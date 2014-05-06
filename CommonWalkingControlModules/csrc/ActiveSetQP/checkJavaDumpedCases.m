@@ -1,6 +1,6 @@
 clear java
 % generate 1.6 classes
-%!javac  ../../src/us/ihmc/commonWalkingControlModules/controlModules/nativeOptimization/{MomentumOptimizerInterface.java,ActiveSetQPMomentumOptimizer.java}  -cp ../../../ThirdParty/ThirdPartyJars/EJML/EJML.jar:../../../IHMCUtilities/classes/ -d ../../classes
+!javac   ClassLoaderObjectInputStream.java
 javaaddpath ../../classes/
 javaaddpath ../../../ThirdParty/ThirdPartyJars/EJML/EJML.jar
 javaaddpath ../../../IHMCUtilities/classes/
@@ -9,7 +9,7 @@ javaaddpath (pwd)
 import java.io.*
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.*
 
-problemDump = ['../../../ValkyrieHardwareDrivers/'  'ActiveSetQPMomentumOptimizer_diverence1398849788667735000'];
+problemDump = ['../../../Atlas/'  'ActiveSetQPMomentumOptimizer_diverence1398980280549075000'];
 % problemDump = 'test';
 fis = FileInputStream(problemDump);
 % ois = ObjectInputStream(fis);
@@ -52,14 +52,19 @@ Aeq = [-A QRho;
 beq = [c;pp];
 Ain = [zeros(nRho,nDoF) -eye(nRho)];
 bin = -rhoMin;
-%clear java
-save 'snapshot'
-%%     X = fmincon(FUN,X0,A,B,Aeq,Beq,LB,UB) defines a set of lower and upper
+%     X = fmincon(FUN,X0,A,B,Aeq,Beq,LB,UB) defines a set of lower and upper
 x0 = [prevVd;prevRho];
 lb = [-inf(size(prevVd)); rhoMin];
+
+%%
 %xopt = fmincon(@(x) x'*Q*x+x'*f, x0,Ain, bin, Aeq, beq);
-xopt = fmincon(@(x) x'*Q*x+x'*f, x0,[], [], Aeq, beq, lb,[]);
-vdopt=xopt(1:nDoF);
-rhoopt=xopt(nDoF+1:end);
-bar([x0 xopt])
-legend('x0','x*')
+[xopt, ~, stat]= fmincon(@(x) x'*Q*x+x'*f, x0,[], [], Aeq, beq);
+
+%
+active=[];
+[xopt2, act_opt, fail]=fastQP(Q,f,Aeq, beq, Ain, bin,active);
+fail
+
+%
+checkOpt(xopt, Q, f, Aeq, beq, Ain, bin)
+checkOpt(xopt2, Q, f, Aeq, beq, Ain, bin)
