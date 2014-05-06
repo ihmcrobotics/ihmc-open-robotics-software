@@ -1251,33 +1251,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          moveICPToInsideOfFootAtEndOfSwing(supportSide, transferToFootstepLocation, swingTimeCalculationProvider.getValue(), swingTimeRemaining,
                                            desiredICPLocal);
-         
-         if (enablePushRecovery.getBooleanValue() ? !pushRecoveryModule.getRecoveringFromDoubleSupportFall() : true)
-         {
-            desiredICP.set(desiredICPLocal);
-            desiredICPVelocity.set(desiredICPVelocityLocal);
+ 
+         desiredICP.set(desiredICPLocal);
+         desiredICPVelocity.set(desiredICPVelocityLocal);
 
-            desiredECMP.set(ecmpLocal);
-         }
-         else
-         {
-            FramePoint desired2 = new FramePoint();
-            desired2 = nextFootstep.getPositionInFrame(capturePoint.getReferenceFrame());
-            FramePoint2d desired = new FramePoint2d(capturePoint.getReferenceFrame(), desired2.getX(), desired2.getY());
-            FramePoint2d centroidSupportFoot = new FramePoint2d();
-            bipedSupportPolygons.getFootPolygonInAnkleZUp(swingSide.getOppositeSide()).getCentroid(centroidSupportFoot);
-            centroidSupportFoot.changeFrame(capturePoint.getReferenceFrame());
-            FrameVector2d vector = new FrameVector2d(capturePoint.getReferenceFrame(), centroidSupportFoot.getX(), centroidSupportFoot.getY());
-            FrameLine2d toProject = new FrameLine2d(desired, vector);
-            FramePoint2d orthogonalProjection = toProject.orthogonalProjectionCopy(new FramePoint2d(capturePoint.getReferenceFrame(), capturePoint.getX(),
-                  capturePoint.getY(), "test"));
-
-            desiredICP.set(orthogonalProjection.getX(), orthogonalProjection.getY());
-            desiredICPVelocity.setToZero();
-            desiredECMP.set(orthogonalProjection.getX(), orthogonalProjection.getY());
-         }
-         
-
+         desiredECMP.set(ecmpLocal);
+   
          if (VISUALIZE)
          {
             ecmpViz.set(desiredECMP.getX(), desiredECMP.getY(), 0.0);
@@ -1307,7 +1286,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          footSwitches.get(swingSide).reset();
 
-         if (enablePushRecovery.getBooleanValue() ? pushRecoveryModule.getRecoveringFromDoubleSupportFall() : false)
+         if (pushRecoveryModule.getIsRecoveringFromDoubleSupportFall())
          {
             nextFootstep = pushRecoveryModule.getRecoverFromDoubleSupportFootStep();
          }
@@ -1466,7 +1445,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          
          upcomingFootstepList.notifyComplete();
          
-         if (enablePushRecovery.getBooleanValue() ? !pushRecoveryModule.getRecoveringFromDoubleSupportFall() : true)
+         if (!pushRecoveryModule.getIsRecoveringFromDoubleSupportFall())
          {
           previousSupportSide.set(swingSide.getOppositeSide());
          }
@@ -1693,7 +1672,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       public boolean checkCondition()
       {
-        if (enablePushRecovery.getBooleanValue() ? !pushRecoveryModule.getRecoveringFromDoubleSupportFall() : true)
+        if (!pushRecoveryModule.getIsRecoveringFromDoubleSupportFall())
         {
            Footstep nextFootstep = upcomingFootstepList.getNextFootstep();
             boolean readyToStopWalking = (upcomingFootstepList.isFootstepProviderEmpty() && (nextFootstep == null))
