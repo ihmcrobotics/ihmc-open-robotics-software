@@ -73,7 +73,7 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
          this.stateEstimatorSensorDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getStateEstimatorSensorDefinitions();
          Map<IMUMount, IMUDefinition> imuDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getIMUDefinitions();
          Map<WrenchCalculatorInterface, ForceSensorDefinition> forceSensorDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getForceSensorDefinitions();
-         this.simulatedSensorHolderAndReader = new SimulatedSensorHolderAndReader(sensorFilterParameters, stateEstimatorSensorDefinitions, registry); 
+         this.simulatedSensorHolderAndReader = new SimulatedSensorHolderAndReader(sensorFilterParameters, stateEstimatorSensorDefinitions, sensorNoiseParameters, registry); 
          
          createAndAddOrientationSensors(imuDefinitions, registry);
          createAndAddAngularVelocitySensors(imuDefinitions, registry);
