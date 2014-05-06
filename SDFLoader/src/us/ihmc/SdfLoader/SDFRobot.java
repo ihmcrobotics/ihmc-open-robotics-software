@@ -146,7 +146,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder, Hu
             }
 
             joint.addGroundContactPoint(groundContactPoint);
-            joint.physics.addExternalForcePoint(externalForcePoint);
+            joint.addExternalForcePoint(externalForcePoint);
 
             counters.put(jointName, count);
 

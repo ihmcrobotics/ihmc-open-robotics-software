@@ -40,7 +40,7 @@ public class SingleRigidBodyRobot extends Robot
       this.addRootJoint(bodyJoint);
       
       forcePoint = new ExternalForcePoint("forcePoint", new Vector3d(), this.getRobotsYoVariableRegistry());
-      bodyJoint.physics.addExternalForcePoint(forcePoint);
+      bodyJoint.addExternalForcePoint(forcePoint);
    }
 
 
