@@ -7,9 +7,9 @@ import javax.media.j3d.Transform3D;
 
 import us.ihmc.acsell.parameters.BonoPhysicalProperties;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.dynamics.FullRobotModel;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 /**
