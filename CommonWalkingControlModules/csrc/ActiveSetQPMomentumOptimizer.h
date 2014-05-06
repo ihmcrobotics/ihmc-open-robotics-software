@@ -25,6 +25,7 @@ extern "C" {
 JNIEXPORT void JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_ActiveSetQPMomentumOptimizer_initializeNative
   (JNIEnv *, jobject, jint);
 
+JNIEXPORT void initializeNative(int);
 /*
  * Class:     us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_ActiveSetQPMomentumOptimizer
  * Method:    resetActiveSet
@@ -33,6 +34,7 @@ JNIEXPORT void JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_n
 JNIEXPORT void JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_ActiveSetQPMomentumOptimizer_resetActiveSet
   (JNIEnv *, jobject);
 
+JNIEXPORT void resetActiveSet();
 /*
  * Class:     us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_ActiveSetQPMomentumOptimizer
  * Method:    solveNative
@@ -41,6 +43,15 @@ JNIEXPORT void JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_n
 JNIEXPORT jint JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_ActiveSetQPMomentumOptimizer_solveNative
   (JNIEnv *, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray);
 
+JNIEXPORT int solveNative(
+		double* A, double* b, double* C,
+		double* Jp, double* pp,
+		double* Js, double* ps, double* Ws,
+		double* WRho, double* Lambda,
+		double* WRhoSmoother,
+		double* rhoPrevMean, double* WRhoCoPPenalty,
+		double* QRho, double* c, double* rhoMin,
+		double* vd, double* rho);
 #ifdef __cplusplus
 }
 #endif

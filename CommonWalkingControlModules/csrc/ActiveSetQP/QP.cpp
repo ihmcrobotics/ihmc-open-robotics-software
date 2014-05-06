@@ -28,11 +28,11 @@ int fastQPThatTakesQinv(vector< MatrixXd* > QinvblkDiag, const VectorXd& f, cons
 	int M = Aeq.rows();
 	int N = Aeq.cols();
 
-	if (f.rows() != N) { cerr << "size of f (" << f.rows() << " by " << f.cols() << ") doesn't match cols of Aeq (" << Aeq.rows() << " by " << Aeq.cols() << ")" << endl; return 2; }
-	if (beq.rows() !=M) { cerr << "size of beq doesn't match rows of Aeq" << endl; return 2; }
-	if (Ain.cols() !=N) { cerr << "cols of Ain doesn't match cols of Aeq" << endl; return 2; };
-	if (bin.rows() != Ain.rows()) { cerr << "bin rows doesn't match Ain rows" << endl; return 2; };
-	if (x.rows() != N) { cerr << "x doesn't match Aeq" << endl; return 2; }
+	if (f.rows() != N) { cerr << "size of f (" << f.rows() << " by " << f.cols() << ") doesn't match cols of Aeq (" << Aeq.rows() << " by " << Aeq.cols() << ")" << endl; return -4; }
+	if (beq.rows() !=M) { cerr << "size of beq doesn't match rows of Aeq" << endl; return -4; }
+	if (Ain.cols() !=N) { cerr << "cols of Ain doesn't match cols of Aeq" << endl; return -4; };
+	if (bin.rows() != Ain.rows()) { cerr << "bin rows doesn't match Ain rows" << endl; return -4; };
+	if (x.rows() != N) { cerr << "x doesn't match Aeq" << endl; return -4; }
 	int n_active = active.size();
 
 	MatrixXd Aact = MatrixXd(n_active, N);
