@@ -152,7 +152,7 @@ public class RobotTest
 
       Vector3d externalForcePointOffset = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
       ExternalForcePoint externalForcePoint = new ExternalForcePoint("efp", externalForcePointOffset, robot.getRobotsYoVariableRegistry());
-      root1.physics.addExternalForcePoint(externalForcePoint);
+      root1.addExternalForcePoint(externalForcePoint);
       Vector3d force = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
       externalForcePoint.setForce(force);
 

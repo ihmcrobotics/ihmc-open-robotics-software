@@ -41,7 +41,7 @@ public class StateEstimatorEvaluatorRobot extends Robot
       bodyLink.setMassAndRadiiOfGyration(10.0, 0.1, 0.2, 0.3);
 
       ExternalForcePoint externalForcePoint = new ExternalForcePoint("ef_rootJoint", this.getRobotsYoVariableRegistry());
-      rootJoint.physics.addExternalForcePoint(externalForcePoint);
+      rootJoint.addExternalForcePoint(externalForcePoint);
 
       Graphics3DObject bodyLinkGraphics = new Graphics3DObject();
       bodyLinkGraphics.translate(0.0, 0.0, -0.15);
@@ -55,12 +55,12 @@ public class StateEstimatorEvaluatorRobot extends Robot
 
       IMUMount imuMount0 = new IMUMount("imuMount0", imu0Offset, this);
       KinematicPoint kinematicPoint0 = new KinematicPoint("kp0", offsetVector0, this.getRobotsYoVariableRegistry());
-      rootJoint.physics.addKinematicPoint(kinematicPoint0);
+      rootJoint.addKinematicPoint(kinematicPoint0);
       rootJoint.addIMUMount(imuMount0);
 
       Vector3d velocityPointOffsetVector0 = new Vector3d(0.0, 0.0, 0.2);
       KinematicPoint positionAndVelocityPoint0 = new KinematicPoint("vp0", velocityPointOffsetVector0, this.getRobotsYoVariableRegistry());
-      rootJoint.physics.addKinematicPoint(positionAndVelocityPoint0);
+      rootJoint.addKinematicPoint(positionAndVelocityPoint0);
       
       this.addRootJoint(rootJoint);
 
@@ -93,7 +93,7 @@ public class StateEstimatorEvaluatorRobot extends Robot
          imu1Offset.setTranslation(offsetVector1);
 
          KinematicPoint kinematicPoint1 = new KinematicPoint("kp1", offsetVector1, this.getRobotsYoVariableRegistry());
-         pinJoint1.physics.addKinematicPoint(kinematicPoint1);
+         pinJoint1.addKinematicPoint(kinematicPoint1);
          IMUMount imuMount1 = new IMUMount("imuMount1", imu1Offset, this);
          pinJoint1.addIMUMount(imuMount1);
 
@@ -125,13 +125,13 @@ public class StateEstimatorEvaluatorRobot extends Robot
          imu2Offset.setTranslation(offsetVector2);
 
          KinematicPoint kinematicPoint2 = new KinematicPoint("kp2", offsetVector2, this.getRobotsYoVariableRegistry());
-         pinJoint2.physics.addKinematicPoint(kinematicPoint2);
+         pinJoint2.addKinematicPoint(kinematicPoint2);
          IMUMount imuMount2 = new IMUMount("imuMount2", imu2Offset, this);
          pinJoint2.addIMUMount(imuMount2);
 
          Vector3d velocityPointOffsetVector2 = new Vector3d(0.1, 0.2, 0.3);
          KinematicPoint positionAndVelocityPoint2 = new KinematicPoint("vp2", velocityPointOffsetVector2, this.getRobotsYoVariableRegistry());
-         pinJoint2.physics.addKinematicPoint(positionAndVelocityPoint2);
+         pinJoint2.addKinematicPoint(positionAndVelocityPoint2);
          
 
          pinJoint1.addJoint(pinJoint2);

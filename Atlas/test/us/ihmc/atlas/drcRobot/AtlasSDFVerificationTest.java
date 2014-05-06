@@ -123,8 +123,8 @@ public class AtlasSDFVerificationTest
       ExternalForcePoint fp = new ExternalForcePoint("gravityCompensation", sdfRobot.getRobotsYoVariableRegistry());
       fp.setForce(0, 0, -sdfRobot.getGravityZ() * sdfRobot.computeCenterOfMass(new Point3d()) / 2);
 
-      sdfRobot.getJoint("l_arm_shx").physics.addExternalForcePoint(fp);
-      sdfRobot.getJoint("r_arm_shx").physics.addExternalForcePoint(fp);
+      sdfRobot.getJoint("l_arm_shx").addExternalForcePoint(fp);
+      sdfRobot.getJoint("r_arm_shx").addExternalForcePoint(fp);
    }
 
 

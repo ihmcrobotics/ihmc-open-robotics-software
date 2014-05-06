@@ -49,7 +49,7 @@ public class TestIMUKalmanFilterRobot extends Robot
       link.setMomentOfInertia(1.0, 1.0, 1.0);
 
       ExternalForcePoint ef_body = new ExternalForcePoint("ef_body", new Vector3d(), this.getRobotsYoVariableRegistry());
-      rootJoint.physics.addExternalForcePoint(ef_body);
+      rootJoint.addExternalForcePoint(ef_body);
 
       rootJoint.setLink(link);
       addRootJoint(rootJoint);
