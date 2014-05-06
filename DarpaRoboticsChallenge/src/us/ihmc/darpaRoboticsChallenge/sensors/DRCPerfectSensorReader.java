@@ -38,7 +38,7 @@ public class DRCPerfectSensorReader implements SensorReader, RobotController
    {
       this.rawSensorReader = rawSensorReader;
    }
-   
+
    public JointAndIMUSensorMap getJointAndIMUSensorMap()
    {
       throw new RuntimeException("Should not get there");
