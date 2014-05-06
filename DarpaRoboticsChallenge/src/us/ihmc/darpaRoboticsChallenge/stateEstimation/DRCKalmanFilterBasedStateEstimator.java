@@ -7,9 +7,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlane
 import us.ihmc.commonWalkingControlModules.sensors.WrenchBasedFootSwitch;
 import us.ihmc.controlFlow.ControlFlowGraph;
 import us.ihmc.robotSide.SideDependentList;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
-import us.ihmc.sensorProcessing.stateEstimation.JointAndIMUSensorDataSource;
+import us.ihmc.sensorProcessing.simulatedSensors.JointAndIMUSensorMap;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromController;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimator;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -31,7 +29,6 @@ public class DRCKalmanFilterBasedStateEstimator implements DRCStateEstimatorInte
    //   private final SensorNoiseParameters sensorNoiseParametersForEstimator =
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
-   private final SensorReader sensorReader;
 
    private final SensorAndEstimatorAssembler sensorAndEstimatorAssembler;
    private final StateEstimatorWithPorts stateEstimatorWithPorts;
@@ -41,23 +38,19 @@ public class DRCKalmanFilterBasedStateEstimator implements DRCStateEstimatorInte
 
    public DRCKalmanFilterBasedStateEstimator(StateEstimationDataFromController stateEstimatorDataFromControllerSource,
          FullInverseDynamicsStructure inverseDynamicsStructure, AfterJointReferenceFrameNameMap estimatorReferenceFrameMap,
-         RigidBodyToIndexMap estimatorRigidBodyToIndexMap, SensorReaderFactory sensorReaderFactory, double gravitationalAcceleration,
+         RigidBodyToIndexMap estimatorRigidBodyToIndexMap, JointAndIMUSensorMap jointAndIMUSensorMap, double gravitationalAcceleration,
          StateEstimatorParameters stateEstimatorParameters, SideDependentList<WrenchBasedFootSwitch> footSwitches,
          SideDependentList<ContactablePlaneBody> bipedFeet, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      sensorReader = sensorReaderFactory.getSensorReader();
       this.assumePerfectIMU = stateEstimatorParameters.getAssumePerfectIMU();
       
       // Make the estimator here.
       sensorAndEstimatorAssembler = new SensorAndEstimatorAssembler(stateEstimatorDataFromControllerSource,
-            sensorReaderFactory.getStateEstimatorSensorDefinitions(), stateEstimatorParameters, gravitationalAcceleration, inverseDynamicsStructure,
+            jointAndIMUSensorMap, stateEstimatorParameters, gravitationalAcceleration, inverseDynamicsStructure,
             estimatorReferenceFrameMap, estimatorRigidBodyToIndexMap, registry);
 
       stateEstimatorWithPorts = sensorAndEstimatorAssembler.getEstimator();
 
-      JointAndIMUSensorDataSource jointAndIMUSensorDataSource = sensorAndEstimatorAssembler.getJointAndIMUSensorDataSource();
-      sensorReader.setJointAndIMUSensorDataSource(jointAndIMUSensorDataSource);
-      
       ControlFlowGraph controlFlowGraph = sensorAndEstimatorAssembler.getControlFlowGraph();
 
       controlFlowGraphExecutorController = new ControlFlowGraphExecutorController(controlFlowGraph);

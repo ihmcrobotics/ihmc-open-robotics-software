@@ -50,7 +50,7 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
 
    private final ObjectObjectMap<ForceSensorDefinition, WrenchCalculatorInterface> forceTorqueSensors = new ObjectObjectMap<ForceSensorDefinition, WrenchCalculatorInterface>();
 
-   private JointAndIMUSensorDataSource jointAndIMUSensorDataSource;
+   private final JointAndIMUSensorDataSource jointAndIMUSensorDataSource;
 
    private ForceSensorDataHolder forceSensorDataHolder;
 
@@ -65,8 +65,10 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
 
    private ObjectObjectMap<OneDoFJoint, BacklashCompensatingVelocityYoVariable> finiteDifferenceVelocities;
 
-   public SimulatedSensorHolderAndReader(SensorFilterParameters sensorFilterParameters, YoVariableRegistry simulationRegistry)
+   public SimulatedSensorHolderAndReader(SensorFilterParameters sensorFilterParameters, StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, YoVariableRegistry simulationRegistry)
    {
+      jointAndIMUSensorDataSource = new JointAndIMUSensorDataSource(stateEstimatorSensorDefinitions, sensorFilterParameters, simulationRegistry);
+      
       this.estimatorDT = sensorFilterParameters.getEstimatorDT();
       this.estimateDTinNs = TimeTools.secondsToNanoSeconds(estimatorDT);
       step.set(29831);
@@ -123,9 +125,9 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
       forceTorqueSensors.add(forceSensorDefinition, groundContactPointBasedWrenchCalculator);
    }
 
-   public void setJointAndIMUSensorDataSource(JointAndIMUSensorDataSource jointAndIMUSensorDataSource)
+   public JointAndIMUSensorMap getJointAndIMUSensorMap()
    {
-      this.jointAndIMUSensorDataSource = jointAndIMUSensorDataSource;
+      return jointAndIMUSensorDataSource.getSensorMap();
    }
 
    public void run()
@@ -258,10 +260,14 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
                   forceSensorDataHolder.setForceSensorValue(forceTorqueSensors.getFirst(i), forceTorqueSensor.getWrench());
                }
             }
+
+            jointAndIMUSensorDataSource.startComputation();
+            jointAndIMUSensorDataSource.waitUntilComputationIsDone();
+
             step.increment();
-            
+
             // Signal sim to continue
-            
+
             lock.lock();
             simulationContinue = true;
             simulationContinueCondition.signalAll();
@@ -271,9 +277,7 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
             {
                controllerDispatcher.startEstimator(estimateDTinNs * step.getIntegerValue(), System.nanoTime());               
             }
-
          }
       }
-
    }
 }

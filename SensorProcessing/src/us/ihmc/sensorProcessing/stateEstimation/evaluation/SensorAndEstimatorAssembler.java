@@ -8,12 +8,9 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.controlFlow.ControlFlowGraph;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.sensorProcessing.simulatedSensors.JointAndIMUSensorMap;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorFilterParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
-import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.sensorProcessing.stateEstimation.ComposableOrientationAndCoMEstimatorCreator;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSelectorAndDataConverter;
-import us.ihmc.sensorProcessing.stateEstimation.JointAndIMUSensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.JointStateFullRobotModelUpdater;
 import us.ihmc.sensorProcessing.stateEstimation.OrientationStateRobotModelUpdater;
 import us.ihmc.sensorProcessing.stateEstimation.PointMeasurementNoiseParameters;
@@ -41,7 +38,6 @@ public class SensorAndEstimatorAssembler
    private final ControlFlowGraph controlFlowGraph;
 
    // The following are the elements added to the controlFlowGraph:
-   private final JointAndIMUSensorDataSource jointSensorDataSource;
    @SuppressWarnings("unused")
    private final StateEstimationDataFromController stateEstimatorDataFromControllerSource;
    private final JointStateFullRobotModelUpdater jointStateFullRobotModelUpdater;
@@ -52,7 +48,7 @@ public class SensorAndEstimatorAssembler
    private final boolean assumePerfectIMU;
 
    public SensorAndEstimatorAssembler(StateEstimationDataFromController stateEstimatorDataFromControllerSource,
-         StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, StateEstimatorParameters stateEstimatorParameters, double gravitationalAcceleration,
+         JointAndIMUSensorMap jointAndIMUSensorMap, StateEstimatorParameters stateEstimatorParameters, double gravitationalAcceleration,
          FullInverseDynamicsStructure inverseDynamicsStructure, AfterJointReferenceFrameNameMap estimatorReferenceFrameMap,
          RigidBodyToIndexMap estimatorRigidBodyToIndexMap, YoVariableRegistry parentRegistry)
    {
@@ -60,14 +56,10 @@ public class SensorAndEstimatorAssembler
       double estimatorDT = stateEstimatorParameters.getEstimatorDT();
 
       SensorNoiseParameters sensorNoiseParametersForEstimator = stateEstimatorParameters.getSensorNoiseParameters();
-      SensorFilterParameters sensorFilterParameters = stateEstimatorParameters.getSensorFilterParameters();
       PointMeasurementNoiseParameters pointMeasurementNoiseParameters = stateEstimatorParameters.getPointMeasurementNoiseParameters();
       
       this.stateEstimatorDataFromControllerSource = stateEstimatorDataFromControllerSource;
       SensorConfigurationFactory sensorConfigurationFactory = new SensorConfigurationFactory(sensorNoiseParametersForEstimator, gravitationalAcceleration);
-
-      jointSensorDataSource = new JointAndIMUSensorDataSource(stateEstimatorSensorDefinitions, sensorFilterParameters, registry);
-      JointAndIMUSensorMap jointAndIMUSensorMap = jointSensorDataSource.getSensorMap();
 
       ReferenceFrame estimationFrame = inverseDynamicsStructure.getEstimationFrame();
 
@@ -158,11 +150,6 @@ public class SensorAndEstimatorAssembler
    public StateEstimatorWithPorts getEstimator()
    {
       return stateEstimator;
-   }
-
-   public JointAndIMUSensorDataSource getJointAndIMUSensorDataSource()
-   {
-      return jointSensorDataSource;
    }
 
    public void initializeEstimatorToActual(FramePoint initialCoMPosition, FrameOrientation initialEstimationLinkOrientation)

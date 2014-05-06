@@ -7,13 +7,13 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.controlFlow.ControlFlowGraph;
 import us.ihmc.sensorProcessing.simulatedSensors.InverseDynamicsJointsFromSCSRobotGenerator;
+import us.ihmc.sensorProcessing.simulatedSensors.JointAndIMUSensorMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorFilterParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReaderFromRobotFactory;
 import us.ihmc.sensorProcessing.stateEstimation.DesiredCoMAccelerationsFromRobotStealerController;
-import us.ihmc.sensorProcessing.stateEstimation.JointAndIMUSensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.PointMeasurementNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimationDataFromController;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -74,8 +74,6 @@ public class ComposableStateEstimatorEvaluator
       
       SensorReaderFactory simulatedSensorHolderAndReaderFromRobotFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(robot,
             simulatedSensorNoiseParameters, sensorFilterParameters, imuMounts, new ArrayList<WrenchCalculatorInterface>(), registry, registry);
-      
-      boolean addLinearAccelerationSensors = true;
       
       simulatedSensorHolderAndReaderFromRobotFactory.build(inverseDynamicsStructure.getRootJoint(), null, registry);
       
@@ -246,15 +244,13 @@ public class ComposableStateEstimatorEvaluator
          }
       };
       
+      JointAndIMUSensorMap sensorMap = simulatedSensorHolderAndReaderFromRobotFactory.getSensorReader().getJointAndIMUSensorMap();
       SensorAndEstimatorAssembler sensorAndEstimatorAssembler = new SensorAndEstimatorAssembler(stateEstimatorDataFromControllerSource,
-            simulatedSensorHolderAndReaderFromRobotFactory.getStateEstimatorSensorDefinitions(), stateEstimatorParameters, gravitationalAcceleration,
+            sensorMap, stateEstimatorParameters, gravitationalAcceleration,
             inverseDynamicsStructure, referenceFrameMap, rigidBodyToIndexMap, registry);
 
       ControlFlowGraph controlFlowGraph = sensorAndEstimatorAssembler.getControlFlowGraph();
       StateEstimatorWithPorts orientationEstimator = sensorAndEstimatorAssembler.getEstimator();
-      JointAndIMUSensorDataSource jointSensorDataSource = sensorAndEstimatorAssembler.getJointAndIMUSensorDataSource();
-      
-      simulatedSensorHolderAndReader.setJointAndIMUSensorDataSource(jointSensorDataSource);
 
       desiredCoMAccelerationsFromRobotStealerController.attachStateEstimationDataFromControllerSink(stateEstimationDataFromControllerSink);
       

@@ -2,11 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.stateEstimation.kinematicsBasedStateEstim
 
 import java.util.LinkedHashMap;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-
 import us.ihmc.sensorProcessing.simulatedSensors.JointAndIMUSensorMap;
-import us.ihmc.sensorProcessing.stateEstimation.JointAndIMUSensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -14,6 +10,9 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
+
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 /**
  * JointStateUpdater simply reads the joint position/velocity sensors and updates the FullInverseDynamicsStructure.
@@ -30,19 +29,17 @@ public class JointStateUpdater
    private final RigidBody rootBody;
 
    private final OneDoFJoint[] oneDoFJoints;
-   private final JointAndIMUSensorDataSource jointAndIMUSensorDataSource;
    private final JointAndIMUSensorMap sensorMap;
    private final YoVariableRegistry registry;
    private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> estimatedJointPositions;
 
-   public JointStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, JointAndIMUSensorDataSource jointAndIMUSensorDataSource, YoVariableRegistry parentRegistry)
+   public JointStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, JointAndIMUSensorMap jointAndIMUSensorMap, YoVariableRegistry parentRegistry)
    {
       twistCalculator = inverseDynamicsStructure.getTwistCalculator();
       spatialAccelerationCalculator = inverseDynamicsStructure.getSpatialAccelerationCalculator();
       rootBody = twistCalculator.getRootBody();
       
-      this.jointAndIMUSensorDataSource = jointAndIMUSensorDataSource;
-      this.sensorMap = jointAndIMUSensorDataSource.getSensorMap();
+      this.sensorMap = jointAndIMUSensorMap;
       
       InverseDynamicsJoint[] joints = ScrewTools.computeSupportAndSubtreeJoints(inverseDynamicsStructure.getRootJoint().getSuccessor());
       this.oneDoFJoints = ScrewTools.filterJoints(joints, OneDoFJoint.class);
@@ -80,15 +77,11 @@ public class JointStateUpdater
 
    public void initialize()
    {
-      jointAndIMUSensorDataSource.initialize();
       updateJointState();
    }
 
    public void updateJointState()
    {
-      jointAndIMUSensorDataSource.startComputation();
-      jointAndIMUSensorDataSource.waitUntilComputationIsDone();
-      
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
          OneDoFJoint oneDoFJoint = oneDoFJoints[i];
