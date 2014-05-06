@@ -92,7 +92,7 @@ public class ReflectionSimulationComparerTest
       FloatingJoint floatingJoint0 = new FloatingJoint("floatingJoint", new Vector3d(), robot0);
       Link link0 = new Link("body");
       link0.setMass(1.0);
-      link0.physics.setMomentOfInertia(0.1, 0.1, 0.1);
+      link0.setMomentOfInertia(0.1, 0.1, 0.1);
       floatingJoint0.setLink(link0);
       robot0.addRootJoint(floatingJoint0);
       return robot0;

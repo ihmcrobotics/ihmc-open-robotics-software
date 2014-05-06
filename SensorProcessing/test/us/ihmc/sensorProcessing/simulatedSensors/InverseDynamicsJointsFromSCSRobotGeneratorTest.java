@@ -68,7 +68,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
       final PinJoint joint1 = new PinJoint("joint1", new Vector3d(), robot, Axis.Z);
       Link link1 = new Link("link1");
       link1.setMassAndRadiiOfGyration(1.0, 0.1, 0.1, 0.1);
-      link1.physics.setComOffset(new Vector3d(0.0, 0.2, 0.11));
+      link1.setComOffset(new Vector3d(0.0, 0.2, 0.11));
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addCylinder(0.1, 1.0, YoAppearance.Red());
       linkGraphics.translate(0.5, 0.0, 0.1);
@@ -102,7 +102,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
       PinJoint joint1 = new PinJoint("joint1", new Vector3d(), robot, Axis.Z);
       Link link1 = new Link("link1");
       link1.setMassAndRadiiOfGyration(1.0, 0.1, 0.1, 0.1);
-      link1.physics.setComOffset(new Vector3d(0.25, 0.0, 0.0));
+      link1.setComOffset(new Vector3d(0.25, 0.0, 0.0));
      
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.rotate(Math.PI/2.0, Axis.Y);
@@ -118,7 +118,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
       PinJoint joint2 = new PinJoint("joint2", new Vector3d(0.5, 0.0, 0.0), robot, Axis.Z);
       Link link2 = new Link("link2");
       link2.setMassAndRadiiOfGyration(1.0, 0.1, 0.1, 0.1);
-      link2.physics.setComOffset(new Vector3d(0.25, 0.0, 0.0));
+      link2.setComOffset(new Vector3d(0.25, 0.0, 0.0));
       
       Graphics3DObject linkGraphics2 = new Graphics3DObject();
       linkGraphics2.rotate(Math.PI/2.0, Axis.Y);
@@ -155,8 +155,8 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
       final FloatingJoint joint1 = new FloatingJoint("joint1", new Vector3d(), robot);
       Link link1 = new Link("link1");
       link1.setMassAndRadiiOfGyration(1.0, 0.1, 0.1, 0.1);
-      link1.physics.setComOffset(new Vector3d());
-      link1.physics.setComOffset(new Vector3d(0.0, 0.2, 0.11));
+      link1.setComOffset(new Vector3d());
+      link1.setComOffset(new Vector3d(0.0, 0.2, 0.11));
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addSphere(1.0, YoAppearance.Red());
       linkGraphics.translate(0.0, 0.0, 1.0);
