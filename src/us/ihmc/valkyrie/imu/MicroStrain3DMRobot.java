@@ -81,8 +81,8 @@ public class MicroStrain3DMRobot extends Robot
    {
       Link p = new Link("ms3DMLink");
       p.setMass(MS3DM_MASS);
-      p.physics.setComOffset(0.0, 0.0, 0.0);
-      p.physics.setMomentOfInertia(0.1, 0.1, 0.1);
+      p.setComOffset(0.0, 0.0, 0.0);
+      p.setMomentOfInertia(0.1, 0.1, 0.1);
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addCoordinateSystem(0.1);
