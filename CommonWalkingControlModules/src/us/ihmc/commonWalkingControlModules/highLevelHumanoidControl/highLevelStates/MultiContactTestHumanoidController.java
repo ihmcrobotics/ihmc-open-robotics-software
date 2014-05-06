@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
-import java.util.LinkedHashMap;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule;
@@ -16,10 +14,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.M
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootPoseProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.ChangeableConfigurationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantConfigurationProvider;
-import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePositionTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.trajectories.PoseTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.trajectories.WrapperForPositionAndOrientationTrajectoryGenerators;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -44,14 +38,9 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
 
    private final DesiredFootPoseProvider footPoseProvider;
 
-   private final SideDependentList<ChangeableConfigurationProvider> desiredConfigurationProviders = new SideDependentList<ChangeableConfigurationProvider>();
-   private final LinkedHashMap<ContactablePlaneBody, StraightLinePositionTrajectoryGenerator> swingPositionTrajectoryGenerators =
-      new LinkedHashMap<ContactablePlaneBody, StraightLinePositionTrajectoryGenerator>();
-   private final LinkedHashMap<ContactablePlaneBody, OrientationInterpolationTrajectoryGenerator> swingOrientationTrajectoryGenerators =
-      new LinkedHashMap<ContactablePlaneBody, OrientationInterpolationTrajectoryGenerator>();
+   private final SideDependentList<ChangeableConfigurationProvider> desiredConfigurationProviders = 
+         new SideDependentList<ChangeableConfigurationProvider>();
 
-
-   private final ConstantDoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(1.0);
    private final CoMBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule;
    private final OneDoFJoint[] neckJoints;
 
@@ -86,29 +75,18 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
          ContactablePlaneBody foot = feet.get(robotSide);
          int jacobianId = legJacobianIds.get(robotSide);
 
-         String bodyName = foot.getRigidBody().getName();
-
-
          final ConstantConfigurationProvider currentConfigurationProvider = new ConstantConfigurationProvider(new FramePose(foot.getBodyFrame()));
          final ChangeableConfigurationProvider desiredConfigurationProvider =
             new ChangeableConfigurationProvider(footPoseProvider.getDesiredFootPose(robotSide));
 
-         StraightLinePositionTrajectoryGenerator positionTrajectoryGenerator = new StraightLinePositionTrajectoryGenerator(bodyName, worldFrame,
-                                                                                  trajectoryTimeProvider, currentConfigurationProvider,
-                                                                                  desiredConfigurationProvider, registry);
-
-         OrientationInterpolationTrajectoryGenerator orientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator(bodyName, worldFrame,
-                                                                                         trajectoryTimeProvider, currentConfigurationProvider,
-                                                                                         desiredConfigurationProvider, registry);
-
-         PoseTrajectoryGenerator poseTrajectoryGenerator = new WrapperForPositionAndOrientationTrajectoryGenerators(positionTrajectoryGenerator, orientationTrajectoryGenerator);
-
          desiredConfigurationProviders.put(robotSide, desiredConfigurationProvider);
-         swingPositionTrajectoryGenerators.put(foot, positionTrajectoryGenerator);
-         swingOrientationTrajectoryGenerators.put(foot, orientationTrajectoryGenerator);
 
-         EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(controlDT, foot, jacobianId, robotSide, poseTrajectoryGenerator, null,
-                                                                null, null, walkingControllerParameters, null, momentumBasedController, registry);
+         ConstantDoubleProvider footTrajectoryTimeProvider = new ConstantDoubleProvider(1.0);
+         EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(controlDT, foot, jacobianId, robotSide, /*poseTrajectoryGenerator,*/ null,
+                                                                null, null, walkingControllerParameters,
+                                                                footTrajectoryTimeProvider, currentConfigurationProvider, null, desiredConfigurationProvider,
+                                                                currentConfigurationProvider, null, desiredConfigurationProvider,
+                                                                null, momentumBasedController, registry);
          endEffectorControlModule.setSwingGains(100.0, 200.0, 200.0, 1.0, 1.0);
          endEffectorControlModule.setHoldGains(100.0, 200.0, 0.1);
          endEffectorControlModule.setToeOffGains(0.0, 200.0, 0.1);
@@ -213,6 +191,6 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
       desiredConfigurationProviders.get(robotSide).set(new FramePose(footFrame));
 
       footEndEffectorControlModules.get(robotSide).doSingularityEscapeBeforeTransitionToNextState();
-      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.UNCONSTRAINED);
+      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.MOVE_STRAIGHT);
    }
 }

@@ -87,8 +87,6 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
    private final SideDependentList<ChangeableConfigurationProvider> initialFootConfigurationProviders = new SideDependentList<ChangeableConfigurationProvider>();
    private final SideDependentList<ChangeableConfigurationProvider> desiredFootConfigurationProviders = new SideDependentList<ChangeableConfigurationProvider>();
-   private final SideDependentList<StraightLinePositionTrajectoryGenerator> swingFootPositionTrajectoryGenerators = new SideDependentList<StraightLinePositionTrajectoryGenerator>();
-   private final SideDependentList<OrientationInterpolationTrajectoryGenerator> swingFootOrientationTrajectoryGenerators = new SideDependentList<OrientationInterpolationTrajectoryGenerator>();
 
    private final ConstantDoubleProvider footTrajectoryTimeProvider = new ConstantDoubleProvider(1.0);
    private final ConstantDoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(2.0);
@@ -285,20 +283,8 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          final ChangeableConfigurationProvider initialConfigurationProvider = new ChangeableConfigurationProvider(new FramePose(foot.getBodyFrame()));
          final ChangeableConfigurationProvider desiredConfigurationProvider = new ChangeableConfigurationProvider(new FramePose(foot.getBodyFrame()));
 
-         StraightLinePositionTrajectoryGenerator positionTrajectoryGenerator = new StraightLinePositionTrajectoryGenerator(bodyName, worldFrame,
-                                                                                  footTrajectoryTimeProvider, initialConfigurationProvider,
-                                                                                  desiredConfigurationProvider, registry);
-
-         OrientationInterpolationTrajectoryGenerator orientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator(bodyName, worldFrame,
-                                                                                         footTrajectoryTimeProvider, initialConfigurationProvider,
-                                                                                         desiredConfigurationProvider, registry);
-
-         PoseTrajectoryGenerator poseTrajectoryGenerator = new WrapperForPositionAndOrientationTrajectoryGenerators(positionTrajectoryGenerator, orientationTrajectoryGenerator);
-
          initialFootConfigurationProviders.put(robotSide, initialConfigurationProvider);
          desiredFootConfigurationProviders.put(robotSide, desiredConfigurationProvider);
-         swingFootPositionTrajectoryGenerators.put(robotSide, positionTrajectoryGenerator);
-         swingFootOrientationTrajectoryGenerators.put(robotSide, orientationTrajectoryGenerator);
 
          DoubleProvider onToesInitialPitchProvider = new ConstantDoubleProvider(0.0);
          DoubleProvider onToesInitialPitchVelocityProvider = new ConstantDoubleProvider(0.0);
@@ -307,8 +293,11 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          DoubleTrajectoryGenerator onToesTrajectory = new ThirdOrderPolynomialTrajectoryGenerator(sideString + bodyName, onToesInitialPitchProvider,
                                                          onToesInitialPitchVelocityProvider, onToesFinalPitchProvider, trajectoryTimeProvider, registry);
 
-         EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(controlDT, foot, jacobianId, robotSide, poseTrajectoryGenerator, null,
-                                                                onToesTrajectory, null, walkingControllerParameters, null, momentumBasedController, registry);
+         EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(controlDT, foot, jacobianId, robotSide, /*poseTrajectoryGenerator,*/ null,
+                                                                onToesTrajectory, null, walkingControllerParameters, 
+                                                                footTrajectoryTimeProvider, initialConfigurationProvider, null, desiredConfigurationProvider,
+                                                                initialConfigurationProvider, null, desiredConfigurationProvider,
+                                                                null, momentumBasedController, registry);
          endEffectorControlModule.setSwingGains(100.0, 200.0, 200.0, 1.0, 1.0);
          endEffectorControlModule.setHoldGains(100.0, 200.0, 0.1);
          endEffectorControlModule.setToeOffGains(0.0, 200.0, 0.1);
@@ -720,7 +709,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       desiredFootConfigurationProviders.get(robotSide).set(new FramePose(footFrame));
 
       footEndEffectorControlModules.get(robotSide).doSingularityEscapeBeforeTransitionToNextState();
-      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.UNCONSTRAINED);
+      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.MOVE_STRAIGHT);
    }
 
    private class LoadBearingVariableChangedListener implements VariableChangedListener
