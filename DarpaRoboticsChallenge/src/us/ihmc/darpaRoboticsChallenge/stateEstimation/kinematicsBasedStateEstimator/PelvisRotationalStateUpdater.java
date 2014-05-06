@@ -4,11 +4,12 @@ import java.util.List;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
+import javax.vecmath.Vector3d;
 
 import us.ihmc.sensorProcessing.stateEstimation.IMUSelectorAndDataConverter;
+import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
+import us.ihmc.sensorProcessing.stateEstimation.OrientationStateRobotModelUpdater;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
-import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.AngularVelocitySensorConfiguration;
-import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.OrientationSensorConfiguration;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -41,32 +42,27 @@ public class PelvisRotationalStateUpdater
    private final ReferenceFrame rootJointFrame;
    private final TwistCalculator twistCalculator;
    
-   private final OrientationSensorConfiguration selectedOrientationSensorConfiguration;
-   private final AngularVelocitySensorConfiguration selectedAngularVelocitySensorConfiguration;
+   private final IMUSensorReadOnly imuProcessedOutput;
    
-   private final ReferenceFrame orientationMeasurementFrame;
-   private final ReferenceFrame angularVelocityMeasurementFrame;
-   private final RigidBody angularVelocityMeasurementLink;
+   private final ReferenceFrame measurementFrame;
+   private final RigidBody measurementLink;
 
-   public PelvisRotationalStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure,
-         List<OrientationSensorConfiguration> orientationSensorConfigurations, List<AngularVelocitySensorConfiguration> angularVelocitySensorConfigurations,
+   public PelvisRotationalStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, List<? extends IMUSensorReadOnly> imuProcessedOutputs,
          YoVariableRegistry parentRegistry)
    {
-      checkNumberOfSensors(orientationSensorConfigurations, angularVelocitySensorConfigurations);
+      checkNumberOfSensors(imuProcessedOutputs);
 
-      selectedOrientationSensorConfiguration = orientationSensorConfigurations.get(0);
-      selectedAngularVelocitySensorConfiguration = angularVelocitySensorConfigurations.get(0);
+      imuProcessedOutput = imuProcessedOutputs.get(0);
       
       rootJoint = inverseDynamicsStructure.getRootJoint();
       rootJointFrame = rootJoint.getFrameAfterJoint();
       twistCalculator = inverseDynamicsStructure.getTwistCalculator();
 
-      this.orientationMeasurementFrame = selectedOrientationSensorConfiguration.getMeasurementFrame();
-      this.angularVelocityMeasurementFrame = selectedAngularVelocitySensorConfiguration.getMeasurementFrame();
-      this.angularVelocityMeasurementLink = selectedAngularVelocitySensorConfiguration.getAngularVelocityMeasurementLink();
+      this.measurementFrame = imuProcessedOutput.getMeasurementFrame();
+      this.measurementLink = imuProcessedOutput.getMeasurementLink();
 
       yoRootJointFrameOrientation = new YoFrameOrientation("estimatedRootJointFrame", worldFrame, registry);
-      measurementFrameAngularVelocity = new YoFrameVector("measFrameAngularVelocity", angularVelocityMeasurementFrame, registry);
+      measurementFrameAngularVelocity = new YoFrameVector("measFrameAngularVelocity", measurementFrame, registry);
       measurementFrameAngularVelocityInWorld = new YoFrameVector("measFrameAngularVelocityWorld", worldFrame, registry);
       
       parentRegistry.addChild(registry);
@@ -74,20 +70,13 @@ public class PelvisRotationalStateUpdater
       angularVelocityRootJointFrameRelativeToWorld = new FrameVector(rootJointFrame);
    }
 
-   private void checkNumberOfSensors(List<OrientationSensorConfiguration> orientationSensorConfigurations,
-         List<AngularVelocitySensorConfiguration> angularVelocitySensorConfigurations)
+   private void checkNumberOfSensors(List<? extends IMUSensorReadOnly> imuProcessedOutputs)
    {
-      if (orientationSensorConfigurations.size() > 1)
-         throw new RuntimeException("We are assuming there is only 1 IMU for right now. Got " + orientationSensorConfigurations.size() + " orientation sensors.");
+      if (imuProcessedOutputs.size() > 1)
+         throw new RuntimeException("We are assuming there is only 1 IMU for right now. Got " + imuProcessedOutputs.size() + " IMU sensors.");
       
-      if (angularVelocitySensorConfigurations.size() > 1)
-         throw new RuntimeException("We are assuming there is only 1 IMU for right now. Got " + angularVelocitySensorConfigurations.size() + " sensors for angular velocity.");
-
-      if (orientationSensorConfigurations.size() == 0)
-         throw new RuntimeException("No sensor set up for the orientation.");
-      
-      if (angularVelocitySensorConfigurations.size() == 0)
-         throw new RuntimeException("No sensor set up for the angular velocity.");
+      if (imuProcessedOutputs.size() == 0)
+         throw new RuntimeException("No sensor set up for the IMU.");
    }
 
    public void initialize()
@@ -108,14 +97,16 @@ public class PelvisRotationalStateUpdater
    private final Transform3D transformFromRootJointFrameToMeasurementFrame = new Transform3D();
 
    private final Matrix3d rotationFromRootJointFrameToWorld = new Matrix3d();
+   private final Matrix3d orientationMeasurement = new Matrix3d();
 
    private void updateRootJointRotation()
    {
       // R_{measurementFrame}^{world}
-      transformFromMeasurementFrameToWorld.set(selectedOrientationSensorConfiguration.getOutputPort().getData());
+      imuProcessedOutput.getOrientationMeasurement(orientationMeasurement);
+      transformFromMeasurementFrameToWorld.set(orientationMeasurement);
 
       // R_{root}^{measurementFrame}
-      rootJointFrame.getTransformToDesiredFrame(transformFromRootJointFrameToMeasurementFrame, orientationMeasurementFrame);
+      rootJointFrame.getTransformToDesiredFrame(transformFromRootJointFrameToMeasurementFrame, measurementFrame);
 
       // R_{root}^{world} = R_{estimationLink}^{world} * R_{root}^{estimationLink}
       transformFromRootJointFrameToWorld.mul(transformFromMeasurementFrameToWorld, transformFromRootJointFrameToMeasurementFrame);
@@ -125,6 +116,8 @@ public class PelvisRotationalStateUpdater
       rootJointFrame.update();
    }
 
+   private final Vector3d angularVocityMeasurement = new Vector3d();
+   
    /** Angular velocity of the measurement link, with respect to world. */
    private final FrameVector angularVelocityMeasurementLinkRelativeToWorld = new FrameVector();
 
@@ -142,7 +135,7 @@ public class PelvisRotationalStateUpdater
    private void updateRootJointTwistAngularPart()
    {
       // T_{rootBody}^{rootBody, measurementLink}
-      twistCalculator.packRelativeTwist(twistRootJointFrameRelativeToMeasurementLink, angularVelocityMeasurementLink, rootJoint.getSuccessor());
+      twistCalculator.packRelativeTwist(twistRootJointFrameRelativeToMeasurementLink, measurementLink, rootJoint.getSuccessor());
       // T_{rootBody}^{rootJointFrame, measurementLink}
       twistRootJointFrameRelativeToMeasurementLink.changeFrame(rootJointFrame);
       // T_{rootJointFrame}^{rootJointFrame, measurementLink}
@@ -152,7 +145,8 @@ public class PelvisRotationalStateUpdater
       twistRootJointFrameRelativeToMeasurementLink.packAngularPart(angularVelocityRootJointFrameRelativeToMeasurementLink);
 
       // omega_{measurementLink}^{measurementFrame, world}
-      angularVelocityMeasurementLinkRelativeToWorld.setIncludingFrame(angularVelocityMeasurementFrame, selectedAngularVelocitySensorConfiguration.getOutputPort().getData()); 
+      imuProcessedOutput.getAngularVelocityMeasurement(angularVocityMeasurement);
+      angularVelocityMeasurementLinkRelativeToWorld.setIncludingFrame(measurementFrame, angularVocityMeasurement); 
       measurementFrameAngularVelocity.set(angularVelocityMeasurementLinkRelativeToWorld);
 
       // omega_{measurementLink}^{rootJointFrame, world}

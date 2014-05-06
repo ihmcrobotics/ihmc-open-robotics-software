@@ -2,7 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.stateEstimation.kinematicsBasedStateEstim
 
 import java.util.LinkedHashMap;
 
-import us.ihmc.sensorProcessing.simulatedSensors.JointAndIMUSensorMap;
+import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -29,31 +29,21 @@ public class JointStateUpdater
    private final RigidBody rootBody;
 
    private final OneDoFJoint[] oneDoFJoints;
-   private final JointAndIMUSensorMap sensorMap;
+   private final SensorOutputMapReadOnly sensorMap;
    private final YoVariableRegistry registry;
    private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> estimatedJointPositions;
 
-   public JointStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, JointAndIMUSensorMap jointAndIMUSensorMap, YoVariableRegistry parentRegistry)
+   public JointStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, SensorOutputMapReadOnly sensorOutputMapReadOnly, YoVariableRegistry parentRegistry)
    {
       twistCalculator = inverseDynamicsStructure.getTwistCalculator();
       spatialAccelerationCalculator = inverseDynamicsStructure.getSpatialAccelerationCalculator();
       rootBody = twistCalculator.getRootBody();
       
-      this.sensorMap = jointAndIMUSensorMap;
+      this.sensorMap = sensorOutputMapReadOnly;
       
       InverseDynamicsJoint[] joints = ScrewTools.computeSupportAndSubtreeJoints(inverseDynamicsStructure.getRootJoint().getSuccessor());
       this.oneDoFJoints = ScrewTools.filterJoints(joints, OneDoFJoint.class);
 
-      for (int i = 0; i < oneDoFJoints.length; i++)
-      {
-         OneDoFJoint oneDoFJoint = oneDoFJoints[i];
-         if (sensorMap.getJointPositionSensorPort(oneDoFJoint) == null)
-            throw new RuntimeException("sensorMap.getJointPositionSensorPort(oneDoFJoint) == null. oneDoFJoint = " + oneDoFJoint);
-         
-         if (sensorMap.getJointVelocitySensorPort(oneDoFJoint) == null)
-            throw new RuntimeException("sensorMap.getJointVelocitySensorPort(oneDoFJoint) == null. oneDoFJoint = " + oneDoFJoint);
-      }
-      
       if (DEBUG)
       {
          estimatedJointPositions = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
@@ -86,8 +76,8 @@ public class JointStateUpdater
       {
          OneDoFJoint oneDoFJoint = oneDoFJoints[i];
          
-         double positionSensorData = sensorMap.getJointPositionSensorPort(oneDoFJoint).getData()[0];
-         double velocitySensorData = sensorMap.getJointVelocitySensorPort(oneDoFJoint).getData()[0];
+         double positionSensorData = sensorMap.getJointPositionProcessedOutput(oneDoFJoint);
+         double velocitySensorData = sensorMap.getJointVelocityProcessedOutput(oneDoFJoint);
 
          if (DEBUG)
             estimatedJointPositions.get(oneDoFJoint).set(positionSensorData);

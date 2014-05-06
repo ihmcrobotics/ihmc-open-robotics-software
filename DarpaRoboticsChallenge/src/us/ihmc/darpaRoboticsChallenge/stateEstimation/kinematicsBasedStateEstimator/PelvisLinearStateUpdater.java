@@ -13,10 +13,9 @@ import us.ihmc.commonWalkingControlModules.sensors.WrenchBasedFootSwitch;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
-import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.AngularVelocitySensorConfiguration;
-import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.LinearAccelerationSensorConfiguration;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -133,11 +132,10 @@ public class PelvisLinearStateUpdater
    private final FramePoint tempPosition = new FramePoint();
    private final FrameVector tempVelocity = new FrameVector();
    
-   public PelvisLinearStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure,
-         List<AngularVelocitySensorConfiguration> angularVelocitySensorConfigurations,
-         List<LinearAccelerationSensorConfiguration> linearAccelerationSensorConfigurations, SideDependentList<WrenchBasedFootSwitch> footSwitches,
-         SideDependentList<ContactablePlaneBody> bipedFeet, double gravitationalAcceleration, DoubleYoVariable yoTime, StateEstimatorParameters stateEstimatorParameters,
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+   public PelvisLinearStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, List<? extends IMUSensorReadOnly> imuProcessedOutputs,
+         SideDependentList<WrenchBasedFootSwitch> footSwitches, SideDependentList<ContactablePlaneBody> bipedFeet, double gravitationalAcceleration,
+         DoubleYoVariable yoTime, StateEstimatorParameters stateEstimatorParameters, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+         YoVariableRegistry parentRegistry)
    {      
       this.estimatorDT = stateEstimatorParameters.getEstimatorDT();
       this.footSwitches = footSwitches;
@@ -164,7 +162,7 @@ public class PelvisLinearStateUpdater
       forceZInPercentThresholdToFilterFoot.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable v)
+         public void variableChanged(YoVariable<?> v)
          {
             double valueClipped = MathTools.clipToMinMax(forceZInPercentThresholdToFilterFoot.getDoubleValue(), 0.0, 0.45);
             forceZInPercentThresholdToFilterFoot.set(valueClipped);
@@ -174,7 +172,7 @@ public class PelvisLinearStateUpdater
       reinitialize.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable v)
+         public void variableChanged(YoVariable<?> v)
          {
             if (reinitialize.getBooleanValue())
                initialize();
@@ -193,7 +191,7 @@ public class PelvisLinearStateUpdater
       kinematicsBasedLinearStateCalculator.setAlphaCenterOfPressure(computeAlphaGivenBreakFrequencyProperly(stateEstimatorParameters.getCoPFilterFreqInHertz(), estimatorDT));
       kinematicsBasedLinearStateCalculator.enableTwistEstimation(stateEstimatorParameters.useTwistForPelvisLinearStateEstimation());
 
-      imuBasedLinearStateCalculator = new PelvisIMUBasedLinearStateCalculator(inverseDynamicsStructure, angularVelocitySensorConfigurations, linearAccelerationSensorConfigurations, estimatorDT, gravitationalAcceleration, registry);
+      imuBasedLinearStateCalculator = new PelvisIMUBasedLinearStateCalculator(inverseDynamicsStructure, imuProcessedOutputs, estimatorDT, gravitationalAcceleration, registry);
       imuBasedLinearStateCalculator.enableEsimationModule(stateEstimatorParameters.useAccelerometerForEstimation());
       imuBasedLinearStateCalculator.useHackishAccelerationIntegration(stateEstimatorParameters.useHackishAccelerationIntegration());
       imuBasedLinearStateCalculator.enableGravityEstimation(stateEstimatorParameters.estimateGravity());
@@ -249,7 +247,7 @@ public class PelvisLinearStateUpdater
          
          delayTimeBeforeTrustingFoot.addVariableChangedListener(new VariableChangedListener()
          {
-            public void variableChanged(YoVariable v)
+            public void variableChanged(YoVariable<?> v)
             {
                int windowSize = (int)(delayTimeBeforeTrustingFoot.getDoubleValue() / estimatorDT);
                hasFootHitTheGroundFiltered.setWindowSize(windowSize);
