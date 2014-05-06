@@ -244,7 +244,9 @@ public class ComposableStateEstimatorEvaluator
          }
       };
       
-      JointAndIMUSensorMap sensorMap = simulatedSensorHolderAndReaderFromRobotFactory.getSensorReader().getJointAndIMUSensorMap();
+      JointAndIMUSensorMap sensorMap = null; // simulatedSensorHolderAndReaderFromRobotFactory.getSensorReader().getJointAndIMUSensorMap();
+      System.err.println("This state estimator is broken! Reimplement me!");
+      System.exit(-1);
       SensorAndEstimatorAssembler sensorAndEstimatorAssembler = new SensorAndEstimatorAssembler(stateEstimatorDataFromControllerSource,
             sensorMap, stateEstimatorParameters, gravitationalAcceleration,
             inverseDynamicsStructure, referenceFrameMap, rigidBodyToIndexMap, registry);

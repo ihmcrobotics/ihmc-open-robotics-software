@@ -14,15 +14,11 @@ import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCStateEstimatorInterface
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
-import us.ihmc.sensorProcessing.simulatedSensors.JointAndIMUSensorMap;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
+import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
+import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimator;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
-import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.AngularVelocitySensorConfiguration;
-import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.LinearAccelerationSensorConfiguration;
-import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.OrientationSensorConfiguration;
-import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.SensorConfigurationFactory;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -63,23 +59,18 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    private final SideDependentList<WrenchBasedFootSwitch> footSwitches;
 
    public DRCKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, StateEstimatorParameters stateEstimatorParameters,
-         JointAndIMUSensorMap jointAndIMUSensorMap, double gravitationalAcceleration, SideDependentList<WrenchBasedFootSwitch> footSwitches,
+         SensorOutputMapReadOnly sensorOutputMapReadOnly, double gravitationalAcceleration, SideDependentList<WrenchBasedFootSwitch> footSwitches,
          SideDependentList<ContactablePlaneBody> bipedFeet, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       this.estimatorDT = stateEstimatorParameters.getEstimatorDT();
-      
-      jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, jointAndIMUSensorMap, registry);
 
-      SensorNoiseParameters sensorNoiseParametersForEstimator = stateEstimatorParameters.getSensorNoiseParameters();
-      SensorConfigurationFactory sensorConfigurationFactory = new SensorConfigurationFactory(sensorNoiseParametersForEstimator, gravitationalAcceleration);
-      
-      List<OrientationSensorConfiguration> orientationSensorConfigurations = sensorConfigurationFactory.createOrientationSensorConfigurations(jointAndIMUSensorMap.getOrientationSensors());
-      List<AngularVelocitySensorConfiguration> angularVelocitySensorConfigurations = sensorConfigurationFactory.createAngularVelocitySensorConfigurations(jointAndIMUSensorMap.getAngularVelocitySensors());
-      List<LinearAccelerationSensorConfiguration> linearAccelerationSensorConfigurations = sensorConfigurationFactory.createLinearAccelerationSensorConfigurations(jointAndIMUSensorMap.getLinearAccelerationSensors());
-      
-      pelvisRotationalStateUpdater = new PelvisRotationalStateUpdater(inverseDynamicsStructure, orientationSensorConfigurations, angularVelocitySensorConfigurations, registry);
+      jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorOutputMapReadOnly, registry);
 
-      pelvisLinearStateUpdater = new PelvisLinearStateUpdater(inverseDynamicsStructure, angularVelocitySensorConfigurations, linearAccelerationSensorConfigurations, footSwitches, bipedFeet,
+      List<? extends IMUSensorReadOnly> imuProcessedOutputs = sensorOutputMapReadOnly.getIMUProcessedOutputs();
+
+      pelvisRotationalStateUpdater = new PelvisRotationalStateUpdater(inverseDynamicsStructure, imuProcessedOutputs, registry);
+
+      pelvisLinearStateUpdater = new PelvisLinearStateUpdater(inverseDynamicsStructure, imuProcessedOutputs, footSwitches, bipedFeet,
             gravitationalAcceleration, yoTime, stateEstimatorParameters, dynamicGraphicObjectsListRegistry, registry);
       
 
@@ -118,15 +109,15 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       visualizeMeasurementFrames = visualizeMeasurementFrames && dynamicGraphicObjectsListRegistry != null;
       
       if (visualizeMeasurementFrames)
-         setupDynamicGraphicObjects(dynamicGraphicObjectsListRegistry, orientationSensorConfigurations);
+         setupDynamicGraphicObjects(dynamicGraphicObjectsListRegistry, imuProcessedOutputs);
    }
 
    private void setupDynamicGraphicObjects(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
-         List<OrientationSensorConfiguration> orientationSensorConfigurations)
+         List<? extends IMUSensorReadOnly> imuProcessedOutputs)
    {
-      for (int i = 0; i < orientationSensorConfigurations.size(); i++)
+      for (int i = 0; i < imuProcessedOutputs.size(); i++)
       {
-         DynamicGraphicReferenceFrame dynamicGraphicMeasurementFrame = new DynamicGraphicReferenceFrame(orientationSensorConfigurations.get(i).getMeasurementFrame(), registry, 1.0);
+         DynamicGraphicReferenceFrame dynamicGraphicMeasurementFrame = new DynamicGraphicReferenceFrame(imuProcessedOutputs.get(i).getMeasurementFrame(), registry, 1.0);
          dynamicGraphicMeasurementFrames.add(dynamicGraphicMeasurementFrame);
       }
       dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects("imuFrame", dynamicGraphicMeasurementFrames);

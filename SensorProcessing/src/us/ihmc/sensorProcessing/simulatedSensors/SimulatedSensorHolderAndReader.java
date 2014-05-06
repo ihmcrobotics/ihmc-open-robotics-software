@@ -6,8 +6,9 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
+import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
-import us.ihmc.sensorProcessing.stateEstimation.JointAndIMUSensorDataSource;
 import us.ihmc.utilities.ForceSensorDefinition;
 import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.maps.ObjectObjectMap;
@@ -50,7 +51,7 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
 
    private final ObjectObjectMap<ForceSensorDefinition, WrenchCalculatorInterface> forceTorqueSensors = new ObjectObjectMap<ForceSensorDefinition, WrenchCalculatorInterface>();
 
-   private final JointAndIMUSensorDataSource sensorProcessing;
+   private final SensorProcessing sensorProcessing;
 
    private ForceSensorDataHolder forceSensorDataHolder;
 
@@ -67,7 +68,7 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
 
    public SimulatedSensorHolderAndReader(SensorFilterParameters sensorFilterParameters, StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, SensorNoiseParameters sensorNoiseParameters, YoVariableRegistry simulationRegistry)
    {
-      sensorProcessing = new JointAndIMUSensorDataSource(stateEstimatorSensorDefinitions, sensorFilterParameters, simulationRegistry);
+      sensorProcessing = new SensorProcessing(stateEstimatorSensorDefinitions, sensorFilterParameters, sensorNoiseParameters, registry);
       
       this.estimatorDT = sensorFilterParameters.getEstimatorDT();
       this.estimateDTinNs = TimeTools.secondsToNanoSeconds(estimatorDT);
@@ -125,9 +126,9 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
       forceTorqueSensors.add(forceSensorDefinition, groundContactPointBasedWrenchCalculator);
    }
 
-   public JointAndIMUSensorMap getJointAndIMUSensorMap()
+   public SensorOutputMapReadOnly getSensorOutputMapReadOnly()
    {
-      return sensorProcessing.getSensorMap();
+      return sensorProcessing;
    }
 
    public void run()

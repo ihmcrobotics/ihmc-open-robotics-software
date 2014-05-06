@@ -1,6 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.stateEstimation.kinematicsBasedStateEstimator;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -9,10 +10,12 @@ import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
-import us.ihmc.sensorProcessing.simulatedSensors.JointAndIMUSensorMap;
+import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCSimulatedSensorNoiseParameters;
+import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
+import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorFilterParameters;
+import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
-import us.ihmc.sensorProcessing.stateEstimation.JointAndIMUSensorDataSource;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -45,11 +48,10 @@ public class JointStateUpdaterTest
 
       ArrayList<RevoluteJoint> jointsWithPositionSensor = new ArrayList<RevoluteJoint>(joints);
       ArrayList<RevoluteJoint> jointsWithVelocitySensor = new ArrayList<RevoluteJoint>(joints);
-      JointAndIMUSensorDataSource jointAndIMUSensorDataSource = createJointSensorDataSource(registry, jointsWithPositionSensor, jointsWithVelocitySensor);
+      SensorProcessing sensorMap = createJointSensorDataSource(registry, jointsWithPositionSensor, jointsWithVelocitySensor);
       
       try
       {
-         JointAndIMUSensorMap sensorMap = jointAndIMUSensorDataSource.getSensorMap();
          new JointStateUpdater(inverseDynamicsStructure, sensorMap, registry);
       }
       catch (Exception e)
@@ -57,66 +59,6 @@ public class JointStateUpdaterTest
          fail("Could not create JointStateUpdater. StackTrace:");
          e.printStackTrace();
       }
-   }
-
-   @Test
-   public void testConstructorNotEnoughPositionSensors()
-   {
-      YoVariableRegistry registry = new YoVariableRegistry("Blop");
-      
-      Vector3d[] jointAxes = {X, Y, Z, Z, X, Z, Z, X, Y, Y};
-      ScrewTestTools.RandomFloatingChain randomFloatingChain = new ScrewTestTools.RandomFloatingChain(random, jointAxes);
-      ArrayList<RevoluteJoint> joints = new ArrayList<RevoluteJoint>(randomFloatingChain.getRevoluteJoints());
-      
-      FullInverseDynamicsStructure inverseDynamicsStructure = createFullInverseDynamicsStructure(randomFloatingChain, joints);
-
-      ArrayList<RevoluteJoint> jointsWithPositionSensor = new ArrayList<RevoluteJoint>(joints.subList(0, joints.size() - 1));
-      ArrayList<RevoluteJoint> jointsWithVelocitySensor = new ArrayList<RevoluteJoint>(joints);
-      JointAndIMUSensorDataSource jointAndIMUSensorDataSource = createJointSensorDataSource(registry, jointsWithPositionSensor, jointsWithVelocitySensor);
-      
-      JointStateUpdater jointStateUpdater;
-      try
-      {
-         JointAndIMUSensorMap sensorMap = jointAndIMUSensorDataSource.getSensorMap();
-         jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorMap, registry);
-      }
-      catch (Exception e)
-      {
-         jointStateUpdater = null;
-      }
-      
-      if (jointStateUpdater != null)
-         fail("RuntimeException expected, not enough joint position sensors to create the JointStateUpdater.");
-   }
-
-   @Test
-   public void testConstructorNotEnoughVelocitySensors()
-   {
-      YoVariableRegistry registry = new YoVariableRegistry("Blop");
-      
-      Vector3d[] jointAxes = {X, Y, Z, Z, X, Z, Z, X, Y, Y};
-      ScrewTestTools.RandomFloatingChain randomFloatingChain = new ScrewTestTools.RandomFloatingChain(random, jointAxes);
-      ArrayList<RevoluteJoint> joints = new ArrayList<RevoluteJoint>(randomFloatingChain.getRevoluteJoints());
-      
-      FullInverseDynamicsStructure inverseDynamicsStructure = createFullInverseDynamicsStructure(randomFloatingChain, joints);
-
-      ArrayList<RevoluteJoint> jointsWithPositionSensor = new ArrayList<RevoluteJoint>(joints);
-      ArrayList<RevoluteJoint> jointsWithVelocitySensor = new ArrayList<RevoluteJoint>(joints.subList(0, joints.size() - 1));
-      JointAndIMUSensorDataSource jointAndIMUSensorDataSource = createJointSensorDataSource(registry, jointsWithPositionSensor, jointsWithVelocitySensor);
-      
-      JointStateUpdater jointStateUpdater;
-      try
-      {
-         JointAndIMUSensorMap sensorMap = jointAndIMUSensorDataSource.getSensorMap();
-         jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorMap, registry);
-      }
-      catch (Exception e)
-      {
-         jointStateUpdater = null;
-      }
-      
-      if (jointStateUpdater != null)
-         fail("RuntimeException expected, not enough joint velocity sensors to create the JointStateUpdater.");
    }
 
    @Test
@@ -133,45 +75,44 @@ public class JointStateUpdaterTest
       // Test constructor is working for normal case
       ArrayList<RevoluteJoint> jointsWithPositionSensor = new ArrayList<RevoluteJoint>(joints);
       ArrayList<RevoluteJoint> jointsWithVelocitySensor = new ArrayList<RevoluteJoint>(joints);
-      JointAndIMUSensorDataSource jointAndIMUSensorDataSource = createJointSensorDataSource(registry, jointsWithPositionSensor, jointsWithVelocitySensor);
+      SensorProcessing sensorMap = createJointSensorDataSource(registry, jointsWithPositionSensor, jointsWithVelocitySensor);
       
-      JointAndIMUSensorMap sensorMap = jointAndIMUSensorDataSource.getSensorMap();
       JointStateUpdater jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorMap, registry);
       
-      fillSensorsWithRandomPositionsAndVelocities(jointsWithPositionSensor, jointsWithVelocitySensor, jointAndIMUSensorDataSource);
+      fillSensorsWithRandomPositionsAndVelocities(jointsWithPositionSensor, jointsWithVelocitySensor, sensorMap);
       
       jointStateUpdater.initialize();
       
-      readAndCheckJointPositions(jointsWithPositionSensor, jointAndIMUSensorDataSource);
-      readAndCheckJointVelocities(jointsWithVelocitySensor, jointAndIMUSensorDataSource);
+      readAndCheckJointPositions(jointsWithPositionSensor, sensorMap);
+      readAndCheckJointVelocities(jointsWithVelocitySensor, sensorMap);
       
       for (int i = 0; i < 1000; i++)
       {
-         fillSensorsWithRandomPositionsAndVelocities(jointsWithPositionSensor, jointsWithVelocitySensor, jointAndIMUSensorDataSource);
+         fillSensorsWithRandomPositionsAndVelocities(jointsWithPositionSensor, jointsWithVelocitySensor, sensorMap);
          
          jointStateUpdater.updateJointState();
          
-         readAndCheckJointPositions(jointsWithPositionSensor, jointAndIMUSensorDataSource);
-         readAndCheckJointVelocities(jointsWithVelocitySensor, jointAndIMUSensorDataSource);
+         readAndCheckJointPositions(jointsWithPositionSensor, sensorMap);
+         readAndCheckJointVelocities(jointsWithVelocitySensor, sensorMap);
       }
    }
 
-   private static void readAndCheckJointVelocities(ArrayList<RevoluteJoint> jointsWithVelocitySensor, JointAndIMUSensorDataSource jointAndIMUSensorDataSource)
+   private static void readAndCheckJointVelocities(ArrayList<RevoluteJoint> jointsWithVelocitySensor, SensorOutputMapReadOnly sensorMap)
    {
       for (OneDoFJoint joint : jointsWithVelocitySensor)
       {
-         double sensorValue = jointAndIMUSensorDataSource.getSensorMap().getJointVelocitySensorPort(joint).getData()[0];
+         double sensorValue = sensorMap.getJointVelocityProcessedOutput(joint);
          double robotJointValue = joint.getQd();
          
          assertEquals(sensorValue, robotJointValue, EPS);
       }
    }
 
-   private static void readAndCheckJointPositions(ArrayList<RevoluteJoint> jointsWithPositionSensor, JointAndIMUSensorDataSource jointAndIMUSensorDataSource)
+   private static void readAndCheckJointPositions(ArrayList<RevoluteJoint> jointsWithPositionSensor, SensorOutputMapReadOnly sensorMap)
    {
       for (OneDoFJoint joint : jointsWithPositionSensor)
       {
-         double sensorValue = jointAndIMUSensorDataSource.getSensorMap().getJointPositionSensorPort(joint).getData()[0];
+         double sensorValue = sensorMap.getJointPositionProcessedOutput(joint);
          double robotJointValue = joint.getQ();
          
          assertEquals(sensorValue, robotJointValue, EPS);
@@ -179,30 +120,32 @@ public class JointStateUpdaterTest
    }
 
    private static void fillSensorsWithRandomPositionsAndVelocities(ArrayList<RevoluteJoint> jointsWithPositionSensor,
-         ArrayList<RevoluteJoint> jointsWithVelocitySensor, JointAndIMUSensorDataSource jointAndIMUSensorDataSource)
+         ArrayList<RevoluteJoint> jointsWithVelocitySensor, SensorProcessing sensorMap)
    {
       for (OneDoFJoint joint : jointsWithPositionSensor)
       {
          double randPosition = RandomTools.generateRandomDouble(random, -5000.0, 5000.0);
-         jointAndIMUSensorDataSource.setJointPositionSensorValue(joint, randPosition);
+         sensorMap.setJointPositionSensorValue(joint, randPosition);
       }
       
       for (OneDoFJoint joint : jointsWithVelocitySensor)
       {
          double randVelocity = RandomTools.generateRandomDouble(random, -5000.0, 5000.0);
-         jointAndIMUSensorDataSource.setJointVelocitySensorValue(joint, randVelocity);
+         sensorMap.setJointVelocitySensorValue(joint, randVelocity);
       }
    }
 
-   private static JointAndIMUSensorDataSource createJointSensorDataSource(YoVariableRegistry registry, ArrayList<RevoluteJoint> jointsWithPositionSensor,
+   private static SensorProcessing createJointSensorDataSource(YoVariableRegistry registry, ArrayList<RevoluteJoint> jointsWithPositionSensor,
          ArrayList<RevoluteJoint> jointsWithVelocitySensor)
    {
       StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions = createSensorDefinitions(jointsWithPositionSensor, jointsWithVelocitySensor);
       
       SensorFilterParameters sensorFilterParameters = createParametersForNoFiltering();
       
-      JointAndIMUSensorDataSource jointAndIMUSensorDataSource = new JointAndIMUSensorDataSource(stateEstimatorSensorDefinitions, sensorFilterParameters, registry);
-      return jointAndIMUSensorDataSource;
+      SensorNoiseParameters sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createNoiseParametersForEstimatorJerryTuningSeptember2013();
+      
+      SensorProcessing sensorProcessing = new SensorProcessing(stateEstimatorSensorDefinitions, sensorFilterParameters, sensorNoiseParameters, registry);
+      return sensorProcessing;
    }
 
    private static SensorFilterParameters createParametersForNoFiltering()
