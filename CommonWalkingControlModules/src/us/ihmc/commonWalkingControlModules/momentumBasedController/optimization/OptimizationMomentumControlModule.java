@@ -8,6 +8,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.NormOps;
 
+import sun.security.action.LoadLibraryAction;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.ActiveSetQPMomentumOptimizer;
@@ -38,6 +39,7 @@ import us.ihmc.utilities.screwTheory.SpatialForceVector;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.utilities.screwTheory.Wrench;
 
+import com.sun.jna.Native;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
@@ -55,7 +57,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
    public enum QPSolverFlavor
    {
-      CVX_NULL, EIGEN_NULL, EIGEN_DIRECT, EIGEN_ACTIVESET_NULL, EIGEN_ACTIVESET_DIRECT
+      CVX_NULL, EIGEN_NULL, EIGEN_DIRECT, EIGEN_ACTIVESET_NULL, EIGEN_ACTIVESET_DIRECT, EIGEN_ACTIVESET_DIRECT_JNA
    };
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
@@ -110,20 +112,19 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       //setup solvers
       momentumOptimizers.put(QPSolverFlavor.CVX_NULL, new CVXMomentumOptimizerAdapter(nDoF));
       ActiveSetQPMomentumOptimizer eigenQP = 
-                 new ActiveSetQPMomentumOptimizer(nDoF)
+                 new ActiveSetQPMomentumOptimizer(nDoF, false)
                  {
-                  private static final long serialVersionUID = 1L;
-
                   public int solve() throws NoConvergenceException
                     {
-                       resetActiveSet();
+                       resetActiveSetNative();
                        return super.solve();
                     }
                  };
       momentumOptimizers.put(QPSolverFlavor.EIGEN_NULL, eigenQP);
       momentumOptimizers.put(QPSolverFlavor.EIGEN_DIRECT, eigenQP);
-      momentumOptimizers.put(QPSolverFlavor.EIGEN_ACTIVESET_NULL, new ActiveSetQPMomentumOptimizer(nDoF));
-      momentumOptimizers.put(QPSolverFlavor.EIGEN_ACTIVESET_DIRECT, new ActiveSetQPMomentumOptimizer(nDoF));
+      momentumOptimizers.put(QPSolverFlavor.EIGEN_ACTIVESET_NULL, new ActiveSetQPMomentumOptimizer(nDoF, false));
+      momentumOptimizers.put(QPSolverFlavor.EIGEN_ACTIVESET_DIRECT, new ActiveSetQPMomentumOptimizer(nDoF, false));
+      momentumOptimizers.put(QPSolverFlavor.EIGEN_ACTIVESET_DIRECT_JNA, new ActiveSetQPMomentumOptimizer(nDoF, true));
 
       //initialize default solver
       final QPSolverFlavor defaultSolver = QPSolverFlavor.EIGEN_ACTIVESET_DIRECT;
@@ -194,6 +195,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       
       switch(currentQPSolver.getEnumValue())
       {
+      case EIGEN_ACTIVESET_DIRECT_JNA:
       case EIGEN_ACTIVESET_DIRECT:
       case EIGEN_DIRECT:
          return compute(contactStates, upcomingSupportLeg,false);
@@ -213,6 +215,8 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       if(currentQPSolver.getEnumValue()!=requestedQPSolver.getEnumValue())
       {
          momentumOptimizer = momentumOptimizers.get(requestedQPSolver.getEnumValue());
+         if(momentumOptimizer instanceof ActiveSetQPMomentumOptimizer)
+            ((ActiveSetQPMomentumOptimizer)momentumOptimizer).loadNativeLibraries();
          currentQPSolver.set(requestedQPSolver.getEnumValue());
       }
    }
@@ -360,6 +364,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       }
       catch (NoConvergenceException e)
       {
+         qpSolverIteration.set(e.getIter());
          if (!hasNotConvergedInPast.getBooleanValue())
          {
             e.printStackTrace();
