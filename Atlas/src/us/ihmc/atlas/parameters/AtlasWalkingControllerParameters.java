@@ -408,7 +408,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    
    public double getSwingHeightMaxForPushRecoveryTrajectory()
    {
-      return 0.15;
+      return 0.1;
    }
    
    public double getSwingKpZ()
