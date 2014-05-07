@@ -5,12 +5,16 @@ import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.simulationTesting.ReflectionSimulationComparer;
 import com.yobotics.simulationconstructionset.util.simulationTesting.SimpleRewindabilityComparisonScript;
 import com.yobotics.simulationconstructionset.util.simulationTesting.SimulationComparisonScript;
+
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
 import us.ihmc.utilities.MemoryTools;
 
 import javax.vecmath.Vector3d;
+
 import java.lang.reflect.Field;
 import java.util.Collection;
 
@@ -35,6 +39,8 @@ public class ReflectionSimulationComparerTest
    public void testTwoEmptySimulations()
    {
       ReflectionSimulationComparer comparer = new ReflectionSimulationComparer(Integer.MAX_VALUE, Integer.MAX_VALUE);
+      comparer.addFieldToIgnore(getStackTraceAtInitializationField());
+
       
       SimulationConstructionSet scs0 = new SimulationConstructionSet(new Robot("Null"), false, 100);
       SimulationConstructionSet scs1 = new SimulationConstructionSet(new Robot("Null"), false, 100);
@@ -54,10 +60,26 @@ public class ReflectionSimulationComparerTest
       }
       
       comparer = new ReflectionSimulationComparer(Integer.MAX_VALUE, Integer.MAX_VALUE);
+      
       comparer.addFieldsToIgnore(differingFields);
+      comparer.addFieldToIgnore(getStackTraceAtInitializationField());
+      
       simulationsAreTheSame = comparer.compare(scs0, scs1);
      
       assertTrue(simulationsAreTheSame);
+   }
+   
+   public Field getStackTraceAtInitializationField()
+   {
+      try
+      {
+         return YoVariable.class.getDeclaredField("stackTraceAtInitialization");
+      }
+      catch (NoSuchFieldException | SecurityException e)
+      {
+         Assert.fail("StackTraceAtInitialization has been renamed.");
+         return null;
+      }
    }
    
    
