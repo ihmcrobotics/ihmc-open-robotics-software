@@ -250,7 +250,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    
    public double getSwingHeightMaxForPushRecoveryTrajectory()
    {
-      return 0.15;
+      return 0.1;
    }
 
    public double getFinalToeOffPitchAngularVelocity()
