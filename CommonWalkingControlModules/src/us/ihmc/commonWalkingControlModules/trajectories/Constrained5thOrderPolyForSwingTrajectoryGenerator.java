@@ -34,7 +34,6 @@ public class Constrained5thOrderPolyForSwingTrajectoryGenerator
    
    private final double stepTime;
    private double initialTime;
-   private double previousTime;
    
    double maxHeightOfSwingFoot;
    
@@ -45,6 +44,7 @@ public class Constrained5thOrderPolyForSwingTrajectoryGenerator
    private final ReferenceFrame referenceFrame;
    
    private final YoVariableRegistry registry;
+   private boolean isInitialized;
    
    public Constrained5thOrderPolyForSwingTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, double initialTime,
          DoubleProvider stepTimeProvider,PositionProvider initialPositionProvider, PositionProvider finalDesiredPositionProvider, 
@@ -74,7 +74,6 @@ public class Constrained5thOrderPolyForSwingTrajectoryGenerator
       
       this.stepTime = stepTimeProvider.getValue();
       this.initialTime = initialTime;
-      this.previousTime = initialTime;
       
       this.walkingControllerParameters = walkingControllerParameters;
       
@@ -83,18 +82,41 @@ public class Constrained5thOrderPolyForSwingTrajectoryGenerator
    
    public void initialize()
    {
-      setInitialAndFinalPositionsAndVelocities(); 
+	   if(!isInitialized)
+	  {
+		   setInitialAndFinalPositionsAndVelocities();
+	  }
+      double nominalMaxTrajectoryHeight;
+      boolean steppingDown = false;
       
       if(walkingControllerParameters != null)
       {
-    	  maxHeightOfSwingFoot = walkingControllerParameters.getSwingHeightMaxForPushRecoveryTrajectory();  
+    	  nominalMaxTrajectoryHeight = walkingControllerParameters.getSwingHeightMaxForPushRecoveryTrajectory();
+    	  if(initialPosition1D.getDoubleValue() - finalDesiredPosition1D.getDoubleValue()>0)
+    	  {
+    		  steppingDown = true;
+    	  }
+    	  
+	      if(!steppingDown)
+	      {
+		      double stepHeightDifference = Math.abs(Math.max(initialPosition1D.getDoubleValue(), finalDesiredPosition1D.getDoubleValue()) - 
+		    		  Math.min(initialPosition1D.getDoubleValue(), finalDesiredPosition1D.getDoubleValue()));
+		
+		
+		   
+		      maxHeightOfSwingFoot = initialPosition1D.getDoubleValue() + nominalMaxTrajectoryHeight + stepHeightDifference;
+	      }
+	      else
+	      {
+	    	  maxHeightOfSwingFoot = initialPosition1D.getDoubleValue() + nominalMaxTrajectoryHeight;
+	      }
       }
       else
       {
-    	  maxHeightOfSwingFoot = 0.15; //Default value, needed for generic test without being 
-    	  							   //robot specific(i.e. needing a robot models walkingControllerParameters.
+    	  maxHeightOfSwingFoot = 0.15;
       }
-      swingFootTrajectory.setParams(initialPosition1D.getDoubleValue(), initialPosition1D.getDoubleValue()+maxHeightOfSwingFoot, finalDesiredPosition1D.getDoubleValue(), 
+      
+      swingFootTrajectory.setParams(initialPosition1D.getDoubleValue(), maxHeightOfSwingFoot, finalDesiredPosition1D.getDoubleValue(), 
                                     finalDesiredVelocity1D.getDoubleValue(), initialTime, stepTime);
    }
 
@@ -111,6 +133,11 @@ public class Constrained5thOrderPolyForSwingTrajectoryGenerator
    public double getDesiredAcceleration()
    {
       return desiredAcceleration1D.getDoubleValue();
+   }
+   
+   public void setIsInitialized(boolean value)
+   {
+	   isInitialized = value;
    }
    
    private void setInitialAndFinalPositionsAndVelocities()
@@ -134,11 +161,11 @@ public class Constrained5thOrderPolyForSwingTrajectoryGenerator
       
       initialPosition3D.setX(initialPosition3D.getX());
       initialPosition3D.setY(initialPosition3D.getY());
-      initialPosition3D.setY(initialPosition3D.getZ());
+      initialPosition3D.setZ(initialPosition3D.getZ());
       
       finalDesiredPosition3D.setX(finalDesiredPosition3D.getX());
       finalDesiredPosition3D.setY(finalDesiredPosition3D.getY());
-      finalDesiredPosition3D.setY(finalDesiredPosition3D.getZ());
+      finalDesiredPosition3D.setZ(finalDesiredPosition3D.getZ());
       
       finalDesiredVelocity3D.setX(finalDesiredVelocity3D.getX());
       finalDesiredVelocity3D.setY(finalDesiredVelocity3D.getY());
@@ -156,8 +183,6 @@ public class Constrained5thOrderPolyForSwingTrajectoryGenerator
 	   desiredPosition1D.set(swingFootTrajectory.getPosition());
 	   desiredVelocity1D.set(swingFootTrajectory.getVelocity());
 	   desiredAcceleration1D.set(swingFootTrajectory.getAcceleration());
-	   
-	   previousTime = time;
       
    }
 }
