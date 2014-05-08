@@ -88,27 +88,38 @@ public class Constrained5thOrderPolyForSwingTrajectoryGenerator
 	  }
       double nominalMaxTrajectoryHeight;
       boolean steppingDown = false;
+      boolean steppingUp = false;
+      
+      double stepUpFraction = 0.2;
+      double stepDownFraction = 0.15;
       
       if(walkingControllerParameters != null)
       {
     	  nominalMaxTrajectoryHeight = walkingControllerParameters.getSwingHeightMaxForPushRecoveryTrajectory();
-    	  if(initialPosition1D.getDoubleValue() - finalDesiredPosition1D.getDoubleValue()>0)
+    	  if(initialPosition1D.getDoubleValue() - finalDesiredPosition1D.getDoubleValue()>0.03)
     	  {
     		  steppingDown = true;
     	  }
+    	  else if(finalDesiredPosition1D.getDoubleValue() - initialPosition1D.getDoubleValue() > 0.03)
+    	  {
+    		  steppingUp = true;
+    	  }
     	  
-	      if(!steppingDown)
+    	  double stepHeightDifference = Math.abs(Math.max(initialPosition1D.getDoubleValue(), finalDesiredPosition1D.getDoubleValue()) - 
+	    		  Math.min(initialPosition1D.getDoubleValue(), finalDesiredPosition1D.getDoubleValue()));
+    	  
+	      if(steppingUp)
 	      {
-		      double stepHeightDifference = Math.abs(Math.max(initialPosition1D.getDoubleValue(), finalDesiredPosition1D.getDoubleValue()) - 
-		    		  Math.min(initialPosition1D.getDoubleValue(), finalDesiredPosition1D.getDoubleValue()));
-		
-		
-		   
-		      maxHeightOfSwingFoot = initialPosition1D.getDoubleValue() + nominalMaxTrajectoryHeight + stepHeightDifference;
+	    	  maxHeightOfSwingFoot = initialPosition1D.getDoubleValue() + nominalMaxTrajectoryHeight + stepHeightDifference + stepUpFraction * stepHeightDifference;
+	      }
+	      else if(steppingDown)
+	      {
+	    	  maxHeightOfSwingFoot = initialPosition1D.getDoubleValue() + nominalMaxTrajectoryHeight + stepDownFraction * stepHeightDifference;
 	      }
 	      else
 	      {
-	    	  maxHeightOfSwingFoot = initialPosition1D.getDoubleValue() + nominalMaxTrajectoryHeight;
+			   
+	    	  maxHeightOfSwingFoot = initialPosition1D.getDoubleValue() + nominalMaxTrajectoryHeight + stepHeightDifference;
 	      }
       }
       else
