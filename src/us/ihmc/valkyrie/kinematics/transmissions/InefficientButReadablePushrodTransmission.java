@@ -24,8 +24,8 @@ public class InefficientButReadablePushrodTransmission
    private final double length = 0.1049655;    // futek link length (m)
    private final double lengthSquared = length * length;
 
-   private final Vector3d rod5 = new Vector3d(-0.0215689, 0.04128855, 0.0);    // position where rod 5 passes through bone frame plane. x is forward. y is to the left. z is up. (m)
-   private final Vector3d rod6 = new Vector3d(-0.0215689, -0.04128855, 0.0);    // position where rod 6 passes through bone frame plane. x is forward. y is to the left. z is up. (m)
+   private final Vector3d rod5 = new Vector3d(-0.0215689, -0.04128855, 0.0);    // position where rod 5 passes through bone frame plane. x is forward. y is to the left. z is up. (m)
+   private final Vector3d rod6 = new Vector3d(-0.0215689, 0.04128855, 0.0);    // position where rod 6 passes through bone frame plane. x is forward. y is to the left. z is up. (m)
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -37,8 +37,8 @@ public class InefficientButReadablePushrodTransmission
    private final Transform3D pitchTransform3D = new Transform3D();
    private final Transform3D rollTransform3D = new Transform3D();
 
-   private final FramePoint b5InFootFrame = new FramePoint(footFrame, -0.0364, 0.0355, 0.0176);    // position vector of futek link base for actuator 5 side in foot frame (m)
-   private final FramePoint b6InFootFrame = new FramePoint(footFrame, -0.0364, -0.0355, 0.0176);    // position vector of futek link base for actuator 6 side in foot frame (m)
+   private final FramePoint b5InFootFrame = new FramePoint(footFrame, -0.0364, -0.0355, 0.0176);    // position vector of futek link base for actuator 5 side in foot frame (m)
+   private final FramePoint b6InFootFrame = new FramePoint(footFrame, -0.0364, 0.0355, 0.0176);    // position vector of futek link base for actuator 6 side in foot frame (m)
 
    private final FramePoint b5InBoneFrame = new FramePoint();
    private final FramePoint b6InBoneFrame = new FramePoint();
@@ -138,11 +138,11 @@ public class InefficientButReadablePushrodTransmission
       // Solve for t5, t6 in bone frame:
 
       double xDiff = rod5.getX() - b5InBoneFrame.getX();
-      double yDiff = rod5.getX() - b5InBoneFrame.getX();
+      double yDiff = rod5.getY() - b5InBoneFrame.getY();
       double t5zInBoneFrame = b5InBoneFrame.getZ() + Math.sqrt(lengthSquared - xDiff * xDiff - yDiff * yDiff);
 
       xDiff = rod6.getX() - b6InBoneFrame.getX();
-      yDiff = rod6.getX() - b6InBoneFrame.getX();
+      yDiff = rod6.getY() - b6InBoneFrame.getY();
       double t6zInBoneFrame = b6InBoneFrame.getZ() + Math.sqrt(lengthSquared - xDiff * xDiff - yDiff * yDiff);
 
       t5InBoneFrame.setIncludingFrame(boneFrame, rod5);
@@ -179,7 +179,7 @@ public class InefficientButReadablePushrodTransmission
       jRoll5.set(tempCrossVector.getX());
 
       tempRVector.setIncludingFrame(b6InFootFrame);
-      tempCrossVector.cross(tempRVector, f6VectorInFootFrame);
+//      tempCrossVector.cross(tempRVector, f6VectorInFootFrame);
       jRoll6.set(tempCrossVector.getX());
 
       jacobianToPack[0][0] = jPitch5.getDoubleValue();
