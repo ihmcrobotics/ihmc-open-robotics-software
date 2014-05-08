@@ -47,7 +47,7 @@ public class AtlasRobotModel implements DRCRobotModel
       selectedVersion = atlasVersion;
       this.runningOnRealRobot = runningOnRealRobot;
       this.sensorInformation = new AtlasSensorInformation();
-      this.headlessLoader = DRCRobotSDFLoader.loadDRCRobot(selectedVersion.getResourceDirectories(), selectedVersion.getSdfFileAsStream(), true);
+      this.headlessLoader = DRCRobotSDFLoader.loadDRCRobot(new String[]{}, selectedVersion.getSdfFileAsStream(), true);
    }
 
    @Override
