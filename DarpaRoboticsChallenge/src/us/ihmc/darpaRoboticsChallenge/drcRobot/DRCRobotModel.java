@@ -30,7 +30,7 @@ public interface DRCRobotModel
    
    public DRCRobotContactPointParamaters getContactPointParamaters(boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsToFeetOnly);
 
-   public JaxbSDFLoader getJaxbSDFLoader(boolean headless);
+   public JaxbSDFLoader getJaxbSDFLoader();
    
    public DRCRobotPhysicalProperties getPhysicalProperties();
 

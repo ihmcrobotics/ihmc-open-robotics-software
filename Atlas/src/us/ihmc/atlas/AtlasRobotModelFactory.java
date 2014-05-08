@@ -8,7 +8,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 
 import com.martiansoftware.jsap.FlaggedOption;
@@ -21,7 +20,7 @@ public class AtlasRobotModelFactory
    private static String[] AvailableRobotModels = { "ATLAS_NO_HANDS_ADDED_MASS", "ATLAS_SANDIA_HANDS",
          "ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS", "DRC_NO_HANDS", "DRC_HANDS", "DRC_EXTENDED_HANDS", "DRC_HOOKS", "DRC_TASK_HOSE", "DRC_EXTENDED_HOOKS" };
 
-   public static AtlasRobotModel createDRCRobotModel(String robotModelAsString)
+   public static AtlasRobotModel createDRCRobotModel(String robotModelAsString, boolean runningOnRealRobot, boolean headless)
    {
       robotModelAsString = robotModelAsString.toUpperCase().trim();
       try
@@ -29,7 +28,7 @@ public class AtlasRobotModelFactory
          AtlasRobotVersion atlasRobotVersion = AtlasRobotVersion.valueOf(robotModelAsString);
          if (atlasRobotVersion != null)
          {
-            return new AtlasRobotModel(atlasRobotVersion, DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT);
+            return new AtlasRobotModel(atlasRobotVersion, runningOnRealRobot, headless);
          }
       }
       catch (Exception e)
@@ -89,7 +88,7 @@ public class AtlasRobotModelFactory
       else if (selectedOption == JOptionPane.OK_OPTION)
       {
          String groundTypeString = robotTypeComboBox.getSelectedItem().toString();
-         AtlasRobotModel model = createDRCRobotModel(groundTypeString);
+         AtlasRobotModel model = createDRCRobotModel(groundTypeString, false, false);
          return model;
       }
       else
@@ -98,7 +97,7 @@ public class AtlasRobotModelFactory
       }
    }
 
-   public static AtlasRobotModel selectModelFromFlag(String[] args)
+   public static AtlasRobotModel selectModelFromFlag(String[] args, boolean runningOnRealRobot, boolean headless)
    {
       // Add flag to set robot model
       JSAP jsap = new JSAP();
@@ -111,7 +110,7 @@ public class AtlasRobotModelFactory
          JSAPResult config = jsap.parse(args);
 
          if (config.success())
-            return createDRCRobotModel(config.getString("robotModel"));
+            return createDRCRobotModel(config.getString("robotModel"), runningOnRealRobot, headless);
       }
       catch (JSAPException e)
       {

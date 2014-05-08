@@ -84,7 +84,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
       DRCRobotJointMap jointMap = robotModel.getJointMap();
       DRCRobotPhysicalProperties physicalProperties = robotModel.getPhysicalProperties();
       
-      JaxbSDFLoader jaxbSDFLoader = robotModel.getJaxbSDFLoader(false);
+      JaxbSDFLoader jaxbSDFLoader = robotModel.getJaxbSDFLoader();
       SDFFullRobotModel fullRobotModel = jaxbSDFLoader.createFullRobotModel(jointMap);
       SDFRobot robot = jaxbSDFLoader.createRobot(jointMap, false);
       ReferenceFrames referenceFrames = new ReferenceFrames(fullRobotModel, jointMap, physicalProperties.getAnkleHeight());
@@ -170,7 +170,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
       DRCRobotJointMap jointMap = robotModel.getJointMap();
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       DRCRobotPhysicalProperties physicalProperties = robotModel.getPhysicalProperties();
-      JaxbSDFLoader jaxbSDFLoader = robotModel.getJaxbSDFLoader(false);
+      JaxbSDFLoader jaxbSDFLoader = robotModel.getJaxbSDFLoader();
       SDFFullRobotModel fullRobotModel = jaxbSDFLoader.createFullRobotModel(jointMap);
       SDFRobot robot = jaxbSDFLoader.createRobot(jointMap, false);
       

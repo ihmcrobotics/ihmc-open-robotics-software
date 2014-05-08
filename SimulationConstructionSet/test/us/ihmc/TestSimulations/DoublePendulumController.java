@@ -41,7 +41,7 @@ public class DoublePendulumController implements MultiThreadedRobotControlElemen
       doublePendulum.getJ1().setQ(0.1);
    }
 
-   public void read()
+   public void read(double time)
    {
       q_j1.set(doublePendulum.getJ1().getQ().getDoubleValue());
       qd_j1.set(doublePendulum.getJ1().getQD().getDoubleValue());

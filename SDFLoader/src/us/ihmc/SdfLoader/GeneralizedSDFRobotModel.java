@@ -142,4 +142,9 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
       return new SDFGraphics3DObject(joint.getChild().getVisuals(), resourceDirectories, visualTransform);
    }
 
+   public void addForceSensor(String sensorName, String parentJointName, Transform3D transformToParentJoint)
+   {
+      SDFForceSensor sdfForceSensor = new SDFForceSensor(sensorName, transformToParentJoint);
+      joints.get(sensorName).addForceSensor(sdfForceSensor);
+   }
 }

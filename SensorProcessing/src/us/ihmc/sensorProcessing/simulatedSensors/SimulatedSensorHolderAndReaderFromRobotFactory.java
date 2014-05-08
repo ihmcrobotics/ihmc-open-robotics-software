@@ -33,16 +33,16 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
    private final double estimateDT;
    private final SensorNoiseParameters sensorNoiseParameters;
    
-   private final ArrayList<IMUMount> imuMounts;
-   private final ArrayList<WrenchCalculatorInterface> groundContactPointBasedWrenchCalculators;
+   private final ArrayList<IMUMount> imuMounts = new ArrayList<IMUMount>();
+   private final ArrayList<WrenchCalculatorInterface> groundContactPointBasedWrenchCalculators = new ArrayList<WrenchCalculatorInterface>();
 
    private SimulatedSensorHolderAndReader simulatedSensorHolderAndReader;
    private StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions;
    private final SensorFilterParameters sensorFilterParameters;
    
    public SimulatedSensorHolderAndReaderFromRobotFactory(Robot robot, SensorNoiseParameters sensorNoiseParameters,
-         SensorFilterParameters sensorFilterParameters, ArrayList<IMUMount> imuMounts,
-         ArrayList<WrenchCalculatorInterface> groundContactPointBasedWrenchCalculators, YoVariableRegistry estimatorRegistry,
+         SensorFilterParameters sensorFilterParameters, String[] imuSensorsToUse,
+         YoVariableRegistry estimatorRegistry,
          YoVariableRegistry simulationRegistry)
    {
       this.registry = estimatorRegistry;
@@ -51,11 +51,33 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
       this.sensorFilterParameters = sensorFilterParameters;
       
       this.estimateDT = sensorFilterParameters.getEstimatorDT();
-      this.imuMounts = imuMounts;
-      this.groundContactPointBasedWrenchCalculators = groundContactPointBasedWrenchCalculators;
+
+      if(imuSensorsToUse != null)
+      {
+         ArrayList<IMUMount> allIMUMounts = new ArrayList<IMUMount>();
+         robot.getIMUMounts(allIMUMounts);
+         
+         for (IMUMount imuMount : allIMUMounts)
+         {
+            // Only add the main one now. Not the head one.
+            //                   if (imuMount.getName().equals("head_imu_sensor")) imuMounts.add(imuMount);
+            for (String imuSensorName : imuSensorsToUse)
+            {
+               if (imuMount.getName().equals(imuSensorName))
+               {
+                  imuMounts.add(imuMount);
+               }
+            }
+         }         
+      }
+      else
+      {
+         robot.getIMUMounts(imuMounts);
+      }
+      robot.getForceSensors(groundContactPointBasedWrenchCalculators);
    }
 
-   public void build(SixDoFJoint rootJoint, IMUDefinition[] imuDefinition, YoVariableRegistry parentRegistry)
+   public void build(SixDoFJoint rootJoint, IMUDefinition[] imuDefinition, ForceSensorDefinition[] forceSensorDefinitions, YoVariableRegistry parentRegistry)
    {
       ArrayList<Joint> rootJoints = robot.getRootJoints();
       if (rootJoints.size() > 1)
@@ -72,12 +94,12 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
          
          this.stateEstimatorSensorDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getStateEstimatorSensorDefinitions();
          Map<IMUMount, IMUDefinition> imuDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getIMUDefinitions();
-         Map<WrenchCalculatorInterface, ForceSensorDefinition> forceSensorDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getForceSensorDefinitions();
+         Map<WrenchCalculatorInterface, ForceSensorDefinition> forceSensors = stateEstimatorSensorDefinitionsFromRobotFactory.getForceSensorDefinitions();
          this.simulatedSensorHolderAndReader = new SimulatedSensorHolderAndReader(sensorFilterParameters, stateEstimatorSensorDefinitions, sensorNoiseParameters, registry); 
          
          createAndAddOrientationSensors(imuDefinitions, registry);
          createAndAddAngularVelocitySensors(imuDefinitions, registry);
-         createAndAddForceSensors(forceSensorDefinitions, registry);
+         createAndAddForceSensors(forceSensors, registry);
          createAndAddLinearAccelerationSensors(imuDefinitions, registry);
          createAndAddOneDoFPositionAndVelocitySensors(scsToInverseDynamicsJointMap);
       }

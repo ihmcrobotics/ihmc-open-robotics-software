@@ -1,6 +1,7 @@
 package us.ihmc.SdfLoader;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
@@ -26,6 +27,9 @@ public class SDFJointHolder
    private final Transform3D transformFromChildLink;
    private double damping = 0.0;
    private double friction = 0.0;
+   
+   // Extra data
+   private final ArrayList<SDFForceSensor> forceSensors = new ArrayList<>();
    
    // Set by loader
    private SDFLinkHolder parent;
@@ -310,4 +314,17 @@ public class SDFJointHolder
    {
       return axisInJointFrame;
    }
+
+   
+   // Temporary hack to get force sensors nicely in the code
+   public ArrayList<SDFForceSensor> getForceSensors()
+   {
+      return forceSensors;
+   }
+   
+   public void addForceSensor(SDFForceSensor forceSensor)
+   {
+      forceSensors.add(forceSensor);
+   }
+   
 }

@@ -1,6 +1,5 @@
 package us.ihmc.atlas;
 
-import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCPushRecoveryTrack;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.graphics3DAdapter.GroundProfile;
@@ -11,7 +10,7 @@ import com.yobotics.simulationconstructionset.util.ground.BumpyGroundProfile;
 
 public class AtlasPushRecoveryTrack 
 {
-	private static final DRCRobotModel defaultModelForGraphicSelector = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT);
+	private static final DRCRobotModel defaultModelForGraphicSelector = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, false, false);
 	private static final boolean USE_BUMPY_GROUND = false;
 	private final static double forceDuration = 100;
 	
@@ -20,7 +19,7 @@ public class AtlasPushRecoveryTrack
 		  DRCRobotModel model = null;
 		  final double groundHeight = 0.0;
 		  
-	      model = AtlasRobotModelFactory.selectModelFromFlag(args);
+	      model = AtlasRobotModelFactory.selectModelFromFlag(args, false, false);
 	      
 	      if (model == null)
 	         model = AtlasRobotModelFactory.selectModelFromGraphicSelector(defaultModelForGraphicSelector);

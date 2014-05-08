@@ -18,8 +18,6 @@ import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -58,9 +56,9 @@ public class StandaloneAtlasHeadLoopKinematicsCalibrator
    public StandaloneAtlasHeadLoopKinematicsCalibrator(AtlasRobotVersion atlasVersion, boolean runningOnRealRobot)
    {
       //load robot
-	  DRCRobotModel robotModel = new AtlasRobotModel(atlasVersion, runningOnRealRobot);
+	  DRCRobotModel robotModel = new AtlasRobotModel(atlasVersion, runningOnRealRobot, runningOnRealRobot);
       DRCRobotJointMap jointMap = robotModel.getJointMap();
-      JaxbSDFLoader robotLoader = robotModel.getJaxbSDFLoader(false);
+      JaxbSDFLoader robotLoader = robotModel.getJaxbSDFLoader();
       fullRobotModel = robotLoader.createFullRobotModel(jointMap);
       joints = fullRobotModel.getOneDoFJoints();
 
@@ -238,9 +236,8 @@ public class StandaloneAtlasHeadLoopKinematicsCalibrator
    public static void main(String[] arg) throws InterruptedException, IOException
    {
 	  final AtlasRobotVersion ATLAS_ROBOT_MODEL = AtlasRobotVersion.DRC_NO_HANDS;
-	  final boolean RUNNING_ON_REAL_ROBOT = DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT;
 	  
-      StandaloneAtlasHeadLoopKinematicsCalibrator calib = new StandaloneAtlasHeadLoopKinematicsCalibrator(ATLAS_ROBOT_MODEL, RUNNING_ON_REAL_ROBOT);
+      StandaloneAtlasHeadLoopKinematicsCalibrator calib = new StandaloneAtlasHeadLoopKinematicsCalibrator(ATLAS_ROBOT_MODEL, false);
 //      calib.loadData("data/calibration20131208");
       calib.loadData("data/armCalibratoin20131209/calibration_right");
 //      calib.loadData("data/chessboard_joints_20131204");

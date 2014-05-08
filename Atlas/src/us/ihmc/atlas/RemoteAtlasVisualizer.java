@@ -26,7 +26,7 @@ public class RemoteAtlasVisualizer
       System.out.println("Connecting to host " + host);
       
       DRCRobotJointMap jointMap = robotModel.getJointMap();
-      JaxbSDFLoader robotLoader = robotModel.getJaxbSDFLoader(false);
+      JaxbSDFLoader robotLoader = robotModel.getJaxbSDFLoader();
 //      SDFRobot robot = robotLoader.createRobot(jointMap, false);
 //      SliderBoardFactory sliderBoardFactory = GainControllerSliderBoard.getFactory();
 //      SliderBoardFactory sliderBoardFactory = WalkControllerSliderBoard.getFactory();
@@ -62,7 +62,7 @@ public class RemoteAtlasVisualizer
       {
          String host = config.getString("host");
          int port = config.getInt("port");
-         DRCRobotModel model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"));
+         DRCRobotModel model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), false, false);
          
          new RemoteAtlasVisualizer(host, port, bufferSize, model);         
       }

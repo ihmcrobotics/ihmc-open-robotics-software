@@ -50,8 +50,7 @@ public class ComposableStateEstimatorEvaluator
       StateEstimatorEvaluatorRobot robot = new StateEstimatorEvaluatorRobot();
 
       InverseDynamicsJointsFromSCSRobotGenerator generator = new InverseDynamicsJointsFromSCSRobotGenerator(robot);
-      ArrayList<IMUMount> imuMounts = new ArrayList<IMUMount>();
-      robot.getIMUMounts(imuMounts);
+      
 
       FullInverseDynamicsStructure inverseDynamicsStructure = generator.getInverseDynamicsStructure();
 
@@ -73,9 +72,9 @@ public class ComposableStateEstimatorEvaluator
             jointVelocitySlopTimeForBacklashCompensation, controlDT, useTwoPolesForIMUFiltering, doFiniteDifferenceForJointVelocities);
       
       SensorReaderFactory simulatedSensorHolderAndReaderFromRobotFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(robot,
-            simulatedSensorNoiseParameters, sensorFilterParameters, imuMounts, new ArrayList<WrenchCalculatorInterface>(), registry, registry);
+            simulatedSensorNoiseParameters, sensorFilterParameters, null, registry, registry);
       
-      simulatedSensorHolderAndReaderFromRobotFactory.build(inverseDynamicsStructure.getRootJoint(), null, registry);
+      simulatedSensorHolderAndReaderFromRobotFactory.build(inverseDynamicsStructure.getRootJoint(), null, null, registry);
       
       SensorReader simulatedSensorHolderAndReader = simulatedSensorHolderAndReaderFromRobotFactory.getSensorReader();
       

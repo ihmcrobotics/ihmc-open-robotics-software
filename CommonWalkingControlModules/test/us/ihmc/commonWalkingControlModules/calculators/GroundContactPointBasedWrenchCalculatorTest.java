@@ -4,14 +4,17 @@ import com.yobotics.simulationconstructionset.GroundContactPoint;
 import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 import com.yobotics.simulationconstructionset.PinJoint;
 import com.yobotics.simulationconstructionset.Robot;
+import com.yobotics.simulationconstructionset.simulatedSensors.GroundContactPointBasedWrenchCalculator;
 import com.yobotics.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
+
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
-import us.ihmc.sensorProcessing.simulatedSensors.GroundContactPointBasedWrenchCalculator;
+
 import us.ihmc.utilities.Axis;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,7 +44,7 @@ public class GroundContactPointBasedWrenchCalculatorTest
       robot.update();
       
       
-      calculator = new GroundContactPointBasedWrenchCalculator(contactPoints, joint);
+      calculator = new GroundContactPointBasedWrenchCalculator(joint.getName(), contactPoints, joint);
       
       
       point0.setForce(new Vector3d(0.0, 0.0, 1.0));
@@ -62,7 +65,7 @@ public class GroundContactPointBasedWrenchCalculatorTest
       robot.update();
       
 
-      calculator = new GroundContactPointBasedWrenchCalculator(contactPoints, joint2);
+      calculator = new GroundContactPointBasedWrenchCalculator(joint.getName(), contactPoints, joint2);
       point0.setForce(new Vector3d(-1.0, 1.0, 0.0));
       point1.setForce(new Vector3d(-1.0, 1.0, 0.0));
       

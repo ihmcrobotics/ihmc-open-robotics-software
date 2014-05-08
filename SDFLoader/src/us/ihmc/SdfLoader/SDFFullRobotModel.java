@@ -21,6 +21,7 @@ import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Camera;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.IMU;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.ForceSensorDefinition;
 import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.InertiaTools;
 import us.ihmc.utilities.Pair;
@@ -67,6 +68,7 @@ public class SDFFullRobotModel implements FullRobotModel
    private final SideDependentList<RigidBody> feet = new SideDependentList<RigidBody>();
    private final SideDependentList<RigidBody> hands = new SideDependentList<RigidBody>();
    private final ArrayList<IMUDefinition> imuDefinitions = new ArrayList<IMUDefinition>();
+   private final ArrayList<ForceSensorDefinition> forceSensorDefinitions = new ArrayList<ForceSensorDefinition>();
    private final HashMap<String, ReferenceFrame> cameraFrames = new HashMap<String, ReferenceFrame>();
    private final HashMap<String, ReferenceFrame> lidarBaseFrames = new HashMap<String, ReferenceFrame>();
    private final HashMap<String, Transform3D> lidarBaseToSensorTransform = new HashMap<String, Transform3D>();
@@ -132,6 +134,7 @@ public class SDFFullRobotModel implements FullRobotModel
          ReferenceFrame soleFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(robotSide.getCamelCaseNameForStartOfExpression() + "Sole", getEndEffectorFrame(robotSide, LimbName.LEG), soleToFootTransform);
          soleFrames.put(robotSide, soleFrame); 
       }
+      
    }
    
    public String getModelName()
@@ -311,6 +314,13 @@ public class SDFFullRobotModel implements FullRobotModel
       }
       
       addSensorDefinitions(inverseDynamicsJoint, childLink);
+      
+
+      for(SDFForceSensor sdfForceSensor : joint.getForceSensors())
+      {
+         ForceSensorDefinition forceSensorDefinition = new ForceSensorDefinition(sdfForceSensor.getName(), joint.getName(), sdfForceSensor.getTransform());
+         forceSensorDefinitions.add(forceSensorDefinition);
+      }
 
       for (SDFJointHolder sdfJoint : childLink.getChildren())
       {
@@ -461,6 +471,11 @@ public class SDFFullRobotModel implements FullRobotModel
       IMUDefinition[] imuDefinitions = new IMUDefinition[this.imuDefinitions.size()];
       this.imuDefinitions.toArray(imuDefinitions);
       return imuDefinitions;
+   }
+   
+   public ForceSensorDefinition[] getForceSensorDefinitions()
+   {
+      return this.forceSensorDefinitions.toArray(new ForceSensorDefinition[this.forceSensorDefinitions.size()]);
    }
    
    public ReferenceFrame getCameraFrame(String name)

@@ -58,7 +58,7 @@ public class AtlasNetworkProcessor
          DRCRobotModel model;
          try
          {
-            model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"));
+            model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT, true);
          }
          catch (IllegalArgumentException e)
          {

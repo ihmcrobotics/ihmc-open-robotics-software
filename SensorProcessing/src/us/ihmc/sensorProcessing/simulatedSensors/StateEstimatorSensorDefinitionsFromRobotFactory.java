@@ -25,11 +25,11 @@ public class StateEstimatorSensorDefinitionsFromRobotFactory
    private final StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions;
 
    public StateEstimatorSensorDefinitionsFromRobotFactory(SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap, 
-           ArrayList<IMUMount> imuMounts, ArrayList<WrenchCalculatorInterface> groundContactPointBasedWrenchCalculators)
+           ArrayList<IMUMount> imuMounts, ArrayList<WrenchCalculatorInterface> forceSensors)
    {
       this.scsToInverseDynamicsJointMap = scsToInverseDynamicsJointMap;
       this.imuDefinitions = generateIMUDefinitions(imuMounts);
-      this.forceSensorDefinitions = generateForceSensorDefinitions(groundContactPointBasedWrenchCalculators);
+      this.forceSensorDefinitions = generateForceSensorDefinitions(forceSensors);
 
       
       stateEstimatorSensorDefinitions = new StateEstimatorSensorDefinitions();
@@ -57,7 +57,7 @@ public class StateEstimatorSensorDefinitionsFromRobotFactory
       for(WrenchCalculatorInterface groundContactPointBasedWrenchCalculator : groundContactPointBasedWrenchCalculators)
       {
          OneDegreeOfFreedomJoint forceTorqueSensorJoint = groundContactPointBasedWrenchCalculator.getJoint();
-         ForceSensorDefinition sensorDefinition = new ForceSensorDefinition(forceTorqueSensorJoint.getName(), forceTorqueSensorJoint.getName(), new Transform3D());
+         ForceSensorDefinition sensorDefinition = new ForceSensorDefinition(groundContactPointBasedWrenchCalculator.getName(), forceTorqueSensorJoint.getName(), new Transform3D());
          forceSensorDefinitions.put(groundContactPointBasedWrenchCalculator, sensorDefinition);
          
       }

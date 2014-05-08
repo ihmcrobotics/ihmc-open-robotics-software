@@ -1,17 +1,32 @@
 package us.ihmc.atlas.drcRobot;
 
-import com.yobotics.simulationconstructionset.*;
-import com.yobotics.simulationconstructionset.time.GlobalTimer;
-import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
-import com.yobotics.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
-import org.junit.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.bambooTools.BambooTools;
-import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.utilities.AsyncContinuousExecutor;
@@ -20,14 +35,14 @@ import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.math.MathTools;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.ExternalForcePoint;
+import com.yobotics.simulationconstructionset.Robot;
+import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import com.yobotics.simulationconstructionset.YoVariable;
+import com.yobotics.simulationconstructionset.time.GlobalTimer;
+import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
+import com.yobotics.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
 
 /**
  * Created by dstephen on 2/11/14.
@@ -36,7 +51,6 @@ public class AtlasSDFVerificationTest
 {
    private static final boolean KEEP_SCS_UP = false;
    private static final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.DRC_NO_HANDS;
-   private static final boolean RUNNING_ON_REAL_ROBOT = DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT;
 
    private static final boolean CREATE_MOVIE = BambooTools.doMovieCreation();
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
@@ -89,9 +103,9 @@ public class AtlasSDFVerificationTest
    {
       BambooTools.reportTestStartedMessage();
 
-      DRCRobotModel selectedModel = new AtlasRobotModel(ATLAS_ROBOT_VERSION, RUNNING_ON_REAL_ROBOT);
+      DRCRobotModel selectedModel = new AtlasRobotModel(ATLAS_ROBOT_VERSION, false, false);
       DRCRobotJointMap jointMap = selectedModel.getJointMap();
-      JaxbSDFLoader loader = selectedModel.getJaxbSDFLoader(false);
+      JaxbSDFLoader loader = selectedModel.getJaxbSDFLoader();
       SDFRobot sdfRobot = loader.createRobot(jointMap, true);
 
       pinRobotInAir(sdfRobot);

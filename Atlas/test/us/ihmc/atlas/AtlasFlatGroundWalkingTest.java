@@ -19,7 +19,7 @@ public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
       BambooTools.reportTestStartedMessage();
 
       String runName = "AtlasFlatGroundWalkingTest";
-      DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, false);
+      DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, false, false);
       
       setupAndTestFlatGroundSimulationTrack(robotModel, runName);
    }

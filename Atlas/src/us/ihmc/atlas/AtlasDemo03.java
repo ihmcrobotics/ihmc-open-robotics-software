@@ -38,7 +38,7 @@ public class AtlasDemo03 extends DRCDemo03
 
          if (config.success())
          {
-            model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"));
+            model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), false, false);
          }
          else
          {

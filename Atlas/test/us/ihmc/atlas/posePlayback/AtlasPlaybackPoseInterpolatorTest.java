@@ -13,8 +13,6 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceReader;
-import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.posePlayback.PlaybackPoseInterpolatorTest;
@@ -25,7 +23,7 @@ public class AtlasPlaybackPoseInterpolatorTest extends PlaybackPoseInterpolatorT
    @Override
    public DRCRobotModel getRobotModel()
    {
-      return new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT);
+      return new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, false, false);
    }
    
    //this is not a jUnit test. This is a playable pose sequence. Start the sim and press play. Remove @ignore and run locally. 
@@ -36,7 +34,7 @@ public class AtlasPlaybackPoseInterpolatorTest extends PlaybackPoseInterpolatorT
       DRCRobotModel robotModel = getRobotModel();
 
       DRCRobotJointMap jointMap = robotModel.getJointMap();
-      JaxbSDFLoader sdfLoader = robotModel.getJaxbSDFLoader(false);
+      JaxbSDFLoader sdfLoader = robotModel.getJaxbSDFLoader();
       
       SDFFullRobotModel fullRobotModel = sdfLoader.createFullRobotModel(jointMap);
       SDFRobot sdfRobot = sdfLoader.createRobot(jointMap, false);

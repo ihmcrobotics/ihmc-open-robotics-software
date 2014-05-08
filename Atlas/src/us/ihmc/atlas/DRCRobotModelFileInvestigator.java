@@ -20,7 +20,7 @@ public class DRCRobotModelFileInvestigator
          PrintWriter printWriter = new PrintWriter(file);
 
          DRCRobotJointMap jointMap = model.getJointMap();
-         JaxbSDFLoader robotLoader = model.getJaxbSDFLoader(false);
+         JaxbSDFLoader robotLoader = model.getJaxbSDFLoader();
          final SDFRobot robot = robotLoader.createRobot(jointMap, false);
 
          printWriter.println(robot);
@@ -37,7 +37,7 @@ public class DRCRobotModelFileInvestigator
    {
       for (String st : AtlasRobotModelFactory.getAvailableRobotModels())
       {
-         writeModelFile(AtlasRobotModelFactory.createDRCRobotModel(st));
+         writeModelFile(AtlasRobotModelFactory.createDRCRobotModel(st, false, false));
       }
    }
 
