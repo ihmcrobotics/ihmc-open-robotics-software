@@ -75,7 +75,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
       }
       else
       {
-         this.loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSdfFileAsStream(), true);
+         this.loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSdfFileAsStream(), false);
       }
       
       SDFJointNameMap jointMap = getJointMap();
