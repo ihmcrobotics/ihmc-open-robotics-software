@@ -34,6 +34,7 @@ public class AtlasRobotModelFactory
       }
       catch (Exception e)
       {
+         e.printStackTrace();
       }
       throw new IllegalArgumentException(robotModelAsString + " Not a valid robot model");
    }
