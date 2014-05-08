@@ -29,7 +29,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
       footForceSensorTareOffsets = new SideDependentList<SpatialForceVector>(leftFootForceSensorTareOffset_20140406, rightFootForceSensorTareOffset_20140406);
    }
 
-   private static final SideDependentList<Transform3D> transformFromAnkleURDFFrameToZUpFrames = new SideDependentList<>();
+   public static final SideDependentList<Transform3D> transformFromAnkleURDFFrameToZUpFrames = new SideDependentList<>();
    static
    {
       Transform3D leftTransform = new Transform3D();
