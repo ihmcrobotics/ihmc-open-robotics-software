@@ -35,7 +35,7 @@ public abstract class PlaybackPoseInterpolatorTest implements MultiRobotTestInte
       DRCRobotModel robotModel = getRobotModel();
 
       DRCRobotJointMap jointMap = robotModel.getJointMap();
-      JaxbSDFLoader sdfLoader = robotModel.getJaxbSDFLoader(false);
+      JaxbSDFLoader sdfLoader = robotModel.getJaxbSDFLoader();
       
       SDFFullRobotModel fullRobotModel = sdfLoader.createFullRobotModel(jointMap);
       SDFRobot sdfRobot = sdfLoader.createRobot(jointMap, false);
@@ -53,7 +53,7 @@ public abstract class PlaybackPoseInterpolatorTest implements MultiRobotTestInte
       DRCRobotModel robotModel = getRobotModel();
 
       DRCRobotJointMap jointMap = robotModel.getJointMap();
-      JaxbSDFLoader sdfLoader = robotModel.getJaxbSDFLoader(false);
+      JaxbSDFLoader sdfLoader = robotModel.getJaxbSDFLoader();
       
       SDFFullRobotModel fullRobotModel = sdfLoader.createFullRobotModel(jointMap);
       SDFRobot sdfRobot = sdfLoader.createRobot(jointMap, false);
@@ -90,7 +90,7 @@ public abstract class PlaybackPoseInterpolatorTest implements MultiRobotTestInte
       DRCRobotModel robotModel = getRobotModel();
 
       DRCRobotJointMap jointMap = robotModel.getJointMap();
-      JaxbSDFLoader sdfLoader = robotModel.getJaxbSDFLoader(false);
+      JaxbSDFLoader sdfLoader = robotModel.getJaxbSDFLoader();
       
       SDFFullRobotModel fullRobotModel = sdfLoader.createFullRobotModel(jointMap);
       SDFRobot sdfRobot = sdfLoader.createRobot(jointMap, false);
@@ -106,7 +106,7 @@ public abstract class PlaybackPoseInterpolatorTest implements MultiRobotTestInte
       DRCRobotModel robotModel = getRobotModel();
 
       DRCRobotJointMap jointMap = robotModel.getJointMap();
-      JaxbSDFLoader sdfLoader = robotModel.getJaxbSDFLoader(false);
+      JaxbSDFLoader sdfLoader = robotModel.getJaxbSDFLoader();
       
       SDFFullRobotModel fullRobotModel = sdfLoader.createFullRobotModel(jointMap);
       SDFRobot sdfRobot = sdfLoader.createRobot(jointMap, false);

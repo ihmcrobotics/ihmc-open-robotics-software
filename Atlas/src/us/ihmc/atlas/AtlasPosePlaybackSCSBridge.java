@@ -5,7 +5,6 @@ import java.io.IOException;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.posePlayback.PosePlaybackSCSBridge;
@@ -33,7 +32,7 @@ public class AtlasPosePlaybackSCSBridge
 
          if (config.success())
          {
-            model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"));
+            model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), false, false);
          }
          else
          {
@@ -51,7 +50,7 @@ public class AtlasPosePlaybackSCSBridge
       }
 
       DRCRobotJointMap jointMap = model.getJointMap();
-      JaxbSDFLoader loader = model.getJaxbSDFLoader(false);
+      JaxbSDFLoader loader = model.getJaxbSDFLoader();
       SDFRobot sdfRobot = loader.createRobot(jointMap, false);
       FullRobotModel fullRobotModel = loader.createFullRobotModel(jointMap);
       SDFFullRobotModel fullRobotModelForSlider = loader.createFullRobotModel(jointMap);

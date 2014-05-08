@@ -104,7 +104,7 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
       }
       
       //TODO: Clean this up!
-      JaxbSDFLoader robotLoader = robotModel.getJaxbSDFLoader(false);
+      JaxbSDFLoader robotLoader = robotModel.getJaxbSDFLoader();
       DRCRobotJointMap jointMap = robotModel.getJointMap();
       GeneralizedSDFRobotModel generalizedSDFRobotModel = robotLoader.getGeneralizedSDFRobotModel(jointMap.getModelName());
       

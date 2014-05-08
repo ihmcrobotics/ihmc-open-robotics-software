@@ -52,9 +52,9 @@ public class KinematicCalibrationHeadLoopResidualTest
    PlanarCalibrationTarget calibGrid = FactoryPlanarCalibrationTarget.gridChess(
          DetectChessboardInKinematicsData.boardWidth, DetectChessboardInKinematicsData.boardHeight, 0.03);
 
-   private static final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT);
+   private static final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, false, false);
    DRCRobotJointMap jointMap = robotModel.getJointMap();
-   JaxbSDFLoader robotLoader = robotModel.getJaxbSDFLoader(false);
+   JaxbSDFLoader robotLoader = robotModel.getJaxbSDFLoader();
    SDFFullRobotModel fullRobotModel = robotLoader.createFullRobotModel(jointMap);
 
    Transform3D imageToCamera = new Transform3D(new double[]{0, 0, 1, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 1});

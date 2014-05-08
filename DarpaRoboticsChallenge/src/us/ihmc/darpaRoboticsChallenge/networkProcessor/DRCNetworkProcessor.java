@@ -159,7 +159,7 @@ public class DRCNetworkProcessor
       networkingManager = new DRCNetworkProcessorNetworkingManager(this.fieldComputerClient, timestampProvider, robotModel);
 
       //DRCRobotModel robotModel = DRCLocalConfigParameters.robotModelToUse;
-      JaxbSDFLoader loader = robotModel.getJaxbSDFLoader(true);
+      JaxbSDFLoader loader = robotModel.getJaxbSDFLoader();
       fullRobotModel = loader.createFullRobotModel(robotModel.getJointMap());
       
       DRCRobotDataReceiver drcRobotDataReceiver = new DRCRobotDataReceiver(robotModel, fullRobotModel);

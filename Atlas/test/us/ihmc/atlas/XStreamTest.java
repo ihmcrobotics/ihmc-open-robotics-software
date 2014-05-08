@@ -101,7 +101,7 @@ public class XStreamTest
       XStream xStream = new XStream();
       ObjectOutputStream out = xStream.createObjectOutputStream(writer);
       //XXX: fix hard-coded robot model
-      SerializerFactory serializerFactory = new UplinkSerializerFactory(new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT));
+      SerializerFactory serializerFactory = new UplinkSerializerFactory(new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, false, false));
       ArrayList<Serializer<?>> serializers = serializerFactory.getSerializers();
       
       ArrayList<Object> serializedObjects = new ArrayList<Object>();

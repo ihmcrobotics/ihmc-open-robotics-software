@@ -1,8 +1,6 @@
 package us.ihmc.atlas;
 
 import us.ihmc.SdfLoader.JaxbSDFLoader;
-import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 
@@ -12,9 +10,9 @@ public class AtlasSDFViewer
 {
    public static void main(String[] args)
    {
-     DRCRobotModel selectedModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT);
+     DRCRobotModel selectedModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, false, false);
       DRCRobotJointMap jointMap = selectedModel.getJointMap();
-      JaxbSDFLoader loader = selectedModel.getJaxbSDFLoader(false);
+      JaxbSDFLoader loader = selectedModel.getJaxbSDFLoader();
       System.out.println(loader.createRobot(jointMap, true).getName());
       
       SimulationConstructionSet scs = new SimulationConstructionSet(loader.createRobot(jointMap, false));

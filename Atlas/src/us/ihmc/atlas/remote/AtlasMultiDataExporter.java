@@ -77,9 +77,9 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
       String[] jointNamesInOrder;
       String[] vars = null;
       int numberOfEntries = 0;
-      DRCRobotModel model = new AtlasRobotModel(ATLAS_ROBOT_VERSION, RUNNING_ON_REAL_ROBOT);
+      DRCRobotModel model = new AtlasRobotModel(ATLAS_ROBOT_VERSION, false, false);
       DRCRobotJointMap jointMap = model.getJointMap();
-      JaxbSDFLoader loader = model.getJaxbSDFLoader(false);
+      JaxbSDFLoader loader = model.getJaxbSDFLoader();
    	  boolean showGUIAndSaveSCSVideo = true;
       
       String[] cameraName;

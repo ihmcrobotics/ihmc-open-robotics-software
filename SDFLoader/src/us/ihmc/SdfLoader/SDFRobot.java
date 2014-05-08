@@ -1,10 +1,18 @@
 package us.ihmc.SdfLoader;
 
-import com.yobotics.simulationconstructionset.*;
-import com.yobotics.simulationconstructionset.simulatedSensors.LidarMount;
-import com.yobotics.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorLimitationParameters;
-import com.yobotics.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorNoiseParameters;
-import com.yobotics.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorUpdateParameters;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Set;
+
+import javax.media.j3d.Transform3D;
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
+
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Camera;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.IMU;
@@ -26,12 +34,25 @@ import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
-import javax.media.j3d.Transform3D;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-import java.util.*;
+import com.yobotics.simulationconstructionset.CameraMount;
+import com.yobotics.simulationconstructionset.DummyOneDegreeOfFreedomJoint;
+import com.yobotics.simulationconstructionset.ExternalForcePoint;
+import com.yobotics.simulationconstructionset.FloatingJoint;
+import com.yobotics.simulationconstructionset.GroundContactPoint;
+import com.yobotics.simulationconstructionset.IMUMount;
+import com.yobotics.simulationconstructionset.Joint;
+import com.yobotics.simulationconstructionset.Link;
+import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
+import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJointHolder;
+import com.yobotics.simulationconstructionset.PinJoint;
+import com.yobotics.simulationconstructionset.Robot;
+import com.yobotics.simulationconstructionset.SliderJoint;
+import com.yobotics.simulationconstructionset.simulatedSensors.GroundContactPointBasedWrenchCalculator;
+import com.yobotics.simulationconstructionset.simulatedSensors.LidarMount;
+import com.yobotics.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorLimitationParameters;
+import com.yobotics.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorNoiseParameters;
+import com.yobotics.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorUpdateParameters;
+import com.yobotics.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 
 public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder, HumanoidRobot    // TODO: make an SDFHumanoidRobot
 {
@@ -39,8 +60,6 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder, Hu
    private static final boolean SHOW_CONTACT_POINTS = true;
    private static final boolean SHOW_COM_REFERENCE_FRAMES = true;
    private static final boolean SHOW_SENSOR_REFERENCE_FRAMES = false;
-
-   private static final long serialVersionUID = 5864358637898048080L;
 
    private final ArrayList<String> resourceDirectories;
 
@@ -340,6 +359,15 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder, Hu
       scsParentJoint.addJoint(scsJoint);
 
       addSensors(scsJoint, joint.getChild());
+      
+      for(SDFForceSensor forceSensor : joint.getForceSensors())
+      {
+         ArrayList<GroundContactPoint> groundContactPoints = new ArrayList<GroundContactPoint>();
+         scsJoint.physics.recursiveGetAllGroundContactPoints(groundContactPoints);
+         GroundContactPointBasedWrenchCalculator groundContactPointBasedWrenchCalculator = new GroundContactPointBasedWrenchCalculator(forceSensor.getName(),
+               groundContactPoints, (OneDegreeOfFreedomJoint) scsJoint);
+         scsJoint.addForceSensor(groundContactPointBasedWrenchCalculator);
+      }
 
       if (!asNullJoint && lastSimulatedJoints.contains(joint.getName()))
       {
@@ -683,4 +711,5 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder, Hu
    {
       return getRootJoint();
    }
+   
 }

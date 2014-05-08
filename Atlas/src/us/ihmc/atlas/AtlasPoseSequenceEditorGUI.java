@@ -25,7 +25,7 @@ public class AtlasPoseSequenceEditorGUI
 
          if (config.success())
          {
-            model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"));
+            model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), false, false);
          }
          else
          {

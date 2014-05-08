@@ -42,9 +42,9 @@ public class AtlasKinematicCalibrator
    public AtlasKinematicCalibrator(AtlasRobotVersion atlasVersion, boolean runningOnRealRobot)
    {
       //load robot
-	  DRCRobotModel robotModel = new AtlasRobotModel(atlasVersion, runningOnRealRobot);
+	  DRCRobotModel robotModel = new AtlasRobotModel(atlasVersion, runningOnRealRobot, runningOnRealRobot);
       DRCRobotJointMap jointMap = robotModel.getJointMap();
-      JaxbSDFLoader robotLoader = robotModel.getJaxbSDFLoader(false);
+      JaxbSDFLoader robotLoader = robotModel.getJaxbSDFLoader();
       robot = robotLoader.createRobot(jointMap, false);
       registry = robot.getRobotsYoVariableRegistry();
       fullRobotModel = robotLoader.createFullRobotModel(jointMap);

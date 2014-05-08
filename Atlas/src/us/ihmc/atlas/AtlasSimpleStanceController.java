@@ -40,7 +40,7 @@ public class AtlasSimpleStanceController {
 
 	         if (config.success())
 	         {
-	            model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"));
+	            model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), false, false);
 	         }
 	         else
 	         {
@@ -56,7 +56,7 @@ public class AtlasSimpleStanceController {
 	      
 	      DRCRobotJointMap jointMap = model.getJointMap();
 	      DRCRobotPhysicalProperties physicalProperties = model.getPhysicalProperties();
-	      JaxbSDFLoader jaxbSDFLoader = model.getJaxbSDFLoader(false);
+	      JaxbSDFLoader jaxbSDFLoader = model.getJaxbSDFLoader();
 	      SDFFullRobotModel fullRobotModel = jaxbSDFLoader.createFullRobotModel(jointMap);
 	      SDFRobot robot = jaxbSDFLoader.createRobot(jointMap, false);
 	      ReferenceFrames referenceFrames = new ReferenceFrames(fullRobotModel, jointMap, physicalProperties.getAnkleHeight());

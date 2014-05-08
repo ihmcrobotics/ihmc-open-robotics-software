@@ -30,7 +30,6 @@ import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
@@ -49,7 +48,7 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
 
    @Override
    public RobotController getController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, double controlDT, double gravity, DoubleYoVariable yoTime,
-                                        DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, GUISetterUpperRegistry guiSetterUpperRegistry, TwistCalculator twistCalculator,
+                                        DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, TwistCalculator twistCalculator,
                                         CenterOfMassJacobian centerOfMassJacobian, ForceSensorDataHolder forceSensorDataHolder, LidarControllerInterface lidarControllerInterface,
                                         GlobalDataProducer dataProducer, SideDependentList<ArrayList<Point2d>> contactPointsArrayList)
    {
@@ -82,7 +81,7 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
 
       RobotController highLevelHumanoidController = highLevelHumanoidControllerFactory.create(fullRobotModel,
             initialPositionControlKpGains, initialPositionControlKdGains, referenceFrames, null, yoTime, gravityZ, twistCalculator, centerOfMassJacobian,
-            bipedFeet, controlDT, footSwitches, lidarControllerInterface, dynamicGraphicObjectsListRegistry, specificRegistry, guiSetterUpperRegistry, forceSensorDataHolder);
+            bipedFeet, controlDT, footSwitches, lidarControllerInterface, dynamicGraphicObjectsListRegistry, specificRegistry, forceSensorDataHolder);
 
       highLevelHumanoidController.getYoVariableRegistry().addChild(specificRegistry);
 

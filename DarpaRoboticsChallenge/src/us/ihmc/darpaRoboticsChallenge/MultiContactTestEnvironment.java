@@ -42,7 +42,7 @@ public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInter
    public MultiContactTestEnvironment(DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCRobotModel robotModel,
                                       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, RobotSide[] footContactSides, RobotSide[] handContactSides)
    {
-      JaxbSDFLoader jaxbSDFLoader = robotModel.getJaxbSDFLoader(false);
+      JaxbSDFLoader jaxbSDFLoader = robotModel.getJaxbSDFLoader();
       DRCRobotJointMap jointMap = robotModel.getJointMap();
       DRCRobotPhysicalProperties physicalProperties = robotModel.getPhysicalProperties();
       SDFRobot robotForEnvironmentSetup = jaxbSDFLoader.createRobot(jointMap, DRCConfigParameters.USE_COLLISIONS_MESHS_FOR_VISUALIZATION);

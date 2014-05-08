@@ -25,7 +25,6 @@ import us.ihmc.darpaRoboticsChallenge.outputs.DRCSimulationOutputWriter;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCSimulatedSensorNoiseParameters;
 import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCStateEstimatorInterface;
-import us.ihmc.sensorProcessing.simulatedSensors.GroundContactPointBasedWrenchCalculator;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReaderFromRobotFactory;
@@ -48,6 +47,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
 import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
 import com.yobotics.simulationconstructionset.robotController.ModularRobotController;
+import com.yobotics.simulationconstructionset.simulatedSensors.GroundContactPointBasedWrenchCalculator;
 import com.yobotics.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
@@ -109,43 +109,9 @@ public class DRCSimulationFactory
       //    SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMapForEstimator;
       //    scsToInverseDynamicsJointMapForEstimator = robotInterface.getSCSToInverseDynamicsJointMap();
 
-      ArrayList<IMUMount> imuMounts = new ArrayList<IMUMount>();
-      ArrayList<IMUMount> allIMUMounts = new ArrayList<IMUMount>();
-      simulatedRobot.getIMUMounts(allIMUMounts);
-
-      for (IMUMount imuMount : allIMUMounts)
-      {
-         // Only add the main one now. Not the head one.
-         //                   if (imuMount.getName().equals("head_imu_sensor")) imuMounts.add(imuMount);
-         for (String imuSensorName : sensorInformation.getIMUSensorsToUse())
-         {
-            if (imuMount.getName().equals(imuSensorName))
-            {
-               imuMounts.add(imuMount);
-            }
-         }
-      }
-
-      ArrayList<OneDegreeOfFreedomJoint> forceTorqueSensorJoints = new ArrayList<OneDegreeOfFreedomJoint>();
-      // TODO: Get from SDF file
-
-      for (String name : sensorInformation.getForceSensorNames())
-      {
-         forceTorqueSensorJoints.add(simulatedRobot.getOneDegreeOfFreedomJoint(name));
-      }
-
-      ArrayList<WrenchCalculatorInterface> wrenchProviders = new ArrayList<WrenchCalculatorInterface>();
 
       ScsCollisionConfigure collisionConfigure = null;
-      for (OneDegreeOfFreedomJoint sensorJoint : forceTorqueSensorJoints)
-      {
-         ArrayList<GroundContactPoint> groundContactPoints = new ArrayList<GroundContactPoint>();
-         sensorJoint.physics.recursiveGetAllGroundContactPoints(groundContactPoints);
-         GroundContactPointBasedWrenchCalculator groundContactPointBasedWrenchCalculator = new GroundContactPointBasedWrenchCalculator(groundContactPoints,
-               sensorJoint);
-         wrenchProviders.add(groundContactPointBasedWrenchCalculator);
-      }
-
+      
       if( useNewPhysics ) {
          collisionConfigure = drcRobotModel.getPhysicsConfigure(simulatedRobot);
       }
@@ -155,14 +121,14 @@ public class DRCSimulationFactory
       ModularRobotController controller = new ModularRobotController("SensorReaders");
       if (DRCConfigParameters.USE_PERFECT_SENSORS)
       {
-         DRCPerfectSensorReaderFactory drcPerfectSensorReaderFactory = new DRCPerfectSensorReaderFactory(simulatedRobot, wrenchProviders, estimateDT);
+         DRCPerfectSensorReaderFactory drcPerfectSensorReaderFactory = new DRCPerfectSensorReaderFactory(simulatedRobot, estimateDT);
          controller.addRobotController(drcPerfectSensorReaderFactory.getSensorReader());
          sensorReaderFactory = drcPerfectSensorReaderFactory;
       }
       else
       {
          simulatedSensorHolderAndReaderFromRobotFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(
-               simulatedRobot, sensorNoiseParameters, stateEstimatorParameters.getSensorFilterParameters(), imuMounts, wrenchProviders, estimatorRegistry, simulationRegistry);
+               simulatedRobot, sensorNoiseParameters, stateEstimatorParameters.getSensorFilterParameters(), sensorInformation.getIMUSensorsToUse(), estimatorRegistry, simulationRegistry);
          sensorReaderFactory = simulatedSensorHolderAndReaderFromRobotFactory;
       }
 
