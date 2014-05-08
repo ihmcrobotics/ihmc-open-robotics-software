@@ -11,7 +11,8 @@ import us.ihmc.utilities.test.JUnitTestSuiteConstructor;
    us.ihmc.valkyrie.ValkyrieFlatGroundWalkingTest.class,
    us.ihmc.valkyrie.ValkyriePushInSingleSupportTest.class,
    us.ihmc.valkyrie.simulation.ValkyriePosePlaybackDemoTest.class,
-   us.ihmc.valkyrie.ValkyrieControllerFactoryTest.class
+   us.ihmc.valkyrie.ValkyrieControllerFactoryTest.class,
+   us.ihmc.valkyrie.kinematics.transmissions.InefficientButReadablePushrodTransmissionTest.class
 })
 
 public class ValkyrieBambooTestSuite
