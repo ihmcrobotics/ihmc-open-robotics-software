@@ -2,7 +2,6 @@ package us.ihmc.valkyrie.visualizer;
 
 
 import us.ihmc.SdfLoader.JaxbSDFLoader;
-import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
 import us.ihmc.robotDataCommunication.YoVariableClient;
@@ -24,9 +23,9 @@ public class RemoteValkyrieTurboDriverPositionControlSliderBoardVisualizer
    public RemoteValkyrieTurboDriverPositionControlSliderBoardVisualizer(String host, int port, int bufferSize)
    {
       System.out.println("Connecting to host " + host);
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT);
+      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(true, false);
       DRCRobotJointMap jointMap = robotModel.getJointMap();
-      JaxbSDFLoader valkyrieLoader = robotModel.getJaxbSDFLoader(false);
+      JaxbSDFLoader valkyrieLoader = robotModel.getJaxbSDFLoader();
 
       SliderBoardFactory sliderBoardFactory = ValkyrieSliderBoard.getTurboDriverPositionControlFactory();
 

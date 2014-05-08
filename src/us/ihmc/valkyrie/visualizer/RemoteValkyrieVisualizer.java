@@ -22,9 +22,9 @@ public class RemoteValkyrieVisualizer
    public RemoteValkyrieVisualizer(String host, int port, int bufferSize)
    {
       System.out.println("Connecting to host " + host);
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT);
+      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(true, false);
       DRCRobotJointMap jointMap = robotModel.getJointMap();
-      JaxbSDFLoader valkyrieLoader = robotModel.getJaxbSDFLoader(false);
+      JaxbSDFLoader valkyrieLoader = robotModel.getJaxbSDFLoader();
 
       SliderBoardFactory sliderBoardFactory = ValkyrieSliderBoard.getWalkingSliderBoardFactory();
 //    SliderBoardFactory sliderBoardFactory = ValkyrieSliderBoard.getIDControllerSliderBoardFactory();

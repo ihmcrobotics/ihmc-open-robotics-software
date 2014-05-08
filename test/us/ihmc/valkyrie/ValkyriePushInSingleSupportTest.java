@@ -16,7 +16,7 @@ public class ValkyriePushInSingleSupportTest extends DRCPushInSingleSupportTest
       BambooTools.reportTestStartedMessage();
 
       String runName = "ValkyriePushDuringSwing";
-      DRCRobotModel robotModel = new ValkyrieRobotModel(false);
+      DRCRobotModel robotModel = new ValkyrieRobotModel(false, false);
       
       setupAndTestPushInSingleSupport(robotModel, runName);
    }

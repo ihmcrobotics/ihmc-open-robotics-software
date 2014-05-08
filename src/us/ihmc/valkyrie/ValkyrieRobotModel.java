@@ -2,8 +2,11 @@ package us.ihmc.valkyrie;
 
 import java.io.InputStream;
 
+import javax.media.j3d.Transform3D;
+
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFJointNameMap;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -42,7 +45,6 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private DRCRobotSensorInformation sensorInformation;
    private final DRCRobotJointMap jointMap;
    private final String robotName = "VALKYRIE";
-   private final String modelName = "V1";
    private final String sdfFileName = "V1/sdf/V1_sim.sdf";
    
    
@@ -55,11 +57,10 @@ public class ValkyrieRobotModel implements DRCRobotModel
          };
    
    private double estimatorDT;
-   private JaxbSDFLoader loader;
-   private JaxbSDFLoader headlessLoader;
+   private final JaxbSDFLoader loader;
    private final boolean runningOnRealRobot;
    
-   public ValkyrieRobotModel(boolean runningOnRealRobot)
+   public ValkyrieRobotModel(boolean runningOnRealRobot, boolean headless)
    {
       this.runningOnRealRobot = runningOnRealRobot;
       this.jointMap = new ValkyrieJointMap();
@@ -68,7 +69,20 @@ public class ValkyrieRobotModel implements DRCRobotModel
       this.armControllerParameters = new ValkyrieArmControllerParameters(runningOnRealRobot);
       this.walkingControllerParameters = new ValkyrieWalkingControllerParameters(runningOnRealRobot);
       this.contactPointParamaters = new ValkyrieContactPointParamaters(jointMap);
-      this.headlessLoader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSdfFileAsStream(), true);
+      if(headless)
+      {
+         this.loader = DRCRobotSDFLoader.loadDRCRobot(new String[]{}, getSdfFileAsStream(), true);
+      }
+      else
+      {
+         this.loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSdfFileAsStream(), true);
+      }
+      
+      SDFJointNameMap jointMap = getJointMap();
+      for(String forceSensorNames : ValkyrieSensorInformation.forceSensorNames)
+      {
+         loader.addForceSensor(jointMap, forceSensorNames, forceSensorNames, new Transform3D());
+      }
       
    }
    
@@ -192,17 +206,10 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
-   public JaxbSDFLoader getJaxbSDFLoader(boolean headless)
+   public JaxbSDFLoader getJaxbSDFLoader()
    {
-      if(!headless)
-      {
-         if(loader == null)
-         {
-            this.loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSdfFileAsStream(), false);
-         }
-         return loader;
-      }
-      return headlessLoader;
+      
+      return loader;
    }
 
    @Override
@@ -214,13 +221,13 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public SDFFullRobotModel createFullRobotModel()
    {
-      return headlessLoader.createFullRobotModel(getJointMap());
+      return loader.createFullRobotModel(getJointMap());
    }
 
    @Override
    public SDFRobot createSdfRobot(boolean createCollisionMeshes)
    {
-      return headlessLoader.createRobot(jointMap, createCollisionMeshes);
+      return loader.createRobot(jointMap, createCollisionMeshes);
    }
 
 }
