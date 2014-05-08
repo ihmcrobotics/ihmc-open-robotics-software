@@ -34,19 +34,21 @@ public class BonoRobotModel implements DRCRobotModel
    
    private final boolean runningOnRealRobot;
    private JaxbSDFLoader loader;
-   private JaxbSDFLoader headlessLoader;
    private DRCRobotSensorInformation sensorInformation;
    
-   public BonoRobotModel()
-   {
-      this(false);
-   }
    
-   public BonoRobotModel(boolean runningOnRealRobot)
+   public BonoRobotModel(boolean runningOnRealRobot, boolean headless)
    {
      this.runningOnRealRobot = runningOnRealRobot;
      sensorInformation = new BonoSensorInformation();
-     this.headlessLoader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSdfFileAsStream(), true);
+     if(headless)
+     {
+        this.loader = DRCRobotSDFLoader.loadDRCRobot(new String[]{}, getSdfFileAsStream(), true);
+     }
+     else
+     {
+        this.loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSdfFileAsStream(), false);        
+     }
    }
 
    @Override
@@ -160,17 +162,9 @@ public class BonoRobotModel implements DRCRobotModel
    }
 
    @Override
-   public JaxbSDFLoader getJaxbSDFLoader(boolean headless)
+   public JaxbSDFLoader getJaxbSDFLoader()
    {
-      if(!headless)
-      {
-         if(loader == null)
-         {
-            this.loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSdfFileAsStream(), false);
-         }
-         return loader;
-      }
-      return headlessLoader;
+     return loader;
    }
 
    @Override
@@ -182,12 +176,12 @@ public class BonoRobotModel implements DRCRobotModel
    @Override
    public SDFFullRobotModel createFullRobotModel()
    {
-      return headlessLoader.createFullRobotModel(getJointMap());
+      return loader.createFullRobotModel(getJointMap());
    }
 
    @Override
    public SDFRobot createSdfRobot(boolean createCollisionMeshes)
    {
-      return headlessLoader.createRobot(getJointMap(), createCollisionMeshes);
+      return loader.createRobot(getJointMap(), createCollisionMeshes);
    }
 }

@@ -21,7 +21,7 @@ public class BonoFlatGroundWalkingTrack
 {
    public static void main(String[] args)
    {
-      BonoRobotModel robotModel = new BonoRobotModel();
+      BonoRobotModel robotModel = new BonoRobotModel(false, false);
       AutomaticSimulationRunner automaticSimulationRunner = null;
       SliderBoardFactory sliderBoardFactory = WalkControllerSliderBoard.getFactory();
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false, sliderBoardFactory);

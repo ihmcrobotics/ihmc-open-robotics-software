@@ -16,7 +16,7 @@ public class BonoFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
       BambooTools.reportTestStartedMessage();
 
       String runName = "BONOFlatGroundWalkingTest";
-      BonoRobotModel robotModel = new BonoRobotModel();
+      BonoRobotModel robotModel = new BonoRobotModel(false, false);
 
       setupAndTestFlatGroundSimulationTrack(robotModel, runName);
    }
