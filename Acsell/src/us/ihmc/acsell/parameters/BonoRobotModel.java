@@ -2,8 +2,11 @@ package us.ihmc.acsell.parameters;
 
 import java.io.InputStream;
 
+import javax.media.j3d.Transform3D;
+
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFJointNameMap;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.acsell.controlParameters.BonoArmControlParameters;
 import us.ihmc.acsell.controlParameters.BonoStateEstimatorParameters;
@@ -49,6 +52,13 @@ public class BonoRobotModel implements DRCRobotModel
      {
         this.loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSdfFileAsStream(), false);        
      }
+     
+     SDFJointNameMap jointMap = getJointMap();
+     for(String forceSensorNames : getSensorInformation().getForceSensorNames())
+     {
+        loader.addForceSensor(jointMap, forceSensorNames, forceSensorNames, new Transform3D());
+     }
+     
    }
 
    @Override
