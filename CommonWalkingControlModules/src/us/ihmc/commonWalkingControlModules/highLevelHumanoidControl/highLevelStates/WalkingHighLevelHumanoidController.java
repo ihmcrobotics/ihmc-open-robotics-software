@@ -560,7 +560,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          endEffectorControlModule = new EndEffectorControlModule(controlDT, bipedFoot, jacobianId, robotSide,
                  footTouchdownPitchTrajectoryGenerator, maximumToeOffAngleProvider, requestHoldPosition, walkingControllerParameters,
                  swingTimeCalculationProvider, initialPositionProvider, initialVelocityProvider, swingFootFinalPositionProvider,
-                 initialOrientationProvider, finalDesiredVelocityProvider, finalFootOrientationProvider,
+                 initialOrientationProvider, finalDesiredVelocityProvider, finalFootOrientationProvider, trajectoryParametersProvider,
                  dynamicGraphicObjectsListRegistry, momentumBasedController, registry);
 
 

@@ -85,7 +85,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
          EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(controlDT, foot, jacobianId, robotSide, /*poseTrajectoryGenerator,*/ null,
                                                                 null, null, walkingControllerParameters,
                                                                 footTrajectoryTimeProvider, currentConfigurationProvider, null, desiredConfigurationProvider,
-                                                                currentConfigurationProvider, null, desiredConfigurationProvider,
+                                                                currentConfigurationProvider, null, desiredConfigurationProvider, null,
                                                                 null, momentumBasedController, registry);
          endEffectorControlModule.setSwingGains(100.0, 200.0, 200.0, 1.0, 1.0);
          endEffectorControlModule.setHoldGains(100.0, 200.0, 0.1);
