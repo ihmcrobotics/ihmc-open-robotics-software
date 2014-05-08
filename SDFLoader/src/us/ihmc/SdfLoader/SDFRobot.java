@@ -185,6 +185,11 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder, Hu
             }
          }
       }
+      
+      for (SDFJointHolder child : rootLink.getChildren())
+      { 
+         addForceSensors(child);
+      }
 
       Point3d centerOfMass = new Point3d();
       double totalMass = computeCenterOfMass(centerOfMass);
@@ -240,6 +245,29 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder, Hu
    public Collection<OneDegreeOfFreedomJoint> getOneDoFJoints()
    {
       return oneDoFJoints.values();
+   }
+   
+   private void addForceSensors(SDFJointHolder joint)
+   {
+      if(joint.getForceSensors().size() > 0)
+      {
+         String sanitizedJointName = SDFConversionsHelper.sanitizeJointName(joint.getName());
+         OneDegreeOfFreedomJoint scsJoint = getOneDegreeOfFreedomJoint(sanitizedJointName);
+         
+         for(SDFForceSensor forceSensor : joint.getForceSensors())
+         {
+            ArrayList<GroundContactPoint> groundContactPoints = new ArrayList<GroundContactPoint>();
+            scsJoint.physics.recursiveGetAllGroundContactPoints(groundContactPoints);
+            GroundContactPointBasedWrenchCalculator groundContactPointBasedWrenchCalculator = new GroundContactPointBasedWrenchCalculator(forceSensor.getName(),
+                  groundContactPoints, (OneDegreeOfFreedomJoint) scsJoint);
+            scsJoint.addForceSensor(groundContactPointBasedWrenchCalculator);
+         }
+      }
+      
+      for (SDFJointHolder child : joint.getChild().getChildren())
+      {
+         addForceSensors(child);
+      }
    }
 
    private void addJointsRecursively(SDFJointHolder joint, Joint scsParentJoint, boolean useCollisionMeshes,
@@ -360,14 +388,6 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder, Hu
 
       addSensors(scsJoint, joint.getChild());
       
-      for(SDFForceSensor forceSensor : joint.getForceSensors())
-      {
-         ArrayList<GroundContactPoint> groundContactPoints = new ArrayList<GroundContactPoint>();
-         scsJoint.physics.recursiveGetAllGroundContactPoints(groundContactPoints);
-         GroundContactPointBasedWrenchCalculator groundContactPointBasedWrenchCalculator = new GroundContactPointBasedWrenchCalculator(forceSensor.getName(),
-               groundContactPoints, (OneDegreeOfFreedomJoint) scsJoint);
-         scsJoint.addForceSensor(groundContactPointBasedWrenchCalculator);
-      }
 
       if (!asNullJoint && lastSimulatedJoints.contains(joint.getName()))
       {
