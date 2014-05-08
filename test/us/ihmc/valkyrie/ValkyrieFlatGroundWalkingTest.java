@@ -16,7 +16,7 @@ public class ValkyrieFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
       BambooTools.reportTestStartedMessage();
 
       String runName = "ValkyrieFlatGroundWalkingTest";
-      DRCRobotModel robotModel = new ValkyrieRobotModel(false);
+      DRCRobotModel robotModel = new ValkyrieRobotModel(false, false);
 
       setupAndTestFlatGroundSimulationTrack(robotModel, runName);
    }
