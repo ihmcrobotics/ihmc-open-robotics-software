@@ -39,6 +39,8 @@ public class SCSYoVariablesUpdatedListener implements YoVariablesUpdatedListener
    private volatile boolean recording = true;
    private YoVariableClient client;
    
+   private int displayOneInNPackets = DISPLAY_ONE_IN_N_PACKETS;
+   
    private final TObjectDoubleHashMap<String> buttons = new TObjectDoubleHashMap<String>();
 
    public SCSYoVariablesUpdatedListener(int bufferSize)
@@ -188,6 +190,11 @@ public class SCSYoVariablesUpdatedListener implements YoVariablesUpdatedListener
    @Override
    public long getDisplayOneInNPackets()
    {
-      return DISPLAY_ONE_IN_N_PACKETS;
+      return displayOneInNPackets;
+   }
+   
+   public void setDisplayOneInNPackets(int val)
+   {
+      displayOneInNPackets = val;
    }
 }
