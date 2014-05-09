@@ -30,6 +30,8 @@ public class YoVariableConsumer extends Thread
    private final YoVariablesUpdatedListener listener;
    
    private volatile boolean connected = false;
+   
+   private long packetNumber = 0;
 
    public YoVariableConsumer(String host, int port, List<YoVariable> variables, List<JointState<?>> jointStates, YoVariablesUpdatedListener listener)
    {
@@ -40,7 +42,7 @@ public class YoVariableConsumer extends Thread
       this.variables = variables;
       this.jointStates = jointStates;
       this.listener = listener;
-      
+    
    }
    
    @Override
@@ -89,7 +91,7 @@ public class YoVariableConsumer extends Thread
          zmq.Msg msg = socketBase.recv(zmq.ZMQ.ZMQ_NOBLOCK);
          
          
-         if(msg != null)
+         if(msg != null && packetNumber++ % listener.getDisplayOneInNPackets() == 0)
          {
             ByteBuffer buf = msg.buf();
             

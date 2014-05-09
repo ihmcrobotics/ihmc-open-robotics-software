@@ -29,6 +29,8 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 
 public class SCSYoVariablesUpdatedListener implements YoVariablesUpdatedListener, ExitActionListener
 {
+   private static final int DISPLAY_ONE_IN_N_PACKETS = 6;
+
    protected final YoVariableRegistry registry;
    protected final SimulationConstructionSet scs;
 
@@ -181,5 +183,11 @@ public class SCSYoVariablesUpdatedListener implements YoVariablesUpdatedListener
       {
          client.close();
       }
+   }
+
+   @Override
+   public long getDisplayOneInNPackets()
+   {
+      return DISPLAY_ONE_IN_N_PACKETS;
    }
 }
