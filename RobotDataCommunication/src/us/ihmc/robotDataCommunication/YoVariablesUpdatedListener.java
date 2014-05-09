@@ -13,14 +13,15 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 public interface YoVariablesUpdatedListener
 {
    public boolean populateRegistry();
+
    public boolean changesVariables();
-   
+
    public void setRegistry(YoVariableRegistry registry);
 
    public void registerDynamicGraphicObjectListsRegistry(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, boolean showOverheadView);
 
    public void receivedHandshake(YoProtoHandshake handshake);
-   
+
    public void receivedUpdate(long timestamp, ByteBuffer buf);
 
    public void start();
@@ -28,9 +29,11 @@ public interface YoVariablesUpdatedListener
    public void disconnected();
 
    public void setJointStates(List<JointState<? extends Joint>> jointStates);
-   
+
    public void setYoVariableClient(YoVariableClient client);
-   
+
    public void receiveTimedOut(long timeoutInMillis);
-      
+
+   public long getDisplayOneInNPackets();
+
 }

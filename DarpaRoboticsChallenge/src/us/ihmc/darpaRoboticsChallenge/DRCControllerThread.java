@@ -2,16 +2,6 @@ package us.ihmc.darpaRoboticsChallenge;
 
 import java.util.Arrays;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.InverseDynamicsMechanismReferenceFrameVisualizer;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
-import com.yobotics.simulationconstructionset.robotController.ModularRobotController;
-import com.yobotics.simulationconstructionset.robotController.ModularSensorProcessor;
-import com.yobotics.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
-import com.yobotics.simulationconstructionset.robotController.RobotController;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
@@ -23,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.sensors.TwistUpdater;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaElipsoidsVisualizer;
 import us.ihmc.darpaRoboticsChallenge.controllers.ConstrainedCenterOfMassJacobianEvaluator;
 import us.ihmc.darpaRoboticsChallenge.controllers.EstimationLinkHolder;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCContactPointInformationFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParamaters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -38,6 +27,15 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
+
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.InverseDynamicsMechanismReferenceFrameVisualizer;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.robotController.ModularRobotController;
+import com.yobotics.simulationconstructionset.robotController.ModularSensorProcessor;
+import com.yobotics.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
+import com.yobotics.simulationconstructionset.robotController.RobotController;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class DRCControllerThread implements MultiThreadedRobotControlElement
 {
@@ -54,6 +52,9 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
    private final ForceSensorDataHolder forceSensorDataHolderForController;
 
+   
+   private final RobotController robotController;
+   
    public DRCControllerThread(DRCRobotModel robotModel, ControllerFactory controllerFactory, LidarControllerInterface lidarControllerInterface,
          GlobalDataProducer dataProducer, double controlDT, double gravity)
    {
@@ -69,7 +70,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       controllerReferenceFrames = new ReferenceFrames(controllerFullRobotModel, jointMap, physicalProperties.getAnkleHeight());
       controllerReferenceFrames.visualize(dynamicGraphicObjectsListRegistry, registry);
 
-      RobotController robotController = createMomentumBasedController(controllerFullRobotModel, controllerReferenceFrames, sensorInformation,
+      robotController = createMomentumBasedController(controllerFullRobotModel, controllerReferenceFrames, sensorInformation,
             contactPointParamaters, controllerFactory, lidarControllerInterface, t, controlDT, gravity, forceSensorDataHolderForController,
             dynamicGraphicObjectsListRegistry, registry, dataProducer);
 
@@ -154,8 +155,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    @Override
    public void initialize()
    {
-      // TODO Auto-generated method stub
-
+       robotController.initialize();
    }
 
    @Override
@@ -167,8 +167,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    @Override
    public void run()
    {
-      // TODO Auto-generated method stub
-
+      robotController.doControl();
    }
 
    @Override

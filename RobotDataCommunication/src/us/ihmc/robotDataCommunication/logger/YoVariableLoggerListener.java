@@ -262,4 +262,10 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       return false;
    }
 
+   @Override
+   public long getDisplayOneInNPackets()
+   {
+      return 1;
+   }
+
 }
