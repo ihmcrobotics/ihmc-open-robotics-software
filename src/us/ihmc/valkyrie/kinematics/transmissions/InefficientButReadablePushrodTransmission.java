@@ -67,6 +67,8 @@ public class InefficientButReadablePushrodTransmission
    private final DynamicGraphicPosition b5Viz, b6Viz, t5Viz, t6Viz;
    private final DynamicGraphicReferenceFrame boneFrameViz, afterPitchFrameViz, beforeRollFrameViz, footFrameViz;
 
+   private final boolean DEBUG = false;
+
    public InefficientButReadablePushrodTransmission(YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       boneFrame.updateTranslation(new FrameVector(worldFrame, 0.0, 0.0, 1.0));    // Arbitrary. Just put it in the air. If we wanted to have things align with the real robot, then this should be at the ankle.
@@ -114,7 +116,8 @@ public class InefficientButReadablePushrodTransmission
          boneFrameViz = afterPitchFrameViz = beforeRollFrameViz = footFrameViz = null;
       }
 
-      parentRegistry.addChild(registry);
+      if (parentRegistry != null)
+         parentRegistry.addChild(registry);
    }
 
    public void computeJacobian(double[][] jacobianToPack, double pitch, double roll)
@@ -135,6 +138,9 @@ public class InefficientButReadablePushrodTransmission
       b6InBoneFrame.setIncludingFrame(b6InFootFrame);
       b6InBoneFrame.changeFrame(boneFrame);
 
+      printIfDebug("b5InBoneFrame = " + b5InBoneFrame);
+      printIfDebug("b6InBoneFrame = " + b6InBoneFrame);
+
       // Solve for t5, t6 in bone frame:
 
       double xDiff = rod5.getX() - b5InBoneFrame.getX();
@@ -145,11 +151,21 @@ public class InefficientButReadablePushrodTransmission
       yDiff = rod6.getY() - b6InBoneFrame.getY();
       double t6zInBoneFrame = b6InBoneFrame.getZ() + Math.sqrt(lengthSquared - xDiff * xDiff - yDiff * yDiff);
 
+      printIfDebug("t5zInBoneFrame = " + t5zInBoneFrame);
+      printIfDebug("t6zInBoneFrame = " + t6zInBoneFrame);
+
       t5InBoneFrame.setIncludingFrame(boneFrame, rod5);
       t6InBoneFrame.setIncludingFrame(boneFrame, rod6);
 
       t5InBoneFrame.setZ(t5zInBoneFrame);
       t6InBoneFrame.setZ(t6zInBoneFrame);
+
+      if (DEBUG)
+      {
+         System.out.println("t5InFootFrame = " + t5InBoneFrame.changeFrameCopy(footFrame));
+         System.out.println("t6InFootFrame = " + t6InBoneFrame.changeFrameCopy(footFrame));
+      }
+
 
       // Do R cross F to get Jacobian elements:
       f5VectorInBoneFrame.sub(b5InBoneFrame, t5InBoneFrame);
@@ -179,7 +195,7 @@ public class InefficientButReadablePushrodTransmission
       jRoll5.set(tempCrossVector.getX());
 
       tempRVector.setIncludingFrame(b6InFootFrame);
-//      tempCrossVector.cross(tempRVector, f6VectorInFootFrame);
+      tempCrossVector.cross(tempRVector, f6VectorInFootFrame);
       jRoll6.set(tempCrossVector.getX());
 
       jacobianToPack[0][0] = jPitch5.getDoubleValue();
@@ -202,5 +218,11 @@ public class InefficientButReadablePushrodTransmission
 
       }
 
+   }
+
+   private void printIfDebug(String message)
+   {
+      if (DEBUG)
+         System.out.println(message);
    }
 }
