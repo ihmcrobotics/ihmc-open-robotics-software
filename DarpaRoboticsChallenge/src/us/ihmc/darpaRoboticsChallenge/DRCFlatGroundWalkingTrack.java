@@ -24,7 +24,7 @@ public class DRCFlatGroundWalkingTrack
 
    public DRCFlatGroundWalkingTrack(DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
                                     DRCSCSInitialSetup scsInitialSetup, boolean useVelocityAndHeadingScript, AutomaticSimulationRunner automaticSimulationRunner,
-                                    double timePerRecordTick, int simulationDataBufferSize, boolean cheatWithGroundHeightAtForFootstep, DRCRobotModel model)
+                                    int simulationDataBufferSize, boolean cheatWithGroundHeightAtForFootstep, DRCRobotModel model)
    {
       WalkingControllerParameters walkingControlParameters = model.getWalkingControlParameters();
       ArmControllerParameters armControllerParameters = model.getArmControllerParameters();
@@ -33,7 +33,7 @@ public class DRCFlatGroundWalkingTrack
       scsInitialSetup.setSimulationDataBufferSize(simulationDataBufferSize);
 
       double dt = scsInitialSetup.getDT();
-      int recordFrequency = (int) Math.round(timePerRecordTick / dt);
+      int recordFrequency = (int) Math.round(model.getControllerDT() / dt);
       if (recordFrequency < 1)
          recordFrequency = 1;
       scsInitialSetup.setRecordFrequency(recordFrequency);

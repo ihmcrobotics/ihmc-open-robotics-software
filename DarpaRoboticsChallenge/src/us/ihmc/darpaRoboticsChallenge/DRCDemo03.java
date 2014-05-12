@@ -27,8 +27,8 @@ public abstract class DRCDemo03
    private final DRCSimulationFactory drcSimulation;
    private final DRCDemoEnvironmentWithBoxAndSteeringWheel environment;
 
-   public DRCDemo03(DRCGuiInitialSetup guiInitialSetup, AutomaticSimulationRunner automaticSimulationRunner, double timePerRecordTick,
-                    int simulationDataBufferSize, DRCRobotModel robotModel, DRCRobotInitialSetup<SDFRobot> robotInitialSetup)
+   public DRCDemo03(DRCGuiInitialSetup guiInitialSetup, AutomaticSimulationRunner automaticSimulationRunner, int simulationDataBufferSize,
+                    DRCRobotModel robotModel, DRCRobotInitialSetup<SDFRobot> robotInitialSetup)
    {
       DRCSCSInitialSetup scsInitialSetup;
       
@@ -41,7 +41,7 @@ public abstract class DRCDemo03
       scsInitialSetup.setInitializeEstimatorToActual(true);
 
       double dt = scsInitialSetup.getDT();
-      int recordFrequency = (int) Math.round(timePerRecordTick / dt);
+      int recordFrequency = (int) Math.round(robotModel.getControllerDT() / dt);
       if (recordFrequency < 1)
          recordFrequency = 1;
       scsInitialSetup.setRecordFrequency(recordFrequency);

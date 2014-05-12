@@ -32,6 +32,7 @@ import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
 import us.ihmc.iRobot.model.iRobotHandModel;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
+import us.ihmc.utilities.math.TimeTools;
 
 import com.jme3.math.Transform;
 import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
@@ -40,8 +41,17 @@ public class AtlasRobotModel implements DRCRobotModel
 {
    private final AtlasRobotVersion selectedVersion;
    
+   public static final long ESTIMATOR_DT_IN_NS = 1000000;
+   public static final double ESTIMATOR_DT = TimeTools.nanoSecondstoSeconds(ESTIMATOR_DT_IN_NS);
+   public static final double CONTROL_DT = 0.006;
+
+   public static final double ATLAS_ONBOARD_SAMPLINGFREQ = 1000.0;
+   public static final double ATLAS_ONBOARD_DT = 1.0 / ATLAS_ONBOARD_SAMPLINGFREQ;
+
+   
    private final boolean runningOnRealRobot;
    private final JaxbSDFLoader loader;
+  
 
    private DRCRobotSensorInformation sensorInformation;
 
@@ -218,13 +228,13 @@ public class AtlasRobotModel implements DRCRobotModel
    @Override
    public double getEstimatorDT()
    {
-      return 0.001;
+      return ESTIMATOR_DT;
    }
 
    @Override
    public double getControllerDT()
    {
-      return 0.006;
+      return CONTROL_DT;
    }
    
 

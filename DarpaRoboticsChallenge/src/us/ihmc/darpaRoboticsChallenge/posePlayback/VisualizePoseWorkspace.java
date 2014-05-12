@@ -33,11 +33,14 @@ public class VisualizePoseWorkspace
 
    private final PlaybackPoseInterpolator interpolator;
    private final YoVariableRegistry registry = new YoVariableRegistry("PlaybackPoseSCSBridge");
-
+   private final double controlDT;
+   
    private DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
    
    public VisualizePoseWorkspace(DRCRobotModel robotModel) throws IOException
    {
+      this.controlDT = robotModel.getControllerDT();
+      
       DRCRobotJointMap jointMap = robotModel.getJointMap();
       JaxbSDFLoader loader = robotModel.getJaxbSDFLoader();
       SDFRobot sdfRobot = loader.createRobot(jointMap, false);
@@ -144,7 +147,7 @@ public class VisualizePoseWorkspace
 
          double startTime = 0.0;
          double time = startTime;
-         double dt = DRCConfigParameters.CONTROL_DT;
+         double dt = controlDT;
 
          interpolator.startSequencePlayback(sequence, startTime);
 

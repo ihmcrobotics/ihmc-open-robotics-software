@@ -382,7 +382,6 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       AutomaticSimulationRunner automaticSimulationRunner = null;
       DRCGuiInitialSetup guiInitialSetup = createGUIInitialSetup();
       
-      double timePerRecordTick = DRCConfigParameters.CONTROL_DT;
       int simulationDataBufferSize = 16000;
 
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
@@ -393,8 +392,8 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
          scsInitialSetup.setInitializeEstimatorToActual(true);
 
       DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup,
-                                                               scsInitialSetup, useVelocityAndHeadingScript, automaticSimulationRunner, timePerRecordTick,
-                                                               simulationDataBufferSize, cheatWithGroundHeightAtForFootstep,robotModel);
+                                                               scsInitialSetup, useVelocityAndHeadingScript, automaticSimulationRunner, simulationDataBufferSize,
+                                                               cheatWithGroundHeightAtForFootstep, robotModel);
 
       SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
       scs.setGroundVisible(false);

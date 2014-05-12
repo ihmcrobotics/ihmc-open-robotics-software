@@ -16,10 +16,10 @@ import com.martiansoftware.jsap.JSAPResult;
 
 public class AtlasDemo03 extends DRCDemo03
 {
-   public AtlasDemo03(DRCGuiInitialSetup guiInitialSetup, AutomaticSimulationRunner automaticSimulationRunner, double timePerRecordTick,
-         int simulationDataBufferSize, DRCRobotModel robotModel, DRCRobotInitialSetup<SDFRobot> robotInitialSetup)
+   public AtlasDemo03(DRCGuiInitialSetup guiInitialSetup, AutomaticSimulationRunner automaticSimulationRunner, int simulationDataBufferSize,
+         DRCRobotModel robotModel, DRCRobotInitialSetup<SDFRobot> robotInitialSetup)
    {
-      super(guiInitialSetup, automaticSimulationRunner, timePerRecordTick, simulationDataBufferSize, robotModel, robotInitialSetup);
+      super(guiInitialSetup, automaticSimulationRunner, simulationDataBufferSize, robotModel, robotInitialSetup);
    }
 
    public static void main(String[] args) throws JSAPException
@@ -57,12 +57,11 @@ public class AtlasDemo03 extends DRCDemo03
 
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false);
 
-      double timePerRecordTick = DRCConfigParameters.CONTROL_DT;
       int simulationDataBufferSize = 16000;
 //      String ipAddress = null;
 //      int portNumber = -1;
       
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = new VRCTask1InVehicleHovering(0.0); // new VRCTask1InVehicleInitialSetup(-0.03); // DrivingDRCRobotInitialSetup();
-      new AtlasDemo03(guiInitialSetup, automaticSimulationRunner, timePerRecordTick, simulationDataBufferSize, model, robotInitialSetup);
+      new AtlasDemo03(guiInitialSetup, automaticSimulationRunner, simulationDataBufferSize, model, robotInitialSetup);
    }
 }

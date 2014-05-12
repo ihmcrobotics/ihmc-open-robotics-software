@@ -39,14 +39,14 @@ public class DRCHighLevelPositionControlDemo
 
    public DRCHighLevelPositionControlDemo(DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
                                     DRCSCSInitialSetup scsInitialSetup, AutomaticSimulationRunner automaticSimulationRunner,
-                                    double timePerRecordTick, int simulationDataBufferSize, DRCRobotModel model)
+                                    int simulationDataBufferSize, DRCRobotModel model)
    {
       scsInitialSetup.setSimulationDataBufferSize(simulationDataBufferSize);
 
       WalkingControllerParameters drcControlParameters = model.getWalkingControlParameters();
       ArmControllerParameters armControllerParameters = model.getArmControllerParameters();
       double dt = scsInitialSetup.getDT();
-      int recordFrequency = (int) Math.round(timePerRecordTick / dt);
+      int recordFrequency = (int) Math.round(model.getControllerDT() / dt);
       if (recordFrequency < 1)
          recordFrequency = 1;
       scsInitialSetup.setRecordFrequency(recordFrequency);

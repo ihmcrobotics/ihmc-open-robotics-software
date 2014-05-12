@@ -55,6 +55,6 @@ public class AtlasPosePlaybackSCSBridge
       FullRobotModel fullRobotModel = loader.createFullRobotModel(jointMap);
       SDFFullRobotModel fullRobotModelForSlider = loader.createFullRobotModel(jointMap);
 
-      new PosePlaybackSCSBridge(sdfRobot, fullRobotModel, fullRobotModelForSlider);
+      new PosePlaybackSCSBridge(sdfRobot, fullRobotModel, fullRobotModelForSlider, model.getControllerDT());
    }
 }
