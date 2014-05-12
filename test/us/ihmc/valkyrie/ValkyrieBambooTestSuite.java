@@ -12,7 +12,7 @@ import us.ihmc.utilities.test.JUnitTestSuiteConstructor;
    us.ihmc.valkyrie.ValkyriePushInSingleSupportTest.class,
    us.ihmc.valkyrie.simulation.ValkyriePosePlaybackDemoTest.class,
    us.ihmc.valkyrie.ValkyrieControllerFactoryTest.class,
-//   us.ihmc.valkyrie.kinematics.transmissions.InefficientButReadablePushrodTransmissionTest.class,
+   us.ihmc.valkyrie.kinematics.transmissions.InefficientButReadablePushrodTransmissionTest.class,
    us.ihmc.valkyrie.kinematics.ClosedFormJacobianTest.class
 })
 
