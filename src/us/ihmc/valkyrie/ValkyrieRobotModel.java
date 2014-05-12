@@ -4,6 +4,7 @@ import java.io.InputStream;
 
 import javax.media.j3d.Transform3D;
 
+import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFJointNameMap;
@@ -114,7 +115,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
-   public StateEstimatorParameters getStateEstimatorParameters(double estimatorDT)
+   public StateEstimatorParameters getStateEstimatorParameters()
    {
       if(stateEstimatorParamaters == null || this.estimatorDT != estimatorDT)
       {
@@ -188,10 +189,10 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
-   public DRCOutputWriter getOutputWriterWithAccelerationIntegration(DRCOutputWriter valkyrieOutputWriter, double controlDT, boolean runningOnRealRobot)
+   public DRCOutputWriter getOutputWriterWithAccelerationIntegration(DRCOutputWriter valkyrieOutputWriter, boolean runningOnRealRobot)
    {
       ValkyrieOutputWriterWithAccelerationIntegration valkyrieOutputWriterWithAccelerationIntegration =
-            new ValkyrieOutputWriterWithAccelerationIntegration(valkyrieOutputWriter, controlDT, runningOnRealRobot);
+            new ValkyrieOutputWriterWithAccelerationIntegration(valkyrieOutputWriter, getControllerDT(), runningOnRealRobot);
 
       valkyrieOutputWriterWithAccelerationIntegration.setAlphaDesiredVelocity(0.98);
       valkyrieOutputWriterWithAccelerationIntegration.setAlphaDesiredPosition(0.0);
@@ -243,6 +244,31 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public SDFRobot createSdfRobot(boolean createCollisionMeshes)
    {
       return loader.createRobot(jointMap, createCollisionMeshes);
+   }
+   
+   @Override
+   public double getSimulateDT()
+   {
+      return 0.0001;
+   }
+
+   @Override
+   public double getEstimatorDT()
+   {
+      return 0.002;
+   }
+
+   @Override
+   public double getControllerDT()
+   {
+      return 0.006;
+   }
+   
+
+   @Override
+   public GeneralizedSDFRobotModel getGeneralizedRobotModel()
+   {
+      return loader.getGeneralizedSDFRobotModel(getJointMap().getModelName());
    }
 
 }
