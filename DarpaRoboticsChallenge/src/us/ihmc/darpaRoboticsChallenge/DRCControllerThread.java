@@ -206,4 +206,10 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    {
       return getClass().getSimpleName();
    }
+
+   @Override
+   public DynamicGraphicObjectsListRegistry getDynamicGraphicObjectsListRegistry()
+   {
+      return dynamicGraphicObjectsListRegistry;
+   }
 }

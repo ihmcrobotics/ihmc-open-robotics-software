@@ -13,8 +13,6 @@ public interface DRCOutputWriter
 
    public abstract void writeAfterEstimator(long timestamp);
 
-   public abstract void writeAfterSimulationTick();
-
    public abstract void setFullRobotModel(SDFFullRobotModel controllerModel);
 
    public abstract void setEstimatorModel(SDFFullRobotModel estimatorModel);

@@ -51,11 +51,6 @@ public class DRCHighLevelPositionControlDemo
          recordFrequency = 1;
       scsInitialSetup.setRecordFrequency(recordFrequency);
 
-      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
-      if (guiInitialSetup.isGuiShown())
-         dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry(false);
-      else
-         dynamicGraphicObjectsListRegistry = null;
       YoVariableRegistry registry = new YoVariableRegistry("adjustableParabolicTrajectoryDemoSimRegistry");
 
       FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulation(drcControlParameters);
@@ -107,7 +102,7 @@ public class DRCHighLevelPositionControlDemo
       
       private final SDFRobot robot;
       
-      private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry(true);
+      private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
       private final ArrayList<DynamicGraphicPosition> efp_positionViz = new ArrayList<>();
       
       public HoldRobotInTheAir(SDFRobot robot, SimulationConstructionSet scs, SDFFullRobotModel sdfFullRobotModel)

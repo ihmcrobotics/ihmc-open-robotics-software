@@ -6,6 +6,7 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.LongYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class DoublePendulumController implements MultiThreadedRobotControlElement
 {
@@ -80,6 +81,11 @@ public class DoublePendulumController implements MultiThreadedRobotControlElemen
    public String getName()
    {
       return getClass().getSimpleName();
+   }
+
+   public DynamicGraphicObjectsListRegistry getDynamicGraphicObjectsListRegistry()
+   {
+      return null;
    }
 
 }
