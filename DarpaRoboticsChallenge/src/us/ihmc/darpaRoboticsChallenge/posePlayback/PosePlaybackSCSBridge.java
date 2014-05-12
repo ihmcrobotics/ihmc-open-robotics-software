@@ -39,7 +39,6 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
 public class PosePlaybackSCSBridge
 {
-   private static final double controlDT = DRCConfigParameters.CONTROL_DT;
 
    private static final boolean promptForTimeDelay = false;
 
@@ -77,13 +76,16 @@ public class PosePlaybackSCSBridge
    private final SDFRobot sdfRobot;
    private final FullRobotModel fullRobotModel;
    private final SimulationConstructionSet scs;
+   
+   private final double controlDT;
 
    // private final BagOfBalls balls = new BagOfBalls(500, 0.01, YoAppearance.AliceBlue(), registry, dynamicGraphicObjectsListRegistry);
 
-   public PosePlaybackSCSBridge(SDFRobot sdfRobot, FullRobotModel fullRobotModel, FullRobotModel fullRobotModelForSlider) throws IOException
+   public PosePlaybackSCSBridge(SDFRobot sdfRobot, FullRobotModel fullRobotModel, FullRobotModel fullRobotModelForSlider, double controlDT) throws IOException
    {
       this.sdfRobot = sdfRobot;
       this.fullRobotModel = fullRobotModel;
+      this.controlDT = controlDT;
       
       interpolator = new PlaybackPoseInterpolator(registry);
       

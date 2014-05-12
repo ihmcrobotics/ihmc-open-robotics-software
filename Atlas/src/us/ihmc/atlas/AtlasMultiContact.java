@@ -48,7 +48,7 @@ public class AtlasMultiContact
    
    
    public AtlasMultiContact(AtlasRobotModel robotModel, DRCGuiInitialSetup guiInitialSetup, AutomaticSimulationRunner automaticSimulationRunner,
-                          double timePerRecordTick, int simulationDataBufferSize, MultiContactTask task)
+                          int simulationDataBufferSize, MultiContactTask task)
    {
 
       DRCSCSInitialSetup scsInitialSetup;
@@ -81,7 +81,7 @@ public class AtlasMultiContact
       scsInitialSetup.setSimulationDataBufferSize(simulationDataBufferSize);
 
       double dt = scsInitialSetup.getDT();
-      int recordFrequency = (int) Math.round(timePerRecordTick / dt);
+      int recordFrequency = (int) Math.round(robotModel.getControllerDT() / dt);
       if (recordFrequency < 1)
          recordFrequency = 1;
       scsInitialSetup.setRecordFrequency(recordFrequency);
@@ -166,10 +166,9 @@ public class AtlasMultiContact
 
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, true);
 
-      double timePerRecordTick = DRCConfigParameters.CONTROL_DT;
       int simulationDataBufferSize = 16000;
-      new AtlasMultiContact(new AtlasRobotModel(ATLAS_ROBOT_VERSION, false, false), guiInitialSetup, automaticSimulationRunner, timePerRecordTick,
-                          simulationDataBufferSize, MultiContactTask.DEFAULT);
+      new AtlasMultiContact(new AtlasRobotModel(ATLAS_ROBOT_VERSION, false, false), guiInitialSetup, automaticSimulationRunner, simulationDataBufferSize,
+                          MultiContactTask.DEFAULT);
    }
 
 }

@@ -172,7 +172,6 @@ public abstract class DRCFlatGroundWalkingTest
       AutomaticSimulationRunner automaticSimulationRunner = null;
       DRCGuiInitialSetup guiInitialSetup = createGUIInitialSetup();
 
-      double timePerRecordTick = DRCConfigParameters.CONTROL_DT;
       int simulationDataBufferSize = 16000;
       
       GroundProfile groundProfile = new FlatGroundProfile();
@@ -186,8 +185,8 @@ public abstract class DRCFlatGroundWalkingTest
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
       
       DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup,
-                                                               scsInitialSetup, useVelocityAndHeadingScript, automaticSimulationRunner, timePerRecordTick,
-                                                               simulationDataBufferSize, cheatWithGroundHeightAtForFootstep, robotModel);
+                                                               scsInitialSetup, useVelocityAndHeadingScript, automaticSimulationRunner, simulationDataBufferSize,
+                                                               cheatWithGroundHeightAtForFootstep, robotModel);
 
       SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
 
