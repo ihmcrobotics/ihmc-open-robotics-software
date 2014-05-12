@@ -57,7 +57,6 @@ public class ValkyrieRobotModel implements DRCRobotModel
          valModelRoot.getResource("V1/meshes/2013_05_16/").getFile(),
          };
    
-   private double estimatorDT;
    private final JaxbSDFLoader loader;
    private final boolean runningOnRealRobot;
    
@@ -117,10 +116,9 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public StateEstimatorParameters getStateEstimatorParameters()
    {
-      if(stateEstimatorParamaters == null || this.estimatorDT != estimatorDT)
+      if(stateEstimatorParamaters == null)
       {
-         this.estimatorDT = estimatorDT;
-         stateEstimatorParamaters = new ValkyrieStateEstimatorParameters(runningOnRealRobot, estimatorDT);
+         stateEstimatorParamaters = new ValkyrieStateEstimatorParameters(runningOnRealRobot, getEstimatorDT());
       }
       return stateEstimatorParamaters;
    }
