@@ -19,12 +19,10 @@ import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
 import us.ihmc.commonWalkingControlModules.posePlayback.PosePlaybackPacket;
 import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.DRCController;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCPosePlaybackDemo;
 import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.DRCSimulatedRobotInterface;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.PlainDRCRobot;
+import us.ihmc.darpaRoboticsChallenge.DRCSimulationFactory;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.GroundProfile;
 import us.ihmc.utilities.AsyncContinuousExecutor;
@@ -56,9 +54,11 @@ public class ValkyriePosePlaybackDemoTest
    private static final boolean SHOW_GUI = ALWAYS_SHOW_GUI || checkNothingChanged || CREATE_MOVIE;
 
    private BlockingSimulationRunner blockingSimulationRunner;
-   private DRCController drcController;
+   private DRCSimulationFactory drcSimulation;
    private RobotVisualizer robotVisualizer;
    private final Random random = new Random(6519651L);
+   
+   private final ValkyrieRobotModel valkyrieRobotModel = new ValkyrieRobotModel(false, false);
    
    @Before
    public void showMemoryUsageBeforeTest()
@@ -81,10 +81,10 @@ public class ValkyriePosePlaybackDemoTest
          blockingSimulationRunner = null;
       }
 
-      if (drcController != null)
+      if (drcSimulation != null)
       {
-         drcController.dispose();
-         drcController = null;
+         drcSimulation.dispose();
+         drcSimulation = null;
       }
 
       if (robotVisualizer != null)
@@ -106,12 +106,12 @@ public class ValkyriePosePlaybackDemoTest
    {
       DRCPosePlaybackDemo drcPosePlaybackDemo = setupPosePlaybackSim();
       
-      drcController = drcPosePlaybackDemo.getDRCController();
+      drcSimulation = drcPosePlaybackDemo.getDRCSimulation();
       SimulationConstructionSet scs = drcPosePlaybackDemo.getSimulationConstructionSet();
       
       int numberOfPoses = 5;
       double trajectoryTime = 1.0;
-      FullRobotModel fullRobotModel = drcPosePlaybackDemo.getControllerModel();
+      FullRobotModel fullRobotModel = valkyrieRobotModel.createFullRobotModel();
       List<OneDoFJoint> jointToControl = Arrays.asList(fullRobotModel.getOneDoFJoints());
 //      PosePlaybackPacket posePlaybackPacket = new ValkyrieWarmupPoseSequencePacket(fullRobotModel, 1.0);
 //      PosePlaybackPacket posePlaybackPacket = new ValkyrieWarmupPoseSequencePacket("valkercise02.poseSequence", fullRobotModel, 1.0);
@@ -133,13 +133,13 @@ public class ValkyriePosePlaybackDemoTest
    {
       DRCPosePlaybackDemo drcPosePlaybackDemo = setupPosePlaybackSim();
       
-      drcController = drcPosePlaybackDemo.getDRCController();
+      drcSimulation = drcPosePlaybackDemo.getDRCSimulation();
       SimulationConstructionSet scs = drcPosePlaybackDemo.getSimulationConstructionSet();
       
       int numberOfPoses = 5;
       double delayTime = 0.25;
       double trajectoryTime = 1.0;
-      FullRobotModel fullRobotModel = drcPosePlaybackDemo.getControllerModel();
+      FullRobotModel fullRobotModel = valkyrieRobotModel.createFullRobotModel();
       List<OneDoFJoint> jointToControl = Arrays.asList(fullRobotModel.getOneDoFJoints());
       PosePlaybackPacket posePlaybackPacket = createRandomPosePlaybackPacket(fullRobotModel, jointToControl, numberOfPoses, delayTime, trajectoryTime);
       drcPosePlaybackDemo.setupPosePlaybackController(posePlaybackPacket, true);
@@ -158,13 +158,13 @@ public class ValkyriePosePlaybackDemoTest
    {
       DRCPosePlaybackDemo drcPosePlaybackDemo = setupPosePlaybackSim();
       
-      drcController = drcPosePlaybackDemo.getDRCController();
+      drcSimulation = drcPosePlaybackDemo.getDRCSimulation();
       SimulationConstructionSet scs = drcPosePlaybackDemo.getSimulationConstructionSet();
       
       int numberOfPoses = 5;
       double delayTime = 0.25;
       double trajectoryTime = 1.0;
-      FullRobotModel fullRobotModel = drcPosePlaybackDemo.getControllerModel();
+      FullRobotModel fullRobotModel = valkyrieRobotModel.createFullRobotModel();
       ArrayList<OneDoFJoint> jointToControl = new ArrayList<>(Arrays.asList(fullRobotModel.getOneDoFJoints()));
       int numberOfUncontrolledJoints = RandomTools.generateRandomInt(random, 2, jointToControl.size() / 2);
       for (int i = 0; i < numberOfUncontrolledJoints; i++)
@@ -185,8 +185,7 @@ public class ValkyriePosePlaybackDemoTest
 
    private DRCPosePlaybackDemo setupPosePlaybackSim()
    {
-      ValkyrieRobotModel valkyrieRobotModel = new ValkyrieRobotModel(false, false);
-      DRCSimulatedRobotInterface valkyrieRobotInterface = new PlainDRCRobot(valkyrieRobotModel);
+      
 
       AutomaticSimulationRunner automaticSimulationRunner = null;
 
@@ -196,11 +195,11 @@ public class ValkyriePosePlaybackDemoTest
       double initialYaw = 0.0;
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = valkyrieRobotModel.getDefaultRobotInitialSetup(groundHeight + floatingHeight, initialYaw);
       GroundProfile groundProfile = new FlatGroundProfile(groundHeight);
-      DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, valkyrieRobotInterface.getSimulateDT());
+      DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, valkyrieRobotModel.getSimulateDT());
       scsInitialSetup.setDrawGroundProfile(true);
       scsInitialSetup.setInitializeEstimatorToActual(true);
       
-      DRCPosePlaybackDemo drcPosePlaybackDemo = new DRCPosePlaybackDemo(valkyrieRobotInterface, robotInitialSetup, guiInitialSetup, scsInitialSetup, automaticSimulationRunner, DRCConfigParameters.CONTROL_DT, 16000, valkyrieRobotModel);
+      DRCPosePlaybackDemo drcPosePlaybackDemo = new DRCPosePlaybackDemo(robotInitialSetup, guiInitialSetup, scsInitialSetup, automaticSimulationRunner, DRCConfigParameters.CONTROL_DT, 16000, valkyrieRobotModel);
       return drcPosePlaybackDemo;
    }
 
