@@ -1,8 +1,5 @@
 package us.ihmc.sensorProcessing.simulatedSensors;
 
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
-
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
@@ -12,7 +9,6 @@ import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
 import us.ihmc.utilities.ForceSensorDefinition;
 import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.maps.ObjectObjectMap;
-import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
@@ -27,19 +23,8 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("DRCPerfectSensorReader");
    private final IntegerYoVariable step = new IntegerYoVariable("step", registry);
-   
-   private final ReentrantLock lock = new ReentrantLock();
-   private final Condition simulationDoneCondition = lock.newCondition();
-   private final Condition simulationContinueCondition = lock.newCondition();
-   private boolean simulationIsDone = false;
-   private boolean simulationContinue = false;
-   
-   private boolean started = false;
-
+  
    private final double estimatorDT;
-   private final long estimateDTinNs;
-
-   private volatile ControllerDispatcher controllerDispatcher;
 
    private final ObjectObjectMap<OneDoFJoint, SimulatedOneDoFJointPositionSensor> jointPositionSensors = new ObjectObjectMap<OneDoFJoint, SimulatedOneDoFJointPositionSensor>();
    private final ObjectObjectMap<OneDoFJoint, SimulatedOneDoFJointVelocitySensor> jointVelocitySensors = new ObjectObjectMap<OneDoFJoint, SimulatedOneDoFJointVelocitySensor>();
@@ -55,11 +40,6 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
 
    private ForceSensorDataHolder forceSensorDataHolder;
 
-   /*
-    * Multithreading support
-    */
-   private final DispatcherExecutor dispatcherExecutor = new DispatcherExecutor();
-
    private final BooleanYoVariable useFiniteDifferencesForVelocities;
    private final DoubleYoVariable alphaFiniteDifferences;
    private final DoubleYoVariable slopTimeFiniteDifferences;
@@ -71,7 +51,6 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
       sensorProcessing = new SensorProcessing(stateEstimatorSensorDefinitions, sensorFilterParameters, sensorNoiseParameters, registry);
       
       this.estimatorDT = sensorFilterParameters.getEstimatorDT();
-      this.estimateDTinNs = TimeTools.secondsToNanoSeconds(estimatorDT);
       step.set(29831);
 
       useFiniteDifferencesForVelocities = new BooleanYoVariable("useFiniteDifferencesForVelocities", registry);
@@ -131,39 +110,84 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
       return sensorProcessing;
    }
 
-   public void run()
+   public void read()
    {
-      if(!started)
+      for (int i = 0; i < jointPositionSensors.getLength(); i++)
       {
-         dispatcherExecutor.start();
-         started = true;
-      }
-      
-      if (controllerDispatcher != null)
-      {
-         controllerDispatcher.waitUntilComputationIsDone();
-      }
-      lock.lock();
-      simulationIsDone = true;
-      simulationDoneCondition.signalAll();
+         SimulatedOneDoFJointPositionSensor simulatedOneDoFJointPositionSensor = jointPositionSensors.getSecond(i);
+         simulatedOneDoFJointPositionSensor.startComputation();
+         simulatedOneDoFJointPositionSensor.waitUntilComputationIsDone();
+         Double value = simulatedOneDoFJointPositionSensor.getJointPositionOutputPort().getData();
+         sensorProcessing.setJointPositionSensorValue(jointPositionSensors.getFirst(i), value);
 
-      while(!simulationContinue)
-      {
-         try
+         BacklashCompensatingVelocityYoVariable finiteDifferenceVelocity = finiteDifferenceVelocities.getSecond(i);
+         finiteDifferenceVelocity.update(value);
+
+         if (useFiniteDifferencesForVelocities.getBooleanValue())
          {
-            simulationContinueCondition.await();            
-         }
-         catch (InterruptedException e)
-         {
+            sensorProcessing.setJointVelocitySensorValue(jointVelocitySensors.getFirst(i), finiteDifferenceVelocity.getDoubleValue());
          }
       }
-      simulationContinue = false;
-      lock.unlock();
+
+      if (!useFiniteDifferencesForVelocities.getBooleanValue())
+      {
+         for (int i = 0; i < jointVelocitySensors.getLength(); i++)
+         {
+            SimulatedOneDoFJointVelocitySensor simulatedOneDoFJointVelocitySensor = jointVelocitySensors.getSecond(i);
+            simulatedOneDoFJointVelocitySensor.startComputation();
+            simulatedOneDoFJointVelocitySensor.waitUntilComputationIsDone();
+            Double value = simulatedOneDoFJointVelocitySensor.getJointVelocityOutputPort().getData();
+            sensorProcessing.setJointVelocitySensorValue(jointVelocitySensors.getFirst(i), value);
+         }
+      }
+
+      for (int i = 0; i < orientationSensors.getLength(); i++)
+      {
+         SimulatedOrientationSensorFromRobot orientationSensor = orientationSensors.getSecond(i);
+         orientationSensor.startComputation();
+         orientationSensor.waitUntilComputationIsDone();
+         Matrix3d value = orientationSensor.getOrientationOutputPort().getData();
+         sensorProcessing.setOrientationSensorValue(orientationSensors.getFirst(i), value);
+      }
+
+      for (int i = 0; i < angularVelocitySensors.getLength(); i++)
+      {
+         SimulatedAngularVelocitySensorFromRobot angularVelocitySensor = angularVelocitySensors.getSecond(i);
+         angularVelocitySensor.startComputation();
+         angularVelocitySensor.waitUntilComputationIsDone();
+         Vector3d value = angularVelocitySensor.getAngularVelocityOutputPort().getData();
+         sensorProcessing.setAngularVelocitySensorValue(angularVelocitySensors.getFirst(i), value);
+      }
+
+      for (int i = 0; i < linearAccelerationSensors.getLength(); i++)
+      {
+
+         SimulatedLinearAccelerationSensorFromRobot linearAccelerationSensor = linearAccelerationSensors.getSecond(i);
+         linearAccelerationSensor.startComputation();
+         linearAccelerationSensor.waitUntilComputationIsDone();
+         Vector3d value = linearAccelerationSensor.getLinearAccelerationOutputPort().getData();
+         sensorProcessing.setLinearAccelerationSensorValue(linearAccelerationSensors.getFirst(i), value);
+      }
+
+      if (forceSensorDataHolder != null)
+      {
+         for (int i = 0; i < forceTorqueSensors.getLength(); i++)
+         {
+            final WrenchCalculatorInterface forceTorqueSensor = forceTorqueSensors.getSecond(i);
+            forceTorqueSensor.calculate();
+            forceSensorDataHolder.setForceSensorValue(forceTorqueSensors.getFirst(i), forceTorqueSensor.getWrench());
+         }
+      }
+
+      sensorProcessing.startComputation();
+      sensorProcessing.waitUntilComputationIsDone();
+
+      step.increment();
+      
    }
 
    public void setControllerDispatcher(ControllerDispatcher controllerDispatcher)
    {
-      this.controllerDispatcher = controllerDispatcher;
    }
 
    public void setForceSensorDataHolder(ForceSensorDataHolder forceSensorDataHolder)
@@ -171,128 +195,9 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
       this.forceSensorDataHolder = forceSensorDataHolder;
    }
 
-   private class DispatcherExecutor extends Thread
+   @Deprecated
+   public void run()
    {
-
-      public void run()
-      {
-         while (true)
-         {
-            
-            // Wait for simulation to finish
-
-            lock.lock();
-            while(!simulationIsDone)
-            {
-               try
-               {
-                  simulationDoneCondition.await();
-               }
-               catch (InterruptedException e)
-               {
-               }
-            }
-            simulationIsDone = false;
-            lock.unlock();
-            
-            for (int i = 0; i < jointPositionSensors.getLength(); i++)
-            {
-               SimulatedOneDoFJointPositionSensor simulatedOneDoFJointPositionSensor = jointPositionSensors.getSecond(i);
-               simulatedOneDoFJointPositionSensor.startComputation();
-               simulatedOneDoFJointPositionSensor.waitUntilComputationIsDone();
-               Double value = simulatedOneDoFJointPositionSensor.getJointPositionOutputPort().getData();
-               sensorProcessing.setJointPositionSensorValue(jointPositionSensors.getFirst(i), value);
-
-               BacklashCompensatingVelocityYoVariable finiteDifferenceVelocity = finiteDifferenceVelocities.getSecond(i);
-               finiteDifferenceVelocity.update(value);
-
-               if (useFiniteDifferencesForVelocities.getBooleanValue())
-               {
-                  sensorProcessing.setJointVelocitySensorValue(jointVelocitySensors.getFirst(i), finiteDifferenceVelocity.getDoubleValue());
-               }
-            }
-
-            if (!useFiniteDifferencesForVelocities.getBooleanValue())
-            {
-               for (int i = 0; i < jointVelocitySensors.getLength(); i++)
-               {
-                  SimulatedOneDoFJointVelocitySensor simulatedOneDoFJointVelocitySensor = jointVelocitySensors.getSecond(i);
-                  simulatedOneDoFJointVelocitySensor.startComputation();
-                  simulatedOneDoFJointVelocitySensor.waitUntilComputationIsDone();
-                  Double value = simulatedOneDoFJointVelocitySensor.getJointVelocityOutputPort().getData();
-                  sensorProcessing.setJointVelocitySensorValue(jointVelocitySensors.getFirst(i), value);
-               }
-            }
-
-            for (int i = 0; i < orientationSensors.getLength(); i++)
-            {
-               SimulatedOrientationSensorFromRobot orientationSensor = orientationSensors.getSecond(i);
-               orientationSensor.startComputation();
-               orientationSensor.waitUntilComputationIsDone();
-               Matrix3d value = orientationSensor.getOrientationOutputPort().getData();
-               sensorProcessing.setOrientationSensorValue(orientationSensors.getFirst(i), value);
-            }
-
-            for (int i = 0; i < angularVelocitySensors.getLength(); i++)
-            {
-               SimulatedAngularVelocitySensorFromRobot angularVelocitySensor = angularVelocitySensors.getSecond(i);
-               angularVelocitySensor.startComputation();
-               angularVelocitySensor.waitUntilComputationIsDone();
-               Vector3d value = angularVelocitySensor.getAngularVelocityOutputPort().getData();
-               sensorProcessing.setAngularVelocitySensorValue(angularVelocitySensors.getFirst(i), value);
-            }
-
-            for (int i = 0; i < linearAccelerationSensors.getLength(); i++)
-            {
-
-               SimulatedLinearAccelerationSensorFromRobot linearAccelerationSensor = linearAccelerationSensors.getSecond(i);
-               linearAccelerationSensor.startComputation();
-               linearAccelerationSensor.waitUntilComputationIsDone();
-               Vector3d value = linearAccelerationSensor.getLinearAccelerationOutputPort().getData();
-               sensorProcessing.setLinearAccelerationSensorValue(linearAccelerationSensors.getFirst(i), value);
-            }
-
-            if (forceSensorDataHolder != null)
-            {
-               for (int i = 0; i < forceTorqueSensors.getLength(); i++)
-               {
-                  final WrenchCalculatorInterface forceTorqueSensor = forceTorqueSensors.getSecond(i);
-                  forceTorqueSensor.calculate();
-                  forceSensorDataHolder.setForceSensorValue(forceTorqueSensors.getFirst(i), forceTorqueSensor.getWrench());
-               }
-            }
-
-            sensorProcessing.startComputation();
-            sensorProcessing.waitUntilComputationIsDone();
-
-            step.increment();
-
-            // Signal sim to continue
-
-            lock.lock();
-            simulationContinue = true;
-            simulationContinueCondition.signalAll();
-            lock.unlock();
-
-            if(controllerDispatcher != null)
-            {
-               try
-               {
-                  controllerDispatcher.startEstimator(estimateDTinNs * step.getIntegerValue(), System.nanoTime());
-               }
-               catch(Exception e)
-               {
-                  e.printStackTrace();
-                  System.exit(-1);
-               }
-            }
-         }
-      }
-   }
-
-   public void read()
-   {
-      // TODO Auto-generated method stub
-      
+      read();
    }
 }

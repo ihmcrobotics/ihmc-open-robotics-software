@@ -119,7 +119,7 @@ public class DRCPosePlaybackDemo
       
       private final SDFRobot robot;
       
-      private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry(true);
+      private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
       private final ArrayList<DynamicGraphicPosition> efp_positionViz = new ArrayList<>();
       
       public HoldRobotInTheAir(SDFRobot robot, SimulationConstructionSet scs, SDFFullRobotModel sdfFullRobotModel)

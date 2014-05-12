@@ -1,251 +1,157 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
-import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.PIDLidarTorqueController;
 import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
 import us.ihmc.darpaRoboticsChallenge.controllers.EstimationLinkHolder;
-import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.BlockingThreadSynchronizer;
-import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadSynchronizer;
+import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadDataSynchronizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.ScsInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCSimulationOutputWriter;
-import us.ihmc.darpaRoboticsChallenge.sensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCSimulatedSensorNoiseParameters;
 import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCStateEstimatorInterface;
+import us.ihmc.robotDataCommunication.VisualizerUtils;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReaderFromRobotFactory;
-import us.ihmc.sensorProcessing.stateEstimation.StateEstimator;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
-import us.ihmc.sensorProcessing.stateEstimation.evaluation.RunnableRunnerController;
-import us.ihmc.sensorProcessing.stateEstimation.evaluation.StateEstimatorErrorCalculatorController;
-import us.ihmc.util.NonRealtimeThreadFactory;
-import us.ihmc.util.ThreadFactory;
-import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.net.TimestampProvider;
 
-import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.UnreasonableAccelerationException;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
-import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
-import com.yobotics.simulationconstructionset.robotController.ModularRobotController;
-import com.yobotics.simulationconstructionset.util.environments.SelectableObjectListener;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.robotController.AbstractThreadedRobotController;
+import com.yobotics.simulationconstructionset.robotController.MultiThreadedRobotController;
+import com.yobotics.simulationconstructionset.robotController.SingleThreadedRobotController;
 import com.yobotics.simulationconstructionset.util.ground.TerrainObject;
+import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class DRCSimulationFactory
 {
-   private static final boolean COMPUTE_ESTIMATOR_ERROR = true;
+   private static final boolean RUN_MULTI_THREADED = true;
+   
+   private static final double gravity = -9.81;
+   
+   private final SimulationConstructionSet scs;
+   private final SDFRobot simulatedRobot;
+   
+   private DRCEstimatorThread drcEstimatorThread;
+   private DRCControllerThread drcControllerThread;
+   
+   private final SimulatedDRCRobotTimeProvider simulatedDRCRobotTimeProvider;
 
-   private final HumanoidRobotSimulation<SDFRobot> sim;
-   private final DRCController controller;
-   
-   private static SDFRobot simulatedRobot;
-   private static SimulatedDRCRobotTimeProvider timestampProvider;
-   
    public DRCSimulationFactory(DRCRobotModel drcRobotModel, ControllerFactory controllerFactory,
-         final TerrainObject environmentTerrain, DRCRobotInitialSetup<SDFRobot> robotInitialSetup, ScsInitialSetup scsInitialSetup,
+         TerrainObject environmentTerrain, DRCRobotInitialSetup<SDFRobot> robotInitialSetup, ScsInitialSetup scsInitialSetup,
          DRCGuiInitialSetup guiInitialSetup, GlobalDataProducer globalDataProducer, RobotVisualizer robotVisualizer)
    {
-      CommonAvatarEnvironmentInterface env;
+      simulatedDRCRobotTimeProvider = new SimulatedDRCRobotTimeProvider(drcRobotModel.getSimulateDT());
+      simulatedRobot = drcRobotModel.createSdfRobot(false);
+
+      scs = new SimulationConstructionSet(simulatedRobot, guiInitialSetup.getGraphics3DAdapter(), scsInitialSetup.getSimulationDataBufferSize());
+      scs.setDT(drcRobotModel.getSimulateDT(), 1);
+
+      createRobotController(drcRobotModel, controllerFactory, globalDataProducer, robotVisualizer, simulatedRobot, scs, scsInitialSetup, robotInitialSetup);
+
+      simulatedRobot.setDynamicIntegrationMethod(scsInitialSetup.getDynamicIntegrationMethod());
+
+      scsInitialSetup.initializeSimulation(scs);
       
+
+      if(guiInitialSetup.isGuiShown())
+      {
+         VisualizerUtils.createOverheadPlotter(drcControllerThread.getDynamicGraphicObjectsListRegistry(), scs, DRCLocalConfigParameters.SHOW_OVERHEAD_VIEW);           
+      }
+      
+      guiInitialSetup.initializeGUI(scs, simulatedRobot, drcRobotModel);
+
       if (environmentTerrain != null)
       {
-         env = new CommonAvatarEnvironmentInterface()
-
-         {
-
-            @Override
-            public TerrainObject getTerrainObject()
-            {
-               // TODO Auto-generated method stub
-               return environmentTerrain;
-            }
-
-            @Override
-            public List<Robot> getEnvironmentRobots()
-            {
-               return new ArrayList<Robot>();
-            }
-
-            @Override
-            public void createAndSetContactControllerToARobot()
-            {
-            }
-
-            @Override
-            public void addSelectableListenerToSelectables(SelectableObjectListener selectedListener)
-            {
-            }
-
-            @Override
-            public void addContactPoints(ExternalForcePoint[] externalForcePoints)
-            {
-            }
-         };
+         scs.addStaticLinkGraphics(environmentTerrain.getLinkGraphics());
       }
-      else
-      {
-         env = null;
-      }
-      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry(false);
-      Pair<HumanoidRobotSimulation<SDFRobot>, DRCController> simAndController = createSimulation(controllerFactory, env, robotInitialSetup, scsInitialSetup, guiInitialSetup, globalDataProducer, robotVisualizer, dynamicGraphicObjectsListRegistry, false, drcRobotModel);
-      sim = simAndController.first();
-      controller = simAndController.second();
-   }
-   
-   public static Pair<HumanoidRobotSimulation<SDFRobot>, DRCController> createSimulation(ControllerFactory controllerFactory,
-         CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, DRCRobotInitialSetup<SDFRobot> robotInitialSetup,
-         ScsInitialSetup scsInitialSetup, DRCGuiInitialSetup guiInitialSetup, GlobalDataProducer dataProducer, RobotVisualizer robotVisualizer,
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, boolean useNewPhysics, DRCRobotModel drcRobotModel)
-   {
-      GUISetterUpperRegistry guiSetterUpperRegistry = new GUISetterUpperRegistry();
 
-      
-      DRCRobotSensorInformation sensorInformation = drcRobotModel.getSensorInformation();
-
-      double estimateDT = drcRobotModel.getEstimatorDT();
-      double simulateDT = drcRobotModel.getSimulateDT();
-      double controlDT = drcRobotModel.getControllerDT();
-      StateEstimatorParameters stateEstimatorParameters = drcRobotModel.getStateEstimatorParameters();
-      
-      int estimationTicksPerControlTick = (int) (estimateDT / simulateDT);
-
-      simulatedRobot = drcRobotModel.createSdfRobot(false);
-      YoVariableRegistry estimatorRegistry = new YoVariableRegistry("Estimator");
-      YoVariableRegistry controllerRegistry = new YoVariableRegistry("controllerRegistry");
-//      YoVariableThreadAccessValidator estimatorThreadValidator = new YoVariableThreadAccessValidator(estimatorRegistry);
-//      YoVariableThreadAccessValidator controllerThreadValidator = new YoVariableThreadAccessValidator(controllerRegistry);
-      
-      YoVariableRegistry simulationRegistry = simulatedRobot.getRobotsYoVariableRegistry();
-      simulationRegistry.addChild(estimatorRegistry);
-      simulationRegistry.addChild(controllerRegistry);
+      scsInitialSetup.initializeRobot(simulatedRobot, null);
+      robotInitialSetup.initializeRobot(simulatedRobot, drcRobotModel.getJointMap());
+      simulatedRobot.update();
       
       setupJointDamping(simulatedRobot, drcRobotModel);
 
-      DRCOutputWriter drcOutputWriter = new DRCSimulationOutputWriter(simulatedRobot, dynamicGraphicObjectsListRegistry, robotVisualizer, simulationRegistry);
+      
+   }
+
+
+   private void createRobotController(DRCRobotModel drcRobotModel, ControllerFactory controllerFactory, GlobalDataProducer globalDataProducer,
+         RobotVisualizer robotVisualizer, SDFRobot simulatedRobot, SimulationConstructionSet scs, ScsInitialSetup scsInitialSetup,
+         DRCRobotInitialSetup<SDFRobot> robotInitialSetup)
+   {
+      SensorNoiseParameters sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersZeroNoise();
+      StateEstimatorParameters stateEstimatorParameters = drcRobotModel.getStateEstimatorParameters();
+      
+      YoVariableRegistry registry = new YoVariableRegistry("DRCSimulation");
+      
+      LidarControllerInterface lidarControllerInterface = new PIDLidarTorqueController(DRCConfigParameters.LIDAR_SPINDLE_VELOCITY,
+            drcRobotModel.getSimulateDT());
+      SensorReaderFactory sensorReaderFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(simulatedRobot, sensorNoiseParameters,
+            stateEstimatorParameters.getSensorFilterParameters(), drcRobotModel.getSensorInformation().getIMUSensorsToUse(), registry);
+      
+      ThreadDataSynchronizer threadDataSynchronizer = new ThreadDataSynchronizer(drcRobotModel);
+      DRCOutputWriter drcOutputWriter = new DRCSimulationOutputWriter(simulatedRobot, robotVisualizer, registry);
       if (DRCLocalConfigParameters.INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES)
       {
          drcOutputWriter = drcRobotModel.getOutputWriterWithAccelerationIntegration(drcOutputWriter, false);
       }
       
-      if (DRCConfigParameters.LIMIT_CONTROLLER_OUTPUT_TORQUES)
-      {
-//         drcOutputWriter = new DRCOutputWriterWithTorqueLimits(drcOutputWriter);
-         throw new RuntimeException("Atlas torque limits are under NDA");
-      }
       
-      // TODO: Build LIDAR here
-      LidarControllerInterface lidarControllerInterface;
-
-      SensorNoiseParameters sensorNoiseParameters;
-
-      lidarControllerInterface = new PIDLidarTorqueController(DRCConfigParameters.LIDAR_SPINDLE_VELOCITY, controlDT);
-      sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersZeroNoise();
-//         sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersALittleNoise();
-//         sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersGazeboSDF();
-
-      //    SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMapForEstimator;
-      //    scsToInverseDynamicsJointMapForEstimator = robotInterface.getSCSToInverseDynamicsJointMap();
-
-
-      ScsCollisionConfigure collisionConfigure = null;
+      drcEstimatorThread = new DRCEstimatorThread(drcRobotModel, sensorReaderFactory, threadDataSynchronizer, drcOutputWriter,
+            globalDataProducer, simulatedDRCRobotTimeProvider, drcRobotModel.getEstimatorDT(), gravity);
       
-      if( useNewPhysics ) {
-         collisionConfigure = drcRobotModel.getPhysicsConfigure(simulatedRobot);
-      }
-
-      SensorReaderFactory sensorReaderFactory; // this is the connection between the ModularRobotController and the DRCController below
-      SimulatedSensorHolderAndReaderFromRobotFactory simulatedSensorHolderAndReaderFromRobotFactory;
-      ModularRobotController controller = new ModularRobotController("SensorReaders");
-      if (DRCConfigParameters.USE_PERFECT_SENSORS)
+      drcControllerThread = new DRCControllerThread(drcRobotModel, controllerFactory, lidarControllerInterface, threadDataSynchronizer,
+            drcOutputWriter, globalDataProducer, drcRobotModel.getControllerDT(), gravity);
+      
+      
+      AbstractThreadedRobotController multiThreadedRobotController;
+      
+      if(RUN_MULTI_THREADED)
       {
-         DRCPerfectSensorReaderFactory drcPerfectSensorReaderFactory = new DRCPerfectSensorReaderFactory(simulatedRobot, estimateDT);
-         controller.addRobotController(drcPerfectSensorReaderFactory.getSensorReader());
-         sensorReaderFactory = drcPerfectSensorReaderFactory;
+         multiThreadedRobotController = new MultiThreadedRobotController("DRCSimulation", simulatedRobot.getYoTime(), scs);         
       }
       else
       {
-         simulatedSensorHolderAndReaderFromRobotFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(
-               simulatedRobot, sensorNoiseParameters, stateEstimatorParameters.getSensorFilterParameters(), sensorInformation.getIMUSensorsToUse(), estimatorRegistry);
-         sensorReaderFactory = simulatedSensorHolderAndReaderFromRobotFactory;
+         System.err.println("[WARNING] Running simulation in single threaded mode");
+         multiThreadedRobotController = new SingleThreadedRobotController("DRCSimulation", simulatedRobot.getYoTime(), scs);
       }
-
-//      SimulatedHandControllerDispatcher handControllerDispatcher = new SimulatedHandControllerDispatcher(simulatedRobot, robotInterface.getTimeStampProvider(),
-//            estimationTicksPerControlTick);
-//      controller.addRobotController(handControllerDispatcher);
-
-      controller.addRobotController(lidarControllerInterface);
-
-      double gravity = simulatedRobot.getGravityZ();
-     
-      ThreadFactory threadFactory = new NonRealtimeThreadFactory();
-      ThreadSynchronizer threadSynchronizer = new BlockingThreadSynchronizer();
+      int estimatorTicksPerSimulationTick = (int) Math.round(drcRobotModel.getEstimatorDT()/drcRobotModel.getSimulateDT());
+      int controllerTicksPerSimulationTick = (int) Math.round(drcRobotModel.getControllerDT()/drcRobotModel.getSimulateDT());
+      multiThreadedRobotController.addController(drcEstimatorThread, estimatorTicksPerSimulationTick, false);
+      multiThreadedRobotController.addController(drcControllerThread, controllerTicksPerSimulationTick, true);
       
-      timestampProvider = new SimulatedDRCRobotTimeProvider(drcRobotModel.getSimulateDT());
-      simulatedRobot.setController(timestampProvider, estimationTicksPerControlTick);
-      SDFFullRobotModelFactory fullRobotModelFactory = new SDFFullRobotModelFactory(drcRobotModel.getGeneralizedRobotModel(), drcRobotModel.getJointMap());
-      DRCController robotController = new DRCController(fullRobotModelFactory, controllerFactory, sensorReaderFactory, drcOutputWriter,
-            lidarControllerInterface, gravity, controlDT, dataProducer, timestampProvider,
-            dynamicGraphicObjectsListRegistry, guiSetterUpperRegistry, estimatorRegistry, controllerRegistry, threadFactory, threadSynchronizer, 
-            drcRobotModel, drcRobotModel.getContactPointParamaters(false, false), estimateDT);
-      robotController.initialize();
 
-      if (simulatedSensorHolderAndReaderFromRobotFactory != null)
-         controller.addRobotController(new RunnableRunnerController(simulatedSensorHolderAndReaderFromRobotFactory.getSensorReader()));
-
-      final HumanoidRobotSimulation<SDFRobot> humanoidRobotSimulation = new HumanoidRobotSimulation<SDFRobot>(simulatedRobot, controller,
-            estimationTicksPerControlTick, commonAvatarEnvironmentInterface, simulatedRobot.getAllExternalForcePoints(), robotInitialSetup, scsInitialSetup,
-            guiInitialSetup, guiSetterUpperRegistry, dynamicGraphicObjectsListRegistry, drcRobotModel,collisionConfigure);
-
-      //TODO: Can only do this if we have a simulation...
       if (scsInitialSetup.getInitializeEstimatorToActual())
       {
          System.err.println("Warning! Initializing Estimator to Actual!");
-         DRCStateEstimatorInterface drcStateEstimator = robotController.getDRCStateEstimator();
+         DRCStateEstimatorInterface drcStateEstimator = drcEstimatorThread.getDRCStateEstimator();
          initializeEstimatorToActual(drcStateEstimator, robotInitialSetup, simulatedRobot, drcRobotModel.getJointMap());
       }
-
-      if (COMPUTE_ESTIMATOR_ERROR && robotController.getDRCStateEstimator() != null)
-      {
-         DRCStateEstimatorInterface drcStateEstimator = robotController.getDRCStateEstimator();
-         StateEstimator stateEstimator = drcStateEstimator.getStateEstimator();
-
-         Joint estimationJoint = getEstimationJoint(simulatedRobot,drcRobotModel.getJointMap());
-
-         StateEstimatorErrorCalculatorController stateEstimatorErrorCalculatorController = new StateEstimatorErrorCalculatorController(stateEstimator,
-               simulatedRobot, estimationJoint, stateEstimatorParameters.getAssumePerfectIMU(), stateEstimatorParameters.useKinematicsBasedStateEstimator());
-         simulatedRobot.setController(stateEstimatorErrorCalculatorController, estimationTicksPerControlTick);
-      }
       
-//      estimatorThreadValidator.start();
-//      controllerThreadValidator.start();
       
-      return new Pair<HumanoidRobotSimulation<SDFRobot>, DRCController>(humanoidRobotSimulation, robotController);
+      simulatedRobot.setController(multiThreadedRobotController);
+      simulatedRobot.setController(lidarControllerInterface, estimatorTicksPerSimulationTick);
+      simulatedRobot.setController(simulatedDRCRobotTimeProvider);
    }
-
+   
    private static Joint getEstimationJoint(SDFRobot simulatedRobot, DRCRobotJointMap jointMap)
    {
       Joint estimationJoint;
@@ -303,57 +209,55 @@ public class DRCSimulationFactory
       }
    }
 
-   //   public static DesiredCoMAccelerationsFromRobotStealerController createAndAddDesiredCoMAccelerationFromRobotStealerController(ReferenceFrame estimationFrame,
-   //         double controlDT, int simulationTicksPerControlTick, SDFRobot simulatedRobot, ArrayList<RobotControllerAndParameters> robotControllersAndParameters)
-   //   {
-   //      InverseDynamicsJointsFromSCSRobotGenerator generator = new InverseDynamicsJointsFromSCSRobotGenerator(simulatedRobot);
-   //
-   //      // TODO: Better way to get estimationJoint
-   //      Joint estimationJoint = simulatedRobot.getRootJoints().get(0);
-   //      double comAccelerationProcessNoiseStandardDeviation = Math.sqrt(1e-1);
-   //      double angularAccelerationProcessNoiseStandardDeviation = Math.sqrt(1e-1);
-   //
-   //      DesiredCoMAccelerationsFromRobotStealerController desiredCoMAccelerationsFromRobotStealerController = new DesiredCoMAccelerationsFromRobotStealerController(
-   //            estimationFrame, comAccelerationProcessNoiseStandardDeviation, angularAccelerationProcessNoiseStandardDeviation, generator, estimationJoint,
-   //            controlDT);
-   //
-   //      RobotControllerAndParameters desiredCoMAccelerationsFromRobotStealerControllerAndParameters = new RobotControllerAndParameters(
-   //            desiredCoMAccelerationsFromRobotStealerController, simulationTicksPerControlTick);
-   //      robotControllersAndParameters.add(desiredCoMAccelerationsFromRobotStealerControllerAndParameters);
-   //
-   //      return desiredCoMAccelerationsFromRobotStealerController;
-   //   }
-   
+
    public SimulationConstructionSet getSimulationConstructionSet()
    {
-      return sim.getSimulationConstructionSet();
+      return scs;
    }
-   
+
+
    public void start(AutomaticSimulationRunner automaticSimulationRunner)
    {
-      sim.start(automaticSimulationRunner);
+      Thread simThread = new Thread(scs, "SCS simulation thread");
+      simThread.start();
+
+      if (automaticSimulationRunner != null)
+      {
+         try
+         {
+            automaticSimulationRunner.automaticallyRunSimulation(scs);
+         }
+         catch (SimulationExceededMaximumTimeException e)
+         {
+            throw new RuntimeException("Simulation Exceeded maximum runtime!");
+         }
+      }
    }
+
 
    public void dispose()
    {
-      controller.dispose();
+      //TODO: Implement me
    }
+
+
    public SDFRobot getRobot()
    {
-      return sim.getRobot();
+      return simulatedRobot;
    }
-   
+
+
    @Deprecated
    public void addAdditionalYoVariableRegistriesToSCS(YoVariableRegistry registry)
    {
-      sim.addAdditionalYoVariableRegistriesToSCS(registry);
+      System.err.println("[DRCSimulationFactory] Adding yovariables to simulation registry. Do not do this.");
+      scs.getRootRegistry().addChild(registry);
    }
 
 
    public TimestampProvider getTimeStampProvider()
    {
-      return timestampProvider;
+      return simulatedDRCRobotTimeProvider;
    }
 
-   
 }

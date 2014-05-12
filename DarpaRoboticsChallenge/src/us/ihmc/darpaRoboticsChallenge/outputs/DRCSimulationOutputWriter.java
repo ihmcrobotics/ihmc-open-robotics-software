@@ -15,7 +15,6 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RawOutputWriter;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.math.filter.DelayedDoubleYoVariable;
 
 public class DRCSimulationOutputWriter extends SDFPerfectSimulatedOutputWriter implements DRCOutputWriter
@@ -24,7 +23,6 @@ public class DRCSimulationOutputWriter extends SDFPerfectSimulatedOutputWriter i
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
    private final RobotVisualizer robotVisualizer;
    private final ObjectObjectMap<OneDoFJoint, DoubleYoVariable> rawJointTorques;
    private final ObjectObjectMap<OneDoFJoint, DelayedDoubleYoVariable> delayedJointTorques;
@@ -33,11 +31,9 @@ public class DRCSimulationOutputWriter extends SDFPerfectSimulatedOutputWriter i
 
    double[] prevError;
 
-   public DRCSimulationOutputWriter(SDFRobot robot, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
-                                    RobotVisualizer robotVisualizer, YoVariableRegistry simulationRegistry)
+   public DRCSimulationOutputWriter(SDFRobot robot, RobotVisualizer robotVisualizer, YoVariableRegistry simulationRegistry)
    {
       super(robot);
-      this.dynamicGraphicObjectsListRegistry = dynamicGraphicObjectsListRegistry;
       this.robotVisualizer = robotVisualizer;
 
       rawJointTorques = new ObjectObjectMap<OneDoFJoint, DoubleYoVariable>();
@@ -49,21 +45,6 @@ public class DRCSimulationOutputWriter extends SDFPerfectSimulatedOutputWriter i
 
    @Override
    public void writeAfterController(long timestamp)
-   {
-      // Do not write here, because it will set the robot's torques while the simulation is running
-   }
-
-   @Override
-   public void writeAfterEstimator(long timestamp)
-   {
-      if (robotVisualizer != null)
-      {
-         robotVisualizer.update(timestamp);
-      }
-   }
-
-   @Override
-   public void writeAfterSimulationTick()
    {
       for (int i = 0; i < revoluteJoints.size(); i++)
       {
@@ -96,9 +77,14 @@ public class DRCSimulationOutputWriter extends SDFPerfectSimulatedOutputWriter i
          rawOutputWriters.get(i).write();
       }
 
-      if (dynamicGraphicObjectsListRegistry != null)
+   }
+
+   @Override
+   public void writeAfterEstimator(long timestamp)
+   {
+      if (robotVisualizer != null)
       {
-         dynamicGraphicObjectsListRegistry.update();
+         robotVisualizer.update(timestamp);
       }
    }
 

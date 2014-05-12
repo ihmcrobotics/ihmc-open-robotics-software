@@ -14,6 +14,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParamaters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
+import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.JointConfigurationGatherer;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
 import us.ihmc.darpaRoboticsChallenge.sensors.RobotJointLimitWatcher;
 import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCStateEstimatorInterface;
@@ -28,8 +29,10 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.utilities.IMUDefinition;
+import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.net.TimestampProvider;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.TotalMassCalculator;
 
@@ -60,7 +63,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
 
    public DRCEstimatorThread(DRCRobotModel robotModel, SensorReaderFactory sensorReaderFactory, ThreadDataSynchronizer threadDataSynchronizer,
-         DRCOutputWriter drcOutputWriter, double estimatorDT, double gravity)
+         DRCOutputWriter drcOutputWriter, GlobalDataProducer dataProducer, TimestampProvider timestampProvider, double estimatorDT, double gravity)
    {
       this.threadDataSynchronizer = threadDataSynchronizer;
       this.outputWriter = drcOutputWriter;
@@ -105,6 +108,14 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       RobotJointLimitWatcher robotJointLimitWatcher = new RobotJointLimitWatcher(estimatorFullRobotModel.getOneDoFJoints());
       estimatorController.addRobotController(robotJointLimitWatcher);
 
+      
+      if (dataProducer != null)
+      {
+         JointConfigurationGatherer jointConfigurationGathererAndProducer = new JointConfigurationGatherer(estimatorFullRobotModel, estimatorRegistry, robotModel.getJointMap());
+
+         estimatorController.setRawOutputWriter(new DRCPoseCommunicator(estimatorFullRobotModel, jointConfigurationGathererAndProducer,
+                 dataProducer.getObjectCommunicator(), timestampProvider, robotModel));
+      }
       
       firstTick.set(true);
       estimatorRegistry.addChild(estimatorController.getYoVariableRegistry());
@@ -203,6 +214,12 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    public DRCStateEstimatorInterface getDRCStateEstimator()
    {
       return drcStateEstimator;
+   }
+
+   @Override
+   public DynamicGraphicObjectsListRegistry getDynamicGraphicObjectsListRegistry()
+   {
+      return dynamicGraphicObjectsListRegistry;
    }
 
 }
