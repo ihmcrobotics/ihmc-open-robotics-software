@@ -281,4 +281,10 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
          }
       }
    }
+
+   public void read()
+   {
+      // TODO Auto-generated method stub
+      
+   }
 }

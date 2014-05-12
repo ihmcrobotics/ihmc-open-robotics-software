@@ -18,38 +18,32 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MultiContactTestHumanoidControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.DRCController;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCSimulationFactory;
-import us.ihmc.darpaRoboticsChallenge.HumanoidRobotSimulation;
 import us.ihmc.darpaRoboticsChallenge.MultiContactTestEnvironment;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.HandContactParameters;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.PlainDRCRobot;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
-import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 import com.martiansoftware.jsap.JSAPException;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.inputdevices.MidiSliderBoard;
 
 public class AtlasMultiContact
 {
    private static final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.DRC_NO_HANDS;
    
-   private final HumanoidRobotSimulation<SDFRobot> drcSimulation;
+   private final DRCSimulationFactory drcSimulation;
    private final MultiContactTestEnvironment environment;
    private final SimulationConstructionSet simulationConstructionSet;
-   private final DRCController drcController;
    public static enum  MultiContactTask {DEFAULT, PUSHUP} ;
    
    
@@ -82,16 +76,8 @@ public class AtlasMultiContact
       DRCRobotJointMap jointMap = robotModel.getJointMap();
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
 
-      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
-      boolean updateInSimulationThread=false; //being updated in DRC-Controller thread, SCS only for display
-      if (guiInitialSetup.isGuiShown())
-          dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry(updateInSimulationThread);
-       else
-          dynamicGraphicObjectsListRegistry = null;
-
-      environment = new MultiContactTestEnvironment(robotInitialSetup, robotModel, dynamicGraphicObjectsListRegistry, footContactSides, handContactSides);
-      final PlainDRCRobot robotInterface = new PlainDRCRobot(robotModel);
-      scsInitialSetup = new DRCSCSInitialSetup(environment, robotInterface.getSimulateDT());
+      environment = new MultiContactTestEnvironment(robotInitialSetup, robotModel, footContactSides, handContactSides);
+      scsInitialSetup = new DRCSCSInitialSetup(environment, robotModel.getSimulateDT());
       scsInitialSetup.setSimulationDataBufferSize(simulationDataBufferSize);
 
       double dt = scsInitialSetup.getDT();
@@ -132,9 +118,8 @@ public class AtlasMultiContact
             handContactPointTransforms, handContactPoints, footContactSides, handContactSides, controllerParameters, armControllerParameters);
       ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, DRCConfigParameters.contactTresholdForceForSCS, sensorInformation.getFeetForceSensorNames());
 
-      Pair<HumanoidRobotSimulation<SDFRobot>, DRCController> humanoidSimulation = DRCSimulationFactory.createSimulation(controllerFactory, environment, robotInterface, robotInitialSetup, scsInitialSetup, guiInitialSetup, null, null, dynamicGraphicObjectsListRegistry,false,robotModel);
-      drcSimulation = humanoidSimulation.first();
-      drcController = humanoidSimulation.second();
+      drcSimulation = new DRCSimulationFactory(robotModel, controllerFactory, environment.getTerrainObject(), robotInitialSetup, scsInitialSetup,
+            guiInitialSetup, null, null);
       
        simulationConstructionSet = drcSimulation.getSimulationConstructionSet();
 
@@ -165,9 +150,9 @@ public class AtlasMultiContact
       }
    }
    
-   public DRCController getDRCController()
+   public DRCSimulationFactory getDRCSimulation()
    {
-	   return drcController;
+	   return drcSimulation;
    }
    
    public SimulationConstructionSet getSimulationConstructionSet()

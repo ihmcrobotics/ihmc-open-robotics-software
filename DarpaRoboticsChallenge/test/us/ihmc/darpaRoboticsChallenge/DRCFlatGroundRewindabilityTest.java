@@ -13,7 +13,6 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.PlainDRCRobot;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.GroundProfile;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
@@ -144,13 +143,10 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
       int simulationDataBufferSize = 16000;
 
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
-      DRCSimulatedRobotInterface robotInterface = new PlainDRCRobot(robotModel);
-      DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotInterface.getSimulateDT());
+      DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotModel.getSimulateDT());
 
-      DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInterface, robotInitialSetup,
-                                                               guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript, automaticSimulationRunner,
-                                                               timePerRecordTick, simulationDataBufferSize,
-            cheatWithGroundHeightAtForFootstep,robotModel);
+      DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup,
+            useVelocityAndHeadingScript, automaticSimulationRunner, timePerRecordTick, simulationDataBufferSize, cheatWithGroundHeightAtForFootstep, robotModel);
 
       SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
 

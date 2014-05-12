@@ -1,13 +1,16 @@
 package us.ihmc.darpaRoboticsChallenge;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
+import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
+import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.PIDLidarTorqueController;
@@ -18,6 +21,7 @@ import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadSynchronizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.ScsInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
@@ -36,27 +40,84 @@ import us.ihmc.util.NonRealtimeThreadFactory;
 import us.ihmc.util.ThreadFactory;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
+import us.ihmc.utilities.net.TimestampProvider;
 
-import com.yobotics.simulationconstructionset.GroundContactPoint;
-import com.yobotics.simulationconstructionset.IMUMount;
+import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.Joint;
-import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 import com.yobotics.simulationconstructionset.Robot;
+import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.UnreasonableAccelerationException;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
 import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
 import com.yobotics.simulationconstructionset.robotController.ModularRobotController;
-import com.yobotics.simulationconstructionset.simulatedSensors.GroundContactPointBasedWrenchCalculator;
-import com.yobotics.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
+import com.yobotics.simulationconstructionset.util.environments.SelectableObjectListener;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.ground.TerrainObject;
 
 public class DRCSimulationFactory
 {
    private static final boolean COMPUTE_ESTIMATOR_ERROR = true;
 
+   private final HumanoidRobotSimulation<SDFRobot> sim;
+   private final DRCController controller;
+   
+   private static SDFRobot simulatedRobot;
+   private static SimulatedDRCRobotTimeProvider timestampProvider;
+   
+   public DRCSimulationFactory(DRCRobotModel drcRobotModel, ControllerFactory controllerFactory,
+         final TerrainObject environmentTerrain, DRCRobotInitialSetup<SDFRobot> robotInitialSetup, ScsInitialSetup scsInitialSetup,
+         DRCGuiInitialSetup guiInitialSetup, GlobalDataProducer globalDataProducer, RobotVisualizer robotVisualizer)
+   {
+      CommonAvatarEnvironmentInterface env;
+      
+      if (environmentTerrain != null)
+      {
+         env = new CommonAvatarEnvironmentInterface()
+
+         {
+
+            @Override
+            public TerrainObject getTerrainObject()
+            {
+               // TODO Auto-generated method stub
+               return environmentTerrain;
+            }
+
+            @Override
+            public List<Robot> getEnvironmentRobots()
+            {
+               return new ArrayList<Robot>();
+            }
+
+            @Override
+            public void createAndSetContactControllerToARobot()
+            {
+            }
+
+            @Override
+            public void addSelectableListenerToSelectables(SelectableObjectListener selectedListener)
+            {
+            }
+
+            @Override
+            public void addContactPoints(ExternalForcePoint[] externalForcePoints)
+            {
+            }
+         };
+      }
+      else
+      {
+         env = null;
+      }
+      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry(false);
+      Pair<HumanoidRobotSimulation<SDFRobot>, DRCController> simAndController = createSimulation(controllerFactory, env, robotInitialSetup, scsInitialSetup, guiInitialSetup, globalDataProducer, robotVisualizer, dynamicGraphicObjectsListRegistry, false, drcRobotModel);
+      sim = simAndController.first();
+      controller = simAndController.second();
+   }
+   
    public static Pair<HumanoidRobotSimulation<SDFRobot>, DRCController> createSimulation(ControllerFactory controllerFactory,
-         CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, DRCSimulatedRobotInterface robotInterface, DRCRobotInitialSetup<SDFRobot> robotInitialSetup,
+         CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, DRCRobotInitialSetup<SDFRobot> robotInitialSetup,
          ScsInitialSetup scsInitialSetup, DRCGuiInitialSetup guiInitialSetup, GlobalDataProducer dataProducer, RobotVisualizer robotVisualizer,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, boolean useNewPhysics, DRCRobotModel drcRobotModel)
    {
@@ -66,13 +127,13 @@ public class DRCSimulationFactory
       DRCRobotSensorInformation sensorInformation = drcRobotModel.getSensorInformation();
 
       double estimateDT = DRCConfigParameters.ESTIMATOR_DT;
-      double simulateDT = robotInterface.getSimulateDT();
+      double simulateDT = drcRobotModel.getSimulateDT();
       double controlDT = DRCConfigParameters.CONTROL_DT;
-      StateEstimatorParameters stateEstimatorParameters = drcRobotModel.getStateEstimatorParameters(estimateDT);
+      StateEstimatorParameters stateEstimatorParameters = drcRobotModel.getStateEstimatorParameters();
       
       int estimationTicksPerControlTick = (int) (estimateDT / simulateDT);
 
-      SDFRobot simulatedRobot = robotInterface.getRobot();
+      simulatedRobot = drcRobotModel.createSdfRobot(false);
       YoVariableRegistry estimatorRegistry = new YoVariableRegistry("Estimator");
       YoVariableRegistry controllerRegistry = new YoVariableRegistry("controllerRegistry");
 //      YoVariableThreadAccessValidator estimatorThreadValidator = new YoVariableThreadAccessValidator(estimatorRegistry);
@@ -87,7 +148,7 @@ public class DRCSimulationFactory
       DRCOutputWriter drcOutputWriter = new DRCSimulationOutputWriter(simulatedRobot, dynamicGraphicObjectsListRegistry, robotVisualizer, simulationRegistry);
       if (DRCLocalConfigParameters.INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES)
       {
-         drcOutputWriter = drcRobotModel.getOutputWriterWithAccelerationIntegration(drcOutputWriter, controlDT, false);
+         drcOutputWriter = drcRobotModel.getOutputWriterWithAccelerationIntegration(drcOutputWriter, false);
       }
       
       if (DRCConfigParameters.LIMIT_CONTROLLER_OUTPUT_TORQUES)
@@ -128,7 +189,7 @@ public class DRCSimulationFactory
       else
       {
          simulatedSensorHolderAndReaderFromRobotFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(
-               simulatedRobot, sensorNoiseParameters, stateEstimatorParameters.getSensorFilterParameters(), sensorInformation.getIMUSensorsToUse(), estimatorRegistry, simulationRegistry);
+               simulatedRobot, sensorNoiseParameters, stateEstimatorParameters.getSensorFilterParameters(), sensorInformation.getIMUSensorsToUse(), estimatorRegistry);
          sensorReaderFactory = simulatedSensorHolderAndReaderFromRobotFactory;
       }
 
@@ -138,13 +199,16 @@ public class DRCSimulationFactory
 
       controller.addRobotController(lidarControllerInterface);
 
-      double gravity = robotInterface.getRobot().getGravityZ();
+      double gravity = simulatedRobot.getGravityZ();
      
       ThreadFactory threadFactory = new NonRealtimeThreadFactory();
       ThreadSynchronizer threadSynchronizer = new BlockingThreadSynchronizer();
-
-      DRCController robotController = new DRCController(robotInterface.getFullRobotModelFactory(), controllerFactory, sensorReaderFactory, drcOutputWriter,
-            lidarControllerInterface, gravity, controlDT, dataProducer, robotInterface.getTimeStampProvider(),
+      
+      timestampProvider = new SimulatedDRCRobotTimeProvider(drcRobotModel.getSimulateDT());
+      simulatedRobot.setController(timestampProvider, estimationTicksPerControlTick);
+      SDFFullRobotModelFactory fullRobotModelFactory = new SDFFullRobotModelFactory(drcRobotModel.getGeneralizedRobotModel(), drcRobotModel.getJointMap());
+      DRCController robotController = new DRCController(fullRobotModelFactory, controllerFactory, sensorReaderFactory, drcOutputWriter,
+            lidarControllerInterface, gravity, controlDT, dataProducer, timestampProvider,
             dynamicGraphicObjectsListRegistry, guiSetterUpperRegistry, estimatorRegistry, controllerRegistry, threadFactory, threadSynchronizer, 
             drcRobotModel, drcRobotModel.getContactPointParamaters(false, false), estimateDT);
       robotController.initialize();
@@ -259,5 +323,37 @@ public class DRCSimulationFactory
    //
    //      return desiredCoMAccelerationsFromRobotStealerController;
    //   }
+   
+   public SimulationConstructionSet getSimulationConstructionSet()
+   {
+      return sim.getSimulationConstructionSet();
+   }
+   
+   public void start(AutomaticSimulationRunner automaticSimulationRunner)
+   {
+      sim.start(automaticSimulationRunner);
+   }
 
+   public void dispose()
+   {
+      controller.dispose();
+   }
+   public SDFRobot getRobot()
+   {
+      return sim.getRobot();
+   }
+   
+   @Deprecated
+   public void addAdditionalYoVariableRegistriesToSCS(YoVariableRegistry registry)
+   {
+      sim.addAdditionalYoVariableRegistriesToSCS(registry);
+   }
+
+
+   public TimestampProvider getTimeStampProvider()
+   {
+      return timestampProvider;
+   }
+
+   
 }

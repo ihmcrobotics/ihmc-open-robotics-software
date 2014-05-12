@@ -1,33 +1,30 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
+import java.io.IOException;
+
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
-import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepTimingParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelState;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.PlainDRCRobot;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.net.LocalObjectCommunicator;
 import us.ihmc.utilities.net.ObjectCommunicator;
 
-import java.io.IOException;
+import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
 
 public abstract class DRCDemo03
 {
    private static final boolean START_NETWORK = true;
    private static final boolean SHOW_HEIGHTMAP = false;
-   private final HumanoidRobotSimulation<SDFRobot> drcSimulation;
+   private final DRCSimulationFactory drcSimulation;
    private final DRCDemoEnvironmentWithBoxAndSteeringWheel environment;
 
    public DRCDemo03(DRCGuiInitialSetup guiInitialSetup, AutomaticSimulationRunner automaticSimulationRunner, double timePerRecordTick,
@@ -38,8 +35,7 @@ public abstract class DRCDemo03
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
       
       environment = new DRCDemoEnvironmentWithBoxAndSteeringWheel(dynamicGraphicObjectsListRegistry);
-      final PlainDRCRobot robotInterface = new PlainDRCRobot(robotModel);
-      scsInitialSetup = new DRCSCSInitialSetup(environment, robotInterface.getSimulateDT());
+      scsInitialSetup = new DRCSCSInitialSetup(environment, robotModel.getSimulateDT());
       
       scsInitialSetup.setSimulationDataBufferSize(simulationDataBufferSize);
       scsInitialSetup.setInitializeEstimatorToActual(true);
@@ -61,16 +57,14 @@ public abstract class DRCDemo03
       
       ControllerFactory controllerFactory = DRCObstacleCourseSimulation.createDRCMultiControllerFactory(null, dataProducer, footstepTimingParameters,initialBehavior,robotModel);
 
-      
-      Pair<HumanoidRobotSimulation<SDFRobot>, DRCController> humanoidSimulation = DRCSimulationFactory.createSimulation(controllerFactory, environment, robotInterface, robotInitialSetup, scsInitialSetup,
-              guiInitialSetup, dataProducer, null, dynamicGraphicObjectsListRegistry,false,robotModel);
-      drcSimulation = humanoidSimulation.first();
+      drcSimulation = new DRCSimulationFactory(robotModel, controllerFactory, environment.getTerrainObject(), robotInitialSetup, scsInitialSetup,
+            guiInitialSetup, dataProducer, null);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulation.getSimulationConstructionSet();
 
       if (START_NETWORK)
       {
-         LocalObjectCommunicator localObjectCommunicator = DRCObstacleCourseSimulation.createLocalObjectCommunicator(drcSimulation, robotInterface, robotModel);
+         LocalObjectCommunicator localObjectCommunicator = DRCObstacleCourseSimulation.createLocalObjectCommunicator(drcSimulation, robotModel);
 
          new DRCNetworkProcessor(localObjectCommunicator, drcNetworkProcessorServer, robotModel);
 

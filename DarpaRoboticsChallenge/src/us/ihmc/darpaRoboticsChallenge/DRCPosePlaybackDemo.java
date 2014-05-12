@@ -20,8 +20,6 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.SideDependentList;
-import us.ihmc.utilities.Pair;
-import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
@@ -37,11 +35,11 @@ public class DRCPosePlaybackDemo
 {
    private static final HighLevelState JOINT_PD_CONTROL = HighLevelState.JOINT_PD_CONTROL;
    
-   private final HumanoidRobotSimulation<SDFRobot> drcSimulation;
-   private final DRCController drcController;
+   private final DRCSimulationFactory drcSimulation;
+
    private final PolyvalentHighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory;
 
-   public DRCPosePlaybackDemo(DRCSimulatedRobotInterface robotInterface, DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
+   public DRCPosePlaybackDemo(DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
                                     DRCSCSInitialSetup scsInitialSetup, AutomaticSimulationRunner automaticSimulationRunner,
                                     double timePerRecordTick, int simulationDataBufferSize, DRCRobotModel model)
    {
@@ -53,11 +51,6 @@ public class DRCPosePlaybackDemo
          recordFrequency = 1;
       scsInitialSetup.setRecordFrequency(recordFrequency);
 
-      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
-      if (guiInitialSetup.isGuiShown())
-         dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry(false);
-      else
-         dynamicGraphicObjectsListRegistry = null;
       YoVariableRegistry registry = new YoVariableRegistry("adjustableParabolicTrajectoryDemoSimRegistry");
       
       WalkingControllerParameters walkingControlParameters = model.getWalkingControlParameters();
@@ -71,10 +64,7 @@ public class DRCPosePlaybackDemo
       SideDependentList<String> footForceSensorNames = model.getSensorInformation().getFeetForceSensorNames();
       
       ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, DRCConfigParameters.contactTresholdForceForSCS, footForceSensorNames);
-      Pair<HumanoidRobotSimulation<SDFRobot>, DRCController> humanoidSimulation = DRCSimulationFactory.createSimulation(controllerFactory, null,
-            robotInterface, robotInitialSetup, scsInitialSetup, guiInitialSetup, null, null, dynamicGraphicObjectsListRegistry, false,model);
-      drcSimulation = humanoidSimulation.first();
-      drcController = humanoidSimulation.second();
+      drcSimulation = new DRCSimulationFactory(model, controllerFactory, null, robotInitialSetup, scsInitialSetup, guiInitialSetup, null, null);
 
       // add other registries
       drcSimulation.addAdditionalYoVariableRegistriesToSCS(registry);
@@ -83,7 +73,7 @@ public class DRCPosePlaybackDemo
       
       SDFRobot robot = drcSimulation.getRobot();
       //System.out.println(robot);
-      HoldRobotInTheAir controller = new HoldRobotInTheAir(robot, simulationConstructionSet, drcController.getControllerModel());
+      HoldRobotInTheAir controller = new HoldRobotInTheAir(robot, simulationConstructionSet, model.createFullRobotModel());
       robot.setController(controller);
       controller.initialize();
       
@@ -97,16 +87,6 @@ public class DRCPosePlaybackDemo
       }
    }
    
-   public FullRobotModel getControllerModel()
-   {
-      return drcController.getControllerModel();
-   }
-   
-   public DRCController getDRCController()
-   {
-      return drcController;
-   }
-   
    public SimulationConstructionSet getSimulationConstructionSet()
    {
       return drcSimulation.getSimulationConstructionSet();
@@ -115,6 +95,11 @@ public class DRCPosePlaybackDemo
    public void setupPosePlaybackController(PosePlaybackPacket posePlaybackPacket, boolean transitionRequested)
    {
       highLevelHumanoidControllerFactory.createPosePlayBackController(posePlaybackPacket, true);
+   }
+   
+   public DRCSimulationFactory getDRCSimulation()
+   {
+      return drcSimulation;
    }
 
    private class HoldRobotInTheAir implements RobotController

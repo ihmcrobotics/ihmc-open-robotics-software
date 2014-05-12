@@ -2,6 +2,7 @@ package us.ihmc.atlas;
 
 import javax.media.j3d.Transform3D;
 
+import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFJointNameMap;
@@ -79,9 +80,9 @@ public class AtlasRobotModel implements DRCRobotModel
    }
 
    @Override
-   public StateEstimatorParameters getStateEstimatorParameters(double estimatorDT)
+   public StateEstimatorParameters getStateEstimatorParameters()
    {
-      return new AtlasStateEstimatorParameters(runningOnRealRobot, estimatorDT);
+      return new AtlasStateEstimatorParameters(runningOnRealRobot, getEstimatorDT());
    }
 
    @Override
@@ -158,7 +159,7 @@ public class AtlasRobotModel implements DRCRobotModel
    }
 
    @Override
-   public DRCOutputWriter getOutputWriterWithAccelerationIntegration(DRCOutputWriter drcOutputWriter, double controlDT, boolean runningOnRealRobot)
+   public DRCOutputWriter getOutputWriterWithAccelerationIntegration(DRCOutputWriter drcOutputWriter, boolean runningOnRealRobot)
    {
       throw new RuntimeException("Implement me!");
    }
@@ -206,5 +207,30 @@ public class AtlasRobotModel implements DRCRobotModel
    public SDFRobot createSdfRobot(boolean createCollisionMeshes)
    {
       return loader.createRobot(getJointMap(), createCollisionMeshes);
+   }
+   
+   @Override
+   public double getSimulateDT()
+   {
+      return 0.0001;
+   }
+
+   @Override
+   public double getEstimatorDT()
+   {
+      return 0.001;
+   }
+
+   @Override
+   public double getControllerDT()
+   {
+      return 0.006;
+   }
+   
+
+   @Override
+   public GeneralizedSDFRobotModel getGeneralizedRobotModel()
+   {
+      return loader.getGeneralizedSDFRobotModel(getJointMap().getModelName());
    }
 }

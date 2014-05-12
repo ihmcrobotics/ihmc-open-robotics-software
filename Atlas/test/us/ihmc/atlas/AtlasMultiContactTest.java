@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCController;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
+import us.ihmc.darpaRoboticsChallenge.DRCSimulationFactory;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.MemoryTools;
@@ -32,7 +33,7 @@ public class AtlasMultiContactTest
    private static final boolean SHOW_GUI = ALWAYS_SHOW_GUI || CREATE_MOVIE;
 
    private BlockingSimulationRunner blockingSimulationRunner;
-   private DRCController drcController;
+   private DRCSimulationFactory drcSimulation;
    private RobotVisualizer robotVisualizer;
 
    @Before
@@ -56,10 +57,10 @@ public class AtlasMultiContactTest
          blockingSimulationRunner = null;
       }
 
-      if (drcController != null)
+      if (drcSimulation != null)
       {
-         drcController.dispose();
-         drcController = null;
+         drcSimulation.dispose();
+         drcSimulation = null;
       }
 
       if (robotVisualizer != null)
@@ -85,7 +86,7 @@ public class AtlasMultiContactTest
 
       AtlasMultiContact drcMultiContact = setupSimulation();
       SimulationConstructionSet scs = drcMultiContact.getSimulationConstructionSet();
-      drcController = drcMultiContact.getDRCController();
+      drcSimulation = drcMultiContact.getDRCSimulation();
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 

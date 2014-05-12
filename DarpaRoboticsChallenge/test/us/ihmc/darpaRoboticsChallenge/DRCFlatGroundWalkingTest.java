@@ -13,7 +13,6 @@ import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.PlainDRCRobot;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.GroundProfile;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
@@ -42,7 +41,7 @@ public abstract class DRCFlatGroundWalkingTest
    private static final boolean SHOW_GUI = ALWAYS_SHOW_GUI || checkNothingChanged || CREATE_MOVIE;
 
    private BlockingSimulationRunner blockingSimulationRunner;
-   private DRCController drcController;
+   private DRCSimulationFactory drcSimulation;
    private RobotVisualizer robotVisualizer;
 
    private static final double standingTimeDuration = 1.0;
@@ -73,10 +72,10 @@ public abstract class DRCFlatGroundWalkingTest
          blockingSimulationRunner = null;
       }
 
-      if (drcController != null)
+      if (drcSimulation != null)
       {
-         drcController.dispose();
-         drcController = null;
+         drcSimulation.dispose();
+         drcSimulation = null;
       }
 
       if (robotVisualizer != null)
@@ -178,8 +177,7 @@ public abstract class DRCFlatGroundWalkingTest
       
       GroundProfile groundProfile = new FlatGroundProfile();
       
-      DRCSimulatedRobotInterface robotInterface = new PlainDRCRobot(robotModel);
-      DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotInterface.getSimulateDT(), useLoadOfContactPointsForTheFeet);
+      DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotModel.getSimulateDT(), useLoadOfContactPointsForTheFeet);
       scsInitialSetup.setDrawGroundProfile(drawGroundProfile);
       
       if (cheatWithGroundHeightAtForFootstep)
@@ -187,7 +185,7 @@ public abstract class DRCFlatGroundWalkingTest
 
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
       
-      DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInterface, robotInitialSetup, guiInitialSetup,
+      DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup,
                                                                scsInitialSetup, useVelocityAndHeadingScript, automaticSimulationRunner, timePerRecordTick,
                                                                simulationDataBufferSize, cheatWithGroundHeightAtForFootstep, robotModel);
 
@@ -195,7 +193,7 @@ public abstract class DRCFlatGroundWalkingTest
 
       setupCameraForUnitTest(scs);
 
-      drcController = drcFlatGroundWalkingTrack.getDrcController();
+      drcSimulation = drcFlatGroundWalkingTrack.getDrcSimulation();
 
       return drcFlatGroundWalkingTrack;
    }

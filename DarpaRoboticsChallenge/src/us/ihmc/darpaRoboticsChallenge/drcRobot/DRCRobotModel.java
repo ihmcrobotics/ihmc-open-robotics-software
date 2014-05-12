@@ -1,5 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.drcRobot;
 
+import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
@@ -26,7 +27,7 @@ public interface DRCRobotModel
    
    public WalkingControllerParameters getDrivingControllerParameters();
    
-   public StateEstimatorParameters getStateEstimatorParameters(double estimatorDT);
+   public StateEstimatorParameters getStateEstimatorParameters();
    
    public DRCRobotContactPointParamaters getContactPointParamaters(boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsToFeetOnly);
 
@@ -42,7 +43,7 @@ public interface DRCRobotModel
 
    public ScsCollisionConfigure getPhysicsConfigure( SDFRobot robotModel );
 
-   public DRCOutputWriter getOutputWriterWithAccelerationIntegration(DRCOutputWriter drcOutputWriter, double controlDT, boolean runningOnRealRobot);
+   public DRCOutputWriter getOutputWriterWithAccelerationIntegration(DRCOutputWriter drcOutputWriter, boolean runningOnRealRobot);
    
    public void setJointDamping(SDFRobot simulatedRobot);
    
@@ -53,4 +54,15 @@ public interface DRCRobotModel
    public SDFFullRobotModel createFullRobotModel();
    
    public SDFRobot createSdfRobot(boolean createCollisionMeshes);
+   
+   public double getSimulateDT();
+   
+   public double getEstimatorDT();
+   
+   public double getControllerDT();
+
+   public GeneralizedSDFRobotModel getGeneralizedRobotModel();
+   
+   
+   
 }

@@ -12,20 +12,17 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.robotSide.SideDependentList;
-import us.ihmc.utilities.Pair;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class DRCFlatGroundWalkingTrack
 {   
-   private static final boolean START_YOVARIABLE_SERVER = true; 
-   private final HumanoidRobotSimulation<SDFRobot> drcSimulation;
-   private final DRCController drcController;
+   private static final boolean START_YOVARIABLE_SERVER = false; 
+   private final DRCSimulationFactory drcSimulation;
    private final YoVariableServer robotVisualizer;
 
-   public DRCFlatGroundWalkingTrack(DRCSimulatedRobotInterface robotInterface, DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
+   public DRCFlatGroundWalkingTrack(DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
                                     DRCSCSInitialSetup scsInitialSetup, boolean useVelocityAndHeadingScript, AutomaticSimulationRunner automaticSimulationRunner,
                                     double timePerRecordTick, int simulationDataBufferSize, boolean cheatWithGroundHeightAtForFootstep, DRCRobotModel model)
    {
@@ -41,11 +38,6 @@ public class DRCFlatGroundWalkingTrack
          recordFrequency = 1;
       scsInitialSetup.setRecordFrequency(recordFrequency);
 
-      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
-      if (guiInitialSetup.isGuiShown())
-         dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry(false);
-      else
-         dynamicGraphicObjectsListRegistry = null;
       YoVariableRegistry registry = new YoVariableRegistry("adjustableParabolicTrajectoryDemoSimRegistry");
 
       boolean useFastTouchdowns = false;
@@ -61,7 +53,8 @@ public class DRCFlatGroundWalkingTrack
 
       if (START_YOVARIABLE_SERVER)
       {
-         robotVisualizer = new YoVariableServer(robotInterface.getRobot().getRobotsYoVariableRegistry(), DRCLocalConfigParameters.DEFAULT_YOVARIABLE_SERVER_PORT, DRCConfigParameters.ESTIMATOR_DT, dynamicGraphicObjectsListRegistry);
+         throw new RuntimeException("Something about chickens and eggs");
+         //robotVisualizer = new YoVariableServer(robotInterface.getRobot().getRobotsYoVariableRegistry(), DRCLocalConfigParameters.DEFAULT_YOVARIABLE_SERVER_PORT, DRCConfigParameters.ESTIMATOR_DT, dynamicGraphicObjectsListRegistry);
       }
       else
       {
@@ -71,10 +64,7 @@ public class DRCFlatGroundWalkingTrack
       SideDependentList<String> footForceSensorNames = model.getSensorInformation().getFeetForceSensorNames();
       
       ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, DRCConfigParameters.contactTresholdForceForSCS, footForceSensorNames);
-      Pair<HumanoidRobotSimulation<SDFRobot>, DRCController> humanoidSimulation = DRCSimulationFactory.createSimulation(controllerFactory, null,
-            robotInterface, robotInitialSetup, scsInitialSetup, guiInitialSetup, null, robotVisualizer, dynamicGraphicObjectsListRegistry, false,model);
-      drcSimulation = humanoidSimulation.first();
-      drcController = humanoidSimulation.second();
+      drcSimulation = new DRCSimulationFactory(model, controllerFactory, null, robotInitialSetup, scsInitialSetup, guiInitialSetup, null, robotVisualizer);
 
       // add other registries
       drcSimulation.addAdditionalYoVariableRegistriesToSCS(registry);
@@ -99,9 +89,9 @@ public class DRCFlatGroundWalkingTrack
       return drcSimulation.getSimulationConstructionSet();
    }
 
-   public DRCController getDrcController()
+   public DRCSimulationFactory getDrcSimulation()
    {
-      return drcController;
+      return drcSimulation;
    }
 
    public YoVariableServer getRobotVisualizer()

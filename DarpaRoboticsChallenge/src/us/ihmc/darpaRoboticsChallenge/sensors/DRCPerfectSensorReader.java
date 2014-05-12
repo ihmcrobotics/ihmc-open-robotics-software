@@ -74,24 +74,15 @@ public class DRCPerfectSensorReader implements SensorReader, RobotController
       return getName();
    }
 
+   @Deprecated
    public void doControl()
    {
-      step.increment();
-      if(controllerDispatcher != null)
-      {
-         controllerDispatcher.waitUntilComputationIsDone();
-      }
-      
       read();
-      
-      if(controllerDispatcher != null)
-      {
-         controllerDispatcher.startEstimator(estimateDTinNs * step.getIntegerValue(), System.nanoTime());
-      }
    }
 
-   private void read()
+   public void read()
    {
+      step.increment();
       if(rawSensorReader != null)
       {
          rawSensorReader.read();
@@ -105,6 +96,11 @@ public class DRCPerfectSensorReader implements SensorReader, RobotController
             forceTorqueSensor.calculate();  
             forceSensorDataHolder.setForceSensorValue(forceTorqueSensorEntry.getKey(), forceTorqueSensor.getWrench());
          }
+      }
+      
+      if(controllerDispatcher != null)
+      {
+         controllerDispatcher.startEstimator(estimateDTinNs * step.getIntegerValue(), System.nanoTime());
       }
    }
    

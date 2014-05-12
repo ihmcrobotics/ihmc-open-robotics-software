@@ -3,8 +3,6 @@ package us.ihmc.darpaRoboticsChallenge;
 import javax.swing.JButton;
 
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.SdfLoader.JaxbSDFLoader;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.GuiInitialSetup;
@@ -104,9 +102,7 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
       }
       
       //TODO: Clean this up!
-      JaxbSDFLoader robotLoader = robotModel.getJaxbSDFLoader();
-      DRCRobotJointMap jointMap = robotModel.getJointMap();
-      GeneralizedSDFRobotModel generalizedSDFRobotModel = robotLoader.getGeneralizedSDFRobotModel(jointMap.getModelName());
+      GeneralizedSDFRobotModel generalizedSDFRobotModel = robotModel.getGeneralizedRobotModel();
       
       if (DRCLocalConfigParameters.MAKE_SLIDER_BOARD && sliderBoardFactory != null)
          sliderBoardFactory.makeSliderBoard(scs, scs.getRootRegistry(), generalizedSDFRobotModel);

@@ -14,10 +14,10 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.HandContactParameters;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
@@ -28,7 +28,6 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.util.environments.SelectableObjectListener;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.TerrainObject;
@@ -40,7 +39,7 @@ public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInter
    private final RobotSide[] handContactSides;
 
    public MultiContactTestEnvironment(DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCRobotModel robotModel,
-                                      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, RobotSide[] footContactSides, RobotSide[] handContactSides)
+                                      RobotSide[] footContactSides, RobotSide[] handContactSides)
    {
       JaxbSDFLoader jaxbSDFLoader = robotModel.getJaxbSDFLoader();
       DRCRobotJointMap jointMap = robotModel.getJointMap();
