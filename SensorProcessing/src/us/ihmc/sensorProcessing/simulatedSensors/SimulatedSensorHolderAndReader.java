@@ -276,7 +276,15 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
 
             if(controllerDispatcher != null)
             {
-               controllerDispatcher.startEstimator(estimateDTinNs * step.getIntegerValue(), System.nanoTime());               
+               try
+               {
+                  controllerDispatcher.startEstimator(estimateDTinNs * step.getIntegerValue(), System.nanoTime());
+               }
+               catch(Exception e)
+               {
+                  e.printStackTrace();
+                  System.exit(-1);
+               }
             }
          }
       }
