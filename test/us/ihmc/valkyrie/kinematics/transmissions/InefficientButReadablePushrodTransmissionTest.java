@@ -70,37 +70,37 @@ public class InefficientButReadablePushrodTransmissionTest
       pitch.set(0.0);
       roll.set(0.0);
       computeAndPrint(inefficientButReadablePushrodTransmission, pitch, roll, jacobian, scs);
-      assertJacobianEquals(jacobian, -0.0366712094326246, -0.0366712094326246, 0.034118686505983736, 0.034118686505983736);
+      assertJacobianEquals(jacobian, -0.0366712094326246, -0.0366712094326246, 0.034118686505983736, -0.034118686505983736);
 
       pitch.set(0.2);
       roll.set(0.1);
       computeAndPrint(inefficientButReadablePushrodTransmission, pitch, roll, jacobian, scs);
-      assertJacobianEquals(jacobian, -0.036202355875729446, -0.035509962933305175, 0.03640538461195576, 0.03640538461195576);
+      assertJacobianEquals(jacobian, -0.036202355875729446, -0.035509962933305175, 0.03640538461195576, -0.03181607828356141);
 
       pitch.set(-0.2);
       roll.set(0.1);
       computeAndPrint(inefficientButReadablePushrodTransmission, pitch, roll, jacobian, scs);
-      assertJacobianEquals(jacobian, -0.034740329545336665, -0.03695254741929382, 0.03440182578269918, 0.03440182578269918);
+      assertJacobianEquals(jacobian, -0.034740329545336665, -0.03695254741929382, 0.03440182578269918, -0.02988230913579041);
 
       pitch.set(0.2);
       roll.set(-0.1);
       computeAndPrint(inefficientButReadablePushrodTransmission, pitch, roll, jacobian, scs);
-      assertJacobianEquals(jacobian, -0.035509962933305175, -0.036202355875729446, 0.03181607828356141, 0.03181607828356141);
+      assertJacobianEquals(jacobian, -0.035509962933305175, -0.036202355875729446, 0.03181607828356141, -0.03640538461195576);
 
       pitch.set(0.35);
       roll.set(0.0);
       computeAndPrint(inefficientButReadablePushrodTransmission, pitch, roll, jacobian, scs);
-      assertJacobianEquals(jacobian, -0.03406729338743576, -0.03406729338743576, 0.03341354644555879, 0.03341354644555879);
+      assertJacobianEquals(jacobian, -0.03406729338743576, -0.03406729338743576, 0.03341354644555879, -0.03341354644555879);
 
       pitch.set(-0.35);
       roll.set(0.0);
       computeAndPrint(inefficientButReadablePushrodTransmission, pitch, roll, jacobian, scs);
-      assertJacobianEquals(jacobian, -0.03440991379530292, -0.03440991379530292, 0.030355910924449715, 0.030355910924449715);
+      assertJacobianEquals(jacobian, -0.03440991379530292, -0.03440991379530292, 0.030355910924449715, -0.030355910924449715);
 
       pitch.set(0.0);
       roll.set(0.25);
       computeAndPrint(inefficientButReadablePushrodTransmission, pitch, roll, jacobian, scs);
-      assertJacobianEquals(jacobian, -0.03539813540952868, -0.037679153131957736, 0.038150540900731125, 0.038150540900731125);
+      assertJacobianEquals(jacobian, -0.03539813540952868, -0.037679153131957736, 0.038150540900731125, -0.02679783281436968);
 
       if (visualizeAndKeepUp)
       {
