@@ -3,7 +3,6 @@ package us.ihmc.acsell.simulation;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.acsell.parameters.BonoRobotModel;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
-import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTrack;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
@@ -38,7 +37,7 @@ public class BonoFlatGroundWalkingTrack
       boolean cheatWithGroundHeightAtForFootstep = false;
 
       new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup,
-                                    useVelocityAndHeadingScript, automaticSimulationRunner, DRCConfigParameters.CONTROL_DT, 16000,
-                                    cheatWithGroundHeightAtForFootstep, robotModel);
+                                    useVelocityAndHeadingScript, automaticSimulationRunner, 16000, cheatWithGroundHeightAtForFootstep,
+                                    robotModel);
    }
 }
