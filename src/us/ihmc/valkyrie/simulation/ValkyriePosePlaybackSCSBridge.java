@@ -24,7 +24,7 @@ public class ValkyriePosePlaybackSCSBridge
       FullRobotModel fullRobotModel = loader.createFullRobotModel(jointMap);
       SDFFullRobotModel fullRobotModelForSlider = loader.createFullRobotModel(jointMap);
    
-      new PosePlaybackSCSBridge(sdfRobot, fullRobotModel, fullRobotModelForSlider);
+      new PosePlaybackSCSBridge(sdfRobot, fullRobotModel, fullRobotModelForSlider, robotModel.getControllerDT());
    
    }
 }

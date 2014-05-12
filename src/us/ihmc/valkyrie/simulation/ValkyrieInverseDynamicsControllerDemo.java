@@ -2,7 +2,6 @@ package us.ihmc.valkyrie.simulation;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
-import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCInverseDynamicsControllerDemo;
 import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
@@ -26,6 +25,6 @@ public class ValkyrieInverseDynamicsControllerDemo
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, model.getSimulateDT());
       AutomaticSimulationRunner automaticSimulationRunner = null;
       
-      new DRCInverseDynamicsControllerDemo(robotInitialSetup, guiInitialSetup, scsInitialSetup, automaticSimulationRunner, DRCConfigParameters.CONTROL_DT, 16000, model);
+      new DRCInverseDynamicsControllerDemo(robotInitialSetup, guiInitialSetup, scsInitialSetup, automaticSimulationRunner, 16000, model);
    }
 }
