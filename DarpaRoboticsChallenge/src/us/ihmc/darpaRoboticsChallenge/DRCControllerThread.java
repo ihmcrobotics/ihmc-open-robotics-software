@@ -1,7 +1,5 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import java.util.Arrays;
-
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
@@ -13,21 +11,25 @@ import us.ihmc.commonWalkingControlModules.sensors.TwistUpdater;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaElipsoidsVisualizer;
 import us.ihmc.darpaRoboticsChallenge.controllers.ConstrainedCenterOfMassJacobianEvaluator;
 import us.ihmc.darpaRoboticsChallenge.controllers.EstimationLinkHolder;
+import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadDataSynchronizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParamaters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
+import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
 import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
+import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.InverseDynamicsMechanismReferenceFrameVisualizer;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -44,7 +46,9 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    private static final boolean SHOW_INERTIA_GRAPHICS = false;
    private static final boolean SHOW_REFERENCE_FRAMES = false;
 
-   private final DoubleYoVariable t = new DoubleYoVariable("t", registry);
+   private final DoubleYoVariable controllerTime = new DoubleYoVariable("controllerTime", registry);
+   private final BooleanYoVariable firstTick = new BooleanYoVariable("firstTick", registry);
+   
 
    private final SDFFullRobotModel controllerFullRobotModel;
    private final ReferenceFrames controllerReferenceFrames;
@@ -52,27 +56,37 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
    private final ForceSensorDataHolder forceSensorDataHolderForController;
 
+   private final ThreadDataSynchronizer threadDataSynchronizer;
+   private final DRCOutputWriter outputWriter;
    
    private final RobotController robotController;
    
    public DRCControllerThread(DRCRobotModel robotModel, ControllerFactory controllerFactory, LidarControllerInterface lidarControllerInterface,
-         GlobalDataProducer dataProducer, double controlDT, double gravity)
+         ThreadDataSynchronizer threadDataSynchronizer, DRCOutputWriter outputWriter, GlobalDataProducer dataProducer, double controlDT, double gravity)
    {
-      controllerFullRobotModel = robotModel.createFullRobotModel();
+      this.threadDataSynchronizer = threadDataSynchronizer;
+      this.outputWriter = outputWriter;
+      controllerFullRobotModel = threadDataSynchronizer.getControllerFullRobotModel();
+      forceSensorDataHolderForController = threadDataSynchronizer.getControllerForceSensorDataHolder();
+
+      outputWriter.setFullRobotModel(controllerFullRobotModel);
+      outputWriter.setForceSensorDataHolderForController(forceSensorDataHolderForController);
+      
       DRCRobotJointMap jointMap = robotModel.getJointMap();
       DRCRobotPhysicalProperties physicalProperties = robotModel.getPhysicalProperties();
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       DRCRobotContactPointParamaters contactPointParamaters = robotModel.getContactPointParamaters(false, false);
 
-      forceSensorDataHolderForController = new ForceSensorDataHolder(Arrays.asList(controllerFullRobotModel.getForceSensorDefinitions()),
-            controllerFullRobotModel.getRootJoint());
 
       controllerReferenceFrames = new ReferenceFrames(controllerFullRobotModel, jointMap, physicalProperties.getAnkleHeight());
       controllerReferenceFrames.visualize(dynamicGraphicObjectsListRegistry, registry);
 
       robotController = createMomentumBasedController(controllerFullRobotModel, controllerReferenceFrames, sensorInformation,
-            contactPointParamaters, controllerFactory, lidarControllerInterface, t, controlDT, gravity, forceSensorDataHolderForController,
+            contactPointParamaters, controllerFactory, lidarControllerInterface, controllerTime, controlDT, gravity, forceSensorDataHolderForController,
             dynamicGraphicObjectsListRegistry, registry, dataProducer);
+      
+      firstTick.set(true);
+      registry.addChild(robotController.getYoVariableRegistry());
 
    }
 
@@ -155,26 +169,30 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    @Override
    public void initialize()
    {
-       robotController.initialize();
    }
 
    @Override
    public void read(double time)
    {
-      t.set(time);
+      controllerTime.set(time);
+      threadDataSynchronizer.receiveControllerState();
    }
 
    @Override
    public void run()
    {
+      if(firstTick.getBooleanValue())
+      {
+         robotController.initialize();
+         firstTick.set(false);
+      }
       robotController.doControl();
    }
 
    @Override
    public void write()
    {
-      // TODO Auto-generated method stub
-
+      outputWriter.writeAfterController(TimeTools.secondsToNanoSeconds(controllerTime.getDoubleValue()));
    }
 
    @Override

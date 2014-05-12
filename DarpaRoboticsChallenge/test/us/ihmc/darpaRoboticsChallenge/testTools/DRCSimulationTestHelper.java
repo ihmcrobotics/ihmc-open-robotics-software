@@ -1,10 +1,13 @@
 package us.ihmc.darpaRoboticsChallenge.testTools;
 
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.time.GlobalTimer;
-import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
-import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import com.yobotics.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
+import static org.junit.Assert.assertFalse;
+
+import java.util.ArrayList;
+import java.util.Random;
+
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -12,7 +15,11 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.BlindWalk
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
 import us.ihmc.commonWalkingControlModules.packets.ComHeightPacket;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
-import us.ihmc.darpaRoboticsChallenge.*;
+import us.ihmc.darpaRoboticsChallenge.DRCDemo01StartingLocation;
+import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
+import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseDemo;
+import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseSimulation;
+import us.ihmc.darpaRoboticsChallenge.DRCSimulationFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
 import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
@@ -24,12 +31,11 @@ import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-import java.util.ArrayList;
-import java.util.Random;
-
-import static org.junit.Assert.assertFalse;
+import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import com.yobotics.simulationconstructionset.time.GlobalTimer;
+import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
+import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import com.yobotics.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
 
 public class DRCSimulationTestHelper
 {
@@ -42,6 +48,8 @@ public class DRCSimulationTestHelper
    private final WalkingControllerParameters walkingControlParameters;
    
    private final boolean createMovie;
+   
+   private final DRCRobotModel robotModel;
 
    public DRCSimulationTestHelper(String name, String scriptFilename, DRCDemo01StartingLocation selectedLocation,
          boolean checkNothingChanged, boolean showGUI, boolean createMovie, DRCRobotModel robotModel)
@@ -56,6 +64,7 @@ public class DRCSimulationTestHelper
       this.walkingControlParameters = robotModel.getWalkingControlParameters();
       this.checkNothingChanged = checkNothingChanged;
       this.createMovie = createMovie;
+      this.robotModel = robotModel;
       if (createMovie) showGUI = true;
       
       boolean automaticallyStartSimulation = false;
@@ -94,10 +103,10 @@ public class DRCSimulationTestHelper
 
    public ScriptedFootstepGenerator createScriptedFootstepGenerator()
    {
-      DRCController controller = drcSimulation.getController();
+      DRCSimulationFactory simulation = drcSimulation.getSimulation();
 
-      ReferenceFrames referenceFrames = controller.getControllerReferenceFrames();
-      FullRobotModel fullRobotModel = controller.getControllerModel();
+      FullRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      ReferenceFrames referenceFrames = new ReferenceFrames(fullRobotModel, robotModel.getJointMap(), robotModel.getPhysicalProperties().getAnkleHeight());
 
       ScriptedFootstepGenerator scriptedFootstepGenerator = new ScriptedFootstepGenerator(referenceFrames, fullRobotModel,walkingControlParameters);
 
@@ -157,9 +166,9 @@ public class DRCSimulationTestHelper
    {
       blockingSimulationRunner.destroySimulation();
       blockingSimulationRunner = null;
-      if (drcSimulation != null && drcSimulation.getController() != null)
+      if (drcSimulation != null && drcSimulation.getSimulation() != null)
       {
-         drcSimulation.getController().dispose();
+         drcSimulation.getSimulation().dispose();
       }
       GlobalTimer.clearTimers();
       TimerTaskScheduler.cancelAndReset();

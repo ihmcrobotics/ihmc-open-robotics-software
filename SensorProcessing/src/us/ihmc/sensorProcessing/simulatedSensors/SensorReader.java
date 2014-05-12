@@ -5,6 +5,8 @@ import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
 
 public interface SensorReader
 {
+   public abstract void read();
+   
    public abstract SensorOutputMapReadOnly getSensorOutputMapReadOnly();
 
    public abstract void setControllerDispatcher(ControllerDispatcher controllerDispatcher);

@@ -1,7 +1,5 @@
 package us.ihmc.sensorProcessing.stateEstimation.evaluation;
 
-import java.util.ArrayList;
-
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
@@ -23,11 +21,9 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.AfterJointReferenceFrameNameMap;
 
-import com.yobotics.simulationconstructionset.IMUMount;
 import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 
 
 public class ComposableStateEstimatorEvaluator
@@ -72,7 +68,7 @@ public class ComposableStateEstimatorEvaluator
             jointVelocitySlopTimeForBacklashCompensation, controlDT, useTwoPolesForIMUFiltering, doFiniteDifferenceForJointVelocities);
       
       SensorReaderFactory simulatedSensorHolderAndReaderFromRobotFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(robot,
-            simulatedSensorNoiseParameters, sensorFilterParameters, null, registry, registry);
+            simulatedSensorNoiseParameters, sensorFilterParameters, null, registry);
       
       simulatedSensorHolderAndReaderFromRobotFactory.build(inverseDynamicsStructure.getRootJoint(), null, null, registry);
       

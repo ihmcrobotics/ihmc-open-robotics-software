@@ -45,12 +45,12 @@ public class DRCLidar
       }
    }
 
-   public static void setupDRCRobotLidar(HumanoidRobotSimulation<SDFRobot> sdfRobotSimulation, ObjectCommunicator objectCommunicator, DRCRobotJointMap jointMap,
+   public static void setupDRCRobotLidar(DRCSimulationFactory drcSimulation, ObjectCommunicator objectCommunicator, DRCRobotJointMap jointMap,
          TimestampProvider timestampProvider, boolean startLidar)
    {
-      Graphics3DAdapter graphics3dAdapter = sdfRobotSimulation.getSimulationConstructionSet().getGraphics3dAdapter();
+      Graphics3DAdapter graphics3dAdapter = drcSimulation.getSimulationConstructionSet().getGraphics3dAdapter();
       
-      LidarMount lidarMount = getLidarSensor(sdfRobotSimulation.getRobot());
+      LidarMount lidarMount = getLidarSensor(drcSimulation.getRobot());
       
       LidarScanParameters lidarScanParameters = lidarMount.getLidarScanParameters();
       int horizontalRays = lidarScanParameters.pointsPerSweep;

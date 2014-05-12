@@ -47,7 +47,7 @@ public class ManipulationControlModule
    
    private DirectControlManipulationTaskDispatcher directControlManipulationTaskDispatcher;
 
-   private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable("onFirstTick", registry);
+   private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable("hasBeenInitialized", registry);
    private SideDependentList<IndividualHandControlModule> individualHandControlModules;
 
    private final PipeLine<RobotSide> pipeline = new PipeLine<RobotSide>();

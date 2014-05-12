@@ -19,7 +19,6 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.SideDependentList;
-import us.ihmc.utilities.Pair;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
@@ -35,10 +34,10 @@ public class DRCHighLevelPositionControlDemo
 {
    private static final HighLevelState TASKSPACE_POSITION_CONTROL = HighLevelState.JOINT_PD_CONTROL;
    
-   private final HumanoidRobotSimulation<SDFRobot> drcSimulation;
-   private final DRCController drcController;
+   private final DRCSimulationFactory drcSimulation;
 
-   public DRCHighLevelPositionControlDemo(DRCSimulatedRobotInterface robotInterface, DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
+
+   public DRCHighLevelPositionControlDemo(DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
                                     DRCSCSInitialSetup scsInitialSetup, AutomaticSimulationRunner automaticSimulationRunner,
                                     double timePerRecordTick, int simulationDataBufferSize, DRCRobotModel model)
    {
@@ -67,16 +66,13 @@ public class DRCHighLevelPositionControlDemo
       SideDependentList<String> footForceSensorNames = model.getSensorInformation().getFeetForceSensorNames();
       
       ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, DRCConfigParameters.contactTresholdForceForSCS, footForceSensorNames);
-      Pair<HumanoidRobotSimulation<SDFRobot>, DRCController> humanoidSimulation = DRCSimulationFactory.createSimulation(controllerFactory, null,
-            robotInterface, robotInitialSetup, scsInitialSetup, guiInitialSetup, null, null, dynamicGraphicObjectsListRegistry, false,model);
-      drcSimulation = humanoidSimulation.first();
-      drcController = humanoidSimulation.second();
+      drcSimulation = new DRCSimulationFactory(model, controllerFactory, null, robotInitialSetup, scsInitialSetup, guiInitialSetup, null, null);
 
       // add other registries
       drcSimulation.addAdditionalYoVariableRegistriesToSCS(registry);
       
       
-      HoldRobotInTheAir controller = new HoldRobotInTheAir(drcSimulation.getRobot(), drcSimulation.getSimulationConstructionSet(), drcController.getControllerModel());
+      HoldRobotInTheAir controller = new HoldRobotInTheAir(drcSimulation.getRobot(), drcSimulation.getSimulationConstructionSet(), model.createFullRobotModel());
       drcSimulation.getRobot().setController(controller);
       controller.initialize();
       
@@ -93,11 +89,6 @@ public class DRCHighLevelPositionControlDemo
    public SimulationConstructionSet getSimulationConstructionSet()
    {
       return drcSimulation.getSimulationConstructionSet();
-   }
-
-   public DRCController getDrcController()
-   {
-      return drcController;
    }
    
    private class HoldRobotInTheAir implements RobotController

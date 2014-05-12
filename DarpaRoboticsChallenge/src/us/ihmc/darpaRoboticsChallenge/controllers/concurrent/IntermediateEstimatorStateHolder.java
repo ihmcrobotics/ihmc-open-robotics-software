@@ -1,16 +1,14 @@
 package us.ihmc.darpaRoboticsChallenge.controllers.concurrent;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
-import us.ihmc.utilities.ForceSensorDefinition;
 import us.ihmc.utilities.GenericCRC32;
-import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJointStateChecksum;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJointStateCopier;
 import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.SixDoFJoint;
 
 public class IntermediateEstimatorStateHolder
 {
@@ -33,10 +31,10 @@ public class IntermediateEstimatorStateHolder
    private final ForceSensorDataHolder controllerForceSensorDataHolder;
 
    public IntermediateEstimatorStateHolder(DRCRobotModel robotModel, RigidBody estimatorRootBody, RigidBody controllerRootBody,
-         ArrayList<ForceSensorDefinition> forceSensorDefinitions, ForceSensorDataHolder estimatorForceSensorDataHolder,
+         ForceSensorDataHolder estimatorForceSensorDataHolder,
          ForceSensorDataHolder controllerForceSensorDataHolder)
    {
-      FullRobotModel intermediateModel = robotModel.createFullRobotModel();
+      SDFFullRobotModel intermediateModel = robotModel.createFullRobotModel();
       RigidBody intermediateRootBody = intermediateModel.getElevator();
 
       estimatorChecksum = new InverseDynamicsJointStateChecksum(estimatorRootBody, estimatorChecksumCalculator);
@@ -46,13 +44,8 @@ public class IntermediateEstimatorStateHolder
       intermediateToControllerCopier = new InverseDynamicsJointStateCopier(intermediateRootBody, controllerRootBody);
 
       this.estimatorForceSensorDataHolder = estimatorForceSensorDataHolder;
-      this.intermediateForceSensorDataHolder = new ForceSensorDataHolder(forceSensorDefinitions, intermediateModel.getRootJoint());
+      this.intermediateForceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(intermediateModel.getForceSensorDefinitions()), intermediateModel.getRootJoint());
       this.controllerForceSensorDataHolder = controllerForceSensorDataHolder;
-   }
-
-   public void setForceSensorDefinitions(ArrayList<ForceSensorDefinition> forceSensorDefinitions, SixDoFJoint rootJoint,
-         ForceSensorDataHolder estimatorForceSensorDataHolder, ForceSensorDataHolder controllerForceSensorDataHolder)
-   {
    }
 
    public void setFromEstimatorModel(long timestamp, long estimatorTick, long estimatorClockStartTime)
@@ -118,18 +111,15 @@ public class IntermediateEstimatorStateHolder
       private final RigidBody estimatorRootJoint;
       private final RigidBody controllerRootJoint;
 
-      private final ArrayList<ForceSensorDefinition> forceSensorDefinitions;
       private final ForceSensorDataHolder estimatorForceSensorDataHolder;
       private final ForceSensorDataHolder controllerForceSensorDataHolder;
 
       public Builder(DRCRobotModel robotModel, RigidBody estimatorRootJoint, RigidBody controllerRootJoint,
-            ArrayList<ForceSensorDefinition> forceSensorDefinitions, ForceSensorDataHolder estimatorForceSensorDataHolder,
-            ForceSensorDataHolder controllerForceSensorDataHolder)
+            ForceSensorDataHolder estimatorForceSensorDataHolder, ForceSensorDataHolder controllerForceSensorDataHolder)
       {
          this.robotModel = robotModel;
          this.estimatorRootJoint = estimatorRootJoint;
          this.controllerRootJoint = controllerRootJoint;
-         this.forceSensorDefinitions = forceSensorDefinitions;
          this.estimatorForceSensorDataHolder = estimatorForceSensorDataHolder;
          this.controllerForceSensorDataHolder = controllerForceSensorDataHolder;
       }
@@ -137,8 +127,8 @@ public class IntermediateEstimatorStateHolder
       @Override
       public IntermediateEstimatorStateHolder newInstance()
       {
-         return new IntermediateEstimatorStateHolder(robotModel, estimatorRootJoint, controllerRootJoint, forceSensorDefinitions,
-               estimatorForceSensorDataHolder, controllerForceSensorDataHolder);
+         return new IntermediateEstimatorStateHolder(robotModel, estimatorRootJoint, controllerRootJoint, estimatorForceSensorDataHolder,
+               controllerForceSensorDataHolder);
       }
 
    }
