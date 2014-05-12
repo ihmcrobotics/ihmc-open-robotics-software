@@ -18,7 +18,6 @@ import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPose;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
 import us.ihmc.commonWalkingControlModules.posePlayback.PosePlaybackPacket;
 import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
-import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCPosePlaybackDemo;
 import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
@@ -199,7 +198,7 @@ public class ValkyriePosePlaybackDemoTest
       scsInitialSetup.setDrawGroundProfile(true);
       scsInitialSetup.setInitializeEstimatorToActual(true);
       
-      DRCPosePlaybackDemo drcPosePlaybackDemo = new DRCPosePlaybackDemo(robotInitialSetup, guiInitialSetup, scsInitialSetup, automaticSimulationRunner, DRCConfigParameters.CONTROL_DT, 16000, valkyrieRobotModel);
+      DRCPosePlaybackDemo drcPosePlaybackDemo = new DRCPosePlaybackDemo(robotInitialSetup, guiInitialSetup, scsInitialSetup, automaticSimulationRunner, valkyrieRobotModel.getControllerDT(), 16000, valkyrieRobotModel);
       return drcPosePlaybackDemo;
    }
 
