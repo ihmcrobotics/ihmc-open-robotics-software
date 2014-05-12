@@ -4,6 +4,7 @@ import java.io.InputStream;
 
 import javax.media.j3d.Transform3D;
 
+import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFJointNameMap;
@@ -74,9 +75,9 @@ public class BonoRobotModel implements DRCRobotModel
    }
 
    @Override
-   public StateEstimatorParameters getStateEstimatorParameters(double estimatorDT)
+   public StateEstimatorParameters getStateEstimatorParameters()
    {
-      return new BonoStateEstimatorParameters(runningOnRealRobot, estimatorDT);
+      return new BonoStateEstimatorParameters(runningOnRealRobot, getEstimatorDT());
    }
 
    @Override
@@ -142,7 +143,7 @@ public class BonoRobotModel implements DRCRobotModel
    }
    
    @Override
-   public DRCOutputWriter getOutputWriterWithAccelerationIntegration(DRCOutputWriter drcOutputWriter, double controlDT, boolean runningOnRealRobot)
+   public DRCOutputWriter getOutputWriterWithAccelerationIntegration(DRCOutputWriter drcOutputWriter, boolean runningOnRealRobot)
    {
       throw new RuntimeException("Implement me!");
    }
@@ -193,5 +194,29 @@ public class BonoRobotModel implements DRCRobotModel
    public SDFRobot createSdfRobot(boolean createCollisionMeshes)
    {
       return loader.createRobot(getJointMap(), createCollisionMeshes);
+   }
+
+   @Override
+   public double getSimulateDT()
+   {
+      return 0.0001;
+   }
+
+   @Override
+   public double getEstimatorDT()
+   {
+      return 0.001;
+   }
+
+   @Override
+   public double getControllerDT()
+   {
+      return 0.006;
+   }
+
+   @Override
+   public GeneralizedSDFRobotModel getGeneralizedRobotModel()
+   {
+      return loader.getGeneralizedSDFRobotModel(getJointMap().getModelName());
    }
 }
