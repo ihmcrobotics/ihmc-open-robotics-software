@@ -23,22 +23,52 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    private static final SideDependentList<SpatialForceVector> footForceSensorTareOffsets;
    static
    {
-      SpatialForceVector leftFootForceSensorTareOffset_20140406 = new SpatialForceVector(null, new double[] { 7.1, -23.7, 3.8, 186.2, 319.7, 1067.7 });
-      SpatialForceVector rightFootForceSensorTareOffset_20140406 = new SpatialForceVector(null, new double[] { -1.08, -2.79, -9.63, 38.05, 7.35, -109.3 });
+//      SpatialForceVector leftFootForceSensorTareOffset_20140406 = new SpatialForceVector(null, new double[] { 7.1, -23.7, 3.8, 186.2, 319.7, 1067.7 });
+//      SpatialForceVector rightFootForceSensorTareOffset_20140406 = new SpatialForceVector(null, new double[] { -1.08, -2.79, -9.63, 38.05, 7.35, -109.3 });
+//      SpatialForceVector leftFootForceSensorTareOffset_zero = new SpatialForceVector(null, new double[6]);
+//      SpatialForceVector rightFootForceSensorTareOffset_zero = new SpatialForceVector(null, new double[6]); 
+
+      SpatialForceVector leftFootForceSensorTareOffset_20140512 = new SpatialForceVector(null, new double[] { 7.02, -23.79, 3.09, 189.6, 322.5, 1081.0 });
+      SpatialForceVector rightFootForceSensorTareOffset_20140512 = new SpatialForceVector(null, new double[] {-1.12, -2.46, -8.94, 27.54, 3.70, -101.7});
       
-      footForceSensorTareOffsets = new SideDependentList<SpatialForceVector>(leftFootForceSensorTareOffset_20140406, rightFootForceSensorTareOffset_20140406);
+      footForceSensorTareOffsets = new SideDependentList<SpatialForceVector>(leftFootForceSensorTareOffset_20140512, rightFootForceSensorTareOffset_20140512);
    }
 
-   public static final SideDependentList<Transform3D> transformFromAnkleURDFFrameToZUpFrames = new SideDependentList<>();
+   public static final SideDependentList<Transform3D> transformFromMeasurementToAnkleZUpFrames = new SideDependentList<>();
    static
-   {
+   {     
+      /* 
+       * Obtained from v1_hw_ihmc.urdf
+         <joint name="/v1/LeftLeg6Axis_Offset" type="fixed">
+         <origin rpy="1.72079632679 0.518666 1.64601" xyz="0.0551839 0 -0.0291731"/>
+         <axis xyz="0 0 1"/>
+         <parent link="/v1/LeftUpperFoot"/>
+         <child link="/v1/LeftLeg6Axis_Frame"/>
+         </joint>
+      */
+      Transform3D translateForwardAndDownOnFoot = new Transform3D();
+      translateForwardAndDownOnFoot.setTranslation(new Vector3d(0.0551839, 0.0, -0.0291731)); 
+      
+      Transform3D rotYBy7dot5 = new Transform3D();
+      rotYBy7dot5.rotY(Math.PI/24.0);
+      
+      Transform3D rotXByPi = new Transform3D();
+      rotXByPi.rotX(Math.PI);
+      
+      Transform3D rotateZ60Degrees = new Transform3D();
+      rotateZ60Degrees.rotZ(-Math.PI/3.0);
+      
       Transform3D leftTransform = new Transform3D();
-      leftTransform.setEuler(new Vector3d(-Math.PI, Math.PI / 2.0, 0.0));
-      transformFromAnkleURDFFrameToZUpFrames.put(RobotSide.LEFT, leftTransform);
+      leftTransform.mul(translateForwardAndDownOnFoot);
+      leftTransform.mul(rotYBy7dot5);
+      leftTransform.mul(rotateZ60Degrees);
+      leftTransform.mul(rotXByPi);
 
-      Transform3D rightTransform = new Transform3D();
-      rightTransform.setEuler(new Vector3d(0.0, Math.PI / 2.0, 0.0));
-      transformFromAnkleURDFFrameToZUpFrames.put(RobotSide.RIGHT, rightTransform);
+      transformFromMeasurementToAnkleZUpFrames.put(RobotSide.LEFT, leftTransform);
+
+      //two feet are identical
+      Transform3D rightTransform = new Transform3D(leftTransform);
+      transformFromMeasurementToAnkleZUpFrames.put(RobotSide.RIGHT, rightTransform);
    }
 
    
@@ -135,6 +165,6 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    
    public Transform3D getTransformFromAnkleURDFFrameToZUpFrame(RobotSide robotSide)
    {
-      return transformFromAnkleURDFFrameToZUpFrames.get(robotSide);
+      return transformFromMeasurementToAnkleZUpFrames.get(robotSide);
    }
 }
