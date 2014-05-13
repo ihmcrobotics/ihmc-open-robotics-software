@@ -8,7 +8,6 @@ import org.junit.runners.Suite;
 {
    AtlasObstacleCoursePlatformTest.class,
    AtlasObstacleCourseRocksTest.class,
-   AtlasObstacleCourseSteppingStonesTest.class,
    AtlasObstacleCourseTrialsWalkingTaskTest.class,
    AtlasObstacleCourseTrialsTerrainTest.class
 })
