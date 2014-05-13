@@ -25,8 +25,8 @@
         </location>
         <orientation>
           <x>-0.003757432336996462</x>
-          <y>0.00332283060978079</y>
-          <z>-0.06087569215336912</z>
+          <y>0.0033228306097807902</y>
+          <z>-0.060875692153369125</z>
           <w>0.9981327519943527</w>
         </orientation>
       </us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
@@ -1221,7 +1221,7 @@
   <long>649869077705</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
-    <dataType>JOINT_ANGLES</dataType>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <trajectoryTime>10.0</trajectoryTime>
     <jointAngles>
@@ -1271,7 +1271,7 @@
   <long>691276561501</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>LEFT</robotSide>
-    <dataType>JOINT_ANGLES</dataType>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <trajectoryTime>10.0</trajectoryTime>
     <jointAngles>
@@ -1584,7 +1584,7 @@
   <long>866572711049</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
-    <dataType>JOINT_ANGLES</dataType>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <trajectoryTime>10.0</trajectoryTime>
     <jointAngles>
@@ -1808,7 +1808,7 @@
   <long>950620677595</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
-    <dataType>JOINT_ANGLES</dataType>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <trajectoryTime>10.0</trajectoryTime>
     <jointAngles>
@@ -1877,7 +1877,7 @@
   <long>995708742164</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
-    <dataType>JOINT_ANGLES</dataType>
+    <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
     <trajectoryTime>10.0</trajectoryTime>
     <jointAngles>
