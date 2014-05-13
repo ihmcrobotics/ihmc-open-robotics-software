@@ -55,7 +55,7 @@ public class InefficientPushrodTransmissionJacobian
    private final FrameVector tempRVector = new FrameVector();
    private final FrameVector tempCrossVector = new FrameVector();
 
-   private boolean visualize = true;
+   private boolean visualize = false;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
