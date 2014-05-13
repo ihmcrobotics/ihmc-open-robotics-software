@@ -35,7 +35,7 @@ public class InefficientButReadablePushrodTransmissionTest
          dynamicGraphicObjectsListRegistry = null;
       }
 
-      InefficientButReadablePushrodTransmission inefficientButReadablePushrodTransmission = new InefficientButReadablePushrodTransmission(registry,
+      InefficientPushrodTransmissionJacobian inefficientButReadablePushrodTransmission = new InefficientPushrodTransmissionJacobian(registry,
                                                                                                dynamicGraphicObjectsListRegistry);
 
       SimulationConstructionSet scs;
@@ -124,7 +124,7 @@ public class InefficientButReadablePushrodTransmissionTest
 
    }
 
-   private void computeAndPrint(InefficientButReadablePushrodTransmission inefficientButReadablePushrodTransmission, DoubleYoVariable pitch,
+   private void computeAndPrint(InefficientPushrodTransmissionJacobian inefficientButReadablePushrodTransmission, DoubleYoVariable pitch,
                                 DoubleYoVariable roll, double[][] jacobian, SimulationConstructionSet scs)
    {
       inefficientButReadablePushrodTransmission.computeJacobian(jacobian, pitch.getDoubleValue(), roll.getDoubleValue());

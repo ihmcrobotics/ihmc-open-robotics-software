@@ -17,7 +17,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
 
-public class InefficientButReadablePushrodTransmission
+public class InefficientPushrodTransmissionJacobian
 {
    private final double h = 0.0127;    // height of pitch axis above roll axis in meters (m)
 
@@ -69,7 +69,7 @@ public class InefficientButReadablePushrodTransmission
 
    private final boolean DEBUG = false;
 
-   public InefficientButReadablePushrodTransmission(YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public InefficientPushrodTransmissionJacobian(YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       boneFrame.updateTranslation(new FrameVector(worldFrame, 0.0, 0.0, 1.0));    // Arbitrary. Just put it in the air. If we wanted to have things align with the real robot, then this should be at the ankle.
       beforeRollFrame.updateTranslation(new FrameVector(afterPitchFrame, 0.0, 0.0, -h));

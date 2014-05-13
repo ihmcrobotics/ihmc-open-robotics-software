@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import us.ihmc.valkyrie.kinematics.transmissions.InefficientButReadablePushrodTransmission;
+import us.ihmc.valkyrie.kinematics.transmissions.InefficientPushrodTransmissionJacobian;
 import us.ihmc.valkyrie.kinematics.util.ClosedFormJacobian;
 
 public class ClosedFormJacobianTest
@@ -58,7 +58,7 @@ public class ClosedFormJacobianTest
    @Test
    public void testJacobianMatchesInefficientImplementation()
    {
-      InefficientButReadablePushrodTransmission inefficientButReadablePushrodTransmission = new InefficientButReadablePushrodTransmission(null, null);
+      InefficientPushrodTransmissionJacobian inefficientButReadablePushrodTransmission = new InefficientPushrodTransmissionJacobian(null, null);
 
       for (int i = 0; i < 7; i++)
       {
