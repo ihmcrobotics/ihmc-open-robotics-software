@@ -19,6 +19,7 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 import com.yobotics.simulationconstructionset.util.math.filter.GlitchFilteredBooleanYoVariable;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
@@ -66,8 +67,12 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
    private final YoFrameVector yoFootTorque;
    private final YoFrameVector yoFootForceInFoot;
    private final YoFrameVector yoFootTorqueInFoot;
-
+   
    private final double robotTotalWeight;
+   
+  
+   private final boolean showForceSensorFrame = true;
+   private final DynamicGraphicReferenceFrame dynamicGraphicForceSensorMeasuremnetFrame, dynamicGraphicForceSensorFootFrame;
 
    public WrenchBasedFootSwitch(String namePrefix, ForceSensorData forceSensorData, double footSwitchCoPThresholdFraction, double robotTotalWeight, ContactablePlaneBody contactablePlaneBody,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, double contactThresholdForce, YoVariableRegistry parentRegistry)
@@ -80,9 +85,21 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
 
       yoFootForce = new YoFrameVector(namePrefix + "FootForce", forceSensorData.getMeasurementFrame(), registry);
       yoFootTorque = new YoFrameVector(namePrefix + "FootTorque", forceSensorData.getMeasurementFrame(), registry);
-      yoFootForceInFoot = new YoFrameVector(namePrefix + "FootForceInFootFrame", contactablePlaneBody.getBodyFrame(), registry);
-      yoFootTorqueInFoot = new YoFrameVector(namePrefix + "FootTorqueInFootFrame", contactablePlaneBody.getBodyFrame(), registry);
-
+      yoFootForceInFoot = new YoFrameVector(namePrefix + "ForceFootFrame", contactablePlaneBody.getBodyFrame(), registry);
+      yoFootTorqueInFoot = new YoFrameVector(namePrefix + "TorqueFootFrame", contactablePlaneBody.getBodyFrame(), registry);
+      if(showForceSensorFrame && dynamicGraphicObjectsListRegistry!=null)
+      {
+         final double scale=1.0;
+         dynamicGraphicForceSensorMeasuremnetFrame = new DynamicGraphicReferenceFrame(forceSensorData.getMeasurementFrame(), registry, .6*scale, YoAppearance.Yellow());
+         dynamicGraphicForceSensorFootFrame = new DynamicGraphicReferenceFrame(contactablePlaneBody.getBodyFrame(), registry, scale, YoAppearance.AliceBlue());
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(namePrefix+"MeasFrame",dynamicGraphicForceSensorMeasuremnetFrame);
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(namePrefix+"FootFrame",dynamicGraphicForceSensorFootFrame);
+      }
+      else
+      {
+         dynamicGraphicForceSensorMeasuremnetFrame=null;
+         dynamicGraphicForceSensorFootFrame=null;
+      }
       footForceMagnitude = new DoubleYoVariable(namePrefix + "FootForceMag", registry);
       hasFootHitGround = new BooleanYoVariable(namePrefix + "FootHitGround", registry);
 
@@ -127,7 +144,8 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       this.footMinX = computeMinX(contactablePlaneBody);
       this.footMaxX = computeMaxX(contactablePlaneBody);
       this.footLength = computeLength(contactablePlaneBody);
-
+      
+ 
       parentRegistry.addChild(registry);
    }
 
@@ -269,6 +287,15 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       footTorque.changeFrame(contactablePlaneBody.getBodyFrame());
       yoFootTorqueInFoot.set(footTorque);
 
+      updateSensorVisualizer();
+   }
+   
+   private void updateSensorVisualizer()
+   {
+      if(dynamicGraphicForceSensorMeasuremnetFrame!=null)
+         dynamicGraphicForceSensorMeasuremnetFrame.update();
+      if(dynamicGraphicForceSensorFootFrame!=null)
+         dynamicGraphicForceSensorFootFrame.update();
    }
 
    private boolean isForceMagnitudePastThreshold()
