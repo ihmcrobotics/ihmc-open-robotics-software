@@ -42,7 +42,7 @@ public class CenterOfPressureResolver
       double vector12y = Double.NaN;
       
       double normalTorqueAtCenterOfPressure;
-      if (Math.abs(fz) > 1e-7)
+      if (fz > 1e-7)
       {
          //with sufficient normal force
          vector12x = -1.0/fz * torqueAtZeroInPlaneFrame.getY();
