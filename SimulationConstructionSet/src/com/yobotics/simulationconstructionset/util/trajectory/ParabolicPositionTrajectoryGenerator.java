@@ -144,9 +144,4 @@ public class ParabolicPositionTrajectoryGenerator implements PositionTrajectoryG
       packVelocity(velocityToPack);
       packAcceleration(accelerationToPack);
    }
-
-   public void updateTrajectory(FramePoint replanInitialPosition, FramePoint replanFinalPosition, FrameVector replanInitialVelocity, double replanInitialTime)
-   {
-      throw new RuntimeException("not implemented");
-   }
 }

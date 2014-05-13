@@ -778,12 +778,6 @@ public class InverseDynamicsJointController extends State<HighLevelState>
          packAngularVelocity(angularVelocityToPack);
          packAngularAcceleration(angularAccelerationToPack);
       }
-      
-      @Override
-      public void updateTrajectory(FramePoint replanInitialPosition, FramePoint replanFinalPosition, FrameVector replanInitialVelocity, double replanInitialTime)
-      {
-         throw new RuntimeException("not implemented");
-      }
    }
 
    public static class GravityCompensationSliderBoard
