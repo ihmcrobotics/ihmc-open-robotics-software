@@ -88,11 +88,11 @@ public class ValkyrieRobotModel implements DRCRobotModel
          {
             if(forceSensorNames.equals("LeftAnkle"))
             {
-               transform.set(ValkyrieSensorInformation.transformFromAnkleURDFFrameToZUpFrames.get(RobotSide.LEFT));
+               transform.set(ValkyrieSensorInformation.transformFromMeasurementToAnkleZUpFrames.get(RobotSide.LEFT));
             }
             else if(forceSensorNames.equals("RightAnkle"))
             {
-               transform.set(ValkyrieSensorInformation.transformFromAnkleURDFFrameToZUpFrames.get(RobotSide.RIGHT));               
+               transform.set(ValkyrieSensorInformation.transformFromMeasurementToAnkleZUpFrames.get(RobotSide.RIGHT));               
             }
          }
          
