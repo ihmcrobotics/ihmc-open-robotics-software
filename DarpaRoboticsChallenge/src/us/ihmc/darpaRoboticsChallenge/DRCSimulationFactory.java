@@ -51,7 +51,8 @@ public class DRCSimulationFactory
    
    private DRCEstimatorThread drcEstimatorThread;
    private DRCControllerThread drcControllerThread;
-   
+   private AbstractThreadedRobotController multiThreadedRobotController;
+
    private final SimulatedDRCRobotTimeProvider simulatedDRCRobotTimeProvider;
 
    public DRCSimulationFactory(DRCRobotModel drcRobotModel, ControllerFactory controllerFactory,
@@ -121,8 +122,6 @@ public class DRCSimulationFactory
       drcControllerThread = new DRCControllerThread(drcRobotModel, controllerFactory, lidarControllerInterface, threadDataSynchronizer,
             drcOutputWriter, globalDataProducer, drcRobotModel.getControllerDT(), gravity);
       
-      
-      AbstractThreadedRobotController multiThreadedRobotController;
       
       if(RUN_MULTI_THREADED)
       {
@@ -237,7 +236,10 @@ public class DRCSimulationFactory
 
    public void dispose()
    {
-      //TODO: Implement me
+      multiThreadedRobotController.stop();
+      drcEstimatorThread = null;
+      drcControllerThread = null;
+      multiThreadedRobotController = null;
    }
 
 
