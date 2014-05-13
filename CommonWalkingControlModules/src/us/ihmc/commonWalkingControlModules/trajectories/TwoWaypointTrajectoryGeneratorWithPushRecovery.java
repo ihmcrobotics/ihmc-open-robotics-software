@@ -217,14 +217,15 @@ public void compute(double time)
 		  }
 	  }
       else
-      {
-    	  initializedCntr.set(0);
-    	  
+      {  
     	  touchdownTrajectoryGenerator.compute(time);
     	  desiredPosition.set(touchdownTrajectoryGenerator.getDesiredPosition());
     	  desiredVelocity.set(touchdownTrajectoryGenerator.getDesiredVelocity());
     	  desiredAcceleration.set(touchdownTrajectoryGenerator.getDesiredAcceleration());
       }
+      
+      if(time>=stepTime.getDoubleValue() && initializedCntr.getIntegerValue()!=0)
+    	  initializedCntr.set(0);
    }
 
    public void get(FramePoint positionToPack)
