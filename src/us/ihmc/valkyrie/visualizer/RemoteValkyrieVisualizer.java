@@ -1,8 +1,5 @@
 package us.ihmc.valkyrie.visualizer;
 
-import us.ihmc.SdfLoader.JaxbSDFLoader;
-import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
 import us.ihmc.robotDataCommunication.YoVariableClient;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
@@ -23,14 +20,11 @@ public class RemoteValkyrieVisualizer
    {
       System.out.println("Connecting to host " + host);
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(true, false);
-      DRCRobotJointMap jointMap = robotModel.getJointMap();
-      JaxbSDFLoader valkyrieLoader = robotModel.getJaxbSDFLoader();
-
       SliderBoardFactory sliderBoardFactory = ValkyrieSliderBoard.getWalkingSliderBoardFactory();
 //    SliderBoardFactory sliderBoardFactory = ValkyrieSliderBoard.getIDControllerSliderBoardFactory();
 //      SliderBoardFactory sliderBoardFactory = new StandPrepSliderBoardFactory();
 
-      ValkyrieSliderBoardControllerListener scsYoVariablesUpdatedListener = new ValkyrieSliderBoardControllerListener(valkyrieLoader, jointMap, bufferSize,
+      ValkyrieSliderBoardControllerListener scsYoVariablesUpdatedListener = new ValkyrieSliderBoardControllerListener(robotModel, bufferSize,
             sliderBoardFactory);
 
       int numberOfTicksBeforeUpdatingGraphs = 30;
