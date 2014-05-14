@@ -658,13 +658,16 @@ public void compute(double time)
 
    private void visualizeSpline()
    {   
+	   double tf;
+	   double t0;
+	   double t;
 	   if(!hasReplanned.getBooleanValue())
 	   {
 	      for (int i = 0; i < numberOfVisualizationMarkers; i++)
 	      {
-	    	  double t0 = concatenatedSplinesWithArcLengthCalculatedIteratively.getT0();
-	    	  double tf = concatenatedSplinesWithArcLengthCalculatedIteratively.getTf();
-	    	  double t = t0 + (double) i / (double) (numberOfVisualizationMarkers) * (tf - t0);
+	    	  t0 = concatenatedSplinesWithArcLengthCalculatedIteratively.getT0();
+	    	  tf = concatenatedSplinesWithArcLengthCalculatedIteratively.getTf();
+	    	  t = t0 + (double) i / (double) (numberOfVisualizationMarkers) * (tf - t0);
 	    	  compute(t);
 	    	  trajectoryBagOfBalls.setBall(desiredPosition.getFramePointCopy(), i);
 	      }
@@ -676,9 +679,8 @@ public void compute(double time)
 	   }
 	   else
 	   {
-		   double t0 = timeIntoStep.getDoubleValue();
-		   double tf = stepTime.getDoubleValue();
-		   double t;
+		   t0 = timeIntoStep.getDoubleValue();
+		   tf = stepTime.getDoubleValue();
 		   
 		   for (int i = 0; i < numberOfVisualizationMarkers; i++)
 		      {
