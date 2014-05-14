@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule.ConstraintType;
+import us.ihmc.commonWalkingControlModules.controlModules.endEffector.FootControlModule;
+import us.ihmc.commonWalkingControlModules.controlModules.endEffector.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingManagers;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
@@ -82,7 +82,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
          desiredConfigurationProviders.put(robotSide, desiredConfigurationProvider);
 
          ConstantDoubleProvider footTrajectoryTimeProvider = new ConstantDoubleProvider(1.0);
-         EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(controlDT, foot, jacobianId, robotSide, /*poseTrajectoryGenerator,*/ null,
+         FootControlModule endEffectorControlModule = new FootControlModule(controlDT, foot, jacobianId, robotSide, /*poseTrajectoryGenerator,*/ null,
                                                                 null, null, walkingControllerParameters,
                                                                 footTrajectoryTimeProvider, currentConfigurationProvider, null, desiredConfigurationProvider,
                                                                 currentConfigurationProvider, null, desiredConfigurationProvider, null,

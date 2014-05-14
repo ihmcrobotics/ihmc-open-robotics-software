@@ -16,7 +16,7 @@ import com.yobotics.simulationconstructionset.util.trajectory.YoVariableDoublePr
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
-import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule;
+import us.ihmc.commonWalkingControlModules.controlModules.endEffector.FootControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
@@ -70,7 +70,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
 
    protected final YoFrameVector desiredPelvisAngularAcceleration = new YoFrameVector("desiredPelvisAngularAcceleration", worldFrame, registry);
    protected final SideDependentList<Integer> legJacobianIds = new SideDependentList<Integer>();
-   protected final SideDependentList<EndEffectorControlModule> footEndEffectorControlModules = new SideDependentList<EndEffectorControlModule>();
+   protected final SideDependentList<FootControlModule> footEndEffectorControlModules = new SideDependentList<FootControlModule>();
    protected final FullRobotModel fullRobotModel;
    protected final MomentumBasedController momentumBasedController;
    protected final WalkingControllerParameters walkingControllerParameters;

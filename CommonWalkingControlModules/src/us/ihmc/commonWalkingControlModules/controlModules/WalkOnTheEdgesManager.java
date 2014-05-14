@@ -8,7 +8,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule;
+import us.ihmc.commonWalkingControlModules.controlModules.endEffector.FootControlModule;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
@@ -71,7 +71,7 @@ public class WalkOnTheEdgesManager
    private final DoubleYoVariable minStepLengthForToeTouchdown = new DoubleYoVariable("minStepLengthForToeTouchdown", registry);
 
    private final SideDependentList<? extends ContactablePlaneBody> feet;
-   private final SideDependentList<EndEffectorControlModule> footEndEffectorControlModules;
+   private final SideDependentList<FootControlModule> footEndEffectorControlModules;
 
    private final DoubleYoVariable extraCoMMaxHeightWithToes = new DoubleYoVariable("extraCoMMaxHeightWithToes", registry);
 
@@ -97,7 +97,7 @@ public class WalkOnTheEdgesManager
    private final double footLength;
 
    public WalkOnTheEdgesManager(WalkingControllerParameters walkingControllerParameters, WalkOnTheEdgesProviders walkOnTheEdgesProviders,
-         SideDependentList<? extends ContactablePlaneBody> feet, SideDependentList<EndEffectorControlModule> footEndEffectorControlModules,
+         SideDependentList<? extends ContactablePlaneBody> feet, SideDependentList<FootControlModule> footEndEffectorControlModules,
          YoVariableRegistry parentRegistry)
    {
       this.stayOnToes.set(walkingControllerParameters.stayOnToes());
@@ -206,7 +206,7 @@ public class WalkOnTheEdgesManager
          return;
       }
 
-      EndEffectorControlModule trailingEndEffectorControlModule = footEndEffectorControlModules.get(trailingLeg);
+      FootControlModule trailingEndEffectorControlModule = footEndEffectorControlModules.get(trailingLeg);
       doToeOff.set(Math.abs(trailingEndEffectorControlModule.getJacobianDeterminant()) < walkOnTheEdgesProviders.getJacobianDeterminantThresholdForToeOff());
    }
 

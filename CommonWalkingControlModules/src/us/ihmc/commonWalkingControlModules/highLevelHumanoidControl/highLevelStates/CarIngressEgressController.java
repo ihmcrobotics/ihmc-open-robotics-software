@@ -12,8 +12,8 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisDesiredsHandler;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.endEffector.EndEffectorControlModule.ConstraintType;
+import us.ihmc.commonWalkingControlModules.controlModules.endEffector.FootControlModule;
+import us.ihmc.commonWalkingControlModules.controlModules.endEffector.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingManagers;
@@ -293,7 +293,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          DoubleTrajectoryGenerator onToesTrajectory = new ThirdOrderPolynomialTrajectoryGenerator(sideString + bodyName, onToesInitialPitchProvider,
                                                          onToesInitialPitchVelocityProvider, onToesFinalPitchProvider, trajectoryTimeProvider, registry);
 
-         EndEffectorControlModule endEffectorControlModule = new EndEffectorControlModule(controlDT, foot, jacobianId, robotSide, null,
+         FootControlModule endEffectorControlModule = new FootControlModule(controlDT, foot, jacobianId, robotSide, null,
                                                                 onToesTrajectory, null, walkingControllerParameters, 
                                                                 footTrajectoryTimeProvider, initialConfigurationProvider, null, desiredConfigurationProvider,
                                                                 initialConfigurationProvider, null, desiredConfigurationProvider, null,
