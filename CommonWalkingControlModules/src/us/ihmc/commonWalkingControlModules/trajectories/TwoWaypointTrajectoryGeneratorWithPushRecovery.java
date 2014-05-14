@@ -24,7 +24,7 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionProvider;
-import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
+import com.yobotics.simulationconstructionset.util.trajectory.ReplannablePositionTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParameters;
 import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParametersProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryWaypointGenerationMethod;
@@ -39,7 +39,7 @@ import com.yobotics.simulationconstructionset.util.trajectory.YoConcatenatedSpli
  * the soft TouchdownTrajectoryGenerator included rather than the two being combined in an ArrayList of position trajectory generators. When 
  * the robot is pushed, the XY portion of the trajectory are replanned so the robot can recover from the push.
  */
-public class TwoWaypointTrajectoryGeneratorWithPushRecovery implements PositionTrajectoryGenerator
+public class TwoWaypointTrajectoryGeneratorWithPushRecovery implements ReplannablePositionTrajectoryGenerator
 {
 	private static final int arcLengthCalculatorDivisionsPerPolynomial = 20;
 	private final static double EPSILON = 1e-3;
@@ -277,7 +277,7 @@ public void compute(double time)
 	   }
    }
    
-   public void replanTrajectory()
+   public void replan()
    {
 	   //TODO add in method for visualizing push recovery trajectory
 	   pushRecoveryTrajectoryGenerator.initialize();
