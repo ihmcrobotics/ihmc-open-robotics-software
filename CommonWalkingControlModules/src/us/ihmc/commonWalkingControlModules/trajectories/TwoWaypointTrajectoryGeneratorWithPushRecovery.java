@@ -280,6 +280,8 @@ public void compute(double time)
    public void replan()
    {
 	   //TODO add in method for visualizing push recovery trajectory
+	   pushRecoveryTrajectoryGenerator.setTimeIntoStep(timeIntoStep.getDoubleValue());
+	   
 	   pushRecoveryTrajectoryGenerator.initialize();
 	   touchdownTrajectoryGenerator.initialize();
 	   hasReplanned.set(true);
