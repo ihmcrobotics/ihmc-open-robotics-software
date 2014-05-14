@@ -24,6 +24,8 @@ public class InefficientPushrodTransmissionJacobian
    private final double length = 0.1049655;    // futek link length (m)
    private final double lengthSquared = length * length;
 
+   private boolean useFuteks = true; 
+   
    private final Vector3d rod5 = new Vector3d(-0.0215689, -0.04128855, 0.0);    // position where rod 5 passes through bone frame plane. x is forward. y is to the left. z is up. (m)
    private final Vector3d rod6 = new Vector3d(-0.0215689, 0.04128855, 0.0);    // position where rod 6 passes through bone frame plane. x is forward. y is to the left. z is up. (m)
 
@@ -45,6 +47,9 @@ public class InefficientPushrodTransmissionJacobian
 
    private final FramePoint t5InBoneFrame = new FramePoint();
    private final FramePoint t6InBoneFrame = new FramePoint();
+   
+   private final FramePoint t5InFootFrame = new FramePoint();
+   private final FramePoint t6InFootFrame = new FramePoint();
 
    private final FrameVector f5VectorInBoneFrame = new FrameVector(boneFrame);
    private final FrameVector f6VectorInBoneFrame = new FrameVector(boneFrame);
@@ -120,6 +125,11 @@ public class InefficientPushrodTransmissionJacobian
          parentRegistry.addChild(registry);
    }
 
+   public void setUseFuteks(boolean useFuteks)
+   {
+      this.useFuteks = useFuteks;
+   }
+   
    public void computeJacobian(double[][] jacobianToPack, double pitch, double roll)
    {
       // Update forward kinematics reference frames using roll and pitch.
@@ -160,41 +170,59 @@ public class InefficientPushrodTransmissionJacobian
       t5InBoneFrame.setZ(t5zInBoneFrame);
       t6InBoneFrame.setZ(t6zInBoneFrame);
 
+      t5InFootFrame.setIncludingFrame(t5InBoneFrame);
+      t6InFootFrame.setIncludingFrame(t6InBoneFrame);
+      
+      t5InFootFrame.changeFrame(footFrame);
+      t6InFootFrame.changeFrame(footFrame);
+      
       if (DEBUG)
       {
-         System.out.println("t5InFootFrame = " + t5InBoneFrame.changeFrameCopy(footFrame));
-         System.out.println("t6InFootFrame = " + t6InBoneFrame.changeFrameCopy(footFrame));
+         System.out.println("t5InFootFrame = " + t5InFootFrame);
+         System.out.println("t6InFootFrame = " + t6InFootFrame);
       }
 
 
       // Do R cross F to get Jacobian elements:
-      f5VectorInBoneFrame.sub(b5InBoneFrame, t5InBoneFrame);
-      f6VectorInBoneFrame.sub(b6InBoneFrame, t6InBoneFrame);
 
-      f5VectorInBoneFrame.normalize();
-      f6VectorInBoneFrame.normalize();
+      if (useFuteks)
+      {
+         f5VectorInBoneFrame.sub(b5InBoneFrame, t5InBoneFrame);
+         f6VectorInBoneFrame.sub(b6InBoneFrame, t6InBoneFrame);
 
+         f5VectorInBoneFrame.normalize();
+         f6VectorInBoneFrame.normalize();
+         
+         printIfDebug("f5VectorInBoneFrame = " + f5VectorInBoneFrame);
+         printIfDebug("f6VectorInBoneFrame = " + f6VectorInBoneFrame);
+      }
+      else
+      {
+         f5VectorInBoneFrame.setIncludingFrame(boneFrame, 0.0, 0.0, -1.0);
+         f6VectorInBoneFrame.setIncludingFrame(boneFrame, 0.0, 0.0, -1.0);
+      }
+      
       f5VectorInFootFrame.setIncludingFrame(f5VectorInBoneFrame);
       f5VectorInFootFrame.changeFrame(footFrame);
       f6VectorInFootFrame.setIncludingFrame(f6VectorInBoneFrame);
       f6VectorInFootFrame.changeFrame(footFrame);
 
-      tempRVector.setIncludingFrame(b5InBoneFrame);
+      tempRVector.setIncludingFrame(t5InBoneFrame); //kjb5InBoneFrame);
       tempCrossVector.setToZero(tempRVector.getReferenceFrame());
       tempCrossVector.cross(tempRVector, f5VectorInBoneFrame);
       jPitch5.set(tempCrossVector.getY());
 
-      tempRVector.setIncludingFrame(b6InBoneFrame);
+      tempRVector.setIncludingFrame(t6InBoneFrame); //b6InBoneFrame);
       tempCrossVector.cross(tempRVector, f6VectorInBoneFrame);
       jPitch6.set(tempCrossVector.getY());
 
 
-      tempRVector.setIncludingFrame(b5InFootFrame);
+      tempRVector.setIncludingFrame(t5InFootFrame); //b5InFootFrame);
       tempCrossVector.setToZero(tempRVector.getReferenceFrame());
       tempCrossVector.cross(tempRVector, f5VectorInFootFrame);
       jRoll5.set(tempCrossVector.getX());
 
-      tempRVector.setIncludingFrame(b6InFootFrame);
+      tempRVector.setIncludingFrame(t6InFootFrame); //b6InFootFrame);
       tempCrossVector.cross(tempRVector, f6VectorInFootFrame);
       jRoll6.set(tempCrossVector.getX());
 
@@ -225,4 +253,5 @@ public class InefficientPushrodTransmissionJacobian
       if (DEBUG)
          System.out.println(message);
    }
+
 }
