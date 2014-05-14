@@ -46,7 +46,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private DRCRobotSensorInformation sensorInformation;
    private final DRCRobotJointMap jointMap;
    private final String robotName = "VALKYRIE";
-   private final String sdfFileName = "V1/sdf/V1_sim.sdf";
+   private final String sdfFileName = "V1/sdf/V1_sim_hacked_lidar.sdf";//"V1/sdf/V1_sim.sdf";
    
    
    private final String[] resourceDirectories = {
