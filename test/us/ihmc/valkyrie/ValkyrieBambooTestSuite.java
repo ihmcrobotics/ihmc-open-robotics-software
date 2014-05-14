@@ -14,8 +14,7 @@ import us.ihmc.utilities.test.JUnitTestSuiteConstructor;
    us.ihmc.valkyrie.ValkyrieControllerFactoryTest.class,
    us.ihmc.valkyrie.kinematics.transmissions.InefficientPushrodTransmissionJacobianTest.class,
    us.ihmc.valkyrie.kinematics.transmissions.InefficientPushRodTransmissionTest.class,
-   us.ihmc.valkyrie.kinematics.ClosedFormJacobianTest.class,
-   us.ihmc.valkyrie.kinematics.PushrodTransmissionComparisonTest.class
+   us.ihmc.valkyrie.kinematics.ClosedFormJacobianTest.class
 })
 
 public class ValkyrieBambooTestSuite
