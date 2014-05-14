@@ -173,12 +173,6 @@ public class BonoRobotModel implements DRCRobotModel
    }
 
    @Override
-   public JaxbSDFLoader getJaxbSDFLoader()
-   {
-     return loader;
-   }
-
-   @Override
    public DRCRobotSensorInformation getSensorInformation()
    {
       return sensorInformation;
