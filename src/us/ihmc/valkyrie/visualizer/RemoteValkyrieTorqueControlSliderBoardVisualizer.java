@@ -1,8 +1,6 @@
 package us.ihmc.valkyrie.visualizer;
 
 
-import us.ihmc.SdfLoader.JaxbSDFLoader;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
 import us.ihmc.robotDataCommunication.YoVariableClient;
 import us.ihmc.robotDataCommunication.visualizer.SCSYoVariablesUpdatedListener;
@@ -24,12 +22,9 @@ public class RemoteValkyrieTorqueControlSliderBoardVisualizer
    {
       System.out.println("Connecting to host " + host);
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(true, false);
-      DRCRobotJointMap jointMap = robotModel.getJointMap();
-      JaxbSDFLoader valkyrieLoader = robotModel.getJaxbSDFLoader();
-
       SliderBoardFactory sliderBoardFactory = ValkyrieSliderBoard.getForceControlFactory();
 
-      SCSYoVariablesUpdatedListener scsYoVariablesUpdatedListener = new ValkyrieSliderBoardControllerListener(valkyrieLoader, jointMap, bufferSize, sliderBoardFactory);
+      SCSYoVariablesUpdatedListener scsYoVariablesUpdatedListener = new ValkyrieSliderBoardControllerListener(robotModel, bufferSize, sliderBoardFactory);
 
       YoVariableClient client = new YoVariableClient(host, port, scsYoVariablesUpdatedListener, "remote", false);
       client.start();

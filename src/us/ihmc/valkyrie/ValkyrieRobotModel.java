@@ -220,13 +220,6 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
-   public JaxbSDFLoader getJaxbSDFLoader()
-   {
-      
-      return loader;
-   }
-
-   @Override
    public DRCRobotSensorInformation getSensorInformation()
    {
       return sensorInformation;

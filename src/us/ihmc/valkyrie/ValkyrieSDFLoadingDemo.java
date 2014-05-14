@@ -5,11 +5,9 @@ import java.util.HashSet;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaElipsoidsVisualizer;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 
@@ -30,10 +28,8 @@ public class ValkyrieSDFLoadingDemo
    public ValkyrieSDFLoadingDemo()
    {
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(false, false);
-      DRCRobotJointMap jointMap = robotModel.getJointMap();
-      JaxbSDFLoader loader = robotModel.getJaxbSDFLoader();
       
-      SDFRobot valkyrieRobot = loader.createRobot(jointMap, false);
+      SDFRobot valkyrieRobot = robotModel.createSdfRobot(false);
       valkyrieRobot.setPositionInWorld(new Vector3d());
       
       if (SHOW_ELLIPSOIDS)
@@ -41,7 +37,7 @@ public class ValkyrieSDFLoadingDemo
          addIntertialEllipsoidsToVisualizer(valkyrieRobot);
       }
 
-      SDFFullRobotModel sdfFullRobotModel = loader.createFullRobotModel(jointMap);
+      SDFFullRobotModel sdfFullRobotModel = robotModel.createFullRobotModel();
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
       CommonInertiaElipsoidsVisualizer inertiaVis = new CommonInertiaElipsoidsVisualizer(sdfFullRobotModel.getElevator(), dynamicGraphicObjectsListRegistry);
       inertiaVis.update();

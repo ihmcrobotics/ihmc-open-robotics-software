@@ -19,10 +19,9 @@ public class ValkyriePosePlaybackSCSBridge
       DRCRobotModel robotModel = new ValkyrieRobotModel(false, false);
       
       DRCRobotJointMap jointMap = robotModel.getJointMap();
-      JaxbSDFLoader loader = robotModel.getJaxbSDFLoader();
-      SDFRobot sdfRobot = loader.createRobot(jointMap, false);
-      FullRobotModel fullRobotModel = loader.createFullRobotModel(jointMap);
-      SDFFullRobotModel fullRobotModelForSlider = loader.createFullRobotModel(jointMap);
+      SDFRobot sdfRobot = robotModel.createSdfRobot(false);
+      FullRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      SDFFullRobotModel fullRobotModelForSlider = robotModel.createFullRobotModel();
    
       new PosePlaybackSCSBridge(sdfRobot, fullRobotModel, fullRobotModelForSlider, robotModel.getControllerDT());
    

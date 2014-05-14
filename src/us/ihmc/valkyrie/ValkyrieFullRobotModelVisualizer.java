@@ -29,13 +29,11 @@ public class ValkyrieFullRobotModelVisualizer
 //      GeneralizedSDFRobotModel generalizedSDFRobotModel = robotInterface.getGeneralizedSDFRobotModel();
       
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(false, false);
-      DRCRobotJointMap jointMap = robotModel.getJointMap();
-      JaxbSDFLoader valkyrieLoader = robotModel.getJaxbSDFLoader();
       
       
-      GeneralizedSDFRobotModel generalizedSDFRobotModel = valkyrieLoader.getGeneralizedSDFRobotModel(jointMap.getModelName());
+      GeneralizedSDFRobotModel generalizedSDFRobotModel = robotModel.getGeneralizedRobotModel();
 //      jaxbSDFLoader.createRobot(jointMap, false);
-      SDFFullRobotModel sdfFullRobotModel = valkyrieLoader.createFullRobotModel(jointMap);
+      SDFFullRobotModel sdfFullRobotModel = robotModel.createFullRobotModel();
       
 //      sdfFullRobotModel.getRootJoint().setRotation(0.5, 1.0, 0.8);
 //      for(OneDoFJoint joint : sdfFullRobotModel.getOneDoFJoints())
