@@ -20,6 +20,11 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    private final SideDependentList<Transform3D> handPosesWithRespectToChestFrame = new SideDependentList<Transform3D>();
    private final double minElbowRollAngle = 0.5;
    
+   private final double upperNeckExtensorUpperLimit = 0.785398;
+   private final double upperNeckExtensorLowerLimit = -0.0872665;
+   private final double lowerNeckExtensorUpperLimit = 0.0;
+   private final double lowerNeckExtensorLowerLimit = -1.5708;
+   
    public ValkyrieWalkingControllerParameters()
    {
       this(false);
@@ -114,7 +119,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
 
    public String[] getDefaultHeadOrientationControlJointNames()
    {
-      return new String[] { ValkyrieJointMap.upperNeckPitchJointName,ValkyrieJointMap.pelvisYawJointName };
+      return new String[] { ValkyrieJointMap.upperNeckPitchJointName,ValkyrieJointMap.pelvisYawJointName,ValkyrieJointMap.lowerNeckPitchJointName };
    }
 
    public String[] getAllowableHeadOrientationControlJointNames()
@@ -184,12 +189,12 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
 
    public double getUpperNeckPitchLimit()
    {
-      return 0.785398;//1.14494;
+      return upperNeckExtensorUpperLimit + lowerNeckExtensorUpperLimit;//1.14494;
    }
 
    public double getLowerNeckPitchLimit()
    {
-      return -0.0872665;//-0.602139;
+      return upperNeckExtensorLowerLimit + lowerNeckExtensorLowerLimit;//-0.602139;
    }
 
    public double getHeadYawLimit()
