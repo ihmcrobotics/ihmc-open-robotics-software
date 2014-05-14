@@ -96,7 +96,7 @@ public class TwoWaypointTrajectoryGeneratorWithPushRecovery implements PositionT
    	private final YoConcatenatedSplines concatenatedSplinesWithArcLengthCalculatedIteratively;
    
    	private final SmoothCartesianWaypointConnectorTrajectoryGenerator2D pushRecoveryTrajectoryGenerator;
-   	private final IntegerYoVariable initializedCntr;
+   	private final BooleanYoVariable hasReplanned;
    	private final DoubleYoVariable initialTime;
    
    	private final SoftTouchdownTrajectoryGenerator touchdownTrajectoryGenerator;
@@ -136,8 +136,8 @@ public class TwoWaypointTrajectoryGeneratorWithPushRecovery implements PositionT
 
 	      this.referenceFrame = referenceFrame;
 	      
-	      this.initializedCntr = new IntegerYoVariable(namePrefix + "InitializeCounter", this.registry);
-	      this.initializedCntr.set(0);
+	      this.hasReplanned = new BooleanYoVariable(namePrefix + "HasReplanned", this.registry);
+	      this.hasReplanned.set(false);
 	      
 	      this.initialTime = new DoubleYoVariable(namePrefix + "InitialTime", this.registry);
 	      this.initialTime.set(0.0);
@@ -193,7 +193,7 @@ public void compute(double time)
 	  {
     	  concatenatedSplinesWithArcLengthCalculatedIteratively.compute(time);
     	  
-    	  if(initializedCntr.getIntegerValue()>1)
+    	  if(hasReplanned.getBooleanValue())
 		  {
 			  pushRecoveryTrajectoryGenerator.compute(time);
 			  
@@ -224,8 +224,8 @@ public void compute(double time)
     	  desiredAcceleration.set(touchdownTrajectoryGenerator.getDesiredAcceleration());
       }
       
-      if(time>=stepTime.getDoubleValue() && initializedCntr.getIntegerValue()!=0)
-    	  initializedCntr.set(0);
+      if(time>=stepTime.getDoubleValue() && hasReplanned.getBooleanValue())
+    	  hasReplanned.set(false);
    }
 
    public void get(FramePoint positionToPack)
@@ -245,49 +245,47 @@ public void compute(double time)
 
    public void initialize()
    {
-	   if(initializedCntr.getIntegerValue()<1)
+	   setTrajectoryParameters();
+  
+	   double stepTime = stepTimeProvider.getValue();
+	   this.stepTime.set(stepTime);
+
+	   setInitialAndFinalTimesPositionsAndVelocities();
+	   setWaypointPositions();
+
+	   double[] arcLengthsIgnoringAccelerationEndpointPositions = getArcLengthsApproximatedByDistance(nonAccelerationEndpointIndices);
+	   setLinearSplineLengthFactor(arcLengthsIgnoringAccelerationEndpointPositions);
+	   setAccelerationEndpointPositions();
+
+	   double[] arcLengths;
+
+	   arcLengths = getArcLengthsApproximatedByDistance(allIndices);
+	   setWaypointAndAccelerationEndpointTimesAndVelocities(arcLengths);
+
+	   if (!waypointsAreTheSamePoint)
 	   {
-		   setTrajectoryParameters();
-      
-		   double stepTime = stepTimeProvider.getValue();
-		   this.stepTime.set(stepTime);
-	
-		   setInitialAndFinalTimesPositionsAndVelocities();
-		   setWaypointPositions();
-	
-		   double[] arcLengthsIgnoringAccelerationEndpointPositions = getArcLengthsApproximatedByDistance(nonAccelerationEndpointIndices);
-		   setLinearSplineLengthFactor(arcLengthsIgnoringAccelerationEndpointPositions);
-		   setAccelerationEndpointPositions();
-	
-		   double[] arcLengths;
-	
-		   arcLengths = getArcLengthsApproximatedByDistance(allIndices);
+		   setConcatenatedSplines(concatenatedSplinesWithArcLengthApproximatedByDistance);
+		   arcLengths = getArcLengthsCalculatedIteratively();
 		   setWaypointAndAccelerationEndpointTimesAndVelocities(arcLengths);
-	
-		   if (!waypointsAreTheSamePoint)
-		   {
-			   setConcatenatedSplines(concatenatedSplinesWithArcLengthApproximatedByDistance);
-			   arcLengths = getArcLengthsCalculatedIteratively();
-			   setWaypointAndAccelerationEndpointTimesAndVelocities(arcLengths);
-		   }
-	      
-		   setConcatenatedSplines(concatenatedSplinesWithArcLengthCalculatedIteratively);
-      		}
-	   	else
-	   	{
-	   		System.out.print("ARE YOU RESETTING THE INITIAL TIME PROVIDER???");
-//	   		pushRecoveryTrajectoryGenerator.setInitialTime(timeIntoStep.getDoubleValue());
-	   		pushRecoveryTrajectoryGenerator.initialize();
-	   	}
+	   }
+      
+	   setConcatenatedSplines(concatenatedSplinesWithArcLengthCalculatedIteratively);
+      		
 	   
-	   	touchdownTrajectoryGenerator.initialize();
+	   touchdownTrajectoryGenerator.initialize();
 	   
-	   	initializedCntr.set(initializedCntr.getIntegerValue()+1); // Increment to keep track of the number of initializations.
-	   
-	   	if (visualize.getBooleanValue())
-	   	{
-	   		visualizeSpline();
-	   	}
+	   if (visualize.getBooleanValue())
+	   {
+		   visualizeSpline();
+	   }
+   }
+   
+   public void replanTrajectory()
+   {
+	   //TODO add in method for visualizing push recovery trajectory
+	   pushRecoveryTrajectoryGenerator.initialize();
+	   touchdownTrajectoryGenerator.initialize();
+	   hasReplanned.set(true);
    }
 
    private void setTrajectoryParameters()
