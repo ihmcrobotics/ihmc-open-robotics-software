@@ -45,7 +45,7 @@ public class ComparePushRodTransmissionsTest
 
       InterpolatedPushRodTransmission interpolatedPushRodTransmission = new InterpolatedPushRodTransmission(ankleNamespace, reflect, compliance);
       InefficientPushRodTransmission inefficientPushrodTransmission = new InefficientPushRodTransmission(reflect, null, null);
-      inefficientPushrodTransmission.setUseFuteks(true);
+      inefficientPushrodTransmission.setUseFuteks(false);
 
       double epsilon = 1e-7;
 
