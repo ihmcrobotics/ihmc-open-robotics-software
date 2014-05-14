@@ -31,6 +31,8 @@ import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryWaypoint
 import com.yobotics.simulationconstructionset.util.trajectory.VectorProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.YoConcatenatedSplines;
 
+import de.lessvoid.nifty.tools.time.TimeInterpolator;
+
 /** 
  * 
  * @author anonymous
@@ -285,6 +287,11 @@ public void compute(double time)
 	   pushRecoveryTrajectoryGenerator.initialize();
 	   touchdownTrajectoryGenerator.initialize();
 	   hasReplanned.set(true);
+	   
+	   if(visualize.getBooleanValue())
+	   {
+		   visualizeSpline();
+	   }
    }
 
    private void setTrajectoryParameters()
@@ -650,20 +657,36 @@ public void compute(double time)
    }
 
    private void visualizeSpline()
-   {
-      for (int i = 0; i < numberOfVisualizationMarkers; i++)
-      {
-         double t0 = concatenatedSplinesWithArcLengthCalculatedIteratively.getT0();
-         double tf = concatenatedSplinesWithArcLengthCalculatedIteratively.getTf();
-         double t = t0 + (double) i / (double) (numberOfVisualizationMarkers) * (tf - t0);
-         compute(t);
-         trajectoryBagOfBalls.setBall(desiredPosition.getFramePointCopy(), i);
-      }
-
-      for (int i = 0; i < nonAccelerationEndpointIndices.length; i++)
-      {
-         fixedPointBagOfBalls.setBall(allPositions[nonAccelerationEndpointIndices[i]].getFramePointCopy(), YoAppearance.AliceBlue(), i);
-      }
+   {   
+	   if(!hasReplanned.getBooleanValue())
+	   {
+	      for (int i = 0; i < numberOfVisualizationMarkers; i++)
+	      {
+	    	  double t0 = concatenatedSplinesWithArcLengthCalculatedIteratively.getT0();
+	    	  double tf = concatenatedSplinesWithArcLengthCalculatedIteratively.getTf();
+	    	  double t = t0 + (double) i / (double) (numberOfVisualizationMarkers) * (tf - t0);
+	    	  compute(t);
+	    	  trajectoryBagOfBalls.setBall(desiredPosition.getFramePointCopy(), i);
+	      }
+	
+	      	for (int i = 0; i < nonAccelerationEndpointIndices.length; i++)
+	      	{
+	      		fixedPointBagOfBalls.setBall(allPositions[nonAccelerationEndpointIndices[i]].getFramePointCopy(), YoAppearance.AliceBlue(), i);
+	      	}
+	   }
+	   else
+	   {
+		   double t0 = timeIntoStep.getDoubleValue();
+		   double tf = stepTime.getDoubleValue();
+		   double t;
+		   
+		   for (int i = 0; i < numberOfVisualizationMarkers; i++)
+		      {
+		    	  t = t0 + (double) i / (double) (numberOfVisualizationMarkers) * (tf - t0);
+		    	  compute(t);
+		    	  trajectoryBagOfBalls.setBall(desiredPosition.getFramePointCopy(), i);
+		      }
+	   }
    }
 
    @Override
