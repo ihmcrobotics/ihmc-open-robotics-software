@@ -5,8 +5,6 @@ import java.util.List;
 
 import javax.vecmath.Vector3d;
 
-import org.junit.runners.ParentRunner;
-
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.MathTools;
@@ -19,7 +17,6 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
-import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
@@ -44,7 +41,7 @@ import com.yobotics.simulationconstructionset.util.trajectory.YoConcatenatedSpli
  */
 public class TwoWaypointTrajectoryGeneratorWithPushRecovery implements PositionTrajectoryGenerator
 {
-	
+	private static final int arcLengthCalculatorDivisionsPerPolynomial = 20;
 	private final static double EPSILON = 1e-3;
 	private final static double WAYPOINT_CLOSENESS_FACTOR = .15; // waypoints are considered close together if the distance between them is less than the total
    // distance times this fraction; waypoints that are close together are both set to their midpoint and passed through at a velocity of zero
@@ -80,33 +77,33 @@ public class TwoWaypointTrajectoryGeneratorWithPushRecovery implements PositionT
 
 	private final DoubleYoVariable[] allTimes = new DoubleYoVariable[6];
 	protected final YoFramePoint[] allPositions = new YoFramePoint[6];
-   	private final YoFrameVector[] allVelocities = new YoFrameVector[6];
+	private final YoFrameVector[] allVelocities = new YoFrameVector[6];
 
-   	private final TrajectoryParametersProvider trajectoryParametersProvider;
-   	protected TwoWaypointTrajectoryParameters trajectoryParameters;
-   
-   	private static final int[] endpointIndices = new int[] { 0, 5 };
-   	private static final int[] waypointIndices = new int[] { 2, 3 };
-   	private static final int[] oppositeWaypointIndices = new int[] { 3, 2 };
-   	private static final int[] accelerationEndpointIndices = new int[] { 1, 4 };
-   	private static final int[] nonAccelerationEndpointIndices = new int[] { 0, 2, 3, 5 };
-   	private static final int[] allIndices = new int[] { 0, 1, 2, 3, 4, 5 };
+	private final TrajectoryParametersProvider trajectoryParametersProvider;
+	protected TwoWaypointTrajectoryParameters trajectoryParameters;
 
-   	private final YoConcatenatedSplines concatenatedSplinesWithArcLengthApproximatedByDistance;
-   	private final YoConcatenatedSplines concatenatedSplinesWithArcLengthCalculatedIteratively;
-   
-   	private final SmoothCartesianWaypointConnectorTrajectoryGenerator2D pushRecoveryTrajectoryGenerator;
-   	private final BooleanYoVariable hasReplanned;
-   	private final DoubleYoVariable initialTime;
-   
-   	private final SoftTouchdownTrajectoryGenerator touchdownTrajectoryGenerator;
+	private static final int[] endpointIndices = new int[] { 0, 5 };
+	private static final int[] waypointIndices = new int[] { 2, 3 };
+	private static final int[] oppositeWaypointIndices = new int[] { 3, 2 };
+	private static final int[] accelerationEndpointIndices = new int[] { 1, 4 };
+	private static final int[] nonAccelerationEndpointIndices = new int[] { 0, 2, 3, 5 };
+	private static final int[] allIndices = new int[] { 0, 1, 2, 3, 4, 5 };
 
-   	private boolean waypointsAreTheSamePoint = false;
+	private final YoConcatenatedSplines concatenatedSplinesWithArcLengthApproximatedByDistance;
+	private final YoConcatenatedSplines concatenatedSplinesWithArcLengthCalculatedIteratively;
+
+	private final SmoothCartesianWaypointConnectorTrajectoryGenerator2D pushRecoveryTrajectoryGenerator;
+	private final BooleanYoVariable hasReplanned;
+	private final DoubleYoVariable initialTime;
+
+	private final SoftTouchdownTrajectoryGenerator touchdownTrajectoryGenerator;
+
+	private boolean waypointsAreTheSamePoint = false;
 	
 	public TwoWaypointTrajectoryGeneratorWithPushRecovery(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider stepTimeProvider,
 	         PositionProvider initialPositionProvider, VectorProvider initialVelocityProvider, PositionProvider finalPositionProvider,
 	         VectorProvider finalDesiredVelocityProvider, TrajectoryParametersProvider trajectoryParametersProvider, YoVariableRegistry parentRegistry,
-	         int arcLengthCalculatorDivisionsPerPolynomial, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+	         /*int arcLengthCalculatorDivisionsPerPolynomial,*/ DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
 	         WalkingControllerParameters walkingControllerParameters, boolean visualize)
 	{
 		registry = new YoVariableRegistry(namePrefix + namePostFix);
