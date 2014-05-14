@@ -54,7 +54,11 @@ public class InefficientPushRodTransmission implements PushRodTransmissionInterf
       inefficientPushrodTransmissionJacobian = new InefficientPushrodTransmissionJacobian(parentRegistry, dynamicGraphicObjectsListRegistry);
    }
   
-   
+   public void setUseFuteks(boolean useFuteks)
+   {
+      inefficientPushrodTransmissionJacobian.setUseFuteks(useFuteks);      
+   }
+
    private boolean invertMatrix(double[][] matrix, double[][] inverseTransposeToPack)
    {
       double determinant = (matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0]);
