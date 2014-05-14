@@ -23,12 +23,9 @@ import javax.vecmath.Vector3d;
 
 import org.apache.batik.dom.util.HashTable;
 
-import us.ihmc.SdfLoader.JaxbSDFLoader;
-import us.ihmc.SdfLoader.SDFJointNameMap;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
@@ -63,9 +60,9 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
    Thread simulation;
    boolean exportSCSVideo;
    
-   public AtlasMultiDataExporter(JaxbSDFLoader loader, SDFJointNameMap jointNameMap, int bufferSize, boolean showGUIAndSaveSCSVideo, File logFile) throws IOException
+   public AtlasMultiDataExporter(DRCRobotModel robotModel, int bufferSize, boolean showGUIAndSaveSCSVideo, File logFile) throws IOException
    {
-	   initialize(loader, jointNameMap, bufferSize, showGUIAndSaveSCSVideo, logFile);
+	   initialize(robotModel, bufferSize, showGUIAndSaveSCSVideo, logFile);
 	   simulation = new Thread(scs);
 	   exportSCSVideo = showGUIAndSaveSCSVideo;
    }
@@ -79,7 +76,6 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
       int numberOfEntries = 0;
       DRCRobotModel model = new AtlasRobotModel(ATLAS_ROBOT_VERSION, false, false);
       DRCRobotJointMap jointMap = model.getJointMap();
-      JaxbSDFLoader loader = model.getJaxbSDFLoader();
    	  boolean showGUIAndSaveSCSVideo = true;
       
       String[] cameraName;
@@ -145,7 +141,7 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
 		   double[] cameraParameters = {simulationCameraHour[j], simulationCameraRadius[j], simulationCameraHeight[j]};
 		   final String variableGroupName = "selectedVariables";
 
-	       AtlasMultiDataExporter exportData = new AtlasMultiDataExporter(loader, jointMap, bufferSize[j], showGUIAndSaveSCSVideo, inFolder[j]); 
+	       AtlasMultiDataExporter exportData = new AtlasMultiDataExporter(model, bufferSize[j], showGUIAndSaveSCSVideo, inFolder[j]); 
 	       
 	       SimulateAndExport simulateExport = exportData.new SimulateAndExport(exportData, startIndex[j], secondOfSimulation[j], 
 	    		                                 cameraName[j], outputFileName[j], outFolder[j], variableGroupName, vars, timeVariable[j], cameraParameters);
@@ -284,8 +280,8 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
        return file;
    }
    
-   private void initialize(JaxbSDFLoader loader, SDFJointNameMap jointNameMap, 
-		                   int bufferSize, boolean showGUI, File logFile) throws IOException
+   private void initialize(DRCRobotModel robotModel, int bufferSize, 
+                              boolean showGUI, File logFile) throws IOException
    {
      if (logFile == null)
      {
@@ -296,7 +292,7 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
      {
         System.out.println("loading log from folder:" + logFile);
         scs = new SimulationConstructionSet(showGUI, bufferSize);
-        readLogFile(logFile, loader, jointNameMap); 
+        readLogFile(logFile, robotModel); 
      }
      else
      {
@@ -321,7 +317,7 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
      }
   }
 
-  private void readLogFile(File selectedFile, JaxbSDFLoader loader, SDFJointNameMap jointNameMap) throws IOException
+  private void readLogFile(File selectedFile, DRCRobotModel robotModel) throws IOException
   {
      LogPropertiesReader logProperties = new LogPropertiesReader(new File(selectedFile, YoVariableLoggerListener.propertyFile));
      File handshake = new File(selectedFile, logProperties.getHandshakeFile());
@@ -346,7 +342,8 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
      @SuppressWarnings("resource")
      final FileChannel logChannel = new FileInputStream(logdata).getChannel();
      
-     robot = new YoVariableLogPlaybackRobot(loader.getGeneralizedSDFRobotModel(jointNameMap.getModelName()),jointNameMap, 
+     
+     robot = new YoVariableLogPlaybackRobot(robotModel.getGeneralizedRobotModel(),robotModel.getJointMap(), 
     		                                               parser.getJointStates(), parser.getYoVariablesList(), logChannel, scs);
      
      double dt = parser.getDt();

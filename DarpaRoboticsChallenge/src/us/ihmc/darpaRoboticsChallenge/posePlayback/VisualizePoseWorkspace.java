@@ -5,7 +5,6 @@ import java.io.IOException;
 
 import javax.swing.JFileChooser;
 
-import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPose;
@@ -13,8 +12,6 @@ import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseInterpolator
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceReader;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceWriter;
-import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
@@ -42,8 +39,7 @@ public class VisualizePoseWorkspace
       this.controlDT = robotModel.getControllerDT();
       
       DRCRobotJointMap jointMap = robotModel.getJointMap();
-      JaxbSDFLoader loader = robotModel.getJaxbSDFLoader();
-      SDFRobot sdfRobot = loader.createRobot(jointMap, false);
+      SDFRobot sdfRobot = robotModel.createSdfRobot(false);
 
       interpolator = new PlaybackPoseInterpolator(registry);
 
@@ -51,7 +47,7 @@ public class VisualizePoseWorkspace
       scs.addYoVariableRegistry(registry);
       dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
 
-      fullRobotModelForSlider = loader.createFullRobotModel(jointMap);
+      fullRobotModelForSlider = robotModel.createFullRobotModel();
       DRCRobotMidiSliderBoardPositionManipulation sliderBoard = new DRCRobotMidiSliderBoardPositionManipulation(scs, sdfRobot, fullRobotModelForSlider, dynamicGraphicObjectsListRegistry);
 
       posePlaybackRobotPoseSequence = new PlaybackPoseSequence(fullRobotModelForSlider);

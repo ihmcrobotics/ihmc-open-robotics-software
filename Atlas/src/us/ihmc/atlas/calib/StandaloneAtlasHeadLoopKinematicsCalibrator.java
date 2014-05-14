@@ -14,11 +14,9 @@ import org.ddogleg.optimization.FactoryOptimization;
 import org.ddogleg.optimization.UnconstrainedLeastSquares;
 import org.ddogleg.optimization.UtilOptimize;
 
-import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -57,9 +55,7 @@ public class StandaloneAtlasHeadLoopKinematicsCalibrator
    {
       //load robot
 	  DRCRobotModel robotModel = new AtlasRobotModel(atlasVersion, runningOnRealRobot, runningOnRealRobot);
-      DRCRobotJointMap jointMap = robotModel.getJointMap();
-      JaxbSDFLoader robotLoader = robotModel.getJaxbSDFLoader();
-      fullRobotModel = robotLoader.createFullRobotModel(jointMap);
+      fullRobotModel = robotModel.createFullRobotModel();
       joints = fullRobotModel.getOneDoFJoints();
 
       cameraFrame = fullRobotModel.getCameraFrame("stereo_camera_left");

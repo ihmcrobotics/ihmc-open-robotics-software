@@ -13,7 +13,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
-import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedSensorReader;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPose;
@@ -21,7 +20,6 @@ import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceReader;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceWriter;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
-import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
@@ -52,10 +50,9 @@ public class PoseSequenceSelectorPanel extends JPanel
 
       DRCRobotJointMap jointMap = robotModel.getJointMap();
       DRCRobotPhysicalProperties physicalProperties = robotModel.getPhysicalProperties();
-      JaxbSDFLoader loader = robotModel.getJaxbSDFLoader();
 
-      fullRobotModel = loader.createFullRobotModel(jointMap);
-      sdfRobot = loader.createRobot(jointMap, false);
+      fullRobotModel = robotModel.createFullRobotModel();
+      sdfRobot = robotModel.createSdfRobot(false);
 
       sequence = new PlaybackPoseSequence(fullRobotModel);
       

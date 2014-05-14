@@ -8,7 +8,6 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedSensorReader;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
@@ -41,13 +40,12 @@ public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInter
    public MultiContactTestEnvironment(DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCRobotModel robotModel,
                                       RobotSide[] footContactSides, RobotSide[] handContactSides)
    {
-      JaxbSDFLoader jaxbSDFLoader = robotModel.getJaxbSDFLoader();
       DRCRobotJointMap jointMap = robotModel.getJointMap();
       DRCRobotPhysicalProperties physicalProperties = robotModel.getPhysicalProperties();
-      SDFRobot robotForEnvironmentSetup = jaxbSDFLoader.createRobot(jointMap, DRCConfigParameters.USE_COLLISIONS_MESHS_FOR_VISUALIZATION);
+      SDFRobot robotForEnvironmentSetup = robotModel.createSdfRobot(DRCConfigParameters.USE_COLLISIONS_MESHS_FOR_VISUALIZATION);
       robotInitialSetup.initializeRobot(robotForEnvironmentSetup, jointMap);
       robotForEnvironmentSetup.update();
-      FullRobotModel fullRobotModelForEnvironmentSetup = jaxbSDFLoader.createFullRobotModel(jointMap);
+      FullRobotModel fullRobotModelForEnvironmentSetup = robotModel.createFullRobotModel();
 
       CommonWalkingReferenceFrames referenceFramesForEnvironmentSetup = new ReferenceFrames(fullRobotModelForEnvironmentSetup, jointMap, physicalProperties.getAnkleHeight());
       SDFPerfectSimulatedSensorReader sensorReaderAndOutputWriter = new SDFPerfectSimulatedSensorReader(robotForEnvironmentSetup,

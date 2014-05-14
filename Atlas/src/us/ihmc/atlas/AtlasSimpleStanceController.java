@@ -1,6 +1,5 @@
 package us.ihmc.atlas;
 
-import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -56,9 +55,8 @@ public class AtlasSimpleStanceController {
 	      
 	      DRCRobotJointMap jointMap = model.getJointMap();
 	      DRCRobotPhysicalProperties physicalProperties = model.getPhysicalProperties();
-	      JaxbSDFLoader jaxbSDFLoader = model.getJaxbSDFLoader();
-	      SDFFullRobotModel fullRobotModel = jaxbSDFLoader.createFullRobotModel(jointMap);
-	      SDFRobot robot = jaxbSDFLoader.createRobot(jointMap, false);
+	      SDFFullRobotModel fullRobotModel = model.createFullRobotModel();
+	      SDFRobot robot = model.createSdfRobot(false);
 	      ReferenceFrames referenceFrames = new ReferenceFrames(fullRobotModel, jointMap, physicalProperties.getAnkleHeight());
 
 	      DRCRobotInitialSetup<SDFRobot> intialSetup = model.getDefaultRobotInitialSetup(0, 0);
