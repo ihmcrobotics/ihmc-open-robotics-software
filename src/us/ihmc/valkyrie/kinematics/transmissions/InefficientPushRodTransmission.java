@@ -9,6 +9,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 public class InefficientPushRodTransmission implements PushRodTransmissionInterface
 {
    private static final double INFINITY_THRESHOLD = 1e10;
+   private static final boolean DEBUG = false;
 
    private int numActuators()
    {
@@ -56,14 +57,19 @@ public class InefficientPushRodTransmission implements PushRodTransmissionInterf
    
    private boolean invertMatrix(double[][] matrix, double[][] inverseTransposeToPack)
    {
-      double det = (matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0]);
+      double determinant = (matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0]);
 
-      if (det != 0.0)
+      if (Math.abs(determinant) < 1e-5) 
       {
-         inverseTransposeToPack[0][0] = (1.0 / det) * matrix[1][1];
-         inverseTransposeToPack[0][1] = (1.0 / det) * (-matrix[0][1]);
-         inverseTransposeToPack[1][0] = (1.0 / det) * (-matrix[1][0]);
-         inverseTransposeToPack[1][1] = (1.0 / det) * matrix[0][0];
+         printIfDebug("InefficientPushRodTransmission: determinant = " + determinant);
+      }
+      
+      if (determinant != 0.0)
+      {
+         inverseTransposeToPack[0][0] = (1.0 / determinant) * matrix[1][1];
+         inverseTransposeToPack[0][1] = (1.0 / determinant) * (-matrix[0][1]);
+         inverseTransposeToPack[1][0] = (1.0 / determinant) * (-matrix[1][0]);
+         inverseTransposeToPack[1][1] = (1.0 / determinant) * matrix[0][0];
 
          return true;
       }
@@ -72,20 +78,19 @@ public class InefficientPushRodTransmission implements PushRodTransmissionInterf
    }
    
    
+   private void printIfDebug(String string)
+   {
+      if (DEBUG) System.out.println(string);
+      
+   }
+
    @Override
    public void actuatorToJointEffort(TurboDriver[] actuatorData, ValkyrieJoint[] jointData)
    {
       assertTrue(numActuators() == actuatorData.length && numJoints() == jointData.length);
 
-//      double actuatorPosition0 = (actuatorData[0].getPosition());
-//      double actuatorPosition1 = (actuatorData[1].getPosition());
       double actuatorForce0 = actuatorData[1].getEffort(); //TODO: Verify the ordering here...
       double actuatorForce1 = actuatorData[0].getEffort();
-
-//      if (Math.abs(actuatorPosition0) > INFINITY_THRESHOLD || Math.abs(actuatorPosition1) > INFINITY_THRESHOLD)
-//      {
-//         throw new RuntimeException("actuatorToJointEffort: th_m1 or th_m2 is infinity!!");
-//      }
 
       double pitchAngle = jointData[0].getPosition();
       double rollAngle = reflect * jointData[1].getPosition();

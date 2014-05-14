@@ -7,6 +7,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.utilities.RandomTools;
 import us.ihmc.valkyrie.kinematics.ValkyrieJoint;
 import us.ihmc.valkyrie.roboNet.DummyTurboDriver;
 import us.ihmc.valkyrie.roboNet.TurboDriver;
@@ -16,7 +17,7 @@ public class ComparePushRodTransmissionsTest
    private static final boolean DEBUG = false;
 
    @Test   
-   public void testCompareInefficientToEfficientWill()
+   public void testCompareInefficientToEfficient()
    {
       Random random = new Random(1255L);
 
@@ -24,11 +25,6 @@ public class ComparePushRodTransmissionsTest
 
       InefficientPushRodTransmission inefficientPushrodTransmission = new InefficientPushRodTransmission(reflect, null, null);
       EfficientPushRodTransmission efficientPushrodTransmission = new EfficientPushRodTransmission(reflect);
-      
-//      String ankleNamespace = "v1_ankle";
-//      double compliance = 0.0;
-//      InterpolatedPushRodTransmission interpolatedPushRodTransmission = new InterpolatedPushRodTransmission(ankleNamespace, reflect, compliance);
-//      InterpolatedPushRodTransmission efficientPushrodTransmission = new InterpolatedPushRodTransmission(ankleNamespace, reflect, compliance);
       
       TurboDriver[] actuatorData = new DummyTurboDriver[2];
       actuatorData[0] = new DummyTurboDriver();
@@ -38,24 +34,23 @@ public class ComparePushRodTransmissionsTest
       jointData[0] = new ValkyrieJoint("joint0", null);
       jointData[1] = new ValkyrieJoint("joint1", null);
       
-      double epsilon = 1e-7; //0.05;
+      double epsilon = 1e-4;
       
-      double increment = 0.02;
+      double increment = 0.05;
       
-      for (double pitch = -Math.PI / 3.0; pitch < Math.PI / 3.0; pitch = pitch + increment)
+      for (double pitch = -1.0; pitch < 1.0; pitch = pitch + increment)
       {
-         for (double roll = -Math.PI / 3.0; roll < Math.PI / 3.0; roll = roll + increment)
+         for (double roll = -0.5; roll < 0.5; roll = roll + increment)
          { 
-//            double pitch = 0.0;
-//            double roll = 0.5;
+            printIfDebug("pitch = " + pitch + ", roll = " + roll);
             
             jointData[0].setPosition(pitch);
             jointData[1].setPosition(roll);
 
             // Check the actuatorToJointEffort
 
-            double force0 = 1.0; //RandomTools.generateRandomDouble(random, -100.0, 100.0);
-            double force1 = 0.0; //RandomTools.generateRandomDouble(random, -100.0, 100.0);
+            double force0 = RandomTools.generateRandomDouble(random, -100.0, 100.0);
+            double force1 = RandomTools.generateRandomDouble(random, -100.0, 100.0);
 
             actuatorData[0].setEffortCommand(force0);
             actuatorData[1].setEffortCommand(force1);
@@ -86,37 +81,49 @@ public class ComparePushRodTransmissionsTest
             assertEquals(inefficientPitchTorque, efficientPitchTorque, epsilon);
             assertEquals(inefficientRollTorque, efficientRollTorque, epsilon);
             
-//            // Check the jointToActuatorEffort
-//            double pitchTorque = RandomTools.generateRandomDouble(random, -40.0, 40.0);
-//            double rollTorque = RandomTools.generateRandomDouble(random, -40.0, 40.0);
-//
-//            jointData[0].setDesiredEffort(pitchTorque);
-//            jointData[1].setDesiredEffort(rollTorque);
-//
-//            actuatorData[0].setEffortCommand(Double.NaN);
-//            actuatorData[1].setEffortCommand(Double.NaN);
-//
-//            inefficientPushrodTransmission.jointToActuatorEffort(actuatorData, jointData);
-//
-//            double inefficientActuatorForce0 = actuatorData[0].getEffort();
-//            double inefficientActuatorForce1 = actuatorData[1].getEffort();
-//
-//            actuatorData[0].setEffortCommand(Double.NaN);
-//            actuatorData[1].setEffortCommand(Double.NaN);
-//
-//            efficientPushrodTransmission.jointToActuatorEffort(actuatorData, jointData);
-//            
-//            double efficientActuatorForce0 = actuatorData[0].getEffort();
-//            double efficientActuatorForce1 = actuatorData[1].getEffort();
-//
-//            assertFalse(Double.isNaN(inefficientActuatorForce0));
-//            assertFalse(Double.isNaN(inefficientActuatorForce1));
-//            
-//            assertEquals(inefficientActuatorForce0, efficientActuatorForce0, epsilon);
-//            assertEquals(inefficientActuatorForce1, efficientActuatorForce1, epsilon);
+            // Check the jointToActuatorEffort
+            double pitchTorque = RandomTools.generateRandomDouble(random, -40.0, 40.0);
+            double rollTorque = RandomTools.generateRandomDouble(random, -40.0, 40.0);
+
+            jointData[0].setDesiredEffort(pitchTorque);
+            jointData[1].setDesiredEffort(rollTorque);
+
+            actuatorData[0].setEffortCommand(Double.NaN);
+            actuatorData[1].setEffortCommand(Double.NaN);
+
+            inefficientPushrodTransmission.jointToActuatorEffort(actuatorData, jointData);
+
+            double inefficientActuatorForce0 = actuatorData[0].getEffort();
+            double inefficientActuatorForce1 = actuatorData[1].getEffort();
+
+            actuatorData[0].setEffortCommand(Double.NaN);
+            actuatorData[1].setEffortCommand(Double.NaN);
+
+            efficientPushrodTransmission.jointToActuatorEffort(actuatorData, jointData);
+            
+            double efficientActuatorForce0 = actuatorData[0].getEffort();
+            double efficientActuatorForce1 = actuatorData[1].getEffort();
+
+            printIfDebug("pitchTorque = " + pitchTorque + ", rollTorque = " + rollTorque + ", inefficientActuatorForce0 = " + inefficientActuatorForce0 + ", inefficientActuatorForce1 = " + inefficientActuatorForce1 + ", efficientActuatorForce0 = " + efficientActuatorForce0 + ", efficientActuatorForce1 = " + efficientActuatorForce1);
+            printIfDebug("");
+
+            assertFalse(Double.isNaN(inefficientActuatorForce0));
+            assertFalse(Double.isNaN(inefficientActuatorForce1));
+            
+            assertEquals(inefficientActuatorForce0, efficientActuatorForce0, epsilon);
+            assertEquals(inefficientActuatorForce1, efficientActuatorForce1, epsilon);
          }
       }
 
+   }
+   
+   public void testInefficientToInterpolated()
+   {
+//    String ankleNamespace = "v1_ankle";
+//    double compliance = 0.0;
+//    InterpolatedPushRodTransmission interpolatedPushRodTransmission = new InterpolatedPushRodTransmission(ankleNamespace, reflect, compliance);
+//    InterpolatedPushRodTransmission efficientPushrodTransmission = new InterpolatedPushRodTransmission(ankleNamespace, reflect, compliance);
+    
    }
 
    private void printIfDebug(String string)
