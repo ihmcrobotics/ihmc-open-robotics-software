@@ -13,7 +13,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
@@ -24,9 +23,8 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.SemiCircularStepValid
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.SimplePathParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.TurningThenStraightFootstepGenerator;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
-import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.darpaRoboticsChallenge.userInterface.DRCOperatorUserInterface;
 import us.ihmc.robotSide.RobotSide;
@@ -164,12 +162,11 @@ public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTe
 
    private void setupRobotParameters()
    {
-      DRCRobotJointMap jointMap = getRobotModel().getJointMap();
-      JaxbSDFLoader jaxbSDFLoader = getRobotModel().getJaxbSDFLoader();
-      DRCRobotPhysicalProperties physicalProperties = getRobotModel().getPhysicalProperties();
-      walkingParamaters = getRobotModel().getWalkingControlParameters();
-      fullRobotModel = jaxbSDFLoader.createFullRobotModel(jointMap);
-      referenceFrames = new ReferenceFrames(fullRobotModel, jointMap, physicalProperties.getAnkleHeight());
+      DRCRobotModel robotModel = getRobotModel();
+      DRCRobotPhysicalProperties physicalProperties = robotModel.getPhysicalProperties();
+      walkingParamaters = robotModel.getWalkingControlParameters();
+      fullRobotModel = robotModel.createFullRobotModel();
+      referenceFrames = new ReferenceFrames(fullRobotModel, robotModel.getJointMap(), physicalProperties.getAnkleHeight());
       bipedFeet = DRCOperatorUserInterface.setupBipedFeet(referenceFrames, fullRobotModel, walkingParamaters);
    }
 

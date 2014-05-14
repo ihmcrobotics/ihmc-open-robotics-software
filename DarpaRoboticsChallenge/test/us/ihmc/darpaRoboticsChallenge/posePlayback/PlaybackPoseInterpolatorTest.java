@@ -2,22 +2,17 @@ package us.ihmc.darpaRoboticsChallenge.posePlayback;
 
 import static org.junit.Assert.assertTrue;
 
-import java.io.Reader;
-import java.io.StringReader;
 import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPose;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseInterpolator;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceReader;
-import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.utilities.ThreadTools;
 
@@ -34,11 +29,8 @@ public abstract class PlaybackPoseInterpolatorTest implements MultiRobotTestInte
    {
       DRCRobotModel robotModel = getRobotModel();
 
-      DRCRobotJointMap jointMap = robotModel.getJointMap();
-      JaxbSDFLoader sdfLoader = robotModel.getJaxbSDFLoader();
-      
-      SDFFullRobotModel fullRobotModel = sdfLoader.createFullRobotModel(jointMap);
-      SDFRobot sdfRobot = sdfLoader.createRobot(jointMap, false);
+      SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      SDFRobot sdfRobot = robotModel.createSdfRobot(false);
 
       double delay = 0.3;
       double trajectoryTime = 1.0;
@@ -51,12 +43,8 @@ public abstract class PlaybackPoseInterpolatorTest implements MultiRobotTestInte
    public void testRandomExample()
    {
       DRCRobotModel robotModel = getRobotModel();
-
-      DRCRobotJointMap jointMap = robotModel.getJointMap();
-      JaxbSDFLoader sdfLoader = robotModel.getJaxbSDFLoader();
-      
-      SDFFullRobotModel fullRobotModel = sdfLoader.createFullRobotModel(jointMap);
-      SDFRobot sdfRobot = sdfLoader.createRobot(jointMap, false);
+      SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      SDFRobot sdfRobot = robotModel.createSdfRobot(false);
       
       int numberOfPoses = 5;
       double delay = 0.3;
@@ -88,12 +76,8 @@ public abstract class PlaybackPoseInterpolatorTest implements MultiRobotTestInte
    public void testLoadingAndPlayingASequence()
    {
       DRCRobotModel robotModel = getRobotModel();
-
-      DRCRobotJointMap jointMap = robotModel.getJointMap();
-      JaxbSDFLoader sdfLoader = robotModel.getJaxbSDFLoader();
-      
-      SDFFullRobotModel fullRobotModel = sdfLoader.createFullRobotModel(jointMap);
-      SDFRobot sdfRobot = sdfLoader.createRobot(jointMap, false);
+      SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      SDFRobot sdfRobot = robotModel.createSdfRobot(false);
       
       PlaybackPoseSequence sequence = new PlaybackPoseSequence(fullRobotModel);
       PlaybackPoseSequenceReader.appendFromFile(sequence, "testSequence2.poseSequence");
@@ -104,12 +88,8 @@ public abstract class PlaybackPoseInterpolatorTest implements MultiRobotTestInte
    public void testLoadingAndPlayingAnotherSequence()
    {
       DRCRobotModel robotModel = getRobotModel();
-
-      DRCRobotJointMap jointMap = robotModel.getJointMap();
-      JaxbSDFLoader sdfLoader = robotModel.getJaxbSDFLoader();
-      
-      SDFFullRobotModel fullRobotModel = sdfLoader.createFullRobotModel(jointMap);
-      SDFRobot sdfRobot = sdfLoader.createRobot(jointMap, false);
+      SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      SDFRobot sdfRobot = robotModel.createSdfRobot(false);
       
       PlaybackPoseSequence sequence = new PlaybackPoseSequence(fullRobotModel);
       PlaybackPoseSequenceReader.appendFromFile(sequence, "tenPoses.poseSequence");

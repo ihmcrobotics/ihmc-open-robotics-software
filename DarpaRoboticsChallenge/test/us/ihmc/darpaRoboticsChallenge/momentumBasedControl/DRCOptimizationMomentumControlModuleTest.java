@@ -20,7 +20,6 @@ import org.ejml.ops.EjmlUnitTests;
 import org.ejml.ops.MatrixFeatures;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedSensorReader;
 import us.ihmc.SdfLoader.SDFRobot;
@@ -82,13 +81,13 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
       DRCRobotJointMap jointMap = robotModel.getJointMap();
       DRCRobotPhysicalProperties physicalProperties = robotModel.getPhysicalProperties();
       
-      JaxbSDFLoader jaxbSDFLoader = robotModel.getJaxbSDFLoader();
-      SDFFullRobotModel fullRobotModel = jaxbSDFLoader.createFullRobotModel(jointMap);
-      SDFRobot robot = jaxbSDFLoader.createRobot(jointMap, false);
+      SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      SDFRobot sdfRobot = robotModel.createSdfRobot(false);
+      
       ReferenceFrames referenceFrames = new ReferenceFrames(fullRobotModel, jointMap, physicalProperties.getAnkleHeight());
 
       DRCRobotInitialSetup<SDFRobot> intialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
-      initializeRobot(fullRobotModel, robot, referenceFrames, intialSetup, jointMap);
+      initializeRobot(fullRobotModel, sdfRobot, referenceFrames, intialSetup, jointMap);
 
       SixDoFJoint rootJoint = fullRobotModel.getRootJoint();
 
@@ -168,9 +167,8 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
       DRCRobotJointMap jointMap = robotModel.getJointMap();
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       DRCRobotPhysicalProperties physicalProperties = robotModel.getPhysicalProperties();
-      JaxbSDFLoader jaxbSDFLoader = robotModel.getJaxbSDFLoader();
-      SDFFullRobotModel fullRobotModel = jaxbSDFLoader.createFullRobotModel(jointMap);
-      SDFRobot robot = jaxbSDFLoader.createRobot(jointMap, false);
+      SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      SDFRobot robot = robotModel.createSdfRobot(false);
       
       ReferenceFrames referenceFrames = new ReferenceFrames(fullRobotModel, jointMap, physicalProperties.getAnkleHeight());
 

@@ -12,7 +12,7 @@ import javax.swing.ActionMap;
 import javax.swing.JFileChooser;
 import javax.swing.JTable;
 
-import us.ihmc.SdfLoader.JaxbSDFLoader;
+import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.SDFJointNameMap;
 import us.ihmc.robotDataCommunication.VisualizerUtils;
 import us.ihmc.robotDataCommunication.YoVariableHandshakeParser;
@@ -25,17 +25,17 @@ public class YoVariableLogVisualizer
 {
    private static final String defaultLogReadingDirectory = "/media/remote/RobotLogs";
 
-   private final JaxbSDFLoader loader;
    private final SDFJointNameMap jointNameMap;
+   private final GeneralizedSDFRobotModel generalizedSDFRobotModel;
    private final String timeVariableName;
    private final int bufferSize;
    protected final SimulationConstructionSet scs;
 
-   public YoVariableLogVisualizer(JaxbSDFLoader loader, SDFJointNameMap jointNameMap, String timeVariableName, 
+   public YoVariableLogVisualizer(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap jointNameMap, String timeVariableName, 
          int bufferSize, boolean showOverheadView, File logFile) throws IOException
    {
       this.bufferSize = bufferSize;
-      this.loader = loader;
+      this.generalizedSDFRobotModel = generalizedSDFRobotModel;
       this.jointNameMap = jointNameMap;
       this.timeVariableName = timeVariableName;
 
@@ -117,7 +117,7 @@ public class YoVariableLogVisualizer
       
       
       scs.setTimeVariableName(timeVariableName);
-      YoVariableLogPlaybackRobot robot = new YoVariableLogPlaybackRobot(loader.getGeneralizedSDFRobotModel(jointNameMap.getModelName()),jointNameMap, parser.getJointStates(), parser.getYoVariablesList(), logChannel, scs);
+      YoVariableLogPlaybackRobot robot = new YoVariableLogPlaybackRobot(generalizedSDFRobotModel,jointNameMap, parser.getJointStates(), parser.getYoVariablesList(), logChannel, scs);
       
       double dt = parser.getDt();
       System.out.println(getClass().getSimpleName()+ ": dt set to " + dt);

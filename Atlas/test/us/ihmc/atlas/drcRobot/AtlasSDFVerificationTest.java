@@ -22,12 +22,10 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.bambooTools.BambooTools;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.MemoryTools;
@@ -104,9 +102,7 @@ public class AtlasSDFVerificationTest
       BambooTools.reportTestStartedMessage();
 
       DRCRobotModel selectedModel = new AtlasRobotModel(ATLAS_ROBOT_VERSION, false, false);
-      DRCRobotJointMap jointMap = selectedModel.getJointMap();
-      JaxbSDFLoader loader = selectedModel.getJaxbSDFLoader();
-      SDFRobot sdfRobot = loader.createRobot(jointMap, true);
+      SDFRobot sdfRobot = selectedModel.createSdfRobot(true);
 
       pinRobotInAir(sdfRobot);
 

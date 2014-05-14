@@ -3,14 +3,11 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor;
 import java.io.IOException;
 import java.net.URI;
 
-import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.configuration.DRCNetClassList;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotDataReceiver;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCSensorParameters;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandJointAnglePacket;
@@ -158,9 +155,7 @@ public class DRCNetworkProcessor
       robotPoseBuffer = new RobotPoseBuffer(this.fieldComputerClient, 1000, timestampProvider);
       networkingManager = new DRCNetworkProcessorNetworkingManager(this.fieldComputerClient, timestampProvider, robotModel);
 
-      //DRCRobotModel robotModel = DRCLocalConfigParameters.robotModelToUse;
-      JaxbSDFLoader loader = robotModel.getJaxbSDFLoader();
-      fullRobotModel = loader.createFullRobotModel(robotModel.getJointMap());
+      fullRobotModel = robotModel.createFullRobotModel();
       
       DRCRobotDataReceiver drcRobotDataReceiver = new DRCRobotDataReceiver(robotModel, fullRobotModel);
       this.fieldComputerClient.attachListener(DRCJointConfigurationData.class, drcRobotDataReceiver);

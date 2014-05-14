@@ -6,14 +6,12 @@ import java.io.StringReader;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceReader;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.posePlayback.PlaybackPoseInterpolatorTest;
 
@@ -32,12 +30,8 @@ public class AtlasPlaybackPoseInterpolatorTest extends PlaybackPoseInterpolatorT
    public void testFromExample()
    {
       DRCRobotModel robotModel = getRobotModel();
-
-      DRCRobotJointMap jointMap = robotModel.getJointMap();
-      JaxbSDFLoader sdfLoader = robotModel.getJaxbSDFLoader();
-      
-      SDFFullRobotModel fullRobotModel = sdfLoader.createFullRobotModel(jointMap);
-      SDFRobot sdfRobot = sdfLoader.createRobot(jointMap, false);
+      SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      SDFRobot sdfRobot = robotModel.createSdfRobot(false);
       
       StringBuffer stringBuffer = new StringBuffer();
       stringBuffer.append("delayBeforePose poseDuration back_bkz back_bky back_bkx l_arm_shy l_arm_shx l_arm_ely l_arm_elx l_arm_wry l_arm_wrx neck_ry hokuyo_joint r_arm_shy r_arm_shx r_arm_ely r_arm_elx r_arm_wry r_arm_wrx l_leg_hpz l_leg_hpx l_leg_hpy l_leg_kny l_leg_aky l_leg_akx r_leg_hpz r_leg_hpx r_leg_hpy r_leg_kny r_leg_aky r_leg_akx\n");

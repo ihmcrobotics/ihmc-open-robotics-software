@@ -1,26 +1,23 @@
 package us.ihmc.atlas.calib;
 
-import com.yobotics.simulationconstructionset.IntegerYoVariable;
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import java.util.ArrayList;
+import java.util.Map;
 
 import org.ddogleg.optimization.FactoryOptimization;
 import org.ddogleg.optimization.UnconstrainedLeastSquares;
 import org.ddogleg.optimization.functions.FunctionNtoM;
 
-import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModelVisualizer;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
-import java.util.ArrayList;
-import java.util.Map;
+import com.yobotics.simulationconstructionset.IntegerYoVariable;
+import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class AtlasKinematicCalibrator
 {
@@ -43,11 +40,9 @@ public class AtlasKinematicCalibrator
    {
       //load robot
 	  DRCRobotModel robotModel = new AtlasRobotModel(atlasVersion, runningOnRealRobot, runningOnRealRobot);
-      DRCRobotJointMap jointMap = robotModel.getJointMap();
-      JaxbSDFLoader robotLoader = robotModel.getJaxbSDFLoader();
-      robot = robotLoader.createRobot(jointMap, false);
+      robot = robotModel.createSdfRobot(false);
       registry = robot.getRobotsYoVariableRegistry();
-      fullRobotModel = robotLoader.createFullRobotModel(jointMap);
+      fullRobotModel = robotModel.createFullRobotModel();
       joints = fullRobotModel.getOneDoFJoints();
       yoIndex = new IntegerYoVariable("index", registry);
 

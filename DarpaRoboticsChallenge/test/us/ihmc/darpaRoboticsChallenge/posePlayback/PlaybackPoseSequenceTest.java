@@ -8,25 +8,20 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceReader;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceWriter;
-import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 
 public abstract class PlaybackPoseSequenceTest implements MultiRobotTestInterface
 {
    @Test
    public void testReadAndWriteWithRandomSequence()
    {
-
-      DRCRobotJointMap jointMap = getRobotModel().getJointMap();
-      JaxbSDFLoader sdfLoader = getRobotModel().getJaxbSDFLoader();
-
-      SDFFullRobotModel fullRobotModel = sdfLoader.createFullRobotModel(jointMap);
+      DRCRobotModel robotModel = getRobotModel();
+      SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
 
       int numberOfPoses = 5;
       double delay = 0.3;

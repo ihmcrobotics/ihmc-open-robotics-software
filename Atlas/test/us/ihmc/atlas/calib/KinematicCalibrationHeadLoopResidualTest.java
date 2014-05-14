@@ -1,32 +1,16 @@
 package us.ihmc.atlas.calib;
 
-import boofcv.alg.geo.PerspectiveOps;
-import boofcv.alg.geo.calibration.PlanarCalibrationTarget;
-import boofcv.factory.calib.FactoryPlanarCalibrationTarget;
-import boofcv.struct.calib.IntrinsicParameters;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import georegression.struct.point.Point2D_F64;
 
-import org.ddogleg.optimization.FactoryOptimization;
-import org.ddogleg.optimization.UnconstrainedLeastSquares;
-import org.ddogleg.optimization.UtilOptimize;
-import org.junit.Test;
-
-import us.ihmc.SdfLoader.JaxbSDFLoader;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.atlas.calib.AtlasHeadLoopKinematicCalibrator;
-import us.ihmc.atlas.calib.CalibUtil;
-import us.ihmc.atlas.calib.DetectChessboardInKinematicsData;
-import us.ihmc.atlas.calib.KinematicCalibrationHeadLoopResidual;
-import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.imageProcessing.configuration.ConfigurationLoader;
-import us.ihmc.robotSide.RobotSide;
-import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.AxisAngle4d;
@@ -34,12 +18,24 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
+import org.ddogleg.optimization.FactoryOptimization;
+import org.ddogleg.optimization.UnconstrainedLeastSquares;
+import org.ddogleg.optimization.UtilOptimize;
+import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.atlas.AtlasRobotModel;
+import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.imageProcessing.configuration.ConfigurationLoader;
+import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import boofcv.alg.geo.PerspectiveOps;
+import boofcv.alg.geo.calibration.PlanarCalibrationTarget;
+import boofcv.factory.calib.FactoryPlanarCalibrationTarget;
+import boofcv.struct.calib.IntrinsicParameters;
 
 /**
  * @author Peter Abeles
@@ -54,8 +50,7 @@ public class KinematicCalibrationHeadLoopResidualTest
 
    private static final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, false, false);
    DRCRobotJointMap jointMap = robotModel.getJointMap();
-   JaxbSDFLoader robotLoader = robotModel.getJaxbSDFLoader();
-   SDFFullRobotModel fullRobotModel = robotLoader.createFullRobotModel(jointMap);
+   SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
 
    Transform3D imageToCamera = new Transform3D(new double[]{0, 0, 1, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 1});
 
