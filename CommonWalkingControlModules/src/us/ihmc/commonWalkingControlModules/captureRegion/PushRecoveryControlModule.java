@@ -174,11 +174,12 @@ public class PushRecoveryControlModule
    {
       if (enablePushRecovery.getBooleanValue())
       {
-         if (footstepWasProjectedInCaptureRegion.getBooleanValue())
-         {
-            // can not re-plan again
-            return false;
-         }
+         // TODO: find a way to prevent to many replans
+//         if (footstepWasProjectedInCaptureRegion.getBooleanValue())
+//         {
+//            // can not re-plan again
+//            return false;
+//         }
 
          captureRegionCalculator.calculateCaptureRegion(swingSide, swingTimeRemaining, capturePoint2d, omega0, footPolygon);
          footstepWasProjectedInCaptureRegion.set(footstepAdjustor.adjustFootstep(nextFootstep, captureRegionCalculator.getCaptureRegion()));
