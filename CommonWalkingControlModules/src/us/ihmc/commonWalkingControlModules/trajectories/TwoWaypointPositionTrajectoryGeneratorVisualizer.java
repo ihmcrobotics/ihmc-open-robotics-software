@@ -200,7 +200,7 @@ public class TwoWaypointPositionTrajectoryGeneratorVisualizer
             WalkingControllerParameters walkingControllerParameters, boolean visualize, List<FramePoint> waypoints)
       {
          super(namePrefix, referenceFrame, stepTimeProvider, initialPositionProvider, initialVelocityProvider, finalPositionProvider, finalDesiredVelocityProvider,
-               trajectoryParametersProvider, parentRegistry, arcLengthCalculatorDivisionsPerPolynomial, dynamicGraphicObjectsListRegistry, walkingControllerParameters,
+               trajectoryParametersProvider, parentRegistry, dynamicGraphicObjectsListRegistry, walkingControllerParameters,
                visualize);
          
          this.referenceFrame = referenceFrame;
