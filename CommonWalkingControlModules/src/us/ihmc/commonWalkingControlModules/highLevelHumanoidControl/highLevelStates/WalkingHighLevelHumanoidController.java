@@ -1231,7 +1231,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                footEndEffectorControlModules.get(swingSide).replanTrajectory();
 
                TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForSingleSupport(nextFootstep, swingSide);
-               instantaneousCapturePointPlanner.reInitializeSingleSupport(transferToAndNextFootstepsData, yoTime.getDoubleValue());
+//               instantaneousCapturePointPlanner.reInitializeSingleSupport(transferToAndNextFootstepsData, yoTime.getDoubleValue()); // This is causing the jump in the desired ICP
             }
          }
 
