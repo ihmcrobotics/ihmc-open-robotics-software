@@ -656,7 +656,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       String[] headOrientationControlJointNames = walkingControllerParameters.getDefaultHeadOrientationControlJointNames();
 
       if (headOrientationManager != null)
+      {
          jacobianIdForHeadOrientationControl = headOrientationManager.createJacobian(fullRobotModel, headOrientationControlJointNames);
+         headOrientationManager.setUp(baseForHeadOrientationControl, jacobianIdForHeadOrientationControl);
+      }
    }
 
    public void initialize()
