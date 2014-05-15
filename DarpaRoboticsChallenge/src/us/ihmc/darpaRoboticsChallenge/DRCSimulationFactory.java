@@ -120,7 +120,7 @@ public class DRCSimulationFactory
             globalDataProducer, simulatedDRCRobotTimeProvider, drcRobotModel.getEstimatorDT(), gravity);
       
       drcControllerThread = new DRCControllerThread(drcRobotModel, controllerFactory, lidarControllerInterface, threadDataSynchronizer,
-            drcOutputWriter, globalDataProducer, drcRobotModel.getControllerDT(), gravity);
+            drcOutputWriter, globalDataProducer, gravity);
       
       
       if(RUN_MULTI_THREADED)

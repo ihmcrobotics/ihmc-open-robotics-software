@@ -33,12 +33,17 @@ public class ThreadDataSynchronizer
 
    }
 
-   public void receiveControllerState()
+   public long receiveControllerState()
    {
       IntermediateEstimatorStateHolder estimatorStateHolder = estimatorStateCopier.getCopyForReading();
       if (estimatorStateHolder != null)
       {
          estimatorStateHolder.getIntoControllerModel();
+         return estimatorStateHolder.getEstimatorClockStartTime();
+      }
+      else
+      {
+         return Long.MIN_VALUE;
       }
    }
 
