@@ -42,6 +42,7 @@ import com.yobotics.simulationconstructionset.LongYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.ModularRobotController;
 import com.yobotics.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
+import com.yobotics.simulationconstructionset.time.ExecutionTimer;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class DRCEstimatorThread implements MultiThreadedRobotControlElement
@@ -60,7 +61,9 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    private final DoubleYoVariable estimatorTime = new DoubleYoVariable("estimatorTime", estimatorRegistry);
    private final LongYoVariable estimatorTick = new LongYoVariable("estimatorTick", estimatorRegistry);
    private final BooleanYoVariable firstTick = new BooleanYoVariable("firstTick", estimatorRegistry);
-
+   
+   private final LongYoVariable startClockTime = new LongYoVariable("startTime", estimatorRegistry);
+   private final ExecutionTimer estimatorTimer = new ExecutionTimer("estimatorTimer", 10.0, estimatorRegistry);
 
    public DRCEstimatorThread(DRCRobotModel robotModel, SensorReaderFactory sensorReaderFactory, ThreadDataSynchronizer threadDataSynchronizer,
          DRCOutputWriter drcOutputWriter, GlobalDataProducer dataProducer, TimestampProvider timestampProvider, double estimatorDT, double gravity)
@@ -139,9 +142,10 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    }
 
    @Override
-   public void read(double time)
+   public void read(double time, long currentClockTime)
    {
       estimatorTime.set(time);
+      startClockTime.set(currentClockTime);
       sensorReader.read();
    }
 
@@ -153,14 +157,17 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          estimatorController.initialize();
          firstTick.set(false);
       }
+      
+      estimatorTimer.startMeasurement();
       estimatorController.doControl();
+      estimatorTimer.stopMeasurement();
    }
 
    @Override
    public void write()
    {
       long timestamp = TimeTools.secondsToNanoSeconds(estimatorTime.getDoubleValue());
-      threadDataSynchronizer.publishEstimatorState(timestamp, estimatorTick.getLongValue(), 0);
+      threadDataSynchronizer.publishEstimatorState(timestamp, estimatorTick.getLongValue(), startClockTime.getLongValue());
       outputWriter.writeAfterEstimator(timestamp);
       estimatorTick.increment();
    }
@@ -220,6 +227,12 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    public DynamicGraphicObjectsListRegistry getDynamicGraphicObjectsListRegistry()
    {
       return dynamicGraphicObjectsListRegistry;
+   }
+
+   @Override
+   public long nextWakeupTime()
+   {
+      throw new RuntimeException("Estimator thread should not wake up based on clock");
    }
 
 }

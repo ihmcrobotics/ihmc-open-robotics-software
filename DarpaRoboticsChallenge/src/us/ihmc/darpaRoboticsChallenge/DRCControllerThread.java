@@ -32,11 +32,13 @@ import us.ihmc.utilities.screwTheory.TwistCalculator;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.InverseDynamicsMechanismReferenceFrameVisualizer;
+import com.yobotics.simulationconstructionset.LongYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.ModularRobotController;
 import com.yobotics.simulationconstructionset.robotController.ModularSensorProcessor;
 import com.yobotics.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
+import com.yobotics.simulationconstructionset.time.ExecutionTimer;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class DRCControllerThread implements MultiThreadedRobotControlElement
@@ -61,8 +63,11 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    
    private final RobotController robotController;
    
+   private final ExecutionTimer controllerTimer = new ExecutionTimer("controllerTimer", 10.0, registry);
+   private final LongYoVariable nextExecutionTime = new LongYoVariable("nextExecutionTime", registry);
+   
    public DRCControllerThread(DRCRobotModel robotModel, ControllerFactory controllerFactory, LidarControllerInterface lidarControllerInterface,
-         ThreadDataSynchronizer threadDataSynchronizer, DRCOutputWriter outputWriter, GlobalDataProducer dataProducer, double controlDT, double gravity)
+         ThreadDataSynchronizer threadDataSynchronizer, DRCOutputWriter outputWriter, GlobalDataProducer dataProducer, double gravity)
    {
       this.threadDataSynchronizer = threadDataSynchronizer;
       this.outputWriter = outputWriter;
@@ -82,10 +87,11 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       controllerReferenceFrames.visualize(dynamicGraphicObjectsListRegistry, registry);
 
       robotController = createMomentumBasedController(controllerFullRobotModel, controllerReferenceFrames, sensorInformation,
-            contactPointParamaters, controllerFactory, lidarControllerInterface, controllerTime, controlDT, gravity, forceSensorDataHolderForController,
+            contactPointParamaters, controllerFactory, lidarControllerInterface, controllerTime, robotModel.getControllerDT(), gravity, forceSensorDataHolderForController,
             dynamicGraphicObjectsListRegistry, registry, dataProducer);
       
       firstTick.set(true);
+      nextExecutionTime.set(0);
       registry.addChild(robotController.getYoVariableRegistry());
 
    }
@@ -172,7 +178,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    }
 
    @Override
-   public void read(double time)
+   public void read(double time, long currentClockTime)
    {
       controllerTime.set(time);
       threadDataSynchronizer.receiveControllerState();
@@ -186,7 +192,9 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
          robotController.initialize();
          firstTick.set(false);
       }
+      controllerTimer.startMeasurement();
       robotController.doControl();
+      controllerTimer.stopMeasurement();
    }
 
    @Override
@@ -211,5 +219,11 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    public DynamicGraphicObjectsListRegistry getDynamicGraphicObjectsListRegistry()
    {
       return dynamicGraphicObjectsListRegistry;
+   }
+
+   @Override
+   public long nextWakeupTime()
+   {
+      return 0;
    }
 }
