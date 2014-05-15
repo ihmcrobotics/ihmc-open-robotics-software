@@ -175,7 +175,7 @@ public class DRCSimulationTestHelper
       AsyncContinuousExecutor.cancelAndReset();
    }
 
-   public boolean simulateAndBlockAndCatchExceptions(double simulationTime)
+   public boolean simulateAndBlockAndCatchExceptions(double simulationTime) throws SimulationExceededMaximumTimeException
    {
       try
       {
@@ -185,7 +185,7 @@ public class DRCSimulationTestHelper
       catch(Exception e)
       {
          System.err.println("Caught exception in SimulationTestHelper.simulateAndBlockAndCatchExceptions. Exception = /n" + e);
-         return false;
+         throw e;
       }
    }
    
