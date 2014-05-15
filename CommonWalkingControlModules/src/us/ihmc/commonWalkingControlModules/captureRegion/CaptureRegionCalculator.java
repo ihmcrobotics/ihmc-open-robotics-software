@@ -44,7 +44,8 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 public class CaptureRegionCalculator
 {
    // Warning! The following may not be rewindable if not made a Yo...
-// private FrameConvexPolygon2d captureRegion;
+   // private FrameConvexPolygon2d captureRegion;
+   private final CaptureRegionMathTools captureRegionMath = new CaptureRegionMathTools();
    YoVariableRegistry registry = new YoVariableRegistry("captureRegion");
 
    private final SideDependentList<FrameConvexPolygon2d> reachableRegions;
@@ -553,11 +554,11 @@ public class CaptureRegionCalculator
    }
 
 
-   public static FramePoint2d getPointBetweenVectorsAtDistanceFromOriginCircular(FrameVector2d directionA, FrameVector2d directionB, double alphaFromAToB,
+   public FramePoint2d getPointBetweenVectorsAtDistanceFromOriginCircular(FrameVector2d directionA, FrameVector2d directionB, double alphaFromAToB,
            double distance, FramePoint2d origin)
    {
       FramePoint2d ret = new FramePoint2d();
-      CaptureRegionMathTools.getPointBetweenVectorsAtDistanceFromOriginCircular(directionA, directionB, alphaFromAToB, distance, origin, ret);
+      captureRegionMath.getPointBetweenVectorsAtDistanceFromOriginCircular(directionA, directionB, alphaFromAToB, distance, origin, ret);
       return ret;
    }
 
