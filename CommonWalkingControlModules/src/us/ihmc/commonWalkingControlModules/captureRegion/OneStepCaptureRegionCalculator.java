@@ -18,6 +18,8 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 
 public class OneStepCaptureRegionCalculator
 {
+   private final CaptureRegionMathTools captureRegionMath = new CaptureRegionMathTools();
+   
    private static final boolean VISUALIZE = true;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final int MAX_CAPTURE_REGION_POLYGON_POINTS = 20;
@@ -190,7 +192,7 @@ public class OneStepCaptureRegionCalculator
       for (int i = 0; i < KINEMATIC_LIMIT_POINTS - 1; i++)
       {
          double alphaFromAToB = ((double) (i + 1)) / ((double) (KINEMATIC_LIMIT_POINTS + 1));
-         CaptureRegionMathTools.getPointBetweenVectorsAtDistanceFromOriginCircular(firstKinematicExtremeDirection,
+         captureRegionMath.getPointBetweenVectorsAtDistanceFromOriginCircular(firstKinematicExtremeDirection,
                                                                               lastKinematicExtremeDirection,
                                                                               alphaFromAToB,
                                                                               kinematicStepRange,
