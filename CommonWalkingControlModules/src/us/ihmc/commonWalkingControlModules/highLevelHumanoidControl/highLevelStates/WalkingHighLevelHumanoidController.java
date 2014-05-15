@@ -1186,6 +1186,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       private final FramePoint2d capturePoint2d = new FramePoint2d();
 
       private Footstep nextFootstep;
+      private double captureTime;
 
       public SingleSupportState(RobotSide robotSide)
       {
@@ -1212,7 +1213,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                yoTime.getDoubleValue());
 
          RobotSide supportSide = swingSide.getOppositeSide();
-         double swingTimeRemaining = swingTimeCalculationProvider.getValue() - stateMachine.timeInCurrentState();
+         double swingTimeRemaining = swingTimeCalculationProvider.getValue() - (stateMachine.timeInCurrentState() - captureTime);
          FramePoint2d transferToFootstepLocation = transferToFootstep.getFramePoint2dCopy();
          FrameConvexPolygon2d footPolygon = computeFootPolygon(supportSide, referenceFrames.getAnkleZUpFrame(supportSide));
          double omega0 = icpAndMomentumBasedController.getOmega0();
@@ -1224,9 +1225,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
             if (footstepHasBeenAdjusted)
             {
+               captureTime = stateMachine.timeInCurrentState();
                updateFootstepParameters();
                double oldSwingTime = swingTimeCalculationProvider.getValue();
-               swingTimeCalculationProvider.setSwingTime(oldSwingTime - stateMachine.timeInCurrentState());
+               swingTimeCalculationProvider.setSwingTime(oldSwingTime - captureTime);
 
                footEndEffectorControlModules.get(swingSide).replanTrajectory();
 
@@ -1248,7 +1250,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             ecmpViz.set(desiredECMP.getX(), desiredECMP.getY(), 0.0);
          }
 
-         pelvisOrientationTrajectoryGenerator.compute(stateMachine.timeInCurrentState());
+         pelvisOrientationTrajectoryGenerator.compute(stateMachine.timeInCurrentState() - captureTime);
          pelvisOrientationTrajectoryGenerator.get(desiredPelvisOrientationToPack);
          pelvisOrientationTrajectoryGenerator.packAngularVelocity(desiredPelvisAngularVelocityToPack);
          pelvisOrientationTrajectoryGenerator.packAngularAcceleration(desiredPelvisAngularAccelerationToPack);
@@ -1256,7 +1258,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          desiredPelvisAngularVelocity.set(desiredPelvisAngularVelocityToPack);
          desiredPelvisAngularAcceleration.set(desiredPelvisAngularAccelerationToPack);
 
-         if ((stateMachine.timeInCurrentState() < 0.5 * swingTimeCalculationProvider.getValue())
+         if ((stateMachine.timeInCurrentState() - captureTime < 0.5 * swingTimeCalculationProvider.getValue())
                && footEndEffectorControlModules.get(swingSide).isInSingularityNeighborhood())
          {
             footEndEffectorControlModules.get(swingSide).doSingularityEscape(true);
@@ -1266,6 +1268,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       @Override
       public void doTransitionIntoAction()
       {
+         captureTime = 0.0;
          hasICPPlannerFinished.set(false);
          trailingLeg.set(null);
 
