@@ -116,8 +116,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
                  {
                   public int solve() throws NoConvergenceException
                     {
-                       resetActiveSetNative();
-                       return super.solve();
+                       return super.solve(true);
                     }
                  };
       momentumOptimizers.put(QPSolverFlavor.EIGEN_NULL, eigenQP);

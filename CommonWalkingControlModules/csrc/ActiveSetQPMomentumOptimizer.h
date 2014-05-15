@@ -7,6 +7,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#undef us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_ActiveSetQPMomentumOptimizer_serialVersionUID
+#define us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_ActiveSetQPMomentumOptimizer_serialVersionUID -3703185211823067947LL
 #undef us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_ActiveSetQPMomentumOptimizer_nPointsPerPlane
 #define us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_ActiveSetQPMomentumOptimizer_nPointsPerPlane 4L
 #undef us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_ActiveSetQPMomentumOptimizer_nSupportVectorsPerPoint
@@ -20,38 +22,30 @@ extern "C" {
 /*
  * Class:     us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_ActiveSetQPMomentumOptimizer
  * Method:    initializeNative
- * Signature: (I)V
+ * Signature: (II)V
  */
 JNIEXPORT void JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_ActiveSetQPMomentumOptimizer_initializeNative
-  (JNIEnv *, jobject, jint);
+  (JNIEnv *, jobject, jint, jint);
 
-JNIEXPORT void initializeNative(int);
-/*
- * Class:     us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_ActiveSetQPMomentumOptimizer
- * Method:    resetActiveSet
- * Signature: ()V
- */
-JNIEXPORT void JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_ActiveSetQPMomentumOptimizer_resetActiveSet
-  (JNIEnv *, jobject);
-
-JNIEXPORT void resetActiveSet();
 /*
  * Class:     us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_ActiveSetQPMomentumOptimizer
  * Method:    solveNative
- * Signature: ([D[D[D[D[D[D[D[D[D[D[D[D[D[D[D[D[D[D)I
+ * Signature: ([D[D[D[D[D[D[D[D[D[D[D[D[D[D[D[D[D[D[I)I
  */
 JNIEXPORT jint JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_ActiveSetQPMomentumOptimizer_solveNative
-  (JNIEnv *, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray);
+  (JNIEnv *, jobject, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jdoubleArray, jintArray);
 
-JNIEXPORT int solveNative(
-		double* A, double* b, double* C,
-		double* Jp, double* pp,
-		double* Js, double* ps, double* Ws,
-		double* WRho, double* Lambda,
-		double* WRhoSmoother,
-		double* rhoPrevMean, double* WRhoCoPPenalty,
-		double* QRho, double* c, double* rhoMin,
-		double* vd, double* rho);
+#ifdef __cplusplus
+}
+#endif
+#endif
+/* Header for class us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_ActiveSetQPMomentumOptimizer_JnaInterface */
+
+#ifndef _Included_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_ActiveSetQPMomentumOptimizer_JnaInterface
+#define _Included_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_ActiveSetQPMomentumOptimizer_JnaInterface
+#ifdef __cplusplus
+extern "C" {
+#endif
 #ifdef __cplusplus
 }
 #endif

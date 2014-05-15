@@ -2,11 +2,14 @@ package us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization;
 
 import com.sun.jna.Library;
 import com.sun.jna.Native;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+
 import us.ihmc.utilities.exeptions.NoConvergenceException;
 
 import java.io.*;
+import java.util.Arrays;
 
 // javah -cp ../classes/:../../ThirdParty/ThirdPartyJars/EJML/EJML.jar -o ActiveSetQPMomentumOptimizer.h us.ihmc.commonWalkingControlModules.controlModules
 // .nativeOptimization.ActiveSetQPMomentumOptimizer
@@ -15,12 +18,14 @@ import java.io.*;
 public class ActiveSetQPMomentumOptimizer implements MomentumOptimizerInterface, Serializable
 {
    public static final long serialVersionUID = -3703185211823067947L;
+   public static final int MAX_ITER = -1;
    static final int nPointsPerPlane = 4;
    static final int nSupportVectorsPerPoint=4;
    static final int nPlanes=4;
    static final int nWrench=6;
    static final int nRho = nPlanes*nPointsPerPlane*nSupportVectorsPerPoint;
    final int nDoF;
+   int iter;
    
    boolean saveNoConvergeProblem=false;
 
@@ -40,6 +45,7 @@ public class ActiveSetQPMomentumOptimizer implements MomentumOptimizerInterface,
      
    public DenseMatrix64F vd, rho;
    public DenseMatrix64F prevVd, prevRho;
+   public int[] activeSet;
    double optVal;
    final boolean useJNA;
    
@@ -53,8 +59,9 @@ public class ActiveSetQPMomentumOptimizer implements MomentumOptimizerInterface,
             double[] WRhoSmoother, 
             double[] rhoPrevMean, double[] WRhoCoPPenalty,
             double[] QRho, double[] c, double[] rhoMin,
-            double[] vd, double[] rho);
-      void initializeNative(int nDoF);
+            double[] vd, double[] rho,
+            int[] activeSet);
+      void initializeNative(int nDoF, int maxIter);
       JnaInterface INSTANCE = (JnaInterface) Native.loadLibrary("ActiveSetQPMomentumOptimizer_rel", JnaInterface.class);
    }
    
@@ -75,7 +82,9 @@ public class ActiveSetQPMomentumOptimizer implements MomentumOptimizerInterface,
          Ws = new DenseMatrix64F(nDoF, nDoF);
          
          
-         initializeNative(nDoF);
+         //
+         loadNativeLibraries();
+         initializeNative(nDoF, MAX_ITER);
          
    }
 
@@ -164,6 +173,8 @@ public class ActiveSetQPMomentumOptimizer implements MomentumOptimizerInterface,
       c = _c;
       rhoMin = _rhoMin;
 
+      if(activeSet==null)
+         activeSet = new int[nWrench]; //nrow(A) 
    }
 
    @Override
@@ -174,20 +185,23 @@ public class ActiveSetQPMomentumOptimizer implements MomentumOptimizerInterface,
       setInputs(a, b, momentumDotWeight, jSecondary, pSecondary,
          weightMatrixSecondary, WRho, Lambda, WRhoSmoother, rhoPrevAvg,
          WRhoCop, QRho, c, rhoMin);
+      
+      //note: the nrow(Jp vd=pp) may change
       CommonOps.insert(jPrimary, Jp, 0, 0);
       CommonOps.insert(pPrimary, pp, 0, 0);
+      if(activeSet.length != (nWrench+nDoF))
+         activeSet = new int[nWrench+nDoF]; //nrow(A) + nrow(Jp)
    }
    
-   private native void initializeNative(int nDoF);
-   public void initlaize(int nDoF)
+   private native void initializeNative(int nDoF, int maxIter);
+   public void initlaize(int nDoF, int maxIter)
    {
       if(useJNA)
-         JnaInterface.INSTANCE.initializeNative(nDoF);
+         JnaInterface.INSTANCE.initializeNative(nDoF, maxIter);
       else
-         initializeNative(nDoF);
+         initializeNative(nDoF, maxIter);
    }
    
-   public native void resetActiveSetNative();
    
    public native int solveNative(
          double[] A, double[] b, double[] C, 
@@ -197,24 +211,28 @@ public class ActiveSetQPMomentumOptimizer implements MomentumOptimizerInterface,
          double[] WRhoSmoother, 
          double[] rhoPrevMean, double[] WRhoCoPPenalty,
          double[] QRho, double[] c, double[] rhoMin,
-         double[] vd, double[] rho);
+         double[] vd, double[] rho,
+         int[] activeSet);
    
    /*
-    * min(qdd,rho) 0.5 qdd' A qdd + b'qdd 
-    * 
-    * minimize quad(A * vd - b, C) + quad(Js * vd - ps, Ws) + quad(rho, WRho) + quad(vd, Lambda) + quad(rho - rhoPrevious, WRhoSmoother) + quad(rho - rhoPreviousMean, WRhoCoPPenalty)
-    *    subject to
-    *      Qrho * rho == A * vd + c # simple force balance
-    *      rho >= rhoMin
-    *    end
+    * read ActiveSetQPMomentumOptimizer.cpp for parameter comments
     */
    @Override
    public int solve() throws NoConvergenceException
    {
+      return solve(false);
+   }
+   public int solve(boolean clearActiveSet) throws NoConvergenceException
+   {
 
       CommonOps.insert(rho, prevRho, 0, 0);
       CommonOps.insert(vd, prevVd, 0, 0);
-      int iter;
+      if(activeSet==null)
+         throw new NullPointerException("activeSet not initialize properly");
+      if (clearActiveSet)
+         Arrays.fill(activeSet, 0);
+      
+      iter=0;
       if(useJNA)
       {
          iter = JnaInterface.INSTANCE.solveNative(
@@ -225,7 +243,8 @@ public class ActiveSetQPMomentumOptimizer implements MomentumOptimizerInterface,
             WRhoSmoother.getData(), 
             rhoPrevMean.getData(), WRhoCoPPenalty.getData(),
             QRho.getData(), c.getData(), rhoMin.getData(), 
-            vd.getData(), rho.getData()  // in/out
+            vd.getData(), rho.getData(),  // in/out
+            activeSet
         );
       }
       else
@@ -238,11 +257,27 @@ public class ActiveSetQPMomentumOptimizer implements MomentumOptimizerInterface,
             WRhoSmoother.getData(), 
             rhoPrevMean.getData(), WRhoCoPPenalty.getData(),
             QRho.getData(), c.getData(), rhoMin.getData(), 
-            vd.getData(), rho.getData()  // in/out
+            vd.getData(), rho.getData(),  // in/out
+            activeSet
         );
       }
       if(iter <0)
       {
+         {
+          iter = solveNative(
+              A.getData(), b.getData(), C.getData(), 
+              Jp.getData(),pp.getData(),
+              Js.getData(), ps.getData(), Ws.getData(), 
+              WRho.getData(), Lambda.getData(), 
+              WRhoSmoother.getData(), 
+              rhoPrevMean.getData(), WRhoCoPPenalty.getData(),
+              QRho.getData(), c.getData(), rhoMin.getData(), 
+              vd.getData(), rho.getData(),  // in/out
+              activeSet
+          );
+         System.out.println("Try again, iter=" + iter +"\n -----");
+         }
+
          if(saveNoConvergeProblem)
          {
                  String fileName = getClass().getSimpleName()+"_diverence"+System.nanoTime();
@@ -284,10 +319,11 @@ public class ActiveSetQPMomentumOptimizer implements MomentumOptimizerInterface,
    
    
    static String[] nativeLibraryCandidates = {"ActiveSetQPMomentumOptimizer_rel","ActiveSetQPMomentumOptimizer_msz","ActiveSetQPMomentumOptimizer"};
+   /*
    static
    {
       loadNativeLibraries();
-   }
+   }*/
    
    public static void loadNativeLibraries()
    {
@@ -309,16 +345,24 @@ public class ActiveSetQPMomentumOptimizer implements MomentumOptimizerInterface,
    
    public static void main(String[] arg) throws IOException, ClassNotFoundException, NoConvergenceException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException
    {
-      FileInputStream is = new FileInputStream("../ValkyrieHardwareDrivers/ActiveSetQPMomentumOptimizer_diverence1398789891417766000");
+      String fileName="../Atlas/ActiveSetQPMomentumOptimizer_diverence1399891506516816000";
+      FileInputStream is = new FileInputStream(fileName);
       ObjectInputStream ois = new ObjectInputStream(is);
       ActiveSetQPMomentumOptimizer solver = (ActiveSetQPMomentumOptimizer) ois.readObject();
       ois.close();
       is.close();
 
+      
       solver.setSaveNoConvergeProblem(false);
-      solver.initializeNative(solver.nDoF);
-      solver.solve();
-
+      solver.loadNativeLibraries();
+      solver.initializeNative(solver.nDoF,MAX_ITER);
+      System.err.flush();
+      System.out.println("Reconstruct problem from ");
+      System.out.println("iter="+solver.iter);
+      System.out.println("Opt="+solver.optVal);
+      System.out.println("ActiveSet="+Arrays.toString(solver.activeSet));
+      System.out.println("iter="+solver.solve());
+      System.out.println("ActiveSet="+Arrays.toString(solver.activeSet));
    }
 
 

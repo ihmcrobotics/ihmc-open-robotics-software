@@ -9,7 +9,8 @@ javaaddpath (pwd)
 import java.io.*
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.*
 
-problemDump = ['../../../Atlas/'  'ActiveSetQPMomentumOptimizer_diverence1398980280549075000'];
+%problemDump = ['../../../Atlas/'  'ActiveSetQPMomentumOptimizer_diverence1399891506516816000'];
+problemDump = ['../../../Atlas/'  'ActiveSetQPMomentumOptimizer_diverence1399891506516816000'];
 % problemDump = 'test';
 fis = FileInputStream(problemDump);
 % ois = ObjectInputStream(fis);
@@ -58,13 +59,17 @@ lb = [-inf(size(prevVd)); rhoMin];
 
 %%
 %xopt = fmincon(@(x) x'*Q*x+x'*f, x0,Ain, bin, Aeq, beq);
-[xopt, ~, stat]= fmincon(@(x) x'*Q*x+x'*f, x0,[], [], Aeq, beq);
+%Aeq=Aeq(1:37,:);
+%beq=beq(1:37);
+[xopt, ~, stat]= fmincon(@(x) x'*Q*x+x'*f, x0,Ain, bin, Aeq, beq);
 
 %
 active=[];
 [xopt2, act_opt, fail]=fastQP(Q,f,Aeq, beq, Ain, bin,active);
 fail
 
+
 %
 checkOpt(xopt, Q, f, Aeq, beq, Ain, bin)
 checkOpt(xopt2, Q, f, Aeq, beq, Ain, bin)
+mostViolation=max(Ain*xopt2 - bin)
