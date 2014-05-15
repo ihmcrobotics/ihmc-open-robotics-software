@@ -68,6 +68,7 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculatorTest
       assertSumOfForcesIsAsExpected(endEffectorsWithAssignedForces, desiredCOMForces, HIGH_ACCURACY_THRESHOLD);
    }
 
+   @Ignore
    @Test
    public void testLeftFootAtOrigin()
    {
@@ -88,6 +89,7 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculatorTest
       assertSumOfForcesIsAsExpected(endEffectorsWithAssignedForces, desiredCOMForces, HIGH_ACCURACY_THRESHOLD);
    }
 
+   @Ignore
    @Test
    public void testLeftHandAtOrigin()
    {
