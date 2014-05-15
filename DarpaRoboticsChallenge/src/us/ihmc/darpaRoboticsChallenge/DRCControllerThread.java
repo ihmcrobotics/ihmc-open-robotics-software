@@ -3,6 +3,7 @@ package us.ihmc.darpaRoboticsChallenge;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
+import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.CenterOfMassJacobianUpdater;
 import us.ihmc.commonWalkingControlModules.sensors.CommonWalkingReferenceFramesUpdater;
@@ -72,6 +73,10 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       this.threadDataSynchronizer = threadDataSynchronizer;
       this.outputWriter = outputWriter;
       controllerFullRobotModel = threadDataSynchronizer.getControllerFullRobotModel();
+      
+      FullRobotModelCorruptor controllerFullRobotModelCorruptor = new FullRobotModelCorruptor(controllerFullRobotModel, registry);
+      
+      
       forceSensorDataHolderForController = threadDataSynchronizer.getControllerForceSensorDataHolder();
 
       outputWriter.setFullRobotModel(controllerFullRobotModel);
