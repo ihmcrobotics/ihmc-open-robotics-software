@@ -1,3 +1,4 @@
+
 function [x,active,fail] = fastQP(Q,f,Aeq,beq,Ain,bin,active)
     %min 1/2 * x'diag(Qdiag)'x + f'x s.t A x = b, Ain x <= bin 
     %using active set method.  Iterative solve a linearly constrained
@@ -51,6 +52,7 @@ function [x,active,fail] = fastQP(Q,f,Aeq,beq,Ain,bin,active)
         % [A,zeros(M+Mact,M+Mact)]];
         
         QinvAt= [QinvAteq,Qinv*Aact'];
+        
         lam = -pinv(A*QinvAt)*[b+(f'*QinvAt)'];
         x = minusQinvf - QinvAt*lam;   
         lamIneq = lam(M+1:end);
@@ -60,13 +62,13 @@ function [x,active,fail] = fastQP(Q,f,Aeq,beq,Ain,bin,active)
             break; 
         end
  
-        violated = find( Ain*x-bin >= eps);   
-        if isempty(violated) && all(lamIneq >= 0)
+        violated = find( Ain*x-bin >= 1e-8);   
+        if isempty(violated) && all(lamIneq >= eps)
             break; 
         end
         
         active = active(lamIneq >= 0,:);
-        active = [active;violated];
+        active = unique([active;violated])
         
         Aact = [Ain(active,:)];
         bact = [bin(active,:)];

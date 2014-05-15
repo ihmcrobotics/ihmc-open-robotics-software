@@ -8,9 +8,7 @@
 
 #define _USE_MATH_DEFINES
 
-#define MAX_CONSTRS 1000
-#define MAX_STATE   1000
-#define MAX_ITER    10
+int MAX_ITER = -1; // default: #equality constraints
 
 
 using namespace Eigen;
@@ -21,6 +19,8 @@ using namespace std;
 //int fastQPThatTakesQinv(vector< MatrixBase<tA>* > QinvblkDiag, const MatrixBase<tB>& f, const MatrixBase<tC>& Aeq, const MatrixBase<tD>& beq, const MatrixBase<tE>& Ain, const MatrixBase<tF>& bin, set<int>& active, MatrixBase<tG>& x)
 int fastQPThatTakesQinv(vector< MatrixXd* > QinvblkDiag, const VectorXd& f, const MatrixXd& Aeq, const VectorXd& beq, const MatrixXd& Ain, const VectorXd& bin, set<int>& active, VectorXd& x)
 {
+
+	int max_iter = (MAX_ITER<0? (Aeq.rows()+Ain.rows()): MAX_ITER);
 	int i,d;
 	int iterCnt = 0;
 
@@ -169,10 +169,8 @@ int fastQPThatTakesQinv(vector< MatrixXd* > QinvblkDiag, const VectorXd& f, cons
 		}
 		active.insert(new_active.begin(),new_active.end());
 
-		if (iterCnt > MAX_ITER) {
-			//Default to calling this method
-			//      cout << "FastQP max iter reached." << endl;
-			//       mexErrMsgIdAndTxt("Drake:approximateIKmex:Error", "Max iter reached. Problem is likely infeasible");
+
+		if (iterCnt > max_iter) {
 			return -1;
 		}
 	}  

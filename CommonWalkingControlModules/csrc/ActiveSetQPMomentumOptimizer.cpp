@@ -29,39 +29,28 @@ typedef Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic,Eigen::RowMajor> Matr
 
 int nDoF=-1;
 jboolean isCopy=JNI_FALSE;
-#ifdef USE_ACTIVE_SET
-	std::set<int> active;
-#endif
 using namespace Eigen;
 
-JNIEXPORT void JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_ActiveSetQPMomentumOptimizer_initializeNative (JNIEnv *env, jobject obj, jint _nDoF)
+extern "C"
 {
-	std::cout << "use JNI" << std::endl;
-	initializeNative(_nDoF);
+	extern int MAX_ITER; //instance in QP.cpp
+	JNIEXPORT void initializeNative (int _nDoF, int _max_iter)
+	{
+		nDoF = _nDoF;
+		MAX_ITER = _max_iter;
+		std::cerr << "ActiveSetQPMomentumOptimizer Library initialized nDoF = " << nDoF << " MAX_ITER="<< MAX_ITER <<std::endl;
+		std::cerr << "Compiled at " __TIME__ << std::endl;
+	}
 }
 
-JNIEXPORT void initializeNative (int _nDoF)
+JNIEXPORT void JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_ActiveSetQPMomentumOptimizer_initializeNative (JNIEnv *env, jobject obj, jint _nDoF, jint _max_iter)
 {
-	nDoF = _nDoF;
-	std::cerr << "ActiveSetQPMomentumOptimizer Library initialized nDoF = " << nDoF << std::endl;
-	std::cerr << "Compiled at " __TIME__ << std::endl;
-#ifdef USE_ACTIVE_SET
-	active.clear();
-#endif
+//	std::cout << "use JNI" << std::endl;
+	initializeNative(_nDoF, _max_iter);
 }
 
-JNIEXPORT void JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_nativeOptimization_ActiveSetQPMomentumOptimizer_resetActiveSet
-  (JNIEnv *, jobject)
-{
-	resetActiveSet();
-}
 
-JNIEXPORT void resetActiveSet()
-{
-#ifdef USE_ACTIVE_SET
-	active.clear();
-#endif
-}
+
 
 bool myIsNAN(double x)
 {
@@ -76,7 +65,8 @@ int solveEigen(
 		MatrixXd WRhoSmoother, 
 		MatrixXd rhoPrevMean, MatrixXd  WRhoCoPPenalty, 
 		MatrixXd QRho, MatrixXd  c, MatrixXd  rhoMin, 
-		Eigen::Map<MatrixXdR>&  vd, Eigen::Map<MatrixXdR>& rho)
+		Eigen::Map<MatrixXdR>&  vd, Eigen::Map<MatrixXdR>& rho, 
+		int* activeSet)
 {
 
 	/*
@@ -180,7 +170,20 @@ int solveEigen(
 #endif
 
 #ifdef USE_ACTIVE_SET
-	int ret=fastQP(QblkDiag, f,  Aeq, beq, Ain, bin, active, x);
+	std::set<int> stlActiveSet;
+	for(int i=0;i<Aeq.rows();i++)
+	{
+		if(activeSet[i])
+			stlActiveSet.insert(i);
+	}
+
+	int ret=fastQP(QblkDiag, f,  Aeq, beq, Ain, bin, stlActiveSet, x);
+
+	std::fill(activeSet, activeSet+Aeq.rows(),0);
+	for(std::set<int>::iterator p=stlActiveSet.begin();p!=stlActiveSet.end();p++)
+	{
+		activeSet[*p]=1;
+	}
 #else
 	int ret=solve_quadprog(Q, f,  Aeq, beq, Ain, bin, x);
 #endif
@@ -231,7 +234,7 @@ JNIEXPORT jint JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_n
 		jdoubleArray WRhoSmoother, 
 		jdoubleArray rhoPrevMean, jdoubleArray WRhoCoPPenalty, 
 		jdoubleArray QRho, jdoubleArray c, jdoubleArray rhoMin, 
-		jdoubleArray vd, jdoubleArray rho)
+		jdoubleArray vd, jdoubleArray rho, jintArray activeSet)
 {
 	int ret;
 	J2E(A, nWrench, nDoF);  J2E(b,nWrench,1);  J2E(C,nWrench,nWrench); 
@@ -241,9 +244,10 @@ JNIEXPORT jint JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_n
 	J2E(WRhoSmoother,nRho,nRho); 
 	J2E(rhoPrevMean,nRho,1);  J2E(WRhoCoPPenalty,nRho,nRho); 
 	J2E(QRho,nWrench,nRho);  J2E(c,nWrench,1);  J2E(rhoMin,nRho,1); 
-	 J2E(vd,nDoF,1); J2E(rho,nRho,1); 
+	J2E(vd,nDoF,1); J2E(rho,nRho,1); 
+	int* cActiveSet = (int*)env->GetPrimitiveArrayCritical(activeSet, &isCopy);
 
-	ret = solveEigen(eA,  eb,  eC, eJp, epp, eJs,  eps,  eWs, eWRho,  eLambda, eWRhoSmoother, erhoPrevMean,  eWRhoCoPPenalty, eQRho,  ec,  erhoMin, evd, erho);
+	ret = solveEigen(eA,  eb,  eC, eJp, epp, eJs,  eps,  eWs, eWRho,  eLambda, eWRhoSmoother, erhoPrevMean,  eWRhoCoPPenalty, eQRho,  ec,  erhoMin, evd, erho, cActiveSet);
 
 	J2E_FREE(A);  J2E_FREE(b);  J2E_FREE(C); 
 	J2E_FREE(Jp);  J2E_FREE(pp); 
@@ -253,30 +257,34 @@ JNIEXPORT jint JNICALL Java_us_ihmc_commonWalkingControlModules_controlModules_n
 	J2E_FREE(rhoPrevMean);  J2E_FREE(WRhoCoPPenalty); 
 	J2E_FREE(QRho);  J2E_FREE(c);  J2E_FREE(rhoMin); 
 	J2E_FREE(vd); J2E_FREE(rho);  
+	env->ReleasePrimitiveArrayCritical(activeSet, cActiveSet, 0);
 
 	return ret;
 }
 
-JNIEXPORT int solveNative(
-		double* A, double* b, double* C,
-		double* Jp, double* pp,
-		double* Js, double* ps, double* Ws,
-		double* WRho, double* Lambda,
-		double* WRhoSmoother,
-		double* rhoPrevMean, double* WRhoCoPPenalty,
-		double* QRho, double* c, double* rhoMin,
-		double* vd, double* rho)
-{
-	int ret;
-	JNA2E(A, nWrench, nDoF);  JNA2E(b,nWrench,1);  JNA2E(C,nWrench,nWrench);
-	JNA2E(Jp,nDoF,nDoF);  JNA2E(pp,nDoF,1);
-	JNA2E(Js,nDoF,nDoF);  JNA2E(ps,nDoF,1);  JNA2E(Ws,nDoF,nDoF);
-	JNA2E(WRho,nRho,nRho);  JNA2E(Lambda,nDoF,nDoF);
-	JNA2E(WRhoSmoother,nRho,nRho);
-	JNA2E(rhoPrevMean,nRho,1);  JNA2E(WRhoCoPPenalty,nRho,nRho);
-	JNA2E(QRho,nWrench,nRho);  JNA2E(c,nWrench,1);  JNA2E(rhoMin,nRho,1);
-	JNA2E(vd,nDoF,1); JNA2E(rho,nRho,1);
+extern "C" {
+	JNIEXPORT int solveNative(
+			double* A, double* b, double* C,
+			double* Jp, double* pp,
+			double* Js, double* ps, double* Ws,
+			double* WRho, double* Lambda,
+			double* WRhoSmoother,
+			double* rhoPrevMean, double* WRhoCoPPenalty,
+			double* QRho, double* c, double* rhoMin,
+			double* vd, double* rho,
+			int* activeSet)
+	{
+		int ret;
+		JNA2E(A, nWrench, nDoF);  JNA2E(b,nWrench,1);  JNA2E(C,nWrench,nWrench);
+		JNA2E(Jp,nDoF,nDoF);  JNA2E(pp,nDoF,1);
+		JNA2E(Js,nDoF,nDoF);  JNA2E(ps,nDoF,1);  JNA2E(Ws,nDoF,nDoF);
+		JNA2E(WRho,nRho,nRho);  JNA2E(Lambda,nDoF,nDoF);
+		JNA2E(WRhoSmoother,nRho,nRho);
+		JNA2E(rhoPrevMean,nRho,1);  JNA2E(WRhoCoPPenalty,nRho,nRho);
+		JNA2E(QRho,nWrench,nRho);  JNA2E(c,nWrench,1);  JNA2E(rhoMin,nRho,1);
+		JNA2E(vd,nDoF,1); JNA2E(rho,nRho,1);
 
-	ret = solveEigen(eA,  eb,  eC, eJp, epp, eJs,  eps,  eWs, eWRho,  eLambda, eWRhoSmoother, erhoPrevMean,  eWRhoCoPPenalty, eQRho,  ec,  erhoMin, evd, erho);
-	return ret+100;
+		ret = solveEigen(eA,  eb,  eC, eJp, epp, eJs,  eps,  eWs, eWRho,  eLambda, eWRhoSmoother, erhoPrevMean,  eWRhoCoPPenalty, eQRho,  ec,  erhoMin, evd, erho, activeSet);
+		return ret;
+	}
 }
