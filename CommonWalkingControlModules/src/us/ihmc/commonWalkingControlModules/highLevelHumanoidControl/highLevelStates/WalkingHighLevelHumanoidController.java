@@ -646,17 +646,17 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       }
    }
 
-   private RigidBody baseForHeadOrientationControl;
-   private int jacobianIdForHeadOrientationControl;
-
    public void setupManagers(VariousWalkingManagers variousWalkingManagers)
    {
-      baseForHeadOrientationControl = fullRobotModel.getElevator();
+      RigidBody baseForHeadOrientationControl = fullRobotModel.getElevator();
       HeadOrientationManager headOrientationManager = variousWalkingManagers.getHeadOrientationManager();
       String[] headOrientationControlJointNames = walkingControllerParameters.getDefaultHeadOrientationControlJointNames();
 
       if (headOrientationManager != null)
-         jacobianIdForHeadOrientationControl = headOrientationManager.createJacobian(fullRobotModel, headOrientationControlJointNames);
+      {
+         int jacobianIdForHeadOrientationControl = headOrientationManager.createJacobian(fullRobotModel, headOrientationControlJointNames);
+         headOrientationManager.setUp(baseForHeadOrientationControl, jacobianIdForHeadOrientationControl);         
+      }
    }
 
    public void initialize()
@@ -674,7 +674,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       HeadOrientationManager headOrientationManager = variousWalkingManagers.getHeadOrientationManager();
       if (headOrientationManager != null)
       {
-         headOrientationManager.setUp(baseForHeadOrientationControl, jacobianIdForHeadOrientationControl);
          headOrientationManager.setMaxAccelerationAndJerk(walkingControllerParameters.getMaxAccelerationUpperBody(), walkingControllerParameters.getMaxJerkUpperBody());
          walkingHeadOrientationKp.set(walkingControllerParameters.getKpHeadOrientation());
          walkingHeadOrientationZeta.set(walkingControllerParameters.getZetaHeadOrientation());
