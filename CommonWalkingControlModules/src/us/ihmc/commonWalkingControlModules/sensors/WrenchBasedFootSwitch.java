@@ -3,8 +3,6 @@ package us.ihmc.commonWalkingControlModules.sensors;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.bind.JAXB;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolver;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
@@ -117,7 +115,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       for(int i=0;i<numberOfJointFromFoot;i++)
       {
          FrameVector jAxis = ((OneDoFJoint)currentBody.getParentJoint()).getJointAxis();
-         yoFootTorqueInJoints.add(new Pair(jAxis,new DoubleYoVariable(namePrefix + "NegGRFWrenchIn"+ jAxis.getReferenceFrame().getName(), parentRegistry)));
+         yoFootTorqueInJoints.add(new Pair(jAxis,new DoubleYoVariable("NegGRFWrenchIn"+ currentBody.getParentJoint().getName(), parentRegistry)));
          currentBody=currentBody.getParentJoint().getPredecessor();
       }
       
