@@ -5,6 +5,7 @@ import java.util.HashMap;
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParamaters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -75,8 +76,24 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    private static final SideDependentList<String> wristForceSensorNames = new SideDependentList<String>("LeftForearmSupinator", "RightForearmSupinator");
    private static final String lidarSensorName = "/v1/Ibeo_sensor";
    private static final String lidarJointName = "";//"Ibeo_sensor_joint";
-   private static final String leftCameraName = "/v1/LeftHazardCamera___default__";
-   private static final String rightCameraName ="/v1/RightHazardCamera___default__";
+   
+   private static int forheadCameraId = 0;
+   private static int leftHazardCameraId = 1;
+   private static int rightHazardCameraId = 2;
+   private static int primaryCameraId = forheadCameraId;
+   
+   private final DRCRobotCameraParamaters[] cameraParamaters = new DRCRobotCameraParamaters[3];
+   
+   private static final String forheadCameraName = "forhead_camera_lifeCam";
+   private static final String forheadCameraTopic = "/head/image_rect_color/compressed";
+   
+   private static final String leftStereoCameraName = "/v1/LeftHazardCamera___default__";
+   private static final String leftCameraTopic = "/v1/LeftHazardCamera/compressed";
+   
+   private static final String rightStereoCameraName ="/v1/RightHazardCamera___default__";
+   private static final String rightCameraTopic = "/v1/rightHazardCamera/compressed";
+   
+   
    private static final String rightTrunkIMUSensor = "v1Trunk_RightIMU";
    private static final String leftTrunkIMUSensor = "v1Trunk_LeftIMU";
    private static final String leftPelvisIMUSensor = "v1Pelvis_LeftIMU";
@@ -94,6 +111,13 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    // public static final String[] imuSensorsToUse = {leftPelvisIMUSensor, rightPelvisIMUSensor};
    public static final String[] imuSensorsToUse = {leftPelvisIMUSensor};
    
+   public ValkyrieSensorInformation()
+   {
+      cameraParamaters[0] = new DRCRobotCameraParamaters(forheadCameraName,forheadCameraTopic,forheadCameraId);
+      cameraParamaters[1] = new DRCRobotCameraParamaters(leftStereoCameraName,leftCameraTopic,leftHazardCameraId);
+      cameraParamaters[2] = new DRCRobotCameraParamaters(rightStereoCameraName,rightCameraTopic,rightHazardCameraId);
+   }
+   
    public String getUrdfFeetForceSensorName(RobotSide side)
    {
       return urdfFeetForceSensorNames.get(side);
@@ -104,18 +128,6 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
       return imuUSBSerialIds;
    }
    
-   @Override
-   public String getLeftCameraName()
-   {
-      return leftCameraName;
-   }
-
-   @Override
-   public String getRightCameraName()
-   {
-      return rightCameraName;
-   }
-
    @Override
    public String getLidarSensorName()
    {
@@ -166,5 +178,17 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    public Transform3D getTransformFromAnkleURDFFrameToZUpFrame(RobotSide robotSide)
    {
       return transformFromMeasurementToAnkleZUpFrames.get(robotSide);
+   }
+
+   @Override
+   public DRCRobotCameraParamaters[] getCameraParamaters()
+   {
+      return cameraParamaters;
+   }
+
+   @Override
+   public DRCRobotCameraParamaters getPrimaryCameraParamaters()
+   {
+      return cameraParamaters[primaryCameraId];
    }
 }
