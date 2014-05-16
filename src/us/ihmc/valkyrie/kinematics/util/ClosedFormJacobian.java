@@ -6,20 +6,20 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.simple.SimpleMatrix;
 
+import us.ihmc.valkyrie.kinematics.transmissions.PushRodTransmissionJoint;
+
 public class ClosedFormJacobian
 {
    // geometric parameters from CAD
-   private final double h = 0.0127;
-   private final double length = 0.1049655;
-   private final double[] b5vals = new double[] {0.0176, 0.0355, -0.0364, 1.0};
-   private final double[] b6vals = new double[] {0.0176, -0.0355, -0.0364, 1.0};
-   private final double[] rod5vals = new double[] {0.0, -0.0215689, -0.04128855, 1.0};
-   private final double[] rod6vals = new double[] {0.0, -0.0215689, 0.04128855, 1.0};
-
-   private final DenseMatrix64F b5 = new DenseMatrix64F(4, 1, false, b5vals);
-   private final DenseMatrix64F b6 = new DenseMatrix64F(4, 1, false, b6vals);
-   private final DenseMatrix64F rod5 = new DenseMatrix64F(4, 1, false, rod5vals);
-   private final DenseMatrix64F rod6 = new DenseMatrix64F(4, 1, false, rod6vals);
+   private double h;
+   private double length;
+   private double lengthSquared;
+   
+   private DenseMatrix64F b5;
+   private DenseMatrix64F b6;
+   private DenseMatrix64F rod5;
+   private DenseMatrix64F rod6;
+   
    private final boolean DEBUG = false;
 
    private final DenseMatrix64F dHTM_0_1 = SimpleMatrix.identity(4).getMatrix();
@@ -48,7 +48,60 @@ public class ClosedFormJacobian
    private final Vector3d unitForceVector5p = new Vector3d();
    private final Vector3d unitForceVector6p = new Vector3d();
   
-   
+   public ClosedFormJacobian(PushRodTransmissionJoint pushRodTransmissionJoint)
+   {
+      switch (pushRodTransmissionJoint)
+      {
+      case ANKLE:
+      {
+         setupForAnkleActuators();
+         break;
+      }
+      case WAIST:
+      {
+         setupForWaistActuators();
+         break;
+      }
+      }
+   }
+      
+   public void setupForAnkleActuators()
+   {
+      h = 0.0127;
+      length = 0.1049655;
+      lengthSquared = length * length;
+
+      double[] b5vals = new double[] {0.0176, 0.0355, -0.0364, 1.0};
+      double[] b6vals = new double[] {0.0176, -0.0355, -0.0364, 1.0};
+      double[] rod5vals = new double[] {0.0, -0.0215689, -0.04128855, 1.0};
+      double[] rod6vals = new double[] {0.0, -0.0215689, 0.04128855, 1.0};
+
+      b5 = new DenseMatrix64F(4, 1, false, b5vals);
+      b6 = new DenseMatrix64F(4, 1, false, b6vals);
+      rod5 = new DenseMatrix64F(4, 1, false, rod5vals);
+      rod6 = new DenseMatrix64F(4, 1, false, rod6vals);     
+   }
+
+
+   public void setupForWaistActuators()
+   {
+      // TODO: Add Waist parameters. Right now they are ankle parameters.
+      h = 0.0127;
+      length = 0.1049655;
+      lengthSquared = length * length;
+
+      double[] b5vals = new double[] {0.0176, 0.0355, -0.0364, 1.0};
+      double[] b6vals = new double[] {0.0176, -0.0355, -0.0364, 1.0};
+      double[] rod5vals = new double[] {0.0, -0.0215689, -0.04128855, 1.0};
+      double[] rod6vals = new double[] {0.0, -0.0215689, 0.04128855, 1.0};
+
+      b5 = new DenseMatrix64F(4, 1, false, b5vals);
+      b6 = new DenseMatrix64F(4, 1, false, b6vals);
+      rod5 = new DenseMatrix64F(4, 1, false, rod5vals);
+      rod6 = new DenseMatrix64F(4, 1, false, rod6vals);          
+   }
+
+      
    private void denavitHartenbergTransformationMatrix(DenseMatrix64F matrixToPack, double a, double alpha, double d, double theta)
    {
       double cosTheta = Math.cos(theta);
