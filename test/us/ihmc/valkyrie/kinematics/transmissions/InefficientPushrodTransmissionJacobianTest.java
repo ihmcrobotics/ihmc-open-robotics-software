@@ -35,8 +35,9 @@ public class InefficientPushrodTransmissionJacobianTest
          dynamicGraphicObjectsListRegistry = null;
       }
 
-      InefficientPushrodTransmissionJacobian inefficientPushrodTransmissionJacobian = new InefficientPushrodTransmissionJacobian(registry,
-                                                                                               dynamicGraphicObjectsListRegistry);
+      PushRodTransmissionJoint pushRodTransmissionJoint = PushRodTransmissionJoint.ANKLE;
+      InefficientPushrodTransmissionJacobian inefficientPushrodTransmissionJacobian = new InefficientPushrodTransmissionJacobian(pushRodTransmissionJoint, registry,
+            dynamicGraphicObjectsListRegistry);
 
       SimulationConstructionSet scs;
       if (visualizeAndKeepUp)

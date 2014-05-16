@@ -21,11 +21,12 @@ public class ComparePushRodTransmissionsTest
    public void testCompareInefficientToEfficient()
    {
       Random random = new Random(1255L);
-      double reflect = 1.0;
-
       double epsilon = 1e-7;
 
-      InefficientPushRodTransmission inefficientPushrodTransmission = new InefficientPushRodTransmission(reflect, null, null);
+      double reflect = 1.0;
+      PushRodTransmissionJoint pushRodTransmissionJoint = PushRodTransmissionJoint.ANKLE;
+      
+      InefficientPushRodTransmission inefficientPushrodTransmission = new InefficientPushRodTransmission(pushRodTransmissionJoint, reflect, null, null);
       EfficientPushRodTransmission efficientPushrodTransmission = new EfficientPushRodTransmission(reflect);
 
       compareTwoPushRodTransmissionInterfaces(random, epsilon, inefficientPushrodTransmission, efficientPushrodTransmission);
@@ -42,9 +43,10 @@ public class ComparePushRodTransmissionsTest
       String ankleNamespace = "v1_ankle";
       double compliance = 0.0;
       double reflect = 1.0;
+      PushRodTransmissionJoint pushRodTransmissionJoint = PushRodTransmissionJoint.ANKLE;
 
       InterpolatedPushRodTransmission interpolatedPushRodTransmission = new InterpolatedPushRodTransmission(ankleNamespace, reflect, compliance);
-      InefficientPushRodTransmission inefficientPushrodTransmission = new InefficientPushRodTransmission(reflect, null, null);
+      InefficientPushRodTransmission inefficientPushrodTransmission = new InefficientPushRodTransmission(pushRodTransmissionJoint, reflect, null, null);
       inefficientPushrodTransmission.setUseFuteks(false);
 
       double epsilon = 1e-7;
