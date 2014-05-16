@@ -5,11 +5,11 @@ import us.ihmc.robotSide.SideDependentList;
 public interface DRCRobotSensorInformation
 {
    public abstract String[] getIMUSensorsToUse();
+   
+   public abstract DRCRobotCameraParamaters[] getCameraParamaters();
 
-   public abstract String getLeftCameraName();
-
-   public abstract String getRightCameraName();
-
+   public abstract DRCRobotCameraParamaters getPrimaryCameraParamaters();
+   
    public abstract String getLidarSensorName();
 
    public abstract String getLidarJointName();
