@@ -34,6 +34,8 @@ public class FullRobotModelCorruptor
          public void variableChanged(YoVariable<?> v)
          {
             RigidBody chest = fullRobotModel.getChest();
+            tempFramePoint.setToZero(chestCoMOffset.getReferenceFrame());
+            
             chestCoMOffset.getFrameTuple(tempFramePoint);
 
             chest.setCoMOffset(tempFramePoint);
