@@ -89,8 +89,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    public TwoWaypointPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider stepTimeProvider,
          PositionProvider initialPositionProvider, VectorProvider initialVelocityProvider, PositionProvider finalPositionProvider,
          VectorProvider finalDesiredVelocityProvider, TrajectoryParametersProvider trajectoryParametersProvider, YoVariableRegistry parentRegistry,
-         /*int arcLengthCalculatorDivisionsPerPolynomial,*/ DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
-         WalkingControllerParameters walkingControllerParameters, boolean visualize)
+         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,WalkingControllerParameters walkingControllerParameters, boolean visualize)
    {
       registry = new YoVariableRegistry(namePrefix + namePostFix);
       parentRegistry.addChild(registry);
@@ -604,11 +603,15 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
    private void visualizeSpline()
    {
+	   double t0;
+	   double tf;
+	   double t;
+	   
       for (int i = 0; i < numberOfVisualizationMarkers; i++)
       {
-         double t0 = concatenatedSplinesWithArcLengthCalculatedIteratively.getT0();
-         double tf = concatenatedSplinesWithArcLengthCalculatedIteratively.getTf();
-         double t = t0 + (double) i / (double) (numberOfVisualizationMarkers) * (tf - t0);
+         t0 = concatenatedSplinesWithArcLengthCalculatedIteratively.getT0();
+         tf = concatenatedSplinesWithArcLengthCalculatedIteratively.getTf();
+         t = t0 + (double) i / (double) (numberOfVisualizationMarkers) * (tf - t0);
          compute(t);
          trajectoryBagOfBalls.setBall(desiredPosition.getFramePointCopy(), i);
       }
