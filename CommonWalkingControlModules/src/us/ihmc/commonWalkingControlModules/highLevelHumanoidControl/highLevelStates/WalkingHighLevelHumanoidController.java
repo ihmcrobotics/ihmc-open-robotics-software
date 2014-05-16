@@ -1445,7 +1445,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          if (enablePushRecovery.getBooleanValue())
          {
-            pushRecoveryModule.initialize();
+            pushRecoveryModule.reset();
          }
 
          resetLoadedLegIntegrators(swingSide);
@@ -1658,15 +1658,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       public boolean checkCondition()
       {
-        // if (!pushRecoveryModule.getIsRecoveringFromDoubleSupportFall())
-        // {
             Footstep nextFootstep = upcomingFootstepList.getNextFootstep();
             boolean readyToStopWalking = (upcomingFootstepList.isFootstepProviderEmpty() && (nextFootstep == null))
                   && ((getSupportLeg() == null) || super.checkCondition());
             return readyToStopWalking;
-        // }
-
-        // return false;
       }
    }
 
