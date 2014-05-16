@@ -1901,6 +1901,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    {
       double zCurrent = comPosition.getZ();
       double zdCurrent = comVelocity.getZ();
+      Footstep nextFootstep;
 
       if (controlPelvisHeightInsteadOfCoMHeight.getBooleanValue())
       {
@@ -1921,7 +1922,15 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       centerOfMassHeightInputData.setSupportLeg(getSupportLeg());
 
-      Footstep nextFootstep = upcomingFootstepList.getNextFootstep();
+      if (pushRecoveryModule.getIsRecoveringFromDoubleSupportFall())
+      {
+         nextFootstep = pushRecoveryModule.getRecoverFromDoubleSupportFootStep();
+      }
+      else
+      {
+         nextFootstep = upcomingFootstepList.getNextFootstep();
+      }
+      
       centerOfMassHeightInputData.setUpcomingFootstep(nextFootstep);
 
       centerOfMassHeightTrajectoryGenerator.solve(coMHeightPartialDerivatives, centerOfMassHeightInputData);
