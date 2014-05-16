@@ -71,6 +71,7 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
       this.startTimeProvider = startTimeProvider;
       
       startTime = new DoubleYoVariable(namePrefix + "startTime", registry);
+      startTime.set(startTimeProvider.getValue());
 
       timeIntoTouchdown = new DoubleYoVariable(namePrefix + "timeIntoTouchdown", registry);
 
@@ -79,13 +80,9 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
 
    public void initialize()
    {
-	   if(!replanningTrajectory.getBooleanValue())
-	   {
-		   setInitialTimePositionsAndVelocities();
-	   }
+	  setInitialTimePositionsAndVelocities();
       
       trajectory.setLinearUsingInitialPositionAndVelocity(t0, tf, p0, pd0);
-      replanningTrajectory.set(false);
    }
 
    public void compute(double time)
@@ -100,7 +97,6 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
    
    public void setInitialTimePositionsAndVelocities()
    {
-	   startTime.set(startTimeProvider.getValue());
 	   t0 = startTime.getDoubleValue();
 	   timeIntoTouchdown.set(0.0);
 	      
@@ -114,36 +110,6 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
    public boolean isDone()
    {
       return false;
-   }
-   
-   public void setInitialPosition(FramePoint newInitialPosition)
-   {
-	   if(!replanningTrajectory.getBooleanValue())
-	   {
-		   throw new RuntimeException("You must set the boolean replanningTrajectory before you are allowed to set a new initial position or velocity");
-	   }
-	   else
-	   {
-		   p0.set(newInitialPosition);
-	   }
-   }
-   
-   public void setInitialVelocity(FrameVector newInitialVelocity)
-   {
-	   if(!replanningTrajectory.getBooleanValue())
-	   {
-		   throw new RuntimeException("You must set the boolean replanningTrajectory before you are allowed to set a new initial position or velocity");
-	   }
-	   else
-	   {
-		   pd0.set(newInitialVelocity);
-	   }
-
-   }
-   
-   public void setReplanningTrajectoryBoolean(boolean value)
-   {
-	   replanningTrajectory.set(true);
    }
 
    public void get(FramePoint positionToPack)
