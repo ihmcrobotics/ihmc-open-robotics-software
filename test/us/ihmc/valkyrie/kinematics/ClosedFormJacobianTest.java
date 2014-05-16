@@ -21,7 +21,7 @@ public class ClosedFormJacobianTest
    {
       0.0, 0.2, -0.2, 0.2, 0.35, -0.35, 0.0
    };
-   private ClosedFormJacobian closedFormJacobian = new ClosedFormJacobian();
+   private ClosedFormJacobian closedFormJacobian = new ClosedFormJacobian(PushRodTransmissionJoint.ANKLE);
 
    private double[] m11_matlab = new double[]
    {

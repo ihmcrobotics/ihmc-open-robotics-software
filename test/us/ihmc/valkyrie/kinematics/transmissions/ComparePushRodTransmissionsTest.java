@@ -27,7 +27,7 @@ public class ComparePushRodTransmissionsTest
       PushRodTransmissionJoint pushRodTransmissionJoint = PushRodTransmissionJoint.ANKLE;
       
       InefficientPushRodTransmission inefficientPushrodTransmission = new InefficientPushRodTransmission(pushRodTransmissionJoint, reflect, null, null);
-      EfficientPushRodTransmission efficientPushrodTransmission = new EfficientPushRodTransmission(reflect);
+      EfficientPushRodTransmission efficientPushrodTransmission = new EfficientPushRodTransmission(pushRodTransmissionJoint, reflect);
 
       compareTwoPushRodTransmissionInterfaces(random, epsilon, inefficientPushrodTransmission, efficientPushrodTransmission);
    }

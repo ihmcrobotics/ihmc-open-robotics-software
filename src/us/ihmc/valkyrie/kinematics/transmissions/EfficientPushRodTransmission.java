@@ -44,13 +44,13 @@ public class EfficientPushRodTransmission implements PushRodTransmissionInterfac
    
    private final double reflect;
    
-   public EfficientPushRodTransmission(double reflect)
+   public EfficientPushRodTransmission(PushRodTransmissionJoint pushRodTransmissionJoint, double reflect)
    {
 
       if (Math.abs(Math.abs(reflect) - 1.0) > 1e-7) throw new RuntimeException("reflect must be 1.0 or -1.0");
       this.reflect = reflect;
       
-      efficientPushrodTransmissionJacobian = new ClosedFormJacobian();
+      efficientPushrodTransmissionJacobian = new ClosedFormJacobian(pushRodTransmissionJoint);
    }
    
    private boolean invertMatrix(double[][] matrix, double[][] inverseTransposeToPack)
