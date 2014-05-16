@@ -150,11 +150,11 @@ public class ClosedFormJacobian
 
       DenseMatrix64F t5 = rod5;
       DenseMatrix64F t6 = rod6;
-      double pushrodHeightSolution5 = Math.sqrt(Math.pow(length, 2) - Math.pow(t5.get(1) - b5BF.get(1), 2) - Math.pow(t5.get(2) - b5BF.get(2), 2))
+      double pushrodHeightSolution5 = Math.sqrt(lengthSquared - Math.pow(t5.get(1) - b5BF.get(1), 2) - Math.pow(t5.get(2) - b5BF.get(2), 2))
                                       + b5BF.get(0);
       t5.set(0, 0, pushrodHeightSolution5);
 
-      double pushrodHeightSolution6 = Math.sqrt(Math.pow(length, 2) - Math.pow(t6.get(1) - b6BF.get(1), 2) - Math.pow(t6.get(2) - b6BF.get(2), 2))
+      double pushrodHeightSolution6 = Math.sqrt(lengthSquared - Math.pow(t6.get(1) - b6BF.get(1), 2) - Math.pow(t6.get(2) - b6BF.get(2), 2))
                                       + b6BF.get(0);
       t6.set(0, 0, pushrodHeightSolution6);
 
