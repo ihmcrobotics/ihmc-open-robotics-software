@@ -1,5 +1,6 @@
 package us.ihmc.acsell.parameters;
 
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParamaters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -50,18 +51,6 @@ public class BonoSensorInformation implements DRCRobotSensorInformation
    }
 
    @Override
-   public String getLeftCameraName()
-   {
-      return leftCameraName;
-   }
-
-   @Override
-   public String getRightCameraName()
-   {
-      return rightCameraName;
-   }
-   
-   @Override
    public String getLidarJointName()
    {
       return null;
@@ -77,5 +66,17 @@ public class BonoSensorInformation implements DRCRobotSensorInformation
    public String getPrimaryBodyImu()
    {
       return imuSensor;
+   }
+
+   @Override
+   public DRCRobotCameraParamaters[] getCameraParamaters()
+   {
+      return new DRCRobotCameraParamaters[0];
+   }
+
+   @Override
+   public DRCRobotCameraParamaters getPrimaryCameraParamaters()
+   {
+      return null;
    }
 }
