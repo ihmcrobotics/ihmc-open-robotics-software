@@ -3,6 +3,7 @@ package us.ihmc.darpaRoboticsChallenge;
 import javax.swing.JButton;
 
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParamaters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.GuiInitialSetup;
@@ -57,22 +58,14 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
       scs.setupCamera(behindPelvis);
 
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
-      String leftCameraName = sensorInformation.getLeftCameraName();
-      if (leftCameraName != null)
+      DRCRobotCameraParamaters[] cameraInfo = sensorInformation.getCameraParamaters();
+      for(int i = 0; i < cameraInfo.length; i ++)
       {
-         CameraConfiguration camera5 = new CameraConfiguration(leftCameraName);
-         camera5.setCameraMount(leftCameraName);
-         scs.setupCamera(camera5);
+         CameraConfiguration camera = new CameraConfiguration(cameraInfo[i].getCameraNameInSdf());
+         camera.setCameraMount(cameraInfo[i].getCameraNameInSdf());
+         scs.setupCamera(camera);
       }
-      
-      String rightCameraName = sensorInformation.getRightCameraName();
-      if (rightCameraName != null)
-      {
-         CameraConfiguration camera6 = new CameraConfiguration(rightCameraName);
-         camera6.setCameraMount(rightCameraName);
-         scs.setupCamera(camera6);
-      }
-      
+           
       scs.setGroundVisible(groundProfileVisible);
       
       if (drawPlaneAtZ0)
