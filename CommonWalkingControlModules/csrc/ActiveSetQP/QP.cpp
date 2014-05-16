@@ -8,8 +8,10 @@
 
 #define _USE_MATH_DEFINES
 
-int MAX_ITER = -1; // default: #equality constraints
-
+extern "C"
+{
+	int MAX_ITER = -1; // default: #equality constraints
+}
 
 using namespace Eigen;
 using namespace std;
