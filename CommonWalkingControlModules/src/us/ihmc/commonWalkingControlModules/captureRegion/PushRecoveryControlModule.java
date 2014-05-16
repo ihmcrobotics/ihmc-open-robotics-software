@@ -76,10 +76,10 @@ public class PushRecoveryControlModule
 
       footstepWasProjectedInCaptureRegion = new BooleanYoVariable("footstepWasProjectedInCaptureRegion", registry);
 
-      initialize();
+      reset();
    }
 
-   public void initialize()
+   public void reset()
    {
       footstepWasProjectedInCaptureRegion.set(false);
       recoverFromDoubleSupportFallFootStep = null;
