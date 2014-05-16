@@ -21,7 +21,9 @@ public class InefficientPushRodTransmissionTest
       Random random = new Random(1234L);
 
       double reflect = 1.0;
-      InefficientPushRodTransmission inefficientPushrodTransmission = new InefficientPushRodTransmission(reflect, null, null);
+      PushRodTransmissionJoint pushRodTransmissionJoint = PushRodTransmissionJoint.ANKLE;
+
+      InefficientPushRodTransmission inefficientPushrodTransmission = new InefficientPushRodTransmission(pushRodTransmissionJoint, reflect, null, null);
 
       TurboDriver[] actuatorData = new DummyTurboDriver[2];
       actuatorData[0] = new DummyTurboDriver();
@@ -79,8 +81,9 @@ public class InefficientPushRodTransmissionTest
    public void testRegression()
    {
       double reflect = 1.0;
+      PushRodTransmissionJoint pushRodTransmissionJoint = PushRodTransmissionJoint.ANKLE;
 
-      InefficientPushRodTransmission inefficientPushrodTransmission = new InefficientPushRodTransmission(reflect, null, null);
+      InefficientPushRodTransmission inefficientPushrodTransmission = new InefficientPushRodTransmission(pushRodTransmissionJoint, reflect, null, null);
 
       TurboDriver[] actuatorData = new DummyTurboDriver[2];
       actuatorData[0] = new DummyTurboDriver();

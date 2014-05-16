@@ -19,16 +19,19 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicRefere
 
 public class InefficientPushrodTransmissionJacobian
 {
-   private final double h = 0.0127;    // height of pitch axis above roll axis in meters (m)
+   private double h;    // height of pitch axis above roll axis in meters (m)
 
-   private final double length = 0.1049655;    // futek link length (m)
-   private final double lengthSquared = length * length;
+   private double length;    // futek link length (m)
+   private double lengthSquared = length * length;
 
+   private final Vector3d rod5 = new Vector3d();    // position where rod 5 passes through bone frame plane. x is forward. y is to the left. z is up. (m)
+   private final Vector3d rod6 = new Vector3d();    // position where rod 6 passes through bone frame plane. x is forward. y is to the left. z is up. (m)
+
+   private final Vector3d rodBottom5 = new Vector3d();  // position vector of futek link base for actuator 5 side in foot frame (m)
+   private final Vector3d rodBottom6 = new Vector3d();   // position vector of futek link base for actuator 6 side in foot frame (m)
+   
    private boolean useFuteks = true; 
    
-   private final Vector3d rod5 = new Vector3d(-0.0215689, -0.04128855, 0.0);    // position where rod 5 passes through bone frame plane. x is forward. y is to the left. z is up. (m)
-   private final Vector3d rod6 = new Vector3d(-0.0215689, 0.04128855, 0.0);    // position where rod 6 passes through bone frame plane. x is forward. y is to the left. z is up. (m)
-
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final TranslationReferenceFrame boneFrame = new TranslationReferenceFrame("boneFrame", worldFrame);
@@ -39,8 +42,8 @@ public class InefficientPushrodTransmissionJacobian
    private final Transform3D pitchTransform3D = new Transform3D();
    private final Transform3D rollTransform3D = new Transform3D();
 
-   private final FramePoint b5InFootFrame = new FramePoint(footFrame, -0.0364, -0.0355, 0.0176);    // position vector of futek link base for actuator 5 side in foot frame (m)
-   private final FramePoint b6InFootFrame = new FramePoint(footFrame, -0.0364, 0.0355, 0.0176);    // position vector of futek link base for actuator 6 side in foot frame (m)
+   private final FramePoint b5InFootFrame = new FramePoint();   
+   private final FramePoint b6InFootFrame = new FramePoint();   
 
    private final FramePoint b5InBoneFrame = new FramePoint();
    private final FramePoint b6InBoneFrame = new FramePoint();
@@ -74,8 +77,21 @@ public class InefficientPushrodTransmissionJacobian
 
    private final boolean DEBUG = false;
 
-   public InefficientPushrodTransmissionJacobian(YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public InefficientPushrodTransmissionJacobian(PushRodTransmissionJoint pushRodTransmissionJoint, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
+      switch (pushRodTransmissionJoint)
+      {
+      case ANKLE:
+      {
+         setupForAnkleActuators();
+         break;
+      }
+      case WAIST:
+      {
+         setupForWaistActuators();
+         break;
+      }
+      }
       boneFrame.updateTranslation(new FrameVector(worldFrame, 0.0, 0.0, 1.0));    // Arbitrary. Just put it in the air. If we wanted to have things align with the real robot, then this should be at the ankle.
       beforeRollFrame.updateTranslation(new FrameVector(afterPitchFrame, 0.0, 0.0, -h));
 
@@ -124,6 +140,35 @@ public class InefficientPushrodTransmissionJacobian
       if (parentRegistry != null)
          parentRegistry.addChild(registry);
    }
+   
+   public void setupForAnkleActuators()
+   {
+      h = 0.0127;
+
+      length = 0.1049655;
+      lengthSquared = length * length;
+
+      rod5.set(-0.0215689, -0.04128855, 0.0);    
+      rod6.set(-0.0215689, 0.04128855, 0.0);     
+
+      rodBottom5.set(-0.0364, -0.0355, 0.0176);     
+      rodBottom6.set(-0.0364, 0.0355, 0.0176);         
+   }
+   
+   public void setupForWaistActuators()
+   {
+      // TODO: Add Waist parameters. Right now they are ankle parameters.
+      h = 0.0127;
+
+      length = 0.1049655;
+      lengthSquared = length * length;
+
+      rod5.set(-0.0215689, -0.04128855, 0.0);    
+      rod6.set(-0.0215689, 0.04128855, 0.0);     
+
+      rodBottom5.set(-0.0364, -0.0355, 0.0176);     
+      rodBottom6.set(-0.0364, 0.0355, 0.0176);         
+   }
 
    public void setUseFuteks(boolean useFuteks)
    {
@@ -142,6 +187,9 @@ public class InefficientPushrodTransmissionJacobian
       afterPitchFrame.updateTransform(pitchTransform3D);
       footFrame.updateTransform(rollTransform3D);
 
+      b5InFootFrame.setIncludingFrame(footFrame, rodBottom5);   
+      b6InFootFrame.setIncludingFrame(footFrame, rodBottom6);   
+      
       b5InBoneFrame.setIncludingFrame(b5InFootFrame);
       b5InBoneFrame.changeFrame(boneFrame);
 
