@@ -12,7 +12,7 @@ public class ValkyrieConfigurationRoot
 
    public static final String SCHEDULE_FILE = "main_ihmc.yaml";
    public static final String URDF_FILE = "models/V1_hw_ihmc.urdf";
-   public static final String SDF_FILE = "V1/sdf/V1_sim_added_mass_hacked_lidar.sdf";//"V1/sdf/V1_sim.sdf";+
+   public static final String SDF_FILE = "V1/sdf/V1_sim_added_mass.sdf";//"V1/sdf/V1_sim_added_mass_hacked_lidar.sdf";
 
    public static final String BENCH_SCHEDULE_FILE = "main_bench.yaml";
    public static final String BENCH_URDF_FILE = "models/V1_hw_bench.urdf";
