@@ -22,6 +22,7 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
+import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
 import us.ihmc.valkyrie.io.ValkyrieOutputWriterWithAccelerationIntegration;
 import us.ihmc.valkyrie.models.ModelRoot;
 import us.ihmc.valkyrie.paramaters.ValkyrieArmControllerParameters;
@@ -46,7 +47,6 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private DRCRobotSensorInformation sensorInformation;
    private final DRCRobotJointMap jointMap;
    private final String robotName = "VALKYRIE";
-   private final String sdfFileName = "V1/sdf/V1_sim_hacked_lidar.sdf";//"V1/sdf/V1_sim.sdf";
    
    
    private final String[] resourceDirectories = {
@@ -143,7 +143,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
 
    private String getSdfFile()
    {
-      return sdfFileName;
+      return ValkyrieConfigurationRoot.SDF_FILE;
    }
 
    private String[] getResourceDirectories()
