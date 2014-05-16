@@ -43,6 +43,7 @@ import de.lessvoid.nifty.tools.time.TimeInterpolator;
  */
 public class TwoWaypointTrajectoryGeneratorWithPushRecovery implements ReplannablePositionTrajectoryGenerator
 {
+   private static final boolean VISUALIZE = true;
 	private static final int arcLengthCalculatorDivisionsPerPolynomial = 20;
 	private final static double EPSILON = 1e-3;
 	private final static double WAYPOINT_CLOSENESS_FACTOR = .15; // waypoints are considered close together if the distance between them is less than the total
@@ -105,15 +106,14 @@ public class TwoWaypointTrajectoryGeneratorWithPushRecovery implements Replannab
 	public TwoWaypointTrajectoryGeneratorWithPushRecovery(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider stepTimeProvider,
 	         PositionProvider initialPositionProvider, VectorProvider initialVelocityProvider, PositionProvider finalPositionProvider,
 	         VectorProvider finalDesiredVelocityProvider, TrajectoryParametersProvider trajectoryParametersProvider, YoVariableRegistry parentRegistry,
-	         /*int arcLengthCalculatorDivisionsPerPolynomial,*/ DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
-	         WalkingControllerParameters walkingControllerParameters, boolean visualize)
+	         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, WalkingControllerParameters walkingControllerParameters)
 	{
 		registry = new YoVariableRegistry(namePrefix + namePostFix);
 	      parentRegistry.addChild(registry);
 
 	     setInitialSwingVelocityToZero = new BooleanYoVariable(namePrefix + "SetInitialSwingVelocityToZero", registry);
 	     setInitialSwingVelocityToZero.set(false);
-	      if (visualize)
+	      if (VISUALIZE)
 	      {
 	         trajectoryBagOfBalls = new BagOfBalls(numberOfVisualizationMarkers, 0.01, namePrefix + "TrajectoryBagOfBalls", registry,
 	               dynamicGraphicObjectsListRegistry);
@@ -175,7 +175,7 @@ public class TwoWaypointTrajectoryGeneratorWithPushRecovery implements Replannab
 	            + "ConcatenatedSplinesWithArcLengthCalculatedIteratively");
 
 	      this.visualize = new BooleanYoVariable(namePrefix + "Visualize", registry);
-	      this.visualize.set(visualize);
+	      this.visualize.set(VISUALIZE);
 	      
 	      this.pushRecoveryTrajectoryGenerator = new SmoothCartesianWaypointConnectorTrajectoryGenerator2D(namePrefix + "PushRecoveryTrajectory", referenceFrame, this.initialTime.getDoubleValue(), 
 	    		  stepTimeProvider, initialPositionProvider, finalPositionProvider, initialVelocityProvider, parentRegistry, dynamicGraphicObjectsListRegistry, 
