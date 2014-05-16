@@ -18,13 +18,28 @@ public class ComparePushRodTransmissionsTest
    private static final boolean DEBUG = false;
 
    @Test
-   public void testCompareInefficientToEfficient()
+   public void testCompareInefficientToEfficientAnkle()
    {
       Random random = new Random(1255L);
       double epsilon = 1e-7;
 
       double reflect = 1.0;
       PushRodTransmissionJoint pushRodTransmissionJoint = PushRodTransmissionJoint.ANKLE;
+      
+      InefficientPushRodTransmission inefficientPushrodTransmission = new InefficientPushRodTransmission(pushRodTransmissionJoint, reflect, null, null);
+      EfficientPushRodTransmission efficientPushrodTransmission = new EfficientPushRodTransmission(pushRodTransmissionJoint, reflect);
+
+      compareTwoPushRodTransmissionInterfaces(random, epsilon, inefficientPushrodTransmission, efficientPushrodTransmission);
+   }
+   
+   @Test
+   public void testCompareInefficientToEfficientWaist()
+   {
+      Random random = new Random(1255L);
+      double epsilon = 1e-7;
+
+      double reflect = 1.0;
+      PushRodTransmissionJoint pushRodTransmissionJoint = PushRodTransmissionJoint.WAIST;
       
       InefficientPushRodTransmission inefficientPushrodTransmission = new InefficientPushRodTransmission(pushRodTransmissionJoint, reflect, null, null);
       EfficientPushRodTransmission efficientPushrodTransmission = new EfficientPushRodTransmission(pushRodTransmissionJoint, reflect);
