@@ -201,7 +201,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       SDFRobot robot = drcSimulationTestHelper.getRobot();
 
       SlipOnNextStepPerturber slipOnEachStepPerturber = new SlipOnNextStepPerturber(robot, RobotSide.LEFT);
-      slipOnEachStepPerturber.setAmountToSlipNextStep(new Vector3d(0.06, -0.06, 0.0));
+      slipOnEachStepPerturber.setAmountToSlipNextStep(getFootSlipVector());
       slipOnEachStepPerturber.setRotationToSlipNextStep(-0.15, 0.0, 0.0);
       slipOnEachStepPerturber.setSlipAfterStepTimeDelta(0.05);
       slipOnEachStepPerturber.setPercentToSlipPerTick(0.1);
@@ -461,12 +461,8 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       FootstepDataList footstepDataList = createFootstepsForTurningInPlaceAndPassingPI(scriptedFootstepGenerator);
       drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
 
-
-      final DoubleYoVariable pelvisOrientationError =
-         (DoubleYoVariable) simulationConstructionSet.getVariable(
-             "WalkingHighLevelHumanoidController.RootJointAngularAccelerationControlModule.pelvisAxisAngleOrientationController",
-             "pelvisOrientationErrorMagnitude");
-
+      final DoubleYoVariable pelvisOrientationError = getPelvisOrientationErrorVariableName(simulationConstructionSet);
+      
       SimulationDoneCriterion checkPelvisOrientationError = new SimulationDoneCriterion()
       {
          @Override
@@ -717,4 +713,8 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
    }
+   
+   protected abstract Vector3d getFootSlipVector();
+   
+   protected abstract DoubleYoVariable getPelvisOrientationErrorVariableName(SimulationConstructionSet scs);
 }
