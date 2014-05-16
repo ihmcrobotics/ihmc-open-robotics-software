@@ -98,7 +98,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       firstTick.set(true);
       nextExecutionTime.set(0);
       registry.addChild(robotController.getYoVariableRegistry());
-
+      registry.addChild(outputWriter.getControllerYoVariableRegistry());
    }
 
    public static RobotController createMomentumBasedController(SDFFullRobotModel controllerModel, ReferenceFrames referenceFramesForController,
