@@ -38,6 +38,8 @@ import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
 
 public class ValkyrieRobotModel implements DRCRobotModel
 {
+   private static final boolean PRINT_MODEL = false;
+   
    private static Class<ModelRoot> valModelRoot = ModelRoot.class;
    private final ArmControllerParameters armControllerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
@@ -234,7 +236,21 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public SDFRobot createSdfRobot(boolean createCollisionMeshes)
    {
-      return loader.createRobot(jointMap, createCollisionMeshes);
+      SDFRobot sdfRobot = loader.createRobot(jointMap, createCollisionMeshes);
+
+      if (PRINT_MODEL) 
+      {
+         System.out.println("\nValkyrieRobotModel Link Masses:");
+
+         StringBuffer stringBuffer = new StringBuffer();
+         sdfRobot.printRobotJointsAndMasses(stringBuffer);
+         System.out.println(stringBuffer);
+         System.out.println();
+
+         System.out.println("ValkyrieRobotModel: \n" + sdfRobot);
+      }
+
+      return sdfRobot;
    }
    
    @Override
