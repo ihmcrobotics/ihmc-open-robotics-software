@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules.head;
 
-
 import us.ihmc.commonWalkingControlModules.configurations.HeadOrientationControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.DegenerateOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
@@ -26,14 +25,18 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameQuaternion
 public class HeadOrientationControlModule extends DegenerateOrientationControlModule
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   
+
    private final YoFrameQuaternion orientationToTrack;
    private final YoFramePoint pointToTrack;
    private final ReferenceFrame chestFrame;
    private final ReferenceFrame headFrame;
-   private final ReferenceFrame headOrientationExpressedInFrame;
    private final OriginAndPointFrame pointTrackingFrame;
    private final DynamicGraphicReferenceFrame pointTrackingFrameFiz;
+
+   private enum HeadTrackingMode
+   {
+      ORIENTATION, POINT
+   }
 
    private final EnumYoVariable<HeadTrackingMode> headTrackingMode = EnumYoVariable.create("headTrackingMode", HeadTrackingMode.class, registry);
 
@@ -41,26 +44,35 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
    private final DoubleYoVariable pitchLowerLimit = new DoubleYoVariable("pitchLowerLimit", registry);
    private final DoubleYoVariable pitchUpperLimit = new DoubleYoVariable("pitchUpperLimit", registry);
    private final DoubleYoVariable rollLimit = new DoubleYoVariable("rollLimit", registry);
-   
+
    private final RigidBody head;
+
+   /*
+    * TODO Sylvain. In walking, the head in controlled with respect to the
+    * elevator (see WalkingHighLevelHumanoidController.setupManagers()). This
+    * causes the head to have a little lag when rotating the pelvis (around z
+    * only). The best option would be to control the head with respect to two
+    * bases: for the pitch and roll with respect to the elevator, and for the
+    * yaw with respect to the pelvis.
+    */
 
    public HeadOrientationControlModule(MomentumBasedController momentumBasedController, ReferenceFrame headOrientationExpressedInFrame,
          HeadOrientationControllerParameters headOrientationControllerParameters, YoVariableRegistry parentRegistry,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      super("head", new RigidBody[] {}, momentumBasedController.getFullRobotModel().getHead(), new GeometricJacobian[]{}, momentumBasedController, parentRegistry);
+      super("head", new RigidBody[] {}, momentumBasedController.getFullRobotModel().getHead(), new GeometricJacobian[] {}, momentumBasedController,
+            parentRegistry);
 
       FullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
       this.head = fullRobotModel.getHead();
-      
+
       pointTrackingFrame = new OriginAndPointFrame("headPointTrackingFrame", worldFrame);
 
       this.chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
       this.headFrame = head.getBodyFixedFrame();
-      this.headOrientationExpressedInFrame = headOrientationExpressedInFrame;
       orientationToTrack = new YoFrameQuaternion("headOrientationToTrack", headOrientationExpressedInFrame, registry);
       pointToTrack = new YoFramePoint("headPointToTrack", worldFrame, registry);
-      
+
       if (dynamicGraphicObjectsListRegistry != null)
       {
          pointTrackingFrameFiz = new DynamicGraphicReferenceFrame(pointTrackingFrame, registry, 0.3);
@@ -80,9 +92,9 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
    {
       return head;
    }
-   
+
    private final FramePoint headPosition = new FramePoint();
-   
+
    @Override
    protected void packDesiredFrameOrientation(FrameOrientation orientationToPack)
    {
@@ -92,25 +104,25 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
 
       switch (headTrackingMode.getEnumValue())
       {
-         case ORIENTATION :
-         {
-            orientationToPack.setToZero(orientationToTrack.getReferenceFrame());
-            orientationToTrack.get(orientationToPack);
+      case ORIENTATION:
+      {
+         orientationToPack.setToZero(orientationToTrack.getReferenceFrame());
+         orientationToTrack.get(orientationToPack);
 
-            break;
-         }
+         break;
+      }
 
-         case POINT :
-         {
-            pointTrackingFrame.update();
-            pointTrackingFrameFiz.update();
+      case POINT:
+      {
+         pointTrackingFrame.update();
+         pointTrackingFrameFiz.update();
 
-            orientationToPack.setToZero(pointTrackingFrame);
-            break;
-         }
+         orientationToPack.setToZero(pointTrackingFrame);
+         break;
+      }
 
-         default :
-            throw new RuntimeException("Case " + headTrackingMode.getEnumValue() + " not handled.");
+      default:
+         throw new RuntimeException("Case " + headTrackingMode.getEnumValue() + " not handled.");
       }
       orientationToPack.changeFrame(worldFrame);
 
@@ -173,12 +185,5 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
    {
       this.headTrackingMode.set(HeadTrackingMode.POINT);
       this.pointToTrack.set(point);
-   }
-
-   private enum HeadTrackingMode {ORIENTATION, POINT;}
-
-   public ReferenceFrame getHeadOrientationFrame()
-   {
-      return headOrientationExpressedInFrame;
    }
 }

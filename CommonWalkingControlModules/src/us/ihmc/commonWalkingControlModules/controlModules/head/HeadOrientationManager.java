@@ -3,9 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.head;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHeadOrientationProvider;
-import us.ihmc.commonWalkingControlModules.trajectories.CurrentOrientationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.trajectories.OrientationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.SettableOrientationProvider;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -33,6 +31,7 @@ public class HeadOrientationManager
    private final BooleanYoVariable isTrackingOrientation;
    
    private final ReferenceFrame headOrientationExpressedInFrame;
+   private final SettableOrientationProvider initialOrientationProvider;
    private final SettableOrientationProvider finalOrientationProvider;
    private int jacobianId = -1;
 
@@ -52,12 +51,13 @@ public class HeadOrientationManager
          receivedNewHeadOrientationTime = new DoubleYoVariable("receivedNewHeadOrientationTime", registry);
          isTrackingOrientation = new BooleanYoVariable("isTrackingOrientation", registry);
          DoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(trajectoryTime);
-         OrientationProvider initialOrientationProvider = new CurrentOrientationProvider(headOrientationExpressedInFrame, headOrientationControlModule.getHead().getBodyFixedFrame());
+//         initialOrientationProvider = new CurrentOrientationProvider(headOrientationExpressedInFrame, headOrientationControlModule.getHead().getBodyFixedFrame());
+         initialOrientationProvider = new SettableOrientationProvider("headInitialOrientation", headOrientationExpressedInFrame, registry);
          finalOrientationProvider = new SettableOrientationProvider("headFinalOrientation", headOrientationExpressedInFrame, registry);
-         orientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator("headOrientation",
-               headOrientationExpressedInFrame, trajectoryTimeProvider, initialOrientationProvider, finalOrientationProvider,
-               registry);
+         orientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator("headOrientation", headOrientationExpressedInFrame,
+               trajectoryTimeProvider, initialOrientationProvider, finalOrientationProvider, registry);
          orientationTrajectoryGenerator.setContinuouslyUpdateFinalOrientation(true);
+         orientationTrajectoryGenerator.initialize();
          parentRegistry.addChild(registry);
       }
       else
@@ -66,6 +66,7 @@ public class HeadOrientationManager
          registry = null;
          receivedNewHeadOrientationTime = null;
          isTrackingOrientation = null;
+         initialOrientationProvider = null;
          finalOrientationProvider = null;
          orientationTrajectoryGenerator = null;
       }
@@ -102,6 +103,8 @@ public class HeadOrientationManager
       
       if (desiredHeadOrientationProvider.isNewHeadOrientationInformationAvailable())
       {
+         orientationTrajectoryGenerator.get(desiredOrientation);
+         initialOrientationProvider.setOrientation(desiredOrientation);
          finalOrientationProvider.setOrientation(desiredHeadOrientationProvider.getDesiredHeadOrientation());
          receivedNewHeadOrientationTime.set(yoTime.getDoubleValue());
          orientationTrajectoryGenerator.initialize();
@@ -109,6 +112,8 @@ public class HeadOrientationManager
       }
       else if (desiredHeadOrientationProvider.isNewLookAtInformationAvailable())
       {
+         orientationTrajectoryGenerator.get(desiredOrientation);
+         initialOrientationProvider.setOrientation(desiredOrientation);
          headOrientationControlModule.setPointToTrack(desiredHeadOrientationProvider.getLookAtPoint());
          headOrientationControlModule.packDesiredFrameOrientation(desiredOrientation);
          desiredOrientation.changeFrame(headOrientationExpressedInFrame);
@@ -160,6 +165,4 @@ public class HeadOrientationManager
    {
       setUp(null, -1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
    }
-
-   
 }
