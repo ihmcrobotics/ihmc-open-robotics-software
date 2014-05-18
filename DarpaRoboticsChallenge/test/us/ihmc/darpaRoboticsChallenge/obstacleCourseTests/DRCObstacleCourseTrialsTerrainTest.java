@@ -167,7 +167,7 @@ private Class thisClass = DRCObstacleCourseTrialsTerrainTest.class;
       
       SDFRobot robot = drcSimulationTestHelper.getRobot();
       SlipRandomOnNextStepPerturber slipRandomOnEachStepPerturber = new SlipRandomOnNextStepPerturber(robot, 1201L);
-      slipRandomOnEachStepPerturber.setTranslationRangeToSlipNextStep(new double[]{0.04, 0.04, 0.0}, new double[]{0.06, 0.08, 0.005});
+      slipRandomOnEachStepPerturber.setTranslationRangeToSlipNextStep(new double[]{0.03, 0.03, 0.0}, new double[]{0.04, 0.06, 0.005});
       slipRandomOnEachStepPerturber.setRotationRangeToSlipNextStep(new double[]{0.0, 0.0, 0.0}, new double[]{0.2, 0.05, 0.02});
       slipRandomOnEachStepPerturber.setSlipAfterStepTimeDeltaRange(0.01, 0.5);
       slipRandomOnEachStepPerturber.setSlipPercentSlipPerTickRange(0.01, 0.03);
