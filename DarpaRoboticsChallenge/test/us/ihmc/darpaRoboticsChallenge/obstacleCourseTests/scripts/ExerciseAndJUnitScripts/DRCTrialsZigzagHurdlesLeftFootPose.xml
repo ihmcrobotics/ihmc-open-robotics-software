@@ -10,7 +10,7 @@
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.0773720208831806</x>
-          <y>0.023101831244910262</y>
+          <y>0.022</y>
           <z>0.10476879825240526</z>
         </location>
         <orientation>
@@ -24,7 +24,7 @@
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.3036819676744558</x>
-          <y>-0.3984029599072972</y>
+          <y>-0.41</y>
           <z>0.22398318378072613</z>
         </location>
         <orientation>
@@ -49,7 +49,7 @@
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.6557827186562704</x>
-          <y>0.001001880857192744</y>
+          <y>-0.015</y>
           <z>0.2392286766667321</z>
         </location>
         <orientation>
