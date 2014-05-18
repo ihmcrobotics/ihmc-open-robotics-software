@@ -1,6 +1,5 @@
 package us.ihmc.atlas.parameters;
 
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.back_bkx;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.back_bky;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.back_bkz;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.jointNames;
@@ -117,19 +116,9 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       return new String[] {jointNames[back_bkz], jointNames[neck_ry]}; 
    }
    
-   public String[] getAllowableHeadOrientationControlJointNames()
-   {
-      return new String[] {jointNames[back_bkz], jointNames[back_bkx], jointNames[neck_ry]}; 
-   }
-
    public String[] getDefaultChestOrientationControlJointNames()
    {
       return new String[]{};
-   }
-
-   public String[] getAllowableChestOrientationControlJointNames()
-   {
-      return new String[] {jointNames[back_bky]};
    }
 
    public boolean checkOrbitalEnergyCondition()
