@@ -84,19 +84,9 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
       return new String[0];
    }
 
-   public String[] getAllowableHeadOrientationControlJointNames()
-   {
-      return new String[0];
-   }
-
    public String[] getDefaultChestOrientationControlJointNames()
    {
       return new String[0];
-   }
-
-   public String[] getAllowableChestOrientationControlJointNames()
-   {
-      return new String[] {"back_mby"};
    }
 
    public boolean checkOrbitalEnergyCondition()
