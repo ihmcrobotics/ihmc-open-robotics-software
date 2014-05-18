@@ -1,4 +1,4 @@
 package us.ihmc.valkyrie.kinematics.transmissions;
 
-public enum PushRodTransmissionJoint{ANKLE, WAIST};
+public enum PushRodTransmissionJoint{ANKLE, WAIST, WRIST};
 

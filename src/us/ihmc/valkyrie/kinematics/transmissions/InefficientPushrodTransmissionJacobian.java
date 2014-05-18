@@ -91,6 +91,11 @@ public class InefficientPushrodTransmissionJacobian
          setupForWaistActuators();
          break;
       }
+      case WRIST:
+      {
+         setupForWristActuators();
+         break;
+      }
       }
       
       boneFrame.updateTranslation(new FrameVector(worldFrame, 0.0, 0.0, 1.0));    // Arbitrary. Just put it in the air. If we wanted to have things align with the real robot, then this should be at the ankle.
@@ -159,6 +164,21 @@ public class InefficientPushrodTransmissionJacobian
    public void setupForWaistActuators()
    {
       // TODO: Add Waist parameters. Right now they are ankle parameters.
+      h = 0.0127;
+
+      length = 0.1049655;
+      lengthSquared = length * length;
+
+      rod5.set(-0.0215689, -0.04128855, 0.0);    
+      rod6.set(-0.0215689, 0.04128855, 0.0);     
+
+      rodBottom5.set(-0.0364, -0.0355, 0.0176);     
+      rodBottom6.set(-0.0364, 0.0355, 0.0176);         
+   }
+   
+   public void setupForWristActuators()
+   {
+      // TODO: Add Wwrist parameters. Right now they are ankle parameters.
       h = 0.0127;
 
       length = 0.1049655;
