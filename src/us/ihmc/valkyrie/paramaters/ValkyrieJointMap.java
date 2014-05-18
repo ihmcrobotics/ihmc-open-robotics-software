@@ -1,5 +1,13 @@
 package us.ihmc.valkyrie.paramaters;
 
+import static us.ihmc.valkyrie.paramaters.ValkyrieOrderedJointMap.jointNames;
+import static us.ihmc.valkyrie.paramaters.ValkyrieOrderedJointMap.WaistExtensor;
+import static us.ihmc.valkyrie.paramaters.ValkyrieOrderedJointMap.WaistLateralExtensor;
+import static us.ihmc.valkyrie.paramaters.ValkyrieOrderedJointMap.WaistRotator;
+import static us.ihmc.valkyrie.paramaters.ValkyrieOrderedJointMap.LowerNeckExtensor;
+import static us.ihmc.valkyrie.paramaters.ValkyrieOrderedJointMap.UpperNeckExtensor;
+import static us.ihmc.valkyrie.paramaters.ValkyrieOrderedJointMap.NeckRotator;
+
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -24,11 +32,12 @@ public class ValkyrieJointMap extends DRCRobotJointMap
    public static final SideDependentList<String> jointBeforeThighNames = new SideDependentList<String>("LeftHipExtensor","RightHipExtensor");
    public static final String chestName = "v1Trunk";
    public static final String pelvisName = "v1Pelvis";
-   public static final String pelvisPitchJointName = "WaistExtensor";
-   public static final String pelvisYawJointName = "WaistRotator";
-   public static final String lowerNeckPitchJointName = "LowerNeckExtensor";
-   public static final String upperNeckPitchJointName = "UpperNeckExtensor";
-   public static final String neckYawJointName = "NeckRotator";
+   public static final String spineRollJointName = jointNames[WaistLateralExtensor];
+   public static final String spinePitchJointName = jointNames[WaistExtensor];
+   public static final String spineYawJointName = jointNames[WaistRotator];
+   public static final String lowerNeckPitchJointName = jointNames[LowerNeckExtensor];
+   public static final String upperNeckPitchJointName = jointNames[UpperNeckExtensor];
+   public static final String neckYawJointName = jointNames[NeckRotator];
    public static final String headName = "v1Head";
    
    private final LegJointName[] legJoints = { LegJointName.HIP_YAW, LegJointName.HIP_ROLL, LegJointName.HIP_PITCH, LegJointName.KNEE, LegJointName.ANKLE_PITCH,
