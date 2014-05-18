@@ -4,8 +4,6 @@ public interface HeadOrientationControllerParameters
 {
    public abstract String[] getDefaultHeadOrientationControlJointNames();
    
-   public abstract String[] getAllowableHeadOrientationControlJointNames();
-   
    public abstract String getJointNameForExtendedPitchRange();
    
    public abstract double getUpperNeckPitchLimit();
