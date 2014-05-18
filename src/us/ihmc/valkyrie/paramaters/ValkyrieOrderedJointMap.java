@@ -1,7 +1,5 @@
 package us.ihmc.valkyrie.paramaters;
 
-
-
 public class ValkyrieOrderedJointMap 
 {
 

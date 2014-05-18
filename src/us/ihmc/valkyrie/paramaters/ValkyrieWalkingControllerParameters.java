@@ -119,12 +119,37 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
 
    public String[] getDefaultHeadOrientationControlJointNames()
    {
-      return new String[] { ValkyrieJointMap.upperNeckPitchJointName,ValkyrieJointMap.pelvisYawJointName,ValkyrieJointMap.lowerNeckPitchJointName };
+      return new String[] { ValkyrieJointMap.lowerNeckPitchJointName, ValkyrieJointMap.upperNeckPitchJointName, ValkyrieJointMap.spineYawJointName };
    }
 
    public String[] getDefaultChestOrientationControlJointNames()
    {
-      return new String[] { ValkyrieJointMap.pelvisName };
+      return new String[] {};
+   }
+
+   public String getJointNameForExtendedPitchRange()
+   {
+      return ValkyrieJointMap.spinePitchJointName;
+   }
+
+   public double getUpperNeckPitchLimit()
+   {
+      return upperNeckExtensorUpperLimit + lowerNeckExtensorUpperLimit;//1.14494;
+   }
+
+   public double getLowerNeckPitchLimit()
+   {
+      return upperNeckExtensorLowerLimit + lowerNeckExtensorLowerLimit;//-0.602139;
+   }
+
+   public double getHeadYawLimit()
+   {
+      return Math.PI / 4.0;
+   }
+
+   public double getHeadRollLimit()
+   {
+      return Math.PI / 4.0;
    }
 
    public boolean checkOrbitalEnergyCondition()
@@ -175,31 +200,6 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    public boolean resetDesiredICPToCurrentAtStartOfSwing()
    {
       return false;
-   }
-
-   public double getUpperNeckPitchLimit()
-   {
-      return upperNeckExtensorUpperLimit + lowerNeckExtensorUpperLimit;//1.14494;
-   }
-
-   public double getLowerNeckPitchLimit()
-   {
-      return upperNeckExtensorLowerLimit + lowerNeckExtensorLowerLimit;//-0.602139;
-   }
-
-   public double getHeadYawLimit()
-   {
-      return Math.PI / 4.0;
-   }
-
-   public double getHeadRollLimit()
-   {
-      return Math.PI / 4.0;
-   }
-
-   public String getJointNameForExtendedPitchRange()
-   {
-      return ValkyrieJointMap.pelvisPitchJointName;
    }
 
    public SideDependentList<Transform3D> getHandControlFramesWithRespectToFrameAfterWrist()
