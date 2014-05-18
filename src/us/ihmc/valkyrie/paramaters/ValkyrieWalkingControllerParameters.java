@@ -122,19 +122,9 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       return new String[] { ValkyrieJointMap.upperNeckPitchJointName,ValkyrieJointMap.pelvisYawJointName,ValkyrieJointMap.lowerNeckPitchJointName };
    }
 
-   public String[] getAllowableHeadOrientationControlJointNames()
-   {
-      return new String[] { ValkyrieJointMap.lowerNeckPitchJointName, ValkyrieJointMap.neckYawJointName, ValkyrieJointMap.upperNeckPitchJointName };
-   }
-
    public String[] getDefaultChestOrientationControlJointNames()
    {
       return new String[] { ValkyrieJointMap.pelvisName };
-   }
-
-   public String[] getAllowableChestOrientationControlJointNames()
-   {
-      return new String[] { ValkyrieJointMap.pelvisPitchJointName };
    }
 
    public boolean checkOrbitalEnergyCondition()
