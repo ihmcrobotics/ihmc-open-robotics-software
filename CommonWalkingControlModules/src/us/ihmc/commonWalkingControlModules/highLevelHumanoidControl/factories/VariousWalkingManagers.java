@@ -55,8 +55,8 @@ public class VariousWalkingManagers
       {
          desiredHeadOrientationProvider = variousWalkingProviders.getDesiredHeadOrientationProvider();
 
-         headOrientationControlModule = setupHeadOrientationControlModule(controlDT, fullRobotModel, twistCalculator, registry,
-                 dynamicGraphicObjectsListRegistry, momentumBasedController, desiredHeadOrientationProvider, walkingControllerParameters);
+         headOrientationControlModule = setupHeadOrientationControlModule(momentumBasedController, desiredHeadOrientationProvider, walkingControllerParameters,
+               dynamicGraphicObjectsListRegistry, registry);
 
          headOrientationManager = new HeadOrientationManager(momentumBasedController, headOrientationControlModule, desiredHeadOrientationProvider,
                  walkingControllerParameters.getTrajectoryTimeHeadOrientation(), registry);
@@ -102,36 +102,20 @@ public class VariousWalkingManagers
    }
 
 
-   private static HeadOrientationControlModule setupHeadOrientationControlModule(double controlDT, FullRobotModel fullRobotModel,
-           TwistCalculator twistCalculator, YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
-           MomentumBasedController momentumBasedController, DesiredHeadOrientationProvider desiredHeadOrientationProvider,
-           HeadOrientationControllerParameters headOrientationControllerParameters)
+   private static HeadOrientationControlModule setupHeadOrientationControlModule(MomentumBasedController momentumBasedController,
+           DesiredHeadOrientationProvider desiredHeadOrientationProvider, HeadOrientationControllerParameters headOrientationControllerParameters,
+           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry registry)
    {
       CommonWalkingReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
-
-      RigidBody head = fullRobotModel.getHead();
-      RigidBody pelvis = fullRobotModel.getPelvis();
-      RigidBody elevator = fullRobotModel.getElevator();
-
-      ReferenceFrame chestFrame;
-
-      if (fullRobotModel.getChest() == null)
-      {
-         chestFrame = fullRobotModel.getPelvis().getBodyFixedFrame();
-      }
-      else
-      {
-         chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
-      }
 
       ReferenceFrame headOrientationExpressedInFrame;
       if (desiredHeadOrientationProvider != null)
          headOrientationExpressedInFrame = desiredHeadOrientationProvider.getHeadOrientationExpressedInFrame();
       else
-         headOrientationExpressedInFrame = referenceFrames.getPelvisZUpFrame();    // ReferenceFrame.getWorldFrame(); //
-      HeadOrientationControlModule headOrientationControlModule = new HeadOrientationControlModule(controlDT, pelvis, elevator, head, twistCalculator,
-                                                                     headOrientationExpressedInFrame, chestFrame, headOrientationControllerParameters,
-                                                                     registry, dynamicGraphicObjectsListRegistry);
+         headOrientationExpressedInFrame = referenceFrames.getPelvisZUpFrame(); // ReferenceFrame.getWorldFrame(); //
+
+      HeadOrientationControlModule headOrientationControlModule = new HeadOrientationControlModule(momentumBasedController,
+            headOrientationExpressedInFrame, headOrientationControllerParameters, registry, dynamicGraphicObjectsListRegistry);
 
       // Setting initial head pitch
       // This magic number (0.67) is a good default head pitch for getting good LIDAR point coverage of ground by feet

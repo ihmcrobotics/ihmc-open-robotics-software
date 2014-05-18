@@ -1,6 +1,19 @@
 package us.ihmc.commonWalkingControlModules.controlModules.head;
 
 
+import us.ihmc.commonWalkingControlModules.configurations.HeadOrientationControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.DegenerateOrientationControlModule;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
+import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.OriginAndPointFrame;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.GeometricJacobian;
+import us.ihmc.utilities.screwTheory.RigidBody;
+
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -9,13 +22,6 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameQuaternion;
-import us.ihmc.commonWalkingControlModules.configurations.HeadOrientationControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.DegenerateOrientationControlModule;
-import us.ihmc.utilities.math.MathTools;
-import us.ihmc.utilities.math.geometry.*;
-import us.ihmc.utilities.screwTheory.GeometricJacobian;
-import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 public class HeadOrientationControlModule extends DegenerateOrientationControlModule
 {
@@ -37,18 +43,19 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
    private final DoubleYoVariable rollLimit = new DoubleYoVariable("rollLimit", registry);
    
    private final RigidBody head;
-   
-   public HeadOrientationControlModule(double controlDT, RigidBody pelvis, RigidBody elevator, RigidBody head, TwistCalculator twistCalculator,
-         ReferenceFrame headOrientationExpressedInFrame, ReferenceFrame chestFrame, HeadOrientationControllerParameters headOrientationControllerParameters,
-         YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
-   {
-      super("head", new RigidBody[] {}, head, new GeometricJacobian[]{}, twistCalculator, controlDT, parentRegistry);
 
-      this.head = head;
+   public HeadOrientationControlModule(MomentumBasedController momentumBasedController, ReferenceFrame headOrientationExpressedInFrame,
+         HeadOrientationControllerParameters headOrientationControllerParameters, YoVariableRegistry parentRegistry,
+         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   {
+      super("head", new RigidBody[] {}, momentumBasedController.getFullRobotModel().getHead(), new GeometricJacobian[]{}, momentumBasedController, parentRegistry);
+
+      FullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
+      this.head = fullRobotModel.getHead();
       
       pointTrackingFrame = new OriginAndPointFrame("headPointTrackingFrame", worldFrame);
 
-      this.chestFrame = chestFrame;
+      this.chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
       this.headFrame = head.getBodyFixedFrame();
       this.headOrientationExpressedInFrame = headOrientationExpressedInFrame;
       orientationToTrack = new YoFrameQuaternion("headOrientationToTrack", headOrientationExpressedInFrame, registry);

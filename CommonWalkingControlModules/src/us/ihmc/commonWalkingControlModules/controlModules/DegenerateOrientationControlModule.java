@@ -7,6 +7,7 @@ import javax.vecmath.Vector3d;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -42,9 +43,16 @@ public abstract class DegenerateOrientationControlModule
    private final TwistCalculator twistCalculator;
    
    private final double controlDT;
-   
+
    public DegenerateOrientationControlModule(String namePrefix, RigidBody[] defaultBases, RigidBody endEffector, GeometricJacobian[] defaultJacobians,
-           TwistCalculator twistCalculator, double controlDT, YoVariableRegistry parentRegistry)
+         MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
+   {
+      this(namePrefix, defaultBases, endEffector, defaultJacobians, momentumBasedController.getTwistCalculator(), momentumBasedController.getControlDT(),
+            parentRegistry);
+   }
+
+   public DegenerateOrientationControlModule(String namePrefix, RigidBody[] defaultBases, RigidBody endEffector, GeometricJacobian[] defaultJacobians,
+         TwistCalculator twistCalculator, double controlDT, YoVariableRegistry parentRegistry)
    {
       this.namePrefix = namePrefix;
       this.endEffector = endEffector;
