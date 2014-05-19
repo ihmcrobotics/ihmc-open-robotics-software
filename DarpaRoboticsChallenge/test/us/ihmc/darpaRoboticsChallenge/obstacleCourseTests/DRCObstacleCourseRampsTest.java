@@ -114,7 +114,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
 
       Vector3d minLocationCorruption = new Vector3d(0.0, 0.0, 0.0);
       Vector3d maxLocationCorruption = new Vector3d(0.0, 0.0, 0.05);
-      double maxRotationCorruption = Math.PI/8.0;
+      double maxRotationCorruption = getMaxRotationCorruption();
       FootstepDataListCorruptor footstepDataListCorruptor = new FootstepDataListCorruptor(minLocationCorruption, maxLocationCorruption, maxRotationCorruption);
 
       doUpRampTest(footstepDataListCorruptor, StepLength.SHORT);
@@ -129,7 +129,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
 
       Vector3d minLocationCorruption = new Vector3d(0.0, 0.0, -0.06);
       Vector3d maxLocationCorruption = new Vector3d(0.0, 0.0, 0.0);
-      double maxRotationCorruption = Math.PI/8.0;
+      double maxRotationCorruption = getMaxRotationCorruption();
       FootstepDataListCorruptor footstepDataListCorruptor = new FootstepDataListCorruptor(minLocationCorruption, maxLocationCorruption, maxRotationCorruption);
 
       doUpRampTest(footstepDataListCorruptor, StepLength.SHORT);
@@ -341,5 +341,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       
       return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
    }
+   
+   protected abstract double getMaxRotationCorruption();
 
 }
