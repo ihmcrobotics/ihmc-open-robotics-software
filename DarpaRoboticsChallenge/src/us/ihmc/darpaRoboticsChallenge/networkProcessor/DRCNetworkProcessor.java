@@ -41,6 +41,7 @@ public class DRCNetworkProcessor
    private final AtomicSettableTimestampProvider timestampProvider = new AtomicSettableTimestampProvider();
    private final DRCNetworkProcessorNetworkingManager networkingManager;
    private final RobotPoseBuffer robotPoseBuffer;
+   private final DRCRobotSensorInformation sensorInformation;
 
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
 
@@ -78,7 +79,7 @@ public class DRCNetworkProcessor
          {
             rosNativeNetworkProcessor = null;
          }
-         GazeboCameraReceiver cameraReceiver = new GazeboCameraReceiver(robotPoseBuffer, videoSettings, rosMainNode, networkingManager,ppsTimestampOffsetProvider);
+         GazeboCameraReceiver cameraReceiver = new GazeboCameraReceiver(sensorInformation, robotPoseBuffer, videoSettings, rosMainNode, networkingManager,ppsTimestampOffsetProvider);
 //         CameraInfoReceiver cameraInfoServer = new MultiSenseCameraInfoReciever(rosMainNode, networkingManager.getControllerStateHandler());
 //         networkingManager.getControllerCommandHandler().setIntrinsicServer(cameraInfoServer);
          
@@ -164,7 +165,7 @@ public class DRCNetworkProcessor
             networkingManager.getControllerStateHandler().sendHandJointAnglePacket(object); }
       });
       
-      DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
+      sensorInformation = robotModel.getSensorInformation();
       ppsTimestampOffsetProvider = robotModel.getPPSTimestampOffsetProvider();
       videoSettings = sensorInformation.getPrimaryCameraParamaters().getVideoSettings();
    }
