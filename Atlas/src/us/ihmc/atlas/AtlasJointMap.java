@@ -18,22 +18,18 @@ import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_hpy;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_hpz;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_kny;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
 import javax.media.j3d.Transform3D;
-import javax.vecmath.Point2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.atlas.parameters.AtlasContactPointParamaters;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.atlas.ros.AtlasOrderedJointMap;
-import us.ihmc.darpaRoboticsChallenge.IncorrectDrcRobotModelException;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.Pair;

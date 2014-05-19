@@ -9,6 +9,7 @@ import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.configuration.DRCNetClassList;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCSensorParameters;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandJointAnglePacket;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.CameraInfoReceiver;
@@ -21,13 +22,10 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.RobotBoundingBoxes;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.SCSLidarDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosNativeNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.RobotPoseBuffer;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.AlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.RealRobotPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
 import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.DRCJointConfigurationData;
 import us.ihmc.graphics3DAdapter.camera.VideoSettings;
-import us.ihmc.graphics3DAdapter.camera.VideoSettingsFactory;
 import us.ihmc.utilities.net.AtomicSettableTimestampProvider;
 import us.ihmc.utilities.net.KryoObjectClient;
 import us.ihmc.utilities.net.LocalObjectCommunicator;
@@ -47,12 +45,9 @@ public class DRCNetworkProcessor
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
 
    private final SDFFullRobotModel fullRobotModel;
-//   private final DRCRobotJointMap jointMap;
    private final RobotBoundingBoxes robotBoundingBoxes;
 
    private static String scsMachineIPAddress = DRCLocalConfigParameters.ROBOT_CONTROLLER_IP_ADDRESS;
-   private static String rosMasterURI = DRCConfigParameters.ROS_MASTER_URI;
-
    /*
     * This will become a stand-alone application in the final competition. Do
     * NOT pass in objects shared with the DRC simulation!
@@ -84,13 +79,13 @@ public class DRCNetworkProcessor
             rosNativeNetworkProcessor = null;
          }
          GazeboCameraReceiver cameraReceiver = new GazeboCameraReceiver(robotPoseBuffer, videoSettings, rosMainNode, networkingManager,ppsTimestampOffsetProvider);
-         CameraInfoReceiver cameraInfoServer = new MultiSenseCameraInfoReciever(rosMainNode, networkingManager.getControllerStateHandler());
-         networkingManager.getControllerCommandHandler().setIntrinsicServer(cameraInfoServer);
+//         CameraInfoReceiver cameraInfoServer = new MultiSenseCameraInfoReciever(rosMainNode, networkingManager.getControllerStateHandler());
+//         networkingManager.getControllerCommandHandler().setIntrinsicServer(cameraInfoServer);
          
          new GazeboLidarDataReceiver(rosMainNode, robotPoseBuffer, networkingManager, fullRobotModel, robotBoundingBoxes,
                robotModel.getSensorInformation(), fieldComputerClient, rosNativeNetworkProcessor, ppsTimestampOffsetProvider);
          
-         new FishEyeDataReceiver(robotPoseBuffer, videoSettings, rosMainNode, networkingManager, DRCSensorParameters.DEFAULT_FIELD_OF_VIEW, ppsTimestampOffsetProvider);
+//         new FishEyeDataReceiver(robotPoseBuffer, videoSettings, rosMainNode, networkingManager, DRCSensorParameters.DEFAULT_FIELD_OF_VIEW, ppsTimestampOffsetProvider);
          
          ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
          
@@ -169,18 +164,9 @@ public class DRCNetworkProcessor
             networkingManager.getControllerStateHandler().sendHandJointAnglePacket(object); }
       });
       
-      
-
-      if (DRCLocalConfigParameters.USING_REAL_HEAD)
-      {
-         ppsTimestampOffsetProvider = new RealRobotPPSTimestampOffsetProvider();
-         videoSettings = VideoSettingsFactory.get32kBitSettingsWide();
-      }
-      else
-      {
-         ppsTimestampOffsetProvider = new AlwaysZeroOffsetPPSTimestampOffsetProvider();
-         videoSettings = VideoSettingsFactory.get32kBitSettingsSquare();
-      }
+      DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
+      ppsTimestampOffsetProvider = robotModel.getPPSTimestampOffsetProvider();
+      videoSettings = sensorInformation.getPrimaryCameraParamaters().getVideoSettings();
    }
 
    private void connect()

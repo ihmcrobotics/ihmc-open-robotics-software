@@ -12,7 +12,7 @@ import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosMultisensePPSSubscriber;
 
-public class RealRobotPPSTimestampOffsetProvider implements PPSTimestampOffsetProvider
+public class AtlasPPSTimestampOffsetProvider implements PPSTimestampOffsetProvider
 {
    private static final String MULTISENSE_SL_PPS_TOPIC = "/multisense_sl/pps";
    private RosMultisensePPSSubscriber ppsSubscriber;
@@ -24,7 +24,7 @@ public class RealRobotPPSTimestampOffsetProvider implements PPSTimestampOffsetPr
    
    private final AtomicBoolean offsetIsDetermined = new AtomicBoolean(false);
 
-   public RealRobotPPSTimestampOffsetProvider()
+   public AtlasPPSTimestampOffsetProvider()
    {
       setupZMQSocket();
 
