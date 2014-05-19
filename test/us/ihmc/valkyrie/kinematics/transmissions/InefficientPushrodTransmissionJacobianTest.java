@@ -2,6 +2,7 @@ package us.ihmc.valkyrie.kinematics.transmissions;
 
 import static org.junit.Assert.assertEquals;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.utilities.ThreadTools;
@@ -17,7 +18,7 @@ public class InefficientPushrodTransmissionJacobianTest
    private final boolean visualizeAndKeepUp = false;
 
    @Test
-   public void testInefficientButReadablePushrodTransmission()
+   public void testInefficientButReadablePushrodTransmissionForAnkles()
    {
       Robot robot = new Robot("testPushrodTransmission");
 
@@ -114,6 +115,107 @@ public class InefficientPushrodTransmissionJacobianTest
       }
 
    }
+   
+   @Ignore
+   @Test
+   public void testInefficientButReadablePushrodTransmissionForWaist()
+   {
+      Robot robot = new Robot("testPushrodTransmission");
+
+      YoVariableRegistry registry = robot.getRobotsYoVariableRegistry();
+      DoubleYoVariable pitch = new DoubleYoVariable("pitch", registry);
+      DoubleYoVariable roll = new DoubleYoVariable("roll", registry);
+
+      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
+      if (visualizeAndKeepUp)
+      {
+         dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+      }
+      else
+      {
+         dynamicGraphicObjectsListRegistry = null;
+      }
+
+      PushRodTransmissionJoint pushRodTransmissionJoint = PushRodTransmissionJoint.WAIST;
+      InefficientPushrodTransmissionJacobian inefficientPushrodTransmissionJacobian = new InefficientPushrodTransmissionJacobian(pushRodTransmissionJoint, registry,
+            dynamicGraphicObjectsListRegistry);
+
+      SimulationConstructionSet scs;
+      if (visualizeAndKeepUp)
+      {
+         scs = new SimulationConstructionSet(robot);
+         dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
+         scs.setCameraPosition(0.62, -0.4, 1.26);
+         scs.setCameraFix(0.0, 0.0, 1.02);
+
+         scs.startOnAThread();
+      }
+      else
+      {
+         scs = null;
+      }
+
+      double[][] jacobian = new double[2][2];
+
+      if (visualizeAndKeepUp)
+      {
+         double increment = 0.1;
+         for (pitch.set(-Math.PI / 3.0); pitch.getDoubleValue() < Math.PI / 3.0; pitch.add(increment))
+         {
+            for (roll.set(-Math.PI / 3.0); roll.getDoubleValue() < Math.PI / 3.0; roll.add(increment))
+            {
+               computeAndPrint(inefficientPushrodTransmissionJacobian, pitch, roll, jacobian, scs);
+            }
+         }
+      }
+
+//      pitch.set(0.0);
+//      roll.set(0.0);
+//      computeAndPrint(inefficientPushrodTransmissionJacobian, pitch, roll, jacobian, scs);
+//      assertJacobianEquals(jacobian, -0.0366712094326246, -0.0366712094326246, 0.034118686505983736, -0.034118686505983736);
+//
+//      pitch.set(0.2);
+//      roll.set(0.1);
+//      computeAndPrint(inefficientPushrodTransmissionJacobian, pitch, roll, jacobian, scs);
+//      assertJacobianEquals(jacobian, -0.036202355875729446, -0.035509962933305175, 0.03640538461195576, -0.03181607828356141);
+//
+//      pitch.set(-0.2);
+//      roll.set(0.1);
+//      computeAndPrint(inefficientPushrodTransmissionJacobian, pitch, roll, jacobian, scs);
+//      assertJacobianEquals(jacobian, -0.034740329545336665, -0.03695254741929382, 0.03440182578269918, -0.02988230913579041);
+//
+//      pitch.set(0.2);
+//      roll.set(-0.1);
+//      computeAndPrint(inefficientPushrodTransmissionJacobian, pitch, roll, jacobian, scs);
+//      assertJacobianEquals(jacobian, -0.035509962933305175, -0.036202355875729446, 0.03181607828356141, -0.03640538461195576);
+//
+//      pitch.set(0.35);
+//      roll.set(0.0);
+//      computeAndPrint(inefficientPushrodTransmissionJacobian, pitch, roll, jacobian, scs);
+//      assertJacobianEquals(jacobian, -0.03406729338743576, -0.03406729338743576, 0.03341354644555879, -0.03341354644555879);
+//
+//      pitch.set(-0.35);
+//      roll.set(0.0);
+//      computeAndPrint(inefficientPushrodTransmissionJacobian, pitch, roll, jacobian, scs);
+//      assertJacobianEquals(jacobian, -0.03440991379530292, -0.03440991379530292, 0.030355910924449715, -0.030355910924449715);
+//
+//      pitch.set(0.0);
+//      roll.set(0.25);
+//      computeAndPrint(inefficientPushrodTransmissionJacobian, pitch, roll, jacobian, scs);
+//      assertJacobianEquals(jacobian, -0.03539813540952868, -0.037679153131957736, 0.038150540900731125, -0.02679783281436968);
+
+      if (visualizeAndKeepUp)
+      {
+         scs.gotoInPointNow();
+         scs.setIndex(1);
+         scs.setInPoint();
+         scs.cropBuffer();
+
+         ThreadTools.sleepForever();
+      }
+
+   }
+
 
 
    private void assertJacobianEquals(double[][] jacobian, double j00, double j01, double j10, double j11)

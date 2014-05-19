@@ -9,14 +9,22 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.utilities.RandomTools;
+import us.ihmc.utilities.ThreadTools;
 import us.ihmc.valkyrie.kinematics.ValkyrieJoint;
 import us.ihmc.valkyrie.roboNet.DummyTurboDriver;
 import us.ihmc.valkyrie.roboNet.TurboDriver;
 
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.Robot;
+import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+
 public class ComparePushRodTransmissionsTest
 {
    private static final boolean DEBUG = false;
-
+   private static final boolean VISUALIZE = false;
+   
    @Test
    public void testCompareInefficientToEfficientAnkle()
    {
@@ -26,12 +34,16 @@ public class ComparePushRodTransmissionsTest
       double reflect = 1.0;
       PushRodTransmissionJoint pushRodTransmissionJoint = PushRodTransmissionJoint.ANKLE;
       
-      InefficientPushRodTransmission inefficientPushrodTransmission = new InefficientPushRodTransmission(pushRodTransmissionJoint, reflect, null, null);
+      YoVariableRegistry registry = new YoVariableRegistry("test");
+      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+      
+      InefficientPushRodTransmission inefficientPushrodTransmission = new InefficientPushRodTransmission(pushRodTransmissionJoint, reflect, registry, dynamicGraphicObjectsListRegistry);
       EfficientPushRodTransmission efficientPushrodTransmission = new EfficientPushRodTransmission(pushRodTransmissionJoint, reflect);
 
-      compareTwoPushRodTransmissionInterfaces(random, epsilon, inefficientPushrodTransmission, efficientPushrodTransmission);
+      compareTwoPushRodTransmissionInterfaces(random, epsilon, inefficientPushrodTransmission, efficientPushrodTransmission, registry, dynamicGraphicObjectsListRegistry);
    }
    
+   @Ignore
    @Test
    public void testCompareInefficientToEfficientWaist()
    {
@@ -41,17 +53,20 @@ public class ComparePushRodTransmissionsTest
       double reflect = 1.0;
       PushRodTransmissionJoint pushRodTransmissionJoint = PushRodTransmissionJoint.WAIST;
       
-      InefficientPushRodTransmission inefficientPushrodTransmission = new InefficientPushRodTransmission(pushRodTransmissionJoint, reflect, null, null);
+      YoVariableRegistry registry = new YoVariableRegistry("test");
+      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+
+      InefficientPushRodTransmission inefficientPushrodTransmission = new InefficientPushRodTransmission(pushRodTransmissionJoint, reflect, registry, dynamicGraphicObjectsListRegistry);
       EfficientPushRodTransmission efficientPushrodTransmission = new EfficientPushRodTransmission(pushRodTransmissionJoint, reflect);
 
-      compareTwoPushRodTransmissionInterfaces(random, epsilon, inefficientPushrodTransmission, efficientPushrodTransmission);
+      compareTwoPushRodTransmissionInterfaces(random, epsilon, inefficientPushrodTransmission, efficientPushrodTransmission, registry, dynamicGraphicObjectsListRegistry);
    }
    
    // Seems that the interpolated should be same as the pushrod when use futeks is false. Should try to get this to work
    // Or figure out if the interpolated is just plain wrong.
    @Ignore 
    @Test
-   public void testCompareInefficientToInterpolated()
+   public void testCompareInefficientToInterpolatedAnkles()
    {
       Random random = new Random(1255L);
 
@@ -60,19 +75,76 @@ public class ComparePushRodTransmissionsTest
       double reflect = 1.0;
       PushRodTransmissionJoint pushRodTransmissionJoint = PushRodTransmissionJoint.ANKLE;
 
+      YoVariableRegistry registry = new YoVariableRegistry("test");
+      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+
       InterpolatedPushRodTransmission interpolatedPushRodTransmission = new InterpolatedPushRodTransmission(ankleNamespace, reflect, compliance);
-      InefficientPushRodTransmission inefficientPushrodTransmission = new InefficientPushRodTransmission(pushRodTransmissionJoint, reflect, null, null);
+      InefficientPushRodTransmission inefficientPushrodTransmission = new InefficientPushRodTransmission(pushRodTransmissionJoint, reflect, registry, dynamicGraphicObjectsListRegistry);
       inefficientPushrodTransmission.setUseFuteks(false);
 
       double epsilon = 1e-7;
 
-      compareTwoPushRodTransmissionInterfaces(random, epsilon, inefficientPushrodTransmission, interpolatedPushRodTransmission);
+      compareTwoPushRodTransmissionInterfaces(random, epsilon, inefficientPushrodTransmission, interpolatedPushRodTransmission, registry, dynamicGraphicObjectsListRegistry);
+   }
+   
+   @Ignore
+   @Test
+   public void testCompareInefficientToInterpolatedWaist()
+   {
+      Random random = new Random(1255L);
+
+      String ankleNamespace = "v1_waist";
+      double compliance = 0.0;
+      double reflect = 1.0;
+      PushRodTransmissionJoint pushRodTransmissionJoint = PushRodTransmissionJoint.WAIST;
+
+      YoVariableRegistry registry = new YoVariableRegistry("test");
+      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+
+      InefficientPushRodTransmission inefficientPushrodTransmission = new InefficientPushRodTransmission(pushRodTransmissionJoint, reflect, registry, dynamicGraphicObjectsListRegistry);
+      reflect = -reflect;
+      InterpolatedPushRodTransmission interpolatedPushRodTransmission = new InterpolatedPushRodTransmission(ankleNamespace, reflect, compliance);
+      inefficientPushrodTransmission.setUseFuteks(false);
+
+      double epsilon = 1e-7;
+
+      compareTwoPushRodTransmissionInterfaces(random, epsilon, inefficientPushrodTransmission, interpolatedPushRodTransmission, registry, dynamicGraphicObjectsListRegistry);
    }
 
-
-   private void compareTwoPushRodTransmissionInterfaces(Random random, double epsilon, PushRodTransmissionInterface inefficientPushrodTransmission,
-           PushRodTransmissionInterface efficientPushrodTransmission)
+   
+   private void compareTwoPushRodTransmissionInterfaces(Random random, double epsilon, PushRodTransmissionInterface pushrodTransmissionA,
+           PushRodTransmissionInterface pushrodTransmissionB, YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
+      Robot robot = new Robot("comparePushrodTransmission");
+      robot.getRobotsYoVariableRegistry().addChild(registry);
+
+      DoubleYoVariable topJointAngle = new DoubleYoVariable("topJointAngle", registry);
+      DoubleYoVariable bottomJointAngle = new DoubleYoVariable("bottomJointAngle", registry);
+      
+      DoubleYoVariable force0 = new DoubleYoVariable("force0", registry);
+      DoubleYoVariable force1 = new DoubleYoVariable("force1", registry);
+      
+      DoubleYoVariable topJointTorqueA = new DoubleYoVariable("topJointTorqueA", registry);
+      DoubleYoVariable bottomJointTorqueA = new DoubleYoVariable("bottomJointTorqueA", registry);
+      DoubleYoVariable topJointTorqueB = new DoubleYoVariable("topJointTorqueB", registry);
+      DoubleYoVariable bottomJointTorqueB = new DoubleYoVariable("bottomJointTorqueB", registry);
+      
+      SimulationConstructionSet scs;
+      if (VISUALIZE)
+      {
+         scs = new SimulationConstructionSet(robot);
+         dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
+         scs.setCameraPosition(0.62, -0.4, 1.26);
+         scs.setCameraFix(0.0, 0.0, 1.02);
+
+         scs.startOnAThread();
+      }
+      else
+      {
+         scs = null;
+      }
+      
+      
       TurboDriver[] actuatorData = new DummyTurboDriver[2];
       actuatorData[0] = new DummyTurboDriver();
       actuatorData[1] = new DummyTurboDriver();
@@ -92,41 +164,49 @@ public class ComparePushRodTransmissionsTest
             jointData[0].setPosition(pitch);
             jointData[1].setPosition(roll);
 
+            topJointAngle.set(pitch);
+            bottomJointAngle.set(roll);
+            
             // Check the actuatorToJointEffort
 
-            double force0 = RandomTools.generateRandomDouble(random, -100.0, 100.0);
-            double force1 = RandomTools.generateRandomDouble(random, -100.0, 100.0);
+            force0.set(RandomTools.generateRandomDouble(random, -100.0, 100.0));
+            force1.set(RandomTools.generateRandomDouble(random, -100.0, 100.0));
 
-            actuatorData[0].setEffortCommand(force0);
-            actuatorData[1].setEffortCommand(force1);
-
-            jointData[0].setEffort(Double.NaN);
-            jointData[1].setEffort(Double.NaN);
-
-            inefficientPushrodTransmission.jointToActuatorPosition(actuatorData, jointData);
-            inefficientPushrodTransmission.actuatorToJointEffort(actuatorData, jointData);
-
-            double inefficientPitchTorque = jointData[0].getEffort();
-            double inefficientRollTorque = jointData[1].getEffort();
+            actuatorData[0].setEffortCommand(force0.getDoubleValue());
+            actuatorData[1].setEffortCommand(force1.getDoubleValue());
 
             jointData[0].setEffort(Double.NaN);
             jointData[1].setEffort(Double.NaN);
 
-            efficientPushrodTransmission.jointToActuatorPosition(actuatorData, jointData);
-            efficientPushrodTransmission.actuatorToJointEffort(actuatorData, jointData);
+            pushrodTransmissionA.jointToActuatorPosition(actuatorData, jointData);
+            pushrodTransmissionA.actuatorToJointEffort(actuatorData, jointData);
 
-            double efficientPitchTorque = jointData[0].getEffort();
-            double efficientRollTorque = jointData[1].getEffort();
+            topJointTorqueA.set(jointData[0].getEffort());
+            bottomJointTorqueA.set(jointData[1].getEffort());
 
-            printIfDebug("f0 = " + force0 + ", f1 = " + force1 + ", ineffPitchTau = " + inefficientPitchTorque + ", ineffRollTau = " + inefficientRollTorque
-                         + ", effPitchTau = " + efficientPitchTorque + ", effRollTau = " + efficientRollTorque);
+            jointData[0].setEffort(Double.NaN);
+            jointData[1].setEffort(Double.NaN);
 
-            assertFalse(Double.isNaN(inefficientPitchTorque));
-            assertFalse(Double.isNaN(inefficientRollTorque));
+            pushrodTransmissionB.jointToActuatorPosition(actuatorData, jointData);
+            pushrodTransmissionB.actuatorToJointEffort(actuatorData, jointData);
 
-            assertEquals(inefficientPitchTorque, efficientPitchTorque, epsilon);
-            assertEquals(inefficientRollTorque, efficientRollTorque, epsilon);
+            topJointTorqueB.set(jointData[0].getEffort());
+            bottomJointTorqueB.set(jointData[1].getEffort());
 
+            printIfDebug("f0 = " + force0 + ", f1 = " + force1 + ", topJointTorqueA = " + topJointTorqueA.getDoubleValue ()+ ", bottomJointTorqueA = " + bottomJointTorqueA.getDoubleValue()
+                         + ", topJointTorqueB = " + topJointTorqueB.getDoubleValue() + ", effRollTau = " + bottomJointTorqueB.getDoubleValue());
+
+            assertFalse(Double.isNaN(topJointTorqueA.getDoubleValue()));
+            assertFalse(Double.isNaN(bottomJointTorqueA.getDoubleValue()));
+
+            assertEquals(topJointTorqueA.getDoubleValue(), topJointTorqueB.getDoubleValue(), epsilon);
+            assertEquals(bottomJointTorqueA.getDoubleValue(), bottomJointTorqueB.getDoubleValue(), epsilon);
+
+            if (VISUALIZE)
+            {
+               scs.tickAndUpdate();
+            }
+            
             // Check the jointToActuatorEffort
             double pitchTorque = RandomTools.generateRandomDouble(random, -40.0, 40.0);
             double rollTorque = RandomTools.generateRandomDouble(random, -40.0, 40.0);
@@ -137,30 +217,40 @@ public class ComparePushRodTransmissionsTest
             actuatorData[0].setEffortCommand(Double.NaN);
             actuatorData[1].setEffortCommand(Double.NaN);
 
-            inefficientPushrodTransmission.jointToActuatorEffort(actuatorData, jointData);
+            pushrodTransmissionA.jointToActuatorEffort(actuatorData, jointData);
 
-            double inefficientActuatorForce0 = actuatorData[0].getEffort();
-            double inefficientActuatorForce1 = actuatorData[1].getEffort();
+            double actuatorForceA0 = actuatorData[0].getEffort();
+            double actuatorForceA1 = actuatorData[1].getEffort();
 
             actuatorData[0].setEffortCommand(Double.NaN);
             actuatorData[1].setEffortCommand(Double.NaN);
 
-            efficientPushrodTransmission.jointToActuatorEffort(actuatorData, jointData);
+            pushrodTransmissionB.jointToActuatorEffort(actuatorData, jointData);
 
-            double efficientActuatorForce0 = actuatorData[0].getEffort();
-            double efficientActuatorForce1 = actuatorData[1].getEffort();
+            double actuatorForceB0 = actuatorData[0].getEffort();
+            double actuatorForceB1 = actuatorData[1].getEffort();
 
-            printIfDebug("pitchTorque = " + pitchTorque + ", rollTorque = " + rollTorque + ", inefficientActuatorForce0 = " + inefficientActuatorForce0
-                         + ", inefficientActuatorForce1 = " + inefficientActuatorForce1 + ", efficientActuatorForce0 = " + efficientActuatorForce0
-                         + ", efficientActuatorForce1 = " + efficientActuatorForce1);
+            printIfDebug("pitchTorque = " + pitchTorque + ", rollTorque = " + rollTorque + ", actuatorForceA0 = " + actuatorForceA0
+                         + ", actuatorForceA1 = " + actuatorForceA1 + ", actuatorForceB0 = " + actuatorForceB0
+                         + ", actuatorForceB1 = " + actuatorForceB1);
             printIfDebug("");
 
-            assertFalse(Double.isNaN(inefficientActuatorForce0));
-            assertFalse(Double.isNaN(inefficientActuatorForce1));
+            assertFalse(Double.isNaN(actuatorForceA0));
+            assertFalse(Double.isNaN(actuatorForceA1));
 
-            assertEquals(inefficientActuatorForce0, efficientActuatorForce0, epsilon);
-            assertEquals(inefficientActuatorForce1, efficientActuatorForce1, epsilon);
+            assertEquals(actuatorForceA0, actuatorForceB0, epsilon);
+            assertEquals(actuatorForceA1, actuatorForceB1, epsilon);
          }
+      }
+      
+      if (VISUALIZE)
+      {
+         scs.gotoInPointNow();
+         scs.setIndex(1);
+         scs.setInPoint();
+         scs.cropBuffer();
+
+         ThreadTools.sleepForever();
       }
    }
 

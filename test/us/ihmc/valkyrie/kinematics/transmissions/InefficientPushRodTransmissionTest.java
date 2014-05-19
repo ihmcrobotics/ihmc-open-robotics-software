@@ -13,7 +13,7 @@ import us.ihmc.valkyrie.roboNet.TurboDriver;
 
 public class InefficientPushRodTransmissionTest
 {
-   private static final boolean DEBUG = true;
+   private static final boolean DEBUG = false;
 
    @Test
    public void testForwardBackward()
