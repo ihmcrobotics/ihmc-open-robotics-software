@@ -7,6 +7,8 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParamaters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
+import us.ihmc.graphics3DAdapter.camera.VideoSettingsFactory;
+import us.ihmc.graphics3DAdapter.camera.VideoSettingsH264LowLatency;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
@@ -113,9 +115,10 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    
    public ValkyrieSensorInformation()
    {
-      cameraParamaters[0] = new DRCRobotCameraParamaters(forheadCameraName,forheadCameraTopic,forheadCameraId);
-      cameraParamaters[1] = new DRCRobotCameraParamaters(leftStereoCameraName,leftCameraTopic,leftHazardCameraId);
-      cameraParamaters[2] = new DRCRobotCameraParamaters(rightStereoCameraName,rightCameraTopic,rightHazardCameraId);
+      VideoSettingsH264LowLatency videoSetting = VideoSettingsFactory.get32kBitSettingsSquare();
+      cameraParamaters[0] = new DRCRobotCameraParamaters(forheadCameraName,forheadCameraTopic,videoSetting,forheadCameraId);
+      cameraParamaters[1] = new DRCRobotCameraParamaters(leftStereoCameraName,leftCameraTopic,videoSetting,leftHazardCameraId);
+      cameraParamaters[2] = new DRCRobotCameraParamaters(rightStereoCameraName,rightCameraTopic,videoSetting,rightHazardCameraId);
    }
    
    public String getUrdfFeetForceSensorName(RobotSide side)
