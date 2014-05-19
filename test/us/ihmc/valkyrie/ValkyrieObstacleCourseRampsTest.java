@@ -12,5 +12,10 @@ public class ValkyrieObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
    {
       return robotModel;
    }
+   @Override
+   protected double getMaxRotationCorruption()
+   {
+      return 0.0;
+   }
 
 }
