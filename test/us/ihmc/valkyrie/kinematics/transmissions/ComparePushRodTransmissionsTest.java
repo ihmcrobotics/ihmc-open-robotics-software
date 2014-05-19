@@ -102,7 +102,6 @@ public class ComparePushRodTransmissionsTest
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
 
       InefficientPushRodTransmission inefficientPushrodTransmission = new InefficientPushRodTransmission(pushRodTransmissionJoint, reflect, registry, dynamicGraphicObjectsListRegistry);
-      reflect = -reflect;
       InterpolatedPushRodTransmission interpolatedPushRodTransmission = new InterpolatedPushRodTransmission(ankleNamespace, reflect, compliance);
       inefficientPushrodTransmission.setUseFuteks(false);
 
@@ -121,6 +120,12 @@ public class ComparePushRodTransmissionsTest
       DoubleYoVariable topJointAngle = new DoubleYoVariable("topJointAngle", registry);
       DoubleYoVariable bottomJointAngle = new DoubleYoVariable("bottomJointAngle", registry);
       
+      DoubleYoVariable actuatorForceA0 = new DoubleYoVariable("actuatorForceA0", registry);
+      DoubleYoVariable actuatorForceA1 = new DoubleYoVariable("actuatorForceA1", registry);
+      
+      DoubleYoVariable actuatorForceB0 = new DoubleYoVariable("actuatorForceB0", registry);
+      DoubleYoVariable actuatorForceB1 = new DoubleYoVariable("actuatorForceB1", registry);
+      
       DoubleYoVariable force0 = new DoubleYoVariable("force0", registry);
       DoubleYoVariable force1 = new DoubleYoVariable("force1", registry);
       
@@ -129,6 +134,9 @@ public class ComparePushRodTransmissionsTest
       DoubleYoVariable topJointTorqueB = new DoubleYoVariable("topJointTorqueB", registry);
       DoubleYoVariable bottomJointTorqueB = new DoubleYoVariable("bottomJointTorqueB", registry);
       
+      DoubleYoVariable topJointTorque = new DoubleYoVariable("topJointTorque", registry);
+      DoubleYoVariable bottomJointTorque = new DoubleYoVariable("bottomJointTorque", registry);
+
       SimulationConstructionSet scs;
       if (VISUALIZE)
       {
@@ -206,40 +214,59 @@ public class ComparePushRodTransmissionsTest
             {
                scs.tickAndUpdate();
             }
-            
-            // Check the jointToActuatorEffort
-            double pitchTorque = RandomTools.generateRandomDouble(random, -40.0, 40.0);
-            double rollTorque = RandomTools.generateRandomDouble(random, -40.0, 40.0);
+         }
+      }
+      
+      for (double pitch = -1.0; pitch < 1.0; pitch = pitch + increment)
+      {
+         for (double roll = -0.5; roll < 0.5; roll = roll + increment)
+         {
+            printIfDebug("pitch = " + pitch + ", roll = " + roll);
 
-            jointData[0].setDesiredEffort(pitchTorque);
-            jointData[1].setDesiredEffort(rollTorque);
+            jointData[0].setPosition(pitch);
+            jointData[1].setPosition(roll);
+
+            topJointAngle.set(pitch);
+            bottomJointAngle.set(roll);
+
+            // Check the jointToActuatorEffort
+            topJointTorque.set(RandomTools.generateRandomDouble(random, -40.0, 40.0));
+            bottomJointTorque.set(RandomTools.generateRandomDouble(random, -40.0, 40.0));
+
+            jointData[0].setDesiredEffort(topJointTorque.getDoubleValue());
+            jointData[1].setDesiredEffort(bottomJointTorque.getDoubleValue());
 
             actuatorData[0].setEffortCommand(Double.NaN);
             actuatorData[1].setEffortCommand(Double.NaN);
 
             pushrodTransmissionA.jointToActuatorEffort(actuatorData, jointData);
 
-            double actuatorForceA0 = actuatorData[0].getEffort();
-            double actuatorForceA1 = actuatorData[1].getEffort();
+            actuatorForceA0.set(actuatorData[0].getEffort());
+            actuatorForceA1.set(actuatorData[1].getEffort());
 
             actuatorData[0].setEffortCommand(Double.NaN);
             actuatorData[1].setEffortCommand(Double.NaN);
 
             pushrodTransmissionB.jointToActuatorEffort(actuatorData, jointData);
 
-            double actuatorForceB0 = actuatorData[0].getEffort();
-            double actuatorForceB1 = actuatorData[1].getEffort();
+            actuatorForceB0.set(actuatorData[0].getEffort());
+            actuatorForceB1.set(actuatorData[1].getEffort());
 
-            printIfDebug("pitchTorque = " + pitchTorque + ", rollTorque = " + rollTorque + ", actuatorForceA0 = " + actuatorForceA0
+            printIfDebug("topJointTorque = " + topJointTorque.getDoubleValue() + ", bottomJointTorque = " + bottomJointTorque.getDoubleValue() + ", actuatorForceA0 = " + actuatorForceA0
                          + ", actuatorForceA1 = " + actuatorForceA1 + ", actuatorForceB0 = " + actuatorForceB0
                          + ", actuatorForceB1 = " + actuatorForceB1);
             printIfDebug("");
 
-            assertFalse(Double.isNaN(actuatorForceA0));
-            assertFalse(Double.isNaN(actuatorForceA1));
+            assertFalse(Double.isNaN(actuatorForceA0.getDoubleValue()));
+            assertFalse(Double.isNaN(actuatorForceA1.getDoubleValue()));
 
-            assertEquals(actuatorForceA0, actuatorForceB0, epsilon);
-            assertEquals(actuatorForceA1, actuatorForceB1, epsilon);
+            assertEquals(actuatorForceA0.getDoubleValue(), actuatorForceB0.getDoubleValue(), epsilon);
+            assertEquals(actuatorForceA1.getDoubleValue(), actuatorForceB1.getDoubleValue(), epsilon);
+            
+            if (VISUALIZE)
+            {
+               scs.tickAndUpdate();
+            }
          }
       }
       
