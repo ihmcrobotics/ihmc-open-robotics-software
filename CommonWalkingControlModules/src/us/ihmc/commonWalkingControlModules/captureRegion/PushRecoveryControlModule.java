@@ -216,6 +216,13 @@ public class PushRecoveryControlModule
 //         }
 
          captureRegionCalculator.calculateCaptureRegion(swingSide, swingTimeRemaining, capturePoint2d, omega0, footPolygon);
+         
+         if(swingTimeRemaining < defaultSwingTime * 0.2)
+         {
+            // do not replan if we are almost at touchdown
+            return false;
+         }
+         
          footstepWasProjectedInCaptureRegion.set(footstepAdjustor.adjustFootstep(nextFootstep, captureRegionCalculator.getCaptureRegion()));
 
          return footstepWasProjectedInCaptureRegion.getBooleanValue();

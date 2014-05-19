@@ -1225,8 +1225,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             {
                captureTime = stateMachine.timeInCurrentState();
                updateFootstepParameters();
-               double oldSwingTime = swingTimeCalculationProvider.getValue();
-               swingTimeCalculationProvider.setSwingTime(oldSwingTime - captureTime);
+               //double oldSwingTime = swingTimeCalculationProvider.getValue();
+               double distance = transferToFootstepLocation.distance(nextFootstep.getPosition2dCopy());
+               System.out.println(distance);
+               
+               swingTimeCalculationProvider.setSwingTime(distance);//oldSwingTime - captureTime);
 
                footEndEffectorControlModules.get(swingSide).replanTrajectory();
 
