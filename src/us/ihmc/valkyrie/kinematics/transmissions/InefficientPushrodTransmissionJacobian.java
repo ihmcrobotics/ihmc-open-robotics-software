@@ -209,13 +209,13 @@ public class InefficientPushrodTransmissionJacobian
       futekLength = 0.13100;
       futekLengthSquared = futekLength * futekLength;
 
-      rod5PointInBoneFrame.set(-0.005994, -0.069694, 0.088702);    
-      rod6PointInBoneFrame.set(-0.005994, 0.069694, 0.088702);     
+      rod5PointInBoneFrame.set(-0.005994, 0.069694, 0.088702);    
+      rod6PointInBoneFrame.set(-0.005994, -0.069694, 0.088702);     
       actuatorSlider5PitchRotation = (90.0 - 66.00) * DEGREES;
       actuatorSlider6PitchRotation = (90.0 - 66.00) * DEGREES;
       
-      rodBottom5.set(-0.0762, -0.0510794, 0.0);     
-      rodBottom6.set(-0.0762, 0.0510794, 0.0);         
+      rodBottom5.set(-0.0762, 0.0510794, 0.0);     
+      rodBottom6.set(-0.0762, -0.0510794, 0.0);         
    }
    
    public void setupForWristActuators()
