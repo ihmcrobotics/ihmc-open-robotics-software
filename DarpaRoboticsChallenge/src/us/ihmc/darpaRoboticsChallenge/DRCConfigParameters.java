@@ -60,13 +60,7 @@ public class DRCConfigParameters
    public static final boolean SHOW_BANDWIDTH_DIALOG = false;
 
 
-   // Video Source IDs
-   public static final int MULTISENSE_LEFT_CAMERA = 1;
-   public static final int MULTISENSE_RIGHT_CAMERA = 2;
-   public static final int FISHEYE_LEFT_CAMERA = 3;
-   public static final int FISHEYE_RIGHT_CAMERA = 4;
-   public static final int REAR_CAMERA = 5;
-   public static final int VIDEO_FRAME = 6;
+   
 
    // Networking
    public static final String CONSTELLATION_SIMULATOR_COMPUTER_VPN_IP = "10.0.0.51";
@@ -83,42 +77,7 @@ public class DRCConfigParameters
    public static final int CONTROLLER_CLOUD_DISPATCHER_BACKEND_TCP_PORT = 5002;
    public static final int PPS_PROVIDER_PORT = 5050;
 
-
-   public static final String MULTISENSE_CAMERA_STRING_BASE;
-
-   // ROS Topics
-   public static final String FISHEYE_RIGHT_CAMERA_TOPIC;
-   public static final String FISHEYE_LEFT_CAMERA_TOPIC;
-   public static final String MULTISENSE_LEFT_CAMERA_TOPIC;
-   public static final String MULTISENSE_RIGHT_CAMERA_TOPIC;
-
    public static boolean LIDAR_ADJUSTMENT_ACTIVE = false;
-
-   static
-   {
-      if (DRCLocalConfigParameters.USING_REAL_HEAD)
-      {
-         MULTISENSE_CAMERA_STRING_BASE = "/multisense_sl";
-
-         // ROS Topics
-         FISHEYE_RIGHT_CAMERA_TOPIC = "/blackfly/camera/right/compressed";
-         FISHEYE_LEFT_CAMERA_TOPIC = "/blackfly/camera/left/compressed";
-         MULTISENSE_LEFT_CAMERA_TOPIC = MULTISENSE_CAMERA_STRING_BASE + "/left/image_rect_color/compressed";
-         MULTISENSE_RIGHT_CAMERA_TOPIC = MULTISENSE_CAMERA_STRING_BASE + "/right/image_rect/compressed";
-      }
-      else
-      {
-         MULTISENSE_CAMERA_STRING_BASE = "/multisense_sl/camera";
-
-         // ROS Topics
-         FISHEYE_RIGHT_CAMERA_TOPIC = "/l_situational_awareness_camera/image_raw/compressed";
-         FISHEYE_LEFT_CAMERA_TOPIC = "/r_situational_awareness_camera/image_raw/compressed";
-         MULTISENSE_LEFT_CAMERA_TOPIC = MULTISENSE_CAMERA_STRING_BASE + "/left/image_rect_color/compressed";
-         MULTISENSE_RIGHT_CAMERA_TOPIC = MULTISENSE_CAMERA_STRING_BASE + "/right/image_rect_color/compressed";
-      }
-   }
-
-
    // Video Settings
    public static final boolean STREAM_VIDEO = true;
 
