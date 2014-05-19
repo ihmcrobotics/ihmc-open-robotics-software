@@ -15,4 +15,10 @@ public class AtlasObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
       return robotModel;
    }
 
+   @Override
+   protected double getMaxRotationCorruption()
+   {
+      return Math.PI/8.0;
+   }
+
 }
