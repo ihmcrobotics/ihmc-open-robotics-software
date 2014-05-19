@@ -163,17 +163,17 @@ public class ComparePushRodTransmissionsTest
 
       double increment = 0.05;
 
-      for (double pitch = -1.0; pitch < 1.0; pitch = pitch + increment)
+      for (double topJoint = -1.0; topJoint < 1.0; topJoint = topJoint + increment)
       {
-         for (double roll = -0.5; roll < 0.5; roll = roll + increment)
+         for (double bottomJoint = -0.5; bottomJoint < 0.5; bottomJoint = bottomJoint + increment)
          {
-            printIfDebug("pitch = " + pitch + ", roll = " + roll);
+            printIfDebug("topJoint = " + topJoint + ", bottomJoint = " + bottomJoint);
 
-            jointData[0].setPosition(pitch);
-            jointData[1].setPosition(roll);
+            jointData[0].setPosition(topJoint);
+            jointData[1].setPosition(bottomJoint);
 
-            topJointAngle.set(pitch);
-            bottomJointAngle.set(roll);
+            topJointAngle.set(topJoint);
+            bottomJointAngle.set(bottomJoint);
             
             // Check the actuatorToJointEffort
 
@@ -217,17 +217,17 @@ public class ComparePushRodTransmissionsTest
          }
       }
       
-      for (double pitch = -1.0; pitch < 1.0; pitch = pitch + increment)
+      for (double topJoint = -1.0; topJoint < 1.0; topJoint = topJoint + increment)
       {
-         for (double roll = -0.5; roll < 0.5; roll = roll + increment)
+         for (double bottomJoint = -0.5; bottomJoint < 0.5; bottomJoint = bottomJoint + increment)
          {
-            printIfDebug("pitch = " + pitch + ", roll = " + roll);
+            printIfDebug("topJoint = " + topJoint + ", bottomJoint = " + bottomJoint);
 
-            jointData[0].setPosition(pitch);
-            jointData[1].setPosition(roll);
+            jointData[0].setPosition(topJoint);
+            jointData[1].setPosition(bottomJoint);
 
-            topJointAngle.set(pitch);
-            bottomJointAngle.set(roll);
+            topJointAngle.set(topJoint);
+            bottomJointAngle.set(bottomJoint);
 
             // Check the jointToActuatorEffort
             topJointTorque.set(RandomTools.generateRandomDouble(random, -40.0, 40.0));
