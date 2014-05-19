@@ -19,15 +19,15 @@
       <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
         <robotSide>RIGHT</robotSide>
         <location>
-          <x>0.44070705158882256</x>
-          <y>-0.1986528168116658</y>
-          <z>0.21909570163765768</z>
+          <x>0.4401330980275303</x>
+          <y>-0.19327924507984344</y>
+          <z>0.23187602273476116</z>
         </location>
         <orientation>
-          <x>0.09989064559473283</x>
-          <y>-0.10590221584367346</y>
-          <z>0.010548443775224467</z>
-          <w>0.9892903061973206</w>
+          <x>-0.04238566494716848</x>
+          <y>-0.023627383899389877</y>
+          <z>-0.001170449815849408</z>
+          <w>0.9988212213325695</w>
         </orientation>
       </us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
     </footstepDataList>
@@ -126,8 +126,8 @@
       <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
         <robotSide>LEFT</robotSide>
         <location>
-          <x>1.2430444849524749</x>
-          <y>0.39067021853408623</y>
+          <x>1.2130444849524749</x>
+          <y>0.33067021853408623</y>
           <z>0.3067827660256722</z>
         </location>
         <orientation>
@@ -140,8 +140,8 @@
       <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
         <robotSide>RIGHT</robotSide>
         <location>
-          <x>1.2290249137658789</x>
-          <y>0.21216645522863214</y>
+          <x>1.2090249137658789</x>
+          <y>0.17216645522863214</y>
           <z>0.24634678989129632</z>
         </location>
         <orientation>
@@ -163,20 +163,6 @@
   <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList>
     <footstepDataList>
       <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
-        <robotSide>LEFT</robotSide>
-        <location>
-          <x>1.5695287205835529</x>
-          <y>0.41228540879344183</y>
-          <z>0.4077749015350778</z>
-        </location>
-        <orientation>
-          <x>-0.00607721555534431</x>
-          <y>-0.12717510859732784</y>
-          <z>-0.005456356007938305</z>
-          <w>0.9918466551758222</w>
-        </orientation>
-      </us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
-      <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>1.5756619529088864</x>
@@ -190,6 +176,20 @@
           <w>0.9920987460351087</w>
         </orientation>
       </us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
+      <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
+        <robotSide>LEFT</robotSide>
+        <location>
+          <x>1.5695287205835529</x>
+          <y>0.41228540879344183</y>
+          <z>0.4077749015350778</z>
+        </location>
+        <orientation>
+          <x>-0.00607721555534431</x>
+          <y>-0.12717510859732784</y>
+          <z>-0.005456356007938305</z>
+          <w>0.9918466551758222</w>
+        </orientation>
+      </us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>      
     </footstepDataList>
     <trajectoryWaypointGenerationMethod>DEFAULT</trajectoryWaypointGenerationMethod>
     <speed>0.5</speed>
@@ -205,7 +205,7 @@
         <robotSide>LEFT</robotSide>
         <location>
           <x>1.9949448276683286</x>
-          <y>0.39557136890572836</y>
+          <y>0.33557136890572836</y>
           <z>0.5821169417141406</z>
         </location>
         <orientation>
@@ -219,7 +219,7 @@
         <robotSide>RIGHT</robotSide>
         <location>
           <x>1.9899258885322495</x>
-          <y>0.2065881268172946</y>
+          <y>0.1465881268172946</y>
           <z>0.5474662064327864</z>
         </location>
         <orientation>
@@ -241,24 +241,10 @@
   <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList>
     <footstepDataList>
       <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
-        <robotSide>LEFT</robotSide>
-        <location>
-          <x>2.380136700073599</x>
-          <y>0.43790819091073935</y>
-          <z>0.7100119404497753</z>
-        </location>
-        <orientation>
-          <x>0.019221834044074116</x>
-          <y>-0.11082675337542142</y>
-          <z>0.013099652697539677</z>
-          <w>0.9935674868530318</w>
-        </orientation>
-      </us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
-      <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
         <robotSide>RIGHT</robotSide>
         <location>
-          <x>2.409707138086316</x>
-          <y>0.2582939685783477</y>
+          <x>2.429707138086316</x>
+          <y>0.2082939685783477</y>
           <z>0.7100452294625275</z>
         </location>
         <orientation>
@@ -266,6 +252,20 @@
           <y>-0.13387768845970963</y>
           <z>0.00348969425188847</z>
           <w>0.9894845300783502</w>
+        </orientation>
+      </us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>      
+      <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
+        <robotSide>LEFT</robotSide>
+        <location>
+          <x>2.430136700073599</x>
+          <y>0.40790819091073935</y>
+          <z>0.7100119404497753</z>
+        </location>
+        <orientation>
+          <x>0.019221834044074116</x>
+          <y>-0.11082675337542142</y>
+          <z>0.013099652697539677</z>
+          <w>0.9935674868530318</w>
         </orientation>
       </us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
     </footstepDataList>
@@ -283,12 +283,12 @@
         <robotSide>LEFT</robotSide>
         <location>
           <x>2.8429695763209906</x>
-          <y>0.4168451938396492</y>
+          <y>0.3568451938396492</y>
           <z>0.5981720968746931</z>
         </location>
         <orientation>
           <x>0.13750947486487514</x>
-          <y>0.030053029531668787</y>
+          <y>0.010053029531668787</y>
           <z>-0.04575337601848787</z>
           <w>0.9889866471905805</w>
         </orientation>
@@ -297,7 +297,7 @@
         <robotSide>RIGHT</robotSide>
         <location>
           <x>2.8307033335321052</x>
-          <y>0.2529437139708664</y>
+          <y>0.2229437139708664</y>
           <z>0.5414602861500396</z>
         </location>
         <orientation>
@@ -322,7 +322,7 @@
         <robotSide>LEFT</robotSide>
         <location>
           <x>3.2325880802291973</x>
-          <y>0.45691632858753456</y>
+          <y>0.41691632858753456</y>
           <z>0.4275149964472299</z>
         </location>
         <orientation>
@@ -336,7 +336,7 @@
         <robotSide>RIGHT</robotSide>
         <location>
           <x>3.223978299730319</x>
-          <y>0.24431041119603225</y>
+          <y>0.20431041119603225</y>
           <z>0.4167458258921948</z>
         </location>
         <orientation>
@@ -361,7 +361,7 @@
         <robotSide>LEFT</robotSide>
         <location>
           <x>3.638867752599584</x>
-          <y>0.43401488124753923</y>
+          <y>0.39401488124753923</y>
           <z>0.3077367005291427</z>
         </location>
         <orientation>
@@ -375,7 +375,7 @@
         <robotSide>RIGHT</robotSide>
         <location>
           <x>3.6144854505799113</x>
-          <y>0.24957267893770213</y>
+          <y>0.20957267893770213</y>
           <z>0.242171735168363</z>
         </location>
         <orientation>
@@ -400,7 +400,7 @@
         <robotSide>LEFT</robotSide>
         <location>
           <x>4.01619783345502</x>
-          <y>0.43576188053197845</y>
+          <y>0.39576188053197845</y>
           <z>0.07243820128762324</z>
         </location>
         <orientation>
@@ -414,7 +414,7 @@
         <robotSide>RIGHT</robotSide>
         <location>
           <x>4.032414534136265</x>
-          <y>0.24493220499022378</y>
+          <y>0.20493220499022378</y>
           <z>0.07683446495053348</z>
         </location>
         <orientation>
@@ -439,7 +439,7 @@
         <robotSide>LEFT</robotSide>
         <location>
           <x>4.446387155884757</x>
-          <y>0.4174322952322354</y>
+          <y>0.3774322952322354</y>
           <z>0.07522355611314269</z>
         </location>
         <orientation>
@@ -453,7 +453,7 @@
         <robotSide>RIGHT</robotSide>
         <location>
           <x>4.471209368962296</x>
-          <y>0.18333060523650263</y>
+          <y>0.15333060523650263</y>
           <z>0.07591938637051032</z>
         </location>
         <orientation>
