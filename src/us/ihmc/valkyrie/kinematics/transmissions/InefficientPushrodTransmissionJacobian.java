@@ -4,6 +4,7 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -19,14 +20,22 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicRefere
 
 public class InefficientPushrodTransmissionJacobian
 {
-   private double h;    // height of pitch axis above roll axis in meters (m)
+   private final boolean DEBUG = false;
 
-   private double length;    // futek link length (m)
-   private double lengthSquared = length * length;
+   private static final double DEGREES = 180.0/Math.PI;
 
-   private final Vector3d rod5 = new Vector3d();    // position where rod 5 passes through bone frame plane. x is forward. y is to the left. z is up. (m)
-   private final Vector3d rod6 = new Vector3d();    // position where rod 6 passes through bone frame plane. x is forward. y is to the left. z is up. (m)
+   private Axis topJointAxis, bottomJointAxis;
+   
+   private double heightOfTopAxisAboveBottomAxis;    // meters (m)
 
+   private double futekLength;    // futek link length (m)
+   private double futekLengthSquared;
+
+   private final Vector3d rod5PointInBoneFrame = new Vector3d();    // position where rod 5 passes through bone frame plane. x is forward. y is to the left. z is up. (m)
+   private final Vector3d rod6PointInBoneFrame = new Vector3d();    // position where rod 6 passes through bone frame plane. x is forward. y is to the left. z is up. (m)
+   private double actuatorSlider5PitchRotation; // actuator slider 5 pitch angle
+   private double actuatorSlider6PitchRotation; // actuator slider 6 pitch angle
+   
    private final Vector3d rodBottom5 = new Vector3d();  // position vector of futek link base for actuator 5 side in foot frame (m)
    private final Vector3d rodBottom6 = new Vector3d();   // position vector of futek link base for actuator 6 side in foot frame (m)
    
@@ -34,48 +43,53 @@ public class InefficientPushrodTransmissionJacobian
    
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final TranslationReferenceFrame boneFrame = new TranslationReferenceFrame("boneFrame", worldFrame);
-   private final TransformReferenceFrame afterPitchFrame = new TransformReferenceFrame("afterPitchFrame", boneFrame);
-   private final TranslationReferenceFrame beforeRollFrame = new TranslationReferenceFrame("beforeRollFrame", afterPitchFrame);
-   private final TransformReferenceFrame footFrame = new TransformReferenceFrame("footFrame", beforeRollFrame);
+   private final TranslationReferenceFrame topFrame = new TranslationReferenceFrame("topFrame", worldFrame);
+   private final TransformReferenceFrame actuator5SlideFrame = new TransformReferenceFrame("actuator5SlideFrame", topFrame);
+   private final TransformReferenceFrame actuator6SlideFrame = new TransformReferenceFrame("actuator6SlideFrame", topFrame);
+   private final TransformReferenceFrame afterTopJointFrame = new TransformReferenceFrame("afterTopJointFrame", topFrame);
+   private final TranslationReferenceFrame beforeBottomJointFrame = new TranslationReferenceFrame("beforeBottomJointFrame", afterTopJointFrame);
+   private final TransformReferenceFrame bottomFrame = new TransformReferenceFrame("bottomFrame", beforeBottomJointFrame);
 
-   private final Transform3D pitchTransform3D = new Transform3D();
-   private final Transform3D rollTransform3D = new Transform3D();
+   private final Transform3D topJointTransform3D = new Transform3D();
+   private final Transform3D bottomJointTransform3D = new Transform3D();
 
-   private final FramePoint b5InFootFrame = new FramePoint();   
-   private final FramePoint b6InFootFrame = new FramePoint();   
+   private final FramePoint b5InBottomFrame = new FramePoint();   
+   private final FramePoint b6InBottomFrame = new FramePoint();   
 
-   private final FramePoint b5InBoneFrame = new FramePoint();
-   private final FramePoint b6InBoneFrame = new FramePoint();
-
-   private final FramePoint t5InBoneFrame = new FramePoint();
-   private final FramePoint t6InBoneFrame = new FramePoint();
+   private final FramePoint b5InTopFrame = new FramePoint();
+   private final FramePoint b6InTopFrame = new FramePoint();
    
-   private final FramePoint t5InFootFrame = new FramePoint();
-   private final FramePoint t6InFootFrame = new FramePoint();
+   private final FramePoint b5InSlideFrame = new FramePoint();
+   private final FramePoint b6InSlideFrame = new FramePoint();
 
-   private final FrameVector f5VectorInBoneFrame = new FrameVector(boneFrame);
-   private final FrameVector f6VectorInBoneFrame = new FrameVector(boneFrame);
+   private final FramePoint t5InTopFrame = new FramePoint();
+   private final FramePoint t6InTopFrame = new FramePoint();
+   
+   private final FramePoint t5InBottomFrame = new FramePoint();
+   private final FramePoint t6InBottomFrame = new FramePoint();
 
-   private final FrameVector f5VectorInFootFrame = new FrameVector(footFrame);
-   private final FrameVector f6VectorInFootFrame = new FrameVector(footFrame);
+   private final FrameVector f5VectorInTopFrame = new FrameVector(topFrame);
+   private final FrameVector f6VectorInTopFrame = new FrameVector(topFrame);
+
+   private final FrameVector f5VectorInBottomFrame = new FrameVector(bottomFrame);
+   private final FrameVector f6VectorInBottomFrame = new FrameVector(bottomFrame);
 
    private final FrameVector tempRVector = new FrameVector();
    private final FrameVector tempCrossVector = new FrameVector();
 
-   private boolean visualize = false;
+   private boolean visualize = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final DoubleYoVariable jPitch5 = new DoubleYoVariable("jPitch5", registry);
-   private final DoubleYoVariable jPitch6 = new DoubleYoVariable("jPitch6", registry);
-   private final DoubleYoVariable jRoll5 = new DoubleYoVariable("jRoll5", registry);
-   private final DoubleYoVariable jRoll6 = new DoubleYoVariable("jRoll6", registry);
+   private final DoubleYoVariable jTopJoint5 = new DoubleYoVariable("jTopJoint5", registry);
+   private final DoubleYoVariable jTopJoint6 = new DoubleYoVariable("jTopJoint6", registry);
+   private final DoubleYoVariable jBottomJoint5 = new DoubleYoVariable("jBottomJoint5", registry);
+   private final DoubleYoVariable jBottomJoint6 = new DoubleYoVariable("jBottomJoint6", registry);
 
    private final DynamicGraphicPosition b5Viz, b6Viz, t5Viz, t6Viz;
-   private final DynamicGraphicReferenceFrame boneFrameViz, afterPitchFrameViz, beforeRollFrameViz, footFrameViz;
-
-   private final boolean DEBUG = false;
+   
+   private final DynamicGraphicReferenceFrame actuator5SlideFrameViz, actuator6SlideFrameViz;
+   private final DynamicGraphicReferenceFrame topFrameViz, afterTopJointFrameViz, beforeBottomJointFrameViz, bottomFrameViz;
 
    public InefficientPushrodTransmissionJacobian(PushRodTransmissionJoint pushRodTransmissionJoint, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
@@ -98,8 +112,20 @@ public class InefficientPushrodTransmissionJacobian
       }
       }
       
-      boneFrame.updateTranslation(new FrameVector(worldFrame, 0.0, 0.0, 1.0));    // Arbitrary. Just put it in the air. If we wanted to have things align with the real robot, then this should be at the ankle.
-      beforeRollFrame.updateTranslation(new FrameVector(afterPitchFrame, 0.0, 0.0, -h));
+      topFrame.updateTranslation(new FrameVector(worldFrame, 0.0, 0.0, 1.0));    // Arbitrary. Just put it in the air. If we wanted to have things align with the real robot, then this should be at the ankle.
+      
+      Transform3D transformFromActuatorSlide5FrameToBoneFrame = new Transform3D();      
+      transformFromActuatorSlide5FrameToBoneFrame.rotY(-actuatorSlider5PitchRotation);
+      transformFromActuatorSlide5FrameToBoneFrame.setTranslation(new Vector3d(rod5PointInBoneFrame));
+      
+      Transform3D transformFromActuatorSlide6FrameToBoneFrame = new Transform3D();      
+      transformFromActuatorSlide6FrameToBoneFrame.rotY(-actuatorSlider6PitchRotation);
+      transformFromActuatorSlide6FrameToBoneFrame.setTranslation(new Vector3d(rod6PointInBoneFrame));
+
+      actuator5SlideFrame.updateTransform(transformFromActuatorSlide5FrameToBoneFrame);
+      actuator6SlideFrame.updateTransform(transformFromActuatorSlide6FrameToBoneFrame);
+      
+      beforeBottomJointFrame.updateTranslation(new FrameVector(afterTopJointFrame, 0.0, 0.0, -heightOfTopAxisAboveBottomAxis));
 
       if (dynamicGraphicObjectsListRegistry == null)
       {
@@ -120,27 +146,34 @@ public class InefficientPushrodTransmissionJacobian
 
          double frameScale = 0.05;
 
-         boneFrameViz = new DynamicGraphicReferenceFrame(boneFrame, registry, frameScale);
-         afterPitchFrameViz = new DynamicGraphicReferenceFrame(afterPitchFrame, registry, frameScale * 0.8);
-         beforeRollFrameViz = new DynamicGraphicReferenceFrame(beforeRollFrame, registry, frameScale * 0.6);
-         footFrameViz = new DynamicGraphicReferenceFrame(footFrame, registry, frameScale * 0.4);
+         topFrameViz = new DynamicGraphicReferenceFrame(topFrame, registry, frameScale);
+         afterTopJointFrameViz = new DynamicGraphicReferenceFrame(afterTopJointFrame, registry, frameScale * 0.8);
+         beforeBottomJointFrameViz = new DynamicGraphicReferenceFrame(beforeBottomJointFrame, registry, frameScale * 0.6);
+         bottomFrameViz = new DynamicGraphicReferenceFrame(bottomFrame, registry, frameScale * 0.4);
 
+         actuator5SlideFrameViz = new DynamicGraphicReferenceFrame(actuator5SlideFrame, registry, frameScale * 0.6);
+         actuator6SlideFrameViz = new DynamicGraphicReferenceFrame(actuator6SlideFrame, registry, frameScale * 0.6);
+         
          dynamicGraphicObjectsList.add(b5Viz);
          dynamicGraphicObjectsList.add(b6Viz);
          dynamicGraphicObjectsList.add(t5Viz);
          dynamicGraphicObjectsList.add(t6Viz);
 
-         dynamicGraphicObjectsList.add(boneFrameViz);
-         dynamicGraphicObjectsList.add(afterPitchFrameViz);
-         dynamicGraphicObjectsList.add(beforeRollFrameViz);
-         dynamicGraphicObjectsList.add(footFrameViz);
+         dynamicGraphicObjectsList.add(topFrameViz);
+         dynamicGraphicObjectsList.add(afterTopJointFrameViz);
+         dynamicGraphicObjectsList.add(beforeBottomJointFrameViz);
+         dynamicGraphicObjectsList.add(bottomFrameViz);
+         
+         dynamicGraphicObjectsList.add(actuator5SlideFrameViz);
+         dynamicGraphicObjectsList.add(actuator6SlideFrameViz);
 
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
       }
       else
       {
          b5Viz = b6Viz = t5Viz = t6Viz = null;
-         boneFrameViz = afterPitchFrameViz = beforeRollFrameViz = footFrameViz = null;
+         topFrameViz = afterTopJointFrameViz = beforeBottomJointFrameViz = bottomFrameViz = null;
+         actuator5SlideFrameViz = actuator6SlideFrameViz = null;
       }
 
       if (parentRegistry != null)
@@ -149,44 +182,55 @@ public class InefficientPushrodTransmissionJacobian
    
    public void setupForAnkleActuators()
    {
-      h = 0.0127;
+      topJointAxis = Axis.Y; // Pitch.
+      bottomJointAxis = Axis.X; // Roll.
+      
+      heightOfTopAxisAboveBottomAxis = 0.0127;
 
-      length = 0.1049655;
-      lengthSquared = length * length;
+      futekLength = 0.1049655;
+      futekLengthSquared = futekLength * futekLength;
 
-      rod5.set(-0.0215689, -0.04128855, 0.0);    
-      rod6.set(-0.0215689, 0.04128855, 0.0);     
-
+      rod5PointInBoneFrame.set(-0.0215689, -0.04128855, 0.05);  // z is arbitrary since already aligned in z.  
+      rod6PointInBoneFrame.set(-0.0215689, 0.04128855, 0.05);  // z is arbitrary since already aligned in z.  
+      actuatorSlider5PitchRotation = 0.0;
+      actuatorSlider6PitchRotation = 0.0;
+      
       rodBottom5.set(-0.0364, -0.0355, 0.0176);     
       rodBottom6.set(-0.0364, 0.0355, 0.0176);         
    }
    
    public void setupForWaistActuators()
    {
-      // TODO: Add Waist parameters. Right now they are ankle parameters.
-      h = 0.0127;
+      topJointAxis = Axis.X; // Roll.
+      bottomJointAxis = Axis.Y; // Pitch.
+      
+      heightOfTopAxisAboveBottomAxis = 0.02032;
 
-      length = 0.1049655;
-      lengthSquared = length * length;
+      futekLength = 0.13100;
+      futekLengthSquared = futekLength * futekLength;
 
-      rod5.set(-0.0215689, -0.04128855, 0.0);    
-      rod6.set(-0.0215689, 0.04128855, 0.0);     
-
-      rodBottom5.set(-0.0364, -0.0355, 0.0176);     
-      rodBottom6.set(-0.0364, 0.0355, 0.0176);         
+      rod5PointInBoneFrame.set(-0.005994, -0.069694, 0.088702);    
+      rod6PointInBoneFrame.set(-0.005994, 0.069694, 0.088702);     
+      actuatorSlider5PitchRotation = (90.0 - 66.00) * DEGREES;
+      actuatorSlider6PitchRotation = (90.0 - 66.00) * DEGREES;
+      
+      rodBottom5.set(-0.0762, -0.0510794, 0.0);     
+      rodBottom6.set(-0.0762, 0.0510794, 0.0);         
    }
    
    public void setupForWristActuators()
    {
-      // TODO: Add Wwrist parameters. Right now they are ankle parameters.
-      h = 0.0127;
+      // TODO: Add Wrist parameters. Right now they are ankle parameters.
+      heightOfTopAxisAboveBottomAxis = 0.0127;
 
-      length = 0.1049655;
-      lengthSquared = length * length;
+      futekLength = 0.1049655;
+      futekLengthSquared = futekLength * futekLength;
 
-      rod5.set(-0.0215689, -0.04128855, 0.0);    
-      rod6.set(-0.0215689, 0.04128855, 0.0);     
-
+      rod5PointInBoneFrame.set(-0.0215689, -0.04128855, 0.0);    
+      rod6PointInBoneFrame.set(-0.0215689, 0.04128855, 0.0);     
+      actuatorSlider5PitchRotation = 0.0;
+      actuatorSlider6PitchRotation = 0.0;
+      
       rodBottom5.set(-0.0364, -0.0355, 0.0176);     
       rodBottom6.set(-0.0364, 0.0355, 0.0176);         
    }
@@ -196,59 +240,71 @@ public class InefficientPushrodTransmissionJacobian
       this.useFuteks = useFuteks;
    }
    
-   public void computeJacobian(double[][] jacobianToPack, double pitch, double roll)
+   public void computeJacobian(double[][] jacobianToPack, double topJointAngle, double bottomJointAngle)
    {
       // Update forward kinematics reference frames using roll and pitch.
-      pitchTransform3D.setIdentity();
-      pitchTransform3D.rotY(pitch);
+      computeRotationTransform(topJointTransform3D, topJointAngle, topJointAxis);
+      computeRotationTransform(bottomJointTransform3D, bottomJointAngle, bottomJointAxis);
 
-      rollTransform3D.setIdentity();
-      rollTransform3D.rotX(roll);
+      afterTopJointFrame.updateTransform(topJointTransform3D);
+      bottomFrame.updateTransform(bottomJointTransform3D);
 
-      afterPitchFrame.updateTransform(pitchTransform3D);
-      footFrame.updateTransform(rollTransform3D);
-
-      b5InFootFrame.setIncludingFrame(footFrame, rodBottom5);   
-      b6InFootFrame.setIncludingFrame(footFrame, rodBottom6);   
+      b5InBottomFrame.setIncludingFrame(bottomFrame, rodBottom5);   
+      b6InBottomFrame.setIncludingFrame(bottomFrame, rodBottom6);   
       
-      b5InBoneFrame.setIncludingFrame(b5InFootFrame);
-      b5InBoneFrame.changeFrame(boneFrame);
+      b5InTopFrame.setIncludingFrame(b5InBottomFrame);
+      b5InTopFrame.changeFrame(topFrame);
 
-      b6InBoneFrame.setIncludingFrame(b6InFootFrame);
-      b6InBoneFrame.changeFrame(boneFrame);
+      b6InTopFrame.setIncludingFrame(b6InBottomFrame);
+      b6InTopFrame.changeFrame(topFrame);
+      
+      b5InSlideFrame.setIncludingFrame(b5InBottomFrame);
+      b5InSlideFrame.changeFrame(actuator5SlideFrame);
 
-      printIfDebug("b5InBoneFrame = " + b5InBoneFrame);
-      printIfDebug("b6InBoneFrame = " + b6InBoneFrame);
+      b6InSlideFrame.setIncludingFrame(b6InBottomFrame);
+      b6InSlideFrame.changeFrame(actuator6SlideFrame);
+
+      printIfDebug("b5InBoneFrame = " + b5InTopFrame);
+      printIfDebug("b6InBoneFrame = " + b6InTopFrame);
 
       // Solve for t5, t6 in bone frame:
-
-      double xDiff = rod5.getX() - b5InBoneFrame.getX();
-      double yDiff = rod5.getY() - b5InBoneFrame.getY();
-      double t5zInBoneFrame = b5InBoneFrame.getZ() + Math.sqrt(lengthSquared - xDiff * xDiff - yDiff * yDiff);
-
-      xDiff = rod6.getX() - b6InBoneFrame.getX();
-      yDiff = rod6.getY() - b6InBoneFrame.getY();
-      double t6zInBoneFrame = b6InBoneFrame.getZ() + Math.sqrt(lengthSquared - xDiff * xDiff - yDiff * yDiff);
-
-      printIfDebug("t5zInBoneFrame = " + t5zInBoneFrame);
-      printIfDebug("t6zInBoneFrame = " + t6zInBoneFrame);
-
-      t5InBoneFrame.setIncludingFrame(boneFrame, rod5);
-      t6InBoneFrame.setIncludingFrame(boneFrame, rod6);
-
-      t5InBoneFrame.setZ(t5zInBoneFrame);
-      t6InBoneFrame.setZ(t6zInBoneFrame);
-
-      t5InFootFrame.setIncludingFrame(t5InBoneFrame);
-      t6InFootFrame.setIncludingFrame(t6InBoneFrame);
       
-      t5InFootFrame.changeFrame(footFrame);
-      t6InFootFrame.changeFrame(footFrame);
+      double xDiff = b5InSlideFrame.getX();
+      double yDiff = b5InSlideFrame.getY();
+      double t5zInSlideFrame = b5InSlideFrame.getZ() + Math.sqrt(futekLengthSquared - xDiff * xDiff - yDiff * yDiff);
+
+      xDiff = b6InSlideFrame.getX();
+      yDiff = b6InSlideFrame.getY();
+      double t6zInSlideFrame = b6InSlideFrame.getZ() + Math.sqrt(futekLengthSquared - xDiff * xDiff - yDiff * yDiff);
+
+      printIfDebug("t5zInSlideFrame = " + t5zInSlideFrame);
+      printIfDebug("t6zInSlideFrame = " + t6zInSlideFrame);
+
+
+      t5InTopFrame.setToZero(actuator5SlideFrame);
+      t6InTopFrame.setToZero(actuator6SlideFrame);
+
+      t5InTopFrame.setZ(t5zInSlideFrame);
+      t6InTopFrame.setZ(t6zInSlideFrame);
+
+      t5InTopFrame.changeFrame(topFrame);
+      t6InTopFrame.changeFrame(topFrame);
+
+      printIfDebug("t5InBoneFrame = " + t5InTopFrame);
+      printIfDebug("t6InBoneFrame = " + t6InTopFrame);
+
+      // Compute topsInFootFrame:
+      
+      t5InBottomFrame.setIncludingFrame(t5InTopFrame);
+      t6InBottomFrame.setIncludingFrame(t6InTopFrame);
+      
+      t5InBottomFrame.changeFrame(bottomFrame);
+      t6InBottomFrame.changeFrame(bottomFrame);
       
       if (DEBUG)
       {
-         System.out.println("t5InFootFrame = " + t5InFootFrame);
-         System.out.println("t6InFootFrame = " + t6InFootFrame);
+         System.out.println("t5InFootFrame = " + t5InBottomFrame);
+         System.out.println("t6InFootFrame = " + t6InBottomFrame);
       }
 
 
@@ -256,65 +312,97 @@ public class InefficientPushrodTransmissionJacobian
 
       if (useFuteks)
       {
-         f5VectorInBoneFrame.sub(b5InBoneFrame, t5InBoneFrame);
-         f6VectorInBoneFrame.sub(b6InBoneFrame, t6InBoneFrame);
+         f5VectorInTopFrame.sub(b5InTopFrame, t5InTopFrame);
+         f6VectorInTopFrame.sub(b6InTopFrame, t6InTopFrame);
 
-         f5VectorInBoneFrame.normalize();
-         f6VectorInBoneFrame.normalize();
+         f5VectorInTopFrame.normalize();
+         f6VectorInTopFrame.normalize();
          
-         printIfDebug("f5VectorInBoneFrame = " + f5VectorInBoneFrame);
-         printIfDebug("f6VectorInBoneFrame = " + f6VectorInBoneFrame);
+         printIfDebug("f5VectorInBoneFrame = " + f5VectorInTopFrame);
+         printIfDebug("f6VectorInBoneFrame = " + f6VectorInTopFrame);
       }
       else
       {
-         f5VectorInBoneFrame.setIncludingFrame(boneFrame, 0.0, 0.0, -1.0);
-         f6VectorInBoneFrame.setIncludingFrame(boneFrame, 0.0, 0.0, -1.0);
+         f5VectorInTopFrame.setIncludingFrame(actuator5SlideFrame, 0.0, 0.0, -1.0);
+         f6VectorInTopFrame.setIncludingFrame(actuator6SlideFrame, 0.0, 0.0, -1.0);
+         
+         f5VectorInTopFrame.changeFrame(topFrame);
+         f6VectorInTopFrame.changeFrame(topFrame);
       }
       
-      f5VectorInFootFrame.setIncludingFrame(f5VectorInBoneFrame);
-      f5VectorInFootFrame.changeFrame(footFrame);
-      f6VectorInFootFrame.setIncludingFrame(f6VectorInBoneFrame);
-      f6VectorInFootFrame.changeFrame(footFrame);
+      f5VectorInBottomFrame.setIncludingFrame(f5VectorInTopFrame);
+      f5VectorInBottomFrame.changeFrame(bottomFrame);
+      f6VectorInBottomFrame.setIncludingFrame(f6VectorInTopFrame);
+      f6VectorInBottomFrame.changeFrame(bottomFrame);
 
-      tempRVector.setIncludingFrame(t5InBoneFrame); //kjb5InBoneFrame);
+      tempRVector.setIncludingFrame(t5InTopFrame); //kjb5InBoneFrame);
       tempCrossVector.setToZero(tempRVector.getReferenceFrame());
-      tempCrossVector.cross(tempRVector, f5VectorInBoneFrame);
-      jPitch5.set(tempCrossVector.getY());
+      tempCrossVector.cross(tempRVector, f5VectorInTopFrame);
+      jTopJoint5.set(tempCrossVector.getY());
 
-      tempRVector.setIncludingFrame(t6InBoneFrame); //b6InBoneFrame);
-      tempCrossVector.cross(tempRVector, f6VectorInBoneFrame);
-      jPitch6.set(tempCrossVector.getY());
+      tempRVector.setIncludingFrame(t6InTopFrame); //b6InBoneFrame);
+      tempCrossVector.cross(tempRVector, f6VectorInTopFrame);
+      jTopJoint6.set(tempCrossVector.getY());
 
 
-      tempRVector.setIncludingFrame(t5InFootFrame); //b5InFootFrame);
+      tempRVector.setIncludingFrame(t5InBottomFrame); //b5InFootFrame);
       tempCrossVector.setToZero(tempRVector.getReferenceFrame());
-      tempCrossVector.cross(tempRVector, f5VectorInFootFrame);
-      jRoll5.set(tempCrossVector.getX());
+      tempCrossVector.cross(tempRVector, f5VectorInBottomFrame);
+      jBottomJoint5.set(tempCrossVector.getX());
 
-      tempRVector.setIncludingFrame(t6InFootFrame); //b6InFootFrame);
-      tempCrossVector.cross(tempRVector, f6VectorInFootFrame);
-      jRoll6.set(tempCrossVector.getX());
+      tempRVector.setIncludingFrame(t6InBottomFrame); //b6InFootFrame);
+      tempCrossVector.cross(tempRVector, f6VectorInBottomFrame);
+      jBottomJoint6.set(tempCrossVector.getX());
 
-      jacobianToPack[0][0] = jPitch5.getDoubleValue();
-      jacobianToPack[0][1] = jPitch6.getDoubleValue();
-      jacobianToPack[1][0] = jRoll5.getDoubleValue();
-      jacobianToPack[1][1] = jRoll6.getDoubleValue();
+      jacobianToPack[0][0] = jTopJoint5.getDoubleValue();
+      jacobianToPack[0][1] = jTopJoint6.getDoubleValue();
+      jacobianToPack[1][0] = jBottomJoint5.getDoubleValue();
+      jacobianToPack[1][1] = jBottomJoint6.getDoubleValue();
 
       if (visualize)
       {
-         t5Viz.setPosition(t5InBoneFrame.changeFrameCopy(worldFrame));
-         t6Viz.setPosition(t6InBoneFrame.changeFrameCopy(worldFrame));
+         t5Viz.setPosition(t5InTopFrame.changeFrameCopy(worldFrame));
+         t6Viz.setPosition(t6InTopFrame.changeFrameCopy(worldFrame));
 
-         b5Viz.setPosition(b5InFootFrame.changeFrameCopy(worldFrame));
-         b6Viz.setPosition(b6InFootFrame.changeFrameCopy(worldFrame));
+         b5Viz.setPosition(b5InBottomFrame.changeFrameCopy(worldFrame));
+         b6Viz.setPosition(b6InBottomFrame.changeFrameCopy(worldFrame));
 
-         boneFrameViz.update();
-         afterPitchFrameViz.update();
-         beforeRollFrameViz.update();
-         footFrameViz.update();
+         topFrameViz.update();
+         afterTopJointFrameViz.update();
+         beforeBottomJointFrameViz.update();
+         bottomFrameViz.update();
 
+         actuator5SlideFrameViz.update();
+         actuator6SlideFrameViz.update();
       }
 
+   }
+   
+   private static void computeRotationTransform(Transform3D transform3DToPack, double rotationAngle, Axis rotationAxis)
+   {
+      transform3DToPack.setIdentity();
+      switch(rotationAxis)
+      {
+      case X:
+      {
+         transform3DToPack.rotX(rotationAngle);
+         break;
+      }
+      case Y:
+      {
+         transform3DToPack.rotY(rotationAngle);
+         break;
+      }
+      case Z:
+      {
+         transform3DToPack.rotZ(rotationAngle);
+         break;
+      }
+      default: 
+      {
+         throw new RuntimeException("Shouldn't get here.");
+      }
+      }
    }
 
    private void printIfDebug(String message)
