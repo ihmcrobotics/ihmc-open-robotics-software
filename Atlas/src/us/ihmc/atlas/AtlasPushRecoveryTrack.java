@@ -1,51 +1,73 @@
 package us.ihmc.atlas;
 
-import us.ihmc.darpaRoboticsChallenge.DRCPushRecoveryTrack;
+import javax.vecmath.Vector3d;
+
+import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
+import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTrack;
+import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
+import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
+import us.ihmc.darpaRoboticsChallenge.controllers.DRCPushRobotController;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.darpaRoboticsChallenge.validation.YoVariableThreadAccessValidator;
+import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
+import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
 import us.ihmc.graphics3DAdapter.GroundProfile;
 
 import com.martiansoftware.jsap.JSAPException;
 import com.yobotics.simulationconstructionset.util.FlatGroundProfile;
-import com.yobotics.simulationconstructionset.util.ground.BumpyGroundProfile;
 
-public class AtlasPushRecoveryTrack 
+public class AtlasPushRecoveryTrack
 {
-	private static final DRCRobotModel defaultModelForGraphicSelector = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, false, false);
-	private static final boolean USE_BUMPY_GROUND = false;
-	private final static double forceDuration = 100;
-	
-	public static void main(String[] args) throws JSAPException
-	{
-		  DRCRobotModel model = null;
-		  final double groundHeight = 0.0;
-		  
-	      model = AtlasRobotModelFactory.selectModelFromFlag(args, false, false);
-	      
-	      if (model == null)
-	         model = AtlasRobotModelFactory.selectModelFromGraphicSelector(defaultModelForGraphicSelector);
+   private static final DRCRobotModel defaultModelForGraphicSelector = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, false, false);
 
-	      if (model == null)
-	          throw new RuntimeException("No robot model selected");
+   public static void main(String[] args) throws JSAPException
+   {
+      DRCRobotModel model = null;
+      final double groundHeight = 0.0;
 
-	      GroundProfile groundProfile;
-	      if (USE_BUMPY_GROUND)
-	      {
-	         groundProfile = createBumpyGroundProfile();
-	      }
-	      else
-	      {
-	         groundProfile = new FlatGroundProfile(groundHeight);
-	      }	
-	      
-	      new DRCPushRecoveryTrack (groundProfile, model, forceDuration, groundHeight);
-	}
-	
-	private static BumpyGroundProfile createBumpyGroundProfile()
-    {
-      double xAmp1 = 0.05, xFreq1 = 0.5, xAmp2 = 0.01, xFreq2 = 0.5;
-      double yAmp1 = 0.01, yFreq1 = 0.07, yAmp2 = 0.05, yFreq2 = 0.37;
-      BumpyGroundProfile groundProfile = new BumpyGroundProfile(xAmp1, xFreq1, xAmp2, xFreq2, yAmp1, yFreq1, yAmp2, yFreq2);
-      return groundProfile;
-    }
+      model = AtlasRobotModelFactory.selectModelFromFlag(args, false, false);
 
+      if (model == null)
+         model = AtlasRobotModelFactory.selectModelFromGraphicSelector(defaultModelForGraphicSelector);
+
+      if (model == null)
+         throw new RuntimeException("No robot model selected");
+
+      GroundProfile groundProfile = new FlatGroundProfile(groundHeight);
+
+      YoVariableThreadAccessValidator.registerAccessValidator();
+      AutomaticSimulationRunner automaticSimulationRunner = null;
+      SliderBoardFactory sliderBoardFactory = WalkControllerSliderBoard.getFactory();
+      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false, sliderBoardFactory);
+
+      DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, model.getSimulateDT());
+      scsInitialSetup.setDrawGroundProfile(true);
+      scsInitialSetup.setInitializeEstimatorToActual(true);
+
+      double initialYaw = 0.3;
+      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = model.getDefaultRobotInitialSetup(groundHeight, initialYaw);
+
+      boolean useVelocityAndHeadingScript = true;
+      boolean cheatWithGroundHeightAtForFootstep = false;
+
+      DRCFlatGroundWalkingTrack track = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript,
+            automaticSimulationRunner, 16000, cheatWithGroundHeightAtForFootstep, model);
+
+      SDFRobot robot = track.getDrcSimulation().getRobot();
+      SDFFullRobotModel fullRobotModel = model.createFullRobotModel();
+      DRCPushRobotController pushRobotController = new DRCPushRobotController(robot, fullRobotModel);
+
+      pushRobotController.addPushButtonToSCS(track.getSimulationConstructionSet());
+      
+      double defaultForceDurationInSeconds = 0.1;
+      double defaultForceMagnitude = 200.0;
+      Vector3d defaultForceDirection = new Vector3d(0.0, -1.0, 0.0);
+      
+      pushRobotController.setPushDuration(defaultForceDurationInSeconds);
+      pushRobotController.setPushForceMagnitude(defaultForceMagnitude);
+      pushRobotController.setPushForceDirection(defaultForceDirection);
+   }
 }
