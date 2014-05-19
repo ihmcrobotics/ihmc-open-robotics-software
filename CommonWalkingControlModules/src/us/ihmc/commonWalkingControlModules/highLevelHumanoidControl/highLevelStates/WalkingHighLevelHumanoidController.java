@@ -1184,6 +1184,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       private final FramePoint2d capturePoint2d = new FramePoint2d();
 
       private Footstep nextFootstep;
+      private final FramePoint swingFootPosition = new FramePoint();
       private double captureTime;
 
       public SingleSupportState(RobotSide robotSide)
@@ -1215,6 +1216,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          FramePoint2d transferToFootstepLocation = transferToFootstep.getFramePoint2dCopy();
          FrameConvexPolygon2d footPolygon = computeFootPolygon(supportSide, referenceFrames.getAnkleZUpFrame(supportSide));
          double omega0 = icpAndMomentumBasedController.getOmega0();
+         
+         ReferenceFrame swingFootFrame = referenceFrames.getAnkleZUpFrame(swingSide);
+         swingFootPosition.setToZero(swingFootFrame);
+         swingFootPosition.changeFrame(nextFootstep.getPosition().getReferenceFrame());
 
          if (pushRecoveryModule.isEnabled())
          {
@@ -1225,11 +1230,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             {
                captureTime = stateMachine.timeInCurrentState();
                updateFootstepParameters();
-               //double oldSwingTime = swingTimeCalculationProvider.getValue();
-               double distance = transferToFootstepLocation.distance(nextFootstep.getPosition2dCopy());
-               System.out.println(distance);
-               
-               swingTimeCalculationProvider.setSwingTime(distance);//oldSwingTime - captureTime);
+//               double oldSwingTime = swingTimeCalculationProvider.getValue();
+
+               double distance = 2.0 * swingFootPosition.distance(nextFootstep.getPosition());
+               swingTimeCalculationProvider.setSwingTime(Math.max(0.2, distance));//oldSwingTime - captureTime);
 
                footEndEffectorControlModules.get(swingSide).replanTrajectory();
 
