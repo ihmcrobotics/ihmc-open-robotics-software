@@ -2,6 +2,8 @@ package us.ihmc.atlas.parameters;
 
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParamaters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
+import us.ihmc.graphics3DAdapter.camera.VideoSettingsFactory;
+import us.ihmc.graphics3DAdapter.camera.VideoSettingsH264LowLatency;
 import us.ihmc.robotSide.SideDependentList;
 
 public class AtlasSensorInformation implements DRCRobotSensorInformation
@@ -41,12 +43,17 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    public static final String[] imuSensorsToUse = { bodyIMUSensor };
    
    
-   public AtlasSensorInformation()
+   public AtlasSensorInformation(boolean runningOnRealRobot)
    {
-      cameraParamaters[0] = new DRCRobotCameraParamaters(left_camera_name, left_camera_topic, left_info_camera_topic, left_frame_name, true, multisense_sl_left_camera_id);
-      cameraParamaters[1] = new DRCRobotCameraParamaters(right_camera_name, right_camera_topic, right_info_camera_topic, right_frame_name, true, multisense_sl_right_camera_id);
-      cameraParamaters[2] = new DRCRobotCameraParamaters(leftFisheyeCameraName, fisheye_left_camera_topic, blackfly_left_camera_id);
-      cameraParamaters[3] = new DRCRobotCameraParamaters(rightFisheyeCameraName, fisheye_right_camera_topic, blackfly_right_camera_id);
+      VideoSettingsH264LowLatency videoSetting = VideoSettingsFactory.get32kBitSettingsSquare();
+      if(runningOnRealRobot)
+      {
+         videoSetting = VideoSettingsFactory.get32kBitSettingsWide();
+      }
+      cameraParamaters[0] = new DRCRobotCameraParamaters(left_camera_name, left_camera_topic, left_info_camera_topic, left_frame_name, true, videoSetting, multisense_sl_left_camera_id);
+      cameraParamaters[1] = new DRCRobotCameraParamaters(right_camera_name, right_camera_topic, right_info_camera_topic, right_frame_name, true, videoSetting, multisense_sl_right_camera_id);
+      cameraParamaters[2] = new DRCRobotCameraParamaters(leftFisheyeCameraName, fisheye_left_camera_topic, videoSetting, blackfly_left_camera_id);
+      cameraParamaters[3] = new DRCRobotCameraParamaters(rightFisheyeCameraName, fisheye_right_camera_topic, videoSetting, blackfly_right_camera_id);
    }
    
    @Override

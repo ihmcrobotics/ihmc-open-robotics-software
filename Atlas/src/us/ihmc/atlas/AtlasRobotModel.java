@@ -28,6 +28,9 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandType;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.AlwaysZeroOffsetPPSTimestampOffsetProvider;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.AtlasPPSTimestampOffsetProvider;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
 import us.ihmc.iRobot.model.iRobotHandModel;
 import us.ihmc.robotSide.RobotSide;
@@ -59,7 +62,7 @@ public class AtlasRobotModel implements DRCRobotModel
    {
       selectedVersion = atlasVersion;
       this.runningOnRealRobot = runningOnRealRobot;
-      this.sensorInformation = new AtlasSensorInformation();
+      this.sensorInformation = new AtlasSensorInformation(runningOnRealRobot);
       
       if(!headless)
       {  
@@ -236,5 +239,15 @@ public class AtlasRobotModel implements DRCRobotModel
    public GeneralizedSDFRobotModel getGeneralizedRobotModel()
    {
       return loader.getGeneralizedSDFRobotModel(getJointMap().getModelName());
+   }
+
+   @Override
+   public PPSTimestampOffsetProvider getPPSTimestampOffsetProvider()
+   {
+      if(runningOnRealRobot)
+      {
+         return new AtlasPPSTimestampOffsetProvider();
+      }
+      return new AlwaysZeroOffsetPPSTimestampOffsetProvider();
    }
 }
