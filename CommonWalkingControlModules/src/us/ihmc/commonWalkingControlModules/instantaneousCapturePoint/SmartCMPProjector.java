@@ -144,6 +144,11 @@ public class SmartCMPProjector
       return new FramePoint2d[]{one[0], two[0]};
    }
 
+   /**
+    * Project the CMP to the support polygon by moving it along the line CMP-ICP.
+    * Only problem, sometimes the line CMP-ICP doesn't intersect with the support polygon and the CMP isn't projected.
+    * Risk of jumps on the CMP because of the latter.
+    */
    public void projectCMPIntoSupportPolygonIfOutside(FramePoint2d capturePoint, FrameConvexPolygon2d supportPolygon, FramePoint2d desiredCMP)
    {
       ReferenceFrame returnFrame = desiredCMP.getReferenceFrame();
