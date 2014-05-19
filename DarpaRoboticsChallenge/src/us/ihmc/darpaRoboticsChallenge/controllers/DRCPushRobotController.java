@@ -46,7 +46,6 @@ public class DRCPushRobotController implements RobotController
       pushableRobot.setController(this);
 
       pushTimeSwitch.set(Double.NEGATIVE_INFINITY);
-      pushDirection.set(0.0, -1.0, 0.0);
       pushForceMagnitude.set(0.0);
    }
 
