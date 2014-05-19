@@ -628,7 +628,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          doubleSupportState.addStateTransition(toTransfer);
       }
 
-      if (pushRecoveryModule.isEnabled())
+//      if (pushRecoveryModule.isEnabled())
       {
          for (RobotSide robotSide : RobotSide.values)
          {
