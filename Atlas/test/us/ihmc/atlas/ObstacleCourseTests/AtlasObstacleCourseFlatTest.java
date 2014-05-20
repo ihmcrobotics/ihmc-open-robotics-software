@@ -22,7 +22,7 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    @Override
    protected Vector3d getFootSlipVector()
    {
-      return new Vector3d(0.06, -0.06, 0.0);
+      return new Vector3d(0.05, -0.05, 0.0);//(0.06, -0.06, 0.0);
    }
    @Override
    protected DoubleYoVariable getPelvisOrientationErrorVariableName(SimulationConstructionSet scs)
