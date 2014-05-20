@@ -179,6 +179,13 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
       this.recordFrequency = recordFrequency;
    }
 
+   public void setTimePerRecordTick(double timePerRecordTick)
+   {
+      int recordFrequency = (int) Math.round(timePerRecordTick / simulateDT);
+      if (recordFrequency < 1) recordFrequency = 1;
+      setRecordFrequency(recordFrequency);
+   }
+
    public int getRecordFrequency()
    {
       return recordFrequency;
