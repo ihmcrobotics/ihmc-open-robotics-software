@@ -1,6 +1,7 @@
 package us.ihmc.acsell.parameters;
 
 import java.io.InputStream;
+import java.net.URI;
 
 import javax.media.j3d.Transform3D;
 
@@ -26,6 +27,7 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.AlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
+import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 
@@ -220,5 +222,17 @@ public class BonoRobotModel implements DRCRobotModel
    public PPSTimestampOffsetProvider getPPSTimestampOffsetProvider()
    {
       return new AlwaysZeroOffsetPPSTimestampOffsetProvider();
+   }
+
+   @Override
+   public boolean isRunningOnRealRobot()
+   {
+      return runningOnRealRobot;
+   }
+
+   @Override
+   public DRCSensorSuiteManager getSensorSuiteManager(URI rosCoreURI)
+   {
+      return null;
    }
 }
