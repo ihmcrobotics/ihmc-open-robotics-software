@@ -10,7 +10,6 @@ import javax.imageio.ImageIO;
 
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.driving.DRCStereoListener;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.CameraDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
 import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.DRCJointConfigurationData;
 import us.ihmc.utilities.net.ObjectCommunicator;
@@ -30,10 +29,9 @@ public class ArmCalibrationHelper implements DRCStereoListener
    private DRCJointConfigurationData lastJointConfigurationData;
 
    public ArmCalibrationHelper(ObjectCommunicator fieldComputerClient, DRCNetworkProcessorNetworkingManager networkingManager,
-         CameraDataReceiver cameraDataReceiver, DRCRobotJointMap jointMap)
+         DRCRobotJointMap jointMap)
    {
       this.jointMap = jointMap;
-      cameraDataReceiver.registerCameraListener(this);
       networkingManager.getControllerCommandHandler().setArmCalibrationHelper(this);
       fieldComputerClient.attachListener(DRCJointConfigurationData.class, new JointAngleConsumer());
       startPeriodicRecording();

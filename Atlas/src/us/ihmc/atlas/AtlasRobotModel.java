@@ -1,5 +1,7 @@
 package us.ihmc.atlas;
 
+import java.net.URI;
+
 import javax.media.j3d.Transform3D;
 
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
@@ -17,6 +19,7 @@ import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.atlas.parameters.AtlasStateEstimatorParameters;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.atlas.physics.AtlasPhysicsEngineConfiguration;
+import us.ihmc.atlas.sensors.AtlasSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
@@ -32,6 +35,7 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.AlwaysZeroOffsetPPST
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.AtlasPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
+import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.iRobot.model.iRobotHandModel;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -249,5 +253,17 @@ public class AtlasRobotModel implements DRCRobotModel
          return new AtlasPPSTimestampOffsetProvider();
       }
       return new AlwaysZeroOffsetPPSTimestampOffsetProvider();
+   }
+
+   @Override
+   public boolean isRunningOnRealRobot()
+   {
+      return runningOnRealRobot;
+   }
+
+   @Override
+   public DRCSensorSuiteManager getSensorSuiteManager(URI rosCoreURI)
+   {
+      return new AtlasSensorSuiteManager(rosCoreURI, getPPSTimestampOffsetProvider(), sensorInformation, getJointMap());
    }
 }

@@ -1,5 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.drcRobot;
 
+import java.net.URI;
+
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
@@ -9,6 +11,7 @@ import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
+import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 
@@ -19,6 +22,8 @@ public interface DRCRobotModel
 {
    //TODO: RobotBoundingBoxes.java
 
+   public boolean isRunningOnRealRobot();
+   
    public ArmControllerParameters getArmControllerParameters();
 
    public WalkingControllerParameters getWalkingControlParameters();
@@ -62,7 +67,7 @@ public interface DRCRobotModel
    public GeneralizedSDFRobotModel getGeneralizedRobotModel();
 
    public PPSTimestampOffsetProvider getPPSTimestampOffsetProvider();
-   
-   
+
+   public DRCSensorSuiteManager getSensorSuiteManager(URI rosCoreURI);
    
 }
