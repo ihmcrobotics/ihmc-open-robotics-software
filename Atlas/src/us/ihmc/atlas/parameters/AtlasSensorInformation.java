@@ -20,6 +20,7 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    private static int blackfly_right_camera_id = 3;
    private static int primaryCameraId = multisense_sl_left_camera_id;
    
+   private static final String multisenseBaseTFName = "/head";
    private static final String camera_string_base = "/multisense_sl";
    private static final String left_camera_name = "stereo_camera_left";
    private static final String left_camera_topic = camera_string_base + "/left/image_rect_color/compressed";
@@ -50,10 +51,12 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
       {
          videoSetting = VideoSettingsFactory.get32kBitSettingsWide();
       }
-      cameraParamaters[0] = new DRCRobotCameraParamaters(left_camera_name, left_camera_topic, left_info_camera_topic, left_frame_name, true, videoSetting, multisense_sl_left_camera_id);
-      cameraParamaters[1] = new DRCRobotCameraParamaters(right_camera_name, right_camera_topic, right_info_camera_topic, right_frame_name, true, videoSetting, multisense_sl_right_camera_id);
-      cameraParamaters[2] = new DRCRobotCameraParamaters(leftFisheyeCameraName, fisheye_left_camera_topic, videoSetting, blackfly_left_camera_id);
-      cameraParamaters[3] = new DRCRobotCameraParamaters(rightFisheyeCameraName, fisheye_right_camera_topic, videoSetting, blackfly_right_camera_id);
+      
+      cameraParamaters[0] = new DRCRobotCameraParamaters(left_camera_name, left_camera_topic, left_info_camera_topic, left_frame_name, multisenseBaseTFName, videoSetting, multisense_sl_left_camera_id);
+      cameraParamaters[1] = new DRCRobotCameraParamaters(right_camera_name, right_camera_topic, right_info_camera_topic, right_frame_name, multisenseBaseTFName, videoSetting, multisense_sl_right_camera_id);
+      
+      cameraParamaters[2] = new DRCRobotCameraParamaters(leftFisheyeCameraName, fisheye_left_camera_topic, leftFisheyeCameraName, videoSetting, blackfly_left_camera_id);
+      cameraParamaters[3] = new DRCRobotCameraParamaters(rightFisheyeCameraName, fisheye_right_camera_topic, rightFisheyeCameraName, videoSetting, blackfly_right_camera_id);
    }
    
    @Override

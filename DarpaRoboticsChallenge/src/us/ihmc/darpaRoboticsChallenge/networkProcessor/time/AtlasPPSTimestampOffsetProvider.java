@@ -64,7 +64,7 @@ public class AtlasPPSTimestampOffsetProvider implements PPSTimestampOffsetProvid
    }
 
    @Override
-   public long ajustTimeStampToRobotClock(long timeStamp)
+   public long adjustTimeStampToRobotClock(long timeStamp)
    {
       return timeStamp + currentTimeStampOffset.get();
    }
