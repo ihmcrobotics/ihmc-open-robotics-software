@@ -120,6 +120,8 @@ public class PelvisLinearStateUpdater
    
    private final StateEstimatorParameters stateEstimatorParameters;
    
+   private boolean initializeToActual = false;
+   
    // Temporary variables
    private final FramePoint rootJointPosition = new FramePoint(worldFrame);
    private final FrameVector rootJointVelocity = new FrameVector(worldFrame);
@@ -282,6 +284,13 @@ public class PelvisLinearStateUpdater
       
       centerOfMassCalculator.compute();
       centerOfMassCalculator.packCenterOfMass(tempPosition);
+      if (!initializeToActual && DRCKinematicsBasedStateEstimator.INITIALIZE_HEIGHT_WITH_FOOT)
+      {
+         tempPosition.changeFrame(footFrames.get(RobotSide.LEFT));
+         double footToCoMZ = tempPosition.getZ();
+         tempPosition.changeFrame(worldFrame);
+         tempPosition.setZ(tempPosition.getZ() - footToCoMZ);
+      }
       tempFrameVector.setIncludingFrame(tempPosition);
       tempFrameVector.changeFrame(worldFrame);
 
@@ -621,12 +630,14 @@ public class PelvisLinearStateUpdater
 
    public void initializeCoMPositionToActual(Point3d initialCoMPosition)
    {
+      initializeToActual = true;
       centerOfMassPosition.setIncludingFrame(worldFrame, initialCoMPosition);
       yoCenterOfMassPosition.set(initialCoMPosition);
    }
 
    public void initializeCoMPositionToActual(FramePoint initialCoMPosition)
    {
+      initializeToActual = true;
       centerOfMassPosition.set(initialCoMPosition);
       yoCenterOfMassPosition.set(initialCoMPosition);
    }

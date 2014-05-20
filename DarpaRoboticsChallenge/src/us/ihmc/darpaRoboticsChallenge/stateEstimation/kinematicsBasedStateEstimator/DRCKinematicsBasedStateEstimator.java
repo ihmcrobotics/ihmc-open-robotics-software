@@ -37,6 +37,8 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterface, StateEstimator
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
+   public static final boolean INITIALIZE_HEIGHT_WITH_FOOT = false;
    
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
