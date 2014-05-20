@@ -15,7 +15,7 @@ public class AlwaysZeroOffsetPPSTimestampOffsetProvider implements PPSTimestampO
       return 0;
    }
 
-   public long ajustTimeStampToRobotClock(long timeStamp)
+   public long adjustTimeStampToRobotClock(long timeStamp)
    {
       return timeStamp;
    }

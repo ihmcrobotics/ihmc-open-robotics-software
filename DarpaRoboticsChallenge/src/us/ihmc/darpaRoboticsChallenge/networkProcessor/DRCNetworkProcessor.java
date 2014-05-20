@@ -14,7 +14,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCSensorParameters;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandJointAnglePacket;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.CameraInfoReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.FishEyeDataReceiver;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.GazeboCameraReceiver;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.RosCameraReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.MultiSenseCameraInfoReciever;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.SCSCameraDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.GazeboLidarDataReceiver;
@@ -79,7 +79,7 @@ public class DRCNetworkProcessor
          {
             rosNativeNetworkProcessor = null;
          }
-         GazeboCameraReceiver cameraReceiver = new GazeboCameraReceiver(sensorInformation, robotPoseBuffer, videoSettings, rosMainNode, networkingManager,ppsTimestampOffsetProvider);
+         RosCameraReceiver cameraReceiver = new RosCameraReceiver(sensorInformation.getPrimaryCameraParamaters(), robotPoseBuffer, videoSettings, rosMainNode, networkingManager,ppsTimestampOffsetProvider);
 //         CameraInfoReceiver cameraInfoServer = new MultiSenseCameraInfoReciever(rosMainNode, networkingManager.getControllerStateHandler());
 //         networkingManager.getControllerCommandHandler().setIntrinsicServer(cameraInfoServer);
          

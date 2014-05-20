@@ -2,9 +2,6 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.camera;
 
 import java.awt.image.BufferedImage;
 
-import com.vividsolutions.jts.operation.buffer.validate.BufferResultValidator;
-
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorControllerStateHandler;
@@ -38,10 +35,7 @@ public class SCSCameraDataReceiver extends CameraDataReceiver implements ObjectC
       updateLeftEyeImage(object.getImage(), object.getTimeStamp(), object.getFieldOfView());
       scsCameraInfoReceiver.setIntrinsicPacket(object);
     }
-   
- 
 }
-
 
 class SCSCameraInfoReceiver implements CameraInfoReceiver
 {
