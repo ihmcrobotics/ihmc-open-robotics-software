@@ -1170,6 +1170,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       desiredPelvisOrientation.set(averageOrientation);
    }
 
+   private final DoubleYoVariable swingTimeRemainingPush = new DoubleYoVariable("swingTimeRemainingPushDebug", registry);
    private class SingleSupportState extends State<WalkingState>
    {
       private final RobotSide swingSide;
@@ -1186,6 +1187,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       private Footstep nextFootstep;
       private final FramePoint swingFootPosition = new FramePoint();
       private double captureTime;
+      private double defaultSwingTime;
 
       public SingleSupportState(RobotSide robotSide)
       {
@@ -1194,6 +1196,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          this.desiredPelvisOrientationToPack = new FrameOrientation(worldFrame);
          this.desiredPelvisAngularVelocityToPack = new FrameVector(fullRobotModel.getRootJoint().getFrameAfterJoint());
          this.desiredPelvisAngularAccelerationToPack = new FrameVector(fullRobotModel.getRootJoint().getFrameAfterJoint());
+         defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
       }
 
       @Override
@@ -1213,6 +1216,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          RobotSide supportSide = swingSide.getOppositeSide();
          double swingTimeRemaining = swingTimeCalculationProvider.getValue() - (stateMachine.timeInCurrentState() - captureTime);
+         swingTimeRemainingPush.set(swingTimeRemaining);
          FramePoint2d transferToFootstepLocation = transferToFootstep.getFramePoint2dCopy();
          FrameConvexPolygon2d footPolygon = computeFootPolygon(supportSide, referenceFrames.getAnkleZUpFrame(supportSide));
          double omega0 = icpAndMomentumBasedController.getOmega0();
@@ -1228,12 +1232,16 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
             if (footstepHasBeenAdjusted)
             {
-               captureTime = stateMachine.timeInCurrentState();
                updateFootstepParameters();
+               
+               captureTime = stateMachine.timeInCurrentState();
 //               double oldSwingTime = swingTimeCalculationProvider.getValue();
-
-               double distance = 2.0 * swingFootPosition.distance(nextFootstep.getPosition());
-               swingTimeCalculationProvider.setSwingTime(Math.max(0.2, distance));//oldSwingTime - captureTime);
+//               double percentInSwing = MathTools.clipToMinMax(captureTime/defaultSwingTime, 0.0, 1.0);
+//               double fastSwingTime = 1.0;
+//               
+//               double newSwingTime = Math.max(fastSwingTime * (1.0 - percentInSwing), 0.2);
+//               swingTimeCalculationProvider.setSwingTime(newSwingTime);
+               swingTimeCalculationProvider.setSwingTime(defaultSwingTime - captureTime);
 
                footEndEffectorControlModules.get(swingSide).replanTrajectory();
 
@@ -1364,9 +1372,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          Vector3d initialVectorPosition = new Vector3d();
          footToWorldTransform.get(supportSide.getOppositeSide()).get(initialVectorPosition);
          FramePoint initialFramePosition = new FramePoint(worldFrame, initialVectorPosition);
-         FramePoint footFinalPosition = new FramePoint(worldFrame);
-         swingFootFinalPositionProvider.get(footFinalPosition);
-         double stepDistance = initialFramePosition.distance(footFinalPosition);
+//         FramePoint footFinalPosition = new FramePoint(worldFrame);
+//         swingFootFinalPositionProvider.get(footFinalPosition);
+         double stepDistance = initialFramePosition.distance(nextFootstep.getPositionInFrame(worldFrame));
          swingTimeCalculationProvider.setSwingTimeByDistance(stepDistance);
          transferTimeCalculationProvider.setTransferTime();
 
