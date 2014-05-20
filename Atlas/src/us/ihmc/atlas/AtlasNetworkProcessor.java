@@ -10,7 +10,6 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DummyController;
 import us.ihmc.iRobot.control.IRobotControlThreadManager;
 import us.ihmc.utilities.net.LocalObjectCommunicator;
-import us.ihmc.utilities.net.ObjectCommunicator;
 
 import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
@@ -26,10 +25,10 @@ public class AtlasNetworkProcessor
    public static void main(String[] args) throws URISyntaxException, JSAPException
    {
       JSAP jsap = new JSAP();
-      FlaggedOption scsIPFlag =
-         new FlaggedOption("scs-ip").setLongFlag("scs-ip").setShortFlag(JSAP.NO_SHORTFLAG).setRequired(false).setStringParser(JSAP.STRING_PARSER);
-      FlaggedOption rosURIFlag =
-         new FlaggedOption("ros-uri").setLongFlag("ros-uri").setShortFlag(JSAP.NO_SHORTFLAG).setRequired(false).setStringParser(JSAP.STRING_PARSER);
+      FlaggedOption scsIPFlag = new FlaggedOption("scs-ip").setLongFlag("scs-ip").setShortFlag(JSAP.NO_SHORTFLAG).setRequired(false)
+            .setStringParser(JSAP.STRING_PARSER);
+      FlaggedOption rosURIFlag = new FlaggedOption("ros-uri").setLongFlag("ros-uri").setShortFlag(JSAP.NO_SHORTFLAG).setRequired(false)
+            .setStringParser(JSAP.STRING_PARSER);
       Switch simulateController = new Switch("simulate-controller").setShortFlag('d').setLongFlag(JSAP.NO_LONGFLAG);
 
       FlaggedOption robotModel = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(true).setStringParser(JSAP.STRING_PARSER);
@@ -68,15 +67,14 @@ public class AtlasNetworkProcessor
             return;
          }
 
-
          if (config.getBoolean(simulateController.getID()))
          {
-            System.err.println(
-                "WARNING WARNING WARNING :: Simulating DRC Controller - WILL NOT WORK ON REAL ROBOT. Do not use -d argument when running on real robot.");
-            ObjectCommunicator objectCommunicator = new LocalObjectCommunicator();
+            System.err
+                  .println("WARNING WARNING WARNING :: Simulating DRC Controller - WILL NOT WORK ON REAL ROBOT. Do not use -d argument when running on real robot.");
+            LocalObjectCommunicator objectCommunicator = new LocalObjectCommunicator();
 
             new DummyController(rosMasterURI, objectCommunicator, model, new IRobotControlThreadManager(objectCommunicator));
-            new DRCNetworkProcessor(new URI(rosMasterURI), objectCommunicator, model);
+            new DRCNetworkProcessor(objectCommunicator,null, model);
          }
          else
          {
@@ -87,9 +85,7 @@ public class AtlasNetworkProcessor
       {
          System.err.println("Invalid parameters");
          System.out.println(jsap.getHelp());
-
          return;
       }
    }
-
 }

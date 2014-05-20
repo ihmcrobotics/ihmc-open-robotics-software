@@ -2,6 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.camera;
 
 import java.awt.image.BufferedImage;
 
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParamaters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorControllerStateHandler;
@@ -9,7 +10,6 @@ import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingMa
 import us.ihmc.graphics3DAdapter.camera.CameraInformationPacket;
 import us.ihmc.graphics3DAdapter.camera.IntrinsicCameraParametersPacket;
 import us.ihmc.graphics3DAdapter.camera.LocalVideoPacket;
-import us.ihmc.graphics3DAdapter.camera.VideoSettings;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.net.ObjectConsumer;
 
@@ -22,9 +22,9 @@ public class SCSCameraDataReceiver extends CameraDataReceiver implements ObjectC
 {
    SCSCameraInfoReceiver scsCameraInfoReceiver;
    
-   public SCSCameraDataReceiver(RobotPoseBuffer robotPoseBuffer, VideoSettings videoSettings, ObjectCommunicator scsCommunicator, DRCNetworkProcessorNetworkingManager networkingManager, PPSTimestampOffsetProvider ppsTimestampOffsetProvider)
+   public SCSCameraDataReceiver(RobotPoseBuffer robotPoseBuffer, DRCRobotCameraParamaters drcRobotCameraParamaters, ObjectCommunicator scsCommunicator, DRCNetworkProcessorNetworkingManager networkingManager, PPSTimestampOffsetProvider ppsTimestampOffsetProvider)
    {
-      super(robotPoseBuffer, videoSettings, networkingManager, ppsTimestampOffsetProvider);
+      super(robotPoseBuffer, drcRobotCameraParamaters.getVideoSettings(), networkingManager, ppsTimestampOffsetProvider);
       scsCommunicator.attachListener(LocalVideoPacket.class, this);
       scsCameraInfoReceiver = new SCSCameraInfoReceiver(networkingManager.getControllerStateHandler());
       networkingManager.getControllerCommandHandler().setIntrinsicServer(scsCameraInfoReceiver);
