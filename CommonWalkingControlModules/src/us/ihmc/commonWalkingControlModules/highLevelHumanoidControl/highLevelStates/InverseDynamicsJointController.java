@@ -59,7 +59,6 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPositi
 import com.yobotics.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePose;
-import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.YoPositionProvider;
 
@@ -67,7 +66,7 @@ import com.yobotics.simulationconstructionset.util.trajectory.YoPositionProvider
  * Simple controller using an inverse dynamics calculator. Mainly used to check gravity compensation, and simple controls while having the robot hanging in the air.
  * @author Plenty of people :)
  */
-public class InverseDynamicsJointController extends State<HighLevelState>
+public class InverseDynamicsJointController extends HighLevelBehavior
 {
    private static final HighLevelState controllerState = HighLevelState.INGRESS_EGRESS;
    

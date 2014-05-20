@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHumanoidControllerManager;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.MultiContactTestHumanoidController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CoMBasedMomentumRateOfChangeControlModule;
@@ -43,7 +44,6 @@ import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
-import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.DampedLeastSquaresSolver;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -61,7 +61,6 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.GainCalculator;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParameters;
 
 public class MultiContactTestHumanoidControllerFactory implements HighLevelHumanoidControllerFactory
@@ -207,8 +206,8 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
          multiContactBehavior.setHandInContact(robotSide, true);
       }
 
-      ArrayList<Pair<State<HighLevelState>, YoVariableRegistry>> highLevelBehaviors = new ArrayList<>();
-      highLevelBehaviors.add(new Pair<State<HighLevelState>, YoVariableRegistry>(multiContactBehavior, multiContactBehavior.getYoVariableRegistry()));
+      ArrayList<HighLevelBehavior> highLevelBehaviors = new ArrayList<>();
+      highLevelBehaviors.add(multiContactBehavior);
 
       // This is the "highest level" controller that enables switching between the different controllers (walking, multi-contact, driving, etc.)
       HighLevelHumanoidControllerManager ret = new HighLevelHumanoidControllerManager(HighLevelState.MULTI_CONTACT, highLevelBehaviors, momentumBasedController, null);

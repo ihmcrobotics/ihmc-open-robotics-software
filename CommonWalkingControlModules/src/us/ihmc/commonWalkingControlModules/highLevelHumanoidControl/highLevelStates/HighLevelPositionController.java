@@ -31,7 +31,6 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.GainCalculator;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
-import com.yobotics.simulationconstructionset.util.statemachines.State;
 
 /**
  * Similar control to {@link CarIngressEgressController} but without handling external wrenches (no ground contact) nor trying to control any part of the robot with respect to world frame.
@@ -39,7 +38,7 @@ import com.yobotics.simulationconstructionset.util.statemachines.State;
  * @author Sylvain
  *
  */
-public class HighLevelPositionController extends State<HighLevelState>
+public class HighLevelPositionController extends HighLevelBehavior
 {
    private final static HighLevelState controllerState = HighLevelState.TASKSPACE_POSITION_CONTROL;
    private final static MomentumControlModuleType MOMENTUM_CONTROL_MODULE_TO_USE = MomentumControlModuleType.OPT_NULLSPACE;
