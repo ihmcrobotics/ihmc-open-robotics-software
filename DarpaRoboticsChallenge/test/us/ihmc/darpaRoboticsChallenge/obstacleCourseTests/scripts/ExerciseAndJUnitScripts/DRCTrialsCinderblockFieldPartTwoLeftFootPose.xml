@@ -219,7 +219,7 @@
         <robotSide>RIGHT</robotSide>
         <location>
           <x>1.9899258885322495</x>
-          <y>0.1465881268172946</y>
+          <y>0.1665881268172946</y>
           <z>0.5474662064327864</z>
         </location>
         <orientation>
@@ -322,7 +322,7 @@
         <robotSide>LEFT</robotSide>
         <location>
           <x>3.2325880802291973</x>
-          <y>0.41691632858753456</y>
+          <y>0.35691632858753456</y>
           <z>0.4275149964472299</z>
         </location>
         <orientation>
