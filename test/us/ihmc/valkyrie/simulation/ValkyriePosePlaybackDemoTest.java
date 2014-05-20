@@ -103,21 +103,14 @@ public class ValkyriePosePlaybackDemoTest
    @Test
    public void testPosePlaybackControllerWithWarmupPacket() throws SimulationExceededMaximumTimeException
    {
-      DRCPosePlaybackDemo drcPosePlaybackDemo = setupPosePlaybackSim();
-      
-      drcSimulation = drcPosePlaybackDemo.getDRCSimulation();
-      SimulationConstructionSet scs = drcPosePlaybackDemo.getSimulationConstructionSet();
-      
       int numberOfPoses = 5;
       double trajectoryTime = 1.0;
       FullRobotModel fullRobotModel = valkyrieRobotModel.createFullRobotModel();
-      List<OneDoFJoint> jointToControl = Arrays.asList(fullRobotModel.getOneDoFJoints());
 //      PosePlaybackPacket posePlaybackPacket = new ValkyrieWarmupPoseSequencePacket(fullRobotModel, 1.0);
 //      PosePlaybackPacket posePlaybackPacket = new ValkyrieWarmupPoseSequencePacket("valkercise02.poseSequence", fullRobotModel, 1.0);
       PosePlaybackPacket posePlaybackPacket = new ValkyrieWarmupPoseSequencePacket("valkerena.poseSequence", fullRobotModel, 1.0);
       
-      drcPosePlaybackDemo.setupPosePlaybackController(posePlaybackPacket, true);
-
+      SimulationConstructionSet scs = startPosePlaybackSim(posePlaybackPacket);
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
       scs.getVariable("PosePlayback_startPosePlayback").setValueFromDouble(1.0);
@@ -130,19 +123,14 @@ public class ValkyriePosePlaybackDemoTest
    @Test
    public void testPosePlaybackControllerWithRandomPoses() throws SimulationExceededMaximumTimeException
    {
-      DRCPosePlaybackDemo drcPosePlaybackDemo = setupPosePlaybackSim();
-      
-      drcSimulation = drcPosePlaybackDemo.getDRCSimulation();
-      SimulationConstructionSet scs = drcPosePlaybackDemo.getSimulationConstructionSet();
-      
       int numberOfPoses = 5;
       double delayTime = 0.25;
       double trajectoryTime = 1.0;
       FullRobotModel fullRobotModel = valkyrieRobotModel.createFullRobotModel();
       List<OneDoFJoint> jointToControl = Arrays.asList(fullRobotModel.getOneDoFJoints());
       PosePlaybackPacket posePlaybackPacket = createRandomPosePlaybackPacket(fullRobotModel, jointToControl, numberOfPoses, delayTime, trajectoryTime);
-      drcPosePlaybackDemo.setupPosePlaybackController(posePlaybackPacket, true);
 
+      SimulationConstructionSet scs = startPosePlaybackSim(posePlaybackPacket);
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
       scs.getVariable("PosePlayback_startPosePlayback").setValueFromDouble(1.0);
@@ -155,11 +143,6 @@ public class ValkyriePosePlaybackDemoTest
    @Test
    public void testPosePlaybackControllerWithRandomPosesWithSomeJointsUncontrolled() throws SimulationExceededMaximumTimeException
    {
-      DRCPosePlaybackDemo drcPosePlaybackDemo = setupPosePlaybackSim();
-      
-      drcSimulation = drcPosePlaybackDemo.getDRCSimulation();
-      SimulationConstructionSet scs = drcPosePlaybackDemo.getSimulationConstructionSet();
-      
       int numberOfPoses = 5;
       double delayTime = 0.25;
       double trajectoryTime = 1.0;
@@ -171,8 +154,8 @@ public class ValkyriePosePlaybackDemoTest
          jointToControl.remove(RandomTools.generateRandomInt(random, 1, jointToControl.size()) - 1);
       }
       PosePlaybackPacket posePlaybackPacket = createRandomPosePlaybackPacket(fullRobotModel, jointToControl, numberOfPoses, delayTime, trajectoryTime);
-      drcPosePlaybackDemo.setupPosePlaybackController(posePlaybackPacket, true);
 
+      SimulationConstructionSet scs = startPosePlaybackSim(posePlaybackPacket);
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
       scs.getVariable("PosePlayback_startPosePlayback").setValueFromDouble(1.0);
@@ -182,10 +165,8 @@ public class ValkyriePosePlaybackDemoTest
       BambooTools.reportTestFinishedMessage();
    }
 
-   private DRCPosePlaybackDemo setupPosePlaybackSim()
+   private SimulationConstructionSet startPosePlaybackSim(PosePlaybackPacket posePlaybackPacket)
    {
-      
-
       AutomaticSimulationRunner automaticSimulationRunner = null;
 
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false, null);
@@ -197,9 +178,12 @@ public class ValkyriePosePlaybackDemoTest
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, valkyrieRobotModel.getSimulateDT());
       scsInitialSetup.setDrawGroundProfile(true);
       scsInitialSetup.setInitializeEstimatorToActual(true);
-      
-      DRCPosePlaybackDemo drcPosePlaybackDemo = new DRCPosePlaybackDemo(robotInitialSetup, guiInitialSetup, scsInitialSetup, automaticSimulationRunner, valkyrieRobotModel.getControllerDT(), 16000, valkyrieRobotModel);
-      return drcPosePlaybackDemo;
+      scsInitialSetup.setSimulationDataBufferSize(16000);
+      scsInitialSetup.setTimePerRecordTick(valkyrieRobotModel.getControllerDT());
+
+      DRCPosePlaybackDemo drcPosePlaybackDemo = new DRCPosePlaybackDemo(robotInitialSetup, guiInitialSetup, scsInitialSetup, automaticSimulationRunner, posePlaybackPacket, valkyrieRobotModel);
+      drcSimulation = drcPosePlaybackDemo.getDRCSimulation();
+      return drcPosePlaybackDemo.getSimulationConstructionSet();
    }
 
    private void createMovie(SimulationConstructionSet scs)
