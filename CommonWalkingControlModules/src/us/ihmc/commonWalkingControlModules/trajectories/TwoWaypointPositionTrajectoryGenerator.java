@@ -59,9 +59,9 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    private final DoubleYoVariable stepTime;
    private final DoubleYoVariable timeIntoStep;
    private final DoubleYoVariable defaultGroundClearance;
-   
+
    private final BooleanYoVariable setInitialSwingVelocityToZero;
-   
+
    private final YoFramePoint desiredPosition;
    private final YoFrameVector desiredVelocity;
    private final YoFrameVector desiredAcceleration;
@@ -89,13 +89,13 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    public TwoWaypointPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider stepTimeProvider,
          PositionProvider initialPositionProvider, VectorProvider initialVelocityProvider, PositionProvider finalPositionProvider,
          VectorProvider finalDesiredVelocityProvider, TrajectoryParametersProvider trajectoryParametersProvider, YoVariableRegistry parentRegistry,
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,WalkingControllerParameters walkingControllerParameters, boolean visualize)
+         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, WalkingControllerParameters walkingControllerParameters, boolean visualize)
    {
       registry = new YoVariableRegistry(namePrefix + namePostFix);
       parentRegistry.addChild(registry);
 
-     setInitialSwingVelocityToZero = new BooleanYoVariable(namePrefix + "SetInitialSwingVelocityToZero", registry);
-     setInitialSwingVelocityToZero.set(false);
+      setInitialSwingVelocityToZero = new BooleanYoVariable(namePrefix + "SetInitialSwingVelocityToZero", registry);
+      setInitialSwingVelocityToZero.set(false);
       if (visualize)
       {
          trajectoryBagOfBalls = new BagOfBalls(numberOfVisualizationMarkers, 0.01, namePrefix + "TrajectoryBagOfBalls", registry,
@@ -129,7 +129,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
       defaultGroundClearance = new DoubleYoVariable(namePrefix + "DefaultGroundClearance", registry);
       defaultGroundClearance.set(SimpleTwoWaypointTrajectoryParameters.getDefaultGroundClearance());
-      
+
       desiredPosition = new YoFramePoint(namePrefix + "DesiredPosition", referenceFrame, registry);
       desiredVelocity = new YoFrameVector(namePrefix + "DesiredVelocity", referenceFrame, registry);
       desiredAcceleration = new YoFrameVector(namePrefix + "DesiredAcceleration", referenceFrame, registry);
@@ -429,12 +429,12 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       {
          positionSources[i].get(tempPosition);
          velocitySources[i].get(tempVelocity);
-         
+
          if ((i == 0) && setInitialSwingVelocityToZero.getBooleanValue())
          {
             tempVelocity.set(0.0, 0.0, 0.0);
          }
-         
+
          tempPosition.changeFrame(referenceFrame);
          tempVelocity.changeFrame(referenceFrame);
          allPositions[endpointIndices[i]].set(tempPosition);
@@ -603,10 +603,10 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
    private void visualizeSpline()
    {
-	   double t0;
-	   double tf;
-	   double t;
-	   
+      double t0;
+      double tf;
+      double t;
+
       for (int i = 0; i < numberOfVisualizationMarkers; i++)
       {
          t0 = concatenatedSplinesWithArcLengthCalculatedIteratively.getT0();
@@ -663,11 +663,11 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
             index++;
          }
       }
-      
+
       // return default waypoints at height of box if there are no intersections
       if (index != 2 || ((boxFrameFinalPosition.getX() > (halfSideLengthsXY.x) == (boxFrameInitialPosition.getX() > (halfSideLengthsXY.x))))
             || ((boxFrameFinalPosition.getY() > (halfSideLengthsXY.y) == (boxFrameInitialPosition.getY() > (halfSideLengthsXY.y)))))
-      {         
+      {
          return getWaypointsAtGroundClearance(defaultGroundClearance.getDoubleValue());
       }
 

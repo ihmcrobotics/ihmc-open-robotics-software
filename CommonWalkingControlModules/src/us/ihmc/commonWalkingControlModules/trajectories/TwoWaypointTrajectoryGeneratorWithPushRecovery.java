@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -9,6 +10,7 @@ import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
@@ -31,127 +33,155 @@ public class TwoWaypointTrajectoryGeneratorWithPushRecovery implements PositionT
 {
    private static final boolean VISUALIZE = true;
 
-	private final String namePostFix = getClass().getSimpleName();
-	private final YoVariableRegistry registry;
-	private final BooleanYoVariable visualize;
-
-	protected final EnumYoVariable<TrajectoryWaypointGenerationMethod> waypointGenerationMethod;
-
-	private final DoubleProvider stepTimeProvider;
-	private final PositionProvider[] positionSources = new PositionProvider[2];
-	private final VectorProvider[] velocitySources = new VectorProvider[2];
-
-	private final DoubleYoVariable stepTime;
-	private final DoubleYoVariable timeIntoStep;
-	private final DoubleYoVariable defaultGroundClearance;
+   private final String namePostFix = getClass().getSimpleName();
+   private final YoVariableRegistry registry;
+   private final BooleanYoVariable visualize;
    
-	private final BooleanYoVariable setInitialSwingVelocityToZero;
-   
-	private final YoFramePoint desiredPosition;
-	private final YoFrameVector desiredVelocity;
-	private final YoFrameVector desiredAcceleration;
+   private final int numberOfBallsInBag = 30;
+   private final BagOfBalls bagOfBalls;
+   private double t0ForViz;
+   private double tfForViz;
+   private double tForViz;
 
-	protected TwoWaypointTrajectoryParameters trajectoryParameters;
+   protected final EnumYoVariable<TrajectoryWaypointGenerationMethod> waypointGenerationMethod;
 
-	private final SmoothCartesianWaypointConnectorTrajectoryGenerator2D pushRecoveryTrajectoryGenerator;
-	private final BooleanYoVariable hasReplanned;
-	private final DoubleYoVariable initialTime;
-	private final PositionTrajectoryGenerator nominalTrajectoryGenerator;
-	
-	private FramePoint nominalTrajectoryPosition;
-	private FrameVector nominalTrajectoryVelocity;
-	private FrameVector nominalTrajectoryAcceleration;
-	
-	private double timeRemaining;
+   private final DoubleProvider stepTimeProvider;
+   private final PositionProvider[] positionSources = new PositionProvider[2];
+   private final VectorProvider[] velocitySources = new VectorProvider[2];
 
-//	private final SoftTouchdownTrajectoryGenerator touchdownTrajectoryGenerator;
-	
-	public TwoWaypointTrajectoryGeneratorWithPushRecovery(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider stepTimeProvider,
-	         PositionProvider initialPositionProvider, VectorProvider initialVelocityProvider, PositionProvider finalPositionProvider,
-	         VectorProvider finalDesiredVelocityProvider, TrajectoryParametersProvider trajectoryParametersProvider, YoVariableRegistry parentRegistry,
-	         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, PositionTrajectoryGenerator nominalTrajectoryGenerator,
-	         WalkingControllerParameters walkingControllerParameters, boolean visualize)
-	{
-		registry = new YoVariableRegistry(namePrefix + namePostFix);
-	      parentRegistry.addChild(registry);
+   private final DoubleYoVariable stepTime;
+   private final DoubleYoVariable timeIntoStep;
+   private final DoubleYoVariable defaultGroundClearance;
 
-	     setInitialSwingVelocityToZero = new BooleanYoVariable(namePrefix + "SetInitialSwingVelocityToZero", registry);
-	     setInitialSwingVelocityToZero.set(false);
+   private final BooleanYoVariable setInitialSwingVelocityToZero;
 
-	      this.waypointGenerationMethod = new EnumYoVariable<TrajectoryWaypointGenerationMethod>(namePrefix + "WaypointGenerationMethod", registry,
-	            TrajectoryWaypointGenerationMethod.class);
+   private final YoFramePoint desiredPosition;
+   private final YoFrameVector desiredVelocity;
+   private final YoFrameVector desiredAcceleration;
 
-	      this.stepTimeProvider = stepTimeProvider;
-	      
-	      this.hasReplanned = new BooleanYoVariable(namePrefix + "HasReplanned", this.registry);
-	      this.hasReplanned.set(false);
-	      
-	      this.initialTime = new DoubleYoVariable(namePrefix + "InitialTime", this.registry);
-	      this.initialTime.set(0.0);
-	      
-	      this.nominalTrajectoryPosition = new FramePoint();
-	      this.nominalTrajectoryVelocity = new FrameVector();
-	      this.nominalTrajectoryAcceleration = new FrameVector();
+   protected TwoWaypointTrajectoryParameters trajectoryParameters;
 
-	      positionSources[0] = initialPositionProvider;
-	      positionSources[1] = finalPositionProvider;
+   private final SmoothCartesianWaypointConnectorTrajectoryGenerator2D pushRecoveryTrajectoryGenerator;
+   private final BooleanYoVariable hasReplanned;
+   private final DoubleYoVariable initialTime;
+   private final PositionTrajectoryGenerator nominalTrajectoryGenerator;
 
-	      velocitySources[0] = initialVelocityProvider;
-	      velocitySources[1] = finalDesiredVelocityProvider;
+   private FramePoint nominalTrajectoryPosition;
+   private FrameVector nominalTrajectoryVelocity;
+   private FrameVector nominalTrajectoryAcceleration;
 
-	      stepTime = new DoubleYoVariable(namePrefix + "StepTime", registry);
-	      stepTime.set(stepTimeProvider.getValue());
+   private double timeRemaining;
 
-	      timeIntoStep = new DoubleYoVariable(namePrefix + "TimeIntoStep", registry);
+   //	private final SoftTouchdownTrajectoryGenerator touchdownTrajectoryGenerator;
 
-	      defaultGroundClearance = new DoubleYoVariable(namePrefix + "DefaultGroundClearance", registry);
-	      defaultGroundClearance.set(SimpleTwoWaypointTrajectoryParameters.getDefaultGroundClearance());
-	      
-	      desiredPosition = new YoFramePoint(namePrefix + "DesiredPosition", referenceFrame, registry);
-	      desiredVelocity = new YoFrameVector(namePrefix + "DesiredVelocity", referenceFrame, registry);
-	      desiredAcceleration = new YoFrameVector(namePrefix + "DesiredAcceleration", referenceFrame, registry);
+   public TwoWaypointTrajectoryGeneratorWithPushRecovery(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider stepTimeProvider,
+         PositionProvider initialPositionProvider, VectorProvider initialVelocityProvider, PositionProvider finalPositionProvider,
+         VectorProvider finalDesiredVelocityProvider, TrajectoryParametersProvider trajectoryParametersProvider, YoVariableRegistry parentRegistry,
+         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, PositionTrajectoryGenerator nominalTrajectoryGenerator,
+         WalkingControllerParameters walkingControllerParameters, boolean visualize)
+   {
+      registry = new YoVariableRegistry(namePrefix + namePostFix);
+      parentRegistry.addChild(registry);
 
-	      this.visualize = new BooleanYoVariable(namePrefix + "Visualize", registry);
-	      this.visualize.set(VISUALIZE);
-	      
-	      this.nominalTrajectoryGenerator = nominalTrajectoryGenerator;
-	      
-	      this.pushRecoveryTrajectoryGenerator = new SmoothCartesianWaypointConnectorTrajectoryGenerator2D(namePrefix + "PushRecoveryTrajectory", referenceFrame, this.initialTime.getDoubleValue(), 
-	    		  stepTimeProvider, initialPositionProvider, finalPositionProvider, initialVelocityProvider, parentRegistry, dynamicGraphicObjectsListRegistry, 
-	    		  walkingControllerParameters);
-	}
-	
-	public void initialize()
-	{
-		timeRemaining = stepTimeProvider.getValue();
-		
-		pushRecoveryTrajectoryGenerator.setTimeIntoStep(stepTime.getDoubleValue() - timeRemaining);
-		pushRecoveryTrajectoryGenerator.initialize();
-	}	
-	
+      setInitialSwingVelocityToZero = new BooleanYoVariable(namePrefix + "SetInitialSwingVelocityToZero", registry);
+      setInitialSwingVelocityToZero.set(false);
+
+      this.waypointGenerationMethod = new EnumYoVariable<TrajectoryWaypointGenerationMethod>(namePrefix + "WaypointGenerationMethod", registry,
+            TrajectoryWaypointGenerationMethod.class);
+
+      this.stepTimeProvider = stepTimeProvider;
+
+      this.hasReplanned = new BooleanYoVariable(namePrefix + "HasReplanned", this.registry);
+      this.hasReplanned.set(false);
+
+      this.initialTime = new DoubleYoVariable(namePrefix + "InitialTime", this.registry);
+      this.initialTime.set(0.0);
+
+      this.nominalTrajectoryPosition = new FramePoint();
+      this.nominalTrajectoryVelocity = new FrameVector();
+      this.nominalTrajectoryAcceleration = new FrameVector();
+
+      positionSources[0] = initialPositionProvider;
+      positionSources[1] = finalPositionProvider;
+
+      velocitySources[0] = initialVelocityProvider;
+      velocitySources[1] = finalDesiredVelocityProvider;
+
+      stepTime = new DoubleYoVariable(namePrefix + "StepTime", registry);
+      stepTime.set(stepTimeProvider.getValue());
+
+      timeIntoStep = new DoubleYoVariable(namePrefix + "TimeIntoStep", registry);
+
+      defaultGroundClearance = new DoubleYoVariable(namePrefix + "DefaultGroundClearance", registry);
+      defaultGroundClearance.set(SimpleTwoWaypointTrajectoryParameters.getDefaultGroundClearance());
+
+      desiredPosition = new YoFramePoint(namePrefix + "DesiredPosition", referenceFrame, registry);
+      desiredVelocity = new YoFrameVector(namePrefix + "DesiredVelocity", referenceFrame, registry);
+      desiredAcceleration = new YoFrameVector(namePrefix + "DesiredAcceleration", referenceFrame, registry);
+
+      this.visualize = new BooleanYoVariable(namePrefix + "Visualize", registry);
+      this.visualize.set(VISUALIZE);
+
+      this.nominalTrajectoryGenerator = nominalTrajectoryGenerator;
+
+      this.pushRecoveryTrajectoryGenerator = new SmoothCartesianWaypointConnectorTrajectoryGenerator2D(namePrefix + "PushRecoveryTrajectory", referenceFrame,
+            this.initialTime.getDoubleValue(), stepTimeProvider, initialPositionProvider, finalPositionProvider, initialVelocityProvider, parentRegistry,
+            dynamicGraphicObjectsListRegistry, walkingControllerParameters);
+      
+      this.bagOfBalls = new BagOfBalls(numberOfBallsInBag, 0.01, namePrefix + "SwingTrajectoryBagOfBalls", registry,
+            dynamicGraphicObjectsListRegistry);
+   }
+
+   public void initialize()
+   {
+      timeRemaining = stepTimeProvider.getValue();
+
+      pushRecoveryTrajectoryGenerator.setTimeIntoStep(stepTime.getDoubleValue() - timeRemaining);
+      timeIntoStep.set(stepTime.getDoubleValue() - timeRemaining);
+      pushRecoveryTrajectoryGenerator.initialize();
+      
+      if(VISUALIZE)
+      {
+         visualizeTrajectory();
+      }
+   }
+
    public void compute(double time)
    {
       timeIntoStep.set(time);
-      
+
       nominalTrajectoryGenerator.compute(time);
       pushRecoveryTrajectoryGenerator.compute(time);
-      
+
       nominalTrajectoryGenerator.get(nominalTrajectoryPosition);
       nominalTrajectoryGenerator.packVelocity(nominalTrajectoryVelocity);
       nominalTrajectoryGenerator.packAcceleration(nominalTrajectoryAcceleration);
-			  
+
       desiredPosition.setX(pushRecoveryTrajectoryGenerator.getDesiredPosition().getX());
       desiredPosition.setY(pushRecoveryTrajectoryGenerator.getDesiredPosition().getY());
       desiredPosition.setZ(nominalTrajectoryPosition.getZ());
-      
+
       desiredVelocity.setX(pushRecoveryTrajectoryGenerator.getDesiredVelocity().getX());
       desiredVelocity.setY(pushRecoveryTrajectoryGenerator.getDesiredVelocity().getY());
       desiredVelocity.setZ(nominalTrajectoryVelocity.getZ());
-      
+
       desiredAcceleration.setX(pushRecoveryTrajectoryGenerator.getDesiredAcceleration().getX());
       desiredAcceleration.setY(pushRecoveryTrajectoryGenerator.getDesiredAcceleration().getY());
       desiredAcceleration.setZ(nominalTrajectoryAcceleration.getZ());
-      
+
+   }
+   
+   private void visualizeTrajectory()
+   {
+      t0ForViz = timeIntoStep.getDoubleValue();
+      tfForViz = stepTime.getDoubleValue();
+
+      for (int i = 0; i < numberOfBallsInBag; i++)
+      {
+         tForViz = t0ForViz + (double) i / (double) (numberOfBallsInBag) * (tfForViz - t0ForViz);
+         compute(tForViz);
+         bagOfBalls.setBall(desiredPosition.getFramePointCopy(), i);
+      }
    }
 
    public void get(FramePoint positionToPack)
