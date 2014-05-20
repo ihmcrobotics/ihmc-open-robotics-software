@@ -16,7 +16,7 @@ public class ValkyrieNetworkProcessor
 {
    private static String rosMasterURI = DRCConfigParameters.ROS_MASTER_URI;
    private static final DRCRobotModel model = new ValkyrieRobotModel(true, true);
-
+   
    public static void main(String[] args) throws URISyntaxException, JSAPException
    {
       JSAP jsap = new JSAP();

@@ -1,6 +1,7 @@
 package us.ihmc.valkyrie;
 
 import java.io.InputStream;
+import java.net.URI;
 
 import javax.media.j3d.Transform3D;
 
@@ -22,6 +23,7 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.AlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
+import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
@@ -34,6 +36,7 @@ import us.ihmc.valkyrie.paramaters.ValkyriePhysicalProperties;
 import us.ihmc.valkyrie.paramaters.ValkyrieSensorInformation;
 import us.ihmc.valkyrie.paramaters.ValkyrieStateEstimatorParameters;
 import us.ihmc.valkyrie.paramaters.ValkyrieWalkingControllerParameters;
+import us.ihmc.valkyrie.sensors.ValkyrieSensorSuiteManager;
 
 import com.jme3.math.Transform;
 import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
@@ -272,7 +275,6 @@ public class ValkyrieRobotModel implements DRCRobotModel
    {
       return 0.006;
    }
-   
 
    @Override
    public GeneralizedSDFRobotModel getGeneralizedRobotModel()
@@ -284,6 +286,18 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public PPSTimestampOffsetProvider getPPSTimestampOffsetProvider()
    {
       return new AlwaysZeroOffsetPPSTimestampOffsetProvider();
+   }
+
+   @Override
+   public boolean isRunningOnRealRobot()
+   {
+      return runningOnRealRobot;
+   }
+
+   @Override
+   public DRCSensorSuiteManager getSensorSuiteManager(URI rosCoreURI)
+   {
+      return new ValkyrieSensorSuiteManager(rosCoreURI, getPPSTimestampOffsetProvider(), sensorInformation);
    }
 
 }
