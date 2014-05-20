@@ -56,7 +56,7 @@ public class PushRecoveryControlModule
 
    public PushRecoveryControlModule(MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters,
          BooleanYoVariable readyToGrabNextFootstep, ICPAndMomentumBasedController icpAndMomentumBasedController, SwingTimeCalculator swingTimeCalculator,
-         StateMachine<?> stateMachine, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+         StateMachine<?> stateMachine, YoVariableRegistry parentRegistry)
    {
       this.momentumBasedController = momentumBasedController;
       this.readyToGrabNextFootstep = readyToGrabNextFootstep;
@@ -71,6 +71,7 @@ public class PushRecoveryControlModule
       this.enablePushRecoveryFromDoubleSupport.set(false);
       this.defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
 
+      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
       captureRegionCalculator = new OneStepCaptureRegionCalculator(referenceFrames, walkingControllerParameters, registry, dynamicGraphicObjectsListRegistry);
       footstepAdjustor = new FootstepAdjustor(registry, dynamicGraphicObjectsListRegistry);
       orientationStateVisualizer = new OrientationStateVisualizer(dynamicGraphicObjectsListRegistry, registry);

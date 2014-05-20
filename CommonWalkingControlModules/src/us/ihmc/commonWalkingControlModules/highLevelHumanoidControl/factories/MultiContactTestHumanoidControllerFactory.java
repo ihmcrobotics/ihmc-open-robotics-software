@@ -184,7 +184,7 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
             pelvisLoadBearingProvider, reinitializeWalkingController, controlStatusProducer);
 
       VariousWalkingManagers variousWalkingManagers = VariousWalkingManagers.create(momentumBasedController, yoTime, variousWalkingProviders, walkingControllerParameters,
-            armControllerParameters, registry, dynamicGraphicObjectsListRegistry);
+            armControllerParameters, registry);
       
       MultiContactTestHumanoidController multiContactBehavior = new MultiContactTestHumanoidController(variousWalkingProviders, variousWalkingManagers,
                                                                    momentumRateOfChangeControlModule,

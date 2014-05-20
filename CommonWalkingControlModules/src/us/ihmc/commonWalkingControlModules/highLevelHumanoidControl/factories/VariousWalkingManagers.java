@@ -40,10 +40,11 @@ public class VariousWalkingManagers
 
    public static VariousWalkingManagers create(MomentumBasedController momentumBasedController, DoubleYoVariable yoTime,
            VariousWalkingProviders variousWalkingProviders, WalkingControllerParameters walkingControllerParameters,
-           ArmControllerParameters armControlParameters, YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+           ArmControllerParameters armControlParameters, YoVariableRegistry registry)
    {
       FullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
       TwistCalculator twistCalculator = momentumBasedController.getTwistCalculator();
+      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
       double controlDT = momentumBasedController.getControlDT();
 
 

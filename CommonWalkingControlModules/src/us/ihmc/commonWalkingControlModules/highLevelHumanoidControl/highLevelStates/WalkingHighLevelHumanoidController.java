@@ -91,7 +91,6 @@ import com.yobotics.simulationconstructionset.util.GainCalculator;
 import com.yobotics.simulationconstructionset.util.PDController;
 import com.yobotics.simulationconstructionset.util.errorHandling.WalkingStatusReporter;
 import com.yobotics.simulationconstructionset.util.errorHandling.WalkingStatusReporter.ErrorType;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
@@ -310,15 +309,13 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final BooleanYoVariable doPrepareManipulationForLocomotion = new BooleanYoVariable("doPrepareManipulationForLocomotion", registry);
 
    public WalkingHighLevelHumanoidController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
-         SideDependentList<FootSwitchInterface> footSwitches, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
-         CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator, TransferTimeCalculationProvider transferTimeCalculationProvider,
+         SideDependentList<FootSwitchInterface> footSwitches, CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator, TransferTimeCalculationProvider transferTimeCalculationProvider,
          double desiredPelvisPitch, WalkingControllerParameters walkingControllerParameters,
          ICPBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule, LidarControllerInterface lidarControllerInterface,
          InstantaneousCapturePointPlanner instantaneousCapturePointPlanner, ICPAndMomentumBasedController icpAndMomentumBasedController,
          MomentumBasedController momentumBasedController, WalkingStatusReporter walkingStatusReporter)
    {
-      super(variousWalkingProviders, variousWalkingManagers, momentumBasedController, walkingControllerParameters, lidarControllerInterface,
-            dynamicGraphicObjectsListRegistry, controllerState);
+      super(variousWalkingProviders, variousWalkingManagers, momentumBasedController, walkingControllerParameters, lidarControllerInterface, controllerState);
 
       super.addUpdatables(icpAndMomentumBasedController.getUpdatables());
 
@@ -434,7 +431,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             initialPelvisOrientationProvider, finalPelvisOrientationProvider, registry);
 
       pushRecoveryModule = new PushRecoveryControlModule(momentumBasedController, walkingControllerParameters, readyToGrabNextFootstep, icpAndMomentumBasedController,
-            swingTimeCalculator, stateMachine, registry, dynamicGraphicObjectsListRegistry);
+            swingTimeCalculator, stateMachine, registry);
 
       setUpStateMachine();
       readyToGrabNextFootstep.set(true);

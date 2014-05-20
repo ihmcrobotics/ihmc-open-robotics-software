@@ -167,7 +167,7 @@ public class InverseDynamicsJointController extends State<HighLevelState>
    
    private final SideDependentList<BooleanYoVariable> mirroredLegGains = new SideDependentList<>();
    
-   public InverseDynamicsJointController(MomentumBasedController momentumBasedController, BipedSupportPolygons bipedSupportPolygons, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public InverseDynamicsJointController(MomentumBasedController momentumBasedController, BipedSupportPolygons bipedSupportPolygons)
    {
       super(controllerState);
 
@@ -185,7 +185,7 @@ public class InverseDynamicsJointController extends State<HighLevelState>
       gainScaling.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable v)
+         public void variableChanged(YoVariable<?> v)
          {
             gainScaling.set(MathTools.clipToMinMax(gainScaling.getDoubleValue(), 0.0, 1.0));
          }
@@ -200,7 +200,7 @@ public class InverseDynamicsJointController extends State<HighLevelState>
       footForceScaling.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable v)
+         public void variableChanged(YoVariable<?> v)
          {
             footForceScaling.set(MathTools.clipToMinMax(footForceScaling.getDoubleValue(), 0.0, 1.0));
          }
@@ -234,6 +234,7 @@ public class InverseDynamicsJointController extends State<HighLevelState>
          YoFramePoint cop = new YoFramePoint(CONTROLLER_PREFIX + robotSide.getCamelCaseNameForMiddleOfExpression() + "CoPDesired", worldFrame, registry);
          cops.put(robotSide, cop);
          
+         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
          if (dynamicGraphicObjectsListRegistry != null)
          {
             Artifact artifact = cop.createDynamicGraphicPosition(CONTROLLER_PREFIX + robotSide.getCamelCaseNameForMiddleOfExpression() + "CoP", 0.005, YoAppearance.Brown(), GraphicType.BALL_WITH_CROSS).createArtifact();
@@ -372,7 +373,7 @@ public class InverseDynamicsJointController extends State<HighLevelState>
          VariableChangedListener kpScaledUpdater = new VariableChangedListener()
          {
             @Override
-            public void variableChanged(YoVariable v)
+            public void variableChanged(YoVariable<?> v)
             {
                DoubleYoVariable kpScaled = kpScaledMap.get(revoluteJoint);
                DoubleYoVariable kp = kpMap.get(revoluteJoint);
@@ -388,7 +389,7 @@ public class InverseDynamicsJointController extends State<HighLevelState>
          VariableChangedListener kdUpdater = new VariableChangedListener()
          {
             @Override
-            public void variableChanged(YoVariable v)
+            public void variableChanged(YoVariable<?> v)
             {
                DoubleYoVariable kd = kdMap.get(revoluteJoint);
                DoubleYoVariable kpScaled = kpScaledMap.get(revoluteJoint);
@@ -420,7 +421,7 @@ public class InverseDynamicsJointController extends State<HighLevelState>
          initializeMirrorDesireds.addVariableChangedListener(new VariableChangedListener()
          {
             @Override
-            public void variableChanged(YoVariable v)
+            public void variableChanged(YoVariable<?> v)
             {
                if (initializeMirrorDesireds.getBooleanValue())
                   initializeMirrorDesireds.set(false, false);
@@ -435,7 +436,7 @@ public class InverseDynamicsJointController extends State<HighLevelState>
          desiredMirroredFootPose.attachVariableChangedListener(new VariableChangedListener()
          {
             @Override
-            public void variableChanged(YoVariable v)
+            public void variableChanged(YoVariable<?> v)
             {
                for (RobotSide robotSide : RobotSide.values)
                {
@@ -457,7 +458,7 @@ public class InverseDynamicsJointController extends State<HighLevelState>
          private final List<T> keyList = new ArrayList<T>(mapToUpdate.keySet());
 
          @Override
-         public void variableChanged(YoVariable v)
+         public void variableChanged(YoVariable<?> v)
          {
             for (int i = 0; i < keyList.size(); i++)
                mapToUpdate.get(keyList.get(i)).set(refVariable.getDoubleValue());
@@ -911,7 +912,7 @@ public class InverseDynamicsJointController extends State<HighLevelState>
          sliderInGainsMode.addVariableChangedListener(new VariableChangedListener()
          {
             @Override
-            public void variableChanged(YoVariable v)
+            public void variableChanged(YoVariable<?> v)
             {
                if (sliderInGainsMode.getBooleanValue())
                   sliderBoardSubMode.set(SliderBoardSubMode.Gains);
@@ -923,7 +924,7 @@ public class InverseDynamicsJointController extends State<HighLevelState>
          VariableChangedListener variableChangedListener = new VariableChangedListener()
          {
             @Override
-            public void variableChanged(YoVariable v)
+            public void variableChanged(YoVariable<?> v)
             {
                if (sliderBoardMode.valueEquals(SliderBoardMode.WholeBody))
                {
@@ -962,7 +963,7 @@ public class InverseDynamicsJointController extends State<HighLevelState>
             inMirroredMode.addVariableChangedListener(new VariableChangedListener()
             {
                @Override
-               public void variableChanged(YoVariable v)
+               public void variableChanged(YoVariable<?> v)
                {
                   if (inMirroredMode.getBooleanValue())
                      controlMode.set(ControlMode.Mirrored);
@@ -975,7 +976,7 @@ public class InverseDynamicsJointController extends State<HighLevelState>
             {
                @SuppressWarnings("deprecation")
                @Override
-               public void variableChanged(YoVariable v)
+               public void variableChanged(YoVariable<?> v)
                {
                   registry.getVariable(CONTROLLER_PREFIX + "initializeMirrorDesireds").setValueFromDouble(1.0);
                }

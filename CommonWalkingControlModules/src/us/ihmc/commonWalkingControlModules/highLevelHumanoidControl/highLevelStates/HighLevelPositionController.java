@@ -29,7 +29,6 @@ import com.yobotics.simulationconstructionset.VariableChangedListener;
 import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.GainCalculator;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
@@ -79,7 +78,7 @@ public class HighLevelPositionController extends State<HighLevelState>
    private final DoubleYoVariable gainScaling = new DoubleYoVariable("highLevelPControl_gainScaling", registry);
    private final LinkedHashMap<RigidBody, DoubleYoVariable> individualControllerGainScalingMap = new LinkedHashMap<>();
 
-   public HighLevelPositionController(MomentumBasedController momentumBasedController, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public HighLevelPositionController(MomentumBasedController momentumBasedController)
    {
       super(controllerState);
    
@@ -217,7 +216,7 @@ public class HighLevelPositionController extends State<HighLevelState>
       gainScaling.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable v)
+         public void variableChanged(YoVariable<?> v)
          {
             gainScaling.set(MathTools.clipToMinMax(gainScaling.getDoubleValue(), 0.0, 1.0));
          }
@@ -251,7 +250,7 @@ public class HighLevelPositionController extends State<HighLevelState>
       VariableChangedListener gainChangedListener = new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable v)
+         public void variableChanged(YoVariable<?> v)
          {
             for (int i = 0; i < endEffectors.size(); i++)
             {
@@ -285,7 +284,7 @@ public class HighLevelPositionController extends State<HighLevelState>
          individualControllerGainScaling.addVariableChangedListener(new VariableChangedListener()
          {
             @Override
-            public void variableChanged(YoVariable v)
+            public void variableChanged(YoVariable<?> v)
             {
                individualControllerGainScaling.set(MathTools.clipToMinMax(individualControllerGainScaling.getDoubleValue(), 0.0, 1.0));
             }

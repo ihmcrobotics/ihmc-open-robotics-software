@@ -51,8 +51,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
            LidarControllerInterface lidarControllerInterface,
            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      super(variousWalkingProviders, variousWalkingManagers, momentumBasedController, walkingControllerParameters,
-            lidarControllerInterface, dynamicGraphicObjectsListRegistry, controllerState);
+      super(variousWalkingProviders, variousWalkingManagers, momentumBasedController, walkingControllerParameters, lidarControllerInterface, controllerState);
 
       this.footPoseProvider = variousWalkingProviders.getDesiredFootPoseProvider();
       this.momentumRateOfChangeControlModule = momentumRateOfChangeControlModule;
