@@ -84,6 +84,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    private static int rightHazardCameraId = 2;
    private static int primaryCameraId = forheadCameraId;
    
+   private static final String headLinkName = "/v1/Head";
    private final DRCRobotCameraParamaters[] cameraParamaters = new DRCRobotCameraParamaters[3];
    
    private static final String forheadCameraName = "/v1/HeadWebcam___default__";
@@ -116,9 +117,9 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    public ValkyrieSensorInformation()
    {
       VideoSettingsH264LowLatency videoSetting = VideoSettingsFactory.get32kBitSettingsSquare();
-      cameraParamaters[0] = new DRCRobotCameraParamaters(forheadCameraName,forheadCameraTopic,videoSetting,forheadCameraId);
-      cameraParamaters[1] = new DRCRobotCameraParamaters(leftStereoCameraName,leftCameraTopic,videoSetting,leftHazardCameraId);
-      cameraParamaters[2] = new DRCRobotCameraParamaters(rightStereoCameraName,rightCameraTopic,videoSetting,rightHazardCameraId);
+      cameraParamaters[0] = new DRCRobotCameraParamaters(forheadCameraName,forheadCameraTopic,headLinkName,videoSetting,forheadCameraId);
+      cameraParamaters[1] = new DRCRobotCameraParamaters(leftStereoCameraName,leftCameraTopic,headLinkName,videoSetting,leftHazardCameraId);
+      cameraParamaters[2] = new DRCRobotCameraParamaters(rightStereoCameraName,rightCameraTopic,headLinkName,videoSetting,rightHazardCameraId);
    }
    
    public String getUrdfFeetForceSensorName(RobotSide side)
