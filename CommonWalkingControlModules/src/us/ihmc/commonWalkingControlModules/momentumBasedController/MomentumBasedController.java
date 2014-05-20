@@ -133,6 +133,8 @@ public class MomentumBasedController
          new DoubleYoVariable("rightFootCoPErrorMagnitude", registry));
    private final DoubleYoVariable gainCoPX = new DoubleYoVariable("gainCoPX", registry);
    private final DoubleYoVariable gainCoPY = new DoubleYoVariable("gainCoPY", registry);
+   
+   private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
 
    public MomentumBasedController(FullRobotModel fullRobotModel, CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames,
          SideDependentList<FootSwitchInterface> footSwitches, DoubleYoVariable yoTime, double gravityZ, TwistCalculator twistCalculator,
@@ -141,6 +143,8 @@ public class MomentumBasedController
          MomentumOptimizationSettings momentumOptimizationSettings, OldMomentumControlModule oldMomentumControlModule,
          ArrayList<Updatable> updatables, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
+      this.dynamicGraphicObjectsListRegistry = dynamicGraphicObjectsListRegistry;
+
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
       
       this.footSwitches = footSwitches;
@@ -841,5 +845,10 @@ public class MomentumBasedController
    public FootSwitchInterface getFootSwitch(RobotSide robotSide)
    {
       return footSwitches.get(robotSide);
+   }
+
+   public DynamicGraphicObjectsListRegistry getDynamicGraphicObjectsListRegistry()
+   {
+      return dynamicGraphicObjectsListRegistry;
    }
 }

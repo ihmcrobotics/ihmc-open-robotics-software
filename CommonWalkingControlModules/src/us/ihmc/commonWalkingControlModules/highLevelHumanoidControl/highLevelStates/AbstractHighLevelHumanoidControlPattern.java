@@ -100,8 +100,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
 
    public AbstractHighLevelHumanoidControlPattern(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
            MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters,
-           LidarControllerInterface lidarControllerInterface, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
-           HighLevelState controllerState)
+           LidarControllerInterface lidarControllerInterface, HighLevelState controllerState)
    {
       super(controllerState);
 
@@ -109,7 +108,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends State<High
 
 //    this.variousWalkingManagers = variousWalkingManagers;
 
-      this.dynamicGraphicObjectsListRegistry = dynamicGraphicObjectsListRegistry;
+      this.dynamicGraphicObjectsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
 
       // Getting parameters from the momentumBasedController
       this.momentumBasedController = momentumBasedController;

@@ -57,8 +57,7 @@ public class ICPAndMomentumBasedController
    private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
    
    public ICPAndMomentumBasedController(MomentumBasedController momentumBasedController, FullRobotModel fullRobotModel,
-           SideDependentList<? extends ContactablePlaneBody> bipedFeet, BipedSupportPolygons bipedSupportPolygons, YoVariableRegistry parentRegistry,
-           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+           SideDependentList<? extends ContactablePlaneBody> bipedFeet, BipedSupportPolygons bipedSupportPolygons, YoVariableRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
 
@@ -93,6 +92,8 @@ public class ICPAndMomentumBasedController
       this.updatables.add(new Omega0Updater());
       this.updatables.add(new BipedSupportPolygonsUpdater());
       this.updatables.add(new CapturePointUpdater());
+
+      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
 
       if (dynamicGraphicObjectsListRegistry != null)
       {

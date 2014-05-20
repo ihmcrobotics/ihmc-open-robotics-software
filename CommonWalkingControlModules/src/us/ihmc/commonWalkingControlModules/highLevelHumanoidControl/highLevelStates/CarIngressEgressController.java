@@ -29,10 +29,8 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisPoseProv
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.ChangeableConfigurationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.SettableOrientationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePositionTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.trajectories.WrapperForPositionAndOrientationTrajectoryGenerators;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -49,7 +47,6 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.VariableChangedListener;
 import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.util.GainCalculator;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.trajectory.ConstantDoubleProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGenerator;
@@ -129,11 +126,9 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
    public CarIngressEgressController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
                                      MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters,
-                                     LidarControllerInterface lidarControllerInterface,
-                                     DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+                                     LidarControllerInterface lidarControllerInterface)
    {
-      super(variousWalkingProviders, variousWalkingManagers, momentumBasedController, walkingControllerParameters,
-            lidarControllerInterface, dynamicGraphicObjectsListRegistry, controllerState);
+      super(variousWalkingProviders, variousWalkingManagers, momentumBasedController, walkingControllerParameters, lidarControllerInterface, controllerState);
 
       setupManagers(variousWalkingManagers);
 
@@ -156,7 +151,6 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
       // Setup the pelvis trajectory generator
       pelvisPositionControlFrame = fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint();
-      boolean visualize = true;
       this.pelvisController = new RigidBodySpatialAccelerationControlModule("pelvis", twistCalculator, fullRobotModel.getPelvis(), pelvisPositionControlFrame, controlDT, registry);
 
       carIngressPelvisPositionKp.set(100.0);
@@ -213,7 +207,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    {
       VariableChangedListener ret = new VariableChangedListener()
       {
-         public void variableChanged(YoVariable v)
+         public void variableChanged(YoVariable<?> v)
          {
             double kPelvisPosition = carIngressPelvisPositionKp.getDoubleValue();
             double dPelvisPosition = GainCalculator.computeDerivativeGain(kPelvisPosition, carIngressPelvisPositionZeta.getDoubleValue());
@@ -238,7 +232,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    {
       VariableChangedListener ret = new VariableChangedListener()
       {
-         public void variableChanged(YoVariable v)
+         public void variableChanged(YoVariable<?> v)
          {
             double chestKp = carIngressChestOrientationKp.getDoubleValue();
             double chestZeta = carIngressChestOrientationZeta.getDoubleValue();
@@ -256,7 +250,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    {
       VariableChangedListener ret = new VariableChangedListener()
       {
-         public void variableChanged(YoVariable v)
+         public void variableChanged(YoVariable<?> v)
          {
             double headKp = carIngressHeadOrientationKp.getDoubleValue();
             double headZeta = carIngressHeadOrientationZeta.getDoubleValue();
@@ -714,7 +708,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
    private class LoadBearingVariableChangedListener implements VariableChangedListener
    {
-      public void variableChanged(YoVariable v)
+      public void variableChanged(YoVariable<?> v)
       {
          if (!(v instanceof BooleanYoVariable))
             return;
@@ -738,7 +732,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
    private class ToeOffYoVariableChangedListener implements VariableChangedListener
    {
-      public void variableChanged(YoVariable v)
+      public void variableChanged(YoVariable<?> v)
       {
          if (!(v instanceof BooleanYoVariable))
             return;
