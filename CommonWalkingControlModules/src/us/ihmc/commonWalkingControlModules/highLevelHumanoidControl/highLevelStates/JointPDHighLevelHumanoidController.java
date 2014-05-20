@@ -1,18 +1,18 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
-import com.yobotics.simulationconstructionset.util.math.functionGenerator.YoFunctionGenerator;
-import com.yobotics.simulationconstructionset.util.statemachines.State;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class JointPDHighLevelHumanoidController extends State<HighLevelState>
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
+
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
+import com.yobotics.simulationconstructionset.util.math.functionGenerator.YoFunctionGenerator;
+
+public class JointPDHighLevelHumanoidController extends HighLevelBehavior
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final DoubleYoVariable gainScaling = new DoubleYoVariable("hl_gainScaling", registry);

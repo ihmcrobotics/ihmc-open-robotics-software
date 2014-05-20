@@ -3,9 +3,9 @@ package us.ihmc.commonWalkingControlModules.posePlayback;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelState;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.MathTools;
@@ -18,12 +18,11 @@ import com.yobotics.simulationconstructionset.VariableChangedListener;
 import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.PDController;
-import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.trajectory.CubicPolynomialTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.YoVariableDoubleProvider;
 
-public class PosePlaybackController extends State<HighLevelState>
+public class PosePlaybackController extends HighLevelBehavior
 {
    private static final HighLevelState controllerState = HighLevelState.POSE_PLAYBACK;
 
@@ -62,7 +61,7 @@ public class PosePlaybackController extends State<HighLevelState>
       outputScaling.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable v)
+         public void variableChanged(YoVariable<?> v)
          {
             outputScaling.set(MathTools.clipToMinMax(outputScaling.getDoubleValue(), 0.0, 1.0));
          }

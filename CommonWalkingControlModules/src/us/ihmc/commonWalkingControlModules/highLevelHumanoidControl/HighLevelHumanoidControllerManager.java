@@ -3,10 +3,10 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl;
 import java.util.ArrayList;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.packets.DesiredHighLevelStateProvider;
-import us.ihmc.utilities.Pair;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
@@ -32,7 +32,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
 
    private final DesiredHighLevelStateProvider highLevelStateProvider;
 
-   public HighLevelHumanoidControllerManager(HighLevelState initialBehavior, ArrayList<Pair<State<HighLevelState>, YoVariableRegistry>> highLevelBehaviors,
+   public HighLevelHumanoidControllerManager(HighLevelState initialBehavior, ArrayList<HighLevelBehavior> highLevelBehaviors,
          MomentumBasedController momentumBasedController, VariousWalkingProviders variousWalkingProviders)
    {
       DoubleYoVariable yoTime = momentumBasedController.getYoTime();
@@ -46,7 +46,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
 
       for (int i = 0; i < highLevelBehaviors.size(); i++)
       {
-         this.registry.addChild(highLevelBehaviors.get(i).second());
+         this.registry.addChild(highLevelBehaviors.get(i).getYoVariableRegistry());
       }
       this.initialBehavior = initialBehavior;
       this.momentumBasedController = momentumBasedController;
@@ -54,18 +54,18 @@ public class HighLevelHumanoidControllerManager implements RobotController
    }
 
    @SuppressWarnings("unchecked")
-   private StateMachine<HighLevelState> setUpStateMachine(ArrayList<Pair<State<HighLevelState>,YoVariableRegistry>> highLevelBehaviors, DoubleYoVariable yoTime, YoVariableRegistry registry)
+   private StateMachine<HighLevelState> setUpStateMachine(ArrayList<HighLevelBehavior> highLevelBehaviors, DoubleYoVariable yoTime, YoVariableRegistry registry)
    {
       StateMachine<HighLevelState> highLevelStateMachine = new StateMachine<HighLevelState>("highLevelState", "switchTimeName", HighLevelState.class, yoTime, registry);
 
       // Enable transition between every existing state of the state machine
       for (int i = 0; i < highLevelBehaviors.size(); i ++)
       {
-         State<HighLevelState> highLevelStateA = highLevelBehaviors.get(i).first();
+         HighLevelBehavior highLevelStateA = highLevelBehaviors.get(i);
 
          for (int j = 0; j < highLevelBehaviors.size(); j ++)
          {
-            State<HighLevelState> highLevelStateB = highLevelBehaviors.get(j).first();
+            HighLevelBehavior highLevelStateB = highLevelBehaviors.get(j);
 
             StateMachineTools.addRequestedStateTransition(requestedHighLevelState, false, highLevelStateA, highLevelStateB);
             StateMachineTools.addRequestedStateTransition(requestedHighLevelState, false, highLevelStateB, highLevelStateA);
@@ -74,7 +74,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
 
       for (int i = 0; i < highLevelBehaviors.size(); i ++)
       {
-         highLevelStateMachine.addState(highLevelBehaviors.get(i).first());
+         highLevelStateMachine.addState(highLevelBehaviors.get(i));
       }
 
       return highLevelStateMachine;
@@ -95,7 +95,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
       requestedHighLevelState.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable v)
+         public void variableChanged(YoVariable<?> v)
          {
             if (requestedHighLevelState.valueEquals(stateEnum))
             {
@@ -123,7 +123,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
    }
    
    @SuppressWarnings("unchecked")
-   public void addHighLevelBehavior(Pair<State<HighLevelState>, YoVariableRegistry> highLevelBehavior, boolean transitionRequested)
+   public void addHighLevelBehavior(HighLevelBehavior highLevelBehavior, boolean transitionRequested)
    {
       // Enable transition between every existing state of the state machine
       for (HighLevelState stateEnum : allHighLevelStateEnums)
@@ -131,15 +131,15 @@ public class HighLevelHumanoidControllerManager implements RobotController
          State<HighLevelState> otherHighLevelState = stateMachine.getState(stateEnum);
          if (otherHighLevelState == null) continue;
 
-         StateMachineTools.addRequestedStateTransition(requestedHighLevelState, false, otherHighLevelState, highLevelBehavior.first());
-         StateMachineTools.addRequestedStateTransition(requestedHighLevelState, false, highLevelBehavior.first(), otherHighLevelState);
+         StateMachineTools.addRequestedStateTransition(requestedHighLevelState, false, otherHighLevelState, highLevelBehavior);
+         StateMachineTools.addRequestedStateTransition(requestedHighLevelState, false, highLevelBehavior, otherHighLevelState);
       }
 
-      this.stateMachine.addState(highLevelBehavior.first());
-      this.registry.addChild(highLevelBehavior.second());
+      this.stateMachine.addState(highLevelBehavior);
+      this.registry.addChild(highLevelBehavior.getYoVariableRegistry());
       
       if (transitionRequested)
-         requestedHighLevelState.set(highLevelBehavior.first().getStateEnum());
+         requestedHighLevelState.set(highLevelBehavior.getStateEnum());
    }
 
    public YoVariableRegistry getYoVariableRegistry()
