@@ -190,7 +190,8 @@ public class ValkyriePosePlaybackDemoTest
    {
       if (CREATE_MOVIE)
       {
-         BambooTools.createMovieAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(scs, 1);
+         BambooTools.createMovieAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(BambooTools.getSimpleRobotNameFor(BambooTools
+               .SimpleRobotNameKeys.VALKYRIE), scs, 1);
       }
    }
 

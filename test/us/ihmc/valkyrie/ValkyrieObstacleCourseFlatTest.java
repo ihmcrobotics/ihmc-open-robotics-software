@@ -5,6 +5,7 @@ import javax.vecmath.Vector3d;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 
+import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseFlatTest;
 
@@ -17,6 +18,13 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    {
       return robotModel;
    }
+
+   @Override
+   public String getSimpleRobotName()
+   {
+      return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.VALKYRIE);
+   }
+
    @Override
    protected Vector3d getFootSlipVector()
    {
