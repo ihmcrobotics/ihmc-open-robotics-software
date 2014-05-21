@@ -28,7 +28,7 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateTransition
 
 public class PushRecoveryControlModule
 {
-   private static final double MINIMUM_TIME_BEFORE_RECOVER_WITH_REDUCED_POLYGON = 2;
+   private static final double MINIMUM_TIME_BEFORE_RECOVER_WITH_REDUCED_POLYGON = 3;
    private static final double FAST_SWING_TIME_FOR_CAPTURE_REGION_CALCULATOR = 0.4;
    private static final double DOUBLESUPPORT_SUPPORT_POLYGON_SCALE = 0.8;
    private static final double FAST_SWING_TIME = 0.3;
