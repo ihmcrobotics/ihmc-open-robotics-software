@@ -148,6 +148,11 @@ public class TwoWaypointTrajectoryGeneratorWithPushRecovery implements PositionT
 
    public void compute(double time)
    {
+	   if(timeIntoStep.getDoubleValue()-time > 0.01)
+	   {
+		   throw new RuntimeException("The time going into the push recovery trajectory generator experienced a large jump.");
+	   }
+	   
       timeIntoStep.set(time);
 
       nominalTrajectoryGenerator.compute(time);
@@ -179,9 +184,23 @@ public class TwoWaypointTrajectoryGeneratorWithPushRecovery implements PositionT
       for (int i = 0; i < numberOfBallsInBag; i++)
       {
          tForViz = t0ForViz + (double) i / (double) (numberOfBallsInBag) * (tfForViz - t0ForViz);
-         compute(tForViz);
+         computePositionsForVis(tForViz);
          bagOfBalls.setBall(desiredPosition.getFramePointCopy(), i);
       }
+   }
+   
+   public void computePositionsForVis(double time)
+   { 
+      nominalTrajectoryGenerator.compute(time);
+      pushRecoveryTrajectoryGenerator.compute(time);
+
+      nominalTrajectoryGenerator.get(nominalTrajectoryPosition);
+      nominalTrajectoryGenerator.packVelocity(nominalTrajectoryVelocity);
+      nominalTrajectoryGenerator.packAcceleration(nominalTrajectoryAcceleration);
+
+      desiredPosition.setX(pushRecoveryTrajectoryGenerator.getDesiredPosition().getX());
+      desiredPosition.setY(pushRecoveryTrajectoryGenerator.getDesiredPosition().getY());
+      desiredPosition.setZ(nominalTrajectoryPosition.getZ());
    }
 
    public void get(FramePoint positionToPack)
