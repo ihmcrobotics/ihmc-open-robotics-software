@@ -161,7 +161,7 @@ public class ParabolicVelocityInstantaneousCapturePointTrajectory implements Ins
       currentTime.set(time - startTime.getDoubleValue());
       parameterGenerator.compute(currentTime.getDoubleValue());
       
-      double parameter = parameterGenerator.getValue();
+      double parameter = parameterGenerator.getCurrentSwingTimeValue();
       double parameterDot = parameterGenerator.getVelocity();
       tempPointInitialDesired.setIncludingFrame(initialDesiredICP.getFramePoint2dCopy());
       tempPointFinalDesired.setIncludingFrame(finalDesiredICP.getFramePoint2dCopy());

@@ -170,7 +170,7 @@ public class PosePlaybackController extends HighLevelBehavior
          jointTrajectory.compute(timeInCurrentPose.getDoubleValue());
 
          double currentPosition = oneDoFJoint.getQ();
-         double desiredPosition = jointTrajectory.getValue();
+         double desiredPosition = jointTrajectory.getCurrentSwingTimeValue();
          double currentRate = oneDoFJoint.getQd();
          double desiredRate = jointTrajectory.getVelocity();
 
@@ -197,7 +197,7 @@ public class PosePlaybackController extends HighLevelBehavior
          if (setInitialDesiredAngleToActualJointAngle)
             jointInitialDesiredAngle.set(oneDoFJoint.getQ());
          else
-            jointInitialDesiredAngle.set(jointTrajectories.get(oneDoFJoint).getValue());
+            jointInitialDesiredAngle.set(jointTrajectories.get(oneDoFJoint).getCurrentSwingTimeValue());
          
          Double finalDesiredAngle = playbackPose.getJointAngle(oneDoFJoint);
          

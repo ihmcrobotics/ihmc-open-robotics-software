@@ -11,8 +11,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepUtils;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.ICPAndMomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
-import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalculator;
-import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculator;
+import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculationProvider;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -46,7 +45,7 @@ public class PushRecoveryControlModule
    private final BooleanYoVariable footstepWasProjectedInCaptureRegion;
    private final BooleanYoVariable enablePushRecovery = new BooleanYoVariable("enablePushRecovery", registry);
    private final CommonWalkingReferenceFrames referenceFrames;
-   private final ConstantSwingTimeCalculator swingTimeCalculator;
+   private final SwingTimeCalculationProvider swingTimeCalculatorProvider;
    private final StateMachine<?> stateMachine;
 
    private boolean recoveringFromDoubleSupportFall;
@@ -55,21 +54,20 @@ public class PushRecoveryControlModule
    private double defaultSwingTime;
 
    public PushRecoveryControlModule(MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters,
-         BooleanYoVariable readyToGrabNextFootstep, ICPAndMomentumBasedController icpAndMomentumBasedController, SwingTimeCalculator swingTimeCalculator,
+         BooleanYoVariable readyToGrabNextFootstep, ICPAndMomentumBasedController icpAndMomentumBasedController, SwingTimeCalculationProvider swingTimeCalculatorProvider,
          StateMachine<?> stateMachine, YoVariableRegistry parentRegistry)
    {
       this.momentumBasedController = momentumBasedController;
       this.readyToGrabNextFootstep = readyToGrabNextFootstep;
       this.icpAndMomentumBasedController = icpAndMomentumBasedController;
       this.referenceFrames = momentumBasedController.getReferenceFrames();
-      this.swingTimeCalculator = (ConstantSwingTimeCalculator) swingTimeCalculator;
+      this.swingTimeCalculatorProvider = swingTimeCalculatorProvider;
       this.stateMachine = stateMachine;
 
       enablePushRecovery.set(false);
 
       this.enablePushRecoveryFromDoubleSupport = new BooleanYoVariable("enablePushRecoveryFromDoubleSupport", registry);
       this.enablePushRecoveryFromDoubleSupport.set(false);
-      this.defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
 
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
       captureRegionCalculator = new OneStepCaptureRegionCalculator(referenceFrames, walkingControllerParameters, registry, dynamicGraphicObjectsListRegistry);
@@ -96,7 +94,7 @@ public class PushRecoveryControlModule
 
       if (recoveringFromDoubleSupportFall)
       {
-         this.swingTimeCalculator.setSwingTime(this.defaultSwingTime);
+         swingTimeCalculatorProvider.resetFastSwingTime();
          recoveringFromDoubleSupportFall = false;
       }
    }
@@ -189,7 +187,7 @@ public class PushRecoveryControlModule
                   recoverFromDoubleSupportFallFootStep = currentFootstep;
                   recoveringFromDoubleSupportFall = true;
 
-                  swingTimeCalculator.setSwingTime(FAST_SWING_TIME);
+                  swingTimeCalculatorProvider.setFastSwingTime(FAST_SWING_TIME);
 
                   return true;
                }
@@ -218,7 +216,7 @@ public class PushRecoveryControlModule
 
          captureRegionCalculator.calculateCaptureRegion(swingSide, swingTimeRemaining, capturePoint2d, omega0, footPolygon);
          
-         if(swingTimeRemaining < defaultSwingTime * 0.2)
+         if(swingTimeRemaining < swingTimeCalculatorProvider.getCurrentSwingTimeValue() * 0.2)
          {
             // do not replan if we are almost at touchdown
             return false;

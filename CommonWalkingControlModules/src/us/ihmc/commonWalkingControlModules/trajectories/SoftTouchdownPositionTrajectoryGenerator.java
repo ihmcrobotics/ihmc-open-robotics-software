@@ -71,7 +71,7 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
       this.startTimeProvider = startTimeProvider;
       
       startTime = new DoubleYoVariable(namePrefix + "startTime", registry);
-      startTime.set(startTimeProvider.getValue());
+      startTime.set(startTimeProvider.getCurrentSwingTimeValue());
 
       timeIntoTouchdown = new DoubleYoVariable(namePrefix + "timeIntoTouchdown", registry);
 
