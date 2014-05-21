@@ -10,14 +10,29 @@ import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimu
 
 public class ValkyrieFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
 {
+
+   private DRCRobotModel robotModel;
+
    @Test
    public void testValkyrieFlatGroundWalking() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 
       String runName = "ValkyrieFlatGroundWalkingTest";
-      DRCRobotModel robotModel = new ValkyrieRobotModel(false, false);
+      robotModel = new ValkyrieRobotModel(false, false);
 
       setupAndTestFlatGroundSimulationTrack(robotModel, runName);
+   }
+
+   @Override
+   public DRCRobotModel getRobotModel()
+   {
+      return robotModel;
+   }
+
+   @Override
+   public String getSimpleRobotName()
+   {
+      return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.VALKYRIE);
    }
 }
