@@ -1444,14 +1444,17 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             {
                previousSupportSide.set(swingSide.getOppositeSide());
             }
-
-            // ContactableBody swingFoot = contactablePlaneBodies.get(swingSide);
-            // Footstep desiredFootstep = desiredFootstepCalculator.updateAndGetDesiredFootstep(swingSide.getOppositeSide());
-            // contactStates.get(swingFoot).setContactPoints(desiredFootstep.getExpectedContactPoints());
-            // updateFootStateMachines(swingFoot);
-
             pushRecoveryModule.reset();
          }
+         else
+         {
+            previousSupportSide.set(swingSide.getOppositeSide());
+         }
+
+         // ContactableBody swingFoot = contactablePlaneBodies.get(swingSide);
+         // Footstep desiredFootstep = desiredFootstepCalculator.updateAndGetDesiredFootstep(swingSide.getOppositeSide());
+         // contactStates.get(swingFoot).setContactPoints(desiredFootstep.getExpectedContactPoints());
+         // updateFootStateMachines(swingFoot);
 
          resetLoadedLegIntegrators(swingSide);
       }
