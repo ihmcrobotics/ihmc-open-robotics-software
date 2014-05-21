@@ -85,7 +85,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
                                                                 null, null, walkingControllerParameters,
                                                                 footTrajectoryTimeProvider, currentConfigurationProvider, null, desiredConfigurationProvider,
                                                                 currentConfigurationProvider, null, desiredConfigurationProvider, null,
-                                                                null, momentumBasedController, registry);
+                                                                momentumBasedController, registry);
          endEffectorControlModule.setSwingGains(100.0, 200.0, 200.0, 1.0, 1.0);
          endEffectorControlModule.setHoldGains(100.0, 200.0, 0.1);
          endEffectorControlModule.setToeOffGains(0.0, 200.0, 0.1);
