@@ -532,8 +532,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          int jacobianId = legJacobianIds.get(robotSide);
 
-         FootControlModule endEffectorControlModule;
-
          BooleanYoVariable requestHoldPosition = requestSupportFootToHoldPosition.get(robotSide);
 
          DoubleProvider maximumToeOffAngleProvider = walkOnTheEdgesProviders.getMaximumToeOffAngleProvider();
@@ -544,11 +542,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          VectorProvider initialVelocityProvider = new CurrentLinearVelocityProvider(referenceFrames.getFootFrame(robotSide),
                fullRobotModel.getFoot(robotSide), twistCalculator);
          
-         endEffectorControlModule = new FootControlModule(controlDT, bipedFoot, jacobianId, robotSide,
+         FootControlModule endEffectorControlModule = new FootControlModule(controlDT, bipedFoot, jacobianId, robotSide,
                  footTouchdownPitchTrajectoryGenerator, maximumToeOffAngleProvider, requestHoldPosition, walkingControllerParameters,
                  swingTimeCalculationProvider, initialPositionProvider, initialVelocityProvider, swingFootFinalPositionProvider,
                  initialOrientationProvider, finalDesiredVelocityProvider, finalFootOrientationProvider, trajectoryParametersProvider,
-                 dynamicGraphicObjectsListRegistry, momentumBasedController, registry);
+                 momentumBasedController, registry);
 
 
          VariableChangedListener swingGainsChangedListener = createEndEffectorGainsChangedListener(endEffectorControlModule);
