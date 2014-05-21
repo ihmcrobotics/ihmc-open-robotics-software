@@ -73,7 +73,7 @@ import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimu
          ThreadTools.sleep(1000);
          boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
          
-         drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
+         drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
          drcSimulationTestHelper.checkNothingChanged();
 
          assertTrue(success);

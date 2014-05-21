@@ -2,6 +2,7 @@ package us.ihmc.atlas.utilities.kinematics;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.utilities.kinematics.NumericalInverseKinematicsCalculatorWithRobotTest;
 
@@ -11,6 +12,12 @@ public class AtlasNumericalInverseKinematicsCalculatorWithRobotTest extends Nume
    public DRCRobotModel getRobotModel()
    {
       return new AtlasRobotModel(AtlasRobotVersion.ATLAS_SANDIA_HANDS, false, false);
+   }
+
+   @Override
+   public String getSimpleRobotName()
+   {
+      return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
 
 }

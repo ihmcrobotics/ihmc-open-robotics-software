@@ -189,11 +189,11 @@ public class DRCSimulationTestHelper
       }
    }
    
-   public void createMovie(SimulationConstructionSet scs, int callStackHeight)
+   public void createMovie(String simplifiedRobotModelName, SimulationConstructionSet scs, int callStackHeight)
    {
       if (createMovie)
       {
-         BambooTools.createMovieAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(scs, callStackHeight);
+         BambooTools.createMovieAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(simplifiedRobotModelName, scs, callStackHeight);
       }
    }
    

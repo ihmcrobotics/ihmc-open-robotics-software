@@ -13,14 +13,28 @@ import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimu
 public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
 {
 
+   private DRCRobotModel robotModel;
+
    @Test
    public void testAtlasFlatGroundWalking() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 
       String runName = "AtlasFlatGroundWalkingTest";
-      DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, false, false);
+      robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, false, false);
       
       setupAndTestFlatGroundSimulationTrack(robotModel, runName);
+   }
+
+   @Override
+   public DRCRobotModel getRobotModel()
+   {
+      return robotModel;
+   }
+
+   @Override
+   public String getSimpleRobotName()
+   {
+      return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
 }
