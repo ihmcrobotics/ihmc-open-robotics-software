@@ -1182,7 +1182,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       private final FramePoint2d capturePoint2d = new FramePoint2d();
 
       private Footstep nextFootstep;
-      private final FramePoint swingFootPosition = new FramePoint();
       private double captureTime;
       private double defaultSwingTime;
 
@@ -1218,10 +1217,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          FrameConvexPolygon2d footPolygon = computeFootPolygon(supportSide, referenceFrames.getAnkleZUpFrame(supportSide));
          double omega0 = icpAndMomentumBasedController.getOmega0();
          
-         ReferenceFrame swingFootFrame = referenceFrames.getAnkleZUpFrame(swingSide);
-         swingFootPosition.setToZero(swingFootFrame);
-         swingFootPosition.changeFrame(nextFootstep.getPosition().getReferenceFrame());
-
          if (pushRecoveryModule.isEnabled())
          {
             boolean footstepHasBeenAdjusted = pushRecoveryModule.checkAndUpdateFootstep(swingSide, swingTimeRemaining, capturePoint2d, nextFootstep, omega0,
