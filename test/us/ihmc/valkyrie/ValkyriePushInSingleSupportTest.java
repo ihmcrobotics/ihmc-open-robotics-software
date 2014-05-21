@@ -5,12 +5,12 @@ import javax.vecmath.Vector3d;
 import org.junit.Test;
 
 import us.ihmc.bambooTools.BambooTools;
-import us.ihmc.darpaRoboticsChallenge.DRCPushInSingleSupportTest;
+import us.ihmc.darpaRoboticsChallenge.DRCPushRecoveryTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
-public class ValkyriePushInSingleSupportTest extends DRCPushInSingleSupportTest
+public class ValkyriePushInSingleSupportTest extends DRCPushRecoveryTest
 {
    private final double forceMagnitude = 1000.0;
    private final double forceDuration = 0.05;
