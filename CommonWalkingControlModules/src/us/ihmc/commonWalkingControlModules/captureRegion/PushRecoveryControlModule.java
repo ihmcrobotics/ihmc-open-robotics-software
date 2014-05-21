@@ -51,7 +51,6 @@ public class PushRecoveryControlModule
    private boolean recoveringFromDoubleSupportFall;
    private Footstep recoverFromDoubleSupportFallFootStep;
    private BooleanYoVariable readyToGrabNextFootstep;
-   private double defaultSwingTime;
 
    public PushRecoveryControlModule(MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters,
          BooleanYoVariable readyToGrabNextFootstep, ICPAndMomentumBasedController icpAndMomentumBasedController, SwingTimeCalculationProvider swingTimeCalculatorProvider,

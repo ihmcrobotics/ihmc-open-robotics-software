@@ -130,7 +130,6 @@ public class DRCPushRobotController implements RobotController
       {
          isBeingPushed.set(false);
          forceVector.set(0.0, 0.0, 0.0);
-         pushForceMagnitude.set(0.0);
       }
 
       forcePoint.setForce(forceVector);
