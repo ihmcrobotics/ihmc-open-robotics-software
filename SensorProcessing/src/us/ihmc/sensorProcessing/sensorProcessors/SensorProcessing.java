@@ -55,6 +55,8 @@ public class SensorProcessing implements SensorOutputMapReadOnly
    private final ObjectObjectMap<IMUDefinition, AlphaFilteredYoFrameVector> linearAccelerationFilteredValues = new ObjectObjectMap<IMUDefinition, AlphaFilteredYoFrameVector>();
    private final DoubleYoVariable linearAccelerationAlpha = new DoubleYoVariable("linearAccelerationAlpha", registry);
    
+   private final ObjectObjectMap<OneDoFJoint, DoubleYoVariable> jointForceMeasured = new ObjectObjectMap<OneDoFJoint, DoubleYoVariable>();
+   
    private final ArrayList<IMUSensor> imuOutputs = new ArrayList<IMUSensor>();
 
    private final boolean useTwoPolesForIMUFiltering;

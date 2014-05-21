@@ -49,6 +49,8 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    private static final boolean SHOW_INERTIA_GRAPHICS = false;
    private static final boolean SHOW_REFERENCE_FRAMES = false;
 
+   private final long controlDTInNS;
+   
    private final DoubleYoVariable controllerTime = new DoubleYoVariable("controllerTime", registry);
    private final BooleanYoVariable firstTick = new BooleanYoVariable("firstTick", registry);
    
@@ -66,19 +68,22 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    
    private final ExecutionTimer controllerTimer = new ExecutionTimer("controllerTimer", 10.0, registry);
    private final LongYoVariable nextExecutionTime = new LongYoVariable("nextExecutionTime", registry);
+   private final LongYoVariable totalDelay = new LongYoVariable("totalDelay", registry);
    
    public DRCControllerThread(DRCRobotModel robotModel, ControllerFactory controllerFactory, LidarControllerInterface lidarControllerInterface,
          ThreadDataSynchronizer threadDataSynchronizer, DRCOutputWriter outputWriter, GlobalDataProducer dataProducer, double gravity)
    {
       this.threadDataSynchronizer = threadDataSynchronizer;
       this.outputWriter = outputWriter;
+      this.controlDTInNS = TimeTools.secondsToNanoSeconds(robotModel.getControllerDT());
       controllerFullRobotModel = threadDataSynchronizer.getControllerFullRobotModel();
       
-      FullRobotModelCorruptor controllerFullRobotModelCorruptor = new FullRobotModelCorruptor(controllerFullRobotModel, registry);
+      new FullRobotModelCorruptor(controllerFullRobotModel, registry);
       
       
       forceSensorDataHolderForController = threadDataSynchronizer.getControllerForceSensorDataHolder();
 
+      
       outputWriter.setFullRobotModel(controllerFullRobotModel);
       outputWriter.setForceSensorDataHolderForController(forceSensorDataHolderForController);
       
@@ -185,8 +190,11 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    @Override
    public void read(double time, long currentClockTime)
    {
-      controllerTime.set(time);
+      long estimatorStartTime = threadDataSynchronizer.getEstimatorClockStartTime();
+      long timestamp = threadDataSynchronizer.getTimestamp();
+      controllerTime.set(TimeTools.nanoSecondstoSeconds(timestamp));
       threadDataSynchronizer.receiveControllerState();
+      nextExecutionTime.set(estimatorStartTime + controlDTInNS);
    }
 
    @Override
@@ -203,9 +211,10 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    }
 
    @Override
-   public void write()
+   public void write(long timestamp)
    {
       outputWriter.writeAfterController(TimeTools.secondsToNanoSeconds(controllerTime.getDoubleValue()));
+      totalDelay.set(timestamp - nextExecutionTime.getLongValue() - controlDTInNS);
    }
 
    @Override
@@ -229,6 +238,6 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    @Override
    public long nextWakeupTime()
    {
-      return 0;
+      return nextExecutionTime.getLongValue();
    }
 }

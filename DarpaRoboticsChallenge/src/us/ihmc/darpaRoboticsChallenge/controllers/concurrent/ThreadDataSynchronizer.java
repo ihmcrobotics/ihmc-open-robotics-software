@@ -16,6 +16,9 @@ public class ThreadDataSynchronizer
    private final ForceSensorDataHolder controllerForceSensorDataHolder;
 
    private final ConcurrentCopier<IntermediateEstimatorStateHolder> estimatorStateCopier;
+   
+   private long timestamp;
+   private long estimatorClockStartTime;
 
    public ThreadDataSynchronizer(DRCRobotModel robotModel)
    {
@@ -33,17 +36,14 @@ public class ThreadDataSynchronizer
 
    }
 
-   public long receiveControllerState()
+   public void receiveControllerState()
    {
       IntermediateEstimatorStateHolder estimatorStateHolder = estimatorStateCopier.getCopyForReading();
       if (estimatorStateHolder != null)
       {
          estimatorStateHolder.getIntoControllerModel();
-         return estimatorStateHolder.getEstimatorClockStartTime();
-      }
-      else
-      {
-         return Long.MIN_VALUE;
+         timestamp = estimatorStateHolder.getTimestamp();
+         estimatorClockStartTime = estimatorStateHolder.getEstimatorClockStartTime();
       }
    }
 
@@ -72,6 +72,16 @@ public class ThreadDataSynchronizer
    public ForceSensorDataHolder getControllerForceSensorDataHolder()
    {
       return controllerForceSensorDataHolder;
+   }
+
+   public long getTimestamp()
+   {
+      return timestamp;
+   }
+
+   public long getEstimatorClockStartTime()
+   {
+      return estimatorClockStartTime;
    }
 
 }
