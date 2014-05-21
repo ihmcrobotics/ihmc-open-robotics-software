@@ -275,8 +275,73 @@ public class OneStepCaptureRegionCalculatorTest
          waitForButtonOrPause(testFrame);
       }
    }
+
+   @Test
+   public void testCalculationWithHighSwingTime()
+   {
+      // do not change parameters
+      // expected results are pre-calculated
+      double midFootAnkleXOffset = 0.1;
+      double footWidth = 0.5;
+      double footLength = 1.0;
+      double kineamaticStepRange = 3.0;
+      
+      RobotSide swingSide = RobotSide.RIGHT;
+      double swingTimeRemaining = 0.6;
+      double omega0 = 3.0;
+      
+      OneStepCaptureRegionCalculator captureRegionCalculator = new OneStepCaptureRegionCalculator(
+            midFootAnkleXOffset, footWidth, kineamaticStepRange, ankleZUpFrames, registry, null);
+      
+      ArrayList<FramePoint2d> listOfPoints = new ArrayList<FramePoint2d>();
+      listOfPoints.add(new FramePoint2d(worldFrame, -footLength/2.0, -footWidth/2.0));
+      listOfPoints.add(new FramePoint2d(worldFrame, -footLength/2.0, footWidth/2.0));
+      listOfPoints.add(new FramePoint2d(worldFrame, footLength/2.0, -footWidth/2.0));
+      listOfPoints.add(new FramePoint2d(worldFrame, footLength/2.0, footWidth/2.0));
+      FrameConvexPolygon2d supportFootPolygon = new FrameConvexPolygon2d(listOfPoints);
+      
+      FramePoint2d icp = new FramePoint2d(worldFrame, 0.3, -0.5);
+      captureRegionCalculator.calculateCaptureRegion(swingSide, swingTimeRemaining, icp, omega0, supportFootPolygon);
+      FrameConvexPolygon2d captureRegion = captureRegionCalculator.getCaptureRegion();
+      
+      ArrayList<FramePoint2d> predictedICPList = new ArrayList<FramePoint2d>();
+      for(FramePoint2d cop : listOfPoints)
+      {
+         FramePoint2d predictedICP = new FramePoint2d();
+         CaptureRegionMathTools.predictCapturePoint(icp, cop, swingTimeRemaining, omega0, predictedICP);
+         predictedICPList.add(predictedICP);
+      }
+      
+      ReferenceFrame supportAnkleFrame = ankleZUpFrames.get(swingSide.getOppositeSide());
+      ArrayList<FramePoint2d> expectedPointsOutside = new ArrayList<FramePoint2d>();
+      expectedPointsOutside.add(new FramePoint2d(supportAnkleFrame, 2.0, -1.5));
+      
+      for(int i = 0; i < expectedPointsOutside.size(); i++)
+      {
+         assertFalse(captureRegion.isPointInside(expectedPointsOutside.get(i)));
+      }
+      
+      if (PLOT_RESULTS)
+      {
+         FrameGeometryTestFrame testFrame = new FrameGeometryTestFrame(-2, 5, -5, 2);
+         FrameGeometry2dPlotter plotter = testFrame.getFrameGeometry2dPlotter();
+         plotter.setDrawPointsLarge();
+         plotter.addPolygon(supportFootPolygon, Color.black);
+         plotter.addPolygon(captureRegion, Color.green);
+         for(int i = 0; i < predictedICPList.size(); i++)
+         {
+            plotter.addFramePoint2d(predictedICPList.get(i), Color.blue);
+         }
+         for(int i = 0; i < expectedPointsOutside.size(); i++)
+         {
+            plotter.addFramePoint2d(expectedPointsOutside.get(i), Color.red);
+         }
+         
+         waitForButtonOrPause(testFrame);
+      }
+   }
    
-   private class  SimpleAnkleZUpReferenceFrame extends ReferenceFrame
+   private class SimpleAnkleZUpReferenceFrame extends ReferenceFrame
    {
       private static final long serialVersionUID = -2855876641425187923L;
       private final Vector3d offset = new Vector3d();
