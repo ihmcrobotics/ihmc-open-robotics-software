@@ -82,10 +82,10 @@ public class EfficientPushRodTransmission implements PushRodTransmissionInterfac
     double pitchAngle = jointData[0].getPosition();
     double rollAngle = reflect * jointData[1].getPosition();
     
-    jacobian = efficientPushrodTransmissionJacobian.getUpdatedTransform(-rollAngle, -pitchAngle);
+    jacobian = efficientPushrodTransmissionJacobian.getUpdatedTransform(rollAngle, pitchAngle);
 
-    double rollTorque = jacobian[0][0] * actuatorForce0 + jacobian[0][1] * actuatorForce1;
-    double pitchTorque = jacobian[1][0] * actuatorForce0 + jacobian[1][1] * actuatorForce1;
+    double pitchTorque = jacobian[0][0] * actuatorForce0 + jacobian[0][1] * actuatorForce1;
+    double rollTorque  = jacobian[1][0] * actuatorForce0 + jacobian[1][1] * actuatorForce1;
 
     jointData[0].setEffort(pitchTorque);
     jointData[1].setEffort(reflect * rollTorque);
@@ -124,11 +124,11 @@ public class EfficientPushRodTransmission implements PushRodTransmissionInterfac
          throw new RuntimeException("jointToActuatorEffort: pitchAngle or rollAngle is infinity!!\n");
       }
 
-      jacobian = efficientPushrodTransmissionJacobian.getUpdatedTransform(-rollAngle, -pitchAngle);
+      jacobian = efficientPushrodTransmissionJacobian.getUpdatedTransform(rollAngle, pitchAngle);
       invertMatrix(jacobian, jacobianInverse);
 
-      double actuatorForce0 = jacobianInverse[0][0] * rollTorque + jacobianInverse[0][1] * pitchTorque;
-      double actuatorForce1 = jacobianInverse[1][0] * rollTorque + jacobianInverse[1][1] * pitchTorque;
+      double actuatorForce0 = jacobianInverse[0][0] * pitchTorque + jacobianInverse[0][1] * rollTorque;
+      double actuatorForce1 = jacobianInverse[1][0] * pitchTorque + jacobianInverse[1][1] * rollTorque;
 
       checkInfinity(actuatorForce0);
       checkInfinity(actuatorForce1);
