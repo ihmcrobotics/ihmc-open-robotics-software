@@ -1,25 +1,26 @@
 package us.ihmc.commonWalkingControlModules.calculators;
 
-import com.yobotics.simulationconstructionset.GroundContactPoint;
-import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
-import com.yobotics.simulationconstructionset.PinJoint;
-import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.simulatedSensors.GroundContactPointBasedWrenchCalculator;
-import com.yobotics.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.media.j3d.Transform3D;
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 
 import us.ihmc.utilities.Axis;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import com.yobotics.simulationconstructionset.GroundContactPoint;
+import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
+import com.yobotics.simulationconstructionset.PinJoint;
+import com.yobotics.simulationconstructionset.Robot;
+import com.yobotics.simulationconstructionset.simulatedSensors.GroundContactPointBasedWrenchCalculator;
+import com.yobotics.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 
 public class GroundContactPointBasedWrenchCalculatorTest
 {
@@ -44,7 +45,7 @@ public class GroundContactPointBasedWrenchCalculatorTest
       robot.update();
       
       
-      calculator = new GroundContactPointBasedWrenchCalculator(joint.getName(), contactPoints, joint);
+      calculator = new GroundContactPointBasedWrenchCalculator(joint.getName(), contactPoints, joint, new Transform3D());
       
       
       point0.setForce(new Vector3d(0.0, 0.0, 1.0));
@@ -65,7 +66,7 @@ public class GroundContactPointBasedWrenchCalculatorTest
       robot.update();
       
 
-      calculator = new GroundContactPointBasedWrenchCalculator(joint.getName(), contactPoints, joint2);
+      calculator = new GroundContactPointBasedWrenchCalculator(joint.getName(), contactPoints, joint2, new Transform3D());
       point0.setForce(new Vector3d(-1.0, 1.0, 0.0));
       point1.setForce(new Vector3d(-1.0, 1.0, 0.0));
       
@@ -81,6 +82,42 @@ public class GroundContactPointBasedWrenchCalculatorTest
       assertEquals(wholeWrench.get(2,0), 0.0, epsilon);
       assertEquals(wholeWrench.get(3,0), - 2.0, epsilon);
       assertEquals(wholeWrench.get(4,0), 2.0, epsilon);
+      assertEquals(wholeWrench.get(5,0), 0.0, epsilon);
+      
+      
+      
+      //Off-joint-axis force-Sensor
+      PinJoint joint3 = new PinJoint("test3", new Vector3d(0.0, 0.0, 0.0), robot, Axis.X);
+      robot.addRootJoint(joint3);
+      robot.update();
+      
+      Transform3D transformToJoint = new Transform3D();
+      transformToJoint.setTranslation(new Vector3d(-1.0, -1.0, 0.0));
+
+      calculator = new GroundContactPointBasedWrenchCalculator(joint.getName(), contactPoints, joint3, transformToJoint);
+
+      calculator.calculate();
+      wholeWrench = calculator.getWrench();
+      assertTrue(wholeWrench.getNumRows() == 6);
+      assertEquals(wholeWrench.get(0,0), - 2.0, epsilon);
+      assertEquals(wholeWrench.get(1,0), - 2.0, epsilon);
+      assertEquals(wholeWrench.get(2,0), 0.0, epsilon);
+      assertEquals(wholeWrench.get(3,0), - 2.0, epsilon);
+      assertEquals(wholeWrench.get(4,0), 2.0, epsilon);
+      assertEquals(wholeWrench.get(5,0), 0.0, epsilon);
+
+      //different joint angle, which also changed sensor frame
+      joint3.setQ(Math.PI);
+      robot.update();
+
+      calculator.calculate();
+      wholeWrench = calculator.getWrench();
+      assertTrue(wholeWrench.getNumRows() == 6);
+      assertEquals(wholeWrench.get(0,0), - 2.0, epsilon);
+      assertEquals(wholeWrench.get(1,0), + 2.0, epsilon);
+      assertEquals(wholeWrench.get(2,0), + 4.0, epsilon);
+      assertEquals(wholeWrench.get(3,0), - 2.0, epsilon);
+      assertEquals(wholeWrench.get(4,0), - 2.0, epsilon);
       assertEquals(wholeWrench.get(5,0), 0.0, epsilon);
    }
 }
