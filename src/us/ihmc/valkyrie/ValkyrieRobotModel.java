@@ -89,20 +89,15 @@ public class ValkyrieRobotModel implements DRCRobotModel
       for(String forceSensorNames : ValkyrieSensorInformation.forceSensorNames)
       {
          Transform3D transform = new Transform3D();
-         
-         // FIXME: For now, the sim cannot simulate off-axis force sensors 
-         if(runningOnRealRobot)
+         if(forceSensorNames.equals("LeftAnkle"))
          {
-            if(forceSensorNames.equals("LeftAnkle"))
-            {
-               transform.set(ValkyrieSensorInformation.transformFromMeasurementToAnkleZUpFrames.get(RobotSide.LEFT));
-            }
-            else if(forceSensorNames.equals("RightAnkle"))
-            {
-               transform.set(ValkyrieSensorInformation.transformFromMeasurementToAnkleZUpFrames.get(RobotSide.RIGHT));               
-            }
+            transform.set(ValkyrieSensorInformation.transformFromMeasurementToAnkleZUpFrames.get(RobotSide.LEFT));
          }
-         
+         else if(forceSensorNames.equals("RightAnkle"))
+         {
+            transform.set(ValkyrieSensorInformation.transformFromMeasurementToAnkleZUpFrames.get(RobotSide.RIGHT));               
+         }
+            
          loader.addForceSensor(jointMap, forceSensorNames, forceSensorNames, transform);
       }
       
@@ -275,6 +270,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    {
       return 0.006;
    }
+   
 
    @Override
    public GeneralizedSDFRobotModel getGeneralizedRobotModel()
