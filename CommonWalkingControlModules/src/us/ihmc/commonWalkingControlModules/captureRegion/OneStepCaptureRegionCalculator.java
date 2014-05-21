@@ -101,6 +101,7 @@ public class OneStepCaptureRegionCalculator
    }
    
    // variables for the capture region calculation
+   private static final int APPROXIMATION_MULTILIER = 100;
    private RobotSide previousSwingSide;
    private final FrameConvexPolygon2d supportFootPolygon = new FrameConvexPolygon2d();
    private final FramePoint2d footCentroid = new FramePoint2d(worldFrame);
@@ -166,9 +167,9 @@ public class OneStepCaptureRegionCalculator
       // 4. Project the predicted ICP on a circle around the foot with the radius of the step range.
          projectedLine.set(predictedICP);
          projectedLine.sub(copExtreme);
-         CaptureRegionMathTools.solveIntersectionOfRayAndCircle(footCentroid, predictedICP,
-                                                           projectedLine, kinematicStepRange,
-                                                           kinematicExtreme);
+         CaptureRegionMathTools.solveIntersectionOfRayAndCircle(footCentroid,
+               predictedICP, projectedLine, APPROXIMATION_MULTILIER * kinematicStepRange,
+               kinematicExtreme);
 
          if (kinematicExtreme.containsNaN())
          {
@@ -193,11 +194,8 @@ public class OneStepCaptureRegionCalculator
       {
          double alphaFromAToB = ((double) (i + 1)) / ((double) (KINEMATIC_LIMIT_POINTS + 1));
          captureRegionMath.getPointBetweenVectorsAtDistanceFromOriginCircular(firstKinematicExtremeDirection,
-                                                                              lastKinematicExtremeDirection,
-                                                                              alphaFromAToB,
-                                                                              kinematicStepRange,
-                                                                              footCentroid,
-                                                                              additionalKinematicPoint);
+               lastKinematicExtremeDirection, alphaFromAToB, APPROXIMATION_MULTILIER * kinematicStepRange,
+               footCentroid, additionalKinematicPoint);
          rawCaptureRegion.addVertexAndChangeFrame(additionalKinematicPoint);
       }
       
