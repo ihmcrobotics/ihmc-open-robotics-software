@@ -164,10 +164,10 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    }
 
    @Override
-   public void write()
+   public void write(long timestamp)
    {
-      long timestamp = TimeTools.secondsToNanoSeconds(estimatorTime.getDoubleValue());
-      threadDataSynchronizer.publishEstimatorState(timestamp, estimatorTick.getLongValue(), startClockTime.getLongValue());
+      long startTimestamp = TimeTools.secondsToNanoSeconds(estimatorTime.getDoubleValue());
+      threadDataSynchronizer.publishEstimatorState(startTimestamp, estimatorTick.getLongValue(), startClockTime.getLongValue());
       outputWriter.writeAfterEstimator(timestamp);
       estimatorTick.increment();
    }

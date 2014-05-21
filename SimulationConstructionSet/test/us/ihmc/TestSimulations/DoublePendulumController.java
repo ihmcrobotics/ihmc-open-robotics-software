@@ -67,7 +67,7 @@ public class DoublePendulumController implements MultiThreadedRobotControlElemen
       }
    }
 
-   public void write()
+   public void write(long timestamp)
    {
       doublePendulum.getJ1().setTau(tau_j1.getDoubleValue());
       doublePendulum.getJ2().setTau(tau_j2.getDoubleValue());
