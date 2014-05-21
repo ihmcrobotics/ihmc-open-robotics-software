@@ -369,7 +369,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
    {
       if (CREATE_MOVIE)
       {
-         BambooTools.createMovieAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(scs, 1);
+         BambooTools.createMovieAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(getSimpleRobotName(), scs, 1);
       }
    }
 

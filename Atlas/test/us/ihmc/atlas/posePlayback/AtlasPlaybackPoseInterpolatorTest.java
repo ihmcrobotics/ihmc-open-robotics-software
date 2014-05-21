@@ -10,6 +10,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceReader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -23,7 +24,13 @@ public class AtlasPlaybackPoseInterpolatorTest extends PlaybackPoseInterpolatorT
    {
       return new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, false, false);
    }
-   
+
+   @Override
+   public String getSimpleRobotName()
+   {
+      return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
+   }
+
    //this is not a jUnit test. This is a playable pose sequence. Start the sim and press play. Remove @ignore and run locally. 
    @Ignore
    @Test

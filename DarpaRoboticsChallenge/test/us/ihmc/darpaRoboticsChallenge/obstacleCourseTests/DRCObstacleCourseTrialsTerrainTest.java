@@ -77,7 +77,7 @@ private Class thisClass = DRCObstacleCourseTrialsTerrainTest.class;
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(30.0);
 
-      drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -114,7 +114,7 @@ private Class thisClass = DRCObstacleCourseTrialsTerrainTest.class;
       slipRandomOnEachStepPerturber.setProbabilityOfSlip(0.6);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(29.0);
 
-      drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -141,7 +141,7 @@ private Class thisClass = DRCObstacleCourseTrialsTerrainTest.class;
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(15.0);
 
-      drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -179,7 +179,7 @@ private Class thisClass = DRCObstacleCourseTrialsTerrainTest.class;
       slipRandomOnEachStepPerturber.setProbabilityOfSlip(1.0);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(14.0);
       
-      drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -205,7 +205,7 @@ private Class thisClass = DRCObstacleCourseTrialsTerrainTest.class;
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(40.0);
 
-      drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -231,7 +231,7 @@ private Class thisClass = DRCObstacleCourseTrialsTerrainTest.class;
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(40.0);
 
-      drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -256,7 +256,7 @@ private Class thisClass = DRCObstacleCourseTrialsTerrainTest.class;
 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(25.0);
 
-      drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
       drcSimulationTestHelper.checkNothingChanged();
 //ThreadTools.sleepForever();
       assertTrue(success);
@@ -282,7 +282,7 @@ private Class thisClass = DRCObstacleCourseTrialsTerrainTest.class;
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(25.0);
 
-      drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -308,7 +308,7 @@ private Class thisClass = DRCObstacleCourseTrialsTerrainTest.class;
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(50.0);
 
-      drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -351,7 +351,7 @@ private Class thisClass = DRCObstacleCourseTrialsTerrainTest.class;
          success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(6.0);
       }
 
-      drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -390,7 +390,7 @@ private Class thisClass = DRCObstacleCourseTrialsTerrainTest.class;
          success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(8.0);
       }
 
-      drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);

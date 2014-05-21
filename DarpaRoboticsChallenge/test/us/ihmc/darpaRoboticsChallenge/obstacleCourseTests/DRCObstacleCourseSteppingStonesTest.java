@@ -80,7 +80,7 @@ public abstract class DRCObstacleCourseSteppingStonesTest implements MultiRobotT
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(13.0);
 
-      drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);

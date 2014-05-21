@@ -30,7 +30,7 @@ import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimu
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import com.yobotics.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
 
-public abstract class DRCFlatGroundWalkingTest
+public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterface
 {
    private static final boolean ALWAYS_SHOW_GUI = false;
    public static final boolean KEEP_SCS_UP = false;
@@ -163,7 +163,7 @@ public abstract class DRCFlatGroundWalkingTest
    {
       if (CREATE_MOVIE)
       {
-         BambooTools.createMovieAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(scs, 1);
+         BambooTools.createMovieAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(getSimpleRobotName(), scs, 1);
       }
    }
 

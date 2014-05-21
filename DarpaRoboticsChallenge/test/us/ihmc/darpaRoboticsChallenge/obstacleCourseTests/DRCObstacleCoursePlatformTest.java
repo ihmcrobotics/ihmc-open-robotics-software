@@ -85,7 +85,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
          success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
       }
       
-      drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -115,7 +115,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
 
-      drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -146,7 +146,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
       
-      drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
       drcSimulationTestHelper.checkNothingChanged();
       
       assertTrue(success);

@@ -87,7 +87,7 @@ public abstract class DRCObstacleCourseRocksTest implements MultiRobotTestInterf
          success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(6.0);
       }
       
-      drcSimulationTestHelper.createMovie(simulationConstructionSet, 1);
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
