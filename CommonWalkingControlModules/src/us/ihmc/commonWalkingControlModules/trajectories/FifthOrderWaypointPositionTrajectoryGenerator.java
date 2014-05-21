@@ -163,7 +163,7 @@ public class FifthOrderWaypointPositionTrajectoryGenerator implements PositionTr
 
    public void initialize()
    {
-      double stepTime = stepTimeProvider.getValue();
+      double stepTime = stepTimeProvider.getCurrentSwingTimeValue();
       MathTools.checkIfInRange(stepTime, 0.0, Double.POSITIVE_INFINITY);
       this.stepTime.set(stepTime);
 
@@ -191,7 +191,7 @@ public class FifthOrderWaypointPositionTrajectoryGenerator implements PositionTr
 //    intermediatePosition.interpolate(initialPosition, finalDesiredPosition, 0.1);
       intermediatePosition.setZ(Math.max(initialPosition.getZ(), finalDesiredPosition.getZ()) + waypointHeight.getDoubleValue());
       
-      finalDesiredPosition.setZ(finalDesiredPosition.getZ() + finalPositionZOffsetProvider.getValue());
+      finalDesiredPosition.setZ(finalDesiredPosition.getZ() + finalPositionZOffsetProvider.getCurrentSwingTimeValue());
 
       timeIntoStep.set(0.0);
 

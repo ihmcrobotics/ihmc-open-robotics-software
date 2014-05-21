@@ -72,7 +72,7 @@ public class Constrained5thOrderPolyForSwingTrajectoryGenerator
       this.desiredVelocity1D = new DoubleYoVariable(namePrefix + "DesiredVelocityZ", this.registry);
       this.desiredAcceleration1D = new DoubleYoVariable(namePrefix + "DesiredAccelerationZ", this.registry);
       
-      this.stepTime = stepTimeProvider.getValue();
+      this.stepTime = stepTimeProvider.getCurrentSwingTimeValue();
       this.initialTime = initialTime;
       
       this.walkingControllerParameters = walkingControllerParameters;

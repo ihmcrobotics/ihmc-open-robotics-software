@@ -108,7 +108,7 @@ public class TwoWaypointTrajectoryGeneratorWithPushRecovery implements PositionT
       velocitySources[1] = finalDesiredVelocityProvider;
 
       stepTime = new DoubleYoVariable(namePrefix + "StepTime", registry);
-      stepTime.set(stepTimeProvider.getValue());
+      stepTime.set(stepTimeProvider.getCurrentSwingTimeValue());
 
       timeIntoStep = new DoubleYoVariable(namePrefix + "TimeIntoStep", registry);
 
@@ -134,7 +134,7 @@ public class TwoWaypointTrajectoryGeneratorWithPushRecovery implements PositionT
 
    public void initialize()
    {
-      timeRemaining = stepTimeProvider.getValue();
+      timeRemaining = stepTimeProvider.getCurrentSwingTimeValue();
 
       pushRecoveryTrajectoryGenerator.setTimeIntoStep(stepTime.getDoubleValue() - timeRemaining);
       timeIntoStep.set(stepTime.getDoubleValue() - timeRemaining);
