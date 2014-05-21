@@ -181,7 +181,7 @@ public class PushRecoveryControlModule
 
                   currentFootstep = FootstepUtils.getCurrentFootstep(swingSide, referenceFrames, momentumBasedController.getContactablePlaneFeet());
 
-                  footstepAdjustor.adjustFootstep(currentFootstep, captureRegionCalculator.getCaptureRegion());
+                  footstepAdjustor.adjustFootstep(currentFootstep, capturePoint2d, captureRegionCalculator.getCaptureRegion());
                   readyToGrabNextFootstep.set(false);
                   momentumBasedController.getUpcomingSupportLeg().set(transferToSide.getOppositeSide());
                   recoverFromDoubleSupportFallFootStep = currentFootstep;
@@ -222,7 +222,7 @@ public class PushRecoveryControlModule
             return false;
          }
          
-         footstepWasProjectedInCaptureRegion.set(footstepAdjustor.adjustFootstep(nextFootstep, captureRegionCalculator.getCaptureRegion()));
+         footstepWasProjectedInCaptureRegion.set(footstepAdjustor.adjustFootstep(nextFootstep, capturePoint2d, captureRegionCalculator.getCaptureRegion()));
 
          return footstepWasProjectedInCaptureRegion.getBooleanValue();
       }

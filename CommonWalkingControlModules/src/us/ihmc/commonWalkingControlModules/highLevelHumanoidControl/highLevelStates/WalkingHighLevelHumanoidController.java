@@ -1225,12 +1225,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                updateFootstepParameters();
                
                captureTime = stateMachine.timeInCurrentState();
-//               double oldSwingTime = swingTimeCalculationProvider.getValue();
-//               double percentInSwing = MathTools.clipToMinMax(captureTime/defaultSwingTime, 0.0, 1.0);
-//               double fastSwingTime = 1.0;
-//               
-//               double newSwingTime = Math.max(fastSwingTime * (1.0 - percentInSwing), 0.2);
-//               swingTimeCalculationProvider.setSwingTime(newSwingTime);
                swingTimeCalculationProvider.setSwingTime(defaultSwingTime - captureTime);
 
                footEndEffectorControlModules.get(swingSide).replanTrajectory();
