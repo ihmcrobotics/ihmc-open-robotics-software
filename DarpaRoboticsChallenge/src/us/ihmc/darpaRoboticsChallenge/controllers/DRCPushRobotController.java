@@ -69,7 +69,7 @@ public class DRCPushRobotController implements RobotController
       if (scs != null)
       {
          JButton button = new JButton("PushRobot");
-         button.setToolTipText("Click to push the robot as defined in the variable 'PushVector'");
+         button.setToolTipText("Click to push the robot as defined in the variables 'pushDirection' and 'pushMagnitude'");
 
          ActionListener listener = new ActionListener()
          {
