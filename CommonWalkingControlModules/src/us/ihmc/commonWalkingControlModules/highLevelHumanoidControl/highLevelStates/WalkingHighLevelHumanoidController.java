@@ -1333,6 +1333,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             setFlatFootContactState(supportSide);
          }
 
+         swingTimeCalculationProvider.setSwingTime(walkingControllerParameters.getDefaultSwingTime());
+         transferTimeCalculationProvider.setTransferTime();
+         
          updateFootstepParameters();
 
          double stepPitch = nextFootstep.getOrientationInFrame(worldFrame).getYawPitchRoll()[1];
@@ -1353,22 +1356,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          RobotSide supportSide = swingSide.getOppositeSide();
 
          swingFootFinalPositionProvider.set(nextFootstep.getPositionInFrame(worldFrame));
-
-         SideDependentList<Transform3D> footToWorldTransform = new SideDependentList<Transform3D>();
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            Transform3D transform = feet.get(robotSide).getBodyFrame().getTransformToDesiredFrame(worldFrame);
-            footToWorldTransform.set(robotSide, transform);
-         }
-
-         Vector3d initialVectorPosition = new Vector3d();
-         footToWorldTransform.get(supportSide.getOppositeSide()).get(initialVectorPosition);
-         FramePoint initialFramePosition = new FramePoint(worldFrame, initialVectorPosition);
-//         FramePoint footFinalPosition = new FramePoint(worldFrame);
-//         swingFootFinalPositionProvider.get(footFinalPosition);
-         double stepDistance = initialFramePosition.distance(nextFootstep.getPositionInFrame(worldFrame));
-         swingTimeCalculationProvider.setSwingTimeByDistance(stepDistance);
-         transferTimeCalculationProvider.setTransferTime();
 
          trajectoryParametersProvider.set(mapFromFootstepsToTrajectoryParameters.get(nextFootstep));
          finalFootOrientationProviders.get(swingSide).setOrientation(nextFootstep.getOrientationInFrame(worldFrame));
