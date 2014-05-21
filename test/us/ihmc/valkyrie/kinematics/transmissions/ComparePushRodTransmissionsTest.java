@@ -25,6 +25,7 @@ public class ComparePushRodTransmissionsTest
    private static final boolean DEBUG = false;
    private static final boolean VISUALIZE = false;
    
+
    @Test
    public void testCompareInefficientToEfficientAnkle()
    {
@@ -42,7 +43,7 @@ public class ComparePushRodTransmissionsTest
 
       compareTwoPushRodTransmissionInterfaces(random, epsilon, inefficientPushrodTransmission, efficientPushrodTransmission, registry, dynamicGraphicObjectsListRegistry);
    }
-   
+
    @Ignore
    @Test
    public void testCompareInefficientToEfficientWaist()
@@ -64,7 +65,7 @@ public class ComparePushRodTransmissionsTest
    
    // Seems that the interpolated should be same as the pushrod when use futeks is false. Should try to get this to work
    // Or figure out if the interpolated is just plain wrong.
-   @Ignore 
+   @Ignore
    @Test
    public void testCompareInefficientToInterpolatedAnkles()
    {
@@ -109,7 +110,6 @@ public class ComparePushRodTransmissionsTest
 
       compareTwoPushRodTransmissionInterfaces(random, epsilon, inefficientPushrodTransmission, interpolatedPushRodTransmission, registry, dynamicGraphicObjectsListRegistry);
    }
-
    
    private void compareTwoPushRodTransmissionInterfaces(Random random, double epsilon, PushRodTransmissionInterface pushrodTransmissionA,
            PushRodTransmissionInterface pushrodTransmissionB, YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
@@ -177,8 +177,10 @@ public class ComparePushRodTransmissionsTest
             
             // Check the actuatorToJointEffort
 
-            force0.set(RandomTools.generateRandomDouble(random, -100.0, 100.0));
-            force1.set(RandomTools.generateRandomDouble(random, -100.0, 100.0));
+//            force0.set(RandomTools.generateRandomDouble(random, -100.0, 100.0));
+//            force1.set(RandomTools.generateRandomDouble(random, -100.0, 100.0));
+            force0.set(1.0);
+            force1.set(1.0);
 
             actuatorData[0].setEffortCommand(force0.getDoubleValue());
             actuatorData[1].setEffortCommand(force1.getDoubleValue());
@@ -201,8 +203,8 @@ public class ComparePushRodTransmissionsTest
             topJointTorqueB.set(jointData[0].getEffort());
             bottomJointTorqueB.set(jointData[1].getEffort());
 
-            printIfDebug("f0 = " + force0 + ", f1 = " + force1 + ", topJointTorqueA = " + topJointTorqueA.getDoubleValue ()+ ", bottomJointTorqueA = " + bottomJointTorqueA.getDoubleValue()
-                         + ", topJointTorqueB = " + topJointTorqueB.getDoubleValue() + ", effRollTau = " + bottomJointTorqueB.getDoubleValue());
+            printIfDebug( force0 + ", " + force1 + ", topJointTorqueA = " + topJointTorqueA.getDoubleValue () + ", bottomJointTorqueA = " + bottomJointTorqueA.getDoubleValue()
+                         + ", topJointTorqueB = " + topJointTorqueB.getDoubleValue() + ", tauRollEfficient = " + bottomJointTorqueB.getDoubleValue());
 
             assertFalse(Double.isNaN(topJointTorqueA.getDoubleValue()));
             assertFalse(Double.isNaN(bottomJointTorqueA.getDoubleValue()));
