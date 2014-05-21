@@ -546,7 +546,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                  footTouchdownPitchTrajectoryGenerator, maximumToeOffAngleProvider, requestHoldPosition, walkingControllerParameters,
                  swingTimeCalculationProvider, initialPositionProvider, initialVelocityProvider, swingFootFinalPositionProvider,
                  initialOrientationProvider, finalDesiredVelocityProvider, finalFootOrientationProvider, trajectoryParametersProvider,
-                 momentumBasedController, registry);
+                 dynamicGraphicObjectsListRegistry, momentumBasedController, registry);
 
 
          VariableChangedListener swingGainsChangedListener = createEndEffectorGainsChangedListener(endEffectorControlModule);
