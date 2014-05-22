@@ -418,7 +418,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       setupLegJacobians(fullRobotModel);
 
       this.walkOnTheEdgesProviders = new WalkOnTheEdgesProviders(walkingControllerParameters, registry);
-      walkOnTheEdgesManager = new WalkOnTheEdgesManager(walkingControllerParameters, walkOnTheEdgesProviders, feet, footEndEffectorControlModules, registry);
+      walkOnTheEdgesManager = new WalkOnTheEdgesManager(walkingControllerParameters, walkOnTheEdgesProviders, feet, footControlModules, registry);
       this.centerOfMassHeightTrajectoryGenerator.attachWalkOnToesManager(walkOnTheEdgesManager);
 
       maximumConstantJerkFinalToeOffAngleComputer.reinitialize(walkOnTheEdgesProviders.getMaximumToeOffAngle(), referenceTime);
@@ -542,18 +542,18 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          VectorProvider initialVelocityProvider = new CurrentLinearVelocityProvider(referenceFrames.getFootFrame(robotSide),
                fullRobotModel.getFoot(robotSide), twistCalculator);
          
-         FootControlModule endEffectorControlModule = new FootControlModule(controlDT, bipedFoot, jacobianId, robotSide,
+         FootControlModule footControlModule = new FootControlModule(controlDT, bipedFoot, jacobianId, robotSide,
                  footTouchdownPitchTrajectoryGenerator, maximumToeOffAngleProvider, requestHoldPosition, walkingControllerParameters,
                  swingTimeCalculationProvider, initialPositionProvider, initialVelocityProvider, swingFootFinalPositionProvider,
                  initialOrientationProvider, finalDesiredVelocityProvider, finalFootOrientationProvider, trajectoryParametersProvider,
                  dynamicGraphicObjectsListRegistry, momentumBasedController, registry);
 
 
-         VariableChangedListener swingGainsChangedListener = createEndEffectorGainsChangedListener(endEffectorControlModule);
+         VariableChangedListener swingGainsChangedListener = createEndEffectorGainsChangedListener(footControlModule);
          swingGainsChangedListener.variableChanged(null);
 
-         endEffectorControlModule.setParameters(minJacobianDeterminantForSingularityEscape, singularityEscapeNullspaceMultiplierSwingLeg.getDoubleValue());
-         footEndEffectorControlModules.put(robotSide, endEffectorControlModule);
+         footControlModule.setParameters(minJacobianDeterminantForSingularityEscape, singularityEscapeNullspaceMultiplierSwingLeg.getDoubleValue());
+         footControlModules.put(robotSide, footControlModule);
       }
    }
 
@@ -576,9 +576,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       ResetICPTrajectoryAction resetICPTrajectoryAction = new ResetICPTrajectoryAction();
       for (RobotSide robotSide : RobotSide.values)
       {
-         FootControlModule swingEndEffectorControlModule = footEndEffectorControlModules.get(robotSide.getOppositeSide());
-         StopWalkingCondition stopWalkingCondition = new StopWalkingCondition(swingEndEffectorControlModule);
-         ResetSwingTrajectoryDoneAction resetSwingTrajectoryDoneAction = new ResetSwingTrajectoryDoneAction(swingEndEffectorControlModule);
+         FootControlModule swingFootControlModule = footControlModules.get(robotSide.getOppositeSide());
+         StopWalkingCondition stopWalkingCondition = new StopWalkingCondition(swingFootControlModule);
+         ResetSwingTrajectoryDoneAction resetSwingTrajectoryDoneAction = new ResetSwingTrajectoryDoneAction(swingFootControlModule);
 
          ArrayList<StateTransitionAction> stopWalkingStateTransitionActions = new ArrayList<StateTransitionAction>();
          stopWalkingStateTransitionActions.add(resetICPTrajectoryAction);
@@ -600,7 +600,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          ContactablePlaneBody sameSideFoot = feet.get(robotSide);
          SingleSupportToTransferToCondition doneWithSingleSupportAndTransferToOppositeSideCondition = new SingleSupportToTransferToCondition(sameSideFoot,
-               swingEndEffectorControlModule);
+               swingFootControlModule);
          StateTransition<WalkingState> toTransferOppositeSide = new StateTransition<WalkingState>(transferStateEnums.get(robotSide.getOppositeSide()),
                doneWithSingleSupportAndTransferToOppositeSideCondition, resetSwingTrajectoryDoneAction);
          singleSupportState.addStateTransition(toTransferOppositeSide);
@@ -608,7 +608,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          // Sometimes need transfer to same side when two steps are commanded on the same side. Otherwise, the feet cross over.
          ContactablePlaneBody oppositeSideFoot = feet.get(robotSide.getOppositeSide());
          SingleSupportToTransferToCondition doneWithSingleSupportAndTransferToSameSideCondition = new SingleSupportToTransferToCondition(oppositeSideFoot,
-               swingEndEffectorControlModule);
+               swingFootControlModule);
          StateTransition<WalkingState> toTransferSameSide = new StateTransition<WalkingState>(transferStateEnums.get(robotSide),
                doneWithSingleSupportAndTransferToSameSideCondition, resetSwingTrajectoryDoneAction);
          singleSupportState.addStateTransition(toTransferSameSide);
@@ -780,17 +780,17 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          {
             for (RobotSide robotSide : RobotSide.values)
             {
-               FootControlModule footEndEffectorControlModule = footEndEffectorControlModules.get(robotSide);
-               if ((footEndEffectorControlModule.isInEdgeTouchdownState() && walkOnTheEdgesManager.isEdgeTouchDownDone(robotSide))
-                     || (footEndEffectorControlModule.getCurrentConstraintType() == ConstraintType.TOES))
+               FootControlModule footControlModule = footControlModules.get(robotSide);
+               if ((footControlModule.isInEdgeTouchdownState() && walkOnTheEdgesManager.isEdgeTouchDownDone(robotSide))
+                     || (footControlModule.getCurrentConstraintType() == ConstraintType.TOES))
                   setFlatFootContactState(robotSide);
             }
          }
          else
          {
-            FootControlModule footEndEffectorControlModule = footEndEffectorControlModules.get(transferToSide);
-            if ((footEndEffectorControlModule.isInEdgeTouchdownState() && walkOnTheEdgesManager.isEdgeTouchDownDone(transferToSide))
-                  || (footEndEffectorControlModule.getCurrentConstraintType() == ConstraintType.TOES))
+            FootControlModule footControlModule = footControlModules.get(transferToSide);
+            if ((footControlModule.isInEdgeTouchdownState() && walkOnTheEdgesManager.isEdgeTouchDownDone(transferToSide))
+                  || (footControlModule.getCurrentConstraintType() == ConstraintType.TOES))
                setFlatFootContactState(transferToSide);
          }
 
@@ -1057,7 +1057,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          {
             for (RobotSide robotSide : RobotSide.values)
             {
-               if (!footEndEffectorControlModules.get(robotSide).isInEdgeTouchdownState())
+               if (!footControlModules.get(robotSide).isInEdgeTouchdownState())
                   setFlatFootContactState(robotSide);
             }
          }
@@ -1071,7 +1071,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
          else
          {
-            if (footEndEffectorControlModules.get(transferToSide.getOppositeSide()).getCurrentConstraintType() == ConstraintType.SWING) // That case happens when doing 2 steps on same side
+            if (footControlModules.get(transferToSide.getOppositeSide()).getCurrentConstraintType() == ConstraintType.SWING) // That case happens when doing 2 steps on same side
                setFlatFootContactState(transferToSide.getOppositeSide());
             setFlatFootContactState(transferToSide); // still need to determine contact state for trailing leg. This is done in doAction as soon as the previous ICP trajectory is done
          }
@@ -1223,7 +1223,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                updateFootstepParameters();
                
                captureTime = stateMachine.timeInCurrentState();
-               footEndEffectorControlModules.get(swingSide).replanTrajectory(defaultSwingTime - captureTime);
+               footControlModules.get(swingSide).replanTrajectory(defaultSwingTime - captureTime);
 
                TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForSingleSupport(nextFootstep, swingSide);
                instantaneousCapturePointPlanner.initializeSingleSupport(transferToAndNextFootstepsData, yoTime.getDoubleValue() - captureTime);
@@ -1252,9 +1252,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          desiredPelvisAngularAcceleration.set(desiredPelvisAngularAccelerationToPack);
 
          if ((stateMachine.timeInCurrentState() - captureTime < 0.5 * swingTimeCalculationProvider.getValue())
-               && footEndEffectorControlModules.get(swingSide).isInSingularityNeighborhood())
+               && footControlModules.get(swingSide).isInSingularityNeighborhood())
          {
-            footEndEffectorControlModules.get(swingSide).doSingularityEscape(true);
+            footControlModules.get(swingSide).doSingularityEscape(true);
          }
       }
 
@@ -1977,9 +1977,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         FootControlModule endEffectorControlModule = footEndEffectorControlModules.get(robotSide);
+         FootControlModule footControlModule = footControlModules.get(robotSide);
 
-         if (endEffectorControlModule.isInFlatSupportState() && endEffectorControlModule.isInSingularityNeighborhood())
+         if (footControlModule.isInFlatSupportState() && footControlModule.isInSingularityNeighborhood())
          {
             // Ignore the desired height acceleration only if EndEffectorControlModule is not taking care of singularity during support
             if (!LegSingularityAndKneeCollapseAvoidanceControlModule.USE_SINGULARITY_AVOIDANCE_SUPPORT)
@@ -1990,12 +1990,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             if (zDesired >= zCurrent - zTreshold)
             {
                // Can't achieve the desired height, just lock the knee
-               endEffectorControlModule.doSingularityEscape(singularityEscapeNullspaceMultiplierSupportLegLocking.getDoubleValue());
+               footControlModule.doSingularityEscape(singularityEscapeNullspaceMultiplierSupportLegLocking.getDoubleValue());
             }
             else
             {
                // Do the singularity escape before trying to achieve the desired height
-               endEffectorControlModule.doSingularityEscape(singularityEscapeNullspaceMultiplierSupportLeg.getDoubleValue());
+               footControlModule.doSingularityEscape(singularityEscapeNullspaceMultiplierSupportLeg.getDoubleValue());
             }
          }
       }
@@ -2021,7 +2021,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         legLengths.put(robotSide, footEndEffectorControlModules.get(robotSide).updateAndGetLegLength());
+         legLengths.put(robotSide, footControlModules.get(robotSide).updateAndGetLegLength());
       }
 
       // Correct, if necessary, the CoM height trajectory to avoid the knee to collapse
@@ -2029,7 +2029,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       {
          for (RobotSide robotSide : RobotSide.values)
          {
-            footEndEffectorControlModules.get(robotSide).correctCoMHeightTrajectoryForCollapseAvoidance(desiredICPVelocity, comHeightData, zCurrent,
+            footControlModules.get(robotSide).correctCoMHeightTrajectoryForCollapseAvoidance(desiredICPVelocity, comHeightData, zCurrent,
                   pelvisZUpFrame, footSwitches.get(robotSide).computeFootLoadPercentage());
          }
       }
@@ -2039,15 +2039,15 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       {
          for (RobotSide robotSide : leadingLegFirst)
          {
-            FootControlModule footEndEffectorControlModule = footEndEffectorControlModules.get(robotSide);
-            footEndEffectorControlModule.correctCoMHeightTrajectoryForSingularityAvoidance(desiredICPVelocity, comHeightData, zCurrent, pelvisZUpFrame);
+            FootControlModule footControlModule = footControlModules.get(robotSide);
+            footControlModule.correctCoMHeightTrajectoryForSingularityAvoidance(desiredICPVelocity, comHeightData, zCurrent, pelvisZUpFrame);
          }
       }
 
       // Do that after to make sure the swing foot will land
       for (RobotSide robotSide : RobotSide.values)
       {
-         footEndEffectorControlModules.get(robotSide).correctCoMHeightTrajectoryForUnreachableFootStep(comHeightData);
+         footControlModules.get(robotSide).correctCoMHeightTrajectoryForUnreachableFootStep(comHeightData);
       }
    }
 
@@ -2079,8 +2079,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private void setOnToesContactState(RobotSide robotSide)
    {
-      FootControlModule footEndEffectorControlModule = footEndEffectorControlModules.get(robotSide);
-      if (footEndEffectorControlModule.isInFlatSupportState())
+      FootControlModule footControlModule = footControlModules.get(robotSide);
+      if (footControlModule.isInFlatSupportState())
       {
          footNormalContactVector.setIncludingFrame(feet.get(robotSide).getPlaneFrame(), 0.0, 0.0, 1.0);
          footNormalContactVector.changeFrame(worldFrame);
@@ -2090,19 +2090,19 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          footNormalContactVector.setIncludingFrame(worldFrame, 0.0, 0.0, 1.0);
       }
 
-      footEndEffectorControlModule.setContactState(ConstraintType.TOES, footNormalContactVector);
+      footControlModule.setContactState(ConstraintType.TOES, footNormalContactVector);
    }
 
    private void setTouchdownOnHeelContactState(RobotSide robotSide)
    {
       footNormalContactVector.setIncludingFrame(worldFrame, 0.0, 0.0, 1.0);
-      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.HEEL_TOUCHDOWN, footNormalContactVector);
+      footControlModules.get(robotSide).setContactState(ConstraintType.HEEL_TOUCHDOWN, footNormalContactVector);
    }
 
    private void setTouchdownOnToesContactState(RobotSide robotSide)
    {
       footNormalContactVector.setIncludingFrame(worldFrame, 0.0, 0.0, 1.0);
-      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.TOES_TOUCHDOWN, footNormalContactVector);
+      footControlModules.get(robotSide).setContactState(ConstraintType.TOES_TOUCHDOWN, footNormalContactVector);
    }
 
    private void setFlatFootContactState(RobotSide robotSide)
@@ -2111,12 +2111,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          footNormalContactVector.setIncludingFrame(worldFrame, 0.0, 0.0, 1.0);
       else
          footNormalContactVector.setIncludingFrame(feet.get(robotSide).getPlaneFrame(), 0.0, 0.0, 1.0);
-      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.FULL, footNormalContactVector);
+      footControlModules.get(robotSide).setContactState(ConstraintType.FULL, footNormalContactVector);
    }
 
    private void setContactStateForSwing(RobotSide robotSide)
    {
-      FootControlModule endEffectorControlModule = footEndEffectorControlModules.get(robotSide);
+      FootControlModule endEffectorControlModule = footControlModules.get(robotSide);
       endEffectorControlModule.doSingularityEscape(true);
       endEffectorControlModule.setContactState(ConstraintType.SWING);
    }
