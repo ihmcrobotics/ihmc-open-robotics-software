@@ -2,6 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.controllers.concurrent;
 
 import java.util.ArrayList;
 
+import us.ihmc.realtime.MonotonicTime;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.realtime.RealtimeThread;
 import us.ihmc.utilities.Pair;
@@ -12,6 +13,8 @@ public class MultiThreadedRealTimeRobotController
 {
    private final MultiThreadedRobotControlElement sensorReader;
    private final ArrayList<Pair<MultiThreadedRobotControlElement, PriorityParameters>> robotControllers = new ArrayList<>();
+   private final MonotonicTime triggerTime = new MonotonicTime();
+
    
    public MultiThreadedRealTimeRobotController(MultiThreadedRobotControlElement sensorReader)
    {
@@ -60,9 +63,18 @@ public class MultiThreadedRealTimeRobotController
       @Override
       public void run()
       {
-         controller.read(Double.NaN, Long.MAX_VALUE);
-         controller.run();
-         controller.write(System.nanoTime());
+         while(true)
+         {
+            controller.read(Double.NaN, Long.MAX_VALUE);
+            controller.run();
+            controller.write(System.nanoTime());
+            
+            if(controller.nextWakeupTime() != Long.MIN_VALUE)
+            {
+               triggerTime.set(0, controller.nextWakeupTime());
+               waitUntil(triggerTime);               
+            }
+         }
       }
       
       
