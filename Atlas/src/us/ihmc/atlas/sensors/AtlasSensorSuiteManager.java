@@ -12,6 +12,7 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.FishEyeDataReceive
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.SCSCameraDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.RobotBoundingBoxes;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.SCSLidarDataReceiver;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.SCSPointCloudDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosNativeNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
@@ -45,6 +46,8 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
             networkingManager, ppsTimestampOffsetProvider);
       new SCSLidarDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, sdfFullRobotModel, robotBoundingBoxes, sensorInformation, scsCommunicator,
             ppsTimestampOffsetProvider);
+//      new SCSPointCloudDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, sdfFullRobotModel, robotBoundingBoxes, sensorInformation, scsCommunicator,
+//            ppsTimestampOffsetProvider);
 
       if (DRCConfigParameters.CALIBRATE_ARM_MODE)
       {
