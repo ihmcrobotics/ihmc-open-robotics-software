@@ -33,6 +33,7 @@ import us.ihmc.utilities.screwTheory.TwistCalculator;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.InverseDynamicsMechanismReferenceFrameVisualizer;
+import com.yobotics.simulationconstructionset.JointAxisVisualizer;
 import com.yobotics.simulationconstructionset.LongYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.ModularRobotController;
@@ -48,6 +49,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    private static final boolean CREATE_DYNAMICALLY_CONSISTENT_NULLSPACE_EVALUATOR = false;
    private static final boolean SHOW_INERTIA_GRAPHICS = false;
    private static final boolean SHOW_REFERENCE_FRAMES = false;
+   private static final boolean SHOW_JOINTAXIS_ZALIGN_FRAMES = false;
 
    private final long controlDTInNS;
    
@@ -85,7 +87,6 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       
       forceSensorDataHolderForController = threadDataSynchronizer.getControllerForceSensorDataHolder();
 
-      
       outputWriter.setFullRobotModel(controllerFullRobotModel);
       outputWriter.setForceSensorDataHolderForController(forceSensorDataHolderForController);
       
@@ -134,25 +135,30 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       modularRobotController.setSensorProcessor(sensorProcessor);
       modularRobotController.addRobotController(robotController);
 
-      if (SHOW_INERTIA_GRAPHICS)
+      if (dynamicGraphicObjectsListRegistry != null)
       {
-         if (dynamicGraphicObjectsListRegistry != null)
-         {
+        if (SHOW_INERTIA_GRAPHICS)
+        {
             CommonInertiaElipsoidsVisualizer commonInertiaElipsoidsVisualizer = new CommonInertiaElipsoidsVisualizer(controllerModel.getElevator(),
                   dynamicGraphicObjectsListRegistry);
             modularRobotController.addRobotController(commonInertiaElipsoidsVisualizer);
          }
-      }
 
-      if (SHOW_REFERENCE_FRAMES)
-      {
-         if (dynamicGraphicObjectsListRegistry != null)
-         {
-            InverseDynamicsMechanismReferenceFrameVisualizer inverseDynamicsMechanismReferenceFrameVisualizer = new InverseDynamicsMechanismReferenceFrameVisualizer(
-                  controllerModel.getElevator(), dynamicGraphicObjectsListRegistry, 0.5);
-            modularRobotController.addRobotController(inverseDynamicsMechanismReferenceFrameVisualizer);
-         }
+        if (SHOW_REFERENCE_FRAMES)
+        {
+              InverseDynamicsMechanismReferenceFrameVisualizer inverseDynamicsMechanismReferenceFrameVisualizer = new InverseDynamicsMechanismReferenceFrameVisualizer(
+                    controllerModel.getElevator(), dynamicGraphicObjectsListRegistry, 0.5);
+              modularRobotController.addRobotController(inverseDynamicsMechanismReferenceFrameVisualizer);
+        }
+        
+        if (SHOW_JOINTAXIS_ZALIGN_FRAMES)
+        {
+              JointAxisVisualizer jointAxisVisualizer= new JointAxisVisualizer(controllerModel.getElevator(), dynamicGraphicObjectsListRegistry, 0.3);
+              modularRobotController.addRobotController(jointAxisVisualizer);
+          
+        }
       }
+      
 
       if (CREATE_DYNAMICALLY_CONSISTENT_NULLSPACE_EVALUATOR)
       {
@@ -210,23 +216,23 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    {
       if(runController.getBooleanValue())
       {
-         if(firstTick.getBooleanValue())
-         {
-            robotController.initialize();
-            firstTick.set(false);
-         }
-         controllerTimer.startMeasurement();
-         robotController.doControl();
-         controllerTimer.stopMeasurement();         
+      if(firstTick.getBooleanValue())
+      {
+         robotController.initialize();
+         firstTick.set(false);
       }
+      controllerTimer.startMeasurement();
+      robotController.doControl();
+      controllerTimer.stopMeasurement();
+   }
    }
 
    @Override
    public void write(long timestamp)
    {
       if(runController.getBooleanValue())
-      {
-         outputWriter.writeAfterController(TimeTools.secondsToNanoSeconds(controllerTime.getDoubleValue()));
+   {
+      outputWriter.writeAfterController(TimeTools.secondsToNanoSeconds(controllerTime.getDoubleValue()));
          totalDelay.set(timestamp - nextExecutionTime.getLongValue() - controlDTInNS);
       }
    }
