@@ -50,10 +50,11 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
          </joint>
       */
       Transform3D translateForwardAndDownOnFoot = new Transform3D();
-      translateForwardAndDownOnFoot.setTranslation(new Vector3d(0.0551839, 0.0, -0.0291731)); 
+      //translateForwardAndDownOnFoot.setTranslation(new Vector3d(0.0551839, 0.0, -0.0291731)); 
+      translateForwardAndDownOnFoot.setTranslation(new Vector3d(0.058547, 0.0, -0.02150)); 
       
-      Transform3D rotYBy7dot5 = new Transform3D();
-      rotYBy7dot5.rotY(Math.PI/24.0);
+      //Transform3D rotYBy7dot5 = new Transform3D();
+      //rotYBy7dot5.rotY(Math.PI/24.0);
       
       Transform3D rotXByPi = new Transform3D();
       rotXByPi.rotX(Math.PI);
@@ -63,7 +64,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
       
       Transform3D leftTransform = new Transform3D();
       leftTransform.mul(translateForwardAndDownOnFoot);
-      leftTransform.mul(rotYBy7dot5);
+      //leftTransform.mul(rotYBy7dot5);
       leftTransform.mul(rotateZ60Degrees);
       leftTransform.mul(rotXByPi);
 
