@@ -12,6 +12,18 @@
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
+	<Graph>
+		<Variables>root.bono.q_l_leg_kny,root.bono.q_r_leg_kny</Variables>
+		<GraphConfiguration>
+			<Name>config2</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
 </GraphGroup>
 <Entry Boxes>offsetHeightAboveGround,walk</Entry Boxes>
 
@@ -29,9 +41,9 @@ Plotter,
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>-5.940507177995851</Camera X>
- <Camera Y>-0.5731680054955874</Camera Y>
- <Camera Z>1.3361065857985297</Camera Z>
+ <Camera X>5.863267956956039</Camera X>
+ <Camera Y>1.5920773673772315</Camera Y>
+ <Camera Z>0.8859872797237686</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -55,8 +67,8 @@ Plotter,
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>0.0</Fix X>
-<Fix Y>0.0</Fix Y>
-<Fix Z>0.6</Fix Z>
+<Fix X>-0.11596149805533695</Fix X>
+<Fix Y>0.6411394066457405</Fix Y>
+<Fix Z>0.3037997479865997</Fix Z>
 </Fix Position>
 </Canvas 1>
