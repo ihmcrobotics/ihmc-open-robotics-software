@@ -10,7 +10,7 @@ import us.ihmc.valkyrie.kinematics.util.ClosedFormJacobian;
 
 public class ClosedFormJacobianTest
 {
-   private static final boolean DEBUG = true;
+   private static final boolean DEBUG = false;
 
    private double TOLERANCE = 1E-7;
    private double[] roll = new double[]
@@ -171,9 +171,9 @@ public void testJacobianMatchesInefficientImplementationWaist()
 
       if (DEBUG)
       {
-         System.out.println("");
          System.out.println("tau5_roll_wills = " + tau5_roll + ", tau6_roll_wills = " + tau6_roll + ", tau5_pitch_wills = " + tau5_pitch + ", tau6_pitch_wills = " + tau6_pitch);
          System.out.println("tau5_roll_jerry = " + tau5_roll_jerry + ", tau6_roll_jerry = " + tau6_roll_jerry + ", tau5_pitch_jerry = " + tau5_pitch_jerry + ", tau6_pitch_jerry = " + tau6_pitch_jerry);
+         System.out.println(" ");
       }
       assertEquals(tau5_roll, tau5_roll_jerry, TOLERANCE);
       assertEquals(tau6_roll, tau6_roll_jerry, TOLERANCE);

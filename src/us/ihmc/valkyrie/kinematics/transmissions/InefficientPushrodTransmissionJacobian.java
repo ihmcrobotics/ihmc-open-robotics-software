@@ -22,7 +22,7 @@ public class InefficientPushrodTransmissionJacobian
 {
    private final boolean DEBUG = false;
 
-   private static final double DEGREES = 180.0/Math.PI;
+   private static final double DEGREES = Math.PI/180.0;
 
    private Axis topJointAxis, bottomJointAxis;
    
