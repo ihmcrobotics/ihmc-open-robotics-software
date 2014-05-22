@@ -16,7 +16,7 @@ public class TransferTimeCalculationProvider implements DoubleProvider
       this.transferTime.set(defaultTransferTime);
    }
    
-   public double getCurrentSwingTimeValue()
+   public double getValue()
    {
       return transferTime.getDoubleValue();
    }

@@ -55,7 +55,7 @@ public class ZeroToOneParabolicVelocityTrajectoryGenerator implements DoubleTraj
       return currentTime.getDoubleValue() >= trajectoryTime.getDoubleValue();
    }
 
-   public double getCurrentSwingTimeValue()
+   public double getValue()
    {
       return currentValue.getDoubleValue();
    }

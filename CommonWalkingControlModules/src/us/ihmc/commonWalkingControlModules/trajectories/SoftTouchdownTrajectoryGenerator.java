@@ -100,7 +100,7 @@ public class SoftTouchdownTrajectoryGenerator
    
    public void setInitialTimePositionsAndVelocities()
    {
-	   startTime.set(startTimeProvider.getCurrentSwingTimeValue());
+	   startTime.set(startTimeProvider.getValue());
 	   t0 = startTime.getDoubleValue();
 	   timeIntoTouchdown.set(0.0);
 	      

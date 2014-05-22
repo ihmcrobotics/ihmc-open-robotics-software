@@ -607,9 +607,9 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
          offsetHeightAboveGround.set(desiredComHeightProvider.getComHeightOffset());
       }
       offsetHeightAboveGroundTrajectory.compute(yoTime.getDoubleValue() - offsetHeightAboveGroundChangedTime.getDoubleValue());
-      offsetHeightAboveGroundTrajectoryOutput.set(offsetHeightAboveGroundTrajectory.getCurrentSwingTimeValue());
+      offsetHeightAboveGroundTrajectoryOutput.set(offsetHeightAboveGroundTrajectory.getValue());
       
-      offsetHeightAboveGroundPrevValue.set(offsetHeightAboveGroundTrajectory.getCurrentSwingTimeValue());
+      offsetHeightAboveGroundPrevValue.set(offsetHeightAboveGroundTrajectory.getValue());
       
 //      if (projectionSegment == null)
 //      {
@@ -621,7 +621,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       double splineQuery = projectionSegment.percentageAlongLineSegment(queryPoint) * projectionSegment.length();
 
       double[] splineOutput = spline.getZSlopeAndSecondDerivative(splineQuery);
-      double z = splineOutput[0] + offsetHeightAboveGroundTrajectoryOutput.getCurrentSwingTimeValue();
+      double z = splineOutput[0] + offsetHeightAboveGroundTrajectoryOutput.getValue();
       double dzds = splineOutput[1];
       double ddzdds = splineOutput[2];
 

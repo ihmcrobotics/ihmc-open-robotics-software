@@ -108,7 +108,7 @@ public class ParabolicPositionTrajectoryGenerator implements PositionTrajectoryG
    public void initialize()
    {
       timeIntoStep.set(0.0);
-      this.stepTime.set(stepTimeProvider.getCurrentSwingTimeValue());
+      this.stepTime.set(stepTimeProvider.getValue());
 
       if (stepTime.getDoubleValue() < 1e-10)
       {

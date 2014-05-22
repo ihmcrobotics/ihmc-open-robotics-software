@@ -23,7 +23,7 @@ public class SwingTimeCalculationProvider implements DoubleProvider
       this.fastSwingTime = defaultSwingTime;
    }
    
-   public double getCurrentSwingTimeValue()
+   public double getValue()
    {
       return swingTime.getDoubleValue();
    }

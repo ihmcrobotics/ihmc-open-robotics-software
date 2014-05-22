@@ -45,7 +45,7 @@ public class CirclePositionAndOrientationTrajectoryGeneratorTest
       // v = omega x r
       checkVEqualsOmegaCrossR(frame, trajectoryGenerator, random);
 
-      checkOrientationAtVariousPoints(trajectoryGenerator, initialOrientationProvider, trajectoryTimeProvider.getCurrentSwingTimeValue(), frame);
+      checkOrientationAtVariousPoints(trajectoryGenerator, initialOrientationProvider, trajectoryTimeProvider.getValue(), frame);
    }
 
    private void checkOrientationAtVariousPoints(CirclePositionAndOrientationTrajectoryGenerator trajectoryGenerator,

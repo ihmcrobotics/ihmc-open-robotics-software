@@ -142,7 +142,7 @@ public class JointSpaceHandControlControlState extends AbstractJointSpaceHandCon
 //         double desiredPosition = trajectoryGenerator.getValue();
 //         double desiredVelocity = trajectoryGenerator.getVelocity();
          
-         desiredPosition.set(trajectoryGenerator.getCurrentSwingTimeValue());
+         desiredPosition.set(trajectoryGenerator.getValue());
          desiredVelocity.set(trajectoryGenerator.getVelocity());
          double feedforwardAcceleration = trajectoryGenerator.getAcceleration();
 
