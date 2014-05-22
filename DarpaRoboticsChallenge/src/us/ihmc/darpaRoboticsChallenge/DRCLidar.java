@@ -6,12 +6,14 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import javax.media.j3d.Transform3D;
+import javax.vecmath.Point3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.graphics3DAdapter.GPULidar;
 import us.ihmc.graphics3DAdapter.GPULidarCallback;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
+import us.ihmc.utilities.lidar.PointCloudPacket;
 import us.ihmc.utilities.lidar.polarLidar.LidarScan;
 import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
 import us.ihmc.utilities.math.TimeTools;
@@ -64,7 +66,64 @@ public class DRCLidar
       lidarMount.setLidar(lidar);
 
    }
+   
+   public static void setupDRCRobotPointCloud(DRCSimulationFactory drcSimulation, ObjectCommunicator objectCommunicator, DRCRobotJointMap jointMap,
+         TimestampProvider timestampProvider, boolean startLidar)
+   {
+      Graphics3DAdapter graphics3dAdapter = drcSimulation.getSimulationConstructionSet().getGraphics3dAdapter();
+      
+      LidarMount lidarMount = getLidarSensor(drcSimulation.getRobot());
+      
+      LidarScanParameters lidarScanParameters = lidarMount.getLidarScanParameters();
+      int horizontalRays = lidarScanParameters.pointsPerSweep;
+      float fov = lidarScanParameters.sweepYawMax - lidarScanParameters.sweepYawMin;
+      float near = lidarScanParameters.minRange;
+      float far = lidarScanParameters.maxRange;
+      
+      
+      DRCLidarToPointCloudCallback callback = new DRCLidarToPointCloudCallback(objectCommunicator, lidarScanParameters);
+      GPULidar lidar = graphics3dAdapter.createGPULidar(callback, horizontalRays, fov, near, far);
+      lidarMount.setLidar(lidar);
+   }
 
+   
+   public static class DRCLidarToPointCloudCallback implements GPULidarCallback
+   {
+      private final Executor pool = Executors.newSingleThreadExecutor();
+
+      private final ObjectCommunicator objectCommunicator;
+      private final LidarScanParameters lidarScanParameters;
+      
+      public DRCLidarToPointCloudCallback(ObjectCommunicator objectCommunicator, LidarScanParameters lidarScanParameters)
+      {
+         this.objectCommunicator = objectCommunicator;
+         this.lidarScanParameters = lidarScanParameters;
+      }
+      
+      @Override
+      public void scan(float[] scan, Transform3D lidarTransform, double time)
+      {
+         Transform3D transform = new Transform3D(lidarTransform);
+         final LidarScan lidarScan = new LidarScan(new LidarScanParameters(lidarScanParameters, TimeTools.secondsToNanoSeconds(time)), transform, transform,
+               Arrays.copyOf(scan, scan.length));
+         
+         ArrayList<Point3d> points = lidarScan.getAllPoints();
+         Point3d[] pointsArray = new Point3d[points.size()];
+         points.toArray(pointsArray);
+         
+         final PointCloudPacket pointCloud = new PointCloudPacket(pointsArray);
+         
+         pool.execute(new Runnable()
+         {            
+            @Override
+            public void run()
+            {
+               objectCommunicator.consumeObject(pointCloud);     
+            }
+         });
+      }
+      
+   }
    
    public static class DRCLidarCallback implements GPULidarCallback
    {
@@ -85,8 +144,6 @@ public class DRCLidar
          Transform3D transform = new Transform3D(lidarTransform);
          final LidarScan lidarScan = new LidarScan(new LidarScanParameters(lidarScanParameters, TimeTools.secondsToNanoSeconds(time)), transform, transform,
                Arrays.copyOf(scan, scan.length));
-         
-//         lidarScan.getAllPoints()
          
          pool.execute(new Runnable()
          {            
