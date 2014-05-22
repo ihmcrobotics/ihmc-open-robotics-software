@@ -1165,7 +1165,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       desiredPelvisOrientation.set(averageOrientation);
    }
 
-   private final DoubleYoVariable swingTimeRemainingPush = new DoubleYoVariable("swingTimeRemainingPushDebug", registry);
    private class SingleSupportState extends State<WalkingState>
    {
       private final RobotSide swingSide;
@@ -1209,8 +1208,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                yoTime.getDoubleValue());
 
          RobotSide supportSide = swingSide.getOppositeSide();
-         double swingTimeRemaining = swingTimeCalculationProvider.getCurrentSwingTimeValue() - (stateMachine.timeInCurrentState() - captureTime);
-         swingTimeRemainingPush.set(swingTimeRemaining);
+         double swingTimeRemaining = swingTimeCalculationProvider.getCurrentSwingTimeValue() - stateMachine.timeInCurrentState();
          FramePoint2d transferToFootstepLocation = transferToFootstep.getFramePoint2dCopy();
          FrameConvexPolygon2d footPolygon = computeFootPolygon(supportSide, referenceFrames.getAnkleZUpFrame(supportSide));
          double omega0 = icpAndMomentumBasedController.getOmega0();
@@ -1225,12 +1223,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                updateFootstepParameters();
                
                captureTime = stateMachine.timeInCurrentState();
-               swingTimeCalculationProvider.setSwingTime(defaultSwingTime - captureTime);
-
-               footEndEffectorControlModules.get(swingSide).replanTrajectory();
+               footEndEffectorControlModules.get(swingSide).replanTrajectory(defaultSwingTime - captureTime);
 
                TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForSingleSupport(nextFootstep, swingSide);
-               instantaneousCapturePointPlanner.initializeSingleSupport(transferToAndNextFootstepsData, yoTime.getDoubleValue());
+               instantaneousCapturePointPlanner.initializeSingleSupport(transferToAndNextFootstepsData, yoTime.getDoubleValue() - captureTime);
             }
          }
 
