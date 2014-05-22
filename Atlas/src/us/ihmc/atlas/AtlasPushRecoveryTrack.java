@@ -17,6 +17,8 @@ import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
 import us.ihmc.graphics3DAdapter.GroundProfile;
 
 import com.martiansoftware.jsap.JSAPException;
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
+import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.util.FlatGroundProfile;
 
 public class AtlasPushRecoveryTrack
@@ -63,8 +65,18 @@ public class AtlasPushRecoveryTrack
       pushRobotController.addPushButtonToSCS(track.getSimulationConstructionSet());
       
       double defaultForceDurationInSeconds = 0.1;
-      double defaultForceMagnitude = 200.0;
-      Vector3d defaultForceDirection = new Vector3d(0.0, -1.0, 0.0);
+      double defaultForceMagnitude = 600.0;
+      Vector3d defaultForceDirection = new Vector3d(1.0, 0.0, 0.0);
+      
+      SimulationConstructionSet scs = track.getSimulationConstructionSet();
+      
+      @SuppressWarnings("deprecation")
+      BooleanYoVariable enable = (BooleanYoVariable) scs.getVariable("enablePushRecovery");
+      @SuppressWarnings("deprecation")
+      BooleanYoVariable enableDS = (BooleanYoVariable) scs.getVariable("enablePushRecoveryFromDoubleSupport");
+      // enable push recovery
+      enable.set(true);
+      enableDS.set(true);
       
       pushRobotController.setPushDuration(defaultForceDurationInSeconds);
       pushRobotController.setPushForceMagnitude(defaultForceMagnitude);
