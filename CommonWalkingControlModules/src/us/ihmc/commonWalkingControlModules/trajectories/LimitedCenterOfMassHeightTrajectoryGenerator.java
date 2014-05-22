@@ -76,7 +76,7 @@ public class LimitedCenterOfMassHeightTrajectoryGenerator implements DoubleTraje
       return true;
    }
 
-   public double getCurrentSwingTimeValue()
+   public double getValue()
    {
       return desiredCenterOfMassHeight.getDoubleValue();
    }

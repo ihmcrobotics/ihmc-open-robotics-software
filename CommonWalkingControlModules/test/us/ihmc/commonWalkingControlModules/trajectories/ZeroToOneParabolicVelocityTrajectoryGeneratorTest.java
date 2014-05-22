@@ -44,7 +44,7 @@ public class ZeroToOneParabolicVelocityTrajectoryGeneratorTest
    {
       trajectoryGenerator.compute(0.0);
       
-      assertEquals(0.0, trajectoryGenerator.getCurrentSwingTimeValue(), epsilon);
+      assertEquals(0.0, trajectoryGenerator.getValue(), epsilon);
    }
    
    @Test
@@ -52,7 +52,7 @@ public class ZeroToOneParabolicVelocityTrajectoryGeneratorTest
    {
       trajectoryGenerator.compute(trajectoryTime);
       
-      assertEquals(1.0, trajectoryGenerator.getCurrentSwingTimeValue(), epsilon);
+      assertEquals(1.0, trajectoryGenerator.getValue(), epsilon);
    }
    
    @Test
@@ -60,7 +60,7 @@ public class ZeroToOneParabolicVelocityTrajectoryGeneratorTest
    {
       trajectoryGenerator.compute(trajectoryTime / 2.0);
       
-      assertEquals(0.5, trajectoryGenerator.getCurrentSwingTimeValue(), epsilon);
+      assertEquals(0.5, trajectoryGenerator.getValue(), epsilon);
    }
 
    @Test
@@ -68,7 +68,7 @@ public class ZeroToOneParabolicVelocityTrajectoryGeneratorTest
    {
       trajectoryGenerator.compute(trajectoryTime * 1.5);
       
-      assertEquals(1.0, trajectoryGenerator.getCurrentSwingTimeValue(), epsilon);
+      assertEquals(1.0, trajectoryGenerator.getValue(), epsilon);
    }
    
    @Test

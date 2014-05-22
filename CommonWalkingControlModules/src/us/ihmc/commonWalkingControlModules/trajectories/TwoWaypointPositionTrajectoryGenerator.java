@@ -196,7 +196,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
    private void setStepTime()
    {
-      double stepTime = stepTimeProvider.getCurrentSwingTimeValue();
+      double stepTime = stepTimeProvider.getValue();
       if (stepTime <= 0)
       {
          throw new RuntimeException("stepTimeProvider must provide a positive time value.");

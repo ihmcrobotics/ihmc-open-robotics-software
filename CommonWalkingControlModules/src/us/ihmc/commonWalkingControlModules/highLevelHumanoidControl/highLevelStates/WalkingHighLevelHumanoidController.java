@@ -445,7 +445,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       amountToBeInsideDoubleSupport.set(0.03); // 0.02);    // TODO: necessary for stairs...
       transferTimeCalculationProvider.setTransferTime();
 
-      totalEstimatedToeOffTimeProvider.set(transferTimeCalculationProvider.getCurrentSwingTimeValue());
+      totalEstimatedToeOffTimeProvider.set(transferTimeCalculationProvider.getValue());
 
       stopInDoubleSupporTrajectoryTime.set(0.5);
       this.userDesiredPelvisPitch.set(desiredPelvisPitch);
@@ -818,7 +818,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          if (transferToSide != null)
          {
             FramePoint2d stanceFootLocation = new FramePoint2d(referenceFrames.getAnkleZUpFrame(transferToSide));
-            moveICPToInsideOfFootAtEndOfSwing(transferToSide.getOppositeSide(), stanceFootLocation, swingTimeCalculationProvider.getCurrentSwingTimeValue(), 0.0,
+            moveICPToInsideOfFootAtEndOfSwing(transferToSide.getOppositeSide(), stanceFootLocation, swingTimeCalculationProvider.getValue(), 0.0,
                   desiredICPLocal);
          }
          else
@@ -827,7 +827,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             if (previousSupport != null)
             {
                FramePoint2d stanceFootLocation = new FramePoint2d(referenceFrames.getAnkleZUpFrame(previousSupport.getOppositeSide()));
-               moveICPToInsideOfFootAtEndOfSwing(previousSupport, stanceFootLocation, swingTimeCalculationProvider.getCurrentSwingTimeValue(), 0.0, desiredICPLocal);
+               moveICPToInsideOfFootAtEndOfSwing(previousSupport, stanceFootLocation, swingTimeCalculationProvider.getValue(), 0.0, desiredICPLocal);
             }
 
             desiredICPLocal.changeFrame(referenceFrames.getMidFeetZUpFrame());
@@ -963,7 +963,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          else if (rememberFinalICPFromSingleSupport.getBooleanValue() && !finalDesiredICPInWorld.containsNaN())
          {
             FramePoint2d finalDesiredICP = finalDesiredICPInWorld.getFramePoint2dCopy();
-            double trajectoryTime = transferTimeCalculationProvider.getCurrentSwingTimeValue();
+            double trajectoryTime = transferTimeCalculationProvider.getValue();
 
             finalDesiredICPAndTrajectoryTime = new Pair<FramePoint2d, Double>(finalDesiredICP, trajectoryTime);
          }
@@ -976,7 +976,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             instantaneousCapturePointPlanner.initializeDoubleSupport(transferToAndNextFootstepsData, yoTime.getDoubleValue());
 
             FramePoint2d finalDesiredICP = instantaneousCapturePointPlanner.getFinalDesiredICP();
-            double trajectoryTime = transferTimeCalculationProvider.getCurrentSwingTimeValue();
+            double trajectoryTime = transferTimeCalculationProvider.getValue();
 
             finalDesiredICPInWorld.set(finalDesiredICP.changeFrameCopy(worldFrame));
             finalDesiredICPAndTrajectoryTime = new Pair<FramePoint2d, Double>(finalDesiredICP, trajectoryTime);
@@ -1007,7 +1007,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             nextNextFootstep = upcomingFootstepList.getNextNextFootstep();
          }
 
-         double timeAllottedForSingleSupportForICP = swingTimeCalculationProvider.getCurrentSwingTimeValue() + additionalSwingTimeForICP.getDoubleValue();
+         double timeAllottedForSingleSupportForICP = swingTimeCalculationProvider.getValue() + additionalSwingTimeForICP.getDoubleValue();
 
          TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
          transferToAndNextFootstepsData.setTransferFromFootstep(transferFromFootstep);
@@ -1016,9 +1016,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          transferToAndNextFootstepsData.setTransferToSide(transferToSide);
          transferToAndNextFootstepsData.setNextFootstep(nextFootstep);
          transferToAndNextFootstepsData.setNextNextFootstep(nextNextFootstep);
-         transferToAndNextFootstepsData.setEstimatedStepTime(timeAllottedForSingleSupportForICP + transferTimeCalculationProvider.getCurrentSwingTimeValue());
+         transferToAndNextFootstepsData.setEstimatedStepTime(timeAllottedForSingleSupportForICP + transferTimeCalculationProvider.getValue());
          transferToAndNextFootstepsData.setW0(icpAndMomentumBasedController.getOmega0());
-         transferToAndNextFootstepsData.setDoubleSupportDuration(transferTimeCalculationProvider.getCurrentSwingTimeValue());
+         transferToAndNextFootstepsData.setDoubleSupportDuration(transferTimeCalculationProvider.getValue());
          transferToAndNextFootstepsData.setSingleSupportDuration(timeAllottedForSingleSupportForICP);
          double doubleSupportInitialTransferDuration = 0.4; // TODO: Magic Number
          transferToAndNextFootstepsData.setDoubleSupportInitialTransferDuration(doubleSupportInitialTransferDuration);
@@ -1208,7 +1208,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                yoTime.getDoubleValue());
 
          RobotSide supportSide = swingSide.getOppositeSide();
-         double swingTimeRemaining = swingTimeCalculationProvider.getCurrentSwingTimeValue() - stateMachine.timeInCurrentState();
+         double swingTimeRemaining = swingTimeCalculationProvider.getValue() - stateMachine.timeInCurrentState();
          FramePoint2d transferToFootstepLocation = transferToFootstep.getFramePoint2dCopy();
          FrameConvexPolygon2d footPolygon = computeFootPolygon(supportSide, referenceFrames.getAnkleZUpFrame(supportSide));
          double omega0 = icpAndMomentumBasedController.getOmega0();
@@ -1230,7 +1230,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             }
          }
 
-         moveICPToInsideOfFootAtEndOfSwing(supportSide, transferToFootstepLocation, swingTimeCalculationProvider.getCurrentSwingTimeValue(), swingTimeRemaining,
+         moveICPToInsideOfFootAtEndOfSwing(supportSide, transferToFootstepLocation, swingTimeCalculationProvider.getValue(), swingTimeRemaining,
                desiredICPLocal);
 
          desiredICP.set(desiredICPLocal);
@@ -1251,7 +1251,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          desiredPelvisAngularVelocity.set(desiredPelvisAngularVelocityToPack);
          desiredPelvisAngularAcceleration.set(desiredPelvisAngularAccelerationToPack);
 
-         if ((stateMachine.timeInCurrentState() - captureTime < 0.5 * swingTimeCalculationProvider.getCurrentSwingTimeValue())
+         if ((stateMachine.timeInCurrentState() - captureTime < 0.5 * swingTimeCalculationProvider.getValue())
                && footEndEffectorControlModules.get(swingSide).isInSingularityNeighborhood())
          {
             footEndEffectorControlModules.get(swingSide).doSingularityEscape(true);
@@ -1459,7 +1459,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             return false;
          else
          {
-            boolean doubleSupportTimeHasPassed = stateMachine.timeInCurrentState() > transferTimeCalculationProvider.getCurrentSwingTimeValue();
+            boolean doubleSupportTimeHasPassed = stateMachine.timeInCurrentState() > transferTimeCalculationProvider.getValue();
             boolean transferringToThisRobotSide = transferToSide == getUpcomingSupportLeg();
 
             return transferringToThisRobotSide && doubleSupportTimeHasPassed;
@@ -1620,7 +1620,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       private boolean hasMinimumTimePassed()
       {
-         double minimumSwingTime = swingTimeCalculationProvider.getCurrentSwingTimeValue() * minimumSwingFraction.getDoubleValue();
+         double minimumSwingTime = swingTimeCalculationProvider.getValue() * minimumSwingFraction.getDoubleValue();
 
          return stateMachine.timeInCurrentState() > minimumSwingTime;
       }
@@ -1714,12 +1714,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          FramePoint2d desiredToeOffCoP = new FramePoint2d(worldFrame);
          desiredToeOffCoP.interpolate(toeOffPoint2d, finalDesiredICP, toeOffPointToFinalDesiredFactor);
          icpWayPoint = EquivalentConstantCoPCalculator.computeICPPositionWithConstantCMP(finalDesiredICP, desiredToeOffCoP,
-               -transferTimeCalculationProvider.getCurrentSwingTimeValue(), icpAndMomentumBasedController.getOmega0());
+               -transferTimeCalculationProvider.getValue(), icpAndMomentumBasedController.getOmega0());
       }
       else
       {
          icpWayPoint = EquivalentConstantCoPCalculator.computeIntermediateICPWithConstantCMP(desiredICP.getFramePoint2dCopy(), finalDesiredICP,
-               swingTimeCalculationProvider.getCurrentSwingTimeValue() + transferTimeCalculationProvider.getCurrentSwingTimeValue(), swingTimeCalculationProvider.getCurrentSwingTimeValue(),
+               swingTimeCalculationProvider.getValue() + transferTimeCalculationProvider.getValue(), swingTimeCalculationProvider.getValue(),
                icpAndMomentumBasedController.getOmega0());
       }
 
@@ -1757,15 +1757,15 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       transferToAndNextFootstepsData.setTransferFromFootstep(transferFromFootstep);
       transferToAndNextFootstepsData.setTransferToFootstep(transferToFootstep);
 
-      double timeAllottedForSingleSupportForICP = swingTimeCalculationProvider.getCurrentSwingTimeValue() + additionalSwingTimeForICP.getDoubleValue();
+      double timeAllottedForSingleSupportForICP = swingTimeCalculationProvider.getValue() + additionalSwingTimeForICP.getDoubleValue();
 
       transferToAndNextFootstepsData.setTransferToFootPolygonInSoleFrame(footPolygon);
       transferToAndNextFootstepsData.setTransferToSide(swingSide);
       transferToAndNextFootstepsData.setNextFootstep(upcomingFootstepList.getNextNextFootstep());
       transferToAndNextFootstepsData.setNextNextFootstep(upcomingFootstepList.getNextNextNextFootstep());
-      transferToAndNextFootstepsData.setEstimatedStepTime(timeAllottedForSingleSupportForICP + transferTimeCalculationProvider.getCurrentSwingTimeValue());
+      transferToAndNextFootstepsData.setEstimatedStepTime(timeAllottedForSingleSupportForICP + transferTimeCalculationProvider.getValue());
       transferToAndNextFootstepsData.setW0(icpAndMomentumBasedController.getOmega0());
-      transferToAndNextFootstepsData.setDoubleSupportDuration(transferTimeCalculationProvider.getCurrentSwingTimeValue());
+      transferToAndNextFootstepsData.setDoubleSupportDuration(transferTimeCalculationProvider.getValue());
       transferToAndNextFootstepsData.setSingleSupportDuration(timeAllottedForSingleSupportForICP);
       double doubleSupportInitialTransferDuration = 0.4; // TODO: Magic Number
       transferToAndNextFootstepsData.setDoubleSupportInitialTransferDuration(doubleSupportInitialTransferDuration);
