@@ -8,11 +8,14 @@ import java.awt.Color;
 import java.util.ArrayList;
 
 import javax.media.j3d.Transform3D;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.ConvexPolygonTools;
@@ -22,7 +25,19 @@ import us.ihmc.utilities.math.geometry.FrameGeometryTestFrame;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.EnumYoVariable;
+import com.yobotics.simulationconstructionset.Robot;
+import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import com.yobotics.simulationconstructionset.VariableChangedListener;
+import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.plotting.DynamicGraphicYoPolygonArtifact;
+import com.yobotics.simulationconstructionset.plotting.SimulationOverheadPlotter;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameConvexPolygon2d;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 
 public class OneStepCaptureRegionCalculatorTest
 {
@@ -375,5 +390,122 @@ public class OneStepCaptureRegionCalculatorTest
       catch (InterruptedException ex)
       {
       }
+   }
+   
+   private static void setupVisualizer()
+   {
+      Robot robot = new Robot("CaptureRegionViz");
+      double footLength = 0.255;
+      double footBack = 0.09;
+      double footForward = footLength - footBack;
+      double midFootAnkleXOffset = footForward - footLength / 2.0;
+      double footWidth = 0.095;
+      double kinematicStepRange = 0.6;
+      final SideDependentList<ReferenceFrame> ankleZUpFrames = new SideDependentList<>();
+      final SideDependentList<FrameConvexPolygon2d> footPolygons = new SideDependentList<>();
+      final SideDependentList<YoFrameConvexPolygon2d> yoFootPolygons = new SideDependentList<>();
+      YoVariableRegistry registry = robot.getRobotsYoVariableRegistry();
+      final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+      final SideDependentList<DynamicGraphicYoPolygonArtifact> footArtifacts = new SideDependentList<>();
+      for (final RobotSide robotSide : RobotSide.values)
+      {
+         ReferenceFrame ankleZUpFrame = new ReferenceFrame(robotSide.getCamelCaseNameForStartOfExpression() + "AnkleZUpFrame", worldFrame)
+         {
+            private static final long serialVersionUID = -261348843115593336L;
+            @Override
+            public void updateTransformToParent(Transform3D transformToParent)
+            {
+               transformToParent.setTranslation(new Vector3d(0.0, robotSide.negateIfRightSide(0.15), 0.0));
+            }
+         };
+         ankleZUpFrame.update();
+         ankleZUpFrames.put(robotSide, ankleZUpFrame);
+         
+         FrameConvexPolygon2d footConvexPolygon2d = new FrameConvexPolygon2d(ankleZUpFrame);
+         footConvexPolygon2d.addVertex(ankleZUpFrame, footForward, -footWidth / 2.0);
+         footConvexPolygon2d.addVertex(ankleZUpFrame, footForward, footWidth / 2.0);
+         footConvexPolygon2d.addVertex(ankleZUpFrame, -footBack, footWidth / 2.0);
+         footConvexPolygon2d.addVertex(ankleZUpFrame, -footBack, -footWidth / 2.0);
+         footConvexPolygon2d.update();
+         footPolygons.put(robotSide, footConvexPolygon2d);
+         
+         YoFrameConvexPolygon2d yoFootPolygon = new YoFrameConvexPolygon2d(robotSide.getCamelCaseNameForStartOfExpression() + "Foot", "", worldFrame, 4, registry);
+         footConvexPolygon2d.changeFrame(worldFrame);
+         yoFootPolygon.setFrameConvexPolygon2d(footConvexPolygon2d);
+         footConvexPolygon2d.changeFrame(ankleZUpFrame);
+         yoFootPolygons.put(robotSide, yoFootPolygon);
+         Color footColor;
+         if (robotSide == RobotSide.LEFT) footColor = Color.pink;
+         else                             footColor = Color.green;
+         DynamicGraphicYoPolygonArtifact footArtifact = new DynamicGraphicYoPolygonArtifact(robotSide.getCamelCaseNameForStartOfExpression(), yoFootPolygon, footColor, false);
+         dynamicGraphicObjectsListRegistry.registerArtifact("Feet", footArtifact);
+         footArtifacts.put(robotSide, footArtifact);
+      }
+      final OneStepCaptureRegionCalculator oneStepCaptureRegionCalculator = new OneStepCaptureRegionCalculator(midFootAnkleXOffset, footWidth, kinematicStepRange, ankleZUpFrames, registry, null);
+      
+      final YoFrameConvexPolygon2d yoCaptureRegion = new YoFrameConvexPolygon2d("captureRegion", "", worldFrame, 50, registry);
+      DynamicGraphicYoPolygonArtifact captureRegionArtifact = new DynamicGraphicYoPolygonArtifact("CaptureRegion", yoCaptureRegion, Color.BLACK, false);
+      dynamicGraphicObjectsListRegistry.registerArtifact("Capture", captureRegionArtifact);
+      final EnumYoVariable<RobotSide> yoSupportSide = new EnumYoVariable<>("supportSide", registry, RobotSide.class);
+      final DoubleYoVariable swingTimeRemaining = new DoubleYoVariable("swingTimeRemaining", registry);
+      final YoFramePoint2d yoICP = new YoFramePoint2d("ICP", worldFrame, registry);
+      dynamicGraphicObjectsListRegistry.registerArtifact("ICP", yoICP.createDynamicGraphicPosition("ICP", 0.02, YoAppearance.Blue(), GraphicType.CROSS).createArtifact());
+      final double omega0 = 3.4;
+      
+      final SimulationOverheadPlotter simulationOverheadPlotter = new SimulationOverheadPlotter();
+      VariableChangedListener variableChangedListener = new VariableChangedListener()
+      {
+         @Override
+         public void variableChanged(YoVariable<?> v)
+         {
+            FramePoint2d icp = yoICP.getFramePoint2dCopy();
+            RobotSide supportSide = yoSupportSide.getEnumValue();
+            yoFootPolygons.get(supportSide.getOppositeSide()).hide();
+            footPolygons.get(supportSide).changeFrame(worldFrame);
+            yoFootPolygons.get(supportSide).setFrameConvexPolygon2d(footPolygons.get(supportSide));
+            footPolygons.get(supportSide).changeFrame(ankleZUpFrames.get(supportSide));
+            oneStepCaptureRegionCalculator.calculateCaptureRegion(supportSide.getOppositeSide(), swingTimeRemaining.getDoubleValue(), icp, omega0, footPolygons.get(supportSide));
+            
+            FrameConvexPolygon2d frameConvexPolygon2d = new FrameConvexPolygon2d();
+            frameConvexPolygon2d.setIncludingFrameAndUpdate(oneStepCaptureRegionCalculator.getCaptureRegion());
+            frameConvexPolygon2d.changeFrame(worldFrame);
+            yoCaptureRegion.setFrameConvexPolygon2d(frameConvexPolygon2d);
+            
+            simulationOverheadPlotter.update();
+         }
+      };
+      swingTimeRemaining.addVariableChangedListener(variableChangedListener);
+      yoICP.attachVariableChangedListener(variableChangedListener);
+      yoSupportSide.addVariableChangedListener(variableChangedListener);
+
+      swingTimeRemaining.set(0.3);
+      yoICP.set(0.1, 0.2);
+      variableChangedListener.variableChanged(null);
+      
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot);
+
+//      simulationOverheadPlotter.setDrawHistory(false);
+
+      scs.attachPlaybackListener(simulationOverheadPlotter);
+      JPanel simulationOverheadPlotterJPanel = simulationOverheadPlotter.getJPanel();
+      String plotterName = "Plotter";
+      scs.addExtraJpanel(simulationOverheadPlotterJPanel, plotterName);
+      JPanel plotterKeyJPanel = simulationOverheadPlotter.getJPanelKey();
+
+      JScrollPane scrollPane = new JScrollPane(plotterKeyJPanel);
+      scs.addExtraJpanel(scrollPane, "Plotter Legend");
+
+      scs.getStandardSimulationGUI().selectPanel(plotterName);
+
+      dynamicGraphicObjectsListRegistry.update();
+      dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs, false);
+      dynamicGraphicObjectsListRegistry.addArtifactListsToPlotter(simulationOverheadPlotter.getPlotter());
+      Thread myThread = new Thread(scs);
+      myThread.start();
+   }
+   
+   public static void main(String[] args)
+   {
+      setupVisualizer();
    }
 }

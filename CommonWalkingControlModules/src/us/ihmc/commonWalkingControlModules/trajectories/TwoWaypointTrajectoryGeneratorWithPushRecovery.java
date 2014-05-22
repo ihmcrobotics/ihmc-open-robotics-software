@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -45,11 +44,11 @@ public class TwoWaypointTrajectoryGeneratorWithPushRecovery implements PositionT
 
    protected final EnumYoVariable<TrajectoryWaypointGenerationMethod> waypointGenerationMethod;
 
-   private final DoubleProvider stepTimeProvider;
+   private final DoubleProvider swingTimeRemainingProvider;
    private final PositionProvider[] positionSources = new PositionProvider[2];
    private final VectorProvider[] velocitySources = new VectorProvider[2];
 
-   private final DoubleYoVariable stepTime;
+   private final DoubleYoVariable swingTime;
    private final DoubleYoVariable timeIntoStep;
    private final DoubleYoVariable defaultGroundClearance;
 
@@ -70,11 +69,9 @@ public class TwoWaypointTrajectoryGeneratorWithPushRecovery implements PositionT
    private FrameVector nominalTrajectoryVelocity;
    private FrameVector nominalTrajectoryAcceleration;
 
-   private double timeRemaining;
-
    //	private final SoftTouchdownTrajectoryGenerator touchdownTrajectoryGenerator;
 
-   public TwoWaypointTrajectoryGeneratorWithPushRecovery(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider stepTimeProvider,
+   public TwoWaypointTrajectoryGeneratorWithPushRecovery(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider swingTimeProvider, DoubleProvider swingTimeRemainingProvider,
          PositionProvider initialPositionProvider, VectorProvider initialVelocityProvider, PositionProvider finalPositionProvider,
          VectorProvider finalDesiredVelocityProvider, TrajectoryParametersProvider trajectoryParametersProvider, YoVariableRegistry parentRegistry,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, PositionTrajectoryGenerator nominalTrajectoryGenerator,
@@ -89,7 +86,7 @@ public class TwoWaypointTrajectoryGeneratorWithPushRecovery implements PositionT
       this.waypointGenerationMethod = new EnumYoVariable<TrajectoryWaypointGenerationMethod>(namePrefix + "WaypointGenerationMethod", registry,
             TrajectoryWaypointGenerationMethod.class);
 
-      this.stepTimeProvider = stepTimeProvider;
+      this.swingTimeRemainingProvider = swingTimeRemainingProvider;
 
       this.hasReplanned = new BooleanYoVariable(namePrefix + "HasReplanned", this.registry);
       this.hasReplanned.set(false);
@@ -107,8 +104,8 @@ public class TwoWaypointTrajectoryGeneratorWithPushRecovery implements PositionT
       velocitySources[0] = initialVelocityProvider;
       velocitySources[1] = finalDesiredVelocityProvider;
 
-      stepTime = new DoubleYoVariable(namePrefix + "StepTime", registry);
-      stepTime.set(stepTimeProvider.getCurrentSwingTimeValue());
+      swingTime = new DoubleYoVariable(namePrefix + "SwingTime", registry);
+      swingTime.set(swingTimeProvider.getCurrentSwingTimeValue());
 
       timeIntoStep = new DoubleYoVariable(namePrefix + "TimeIntoStep", registry);
 
@@ -125,7 +122,7 @@ public class TwoWaypointTrajectoryGeneratorWithPushRecovery implements PositionT
       this.nominalTrajectoryGenerator = nominalTrajectoryGenerator;
 
       this.pushRecoveryTrajectoryGenerator = new SmoothCartesianWaypointConnectorTrajectoryGenerator2D(namePrefix + "PushRecoveryTrajectory", referenceFrame,
-            this.initialTime.getDoubleValue(), stepTimeProvider, initialPositionProvider, finalPositionProvider, initialVelocityProvider, parentRegistry,
+            this.initialTime.getDoubleValue(), swingTimeProvider, initialPositionProvider, finalPositionProvider, initialVelocityProvider, parentRegistry,
             dynamicGraphicObjectsListRegistry, walkingControllerParameters);
       
       this.bagOfBalls = new BagOfBalls(numberOfBallsInBag, 0.01, namePrefix + "SwingTrajectoryBagOfBalls", registry,
@@ -134,10 +131,9 @@ public class TwoWaypointTrajectoryGeneratorWithPushRecovery implements PositionT
 
    public void initialize()
    {
-      timeRemaining = stepTimeProvider.getCurrentSwingTimeValue();
-
-      pushRecoveryTrajectoryGenerator.setTimeIntoStep(stepTime.getDoubleValue() - timeRemaining);
-      timeIntoStep.set(stepTime.getDoubleValue() - timeRemaining);
+      initialTime.set(timeIntoStep.getDoubleValue());
+      timeIntoStep.set(swingTime.getDoubleValue() - swingTimeRemainingProvider.getCurrentSwingTimeValue());
+      pushRecoveryTrajectoryGenerator.setTimeIntoStep(timeIntoStep.getDoubleValue());
       pushRecoveryTrajectoryGenerator.initialize();
       
       if(VISUALIZE)
@@ -179,7 +175,7 @@ public class TwoWaypointTrajectoryGeneratorWithPushRecovery implements PositionT
    private void visualizeTrajectory()
    {
       t0ForViz = timeIntoStep.getDoubleValue();
-      tfForViz = stepTime.getDoubleValue();
+      tfForViz = swingTime.getDoubleValue();
 
       for (int i = 0; i < numberOfBallsInBag; i++)
       {
@@ -221,7 +217,7 @@ public class TwoWaypointTrajectoryGeneratorWithPushRecovery implements PositionT
    @Override
    public boolean isDone()
    {
-      return timeIntoStep.getDoubleValue() >= stepTime.getDoubleValue();
+      return timeIntoStep.getDoubleValue() >= swingTime.getDoubleValue();
    }
 
    public void packLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
