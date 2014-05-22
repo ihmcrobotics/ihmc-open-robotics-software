@@ -67,7 +67,7 @@ public class MultiThreadedRealTimeRobotController
          {
             controller.read(Double.NaN, Long.MAX_VALUE);
             controller.run();
-            controller.write(System.nanoTime());
+            controller.write(RealtimeThread.getCurrentMonotonicClockTime());
             
             if(controller.nextWakeupTime() != Long.MIN_VALUE)
             {
