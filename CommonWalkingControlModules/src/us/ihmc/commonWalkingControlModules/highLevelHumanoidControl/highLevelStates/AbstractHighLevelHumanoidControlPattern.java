@@ -74,7 +74,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
 
    protected final YoFrameVector desiredPelvisAngularAcceleration = new YoFrameVector("desiredPelvisAngularAcceleration", worldFrame, registry);
    protected final SideDependentList<Integer> legJacobianIds = new SideDependentList<Integer>();
-   protected final SideDependentList<FootControlModule> footEndEffectorControlModules = new SideDependentList<FootControlModule>();
+   protected final SideDependentList<FootControlModule> footControlModules = new SideDependentList<FootControlModule>();
    protected final FullRobotModel fullRobotModel;
    protected final MomentumBasedController momentumBasedController;
    protected final WalkingControllerParameters walkingControllerParameters;
@@ -417,7 +417,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         footEndEffectorControlModules.get(robotSide).doControl();
+         footControlModules.get(robotSide).doControl();
       }
    }
 

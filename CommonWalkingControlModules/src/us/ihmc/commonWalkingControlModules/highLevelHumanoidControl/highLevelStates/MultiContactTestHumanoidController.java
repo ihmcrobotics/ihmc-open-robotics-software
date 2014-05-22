@@ -81,16 +81,16 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
          desiredConfigurationProviders.put(robotSide, desiredConfigurationProvider);
 
          ConstantDoubleProvider footTrajectoryTimeProvider = new ConstantDoubleProvider(1.0);
-         FootControlModule endEffectorControlModule = new FootControlModule(controlDT, foot, jacobianId, robotSide, /*poseTrajectoryGenerator,*/ null,
-                                                                null, null, walkingControllerParameters,
-                                                                footTrajectoryTimeProvider, currentConfigurationProvider, null, desiredConfigurationProvider,
-                                                                currentConfigurationProvider, null, desiredConfigurationProvider, null,
-                                                                null, momentumBasedController, registry);
-         endEffectorControlModule.setSwingGains(100.0, 200.0, 200.0, 1.0, 1.0);
-         endEffectorControlModule.setHoldGains(100.0, 200.0, 0.1);
-         endEffectorControlModule.setToeOffGains(0.0, 200.0, 0.1);
+         FootControlModule footControlModule = new FootControlModule(controlDT, foot, jacobianId, robotSide, null,
+               null, null, walkingControllerParameters, footTrajectoryTimeProvider, currentConfigurationProvider, 
+               null, desiredConfigurationProvider, currentConfigurationProvider, null, desiredConfigurationProvider, null,
+               null, momentumBasedController, registry);
+         
+         footControlModule.setSwingGains(100.0, 200.0, 200.0, 1.0, 1.0);
+         footControlModule.setHoldGains(100.0, 200.0, 0.1);
+         footControlModule.setToeOffGains(0.0, 200.0, 0.1);
 
-         footEndEffectorControlModules.put(robotSide, endEffectorControlModule);
+         footControlModules.put(robotSide, footControlModule);
       }
    }
 
@@ -132,7 +132,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
          {
             FramePose newFootPose = footPoseProvider.getDesiredFootPose(robotSide);
             desiredConfigurationProviders.get(foot).set(newFootPose);
-            footEndEffectorControlModules.get(robotSide).resetCurrentState();
+            footControlModules.get(robotSide).resetCurrentState();
          }
       }
 
@@ -180,16 +180,16 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
 
    private void setFlatFootContactState(RobotSide robotSide)
    {
-      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.FULL);
+      footControlModules.get(robotSide).setContactState(ConstraintType.FULL);
    }
 
    private void setContactStateForSwing(RobotSide robotSide)
    {
       // Initialize desired foot pose to the actual, so no surprising behavior
-      ReferenceFrame footFrame = footEndEffectorControlModules.get(robotSide).getEndEffectorFrame();
+      ReferenceFrame footFrame = footControlModules.get(robotSide).getEndEffectorFrame();
       desiredConfigurationProviders.get(robotSide).set(new FramePose(footFrame));
 
-      footEndEffectorControlModules.get(robotSide).doSingularityEscapeBeforeTransitionToNextState();
-      footEndEffectorControlModules.get(robotSide).setContactState(ConstraintType.MOVE_STRAIGHT);
+      footControlModules.get(robotSide).doSingularityEscapeBeforeTransitionToNextState();
+      footControlModules.get(robotSide).setContactState(ConstraintType.MOVE_STRAIGHT);
    }
 }
