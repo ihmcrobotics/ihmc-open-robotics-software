@@ -85,6 +85,9 @@ public class DRCLidar
          Transform3D transform = new Transform3D(lidarTransform);
          final LidarScan lidarScan = new LidarScan(new LidarScanParameters(lidarScanParameters, TimeTools.secondsToNanoSeconds(time)), transform, transform,
                Arrays.copyOf(scan, scan.length));
+         
+//         lidarScan.getAllPoints()
+         
          pool.execute(new Runnable()
          {            
             @Override
