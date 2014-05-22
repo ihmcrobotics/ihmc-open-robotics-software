@@ -38,7 +38,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   public static final boolean INITIALIZE_HEIGHT_WITH_FOOT = false;
+   public static final boolean INITIALIZE_HEIGHT_WITH_FOOT = true;
    
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
