@@ -40,6 +40,8 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
       new SCSCameraDataReceiver(robotPoseBuffer, sensorInformation.getPrimaryCameraParamaters(), scsCommunicator, networkingManager, ppsTimestampOffsetProvider);
       new SCSLidarDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, sdfFullRobotModel, robotBoundingBoxes, sensorInformation, scsCommunicator,
             ppsTimestampOffsetProvider);
+//      new PointCloudDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, sdfFullRobotModel, robotBoundingBoxes, sensorInformation, scsCommunicator,
+//            ppsTimestampOffsetProvider);
    }
 
    public void initializePhysicalSensors(RobotPoseBuffer robotPoseBuffer, DRCNetworkProcessorNetworkingManager networkingManager,
