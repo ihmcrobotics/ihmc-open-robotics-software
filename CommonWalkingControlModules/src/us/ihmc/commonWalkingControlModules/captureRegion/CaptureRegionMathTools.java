@@ -8,7 +8,6 @@ import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 public class CaptureRegionMathTools
 {
