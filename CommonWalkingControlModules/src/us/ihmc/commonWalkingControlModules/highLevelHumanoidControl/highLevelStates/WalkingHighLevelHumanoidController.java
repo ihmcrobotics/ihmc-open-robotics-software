@@ -535,9 +535,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          BooleanYoVariable requestHoldPosition = requestSupportFootToHoldPosition.get(robotSide);
 
          DoubleProvider maximumToeOffAngleProvider = walkOnTheEdgesProviders.getMaximumToeOffAngleProvider();
-         YoVelocityProvider finalDesiredVelocityProvider =
-               new YoVelocityProvider(robotSide + "TouchdownVelocity", ReferenceFrame.getWorldFrame(), registry);
-         finalDesiredVelocityProvider.set(new Vector3d(0.0, 0.0, walkingControllerParameters.getDesiredTouchdownVelocity()));
+         
          PositionProvider initialPositionProvider = new FrameBasedPositionSource(referenceFrames.getFootFrame(robotSide));
          VectorProvider initialVelocityProvider = new CurrentLinearVelocityProvider(referenceFrames.getFootFrame(robotSide),
                fullRobotModel.getFoot(robotSide), twistCalculator);
@@ -545,7 +543,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          FootControlModule footControlModule = new FootControlModule(controlDT, bipedFoot, jacobianId, robotSide,
                  footTouchdownPitchTrajectoryGenerator, maximumToeOffAngleProvider, requestHoldPosition, walkingControllerParameters,
                  swingTimeCalculationProvider, initialPositionProvider, initialVelocityProvider, swingFootFinalPositionProvider,
-                 initialOrientationProvider, finalDesiredVelocityProvider, finalFootOrientationProvider, trajectoryParametersProvider,
+                 initialOrientationProvider, /*finalDesiredVelocityProvider,*/ finalFootOrientationProvider, trajectoryParametersProvider,
                  dynamicGraphicObjectsListRegistry, momentumBasedController, registry);
 
 
