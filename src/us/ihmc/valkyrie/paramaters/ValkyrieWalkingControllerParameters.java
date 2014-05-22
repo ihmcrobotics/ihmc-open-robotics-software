@@ -265,7 +265,9 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
 
    public double getMaxStepLength()
    {
-      return 0.6; //0.5; //0.35;
+      if(!runningOnRealRobot) return 0.7; //0.5; //0.35;
+	  return 0.6;
+      
    }
 
    public double getMinStepWidth()
