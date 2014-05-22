@@ -70,6 +70,8 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    private final LongYoVariable nextExecutionTime = new LongYoVariable("nextExecutionTime", registry);
    private final LongYoVariable totalDelay = new LongYoVariable("totalDelay", registry);
    
+   private final BooleanYoVariable runController = new BooleanYoVariable("runController", registry);
+   
    public DRCControllerThread(DRCRobotModel robotModel, ControllerFactory controllerFactory, LidarControllerInterface lidarControllerInterface,
          ThreadDataSynchronizer threadDataSynchronizer, DRCOutputWriter outputWriter, GlobalDataProducer dataProducer, double gravity)
    {
@@ -190,31 +192,41 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    @Override
    public void read(double time, long currentClockTime)
    {
-      threadDataSynchronizer.receiveControllerState();
-      long estimatorStartTime = threadDataSynchronizer.getEstimatorClockStartTime();
-      long timestamp = threadDataSynchronizer.getTimestamp();
-      controllerTime.set(TimeTools.nanoSecondstoSeconds(timestamp));
-      nextExecutionTime.set(estimatorStartTime + controlDTInNS);
+      runController.set(threadDataSynchronizer.receiveControllerState());
+      
+      if(runController.getBooleanValue())
+      {
+         long estimatorStartTime = threadDataSynchronizer.getEstimatorClockStartTime();
+         long timestamp = threadDataSynchronizer.getTimestamp();
+         controllerTime.set(TimeTools.nanoSecondstoSeconds(timestamp));
+         nextExecutionTime.set(estimatorStartTime + controlDTInNS);
+      }
    }
 
    @Override
    public void run()
    {
-      if(firstTick.getBooleanValue())
+      if(runController.getBooleanValue())
       {
-         robotController.initialize();
-         firstTick.set(false);
+         if(firstTick.getBooleanValue())
+         {
+            robotController.initialize();
+            firstTick.set(false);
+         }
+         controllerTimer.startMeasurement();
+         robotController.doControl();
+         controllerTimer.stopMeasurement();         
       }
-      controllerTimer.startMeasurement();
-      robotController.doControl();
-      controllerTimer.stopMeasurement();
    }
 
    @Override
    public void write(long timestamp)
    {
-      outputWriter.writeAfterController(TimeTools.secondsToNanoSeconds(controllerTime.getDoubleValue()));
-      totalDelay.set(timestamp - nextExecutionTime.getLongValue() - controlDTInNS);
+      if(runController.getBooleanValue())
+      {
+         outputWriter.writeAfterController(TimeTools.secondsToNanoSeconds(controllerTime.getDoubleValue()));
+         totalDelay.set(timestamp - nextExecutionTime.getLongValue() - controlDTInNS);
+      }
    }
 
    @Override

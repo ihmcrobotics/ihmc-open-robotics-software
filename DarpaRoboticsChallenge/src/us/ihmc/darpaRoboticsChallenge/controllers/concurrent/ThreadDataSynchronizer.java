@@ -36,7 +36,7 @@ public class ThreadDataSynchronizer
 
    }
 
-   public void receiveControllerState()
+   public boolean receiveControllerState()
    {
       IntermediateEstimatorStateHolder estimatorStateHolder = estimatorStateCopier.getCopyForReading();
       if (estimatorStateHolder != null)
@@ -44,11 +44,11 @@ public class ThreadDataSynchronizer
          estimatorStateHolder.getIntoControllerModel();
          timestamp = estimatorStateHolder.getTimestamp();
          estimatorClockStartTime = estimatorStateHolder.getEstimatorClockStartTime();
+         return true;
       }
       else
       {
-         timestamp = Long.MIN_VALUE;
-         estimatorClockStartTime = Long.MIN_VALUE;
+         return false;
       }
    }
 
