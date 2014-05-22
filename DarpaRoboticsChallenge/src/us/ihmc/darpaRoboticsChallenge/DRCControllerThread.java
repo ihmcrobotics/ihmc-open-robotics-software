@@ -190,10 +190,10 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    @Override
    public void read(double time, long currentClockTime)
    {
+      threadDataSynchronizer.receiveControllerState();
       long estimatorStartTime = threadDataSynchronizer.getEstimatorClockStartTime();
       long timestamp = threadDataSynchronizer.getTimestamp();
       controllerTime.set(TimeTools.nanoSecondstoSeconds(timestamp));
-      threadDataSynchronizer.receiveControllerState();
       nextExecutionTime.set(estimatorStartTime + controlDTInNS);
    }
 

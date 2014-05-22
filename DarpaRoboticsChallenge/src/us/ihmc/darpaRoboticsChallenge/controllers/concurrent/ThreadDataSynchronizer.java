@@ -45,6 +45,11 @@ public class ThreadDataSynchronizer
          timestamp = estimatorStateHolder.getTimestamp();
          estimatorClockStartTime = estimatorStateHolder.getEstimatorClockStartTime();
       }
+      else
+      {
+         timestamp = Long.MIN_VALUE;
+         estimatorClockStartTime = Long.MIN_VALUE;
+      }
    }
 
    public void publishEstimatorState(long timestamp, long estimatorTick, long estimatorClockStartTime)
