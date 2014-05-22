@@ -40,21 +40,11 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    public static final SideDependentList<Transform3D> transformFromMeasurementToAnkleZUpFrames = new SideDependentList<>();
    static
    {     
-      /* 
-       * Obtained from v1_hw_ihmc.urdf
-         <joint name="/v1/LeftLeg6Axis_Offset" type="fixed">
-         <origin rpy="1.72079632679 0.518666 1.64601" xyz="0.0551839 0 -0.0291731"/>
-         <axis xyz="0 0 1"/>
-         <parent link="/v1/LeftUpperFoot"/>
-         <child link="/v1/LeftLeg6Axis_Frame"/>
-         </joint>
-      */
       Transform3D translateForwardAndDownOnFoot = new Transform3D();
-      //translateForwardAndDownOnFoot.setTranslation(new Vector3d(0.0551839, 0.0, -0.0291731)); 
-      translateForwardAndDownOnFoot.setTranslation(new Vector3d(0.058547, 0.0, -0.02150)); 
+      translateForwardAndDownOnFoot.setTranslation(new Vector3d(0.02150, 0.0, -0.058547));  //from Will's CAD measurement
       
-      //Transform3D rotYBy7dot5 = new Transform3D();
-      //rotYBy7dot5.rotY(Math.PI/24.0);
+      Transform3D rotYBy7dot5 = new Transform3D();
+      rotYBy7dot5.rotY(-Math.PI/24.0);
       
       Transform3D rotXByPi = new Transform3D();
       rotXByPi.rotX(Math.PI);
@@ -64,15 +54,12 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
       
       Transform3D leftTransform = new Transform3D();
       leftTransform.mul(translateForwardAndDownOnFoot);
-      //leftTransform.mul(rotYBy7dot5);
+      leftTransform.mul(rotYBy7dot5);
       leftTransform.mul(rotateZ60Degrees);
       leftTransform.mul(rotXByPi);
 
       transformFromMeasurementToAnkleZUpFrames.put(RobotSide.LEFT, leftTransform);
-
-      //two feet are identical
-      Transform3D rightTransform = new Transform3D(leftTransform);
-      transformFromMeasurementToAnkleZUpFrames.put(RobotSide.RIGHT, rightTransform);
+      transformFromMeasurementToAnkleZUpFrames.put(RobotSide.RIGHT, new Transform3D(leftTransform));
    }
 
    
