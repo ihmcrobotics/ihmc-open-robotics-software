@@ -74,7 +74,7 @@ public class AtlasNetworkProcessor
             LocalObjectCommunicator objectCommunicator = new LocalObjectCommunicator();
 
             new DummyController(rosMasterURI, objectCommunicator, model, new IRobotControlThreadManager(objectCommunicator));
-            new DRCNetworkProcessor(objectCommunicator,null, model);
+            new DRCNetworkProcessor(objectCommunicator, model);
          }
          else
          {
