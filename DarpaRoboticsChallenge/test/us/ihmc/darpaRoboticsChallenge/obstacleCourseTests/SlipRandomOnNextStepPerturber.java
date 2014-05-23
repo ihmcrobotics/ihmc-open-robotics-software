@@ -6,6 +6,7 @@ import java.util.Random;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
@@ -25,7 +26,7 @@ public class SlipRandomOnNextStepPerturber extends ModularRobotController
       NO_CONTACT, CONTACT_WILL_SLIP, CONTACT_SLIP, CONTACT_DONE_SLIP, CONTACT
    }
 
-   private final GroundContactPointsSlipper groundContactPointsSlipper;
+   private final SideDependentList<GroundContactPointsSlipper> groundContactPointsSlippers;
    private final SDFRobot robot;
    private final BooleanYoVariable slipNextStep;
    private final DoubleYoVariable minSlipAfterTimeDelta, maxSlipAfterTimeDelta, nextSlipAfterTimeDelta;
@@ -58,6 +59,8 @@ public class SlipRandomOnNextStepPerturber extends ModularRobotController
 
       this.robot = robot;
 
+      groundContactPointsSlippers = new SideDependentList<GroundContactPointsSlipper>();
+
       for (RobotSide robotSide : RobotSide.values())
       {
          DoubleYoVariable touchdownTimeForSlip = new DoubleYoVariable(robotSide.getCamelCaseNameForStartOfExpression() + "TouchdownTimeForSlip"
@@ -70,6 +73,10 @@ public class SlipRandomOnNextStepPerturber extends ModularRobotController
          slipStateMap.put(robotSide, slipState);
 
          groundContactPointsMap.put(robotSide, robot.getFootGroundContactPoints(robotSide));
+         
+         GroundContactPointsSlipper groundContactPointsSlipper = new GroundContactPointsSlipper(robotSide.getLowerCaseName());
+         groundContactPointsSlippers.put(robotSide, groundContactPointsSlipper);
+         this.addRobotController(groundContactPointsSlipper);
       }
 
       this.minSlipAfterTimeDelta = new DoubleYoVariable(name + "MinSlipAfterTimeDelta", registry);
@@ -88,9 +95,6 @@ public class SlipRandomOnNextStepPerturber extends ModularRobotController
       maxRotationToSlipNextStep = new YoFrameOrientation(name + "MaxRotationToSlipNextStep", ReferenceFrame.getWorldFrame(), registry);
       minRotationToSlipNextStep = new YoFrameOrientation(name + "MinRotationToSlipNextStep", ReferenceFrame.getWorldFrame(), registry);
       nextRotationToSlip = new YoFrameOrientation(name + "NextRotationToSlip", ReferenceFrame.getWorldFrame(), registry);
-
-      groundContactPointsSlipper = new GroundContactPointsSlipper();
-      this.addRobotController(groundContactPointsSlipper);
 
       setTranslationRangeToSlipNextStep(new double[] { 0.0, 0.0, 0.0 }, new double[] { 0.05, 0.05, 0.0 });
       setRotationRangeToSlipNextStep(new double[] { 0.0, 0.0, 0.0 }, new double[] { 0.3, 0.15, 0.1 });
@@ -169,6 +173,8 @@ public class SlipRandomOnNextStepPerturber extends ModularRobotController
 
       for (RobotSide robotSide : RobotSide.values())
       {
+         GroundContactPointsSlipper groundContactPointsSlipper = groundContactPointsSlippers.get(robotSide);
+
          switch (slipStateMap.get(robotSide).getEnumValue())
          {
          case NO_CONTACT:
@@ -235,12 +241,14 @@ public class SlipRandomOnNextStepPerturber extends ModularRobotController
 
    private void startSlipping(RobotSide robotSide)
    {
+      GroundContactPointsSlipper groundContactPointsSlipper = groundContactPointsSlippers.get(robotSide);
+
       generateRandomSlipParamters();
       groundContactPointsSlipper.setGroundContactPoints(groundContactPointsMap.get(robotSide));
       groundContactPointsSlipper.setPercentToSlipPerTick(nextSlipPercentSlipPerTick.getDoubleValue());
       groundContactPointsSlipper.setDoSlip(true);
       groundContactPointsSlipper.setSlipTranslation(nextTranslationToSlip.getVector3dCopy());
-      groundContactPointsSlipper.setSlipRotation(nextRotationToSlip.getYawPitchRoll());
+      groundContactPointsSlipper.setSlipRotationYawPitchRoll(nextRotationToSlip.getYawPitchRoll());
 
       //      System.out.println("Slip of " + robotSide.getLowerCaseName() + " foot with amount" + nextTranslationToSlip.getVector3dCopy().toString()
       //                         + " with rotation amount " + nextRotationToSlip.getFrameOrientationCopy().toStringAsYawPitchRoll()

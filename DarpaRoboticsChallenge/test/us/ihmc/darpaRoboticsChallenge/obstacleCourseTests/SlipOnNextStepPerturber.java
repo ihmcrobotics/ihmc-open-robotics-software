@@ -47,7 +47,7 @@ public class SlipOnNextStepPerturber extends ModularRobotController
 
       groundContactPoints = robot.getFootGroundContactPoints(robotSide);
       
-      groundContactPointsSlipper = new GroundContactPointsSlipper();
+      groundContactPointsSlipper = new GroundContactPointsSlipper(robotSide.getLowerCaseName());
       groundContactPointsSlipper.addGroundContactPoints(groundContactPoints);
       groundContactPointsSlipper.setPercentToSlipPerTick(0.05);
 
@@ -141,7 +141,7 @@ public class SlipOnNextStepPerturber extends ModularRobotController
       groundContactPointsSlipper.setDoSlip(true);
       groundContactPointsSlipper.setPercentToSlipPerTick(0.01);
       groundContactPointsSlipper.setSlipTranslation(slipAmount);
-      groundContactPointsSlipper.setSlipRotation(yawPitchRoll);
+      groundContactPointsSlipper.setSlipRotationYawPitchRoll(yawPitchRoll);
    }
 
    private boolean footTouchedDown()
