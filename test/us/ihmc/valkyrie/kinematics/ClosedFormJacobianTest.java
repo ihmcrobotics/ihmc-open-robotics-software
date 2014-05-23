@@ -144,10 +144,10 @@ public void testJacobianMatchesMATLABWaist()
          System.out.println(J[0][0] + ", " + J[0][1] + ", " + J[1][0] + ", " + J[1][1]);
          System.out.println(m11_matlab_waist[i] + ", " + m12_matlab_waist[i] + ", " + m21_matlab_waist[i] + ", " + m22_matlab_waist[i]);         
       }
-      assertEquals(J[0][0], -m11_matlab_waist[i], TOLERANCE);
-      assertEquals(J[0][1], -m12_matlab_waist[i], TOLERANCE);
-      assertEquals(J[1][0], -m21_matlab_waist[i], TOLERANCE);
-      assertEquals(J[1][1], -m22_matlab_waist[i], TOLERANCE);
+      assertEquals(J[0][1], -m11_matlab_waist[i], TOLERANCE);
+      assertEquals(J[0][0], -m12_matlab_waist[i], TOLERANCE);
+      assertEquals(J[1][1], -m21_matlab_waist[i], TOLERANCE);
+      assertEquals(J[1][0], -m22_matlab_waist[i], TOLERANCE);
    }
 }
 
