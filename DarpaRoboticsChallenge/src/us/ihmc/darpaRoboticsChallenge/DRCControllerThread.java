@@ -77,6 +77,15 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    private final LongYoVariable controllerLeadsEstimatorTicks = new LongYoVariable("controllerLeadsEstimatorTicks", registry);
    private final LongYoVariable controllerLagsEstimatorTicks = new LongYoVariable("controllerLagsEstimatorTicks", registry);
    
+   /*
+    * Debug variables
+    */
+   private final LongYoVariable lastExpectedEstimatorTick = new LongYoVariable("lastExpectedEstimatorTick", registry);
+   private final LongYoVariable lastEstimatorTick = new LongYoVariable("lastEstimatorTick", registry);
+   private final LongYoVariable lastEstimatorClockStartTime = new LongYoVariable("lastEstimatorClockStartTime", registry);
+   private final LongYoVariable lastControllerClockTime = new LongYoVariable("lastControllerClockTime", registry);
+   
+   
    private final BooleanYoVariable runController = new BooleanYoVariable("runController", registry);
    
    public DRCControllerThread(DRCRobotModel robotModel, ControllerFactory controllerFactory, LidarControllerInterface lidarControllerInterface,
@@ -226,13 +235,22 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
             long timestamp = threadDataSynchronizer.getTimestamp();
             controllerTime.set(TimeTools.nanoSecondstoSeconds(timestamp));
             nextExecutionTime.set(estimatorStartTime + controlDTInNS + estimatorDTInNS);
-            if(expectedEstimatorTick.getLongValue() > threadDataSynchronizer.getEstimatorTick())
+            
+            if(expectedEstimatorTick.getLongValue() != threadDataSynchronizer.getEstimatorTick())
             {
-               controllerLagsEstimatorTicks.increment();
-            }
-            else if(expectedEstimatorTick.getLongValue() < threadDataSynchronizer.getEstimatorTick())
-            {
-               controllerLeadsEstimatorTicks.increment();
+               if(expectedEstimatorTick.getLongValue() > threadDataSynchronizer.getEstimatorTick())
+               {
+                  controllerLagsEstimatorTicks.increment();
+               }
+               else if(expectedEstimatorTick.getLongValue() < threadDataSynchronizer.getEstimatorTick())
+               {
+                  controllerLeadsEstimatorTicks.increment();
+               }
+
+               lastExpectedEstimatorTick.set(expectedEstimatorTick.getLongValue());
+               lastEstimatorTick.set(threadDataSynchronizer.getEstimatorTick());
+               lastEstimatorClockStartTime.set(threadDataSynchronizer.getEstimatorClockStartTime());
+               lastControllerClockTime.set(currentClockTime);
             }
             
             expectedEstimatorTick.set(threadDataSynchronizer.getEstimatorTick() + estimatorTicksPerControlTick);

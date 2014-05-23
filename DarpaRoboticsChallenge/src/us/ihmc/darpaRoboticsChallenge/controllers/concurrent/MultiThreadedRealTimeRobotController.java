@@ -6,7 +6,6 @@ import us.ihmc.affinity.Processor;
 import us.ihmc.realtime.MonotonicTime;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.realtime.RealtimeThread;
-import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.Tuple;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -79,7 +78,7 @@ public class MultiThreadedRealTimeRobotController
       {
          while(true)
          {
-            controller.read(Double.NaN, Long.MAX_VALUE);
+            controller.read(Double.NaN, RealtimeThread.getCurrentMonotonicClockTime());
             controller.run();
             controller.write(RealtimeThread.getCurrentMonotonicClockTime());
             
