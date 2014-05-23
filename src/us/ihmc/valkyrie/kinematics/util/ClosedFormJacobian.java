@@ -112,11 +112,11 @@ public class ClosedFormJacobian
       length = 0.1310005;
       lengthSquared = length * length;
       
-      b5PF = new DenseMatrix64F(4, 1, false, -0.0762,  0.0508, 0.0, 1.0);
-      b6PF = new DenseMatrix64F(4, 1, false, -0.0762, -0.0508, 0.0, 1.0);
+      b5PF = new DenseMatrix64F(4, 1, false, -0.0762, -0.0508, 0.0, 1.0);
+      b6PF = new DenseMatrix64F(4, 1, false, -0.0762,  0.0508, 0.0, 1.0);
       
-      t5TF = new DenseMatrix64F(4, 1, false, 0.0,  0.06985123, 0.0, 1.0);
-      t6TF = new DenseMatrix64F(4, 1, false, 0.0, -0.06985123, 0.0, 1.0);
+      t5TF = new DenseMatrix64F(4, 1, false, 0.0,  -0.06985123, 0.0, 1.0);
+      t6TF = new DenseMatrix64F(4, 1, false, 0.0,  0.06985123, 0.0, 1.0);
       
       transform01StaticPart = new DenseMatrix64F(4,4,true, 1.0, 0.0 ,0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, h, 0.0, 0.0, 0.0, 1.0);
 //      transform01StaticPart.print();
