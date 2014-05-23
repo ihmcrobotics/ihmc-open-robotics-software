@@ -56,7 +56,7 @@ public class RobotTest
       Link link22 = link22(link21);
       root2.setLink(link22);
       Vector3d jointAxis = new Vector3d();
-      pin1.physics.getJointAxis(jointAxis);
+      pin1.getJointAxis(jointAxis);
       PinJoint pin2 = new PinJoint("pin2", new Vector3d(), robot2, jointAxis);
       root2.addJoint(pin2);
       Link link12 = link12(link11, pin1);
@@ -148,7 +148,7 @@ public class RobotTest
 
       Link floatingBody = randomBody(random);
       root1.setLink(floatingBody);
-      Vector3d comOffset = floatingBody.physics.getComOffset();
+      Vector3d comOffset = floatingBody.getComOffset();
 
       Vector3d externalForcePointOffset = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
       ExternalForcePoint externalForcePoint = new ExternalForcePoint("efp", externalForcePointOffset, robot.getRobotsYoVariableRegistry());
@@ -171,7 +171,7 @@ public class RobotTest
 
       // moment from dynamics
       Matrix3d momentOfInertia = new Matrix3d();
-      floatingBody.physics.getMomentOfInertia(momentOfInertia);
+      floatingBody.getMomentOfInertia(momentOfInertia);
 
       Vector3d temp1 = new Vector3d();
       temp1.set(root1.getAngularAccelerationInBody());
@@ -346,16 +346,16 @@ public class RobotTest
    private static double computeScalarInertiaAroundJointAxis(Link link, PinJoint pinJoint)
    {
       Matrix3d momentOfInertia = new Matrix3d();
-      link.physics.getMomentOfInertia(momentOfInertia);
+      link.getMomentOfInertia(momentOfInertia);
 
       Vector3d jointAxis = new Vector3d();
-      pinJoint.physics.getJointAxis(jointAxis);
+      pinJoint.getJointAxis(jointAxis);
       Vector3d temp1 = new Vector3d(jointAxis);
       momentOfInertia.transform(temp1);
       double scalarInertiaAboutCoM = jointAxis.dot(temp1);    // jointAxis^T * momentOfInertia * jointAxis
 
       double mass = link.getMass();
-      Vector3d offsetToCoM = new Vector3d(link.physics.getComOffset());
+      Vector3d offsetToCoM = new Vector3d(link.getComOffset());
       
       Vector3d offset = new Vector3d();
       pinJoint.getOffset(offset);
@@ -400,9 +400,9 @@ public class RobotTest
    public static void createInertiaEllipsoid(Link ret, Graphics3DObject linkGraphics, AppearanceDefinition appearance)
    {
       Matrix3d momentOfInertia = new Matrix3d();
-      ret.physics.getMomentOfInertia(momentOfInertia);
+      ret.getMomentOfInertia(momentOfInertia);
       Vector3d comOffset = new Vector3d();
-      ret.physics.getComOffset(comOffset);
+      ret.getComOffset(comOffset);
       double mass = ret.getMass();
       
       linkGraphics.createInertiaEllipsoid(momentOfInertia, comOffset, mass, appearance);
@@ -428,10 +428,10 @@ public class RobotTest
    private static Link link22(Link link21)
    {
       Link ret = new Link("link22");
-      ret.setComOffset(link21.physics.getComOffset());
+      ret.setComOffset(link21.getComOffset());
       ret.setMass(link21.getMass());
       Matrix3d link2moi = new Matrix3d();
-      link21.physics.getMomentOfInertia(link2moi);
+      link21.getMomentOfInertia(link2moi);
       ret.setMomentOfInertia(link2moi);
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addCoordinateSystem(COORDINATE_SYSTEM_LENGTH);
@@ -444,7 +444,7 @@ public class RobotTest
    private static Link link12(Link link11, PinJoint pin1)
    {
       Link ret = new Link("link12");
-      Vector3d comOffset12 = new Vector3d(link11.physics.getComOffset());
+      Vector3d comOffset12 = new Vector3d(link11.getComOffset());
       
       Vector3d offset = new Vector3d();
       pin1.getOffset(offset);
@@ -452,7 +452,7 @@ public class RobotTest
       ret.setComOffset(comOffset12);
       ret.setMass(link11.getMass());
       Matrix3d link1moi = new Matrix3d();
-      link11.physics.getMomentOfInertia(link1moi);
+      link11.getMomentOfInertia(link1moi);
       ret.setMomentOfInertia(link1moi);
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addCoordinateSystem(COORDINATE_SYSTEM_LENGTH);
@@ -580,7 +580,7 @@ public class RobotTest
       
       Link link = joint1.getLink();
       Vector3d comOffset = new Vector3d();
-      link.physics.getComOffset(comOffset);
+      link.getComOffset(comOffset);
       
       Vector3d temp = new Vector3d(comOffset1);
       temp.scale(mass1);
@@ -593,7 +593,7 @@ public class RobotTest
       JUnitTools.assertTuple3dEquals(expectedCoMOffset, comOffset, epsilon);
       
       Matrix3d momentOfInertia = new Matrix3d();
-      link.physics.getMomentOfInertia(momentOfInertia);
+      link.getMomentOfInertia(momentOfInertia);
       
       Matrix3d expectedMomentOfInertia = new Matrix3d();
      
