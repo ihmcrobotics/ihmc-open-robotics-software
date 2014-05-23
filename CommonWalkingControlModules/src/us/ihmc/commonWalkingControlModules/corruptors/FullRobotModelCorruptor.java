@@ -8,6 +8,7 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.RobotSpecificJointNames;
+import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -102,21 +103,46 @@ public class FullRobotModelCorruptor
             RevoluteJoint oneDoFJoint = (RevoluteJoint) fullRobotModel.getLegJoint(robotSide, legJointName);
             final ReferenceFrame frameBeforeJoint = oneDoFJoint.getFrameBeforeJoint();
             final Vector3d jointAxis = oneDoFJoint.getJointAxis().getVectorCopy();
-            
+
             final Transform3D preCorruptionTransform = new Transform3D();
 
             final DoubleYoVariable offset = new DoubleYoVariable(robotSide + legJointName.getCamelCaseNameForMiddleOfExpression() + "Offset", registry);
-            
-            offset.addVariableChangedListener(new VariableChangedListener(){
 
+            offset.addVariableChangedListener(new VariableChangedListener()
+            {
                @Override
                public void variableChanged(YoVariable<?> v)
                {
                   AxisAngle4d axisAngle = new AxisAngle4d(jointAxis, offset.getDoubleValue());
                   preCorruptionTransform.set(axisAngle);
                   frameBeforeJoint.corruptTransformToParentPreMultiply(preCorruptionTransform);
-               }});
+               }
+            });
          }
+      }
+
+      SpineJointName[] spineJointNames = robotSpecificJointNames.getSpineJointNames();
+
+      for (SpineJointName spineJointName : spineJointNames)
+      {
+         RevoluteJoint oneDoFJoint = (RevoluteJoint) fullRobotModel.getSpineJoint(spineJointName);
+         final ReferenceFrame frameBeforeJoint = oneDoFJoint.getFrameBeforeJoint();
+         final Vector3d jointAxis = oneDoFJoint.getJointAxis().getVectorCopy();
+
+         final Transform3D preCorruptionTransform = new Transform3D();
+
+         final DoubleYoVariable offset = new DoubleYoVariable(spineJointName.getCamelCaseNameForStartOfExpression() + "Offset", registry);
+
+         offset.addVariableChangedListener(new VariableChangedListener()
+         {
+            @Override
+            public void variableChanged(YoVariable<?> v)
+            {
+               AxisAngle4d axisAngle = new AxisAngle4d(jointAxis, offset.getDoubleValue());
+               preCorruptionTransform.set(axisAngle);
+               frameBeforeJoint.corruptTransformToParentPreMultiply(preCorruptionTransform);
+            }
+         });
       }
 
       parentRegistry.addChild(registry);
