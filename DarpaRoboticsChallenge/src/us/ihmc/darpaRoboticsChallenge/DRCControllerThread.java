@@ -52,6 +52,8 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    private static final boolean SHOW_JOINTAXIS_ZALIGN_FRAMES = false;
 
    private final long controlDTInNS;
+   private final long estimatorDTInNS;
+   private final long estimatorTicksPerControlTick;
    
    private final DoubleYoVariable controllerTime = new DoubleYoVariable("controllerTime", registry);
    private final BooleanYoVariable firstTick = new BooleanYoVariable("firstTick", registry);
@@ -71,6 +73,9 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    private final ExecutionTimer controllerTimer = new ExecutionTimer("controllerTimer", 10.0, registry);
    private final LongYoVariable nextExecutionTime = new LongYoVariable("nextExecutionTime", registry);
    private final LongYoVariable totalDelay = new LongYoVariable("totalDelay", registry);
+   private final LongYoVariable expectedEstimatorTick = new LongYoVariable("expectedEstimatorTick", registry);
+   private final LongYoVariable controllerLeadsEstimatorTicks = new LongYoVariable("controllerLeadsEstimatorTicks", registry);
+   private final LongYoVariable controllerLagsEstimatorTicks = new LongYoVariable("controllerLagsEstimatorTicks", registry);
    
    private final BooleanYoVariable runController = new BooleanYoVariable("runController", registry);
    
@@ -80,6 +85,8 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       this.threadDataSynchronizer = threadDataSynchronizer;
       this.outputWriter = outputWriter;
       this.controlDTInNS = TimeTools.secondsToNanoSeconds(robotModel.getControllerDT());
+      this.estimatorDTInNS = TimeTools.secondsToNanoSeconds(robotModel.getEstimatorDT());
+      this.estimatorTicksPerControlTick = this.controlDTInNS / this.estimatorDTInNS;
       controllerFullRobotModel = threadDataSynchronizer.getControllerFullRobotModel();
       
       new FullRobotModelCorruptor(controllerFullRobotModel, registry);
@@ -109,6 +116,8 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       registry.addChild(outputWriter.getControllerYoVariableRegistry());
       
       nextExecutionTime.set(Long.MIN_VALUE);
+      expectedEstimatorTick.set(estimatorDTInNS);
+
    }
 
    public static RobotController createMomentumBasedController(SDFFullRobotModel controllerModel, ReferenceFrames referenceFramesForController,
@@ -202,12 +211,32 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    {
       runController.set(threadDataSynchronizer.receiveControllerState());
       
+      
+      
       if(runController.getBooleanValue())
       {
-         long estimatorStartTime = threadDataSynchronizer.getEstimatorClockStartTime();
-         long timestamp = threadDataSynchronizer.getTimestamp();
-         controllerTime.set(TimeTools.nanoSecondstoSeconds(timestamp));
-         nextExecutionTime.set(estimatorStartTime + controlDTInNS);
+         // Skip the first estimatorTicksPerControlTick estimator ticks
+         if(threadDataSynchronizer.getEstimatorTick() < estimatorTicksPerControlTick)
+         {
+            runController.set(false);
+         }
+         else
+         {         
+            long estimatorStartTime = threadDataSynchronizer.getEstimatorClockStartTime();
+            long timestamp = threadDataSynchronizer.getTimestamp();
+            controllerTime.set(TimeTools.nanoSecondstoSeconds(timestamp));
+            nextExecutionTime.set(estimatorStartTime + controlDTInNS + estimatorDTInNS);
+            if(expectedEstimatorTick.getLongValue() > threadDataSynchronizer.getEstimatorTick())
+            {
+               controllerLagsEstimatorTicks.increment();
+            }
+            else if(expectedEstimatorTick.getLongValue() < threadDataSynchronizer.getEstimatorTick())
+            {
+               controllerLeadsEstimatorTicks.increment();
+            }
+            
+            expectedEstimatorTick.set(threadDataSynchronizer.getEstimatorTick() + estimatorTicksPerControlTick);
+         }
       }
    }
 
@@ -233,7 +262,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       if(runController.getBooleanValue())
    {
       outputWriter.writeAfterController(TimeTools.secondsToNanoSeconds(controllerTime.getDoubleValue()));
-         totalDelay.set(timestamp - nextExecutionTime.getLongValue() - controlDTInNS);
+      totalDelay.set(timestamp - (nextExecutionTime.getLongValue() - controlDTInNS - estimatorDTInNS));
       }
    }
 

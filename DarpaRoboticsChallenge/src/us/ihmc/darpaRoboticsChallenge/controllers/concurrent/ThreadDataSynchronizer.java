@@ -19,6 +19,7 @@ public class ThreadDataSynchronizer
    
    private long timestamp;
    private long estimatorClockStartTime;
+   private long estimatorTick;
 
    public ThreadDataSynchronizer(DRCRobotModel robotModel)
    {
@@ -44,6 +45,7 @@ public class ThreadDataSynchronizer
          estimatorStateHolder.getIntoControllerModel();
          timestamp = estimatorStateHolder.getTimestamp();
          estimatorClockStartTime = estimatorStateHolder.getEstimatorClockStartTime();
+         estimatorTick = estimatorStateHolder.getEstimatorTick();
          return true;
       }
       else
@@ -87,6 +89,11 @@ public class ThreadDataSynchronizer
    public long getEstimatorClockStartTime()
    {
       return estimatorClockStartTime;
+   }
+
+   public long getEstimatorTick()
+   {
+      return estimatorTick;
    }
 
 }
