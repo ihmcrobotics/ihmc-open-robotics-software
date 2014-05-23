@@ -39,12 +39,12 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
          Link link = polledJoint.getLink();  
 
          Matrix3d momentOfInertia = new Matrix3d();
-         link.physics.getMomentOfInertia(momentOfInertia);
+         link.getMomentOfInertia(momentOfInertia);
          
          double mass = link.getMass();
          
          Vector3d comOffset = new Vector3d();
-         link.physics.getComOffset(comOffset);
+         link.getComOffset(comOffset);
                   
          RigidBody parentIDBody = getParentIDBody(polledJoint, elevator);
          
@@ -62,7 +62,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
             PinJoint currentJoint = (PinJoint) polledJoint;
             
             Vector3d jointAxis = new Vector3d();
-            currentJoint.physics.getJointAxis(jointAxis);
+            currentJoint.getJointAxis(jointAxis);
             
             Vector3d jointOffset = new Vector3d();
             currentJoint.getOffset(jointOffset); 

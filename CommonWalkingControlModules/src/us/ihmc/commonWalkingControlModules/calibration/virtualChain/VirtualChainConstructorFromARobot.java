@@ -86,7 +86,7 @@ public class VirtualChainConstructorFromARobot
       double mass = link.getMass();
       
       Vector3d comOffset = new Vector3d();
-      link.physics.getComOffset(comOffset);
+      link.getComOffset(comOffset);
       
       virtualChainTestObject.setMassHere(mass);
 
@@ -107,7 +107,7 @@ public class VirtualChainConstructorFromARobot
       {
          PinJoint pinJoint = (PinJoint) joint;
          Vector3d jointAxis = new Vector3d();
-         pinJoint.physics.getJointAxis(jointAxis);
+         pinJoint.getJointAxis(jointAxis);
          
          ReferenceFrame translationFrame = ReferenceFrame.constructBodyFrameWithUnchangingTranslationFromParent(joint.getName()+"Translation", parentFrame, offsetFromParent);
         

@@ -93,7 +93,7 @@ public class ComCopResidual implements FunctionNtoM
    public Vector3d getCurrentLinkCom()
    {
       Vector3d comOffset = new Vector3d();
-      targetLink.physics.getComOffset(comOffset);
+      targetLink.getComOffset(comOffset);
       return comOffset;
    }
    
@@ -126,7 +126,7 @@ public class ComCopResidual implements FunctionNtoM
       if (lockComY)
       {
          Vector3d lastCom = new Vector3d();
-         targetLink.physics.getComOffset(lastCom);
+         targetLink.getComOffset(lastCom);
          targetLink.setComOffset(inParameter[0],lastCom.y,inParameter[2]);
       }
       else
