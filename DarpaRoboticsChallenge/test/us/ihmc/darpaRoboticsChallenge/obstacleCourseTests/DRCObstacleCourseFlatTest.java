@@ -159,6 +159,82 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       BambooTools.reportTestFinishedMessage();
    }
+   
+   @Test
+   public void testSimpleFlatGroundScriptWithOscillatingFeet() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DEFAULT;
+
+      String scriptName = "scripts/ExerciseAndJUnitScripts/SimpleFlatGroundScript.xml";
+      String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(DRCObstacleCourseFlatTest.class, scriptName);
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCSimpleFlatGroundScriptTest", fileName, selectedLocation, checkNothingChanged, createMovie, false, getRobotModel());
+      SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
+      SDFRobot robot = drcSimulationTestHelper.getRobot();
+      setupCameraForWalkingUpToRamp(simulationConstructionSet);
+      
+      int ticksPerPerturbation = 10;
+      OscillateFeetPerturber oscillateFeetPerturber = new OscillateFeetPerturber(robot, simulationConstructionSet.getDT() * ((double) ticksPerPerturbation));
+      oscillateFeetPerturber.setTranslationMagnitude(new double[]{0.01, 0.015, 0.005});
+      oscillateFeetPerturber.setRotationMagnitudeYawPitchRoll(new double[]{0.017, 0.06, 0.011});
+      
+      oscillateFeetPerturber.setTranslationFrequencyHz(RobotSide.LEFT, new double[]{1.0, 2.5, 3.3});
+      oscillateFeetPerturber.setTranslationFrequencyHz(RobotSide.RIGHT, new double[]{2.0, 0.5, 1.3});
+      
+      oscillateFeetPerturber.setRotationFrequencyHzYawPitchRoll(RobotSide.LEFT, new double[]{5.0, 0.5, 0.3});
+      oscillateFeetPerturber.setRotationFrequencyHzYawPitchRoll(RobotSide.RIGHT, new double[]{0.2, 3.4, 1.11});
+
+      robot.setController(oscillateFeetPerturber, ticksPerPerturbation);
+
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(20.0);
+
+
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
+      drcSimulationTestHelper.checkNothingChanged();
+
+      assertTrue(success);
+
+      BambooTools.reportTestFinishedMessage();
+   }
+   
+   
+   @Test
+   public void testStandingWithOscillatingFeet() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+      DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DEFAULT;
+
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCSimpleFlatGroundScriptTest", null, selectedLocation, checkNothingChanged, createMovie, false, getRobotModel());
+      SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
+      SDFRobot robot = drcSimulationTestHelper.getRobot();
+      setupCameraForWalkingUpToRamp(simulationConstructionSet);
+      
+      int ticksPerPerturbation = 10;
+      OscillateFeetPerturber oscillateFeetPerturber = new OscillateFeetPerturber(robot, simulationConstructionSet.getDT() * ((double) ticksPerPerturbation));
+      oscillateFeetPerturber.setTranslationMagnitude(new double[]{0.01, 0.015, 0.005});
+      oscillateFeetPerturber.setRotationMagnitudeYawPitchRoll(new double[]{0.017, 0.012, 0.011});
+      
+      oscillateFeetPerturber.setTranslationFrequencyHz(RobotSide.LEFT, new double[]{5.0, 2.5, 3.3});
+      oscillateFeetPerturber.setTranslationFrequencyHz(RobotSide.RIGHT, new double[]{2.0, 6.5, 1.3});
+      
+      oscillateFeetPerturber.setRotationFrequencyHzYawPitchRoll(RobotSide.LEFT, new double[]{5.0, 0.5, 7.3});
+      oscillateFeetPerturber.setRotationFrequencyHzYawPitchRoll(RobotSide.RIGHT, new double[]{0.2, 3.4, 1.11});
+
+      robot.setController(oscillateFeetPerturber, ticksPerPerturbation);
+
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(6.0);
+
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
+      drcSimulationTestHelper.checkNothingChanged();
+
+      assertTrue(success);
+
+      BambooTools.reportTestFinishedMessage();
+   }
 
    @Test
    public void testLongStepsMaxHeightPauseAndResume() throws SimulationExceededMaximumTimeException
