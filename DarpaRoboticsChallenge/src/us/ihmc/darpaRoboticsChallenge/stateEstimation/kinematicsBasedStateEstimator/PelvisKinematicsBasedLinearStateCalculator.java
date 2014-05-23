@@ -1,6 +1,8 @@
 package us.ihmc.darpaRoboticsChallenge.stateEstimation.kinematicsBasedStateEstimator;
 
+import javax.media.j3d.Transform3D;
 import javax.vecmath.Point2d;
+import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.sensors.WrenchBasedFootSwitch;
@@ -50,13 +52,13 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
    private final ReferenceFrame rootJointFrame;
    private final SideDependentList<ReferenceFrame> footFrames = new SideDependentList<ReferenceFrame>();
+   private final SideDependentList<ReferenceFrame> copFrames = new SideDependentList<ReferenceFrame>();
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final DoubleYoVariable alphaFootToRootJointPosition = new DoubleYoVariable("alphaFootToRootJointPosition", registry);
    private final DoubleYoVariable alphaFootToRootJointVelocity = new DoubleYoVariable("alphaFootToRootJointVelocity", registry);
-   private final DoubleYoVariable alphaFootToRootJointAccel = new DoubleYoVariable("alphaFootToRootJointAcceleration", registry);
 
-   private final YoFramePoint rootJointPosition = new YoFramePoint("estimatedRootJointPositionWithKinematics", worldFrame, registry);   
+   private final YoFramePoint rootJointPosition = new YoFramePoint("estimatedRootJointPositionWithKinematics", worldFrame, registry);
    private final YoFrameVector rootJointLinearVelocity = new YoFrameVector("estimatedRootJointVelocityWithKinematics", worldFrame, registry);
    private final YoFrameVector rootJointLinearVelocityTwist = new YoFrameVector("estimatedRootJointVelocityWithTwist", worldFrame, registry);
    private final BooleanYoVariable useTwistToComputeRootJointLinearVelocity = new BooleanYoVariable("useTwistToComputeRootJointLinearVelocity", registry);
@@ -67,7 +69,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
    private final SideDependentList<AlphaFilteredYoFrameVector> footToRootJointPositions = new SideDependentList<AlphaFilteredYoFrameVector>();
    private final SideDependentList<FilteredVelocityYoFrameVector> footToRootJointVelocities = new SideDependentList<FilteredVelocityYoFrameVector>();
-   private final SideDependentList<FilteredVelocityYoFrameVector> footToRootJointAccelerations = new SideDependentList<FilteredVelocityYoFrameVector>();
+   private final SideDependentList<YoFrameVector> footToRootJointVelocitiesWithTwist = new SideDependentList<YoFrameVector>();
    private final SideDependentList<Twist> rootJointToFootTwists = new SideDependentList<Twist>(new Twist(), new Twist());
 
    private final SideDependentList<YoFramePoint> footPositionsInWorld = new SideDependentList<YoFramePoint>();
@@ -118,8 +120,8 @@ public class PelvisKinematicsBasedLinearStateCalculator
          FilteredVelocityYoFrameVector footToRootJointVelocity = FilteredVelocityYoFrameVector.createFilteredVelocityYoFrameVector(sidePrefix + "FootToRootJointVelocity", "", alphaFootToRootJointVelocity, estimatorDT, registry, footToRootJointPosition);
          footToRootJointVelocities.put(robotSide, footToRootJointVelocity);
 
-         FilteredVelocityYoFrameVector footToRootJointAccel = FilteredVelocityYoFrameVector.createFilteredVelocityYoFrameVector(sidePrefix + "FootToRootJointAcceleration", "", alphaFootToRootJointAccel, estimatorDT, registry, footToRootJointVelocity);
-         footToRootJointAccelerations.put(robotSide, footToRootJointAccel);
+         YoFrameVector footToRootJointVelocityWithTwist = new YoFrameVector(sidePrefix + "FootToRootJointVelocityWithTwist", worldFrame, registry);
+         footToRootJointVelocitiesWithTwist.put(robotSide, footToRootJointVelocityWithTwist);
 
          YoFramePoint footPositionInWorld = new YoFramePoint(sidePrefix + "FootPositionInWorld", worldFrame, registry);
          footPositionsInWorld.put(robotSide, footPositionInWorld);
@@ -136,12 +138,26 @@ public class PelvisKinematicsBasedLinearStateCalculator
          YoFramePoint2d copRawInFootFrame = new YoFramePoint2d(sidePrefix + "CoPRawInFootFrame", footFrames.get(robotSide), registry);
          copsRawInFootFrame.put(robotSide, copRawInFootFrame);
 
-         AlphaFilteredYoFramePoint2d copFilteredInFootFrame = AlphaFilteredYoFramePoint2d.createAlphaFilteredYoFramePoint2d(sidePrefix + "CoPFilteredInFootFrame", "", registry, alphaCoPFilter, copRawInFootFrame);
+         final AlphaFilteredYoFramePoint2d copFilteredInFootFrame = AlphaFilteredYoFramePoint2d.createAlphaFilteredYoFramePoint2d(sidePrefix + "CoPFilteredInFootFrame", "", registry, alphaCoPFilter, copRawInFootFrame);
          copFilteredInFootFrame.update(0.0, 0.0); // So the next point will be filtered
          copsFilteredInFootFrame.put(robotSide, copFilteredInFootFrame);
 
          YoFramePoint copPositionInWorld = new YoFramePoint(sidePrefix + "CoPPositionsInWorld", worldFrame, registry);
          copPositionsInWorld.put(robotSide, copPositionInWorld);
+
+         ReferenceFrame copFrame = new ReferenceFrame("copFrame", footFrame)
+         {
+            private static final long serialVersionUID = -1926704435608610401L;
+            private final Vector3d copOffset = new Vector3d();
+            @Override
+            public void updateTransformToParent(Transform3D transformToParent)
+            {
+               transformToParent.setIdentity();
+               copFilteredInFootFrame.get(copOffset);
+               transformToParent.setTranslation(copOffset);
+            }
+         };
+         copFrames.put(robotSide, copFrame);
       }
 
       if (VISUALIZE && dynamicGraphicObjectsListRegistry != null)
@@ -230,11 +246,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
       tempVelocity.scale(scaleFactor);
       rootJointLinearVelocity.add(tempVelocity);
 
-      YoFramePoint2d copPosition2d = copsFilteredInFootFrame.get(trustedSide);
-      tempFramePoint.setIncludingFrame(copPosition2d.getReferenceFrame(), copPosition2d.getX(), copPosition2d.getY(), 0.0);
-      tempFramePoint.changeFrame(rootJointToFootTwists.get(trustedSide).getBaseFrame());
-      rootJointToFootTwists.get(trustedSide).changeFrame(rootJointToFootTwists.get(trustedSide).getBaseFrame());
-      rootJointToFootTwists.get(trustedSide).packVelocityOfPointFixedInBodyFrame(tempVelocity, tempFramePoint);
+      rootJointToFootTwists.get(trustedSide).packLinearPart(tempVelocity);
       tempVelocity.changeFrame(worldFrame);
       tempVelocity.scale(-scaleFactor); // We actually want footToPelvis velocity
       rootJointLinearVelocityTwist.add(tempVelocity);
@@ -340,10 +352,20 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
          footToRootJointPositions.get(robotSide).update(tempFrameVector);
          footToRootJointVelocities.get(robotSide).update();
-         footToRootJointAccelerations.get(robotSide).update();
 
+         ReferenceFrame copFrame = copFrames.get(robotSide);
          Twist pelvisToFootTwist = rootJointToFootTwists.get(robotSide);
+
          twistCalculator.packRelativeTwist(pelvisToFootTwist, rootBody, bipedFeet.get(robotSide).getRigidBody());
+         pelvisToFootTwist.changeFrame(rootJointFrame);
+         pelvisToFootTwist.changeBaseFrameNoRelativeTwist(rootJointFrame);
+         pelvisToFootTwist.changeFrame(copFrame);
+         pelvisToFootTwist.changeBodyFrameNoRelativeTwist(copFrame);
+         pelvisToFootTwist.changeFrame(rootJointFrame);
+         pelvisToFootTwist.packLinearPart(tempFrameVector);
+         tempFrameVector.changeFrame(worldFrame);
+         tempFrameVector.negate();
+         footToRootJointVelocitiesWithTwist.get(robotSide).set(tempFrameVector);
       }
 
       kinematicsIsUpToDate.set(true);
@@ -408,10 +430,5 @@ public class PelvisKinematicsBasedLinearStateCalculator
    public void getFootToPelvisVelocity(FrameVector linearVelocityToPack, RobotSide robotSide)
    {
       footToRootJointVelocities.get(robotSide).getFrameTupleIncludingFrame(linearVelocityToPack);
-   }
-
-   public void getFootToPelvisAcceleration(FrameVector linearAccelerationToPack, RobotSide robotSide)
-   {
-      footToRootJointAccelerations.get(robotSide).getFrameTupleIncludingFrame(linearAccelerationToPack);
    }
 }
