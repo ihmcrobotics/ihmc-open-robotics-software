@@ -78,6 +78,8 @@ public class DRCConfigParameters
    public static final int PPS_PROVIDER_PORT = 5050;
 
    public static boolean LIDAR_ADJUSTMENT_ACTIVE = false;
+
+   public static boolean USE_POINT_CLOUD_INSTEAD_OF_LIDAR = false;
    // Video Settings
    public static final boolean STREAM_VIDEO = true;
 
