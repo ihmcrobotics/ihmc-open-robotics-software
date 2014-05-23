@@ -7,7 +7,8 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses(
 {
    ValkyrieObstacleCourseRampsTest.class,
-   ValkyrieObstacleCourseFlatTest.class
+   ValkyrieObstacleCourseFlatTest.class,
+   ValkyriePushInSingleSupportTest.class
 })
 
 public class ValkyrieBambooTestSuiteNightly
