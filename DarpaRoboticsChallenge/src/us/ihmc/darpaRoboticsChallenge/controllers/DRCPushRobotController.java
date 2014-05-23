@@ -18,6 +18,7 @@ import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
+import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
 
 public class DRCPushRobotController implements RobotController
 {
@@ -31,12 +32,14 @@ public class DRCPushRobotController implements RobotController
    private final DoubleYoVariable pushTimeSwitch = new DoubleYoVariable("pushTimeSwitch", registry);
    private final IntegerYoVariable pushNumber = new IntegerYoVariable("pushNumber", registry);
    private final BooleanYoVariable isBeingPushed = new BooleanYoVariable("isBeingPushed", registry);
+   private final DoubleYoVariable pushDelay = new DoubleYoVariable("pushDelay", registry);
 
    private final DoubleYoVariable yoTime;
 
+   private StateTransitionCondition pushCondition = null;
    private final ExternalForcePoint forcePoint;
    private final Vector3d forceVector = new Vector3d();
-
+   
    public DRCPushRobotController(SDFRobot pushableRobot, FullRobotModel fullRobotModel)
    {
       yoTime = pushableRobot.getYoTime();
@@ -63,6 +66,11 @@ public class DRCPushRobotController implements RobotController
    {
       pushDirection.set(direction);
    }
+   
+   public void setPushDelay(double delay)
+   {
+      pushDelay.set(delay);
+   }
 
    public void addPushButtonToSCS(final SimulationConstructionSet scs)
    {
@@ -76,6 +84,7 @@ public class DRCPushRobotController implements RobotController
             @Override
             public void actionPerformed(ActionEvent e)
             {
+               pushCondition = null;
                applyForce();
             }
          };
@@ -87,16 +96,27 @@ public class DRCPushRobotController implements RobotController
 
    public void applyForce(Vector3d direction, double magnitude, double duration)
    {
+      pushCondition = null;
       setPushDuration(duration);
       setPushForceDirection(direction);
       setPushForceMagnitude(magnitude);
+      setPushDelay(0.0);
+      pushTimeSwitch.set(yoTime.getDoubleValue());
       applyForce();
    }
 
-   public void applyForce()
+   public void applyForceDelayed(StateTransitionCondition pushCondition, double timeDelay, Vector3d direction, double magnitude, double duration)
    {
-      System.out.println("Pushing the robot now");
+      this.pushCondition = pushCondition;
+      setPushDuration(duration);
+      setPushForceDirection(direction);
+      setPushForceMagnitude(magnitude);
+      setPushDelay(timeDelay);
+      applyForce();
+   }
 
+   private void applyForce()
+   {      
       double length = pushDirection.length();
       if (length > 1e-5)
       {
@@ -109,7 +129,6 @@ public class DRCPushRobotController implements RobotController
          pushForce.setToZero();
       }
 
-      pushTimeSwitch.set(yoTime.getDoubleValue());
       pushNumber.increment();
    }
 
@@ -121,7 +140,17 @@ public class DRCPushRobotController implements RobotController
    @Override
    public void doControl()
    {
-      if (yoTime.getDoubleValue() <= pushTimeSwitch.getDoubleValue() + pushDuration.getDoubleValue())
+      if (pushCondition != null)
+      {
+         if (pushCondition.checkCondition())
+         {
+            pushTimeSwitch.set(yoTime.getDoubleValue() + pushDelay.getDoubleValue());
+            pushCondition = null;
+         }
+      }
+
+      if (yoTime.getDoubleValue() <= pushTimeSwitch.getDoubleValue() + pushDuration.getDoubleValue()
+            && yoTime.getDoubleValue() >= pushTimeSwitch.getDoubleValue())
       {
          isBeingPushed.set(true);
          pushForce.get(forceVector);
