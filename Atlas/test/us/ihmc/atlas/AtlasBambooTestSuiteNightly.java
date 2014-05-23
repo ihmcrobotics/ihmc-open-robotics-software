@@ -10,6 +10,7 @@ import us.ihmc.atlas.posePlayback.AtlasPlaybackPoseInterpolatorTest;
 @Suite.SuiteClasses({
    us.ihmc.atlas.AtlasFlatGroundRewindabilityTest.class,
    us.ihmc.atlas.AtlasBumpyAndShallowRampsWalkingTest.class,
+   us.ihmc.atlas.AtlasPushInSingleSupportTest.class,
 //   AtlasPlaybackPoseInterpolatorTest.class
 })
 public class AtlasBambooTestSuiteNightly

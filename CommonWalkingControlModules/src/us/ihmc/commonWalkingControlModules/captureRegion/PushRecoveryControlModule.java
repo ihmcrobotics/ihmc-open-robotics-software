@@ -215,7 +215,7 @@ public class PushRecoveryControlModule
 
          captureRegionCalculator.calculateCaptureRegion(swingSide, swingTimeRemaining, capturePoint2d, omega0, footPolygon);
          
-         if(swingTimeRemaining < swingTimeCalculatorProvider.getValue() * 0.2)
+         if(swingTimeRemaining < swingTimeCalculatorProvider.getValue() * 0.1)
          {
             // do not replan if we are almost at touchdown
             return false;
