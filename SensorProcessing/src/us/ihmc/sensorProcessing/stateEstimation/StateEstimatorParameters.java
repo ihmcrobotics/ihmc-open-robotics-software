@@ -54,4 +54,6 @@ public interface StateEstimatorParameters
    public abstract double getFootVelocityThresholdToEnableIMUDriftCompensation();
 
    public abstract boolean useTwistForPelvisLinearStateEstimation();
+
+   public abstract double getPelvisLinearVelocityAlphaNewTwist();
 }
