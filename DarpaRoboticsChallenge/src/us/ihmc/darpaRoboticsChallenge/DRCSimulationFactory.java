@@ -101,15 +101,13 @@ public class DRCSimulationFactory
       SensorNoiseParameters sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersZeroNoise();
       StateEstimatorParameters stateEstimatorParameters = drcRobotModel.getStateEstimatorParameters();
       
-      YoVariableRegistry registry = new YoVariableRegistry("DRCSimulation");
-      
       LidarControllerInterface lidarControllerInterface = new PIDLidarTorqueController(DRCConfigParameters.LIDAR_SPINDLE_VELOCITY,
             drcRobotModel.getSimulateDT());
       SensorReaderFactory sensorReaderFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(simulatedRobot, sensorNoiseParameters,
-            stateEstimatorParameters.getSensorFilterParameters(), drcRobotModel.getSensorInformation().getIMUSensorsToUse(), registry);
+            stateEstimatorParameters.getSensorFilterParameters(), drcRobotModel.getSensorInformation().getIMUSensorsToUse());
       
       ThreadDataSynchronizer threadDataSynchronizer = new ThreadDataSynchronizer(drcRobotModel);
-      DRCOutputWriter drcOutputWriter = new DRCSimulationOutputWriter(simulatedRobot, robotVisualizer, registry);
+      DRCOutputWriter drcOutputWriter = new DRCSimulationOutputWriter(simulatedRobot, robotVisualizer);
       if (DRCLocalConfigParameters.INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES)
       {
          drcOutputWriter = drcRobotModel.getOutputWriterWithAccelerationIntegration(drcOutputWriter, false);

@@ -28,7 +28,7 @@ import com.yobotics.simulationconstructionset.simulatedSensors.WrenchCalculatorI
 
 public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorReaderFactory
 {
-   private final YoVariableRegistry registry;
+   private final YoVariableRegistry registry = new YoVariableRegistry("SensorReaderFactory");
    private final Robot robot;
    private final double estimateDT;
    private final SensorNoiseParameters sensorNoiseParameters;
@@ -41,10 +41,8 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
    private final SensorFilterParameters sensorFilterParameters;
    
    public SimulatedSensorHolderAndReaderFromRobotFactory(Robot robot, SensorNoiseParameters sensorNoiseParameters,
-         SensorFilterParameters sensorFilterParameters, String[] imuSensorsToUse,
-         YoVariableRegistry registry)
+         SensorFilterParameters sensorFilterParameters, String[] imuSensorsToUse)
    {
-      this.registry = registry;
       this.robot = robot;
       this.sensorNoiseParameters = sensorNoiseParameters;
       this.sensorFilterParameters = sensorFilterParameters;
@@ -85,27 +83,25 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
       }
 
       final Joint scsRootJoint = rootJoints.get(0);
-      if (scsRootJoint instanceof FloatingJoint)
-      {
-         SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap = SCSToInverseDynamicsJointMap.createByName((FloatingJoint) scsRootJoint, rootJoint);
-         StateEstimatorSensorDefinitionsFromRobotFactory stateEstimatorSensorDefinitionsFromRobotFactory = new StateEstimatorSensorDefinitionsFromRobotFactory(
-               scsToInverseDynamicsJointMap, imuMounts, groundContactPointBasedWrenchCalculators);
-         
-         this.stateEstimatorSensorDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getStateEstimatorSensorDefinitions();
-         Map<IMUMount, IMUDefinition> imuDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getIMUDefinitions();
-         Map<WrenchCalculatorInterface, ForceSensorDefinition> forceSensors = stateEstimatorSensorDefinitionsFromRobotFactory.getForceSensorDefinitions();
-         this.simulatedSensorHolderAndReader = new SimulatedSensorHolderAndReader(sensorFilterParameters, stateEstimatorSensorDefinitions, sensorNoiseParameters, registry); 
-         
-         createAndAddOrientationSensors(imuDefinitions, registry);
-         createAndAddAngularVelocitySensors(imuDefinitions, registry);
-         createAndAddForceSensors(forceSensors, registry);
-         createAndAddLinearAccelerationSensors(imuDefinitions, registry);
-         createAndAddOneDoFPositionAndVelocitySensors(scsToInverseDynamicsJointMap);
-      }
-      else
-      {
+      if (!(scsRootJoint instanceof FloatingJoint))
          throw new RuntimeException("Not FloatingJoint rootjoint found");
-      }
+
+      SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap = SCSToInverseDynamicsJointMap.createByName((FloatingJoint) scsRootJoint, rootJoint);
+      StateEstimatorSensorDefinitionsFromRobotFactory stateEstimatorSensorDefinitionsFromRobotFactory = new StateEstimatorSensorDefinitionsFromRobotFactory(
+            scsToInverseDynamicsJointMap, imuMounts, groundContactPointBasedWrenchCalculators);
+
+      this.stateEstimatorSensorDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getStateEstimatorSensorDefinitions();
+      Map<IMUMount, IMUDefinition> imuDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getIMUDefinitions();
+      Map<WrenchCalculatorInterface, ForceSensorDefinition> forceSensors = stateEstimatorSensorDefinitionsFromRobotFactory.getForceSensorDefinitions();
+      this.simulatedSensorHolderAndReader = new SimulatedSensorHolderAndReader(sensorFilterParameters, stateEstimatorSensorDefinitions, sensorNoiseParameters, registry);
+
+      createAndAddOrientationSensors(imuDefinitions, registry);
+      createAndAddAngularVelocitySensors(imuDefinitions, registry);
+      createAndAddForceSensors(forceSensors, registry);
+      createAndAddLinearAccelerationSensors(imuDefinitions, registry);
+      createAndAddOneDoFPositionAndVelocitySensors(scsToInverseDynamicsJointMap);
+
+      parentRegistry.addChild(registry);
    }
 
    private void createAndAddForceSensors(Map<WrenchCalculatorInterface, ForceSensorDefinition> forceSensorDefinitions2, YoVariableRegistry registry)
