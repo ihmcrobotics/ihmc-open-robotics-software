@@ -226,4 +226,10 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    {
       return false;
    }
+
+   @Override
+   public double getPelvisLinearVelocityAlphaNewTwist()
+   {
+      return 0.15;
+   }
 }
