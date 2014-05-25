@@ -188,6 +188,8 @@ public class PelvisLinearStateUpdater
       kinematicsBasedLinearStateCalculator.setAlphaPelvisPosition(computeAlphaGivenBreakFrequencyProperly(stateEstimatorParameters.getKinematicsPelvisPositionFilterFreqInHertz(), estimatorDT));
       double alphaFilter = computeAlphaGivenBreakFrequencyProperly(stateEstimatorParameters.getKinematicsPelvisLinearVelocityFilterFreqInHertz(), estimatorDT);
       kinematicsBasedLinearStateCalculator.setAlphaPelvisLinearVelocity(alphaFilter);
+      
+      kinematicsBasedLinearStateCalculator.setPelvisLinearVelocityAlphaNewTwist(stateEstimatorParameters.getPelvisLinearVelocityAlphaNewTwist());
       kinematicsBasedLinearStateCalculator.setPelvisLinearVelocityBacklashParameters(alphaFilter, stateEstimatorParameters.getSensorFilterParameters().getJointVelocitySlopTimeForBacklashCompensation());
       kinematicsBasedLinearStateCalculator.setTrustCoPAsNonSlippingContactPoint(stateEstimatorParameters.trustCoPAsNonSlippingContactPoint());
       kinematicsBasedLinearStateCalculator.setAlphaCenterOfPressure(computeAlphaGivenBreakFrequencyProperly(stateEstimatorParameters.getCoPFilterFreqInHertz(), estimatorDT));
@@ -600,7 +602,8 @@ public class PelvisLinearStateUpdater
       rootJointVelocity.set(pelvisVelocityIMUPart);
       rootJointVelocity.add(pelvisVelocityKinPart);
       yoRootJointVelocity.set(rootJointVelocity);
-      
+      kinematicsBasedLinearStateCalculator.setRootJointVelocity(rootJointVelocity);
+
       imuBasedLinearStateCalculator.updatePelvisPosition(rootJointPosition, pelvisPositionIMUPart);
       kinematicsBasedLinearStateCalculator.getPelvisPosition(pelvisPositionKinPart);
       
@@ -609,7 +612,7 @@ public class PelvisLinearStateUpdater
 
       rootJointPosition.set(pelvisPositionIMUPart);
       rootJointPosition.add(pelvisPositionKinPart);
-      yoRootJointPosition.set(rootJointPosition);
+      yoRootJointPosition.set(rootJointPosition);  
    }
 
    private void updateCoMState()

@@ -231,4 +231,11 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
    {
       return false;
    }
+
+   @Override
+   public double getPelvisLinearVelocityAlphaNewTwist()
+   {
+      //TODO: Tune
+      return 1.0;
+   }
 }

@@ -237,6 +237,11 @@ public class ComposableStateEstimatorEvaluator
          {
             return false;
          }
+
+         public double getPelvisLinearVelocityAlphaNewTwist()
+         {
+            return 1.0;
+         }
       };
       
       JointAndIMUSensorMap sensorMap = null; // simulatedSensorHolderAndReaderFromRobotFactory.getSensorReader().getJointAndIMUSensorMap();
