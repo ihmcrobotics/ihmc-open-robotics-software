@@ -96,6 +96,8 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
       visualizer.setDesiredCapturePoint(desiredCapturePoint);
       visualizer.setDesiredCMP(desiredCMP);
       visualizer.setFinalDesiredCapturePoint(finalDesiredCapturePoint);
+      centerOfMass.setToZero(centerOfMassFrame);
+      visualizer.setCenterOfMass(centerOfMass);
 
       supportLegPreviousTick.set(supportLegInputPort.getData());
 
