@@ -46,7 +46,7 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
 
    private ObjectObjectMap<OneDoFJoint, BacklashCompensatingVelocityYoVariable> finiteDifferenceVelocities;
 
-   public SimulatedSensorHolderAndReader(SensorFilterParameters sensorFilterParameters, StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, SensorNoiseParameters sensorNoiseParameters, YoVariableRegistry simulationRegistry)
+   public SimulatedSensorHolderAndReader(SensorFilterParameters sensorFilterParameters, StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, SensorNoiseParameters sensorNoiseParameters, YoVariableRegistry sensorReaderFactoryRegistry)
    {
       sensorProcessing = new SensorProcessing(stateEstimatorSensorDefinitions, sensorFilterParameters, sensorNoiseParameters, registry);
       
@@ -62,9 +62,9 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
       slopTimeFiniteDifferences.set(sensorFilterParameters.getJointVelocitySlopTimeForBacklashCompensation());
       useFiniteDifferencesForVelocities.set(false);
 
-      if (simulationRegistry != null)
+      if (sensorReaderFactoryRegistry != null)
       {
-         simulationRegistry.addChild(registry);
+         sensorReaderFactoryRegistry.addChild(registry);
       }
    }
 

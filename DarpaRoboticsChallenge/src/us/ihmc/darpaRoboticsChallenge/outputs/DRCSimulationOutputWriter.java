@@ -31,16 +31,13 @@ public class DRCSimulationOutputWriter extends SDFPerfectSimulatedOutputWriter i
 
    double[] prevError;
 
-   public DRCSimulationOutputWriter(SDFRobot robot, RobotVisualizer robotVisualizer, YoVariableRegistry simulationRegistry)
+   public DRCSimulationOutputWriter(SDFRobot robot, RobotVisualizer robotVisualizer)
    {
       super(robot);
       this.robotVisualizer = robotVisualizer;
 
       rawJointTorques = new ObjectObjectMap<OneDoFJoint, DoubleYoVariable>();
       delayedJointTorques = new ObjectObjectMap<OneDoFJoint, DelayedDoubleYoVariable>();
-      
-      simulationRegistry.addChild(registry);
-
    }
 
    @Override
@@ -76,7 +73,6 @@ public class DRCSimulationOutputWriter extends SDFPerfectSimulatedOutputWriter i
       {
          rawOutputWriters.get(i).write();
       }
-
    }
 
    @Override
@@ -93,37 +89,31 @@ public class DRCSimulationOutputWriter extends SDFPerfectSimulatedOutputWriter i
    {
       super.setFullRobotModel(fullRobotModel);
 
-
-
       OneDoFJoint[] joints = fullRobotModel.getOneDoFJoints();
       for (int i = 0; i < joints.length; i++)
       {
          OneDoFJoint oneDoFJoint = joints[i];
-//         oneDoFJoint.setDampingParameter(DRCRobotDampingParameters.getAtlasDamping(i));
+         //         oneDoFJoint.setDampingParameter(DRCRobotDampingParameters.getAtlasDamping(i));
 
          DoubleYoVariable rawJointTorque = new DoubleYoVariable("raw_tau_" + oneDoFJoint.getName(), registry);
          rawJointTorques.add(oneDoFJoint, rawJointTorque);
 
-         DelayedDoubleYoVariable delayedJointTorque = new DelayedDoubleYoVariable("delayed_tau_" + oneDoFJoint.getName(), "", rawJointTorque, TICKS_TO_DELAY,
-                                                         registry);
+         DelayedDoubleYoVariable delayedJointTorque = new DelayedDoubleYoVariable("delayed_tau_" + oneDoFJoint.getName(), "", rawJointTorque, TICKS_TO_DELAY, registry);
          delayedJointTorques.add(oneDoFJoint, delayedJointTorque);
       }
 
       prevError = new double[revoluteJoints.size()];
 
-
       if (robotVisualizer != null)
       {
          robotVisualizer.setFullRobotModel(fullRobotModel);
       }
-
    }
 
    @Override
    public void setEstimatorModel(SDFFullRobotModel estimatorModel)
    {
    }
-
 
    public void addRawOutputWriter(RawOutputWriter rawOutputWriter)
    {
@@ -138,7 +128,6 @@ public class DRCSimulationOutputWriter extends SDFPerfectSimulatedOutputWriter i
    @Override
    public YoVariableRegistry getControllerYoVariableRegistry()
    {
-      return null;
+      return registry;
    }
-
 }

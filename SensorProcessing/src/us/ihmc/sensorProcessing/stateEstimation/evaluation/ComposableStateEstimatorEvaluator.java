@@ -68,7 +68,7 @@ public class ComposableStateEstimatorEvaluator
             jointVelocitySlopTimeForBacklashCompensation, controlDT, useTwoPolesForIMUFiltering, doFiniteDifferenceForJointVelocities);
       
       SensorReaderFactory simulatedSensorHolderAndReaderFromRobotFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(robot,
-            simulatedSensorNoiseParameters, sensorFilterParameters, null, registry);
+            simulatedSensorNoiseParameters, sensorFilterParameters, null);
       
       simulatedSensorHolderAndReaderFromRobotFactory.build(inverseDynamicsStructure.getRootJoint(), null, null, registry);
       
