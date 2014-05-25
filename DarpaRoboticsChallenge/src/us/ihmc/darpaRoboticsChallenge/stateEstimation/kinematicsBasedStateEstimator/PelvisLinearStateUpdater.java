@@ -55,6 +55,8 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateMachineToo
  */
 public class PelvisLinearStateUpdater
 {
+   private static boolean VISUALIZE = false;
+
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -219,10 +221,13 @@ public class PelvisLinearStateUpdater
       imuDriftCompensator.setAlphaFootAngularVelocity(computeAlphaGivenBreakFrequencyProperly(stateEstimatorParameters.getFootVelocityUsedForImuDriftFilterFreqInHertz(), estimatorDT));
       imuDriftCompensator.setFootAngularVelocityThreshold(stateEstimatorParameters.getFootVelocityThresholdToEnableIMUDriftCompensation());
 
-      if (dynamicGraphicObjectsListRegistry != null)
+      if (VISUALIZE)
       {
-         DynamicGraphicPositionArtifact comArtifact = yoCenterOfMassPosition.createDynamicGraphicPosition("Meas CoM", 0.006, YoAppearance.Black(), GraphicType.CROSS).createArtifact();
-         dynamicGraphicObjectsListRegistry.registerArtifact("StateEstimator", comArtifact);
+         if (dynamicGraphicObjectsListRegistry != null)
+         {
+            DynamicGraphicPositionArtifact comArtifact = yoCenterOfMassPosition.createDynamicGraphicPosition("Meas CoM", 0.006, YoAppearance.Black(), GraphicType.CROSS).createArtifact();
+            dynamicGraphicObjectsListRegistry.registerArtifact("StateEstimator", comArtifact);
+         }
       }
       parentRegistry.addChild(registry);
    }

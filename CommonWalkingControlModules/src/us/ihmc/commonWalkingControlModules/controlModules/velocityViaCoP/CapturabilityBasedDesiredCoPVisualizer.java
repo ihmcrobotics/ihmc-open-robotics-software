@@ -29,6 +29,7 @@ public class CapturabilityBasedDesiredCoPVisualizer
    private final YoFramePoint desiredCMP = new YoFramePoint("desiredCMP", "", world, registry);
    private final YoFramePoint pseudoCMP = new YoFramePoint("pseudoCMP", "", world, registry);
    private final YoFramePoint finalDesiredCapturePoint = new YoFramePoint("finalDesiredCapturePoint", "", world, registry);
+   private final YoFramePoint centerOfMass = new YoFramePoint("centerOfMass", world, registry);
    
    public CapturabilityBasedDesiredCoPVisualizer(YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
@@ -41,6 +42,7 @@ public class CapturabilityBasedDesiredCoPVisualizer
          addDesiredCoPViz(dynamicGraphicObjectList, artifactList);
          addDesiredCapturePointViz(dynamicGraphicObjectList, artifactList);
          addDesiredCMPViz(dynamicGraphicObjectList, artifactList);
+         addCenterOfMassViz(dynamicGraphicObjectList, artifactList);
          addGuideLineViz(artifactList);
 
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectList);
@@ -48,6 +50,7 @@ public class CapturabilityBasedDesiredCoPVisualizer
       }
       desiredCMP.setToNaN();
       pseudoCMP.setToNaN();
+      centerOfMass.setToNaN();
       
       parentRegistry.addChild(registry);
    }
@@ -93,6 +96,13 @@ public class CapturabilityBasedDesiredCoPVisualizer
    {
       YoFrameLineSegment2dArtifact guideLineArtifact = new YoFrameLineSegment2dArtifact("Guide Line", guideLine, Color.RED);
       artifactList.add(guideLineArtifact);
+   }
+
+   private void addCenterOfMassViz(DynamicGraphicObjectsList dynamicGraphicObjectList, ArtifactList artifactList)
+   {
+      DynamicGraphicPosition desiredCapturePointViz = centerOfMass.createDynamicGraphicPosition("Center Of Mass", 0.006, YoAppearance.Black(), GraphicType.CROSS);
+      dynamicGraphicObjectList.add(desiredCapturePointViz);
+      artifactList.add(desiredCapturePointViz.createArtifact());
    }
 
    public void setDesiredCoP(FramePoint2d desiredCoP2d)
@@ -146,5 +156,11 @@ public class CapturabilityBasedDesiredCoPVisualizer
    {
       pseudoCMP.changeFrame(this.pseudoCMP.getReferenceFrame());
       this.pseudoCMP.set(pseudoCMP);
+   }
+
+   public void setCenterOfMass(FramePoint centerOfMass)
+   {
+      centerOfMass.changeFrame(this.centerOfMass.getReferenceFrame());
+      this.centerOfMass.set(centerOfMass);
    }
 }

@@ -171,13 +171,16 @@ public class PelvisKinematicsBasedLinearStateCalculator
          copFrames.put(robotSide, copFrame);
       }
 
-      if (VISUALIZE && dynamicGraphicObjectsListRegistry != null)
+      if (VISUALIZE)
       {
-         for (RobotSide robotSide : RobotSide.values)
+         if (dynamicGraphicObjectsListRegistry != null)
          {
-            String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
-            DynamicGraphicPosition copInWorld = new DynamicGraphicPosition(sidePrefix + "StateEstimatorCoP", copPositionsInWorld.get(robotSide), 0.005, YoAppearance.DeepPink());
-            dynamicGraphicObjectsListRegistry.registerArtifact("StateEstimator", copInWorld.createArtifact());
+            for (RobotSide robotSide : RobotSide.values)
+            {
+               String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
+               DynamicGraphicPosition copInWorld = new DynamicGraphicPosition(sidePrefix + "StateEstimatorCoP", copPositionsInWorld.get(robotSide), 0.005, YoAppearance.DeepPink());
+               dynamicGraphicObjectsListRegistry.registerArtifact("StateEstimator", copInWorld.createArtifact());
+            }
          }
       }
 
