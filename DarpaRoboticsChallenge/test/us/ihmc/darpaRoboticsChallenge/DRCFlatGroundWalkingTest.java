@@ -1,6 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
@@ -44,6 +45,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
    private DRCSimulationFactory drcSimulation;
    private RobotVisualizer robotVisualizer;
 
+   private static final double yawingTimeDuration = 0.1;
    private static final double standingTimeDuration = 1.0;
    private static final double defaultWalkingTimeDuration = BambooTools.isEveryCommitBuild() ? 45.0 : 90.0;
    private static final boolean useVelocityAndHeadingScript = true;
@@ -119,8 +121,30 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
 //    DoubleYoVariable centerOfMassHeight = (DoubleYoVariable) scs.getVariable("ProcessedSensors.comPositionz");
       DoubleYoVariable comError = (DoubleYoVariable) scs.getVariable("positionError_comHeight");
 
+      DoubleYoVariable userDesiredPelvisYaw = (DoubleYoVariable) scs.getVariable("userDesiredPelvisYaw");
+      BooleanYoVariable userSetDesiredPelvis = (BooleanYoVariable) scs.getVariable("userSetDesiredPelvis");
+      DoubleYoVariable icpErrorX = (DoubleYoVariable) scs.getVariable("icpErrorX");
+      DoubleYoVariable icpErrorY = (DoubleYoVariable) scs.getVariable("icpErrorY");
+
       initiateMotion(scs, standingTimeDuration, blockingSimulationRunner);
 
+      userSetDesiredPelvis.set(true);
+      userDesiredPelvisYaw.add(Math.PI/4.0);
+      
+      initiateMotion(scs, yawingTimeDuration, blockingSimulationRunner);
+      
+      double icpError = Math.sqrt(icpErrorX.getDoubleValue() * icpErrorX.getDoubleValue() + icpErrorY.getDoubleValue() * icpErrorY.getDoubleValue());
+      assertTrue(icpError < 0.005);
+      
+      userSetDesiredPelvis.set(true);
+      userDesiredPelvisYaw.sub(Math.PI/4.0);
+      initiateMotion(scs, yawingTimeDuration, blockingSimulationRunner);
+
+      userSetDesiredPelvis.set(false);
+      
+      icpError = Math.sqrt(icpErrorX.getDoubleValue() * icpErrorX.getDoubleValue() + icpErrorY.getDoubleValue() * icpErrorY.getDoubleValue());
+      assertTrue(icpError < 0.005);
+      
 //    ThreadTools.sleepForever();
 
       double timeIncrement = 1.0;

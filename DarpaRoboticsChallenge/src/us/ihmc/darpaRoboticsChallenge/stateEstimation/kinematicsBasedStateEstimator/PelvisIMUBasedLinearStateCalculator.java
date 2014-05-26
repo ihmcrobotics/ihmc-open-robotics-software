@@ -35,6 +35,9 @@ public class PelvisIMUBasedLinearStateCalculator
    private final AlphaFilteredYoVariable gravityEstimation = new AlphaFilteredYoVariable("gravityEstimation", registry, alphaGravityEstimation);
    private final FrameVector gravity = new FrameVector(worldFrame);
 
+   private final YoFrameVector imuLinearVelocity = new YoFrameVector("imuLinearVelocity", worldFrame, registry);
+
+   
    private final YoFrameVector rootJointLinearVelocity = new YoFrameVector("imuRootJointLinearVelocity", worldFrame, registry);
    private final YoFrameVector rootJointPosition = new YoFrameVector("imuRootJointPosition", worldFrame, registry);
 
@@ -105,7 +108,7 @@ public class PelvisIMUBasedLinearStateCalculator
          measurementFrame = null;
       }
       
-      yoMeasurementFrameLinearVelocity = new YoFrameVector("imuLinearVelocity", measurementFrame, registry);
+      yoMeasurementFrameLinearVelocity = new YoFrameVector("imuLinearVelocityMeasurementFrame", measurementFrame, registry);
       yoMeasurementFrameLinearVelocityInWorld = new YoFrameVector("imuLinearVelocityInWorld", worldFrame, registry);
       
       yoLinearAccelerationMeasurement = new YoFrameVector("imuLinearAcceleration", measurementFrame, registry);
@@ -209,6 +212,29 @@ public class PelvisIMUBasedLinearStateCalculator
    private final Twist twistRootJointFrameRelativeToMeasurementLink = new Twist();
    private final Twist twistRootJointFrameRelativeToWorld = new Twist();
    
+   private final FrameVector correctionVelocityForMeasurementFrameOffset = new FrameVector();
+
+   public void updateIMUAndRootJointLinearVelocity(FrameVector rootJointVelocity, FrameVector imuLinearVelocityInWorldToUpdate)
+   {
+      measurementFrameLinearVelocityPrevValue.setToZero(measurementFrame);
+      updateLinearAccelerationMeasurement(measurementFrameLinearVelocityPrevValue);
+      
+      yoLinearAccelerationMeasurementInWorld.getFrameTupleIncludingFrame(linearAccelerationMeasurement);
+      linearAccelerationMeasurement.scale(estimatorDT);
+      imuLinearVelocityInWorldToUpdate.add(linearAccelerationMeasurement);
+      
+      imuLinearVelocity.set(imuLinearVelocityInWorldToUpdate);
+      
+      rootJointVelocity.set(imuLinearVelocityInWorldToUpdate);
+
+      getCorrectionVelocityForMeasurementFrameOffset(correctionVelocityForMeasurementFrameOffset);
+      correctionVelocityForMeasurementFrameOffset.changeFrame(worldFrame);
+      rootJointVelocity.sub(correctionVelocityForMeasurementFrameOffset);
+
+      imuLinearVelocityInWorldToUpdate.set(rootJointVelocity);
+      imuLinearVelocityInWorldToUpdate.add(correctionVelocityForMeasurementFrameOffset);
+   }
+   
    public void updatePelvisLinearVelocity(FrameVector rootJointLinearVelocityPrevValue, FrameVector rootJointLinearVelocityToPack)
    {
       if (!isEstimationEnabled())
@@ -281,5 +307,20 @@ public class PelvisIMUBasedLinearStateCalculator
       rootJointPosition.set(rootJointPositionPrevValue);
       rootJointPosition.add(tempRootJointVelocityIntegrated);
       rootJointPosition.getFrameTupleIncludingFrame(rootJointPositionToPack);
+   }
+
+   private void getCorrectionVelocityForMeasurementFrameOffset(FrameVector correctionTermToPack)
+   {
+      Twist tempTwist = new Twist();
+      rootJoint.packJointTwist(tempTwist);
+      
+      FrameVector angularPart = new FrameVector();
+      tempTwist.packAngularPart(angularPart);
+      
+      FramePoint measurementOffset = new FramePoint(measurementFrame);
+      measurementOffset.changeFrame(rootJoint.getFrameAfterJoint());
+      
+      correctionTermToPack.setToZero(angularPart.getReferenceFrame());
+      correctionTermToPack.cross(angularPart, measurementOffset);
    }
 }

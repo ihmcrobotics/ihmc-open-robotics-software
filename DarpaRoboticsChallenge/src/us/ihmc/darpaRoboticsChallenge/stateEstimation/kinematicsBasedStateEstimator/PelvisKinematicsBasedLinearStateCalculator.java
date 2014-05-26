@@ -489,8 +489,4 @@ public class PelvisKinematicsBasedLinearStateCalculator
       footToRootJointVelocities.get(robotSide).getFrameTupleIncludingFrame(linearVelocityToPack);
    }
 
-   public void setRootJointVelocity(FrameVector rootJointVelocity)
-   {
-      rootJointLinearVelocityNewTwist.set(rootJointVelocity);   
-   }
 }
