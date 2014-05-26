@@ -11,6 +11,7 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.RosCameraInfoRecie
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.RosCameraReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.SCSCameraDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.GazeboLidarDataReceiver;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.IbeoPointCloudDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.RobotBoundingBoxes;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.SCSLidarDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.SCSPointCloudDataReceiver;
@@ -48,7 +49,6 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
          new SCSLidarDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, sdfFullRobotModel, robotBoundingBoxes, sensorInformation, scsCommunicator,
                ppsTimestampOffsetProvider);
       }
-
    }
 
    public void initializePhysicalSensors(RobotPoseBuffer robotPoseBuffer, DRCNetworkProcessorNetworkingManager networkingManager,
@@ -74,8 +74,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
       CameraInfoReceiver cameraInfoServer = new RosCameraInfoReciever(cameraParamaters, rosMainNode, networkingManager.getControllerStateHandler());
       networkingManager.getControllerCommandHandler().setIntrinsicServer(cameraInfoServer);
 
-      new GazeboLidarDataReceiver(rosMainNode, robotPoseBuffer, networkingManager, sdfFullRobotModel, robotBoundingBoxes, sensorInformation,
-            objectCommunicator, rosNativeNetworkProcessor, ppsTimestampOffsetProvider);
+      new IbeoPointCloudDataReceiver(rosMainNode, robotPoseBuffer, networkingManager, sdfFullRobotModel, robotBoundingBoxes, sensorInformation, objectCommunicator, rosNativeNetworkProcessor, ppsTimestampOffsetProvider);
 
       ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
 
