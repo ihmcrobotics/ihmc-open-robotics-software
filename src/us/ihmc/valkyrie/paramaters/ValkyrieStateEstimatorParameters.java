@@ -146,7 +146,7 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    @Override
    public boolean useHackishAccelerationIntegration()
    {
-      return true;
+      return false;
    }
 
    @Override
