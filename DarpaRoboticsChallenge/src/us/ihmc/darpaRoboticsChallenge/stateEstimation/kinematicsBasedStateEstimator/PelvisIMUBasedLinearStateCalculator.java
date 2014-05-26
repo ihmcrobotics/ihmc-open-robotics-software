@@ -230,7 +230,10 @@ public class PelvisIMUBasedLinearStateCalculator
       getCorrectionVelocityForMeasurementFrameOffset(correctionVelocityForMeasurementFrameOffset);
       correctionVelocityForMeasurementFrameOffset.changeFrame(worldFrame);
       rootJointVelocity.sub(correctionVelocityForMeasurementFrameOffset);
-
+   }
+   
+   public void correctIMULinearVelocity(FrameVector rootJointVelocity, FrameVector imuLinearVelocityInWorldToUpdate)
+   {
       imuLinearVelocityInWorldToUpdate.set(rootJointVelocity);
       imuLinearVelocityInWorldToUpdate.add(correctionVelocityForMeasurementFrameOffset);
    }
