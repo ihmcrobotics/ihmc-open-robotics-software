@@ -224,7 +224,7 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    @Override
    public boolean useTwistForPelvisLinearStateEstimation()
    {
-      return false;
+      return true;
    }
 
    @Override
