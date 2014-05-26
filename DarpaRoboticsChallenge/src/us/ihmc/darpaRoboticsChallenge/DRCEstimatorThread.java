@@ -64,6 +64,8 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    
    private final LongYoVariable startClockTime = new LongYoVariable("startTime", estimatorRegistry);
    private final ExecutionTimer estimatorTimer = new ExecutionTimer("estimatorTimer", 10.0, estimatorRegistry);
+   
+   private final LongYoVariable actualEstimatorDT = new LongYoVariable("actualEstimatorDT", estimatorRegistry);
 
    public DRCEstimatorThread(DRCRobotModel robotModel, SensorReaderFactory sensorReaderFactory, ThreadDataSynchronizer threadDataSynchronizer,
          DRCOutputWriter drcOutputWriter, GlobalDataProducer dataProducer, TimestampProvider timestampProvider, double estimatorDT, double gravity)
@@ -144,6 +146,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    @Override
    public void read(double time, long currentClockTime)
    {
+      actualEstimatorDT.set(currentClockTime - startClockTime.getLongValue());
       estimatorTime.set(time);
       startClockTime.set(currentClockTime);
       sensorReader.read();
