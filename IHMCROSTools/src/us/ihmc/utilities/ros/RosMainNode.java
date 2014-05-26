@@ -84,6 +84,11 @@ public class RosMainNode implements NodeMain
       for (Entry<String, RosTopicSubscriberInterface<? extends Message>> entry : subscribers.entrySet())
       {
          final RosTopicSubscriberInterface rosTopicSubscriber = entry.getValue();
+         if(entry.getKey() == null)
+         {
+            System.err.println("ROSMAINNODE.JAVA: Ros Topic was NULL! for msg type of " + rosTopicSubscriber.getMessageType());
+            continue;
+         }
          Subscriber<? extends Message> subscriber = connectedNode.newSubscriber(entry.getKey(), rosTopicSubscriber.getMessageType());
          subscriber.addMessageListener(rosTopicSubscriber);
          rosSubscribers.put(rosTopicSubscriber, subscriber);
