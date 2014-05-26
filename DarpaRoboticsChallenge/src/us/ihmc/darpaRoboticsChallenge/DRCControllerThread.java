@@ -84,6 +84,8 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    private final LongYoVariable lastEstimatorTick = new LongYoVariable("lastEstimatorTick", registry);
    private final LongYoVariable lastEstimatorClockStartTime = new LongYoVariable("lastEstimatorClockStartTime", registry);
    private final LongYoVariable lastControllerClockTime = new LongYoVariable("lastControllerClockTime", registry);
+   private final LongYoVariable controllerStartTime = new LongYoVariable("controllerStartTime", registry);
+   private final LongYoVariable actualControlDT = new LongYoVariable("actualControlDT", registry);
    
    
    private final BooleanYoVariable runController = new BooleanYoVariable("runController", registry);
@@ -235,6 +237,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
             long timestamp = threadDataSynchronizer.getTimestamp();
             controllerTime.set(TimeTools.nanoSecondstoSeconds(timestamp));
             nextExecutionTime.set(estimatorStartTime + controlDTInNS + estimatorDTInNS);
+            actualControlDT.set(currentClockTime - controllerStartTime.getLongValue());
             
             if(expectedEstimatorTick.getLongValue() != threadDataSynchronizer.getEstimatorTick())
             {
@@ -254,8 +257,10 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
             }
             
             expectedEstimatorTick.set(threadDataSynchronizer.getEstimatorTick() + estimatorTicksPerControlTick);
+            controllerStartTime.set(currentClockTime);
          }
       }
+      
    }
 
    @Override
