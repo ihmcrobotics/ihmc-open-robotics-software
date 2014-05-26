@@ -617,6 +617,8 @@ public class PelvisLinearStateUpdater
 
       rootJointVelocity.add(pelvisVelocityKinPart);
       yoRootJointVelocity.set(rootJointVelocity);
+      
+      imuBasedLinearStateCalculator.correctIMULinearVelocity(rootJointVelocity, imuVelocityIMUPart);
    }
    
    
@@ -633,7 +635,7 @@ public class PelvisLinearStateUpdater
       rootJointVelocity.add(pelvisVelocityKinPart);
       yoRootJointVelocity.set(rootJointVelocity);
    }
-
+   
    private void computeLinearPositionFromMergingMeasurements()
    {
       imuBasedLinearStateCalculator.updatePelvisPosition(rootJointPosition, pelvisPositionIMUPart);
