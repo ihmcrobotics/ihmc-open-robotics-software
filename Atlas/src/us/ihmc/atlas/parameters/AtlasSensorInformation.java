@@ -40,6 +40,7 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    
    public static final String lidarJointName = "hokuyo_joint";
    public static final String lidarSensorName = "head_hokuyo_sensor";
+   public static final String multisense_laser_topic_string = "/laser/scan";
    public static final String bodyIMUSensor = "pelvis_imu_sensor";
    public static final String[] imuSensorsToUse = { bodyIMUSensor };
    
@@ -111,5 +112,11 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    public DRCRobotCameraParamaters getPrimaryCameraParamaters()
    {
       return cameraParamaters[primaryCameraId];
+   }
+
+   @Override
+   public String getLidarTopic()
+   {
+      return multisense_laser_topic_string;
    }
 }
