@@ -6,7 +6,9 @@ import us.ihmc.affinity.Processor;
 import us.ihmc.realtime.MonotonicTime;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.realtime.RealtimeThread;
+import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.Tuple;
+import us.ihmc.utilities.math.TimeTools;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
@@ -20,6 +22,8 @@ public class MultiThreadedRealTimeRobotController
    
    private final YoVariableRegistry registry;   //TODO: Make this properly multi-thread safe for logging
    private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
+   
+   private final MonotonicTime monotonicTime = new MonotonicTime();
    
    public MultiThreadedRealTimeRobotController(MultiThreadedRobotControlElement sensorReader, YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
@@ -42,7 +46,11 @@ public class MultiThreadedRealTimeRobotController
       long timestamp = RealtimeThread.getCurrentMonotonicClockTime();
       sensorReader.read(time, timestamp);
       sensorReader.run();
-      sensorReader.write(System.nanoTime());
+      
+      // Magic jitter fix
+      monotonicTime.set(0, timestamp + 500000);
+      RealtimeThread.getCurrentRealtimeThread().waitUntil(monotonicTime);
+      sensorReader.write(RealtimeThread.getCurrentMonotonicClockTime());
    }
    
    public void start()
