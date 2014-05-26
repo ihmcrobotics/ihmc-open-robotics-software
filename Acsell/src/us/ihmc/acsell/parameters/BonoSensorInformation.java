@@ -79,4 +79,10 @@ public class BonoSensorInformation implements DRCRobotSensorInformation
    {
       return null;
    }
+
+   @Override
+   public String getLidarTopic()
+   {
+      return null;
+   }
 }
