@@ -65,7 +65,10 @@ public class MultiThreadedRealTimeRobotController
          controller.initialize();
          
          MultiThreadedRobotControlElementRunner runner = new MultiThreadedRobotControlElementRunner(controller, priority);
-         runner.setAffinity(processor);
+         if(processor != null)
+         {
+            runner.setAffinity(processor);            
+         }
          runner.start();
       }
    }
