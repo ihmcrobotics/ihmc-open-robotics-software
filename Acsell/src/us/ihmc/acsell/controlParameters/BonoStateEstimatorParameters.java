@@ -210,4 +210,10 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
       // TODO Tune
       return 1.0;
    }
+
+   @Override
+   public boolean createFusedIMUSensor()
+   {
+      return false;
+   }
 }
