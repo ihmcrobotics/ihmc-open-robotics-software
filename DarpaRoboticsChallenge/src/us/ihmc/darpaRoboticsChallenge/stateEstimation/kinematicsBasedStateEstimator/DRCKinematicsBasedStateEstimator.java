@@ -11,8 +11,6 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.sensors.WrenchBasedFootSwitch;
 import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCStateEstimatorInterface;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.imu.FusedIMUSensor;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
@@ -22,45 +20,32 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.Wrench;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.plotting.DynamicGraphicPositionArtifact;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
 public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterface, StateEstimator
 {
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
    public static final boolean INITIALIZE_HEIGHT_WITH_FOOT = true;
-   
+
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    private final DoubleYoVariable yoTime = new DoubleYoVariable("t_stateEstimator", registry);
-   
+
    private final FusedIMUSensor fusedIMUSensor;
    private final JointStateUpdater jointStateUpdater;
    private final PelvisRotationalStateUpdater pelvisRotationalStateUpdater;
    private final PelvisLinearStateUpdater pelvisLinearStateUpdater;
- 
+
    private final double estimatorDT;
-   
+
    private boolean visualizeMeasurementFrames = false;
    private final ArrayList<DynamicGraphicReferenceFrame> dynamicGraphicMeasurementFrames = new ArrayList<>();
 
-   private final SideDependentList<YoFramePoint> footRawCoPPositionsInWorld;
-   private final YoFramePoint overallRawCoPPositionInWorld;
-   private final FramePoint2d tempRawCoP2d;
-   private final FramePoint tempRawCoP;
-   private final Wrench tempWrench;
-   private final SideDependentList<WrenchBasedFootSwitch> footSwitches;
+   private final CenterOfPressureVisualizer copVisualizer;
 
    public DRCKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, StateEstimatorParameters stateEstimatorParameters,
          SensorOutputMapReadOnly sensorOutputMapReadOnly, double gravitationalAcceleration, SideDependentList<WrenchBasedFootSwitch> footSwitches,
@@ -85,52 +70,28 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
          fusedIMUSensor = null;
          imusToUse.addAll(imuProcessedOutputs);
       }
-      
+
       pelvisRotationalStateUpdater = new PelvisRotationalStateUpdater(inverseDynamicsStructure, imusToUse, registry);
 
-      pelvisLinearStateUpdater = new PelvisLinearStateUpdater(inverseDynamicsStructure, imusToUse, footSwitches, bipedFeet,
-            gravitationalAcceleration, yoTime, stateEstimatorParameters, dynamicGraphicObjectsListRegistry, registry);
-      
+      pelvisLinearStateUpdater = new PelvisLinearStateUpdater(inverseDynamicsStructure, imusToUse, footSwitches, bipedFeet, gravitationalAcceleration, yoTime,
+            stateEstimatorParameters, dynamicGraphicObjectsListRegistry, registry);
 
       if (dynamicGraphicObjectsListRegistry != null)
       {
-         footRawCoPPositionsInWorld = new SideDependentList<>();
-         tempRawCoP2d = new FramePoint2d();
-         tempRawCoP = new FramePoint();
-         this.footSwitches = footSwitches;
-         tempWrench = new Wrench();
-         
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            String side = robotSide.getCamelCaseNameForMiddleOfExpression();
-            YoFramePoint rawCoPPositionInWorld = new YoFramePoint("raw" + side + "CoPPositionsInWorld", worldFrame, registry);
-            footRawCoPPositionsInWorld.put(robotSide, rawCoPPositionInWorld);
-            
-            DynamicGraphicPositionArtifact copArtifact = rawCoPPositionInWorld.createDynamicGraphicPosition("Meas " + side + "CoP", 0.008, YoAppearance.DarkRed(), GraphicType.DIAMOND).createArtifact();
-            dynamicGraphicObjectsListRegistry.registerArtifact("StateEstimator", copArtifact);
-         }
-         
-         overallRawCoPPositionInWorld = new YoFramePoint("overallRawCoPPositionInWorld", worldFrame, registry);
-         DynamicGraphicPositionArtifact overallRawCoPArtifact = overallRawCoPPositionInWorld.createDynamicGraphicPosition("Meas CoP", 0.015, YoAppearance.DarkRed(), GraphicType.DIAMOND).createArtifact();
-         dynamicGraphicObjectsListRegistry.registerArtifact("StateEstimator", overallRawCoPArtifact);
+         copVisualizer = new CenterOfPressureVisualizer(footSwitches, dynamicGraphicObjectsListRegistry, registry);
       }
       else
       {
-         footRawCoPPositionsInWorld = null;
-         overallRawCoPPositionInWorld = null;
-         tempRawCoP2d = null;
-         tempRawCoP = null;
-         this.footSwitches = null;
-         tempWrench = null;
+         copVisualizer = null;
       }
-      
+
       visualizeMeasurementFrames = visualizeMeasurementFrames && dynamicGraphicObjectsListRegistry != null;
 
       List<IMUSensorReadOnly> imusToDisplay = new ArrayList<>();
       imusToDisplay.addAll(imuProcessedOutputs);
       if (fusedIMUSensor != null)
          imusToDisplay.add(fusedIMUSensor);
-      
+
       if (visualizeMeasurementFrames)
          setupDynamicGraphicObjects(dynamicGraphicObjectsListRegistry, imusToDisplay);
    }
@@ -159,7 +120,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       pelvisRotationalStateUpdater.initialize();
       pelvisLinearStateUpdater.initialize();
    }
-   
+
    public void doControl()
    {
       yoTime.add(estimatorDT); //Hack to have a yoTime in the state estimator
@@ -176,28 +137,9 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 
    private void updateVisualizers()
    {
-      if (footRawCoPPositionsInWorld != null)
-      {
-         overallRawCoPPositionInWorld.setToZero();
-         double totalFootForce = 0.0;
-         
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            footSwitches.get(robotSide).computeAndPackCoP(tempRawCoP2d);
-            tempRawCoP.setIncludingFrame(tempRawCoP2d.getReferenceFrame(), tempRawCoP2d.getX(), tempRawCoP2d.getY(), 0.0);
-            tempRawCoP.changeFrame(worldFrame);
-            footRawCoPPositionsInWorld.get(robotSide).set(tempRawCoP);
-            
-            footSwitches.get(robotSide).computeAndPackFootWrench(tempWrench);
-            double singleFootForce = tempWrench.getLinearPartZ();
-            totalFootForce += singleFootForce;
-            tempRawCoP.scale(singleFootForce);
-            overallRawCoPPositionInWorld.add(tempRawCoP);
-         }
-         
-         overallRawCoPPositionInWorld.scale(1.0 / totalFootForce);
-      }
-      
+      if (copVisualizer != null)
+         copVisualizer.update();
+
       if (visualizeMeasurementFrames)
       {
          for (int i = 0; i < dynamicGraphicMeasurementFrames.size(); i++)
@@ -214,7 +156,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    {
       pelvisLinearStateUpdater.startIMUDriftCompensation();
    }
-   
+
    public void initializeEstimatorToActual(Point3d initialCoMPosition, Quat4d initialEstimationLinkOrientation)
    {
       pelvisLinearStateUpdater.initializeCoMPositionToActual(initialCoMPosition);
