@@ -344,6 +344,8 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
          tempFrameVector.setIncludingFrame(tempFramePoint);
          tempFrameVector.changeFrame(worldFrame);
+
+         footToRootJointPositions.get(robotSide).update(tempFrameVector);
       }
 
       kinematicsIsUpToDate.set(true);
