@@ -15,6 +15,12 @@ public interface ArmControllerParameters
    public abstract double getArmTaskspaceMaxIntegralError();
    public abstract double getArmTaskspaceMaxAcceleration();
    public abstract double getArmTaskspaceMaxJerk();
+   
+   public abstract double[] getLowLevelArmJointspaceKp();
+   public abstract double[] getLowLevelArmJointspaceKi();
+   public abstract double[] getLowLevelArmJointspaceKd();
+   public abstract double[] getLowLevelArmJointspaceFfqd_d();
+   public abstract double[] getLowLevelArmJointspaceQerrMax();
 
    public abstract boolean useInverseKinematicsTaskspaceControl();
    

@@ -7,6 +7,12 @@ public class AtlasArmControllerParameters implements ArmControllerParameters
 {
    private final boolean runningOnRealRobot;
    
+   public static final double[] kp = { 60.0, 60.0, 40.0, 40.0, 30.0, 40.0};
+   public static final double[] ki = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+   public static final double[] kd = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+   public static final double[] ff_qd_ds = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+   public static final double[] qerr_maxs = { 10.0, 10.0, 10.0, 10.0, 10.0, 10.0 };
+   
    public AtlasArmControllerParameters()
    {
       this(false);
@@ -17,6 +23,27 @@ public class AtlasArmControllerParameters implements ArmControllerParameters
       this.runningOnRealRobot = runningOnRealRobot;
    }
    
+   public double[] getLowLevelArmJointspaceKp()
+   {
+      return kp; 
+   }
+   public double[] getLowLevelArmJointspaceKi()
+   {
+      return ki; 
+   }
+   public double[] getLowLevelArmJointspaceKd()
+   {
+      return kd; 
+   }
+   public double[] getLowLevelArmJointspaceFfqd_d()
+   {
+      return ff_qd_ds; 
+   }
+   public double[] getLowLevelArmJointspaceQerrMax()
+   {
+      return qerr_maxs; 
+   }
+
    public double getArmJointspaceKp()
    {
       if (!runningOnRealRobot)  return 80.0;
