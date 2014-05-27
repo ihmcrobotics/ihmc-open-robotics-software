@@ -14,6 +14,7 @@ import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCStateEstimatorInterface
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.imu.FusedIMUSensor;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimator;
@@ -44,6 +45,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    private final DoubleYoVariable yoTime = new DoubleYoVariable("t_stateEstimator", registry);
    
+   private final FusedIMUSensor fusedIMUSensor;
    private final JointStateUpdater jointStateUpdater;
    private final PelvisRotationalStateUpdater pelvisRotationalStateUpdater;
    private final PelvisLinearStateUpdater pelvisLinearStateUpdater;
@@ -69,10 +71,24 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorOutputMapReadOnly, registry);
 
       List<? extends IMUSensorReadOnly> imuProcessedOutputs = sensorOutputMapReadOnly.getIMUProcessedOutputs();
+      List<IMUSensorReadOnly> imusToUse = new ArrayList<>();
 
-      pelvisRotationalStateUpdater = new PelvisRotationalStateUpdater(inverseDynamicsStructure, imuProcessedOutputs, registry);
+      if (stateEstimatorParameters.createFusedIMUSensor())
+      {
+         if (imuProcessedOutputs.size() != 2)
+            throw new RuntimeException("Cannot create FusedIMUSensor.");
+         fusedIMUSensor = new FusedIMUSensor(imuProcessedOutputs.get(0), imuProcessedOutputs.get(1), registry);
+         imusToUse.add(fusedIMUSensor);
+      }
+      else
+      {
+         fusedIMUSensor = null;
+         imusToUse.addAll(imuProcessedOutputs);
+      }
+      
+      pelvisRotationalStateUpdater = new PelvisRotationalStateUpdater(inverseDynamicsStructure, imusToUse, registry);
 
-      pelvisLinearStateUpdater = new PelvisLinearStateUpdater(inverseDynamicsStructure, imuProcessedOutputs, footSwitches, bipedFeet,
+      pelvisLinearStateUpdater = new PelvisLinearStateUpdater(inverseDynamicsStructure, imusToUse, footSwitches, bipedFeet,
             gravitationalAcceleration, yoTime, stateEstimatorParameters, dynamicGraphicObjectsListRegistry, registry);
       
 
@@ -109,9 +125,14 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       }
       
       visualizeMeasurementFrames = visualizeMeasurementFrames && dynamicGraphicObjectsListRegistry != null;
+
+      List<IMUSensorReadOnly> imusToDisplay = new ArrayList<>();
+      imusToDisplay.addAll(imuProcessedOutputs);
+      if (fusedIMUSensor != null)
+         imusToDisplay.add(fusedIMUSensor);
       
       if (visualizeMeasurementFrames)
-         setupDynamicGraphicObjects(dynamicGraphicObjectsListRegistry, imuProcessedOutputs);
+         setupDynamicGraphicObjects(dynamicGraphicObjectsListRegistry, imusToDisplay);
    }
 
    private void setupDynamicGraphicObjects(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
@@ -132,6 +153,8 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 
    public void initialize()
    {
+      if (fusedIMUSensor != null)
+         fusedIMUSensor.update();
       jointStateUpdater.initialize();
       pelvisRotationalStateUpdater.initialize();
       pelvisLinearStateUpdater.initialize();
@@ -140,6 +163,9 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    public void doControl()
    {
       yoTime.add(estimatorDT); //Hack to have a yoTime in the state estimator
+
+      if (fusedIMUSensor != null)
+         fusedIMUSensor.update();
 
       jointStateUpdater.updateJointState();
       pelvisRotationalStateUpdater.updateRootJointOrientationAndAngularVelocity();

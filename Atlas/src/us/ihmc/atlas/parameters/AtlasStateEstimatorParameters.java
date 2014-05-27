@@ -238,4 +238,10 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
       //TODO: Tune
       return 1.0;
    }
+
+   @Override
+   public boolean createFusedIMUSensor()
+   {
+      return false;
+   }
 }

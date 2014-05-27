@@ -87,12 +87,10 @@ public class PelvisIMUBasedLinearStateCalculator
          imuProcessedOutput = null;
          imuBasedStateEstimationEnabled.set(false);
       }
-      else if (imuProcessedOutputs.size() > 1)
-      {
-         throw new RuntimeException("Cannot handle more than one IMU yet");
-      }
       else
       {
+         if (imuProcessedOutputs.size() > 1)
+            System.out.println(getClass().getSimpleName() + ": More than 1 IMU sensor, using only the first one: " + imuProcessedOutputs.get(0).getSensorName());
          imuProcessedOutput = imuProcessedOutputs.get(0);
          imuBasedStateEstimationEnabled.set(true);
       }

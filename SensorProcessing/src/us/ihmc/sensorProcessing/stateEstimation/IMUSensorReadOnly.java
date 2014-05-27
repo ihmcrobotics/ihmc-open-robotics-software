@@ -10,6 +10,8 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 
 public interface IMUSensorReadOnly
 {
+   public abstract String getSensorName();
+
    public abstract ReferenceFrame getMeasurementFrame();
 
    public abstract RigidBody getMeasurementLink();

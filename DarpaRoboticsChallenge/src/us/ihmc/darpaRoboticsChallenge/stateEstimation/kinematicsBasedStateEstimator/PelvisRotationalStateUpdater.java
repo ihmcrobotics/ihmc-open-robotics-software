@@ -73,7 +73,7 @@ public class PelvisRotationalStateUpdater
    private void checkNumberOfSensors(List<? extends IMUSensorReadOnly> imuProcessedOutputs)
    {
       if (imuProcessedOutputs.size() > 1)
-         throw new RuntimeException("We are assuming there is only 1 IMU for right now. Got " + imuProcessedOutputs.size() + " IMU sensors.");
+         System.out.println(getClass().getSimpleName() + ": More than 1 IMU sensor, using only the first one: " + imuProcessedOutputs.get(0).getSensorName());
       
       if (imuProcessedOutputs.size() == 0)
          throw new RuntimeException("No sensor set up for the IMU.");

@@ -15,6 +15,8 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 
 public class IMUSensor implements IMUSensorReadOnly
 {
+   private final String sensorName;
+
    private final ReferenceFrame measurementFrame;
    private final RigidBody measurementLink;
    
@@ -30,6 +32,8 @@ public class IMUSensor implements IMUSensorReadOnly
 
    public IMUSensor(IMUDefinition imuDefinition, SensorNoiseParameters sensorNoiseParameters)
    {
+      sensorName = imuDefinition.getName();
+
       measurementFrame = imuDefinition.getIMUFrame();
       measurementLink = imuDefinition.getRigidBody();
 
@@ -40,6 +44,11 @@ public class IMUSensor implements IMUSensorReadOnly
 
       linearAccelerationNoiseCovariance = createDiagonalCovarianceMatrix(sensorNoiseParameters.getLinearAccelerationMeasurementStandardDeviation());
       linearAccelerationBiasProcessNoiseCovariance = createDiagonalCovarianceMatrix(sensorNoiseParameters.getLinearAccelerationBiasProcessNoiseStandardDeviation());
+   }
+
+   public String getSensorName()
+   {
+      return sensorName;
    }
 
    public ReferenceFrame getMeasurementFrame()
