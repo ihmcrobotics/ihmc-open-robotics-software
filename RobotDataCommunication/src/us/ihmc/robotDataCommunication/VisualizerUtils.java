@@ -15,40 +15,44 @@ import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class VisualizerUtils
-{   
-   public static void createOverheadPlotter(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, SimulationConstructionSet scs, boolean showOverheadView)
+{
+   public static void createOverheadPlotter(SimulationConstructionSet scs, boolean showOverheadView, DynamicGraphicObjectsListRegistry... dynamicGraphicObjectsListRegistries)
    {
       SimulationOverheadPlotter plotter = new SimulationOverheadPlotter();
       plotter.setDrawHistory(false);
       plotter.setXVariableToTrack(null);
       plotter.setYVariableToTrack(null);
-   
+
       scs.attachPlaybackListener(plotter);
       JPanel plotterPanel = plotter.getJPanel();
       String plotterName = "Plotter";
       scs.addExtraJpanel(plotterPanel, plotterName);
       JPanel plotterKeyJPanel = plotter.getJPanelKey();
-   
+
       JScrollPane scrollPane = new JScrollPane(plotterKeyJPanel);
-   
+
       scs.addExtraJpanel(scrollPane, "Plotter Legend");
-   
-      dynamicGraphicObjectsListRegistry.addArtifactListsToPlotter(plotter.getPlotter());
-      ArrayList<ArtifactList> buffer = new ArrayList<>();
-      dynamicGraphicObjectsListRegistry.getRegisteredArtifactLists(buffer);
-      
-      for (ArtifactList artifactList: buffer)
+
+      for (int i = 0; i < dynamicGraphicObjectsListRegistries.length; i++)
       {
-         for (Artifact artifact: artifactList.getArtifacts())
+         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = dynamicGraphicObjectsListRegistries[i];
+         dynamicGraphicObjectsListRegistry.addArtifactListsToPlotter(plotter.getPlotter());
+         ArrayList<ArtifactList> buffer = new ArrayList<>();
+         dynamicGraphicObjectsListRegistry.getRegisteredArtifactLists(buffer);
+
+         for (ArtifactList artifactList : buffer)
          {
-            if (artifact.getID() == CommonCapturePointCalculator.CAPTURE_POINT_DYNAMIC_GRAPHIC_OBJECT_NAME)
+            for (Artifact artifact : artifactList.getArtifacts())
             {
-               plotter.setXVariableToTrack(((DynamicGraphicPositionArtifact) artifact).getVariables()[0]);
-               plotter.setYVariableToTrack(((DynamicGraphicPositionArtifact) artifact).getVariables()[1]);
+               if (artifact.getID() == CommonCapturePointCalculator.CAPTURE_POINT_DYNAMIC_GRAPHIC_OBJECT_NAME)
+               {
+                  plotter.setXVariableToTrack(((DynamicGraphicPositionArtifact) artifact).getVariables()[0]);
+                  plotter.setYVariableToTrack(((DynamicGraphicPositionArtifact) artifact).getVariables()[1]);
+               }
             }
          }
       }
-      
+
       if (showOverheadView)
          scs.getStandardSimulationGUI().selectPanel(plotterName);
    }
