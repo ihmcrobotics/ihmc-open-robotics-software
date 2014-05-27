@@ -149,12 +149,6 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
    }
 
    @Override
-   public boolean useHackishAccelerationIntegration()
-   {
-      return false;
-   }
-
-   @Override
    public boolean estimateGravity()
    {
       return true;

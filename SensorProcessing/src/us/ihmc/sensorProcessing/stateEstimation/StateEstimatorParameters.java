@@ -29,9 +29,6 @@ public interface StateEstimatorParameters
    
    public abstract boolean useAccelerometerForEstimation();
    
-   @Deprecated
-   public abstract boolean useHackishAccelerationIntegration();
-   
    public abstract boolean estimateGravity();
    
    public abstract double getGravityFilterFreqInHertz();

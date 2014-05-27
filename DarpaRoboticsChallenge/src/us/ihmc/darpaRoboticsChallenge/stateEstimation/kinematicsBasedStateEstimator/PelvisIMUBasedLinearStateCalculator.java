@@ -49,9 +49,6 @@ public class PelvisIMUBasedLinearStateCalculator
 
    private final IMUSensorReadOnly imuProcessedOutput;
 
-   @Deprecated
-   private final BooleanYoVariable useOldHackishAccelIntegrationWorkingForAtlas = new BooleanYoVariable("useOldHackishAccelIntegrationWorkingForAtlas", registry);
-
    public PelvisIMUBasedLinearStateCalculator(FullInverseDynamicsStructure inverseDynamicsStructure, List<? extends IMUSensorReadOnly> imuProcessedOutputs, double estimatorDT,
          double gravitationalAcceleration, YoVariableRegistry parentRegistry)
    {
@@ -92,12 +89,6 @@ public class PelvisIMUBasedLinearStateCalculator
       parentRegistry.addChild(registry);
    }
 
-   @Deprecated
-   public void useHackishAccelerationIntegration(boolean val)
-   {
-      useOldHackishAccelIntegrationWorkingForAtlas.set(val);
-   }
-   
    public void enableGravityEstimation(boolean enable)
    {
       enableEstimationOfGravity.set(enable);
@@ -196,15 +187,17 @@ public class PelvisIMUBasedLinearStateCalculator
       rootJointPosition.getFrameTupleIncludingFrame(rootJointPositionToPack);
    }
 
+   private final Twist tempTwist = new Twist();
+   private final FrameVector angularPart = new FrameVector();
+   private final FramePoint measurementOffset = new FramePoint();
+
    private void getCorrectionVelocityForMeasurementFrameOffset(FrameVector correctionTermToPack)
    {
-      Twist tempTwist = new Twist();
       rootJoint.packJointTwist(tempTwist);
       
-      FrameVector angularPart = new FrameVector();
       tempTwist.packAngularPart(angularPart);
       
-      FramePoint measurementOffset = new FramePoint(measurementFrame);
+      measurementOffset.setToZero(measurementFrame);
       measurementOffset.changeFrame(rootJoint.getFrameAfterJoint());
       
       correctionTermToPack.setToZero(angularPart.getReferenceFrame());
