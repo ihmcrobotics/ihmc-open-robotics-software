@@ -5,15 +5,37 @@ import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameter
 public class ValkyrieArmControllerParameters implements ArmControllerParameters
 {
    private final boolean runningOnRealRobot;
-
-   public ValkyrieArmControllerParameters()
-   {
-      this(false);
-   }
    
    public ValkyrieArmControllerParameters(boolean runningOnRealRobot)
    {
       this.runningOnRealRobot = runningOnRealRobot;
+   }
+   
+   public static final double[] kp = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+   public static final double[] ki = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+   public static final double[] kd = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+   public static final double[] ff_qd_ds = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+   public static final double[] qerr_maxs = { 10.0, 10.0, 10.0, 10.0, 10.0, 10.0 };
+   
+   public double[] getLowLevelArmJointspaceKp()
+   {
+      return kp; 
+   }
+   public double[] getLowLevelArmJointspaceKi()
+   {
+      return ki; 
+   }
+   public double[] getLowLevelArmJointspaceKd()
+   {
+      return kd; 
+   }
+   public double[] getLowLevelArmJointspaceFfqd_d()
+   {
+      return ff_qd_ds; 
+   }
+   public double[] getLowLevelArmJointspaceQerrMax()
+   {
+      return qerr_maxs; 
    }
 
    public double getArmJointspaceKp()
