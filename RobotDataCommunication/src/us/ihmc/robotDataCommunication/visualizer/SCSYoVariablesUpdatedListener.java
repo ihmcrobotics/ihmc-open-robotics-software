@@ -1,6 +1,5 @@
 package us.ihmc.robotDataCommunication.visualizer;
 
-
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 
 import java.awt.event.ActionEvent;
@@ -38,55 +37,52 @@ public class SCSYoVariablesUpdatedListener implements YoVariablesUpdatedListener
    private final ArrayList<JointUpdater> jointUpdaters = new ArrayList<JointUpdater>();
    private volatile boolean recording = true;
    private YoVariableClient client;
-   
+
    private int displayOneInNPackets = DISPLAY_ONE_IN_N_PACKETS;
-   
+
    private final TObjectDoubleHashMap<String> buttons = new TObjectDoubleHashMap<String>();
 
    public SCSYoVariablesUpdatedListener(int bufferSize)
    {
-      this(new Robot("NullRobot"),bufferSize);
+      this(new Robot("NullRobot"), bufferSize);
    }
 
    public SCSYoVariablesUpdatedListener(Robot robot, int bufferSize)
    {
       this.robot = robot;
-      this.scs = new SimulationConstructionSet(robot,bufferSize);
+      this.scs = new SimulationConstructionSet(robot, bufferSize);
       this.registry = scs.getRootRegistry();
       scs.setScrollGraphsEnabled(false);
       scs.setGroundVisible(false);
       scs.attachExitActionListener(this);
    }
 
-
-
    public void start()
    {
-      for(String yoVariableName : buttons.keySet())
+      for (String yoVariableName : buttons.keySet())
       {
-         final YoVariable var = registry.getVariable(yoVariableName);
+         final YoVariable<?> var = registry.getVariable(yoVariableName);
          final JButton button = new JButton(yoVariableName);
          final double newValue = buttons.get(yoVariableName);
          scs.addButton(button);
          button.addActionListener(new ActionListener()
          {
-            
+
             @Override
             public void actionPerformed(ActionEvent e)
             {
                var.setValueFromDouble(newValue);
             }
          });
-         
       }
-      
+
       new Thread(scs).start();
    }
 
    public void setRegistry(YoVariableRegistry registry)
    {
       this.registry.addChild(registry);
-   } 
+   }
 
    public void receivedUpdate(long timestamp, ByteBuffer buffer)
    {
@@ -106,15 +102,11 @@ public class SCSYoVariablesUpdatedListener implements YoVariablesUpdatedListener
       JointUpdater.getJointUpdaterList(robot.getRootJoints(), jointStates, jointUpdaters);
    }
 
-
-
    public void registerDynamicGraphicObjectListsRegistry(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, boolean showOverheadView)
    {
       dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
 
-
-
-      VisualizerUtils.createOverheadPlotter(dynamicGraphicObjectsListRegistry, scs, showOverheadView);
+      VisualizerUtils.createOverheadPlotter(scs, showOverheadView, dynamicGraphicObjectsListRegistry);
    }
 
    public void disconnected()
@@ -122,7 +114,6 @@ public class SCSYoVariablesUpdatedListener implements YoVariablesUpdatedListener
       System.out.println("DISCONNECTED. SLIDERS NOW ENABLED");
       scs.setScrollGraphsEnabled(true);
    }
-
 
    public void setYoVariableClient(final YoVariableClient client)
    {
@@ -136,16 +127,15 @@ public class SCSYoVariablesUpdatedListener implements YoVariablesUpdatedListener
             client.close();
          }
       });
-      
+
       this.client = client;
-      
    }
 
    public void addButton(String yoVariableName, double newValue)
    {
       buttons.put(yoVariableName, newValue);
    }
-   
+
    public void receivedHandshake(YoProtoHandshake handshake)
    {
       // Ignore
@@ -159,29 +149,28 @@ public class SCSYoVariablesUpdatedListener implements YoVariablesUpdatedListener
    public void receiveTimedOut(long timeoutInMillis)
    {
       // TODO Auto-generated method stub
-      
    }
 
    public boolean populateRegistry()
    {
       return true;
    }
-   
+
    public void closeAndDispose()
    {
-	   scs.closeAndDispose();
+      scs.closeAndDispose();
    }
-   
+
    public DataBuffer getDataBuffer()
    {
-	   return scs.getDataBuffer();
+      return scs.getDataBuffer();
    }
 
    @Override
    public void exitActionPerformed()
    {
       recording = false;
-      if(client != null)
+      if (client != null)
       {
          client.close();
       }
@@ -192,7 +181,7 @@ public class SCSYoVariablesUpdatedListener implements YoVariablesUpdatedListener
    {
       return displayOneInNPackets;
    }
-   
+
    public void setDisplayOneInNPackets(int val)
    {
       displayOneInNPackets = val;

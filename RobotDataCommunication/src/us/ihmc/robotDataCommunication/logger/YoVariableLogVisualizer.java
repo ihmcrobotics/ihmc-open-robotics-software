@@ -126,7 +126,7 @@ public class YoVariableLogVisualizer
       
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = parser.getDynamicGraphicObjectsListRegistry();
       dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
-      VisualizerUtils.createOverheadPlotter(dynamicGraphicObjectsListRegistry, scs, showOverheadView);
+      VisualizerUtils.createOverheadPlotter(scs, showOverheadView, dynamicGraphicObjectsListRegistry);
       scs.getRootRegistry().addChild(parser.getRootRegistry());
       scs.setGroundVisible(false);
       
