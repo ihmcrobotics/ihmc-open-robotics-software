@@ -274,6 +274,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       if(firstTick.getBooleanValue())
       {
          robotController.initialize();
+         outputWriter.initialize();
          firstTick.set(false);
       }
       controllerTimer.startMeasurement();
