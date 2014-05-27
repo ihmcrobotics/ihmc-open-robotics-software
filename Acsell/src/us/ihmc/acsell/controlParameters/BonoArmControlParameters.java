@@ -18,6 +18,27 @@ public class BonoArmControlParameters implements ArmControllerParameters
    {
       this.runningOnRealRobot = runningOnRealRobot;
    }
+
+   public double[] getLowLevelArmJointspaceKp()
+   {
+      return new double[0]; 
+   }
+   public double[] getLowLevelArmJointspaceKi()
+   {
+      return new double[0]; 
+   }
+   public double[] getLowLevelArmJointspaceKd()
+   {
+      return new double[0]; 
+   }
+   public double[] getLowLevelArmJointspaceFfqd_d()
+   {
+      return new double[0]; 
+   }
+   public double[] getLowLevelArmJointspaceQerrMax()
+   {
+      return new double[0];  
+   }
    
    public double getArmJointspaceKp()
    {
