@@ -38,8 +38,6 @@ public class DRCFlatGroundWalkingTrack
          recordFrequency = 1;
       scsInitialSetup.setRecordFrequency(recordFrequency);
 
-      YoVariableRegistry registry = new YoVariableRegistry("adjustableParabolicTrajectoryDemoSimRegistry");
-
       boolean useFastTouchdowns = false;
 
       FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulation(walkingControlParameters);
@@ -65,9 +63,6 @@ public class DRCFlatGroundWalkingTrack
       
       ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, DRCConfigParameters.contactTresholdForceForSCS, footForceSensorNames);
       drcSimulation = new DRCSimulationFactory(model, controllerFactory, null, robotInitialSetup, scsInitialSetup, guiInitialSetup, null, robotVisualizer);
-
-      // add other registries
-      drcSimulation.addAdditionalYoVariableRegistriesToSCS(registry);
 
       if (automaticSimulationRunner != null)
       {

@@ -52,8 +52,6 @@ public class DRCInverseDynamicsControllerDemo
          recordFrequency = 1;
       scsInitialSetup.setRecordFrequency(recordFrequency);
 
-      YoVariableRegistry registry = new YoVariableRegistry("adjustableParabolicTrajectoryDemoSimRegistry");
-      
       WalkingControllerParameters walkingControlParameters = model.getWalkingControlParameters();
       ArmControllerParameters armControlParameters = model.getArmControllerParameters();
 
@@ -66,9 +64,6 @@ public class DRCInverseDynamicsControllerDemo
       
       ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, DRCConfigParameters.contactTresholdForceForSCS, footForceSensorNames);
       drcSimulation = new DRCSimulationFactory(model, controllerFactory, null, robotInitialSetup, scsInitialSetup, guiInitialSetup, null, null);
-
-      // add other registries
-      drcSimulation.addAdditionalYoVariableRegistriesToSCS(registry);
       
       SimulationConstructionSet simulationConstructionSet = drcSimulation.getSimulationConstructionSet();
       
