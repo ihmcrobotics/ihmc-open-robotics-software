@@ -31,14 +31,20 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
    
    public DRCGuiInitialSetup(boolean groundProfileVisible, boolean drawPlaneAtZeroHeight)
    {
-      this(groundProfileVisible, drawPlaneAtZeroHeight, null);
+      this(groundProfileVisible, drawPlaneAtZeroHeight, null, true);
    }
-   
+
    public DRCGuiInitialSetup(boolean groundProfileVisible, boolean drawPlaneAtZeroHeight, SliderBoardFactory sliderBoardFactory)
+   {
+      this(groundProfileVisible, drawPlaneAtZeroHeight, sliderBoardFactory, true);
+   }
+
+   public DRCGuiInitialSetup(boolean groundProfileVisible, boolean drawPlaneAtZeroHeight, SliderBoardFactory sliderBoardFactory, boolean showGUI)
    {
       this.groundProfileVisible = groundProfileVisible;
       this.drawPlaneAtZ0 = drawPlaneAtZeroHeight;
       this.sliderBoardFactory = sliderBoardFactory;
+      this.isGuiShown = showGUI;
    }
    public void initializeGUI(SimulationConstructionSet scs, Robot robot)
    {

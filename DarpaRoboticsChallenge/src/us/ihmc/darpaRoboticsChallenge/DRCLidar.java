@@ -51,20 +51,21 @@ public class DRCLidar
          TimestampProvider timestampProvider, boolean startLidar)
    {
       Graphics3DAdapter graphics3dAdapter = drcSimulation.getSimulationConstructionSet().getGraphics3dAdapter();
-      
-      LidarMount lidarMount = getLidarSensor(drcSimulation.getRobot());
-      
-      LidarScanParameters lidarScanParameters = lidarMount.getLidarScanParameters();
-      int horizontalRays = lidarScanParameters.pointsPerSweep;
-      float fov = lidarScanParameters.sweepYawMax - lidarScanParameters.sweepYawMin;
-      float near = lidarScanParameters.minRange;
-      float far = lidarScanParameters.maxRange;
-      
-      
-      DRCLidarCallback callback = new DRCLidarCallback(objectCommunicator, lidarScanParameters);
-      GPULidar lidar = graphics3dAdapter.createGPULidar(callback, horizontalRays, fov, near, far);
-      lidarMount.setLidar(lidar);
+      if(graphics3dAdapter != null)
+      {
+         LidarMount lidarMount = getLidarSensor(drcSimulation.getRobot());
 
+         LidarScanParameters lidarScanParameters = lidarMount.getLidarScanParameters();
+         int horizontalRays = lidarScanParameters.pointsPerSweep;
+         float fov = lidarScanParameters.sweepYawMax - lidarScanParameters.sweepYawMin;
+         float near = lidarScanParameters.minRange;
+         float far = lidarScanParameters.maxRange;
+
+
+         DRCLidarCallback callback = new DRCLidarCallback(objectCommunicator, lidarScanParameters);
+         GPULidar lidar = graphics3dAdapter.createGPULidar(callback, horizontalRays, fov, near, far);
+         lidarMount.setLidar(lidar);
+      }
    }
    
    public static void setupDRCRobotPointCloud(DRCSimulationFactory drcSimulation, ObjectCommunicator objectCommunicator, DRCRobotJointMap jointMap,
