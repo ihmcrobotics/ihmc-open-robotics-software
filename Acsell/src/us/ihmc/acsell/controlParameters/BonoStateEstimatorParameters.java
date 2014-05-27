@@ -35,8 +35,7 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
    private final PointMeasurementNoiseParameters pointMeasurementNoiseParameters;
 
    //      DRCSimulatedSensorNoiseParameters.createNoiseParametersForEstimatorJerryTuning();
-   private final SensorNoiseParameters sensorNoiseParameters = DRCSimulatedSensorNoiseParameters
-         .createNoiseParametersForEstimatorJerryTuningSeptember2013();
+   private final SensorNoiseParameters sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createNoiseParametersForEstimatorJerryTuningSeptember2013();
 
    public BonoStateEstimatorParameters(boolean runningOnRealRobot, double estimatorDT)
    {
@@ -71,134 +70,154 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
 
       boolean useTwoPolesForIMUFiltering = false;
       boolean doFiniteDifferenceForJointVelocities = false;
-      
+
       sensorFilterParameters = new SensorFilterParameters(jointPositionFilterFrequencyHz, jointVelocityFilterFrequencyHz, orientationFilterFrequencyHz,
-            angularVelocityFilterFrequencyHz, linearAccelerationFilterFrequencyHz, jointVelocitySlopTimeForBacklashCompensation, estimatorDT, useTwoPolesForIMUFiltering, doFiniteDifferenceForJointVelocities);
+            angularVelocityFilterFrequencyHz, linearAccelerationFilterFrequencyHz, jointVelocitySlopTimeForBacklashCompensation, estimatorDT,
+            useTwoPolesForIMUFiltering, doFiniteDifferenceForJointVelocities);
 
       pointMeasurementNoiseParameters = new PointMeasurementNoiseParameters(pointVelocityXYMeasurementStandardDeviation,
             pointVelocityZMeasurementStandardDeviation, pointPositionXYMeasurementStandardDeviation, pointPositionZMeasurementStandardDeviation);
    }
 
+   @Override
    public SensorFilterParameters getSensorFilterParameters()
    {
       return sensorFilterParameters;
    }
 
+   @Override
    public boolean getAssumePerfectIMU()
    {
       return assumePerfectIMU;
    }
 
+   @Override
    public boolean useKinematicsBasedStateEstimator()
    {
       return useKinematicsBasedStateEstimator;
    }
 
+   @Override
    public PointMeasurementNoiseParameters getPointMeasurementNoiseParameters()
    {
       return pointMeasurementNoiseParameters;
    }
 
+   @Override
    public SensorNoiseParameters getSensorNoiseParameters()
    {
       return sensorNoiseParameters;
    }
 
+   @Override
    public double getEstimatorDT()
    {
       return estimatorDT;
    }
 
+   @Override
    public boolean isRunningOnRealRobot()
    {
       return runningOnRealRobot;
    }
 
+   @Override
    public double getKinematicsPelvisPositionFilterFreqInHertz()
    {
       return Double.POSITIVE_INFINITY;
    }
 
+   @Override
    public double getKinematicsPelvisLinearVelocityFilterFreqInHertz()
    {
       return 16.0;
    }
 
+   @Override
    public double getCoPFilterFreqInHertz()
    {
       return 4.0;
    }
 
+   @Override
    public boolean useAccelerometerForEstimation()
    {
       return false;
    }
 
-   public boolean useHackishAccelerationIntegration()
-   {
-      return false;
-   }
-
+   @Override
    public boolean estimateGravity()
    {
       return false;
    }
 
+   @Override
    public double getGravityFilterFreqInHertz()
    {
       return 5.3052e-4;
    }
 
+   @Override
    public double getPelvisPositionFusingFrequency()
    {
       return 11.7893; // alpha = 0.8 with dt = 0.003
    }
 
+   @Override
    public double getPelvisLinearVelocityFusingFrequency()
    {
       return 0.4261; // alpha = 0.992 with dt = 0.003
    }
 
+   @Override
    public double getDelayTimeForTrustingFoot()
    {
       return 0.02;
    }
 
+   @Override
    public double getForceInPercentOfWeightThresholdToTrustFoot()
    {
       return 0.3;
    }
 
+   @Override
    public boolean estimateIMUDrift()
    {
       return false;
    }
 
+   @Override
    public boolean compensateIMUDrift()
    {
       return false;
    }
 
+   @Override
    public double getIMUDriftFilterFreqInHertz()
    {
       return 0.5332;
    }
 
+   @Override
    public double getFootVelocityUsedForImuDriftFilterFreqInHertz()
    {
       return 0.5332;
    }
 
+   @Override
    public double getFootVelocityThresholdToEnableIMUDriftCompensation()
    {
       return 0.03;
    }
 
+   @Override
    public boolean trustCoPAsNonSlippingContactPoint()
    {
       return true;
    }
 
+   @Override
    public boolean useTwistForPelvisLinearStateEstimation()
    {
       return true;
