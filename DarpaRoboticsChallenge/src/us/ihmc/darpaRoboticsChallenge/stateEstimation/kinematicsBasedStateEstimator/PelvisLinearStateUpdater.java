@@ -38,7 +38,6 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.plotting.DynamicGraphicPositionArtifact;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
-import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 import com.yobotics.simulationconstructionset.util.math.filter.FilteredVelocityYoFrameVector;
 import com.yobotics.simulationconstructionset.util.math.filter.GlitchFilteredBooleanYoVariable;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
@@ -74,11 +73,6 @@ public class PelvisLinearStateUpdater
 
    private final DoubleYoVariable alphaIMUAgainstKinematicsForVelocity = new DoubleYoVariable("alphaIMUAgainstKinematicsForVelocity", registry);
    private final DoubleYoVariable alphaIMUAgainstKinematicsForPosition = new DoubleYoVariable("alphaIMUAgainstKinematicsForPosition", registry);
-   
-   private final DoubleYoVariable feetSpacing = new DoubleYoVariable("estimatedFeetSpacing", registry);
-   private final DoubleYoVariable alphaFeetSpacingVelocity = new DoubleYoVariable("alphaFeetSpacingVelocity", registry);
-   private final AlphaFilteredYoVariable feetSpacingVelocity = new AlphaFilteredYoVariable("estimatedFeetSpacingVelocity", registry, alphaFeetSpacingVelocity);
-   private final DoubleYoVariable footVelocityThreshold = new DoubleYoVariable("footVelocityThresholdToFilterTrustedFoot", registry);
    
    private final SideDependentList<DoubleYoVariable> footForcesZInPercentOfTotalForce = new SideDependentList<DoubleYoVariable>();
    private final DoubleYoVariable forceZInPercentThresholdToFilterFoot = new DoubleYoVariable("forceZInPercentThresholdToFilterFootUserParameter", registry);
@@ -207,8 +201,6 @@ public class PelvisLinearStateUpdater
       alphaIMUAgainstKinematicsForPosition.set(computeAlphaGivenBreakFrequencyProperly(stateEstimatorParameters.getPelvisPositionFusingFrequency(), estimatorDT));
 
       delayTimeBeforeTrustingFoot.set(stateEstimatorParameters.getDelayTimeForTrustingFoot());
-
-      footVelocityThreshold.set(Double.MAX_VALUE);
 
       forceZInPercentThresholdToFilterFoot.set(stateEstimatorParameters.getForceInPercentOfWeightThresholdToTrustFoot()); 
       
@@ -349,11 +341,7 @@ public class PelvisLinearStateUpdater
       
       kinematicsBasedLinearStateCalculator.updateKinematics();
       
-//      pelvisIMUBasedLinearStateCalculator.updateLinearAccelerationMeasurement();
-      
       int numberOfEndEffectorsTrusted = setTrustedFeetUsingFootSwitches();
-
-      computeFeetSpacingLengthAndVelocity();
 
       if (numberOfEndEffectorsTrusted >= 2)
       {
@@ -363,8 +351,6 @@ public class PelvisLinearStateUpdater
             numberOfEndEffectorsTrusted = filterTrustedFeetBasedOnContactForces();
             break;
          case MIN_PELVIS_ACCEL:
-//            numberOfEndEffectorsTrusted = filterTrustedFeetBasedOnMinPelvisAcceleration();
-//            break;
             throw new RuntimeException("Implement me if possible!");
          default:
             throw new RuntimeException("Should not get there");
@@ -482,58 +468,6 @@ public class PelvisLinearStateUpdater
       return numberOfEndEffectorsTrusted;
    }
 
-//   private int filterTrustedFeetBasedOnMinPelvisAcceleration()
-//   {
-//      int numberOfEndEffectorsTrusted = 2;
-//
-//      if (feetSpacingVelocity.getDoubleValue() < footVelocityThreshold.getDoubleValue())
-//         return numberOfEndEffectorsTrusted;
-//
-//      for (RobotSide robotSide : RobotSide.values)
-//      {
-//         pelvisIMUBasedLinearStateCalculator.getPelvisLinearAcceleration(pelvisLinearAccelerationFromIMU);
-//         pelvisKinematicsBasedLinearStateCalculator.getFootToPelvisAcceleration(tempFrameVector, robotSide);
-//         tempFrameVector.sub(pelvisLinearAccelerationFromIMU);
-//         accelerationMagnitudeErrors.put(robotSide, tempFrameVector.length());
-//      }
-//
-//      for (RobotSide robotSide : RobotSide.values)
-//      {
-//         if (accelerationMagnitudeErrors.get(robotSide) > accelerationMagnitudeErrors.get(robotSide.getOppositeSide()))
-//         {
-//            areFeetTrusted.get(robotSide).set(false);
-//            numberOfEndEffectorsTrusted--;
-//            return numberOfEndEffectorsTrusted;
-//         }
-//      }
-//
-//      return numberOfEndEffectorsTrusted;
-//   }
-
-   private void computeFeetSpacingLengthAndVelocity()
-   {
-      tempFrameVector.setToZero(worldFrame);
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         kinematicsBasedLinearStateCalculator.getFootToPelvisPosition(tempPosition, robotSide);
-         tempPosition.scale(robotSide.negateIfRightSide(1.0));
-         tempFrameVector.add(tempPosition);
-      }
-
-      feetSpacing.set(tempFrameVector.length());
-
-      tempFrameVector.setToZero(worldFrame);
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         kinematicsBasedLinearStateCalculator.getFootToPelvisVelocity(tempVelocity, robotSide);
-         tempVelocity.scale(robotSide.negateIfRightSide(1.0));
-         tempFrameVector.add(tempVelocity);
-      }
-      feetSpacingVelocity.update(tempFrameVector.length());
-   }
-   
    private class TrustBothFeetState extends State<EstimationState>
    {
       public TrustBothFeetState()
@@ -598,9 +532,11 @@ public class PelvisLinearStateUpdater
 
    private void computeLinearStateFromMergingMeasurements()
    {
-      if (stateEstimatorParameters.useHackishAccelerationIntegration()) computeLinearVelocityFromMergingMeasurementsOld();
-      else computeLinearVelocityFromMergingMeasurementsEstimatingIMUVelocity(); 
-      
+      if (stateEstimatorParameters.useHackishAccelerationIntegration())
+         computeLinearVelocityFromMergingMeasurementsOld();
+      else
+         computeLinearVelocityFromMergingMeasurementsEstimatingIMUVelocity();
+
       computeLinearPositionFromMergingMeasurements();
    }
    
