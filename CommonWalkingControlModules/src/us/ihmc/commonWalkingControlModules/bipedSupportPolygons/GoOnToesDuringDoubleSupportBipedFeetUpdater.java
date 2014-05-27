@@ -340,6 +340,8 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
 
    private void computeOnToesAndOnHeelsLines(BipedFootInterface leftFoot, BipedFootInterface rightFoot)
    {
+      SideDependentList<BipedFootInterface> feet = new SideDependentList<>(leftFoot, rightFoot);
+      
       // Only compute onToesLines, onHeelLines if in double support:
       SideDependentList<FrameLine2d>
          onToesLines = null, onHeelLines = null;
@@ -362,18 +364,26 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
 
       SideDependentList<FrameConvexPolygon2d> footPolygonsInMidFeetZUp = new SideDependentList<FrameConvexPolygon2d>(leftPolygon, rightPolygon);
 
-      // onToesLines:
+      
       SideDependentList<FramePoint[]> onToesPointsLists = new SideDependentList<FramePoint[]>();
-      onToesPointsLists.set(RobotSide.LEFT, FramePoint.changeFrameCopyBatch(leftFoot.getToePointsCopy(), midFeetZUpFrame));    // ugly, but for now
-      onToesPointsLists.set(RobotSide.RIGHT, FramePoint.changeFrameCopyBatch(rightFoot.getToePointsCopy(), midFeetZUpFrame));    // ugly, but for now
+      SideDependentList<FramePoint[]> onHeelPointsLists = new SideDependentList<FramePoint[]>();
+      
+      for (RobotSide side : RobotSide.values)
+      {
+         // onToesLines:
+         FramePoint[] toePoints = feet.get(side).getToePointsCopy();
+         for (FramePoint toePoint : toePoints)
+            toePoint.changeFrame(midFeetZUpFrame);
+         onToesPointsLists.set(side, toePoints);    // ugly, but for now
 
+         // onHeelsLines:
+         FramePoint[] heelPoints = feet.get(side).getHeelPointsCopy();
+         for (FramePoint heelPoint : heelPoints)
+            heelPoint.changeFrame(midFeetZUpFrame);
+         onHeelPointsLists.set(side, heelPoints);    // ugly, but for now
+      }
       onToesLines = getOnToesLines(onToesPointsLists, footPolygonsInMidFeetZUp, bodyZUpFrame);
       this.onToesLines.set(onToesLines);
-
-      // onHeelsLines:
-      SideDependentList<FramePoint[]> onHeelPointsLists = new SideDependentList<FramePoint[]>();
-      onHeelPointsLists.set(RobotSide.LEFT, FramePoint.changeFrameCopyBatch(leftFoot.getHeelPointsCopy(), midFeetZUpFrame));    // ugly, but for now
-      onHeelPointsLists.set(RobotSide.RIGHT, FramePoint.changeFrameCopyBatch(rightFoot.getHeelPointsCopy(), midFeetZUpFrame));    // ugly, but for now
 
       onHeelLines = getOnHeelLines(onHeelPointsLists, footPolygonsInMidFeetZUp, bodyZUpFrame);
       this.onHeelLines.set(onHeelLines);
