@@ -191,7 +191,6 @@ public class PelvisLinearStateUpdater
 
       imuBasedLinearStateCalculator = new PelvisIMUBasedLinearStateCalculator(inverseDynamicsStructure, imuProcessedOutputs, estimatorDT, gravitationalAcceleration, registry);
       imuBasedLinearStateCalculator.enableEsimationModule(stateEstimatorParameters.useAccelerometerForEstimation());
-      imuBasedLinearStateCalculator.useHackishAccelerationIntegration(stateEstimatorParameters.useHackishAccelerationIntegration());
       imuBasedLinearStateCalculator.enableGravityEstimation(stateEstimatorParameters.estimateGravity());
       imuBasedLinearStateCalculator.setAlphaGravityEstimation(computeAlphaGivenBreakFrequencyProperly(stateEstimatorParameters.getGravityFilterFreqInHertz(), estimatorDT));
 
@@ -530,47 +529,27 @@ public class PelvisLinearStateUpdater
 
    private void computeLinearStateFromMergingMeasurements()
    {
-      if (stateEstimatorParameters.useHackishAccelerationIntegration())
-         computeLinearVelocityFromMergingMeasurementsOld();
-      else
-         computeLinearVelocityFromMergingMeasurementsEstimatingIMUVelocity();
-
-      computeLinearPositionFromMergingMeasurements();
+      computeLinearVelocityFromMergingMeasurementsEstimatingIMUVelocity();
+      computePositionFromMergingMeasurements();
    }
    
    private void computeLinearVelocityFromMergingMeasurementsEstimatingIMUVelocity()
    {
       // TODO Check out AlphaFusedYoVariable to that
-      //      imuBasedLinearStateCalculator.updatePelvisLinearVelocity(rootJointVelocity, pelvisVelocityIMUPart);
-      imuBasedLinearStateCalculator.updateIMUAndRootJointLinearVelocity(rootJointVelocity, imuVelocityIMUPart);
+      imuBasedLinearStateCalculator.updateIMUAndRootJointLinearVelocity(pelvisVelocityIMUPart, imuVelocityIMUPart);
 
       kinematicsBasedLinearStateCalculator.getPelvisVelocity(pelvisVelocityKinPart);
 
-      rootJointVelocity.scale(alphaIMUAgainstKinematicsForVelocity.getDoubleValue());
+      pelvisVelocityIMUPart.scale(alphaIMUAgainstKinematicsForVelocity.getDoubleValue());
       pelvisVelocityKinPart.scale(1.0 - alphaIMUAgainstKinematicsForVelocity.getDoubleValue());
 
-      rootJointVelocity.add(pelvisVelocityKinPart);
+      rootJointVelocity.add(pelvisVelocityIMUPart, pelvisVelocityKinPart);
       yoRootJointVelocity.set(rootJointVelocity);
       
       imuBasedLinearStateCalculator.correctIMULinearVelocity(rootJointVelocity, imuVelocityIMUPart);
    }
    
-   
-   private void computeLinearVelocityFromMergingMeasurementsOld()
-   {
-      // TODO Check out AlphaFusedYoVariable to that
-      imuBasedLinearStateCalculator.updatePelvisLinearVelocity(rootJointVelocity, pelvisVelocityIMUPart);
-      kinematicsBasedLinearStateCalculator.getPelvisVelocity(pelvisVelocityKinPart);
-      
-      pelvisVelocityIMUPart.scale(alphaIMUAgainstKinematicsForVelocity.getDoubleValue());
-      pelvisVelocityKinPart.scale(1.0 - alphaIMUAgainstKinematicsForVelocity.getDoubleValue());
-      
-      rootJointVelocity.set(pelvisVelocityIMUPart);
-      rootJointVelocity.add(pelvisVelocityKinPart);
-      yoRootJointVelocity.set(rootJointVelocity);
-   }
-   
-   private void computeLinearPositionFromMergingMeasurements()
+   private void computePositionFromMergingMeasurements()
    {
       imuBasedLinearStateCalculator.updatePelvisPosition(rootJointPosition, pelvisPositionIMUPart);
       kinematicsBasedLinearStateCalculator.getPelvisPosition(pelvisPositionKinPart);

@@ -168,11 +168,6 @@ public class ComposableStateEstimatorEvaluator
             return false;
          }
 
-         public boolean useHackishAccelerationIntegration()
-         {
-            return false;
-         }
-
          public boolean estimateGravity()
          {
             return false;
