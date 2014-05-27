@@ -242,6 +242,11 @@ public class ComposableStateEstimatorEvaluator
          {
             return 1.0;
          }
+
+         public boolean createFusedIMUSensor()
+         {
+            return false;
+         }
       };
       
       JointAndIMUSensorMap sensorMap = null; // simulatedSensorHolderAndReaderFromRobotFactory.getSensorReader().getJointAndIMUSensorMap();
