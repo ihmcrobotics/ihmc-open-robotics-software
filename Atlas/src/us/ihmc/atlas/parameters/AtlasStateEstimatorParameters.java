@@ -151,7 +151,7 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
    @Override
    public boolean useHackishAccelerationIntegration()
    {
-      return true;
+      return false;
    }
 
    @Override
@@ -229,14 +229,13 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
    @Override
    public boolean useTwistForPelvisLinearStateEstimation()
    {
-      return false;
+      return true;
    }
 
    @Override
    public double getPelvisLinearVelocityAlphaNewTwist()
    {
-      //TODO: Tune
-      return 1.0;
+      return 0.15;
    }
 
    @Override
