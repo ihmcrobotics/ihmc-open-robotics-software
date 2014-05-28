@@ -56,7 +56,7 @@ public class DRCPushRobotController implements RobotController
       pushTimeSwitch.set(Double.NEGATIVE_INFINITY);
       pushForceMagnitude.set(0.0);
       
-      forceVisualizer = new DynamicGraphicVector("pushForce", forcePoint, 0.005, YoAppearance.DarkBlue());
+      forceVisualizer = new DynamicGraphicVector("pushForce", forcePoint, 0.008, YoAppearance.DarkBlue());
    }
    
    public DynamicGraphicObject getForceVisualizer()
