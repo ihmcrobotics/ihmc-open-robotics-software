@@ -520,7 +520,6 @@ public class PelvisLinearStateUpdater
       }
    }
 
-   private final FrameVector imuVelocityIMUPart = new FrameVector();
    private final FrameVector pelvisVelocityIMUPart = new FrameVector();
    private final FramePoint pelvisPositionIMUPart = new FramePoint();
 
@@ -529,15 +528,14 @@ public class PelvisLinearStateUpdater
 
    private void computeLinearStateFromMergingMeasurements()
    {
-      computeLinearVelocityFromMergingMeasurementsEstimatingIMUVelocity();
+      computeLinearVelocityFromMergingMeasurements();
       computePositionFromMergingMeasurements();
    }
    
-   private void computeLinearVelocityFromMergingMeasurementsEstimatingIMUVelocity()
+   private void computeLinearVelocityFromMergingMeasurements()
    {
       // TODO Check out AlphaFusedYoVariable to that
-      imuBasedLinearStateCalculator.updateIMUAndRootJointLinearVelocity(pelvisVelocityIMUPart, imuVelocityIMUPart);
-
+      imuBasedLinearStateCalculator.updateIMUAndRootJointLinearVelocity(pelvisVelocityIMUPart);
       kinematicsBasedLinearStateCalculator.getPelvisVelocity(pelvisVelocityKinPart);
 
       pelvisVelocityIMUPart.scale(alphaIMUAgainstKinematicsForVelocity.getDoubleValue());
@@ -545,8 +543,8 @@ public class PelvisLinearStateUpdater
 
       rootJointVelocity.add(pelvisVelocityIMUPart, pelvisVelocityKinPart);
       yoRootJointVelocity.set(rootJointVelocity);
-      
-      imuBasedLinearStateCalculator.correctIMULinearVelocity(rootJointVelocity, imuVelocityIMUPart);
+
+      imuBasedLinearStateCalculator.correctIMULinearVelocity(rootJointVelocity);
    }
    
    private void computePositionFromMergingMeasurements()
@@ -559,7 +557,7 @@ public class PelvisLinearStateUpdater
 
       rootJointPosition.set(pelvisPositionIMUPart);
       rootJointPosition.add(pelvisPositionKinPart);
-      yoRootJointPosition.set(rootJointPosition);  
+      yoRootJointPosition.set(rootJointPosition);
    }
 
    private void updateCoMState()
