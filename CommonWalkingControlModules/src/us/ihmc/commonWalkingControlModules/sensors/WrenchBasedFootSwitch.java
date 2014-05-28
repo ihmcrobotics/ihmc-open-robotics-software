@@ -76,9 +76,12 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
    
    private final double robotTotalWeight;
    
+   private double minThresholdX;
+   private double maxThresholdX;
+   
   
    private final boolean showForceSensorFrame = false;
-   private final DynamicGraphicReferenceFrame dynamicGraphicForceSensorMeasuremnetFrame, dynamicGraphicForceSensorFootFrame;
+   private final DynamicGraphicReferenceFrame dynamicGraphicForceSensorMeasurementFrame, dynamicGraphicForceSensorFootFrame;
 
    public WrenchBasedFootSwitch(String namePrefix, ForceSensorData forceSensorData, double footSwitchCoPThresholdFraction, double robotTotalWeight, ContactablePlaneBody contactablePlaneBody,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, double contactThresholdForce, YoVariableRegistry parentRegistry)
@@ -88,7 +91,6 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       this.contactThresholdForce = new DoubleYoVariable(namePrefix + "ContactThresholdForce", registry);
       this.contactThresholdForce.set(contactThresholdForce); 
 
-
       yoFootForce = new YoFrameVector(namePrefix + "Force", forceSensorData.getMeasurementFrame(), registry);
       yoFootTorque = new YoFrameVector(namePrefix + "Torque", forceSensorData.getMeasurementFrame(), registry);
       yoFootForceInFoot = new YoFrameVector(namePrefix + "ForceFootFrame", contactablePlaneBody.getBodyFrame(), registry);
@@ -97,14 +99,14 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       if(showForceSensorFrame && dynamicGraphicObjectsListRegistry!=null)
       {
          final double scale=1.0;
-         dynamicGraphicForceSensorMeasuremnetFrame = new DynamicGraphicReferenceFrame(forceSensorData.getMeasurementFrame(), registry, .6*scale, YoAppearance.Yellow());
+         dynamicGraphicForceSensorMeasurementFrame = new DynamicGraphicReferenceFrame(forceSensorData.getMeasurementFrame(), registry, .6*scale, YoAppearance.Yellow());
          dynamicGraphicForceSensorFootFrame = new DynamicGraphicReferenceFrame(contactablePlaneBody.getBodyFrame(), registry, scale, YoAppearance.AliceBlue());
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(namePrefix+"MeasFrame",dynamicGraphicForceSensorMeasuremnetFrame);
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(namePrefix+"MeasFrame",dynamicGraphicForceSensorMeasurementFrame);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(namePrefix+"FootFrame",dynamicGraphicForceSensorFootFrame);
       }
       else
       {
-         dynamicGraphicForceSensorMeasuremnetFrame=null;
+         dynamicGraphicForceSensorMeasurementFrame=null;
          dynamicGraphicForceSensorFootFrame=null;
       }
       
@@ -118,10 +120,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
          yoFootTorqueInJoints.add(new Pair(jAxis,new DoubleYoVariable("NegGRFWrenchIn"+ currentBody.getParentJoint().getName(), parentRegistry)));
          currentBody=currentBody.getParentJoint().getPredecessor();
       }
-      
-
-      
-      
+     
       footForceMagnitude = new DoubleYoVariable(namePrefix + "FootForceMag", registry);
       hasFootHitGround = new BooleanYoVariable(namePrefix + "FootHitGround", registry);
 
@@ -139,7 +138,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       this.footswitchCOPBagOfBalls = new BagOfBalls(1, copVisualizerSize, namePrefix + "FootswitchCOP", registry,
             dynamicGraphicObjectsListRegistry);
 
-      this.pastThreshold = new BooleanYoVariable(namePrefix + "PastFootswitchThresold", registry);
+      this.pastThreshold = new BooleanYoVariable(namePrefix + "PastFootswitchThreshold", registry);
       this.heelHitGround = new BooleanYoVariable(namePrefix + "HeelHitGround", registry);
       this.toeHitGround = new BooleanYoVariable(namePrefix + "ToeHitGround", registry);
       
@@ -235,8 +234,8 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
    {
       updateCoP();
 
-      double minThresholdX = footMinX + footSwitchCoPThresholdFraction.getDoubleValue() * footLength;
-      double maxThresholdX = footMaxX - footSwitchCoPThresholdFraction.getDoubleValue() * footLength;
+      minThresholdX = (footMinX + footSwitchCoPThresholdFraction.getDoubleValue() * footLength);
+      maxThresholdX = (footMaxX - footSwitchCoPThresholdFraction.getDoubleValue() * footLength);
 
       if (toeHitGroundFilter.getBooleanValue())
          pastThreshold.set(resolvedCoP.getX() <= maxThresholdX);
@@ -307,8 +306,8 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
    
    private void updateSensorVisualizer()
    {
-      if(dynamicGraphicForceSensorMeasuremnetFrame!=null)
-         dynamicGraphicForceSensorMeasuremnetFrame.update();
+      if(dynamicGraphicForceSensorMeasurementFrame!=null)
+         dynamicGraphicForceSensorMeasurementFrame.update();
       if(dynamicGraphicForceSensorFootFrame!=null)
          dynamicGraphicForceSensorFootFrame.update();
    }
