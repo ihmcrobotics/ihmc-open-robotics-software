@@ -462,10 +462,15 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
 	   return 0.15;
    }
    
-   public double getswingMaxOrientationJerk()
+   public double getSwingMaxOrientationJerk()
    {
       if (!runningOnRealRobot) return Double.POSITIVE_INFINITY;
       return 1500.0;
+   }
+
+   public double getSwingSingularityEscapeMultiplier()
+   {
+      return runningOnRealRobot ? 50.0 : 200.0;
    }
 
    public boolean doPrepareManipulationForLocomotion()

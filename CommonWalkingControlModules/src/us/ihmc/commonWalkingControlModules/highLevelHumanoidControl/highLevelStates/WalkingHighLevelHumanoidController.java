@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
@@ -100,7 +99,6 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionAction;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
-import com.yobotics.simulationconstructionset.util.trajectory.CurrentLinearVelocityProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.FrameBasedPositionSource;
@@ -108,10 +106,8 @@ import com.yobotics.simulationconstructionset.util.trajectory.PositionProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParameters;
 import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParametersProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryWaypointGenerationMethod;
-import com.yobotics.simulationconstructionset.util.trajectory.VectorProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.YoPositionProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.YoVariableDoubleProvider;
-import com.yobotics.simulationconstructionset.util.trajectory.YoVelocityProvider;
 
 public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoidControlPattern
 {
@@ -491,7 +487,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       // TODO: Pull these up to a higher level.
       // TODO: Move these to DRCRobotWalkingControlParameters:
 
-      singularityEscapeNullspaceMultiplierSwingLeg.set(50.0);
+      double singularityEscapeMultiplierForSwing = walkingControllerParameters.getSwingSingularityEscapeMultiplier();
+      singularityEscapeNullspaceMultiplierSwingLeg.set(singularityEscapeMultiplierForSwing);
       singularityEscapeNullspaceMultiplierSupportLeg.set(30.0);
       singularityEscapeNullspaceMultiplierSupportLegLocking.set(0.0); // -0.5);
       double minJacobianDeterminantForSingularityEscape = 0.035;
@@ -513,7 +510,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       swingMaxPositionAcceleration.set(walkingControllerParameters.getSwingMaxPositionAcceleration());
       swingMaxPositionJerk.set(walkingControllerParameters.getSwingMaxPositionJerk());
       swingMaxOrientationAcceleration.set(walkingControllerParameters.getSwingMaxOrientationAcceleration());
-      swingMaxOrientationJerk.set(walkingControllerParameters.getswingMaxOrientationJerk());
+      swingMaxOrientationJerk.set(walkingControllerParameters.getSwingMaxOrientationJerk());
 
       for (RobotSide robotSide : RobotSide.values)
       {
