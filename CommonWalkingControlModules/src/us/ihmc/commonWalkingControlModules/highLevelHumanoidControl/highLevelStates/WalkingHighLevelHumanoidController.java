@@ -1313,16 +1313,18 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
          
 
-         if (pushRecoveryModule.isEnabled() && pushRecoveryModule.getIsRecoveringFromDoubleSupportFall())
-         {
-            swingTimeCalculationProvider.useFastSwingTime();
-            transferTimeCalculationProvider.setTransferTime();
-         }
-         else
-         {
-            swingTimeCalculationProvider.useDefaultSwingTime();
-            transferTimeCalculationProvider.setTransferTime();
-         }
+//         if (pushRecoveryModule.isEnabled() && pushRecoveryModule.getIsRecoveringFromDoubleSupportFall())
+//         {
+//            swingTimeCalculationProvider.useFastSwingTime(); // to remove
+//            transferTimeCalculationProvider.setTransferTime();
+//         }
+//         else
+//         {
+//            swingTimeCalculationProvider.useDefaultSwingTime(); // to remove 
+//            transferTimeCalculationProvider.setTransferTime();
+//         }
+         
+         transferTimeCalculationProvider.setTransferTime();
          
          updateFootstepParameters();
 

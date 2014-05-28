@@ -93,7 +93,7 @@ public class PushRecoveryControlModule
 
       if (recoveringFromDoubleSupportFall)
       {
-         swingTimeCalculatorProvider.resetFastSwingTime();
+         //swingTimeCalculatorProvider.resetFastSwingTime(); // to remove
          recoveringFromDoubleSupportFall = false;
       }
    }
@@ -186,7 +186,7 @@ public class PushRecoveryControlModule
                   recoverFromDoubleSupportFallFootStep = currentFootstep;
                   recoveringFromDoubleSupportFall = true;
 
-                  swingTimeCalculatorProvider.setFastSwingTime(FAST_SWING_TIME);
+                  //swingTimeCalculatorProvider.setFastSwingTime(FAST_SWING_TIME); // to remove
 
                   return true;
                }
