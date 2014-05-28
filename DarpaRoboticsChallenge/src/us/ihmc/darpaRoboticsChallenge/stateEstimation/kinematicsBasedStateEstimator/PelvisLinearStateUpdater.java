@@ -38,7 +38,6 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.plotting.DynamicGraphicPositionArtifact;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
-import com.yobotics.simulationconstructionset.util.math.filter.FilteredVelocityYoFrameVector;
 import com.yobotics.simulationconstructionset.util.math.filter.GlitchFilteredBooleanYoVariable;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
@@ -68,8 +67,6 @@ public class PelvisLinearStateUpdater
    
    private final YoFramePoint yoCenterOfMassPosition = new YoFramePoint("estimatedCenterOfMassPosition", worldFrame, registry);
    private final YoFrameVector yoCenterOfMassVelocity = new YoFrameVector("estimatedCenterOfMassVelocity", worldFrame, registry);
-   private final DoubleYoVariable alphaCoMVelocity = new DoubleYoVariable("alphaCoMVelocity", registry);
-   private final FilteredVelocityYoFrameVector yoCenterOfMassVelocityFD;
 
    private final DoubleYoVariable alphaIMUAgainstKinematicsForVelocity = new DoubleYoVariable("alphaIMUAgainstKinematicsForVelocity", registry);
    private final DoubleYoVariable alphaIMUAgainstKinematicsForPosition = new DoubleYoVariable("alphaIMUAgainstKinematicsForPosition", registry);
@@ -123,9 +120,7 @@ public class PelvisLinearStateUpdater
    private final FrameVector rootJointVelocity = new FrameVector(worldFrame);
    private final FramePoint centerOfMassPosition = new FramePoint(worldFrame);
    private final FrameVector centerOfMassVelocity = new FrameVector(worldFrame);
-//   private final SideDependentList<Double> accelerationMagnitudeErrors = new SideDependentList<Double>(0.0, 0.0);
    private final Vector3d tempRootJointTranslation = new Vector3d();
-//   private final FrameVector pelvisLinearAccelerationFromIMU = new FrameVector();
    private final FrameVector tempFrameVector = new FrameVector();
    private final FramePoint tempPosition = new FramePoint();
    private final FrameVector tempVelocity = new FrameVector();
@@ -153,8 +148,6 @@ public class PelvisLinearStateUpdater
       this.centerOfMassJacobianBody = new CenterOfMassJacobian(ScrewTools.computeSupportAndSubtreeSuccessors(elevator),
               ScrewTools.computeSubtreeJoints(rootBody), rootJointFrame);
 
-      yoCenterOfMassVelocityFD = FilteredVelocityYoFrameVector.createFilteredVelocityYoFrameVector("estimatedCenterOfMassVelocityFD", "", alphaCoMVelocity, estimatorDT, registry, yoCenterOfMassPosition);
-      
       setupBunchOfVariables();
       
       forceZInPercentThresholdToFilterFoot.addVariableChangedListener(new VariableChangedListener()
@@ -566,7 +559,6 @@ public class PelvisLinearStateUpdater
       centerOfMassCalculator.packCenterOfMass(centerOfMassPosition);
       centerOfMassPosition.changeFrame(worldFrame);
       yoCenterOfMassPosition.set(centerOfMassPosition);
-      yoCenterOfMassVelocityFD.update();
 
       centerOfMassJacobianBody.compute();
       centerOfMassVelocity.setToZero(rootJointFrame);
