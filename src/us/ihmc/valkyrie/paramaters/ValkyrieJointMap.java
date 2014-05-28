@@ -1,13 +1,8 @@
 package us.ihmc.valkyrie.paramaters;
 
-import static us.ihmc.valkyrie.paramaters.ValkyrieOrderedJointMap.jointNames;
-import static us.ihmc.valkyrie.paramaters.ValkyrieOrderedJointMap.WaistExtensor;
-import static us.ihmc.valkyrie.paramaters.ValkyrieOrderedJointMap.WaistLateralExtensor;
-import static us.ihmc.valkyrie.paramaters.ValkyrieOrderedJointMap.WaistRotator;
-import static us.ihmc.valkyrie.paramaters.ValkyrieOrderedJointMap.LowerNeckExtensor;
-import static us.ihmc.valkyrie.paramaters.ValkyrieOrderedJointMap.UpperNeckExtensor;
-import static us.ihmc.valkyrie.paramaters.ValkyrieOrderedJointMap.NeckRotator;
+import static us.ihmc.valkyrie.paramaters.ValkyrieOrderedJointMap.*;
 
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -26,132 +21,117 @@ import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
 import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
 
-public class ValkyrieJointMap extends DRCRobotJointMap 
+public class ValkyrieJointMap extends DRCRobotJointMap
 {
-   
-   public static final SideDependentList<String> jointBeforeThighNames = new SideDependentList<String>("LeftHipExtensor","RightHipExtensor");
    public static final String chestName = "v1Trunk";
    public static final String pelvisName = "v1Pelvis";
-   public static final String spineRollJointName = jointNames[WaistLateralExtensor];
-   public static final String spinePitchJointName = jointNames[WaistExtensor];
-   public static final String spineYawJointName = jointNames[WaistRotator];
-   public static final String lowerNeckPitchJointName = jointNames[LowerNeckExtensor];
-   public static final String upperNeckPitchJointName = jointNames[UpperNeckExtensor];
-   public static final String neckYawJointName = jointNames[NeckRotator];
    public static final String headName = "v1Head";
-   
-   private final LegJointName[] legJoints = { LegJointName.HIP_YAW, LegJointName.HIP_ROLL, LegJointName.HIP_PITCH, LegJointName.KNEE, LegJointName.ANKLE_PITCH,
-         LegJointName.ANKLE_ROLL };
-   private final ArmJointName[] armJoints = { ArmJointName.SHOULDER_PITCH, ArmJointName.SHOULDER_ROLL, ArmJointName.SHOULDER_YAW, ArmJointName.ELBOW_PITCH,
-         ArmJointName.ELBOW_YAW, ArmJointName.WRIST_ROLL, ArmJointName.WRIST_PITCH };
+
+   private final LegJointName[] legJoints = { LegJointName.HIP_YAW, LegJointName.HIP_ROLL, LegJointName.HIP_PITCH, LegJointName.KNEE, LegJointName.ANKLE_PITCH, LegJointName.ANKLE_ROLL };
+   private final ArmJointName[] armJoints = { ArmJointName.SHOULDER_PITCH, ArmJointName.SHOULDER_ROLL, ArmJointName.SHOULDER_YAW, ArmJointName.ELBOW_PITCH, ArmJointName.ELBOW_YAW, ArmJointName.WRIST_ROLL, ArmJointName.WRIST_PITCH };
    private final SpineJointName[] spineJoints = { SpineJointName.SPINE_YAW, SpineJointName.SPINE_PITCH, SpineJointName.SPINE_ROLL };
    private final NeckJointName[] neckJoints = { NeckJointName.LOWER_NECK_PITCH, NeckJointName.NECK_YAW, NeckJointName.UPPER_NECK_PITCH };
 
    private final LinkedHashMap<String, JointRole> jointRoles = new LinkedHashMap<String, JointRole>();
+   private final LinkedHashMap<String, Pair<RobotSide, LimbName>> limbNames = new LinkedHashMap<String, Pair<RobotSide, LimbName>>();
+
    private final LinkedHashMap<String, Pair<RobotSide, LegJointName>> legJointNames = new LinkedHashMap<String, Pair<RobotSide, LegJointName>>();
    private final LinkedHashMap<String, Pair<RobotSide, ArmJointName>> armJointNames = new LinkedHashMap<String, Pair<RobotSide, ArmJointName>>();
    private final LinkedHashMap<String, SpineJointName> spineJointNames = new LinkedHashMap<String, SpineJointName>();
    private final LinkedHashMap<String, NeckJointName> neckJointNames = new LinkedHashMap<String, NeckJointName>();
-   private final LinkedHashMap<String, Pair<RobotSide, LimbName>> limbNames = new LinkedHashMap<String, Pair<RobotSide, LimbName>>();
-   private final SideDependentList<String> jointBeforeFeetNames = new SideDependentList<String>();
-   
-   private final ValkyrieContactPointParamaters contactPointParameters;
+
+   private final SideDependentList<EnumMap<LegJointName, String>> legJointStrings = SideDependentList.createListOfEnumMaps(LegJointName.class);
+   private final SideDependentList<EnumMap<ArmJointName, String>> armJointStrings = SideDependentList.createListOfEnumMaps(ArmJointName.class);
+   private final EnumMap<SpineJointName, String> spineJointStrings = new EnumMap<>(SpineJointName.class);
+   private final EnumMap<NeckJointName, String> neckJointStrings = new EnumMap<>(NeckJointName.class);
+
+   private final ValkyrieContactPointParameters contactPointParameters;
 
    public ValkyrieJointMap()
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         legJointNames
-               .put(robotSide.getCamelCaseNameForMiddleOfExpression() + "HipRotator", new Pair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_YAW));
-         legJointNames.put(robotSide.getCamelCaseNameForMiddleOfExpression() + "HipAdductor", new Pair<RobotSide, LegJointName>(robotSide,
-               LegJointName.HIP_ROLL));
-         legJointNames.put(robotSide.getCamelCaseNameForMiddleOfExpression() + "HipExtensor", new Pair<RobotSide, LegJointName>(robotSide,
-               LegJointName.HIP_PITCH));
-         legJointNames.put(robotSide.getCamelCaseNameForMiddleOfExpression() + "KneeExtensor", new Pair<RobotSide, LegJointName>(robotSide, LegJointName.KNEE));
-         legJointNames.put(robotSide.getCamelCaseNameForMiddleOfExpression() + "AnkleExtensor", new Pair<RobotSide, LegJointName>(robotSide,
-               LegJointName.ANKLE_PITCH));
-         legJointNames.put(robotSide.getCamelCaseNameForMiddleOfExpression() + "Ankle", new Pair<RobotSide, LegJointName>(robotSide, LegJointName.ANKLE_ROLL));
+         String[] forcedSideJointNames = forcedSideDependentJointNames.get(robotSide);
+         legJointNames.put(forcedSideJointNames[LeftHipRotator], new Pair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_YAW));
+         legJointNames.put(forcedSideJointNames[LeftHipAdductor], new Pair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_ROLL));
+         legJointNames.put(forcedSideJointNames[LeftHipExtensor], new Pair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_PITCH));
+         legJointNames.put(forcedSideJointNames[LeftKneeExtensor], new Pair<RobotSide, LegJointName>(robotSide, LegJointName.KNEE));
+         legJointNames.put(forcedSideJointNames[LeftAnkleExtensor], new Pair<RobotSide, LegJointName>(robotSide, LegJointName.ANKLE_PITCH));
+         legJointNames.put(forcedSideJointNames[LeftAnkle], new Pair<RobotSide, LegJointName>(robotSide, LegJointName.ANKLE_ROLL));
 
-         armJointNames.put(robotSide.getCamelCaseNameForMiddleOfExpression() + "ShoulderExtensor", new Pair<RobotSide, ArmJointName>(robotSide,
-               ArmJointName.SHOULDER_PITCH));
-         armJointNames.put(robotSide.getCamelCaseNameForMiddleOfExpression() + "ShoulderAdductor", new Pair<RobotSide, ArmJointName>(robotSide,
-               ArmJointName.SHOULDER_ROLL));
-         armJointNames.put(robotSide.getCamelCaseNameForMiddleOfExpression() + "ShoulderSupinator", new Pair<RobotSide, ArmJointName>(robotSide,
-               ArmJointName.SHOULDER_YAW));
-         armJointNames.put(robotSide.getCamelCaseNameForMiddleOfExpression() + "ElbowExtensor", new Pair<RobotSide, ArmJointName>(robotSide,
-               ArmJointName.ELBOW_PITCH));
-         armJointNames.put(robotSide.getCamelCaseNameForMiddleOfExpression() + "ForearmSupinator", new Pair<RobotSide, ArmJointName>(robotSide,
-               ArmJointName.ELBOW_YAW));
-         armJointNames.put(robotSide.getCamelCaseNameForMiddleOfExpression() + "WristExtensor", new Pair<RobotSide, ArmJointName>(robotSide,
-               ArmJointName.WRIST_ROLL));
-         armJointNames.put(robotSide.getCamelCaseNameForMiddleOfExpression() + "Wrist", new Pair<RobotSide, ArmJointName>(robotSide, ArmJointName.WRIST_PITCH));
+         armJointNames.put(forcedSideJointNames[LeftShoulderExtensor], new Pair<RobotSide, ArmJointName>(robotSide, ArmJointName.SHOULDER_PITCH));
+         armJointNames.put(forcedSideJointNames[LeftShoulderAdductor], new Pair<RobotSide, ArmJointName>(robotSide, ArmJointName.SHOULDER_ROLL));
+         armJointNames.put(forcedSideJointNames[LeftShoulderSupinator], new Pair<RobotSide, ArmJointName>(robotSide, ArmJointName.SHOULDER_YAW));
+         armJointNames.put(forcedSideJointNames[LeftElbowExtensor], new Pair<RobotSide, ArmJointName>(robotSide, ArmJointName.ELBOW_PITCH));
+         armJointNames.put(forcedSideJointNames[LeftForearmSupinator], new Pair<RobotSide, ArmJointName>(robotSide, ArmJointName.ELBOW_YAW));
+         armJointNames.put(forcedSideJointNames[LeftWristExtensor], new Pair<RobotSide, ArmJointName>(robotSide, ArmJointName.WRIST_ROLL));
+         armJointNames.put(forcedSideJointNames[LeftWrist], new Pair<RobotSide, ArmJointName>(robotSide, ArmJointName.WRIST_PITCH));
 
          String prefix = getRobotSidePrefix(robotSide);
-
          limbNames.put(prefix + "Palm", new Pair<RobotSide, LimbName>(robotSide, LimbName.ARM));
          limbNames.put(prefix + "UpperFoot", new Pair<RobotSide, LimbName>(robotSide, LimbName.LEG));
-
-         jointBeforeFeetNames.put(robotSide, robotSide.getCamelCaseNameForMiddleOfExpression() + "Ankle");
       }
 
-      spineJointNames.put("WaistRotator", SpineJointName.SPINE_YAW);
-      spineJointNames.put("WaistExtensor", SpineJointName.SPINE_PITCH);
-      spineJointNames.put("WaistLateralExtensor", SpineJointName.SPINE_ROLL);
+      spineJointNames.put(jointNames[WaistRotator], SpineJointName.SPINE_YAW);
+      spineJointNames.put(jointNames[WaistExtensor], SpineJointName.SPINE_PITCH);
+      spineJointNames.put(jointNames[WaistLateralExtensor], SpineJointName.SPINE_ROLL);
 
-      neckJointNames.put("LowerNeckExtensor", NeckJointName.LOWER_NECK_PITCH);
-      neckJointNames.put("NeckRotator", NeckJointName.NECK_YAW);
-      neckJointNames.put("UpperNeckExtensor", NeckJointName.UPPER_NECK_PITCH);
+      neckJointNames.put(jointNames[LowerNeckExtensor], NeckJointName.LOWER_NECK_PITCH);
+      neckJointNames.put(jointNames[NeckRotator], NeckJointName.NECK_YAW);
+      neckJointNames.put(jointNames[UpperNeckExtensor], NeckJointName.UPPER_NECK_PITCH);
 
-      for (String legJoint : legJointNames.keySet())
+      for (String legJointString : legJointNames.keySet())
       {
-         jointRoles.put(legJoint, JointRole.LEG);
+         RobotSide robotSide = legJointNames.get(legJointString).first();
+         LegJointName legJointName = legJointNames.get(legJointString).second();
+         legJointStrings.get(robotSide).put(legJointName, legJointString);
+         jointRoles.put(legJointString, JointRole.LEG);
       }
 
-      for (String armJoint : armJointNames.keySet())
+      for (String armJointString : armJointNames.keySet())
       {
-         jointRoles.put(armJoint, JointRole.ARM);
+         RobotSide robotSide = armJointNames.get(armJointString).first();
+         ArmJointName armJointName = armJointNames.get(armJointString).second();
+         armJointStrings.get(robotSide).put(armJointName, armJointString);
+         jointRoles.put(armJointString, JointRole.ARM);
       }
 
-      for (String spineJoint : spineJointNames.keySet())
+      for (String spineJointString : spineJointNames.keySet())
       {
-         jointRoles.put(spineJoint, JointRole.SPINE);
+         spineJointStrings.put(spineJointNames.get(spineJointString), spineJointString);
+         jointRoles.put(spineJointString, JointRole.SPINE);
       }
 
-      for (String neckJoint : neckJointNames.keySet())
+      for (String neckJointString : neckJointNames.keySet())
       {
-         jointRoles.put(neckJoint, JointRole.NECK);
+         neckJointStrings.put(neckJointNames.get(neckJointString), neckJointString);
+         jointRoles.put(neckJointString, JointRole.NECK);
       }
-      contactPointParameters = new ValkyrieContactPointParamaters(this);
+
+      contactPointParameters = new ValkyrieContactPointParameters(this);
    }
-   
 
    private String getRobotSidePrefix(RobotSide robotSide)
    {
       return (robotSide == RobotSide.LEFT) ? "v1Left" : "v1Right";
    }
-   
-   @Override
-   public String getHighestNeckPitchJointName()
-   {
-      return lowerNeckPitchJointName;
-   }
-   
+
    @Override
    public String getNameOfJointBeforeHand(RobotSide robotSide)
    {
-      return robotSide.getCamelCaseNameForMiddleOfExpression() + "Wrist";
+      return armJointStrings.get(robotSide).get(ArmJointName.WRIST_PITCH);
    }
 
    @Override
    public String getNameOfJointBeforeThigh(RobotSide robotSide)
    {
-      return robotSide.getCamelCaseNameForMiddleOfExpression() + "HipExtensor";
+      return legJointStrings.get(robotSide).get(LegJointName.HIP_PITCH);
    }
 
    @Override
    public String getNameOfJointBeforeChest()
    {
-      return "WaistLateralExtensor";
+      return spineJointStrings.get(SpineJointName.SPINE_ROLL);
    }
 
    @Override
@@ -235,7 +215,7 @@ public class ValkyrieJointMap extends DRCRobotJointMap
    @Override
    public String getJointBeforeFootName(RobotSide robotSide)
    {
-      return jointBeforeFeetNames.get(robotSide);
+      return legJointStrings.get(robotSide).get(LegJointName.ANKLE_ROLL);
    }
 
    @Override
@@ -254,8 +234,8 @@ public class ValkyrieJointMap extends DRCRobotJointMap
    public Set<String> getLastSimulatedJoints()
    {
       HashSet<String> lastSimulatedJoints = new HashSet<>();
-      lastSimulatedJoints.add("LeftWrist");
-      lastSimulatedJoints.add("RightWrist");
+      for (RobotSide robotSide : RobotSide.values)
+         lastSimulatedJoints.add(armJointStrings.get(robotSide).get(ArmJointName.WRIST_PITCH));
       return lastSimulatedJoints;
    }
 
@@ -263,12 +243,6 @@ public class ValkyrieJointMap extends DRCRobotJointMap
    public String getModelName()
    {
       return "V1";
-   }
-
-   @Override
-   public SideDependentList<String> getJointBeforeThighNames()
-   {
-      return jointBeforeThighNames;
    }
 
    @Override
@@ -281,5 +255,29 @@ public class ValkyrieJointMap extends DRCRobotJointMap
    public SideDependentList<Transform3D> getAnkleToSoleFrameTransform()
    {
       return ValkyriePhysicalProperties.ankleToSoleFrameTransforms;
+   }
+
+   @Override
+   public String getLegJointName(RobotSide robotSide, LegJointName legJointName)
+   {
+      return legJointStrings.get(robotSide).get(legJointName);
+   }
+
+   @Override
+   public String getArmJointName(RobotSide robotSide, ArmJointName armJointName)
+   {
+      return armJointStrings.get(robotSide).get(armJointName);
+   }
+
+   @Override
+   public String getNeckJointName(NeckJointName neckJointName)
+   {
+      return neckJointStrings.get(neckJointName);
+   }
+
+   @Override
+   public String getSpineJointName(SpineJointName spineJointName)
+   {
+      return spineJointStrings.get(spineJointName);
    }
 }
