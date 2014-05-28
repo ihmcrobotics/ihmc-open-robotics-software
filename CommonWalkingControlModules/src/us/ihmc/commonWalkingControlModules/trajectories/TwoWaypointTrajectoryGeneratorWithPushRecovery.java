@@ -22,7 +22,6 @@ import com.yobotics.simulationconstructionset.util.trajectory.VectorProvider;
 
 /** 
  * 
- * @author anonymous
  *
  * This trajectory unless the robot is pushed, this class will behave exactly like the TwoWaypointTrajectoyrGenerator except this class has 
  * the soft TouchdownTrajectoryGenerator included rather than the two being combined in an ArrayList of position trajectory generators. When 
@@ -68,8 +67,6 @@ public class TwoWaypointTrajectoryGeneratorWithPushRecovery implements PositionT
    private FramePoint nominalTrajectoryPosition;
    private FrameVector nominalTrajectoryVelocity;
    private FrameVector nominalTrajectoryAcceleration;
-
-   //	private final SoftTouchdownTrajectoryGenerator touchdownTrajectoryGenerator;
 
    public TwoWaypointTrajectoryGeneratorWithPushRecovery(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider swingTimeProvider, DoubleProvider swingTimeRemainingProvider,
          PositionProvider initialPositionProvider, VectorProvider initialVelocityProvider, PositionProvider finalPositionProvider,

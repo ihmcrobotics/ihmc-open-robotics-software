@@ -1533,6 +1533,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private class DoneWithSingleSupportCondition implements StateTransitionCondition
    {
+      private boolean footSwitchActivated;
+      
       public DoneWithSingleSupportCondition(FootControlModule endEffectorControlModule)
       {
       }
@@ -1553,9 +1555,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
 
          FootSwitchInterface footSwitch = footSwitches.get(swingSide);
-
-         // TODO probably make all FootSwitches in this class be HeelSwitches and get rid of instanceof
-         boolean footSwitchActivated;
 
          if (walkOnTheEdgesManager.willLandOnToes())
          {
@@ -1581,7 +1580,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          {
             footSwitchActivated = footSwitch.hasFootHitGround();
          }
-
+         
          if (hasMinimumTimePassed.getBooleanValue() && justFall.getBooleanValue())
             return true;
 
@@ -1598,7 +1597,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                   && (yoTime.getDoubleValue() > timeThatICPPlannerFinished.getDoubleValue() + dwellInSingleSupportDuration.getDoubleValue()))
                return true;
          }
-
+         
          if (walkingControllerParameters.finishSwingWhenTrajectoryDone())
          {
             return hasMinimumTimePassed.getBooleanValue() && (hasICPPlannerFinished.getBooleanValue() || footSwitchActivated);
