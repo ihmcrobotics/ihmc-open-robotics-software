@@ -1,23 +1,8 @@
 package us.ihmc.atlas;
 
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.back_bkx;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.back_bky;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.back_bkz;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.forcedSideDependentJointNames;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.jointNames;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_elx;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_ely;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_shx;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_shy;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_wrx;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_wry;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_akx;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_aky;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_hpx;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_hpy;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_hpz;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_kny;
+import static us.ihmc.atlas.ros.AtlasOrderedJointMap.*;
 
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -26,9 +11,8 @@ import java.util.Set;
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.atlas.parameters.AtlasContactPointParamaters;
+import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
-import us.ihmc.atlas.ros.AtlasOrderedJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -39,38 +23,35 @@ import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
 import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
 
-public class AtlasJointMap extends DRCRobotJointMap 
+public class AtlasJointMap extends DRCRobotJointMap
 {
-   SideDependentList<String> jointBeforeThighNames = new SideDependentList<String>("l_leg_hpy","r_leg_hpy");
    public static final String chestName = "utorso";
    public static final String pelvisName = "pelvis";
    public static final String headName = "head";
-   
-   private final LegJointName[] legJoints =
-   {
-      LegJointName.HIP_YAW, LegJointName.HIP_ROLL, LegJointName.HIP_PITCH, LegJointName.KNEE, LegJointName.ANKLE_PITCH, LegJointName.ANKLE_ROLL
-   };
-   private final ArmJointName[] armJoints =
-   {
-      ArmJointName.SHOULDER_PITCH, ArmJointName.SHOULDER_ROLL, ArmJointName.ELBOW_PITCH, ArmJointName.ELBOW_ROLL, ArmJointName.WRIST_PITCH,
-      ArmJointName.WRIST_ROLL
-   };
-   private final SpineJointName[] spineJoints = {SpineJointName.SPINE_PITCH, SpineJointName.SPINE_ROLL, SpineJointName.SPINE_YAW};
-   private final NeckJointName[] neckJoints = {NeckJointName.LOWER_NECK_PITCH};
+
+   private final LegJointName[] legJoints = { LegJointName.HIP_YAW, LegJointName.HIP_ROLL, LegJointName.HIP_PITCH, LegJointName.KNEE, LegJointName.ANKLE_PITCH, LegJointName.ANKLE_ROLL };
+   private final ArmJointName[] armJoints = { ArmJointName.SHOULDER_PITCH, ArmJointName.SHOULDER_ROLL, ArmJointName.ELBOW_PITCH, ArmJointName.ELBOW_ROLL, ArmJointName.WRIST_PITCH, ArmJointName.WRIST_ROLL };
+   private final SpineJointName[] spineJoints = { SpineJointName.SPINE_PITCH, SpineJointName.SPINE_ROLL, SpineJointName.SPINE_YAW };
+   private final NeckJointName[] neckJoints = { NeckJointName.LOWER_NECK_PITCH };
+
    private final LinkedHashMap<String, JointRole> jointRoles = new LinkedHashMap<String, JointRole>();
+   private final LinkedHashMap<String, Pair<RobotSide, LimbName>> limbNames = new LinkedHashMap<String, Pair<RobotSide, LimbName>>();
+
    private final LinkedHashMap<String, Pair<RobotSide, LegJointName>> legJointNames = new LinkedHashMap<String, Pair<RobotSide, LegJointName>>();
    private final LinkedHashMap<String, Pair<RobotSide, ArmJointName>> armJointNames = new LinkedHashMap<String, Pair<RobotSide, ArmJointName>>();
    private final LinkedHashMap<String, SpineJointName> spineJointNames = new LinkedHashMap<String, SpineJointName>();
    private final LinkedHashMap<String, NeckJointName> neckJointNames = new LinkedHashMap<String, NeckJointName>();
-   private final LinkedHashMap<String, Pair<RobotSide, LimbName>> limbNames = new LinkedHashMap<String, Pair<RobotSide, LimbName>>();
-   private final SideDependentList<String> jointBeforeFeetNames = new SideDependentList<String>();
-   private final AtlasContactPointParamaters contactPointParamaters;
+
+   private final SideDependentList<EnumMap<LegJointName, String>> legJointStrings = SideDependentList.createListOfEnumMaps(LegJointName.class);
+   private final SideDependentList<EnumMap<ArmJointName, String>> armJointStrings = SideDependentList.createListOfEnumMaps(ArmJointName.class);
+   private final EnumMap<SpineJointName, String> spineJointStrings = new EnumMap<>(SpineJointName.class);
+   private final EnumMap<NeckJointName, String> neckJointStrings = new EnumMap<>(NeckJointName.class);
+
+   private final AtlasContactPointParameters contactPointParameters;
    private final AtlasRobotVersion atlasVersion;
-   
-   
+
    public AtlasJointMap(AtlasRobotVersion atlasVersion)
    {
-
       this.atlasVersion = atlasVersion;
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -93,52 +74,60 @@ public class AtlasJointMap extends DRCRobotJointMap
 
          limbNames.put(prefix + "hand", new Pair<RobotSide, LimbName>(robotSide, LimbName.ARM));
          limbNames.put(prefix + "foot", new Pair<RobotSide, LimbName>(robotSide, LimbName.LEG));
-         jointBeforeFeetNames.put(robotSide, forcedSideJointNames[l_leg_akx]);
-       }
+      }
+
       spineJointNames.put(jointNames[back_bkz], SpineJointName.SPINE_YAW);
       spineJointNames.put(jointNames[back_bky], SpineJointName.SPINE_PITCH);
       spineJointNames.put(jointNames[back_bkx], SpineJointName.SPINE_ROLL);
-      neckJointNames.put("neck_ry", NeckJointName.LOWER_NECK_PITCH);
+      neckJointNames.put(jointNames[neck_ry], NeckJointName.LOWER_NECK_PITCH);
 
-      for (String legJoint : legJointNames.keySet())
+      for (String legJointString : legJointNames.keySet())
       {
-         jointRoles.put(legJoint, JointRole.LEG);
+         RobotSide robotSide = legJointNames.get(legJointString).first();
+         LegJointName legJointName = legJointNames.get(legJointString).second();
+         legJointStrings.get(robotSide).put(legJointName, legJointString);
+         jointRoles.put(legJointString, JointRole.LEG);
       }
 
-      for (String armJoint : armJointNames.keySet())
+      for (String armJointString : armJointNames.keySet())
       {
-         jointRoles.put(armJoint, JointRole.ARM);
+         RobotSide robotSide = armJointNames.get(armJointString).first();
+         ArmJointName armJointName = armJointNames.get(armJointString).second();
+         armJointStrings.get(robotSide).put(armJointName, armJointString);
+         jointRoles.put(armJointString, JointRole.ARM);
       }
 
-      for (String spineJoint : spineJointNames.keySet())
+      for (String spineJointString : spineJointNames.keySet())
       {
-         jointRoles.put(spineJoint, JointRole.SPINE);
+         spineJointStrings.put(spineJointNames.get(spineJointString), spineJointString);
+         jointRoles.put(spineJointString, JointRole.SPINE);
       }
 
-      for (String neckJoint : neckJointNames.keySet())
+      for (String neckJointString : neckJointNames.keySet())
       {
-         jointRoles.put(neckJoint, JointRole.NECK);
+         neckJointStrings.put(neckJointNames.get(neckJointString), neckJointString);
+         jointRoles.put(neckJointString, JointRole.NECK);
       }
 
-      contactPointParamaters = new AtlasContactPointParamaters(atlasVersion, this, false, false);
+      contactPointParameters = new AtlasContactPointParameters(atlasVersion, this, false, false);
    }
-   
+
    @Override
    public String getNameOfJointBeforeHand(RobotSide robotSide)
    {
-      return forcedSideDependentJointNames.get(robotSide)[l_arm_wrx];
+      return armJointStrings.get(robotSide).get(ArmJointName.WRIST_ROLL);
    }
 
    @Override
    public String getNameOfJointBeforeThigh(RobotSide robotSide)
    {
-      return forcedSideDependentJointNames.get(robotSide)[l_leg_hpy];
+      return legJointStrings.get(robotSide).get(LegJointName.HIP_PITCH);
    }
 
    @Override
    public String getNameOfJointBeforeChest()
    {
-      return jointNames[back_bkx];
+      return spineJointStrings.get(SpineJointName.SPINE_ROLL);
    }
 
    private String getRobotSidePrefix(RobotSide robotSide)
@@ -226,18 +215,13 @@ public class AtlasJointMap extends DRCRobotJointMap
    @Override
    public String getJointBeforeFootName(RobotSide robotSide)
    {
-      return jointBeforeFeetNames.get(robotSide);
+      return legJointStrings.get(robotSide).get(LegJointName.ANKLE_ROLL);
    }
-
-//   public List<Pair<String, Vector3d>> getHandContactPoints(RobotSide robotSide)
-//   {
-//      return contactPointParamaters.getHandContactPoints(robotSide);
-//   }
 
    @Override
    public List<Pair<String, Vector3d>> getJointNameGroundContactPointMap()
    {
-      return contactPointParamaters.getJointNameGroundContactPointMap();
+      return contactPointParameters.getJointNameGroundContactPointMap();
    }
 
    @Override
@@ -249,46 +233,51 @@ public class AtlasJointMap extends DRCRobotJointMap
    @Override
    public boolean isTorqueVelocityLimitsEnabled()
    {
-      return AtlasContactPointParamaters.ENABLE_JOINT_VELOCITY_TORQUE_LIMITS;
+      return AtlasContactPointParameters.ENABLE_JOINT_VELOCITY_TORQUE_LIMITS;
    }
 
    @Override
    public Set<String> getLastSimulatedJoints()
    {
       HashSet<String> lastSimulatedJoints = new HashSet<>();
-      lastSimulatedJoints.add("l_arm_wrx");
-      lastSimulatedJoints.add("r_arm_wrx");
+      for (RobotSide robotSide : RobotSide.values)
+         lastSimulatedJoints.add(armJointStrings.get(robotSide).get(ArmJointName.WRIST_ROLL));
       return lastSimulatedJoints;
-   }
-
-   @Override
-   public SideDependentList<String> getJointBeforeThighNames()
-   {
-      return jointBeforeThighNames;
    }
 
    @Override
    public String[] getOrderedJointNames()
    {
-      return AtlasOrderedJointMap.jointNames;
-   }
-   
-   @Override
-   public String getHighestNeckPitchJointName()
-   {
-	   return "neck_ry";
+      return jointNames;
    }
 
    @Override
    public SideDependentList<Transform3D> getAnkleToSoleFrameTransform()
    {
-      return new SideDependentList<Transform3D>(AtlasPhysicalProperties.ankle_to_sole_frame_tranform,
-    		  AtlasPhysicalProperties.ankle_to_sole_frame_tranform);
+      return new SideDependentList<Transform3D>(AtlasPhysicalProperties.ankle_to_sole_frame_tranform, AtlasPhysicalProperties.ankle_to_sole_frame_tranform);
    }
-   
-//   @Override
-//   public SideDependentList<ArrayList<Point2d>> getFootGroundContactPointsInSoleFrameForController()
-//   {
-//	   return contactPointParamaters.getFootGroundContactPointsInSoleFrameForController();
-//   }
+
+   @Override
+   public String getLegJointName(RobotSide robotSide, LegJointName legJointName)
+   {
+      return legJointStrings.get(robotSide).get(legJointName);
+   }
+
+   @Override
+   public String getArmJointName(RobotSide robotSide, ArmJointName armJointName)
+   {
+      return armJointStrings.get(robotSide).get(armJointName);
+   }
+
+   @Override
+   public String getNeckJointName(NeckJointName neckJointName)
+   {
+      return neckJointStrings.get(neckJointName);
+   }
+
+   @Override
+   public String getSpineJointName(SpineJointName spineJointName)
+   {
+      return spineJointStrings.get(spineJointName);
+   }
 }

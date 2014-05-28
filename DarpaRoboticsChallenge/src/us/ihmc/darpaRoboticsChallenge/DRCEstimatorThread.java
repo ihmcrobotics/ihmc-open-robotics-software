@@ -10,7 +10,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.WrenchBasedFootSwitch;
 import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadDataSynchronizer;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParamaters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
@@ -78,7 +78,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       drcOutputWriter.setEstimatorModel(estimatorFullRobotModel);
 
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
-      DRCRobotContactPointParamaters contactPointParamaters = robotModel.getContactPointParamaters(false, false);
+      DRCRobotContactPointParameters contactPointParamaters = robotModel.getContactPointParamaters(false, false);
       StateEstimatorParameters stateEstimatorParameters = robotModel.getStateEstimatorParameters();
 
       final List<String> imuSensorsToUse = Arrays.asList(sensorInformation.getIMUSensorsToUse());
@@ -177,7 +177,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
    public static DRCStateEstimatorInterface createStateEstimator(SDFFullRobotModel estimatorFullRobotModel, DRCRobotModel drcRobotModel,
          SensorOutputMapReadOnly sensorOutputMapReadOnly, double gravity, StateEstimatorParameters stateEstimatorParameters,
-         DRCRobotContactPointParamaters contactPointParamaters, ForceSensorDataHolder forceSensorDataHolderForEstimator,
+         DRCRobotContactPointParameters contactPointParamaters, ForceSensorDataHolder forceSensorDataHolderForEstimator,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry registry)
    {
       DRCRobotPhysicalProperties physicalProperties = drcRobotModel.getPhysicalProperties();

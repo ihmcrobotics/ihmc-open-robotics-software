@@ -34,7 +34,7 @@ public interface DRCRobotModel
    
    public StateEstimatorParameters getStateEstimatorParameters();
    
-   public DRCRobotContactPointParamaters getContactPointParamaters(boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsToFeetOnly);
+   public DRCRobotContactPointParameters getContactPointParamaters(boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsToFeetOnly);
 
    public DRCRobotPhysicalProperties getPhysicalProperties();
 

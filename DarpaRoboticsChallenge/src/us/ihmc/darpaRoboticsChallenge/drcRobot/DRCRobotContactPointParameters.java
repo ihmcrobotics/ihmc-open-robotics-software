@@ -11,7 +11,7 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.Pair;
 
-public abstract class DRCRobotContactPointParamaters
+public abstract class DRCRobotContactPointParameters
 {
    public abstract Transform3D getPelvisContactPointTransform();
    public abstract List<Point2d> getPelvisContactPoints();
