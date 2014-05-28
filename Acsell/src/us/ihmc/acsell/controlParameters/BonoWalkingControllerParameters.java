@@ -385,9 +385,14 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
       return Double.POSITIVE_INFINITY;
    }
 
-   public double getswingMaxOrientationJerk()
+   public double getSwingMaxOrientationJerk()
    {
       return Double.POSITIVE_INFINITY;
+   }
+
+   public double getSwingSingularityEscapeMultiplier()
+   {
+      return runningOnRealRobot ? 50.0 : 200.0;
    }
 
    public boolean doPrepareManipulationForLocomotion()
