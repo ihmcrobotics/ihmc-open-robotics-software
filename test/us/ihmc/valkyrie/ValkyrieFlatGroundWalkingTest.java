@@ -21,7 +21,8 @@ public class ValkyrieFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
       String runName = "ValkyrieFlatGroundWalkingTest";
       robotModel = new ValkyrieRobotModel(false, false);
 
-      setupAndTestFlatGroundSimulationTrack(robotModel, runName);
+      boolean doPelvisYawWarmup = true;
+      setupAndTestFlatGroundSimulationTrack(robotModel, runName, doPelvisYawWarmup);
    }
 
    @Override
