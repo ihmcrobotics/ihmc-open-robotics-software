@@ -86,6 +86,7 @@ public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTest
 		MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
 	}
 	
+	// cropped to 1.5 - 6.3 seconds
 	@Ignore
 	@Test
    public void TestForVideo() throws SimulationExceededMaximumTimeException,InterruptedException 
@@ -95,8 +96,8 @@ public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTest
       
       // setup all parameters
       Vector3d forceDirection = new Vector3d(0.0, 1.0, 0.0);
-      double magnitude = 200.0;
-      double duration = 0.2;
+      double magnitude = 150.0;
+      double duration = 0.5;
       double percentInSwing = 0.05;
       RobotSide side = RobotSide.LEFT;
       
