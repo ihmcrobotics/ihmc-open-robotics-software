@@ -30,12 +30,12 @@ public class PointArtifact extends Artifact implements Serializable
 
    public PointArtifact(String id)
    {
-      this(id, 100);
+      this(id, 1);
    }
 
    public PointArtifact(String id, Point2d point)
    {
-      this(id, 100);
+      this(id, 1);
 
       setPoint(point);
    }
