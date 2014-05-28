@@ -17,7 +17,7 @@ import us.ihmc.acsell.initialSetup.BonoInitialSetup;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParamaters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
@@ -141,9 +141,9 @@ public class BonoRobotModel implements DRCRobotModel
    
    //XXX: fix this
    @Override
-   public DRCRobotContactPointParamaters getContactPointParamaters(boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsToFeetOnly)
+   public DRCRobotContactPointParameters getContactPointParamaters(boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsToFeetOnly)
    {
-      return new BonoContactPointParamaters(getJointMap());
+      return new BonoContactPointParameters(getJointMap());
    }
    
    @Override

@@ -1,5 +1,6 @@
 package us.ihmc.acsell.parameters;
 
+import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 
 
@@ -47,9 +48,46 @@ public class BonoOrderedJointNames
       jointNames[r_leg_uay] = "r_leg_uay";
       jointNames[r_leg_lax] = "r_leg_lax";
    }
-   
-   public static SideDependentList<String> getJointBeforeThighNames()
+
+   public static final SideDependentList<String[]> forcedSideDependentJointNames = new SideDependentList<String[]>();
+   static
    {
-      return new SideDependentList<String>(jointNames[l_leg_lhy], jointNames[r_leg_lhy]);
+     String[] jointNamesRight = new String[numberOfJoints];
+     jointNamesRight[back_ubz] = jointNames[back_ubz];
+     jointNamesRight[back_mby] = jointNames[back_mby];
+     jointNamesRight[back_lbx] = jointNames[back_lbx];
+     jointNamesRight[l_leg_uhz] = jointNames[r_leg_uhz];
+     jointNamesRight[l_leg_mhx] = jointNames[r_leg_mhx];
+     jointNamesRight[l_leg_lhy] = jointNames[r_leg_lhy];
+     jointNamesRight[l_leg_kny] = jointNames[r_leg_kny];
+     jointNamesRight[l_leg_uay] = jointNames[r_leg_uay];
+     jointNamesRight[l_leg_lax] = jointNames[r_leg_lax];
+     jointNamesRight[r_leg_uhz] = jointNames[r_leg_uhz];
+     jointNamesRight[r_leg_mhx] = jointNames[r_leg_mhx];
+     jointNamesRight[r_leg_lhy] = jointNames[r_leg_lhy];
+     jointNamesRight[r_leg_kny] = jointNames[r_leg_kny];
+     jointNamesRight[r_leg_uay] = jointNames[r_leg_uay];
+     jointNamesRight[r_leg_lax] = jointNames[r_leg_lax];
+     
+     forcedSideDependentJointNames.put(RobotSide.RIGHT, jointNamesRight);
+   
+     String[] jointNamesLeft = new String[numberOfJoints];
+     jointNamesLeft[back_ubz] = jointNames[back_ubz];
+     jointNamesLeft[back_mby] = jointNames[back_mby];
+     jointNamesLeft[back_lbx] = jointNames[back_lbx];
+     jointNamesLeft[l_leg_uhz] = jointNames[l_leg_uhz];
+     jointNamesLeft[l_leg_mhx] = jointNames[l_leg_mhx];
+     jointNamesLeft[l_leg_lhy] = jointNames[l_leg_lhy];
+     jointNamesLeft[l_leg_kny] = jointNames[l_leg_kny];
+     jointNamesLeft[l_leg_uay] = jointNames[l_leg_uay];
+     jointNamesLeft[l_leg_lax] = jointNames[l_leg_lax];
+     jointNamesLeft[r_leg_uhz] = jointNames[l_leg_uhz];
+     jointNamesLeft[r_leg_mhx] = jointNames[l_leg_mhx];
+     jointNamesLeft[r_leg_lhy] = jointNames[l_leg_lhy];
+     jointNamesLeft[r_leg_kny] = jointNames[l_leg_kny];
+     jointNamesLeft[r_leg_uay] = jointNames[l_leg_uay];
+     jointNamesLeft[r_leg_lax] = jointNames[l_leg_lax];
+     
+     forcedSideDependentJointNames.put(RobotSide.LEFT, jointNamesLeft);
    }
 }
