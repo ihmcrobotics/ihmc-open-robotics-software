@@ -13,7 +13,7 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParamaters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
@@ -30,7 +30,7 @@ import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
 import us.ihmc.valkyrie.io.ValkyrieOutputWriterWithAccelerationIntegration;
 import us.ihmc.valkyrie.models.ModelRoot;
 import us.ihmc.valkyrie.paramaters.ValkyrieArmControllerParameters;
-import us.ihmc.valkyrie.paramaters.ValkyrieContactPointParamaters;
+import us.ihmc.valkyrie.paramaters.ValkyrieContactPointParameters;
 import us.ihmc.valkyrie.paramaters.ValkyrieJointMap;
 import us.ihmc.valkyrie.paramaters.ValkyriePhysicalProperties;
 import us.ihmc.valkyrie.paramaters.ValkyrieSensorInformation;
@@ -48,7 +48,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private static Class<ModelRoot> valModelRoot = ModelRoot.class;
    private final ArmControllerParameters armControllerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
-   private final DRCRobotContactPointParamaters contactPointParamaters;
+   private final DRCRobotContactPointParameters contactPointParamaters;
    private StateEstimatorParameters stateEstimatorParamaters;
    private final DRCRobotPhysicalProperties physicalProperties;
    private DRCRobotSensorInformation sensorInformation;
@@ -74,8 +74,8 @@ public class ValkyrieRobotModel implements DRCRobotModel
       this.physicalProperties = new ValkyriePhysicalProperties();
       this.sensorInformation = new ValkyrieSensorInformation();
       this.armControllerParameters = new ValkyrieArmControllerParameters(runningOnRealRobot);
-      this.walkingControllerParameters = new ValkyrieWalkingControllerParameters(runningOnRealRobot);
-      this.contactPointParamaters = new ValkyrieContactPointParamaters(jointMap);
+      this.walkingControllerParameters = new ValkyrieWalkingControllerParameters(jointMap, runningOnRealRobot);
+      this.contactPointParamaters = new ValkyrieContactPointParameters(jointMap);
       if(headless)
       {
          this.loader = DRCRobotSDFLoader.loadDRCRobot(new String[]{}, getSdfFileAsStream(), true);
@@ -183,7 +183,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
-   public DRCRobotContactPointParamaters getContactPointParamaters(boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsToFeetOnly)
+   public DRCRobotContactPointParameters getContactPointParamaters(boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsToFeetOnly)
    {
       return contactPointParamaters;
    }

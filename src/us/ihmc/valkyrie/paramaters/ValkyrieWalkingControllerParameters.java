@@ -6,10 +6,13 @@ import java.util.Map;
 import javax.media.j3d.Transform3D;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
+import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
+import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 public class ValkyrieWalkingControllerParameters implements WalkingControllerParameters
@@ -24,14 +27,17 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    private final double upperNeckExtensorLowerLimit = -0.0872665;
    private final double lowerNeckExtensorUpperLimit = 0.0;
    private final double lowerNeckExtensorLowerLimit = -1.5708;
+
+   private final  DRCRobotJointMap jointMap;
    
-   public ValkyrieWalkingControllerParameters()
+   public ValkyrieWalkingControllerParameters(DRCRobotJointMap jointMap)
    {
-      this(false);
+      this(jointMap, false);
    }
    
-   public ValkyrieWalkingControllerParameters(boolean runningOnRealRobot)
+   public ValkyrieWalkingControllerParameters(DRCRobotJointMap jointMap, boolean runningOnRealRobot)
    {
+      this.jointMap = jointMap;
       this.runningOnRealRobot = runningOnRealRobot;
 
       for (RobotSide robotSide : RobotSide.values)
@@ -119,7 +125,12 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
 
    public String[] getDefaultHeadOrientationControlJointNames()
    {
-      return new String[] { ValkyrieJointMap.lowerNeckPitchJointName, ValkyrieJointMap.upperNeckPitchJointName, ValkyrieJointMap.spineYawJointName };
+      String[] defaultHeadOrientationControlJointNames = new String[] {
+            jointMap.getSpineJointName(SpineJointName.SPINE_YAW),
+            jointMap.getNeckJointName(NeckJointName.LOWER_NECK_PITCH),
+            jointMap.getNeckJointName(NeckJointName.UPPER_NECK_PITCH),
+            };
+      return defaultHeadOrientationControlJointNames;
    }
 
    public String[] getDefaultChestOrientationControlJointNames()
@@ -129,7 +140,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
 
    public String getJointNameForExtendedPitchRange()
    {
-      return ValkyrieJointMap.spinePitchJointName;
+      return jointMap.getSpineJointName(SpineJointName.SPINE_PITCH);
    }
 
    public double getUpperNeckPitchLimit()
