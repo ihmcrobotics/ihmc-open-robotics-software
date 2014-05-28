@@ -22,7 +22,8 @@ public class BonoFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
       String runName = "BONOFlatGroundWalkingTest";
       robotModel = new BonoRobotModel(false, false);
 
-      setupAndTestFlatGroundSimulationTrack(robotModel, runName);
+      boolean doPelvisYawWarmup = false;
+      setupAndTestFlatGroundSimulationTrack(robotModel, runName, doPelvisYawWarmup);
    }
 
    @Override
