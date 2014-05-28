@@ -10,7 +10,6 @@ import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.PIDLidarTorqueController;
 import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
-import us.ihmc.darpaRoboticsChallenge.controllers.EstimationLinkHolder;
 import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadDataSynchronizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -141,22 +140,6 @@ public class DRCSimulationFactory
       simulatedRobot.setController(simulatedDRCRobotTimeProvider);
    }
 
-   private static Joint getEstimationJoint(SDFRobot simulatedRobot, DRCRobotJointMap jointMap)
-   {
-      Joint estimationJoint;
-      if (EstimationLinkHolder.usingChestLink())
-      {
-         estimationJoint = simulatedRobot.getJoint(jointMap.getNameOfJointBeforeChest()); // used to be: AtlasOrderedJointMap.jointNames[AtlasOrderedJointMap.back_bkx]);
-         if (estimationJoint == null)
-            throw new RuntimeException("Couldn't find chest joint!");
-      }
-      else
-      {
-         estimationJoint = simulatedRobot.getPelvisJoint();
-      }
-      return estimationJoint;
-   }
-
    private static void setupJointDamping(SDFRobot simulatedRobot, DRCRobotModel robotModel)
    {
       robotModel.setJointDamping(simulatedRobot);
@@ -175,7 +158,7 @@ public class DRCSimulationFactory
 
       simulatedRobot.computeCenterOfMass(initialCoMPosition);
 
-      Joint estimationJoint = getEstimationJoint(simulatedRobot, jointMap);
+      Joint estimationJoint = simulatedRobot.getPelvisJoint();
 
       Transform3D estimationLinkTransform3D = estimationJoint.getJointTransform3D();
       Quat4d initialEstimationLinkOrientation = new Quat4d();

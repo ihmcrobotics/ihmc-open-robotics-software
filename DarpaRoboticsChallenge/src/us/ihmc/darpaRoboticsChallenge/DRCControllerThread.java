@@ -11,7 +11,6 @@ import us.ihmc.commonWalkingControlModules.sensors.ReferenceFrameUpdater;
 import us.ihmc.commonWalkingControlModules.sensors.TwistUpdater;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaElipsoidsVisualizer;
 import us.ihmc.darpaRoboticsChallenge.controllers.ConstrainedCenterOfMassJacobianEvaluator;
-import us.ihmc.darpaRoboticsChallenge.controllers.EstimationLinkHolder;
 import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadDataSynchronizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParamaters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
@@ -194,7 +193,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    {
       RigidBody elevator = fullRobotModel.getElevator();
       SixDoFJoint rootInverseDynamicsJoint = fullRobotModel.getRootJoint();
-      RigidBody estimationLink = EstimationLinkHolder.getEstimationLink(fullRobotModel); // rootInverseDynamicsJoint.getSuccessor();
+      RigidBody estimationLink = fullRobotModel.getPelvis();
 
       FullInverseDynamicsStructure inverseDynamicsStructure = new FullInverseDynamicsStructure(elevator, estimationLink, rootInverseDynamicsJoint);
 
