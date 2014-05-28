@@ -22,8 +22,9 @@ public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
 
       String runName = "AtlasFlatGroundWalkingTest";
       robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, false, false);
-      
-      setupAndTestFlatGroundSimulationTrack(robotModel, runName);
+
+      boolean doPelvisYawWarmup = true;
+      setupAndTestFlatGroundSimulationTrack(robotModel, runName, doPelvisYawWarmup);
    }
 
    @Override

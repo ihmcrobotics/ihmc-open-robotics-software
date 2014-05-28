@@ -93,14 +93,14 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   protected void setupAndTestFlatGroundSimulationTrack(DRCRobotModel robotModel, String runName) throws SimulationExceededMaximumTimeException
+   protected void setupAndTestFlatGroundSimulationTrack(DRCRobotModel robotModel, String runName, boolean doPelvisYawWarmup) throws SimulationExceededMaximumTimeException
    {
       DRCFlatGroundWalkingTrack track = setupFlatGroundSimulationTrack(robotModel);
 
-      simulateAndAssertGoodWalking(track, runName);
+      simulateAndAssertGoodWalking(track, runName, doPelvisYawWarmup);
    }
    
-   private void simulateAndAssertGoodWalking(DRCFlatGroundWalkingTrack track, String runName) throws SimulationExceededMaximumTimeException
+   private void simulateAndAssertGoodWalking(DRCFlatGroundWalkingTrack track, String runName, boolean doPelvisYawWarmup) throws SimulationExceededMaximumTimeException
    {
       SimulationConstructionSet scs = track.getSimulationConstructionSet();
 
@@ -128,24 +128,25 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
 
       initiateMotion(scs, standingTimeDuration, blockingSimulationRunner);
 
-      userSetDesiredPelvis.set(true);
-      userDesiredPelvisYaw.add(Math.PI/4.0);
-      
-      initiateMotion(scs, yawingTimeDuration, blockingSimulationRunner);
-      
-      double icpError = Math.sqrt(icpErrorX.getDoubleValue() * icpErrorX.getDoubleValue() + icpErrorY.getDoubleValue() * icpErrorY.getDoubleValue());
-      assertTrue(icpError < 0.005);
-      
-      userSetDesiredPelvis.set(true);
-      userDesiredPelvisYaw.sub(Math.PI/4.0);
-      initiateMotion(scs, yawingTimeDuration, blockingSimulationRunner);
+      if (doPelvisYawWarmup)
+      {
+         userSetDesiredPelvis.set(true);
+         userDesiredPelvisYaw.add(Math.PI/4.0);
 
-      userSetDesiredPelvis.set(false);
-      
-      icpError = Math.sqrt(icpErrorX.getDoubleValue() * icpErrorX.getDoubleValue() + icpErrorY.getDoubleValue() * icpErrorY.getDoubleValue());
-      assertTrue(icpError < 0.005);
-      
-//    ThreadTools.sleepForever();
+         initiateMotion(scs, yawingTimeDuration, blockingSimulationRunner);
+
+         double icpError = Math.sqrt(icpErrorX.getDoubleValue() * icpErrorX.getDoubleValue() + icpErrorY.getDoubleValue() * icpErrorY.getDoubleValue());
+         assertTrue(icpError < 0.005);
+
+         userSetDesiredPelvis.set(true);
+         userDesiredPelvisYaw.sub(Math.PI/4.0);
+         initiateMotion(scs, yawingTimeDuration, blockingSimulationRunner);
+
+         userSetDesiredPelvis.set(false);
+
+         icpError = Math.sqrt(icpErrorX.getDoubleValue() * icpErrorX.getDoubleValue() + icpErrorY.getDoubleValue() * icpErrorY.getDoubleValue());
+         assertTrue(icpError < 0.005);
+      }
 
       double timeIncrement = 1.0;
 
