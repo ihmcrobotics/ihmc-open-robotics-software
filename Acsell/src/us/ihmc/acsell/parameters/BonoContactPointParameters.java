@@ -9,14 +9,14 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParamaters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
 
-public class BonoContactPointParamaters extends DRCRobotContactPointParamaters
+public class BonoContactPointParameters extends DRCRobotContactPointParameters
 {
    private final Vector3d pelvisBoxOffset = new Vector3d(-0.100000, 0.000000, -0.050000);
    private final double pelvisBoxSizeX = 0.100000;
@@ -37,7 +37,7 @@ public class BonoContactPointParamaters extends DRCRobotContactPointParamaters
    private final List<Pair<String, Vector3d>> jointNameGroundContactPointMap = new ArrayList<Pair<String, Vector3d>>();
    private final SideDependentList<ArrayList<Point2d>> controllerContactPointsInSoleFrame = new SideDependentList<ArrayList<Point2d>>();
 
-   public BonoContactPointParamaters(DRCRobotJointMap jointMap)
+   public BonoContactPointParameters(DRCRobotJointMap jointMap)
    {
       Vector3d t0 = new Vector3d(0.0, 0.0, -pelvisBoxSizeZ / 2.0);
       t0.add(pelvisBoxOffset);

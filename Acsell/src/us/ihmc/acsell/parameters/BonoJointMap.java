@@ -1,5 +1,8 @@
 package us.ihmc.acsell.parameters;
 
+import static us.ihmc.acsell.parameters.BonoOrderedJointNames.*;
+
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -8,9 +11,8 @@ import java.util.Set;
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParamaters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.Pair;
@@ -28,53 +30,65 @@ public class BonoJointMap extends DRCRobotJointMap
    public static final String chestName = "utorso";
    public static final String pelvisName = "pelvis";
    public static final String headName = null;
-   
+
    private final SpineJointName[] spineJoints = { SpineJointName.SPINE_ROLL, SpineJointName.SPINE_PITCH, SpineJointName.SPINE_YAW };
    private final LegJointName[] legJoints = { LegJointName.HIP_ROLL, LegJointName.HIP_YAW, LegJointName.HIP_PITCH, LegJointName.KNEE, LegJointName.ANKLE_ROLL,
          LegJointName.ANKLE_PITCH };
-   
+
    protected final LinkedHashMap<String, JointRole> jointRoles = new LinkedHashMap<String, JointRole>();
-   private final LinkedHashMap<String, Pair<RobotSide, LegJointName>> legJointNames = new LinkedHashMap<String, Pair<RobotSide, LegJointName>>();
-   private final LinkedHashMap<String, SpineJointName> spineJointNames = new LinkedHashMap<String, SpineJointName>();
-   private final SideDependentList<String> jointBeforeFeetNames = new SideDependentList<String>();
    private final LinkedHashMap<String, Pair<RobotSide, LimbName>> limbNames = new LinkedHashMap<String, Pair<RobotSide, LimbName>>();
+
+   private final LinkedHashMap<String, Pair<RobotSide, LegJointName>> legJointNames = new LinkedHashMap<String, Pair<RobotSide, LegJointName>>();
    private final LinkedHashMap<String, Pair<RobotSide, ArmJointName>> armJointNames = new LinkedHashMap<String, Pair<RobotSide, ArmJointName>>();
+   private final LinkedHashMap<String, SpineJointName> spineJointNames = new LinkedHashMap<String, SpineJointName>();
    private final LinkedHashMap<String, NeckJointName> neckJointNames = new LinkedHashMap<String, NeckJointName>();
-   private final DRCRobotContactPointParamaters contactPointParamaters;
-   
+
+   private final SideDependentList<EnumMap<LegJointName, String>> legJointStrings = SideDependentList.createListOfEnumMaps(LegJointName.class);
+   private final SideDependentList<EnumMap<ArmJointName, String>> armJointStrings = SideDependentList.createListOfEnumMaps(ArmJointName.class);
+   private final EnumMap<SpineJointName, String> spineJointStrings = new EnumMap<SpineJointName, String>(SpineJointName.class);
+
+   private final DRCRobotContactPointParameters contactPointParamaters;
+
    private final NeckJointName[] neckJoints = {};
    private final ArmJointName[] armJoints = {};
-   
+
    public BonoJointMap()
    {
       super();
       for (RobotSide robotSide : RobotSide.values())
       {
-         String robotSideLowerCaseFirstLetter = robotSide.getSideNameFirstLetter().toLowerCase();
-         legJointNames.put(robotSideLowerCaseFirstLetter + "_leg_mhx", new Pair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_ROLL));
-         legJointNames.put(robotSideLowerCaseFirstLetter + "_leg_uhz", new Pair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_YAW));
-         legJointNames.put(robotSideLowerCaseFirstLetter + "_leg_lhy", new Pair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_PITCH));
-         legJointNames.put(robotSideLowerCaseFirstLetter + "_leg_kny", new Pair<RobotSide, LegJointName>(robotSide, LegJointName.KNEE));
-         legJointNames.put(robotSideLowerCaseFirstLetter + "_leg_lax", new Pair<RobotSide, LegJointName>(robotSide, LegJointName.ANKLE_ROLL));
-         legJointNames.put(robotSideLowerCaseFirstLetter + "_leg_uay", new Pair<RobotSide, LegJointName>(robotSide, LegJointName.ANKLE_PITCH));
-         limbNames.put(null, new Pair<RobotSide, LimbName>(robotSide, LimbName.ARM));
-         limbNames.put(robotSideLowerCaseFirstLetter + "_foot", new Pair<RobotSide, LimbName>(robotSide, LimbName.LEG));
-         jointBeforeFeetNames.put(robotSide, robotSideLowerCaseFirstLetter + "_leg_lax");
-      }     
-      spineJointNames.put("back_lbx", SpineJointName.SPINE_ROLL);
-      spineJointNames.put("back_mby", SpineJointName.SPINE_PITCH);
-      spineJointNames.put("back_ubz", SpineJointName.SPINE_YAW);
-      
+         String[] forcedSideJointNames = forcedSideDependentJointNames.get(robotSide);
+         legJointNames.put(forcedSideJointNames[l_leg_mhx], new Pair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_ROLL));
+         legJointNames.put(forcedSideJointNames[l_leg_uhz], new Pair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_YAW));
+         legJointNames.put(forcedSideJointNames[l_leg_lhy], new Pair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_PITCH));
+         legJointNames.put(forcedSideJointNames[l_leg_kny], new Pair<RobotSide, LegJointName>(robotSide, LegJointName.KNEE));
+         legJointNames.put(forcedSideJointNames[l_leg_lax], new Pair<RobotSide, LegJointName>(robotSide, LegJointName.ANKLE_ROLL));
+         legJointNames.put(forcedSideJointNames[l_leg_uay], new Pair<RobotSide, LegJointName>(robotSide, LegJointName.ANKLE_PITCH));
 
-      for (String spineJoint : spineJointNames.keySet())
-      {
-         jointRoles.put(spineJoint, JointRole.SPINE);
+         String prefix = robotSide.getSideNameFirstLetter().toLowerCase();
+         limbNames.put(null, new Pair<RobotSide, LimbName>(robotSide, LimbName.ARM));
+         limbNames.put(prefix + "_foot", new Pair<RobotSide, LimbName>(robotSide, LimbName.LEG));
       }
-      for (String legJoint : legJointNames.keySet())
+
+      spineJointNames.put(jointNames[back_lbx], SpineJointName.SPINE_ROLL);
+      spineJointNames.put(jointNames[back_mby], SpineJointName.SPINE_PITCH);
+      spineJointNames.put(jointNames[back_ubz], SpineJointName.SPINE_YAW);
+
+      for (String legJointString : legJointNames.keySet())
       {
-         jointRoles.put(legJoint, JointRole.LEG);
+         RobotSide robotSide = legJointNames.get(legJointString).first();
+         LegJointName legJointName = legJointNames.get(legJointString).second();
+         legJointStrings.get(robotSide).put(legJointName, legJointString);
+         jointRoles.put(legJointString, JointRole.LEG);
       }
-      contactPointParamaters = new BonoContactPointParamaters(this);
+
+      for (String spineJointString : spineJointNames.keySet())
+      {
+         spineJointStrings.put(spineJointNames.get(spineJointString), spineJointString);
+         jointRoles.put(spineJointString, JointRole.SPINE);
+      }
+
+      contactPointParamaters = new BonoContactPointParameters(this);
    }
 
    @Override
@@ -92,15 +106,15 @@ public class BonoJointMap extends DRCRobotJointMap
    @Override
    public String[] getOrderedJointNames()
    {
-      return BonoOrderedJointNames.jointNames;
+      return jointNames;
    }
-   
+
    @Override
    public SpineJointName[] getSpineJointNames()
    {
       return spineJoints;
    }
-   
+
    @Override
    public List<Pair<String, Vector3d>> getJointNameGroundContactPointMap()
    {
@@ -174,7 +188,7 @@ public class BonoJointMap extends DRCRobotJointMap
 
       // don't simulate children of ll_ankle_pulley, lr_ankle_pulley, rr_ankle_pulley and rl_ankle_pulley
 
-      for(RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values())
       {
          String prefix = robotSide.getSideNameFirstLetter().toLowerCase();
          lastSimulatedJoints.add(prefix + "l_ankle_pulley");
@@ -187,7 +201,7 @@ public class BonoJointMap extends DRCRobotJointMap
    @Override
    public String getJointBeforeFootName(RobotSide robotSide)
    {
-      return jointBeforeFeetNames.get(robotSide);
+      return legJointStrings.get(robotSide).get(LegJointName.ANKLE_ROLL);
    }
 
    @Override
@@ -201,7 +215,7 @@ public class BonoJointMap extends DRCRobotJointMap
    {
       return armJoints;
    }
-   
+
    @Override
    public NeckJointName[] getNeckJointNames()
    {
@@ -211,15 +225,13 @@ public class BonoJointMap extends DRCRobotJointMap
    @Override
    public String getNameOfJointBeforeChest()
    {
-      // TODO Auto-generated method stub
-      return null;
+      return spineJointStrings.get(SpineJointName.SPINE_ROLL);
    }
 
    @Override
    public String getNameOfJointBeforeThigh(RobotSide robotSide)
    {
-      // TODO Auto-generated method stub
-      return null;
+      return legJointStrings.get(robotSide).get(LegJointName.HIP_PITCH);
    }
 
    @Override
@@ -228,20 +240,32 @@ public class BonoJointMap extends DRCRobotJointMap
       return null;
    }
 
-   @Override
-   public SideDependentList<String> getJointBeforeThighNames()
-   {
-      return BonoOrderedJointNames.getJointBeforeThighNames();
-   }
-
    protected LinkedHashMap<String, Pair<RobotSide, LegJointName>> getLegJointNamesMap()
    {
       return legJointNames;
    }
 
    @Override
-   public String getHighestNeckPitchJointName()
+   public String getLegJointName(RobotSide robotSide, LegJointName legJointName)
+   {
+      return legJointStrings.get(robotSide).get(legJointName);
+   }
+
+   @Override
+   public String getArmJointName(RobotSide robotSide, ArmJointName armJointName)
+   {
+      return armJointStrings.get(robotSide).get(armJointName);
+   }
+
+   @Override
+   public String getNeckJointName(NeckJointName neckJointName)
    {
       return null;
+   }
+
+   @Override
+   public String getSpineJointName(SpineJointName spineJointName)
+   {
+      return spineJointStrings.get(spineJointName);
    }
 }
