@@ -1,0 +1,229 @@
+package us.ihmc.sensorProcessing.sensorProcessors;
+
+import static org.junit.Assert.*;
+
+import java.util.Random;
+
+import org.junit.Test;
+
+import us.ihmc.utilities.RandomTools;
+import us.ihmc.utilities.math.MathTools;
+
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+
+public class ElasticityCompensatorYoVariableTest
+{
+   private static final double EPSILON = 1e-10;
+
+   @Test
+   public void testZeroJointTau1()
+   {
+      Random random = new Random(1561651L);
+      
+      String name = "compensator";
+      YoVariableRegistry registry = new YoVariableRegistry("");
+      DoubleYoVariable stiffness = new DoubleYoVariable("stiffness", registry);
+      DoubleYoVariable rawJointPosition = new DoubleYoVariable("rawJointPosition", registry);
+      DoubleYoVariable jointTau = new DoubleYoVariable("jointTau", registry);
+      ElasticityCompensatorYoVariable elasticityCompensatorYoVariable = new ElasticityCompensatorYoVariable(name, registry);
+      
+      try
+      {
+         elasticityCompensatorYoVariable.update();
+         fail("Should have thrown an exception.");
+      }
+      catch (NullPointerException e)
+      {
+         // Good
+      }
+      
+      for (int i = 0; i < 1000; i++)
+      {
+         stiffness.set(RandomTools.generateRandomDouble(random, 1.0, 10000000.0));
+         elasticityCompensatorYoVariable.setStiffness(stiffness.getDoubleValue());
+         rawJointPosition.set(RandomTools.generateRandomDouble(random, 100.0));
+         elasticityCompensatorYoVariable.update(rawJointPosition.getDoubleValue(), jointTau.getDoubleValue());
+         
+         assertEquals(rawJointPosition.getDoubleValue(), elasticityCompensatorYoVariable.getDoubleValue(), EPSILON);
+      }
+   }
+
+   @Test
+   public void testZeroJointTau2()
+   {
+      Random random = new Random(1561651L);
+      
+      String name = "compensator";
+      YoVariableRegistry registry = new YoVariableRegistry("");
+      DoubleYoVariable stiffness = new DoubleYoVariable("stiffness", registry);
+      DoubleYoVariable rawJointPosition = new DoubleYoVariable("rawJointPosition", registry);
+      DoubleYoVariable jointTau = new DoubleYoVariable("jointTau", registry);
+      ElasticityCompensatorYoVariable elasticityCompensatorYoVariable = new ElasticityCompensatorYoVariable(name, stiffness, registry);
+      try
+      {
+         elasticityCompensatorYoVariable.update();
+         fail("Should have thrown an exception.");
+      }
+      catch (NullPointerException e)
+      {
+         // Good
+      }
+      
+      for (int i = 0; i < 1000; i++)
+      {
+         stiffness.set(RandomTools.generateRandomDouble(random, 1.0, 10000000.0));
+         rawJointPosition.set(RandomTools.generateRandomDouble(random, 100.0));
+         elasticityCompensatorYoVariable.update(rawJointPosition.getDoubleValue(), jointTau.getDoubleValue());
+         
+         assertEquals(rawJointPosition.getDoubleValue(), elasticityCompensatorYoVariable.getDoubleValue(), EPSILON);
+      }
+   }
+
+   @Test
+   public void testZeroJointTau3()
+   {
+      Random random = new Random(1561651L);
+      
+      String name = "compensator";
+      YoVariableRegistry registry = new YoVariableRegistry("");
+      DoubleYoVariable stiffness = new DoubleYoVariable("stiffness", registry);
+      DoubleYoVariable rawJointPosition = new DoubleYoVariable("rawJointPosition", registry);
+      DoubleYoVariable jointTau = new DoubleYoVariable("jointTau", registry);
+      ElasticityCompensatorYoVariable elasticityCompensatorYoVariable = new ElasticityCompensatorYoVariable(name, rawJointPosition, jointTau, registry);
+      
+      for (int i = 0; i < 1000; i++)
+      {
+         stiffness.set(RandomTools.generateRandomDouble(random, 1.0, 10000000.0));
+         elasticityCompensatorYoVariable.setStiffness(stiffness.getDoubleValue());
+         rawJointPosition.set(RandomTools.generateRandomDouble(random, 100.0));
+         elasticityCompensatorYoVariable.update();
+         
+         assertEquals(rawJointPosition.getDoubleValue(), elasticityCompensatorYoVariable.getDoubleValue(), EPSILON);
+      }
+   }
+
+   @Test
+   public void testZeroJointTau4()
+   {
+      Random random = new Random(1561651L);
+      
+      String name = "compensator";
+      YoVariableRegistry registry = new YoVariableRegistry("");
+      DoubleYoVariable stiffness = new DoubleYoVariable("stiffness", registry);
+      DoubleYoVariable rawJointPosition = new DoubleYoVariable("rawJointPosition", registry);
+      DoubleYoVariable jointTau = new DoubleYoVariable("jointTau", registry);
+      ElasticityCompensatorYoVariable elasticityCompensatorYoVariable = new ElasticityCompensatorYoVariable(name, stiffness, rawJointPosition, jointTau, registry);
+      
+      for (int i = 0; i < 1000; i++)
+      {
+         stiffness.set(RandomTools.generateRandomDouble(random, 1.0, 10000000.0));
+         rawJointPosition.set(RandomTools.generateRandomDouble(random, 100.0));
+         elasticityCompensatorYoVariable.update();
+         
+         assertEquals(rawJointPosition.getDoubleValue(), elasticityCompensatorYoVariable.getDoubleValue(), EPSILON);
+      }
+   }
+
+   @Test
+   public void testZeroMaximumDeflection4()
+   {
+      Random random = new Random(1561651L);
+      
+      String name = "compensator";
+      YoVariableRegistry registry = new YoVariableRegistry("");
+      DoubleYoVariable stiffness = new DoubleYoVariable("stiffness", registry);
+      DoubleYoVariable rawJointPosition = new DoubleYoVariable("rawJointPosition", registry);
+      DoubleYoVariable jointTau = new DoubleYoVariable("jointTau", registry);
+      ElasticityCompensatorYoVariable elasticityCompensatorYoVariable = new ElasticityCompensatorYoVariable(name, stiffness, rawJointPosition, jointTau, registry);
+      elasticityCompensatorYoVariable.setMaximuDeflection(0.0);
+      
+      for (int i = 0; i < 1000; i++)
+      {
+         stiffness.set(RandomTools.generateRandomDouble(random, 1.0, 10000000.0));
+         rawJointPosition.set(RandomTools.generateRandomDouble(random, 100.0));
+         jointTau.set(RandomTools.generateRandomDouble(random, 100.0));
+         elasticityCompensatorYoVariable.update();
+         
+         assertEquals(rawJointPosition.getDoubleValue(), elasticityCompensatorYoVariable.getDoubleValue(), EPSILON);
+      }
+   }
+
+   @Test
+   public void testDefaultMaximumDeflection4()
+   {
+      Random random = new Random(1561651L);
+      
+      String name = "compensator";
+      YoVariableRegistry registry = new YoVariableRegistry("");
+      DoubleYoVariable stiffness = new DoubleYoVariable("stiffness", registry);
+      DoubleYoVariable rawJointPosition = new DoubleYoVariable("rawJointPosition", registry);
+      DoubleYoVariable jointTau = new DoubleYoVariable("jointTau", registry);
+      ElasticityCompensatorYoVariable elasticityCompensatorYoVariable = new ElasticityCompensatorYoVariable(name, stiffness, rawJointPosition, jointTau, registry);
+      double maximumDeflection = 0.1;
+      
+      for (int i = 0; i < 10000; i++)
+      {
+         stiffness.set(RandomTools.generateRandomDouble(random, 1.0, 100000.0));
+         rawJointPosition.set(RandomTools.generateRandomDouble(random, 100.0));
+         jointTau.set(RandomTools.generateRandomDouble(random, 10000.0));
+         elasticityCompensatorYoVariable.update();
+         
+         double deflectedJointPosition = rawJointPosition.getDoubleValue() - MathTools.clipToMinMax(jointTau.getDoubleValue() / stiffness.getDoubleValue(), maximumDeflection);
+         
+         assertEquals(deflectedJointPosition, elasticityCompensatorYoVariable.getDoubleValue(), EPSILON);
+      }
+   }
+   
+   @Test
+   public void testInfiniteMaximumDeflection4()
+   {
+      Random random = new Random(1561651L);
+      
+      String name = "compensator";
+      YoVariableRegistry registry = new YoVariableRegistry("");
+      DoubleYoVariable stiffness = new DoubleYoVariable("stiffness", registry);
+      DoubleYoVariable rawJointPosition = new DoubleYoVariable("rawJointPosition", registry);
+      DoubleYoVariable jointTau = new DoubleYoVariable("jointTau", registry);
+      ElasticityCompensatorYoVariable elasticityCompensatorYoVariable = new ElasticityCompensatorYoVariable(name, stiffness, rawJointPosition, jointTau, registry);
+      elasticityCompensatorYoVariable.setMaximuDeflection(Double.POSITIVE_INFINITY);
+      
+      for (int i = 0; i < 10000; i++)
+      {
+         stiffness.set(RandomTools.generateRandomDouble(random, 1.0, 100000.0));
+         rawJointPosition.set(RandomTools.generateRandomDouble(random, 100.0));
+         jointTau.set(RandomTools.generateRandomDouble(random, 10000.0));
+         elasticityCompensatorYoVariable.update();
+         
+         double deflectedJointPosition = rawJointPosition.getDoubleValue() - jointTau.getDoubleValue() / stiffness.getDoubleValue();
+         assertEquals(deflectedJointPosition, elasticityCompensatorYoVariable.getDoubleValue(), EPSILON);
+      }
+   }
+
+   @Test
+   public void testRandomMaximumDeflection4()
+   {
+      Random random = new Random(1561651L);
+      
+      String name = "compensator";
+      YoVariableRegistry registry = new YoVariableRegistry("");
+      DoubleYoVariable stiffness = new DoubleYoVariable("stiffness", registry);
+      DoubleYoVariable rawJointPosition = new DoubleYoVariable("rawJointPosition", registry);
+      DoubleYoVariable jointTau = new DoubleYoVariable("jointTau", registry);
+      ElasticityCompensatorYoVariable elasticityCompensatorYoVariable = new ElasticityCompensatorYoVariable(name, stiffness, rawJointPosition, jointTau, registry);
+      
+      for (int i = 0; i < 10000; i++)
+      {
+         stiffness.set(RandomTools.generateRandomDouble(random, 1.0, 100000.0));
+         rawJointPosition.set(RandomTools.generateRandomDouble(random, 100.0));
+         jointTau.set(RandomTools.generateRandomDouble(random, 10000.0));
+         double maximumDeflection = RandomTools.generateRandomDouble(random, 0.0, 10.0);
+         elasticityCompensatorYoVariable.setMaximuDeflection(maximumDeflection);
+         elasticityCompensatorYoVariable.update();
+         
+         double deflectedJointPosition = rawJointPosition.getDoubleValue() - MathTools.clipToMinMax(jointTau.getDoubleValue() / stiffness.getDoubleValue(), maximumDeflection);
+         
+         assertEquals(deflectedJointPosition, elasticityCompensatorYoVariable.getDoubleValue(), EPSILON);
+      }
+   }
+}
