@@ -7,6 +7,7 @@ import javax.swing.JButton;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
@@ -17,6 +18,8 @@ import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
 
@@ -40,6 +43,8 @@ public class DRCPushRobotController implements RobotController
    private final ExternalForcePoint forcePoint;
    private final Vector3d forceVector = new Vector3d();
    
+   private final DynamicGraphicVector forceVisualizer;
+   
    public DRCPushRobotController(SDFRobot pushableRobot, FullRobotModel fullRobotModel)
    {
       yoTime = pushableRobot.getYoTime();
@@ -50,6 +55,13 @@ public class DRCPushRobotController implements RobotController
 
       pushTimeSwitch.set(Double.NEGATIVE_INFINITY);
       pushForceMagnitude.set(0.0);
+      
+      forceVisualizer = new DynamicGraphicVector("pushForce", forcePoint, 0.005, YoAppearance.DarkBlue());
+   }
+   
+   public DynamicGraphicObject getForceVisualizer()
+   {
+      return forceVisualizer;
    }
 
    public void setPushDuration(double duration)
