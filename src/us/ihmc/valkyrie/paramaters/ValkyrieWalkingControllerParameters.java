@@ -466,10 +466,15 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       return 100.0;
    }
 
-   public double getswingMaxOrientationJerk()
+   public double getSwingMaxOrientationJerk()
    {
       if (!runningOnRealRobot) return Double.POSITIVE_INFINITY;
       return 1500.0;
+   }
+
+   public double getSwingSingularityEscapeMultiplier()
+   {
+      return runningOnRealRobot ? 50.0 : 200.0;
    }
 
    public boolean doPrepareManipulationForLocomotion()
