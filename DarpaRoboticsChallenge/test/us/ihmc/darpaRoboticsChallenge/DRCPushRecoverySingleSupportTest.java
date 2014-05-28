@@ -4,17 +4,18 @@ import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCPushRobotController;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.GroundProfile;
+import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.MemoryTools;
@@ -33,6 +34,7 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateTransition
 public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTestInterface 
 {
 	private final static boolean SHOW_GUI = false;
+	private final static boolean VISUALIZE_FORCE = false;
 	
 	private double swingTime;
 	private SingleSupportStartCondition swingStartConditionRight;
@@ -83,6 +85,26 @@ public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTest
 
 		MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
 	}
+	
+	@Ignore
+	@Test
+   public void TestForVideo() throws SimulationExceededMaximumTimeException,InterruptedException 
+   {
+      BambooTools.reportTestStartedMessage();
+      setupTest(getRobotModel());
+      
+      // setup all parameters
+      Vector3d forceDirection = new Vector3d(0.0, 1.0, 0.0);
+      double magnitude = 200.0;
+      double duration = 0.2;
+      double percentInSwing = 0.05;
+      RobotSide side = RobotSide.LEFT;
+      
+      // apply the push
+      testPush(forceDirection, magnitude, duration, percentInSwing, side);
+      
+      BambooTools.reportTestFinishedMessage();
+   }
 
 	@Test
 	public void TestPushLeftEarlySwing() throws SimulationExceededMaximumTimeException,InterruptedException 
@@ -93,7 +115,7 @@ public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTest
 		// setup all parameters
       Vector3d forceDirection = new Vector3d(0.0, 1.0, 0.0);
       double magnitude = 800.0;
-      double duration = 0.05;
+      double duration = 0.04;
 		double percentInSwing = 0.1;
 		RobotSide side = RobotSide.LEFT;
 		
@@ -192,10 +214,21 @@ public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTest
 		DRCFlatGroundWalkingTrack track = setupTrack(robotModel);
 		FullRobotModel fullRobotModel = robotModel.createFullRobotModel();
 		swingTime = robotModel.getWalkingControlParameters().getDefaultSwingTime();
-		pushRobotController = new DRCPushRobotController(track
-				.getDrcSimulation().getRobot(), fullRobotModel);
+		pushRobotController = new DRCPushRobotController(track.getDrcSimulation().getRobot(), fullRobotModel);
 		
       SimulationConstructionSet scs = track.getSimulationConstructionSet();
+      CameraConfiguration cameraConfiguration = new CameraConfiguration("testCamera");
+      cameraConfiguration.setCameraFix(0.6, 0.0, 0.6);
+      cameraConfiguration.setCameraPosition(10.0, 3.0, 3.0);
+      cameraConfiguration.setCameraTracking(true, true, false, false);
+      scs.setupCamera(cameraConfiguration);
+      scs.selectCamera("testCamera");
+      
+      if(VISUALIZE_FORCE)
+      {
+         scs.addDynamicGraphicObject(pushRobotController.getForceVisualizer());
+      }
+      
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
       
       // get YoVariables
