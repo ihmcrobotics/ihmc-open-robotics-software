@@ -99,7 +99,7 @@ public class AtlasRobotModel implements DRCRobotModel
    @Override
    public StateEstimatorParameters getStateEstimatorParameters()
    {
-      return new AtlasStateEstimatorParameters(runningOnRealRobot, getEstimatorDT());
+      return new AtlasStateEstimatorParameters(getJointMap(), runningOnRealRobot, getEstimatorDT());
    }
 
    @Override

@@ -1,10 +1,15 @@
 package us.ihmc.atlas.parameters;
 
+import java.util.HashMap;
+
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCSimulatedSensorNoiseParameters;
+import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorFilterParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.PointMeasurementNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
+import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 
 public class AtlasStateEstimatorParameters implements StateEstimatorParameters
 {
@@ -38,10 +43,13 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
    private final PointMeasurementNoiseParameters pointMeasurementNoiseParameters;
 
    //      DRCSimulatedSensorNoiseParameters.createNoiseParametersForEstimatorJerryTuning();
-   private final SensorNoiseParameters sensorNoiseParameters = DRCSimulatedSensorNoiseParameters
-         .createNoiseParametersForEstimatorJerryTuningSeptember2013();
+   private final SensorNoiseParameters sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createNoiseParametersForEstimatorJerryTuningSeptember2013();
 
-   public AtlasStateEstimatorParameters(boolean runningOnRealRobot, double estimatorDT)
+   private final boolean doElasticityCompensation;
+   private final double defaultJointStiffness;
+   private final HashMap<String, Double> jointSpecificStiffness = new HashMap<>();
+
+   public AtlasStateEstimatorParameters(DRCRobotJointMap jointMap, boolean runningOnRealRobot, double estimatorDT)
    {
       this.runningOnRealRobot = runningOnRealRobot;
 
@@ -74,9 +82,17 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
 
       useTwoPolesForIMUFiltering = false;
       doFiniteDifferenceForJointVelocities = false;
-      
+
+      doElasticityCompensation = false;
+      defaultJointStiffness = 100000.0;
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         jointSpecificStiffness.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW), 7000.0);
+      }
+
       sensorFilterParameters = new SensorFilterParameters(jointPositionFilterFrequencyHz, jointVelocityFilterFrequencyHz, orientationFilterFrequencyHz,
-            angularVelocityFilterFrequencyHz, linearAccelerationFilterFrequencyHz, jointVelocitySlopTimeForBacklashCompensation, estimatorDT, useTwoPolesForIMUFiltering, doFiniteDifferenceForJointVelocities);
+            angularVelocityFilterFrequencyHz, linearAccelerationFilterFrequencyHz, jointVelocitySlopTimeForBacklashCompensation, estimatorDT,
+            useTwoPolesForIMUFiltering, doFiniteDifferenceForJointVelocities, doElasticityCompensation, defaultJointStiffness, jointSpecificStiffness);
 
       pointMeasurementNoiseParameters = new PointMeasurementNoiseParameters(pointVelocityXYMeasurementStandardDeviation,
             pointVelocityZMeasurementStandardDeviation, pointPositionXYMeasurementStandardDeviation, pointPositionZMeasurementStandardDeviation);
