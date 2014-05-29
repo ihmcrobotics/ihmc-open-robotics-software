@@ -1,5 +1,7 @@
 package us.ihmc.acsell.controlParameters;
 
+import java.util.HashMap;
+
 import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCSimulatedSensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorFilterParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
@@ -37,6 +39,10 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
    //      DRCSimulatedSensorNoiseParameters.createNoiseParametersForEstimatorJerryTuning();
    private final SensorNoiseParameters sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createNoiseParametersForEstimatorJerryTuningSeptember2013();
 
+   private final boolean doElasticityCompensation;
+   private final double defaultJointStiffness;
+   private final HashMap<String, Double> jointSpecificStiffness = new HashMap<String, Double>();
+
    public BonoStateEstimatorParameters(boolean runningOnRealRobot, double estimatorDT)
    {
       this.runningOnRealRobot = runningOnRealRobot;
@@ -71,9 +77,12 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
       boolean useTwoPolesForIMUFiltering = false;
       boolean doFiniteDifferenceForJointVelocities = false;
 
+      doElasticityCompensation = false;
+      defaultJointStiffness = Double.POSITIVE_INFINITY;
+
       sensorFilterParameters = new SensorFilterParameters(jointPositionFilterFrequencyHz, jointVelocityFilterFrequencyHz, orientationFilterFrequencyHz,
             angularVelocityFilterFrequencyHz, linearAccelerationFilterFrequencyHz, jointVelocitySlopTimeForBacklashCompensation, estimatorDT,
-            useTwoPolesForIMUFiltering, doFiniteDifferenceForJointVelocities);
+            useTwoPolesForIMUFiltering, doFiniteDifferenceForJointVelocities, doElasticityCompensation, defaultJointStiffness, jointSpecificStiffness);
 
       pointMeasurementNoiseParameters = new PointMeasurementNoiseParameters(pointVelocityXYMeasurementStandardDeviation,
             pointVelocityZMeasurementStandardDeviation, pointPositionXYMeasurementStandardDeviation, pointPositionZMeasurementStandardDeviation);
