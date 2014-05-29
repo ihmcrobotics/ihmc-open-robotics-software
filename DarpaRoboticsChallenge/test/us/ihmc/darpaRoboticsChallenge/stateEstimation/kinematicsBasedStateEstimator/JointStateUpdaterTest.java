@@ -151,7 +151,7 @@ public class JointStateUpdaterTest
    private static SensorFilterParameters createParametersForNoFiltering()
    {
       double updateDT = 1e-3;
-      SensorFilterParameters sensorFilterParameters = new SensorFilterParameters(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, 0.0, updateDT, false, false);
+      SensorFilterParameters sensorFilterParameters = new SensorFilterParameters(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, 0.0, updateDT, false, false, false, Double.POSITIVE_INFINITY, null);
       return sensorFilterParameters;
    }
 
