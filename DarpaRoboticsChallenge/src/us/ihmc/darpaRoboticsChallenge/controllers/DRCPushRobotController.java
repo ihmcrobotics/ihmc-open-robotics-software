@@ -135,11 +135,15 @@ public class DRCPushRobotController implements RobotController
          pushForce.set(pushDirection);
          pushForce.normalize();
          pushForce.scale(pushForceMagnitude.getDoubleValue());
-         pushTimeSwitch.set(yoTime.getDoubleValue());
+         if(pushCondition == null)
+         {
+            pushTimeSwitch.set(yoTime.getDoubleValue());
+         }
       }
       else
       {
          pushForce.setToZero();
+         pushTimeSwitch.set(Double.NEGATIVE_INFINITY);
       }
 
       pushNumber.increment();
