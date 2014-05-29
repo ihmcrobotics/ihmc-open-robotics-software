@@ -65,7 +65,7 @@ public class ValkyrieArmControllerParameters implements ArmControllerParameters
    public double getArmJointspaceMaxAcceleration()
    {
       if (!runningOnRealRobot)  return Double.POSITIVE_INFINITY;
-      return 20.0;
+      return 5.0; //1.0; //20.0;
    }
 
    public double getArmJointspaceMaxJerk()
