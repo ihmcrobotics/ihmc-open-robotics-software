@@ -20,6 +20,7 @@ import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameQuaternion;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 /**
@@ -34,6 +35,7 @@ public class PelvisRotationalStateUpdater
    
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoFrameOrientation yoRootJointFrameOrientation;
+   private final YoFrameQuaternion yoRootJointFrameQuaternion;
 
    private final YoFrameVector measurementFrameAngularVelocity;
    private final YoFrameVector measurementFrameAngularVelocityInWorld;
@@ -62,6 +64,7 @@ public class PelvisRotationalStateUpdater
       this.measurementLink = imuProcessedOutput.getMeasurementLink();
 
       yoRootJointFrameOrientation = new YoFrameOrientation("estimatedRootJointFrame", worldFrame, registry);
+      yoRootJointFrameQuaternion = new YoFrameQuaternion("estimatedRootJointFrame", worldFrame, registry);
       measurementFrameAngularVelocity = new YoFrameVector("measFrameAngularVelocity", measurementFrame, registry);
       measurementFrameAngularVelocityInWorld = new YoFrameVector("measFrameAngularVelocityWorld", worldFrame, registry);
       
@@ -168,7 +171,10 @@ public class PelvisRotationalStateUpdater
    {
       yoRootJointFrameOrientation.checkReferenceFrameMatch(worldFrame);
       yoRootJointFrameOrientation.set(rotationFromRootJointFrameToWorld);
-      
+
+      yoRootJointFrameQuaternion.checkReferenceFrameMatch(worldFrame);
+      yoRootJointFrameQuaternion.set(rotationFromRootJointFrameToWorld);
+
       yoRootJointFrameOrientation.checkReferenceFrameMatch(worldFrame);
       yoRootJointFrameOrientation.set(rotationFromRootJointFrameToWorld);
    }
