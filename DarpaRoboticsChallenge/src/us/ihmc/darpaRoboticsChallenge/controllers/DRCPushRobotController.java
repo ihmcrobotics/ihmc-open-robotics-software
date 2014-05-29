@@ -108,13 +108,7 @@ public class DRCPushRobotController implements RobotController
 
    public void applyForce(Vector3d direction, double magnitude, double duration)
    {
-      pushCondition = null;
-      setPushDuration(duration);
-      setPushForceDirection(direction);
-      setPushForceMagnitude(magnitude);
-      setPushDelay(0.0);
-      pushTimeSwitch.set(yoTime.getDoubleValue());
-      applyForce();
+      applyForceDelayed(null, 0.0, direction, magnitude, duration);
    }
 
    public void applyForceDelayed(StateTransitionCondition pushCondition, double timeDelay, Vector3d direction, double magnitude, double duration)
