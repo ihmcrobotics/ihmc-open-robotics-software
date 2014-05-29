@@ -59,11 +59,11 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
       jointPositionFilterFrequencyHz = runningOnRealRobot ? Double.POSITIVE_INFINITY : Double.POSITIVE_INFINITY;
       jointVelocityFilterFrequencyHz = runningOnRealRobot ? Double.POSITIVE_INFINITY : Double.POSITIVE_INFINITY;
 
-      orientationFilterFrequencyHz        = runningOnRealRobot ? Double.POSITIVE_INFINITY : Double.POSITIVE_INFINITY;
-      angularVelocityFilterFrequencyHz    = runningOnRealRobot ? Double.POSITIVE_INFINITY : Double.POSITIVE_INFINITY;
+      orientationFilterFrequencyHz        = 50.0; //runningOnRealRobot ? Double.POSITIVE_INFINITY : Double.POSITIVE_INFINITY;
+      angularVelocityFilterFrequencyHz    = 30.0; //30.0; //runningOnRealRobot ? Double.POSITIVE_INFINITY : Double.POSITIVE_INFINITY;
       linearAccelerationFilterFrequencyHz = runningOnRealRobot ? Double.POSITIVE_INFINITY : Double.POSITIVE_INFINITY;
 
-      jointVelocitySlopTimeForBacklashCompensation = 0.03;
+      jointVelocitySlopTimeForBacklashCompensation = 0.06; //0.03;
 
       pointVelocityXYMeasurementStandardDeviation = 2.0;
       pointVelocityZMeasurementStandardDeviation  = 2.0;
@@ -71,7 +71,7 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
       pointPositionXYMeasurementStandardDeviation = 0.1;
       pointPositionZMeasurementStandardDeviation  = 0.1;
 
-      useTwoPolesForIMUFiltering = runningOnRealRobot;
+      useTwoPolesForIMUFiltering = true; //runningOnRealRobot;
       doFiniteDifferenceForJointVelocities = false;
 
       doElasticityCompensation = false;
