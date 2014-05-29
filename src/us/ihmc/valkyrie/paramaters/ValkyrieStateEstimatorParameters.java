@@ -1,6 +1,9 @@
 package us.ihmc.valkyrie.paramaters;
 
 import static us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCSimulatedSensorNoiseParameters.*;
+
+import java.util.HashMap;
+
 import us.ihmc.sensorProcessing.simulatedSensors.SensorFilterParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.PointMeasurementNoiseParameters;
@@ -43,6 +46,10 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
 //   private final SensorNoiseParameters sensorNoiseParameters = createNoiseParametersForEstimatorJerryTuning();
    private final SensorNoiseParameters sensorNoiseParameters = createNoiseParametersForEstimatorJerryTuningSeptember2013();
 
+   private final boolean doElasticityCompensation;
+   private final double defaultJointStiffness;
+   private final HashMap<String, Double> jointSpecificStiffness = new HashMap<String, Double>();
+
    public ValkyrieStateEstimatorParameters(boolean runningOnRealRobot, double estimatorDT)
    {
       this.runningOnRealRobot = runningOnRealRobot;
@@ -67,8 +74,12 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
       useTwoPolesForIMUFiltering = runningOnRealRobot;
       doFiniteDifferenceForJointVelocities = false;
 
+      doElasticityCompensation = false;
+      defaultJointStiffness = Double.POSITIVE_INFINITY;
+
       sensorFilterParameters = new SensorFilterParameters(jointPositionFilterFrequencyHz, jointVelocityFilterFrequencyHz, orientationFilterFrequencyHz,
-            angularVelocityFilterFrequencyHz, linearAccelerationFilterFrequencyHz, jointVelocitySlopTimeForBacklashCompensation, estimatorDT, useTwoPolesForIMUFiltering, doFiniteDifferenceForJointVelocities);
+            angularVelocityFilterFrequencyHz, linearAccelerationFilterFrequencyHz, jointVelocitySlopTimeForBacklashCompensation, estimatorDT,
+            useTwoPolesForIMUFiltering, doFiniteDifferenceForJointVelocities, doElasticityCompensation, defaultJointStiffness, jointSpecificStiffness);
 
       pointMeasurementNoiseParameters = new PointMeasurementNoiseParameters(pointVelocityXYMeasurementStandardDeviation,
             pointVelocityZMeasurementStandardDeviation, pointPositionXYMeasurementStandardDeviation, pointPositionZMeasurementStandardDeviation);
