@@ -64,8 +64,8 @@ public class AtlasPushRecoveryTrack
 
       pushRobotController.addPushButtonToSCS(track.getSimulationConstructionSet());
       
-      double defaultForceDurationInSeconds = 0.1;
-      double defaultForceMagnitude = 600.0;
+      double defaultForceDurationInSeconds = 0.05;
+      double defaultForceMagnitude = 400.0;
       Vector3d defaultForceDirection = new Vector3d(1.0, 0.0, 0.0);
       
       SimulationConstructionSet scs = track.getSimulationConstructionSet();

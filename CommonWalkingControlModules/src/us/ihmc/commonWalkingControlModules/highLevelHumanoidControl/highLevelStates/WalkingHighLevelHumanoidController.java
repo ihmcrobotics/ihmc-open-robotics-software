@@ -583,7 +583,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                new DoneWithTransferCondition(robotSide));
          transferState.addStateTransition(toSingleSupport);
          stateMachine.addState(transferState);
-
+         
          State<WalkingState> singleSupportState = new SingleSupportState(robotSide);
          StateTransition<WalkingState> toDoubleSupport2 = new StateTransition<WalkingState>(doubleSupportState.getStateEnum(), stopWalkingCondition,
                stopWalkingStateTransitionActions);
@@ -1258,7 +1258,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          footSwitches.get(swingSide).reset();
 
-         if (pushRecoveryModule.isEnabled() && pushRecoveryModule.getIsRecoveringFromDoubleSupportFall())
+         if (pushRecoveryModule.isEnabled() && pushRecoveryModule.isRecoveringFromDoubleSupportFall())
          {
             nextFootstep = pushRecoveryModule.getRecoverFromDoubleSupportFootStep();
          }
@@ -1312,6 +1312,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             setFlatFootContactState(supportSide);
          }
          
+
 
 //         if (pushRecoveryModule.isEnabled() && pushRecoveryModule.getIsRecoveringFromDoubleSupportFall())
 //         {
@@ -1417,16 +1418,15 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          if (pushRecoveryModule.isEnabled())
          {
-            if (!pushRecoveryModule.getIsRecoveringFromDoubleSupportFall())
-            {
-               previousSupportSide.set(swingSide.getOppositeSide());
-            }
+//            if (!pushRecoveryModule.isRecoveringFromDoubleSupportFall())
+//            {
+//               previousSupportSide.set(swingSide.getOppositeSide());
+//            }
             pushRecoveryModule.reset();
          }
-         else
-         {
-            previousSupportSide.set(swingSide.getOppositeSide());
-         }
+
+         previousSupportSide.set(swingSide.getOppositeSide());
+
 
          // ContactableBody swingFoot = contactablePlaneBodies.get(swingSide);
          // Footstep desiredFootstep = desiredFootstepCalculator.updateAndGetDesiredFootstep(swingSide.getOppositeSide());
@@ -1588,10 +1588,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          // Just switch states if icp is done, plus a little bit more. You had enough time and more isn't going to do any good.
          
-         if (pushRecoveryModule.isEnabled() && pushRecoveryModule.getIsRecoveringFromDoubleSupportFall())
-         {
-            return stateMachine.timeInCurrentState() > pushRecoveryModule.getTrustTimeToConsiderSwingFinished();
-         }
+//         if (pushRecoveryModule.isEnabled() && pushRecoveryModule.getIsRecoveringFromDoubleSupportFall())
+//         {
+//            return stateMachine.timeInCurrentState() > pushRecoveryModule.getTrustTimeToConsiderSwingFinished();
+//         }
 
          if (DO_TRANSITION_WHEN_TIME_IS_UP)
          {
@@ -1901,7 +1901,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       centerOfMassHeightInputData.setSupportLeg(getSupportLeg());
 
-      if (pushRecoveryModule.isEnabled() && pushRecoveryModule.getIsRecoveringFromDoubleSupportFall())
+      if (pushRecoveryModule.isEnabled() && pushRecoveryModule.isRecoveringFromDoubleSupportFall())
       {
          nextFootstep = pushRecoveryModule.getRecoverFromDoubleSupportFootStep();
       }
