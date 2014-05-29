@@ -27,9 +27,9 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateTransition
 
 public class PushRecoveryControlModule
 {
-   private static final double MINIMUM_TIME_BEFORE_RECOVER_WITH_REDUCED_POLYGON = 3;
-   private static final double FAST_SWING_TIME_FOR_CAPTURE_REGION_CALCULATOR = 0.4;
-   private static final double DOUBLESUPPORT_SUPPORT_POLYGON_SCALE = 0.8;
+   private static final double MINIMUM_TIME_BEFORE_RECOVER_WITH_REDUCED_POLYGON = 6;
+   private static final double FAST_SWING_TIME_FOR_CAPTURE_REGION_CALCULATOR = 0.6;
+   private static final double DOUBLESUPPORT_SUPPORT_POLYGON_SCALE = 0.5;
    private static final double FAST_SWING_TIME = 0.3;
    private static final double TRUST_TIME_SCALE = 0.9;
 
@@ -174,14 +174,14 @@ public class PushRecoveryControlModule
                      return false;
                   }
 
-                  captureRegionCalculator.calculateCaptureRegion(swingSide, FAST_SWING_TIME_FOR_CAPTURE_REGION_CALCULATOR, capturePoint2d,
-                        icpAndMomentumBasedController.getOmega0(),
-                        computeFootPolygon(swingSide.getOppositeSide(), referenceFrames.getAnkleZUpFrame(swingSide.getOppositeSide())));
+//                  captureRegionCalculator.calculateCaptureRegion(swingSide, FAST_SWING_TIME_FOR_CAPTURE_REGION_CALCULATOR, capturePoint2d,
+//                        icpAndMomentumBasedController.getOmega0(),
+//                        computeFootPolygon(swingSide.getOppositeSide(), referenceFrames.getAnkleZUpFrame(swingSide.getOppositeSide())));
 
                   currentFootstep = FootstepUtils.getCurrentFootstep(swingSide, referenceFrames, momentumBasedController.getContactablePlaneFeet());
 
-                  footstepAdjustor.adjustFootstep(currentFootstep, capturePoint2d, captureRegionCalculator.getCaptureRegion());
-                  readyToGrabNextFootstep.set(false);
+//                  footstepAdjustor.adjustFootstep(currentFootstep, capturePoint2d, captureRegionCalculator.getCaptureRegion());
+//                  readyToGrabNextFootstep.set(false);
                   momentumBasedController.getUpcomingSupportLeg().set(transferToSide.getOppositeSide());
                   recoverFromDoubleSupportFallFootStep = currentFootstep;
                   recoveringFromDoubleSupportFall = true;
@@ -204,7 +204,7 @@ public class PushRecoveryControlModule
    public boolean checkAndUpdateFootstep(RobotSide swingSide, double swingTimeRemaining, FramePoint2d capturePoint2d, Footstep nextFootstep, double omega0,
          FrameConvexPolygon2d footPolygon)
    {
-      if (enablePushRecovery.getBooleanValue() && !recoveringFromDoubleSupportFall)
+      if (enablePushRecovery.getBooleanValue())
       {
          // TODO: find a way to prevent to many replans
 //         if (footstepWasProjectedInCaptureRegion.getBooleanValue())
@@ -215,7 +215,8 @@ public class PushRecoveryControlModule
 
          captureRegionCalculator.calculateCaptureRegion(swingSide, swingTimeRemaining, capturePoint2d, omega0, footPolygon);
          
-         if(swingTimeRemaining < swingTimeCalculatorProvider.getValue() * 0.1)
+         //if(swingTimeRemaining < swingTimeCalculatorProvider.getValue() * 0.1)
+         if(swingTimeRemaining < 0.05)
          {
             // do not replan if we are almost at touchdown
             return false;
@@ -238,15 +239,15 @@ public class PushRecoveryControlModule
 
       return tempFootPolygon;
    }
+   
+   public boolean isRecoveringFromDoubleSupportFall()
+   {
+      return recoveringFromDoubleSupportFall;
+   }
 
    public boolean getDoubleSupportEnableState()
    {
       return enablePushRecoveryFromDoubleSupport.getBooleanValue();
-   }
-
-   public boolean getIsRecoveringFromDoubleSupportFall()
-   {
-      return recoveringFromDoubleSupportFall;
    }
 
    public Footstep getRecoverFromDoubleSupportFootStep()
@@ -254,10 +255,10 @@ public class PushRecoveryControlModule
       return recoverFromDoubleSupportFallFootStep;
    }
 
-   public double getTrustTimeToConsiderSwingFinished()
-   {
-      return FAST_SWING_TIME * TRUST_TIME_SCALE;
-   }
+//   public double getTrustTimeToConsiderSwingFinished()
+//   {
+//      return FAST_SWING_TIME * TRUST_TIME_SCALE;
+//   }
 
    public void setRecoveringFromDoubleSupportState(boolean value)
    {
