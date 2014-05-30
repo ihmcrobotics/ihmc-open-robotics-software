@@ -96,7 +96,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       offsetHeightAboveGroundPrevValue.set(0.0);
       offsetHeightAboveGround.addVariableChangedListener(new VariableChangedListener()
       {
-         public void variableChanged(YoVariable v)
+         public void variableChanged(YoVariable<?> v)
          {
             offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
             offsetHeightAboveGroundTrajectory.initialize();
@@ -358,7 +358,8 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
          framePointS0.setZ(s0Max.getY() + offsetHeightAboveGround.getDoubleValue());
          pointS0MaxViz.setPosition(framePointS0);
          
-         FramePoint framePointD0 = FramePoint.morph(transferFromContactFramePosition, transferToContactFramePosition, d0.getX()/sF.getX());
+         FramePoint framePointD0 = new FramePoint(transferFromContactFramePosition.getReferenceFrame());
+         framePointD0.interpolate(transferFromContactFramePosition, transferToContactFramePosition, d0.getX()/sF.getX());
          framePointD0.setZ(d0.getY() + offsetHeightAboveGround.getDoubleValue());
          pointD0Viz.setPosition(framePointD0);
          
@@ -368,7 +369,8 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
          framePointD0.setZ(d0Max.getY() + offsetHeightAboveGround.getDoubleValue());
          pointD0MaxViz.setPosition(framePointD0);
          
-         FramePoint framePointDF = FramePoint.morph(transferFromContactFramePosition, transferToContactFramePosition, dF.getX()/sF.getX());
+         FramePoint framePointDF = new FramePoint(transferFromContactFramePosition.getReferenceFrame());
+         framePointDF.interpolate(transferFromContactFramePosition, transferToContactFramePosition, dF.getX()/sF.getX());
          framePointDF.setZ(dF.getY() + offsetHeightAboveGround.getDoubleValue());
          pointDFViz.setPosition(framePointDF);
          
@@ -412,7 +414,8 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
          CoMHeightPartialDerivativesData coMHeightPartialDerivativesData = new CoMHeightPartialDerivativesData();
          for (int i=0; i<numberOfPoints; i++)
          {
-            FramePoint framePoint = FramePoint.morph(transferFromContactFramePosition, transferToContactFramePosition, ((double) i)/((double) numberOfPoints));
+            FramePoint framePoint = new FramePoint(transferFromContactFramePosition.getReferenceFrame());
+            framePoint.interpolate(transferFromContactFramePosition, transferToContactFramePosition, ((double) i)/((double) numberOfPoints));
             Point2d queryPoint = new Point2d(framePoint.getX(), framePoint.getY());
             this.solve(coMHeightPartialDerivativesData, queryPoint);
             FramePoint framePointToPack = new FramePoint();

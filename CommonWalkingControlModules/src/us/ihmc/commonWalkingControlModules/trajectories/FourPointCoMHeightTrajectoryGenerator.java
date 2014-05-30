@@ -140,11 +140,13 @@ public class FourPointCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       
       if (VISUALIZE)
       {
-         FramePoint framePointD0 = FramePoint.morph(contactFramePositions[0], contactFramePositions[1], s_d0/sF);
+         FramePoint framePointD0 = new FramePoint(contactFramePositions[0].getReferenceFrame());
+         framePointD0.interpolate(contactFramePositions[0], contactFramePositions[1], s_d0/sF);
          framePointD0.setZ(z_d0);
          pointD0Viz.setPosition(framePointD0);
          
-         FramePoint framePointDF = FramePoint.morph(contactFramePositions[0], contactFramePositions[1], (s_df)/sF);
+         FramePoint framePointDF = new FramePoint(contactFramePositions[0].getReferenceFrame());
+         framePointDF.interpolate(contactFramePositions[0], contactFramePositions[1], (s_df)/sF);
          framePointDF.setZ(z_dF);
          pointDFViz.setPosition(framePointDF);
          
@@ -161,7 +163,8 @@ public class FourPointCoMHeightTrajectoryGenerator implements CoMHeightTrajector
          CoMHeightPartialDerivativesData coMHeightPartialDerivativesData = new CoMHeightPartialDerivativesData();
          for (int i=0; i<numberOfPoints; i++)
          {
-            FramePoint framePoint = FramePoint.morph(contactFramePositions[0], contactFramePositions[1], ((double) i)/((double) numberOfPoints));
+            FramePoint framePoint = new FramePoint(contactFramePositions[0].getReferenceFrame());
+            framePoint.interpolate(contactFramePositions[0], contactFramePositions[1], ((double) i)/((double) numberOfPoints));
             Point2d queryPoint = new Point2d(framePoint.getX(), framePoint.getY());
             this.solve(coMHeightPartialDerivativesData, queryPoint);
             FramePoint framePointToPack = new FramePoint();
