@@ -1,7 +1,7 @@
 package us.ihmc.valkyrie;
 
-import org.junit.runner.*;
-import org.junit.runners.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 import us.ihmc.utilities.test.JUnitTestSuiteConstructor;
 
@@ -10,7 +10,6 @@ import us.ihmc.utilities.test.JUnitTestSuiteConstructor;
 {
    us.ihmc.valkyrie.ValkyrieFlatGroundWalkingTest.class,
    us.ihmc.valkyrie.simulation.ValkyriePosePlaybackDemoTest.class,
-   us.ihmc.valkyrie.ValkyrieControllerFactoryTest.class,
    us.ihmc.valkyrie.kinematics.transmissions.InefficientPushrodTransmissionJacobianTest.class,
    us.ihmc.valkyrie.kinematics.transmissions.InefficientPushRodTransmissionTest.class,
    us.ihmc.valkyrie.kinematics.ClosedFormJacobianTest.class,

@@ -1,6 +1,6 @@
 package us.ihmc.valkyrie.kinematics.transmissions;
 
-import us.ihmc.valkyrie.kinematics.ValkyrieJoint;
+import us.ihmc.valkyrie.kinematics.ValkyrieJointInterface;
 import us.ihmc.valkyrie.kinematics.util.ClosedFormJacobian;
 import us.ihmc.valkyrie.roboNet.TurboDriver;
 
@@ -71,7 +71,7 @@ public class EfficientPushRodTransmission implements PushRodTransmissionInterfac
    }
 
    @Override
-   public void actuatorToJointEffort(TurboDriver[] actuatorData, ValkyrieJoint[] jointData)
+   public void actuatorToJointEffort(TurboDriver[] actuatorData, ValkyrieJointInterface[] jointData)
    {
       
     assertTrue(numActuators() == actuatorData.length && numJoints() == jointData.length);
@@ -96,21 +96,21 @@ public class EfficientPushRodTransmission implements PushRodTransmissionInterfac
    
 
    @Override
-   public void actuatorToJointVelocity(TurboDriver[] act_data, ValkyrieJoint[] jnt_data)
+   public void actuatorToJointVelocity(TurboDriver[] act_data, ValkyrieJointInterface[] jnt_data)
    {
       // TODO Auto-generated method stub
       
    }
 
    @Override
-   public void actuatorToJointPosition(TurboDriver[] act_data, ValkyrieJoint[] jnt_data)
+   public void actuatorToJointPosition(TurboDriver[] act_data, ValkyrieJointInterface[] jnt_data)
    {
       // TODO Auto-generated method stub
       
    }
 
    @Override
-   public void jointToActuatorEffort(TurboDriver[] actuatorData, ValkyrieJoint[] jointData)
+   public void jointToActuatorEffort(TurboDriver[] actuatorData, ValkyrieJointInterface[] jointData)
    {
       assertTrue(numActuators() == actuatorData.length && numJoints() == jointData.length);
 
@@ -138,14 +138,14 @@ public class EfficientPushRodTransmission implements PushRodTransmissionInterfac
    }
 
    @Override
-   public void jointToActuatorVelocity(TurboDriver[] act_data, ValkyrieJoint[] jnt_data)
+   public void jointToActuatorVelocity(TurboDriver[] act_data, ValkyrieJointInterface[] jnt_data)
    {
       // TODO Auto-generated method stub
       
    }
 
    @Override
-   public void jointToActuatorPosition(TurboDriver[] act_data, ValkyrieJoint[] jnt_data)
+   public void jointToActuatorPosition(TurboDriver[] act_data, ValkyrieJointInterface[] jnt_data)
    {
       // TODO Auto-generated method stub
       

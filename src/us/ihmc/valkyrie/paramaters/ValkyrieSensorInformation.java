@@ -112,7 +112,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
       cameraParamaters[2] = new DRCRobotCameraParamaters(rightStereoCameraName,rightCameraTopic,headLinkName,videoSetting,rightHazardCameraId);
    }
    
-   public String getUrdfFeetForceSensorName(RobotSide side)
+   public static String getUrdfFeetForceSensorName(RobotSide side)
    {
       return urdfFeetForceSensorNames.get(side);
    }
@@ -164,7 +164,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
       return leftPelvisIMUSensor;
    }
 
-   public SpatialForceVector getFootForceSensorTareOffset(RobotSide robotSide)
+   public static SpatialForceVector getFootForceSensorTareOffset(RobotSide robotSide)
    {
       return footForceSensorTareOffsets.get(robotSide);
    }
