@@ -59,7 +59,7 @@ public class AtlasKinematicCalibrator
    protected void createDisplay(int bufferSize)
    {
       visualizer = new SDFFullRobotModelVisualizer(robot, 1, 0.01); //100hz sample rate
-      visualizer.setFullRobotModel(fullRobotModel);
+      visualizer.setMainRegistry(registry, fullRobotModel, null);
 
       scs = new SimulationConstructionSet(robot, bufferSize);
       scs.setGroundVisible(false);
@@ -83,7 +83,7 @@ public class AtlasKinematicCalibrator
    {
       yoIndex.set(index);
       updateDynamicGraphicsObjects(index);
-      visualizer.update(1);
+      visualizer.update(1, 0);
    }
 
    protected void updateDynamicGraphicsObjects(int index)

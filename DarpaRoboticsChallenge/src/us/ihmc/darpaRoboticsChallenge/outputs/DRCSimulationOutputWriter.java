@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedOutputWriter;
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
 import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.maps.ObjectObjectMap;
@@ -23,7 +22,6 @@ public class DRCSimulationOutputWriter extends SDFPerfectSimulatedOutputWriter i
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final RobotVisualizer robotVisualizer;
    private final ObjectObjectMap<OneDoFJoint, DoubleYoVariable> rawJointTorques;
    private final ObjectObjectMap<OneDoFJoint, DelayedDoubleYoVariable> delayedJointTorques;
 
@@ -31,10 +29,9 @@ public class DRCSimulationOutputWriter extends SDFPerfectSimulatedOutputWriter i
 
    double[] prevError;
 
-   public DRCSimulationOutputWriter(SDFRobot robot, RobotVisualizer robotVisualizer)
+   public DRCSimulationOutputWriter(SDFRobot robot)
    {
       super(robot);
-      this.robotVisualizer = robotVisualizer;
 
       rawJointTorques = new ObjectObjectMap<OneDoFJoint, DoubleYoVariable>();
       delayedJointTorques = new ObjectObjectMap<OneDoFJoint, DelayedDoubleYoVariable>();
@@ -76,15 +73,6 @@ public class DRCSimulationOutputWriter extends SDFPerfectSimulatedOutputWriter i
    }
 
    @Override
-   public void writeAfterEstimator(long timestamp)
-   {
-      if (robotVisualizer != null)
-      {
-         robotVisualizer.update(timestamp);
-      }
-   }
-
-   @Override
    public void setFullRobotModel(SDFFullRobotModel fullRobotModel)
    {
       super.setFullRobotModel(fullRobotModel);
@@ -104,15 +92,6 @@ public class DRCSimulationOutputWriter extends SDFPerfectSimulatedOutputWriter i
 
       prevError = new double[revoluteJoints.size()];
 
-      if (robotVisualizer != null)
-      {
-         robotVisualizer.setFullRobotModel(fullRobotModel);
-      }
-   }
-
-   @Override
-   public void setEstimatorModel(SDFFullRobotModel estimatorModel)
-   {
    }
 
    public void addRawOutputWriter(RawOutputWriter rawOutputWriter)

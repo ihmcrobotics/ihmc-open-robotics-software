@@ -33,13 +33,14 @@ public class YoVariableConnectionBurstTest
       
 
 	  //start server
-      final YoVariableServer server = new YoVariableServer(registry, 1234, 0.001);
+      final YoVariableServer server = new YoVariableServer(1234, 0.001);
+      server.setMainRegistry(registry, null, null);
       server.start();
 
       
       //start client
       int bufferSize=256;
-      SCSYoVariablesUpdatedListener scsYoVariablesUpdatedListener = new SCSYoVariablesUpdatedListener(bufferSize);      
+      SCSYoVariablesUpdatedListener scsYoVariablesUpdatedListener = new SCSYoVariablesUpdatedListener(bufferSize, false);      
       scsYoVariablesUpdatedListener.setDisplayOneInNPackets(1);
       final YoVariableClient client = new YoVariableClient("localhost", 1234, scsYoVariablesUpdatedListener, "", false);
       client.start();
@@ -65,7 +66,7 @@ public class YoVariableConnectionBurstTest
          }
          var3.set(values[i]);
          
-         server.update(++timestamp);
+         server.update(++timestamp, 0);
          
          
          if (iter < 50)

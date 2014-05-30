@@ -9,13 +9,13 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsCont
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.WrenchBasedFootSwitch;
+import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
 import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadDataSynchronizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.JointConfigurationGatherer;
-import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
 import us.ihmc.darpaRoboticsChallenge.sensors.RobotJointLimitWatcher;
 import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCStateEstimatorInterface;
 import us.ihmc.darpaRoboticsChallenge.stateEstimation.kinematicsBasedStateEstimator.DRCKinematicsBasedStateEstimator;
@@ -48,6 +48,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 {
    private final YoVariableRegistry estimatorRegistry = new YoVariableRegistry("DRCEstimatorThread");
+   private final RobotVisualizer robotVisualizer;
    private final SDFFullRobotModel estimatorFullRobotModel;
    private final ForceSensorDataHolder forceSensorDataHolderForEstimator;
    private final ModularRobotController estimatorController;
@@ -55,7 +56,6 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    private final DRCStateEstimatorInterface drcStateEstimator;
 
    private final ThreadDataSynchronizer threadDataSynchronizer;
-   private final DRCOutputWriter outputWriter;
    private final SensorReader sensorReader;
 
    private final DoubleYoVariable estimatorTime = new DoubleYoVariable("estimatorTime", estimatorRegistry);
@@ -70,15 +70,13 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    private final AtomicSettableTimestampProvider timestampProvider = new AtomicSettableTimestampProvider();
 
    public DRCEstimatorThread(DRCRobotModel robotModel, SensorReaderFactory sensorReaderFactory, ThreadDataSynchronizer threadDataSynchronizer,
-         DRCOutputWriter drcOutputWriter, GlobalDataProducer dataProducer, double estimatorDT, double gravity)
+         GlobalDataProducer dataProducer, RobotVisualizer robotVisualizer, double estimatorDT, double gravity)
    {
       this.threadDataSynchronizer = threadDataSynchronizer;
-      this.outputWriter = drcOutputWriter;
+      this.robotVisualizer = robotVisualizer;
       estimatorFullRobotModel = threadDataSynchronizer.getEstimatorFullRobotModel();
       forceSensorDataHolderForEstimator = threadDataSynchronizer.getEstimatorForceSensorDataHolder();
       
-      drcOutputWriter.setEstimatorModel(estimatorFullRobotModel);
-
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       DRCRobotContactPointParameters contactPointParamaters = robotModel.getContactPointParamaters(false, false);
       StateEstimatorParameters stateEstimatorParameters = robotModel.getStateEstimatorParameters();
@@ -126,6 +124,11 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       
       firstTick.set(true);
       estimatorRegistry.addChild(estimatorController.getYoVariableRegistry());
+      
+      if(robotVisualizer != null)
+      {
+         robotVisualizer.setMainRegistry(estimatorRegistry, estimatorFullRobotModel, dynamicGraphicObjectsListRegistry);
+      }
    }
 
    @Override
@@ -174,7 +177,10 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    {
       long startTimestamp = TimeTools.secondsToNanoSeconds(estimatorTime.getDoubleValue());
       threadDataSynchronizer.publishEstimatorState(startTimestamp, estimatorTick.getLongValue(), startClockTime.getLongValue());
-      outputWriter.writeAfterEstimator(timestamp);
+      if(robotVisualizer != null)
+      {
+         robotVisualizer.update(startTimestamp, estimatorRegistry);
+      }
       estimatorTick.increment();
    }
 

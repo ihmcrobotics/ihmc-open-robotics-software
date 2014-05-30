@@ -44,18 +44,29 @@ public class SCSYoVariablesUpdatedListener implements YoVariablesUpdatedListener
 
    public SCSYoVariablesUpdatedListener(int bufferSize)
    {
-      this(new Robot("NullRobot"), bufferSize);
+      this(bufferSize, true);
    }
 
+   public SCSYoVariablesUpdatedListener(int bufferSize, boolean showGUI)
+   {
+      this(new Robot("NullRobot"), bufferSize, showGUI);
+   }
+   
    public SCSYoVariablesUpdatedListener(Robot robot, int bufferSize)
    {
+      this(robot, bufferSize, true);
+   }
+   
+   public SCSYoVariablesUpdatedListener(Robot robot, int bufferSize, boolean showGUI)
+   {
       this.robot = robot;
-      this.scs = new SimulationConstructionSet(robot, bufferSize);
+      this.scs = new SimulationConstructionSet(robot, showGUI, bufferSize);
       this.registry = scs.getRootRegistry();
       scs.setScrollGraphsEnabled(false);
       scs.setGroundVisible(false);
       scs.attachExitActionListener(this);
    }
+
 
    public void start()
    {

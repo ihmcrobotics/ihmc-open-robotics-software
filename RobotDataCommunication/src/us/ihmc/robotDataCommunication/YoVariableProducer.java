@@ -2,58 +2,62 @@ package us.ihmc.robotDataCommunication;
 
 import java.nio.ByteBuffer;
 import java.nio.LongBuffer;
-import java.util.List;
+import java.util.Collection;
 
 import org.zeromq.ZMQ;
 
 import us.ihmc.concurrent.ConcurrentRingBuffer;
-import us.ihmc.robotDataCommunication.jointState.JointHolder;
-
-import com.yobotics.simulationconstructionset.YoVariable;
 
 public class YoVariableProducer extends Thread
 {
+   private static final int NUMBER_OF_WRITE_BUFFERS = 12;
+   
    private final zmq.Ctx ctx = zmq.ZMQ.zmq_init(1);
    
    private final int port;
-   private final ConcurrentRingBuffer<FullStateBuffer> variableBuffer;
-   private final byte[] buffer;
-   private final byte[][] outputBuffer;
-   private final int outputBufferSize=8; // 0 disables outputBuffer
+   private final ConcurrentRingBuffer<FullStateBuffer> mainBuffer;
+   private final ConcurrentRingBuffer<RegistryBuffer>[] buffers;
+  
+   private final byte[] backingArray;
+   private final LongBuffer writeBuffer;
+   
    private final int jointStateOffset;
-   private final LongBuffer longBuffer;
-   private zmq.Msg msg;
 
    private zmq.SocketBase variablePublisher;
    
-   public YoVariableProducer(int port, List<YoVariable> variables, List<JointHolder> jointHolders, ConcurrentRingBuffer<FullStateBuffer> variableBuffer)
+   public YoVariableProducer(int port, int numberOfVariables, int numberOfJointStates, ConcurrentRingBuffer<FullStateBuffer> mainBuffer,
+         Collection<ConcurrentRingBuffer<RegistryBuffer>> buffers)
    {
       super("YoVariableProducer_" + port);
       this.port = port;
-      this.variableBuffer = variableBuffer;
+      this.mainBuffer = mainBuffer;
+      this.buffers = buffers.toArray(new ConcurrentRingBuffer[buffers.size()]);
       
-      this.jointStateOffset = variables.size();
-      int numberOfJointStates = FullStateBuffer.getNumberOfJointStates(jointHolders);
+      this.jointStateOffset = numberOfVariables;
       int bufferSize = (1 + jointStateOffset + numberOfJointStates) * 8;
-      this.buffer = new byte[bufferSize];
       
-      this.outputBuffer=new byte[outputBufferSize][];
-      for(int i=0;i<outputBufferSize;i++)
-      {
-         this.outputBuffer[i] = new byte[bufferSize];         
-      }
-      this.msg = new zmq.Msg(buffer);
-      
-      ByteBuffer byteBuffer = ByteBuffer.wrap(buffer);
-      this.longBuffer = byteBuffer.asLongBuffer();
-      
-      longBuffer.put(0);
-      for(int i = 0; i < variables.size(); i++)
-      {
-         longBuffer.put(variables.get(i).getValueAsLongBits());
-      }
+      backingArray = new byte[bufferSize];
+      writeBuffer = ByteBuffer.wrap(backingArray).asLongBuffer();
    }
    
+   private void updateBuffers(long timestamp)
+   {
+      for(int i = 0; i < buffers.length; i++)
+      {
+         ConcurrentRingBuffer<RegistryBuffer> buffer = buffers[i];
+         if(buffer.poll())
+         {
+            RegistryBuffer newBuffer = buffer.peek();
+            if(newBuffer != null && newBuffer.getTimestamp() < timestamp)
+            {
+               newBuffer = buffer.read();
+               newBuffer.getIntoBuffer(writeBuffer, 1);
+               buffer.flush();
+            }
+         }
+      }
+   }
+
    public void run()
    {
       variablePublisher = ctx.create_socket(ZMQ.PUB);
@@ -65,41 +69,46 @@ public class YoVariableProducer extends Thread
       }
       
       
+      int bufferIndex = 0;
+      byte[][] messageBuffers = new byte[NUMBER_OF_WRITE_BUFFERS][];
+      zmq.Msg messages[] = new zmq.Msg[NUMBER_OF_WRITE_BUFFERS];
+      for(int i = 0; i < NUMBER_OF_WRITE_BUFFERS; i++)
+      {
+         messageBuffers[i] = new byte[backingArray.length];
+         messages[i] = new zmq.Msg(messageBuffers[i]);
+      }
+      
       while (true)
       {
-         variableBuffer.poll();
-         FullStateBuffer fullStateBuffer;
-         int outputBufferIndex=0;
-         while((fullStateBuffer = variableBuffer.read()) != null)
+         if(mainBuffer.poll())
          {
-            longBuffer.put(0, fullStateBuffer.getTimestamp());
-            for(int i = 0; i < jointStateOffset; i++)
+            FullStateBuffer fullStateBuffer;
+   
+            while((fullStateBuffer = mainBuffer.read()) != null)
             {
-               if(fullStateBuffer.hasChangedAndReset(i))
-               {
-                  longBuffer.put(i + 1, fullStateBuffer.getValue(i));                  
-               }
+               
+               writeBuffer.put(0, fullStateBuffer.getTimestamp());
+               fullStateBuffer.getIntoBuffer(writeBuffer, 1);
+               fullStateBuffer.getJointStatesInBuffer(writeBuffer, jointStateOffset + 1);
+               updateBuffers(fullStateBuffer.getTimestamp());
+               
+               byte[] messageBuffer = messageBuffers[bufferIndex % NUMBER_OF_WRITE_BUFFERS];
+               zmq.Msg msg = messages[bufferIndex % NUMBER_OF_WRITE_BUFFERS];
+               
+               System.arraycopy(backingArray, 0, messageBuffer, 0, backingArray.length);
+               variablePublisher.send(msg, 0);
+               
+               bufferIndex++;
             }
-            
-            fullStateBuffer.getJointStatesInBuffer(longBuffer, jointStateOffset + 1);
-            
-            if(outputBufferSize>0)
-            {
-               System.arraycopy(buffer, 0, outputBuffer[outputBufferIndex], 0, buffer.length);
-               msg = new zmq.Msg(outputBuffer[outputBufferIndex]);
-               outputBufferIndex = (outputBufferIndex+1)%outputBufferSize;
-            }
-            
-            variablePublisher.send(msg, 0);
+            mainBuffer.flush();
          }
-         variableBuffer.flush();
-         
          try
          {
             Thread.sleep(1);
          }
          catch (InterruptedException e)
          {
+            // Allow calling Thread.interrupt from YoVariableServer
             break;
          }
       }
@@ -122,5 +131,6 @@ public class YoVariableProducer extends Thread
       catch (InterruptedException e)
       {
       }
+      ctx.terminate();
    }
 }

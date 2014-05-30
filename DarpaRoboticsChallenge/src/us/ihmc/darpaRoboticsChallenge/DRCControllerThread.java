@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.sensors.CommonWalkingReferenceFramesU
 import us.ihmc.commonWalkingControlModules.sensors.ReferenceFrameUpdater;
 import us.ihmc.commonWalkingControlModules.sensors.TwistUpdater;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaElipsoidsVisualizer;
+import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
 import us.ihmc.darpaRoboticsChallenge.controllers.ConstrainedCenterOfMassJacobianEvaluator;
 import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadDataSynchronizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParameters;
@@ -44,11 +45,14 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 
 public class DRCControllerThread implements MultiThreadedRobotControlElement
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry("DRCControllerThread");
    private static final boolean CREATE_DYNAMICALLY_CONSISTENT_NULLSPACE_EVALUATOR = false;
    private static final boolean SHOW_INERTIA_GRAPHICS = false;
    private static final boolean SHOW_REFERENCE_FRAMES = false;
    private static final boolean SHOW_JOINTAXIS_ZALIGN_FRAMES = true;
+ 
+   
+   private final YoVariableRegistry registry = new YoVariableRegistry("DRCControllerThread");
+   private final RobotVisualizer robotVisualizer;
 
    private final long controlDTInNS;
    private final long estimatorDTInNS;
@@ -92,10 +96,12 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    private final BooleanYoVariable runController = new BooleanYoVariable("runController", registry);
    
    public DRCControllerThread(DRCRobotModel robotModel, ControllerFactory controllerFactory, LidarControllerInterface lidarControllerInterface,
-         ThreadDataSynchronizer threadDataSynchronizer, DRCOutputWriter outputWriter, GlobalDataProducer dataProducer, double gravity)
+         ThreadDataSynchronizer threadDataSynchronizer, DRCOutputWriter outputWriter, GlobalDataProducer dataProducer, RobotVisualizer robotVisualizer,
+         double gravity)
    {
       this.threadDataSynchronizer = threadDataSynchronizer;
       this.outputWriter = outputWriter;
+      this.robotVisualizer = robotVisualizer;
       this.controlDTInNS = TimeTools.secondsToNanoSeconds(robotModel.getControllerDT());
       this.estimatorDTInNS = TimeTools.secondsToNanoSeconds(robotModel.getEstimatorDT());
       this.estimatorTicksPerControlTick = this.controlDTInNS / this.estimatorDTInNS;
@@ -128,6 +134,11 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       
       lastEstimatorStartTime.set(Long.MIN_VALUE);
       expectedEstimatorTick.set(estimatorDTInNS);
+      
+      if(robotVisualizer != null)
+      {
+         robotVisualizer.addRegistry(registry, dynamicGraphicObjectsListRegistry);
+      }
 
    }
 
@@ -268,28 +279,32 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    @Override
    public void run()
    {
-      if(runController.getBooleanValue())
+      if (runController.getBooleanValue())
       {
-      if(firstTick.getBooleanValue())
-      {
-         robotController.initialize();
-         outputWriter.initialize();
-         firstTick.set(false);
+         if (firstTick.getBooleanValue())
+         {
+            robotController.initialize();
+            outputWriter.initialize();
+            firstTick.set(false);
+         }
+         controllerTimer.startMeasurement();
+         robotController.doControl();
+         controllerTimer.stopMeasurement();
       }
-      controllerTimer.startMeasurement();
-      robotController.doControl();
-      controllerTimer.stopMeasurement();
-   }
    }
 
    @Override
    public void write(long timestamp)
    {
-      if(runController.getBooleanValue())
-   {
-      outputWriter.writeAfterController(TimeTools.secondsToNanoSeconds(controllerTime.getDoubleValue()));
-      totalDelay.set(timestamp - lastEstimatorStartTime.getLongValue());
-      }
+      if (runController.getBooleanValue())
+      {
+         outputWriter.writeAfterController(TimeTools.secondsToNanoSeconds(controllerTime.getDoubleValue()));
+         totalDelay.set(timestamp - lastEstimatorStartTime.getLongValue());         
+         if(robotVisualizer != null)
+         {
+            robotVisualizer.update(TimeTools.secondsToNanoSeconds(controllerTime.getDoubleValue()), registry);
+         }
+      }      
    }
 
    @Override

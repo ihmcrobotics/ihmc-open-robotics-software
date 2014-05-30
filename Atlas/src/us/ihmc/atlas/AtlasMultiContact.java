@@ -119,7 +119,7 @@ public class AtlasMultiContact
       ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, DRCConfigParameters.contactTresholdForceForSCS, sensorInformation.getFeetForceSensorNames());
 
       drcSimulation = new DRCSimulationFactory(robotModel, controllerFactory, environment.getTerrainObject(), robotInitialSetup, scsInitialSetup,
-            guiInitialSetup, null, null);
+            guiInitialSetup, null);
       
        simulationConstructionSet = drcSimulation.getSimulationConstructionSet();
 

@@ -15,6 +15,7 @@ import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class SDFFullRobotModelVisualizer implements RobotVisualizer
 {
@@ -50,7 +51,7 @@ public class SDFFullRobotModelVisualizer implements RobotVisualizer
       return null;
    }
    
-   public void setFullRobotModel(FullRobotModel fullRobotModel)
+   public void setMainRegistry(YoVariableRegistry registry, FullRobotModel fullRobotModel, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       this.rootJoint = fullRobotModel.getRootJoint();
       
@@ -82,7 +83,7 @@ public class SDFFullRobotModelVisualizer implements RobotVisualizer
    
    private final Vector3d tempPosition = new Vector3d();
    private final Quat4d tempOrientation = new Quat4d();
-   public void update(long timestamp)
+   public void update(long timestamp, long id)
    {
       if(rootJoint != null)
       {
@@ -117,5 +118,18 @@ public class SDFFullRobotModelVisualizer implements RobotVisualizer
    public void close()
    {
       // no-op
+   }
+
+   @Override
+   public void update(long timestamp, YoVariableRegistry registry)
+   {
+      update(timestamp, 0);
+   }
+
+   @Override
+   public void addRegistry(YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   {
+      // TODO Auto-generated method stub
+      
    }
 }

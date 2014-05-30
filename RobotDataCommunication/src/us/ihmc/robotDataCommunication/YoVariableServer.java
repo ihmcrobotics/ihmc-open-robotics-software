@@ -1,39 +1,40 @@
 package us.ihmc.robotDataCommunication;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.robotDataCommunication.jointState.JointHolder;
+import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.screwTheory.RigidBody;
 
-import com.yobotics.simulationconstructionset.VariableChangedListener;
 import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class YoVariableServer implements RobotVisualizer
 {
-   private static final int VARIABLE_BUFFER_CAPACITY = 2048;
-   private static final int CHANGED_BUFFER_CAPACITY = 64;
+   private static final int VARIABLE_BUFFER_CAPACITY = 128;
+   private static final int CHANGED_BUFFER_CAPACITY = 128;
    
    private final double dt;
    
+   // Data to send
+   private List<RigidBody> mainBodies = new ArrayList<>();
+   private YoVariableRegistry mainRegistry;
+   private DynamicGraphicObjectsListRegistry mainDynamicGraphicObjectsListRegistry;
+   private final ArrayList<Pair<YoVariableRegistry, DynamicGraphicObjectsListRegistry>> variableData = new ArrayList<>();
+   
    // Variable data
-   private final YoVariableRegistry registry;
-   private final List<RigidBody> rootBodies = new ArrayList<RigidBody>();
-   private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
+   private ConcurrentRingBuffer<FullStateBuffer> mainBuffer;
+   private final LinkedHashMap<YoVariableRegistry, ConcurrentRingBuffer<RegistryBuffer>> buffers = new LinkedHashMap<>(); 
    
-   private ConcurrentRingBuffer<FullStateBuffer> variableBuffer;
-   private ConcurrentRingBuffer<VariableChangedMessage> changedMessageBuffer = new ConcurrentRingBuffer<VariableChangedMessage>(
-         new VariableChangedMessage.Builder(), CHANGED_BUFFER_CAPACITY);
-   
-   private FullStateBuffer currentBuffer;
-   private List<YoVariable> variables; 
-   
+   // Change data
+   private final LinkedHashMap<YoVariableRegistry, ConcurrentRingBuffer<VariableChangedMessage>> variableChangeData = new LinkedHashMap<>();
+      
    // State
    private boolean started = false;
 
@@ -46,27 +47,14 @@ public class YoVariableServer implements RobotVisualizer
    private YoVariableHandshakeServer handshakeServer;
    private YoVariableProducer producer;
    private YoVariableChangedConsumer consumer;
-
    
-   public YoVariableServer(YoVariableRegistry registry, int port, double dt)
-   {
-      this(registry, port, dt, null, (RigidBody[]) null);
-   }
-   
-   public YoVariableServer(YoVariableRegistry registry, int port, double dt, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, RigidBody... rootBodies)
+   public YoVariableServer(int port, double dt)
    {
       this.handshakePort = port;
       this.producerPort = port + 1;
       this.consumerPort = port + 2;
       
       this.dt = dt;
-      
-      this.registry = registry;
-      if(rootBodies != null)
-      {
-         this.rootBodies.addAll(Arrays.asList(rootBodies));
-      }
-      this.dynamicGraphicObjectsListRegistry = dynamicGraphicObjectsListRegistry;
    }
 
    public synchronized void start()
@@ -76,16 +64,27 @@ public class YoVariableServer implements RobotVisualizer
          throw new RuntimeException("Server already started");
       }
       
-      handshakeServer = new YoVariableHandshakeServer(registry, handshakePort, rootBodies, dynamicGraphicObjectsListRegistry, dt);
-      variables = handshakeServer.getVariables();
-      
+      handshakeServer = new YoVariableHandshakeServer(handshakePort, mainBodies, dt);
       List<JointHolder> jointHolders = handshakeServer.getJointHolders();
-      FullStateBuffer.Builder builder = new FullStateBuffer.Builder(variables.size(), jointHolders);
-      variableBuffer = new ConcurrentRingBuffer<FullStateBuffer>(builder, VARIABLE_BUFFER_CAPACITY);
-      addVariableChangedListeners(variables);
       
-      producer = new YoVariableProducer(producerPort, variables, jointHolders, variableBuffer);
-      consumer = new YoVariableChangedConsumer(consumerPort, changedMessageBuffer);
+      ArrayList<YoVariable> variables = new ArrayList<>();
+      int mainOffset = handshakeServer.addRegistry(mainRegistry, variables);
+      if(mainDynamicGraphicObjectsListRegistry != null)
+      {
+         handshakeServer.addDynamicGraphicObjects(mainDynamicGraphicObjectsListRegistry);
+      }
+      FullStateBuffer.Builder builder = new FullStateBuffer.Builder(mainOffset, variables, jointHolders);
+      mainBuffer = new ConcurrentRingBuffer<FullStateBuffer>(builder, VARIABLE_BUFFER_CAPACITY);
+      variableChangeData.put(mainRegistry, new ConcurrentRingBuffer<>(new VariableChangedMessage.Builder(), CHANGED_BUFFER_CAPACITY));
+      
+      for(Pair<YoVariableRegistry, DynamicGraphicObjectsListRegistry> data : variableData)
+      {
+         addVariableBuffer(data);
+      }
+            
+      producer = new YoVariableProducer(producerPort, handshakeServer.getNumberOfVariables(), FullStateBuffer.getNumberOfJointStates(jointHolders), mainBuffer,
+            buffers.values());
+      consumer = new YoVariableChangedConsumer(consumerPort, handshakeServer.getVariablesAndRootRegistries(), variableChangeData);
       
       
       handshakeServer.start();
@@ -93,24 +92,6 @@ public class YoVariableServer implements RobotVisualizer
       consumer.start();
       
       started = true;
-   }
-
-   private void addVariableChangedListeners(List<YoVariable> variables)
-   {
-      for(int i = 0; i < variables.size(); i++)
-      {
-         final int myID = i;
-         variables.get(i).addVariableChangedListener(new VariableChangedListener()
-         {
-            public void variableChanged(YoVariable v)
-            {
-               if(currentBuffer != null)
-               {
-                  currentBuffer.update(myID, v.getValueAsLongBits());
-               }
-            }
-         });
-      }
    }
 
    public synchronized void close()
@@ -123,43 +104,94 @@ public class YoVariableServer implements RobotVisualizer
       }
    }
 
-   public void update(long timestamp)
+   /**
+    * Update main buffer data.
+    * 
+    * @param timestamp timestamp to send to logger
+    */
+   public void update(long timestamp, long id)
+   {
+      update(timestamp, mainRegistry);
+   }
+   
+   public void update(long timestamp, YoVariableRegistry registry)
    {
       if(!started)
       {
          return;
       }
+      ConcurrentRingBuffer<? extends RegistryBuffer> ringBuffer;
+      if(registry.equals(mainRegistry))
+      {
+         ringBuffer = mainBuffer;
+      }
+      else
+      {
+         ringBuffer = buffers.get(registry);
+         if(ringBuffer == null)
+         {
+            throw new RuntimeException("Cannot find root registry " + registry.getName());
+         }
+      }
+      updateVariableBuffer(timestamp, ringBuffer);
+      updateChangedVariables(registry);
       
-      updateVariableBuffer(timestamp);
-      updateChangedVariables();
+      
    }
-
-   private void updateChangedVariables()
-   {
-      changedMessageBuffer.poll();
-      VariableChangedMessage msg;
-      while((msg = changedMessageBuffer.read()) != null)
-      {
-         variables.get(msg.getId()).setValueFromDouble(msg.getVal());            
-      }
-      changedMessageBuffer.flush();
-   }
-
-   private void updateVariableBuffer(long timestamp)
-   {
-      if(currentBuffer != null)
-      {
-         currentBuffer.updateJointStates(timestamp);
-      }
-      variableBuffer.commit();
-      currentBuffer = variableBuffer.next();
-   }
-
    
-
-   public void setFullRobotModel(FullRobotModel controllerModel)
+   private void addVariableBuffer(Pair<YoVariableRegistry, DynamicGraphicObjectsListRegistry> data)
    {
-      rootBodies.add(controllerModel.getElevator());
+      ArrayList<YoVariable> variables = new ArrayList<>();
+      YoVariableRegistry registry = data.first();
+      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = data.second();
+      int variableOffset = handshakeServer.addRegistry(registry, variables);
+      if(dynamicGraphicObjectsListRegistry != null)
+      {
+         handshakeServer.addDynamicGraphicObjects(dynamicGraphicObjectsListRegistry);
+      }
+      RegistryBuffer.Builder builder = new RegistryBuffer.Builder(variableOffset, variables);
+      ConcurrentRingBuffer<RegistryBuffer> buffer = new ConcurrentRingBuffer<>(builder, VARIABLE_BUFFER_CAPACITY);
+      
+      buffers.put(registry, buffer);
+      variableChangeData.put(registry, new ConcurrentRingBuffer<>(new VariableChangedMessage.Builder(), CHANGED_BUFFER_CAPACITY));
    }
 
+   private void updateChangedVariables(YoVariableRegistry rootRegistry)
+   {
+      ConcurrentRingBuffer<VariableChangedMessage> buffer = variableChangeData.get(rootRegistry);
+      buffer.poll();
+      VariableChangedMessage msg;
+      while((msg = buffer.read()) != null)
+      {
+         msg.getVariable().setValueFromDouble(msg.getVal());            
+      }
+      buffer.flush();
+   }
+
+   private void updateVariableBuffer(long timestamp, ConcurrentRingBuffer<? extends RegistryBuffer> ringBuffer)
+   {
+      RegistryBuffer buffer = ringBuffer.next();
+      if(buffer != null)
+      {
+         buffer.update(timestamp);
+         ringBuffer.commit();
+      }
+   }
+   
+   public void addRegistry(YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   {
+      Pair<YoVariableRegistry, DynamicGraphicObjectsListRegistry> data = new Pair<YoVariableRegistry, DynamicGraphicObjectsListRegistry>(registry, dynamicGraphicObjectsListRegistry);
+      variableData.add(data);
+   }
+
+   @Override
+   public void setMainRegistry(YoVariableRegistry registry, FullRobotModel fullRobotModel, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   {
+      if(fullRobotModel != null)
+      {
+         mainBodies.add(fullRobotModel.getElevator());
+      }
+      mainRegistry = registry;
+      mainDynamicGraphicObjectsListRegistry = dynamicGraphicObjectsListRegistry;
+   }
 }
