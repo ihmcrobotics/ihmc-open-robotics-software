@@ -254,4 +254,10 @@ public class OneStepCaptureRegionCalculator
    {
       return kinematicStepRange;
    }
+   
+   public double getCaptureRegionArea()
+   {
+      captureRegionPolygon.update();
+      return captureRegionPolygon.getArea();
+   }
 }
