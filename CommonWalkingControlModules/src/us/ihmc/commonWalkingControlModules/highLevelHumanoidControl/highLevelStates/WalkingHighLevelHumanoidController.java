@@ -427,7 +427,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             initialPelvisOrientationProvider, finalPelvisOrientationProvider, registry);
 
       pushRecoveryModule = new PushRecoveryControlModule(momentumBasedController, walkingControllerParameters, readyToGrabNextFootstep, 
-                                                         icpAndMomentumBasedController, stateMachine, registry);
+                                                         icpAndMomentumBasedController, stateMachine, registry, swingTimeCalculationProvider);
 
       setUpStateMachine();
       readyToGrabNextFootstep.set(true);
@@ -1214,7 +1214,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                updateFootstepParameters();
                
                captureTime = stateMachine.timeInCurrentState();
-               footControlModules.get(swingSide).replanTrajectory(defaultSwingTime - captureTime);
+               footControlModules.get(swingSide).replanTrajectory(swingTimeCalculationProvider.getValue() - captureTime);
 
                TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForSingleSupport(nextFootstep, swingSide);
                instantaneousCapturePointPlanner.initializeSingleSupport(transferToAndNextFootstepsData, yoTime.getDoubleValue() - captureTime);
@@ -1312,17 +1312,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             setFlatFootContactState(supportSide);
          }
          
-
-
 //         if (pushRecoveryModule.isEnabled() && pushRecoveryModule.getIsRecoveringFromDoubleSupportFall())
 //         {
 //            swingTimeCalculationProvider.useFastSwingTime(); // to remove
-//            transferTimeCalculationProvider.setTransferTime();
-//         }
-//         else
-//         {
-//            swingTimeCalculationProvider.useDefaultSwingTime(); // to remove 
-//            transferTimeCalculationProvider.setTransferTime();
 //         }
          
          transferTimeCalculationProvider.setTransferTime();
@@ -1418,10 +1410,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          if (pushRecoveryModule.isEnabled())
          {
-//            if (!pushRecoveryModule.isRecoveringFromDoubleSupportFall())
-//            {
-//               previousSupportSide.set(swingSide.getOppositeSide());
-//            }
             pushRecoveryModule.reset();
          }
 
