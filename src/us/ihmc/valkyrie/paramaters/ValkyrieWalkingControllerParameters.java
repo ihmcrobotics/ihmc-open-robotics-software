@@ -110,7 +110,8 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
 
    public boolean doToeOffIfPossible()
    {
-      return true;
+      if (!runningOnRealRobot) return true;
+      return false;
    }
 
    public boolean doToeTouchdownIfPossible()
@@ -417,29 +418,32 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
 
    public double getSwingKpXY()
    {
+      if (!runningOnRealRobot) return 100.0;
       return 100.0;
    }
 
    public double getSwingKpZ()
    {
-      return 200.0;
+      if (!runningOnRealRobot) return 200.0;
+      return 100.0;
    }
 
    public double getSwingKpOrientation()
    {
-      return 200.0;
+      if (!runningOnRealRobot) return 200.0;
+      return 40.0;
    }
 
    public double getSwingZetaXYZ()
    {
       if (!runningOnRealRobot) return 0.7;
-      return 0.25;
+      return 0.3;
    }
 
    public double getSwingZetaOrientation()
    {
       if (!runningOnRealRobot) return 0.7;
-      return 0.7; 
+      return 0.3; 
    }
 
    public double getHoldKpXY()
@@ -450,7 +454,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    public double getHoldKpOrientation()
    {
       if (!runningOnRealRobot) return 100.0;
-      return 200.0;
+      return 40.0;
    }
 
    public double getHoldZeta()
@@ -515,12 +519,12 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
 
    public double getDefaultTransferTime()
    {
-      return runningOnRealRobot ? 1.5 : 0.25;
+      return runningOnRealRobot ? 1.0 : 0.25;
    }
 
    public double getDefaultSwingTime()
    {
-      return runningOnRealRobot ? 1.5 : 0.60;
+      return runningOnRealRobot ? 1.0 : 0.60;
    }
 
    public double getPelvisPitchUpperLimit()
