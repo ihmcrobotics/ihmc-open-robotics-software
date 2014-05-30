@@ -32,7 +32,7 @@ import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.net.TimestampProvider;
+import us.ihmc.utilities.net.AtomicSettableTimestampProvider;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.TotalMassCalculator;
 
@@ -66,9 +66,11 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    private final ExecutionTimer estimatorTimer = new ExecutionTimer("estimatorTimer", 10.0, estimatorRegistry);
    
    private final LongYoVariable actualEstimatorDT = new LongYoVariable("actualEstimatorDT", estimatorRegistry);
+   
+   private final AtomicSettableTimestampProvider timestampProvider = new AtomicSettableTimestampProvider();
 
    public DRCEstimatorThread(DRCRobotModel robotModel, SensorReaderFactory sensorReaderFactory, ThreadDataSynchronizer threadDataSynchronizer,
-         DRCOutputWriter drcOutputWriter, GlobalDataProducer dataProducer, TimestampProvider timestampProvider, double estimatorDT, double gravity)
+         DRCOutputWriter drcOutputWriter, GlobalDataProducer dataProducer, double estimatorDT, double gravity)
    {
       this.threadDataSynchronizer = threadDataSynchronizer;
       this.outputWriter = drcOutputWriter;
@@ -150,6 +152,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       estimatorTime.set(time);
       startClockTime.set(currentClockTime);
       sensorReader.read();
+      timestampProvider.set(TimeTools.secondsToNanoSeconds(time));
    }
 
    @Override
