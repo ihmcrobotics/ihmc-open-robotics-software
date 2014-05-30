@@ -1,7 +1,7 @@
 <GraphGroup>
 	<Cols>2</Cols>
 	<Graph>
-		<Variables></Variables>
+		<Variables>atlas.t</Variables>
 		<GraphConfiguration>
 			<Name>config1</Name>
 			<ScalingMethod>1</ScalingMethod>
