@@ -426,8 +426,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       this.pelvisOrientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator("pelvis", worldFrame, swingTimeCalculationProvider,
             initialPelvisOrientationProvider, finalPelvisOrientationProvider, registry);
 
-      pushRecoveryModule = new PushRecoveryControlModule(momentumBasedController, walkingControllerParameters, readyToGrabNextFootstep, icpAndMomentumBasedController,
-            this.swingTimeCalculationProvider, stateMachine, registry);
+      pushRecoveryModule = new PushRecoveryControlModule(momentumBasedController, walkingControllerParameters, readyToGrabNextFootstep, 
+                                                         icpAndMomentumBasedController, stateMachine, registry);
 
       setUpStateMachine();
       readyToGrabNextFootstep.set(true);
@@ -1588,10 +1588,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          // Just switch states if icp is done, plus a little bit more. You had enough time and more isn't going to do any good.
          
-//         if (pushRecoveryModule.isEnabled() && pushRecoveryModule.getIsRecoveringFromDoubleSupportFall())
-//         {
-//            return stateMachine.timeInCurrentState() > pushRecoveryModule.getTrustTimeToConsiderSwingFinished();
-//         }
+         if (pushRecoveryModule.isEnabled() && pushRecoveryModule.isRecoveringFromDoubleSupportFall())
+         {
+            return stateMachine.timeInCurrentState() > pushRecoveryModule.getTrustTimeToConsiderSwingFinished();
+         }
 
          if (DO_TRANSITION_WHEN_TIME_IS_UP)
          {
