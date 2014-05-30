@@ -4,15 +4,7 @@ import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
-
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.time.GlobalTimer;
-import com.yobotics.simulationconstructionset.util.FlatGroundProfile;
-import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
-import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.bambooTools.BambooTools;
@@ -33,9 +25,17 @@ import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
+import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import com.yobotics.simulationconstructionset.time.GlobalTimer;
+import com.yobotics.simulationconstructionset.util.FlatGroundProfile;
+import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
+import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+
 public abstract class DRCPushInDoubleSupportTest implements MultiRobotTestInterface
 {
 	private final static boolean SHOW_GUI = true;
+	private final static boolean VISUALIZE_FORCE = true;
 
 	private DRCPushRobotController pushRobotController;
 	private BlockingSimulationRunner blockingSimulationRunner;
@@ -87,8 +87,8 @@ public abstract class DRCPushInDoubleSupportTest implements MultiRobotTestInterf
 		DRCFlatGroundWalkingTrack track = setupTest(getRobotModel());
 		SimulationConstructionSet scs = track.getSimulationConstructionSet();
 
-		double forceMagnitude = 900.0;
-		double forceDuration = 0.05;
+		double forceMagnitude = 350.0;
+		double forceDuration = 0.15;
 		Vector3d forceDirection = new Vector3d(1.0, 0.0, 0.0);
 
 		blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
@@ -126,6 +126,12 @@ public abstract class DRCPushInDoubleSupportTest implements MultiRobotTestInterf
 		FullRobotModel fullRobotModel = robotModel.createFullRobotModel();
 		pushRobotController = new DRCPushRobotController(track
 				.getDrcSimulation().getRobot(), fullRobotModel);
+		
+		if(VISUALIZE_FORCE)
+      {
+         track.getSimulationConstructionSet().addDynamicGraphicObject(pushRobotController.getForceVisualizer());
+      }
+		
 		return track;
 	}
 
