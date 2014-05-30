@@ -11,31 +11,31 @@ public class ValkyrieArmControllerParameters implements ArmControllerParameters
       this.runningOnRealRobot = runningOnRealRobot;
    }
    
-   public static final double[] kp = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-   public static final double[] ki = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-   public static final double[] kd = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-   public static final double[] ff_qd_ds = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-   public static final double[] qerr_maxs = { 10.0, 10.0, 10.0, 10.0, 10.0, 10.0 };
+   public static final double[] lowLevelArmJointSpace_kp = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+   public static final double[] lowLevelArmJointSpace_ki = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+   public static final double[] lowLevelArmJointSpace_kd = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+   public static final double[] lowLevelArmJointSpace_ff_qd_ds = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+   public static final double[] lowLevelArmJointSpace_qerr_maxs = { 10.0, 10.0, 10.0, 10.0, 10.0, 10.0 };
    
    public double[] getLowLevelArmJointspaceKp()
    {
-      return kp; 
+      return lowLevelArmJointSpace_kp; 
    }
    public double[] getLowLevelArmJointspaceKi()
    {
-      return ki; 
+      return lowLevelArmJointSpace_ki; 
    }
    public double[] getLowLevelArmJointspaceKd()
    {
-      return kd; 
+      return lowLevelArmJointSpace_kd; 
    }
    public double[] getLowLevelArmJointspaceFfqd_d()
    {
-      return ff_qd_ds; 
+      return lowLevelArmJointSpace_ff_qd_ds; 
    }
    public double[] getLowLevelArmJointspaceQerrMax()
    {
-      return qerr_maxs; 
+      return lowLevelArmJointSpace_qerr_maxs; 
    }
 
    public double getArmJointspaceKp()
