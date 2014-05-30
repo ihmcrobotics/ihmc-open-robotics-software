@@ -28,10 +28,10 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateTransition
 public class PushRecoveryControlModule
 {
    private static final double MINIMUM_TIME_BEFORE_RECOVER_WITH_REDUCED_POLYGON = 6;
-   private static final double FAST_SWING_TIME_FOR_CAPTURE_REGION_CALCULATOR = 0.6;
-   private static final double DOUBLESUPPORT_SUPPORT_POLYGON_SCALE = 0.5;
-   private static final double FAST_SWING_TIME = 0.3;
-   private static final double TRUST_TIME_SCALE = 0.9;
+   private static final double DOUBLESUPPORT_SUPPORT_POLYGON_SCALE = 0.85;
+   private static final double FAST_SWING_TIME = 0.4;
+   private static final double TRUST_TIME_SCALE = 0.9; 
+   private static final double MINIMUM_TIME_TO_REPLAN = 0.07;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -45,7 +45,6 @@ public class PushRecoveryControlModule
    private final BooleanYoVariable footstepWasProjectedInCaptureRegion;
    private final BooleanYoVariable enablePushRecovery = new BooleanYoVariable("enablePushRecovery", registry);
    private final CommonWalkingReferenceFrames referenceFrames;
-   private final SwingTimeCalculationProvider swingTimeCalculatorProvider;
    private final StateMachine<?> stateMachine;
 
    private boolean recoveringFromDoubleSupportFall;
@@ -53,14 +52,13 @@ public class PushRecoveryControlModule
    private BooleanYoVariable readyToGrabNextFootstep;
 
    public PushRecoveryControlModule(MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters,
-         BooleanYoVariable readyToGrabNextFootstep, ICPAndMomentumBasedController icpAndMomentumBasedController, SwingTimeCalculationProvider swingTimeCalculatorProvider,
-         StateMachine<?> stateMachine, YoVariableRegistry parentRegistry)
+          BooleanYoVariable readyToGrabNextFootstep, ICPAndMomentumBasedController icpAndMomentumBasedController,
+          StateMachine<?> stateMachine, YoVariableRegistry parentRegistry)
    {
       this.momentumBasedController = momentumBasedController;
       this.readyToGrabNextFootstep = readyToGrabNextFootstep;
       this.icpAndMomentumBasedController = icpAndMomentumBasedController;
       this.referenceFrames = momentumBasedController.getReferenceFrames();
-      this.swingTimeCalculatorProvider = swingTimeCalculatorProvider;
       this.stateMachine = stateMachine;
 
       enablePushRecovery.set(false);
@@ -174,14 +172,9 @@ public class PushRecoveryControlModule
                      return false;
                   }
 
-//                  captureRegionCalculator.calculateCaptureRegion(swingSide, FAST_SWING_TIME_FOR_CAPTURE_REGION_CALCULATOR, capturePoint2d,
-//                        icpAndMomentumBasedController.getOmega0(),
-//                        computeFootPolygon(swingSide.getOppositeSide(), referenceFrames.getAnkleZUpFrame(swingSide.getOppositeSide())));
-
                   currentFootstep = FootstepUtils.getCurrentFootstep(swingSide, referenceFrames, momentumBasedController.getContactablePlaneFeet());
 
-//                  footstepAdjustor.adjustFootstep(currentFootstep, capturePoint2d, captureRegionCalculator.getCaptureRegion());
-//                  readyToGrabNextFootstep.set(false);
+                  readyToGrabNextFootstep.set(false);
                   momentumBasedController.getUpcomingSupportLeg().set(transferToSide.getOppositeSide());
                   recoverFromDoubleSupportFallFootStep = currentFootstep;
                   recoveringFromDoubleSupportFall = true;
@@ -216,7 +209,7 @@ public class PushRecoveryControlModule
          captureRegionCalculator.calculateCaptureRegion(swingSide, swingTimeRemaining, capturePoint2d, omega0, footPolygon);
          
          //if(swingTimeRemaining < swingTimeCalculatorProvider.getValue() * 0.1)
-         if(swingTimeRemaining < 0.05)
+         if(swingTimeRemaining < MINIMUM_TIME_TO_REPLAN)
          {
             // do not replan if we are almost at touchdown
             return false;
@@ -255,10 +248,10 @@ public class PushRecoveryControlModule
       return recoverFromDoubleSupportFallFootStep;
    }
 
-//   public double getTrustTimeToConsiderSwingFinished()
-//   {
-//      return FAST_SWING_TIME * TRUST_TIME_SCALE;
-//   }
+   public double getTrustTimeToConsiderSwingFinished()
+   {
+      return FAST_SWING_TIME * TRUST_TIME_SCALE;
+   }
 
    public void setRecoveringFromDoubleSupportState(boolean value)
    {
