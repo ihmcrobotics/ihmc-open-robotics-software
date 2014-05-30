@@ -109,7 +109,7 @@ public class DRCSimulationFactory
       }
 
       drcEstimatorThread = new DRCEstimatorThread(drcRobotModel, sensorReaderFactory, threadDataSynchronizer, drcOutputWriter, globalDataProducer,
-            simulatedDRCRobotTimeProvider, drcRobotModel.getEstimatorDT(), gravity);
+            drcRobotModel.getEstimatorDT(), gravity);
 
       drcControllerThread = new DRCControllerThread(drcRobotModel, controllerFactory, lidarControllerInterface, threadDataSynchronizer, drcOutputWriter,
             globalDataProducer, gravity);

@@ -6,9 +6,7 @@ import us.ihmc.affinity.Processor;
 import us.ihmc.realtime.MonotonicTime;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.realtime.RealtimeThread;
-import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.Tuple;
-import us.ihmc.utilities.math.TimeTools;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
