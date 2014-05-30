@@ -241,6 +241,6 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    @Override
    public boolean createFusedIMUSensor()
    {
-      return false;
+      return true;
    }
 }
