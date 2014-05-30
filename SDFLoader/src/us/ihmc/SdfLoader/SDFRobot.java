@@ -52,13 +52,12 @@ import com.yobotics.simulationconstructionset.simulatedSensors.LidarMount;
 import com.yobotics.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorLimitationParameters;
 import com.yobotics.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorNoiseParameters;
 import com.yobotics.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorUpdateParameters;
-import com.yobotics.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 
 public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder, HumanoidRobot    // TODO: make an SDFHumanoidRobot
 {
   
    private static final boolean SHOW_CONTACT_POINTS = true;
-   private static final boolean SHOW_COM_REFERENCE_FRAMES = true;
+   private static final boolean SHOW_COM_REFERENCE_FRAMES = false;
    private static final boolean SHOW_SENSOR_REFERENCE_FRAMES = false;
 
    private final ArrayList<String> resourceDirectories;
@@ -408,190 +407,184 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder, Hu
 
    private void addSensors(Joint scsJoint, SDFLinkHolder child)
    {
-      addCameraMounts(scsJoint, child);
-      addLidarMounts(scsJoint, child);
-      addIMUMounts(scsJoint, child);
-   }
-
-   private void addCameraMounts(Joint scsJoint, SDFLinkHolder child)
-   {
       if (child.getSensors() != null)
       {
          for (SDFSensor sensor : child.getSensors())
          {
-            if ("camera".equals(sensor.getType()) || "multicamera".equals(sensor.getType()))
+            switch(sensor.getType())
             {
-               // TODO: handle left and right sides of multicamera
-               final List<Camera> cameras = sensor.getCamera();
-
-               if (cameras != null)
-               {
-                  Transform3D pose = SDFConversionsHelper.poseToTransform(sensor.getPose());
-                  for (Camera camera : cameras)
-                  {
-                     Transform3D cameraTransform = new Transform3D(pose);
-                     cameraTransform.mul(SDFConversionsHelper.poseToTransform(camera.getPose()));
-
-                     double fieldOfView = Double.parseDouble(camera.getHorizontalFov());
-                     double clipNear = Double.parseDouble(camera.getClip().getNear());
-                     double clipFar = Double.parseDouble(camera.getClip().getFar());
-                     CameraMount mount = new CameraMount(sensor.getName() + "_" + camera.getName(), cameraTransform, fieldOfView, clipNear, clipFar, this);
-                     scsJoint.addCameraMount(mount);
-
-                     SDFCamera sdfCamera = new SDFCamera(Integer.parseInt(camera.getImage().getWidth()), Integer.parseInt(camera.getImage().getHeight()));
-                     this.cameras.put(sensor.getName(), sdfCamera);
-                  }
-               }
-               else
-               {
-                  System.err.println("JAXB loader: No camera section defined for camera sensor " + sensor.getName() + ", ignoring sensor.");
-               }
+            case "camera":
+            case "multicamera":
+               addCameraMounts(sensor,scsJoint, child);
+               break;
+            case "imu":
+               addIMUMounts(sensor,scsJoint, child);
+               break;
+            case "gpu_ray":
+            case "ray":
+               addLidarMounts(sensor,scsJoint, child);
+               break;
             }
-
          }
       }
    }
-
-   private void addIMUMounts(Joint scsJoint, SDFLinkHolder child)
+   
+   private void showCordinateSystem(Joint scsJoint, Transform3D offsetFromLink)
    {
-      if (child.getSensors() != null)
+      if(SHOW_SENSOR_REFERENCE_FRAMES)
       {
-         for (SDFSensor sensor : child.getSensors())
-         {
-            if ("imu".equals(sensor.getType()))
-            {
-               // TODO: handle left and right sides of multicamera
-               final IMU imu = sensor.getImu();
-
-               if (imu != null)
-               {
-                  //TODO: This is incorrect. Need to get pose between sensor and joint, not world
-                  Transform3D sensorPose = SDFConversionsHelper.poseToTransform(sensor.getPose());
-                  Transform3D pose = new Transform3D(child.getTransformFromModelReferenceFrame());
-                  pose.mul(sensorPose);
-
-                  IMUMount imuMount = new IMUMount(child.getName() + "_" + sensor.getName(), pose, this);
-
-                  IMUNoise noise = imu.getNoise();
-                  if (noise != null)
-                  {
-                     if ("gaussian".equals(noise.getType()))
-                     {
-                        NoiseParameters accelerationNoise = noise.getAccel();
-                        NoiseParameters angularVelocityNoise = noise.getRate();
-
-                        imuMount.setAccelerationNoiseParameters(Double.parseDouble(accelerationNoise.getMean()),
-                                Double.parseDouble(accelerationNoise.getStddev()));
-                        imuMount.setAccelerationBiasParameters(Double.parseDouble(accelerationNoise.getBias_mean()),
-                                Double.parseDouble(accelerationNoise.getBias_stddev()));
-
-                        imuMount.setAngularVelocityNoiseParameters(Double.parseDouble(angularVelocityNoise.getMean()),
-                                Double.parseDouble(angularVelocityNoise.getStddev()));
-                        imuMount.setAngularVelocityBiasParameters(Double.parseDouble(angularVelocityNoise.getBias_mean()),
-                                Double.parseDouble(angularVelocityNoise.getBias_stddev()));
-
-                     }
-                     else
-                     {
-                        throw new RuntimeException("Unknown IMU noise model: " + noise.getType());
-                     }
-                  }
-
-                  scsJoint.addIMUMount(imuMount);
-                  if(SHOW_SENSOR_REFERENCE_FRAMES)
-                  {
-                     Graphics3DObject linkGraphics = scsJoint.getLink().getLinkGraphics();
-                     linkGraphics.identity();
-                     linkGraphics.transform(sensorPose);
-                     linkGraphics.addCoordinateSystem(1.0);
-                     linkGraphics.identity();
-                  }
-               }
-               else
-               {
-                  System.err.println("JAXB loader: No imu section defined for imu sensor " + sensor.getName() + ", ignoring sensor.");
-               }
-            }
-
-         }
+         Graphics3DObject linkGraphics = scsJoint.getLink().getLinkGraphics();
+         linkGraphics.identity();
+         linkGraphics.transform(offsetFromLink);
+         linkGraphics.addCoordinateSystem(1.0);
+         linkGraphics.identity();
       }
    }
 
-   private void addLidarMounts(Joint scsJoint, SDFLinkHolder child)
+   private void addCameraMounts(SDFSensor sensor, Joint scsJoint, SDFLinkHolder child)
    {
-      if (child.getSensors() != null)
+      // TODO: handle left and right sides of multicamera
+      final List<Camera> cameras = sensor.getCamera();
+      
+      if (cameras != null)
       {
-         for (SDFSensor sensor : child.getSensors())
+         for (Camera camera : cameras)
          {
-            if ("ray".equals(sensor.getType()) || "gpu_ray".equals(sensor.getType()))
-            {
-               Ray sdfRay = sensor.getRay();
-               if (sdfRay == null)
-               {
-                  System.err.println("SDFRobot: lidar not present in ray type sensor " + sensor.getName() + ". Ignoring this sensor.");
-               }
-               else
-               {
-                  Range sdfRange = sdfRay.getRange();
-                  Scan sdfScan = sdfRay.getScan();
-                  double sdfMaxRange = Double.parseDouble(sdfRange.getMax());
-                  double sdfMinRange = Double.parseDouble(sdfRange.getMin());
-                  HorizontalScan sdfHorizontalScan = sdfScan.getHorizontal();
-                  double sdfMaxAngle = Double.parseDouble(sdfHorizontalScan.getMaxAngle());
-                  double sdfMinAngle = Double.parseDouble(sdfHorizontalScan.getMinAngle());
-
-                  // double sdfAngularResolution = Double.parseDouble(sdfHorizontalScan.getSillyAndProbablyNotUsefulResolution());
-                  int sdfSamples = Integer.parseInt(sdfHorizontalScan.getSamples());
-                  double sdfRangeResolution = Double.parseDouble(sdfRay.getRange().getResolution());
-
-                  boolean sdfAlwaysOn = true;
-
-                  double sdfGaussianStdDev = 0.0;
-                  double sdfGaussianMean = 0.0;
-                  double sdfUpdateRate = Double.parseDouble(sensor.getUpdateRate());
-
-                  Noise sdfNoise = sdfRay.getNoise();
-                  if (sdfNoise != null)
-                  {
-                     if ("gaussian".equals(sdfNoise.getType()))
-                     {
-                        sdfGaussianStdDev = Double.parseDouble(sdfNoise.getStddev());
-                        sdfGaussianMean = Double.parseDouble(sdfNoise.getMean());
-                     }
-                     else
-                     {
-                        System.err.println("Unknown noise model: " + sdfNoise.getType());
-                     }
-                  }
-
-                  System.err.println("[SDFRobot]: FIXME: Setting LIDAR angle to 0.5 pi due to current GPULidar limitations");
-                  sdfMinAngle = -0.25 * Math.PI;
-                  sdfMaxAngle = 0.25 * Math.PI;
-                  
-                  LidarScanParameters polarDefinition = new LidarScanParameters(sdfSamples, (float) sdfMinAngle, (float) sdfMaxAngle, 0.0f, (float) sdfMinRange, (float) sdfMaxRange, 0.0f);
-                  Transform3D transform3d = SDFConversionsHelper.poseToTransform(sensor.getPose());
-
-                  SimulatedLIDARSensorNoiseParameters noiseParameters = new SimulatedLIDARSensorNoiseParameters();
-                  noiseParameters.setGaussianNoiseStandardDeviation(sdfGaussianStdDev);
-                  noiseParameters.setGaussianNoiseMean(sdfGaussianMean);
-
-                  SimulatedLIDARSensorLimitationParameters limitationParameters = new SimulatedLIDARSensorLimitationParameters();
-                  limitationParameters.setMaxRange(sdfMaxRange);
-                  limitationParameters.setMinRange(sdfMinRange);
-                  limitationParameters.setQuantization(sdfRangeResolution);
-
-                  SimulatedLIDARSensorUpdateParameters updateParameters = new SimulatedLIDARSensorUpdateParameters();
-                  updateParameters.setAlwaysOn(sdfAlwaysOn);
-                  updateParameters.setUpdateRate(sdfUpdateRate);
-
-
-                  LidarMount lidarMount = new LidarMount(transform3d, polarDefinition);
-                  scsJoint.addSensor(lidarMount);
-                  
-               }
-            }
-
+            Transform3D linkToSensor = SDFConversionsHelper.poseToTransform(sensor.getPose());
+            Transform3D sensorToCamera = SDFConversionsHelper.poseToTransform(camera.getPose());
+            Transform3D linkToCamera = new Transform3D();
+            linkToCamera.mul(linkToSensor, sensorToCamera);
+//            showCordinateSystem(scsJoint,linkToCamera);
+            
+            double fieldOfView = Double.parseDouble(camera.getHorizontalFov());
+            double clipNear = Double.parseDouble(camera.getClip().getNear());
+            double clipFar = Double.parseDouble(camera.getClip().getFar());
+            CameraMount mount = new CameraMount(sensor.getName() + "_" + camera.getName(), linkToCamera, fieldOfView, clipNear, clipFar, this);
+            scsJoint.addCameraMount(mount);
+            
+            SDFCamera sdfCamera = new SDFCamera(Integer.parseInt(camera.getImage().getWidth()), Integer.parseInt(camera.getImage().getHeight()));
+            this.cameras.put(sensor.getName(), sdfCamera);
          }
+      }
+      else
+      {
+         System.err.println("JAXB loader: No camera section defined for camera sensor " + sensor.getName() + ", ignoring sensor.");
+      }
+   }
+
+   private void addIMUMounts(SDFSensor sensor, Joint scsJoint, SDFLinkHolder child)
+   {
+      // TODO: handle left and right sides of multicamera
+      final IMU imu = sensor.getImu();
+      
+      if (imu != null)
+      {
+         Transform3D linkToSensor = SDFConversionsHelper.poseToTransform(sensor.getPose());
+         showCordinateSystem(scsJoint, linkToSensor);
+         IMUMount imuMount = new IMUMount(child.getName() + "_" + sensor.getName(), linkToSensor, this);
+         
+         IMUNoise noise = imu.getNoise();
+         if (noise != null)
+         {
+            if ("gaussian".equals(noise.getType()))
+            {
+               NoiseParameters accelerationNoise = noise.getAccel();
+               NoiseParameters angularVelocityNoise = noise.getRate();
+               
+               imuMount.setAccelerationNoiseParameters(Double.parseDouble(accelerationNoise.getMean()),
+                     Double.parseDouble(accelerationNoise.getStddev()));
+               imuMount.setAccelerationBiasParameters(Double.parseDouble(accelerationNoise.getBias_mean()),
+                     Double.parseDouble(accelerationNoise.getBias_stddev()));
+               
+               imuMount.setAngularVelocityNoiseParameters(Double.parseDouble(angularVelocityNoise.getMean()),
+                     Double.parseDouble(angularVelocityNoise.getStddev()));
+               imuMount.setAngularVelocityBiasParameters(Double.parseDouble(angularVelocityNoise.getBias_mean()),
+                     Double.parseDouble(angularVelocityNoise.getBias_stddev()));
+               
+            }
+            else
+            {
+               throw new RuntimeException("Unknown IMU noise model: " + noise.getType());
+            }
+         }
+         
+         scsJoint.addIMUMount(imuMount);
+         
+      }
+      else
+      {
+         System.err.println("JAXB loader: No imu section defined for imu sensor " + sensor.getName() + ", ignoring sensor.");
+      }
+   }
+
+   private void addLidarMounts(SDFSensor sensor, Joint scsJoint, SDFLinkHolder child)
+   {
+      Ray sdfRay = sensor.getRay();
+      if (sdfRay == null)
+      {
+         System.err.println("SDFRobot: lidar not present in ray type sensor " + sensor.getName() + ". Ignoring this sensor.");
+      }
+      else
+      {
+         Range sdfRange = sdfRay.getRange();
+         Scan sdfScan = sdfRay.getScan();
+         double sdfMaxRange = Double.parseDouble(sdfRange.getMax());
+         double sdfMinRange = Double.parseDouble(sdfRange.getMin());
+         HorizontalScan sdfHorizontalScan = sdfScan.getHorizontal();
+         double sdfMaxAngle = Double.parseDouble(sdfHorizontalScan.getMaxAngle());
+         double sdfMinAngle = Double.parseDouble(sdfHorizontalScan.getMinAngle());
+         
+         // double sdfAngularResolution = Double.parseDouble(sdfHorizontalScan.getSillyAndProbablyNotUsefulResolution());
+         int sdfSamples = Integer.parseInt(sdfHorizontalScan.getSamples());
+         double sdfRangeResolution = Double.parseDouble(sdfRay.getRange().getResolution());
+         
+         boolean sdfAlwaysOn = true;
+         
+         double sdfGaussianStdDev = 0.0;
+         double sdfGaussianMean = 0.0;
+         double sdfUpdateRate = Double.parseDouble(sensor.getUpdateRate());
+         
+         Noise sdfNoise = sdfRay.getNoise();
+         if (sdfNoise != null)
+         {
+            if ("gaussian".equals(sdfNoise.getType()))
+            {
+               sdfGaussianStdDev = Double.parseDouble(sdfNoise.getStddev());
+               sdfGaussianMean = Double.parseDouble(sdfNoise.getMean());
+            }
+            else
+            {
+               System.err.println("Unknown noise model: " + sdfNoise.getType());
+            }
+         }
+         
+         System.err.println("[SDFRobot]: FIXME: Setting LIDAR angle to 0.5 pi due to current GPULidar limitations");
+         sdfMinAngle = -0.25 * Math.PI;
+         sdfMaxAngle = 0.25 * Math.PI;
+         
+         LidarScanParameters polarDefinition = new LidarScanParameters(sdfSamples, (float) sdfMinAngle, (float) sdfMaxAngle, 0.0f, (float) sdfMinRange, (float) sdfMaxRange, 0.0f);
+         
+         
+         Transform3D linkToSensor = SDFConversionsHelper.poseToTransform(sensor.getPose());
+         showCordinateSystem(scsJoint, linkToSensor);
+         
+         SimulatedLIDARSensorNoiseParameters noiseParameters = new SimulatedLIDARSensorNoiseParameters();
+         noiseParameters.setGaussianNoiseStandardDeviation(sdfGaussianStdDev);
+         noiseParameters.setGaussianNoiseMean(sdfGaussianMean);
+         
+         SimulatedLIDARSensorLimitationParameters limitationParameters = new SimulatedLIDARSensorLimitationParameters();
+         limitationParameters.setMaxRange(sdfMaxRange);
+         limitationParameters.setMinRange(sdfMinRange);
+         limitationParameters.setQuantization(sdfRangeResolution);
+         
+         SimulatedLIDARSensorUpdateParameters updateParameters = new SimulatedLIDARSensorUpdateParameters();
+         updateParameters.setAlwaysOn(sdfAlwaysOn);
+         updateParameters.setUpdateRate(sdfUpdateRate);
+         
+         
+         LidarMount lidarMount = new LidarMount(linkToSensor, polarDefinition);
+         scsJoint.addSensor(lidarMount);
+         
       }
    }
 
