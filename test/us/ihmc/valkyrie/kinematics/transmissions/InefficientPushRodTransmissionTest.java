@@ -7,7 +7,8 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.utilities.RandomTools;
-import us.ihmc.valkyrie.kinematics.ValkyrieJoint;
+import us.ihmc.valkyrie.kinematics.YoFilteredValkyrieJoint;
+import us.ihmc.valkyrie.kinematics.ValkyrieJointInterface;
 import us.ihmc.valkyrie.roboNet.DummyTurboDriver;
 import us.ihmc.valkyrie.roboNet.TurboDriver;
 
@@ -29,9 +30,9 @@ public class InefficientPushRodTransmissionTest
       actuatorData[0] = new DummyTurboDriver();
       actuatorData[1] = new DummyTurboDriver();
 
-      ValkyrieJoint[] jointData = new ValkyrieJoint[2];
-      jointData[0] = new ValkyrieJoint("joint0", null);
-      jointData[1] = new ValkyrieJoint("joint1", null);
+      ValkyrieJointInterface[] jointData = new ValkyrieJointInterface[2];
+      jointData[0] = new YoFilteredValkyrieJoint("joint0", null);
+      jointData[1] = new YoFilteredValkyrieJoint("joint1", null);
 
       double increment = 0.05;
       for (double pitch = -Math.PI / 3.0; pitch < Math.PI / 3.0; pitch = pitch + increment)
@@ -89,9 +90,9 @@ public class InefficientPushRodTransmissionTest
       actuatorData[0] = new DummyTurboDriver();
       actuatorData[1] = new DummyTurboDriver();
 
-      ValkyrieJoint[] jointData = new ValkyrieJoint[2];
-      jointData[0] = new ValkyrieJoint("joint0", null);
-      jointData[1] = new ValkyrieJoint("joint1", null);
+      ValkyrieJointInterface[] jointData = new ValkyrieJointInterface[2];
+      jointData[0] = new YoFilteredValkyrieJoint("joint0", null);
+      jointData[1] = new YoFilteredValkyrieJoint("joint1", null);
 
       double pitch = 0.0;
       double roll = 0.0;
@@ -133,7 +134,7 @@ public class InefficientPushRodTransmissionTest
    }
 
    private void verifyARegressionTest(InefficientPushRodTransmission inefficientPushrodTransmission, double pitch, double roll, TurboDriver[] actuatorData,
-                                      ValkyrieJoint[] jointData, double actuatorForce0, double actuatorForce1, double pitchTorque, double rollTorque)
+                                      ValkyrieJointInterface[] jointData, double actuatorForce0, double actuatorForce1, double pitchTorque, double rollTorque)
    {
       actuatorData[0].setEffortCommand(actuatorForce0);
       actuatorData[1].setEffortCommand(actuatorForce1);
