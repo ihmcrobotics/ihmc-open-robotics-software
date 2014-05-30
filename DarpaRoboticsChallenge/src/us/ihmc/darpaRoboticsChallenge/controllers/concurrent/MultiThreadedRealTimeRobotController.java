@@ -8,35 +8,23 @@ import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.realtime.RealtimeThread;
 import us.ihmc.utilities.Tuple;
 
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class MultiThreadedRealTimeRobotController
 {
    private final MultiThreadedRobotControlElement sensorReader;
    private final ArrayList<Tuple<MultiThreadedRobotControlElement, PriorityParameters, Processor>> robotControllers = new ArrayList<>();
-   private final MonotonicTime triggerTime = new MonotonicTime();
-   
-   private final YoVariableRegistry registry;   //TODO: Make this properly multi-thread safe for logging
-   private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
-   
+   private final MonotonicTime triggerTime = new MonotonicTime();   
    private final MonotonicTime monotonicTime = new MonotonicTime();
-   
-   public MultiThreadedRealTimeRobotController(MultiThreadedRobotControlElement sensorReader, YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+      
+   public MultiThreadedRealTimeRobotController(MultiThreadedRobotControlElement sensorReader)
    {
       this.sensorReader = sensorReader;
-      this.registry = registry;
-      this.dynamicGraphicObjectsListRegistry = dynamicGraphicObjectsListRegistry;
-      this.registry.addChild(sensorReader.getYoVariableRegistry());
-      this.dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsListRegistry(dynamicGraphicObjectsListRegistry);
    }
    
    public void addController(MultiThreadedRobotControlElement robotController, PriorityParameters priorityParameters, Processor processor)
    {
       robotControllers.add(new Tuple<MultiThreadedRobotControlElement, PriorityParameters, Processor>(robotController, priorityParameters, processor));
-      registry.addChild(robotController.getYoVariableRegistry());
-      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsListRegistry(robotController.getDynamicGraphicObjectsListRegistry());
    }
    
    public void read(double time)

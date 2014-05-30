@@ -9,7 +9,6 @@ import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSi
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.PIDLidarTorqueController;
-import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
 import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadDataSynchronizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -55,7 +54,7 @@ public class DRCSimulationFactory
 
    public DRCSimulationFactory(DRCRobotModel drcRobotModel, ControllerFactory controllerFactory, TerrainObject environmentTerrain,
          DRCRobotInitialSetup<SDFRobot> robotInitialSetup, ScsInitialSetup scsInitialSetup, DRCGuiInitialSetup guiInitialSetup,
-         GlobalDataProducer globalDataProducer, RobotVisualizer robotVisualizer)
+         GlobalDataProducer globalDataProducer)
    {
       simulatedDRCRobotTimeProvider = new SimulatedDRCRobotTimeProvider(drcRobotModel.getSimulateDT());
       simulatedRobot = drcRobotModel.createSdfRobot(false);
@@ -63,7 +62,7 @@ public class DRCSimulationFactory
       scs = new SimulationConstructionSet(simulatedRobot, guiInitialSetup.getGraphics3DAdapter(), scsInitialSetup.getSimulationDataBufferSize());
       scs.setDT(drcRobotModel.getSimulateDT(), 1);
 
-      createRobotController(drcRobotModel, controllerFactory, globalDataProducer, robotVisualizer, simulatedRobot, scs, scsInitialSetup, robotInitialSetup);
+      createRobotController(drcRobotModel, controllerFactory, globalDataProducer, simulatedRobot, scs, scsInitialSetup, robotInitialSetup);
 
       simulatedRobot.setDynamicIntegrationMethod(scsInitialSetup.getDynamicIntegrationMethod());
 
@@ -90,7 +89,7 @@ public class DRCSimulationFactory
    }
 
    private void createRobotController(DRCRobotModel drcRobotModel, ControllerFactory controllerFactory, GlobalDataProducer globalDataProducer,
-         RobotVisualizer robotVisualizer, SDFRobot simulatedRobot, SimulationConstructionSet scs, ScsInitialSetup scsInitialSetup,
+         SDFRobot simulatedRobot, SimulationConstructionSet scs, ScsInitialSetup scsInitialSetup,
          DRCRobotInitialSetup<SDFRobot> robotInitialSetup)
    {
       SensorNoiseParameters sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersZeroNoise();
@@ -102,17 +101,17 @@ public class DRCSimulationFactory
             stateEstimatorParameters.getSensorFilterParameters(), drcRobotModel.getSensorInformation().getIMUSensorsToUse());
 
       ThreadDataSynchronizer threadDataSynchronizer = new ThreadDataSynchronizer(drcRobotModel);
-      DRCOutputWriter drcOutputWriter = new DRCSimulationOutputWriter(simulatedRobot, robotVisualizer);
+      DRCOutputWriter drcOutputWriter = new DRCSimulationOutputWriter(simulatedRobot);
       if (DRCLocalConfigParameters.INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES)
       {
          drcOutputWriter = drcRobotModel.getOutputWriterWithAccelerationIntegration(drcOutputWriter, false);
       }
 
-      drcEstimatorThread = new DRCEstimatorThread(drcRobotModel, sensorReaderFactory, threadDataSynchronizer, drcOutputWriter, globalDataProducer,
-            drcRobotModel.getEstimatorDT(), gravity);
+      drcEstimatorThread = new DRCEstimatorThread(drcRobotModel, sensorReaderFactory, threadDataSynchronizer, globalDataProducer,
+            null, drcRobotModel.getEstimatorDT(), gravity);
 
       drcControllerThread = new DRCControllerThread(drcRobotModel, controllerFactory, lidarControllerInterface, threadDataSynchronizer, drcOutputWriter,
-            globalDataProducer, gravity);
+            globalDataProducer, null, gravity);
 
       if (RUN_MULTI_THREADED)
       {

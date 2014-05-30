@@ -3,21 +3,21 @@ package us.ihmc.robotDataCommunication;
 import java.nio.LongBuffer;
 import java.util.List;
 
-import us.ihmc.concurrent.dataStructures.ChangeListenerLongBuffer;
 import us.ihmc.robotDataCommunication.jointState.JointHolder;
 import us.ihmc.util.RealtimeTools;
 
-public class FullStateBuffer extends ChangeListenerLongBuffer
+import com.yobotics.simulationconstructionset.YoVariable;
+
+public class FullStateBuffer extends RegistryBuffer
 {
 
-   private long timestamp;
    private final double[] jointStates;
    private final List<JointHolder> jointHolders;
    private final int numberOfJointStates;
    
-   public FullStateBuffer(int numberOfVariables, List<JointHolder> jointHolders)
+   public FullStateBuffer(int variableOffset, List<YoVariable> variables, List<JointHolder> jointHolders)
    {
-      super(numberOfVariables);
+      super(variableOffset, variables);
       this.numberOfJointStates = getNumberOfJointStates(jointHolders);
       this.jointStates = new double[RealtimeTools.nextDivisibleByEight(this.numberOfJointStates)];
       this.jointHolders = jointHolders;
@@ -33,9 +33,10 @@ public class FullStateBuffer extends ChangeListenerLongBuffer
       return numberOfJointStates;
    }
    
-   public void updateJointStates(long timestamp)
+   @Override
+   public void update(long timestamp)
    {
-      this.timestamp = timestamp;
+      super.update(timestamp);
       
       int offset = 0;
       for(int i = 0; i < jointHolders.size(); i++)
@@ -56,25 +57,23 @@ public class FullStateBuffer extends ChangeListenerLongBuffer
 
    public static class Builder implements us.ihmc.concurrent.Builder<FullStateBuffer>
    {
-      private final int numberOfVariables;
       private final List<JointHolder> jointHolders;
+      private final int variableOffset;
+      private final List<YoVariable> variables;
       
-      public Builder(int numberOfVariables, List<JointHolder> jointHolders)
+      public Builder(int variableOffset, List<YoVariable> variables, List<JointHolder> jointHolders)
       {
-         this.numberOfVariables = numberOfVariables;
          this.jointHolders = jointHolders;
+         this.variableOffset = variableOffset;
+         this.variables = variables;
       }
 
       public FullStateBuffer newInstance()
       {
-         return new FullStateBuffer(numberOfVariables, jointHolders);
+         return new FullStateBuffer(variableOffset, variables, jointHolders);
       }
 
       
    }
 
-   public long getTimestamp()
-   {
-      return timestamp;
-   }
 }

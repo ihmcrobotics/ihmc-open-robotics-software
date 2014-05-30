@@ -1,34 +1,36 @@
 package us.ihmc.robotDataCommunication;
 
+import com.yobotics.simulationconstructionset.YoVariable;
+
 public class VariableChangedMessage
 {
-   private int id = -1;
+   private YoVariable variable;
    private double val = -1;
-   
+
    public VariableChangedMessage()
    {
    }
-   
-   public void setId(int id)
+
+   public YoVariable getVariable()
    {
-      this.id = id;
+      return variable;
    }
-   
+
+   public void setVariable(YoVariable variable)
+   {
+      this.variable = variable;
+   }
+
    public void setVal(double val)
    {
       this.val = val;
-   }
-
-   public int getId()
-   {
-      return id;
    }
 
    public double getVal()
    {
       return val;
    }
-   
+
    public static class Builder implements us.ihmc.concurrent.Builder<VariableChangedMessage>
    {
 
@@ -36,8 +38,7 @@ public class VariableChangedMessage
       {
          return new VariableChangedMessage();
       }
-      
+
    }
-   
-   
+
 }

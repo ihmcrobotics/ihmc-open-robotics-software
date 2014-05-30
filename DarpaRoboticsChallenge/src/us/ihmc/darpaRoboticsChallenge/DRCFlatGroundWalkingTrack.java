@@ -14,7 +14,6 @@ import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.robotSide.SideDependentList;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class DRCFlatGroundWalkingTrack
 {   
@@ -62,7 +61,7 @@ public class DRCFlatGroundWalkingTrack
       SideDependentList<String> footForceSensorNames = model.getSensorInformation().getFeetForceSensorNames();
       
       ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, DRCConfigParameters.contactTresholdForceForSCS, footForceSensorNames);
-      drcSimulation = new DRCSimulationFactory(model, controllerFactory, null, robotInitialSetup, scsInitialSetup, guiInitialSetup, null, robotVisualizer);
+      drcSimulation = new DRCSimulationFactory(model, controllerFactory, null, robotInitialSetup, scsInitialSetup, guiInitialSetup, null);
 
       if (automaticSimulationRunner != null)
       {
