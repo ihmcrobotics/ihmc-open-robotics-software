@@ -1,8 +1,5 @@
 package us.ihmc.commonWalkingControlModules.captureRegion;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.media.j3d.Transform3D;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -14,7 +11,6 @@ import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenc
 import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculationProvider;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
-import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -29,9 +25,10 @@ public class PushRecoveryControlModule
 {
    private static final double MINIMUM_TIME_BEFORE_RECOVER_WITH_REDUCED_POLYGON = 6;
    private static final double DOUBLESUPPORT_SUPPORT_POLYGON_SCALE = 0.85;
-   private static final double FAST_SWING_TIME = 0.4;
    private static final double TRUST_TIME_SCALE = 0.9; 
    private static final double MINIMUM_TIME_TO_REPLAN = 0.07;
+   private static final double MINIMUN_CAPTURE_REGION_AREA = 0.005;
+   private static final double REDUCE_SWING_TIME_COEFFICIENT = 0.6;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -46,25 +43,31 @@ public class PushRecoveryControlModule
    private final BooleanYoVariable enablePushRecovery = new BooleanYoVariable("enablePushRecovery", registry);
    private final CommonWalkingReferenceFrames referenceFrames;
    private final StateMachine<?> stateMachine;
+   private final SwingTimeCalculationProvider swingTimeCalculationProvider;
 
    private boolean recoveringFromDoubleSupportFall;
+   private boolean usingReducedSwingTime;
+   private double defaultSwingTime;
+   private double reducedSwinTime;
    private Footstep recoverFromDoubleSupportFallFootStep;
    private BooleanYoVariable readyToGrabNextFootstep;
 
    public PushRecoveryControlModule(MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters,
           BooleanYoVariable readyToGrabNextFootstep, ICPAndMomentumBasedController icpAndMomentumBasedController,
-          StateMachine<?> stateMachine, YoVariableRegistry parentRegistry)
+          StateMachine<?> stateMachine, YoVariableRegistry parentRegistry, SwingTimeCalculationProvider swingTimeCalculationProvider)
    {
       this.momentumBasedController = momentumBasedController;
       this.readyToGrabNextFootstep = readyToGrabNextFootstep;
       this.icpAndMomentumBasedController = icpAndMomentumBasedController;
       this.referenceFrames = momentumBasedController.getReferenceFrames();
       this.stateMachine = stateMachine;
+      this.swingTimeCalculationProvider = swingTimeCalculationProvider;
 
       enablePushRecovery.set(false);
 
       this.enablePushRecoveryFromDoubleSupport = new BooleanYoVariable("enablePushRecoveryFromDoubleSupport", registry);
       this.enablePushRecoveryFromDoubleSupport.set(false);
+      this.usingReducedSwingTime = false;
 
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
       captureRegionCalculator = new OneStepCaptureRegionCalculator(referenceFrames, walkingControllerParameters, registry, dynamicGraphicObjectsListRegistry);
@@ -91,7 +94,11 @@ public class PushRecoveryControlModule
 
       if (recoveringFromDoubleSupportFall)
       {
-         //swingTimeCalculatorProvider.resetFastSwingTime(); // to remove
+         if (usingReducedSwingTime)
+         {
+            this.swingTimeCalculationProvider.setSwingTime(defaultSwingTime);
+            usingReducedSwingTime = false;
+         }
          recoveringFromDoubleSupportFall = false;
       }
    }
@@ -179,8 +186,6 @@ public class PushRecoveryControlModule
                   recoverFromDoubleSupportFallFootStep = currentFootstep;
                   recoveringFromDoubleSupportFall = true;
 
-                  //swingTimeCalculatorProvider.setFastSwingTime(FAST_SWING_TIME); // to remove
-
                   return true;
                }
 
@@ -199,16 +204,23 @@ public class PushRecoveryControlModule
    {
       if (enablePushRecovery.getBooleanValue())
       {
-         // TODO: find a way to prevent to many replans
-//         if (footstepWasProjectedInCaptureRegion.getBooleanValue())
-//         {
-//            // can not re-plan again
-//            return false;
-//         }
-
          captureRegionCalculator.calculateCaptureRegion(swingSide, swingTimeRemaining, capturePoint2d, omega0, footPolygon);
          
-         //if(swingTimeRemaining < swingTimeCalculatorProvider.getValue() * 0.1)
+         // If the capture region is too small we reduce the swing time. 
+         // TODO: now we check only for double support, but should be extended also for single support removing 'isRecoveringFromDoubleSupportFall()'
+         if (isRecoveringFromDoubleSupportFall() && !usingReducedSwingTime && (captureRegionCalculator.getCaptureRegionArea() < PushRecoveryControlModule.MINIMUN_CAPTURE_REGION_AREA 
+                                                     || Double.isNaN(captureRegionCalculator.getCaptureRegionArea())))
+         {
+            this.defaultSwingTime = this.swingTimeCalculationProvider.getValue();
+            reducedSwinTime =  swingTimeRemaining*REDUCE_SWING_TIME_COEFFICIENT;
+            this.swingTimeCalculationProvider.setSwingTime(reducedSwinTime);
+            captureRegionCalculator.calculateCaptureRegion(swingSide, reducedSwinTime, capturePoint2d, omega0, footPolygon);
+            
+            //TODO: now actually if the capture region area is still NaN or too small we can re-reduce the swing time or prepare to fall
+            
+            this.usingReducedSwingTime = true;
+         }
+         
          if(swingTimeRemaining < MINIMUM_TIME_TO_REPLAN)
          {
             // do not replan if we are almost at touchdown
@@ -222,16 +234,16 @@ public class PushRecoveryControlModule
       return false;
    }
 
-   private FrameConvexPolygon2d computeFootPolygon(RobotSide robotSide, ReferenceFrame referenceFrame)
-   {
-      final List<FramePoint> tempContactPoints = new ArrayList<FramePoint>();
-      final FrameConvexPolygon2d tempFootPolygon = new FrameConvexPolygon2d(worldFrame);
-
-      momentumBasedController.getContactPoints(momentumBasedController.getContactablePlaneFeet().get(robotSide), tempContactPoints);
-      tempFootPolygon.setIncludingFrameByProjectionOntoXYPlaneAndUpdate(referenceFrame, tempContactPoints);
-
-      return tempFootPolygon;
-   }
+//   private FrameConvexPolygon2d computeFootPolygon(RobotSide robotSide, ReferenceFrame referenceFrame)
+//   {
+//      final List<FramePoint> tempContactPoints = new ArrayList<FramePoint>();
+//      final FrameConvexPolygon2d tempFootPolygon = new FrameConvexPolygon2d(worldFrame);
+//
+//      momentumBasedController.getContactPoints(momentumBasedController.getContactablePlaneFeet().get(robotSide), tempContactPoints);
+//      tempFootPolygon.setIncludingFrameByProjectionOntoXYPlaneAndUpdate(referenceFrame, tempContactPoints);
+//
+//      return tempFootPolygon;
+//   }
    
    public boolean isRecoveringFromDoubleSupportFall()
    {
@@ -250,7 +262,7 @@ public class PushRecoveryControlModule
 
    public double getTrustTimeToConsiderSwingFinished()
    {
-      return FAST_SWING_TIME * TRUST_TIME_SCALE;
+      return this.reducedSwinTime * TRUST_TIME_SCALE;
    }
 
    public void setRecoveringFromDoubleSupportState(boolean value)
