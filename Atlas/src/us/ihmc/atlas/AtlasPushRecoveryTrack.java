@@ -24,6 +24,7 @@ import com.yobotics.simulationconstructionset.util.FlatGroundProfile;
 public class AtlasPushRecoveryTrack
 {
    private static final DRCRobotModel defaultModelForGraphicSelector = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, false, false);
+   private final static boolean VISUALIZE_FORCE = true;
 
    public static void main(String[] args) throws JSAPException
    {
@@ -64,8 +65,8 @@ public class AtlasPushRecoveryTrack
 
       pushRobotController.addPushButtonToSCS(track.getSimulationConstructionSet());
       
-      double defaultForceDurationInSeconds = 0.05;
-      double defaultForceMagnitude = 400.0;
+      double defaultForceDurationInSeconds = 0.15;
+      double defaultForceMagnitude = 340.0;
       Vector3d defaultForceDirection = new Vector3d(1.0, 0.0, 0.0);
       
       SimulationConstructionSet scs = track.getSimulationConstructionSet();
@@ -77,6 +78,11 @@ public class AtlasPushRecoveryTrack
       // enable push recovery
       enable.set(true);
       enableDS.set(true);
+      
+      if(VISUALIZE_FORCE)
+      {
+         scs.addDynamicGraphicObject(pushRobotController.getForceVisualizer());
+      }
       
       pushRobotController.setPushDuration(defaultForceDurationInSeconds);
       pushRobotController.setPushForceMagnitude(defaultForceMagnitude);
