@@ -25,6 +25,7 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetPr
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
 import us.ihmc.valkyrie.io.ValkyrieOutputWriterWithAccelerationIntegration;
@@ -38,7 +39,9 @@ import us.ihmc.valkyrie.paramaters.ValkyrieStateEstimatorParameters;
 import us.ihmc.valkyrie.paramaters.ValkyrieWalkingControllerParameters;
 import us.ihmc.valkyrie.sensors.ValkyrieSensorSuiteManager;
 
+import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
+import com.jme3.math.Vector3f;
 import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
 
 public class ValkyrieRobotModel implements DRCRobotModel
@@ -54,7 +57,8 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private DRCRobotSensorInformation sensorInformation;
    private final DRCRobotJointMap jointMap;
    private final String robotName = "VALKYRIE";
-   
+   private final SideDependentList<Transform> offsetHandFromWrist = new SideDependentList<Transform>();
+
    
    private final String[] resourceDirectories = {
          valModelRoot.getResource("").getFile(),
@@ -140,7 +144,29 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public Transform getOffsetHandFromWrist(RobotSide side)
    {
-      return new Transform();
+//      if (offsetHandFromWrist.get(side) == null)
+//      {
+         createTransforms();
+//      }
+
+      return offsetHandFromWrist.get(side);
+   }
+   
+   private void createTransforms()
+   {
+      for(RobotSide robotSide : RobotSide.values())
+      {
+         Vector3f centerOfHandToWristTranslation = new Vector3f();
+         float[] angles = new float[3];
+
+            centerOfHandToWristTranslation = new Vector3f(0f, (float) robotSide.negateIfLeftSide(0.015f), -0.06f);
+            angles[0] = (float) robotSide.negateIfLeftSide(Math.toRadians(90));
+            angles[1] = 0.0f;   
+            angles[2] = (float) robotSide.negateIfLeftSide(Math.toRadians(90));
+//       
+         Quaternion centerOfHandToWristRotation = new Quaternion(angles);
+         offsetHandFromWrist.set(robotSide, new Transform(centerOfHandToWristTranslation, centerOfHandToWristRotation));
+      }
    }
 
    private String getSdfFile()
