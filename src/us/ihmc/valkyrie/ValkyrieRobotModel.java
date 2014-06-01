@@ -220,10 +220,10 @@ public class ValkyrieRobotModel implements DRCRobotModel
       ValkyrieOutputWriterWithAccelerationIntegration valkyrieOutputWriterWithAccelerationIntegration =
             new ValkyrieOutputWriterWithAccelerationIntegration(valkyrieOutputWriter, getControllerDT(), runningOnRealRobot);
 
-      valkyrieOutputWriterWithAccelerationIntegration.setAlphaDesiredVelocity(0.98);
-      valkyrieOutputWriterWithAccelerationIntegration.setAlphaDesiredPosition(0.0);
-      valkyrieOutputWriterWithAccelerationIntegration.setVelocityGains(15.0);
-      valkyrieOutputWriterWithAccelerationIntegration.setPositionGains(0.0);
+      valkyrieOutputWriterWithAccelerationIntegration.setAlphaDesiredVelocity(0.98, 0.0);
+      valkyrieOutputWriterWithAccelerationIntegration.setAlphaDesiredPosition(0.0, 0.0);
+      valkyrieOutputWriterWithAccelerationIntegration.setVelocityGains(15.0, 0.0);
+      valkyrieOutputWriterWithAccelerationIntegration.setPositionGains(0.0, 0.0);
 
       return valkyrieOutputWriterWithAccelerationIntegration;
    }
