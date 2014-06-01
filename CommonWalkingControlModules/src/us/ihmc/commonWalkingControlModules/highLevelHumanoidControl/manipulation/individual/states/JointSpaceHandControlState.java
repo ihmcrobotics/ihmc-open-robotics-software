@@ -27,7 +27,7 @@ import com.yobotics.simulationconstructionset.util.math.filter.RateLimitedYoVari
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGenerator;
 
 
-public class JointSpaceHandControlControlState extends AbstractJointSpaceHandControlState
+public class JointSpaceHandControlState extends AbstractJointSpaceHandControlState
 {
    private final OneDoFJoint[] oneDoFJoints;
    private final LinkedHashMap<OneDoFJoint, OneDoFJointQuinticTrajectoryGenerator> trajectories;
@@ -47,7 +47,7 @@ public class JointSpaceHandControlControlState extends AbstractJointSpaceHandCon
    
    private final double dt;
 
-   public JointSpaceHandControlControlState(String namePrefix, IndividualHandControlState stateEnum, RobotSide robotSide,
+   public JointSpaceHandControlState(String namePrefix, IndividualHandControlState stateEnum, RobotSide robotSide,
                                             InverseDynamicsJoint[] controlledJoints, MomentumBasedController momentumBasedController,
                                             ArmControllerParameters armControllerParameters, double dt, YoVariableRegistry parentRegistry)
    {
