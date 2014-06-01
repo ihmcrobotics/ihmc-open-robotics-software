@@ -6,6 +6,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.RobotSpecificJointNames;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
@@ -35,7 +36,7 @@ public class FullRobotModelCorruptor
    public FullRobotModelCorruptor(final FullRobotModel fullRobotModel, YoVariableRegistry parentRegistry)
    {
       FramePoint originalChestCoMOffset = new FramePoint();
-      RigidBody chest = fullRobotModel.getChest();
+      final RigidBody chest = fullRobotModel.getChest();
       chest.packCoMOffset(originalChestCoMOffset);
 
       chestCoMOffset = new YoFramePoint("chestCoMOffset", originalChestCoMOffset.getReferenceFrame(), registry);
@@ -46,11 +47,7 @@ public class FullRobotModelCorruptor
          @Override
          public void variableChanged(YoVariable<?> v)
          {
-            RigidBody chest = fullRobotModel.getChest();
-            tempFramePoint.setToZero(chestCoMOffset.getReferenceFrame());
-
-            chestCoMOffset.getFrameTuple(tempFramePoint);
-
+            chestCoMOffset.getFrameTupleIncludingFrame(tempFramePoint);
             chest.setCoMOffset(tempFramePoint);
          }
       });
@@ -68,10 +65,47 @@ public class FullRobotModelCorruptor
          }
       });
 
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         FramePoint originalArmCoMOffset = new FramePoint();
+         final RigidBody arm = fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_YAW).getSuccessor(); // TODO Hacked for Valkyrie
+         arm.packCoMOffset(originalArmCoMOffset);
 
+         final YoFramePoint armCoMOffset = new YoFramePoint(robotSide.getCamelCaseNameForStartOfExpression() + "ArmCoMOffset", originalArmCoMOffset.getReferenceFrame(), registry);
+         armCoMOffset.set(originalArmCoMOffset);
+
+         armCoMOffset.attachVariableChangedListener(new VariableChangedListener()
+         {
+            @Override
+            public void variableChanged(YoVariable<?> v)
+            {
+               armCoMOffset.getFrameTupleIncludingFrame(tempFramePoint);
+               arm.setCoMOffset(tempFramePoint);
+            }
+         });
+      }
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         FramePoint originalForearmCoMOffset = new FramePoint();
+         final RigidBody forearm = fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH).getSuccessor(); // TODO Hacked for Valkyrie
+         forearm.packCoMOffset(originalForearmCoMOffset);
+
+         final YoFramePoint forearmCoMOffset = new YoFramePoint(robotSide.getCamelCaseNameForStartOfExpression() + "ForearmCoMOffset", originalForearmCoMOffset.getReferenceFrame(), registry);
+         forearmCoMOffset.set(originalForearmCoMOffset);
+
+         forearmCoMOffset.attachVariableChangedListener(new VariableChangedListener()
+         {
+            @Override
+            public void variableChanged(YoVariable<?> v)
+            {
+               forearmCoMOffset.getFrameTupleIncludingFrame(tempFramePoint);
+               forearm.setCoMOffset(tempFramePoint);
+            }
+         });
+      }
 
       hipYawOffset = new YoFrameVector("hipYawOffset", null, registry);
-
       hipYawOffset.attachVariableChangedListener(new VariableChangedListener()
       {
          @Override
