@@ -15,7 +15,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccele
 import us.ihmc.commonWalkingControlModules.controlModules.SE3PDGains;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.AbstractJointSpaceHandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.InverseKinematicsTaskspaceHandPositionControlState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.JointSpaceHandControlControlState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.JointSpaceHandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.LoadBearingCylindricalHandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.LoadBearingPlaneHandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.LowLevelInverseKinematicsTaskspaceHandPositionControlState;
@@ -175,7 +175,7 @@ public class IndividualHandControlModule
       }
       else
       {
-         jointSpaceHandControlState = new JointSpaceHandControlControlState(namePrefix, IndividualHandControlState.JOINT_SPACE, robotSide, controlledJointsInJointSpaceState,
+         jointSpaceHandControlState = new JointSpaceHandControlState(namePrefix, IndividualHandControlState.JOINT_SPACE, robotSide, controlledJointsInJointSpaceState,
                momentumBasedController, armControlParameters, controlDT, registry);         
       }
 
