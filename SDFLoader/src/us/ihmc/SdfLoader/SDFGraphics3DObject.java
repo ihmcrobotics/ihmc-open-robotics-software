@@ -207,10 +207,18 @@ public class SDFGraphics3DObject extends Graphics3DObject
 
    private String convertToFullPath(ArrayList<String> resourceDirectories, String meshPath)
    {
+      // Test if the mesh path is actually a full path
+      File testFile = new File(meshPath);
+      if(testFile.exists())
+      {
+         return meshPath;
+      }
+
       if(meshPath.equals("__default__"))
       {
          meshPath = "file://media/materials/scripts/gazebo.material";
       }
+
       for (String resourceDirectory : resourceDirectories)
       {
          String fullPath;
@@ -230,13 +238,14 @@ public class SDFGraphics3DObject extends Graphics3DObject
          {
             fullPath = meshPath;
          }
-         
-         File testFile = new File(fullPath);
+
+         testFile = new File(fullPath);
          if(testFile.exists())
          {
             return fullPath;
          }
       }
+
       System.out.println(meshPath);
       throw new RuntimeException("Resource not found");
    }
