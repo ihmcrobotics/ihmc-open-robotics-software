@@ -107,7 +107,8 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       this.estimatorTicksPerControlTick = this.controlDTInNS / this.estimatorDTInNS;
       controllerFullRobotModel = threadDataSynchronizer.getControllerFullRobotModel();
       
-      new FullRobotModelCorruptor(controllerFullRobotModel, registry);
+      if (DRCConfigParameters.ALLOW_MODEL_CORRUPTION)
+         new FullRobotModelCorruptor(controllerFullRobotModel, registry);
       
       
       forceSensorDataHolderForController = threadDataSynchronizer.getControllerForceSensorDataHolder();
