@@ -10,7 +10,7 @@ import org.junit.Test;
 
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.valkyrie.kinematics.YoFilteredValkyrieJoint;
+import us.ihmc.valkyrie.kinematics.ValkyrieJoint;
 import us.ihmc.valkyrie.kinematics.ValkyrieJointInterface;
 import us.ihmc.valkyrie.roboNet.DummyTurboDriver;
 import us.ihmc.valkyrie.roboNet.TurboDriver;
@@ -159,8 +159,8 @@ public class ComparePushRodTransmissionsTest
       actuatorData[1] = new DummyTurboDriver();
 
       ValkyrieJointInterface[] jointData = new ValkyrieJointInterface[2];
-      jointData[0] = new YoFilteredValkyrieJoint("joint0", null);
-      jointData[1] = new YoFilteredValkyrieJoint("joint1", null);
+      jointData[0] = new ValkyrieJoint("joint0");
+      jointData[1] = new ValkyrieJoint("joint1");
 
       double increment = 0.05;
 
