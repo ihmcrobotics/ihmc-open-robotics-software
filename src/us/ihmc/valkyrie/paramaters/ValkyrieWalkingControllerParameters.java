@@ -1,10 +1,5 @@
 package us.ihmc.valkyrie.paramaters;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
-import javax.media.j3d.Transform3D;
-
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.robotSide.RobotSide;
@@ -15,6 +10,11 @@ import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
+import javax.media.j3d.Transform3D;
+import javax.vecmath.Vector3d;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 public class ValkyrieWalkingControllerParameters implements WalkingControllerParameters
 {
    private final boolean runningOnRealRobot;
@@ -22,6 +22,8 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    private final SideDependentList<Transform3D> handControlFramesWithRespectToFrameAfterWrist = new SideDependentList<Transform3D>();
    private final SideDependentList<Transform3D> handPosesWithRespectToChestFrame = new SideDependentList<Transform3D>();
    private final double minElbowRollAngle = 0.5;
+
+   private final Vector3d footstepOffsetForScripts = new Vector3d(0.0, 0.0, 0.0);
    
    private final double upperNeckExtensorUpperLimit = 0.785398;
    private final double upperNeckExtensorLowerLimit = -0.0872665;
@@ -572,5 +574,11 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    public double getDesiredTouchdownVelocity()
    {
       return -0.3;
+   }
+
+   @Override
+   public Vector3d getFootstepOffsetForScripts()
+   {
+      return footstepOffsetForScripts;
    }
 }
