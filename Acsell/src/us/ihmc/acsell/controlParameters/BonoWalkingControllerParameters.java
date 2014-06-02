@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.media.j3d.Transform3D;
+import javax.vecmath.Vector3d;
 
 import us.ihmc.acsell.parameters.BonoPhysicalProperties;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -22,6 +23,8 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    private final SideDependentList<Transform3D> handPosesWithRespectToChestFrame = new SideDependentList<Transform3D>();
 
    private final boolean runningOnRealRobot;
+
+   private final Vector3d footstepOffsetForScripts = new Vector3d(0.0, 0.0, 0.0);
    
    public BonoWalkingControllerParameters()
    {
@@ -480,5 +483,11 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    public double getDesiredTouchdownVelocity()
    {
       return -0.3;
+   }
+
+   @Override
+   public Vector3d getFootstepOffsetForScripts()
+   {
+      return footstepOffsetForScripts;
    }
 }
