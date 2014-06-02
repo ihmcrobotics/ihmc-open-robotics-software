@@ -80,7 +80,7 @@ public class ElasticityCompensatorYoVariable extends DoubleYoVariable
    public void update(double rawJointPosition, double jointTau)
    {
       double jointDeflection;
-      if (Math.abs(stiffness.getDoubleValue()) > 1e-10)
+      if (stiffness.getDoubleValue() > 1e-10)
       {
          jointDeflection = jointTau / stiffness.getDoubleValue();
          jointDeflection = MathTools.clipToMinMax(jointDeflection, maximuDeflection.getDoubleValue());
@@ -88,7 +88,7 @@ public class ElasticityCompensatorYoVariable extends DoubleYoVariable
       }
       else
       {
-         this.set(0.0);
+         throw new RuntimeException("Joint stiffness is zero or negative!");
       }
    }
 }
