@@ -1,6 +1,8 @@
 package us.ihmc.robotDataCommunication.logger;
 
 import java.awt.BorderLayout;
+import java.awt.FileDialog;
+import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -115,25 +117,33 @@ public class YoVariableLogVisualizerGUI extends JPanel
          final long startTimestamp = timestamps[0];
          final long endTimestamp = timestamps[1];
          
+         FileDialog saveDialog = new FileDialog((Frame) null, "Export video", FileDialog.SAVE);
          
-         JFileChooser saveDialog = new JFileChooser(System.getProperty("user.home"));
-         saveDialog.setFileFilter(new MovieFileFilter());
+         MovieFileFilter filter = new MovieFileFilter();
+         saveDialog.setFilenameFilter(filter);         
+         saveDialog.setVisible(true);
          
-         if (JFileChooser.APPROVE_OPTION == saveDialog.showSaveDialog(this))
+         String file = saveDialog.getFile();
+         if (file != null)
          {
-            final File selectedFile = saveDialog.getSelectedFile();
-            
-            new Thread()
+            final File selectedFile = new File(saveDialog.getDirectory(), saveDialog.getFile());
+            if (!filter.accept(selectedFile))
             {
-               @Override
-               public void run()
+               JOptionPane
+                     .showMessageDialog(scs.getJFrame(), "Unknown file type \"" + saveDialog.getFile() + "\"\nExcpected: \n" + filter.getDescription());
+            }
+            else
+            {
+               new Thread()
                {
-                  multiPlayer.exportCurrentVideo(selectedFile, startTimestamp, endTimestamp);
-               }
-            }.start();
-            
+                  @Override
+                  public void run()
+                  {
+                     multiPlayer.exportCurrentVideo(selectedFile, startTimestamp, endTimestamp);
+                  }
+               }.start();
+            }
          }
-         
          
       }
       
