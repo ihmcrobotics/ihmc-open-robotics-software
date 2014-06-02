@@ -1,59 +1,63 @@
 package us.ihmc.robotDataCommunication.logger;
 
 import java.awt.BorderLayout;
+import java.awt.FileDialog;
+import java.awt.Frame;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
-
-import javax.swing.Action;
-import javax.swing.ActionMap;
-import javax.swing.JFileChooser;
-import javax.swing.JTable;
 
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.SDFJointNameMap;
 import us.ihmc.robotDataCommunication.VisualizerUtils;
 import us.ihmc.robotDataCommunication.YoVariableHandshakeParser;
-import us.ihmc.utilities.SwingUtils;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class YoVariableLogVisualizer
 {
-   private static final String defaultLogReadingDirectory = "/media/remote/RobotLogs";
-
    private final SDFJointNameMap jointNameMap;
    private final GeneralizedSDFRobotModel generalizedSDFRobotModel;
    private final String timeVariableName;
-   private final int bufferSize;
    protected final SimulationConstructionSet scs;
 
    public YoVariableLogVisualizer(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap jointNameMap, String timeVariableName, 
          int bufferSize, boolean showOverheadView, File logFile) throws IOException
    {
-      this.bufferSize = bufferSize;
       this.generalizedSDFRobotModel = generalizedSDFRobotModel;
       this.jointNameMap = jointNameMap;
       this.timeVariableName = timeVariableName;
 
       if (logFile == null)
       {
-         final JFileChooser fileChooser = new JFileChooser(new File(defaultLogReadingDirectory));
-         sortByDateHack(fileChooser);  
+         final FileDialog fileDialog = new FileDialog((Frame) null, "Choose logging directory");
+         fileDialog.setMode(FileDialog.LOAD);
          
-         fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-         int returnValue = fileChooser.showOpenDialog(null);
-         if(returnValue == JFileChooser.APPROVE_OPTION)
+         fileDialog.setFilenameFilter(new FilenameFilter()
          {
-            logFile = fileChooser.getSelectedFile();
+            
+            @Override
+            public boolean accept(File dir, String name)
+            {
+               return ("robotData.log".equals(name));
+            }
+         });
+         
+         fileDialog.setVisible(true);         
+         String filename = fileDialog.getDirectory();
+         if(filename != null)
+         {
+            logFile = new File(filename);
          }
          else
          {
-            System.err.println("No file selected, closing.");
+            System.err.println("No file selected, closing");
          }
+         
       }
       
       if(logFile != null)
@@ -67,27 +71,6 @@ public class YoVariableLogVisualizer
          scs=null;
       }
       
-   }
-
-   private void sortByDateHack(final JFileChooser fileChooser)
-   {
-      
-      // Found this hack on http://stackoverflow.com/questions/16429779/start-a-jfilechooser-with-files-ordered-by-date
-      ActionMap actionMap = fileChooser.getActionMap();
-      Action details = actionMap.get("viewTypeDetails");
-      if(details != null)
-      {
-         details.actionPerformed(null);
-   
-         //  Find the JTable on the file chooser panel and manually do the sort
-   
-         JTable table = SwingUtils.getDescendantsOfType(JTable.class, fileChooser).get(0);
-         table.getRowSorter().toggleSortOrder(2); table.getRowSorter().toggleSortOrder(2);
-      }
-      else
-      {
-         System.err.println("sort by datetime doesn't work known on OSX ... bail out");
-      }
    }
 
    private void readLogFile(File selectedFile, boolean showOverheadView) throws IOException
