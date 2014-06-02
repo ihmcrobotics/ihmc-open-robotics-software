@@ -28,7 +28,9 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    private final SideDependentList<Transform3D> handControlFramesWithRespectToFrameAfterWrist = new SideDependentList<Transform3D>();
    private final SideDependentList<Transform3D> handPosesWithRespectToChestFrame = new SideDependentList<Transform3D>();
    private final double minElbowRollAngle = 0.5;
-   
+
+   private final Vector3d footstepOffsetForScripts = new Vector3d(0.0, 0.0, 0.0);
+
    // Limits
    private final double neck_pitch_upper_limit = 1.14494; //0.83;    // true limit is = 1.134460, but pitching down more just looks at more robot chest
    private final double neck_pitch_lower_limit = -0.602139; //-0.610865;    // -math.pi/2.0;
@@ -604,6 +606,12 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    public double getDesiredTouchdownVelocity()
    {
       return -0.3;
+   }
+
+   @Override
+   public Vector3d getFootstepOffsetForScripts()
+   {
+      return footstepOffsetForScripts;
    }
 }
 
