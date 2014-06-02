@@ -126,6 +126,36 @@ public class ElasticityCompensatorYoVariableTest
    }
 
    @Test
+   public void testZeroStiffness4()
+   {
+      Random random = new Random(1561651L);
+      
+      String name = "compensator";
+      YoVariableRegistry registry = new YoVariableRegistry("");
+      DoubleYoVariable stiffness = new DoubleYoVariable("stiffness", registry);
+      DoubleYoVariable rawJointPosition = new DoubleYoVariable("rawJointPosition", registry);
+      DoubleYoVariable jointTau = new DoubleYoVariable("jointTau", registry);
+      ElasticityCompensatorYoVariable elasticityCompensatorYoVariable = new ElasticityCompensatorYoVariable(name, stiffness, rawJointPosition, jointTau, registry);
+      stiffness.set(0.0);
+      
+      for (int i = 0; i < 1000; i++)
+      {
+         rawJointPosition.set(RandomTools.generateRandomDouble(random, 100.0));
+         jointTau.set(RandomTools.generateRandomDouble(random, 100.0));
+         
+         try
+         {
+            elasticityCompensatorYoVariable.update();
+            fail("Should have thrown an exception");
+         }
+         catch (RuntimeException e)
+         {
+            // Good
+         }
+      }
+   }
+
+   @Test
    public void testZeroMaximumDeflection4()
    {
       Random random = new Random(1561651L);

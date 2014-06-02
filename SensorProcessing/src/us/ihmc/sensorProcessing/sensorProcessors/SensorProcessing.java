@@ -1,6 +1,7 @@
 package us.ihmc.sensorProcessing.sensorProcessors;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.vecmath.Matrix3d;
@@ -32,6 +33,8 @@ public class SensorProcessing implements SensorOutputMapReadOnly
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final ObjectObjectMap<OneDoFJoint, DoubleYoVariable> jointPositionRawValues = new ObjectObjectMap<OneDoFJoint, DoubleYoVariable>();
+   private final ObjectObjectMap<OneDoFJoint, ElasticityCompensatorYoVariable> jointPositionsDeflected = new ObjectObjectMap<OneDoFJoint, ElasticityCompensatorYoVariable>();
+   private final ObjectObjectMap<OneDoFJoint, DoubleYoVariable> jointStiffnesses = new ObjectObjectMap<OneDoFJoint, DoubleYoVariable>();
    private final ObjectObjectMap<OneDoFJoint, AlphaFilteredYoVariable> jointPositionFilteredValues = new ObjectObjectMap<OneDoFJoint, AlphaFilteredYoVariable>();
    private final DoubleYoVariable jointPositionAlpha = new DoubleYoVariable("jointPositionAlpha", registry);
    
@@ -55,12 +58,14 @@ public class SensorProcessing implements SensorOutputMapReadOnly
    private final ObjectObjectMap<IMUDefinition, AlphaFilteredYoFrameVector> linearAccelerationFilteredValues = new ObjectObjectMap<IMUDefinition, AlphaFilteredYoFrameVector>();
    private final DoubleYoVariable linearAccelerationAlpha = new DoubleYoVariable("linearAccelerationAlpha", registry);
    
-   private final ObjectObjectMap<OneDoFJoint, DoubleYoVariable> jointForceMeasured = new ObjectObjectMap<OneDoFJoint, DoubleYoVariable>();
+   private final ObjectObjectMap<OneDoFJoint, DoubleYoVariable> jointTauRawValues = new ObjectObjectMap<OneDoFJoint, DoubleYoVariable>();
    
    private final ArrayList<IMUSensor> imuOutputs = new ArrayList<IMUSensor>();
 
    private final boolean useTwoPolesForIMUFiltering;
    private final boolean doFiniteDifferenceForJointVelocities;
+
+   private final boolean doElasticityCompensation;
 
    public SensorProcessing(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, SensorFilterParameters sensorFilterParameters,
                                       SensorNoiseParameters sensorNoiseParameters, YoVariableRegistry parentRegistry)
@@ -86,6 +91,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       }
       
       doFiniteDifferenceForJointVelocities = sensorFilterParameters.getDoFiniteDifferenceForJointVelocities();
+      doElasticityCompensation = sensorFilterParameters.isDoElasticityCompensation();
       
       double updateDT = sensorFilterParameters.getEstimatorDT();
       jointPositionAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(sensorFilterParameters.getJointPositionFilterFrequencyInHertz(), updateDT));
@@ -97,11 +103,34 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       List<OneDoFJoint> jointPositionSensorDefinitions = stateEstimatorSensorDefinitions.getJointPositionSensorDefinitions();
       for (OneDoFJoint oneDoFJoint : jointPositionSensorDefinitions)
       {
-         DoubleYoVariable rawJointPosition = new DoubleYoVariable("raw_q_" + oneDoFJoint.getName(), registry);
+         String jointName = oneDoFJoint.getName();
+         DoubleYoVariable jointTauRawValue = new DoubleYoVariable("raw_tau_" + jointName, registry);
+         jointTauRawValues.add(oneDoFJoint, jointTauRawValue);
+      }
+      
+      for (OneDoFJoint oneDoFJoint : jointPositionSensorDefinitions)
+      {
+         String jointName = oneDoFJoint.getName();
+         DoubleYoVariable rawJointPosition = new DoubleYoVariable("raw_q_" + jointName, registry);
          jointPositionRawValues.add(oneDoFJoint, rawJointPosition);
+         
+         if (doElasticityCompensation)
+         {
+            DoubleYoVariable jointStiffness = new DoubleYoVariable(jointName + "Stiffness", registry);
+            HashMap<String, Double> jointSpecificStiffness = sensorFilterParameters.getJointSpecificStiffness();
+            if (jointSpecificStiffness != null && jointSpecificStiffness.get(jointName) != null)
+               jointStiffness.set(jointSpecificStiffness.get(jointName));
+            else
+               jointStiffness.set(sensorFilterParameters.getDefaultJointStiffness());
+            jointStiffnesses.add(oneDoFJoint, jointStiffness);
+            
+            ElasticityCompensatorYoVariable jointPositionDeflected = new ElasticityCompensatorYoVariable("stiff_q_" + jointName, jointStiffness, rawJointPosition, jointTauRawValues.get(oneDoFJoint), parentRegistry);
+            jointPositionsDeflected.add(oneDoFJoint, jointPositionDeflected);
+            
+            rawJointPosition = jointPositionDeflected;
+         }
 
-         AlphaFilteredYoVariable filteredJointPosition = new AlphaFilteredYoVariable("filt_q_" + oneDoFJoint.getName(), registry, jointPositionAlpha,
-                                                            rawJointPosition);
+         AlphaFilteredYoVariable filteredJointPosition = new AlphaFilteredYoVariable("filt_q_" + jointName, registry, jointPositionAlpha, rawJointPosition);
          jointPositionFilteredValues.add(oneDoFJoint, filteredJointPosition);
       }
 
@@ -190,6 +219,11 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       jointVelocityRawValues.get(oneDoFJoint).set(value);
    }
 
+   public void setJointTauSensorValue(OneDoFJoint oneDoFJoint, double value)
+   {
+      jointTauRawValues.get(oneDoFJoint).set(value);
+   }
+
    public void setOrientationSensorValue(IMUDefinition imuDefinition, Quat4d value)
    {
       YoFrameQuaternion rawOrientation = orientationRawValues.get(imuDefinition);
@@ -237,6 +271,16 @@ public class SensorProcessing implements SensorOutputMapReadOnly
    
    public void startComputation()
    {
+      if (doElasticityCompensation)
+      {
+         for (int i = 0; i < jointPositionsDeflected.getLength(); i++)
+         {
+            if (jointPositionsDeflected.getFirst(i).getName().contains("l_leg_hpx"))
+               System.out.println();
+            jointPositionsDeflected.getSecond(i).update();
+         }
+      }
+
       for (int i = 0; i < jointPositionFilteredValues.getLength(); i++)
       {
          AlphaFilteredYoVariable jointPosition = jointPositionFilteredValues.getSecond(i);

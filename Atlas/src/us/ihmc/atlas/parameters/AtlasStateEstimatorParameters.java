@@ -83,8 +83,8 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
       useTwoPolesForIMUFiltering = false;
       doFiniteDifferenceForJointVelocities = false;
 
-      doElasticityCompensation = false;
-      defaultJointStiffness = 100000.0;
+      doElasticityCompensation = runningOnRealRobot;
+      defaultJointStiffness = 10000.0;
       for (RobotSide robotSide : RobotSide.values)
       {
          jointSpecificStiffness.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW), 7000.0);

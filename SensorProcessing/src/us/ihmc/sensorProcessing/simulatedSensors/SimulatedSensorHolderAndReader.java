@@ -28,6 +28,7 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
 
    private final ObjectObjectMap<OneDoFJoint, SimulatedOneDoFJointPositionSensor> jointPositionSensors = new ObjectObjectMap<OneDoFJoint, SimulatedOneDoFJointPositionSensor>();
    private final ObjectObjectMap<OneDoFJoint, SimulatedOneDoFJointVelocitySensor> jointVelocitySensors = new ObjectObjectMap<OneDoFJoint, SimulatedOneDoFJointVelocitySensor>();
+   private final ObjectObjectMap<OneDoFJoint, SimulatedOneDoFJointTorqueSensor> jointTorqueSensors = new ObjectObjectMap<OneDoFJoint, SimulatedOneDoFJointTorqueSensor>();
 
    private final ObjectObjectMap<IMUDefinition, SimulatedOrientationSensorFromRobot> orientationSensors = new ObjectObjectMap<IMUDefinition, SimulatedOrientationSensorFromRobot>();
 
@@ -73,6 +74,11 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
       jointPositionSensors.add(oneDoFJoint, jointPositionSensor);
    }
 
+   public void addJointTorqueSensorPort(OneDoFJoint oneDoFJoint, SimulatedOneDoFJointTorqueSensor jointTorqueSensor)
+   {
+      jointTorqueSensors.add(oneDoFJoint, jointTorqueSensor);
+   }
+
    public void addJointVelocitySensorPort(OneDoFJoint oneDoFJoint, SimulatedOneDoFJointVelocitySensor jointVelocitySensor)
    {
       jointVelocitySensors.add(oneDoFJoint, jointVelocitySensor);
@@ -114,19 +120,30 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
    {
       for (int i = 0; i < jointPositionSensors.getLength(); i++)
       {
+         OneDoFJoint oneDoFJoint = jointPositionSensors.getFirst(i);
          SimulatedOneDoFJointPositionSensor simulatedOneDoFJointPositionSensor = jointPositionSensors.getSecond(i);
          simulatedOneDoFJointPositionSensor.startComputation();
          simulatedOneDoFJointPositionSensor.waitUntilComputationIsDone();
-         Double value = simulatedOneDoFJointPositionSensor.getJointPositionOutputPort().getData();
-         sensorProcessing.setJointPositionSensorValue(jointPositionSensors.getFirst(i), value);
+         Double q = simulatedOneDoFJointPositionSensor.getJointPositionOutputPort().getData();
+         sensorProcessing.setJointPositionSensorValue(oneDoFJoint, q);
 
          BacklashCompensatingVelocityYoVariable finiteDifferenceVelocity = finiteDifferenceVelocities.getSecond(i);
-         finiteDifferenceVelocity.update(value);
+         finiteDifferenceVelocity.update(q);
 
          if (useFiniteDifferencesForVelocities.getBooleanValue())
          {
             sensorProcessing.setJointVelocitySensorValue(jointVelocitySensors.getFirst(i), finiteDifferenceVelocity.getDoubleValue());
          }
+      }
+
+      for (int i = 0; i < jointTorqueSensors.getLength(); i++)
+      {
+         OneDoFJoint oneDoFJoint = jointTorqueSensors.getFirst(i);
+         SimulatedOneDoFJointTorqueSensor simulatedOneDoFJointTorqueSensor = jointTorqueSensors.getSecond(i);
+         simulatedOneDoFJointTorqueSensor.startComputation();
+         simulatedOneDoFJointTorqueSensor.waitUntilComputationIsDone();
+         Double tau = simulatedOneDoFJointTorqueSensor.getJointTorqueOutputPort().getData();
+         sensorProcessing.setJointTauSensorValue(oneDoFJoint, tau);
       }
 
       if (!useFiniteDifferencesForVelocities.getBooleanValue())

@@ -130,6 +130,7 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
 
          SimulatedOneDoFJointPositionSensor positionSensor = new SimulatedOneDoFJointPositionSensor(oneDegreeOfFreedomJoint.getName(), oneDegreeOfFreedomJoint);
          SimulatedOneDoFJointVelocitySensor velocitySensor = new SimulatedOneDoFJointVelocitySensor(oneDegreeOfFreedomJoint.getName(), oneDegreeOfFreedomJoint);
+         SimulatedOneDoFJointTorqueSensor torqueSensor = new SimulatedOneDoFJointTorqueSensor(oneDegreeOfFreedomJoint.getName(), oneDegreeOfFreedomJoint);
 
 //         if (oneDegreeOfFreedomJoint.getName().contains("bky"))
 //         {
@@ -155,6 +156,7 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
          
          simulatedSensorHolderAndReader.addJointPositionSensorPort(oneDoFJoint, positionSensor);
          simulatedSensorHolderAndReader.addJointVelocitySensorPort(oneDoFJoint, velocitySensor);
+         simulatedSensorHolderAndReader.addJointTorqueSensorPort(oneDoFJoint, torqueSensor);
       }
    }
 
