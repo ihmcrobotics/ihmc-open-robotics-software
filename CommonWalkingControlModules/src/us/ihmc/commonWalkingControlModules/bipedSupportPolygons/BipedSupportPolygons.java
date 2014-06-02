@@ -16,7 +16,6 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.plotting.DynamicGraphicYoPolygonArtifact;
 import com.yobotics.simulationconstructionset.time.GlobalTimer;
 import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameConvexPolygon2d;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameLineSegment2d;
@@ -85,8 +84,7 @@ public class BipedSupportPolygons
       supportPolygonViz = new YoFrameConvexPolygon2d("combinedPolygon", "", worldFrame, 30, registry);
       footToFootSegmentViz = new YoFrameLineSegment2d("footToFoot", "", worldFrame, registry);
 
-      DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList("VTP Calculator");
-      ArtifactList artifactList = new ArtifactList("VTP Calculator");
+      ArtifactList artifactList = new ArtifactList("Biped Support Polygon");
 
       DynamicGraphicYoPolygonArtifact dynamicGraphicYoPolygonArtifact = new DynamicGraphicYoPolygonArtifact("Combined Polygon", supportPolygonViz, Color.pink,
             false);
@@ -107,7 +105,6 @@ public class BipedSupportPolygons
 
       if (dynamicGraphicObjectsListRegistry != null)
       {
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
          dynamicGraphicObjectsListRegistry.registerArtifactList(artifactList);
       }
 
