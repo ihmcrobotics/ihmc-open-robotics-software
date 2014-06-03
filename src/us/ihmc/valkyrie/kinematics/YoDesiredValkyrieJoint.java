@@ -1,19 +1,26 @@
 package us.ihmc.valkyrie.kinematics;
 
-public class ValkyrieJoint implements ValkyrieJointInterface
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+
+public class YoDesiredValkyrieJoint implements ValkyrieJointInterface
 {
    private final String name;
    private double q;
    private double qd;
    private double f;
    
-   private double q_d;
-   private double qd_d;
-   private double f_d;
+   private final DoubleYoVariable q_d;
+   private final DoubleYoVariable qd_d;
+   private final DoubleYoVariable f_d;
    
-   public ValkyrieJoint(String name)
+   public YoDesiredValkyrieJoint(String name, YoVariableRegistry registry)
    {
       this.name = name;
+      
+      this.q_d = new DoubleYoVariable(name + "_q_d", registry);
+      this.qd_d = new DoubleYoVariable(name + "_qd_d", registry);
+      this.f_d = new DoubleYoVariable(name + "_tau_d", registry);
    }
 
    @Override
@@ -61,37 +68,37 @@ public class ValkyrieJoint implements ValkyrieJointInterface
    @Override
    public double getDesiredEffort()
    {
-      return f_d;
+      return f_d.getDoubleValue();
    }
 
    @Override
    public void setDesiredEffort(double effort)
    {
-      this.f_d = effort;
+      this.f_d.set(effort);
    }
 
    @Override
    public double getDesiredPosition()
    {
-      return q_d;
+      return q_d.getDoubleValue();
    }
 
    @Override
    public void setDesiredPosition(double position)
    {
-      this.q_d = position;
+      this.q_d.set(position);
    }
 
    @Override
    public double getDesiredVelocity()
    {
-      return qd_d;
+      return qd_d.getDoubleValue();
    }
 
    @Override
    public void setDesiredVelocity(double velocity)
    {
-      this.qd_d = velocity;
+      this.qd_d.set(velocity);
    }
 
 }
