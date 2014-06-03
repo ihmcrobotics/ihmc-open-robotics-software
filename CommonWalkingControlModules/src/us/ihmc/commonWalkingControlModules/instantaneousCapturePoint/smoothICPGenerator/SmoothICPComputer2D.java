@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPG
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
+import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.InstantaneousCapturePointPlanner;
@@ -128,6 +129,12 @@ public class SmoothICPComputer2D extends DoubleSupportFootCenterToToeICPComputer
       //TODO: Need to use Frames throughout here, or don't assume this!
       FramePoint2d ret = new FramePoint2d(ReferenceFrame.getWorldFrame(), upcomingCornerPoint.getX(), upcomingCornerPoint.getY());
       return ret;
+   }
+   
+   public FramePoint2d getConstantCenterOfPressure()
+   {
+      // Returns first element in list of constant centers of pressure from ICP planner.
+      return super.getConstantCentersOfPressure().get(0).getFramePoint2dCopy();
    }
 
 

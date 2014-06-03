@@ -9,6 +9,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
@@ -272,6 +273,8 @@ public class DoubleSupportFootCenterToToeICPComputer
 
          singleSupportStartICP = NewDoubleSupportICPComputer.computeSingleSupportStartICP(supportFoot, cornerPoint0, doubleSupportDuration,
                doubleSupportFirstStepFraction, this.omega0.getDoubleValue());
+         
+         upcomingCornerPoint = footCenterICPCornerFramePoints.get(1).getPoint3dCopy();
       }
    }
 
@@ -710,6 +713,13 @@ public class DoubleSupportFootCenterToToeICPComputer
    public List<YoFramePoint> getConstantCentersOfPressure()
    {
       return constantFootCenterCentersOfPressure;
+   }
+   
+   public FramePoint2d getSingleSupportStartICP()
+   {
+      FramePoint2d tmpPoint = new FramePoint2d();
+      tmpPoint.set(singleSupportStartICP.getX(), singleSupportStartICP.getY());
+      return tmpPoint;
    }
 
    public List<YoFramePoint> getFootCenterICPCornerPoints()

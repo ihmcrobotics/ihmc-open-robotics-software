@@ -99,10 +99,12 @@ public class NewDoubleSupportICPComputer
 
       int numberInFootlist = footLocations.size();
       Point3d positionToHoldAt = new Point3d();
+      
+      YoFramePoint centerOfPressureLocation;
 
       for (int i = 0; i < maxNumberOfConsideredFootsteps; i++)
       {
-         YoFramePoint centerOfPressureLocation = constantCentersOfPressureToModify.get(i);
+         centerOfPressureLocation = constantCentersOfPressureToModify.get(i);
 
          if (i == 0)
          {

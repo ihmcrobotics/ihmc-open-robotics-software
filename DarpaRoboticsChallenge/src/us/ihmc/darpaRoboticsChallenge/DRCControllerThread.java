@@ -191,7 +191,6 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
         }
       }
       
-
       if (CREATE_DYNAMICALLY_CONSISTENT_NULLSPACE_EVALUATOR)
       {
          RobotController dynamicallyConsistentNullspaceEvaluator = new ConstrainedCenterOfMassJacobianEvaluator(controllerModel);
