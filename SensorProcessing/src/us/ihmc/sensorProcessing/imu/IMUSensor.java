@@ -37,13 +37,26 @@ public class IMUSensor implements IMUSensorReadOnly
       measurementFrame = imuDefinition.getIMUFrame();
       measurementLink = imuDefinition.getRigidBody();
 
-      orientationNoiseCovariance = createDiagonalCovarianceMatrix(sensorNoiseParameters.getOrientationMeasurementStandardDeviation());
+      if (sensorNoiseParameters != null)
+      {
+         orientationNoiseCovariance = createDiagonalCovarianceMatrix(sensorNoiseParameters.getOrientationMeasurementStandardDeviation());
 
-      angularVelocityNoiseCovariance = createDiagonalCovarianceMatrix(sensorNoiseParameters.getAngularVelocityMeasurementStandardDeviation());
-      angularVelocityBiasProcessNoiseCovariance = createDiagonalCovarianceMatrix(sensorNoiseParameters.getAngularVelocityBiasProcessNoiseStandardDeviation());
+         angularVelocityNoiseCovariance = createDiagonalCovarianceMatrix(sensorNoiseParameters.getAngularVelocityMeasurementStandardDeviation());
+         angularVelocityBiasProcessNoiseCovariance = createDiagonalCovarianceMatrix(sensorNoiseParameters.getAngularVelocityBiasProcessNoiseStandardDeviation());
 
-      linearAccelerationNoiseCovariance = createDiagonalCovarianceMatrix(sensorNoiseParameters.getLinearAccelerationMeasurementStandardDeviation());
-      linearAccelerationBiasProcessNoiseCovariance = createDiagonalCovarianceMatrix(sensorNoiseParameters.getLinearAccelerationBiasProcessNoiseStandardDeviation());
+         linearAccelerationNoiseCovariance = createDiagonalCovarianceMatrix(sensorNoiseParameters.getLinearAccelerationMeasurementStandardDeviation());
+         linearAccelerationBiasProcessNoiseCovariance = createDiagonalCovarianceMatrix(sensorNoiseParameters.getLinearAccelerationBiasProcessNoiseStandardDeviation());
+      }
+      else
+      {
+         orientationNoiseCovariance = createDiagonalCovarianceMatrix(0.0);
+
+         angularVelocityNoiseCovariance = createDiagonalCovarianceMatrix(0.0);
+         angularVelocityBiasProcessNoiseCovariance = createDiagonalCovarianceMatrix(0.0);
+
+         linearAccelerationNoiseCovariance = createDiagonalCovarianceMatrix(0.0);
+         linearAccelerationBiasProcessNoiseCovariance = createDiagonalCovarianceMatrix(0.0);
+      }
    }
 
    public String getSensorName()
