@@ -32,7 +32,6 @@ public class DRCNetworkProcessor
    private final SDFFullRobotModel fullRobotModel;
    private final DRCRobotDataReceiver drcRobotDataReceiver;
    private final RobotPoseBuffer robotPoseBuffer;
-   private final RobotBoundingBoxes robotBoundingBoxes;
    private final LidarFilter lidarFilter;
    
 
@@ -75,7 +74,7 @@ public class DRCNetworkProcessor
       networkingManager = new DRCNetworkProcessorNetworkingManager(this.fieldComputerClient, timestampProvider, robotModel);
       fullRobotModel = robotModel.createFullRobotModel();
       drcRobotDataReceiver = new DRCRobotDataReceiver(robotModel, fullRobotModel);
-      robotBoundingBoxes = new RobotBoundingBoxes(drcRobotDataReceiver, fullRobotModel);
+      RobotBoundingBoxes robotBoundingBoxes = new RobotBoundingBoxes(drcRobotDataReceiver, fullRobotModel);
       lidarFilter = new LidarFilter(robotBoundingBoxes, fullRobotModel);
       
       this.fieldComputerClient.attachListener(DRCJointConfigurationData.class, drcRobotDataReceiver);
@@ -98,11 +97,11 @@ public class DRCNetworkProcessor
       {
          if (useSimulatedSensors)
          {
-            sensorSuiteManager.initializeSimulatedSensors(localObjectCommunicator, robotPoseBuffer, networkingManager, fullRobotModel, robotBoundingBoxes, lidarFilter);
+            sensorSuiteManager.initializeSimulatedSensors(localObjectCommunicator, robotPoseBuffer, networkingManager, fullRobotModel, lidarFilter);
          }
          else
          {
-            sensorSuiteManager.initializePhysicalSensors(robotPoseBuffer,networkingManager,fullRobotModel,robotBoundingBoxes,fieldComputerClient, lidarFilter);
+            sensorSuiteManager.initializePhysicalSensors(robotPoseBuffer,networkingManager,fullRobotModel,fieldComputerClient, lidarFilter);
          }
       }
       else
