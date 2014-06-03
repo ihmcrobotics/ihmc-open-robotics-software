@@ -1,8 +1,8 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor;
 
 import java.io.IOException;
-
 import java.net.URI;
+
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
@@ -10,6 +10,7 @@ import us.ihmc.darpaRoboticsChallenge.configuration.DRCNetClassList;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandJointAnglePacket;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.LidarFilter;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.RobotBoundingBoxes;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
@@ -32,7 +33,7 @@ public class DRCNetworkProcessor
    private final DRCRobotDataReceiver drcRobotDataReceiver;
    private final RobotPoseBuffer robotPoseBuffer;
    private final RobotBoundingBoxes robotBoundingBoxes;
-   
+   private final LidarFilter lidarFilter;
    
 
    private static String scsMachineIPAddress = DRCLocalConfigParameters.ROBOT_CONTROLLER_IP_ADDRESS;
@@ -75,6 +76,7 @@ public class DRCNetworkProcessor
       fullRobotModel = robotModel.createFullRobotModel();
       drcRobotDataReceiver = new DRCRobotDataReceiver(robotModel, fullRobotModel);
       robotBoundingBoxes = new RobotBoundingBoxes(drcRobotDataReceiver, fullRobotModel);
+      lidarFilter = new LidarFilter(robotBoundingBoxes, fullRobotModel);
       
       this.fieldComputerClient.attachListener(DRCJointConfigurationData.class, drcRobotDataReceiver);
       this.fieldComputerClient.attachListener(HandJointAnglePacket.class, new ObjectConsumer<HandJointAnglePacket>()
@@ -96,11 +98,11 @@ public class DRCNetworkProcessor
       {
          if (useSimulatedSensors)
          {
-            sensorSuiteManager.initializeSimulatedSensors(localObjectCommunicator, robotPoseBuffer, networkingManager, fullRobotModel, robotBoundingBoxes);
+            sensorSuiteManager.initializeSimulatedSensors(localObjectCommunicator, robotPoseBuffer, networkingManager, fullRobotModel, robotBoundingBoxes, lidarFilter);
          }
          else
          {
-            sensorSuiteManager.initializePhysicalSensors(robotPoseBuffer,networkingManager,fullRobotModel,robotBoundingBoxes,fieldComputerClient);
+            sensorSuiteManager.initializePhysicalSensors(robotPoseBuffer,networkingManager,fullRobotModel,robotBoundingBoxes,fieldComputerClient, lidarFilter);
          }
       }
       else
