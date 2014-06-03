@@ -17,6 +17,7 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.ScsInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCSimulationOutputWriter;
+import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCSimulatedSensorNoiseParameters;
 import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCStateEstimatorInterface;
 import us.ihmc.robotDataCommunication.VisualizerUtils;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
@@ -92,7 +93,7 @@ public class DRCSimulationFactory
          DRCRobotInitialSetup<SDFRobot> robotInitialSetup)
    {
       StateEstimatorParameters stateEstimatorParameters = drcRobotModel.getStateEstimatorParameters();
-      SensorNoiseParameters sensorNoiseParameters = stateEstimatorParameters.getSensorNoiseParameters();
+      SensorNoiseParameters sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersZeroNoise();
 
       LidarControllerInterface lidarControllerInterface = new PIDLidarTorqueController(DRCConfigParameters.LIDAR_SPINDLE_VELOCITY,
             drcRobotModel.getSimulateDT());
