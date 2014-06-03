@@ -149,13 +149,13 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    }
 
    @Override
-   public void read(double time, long currentClockTime)
+   public void read(double time, long currentClockTime, long sensorTime)
    {
       actualEstimatorDT.set(currentClockTime - startClockTime.getLongValue());
       estimatorTime.set(time);
       startClockTime.set(currentClockTime);
       sensorReader.read();
-      timestampProvider.set(TimeTools.secondsToNanoSeconds(time));
+      timestampProvider.set(sensorTime);
    }
 
    @Override
