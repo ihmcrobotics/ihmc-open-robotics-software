@@ -170,4 +170,18 @@ public class InstantaneousCapturePointPlannerWithTimeFreezer implements Instanta
    {
       instantaneousCapturePointPlanner.setDoHeelToToeTransfer(doHeelToToeTransfer);
    }
+
+   @Override
+   public FramePoint2d getConstantCenterOfPressure()
+   {
+      // TODO Auto-generated method stub
+      return instantaneousCapturePointPlanner.getConstantCenterOfPressure();
+   }
+
+   @Override
+   public FramePoint2d getSingleSupportStartICP()
+   {
+      // TODO Auto-generated method stub
+      return instantaneousCapturePointPlanner.getSingleSupportStartICP();
+   }
 }

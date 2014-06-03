@@ -1172,6 +1172,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       private Footstep nextFootstep;
       private double captureTime;
       private double defaultSwingTime;
+      private double icpProjectionTimeOffset;
 
       public SingleSupportState(RobotSide robotSide)
       {
@@ -1181,6 +1182,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          this.desiredPelvisAngularVelocityToPack = new FrameVector(fullRobotModel.getRootJoint().getFrameAfterJoint());
          this.desiredPelvisAngularAccelerationToPack = new FrameVector(fullRobotModel.getRootJoint().getFrameAfterJoint());
          defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
+         this.icpProjectionTimeOffset = 0.0;
       }
 
       @Override
@@ -1196,7 +1198,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          capturePoint.getFrameTuple2dIncludingFrame(capturePoint2d);
 
          instantaneousCapturePointPlanner.getICPPositionAndVelocity(desiredICPLocal, desiredICPVelocityLocal, ecmpLocal, capturePoint2d,
-               yoTime.getDoubleValue());
+               yoTime.getDoubleValue() + icpProjectionTimeOffset);
 
          RobotSide supportSide = swingSide.getOppositeSide();
          double swingTimeRemaining = swingTimeCalculationProvider.getValue() - stateMachine.timeInCurrentState();
@@ -1218,6 +1220,15 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
                TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForSingleSupport(nextFootstep, swingSide);
                instantaneousCapturePointPlanner.initializeSingleSupport(transferToAndNextFootstepsData, yoTime.getDoubleValue() - captureTime);
+               
+               if(pushRecoveryModule.useICPProjection())
+               {  
+                  FramePoint2d constantCenterOfPressure = instantaneousCapturePointPlanner.getConstantCenterOfPressure();
+                  FramePoint2d finalDesiredICP = instantaneousCapturePointPlanner.getFinalDesiredICP();
+                  FramePoint2d startICP = instantaneousCapturePointPlanner.getSingleSupportStartICP();
+                  
+                  icpProjectionTimeOffset = pushRecoveryModule.computeTimeToProjectDesiredICPToClosestPointOnTrajectoryToActualICP(capturePoint2d, constantCenterOfPressure, startICP, finalDesiredICP, omega0) - captureTime;
+               }
             }
          }
 

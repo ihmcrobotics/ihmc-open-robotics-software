@@ -29,6 +29,10 @@ public interface InstantaneousCapturePointPlanner
    public abstract boolean isPerformingICPDoubleSupport();
 
    public abstract FramePoint2d getFinalDesiredICP();
+   
+   public abstract FramePoint2d getConstantCenterOfPressure();
+   
+   public abstract FramePoint2d getSingleSupportStartICP();
 
    public abstract double getTimeInState(double time);
 
