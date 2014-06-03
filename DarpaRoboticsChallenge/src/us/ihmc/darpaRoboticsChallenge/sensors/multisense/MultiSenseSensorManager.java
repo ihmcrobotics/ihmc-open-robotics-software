@@ -13,7 +13,6 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.RosCameraInfoRecie
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.RosCameraReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.GazeboLidarDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.LidarFilter;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.RobotBoundingBoxes;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosNativeNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
@@ -33,22 +32,22 @@ public class MultiSenseSensorManager
 
    public MultiSenseSensorManager(DRCRobotSensorInformation sensorInformation, RobotPoseBuffer sharedRobotPoseBuffer, RosMainNode rosMainNode,
          DRCNetworkProcessorNetworkingManager networkingManager, SDFFullRobotModel sharedFullRobotModel, ObjectCommunicator fieldComputerClient,
-         RosNativeNetworkProcessor rosNativeNetworkProcessor, RobotBoundingBoxes robotBoundingBoxes, PPSTimestampOffsetProvider ppsTimestampOffsetProvider,
-         LidarFilter lidarDataFilter)
+         RosNativeNetworkProcessor rosNativeNetworkProcessor, PPSTimestampOffsetProvider ppsTimestampOffsetProvider, LidarFilter lidarDataFilter)
    {
 
       DRCRobotCameraParamaters cameraParamaters = sensorInformation.getPrimaryCameraParamaters();
       this.rosMainNode = rosMainNode;
-      
+
       cameraReceiver = new RosCameraReceiver(cameraParamaters, sharedRobotPoseBuffer, cameraParamaters.getVideoSettings(), rosMainNode, networkingManager,
             ppsTimestampOffsetProvider);
 
-      CameraInfoReceiver cameraInfoServer = new RosCameraInfoReciever(sensorInformation.getPrimaryCameraParamaters(), rosMainNode, networkingManager.getControllerStateHandler());
+      CameraInfoReceiver cameraInfoServer = new RosCameraInfoReciever(sensorInformation.getPrimaryCameraParamaters(), rosMainNode,
+            networkingManager.getControllerStateHandler());
       networkingManager.getControllerCommandHandler().setIntrinsicServer(cameraInfoServer);
 
-      new GazeboLidarDataReceiver(rosMainNode, sharedRobotPoseBuffer, networkingManager, sharedFullRobotModel, robotBoundingBoxes,
-            sensorInformation, fieldComputerClient, rosNativeNetworkProcessor, ppsTimestampOffsetProvider, lidarDataFilter);
-      
+      new GazeboLidarDataReceiver(rosMainNode, sharedRobotPoseBuffer, networkingManager, sharedFullRobotModel, sensorInformation, fieldComputerClient,
+            rosNativeNetworkProcessor, ppsTimestampOffsetProvider, lidarDataFilter);
+
       setMultisenseResolution();
    }
 
@@ -100,6 +99,6 @@ public class MultiSenseSensorManager
    public void registerCameraListener(ArmCalibrationHelper armCalibrationHelper)
    {
       cameraReceiver.registerCameraListener(armCalibrationHelper);
-      
+
    }
 }
