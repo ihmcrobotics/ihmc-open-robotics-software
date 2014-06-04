@@ -275,8 +275,6 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       {
          for (int i = 0; i < jointPositionsDeflected.getLength(); i++)
          {
-            if (jointPositionsDeflected.getFirst(i).getName().contains("l_leg_hpx"))
-               System.out.println();
             jointPositionsDeflected.getSecond(i).update();
          }
       }
