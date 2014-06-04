@@ -2,6 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.stateEstimation.kinematicsBasedStateEstim
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -44,6 +45,9 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 
    private boolean visualizeMeasurementFrames = false;
    private final ArrayList<DynamicGraphicReferenceFrame> dynamicGraphicMeasurementFrames = new ArrayList<>();
+   
+   
+   private final AtomicBoolean reinitialize = new AtomicBoolean(false);
 
    private final CenterOfPressureVisualizer copVisualizer;
 
@@ -123,6 +127,14 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 
    public void doControl()
    {
+      if(reinitialize.get())
+      {
+         initialize();
+         startIMUDriftEstimation();
+         startIMUDriftCompensation();
+         reinitialize.set(false);
+      }
+      
       yoTime.add(estimatorDT); //Hack to have a yoTime in the state estimator
 
       if (fusedIMUSensor != null)
@@ -244,5 +256,10 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    public void initializeOrientationEstimateToMeasurement()
    {
       // Do nothing
+   }
+   
+   public void reinitializeOnNextControlTick()
+   {
+      reinitialize.set(true);
    }
 }
