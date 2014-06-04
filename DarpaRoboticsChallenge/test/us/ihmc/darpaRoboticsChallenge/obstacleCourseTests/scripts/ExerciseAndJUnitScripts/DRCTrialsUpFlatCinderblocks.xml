@@ -68,7 +68,7 @@
   </us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.PauseCommand>
   <long>26200571423</long>
   <us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
-    <heightOffset>0.04998</heightOffset>
+    <heightOffset>0.05</heightOffset>
   </us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
   <long>31872947145</long>
   <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList>
@@ -76,8 +76,8 @@
       <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
         <robotSide>RIGHT</robotSide>
         <location>
-          <x>1.00652158388385</x>
-          <y>-0.3411630651725007</y>
+          <x>0.92652158388385</x>
+          <y>-0.3211630651725007</y>
           <z>0.234911008274867</z>
         </location>
         <orientation>
@@ -90,9 +90,9 @@
       <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
         <robotSide>LEFT</robotSide>
         <location>
-          <x>1.3983324720124408</x>
+          <x>1.3883324720124408</x>
           <y>-0.15866779816983784</y>
-          <z>0.3786716932338011</z>
+          <z>0.3886716932338011</z>
         </location>
         <orientation>
           <x>0.007883928848884692</x>
@@ -104,9 +104,9 @@
       <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
         <robotSide>RIGHT</robotSide>
         <location>
-          <x>1.804817789623096</x>
-          <y>-0.3177136741204984</y>
-          <z>0.5319276409753693</z>
+          <x>1.744817789623096</x>
+          <y>-0.2977136741204984</y>
+          <z>0.5619276409753693</z>
         </location>
         <orientation>
           <x>0.022394749441813012</x>
@@ -118,9 +118,9 @@
       <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
         <robotSide>LEFT</robotSide>
         <location>
-          <x>2.2442523601224194</x>
+          <x>2.1442523601224194</x>
           <y>-0.12000401818319473</y>
-          <z>0.6791695012437344</z>
+          <z>0.7091695012437344</z>
         </location>
         <orientation>
           <x>-0.0935017689557476</x>
