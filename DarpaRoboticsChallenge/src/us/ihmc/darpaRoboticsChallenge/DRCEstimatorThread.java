@@ -17,7 +17,6 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.JointConfigurationGatherer;
 import us.ihmc.darpaRoboticsChallenge.sensors.RobotJointLimitWatcher;
-import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCStateEstimatorInterface;
 import us.ihmc.darpaRoboticsChallenge.stateEstimation.kinematicsBasedStateEstimator.DRCKinematicsBasedStateEstimator;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -53,7 +52,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    private final ForceSensorDataHolder forceSensorDataHolderForEstimator;
    private final ModularRobotController estimatorController;
    private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
-   private final DRCStateEstimatorInterface drcStateEstimator;
+   private final DRCKinematicsBasedStateEstimator drcStateEstimator;
 
    private final ThreadDataSynchronizer threadDataSynchronizer;
    private final SensorReader sensorReader;
@@ -184,7 +183,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       estimatorTick.increment();
    }
 
-   public static DRCStateEstimatorInterface createStateEstimator(SDFFullRobotModel estimatorFullRobotModel, DRCRobotModel drcRobotModel,
+   public static DRCKinematicsBasedStateEstimator createStateEstimator(SDFFullRobotModel estimatorFullRobotModel, DRCRobotModel drcRobotModel,
          SensorOutputMapReadOnly sensorOutputMapReadOnly, double gravity, StateEstimatorParameters stateEstimatorParameters,
          DRCRobotContactPointParameters contactPointParamaters, ForceSensorDataHolder forceSensorDataHolderForEstimator,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry registry)
@@ -224,13 +223,13 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       }
 
       // Create the sensor readers and state estimator here:
-      DRCStateEstimatorInterface drcStateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure, stateEstimatorParameters,
+      DRCKinematicsBasedStateEstimator drcStateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure, stateEstimatorParameters,
             sensorOutputMapReadOnly, gravity, footSwitchesForEstimator, bipedFeet, dynamicGraphicObjectsListRegistry);
 
       return drcStateEstimator;
    }
 
-   public DRCStateEstimatorInterface getDRCStateEstimator()
+   public DRCKinematicsBasedStateEstimator getDRCStateEstimator()
    {
       return drcStateEstimator;
    }
