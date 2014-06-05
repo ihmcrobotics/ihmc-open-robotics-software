@@ -1951,7 +1951,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       desiredCoMHeightVelocityAfterSmoothing.set(comHeightDataAfterSmoothing.getComHeightVelocity());
       desiredCoMHeightAccelerationAfterSmoothing.set(comHeightDataAfterSmoothing.getComHeightAcceleration());
 
-      correctCoMHeight(desiredICPVelocity, zCurrent, comHeightDataAfterSmoothing, true, true);
+      correctCoMHeight(desiredICPVelocity, zCurrent, comHeightDataAfterSmoothing, false, true);
 
       comHeightDataAfterSmoothing.getComHeight(desiredCenterOfMassHeightPoint);
       desiredCoMHeightCorrected.set(desiredCenterOfMassHeightPoint.getZ());
