@@ -196,9 +196,9 @@ public class PelvisLinearStateUpdater
       
       slippageCompensatorMode.set(SlippageCompensatorMode.LOAD_THRESHOLD);
 
-      imuDriftCompensator = new IMUDriftCompensator(footFrames, inverseDynamicsStructure, estimatorDT, registry);
-      imuDriftCompensator.activateEstimation(false);
-      imuDriftCompensator.activateCompensation(false);
+      imuDriftCompensator = new IMUDriftCompensator(footFrames, inverseDynamicsStructure, footSwitches, estimatorDT, registry);
+      imuDriftCompensator.activateEstimation(stateEstimatorParameters.estimateIMUDrift());
+      imuDriftCompensator.activateCompensation(stateEstimatorParameters.compensateIMUDrift());
       imuDriftCompensator.setAlphaIMUDrift(computeAlphaGivenBreakFrequencyProperly(stateEstimatorParameters.getIMUDriftFilterFreqInHertz(), estimatorDT));
       imuDriftCompensator.setAlphaFootAngularVelocity(computeAlphaGivenBreakFrequencyProperly(stateEstimatorParameters.getFootVelocityUsedForImuDriftFilterFreqInHertz(), estimatorDT));
       imuDriftCompensator.setFootAngularVelocityThreshold(stateEstimatorParameters.getFootVelocityThresholdToEnableIMUDriftCompensation());
