@@ -167,7 +167,7 @@ public class FusedIMUSensor implements IMUSensorReadOnly
       measureOrientationInFusedFrame(secondFrameOrientation, secondIMU);
 
       fusedFrameOrientation.setToZero(measurementFrame);
-      fusedFrameOrientation.interpolate(firstFrameOrientation, secondFrameOrientation, 0.5);
+      fusedFrameOrientation.interpolate(firstFrameOrientation, secondFrameOrientation, 0.0);
 
       orientation.set(fusedFrameOrientation);
       quaternion.set(fusedFrameOrientation);
