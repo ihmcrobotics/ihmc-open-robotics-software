@@ -128,10 +128,12 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
 
    public String[] getDefaultHeadOrientationControlJointNames()
    {
+     
       String[] defaultHeadOrientationControlJointNames = new String[] {
             jointMap.getSpineJointName(SpineJointName.SPINE_YAW),
-            jointMap.getNeckJointName(NeckJointName.LOWER_NECK_PITCH),
+            jointMap.getNeckJointName(NeckJointName.LOWER_NECK_PITCH)
             };
+
       return defaultHeadOrientationControlJointNames;
    }
 
@@ -278,7 +280,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
 
    public double getMaxStepLength()
    {
-      if(!runningOnRealRobot) return 0.7; //0.5; //0.35;
+      if(!runningOnRealRobot) return 0.6; //0.5; //0.35;
 	  return 0.6;
       
    }
