@@ -112,7 +112,7 @@ public class DRCLidar
          Point3d[] pointsArray = new Point3d[points.size()];
          points.toArray(pointsArray);
          
-         final PointCloudPacket pointCloud = new PointCloudPacket(pointsArray,TimeTools.secondsToNanoSeconds(time),false);
+         final PointCloudPacket pointCloud = new PointCloudPacket(pointsArray,TimeTools.secondsToNanoSeconds(time));
          
          pool.execute(new Runnable()
          {            
