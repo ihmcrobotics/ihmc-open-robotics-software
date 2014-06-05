@@ -2,7 +2,6 @@ package us.ihmc.acsell.controlParameters;
 
 import java.util.HashMap;
 
-import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCSimulatedSensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorFilterParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.PointMeasurementNoiseParameters;
@@ -36,8 +35,9 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
 
    private final PointMeasurementNoiseParameters pointMeasurementNoiseParameters;
 
-   //      DRCSimulatedSensorNoiseParameters.createNoiseParametersForEstimatorJerryTuning();
-   private final SensorNoiseParameters sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createNoiseParametersForEstimatorJerryTuningSeptember2013();
+   // private final SensorNoiseParameters sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createNoiseParametersForEstimatorJerryTuning();
+   // private SensorNoiseParameters sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createNoiseParametersForEstimatorJerryTuningSeptember2013();
+   private SensorNoiseParameters sensorNoiseParameters = null;
 
    private final boolean doElasticityCompensation;
    private final double defaultJointStiffness;
