@@ -91,11 +91,10 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          }
       }
 
-      sensorReaderFactory.build(estimatorFullRobotModel.getRootJoint(), imuDefinitions, estimatorFullRobotModel.getForceSensorDefinitions(), estimatorRegistry);
+      sensorReaderFactory.build(estimatorFullRobotModel.getRootJoint(), imuDefinitions, estimatorFullRobotModel.getForceSensorDefinitions(),
+            forceSensorDataHolderForEstimator, threadDataSynchronizer.getEstimatorRawJointSensorDataHolderMap(), estimatorRegistry);
       sensorReader = sensorReaderFactory.getSensorReader();
-
-      sensorReader.setForceSensorDataHolder(forceSensorDataHolderForEstimator);
-
+      
       estimatorController = new ModularRobotController("EstimatorController");
       if (sensorReaderFactory.useStateEstimator())
       {

@@ -49,7 +49,6 @@ public class JointConfigurationGatherer
       }
 
       double[] jointAngles = jointConfigurationData.getJointAngles();
-      double[] jointOutAngles = jointConfigurationData.getJointOutAngles();
 
       rootJoint.packTranslation(rootTranslation);
       rootJoint.packRotation(rootOrientation);
@@ -57,7 +56,6 @@ public class JointConfigurationGatherer
       for (int i = 0; i < joints.length; i++)
       {
          jointAngles[i] = joints[i].getQ();
-         jointOutAngles[i] = joints[i].getSecondaryQ();
       }
 
       jointConfigurationData.setRootTranslation(rootTranslation);

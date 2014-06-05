@@ -7,6 +7,8 @@ import java.util.Set;
 
 import javax.vecmath.Vector3d;
 
+import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
+import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.sensorProcessing.signalCorruption.GaussianDoubleCorruptor;
 import us.ihmc.sensorProcessing.signalCorruption.GaussianOrientationCorruptor;
 import us.ihmc.sensorProcessing.signalCorruption.GaussianVectorCorruptor;
@@ -74,7 +76,8 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
       robot.getForceSensors(groundContactPointBasedWrenchCalculators);
    }
 
-   public void build(SixDoFJoint rootJoint, IMUDefinition[] imuDefinition, ForceSensorDefinition[] forceSensorDefinitions, YoVariableRegistry parentRegistry)
+   public void build(SixDoFJoint rootJoint, IMUDefinition[] imuDefinition, ForceSensorDefinition[] forceSensorDefinitions,
+         ForceSensorDataHolder forceSensorDataHolderForEstimator, RawJointSensorDataHolderMap rawJointSensorDataHolderMap, YoVariableRegistry parentRegistry)
    {
       ArrayList<Joint> rootJoints = robot.getRootJoints();
       if (rootJoints.size() > 1)
@@ -93,7 +96,7 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
       this.stateEstimatorSensorDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getStateEstimatorSensorDefinitions();
       Map<IMUMount, IMUDefinition> imuDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getIMUDefinitions();
       Map<WrenchCalculatorInterface, ForceSensorDefinition> forceSensors = stateEstimatorSensorDefinitionsFromRobotFactory.getForceSensorDefinitions();
-      this.simulatedSensorHolderAndReader = new SimulatedSensorHolderAndReader(sensorFilterParameters, stateEstimatorSensorDefinitions, sensorNoiseParameters, registry);
+      this.simulatedSensorHolderAndReader = new SimulatedSensorHolderAndReader(sensorFilterParameters, stateEstimatorSensorDefinitions, forceSensorDataHolderForEstimator, sensorNoiseParameters, registry);
 
       createAndAddOrientationSensors(imuDefinitions, registry);
       createAndAddAngularVelocitySensors(imuDefinitions, registry);

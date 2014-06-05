@@ -6,14 +6,17 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
+import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 
 public class ThreadDataSynchronizer
 {
    private final SDFFullRobotModel estimatorFullRobotModel;
    private final ForceSensorDataHolder estimatorForceSensorDataHolder;
+   private final RawJointSensorDataHolderMap estimatorRawJointSensorDataHolderMap;
 
    private final SDFFullRobotModel controllerFullRobotModel;
    private final ForceSensorDataHolder controllerForceSensorDataHolder;
+   private final RawJointSensorDataHolderMap controllerRawJointSensorDataHolderMap;
 
    private final ConcurrentCopier<IntermediateEstimatorStateHolder> estimatorStateCopier;
    
@@ -26,13 +29,16 @@ public class ThreadDataSynchronizer
       estimatorFullRobotModel = robotModel.createFullRobotModel();
       estimatorForceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(estimatorFullRobotModel.getForceSensorDefinitions()),
             estimatorFullRobotModel.getRootJoint());
+      estimatorRawJointSensorDataHolderMap = new RawJointSensorDataHolderMap(estimatorFullRobotModel);
 
       controllerFullRobotModel = robotModel.createFullRobotModel();
       controllerForceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(controllerFullRobotModel.getForceSensorDefinitions()),
             controllerFullRobotModel.getRootJoint());
+      controllerRawJointSensorDataHolderMap = new RawJointSensorDataHolderMap(controllerFullRobotModel);
 
       IntermediateEstimatorStateHolder.Builder stateCopierBuilder = new IntermediateEstimatorStateHolder.Builder(robotModel,
-            estimatorFullRobotModel.getElevator(), controllerFullRobotModel.getElevator(), estimatorForceSensorDataHolder, controllerForceSensorDataHolder);
+            estimatorFullRobotModel.getElevator(), controllerFullRobotModel.getElevator(), estimatorForceSensorDataHolder, controllerForceSensorDataHolder,
+            estimatorRawJointSensorDataHolderMap, controllerRawJointSensorDataHolderMap);
       estimatorStateCopier = new ConcurrentCopier<IntermediateEstimatorStateHolder>(stateCopierBuilder);
 
    }
@@ -79,6 +85,16 @@ public class ThreadDataSynchronizer
    public ForceSensorDataHolder getControllerForceSensorDataHolder()
    {
       return controllerForceSensorDataHolder;
+   }
+
+   public RawJointSensorDataHolderMap getEstimatorRawJointSensorDataHolderMap()
+   {
+      return estimatorRawJointSensorDataHolderMap;
+   }
+
+   public RawJointSensorDataHolderMap getControllerRawJointSensorDataHolderMap()
+   {
+      return controllerRawJointSensorDataHolderMap;
    }
 
    public long getTimestamp()

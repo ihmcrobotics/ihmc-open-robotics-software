@@ -19,7 +19,7 @@ import com.yobotics.simulationconstructionset.simulatedSensors.WrenchCalculatorI
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 import com.yobotics.simulationconstructionset.util.math.filter.BacklashCompensatingVelocityYoVariable;
 
-public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
+public class SimulatedSensorHolderAndReader implements SensorReader
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("DRCPerfectSensorReader");
    private final IntegerYoVariable step = new IntegerYoVariable("step", registry);
@@ -39,7 +39,7 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
 
    private final SensorProcessing sensorProcessing;
 
-   private ForceSensorDataHolder forceSensorDataHolder;
+   private final ForceSensorDataHolder forceSensorDataHolder;
 
    private final BooleanYoVariable useFiniteDifferencesForVelocities;
    private final DoubleYoVariable alphaFiniteDifferences;
@@ -47,10 +47,10 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
 
    private ObjectObjectMap<OneDoFJoint, BacklashCompensatingVelocityYoVariable> finiteDifferenceVelocities;
 
-   public SimulatedSensorHolderAndReader(SensorFilterParameters sensorFilterParameters, StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, SensorNoiseParameters sensorNoiseParameters, YoVariableRegistry sensorReaderFactoryRegistry)
+   public SimulatedSensorHolderAndReader(SensorFilterParameters sensorFilterParameters, StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, ForceSensorDataHolder forceSensorDataHolderForEstimator, SensorNoiseParameters sensorNoiseParameters, YoVariableRegistry sensorReaderFactoryRegistry)
    {
-      sensorProcessing = new SensorProcessing(stateEstimatorSensorDefinitions, sensorFilterParameters, sensorNoiseParameters, registry);
-      
+      this.sensorProcessing = new SensorProcessing(stateEstimatorSensorDefinitions, sensorFilterParameters, sensorNoiseParameters, registry);
+      this.forceSensorDataHolder = forceSensorDataHolderForEstimator;
       this.estimatorDT = sensorFilterParameters.getEstimatorDT();
       step.set(29831);
 
@@ -201,20 +201,5 @@ public class SimulatedSensorHolderAndReader implements SensorReader, Runnable
 
       step.increment();
       
-   }
-
-   public void setControllerDispatcher(ControllerDispatcher controllerDispatcher)
-   {
-   }
-
-   public void setForceSensorDataHolder(ForceSensorDataHolder forceSensorDataHolder)
-   {
-      this.forceSensorDataHolder = forceSensorDataHolder;
-   }
-
-   @Deprecated
-   public void run()
-   {
-      read();
    }
 }
