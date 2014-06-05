@@ -203,13 +203,13 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
    @Override
    public boolean estimateIMUDrift()
    {
-      return false;
+      return true;
    }
 
    @Override
    public boolean compensateIMUDrift()
    {
-      return false;
+      return true;
    }
 
    @Override
