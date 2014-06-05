@@ -2,6 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.stateEstimation.kinematicsBasedStateEstim
 
 import javax.vecmath.AxisAngle4d;
 
+import us.ihmc.commonWalkingControlModules.sensors.WrenchBasedFootSwitch;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
@@ -65,14 +66,21 @@ public class IMUDriftCompensator
    
    private final SixDoFJoint rootJoint;
    private final ReferenceFrame rootJointFrame;
+
+   private final SideDependentList<WrenchBasedFootSwitch> footSwitches;
+   private final DoubleYoVariable totalLoadPercentageOnFeet = new DoubleYoVariable("totalLoadPercentageOnFeet", registry);
+   private final DoubleYoVariable loadPercentageOnFeetThresholdForIMUDrift = new DoubleYoVariable("loadPercentageOnFeetThresholdForIMUDrift", registry);
    
-   public IMUDriftCompensator(SideDependentList<ReferenceFrame> footFrames, FullInverseDynamicsStructure inverseDynamicsStructure, double estimatorDT, YoVariableRegistry parentRegistry)
+   public IMUDriftCompensator(SideDependentList<ReferenceFrame> footFrames, FullInverseDynamicsStructure inverseDynamicsStructure,
+         SideDependentList<WrenchBasedFootSwitch> footSwitches, double estimatorDT, YoVariableRegistry parentRegistry)
    {
       this.rootJoint = inverseDynamicsStructure.getRootJoint();
       this.footFrames = footFrames;
       this.rootJointFrame = rootJoint.getFrameAfterJoint();
       this.estimatorDT = estimatorDT;
       this.twistCalculator = inverseDynamicsStructure.getTwistCalculator();
+      this.footSwitches = footSwitches;
+      loadPercentageOnFeetThresholdForIMUDrift.set(0.5);
       
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -179,11 +187,18 @@ public class IMUDriftCompensator
          isIMUDriftYawRateEstimated.set(false);
          return;
       }
-         
+
+      double totalLoadPercentage = 0.0;
+      for (RobotSide robotSide : RobotSide.values)
+         totalLoadPercentage += footSwitches.get(robotSide).computeFootLoadPercentage();
+      totalLoadPercentageOnFeet.set(totalLoadPercentage);
+      boolean areFeetLoadedEnough = totalLoadPercentageOnFeet.getDoubleValue() > loadPercentageOnFeetThresholdForIMUDrift.getDoubleValue();
+
       boolean isAngularVelocityXLowEnough = Math.abs(footAngularVelocityDifference.getX()) < footAngularVelocityDifferenceThresholdToEstimateIMUDrift.getX();
       boolean isAngularVelocityYLowEnough = Math.abs(footAngularVelocityDifference.getY()) < footAngularVelocityDifferenceThresholdToEstimateIMUDrift.getY();
       boolean isAngularVelocityZLowEnough = Math.abs(footAngularVelocityDifference.getZ()) < footAngularVelocityDifferenceThresholdToEstimateIMUDrift.getZ();
-      if (isIMUDriftYawRateEstimationActivated.getBooleanValue() && isAngularVelocityXLowEnough && isAngularVelocityYLowEnough && isAngularVelocityZLowEnough)
+
+      if (isIMUDriftYawRateEstimationActivated.getBooleanValue() && areFeetLoadedEnough && isAngularVelocityXLowEnough && isAngularVelocityYLowEnough && isAngularVelocityZLowEnough)
       {
          isIMUDriftYawRateEstimated.set(true);
          estimateIMUDriftYaw();
