@@ -6,6 +6,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedOutputWriter;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
+import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.maps.ObjectObjectMap;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -73,7 +74,7 @@ public class DRCSimulationOutputWriter extends SDFPerfectSimulatedOutputWriter i
    }
 
    @Override
-   public void setFullRobotModel(SDFFullRobotModel fullRobotModel)
+   public void setFullRobotModel(SDFFullRobotModel fullRobotModel, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
    {
       super.setFullRobotModel(fullRobotModel);
 

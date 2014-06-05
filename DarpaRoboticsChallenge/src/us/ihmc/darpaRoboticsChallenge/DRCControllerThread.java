@@ -113,7 +113,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       
       forceSensorDataHolderForController = threadDataSynchronizer.getControllerForceSensorDataHolder();
 
-      outputWriter.setFullRobotModel(controllerFullRobotModel);
+      outputWriter.setFullRobotModel(controllerFullRobotModel, threadDataSynchronizer.getControllerRawJointSensorDataHolderMap());
       outputWriter.setForceSensorDataHolderForController(forceSensorDataHolderForController);
       
       DRCRobotJointMap jointMap = robotModel.getJointMap();

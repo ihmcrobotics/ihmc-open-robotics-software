@@ -120,7 +120,7 @@ public class ArmCalibrationHelper implements DRCStereoListener
          imageDataWriter.close();
 
          PrintWriter qWriter = new PrintWriter(q);
-         PrintWriter qoutWriter = new PrintWriter(qout);
+//         PrintWriter qoutWriter = new PrintWriter(qout);
 
          String[] jointNames = jointMap.getOrderedJointNames();
          for (int i = 0; i < jointNames.length; i++)
@@ -129,13 +129,13 @@ public class ArmCalibrationHelper implements DRCStereoListener
             qWriter.print("=");
             qWriter.println(lastJointConfigurationData.getJointAngles()[i]);
 
-            qoutWriter.print(jointNames[i]);
-            qoutWriter.print("=");
-            qoutWriter.println(lastJointConfigurationData.getJointOutAngles()[i]);
+//            qoutWriter.print(jointNames[i]);
+//            qoutWriter.print("=");
+//            qoutWriter.println(lastJointConfigurationData.getJointOutAngles()[i]);
          }
 
          qWriter.close();
-         qoutWriter.close();
+//         qoutWriter.close();
          System.out.println("Wrote calibration files");
       }
       catch (IOException e)

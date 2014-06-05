@@ -112,7 +112,6 @@ public class SandiaHandModel
    {
       FingerJoint fingerJoint = new FingerJoint(name);
       OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(name);
-      fingerJoint.setDamping(oneDoFJoint.getDampingParameter());
       allJoints.add(fingerJoint);
       return fingerJoint;
    }

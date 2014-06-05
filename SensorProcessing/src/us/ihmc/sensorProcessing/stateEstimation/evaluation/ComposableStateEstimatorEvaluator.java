@@ -70,7 +70,7 @@ public class ComposableStateEstimatorEvaluator
       SensorReaderFactory simulatedSensorHolderAndReaderFromRobotFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(robot,
             simulatedSensorNoiseParameters, sensorFilterParameters, null);
       
-      simulatedSensorHolderAndReaderFromRobotFactory.build(inverseDynamicsStructure.getRootJoint(), null, null, registry);
+      simulatedSensorHolderAndReaderFromRobotFactory.build(inverseDynamicsStructure.getRootJoint(), null, null, null, null, registry);
       
       SensorReader simulatedSensorHolderAndReader = simulatedSensorHolderAndReaderFromRobotFactory.getSensorReader();
       
