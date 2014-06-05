@@ -3,7 +3,6 @@ package us.ihmc.atlas.parameters;
 import java.util.HashMap;
 
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
-import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCSimulatedSensorNoiseParameters;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorFilterParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
@@ -42,8 +41,9 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
 
    private final PointMeasurementNoiseParameters pointMeasurementNoiseParameters;
 
-   //      DRCSimulatedSensorNoiseParameters.createNoiseParametersForEstimatorJerryTuning();
-   private final SensorNoiseParameters sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createNoiseParametersForEstimatorJerryTuningSeptember2013();
+   // private final SensorNoiseParameters sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createNoiseParametersForEstimatorJerryTuning();
+   // private SensorNoiseParameters sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createNoiseParametersForEstimatorJerryTuningSeptember2013();
+   private SensorNoiseParameters sensorNoiseParameters = null;
 
    private final boolean doElasticityCompensation;
    private final double defaultJointStiffness;
