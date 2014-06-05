@@ -14,10 +14,8 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.initialSetup.ScsInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCSimulationOutputWriter;
-import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCSimulatedSensorNoiseParameters;
 import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCStateEstimatorInterface;
 import us.ihmc.robotDataCommunication.VisualizerUtils;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
@@ -53,7 +51,7 @@ public class DRCSimulationFactory
    private final SimulatedDRCRobotTimeProvider simulatedDRCRobotTimeProvider;
 
    public DRCSimulationFactory(DRCRobotModel drcRobotModel, ControllerFactory controllerFactory, TerrainObject environmentTerrain,
-         DRCRobotInitialSetup<SDFRobot> robotInitialSetup, ScsInitialSetup scsInitialSetup, DRCGuiInitialSetup guiInitialSetup,
+         DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCSCSInitialSetup scsInitialSetup, DRCGuiInitialSetup guiInitialSetup,
          GlobalDataProducer globalDataProducer)
    {
       simulatedDRCRobotTimeProvider = new SimulatedDRCRobotTimeProvider(drcRobotModel.getSimulateDT());
@@ -89,11 +87,11 @@ public class DRCSimulationFactory
    }
 
    private void createRobotController(DRCRobotModel drcRobotModel, ControllerFactory controllerFactory, GlobalDataProducer globalDataProducer,
-         SDFRobot simulatedRobot, SimulationConstructionSet scs, ScsInitialSetup scsInitialSetup,
+         SDFRobot simulatedRobot, SimulationConstructionSet scs, DRCSCSInitialSetup scsInitialSetup,
          DRCRobotInitialSetup<SDFRobot> robotInitialSetup)
    {
       StateEstimatorParameters stateEstimatorParameters = drcRobotModel.getStateEstimatorParameters();
-      SensorNoiseParameters sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersZeroNoise();
+      SensorNoiseParameters sensorNoiseParameters = scsInitialSetup.getSimulatedSensorNoiseParameters();
 
       LidarControllerInterface lidarControllerInterface = new PIDLidarTorqueController(DRCConfigParameters.LIDAR_SPINDLE_VELOCITY,
             drcRobotModel.getSimulateDT());
