@@ -1,5 +1,15 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+import java.util.ArrayList;
+
+import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
+import us.ihmc.commonWalkingControlModules.terrain.CommonTerrain;
+import us.ihmc.commonWalkingControlModules.terrain.TerrainType;
+import us.ihmc.darpaRoboticsChallenge.initialSetup.ScsInitialSetup;
+import us.ihmc.graphics3DAdapter.GroundProfile;
+import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
+import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
+
 import com.yobotics.simulationconstructionset.DynamicIntegrationMethod;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
@@ -14,14 +24,6 @@ import com.yobotics.simulationconstructionset.physics.visualize.DefaultCollision
 import com.yobotics.simulationconstructionset.util.LinearGroundContactModel;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.ground.steppingStones.SteppingStones;
-import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
-import us.ihmc.commonWalkingControlModules.terrain.CommonTerrain;
-import us.ihmc.commonWalkingControlModules.terrain.TerrainType;
-import us.ihmc.darpaRoboticsChallenge.initialSetup.ScsInitialSetup;
-import us.ihmc.graphics3DAdapter.GroundProfile;
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-
-import java.util.ArrayList;
 
 public class DRCSCSInitialSetup implements ScsInitialSetup
 {
@@ -33,6 +35,8 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
    private int simulationDataBufferSize = 16000;
    private double gravity = -9.81;
    
+//   private SensorNoiseParameters simulatedSensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersZeroNoise();
+   private SensorNoiseParameters simulatedSensorNoiseParameters = null; // Same as zero noise, but doesn't create sensor corruptors
    private boolean initializeEstimatorToActual = false;
    private final boolean useSoftGroundContactGains;
    
@@ -194,6 +198,16 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
    public double getGravity()
    {
       return gravity;
+   }
+
+   public SensorNoiseParameters getSimulatedSensorNoiseParameters()
+   {
+      return simulatedSensorNoiseParameters;
+   }
+
+   public void setSimulatedSensorNoiseParameters(SensorNoiseParameters simulatedSensorNoiseParameters)
+   {
+      this.simulatedSensorNoiseParameters = simulatedSensorNoiseParameters;
    }
 
    public boolean getInitializeEstimatorToActual()
