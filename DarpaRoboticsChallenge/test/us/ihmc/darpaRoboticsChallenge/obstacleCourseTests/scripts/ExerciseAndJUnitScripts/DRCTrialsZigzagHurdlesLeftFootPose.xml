@@ -98,8 +98,8 @@
       <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
         <robotSide>LEFT</robotSide>
         <location>
-          <x>1.2090638027101501</x>
-          <y>-0.011133703137256576</y>
+          <x>1.1890638027101501</x>
+          <y>0.041133703137256576</y>
           <z>0.06167682727994239</z>
         </location>
         <orientation>
