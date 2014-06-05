@@ -150,7 +150,8 @@ public class IMUDriftCompensator
       resetFootAngularVelocitiesFiltered();
       updateFootOrientations();
       
-      if (isIMUDriftYawRateEstimationActivated.getBooleanValue())
+      boolean areFeetLoadedEnough = areFeetLoadedEnough();
+      if (isIMUDriftYawRateEstimationActivated.getBooleanValue() && areFeetLoadedEnough)
       {
          isIMUDriftYawRateEstimated.set(true);
          estimateIMUDriftYaw();
@@ -160,13 +161,14 @@ public class IMUDriftCompensator
          isIMUDriftYawRateEstimated.set(false);
       }
       
-      if (isIMUDriftCompensationActivated.getBooleanValue())
+      if (isIMUDriftCompensationActivated.getBooleanValue() && areFeetLoadedEnough)
          compensateIMUDriftYaw();
    }
 
    public void updateAndCompensateDrift()
    {
-      if (!isIMUDriftYawRateEstimationActivated.getBooleanValue())
+      boolean areFeetLoadedEnough = areFeetLoadedEnough();
+      if (!isIMUDriftYawRateEstimationActivated.getBooleanValue() || !areFeetLoadedEnough)
       {
          resetFootAngularVelocitiesFiltered();
          updateFootOrientations();
@@ -176,7 +178,7 @@ public class IMUDriftCompensator
       
       updateFootOrientations();
 
-      if (isIMUDriftCompensationActivated.getBooleanValue())
+      if (isIMUDriftCompensationActivated.getBooleanValue() && areFeetLoadedEnough)
          compensateIMUDriftYaw();
    }
 
@@ -188,17 +190,11 @@ public class IMUDriftCompensator
          return;
       }
 
-      double totalLoadPercentage = 0.0;
-      for (RobotSide robotSide : RobotSide.values)
-         totalLoadPercentage += footSwitches.get(robotSide).computeFootLoadPercentage();
-      totalLoadPercentageOnFeet.set(totalLoadPercentage);
-      boolean areFeetLoadedEnough = totalLoadPercentageOnFeet.getDoubleValue() > loadPercentageOnFeetThresholdForIMUDrift.getDoubleValue();
-
       boolean isAngularVelocityXLowEnough = Math.abs(footAngularVelocityDifference.getX()) < footAngularVelocityDifferenceThresholdToEstimateIMUDrift.getX();
       boolean isAngularVelocityYLowEnough = Math.abs(footAngularVelocityDifference.getY()) < footAngularVelocityDifferenceThresholdToEstimateIMUDrift.getY();
       boolean isAngularVelocityZLowEnough = Math.abs(footAngularVelocityDifference.getZ()) < footAngularVelocityDifferenceThresholdToEstimateIMUDrift.getZ();
 
-      if (isIMUDriftYawRateEstimationActivated.getBooleanValue() && areFeetLoadedEnough && isAngularVelocityXLowEnough && isAngularVelocityYLowEnough && isAngularVelocityZLowEnough)
+      if (isIMUDriftYawRateEstimationActivated.getBooleanValue() && areFeetLoadedEnough() && isAngularVelocityXLowEnough && isAngularVelocityYLowEnough && isAngularVelocityZLowEnough)
       {
          isIMUDriftYawRateEstimated.set(true);
          estimateIMUDriftYaw();
@@ -207,6 +203,16 @@ public class IMUDriftCompensator
       {
          isIMUDriftYawRateEstimated.set(false);
       }
+   }
+
+   private boolean areFeetLoadedEnough()
+   {
+      double totalLoadPercentage = 0.0;
+      for (RobotSide robotSide : RobotSide.values)
+         totalLoadPercentage += footSwitches.get(robotSide).computeFootLoadPercentage();
+      totalLoadPercentageOnFeet.set(totalLoadPercentage);
+      boolean areFeetLoadedEnough = totalLoadPercentageOnFeet.getDoubleValue() > loadPercentageOnFeetThresholdForIMUDrift.getDoubleValue();
+      return areFeetLoadedEnough;
    }
 
    private void estimateIMUDriftYaw()
@@ -307,5 +313,6 @@ public class IMUDriftCompensator
          footAngularVelocitiesInWorldFilteredY.get(robotSide).reset();
          footAngularVelocitiesInWorldFilteredZ.get(robotSide).reset();
       }
+      footAngularVelocityAverageFiltered.reset();
    }
 }
