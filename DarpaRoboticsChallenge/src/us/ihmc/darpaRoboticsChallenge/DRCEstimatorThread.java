@@ -27,6 +27,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.utilities.ForceSensorDefinition;
 import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.math.TimeTools;
@@ -111,6 +112,15 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       RobotJointLimitWatcher robotJointLimitWatcher = new RobotJointLimitWatcher(estimatorFullRobotModel.getOneDoFJoints());
       estimatorController.addRobotController(robotJointLimitWatcher);
 
+      for(ForceSensorDefinition forceSensorDefinition:forceSensorDataHolderForEstimator.getForceSensorDefinitions())
+      {
+        ForceSensorToJointTorqueProjector footSensorToJointTorqueProjector = new ForceSensorToJointTorqueProjector(
+              forceSensorDefinition.getSensorName(), 
+              forceSensorDataHolderForEstimator.get(forceSensorDefinition), 
+              forceSensorDefinition.getRigidBody());
+        estimatorController.addRobotController(footSensorToJointTorqueProjector);
+      }
+            
       
       if (dataProducer != null)
       {

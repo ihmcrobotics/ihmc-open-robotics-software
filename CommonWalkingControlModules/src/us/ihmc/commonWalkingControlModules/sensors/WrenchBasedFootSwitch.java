@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.sensors;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
@@ -9,13 +8,10 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalcul
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.sensorProcessing.sensors.ForceSensorData;
-import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
-import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.Wrench;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
@@ -66,22 +62,20 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
    private final double footMaxX;
    private final FrameVector footForce = new FrameVector();
    private final FrameVector footTorque = new FrameVector();
-   private final Wrench tempWrench = new Wrench();
    private final YoFrameVector yoFootForce;
    private final YoFrameVector yoFootTorque;
    private final YoFrameVector yoFootForceInFoot;
    private final YoFrameVector yoFootTorqueInFoot;
-   private final ArrayList<Pair<FrameVector,DoubleYoVariable>> yoFootTorqueInJoints;
-   private final int numberOfJointFromFoot = 2;
+  
    
    private final double robotTotalWeight;
    
    private double minThresholdX;
    private double maxThresholdX;
-   
-  
-   private final boolean showForceSensorFrame = false;
+   private final boolean showForceSensorFrames = false;
    private final DynamicGraphicReferenceFrame dynamicGraphicForceSensorMeasurementFrame, dynamicGraphicForceSensorFootFrame;
+
+  
 
    public WrenchBasedFootSwitch(String namePrefix, ForceSensorData forceSensorData, double footSwitchCoPThresholdFraction, double robotTotalWeight, ContactablePlaneBody contactablePlaneBody,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, double contactThresholdForce, YoVariableRegistry parentRegistry)
@@ -95,8 +89,8 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       yoFootTorque = new YoFrameVector(namePrefix + "Torque", forceSensorData.getMeasurementFrame(), registry);
       yoFootForceInFoot = new YoFrameVector(namePrefix + "ForceFootFrame", contactablePlaneBody.getBodyFrame(), registry);
       yoFootTorqueInFoot = new YoFrameVector(namePrefix + "TorqueFootFrame", contactablePlaneBody.getBodyFrame(), registry);
-      
-      if(showForceSensorFrame && dynamicGraphicObjectsListRegistry!=null)
+
+      if(showForceSensorFrames && dynamicGraphicObjectsListRegistry!=null)
       {
          final double scale=1.0;
          dynamicGraphicForceSensorMeasurementFrame = new DynamicGraphicReferenceFrame(forceSensorData.getMeasurementFrame(), registry, .6*scale, YoAppearance.Yellow());
@@ -108,19 +102,8 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       {
          dynamicGraphicForceSensorMeasurementFrame=null;
          dynamicGraphicForceSensorFootFrame=null;
-      }
+      } 
       
-      
-      //ground reaction wrench on joints
-      yoFootTorqueInJoints = new ArrayList<>();
-      RigidBody currentBody = contactablePlaneBody.getRigidBody();
-      for(int i=0;i<numberOfJointFromFoot;i++)
-      {
-         FrameVector jAxis = ((OneDoFJoint)currentBody.getParentJoint()).getJointAxis();
-         yoFootTorqueInJoints.add(new Pair(jAxis,new DoubleYoVariable("NegGRFWrenchIn"+ currentBody.getParentJoint().getName(), parentRegistry)));
-         currentBody=currentBody.getParentJoint().getPredecessor();
-      }
-     
       footForceMagnitude = new DoubleYoVariable(namePrefix + "FootForceMag", registry);
       hasFootHitGround = new BooleanYoVariable(namePrefix + "FootHitGround", registry);
 
@@ -160,6 +143,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       this.footWrench = new Wrench(forceSensorData.getMeasurementFrame(), null);
 
       this.footMinX = computeMinX(contactablePlaneBody);
+         
       this.footMaxX = computeMaxX(contactablePlaneBody);
       this.footLength = computeLength(contactablePlaneBody);
       
@@ -290,18 +274,8 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       footTorque.changeFrame(contactablePlaneBody.getBodyFrame());
       yoFootTorqueInFoot.set(footTorque);
 
-      //
-      forceSensorData.packWrench(tempWrench);
-      
-      for(Pair<FrameVector, DoubleYoVariable> pair: yoFootTorqueInJoints)
-      {
-         tempWrench.changeFrame(pair.first().getReferenceFrame());
-         footTorque.setToZero(tempWrench.getExpressedInFrame());
-         tempWrench.packAngularPart(footTorque);
-         pair.second().set(-footTorque.dot(pair.first()));
-      }
-      
       updateSensorVisualizer();
+
    }
    
    private void updateSensorVisualizer()
@@ -311,6 +285,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       if(dynamicGraphicForceSensorFootFrame!=null)
          dynamicGraphicForceSensorFootFrame.update();
    }
+   
 
    private boolean isForceMagnitudePastThreshold()
    {
