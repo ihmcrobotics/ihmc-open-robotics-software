@@ -454,7 +454,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder, Hu
             Transform3D sensorToCamera = SDFConversionsHelper.poseToTransform(camera.getPose());
             Transform3D linkToCamera = new Transform3D();
             linkToCamera.mul(linkToSensor, sensorToCamera);
-//            showCordinateSystem(scsJoint,linkToCamera);
+            showCordinateSystem(scsJoint,linkToCamera);
             
             double fieldOfView = Double.parseDouble(camera.getHorizontalFov());
             double clipNear = Double.parseDouble(camera.getClip().getNear());
@@ -563,7 +563,6 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder, Hu
          sdfMaxAngle = 0.25 * Math.PI;
          
          LidarScanParameters polarDefinition = new LidarScanParameters(sdfSamples, (float) sdfMinAngle, (float) sdfMaxAngle, 0.0f, (float) sdfMinRange, (float) sdfMaxRange, 0.0f);
-         
          
          Transform3D linkToSensor = SDFConversionsHelper.poseToTransform(sensor.getPose());
          showCordinateSystem(scsJoint, linkToSensor);
