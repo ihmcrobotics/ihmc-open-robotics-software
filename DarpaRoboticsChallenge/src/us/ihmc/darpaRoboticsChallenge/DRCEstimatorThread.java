@@ -203,7 +203,8 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          bipedFeet.put(robotSide, foot);
       }
 
-      double totalRobotWeight = TotalMassCalculator.computeSubTreeMass(estimatorFullRobotModel.getElevator()) * gravity;
+      double gravityMagnitude = Math.abs(gravity);
+      double totalRobotWeight = TotalMassCalculator.computeSubTreeMass(estimatorFullRobotModel.getElevator()) * gravityMagnitude;
 
       SideDependentList<WrenchBasedFootSwitch> footSwitchesForEstimator = new SideDependentList<WrenchBasedFootSwitch>();
       for (RobotSide robotSide : RobotSide.values)
@@ -223,7 +224,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
       // Create the sensor readers and state estimator here:
       DRCKinematicsBasedStateEstimator drcStateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure, stateEstimatorParameters,
-            sensorOutputMapReadOnly, gravity, footSwitchesForEstimator, bipedFeet, dynamicGraphicObjectsListRegistry);
+            sensorOutputMapReadOnly, gravityMagnitude, footSwitchesForEstimator, bipedFeet, dynamicGraphicObjectsListRegistry);
 
       return drcStateEstimator;
    }
