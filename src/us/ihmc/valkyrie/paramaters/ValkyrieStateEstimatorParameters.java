@@ -1,7 +1,5 @@
 package us.ihmc.valkyrie.paramaters;
 
-import static us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCSimulatedSensorNoiseParameters.*;
-
 import java.util.HashMap;
 
 import us.ihmc.sensorProcessing.simulatedSensors.SensorFilterParameters;
@@ -43,8 +41,9 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
 
    private final PointMeasurementNoiseParameters pointMeasurementNoiseParameters;
 
-//   private final SensorNoiseParameters sensorNoiseParameters = createNoiseParametersForEstimatorJerryTuning();
-   private final SensorNoiseParameters sensorNoiseParameters = createNoiseParametersForEstimatorJerryTuningSeptember2013();
+//   private final SensorNoiseParameters sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createNoiseParametersForEstimatorJerryTuning();
+//   private SensorNoiseParameters sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createNoiseParametersForEstimatorJerryTuningSeptember2013();
+   private SensorNoiseParameters sensorNoiseParameters = null;
 
    private final boolean doElasticityCompensation;
    private final double defaultJointStiffness;
