@@ -61,7 +61,7 @@ public class TwoWaypointTrajectoryGeneratorWithPushRecovery implements PositionT
 
    private final SmoothCartesianWaypointConnectorTrajectoryGenerator2D pushRecoveryTrajectoryGenerator;
    private final BooleanYoVariable hasReplanned;
-   private final DoubleYoVariable initialTime;
+   private final double initialTime = 0.0;
    private final PositionTrajectoryGenerator nominalTrajectoryGenerator;
 
    private FramePoint nominalTrajectoryPosition;
@@ -87,9 +87,6 @@ public class TwoWaypointTrajectoryGeneratorWithPushRecovery implements PositionT
 
       this.hasReplanned = new BooleanYoVariable(namePrefix + "HasReplanned", this.registry);
       this.hasReplanned.set(false);
-
-      this.initialTime = new DoubleYoVariable(namePrefix + "InitialTime", this.registry);
-      this.initialTime.set(0.0);
 
       this.nominalTrajectoryPosition = new FramePoint();
       this.nominalTrajectoryVelocity = new FrameVector();
@@ -119,7 +116,7 @@ public class TwoWaypointTrajectoryGeneratorWithPushRecovery implements PositionT
       this.nominalTrajectoryGenerator = nominalTrajectoryGenerator;
 
       this.pushRecoveryTrajectoryGenerator = new SmoothCartesianWaypointConnectorTrajectoryGenerator2D(namePrefix + "PushRecoveryTrajectory", referenceFrame,
-            this.initialTime.getDoubleValue(), swingTimeProvider, initialPositionProvider, finalPositionProvider, initialVelocityProvider, parentRegistry,
+            initialTime, swingTimeProvider, initialPositionProvider, finalPositionProvider, initialVelocityProvider, parentRegistry,
             dynamicGraphicObjectsListRegistry, walkingControllerParameters);
       
       this.bagOfBalls = new BagOfBalls(numberOfBallsInBag, 0.01, namePrefix + "SwingTrajectoryBagOfBalls", registry,
@@ -128,7 +125,6 @@ public class TwoWaypointTrajectoryGeneratorWithPushRecovery implements PositionT
 
    public void initialize()
    {
-      initialTime.set(timeIntoStep.getDoubleValue());
       timeIntoStep.set(swingTime.getDoubleValue() - swingTimeRemainingProvider.getValue());
       pushRecoveryTrajectoryGenerator.setTimeIntoStep(timeIntoStep.getDoubleValue());
       pushRecoveryTrajectoryGenerator.initialize();
