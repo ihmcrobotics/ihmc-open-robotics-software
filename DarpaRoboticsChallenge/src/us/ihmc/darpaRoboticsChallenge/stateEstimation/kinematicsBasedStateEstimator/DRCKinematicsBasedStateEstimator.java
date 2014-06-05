@@ -66,7 +66,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       {
          if (imuProcessedOutputs.size() != 2)
             throw new RuntimeException("Cannot create FusedIMUSensor.");
-         fusedIMUSensor = new FusedIMUSensor(imuProcessedOutputs.get(0), imuProcessedOutputs.get(1), registry);
+         fusedIMUSensor = new FusedIMUSensor(imuProcessedOutputs.get(0), imuProcessedOutputs.get(1), estimatorDT, stateEstimatorParameters.getIMUDriftFilterFreqInHertz(), registry);
          imusToUse.add(fusedIMUSensor);
       }
       else
