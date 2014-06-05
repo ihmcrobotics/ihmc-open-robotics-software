@@ -9,13 +9,16 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
+import us.ihmc.utilities.math.geometry.AngleTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.screwTheory.RigidBody;
 
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameQuaternion;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
@@ -24,7 +27,7 @@ public class FusedIMUSensor implements IMUSensorReadOnly
 {
    private final String sensorName;
 
-   private final ReferenceFrame measurementFrame;
+   private final ReferenceFrame fusedMeasurementFrame;
    private final RigidBody measurementLink;
 
    private final IMUSensorReadOnly firstIMU;
@@ -35,7 +38,22 @@ public class FusedIMUSensor implements IMUSensorReadOnly
    private final YoFrameOrientation orientation;
    private final YoFrameVector angularVelocity;
    private final YoFrameVector linearAcceleration;
+   
+   // Variables use estimating the IMUs drift around z
+   private final DoubleYoVariable firstIMUYaw;
+   private final DoubleYoVariable secondIMUYaw;
+   private final DoubleYoVariable firstIMUYawPrevValue;
+   private final DoubleYoVariable secondIMUYawPrevValue;
+   private final DoubleYoVariable firstDriftYawRate;
+   private final DoubleYoVariable secondDriftYawRate;
+   private final DoubleYoVariable alphaIMUDriftFilter;
+   private final AlphaFilteredYoVariable firstDriftYawRateFiltered;
+   private final AlphaFilteredYoVariable secondDriftYawRateFiltered;
+   private final DoubleYoVariable firstDriftYaw;
+   private final DoubleYoVariable secondDriftYaw;
 
+   private final double updateDT;
+   
    // Temporary variables
    private final Matrix3d rotationFromIMUToWorld = new Matrix3d();
    private final Matrix3d rotationFromFusedIMUToWorld = new Matrix3d();
@@ -53,11 +71,15 @@ public class FusedIMUSensor implements IMUSensorReadOnly
 
    private final FrameVector firstFrameVector = new FrameVector();
    private final FrameVector secondFrameVector = new FrameVector();
+   
+   private final double[] tempYawPitchRoll = new double[3];
 
-   public FusedIMUSensor(IMUSensorReadOnly firstIMU, IMUSensorReadOnly secondIMU, YoVariableRegistry parentRegistry)
+   public FusedIMUSensor(IMUSensorReadOnly firstIMU, IMUSensorReadOnly secondIMU, double updateDT, double imuDriftFilterFreqInHertz, YoVariableRegistry parentRegistry)
    {
       this.firstIMU = firstIMU;
       this.secondIMU = secondIMU;
+      
+      this.updateDT = updateDT;
 
       sensorName = createSensorName();
 
@@ -66,13 +88,28 @@ public class FusedIMUSensor implements IMUSensorReadOnly
       else
          throw new RuntimeException("Both IMUs have to be attached to the same RigidBody.");
 
-      measurementFrame = createFusedMeasurementFrame();
+      fusedMeasurementFrame = createFusedMeasurementFrame();
 
       registry = new YoVariableRegistry(sensorName);
-      quaternion = new YoFrameQuaternion(sensorName, measurementFrame, registry);
-      orientation = new YoFrameOrientation(sensorName, measurementFrame, registry);
-      angularVelocity = new YoFrameVector("qd_w", sensorName, measurementFrame, registry);
-      linearAcceleration = new YoFrameVector("qdd_", sensorName, measurementFrame, registry);
+      quaternion = new YoFrameQuaternion(sensorName, fusedMeasurementFrame, registry);
+      orientation = new YoFrameOrientation(sensorName, fusedMeasurementFrame, registry);
+      angularVelocity = new YoFrameVector("qd_w", sensorName, fusedMeasurementFrame, registry);
+      linearAcceleration = new YoFrameVector("qdd_", sensorName, fusedMeasurementFrame, registry);
+
+      firstIMUYaw = new DoubleYoVariable(firstIMU.getSensorName() + "Yaw", registry);
+      secondIMUYaw = new DoubleYoVariable(secondIMU.getSensorName() + "Yaw", registry);
+      firstIMUYawPrevValue = new DoubleYoVariable(firstIMU.getSensorName() + "YawPrevValue", registry);
+      secondIMUYawPrevValue = new DoubleYoVariable(secondIMU.getSensorName() + "YawPrevValue", registry);
+      firstDriftYawRate = new DoubleYoVariable(firstIMU.getSensorName() + "EstimatedDriftYawRate", registry);
+      secondDriftYawRate = new DoubleYoVariable(secondIMU.getSensorName() + "EstimatedDriftYawRate", registry);
+      alphaIMUDriftFilter = new DoubleYoVariable("alphaIMUDriftFilter", registry);
+      alphaIMUDriftFilter.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(5.0, updateDT));
+      firstDriftYawRateFiltered = new AlphaFilteredYoVariable(firstIMU.getSensorName() + "EstimatedDriftYawRateFiltered", registry, alphaIMUDriftFilter, firstDriftYawRate);
+      secondDriftYawRateFiltered = new AlphaFilteredYoVariable(secondIMU.getSensorName() + "EstimatedDriftYawRateFiltered", registry, alphaIMUDriftFilter, secondDriftYawRate);
+      firstDriftYaw = new DoubleYoVariable(firstIMU.getSensorName() + "EstimatedDriftYaw", registry);
+      secondDriftYaw = new DoubleYoVariable(secondIMU.getSensorName() + "EstimatedDriftYaw", registry);
+
+      fusedFrameOrientation.setToZero(fusedMeasurementFrame);
 
       parentRegistry.addChild(registry);
    }
@@ -166,11 +203,45 @@ public class FusedIMUSensor implements IMUSensorReadOnly
       measureOrientationInFusedFrame(firstFrameOrientation, firstIMU);
       measureOrientationInFusedFrame(secondFrameOrientation, secondIMU);
 
-      fusedFrameOrientation.setToZero(measurementFrame);
+//      estimateYawDriftAndCorrectOrientation(firstFrameOrientation, secondFrameOrientation, fusedFrameOrientation);
+
       fusedFrameOrientation.interpolate(firstFrameOrientation, secondFrameOrientation, 0.0);
 
       orientation.set(fusedFrameOrientation);
       quaternion.set(fusedFrameOrientation);
+   }
+
+   private void estimateYawDriftAndCorrectOrientation(FrameOrientation firstFrameOrientation, FrameOrientation secondFrameOrientation, FrameOrientation fusedFrameOrientation)
+   {
+      firstFrameOrientation.checkReferenceFrameMatch(fusedMeasurementFrame);
+      secondFrameOrientation.checkReferenceFrameMatch(fusedMeasurementFrame);
+      fusedFrameOrientation.checkReferenceFrameMatch(fusedMeasurementFrame);
+      
+      double fusedIMUYaw = fusedFrameOrientation.getYaw();
+      
+      firstIMUYaw.set(firstFrameOrientation.getYaw() - fusedIMUYaw);
+      secondIMUYaw.set(secondFrameOrientation.getYaw() - fusedIMUYaw);
+      
+      firstDriftYawRate.set(AngleTools.computeAngleDifferenceMinusPiToPi(firstIMUYaw.getDoubleValue(), firstIMUYawPrevValue.getDoubleValue()) / updateDT);
+      secondDriftYawRate.set(AngleTools.computeAngleDifferenceMinusPiToPi(secondIMUYaw.getDoubleValue(), secondIMUYawPrevValue.getDoubleValue()) / updateDT);
+      firstDriftYawRateFiltered.update();
+      secondDriftYawRateFiltered.update();
+      
+      firstDriftYaw.add(firstDriftYawRateFiltered.getDoubleValue() * updateDT);
+      secondDriftYaw.add(secondDriftYawRateFiltered.getDoubleValue() * updateDT);
+      
+      firstIMUYawPrevValue.set(firstIMUYaw.getDoubleValue());
+      secondIMUYawPrevValue.set(secondIMUYaw.getDoubleValue());
+      
+      firstFrameOrientation.getYawPitchRoll(tempYawPitchRoll);
+      tempYawPitchRoll[0] -= firstDriftYaw.getDoubleValue();
+      tempYawPitchRoll[0] = AngleTools.trimAngleMinusPiToPi(tempYawPitchRoll[0]);
+      firstFrameOrientation.setYawPitchRoll(tempYawPitchRoll);
+      
+      secondFrameOrientation.getYawPitchRoll(tempYawPitchRoll);
+      tempYawPitchRoll[0] -= secondDriftYaw.getDoubleValue();
+      tempYawPitchRoll[0] = AngleTools.trimAngleMinusPiToPi(tempYawPitchRoll[0]);
+      secondFrameOrientation.setYawPitchRoll(tempYawPitchRoll);
    }
 
    private void measureOrientationInFusedFrame(FrameOrientation orientationToPack, IMUSensorReadOnly imu)
@@ -180,13 +251,13 @@ public class FusedIMUSensor implements IMUSensorReadOnly
       transformFromIMUToWorld.set(rotationFromIMUToWorld);
 
       // R_{Fused IMU}^{IMU}
-      measurementFrame.getTransformToDesiredFrame(transformFromFusedIMUToIMU, imu.getMeasurementFrame());
+      fusedMeasurementFrame.getTransformToDesiredFrame(transformFromFusedIMUToIMU, imu.getMeasurementFrame());
 
       // R_{Fused IMU}^{world} = R_{IMU}^{world} * R_{Fused IMU}^{IMU}
       transformFromFusedIMUToWorld.mul(transformFromIMUToWorld, transformFromFusedIMUToIMU);
       transformFromFusedIMUToWorld.get(rotationFromFusedIMUToWorld);
 
-      orientationToPack.setIncludingFrame(measurementFrame, rotationFromFusedIMUToWorld);
+      orientationToPack.setIncludingFrame(fusedMeasurementFrame, rotationFromFusedIMUToWorld);
    }
 
    private void updateAngularVelocity()
@@ -197,8 +268,8 @@ public class FusedIMUSensor implements IMUSensorReadOnly
       firstFrameVector.setIncludingFrame(firstIMU.getMeasurementFrame(), firstVector);
       secondFrameVector.setIncludingFrame(secondIMU.getMeasurementFrame(), secondVector);
 
-      firstFrameVector.changeFrame(measurementFrame);
-      secondFrameVector.changeFrame(measurementFrame);
+      firstFrameVector.changeFrame(fusedMeasurementFrame);
+      secondFrameVector.changeFrame(fusedMeasurementFrame);
 
       angularVelocity.add(firstFrameVector, secondFrameVector);
       angularVelocity.scale(0.5);
@@ -212,8 +283,8 @@ public class FusedIMUSensor implements IMUSensorReadOnly
       firstFrameVector.setIncludingFrame(firstIMU.getMeasurementFrame(), firstVector);
       secondFrameVector.setIncludingFrame(secondIMU.getMeasurementFrame(), secondVector);
 
-      firstFrameVector.changeFrame(measurementFrame);
-      secondFrameVector.changeFrame(measurementFrame);
+      firstFrameVector.changeFrame(fusedMeasurementFrame);
+      secondFrameVector.changeFrame(fusedMeasurementFrame);
 
       linearAcceleration.add(firstFrameVector, secondFrameVector);
       linearAcceleration.scale(0.5);
@@ -226,7 +297,7 @@ public class FusedIMUSensor implements IMUSensorReadOnly
 
    public ReferenceFrame getMeasurementFrame()
    {
-      return measurementFrame;
+      return fusedMeasurementFrame;
    }
 
    public RigidBody getMeasurementLink()

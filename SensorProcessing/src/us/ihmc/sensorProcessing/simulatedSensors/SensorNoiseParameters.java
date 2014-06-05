@@ -6,20 +6,22 @@ public class SensorNoiseParameters
 {
    private double jointPositionMeasurementStandardDeviation = 0.0;
    private double jointVelocityMeasurementStandardDeviation = 0.0;
-   
+
    private double comAccelerationProcessNoiseStandardDeviation = 0.0;
    private double angularAccelerationProcessNoiseStandardDeviation = 0.0;
 
    private double orientationMeasurementStandardDeviation = 0.0;
    private double orientationMeasurementLatency = 0.0;
-   
+
    private double angularVelocityMeasurementStandardDeviation = 0.0;
    private double angularVelocityMeasurmentLatency = 0.0;
-   
+
    private double linearAccelerationMeasurementStandardDeviation = 0.0;
 
    private double angularVelocityBiasProcessNoiseStandardDeviation = 0.0;
    private double linearAccelerationBiasProcessNoiseStandardDeviation = 0.0;
+
+   private double imuYawDriftAcceleration = 0.0;
 
    private final Vector3d initialLinearVelocityBias = new Vector3d();
    private final Vector3d initialAngularVelocityBias = new Vector3d();
@@ -33,7 +35,7 @@ public class SensorNoiseParameters
    {
       return this.jointVelocityMeasurementStandardDeviation;
    }
-   
+
    public void setJointPositionMeasurementStandardDeviation(double jointPositionMeasurementStandardDeviation)
    {
       this.jointPositionMeasurementStandardDeviation = jointPositionMeasurementStandardDeviation;
@@ -43,7 +45,7 @@ public class SensorNoiseParameters
    {
       this.jointVelocityMeasurementStandardDeviation = jointVelocityMeasurementStandardDeviation;
    }
-   
+
    public double getComAccelerationProcessNoiseStandardDeviation()
    {
       return comAccelerationProcessNoiseStandardDeviation;
@@ -63,12 +65,12 @@ public class SensorNoiseParameters
    {
       this.angularAccelerationProcessNoiseStandardDeviation = angularAccelerationProcessNoiseStandardDeviation;
    }
-   
+
    public double getOrientationMeasurementStandardDeviation()
    {
       return orientationMeasurementStandardDeviation;
    }
-   
+
    public double getOrientationMeasurementLatency()
    {
       return orientationMeasurementLatency;
@@ -83,7 +85,7 @@ public class SensorNoiseParameters
    {
       return angularVelocityMeasurementStandardDeviation;
    }
-   
+
    public double getAngularVelocityMeasurementLatency()
    {
       return angularVelocityMeasurmentLatency;
@@ -113,12 +115,12 @@ public class SensorNoiseParameters
    {
       this.orientationMeasurementStandardDeviation = orientationMeasurementStandardDeviation;
    }
-   
+
    public void setOrientationMeasurementLatency(double orientationMeasurementLatency)
    {
       this.orientationMeasurementLatency = orientationMeasurementLatency;
    }
-   
+
    public void setAngularVelocityMeasurementLatency(double angularVelocityMeasurmentLatency)
    {
       this.angularVelocityMeasurmentLatency = angularVelocityMeasurmentLatency;
@@ -154,6 +156,13 @@ public class SensorNoiseParameters
       this.initialAngularVelocityBias.set(initialAngularVelocityBias);
    }
 
-  
-  
+   public void setIMUYawDriftAcceleration(double yawDriftAcceleration)
+   {
+      this.imuYawDriftAcceleration = yawDriftAcceleration;
+   }
+
+   public double getIMUYawDriftAcceleration()
+   {
+      return this.imuYawDriftAcceleration;
+   }
 }

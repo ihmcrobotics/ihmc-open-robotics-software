@@ -13,6 +13,7 @@ import us.ihmc.sensorProcessing.signalCorruption.GaussianDoubleCorruptor;
 import us.ihmc.sensorProcessing.signalCorruption.GaussianOrientationCorruptor;
 import us.ihmc.sensorProcessing.signalCorruption.GaussianVectorCorruptor;
 import us.ihmc.sensorProcessing.signalCorruption.LatencyVectorCorruptor;
+import us.ihmc.sensorProcessing.signalCorruption.OrientationConstantAcceleratingYawDriftCorruptor;
 import us.ihmc.sensorProcessing.signalCorruption.OrientationLatencyCorruptor;
 import us.ihmc.sensorProcessing.signalCorruption.RandomWalkBiasVectorCorruptor;
 import us.ihmc.utilities.ForceSensorDefinition;
@@ -176,8 +177,12 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
 
          if (sensorNoiseParameters != null)
          {
+            double yawDriftAcceleration = sensorNoiseParameters.getIMUYawDriftAcceleration();
+            OrientationConstantAcceleratingYawDriftCorruptor yawDriftCorruptor = new OrientationConstantAcceleratingYawDriftCorruptor(sensorName, estimateDT, registry);
+            yawDriftCorruptor.setYawDriftAcceleration(yawDriftAcceleration);
+            orientationSensor.addSignalCorruptor(yawDriftCorruptor);
+
             double orientationMeasurementStandardDeviation = sensorNoiseParameters.getOrientationMeasurementStandardDeviation();
-            
             GaussianOrientationCorruptor orientationCorruptor = new GaussianOrientationCorruptor(sensorName, 12334255L, registry);
             orientationCorruptor.setStandardDeviation(orientationMeasurementStandardDeviation);
             orientationSensor.addSignalCorruptor(orientationCorruptor);
