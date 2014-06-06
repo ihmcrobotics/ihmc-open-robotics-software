@@ -270,8 +270,11 @@ public class InefficientPushrodTransmissionJacobian
       b6InSlideFrame.setIncludingFrame(b6InBottomFrame);
       b6InSlideFrame.changeFrame(actuator6SlideFrame);
 
-      printIfDebug("b5InBoneFrame = " + b5InTopFrame);
-      printIfDebug("b6InBoneFrame = " + b6InTopFrame);
+      if(DEBUG)
+      {
+         System.out.println("b5InBoneFrame = " + b5InTopFrame);
+         System.out.println("b6InBoneFrame = " + b6InTopFrame);         
+      }
 
       // Solve for t5, t6 in bone frame:
       
@@ -283,9 +286,11 @@ public class InefficientPushrodTransmissionJacobian
       yDiff = b6InSlideFrame.getY();
       double t6zInSlideFrame = b6InSlideFrame.getZ() + Math.sqrt(futekLengthSquared - xDiff * xDiff - yDiff * yDiff);
 
-      printIfDebug("t5zInSlideFrame = " + t5zInSlideFrame);
-      printIfDebug("t6zInSlideFrame = " + t6zInSlideFrame);
-
+      if(DEBUG)
+      {
+         System.out.println("t5zInSlideFrame = " + t5zInSlideFrame);
+         System.out.println("t6zInSlideFrame = " + t6zInSlideFrame);
+      }
 
       t5InTopFrame.setToZero(actuator5SlideFrame);
       t6InTopFrame.setToZero(actuator6SlideFrame);
@@ -296,9 +301,11 @@ public class InefficientPushrodTransmissionJacobian
       t5InTopFrame.changeFrame(topFrame);
       t6InTopFrame.changeFrame(topFrame);
 
-      printIfDebug("t5InBoneFrame = " + t5InTopFrame);
-      printIfDebug("t6InBoneFrame = " + t6InTopFrame);
-
+      if(DEBUG)
+      {
+         System.out.println("t5InBoneFrame = " + t5InTopFrame);
+         System.out.println("t6InBoneFrame = " + t6InTopFrame);
+      }
       // Compute topsInFootFrame:
       
       t5InBottomFrame.setIncludingFrame(t5InTopFrame);
@@ -324,8 +331,11 @@ public class InefficientPushrodTransmissionJacobian
          f5VectorInTopFrame.normalize();
          f6VectorInTopFrame.normalize();
          
-         printIfDebug("f5VectorInBoneFrame = " + f5VectorInTopFrame);
-         printIfDebug("f6VectorInBoneFrame = " + f6VectorInTopFrame);
+         if (DEBUG)
+         {
+            System.out.println("f5VectorInBoneFrame = " + f5VectorInTopFrame);
+            System.out.println("f6VectorInBoneFrame = " + f6VectorInTopFrame);            
+         }
       }
       else
       {
@@ -409,12 +419,6 @@ public class InefficientPushrodTransmissionJacobian
          throw new RuntimeException("Shouldn't get here.");
       }
       }
-   }
-
-   private void printIfDebug(String message)
-   {
-      if (DEBUG)
-         System.out.println(message);
    }
 
 }
