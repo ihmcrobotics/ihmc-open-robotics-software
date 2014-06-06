@@ -30,7 +30,7 @@ public class ValkyriePhysicalProperties extends DRCRobotPhysicalProperties
       {
          Transform3D ankleToSoleFrame = new Transform3D();
          //ankleToSoleFrame.setEuler(new Vector3d(0.0, +0.13, 0.0));
-         ankleToSoleFrame.setTranslation(new Vector3d(0.0, 0.0, -ValkyriePhysicalProperties.ankleHeight));
+         ankleToSoleFrame.setTranslation(new Vector3d(footLength / 2.0 - footBack, 0.0, -ValkyriePhysicalProperties.ankleHeight));
          ankleToSoleFrameTransforms.put(side, ankleToSoleFrame);
       }
    }

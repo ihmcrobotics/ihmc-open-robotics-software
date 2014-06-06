@@ -10,6 +10,8 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
+import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
@@ -36,29 +38,37 @@ public class ValkyrieInitialSetup implements DRCRobotInitialSetup<SDFRobot>
    {
       if(!robotInitialized)
       {
-         setActuatorPositions(robot);
+         setActuatorPositions(robot, jointMap);
          positionRobotInWorld(robot);
          robotInitialized = true;
       }
    }
    
-   private void setActuatorPositions(SDFRobot robot)
+   private void setActuatorPositions(SDFRobot robot, DRCRobotJointMap jointMap)
    {
-      robot.getOneDegreeOfFreedomJoint("RightHipExtensor").setQ(-0.4);
-      robot.getOneDegreeOfFreedomJoint("RightKneeExtensor").setQ(-0.8);
-      robot.getOneDegreeOfFreedomJoint("RightAnkleExtensor").setQ(-0.4);
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         String hipPitch = jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH);
+         String knee = jointMap.getLegJointName(robotSide, LegJointName.KNEE);
+         String anklePitch = jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH);
+         String hipRoll = jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL);
+         String ankleRoll = jointMap.getLegJointName(robotSide, LegJointName.ANKLE_ROLL);
+         
+         robot.getOneDegreeOfFreedomJoint(hipPitch).setQ(-0.305);
+         robot.getOneDegreeOfFreedomJoint(knee).setQ(-0.80);
+         robot.getOneDegreeOfFreedomJoint(anklePitch).setQ(-0.495);
+         robot.getOneDegreeOfFreedomJoint(hipRoll).setQ(0.0);
+         robot.getOneDegreeOfFreedomJoint(ankleRoll).setQ(0.0);
+
+         String shoulderRoll = jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL);
+         String shoulderPitch = jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH);
+         String elbowPitch = jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH);
+         
+         robot.getOneDegreeOfFreedomJoint(shoulderRoll).setQ(-0.18);
+         robot.getOneDegreeOfFreedomJoint(shoulderPitch).setQ(0.3);
+         robot.getOneDegreeOfFreedomJoint(elbowPitch).setQ(-1.0);
+      }
       
-      robot.getOneDegreeOfFreedomJoint("LeftHipExtensor").setQ(-0.4);
-      robot.getOneDegreeOfFreedomJoint("LeftKneeExtensor").setQ(-0.8);
-      robot.getOneDegreeOfFreedomJoint("LeftAnkleExtensor").setQ(-0.4);
-      
-      robot.getOneDegreeOfFreedomJoint("LeftShoulderAdductor").setQ(-0.18);
-      robot.getOneDegreeOfFreedomJoint("LeftShoulderExtensor").setQ(0.3);
-      robot.getOneDegreeOfFreedomJoint("LeftElbowExtensor").setQ(-1.0);
-      
-      robot.getOneDegreeOfFreedomJoint("RightShoulderAdductor").setQ(-0.18);
-      robot.getOneDegreeOfFreedomJoint("RightShoulderExtensor").setQ(0.3);
-      robot.getOneDegreeOfFreedomJoint("RightElbowExtensor").setQ(-1.0);
       robot.update();
    }
    

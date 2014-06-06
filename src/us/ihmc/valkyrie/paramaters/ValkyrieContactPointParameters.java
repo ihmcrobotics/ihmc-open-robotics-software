@@ -107,10 +107,10 @@ public class ValkyrieContactPointParameters extends DRCRobotContactPointParamete
     	  Transform3D ankleToSoleFrame = ValkyriePhysicalProperties.getAnkleToSoleFrameTransform(robotSide);
     	  
 	      ArrayList<Pair<String, Point2d>> footGroundContactPoints = new ArrayList<>();
-	      footGroundContactPoints.add(new Pair<String, Point2d>(jointMap.getJointBeforeFootName(robotSide), new Point2d(ValkyriePhysicalProperties.footForward, -ValkyriePhysicalProperties.footWidth / 2.0)));
-	      footGroundContactPoints.add(new Pair<String, Point2d>(jointMap.getJointBeforeFootName(robotSide), new Point2d(ValkyriePhysicalProperties.footForward, ValkyriePhysicalProperties.footWidth / 2.0)));
-	      footGroundContactPoints.add(new Pair<String, Point2d>(jointMap.getJointBeforeFootName(robotSide), new Point2d(-ValkyriePhysicalProperties.footBack, -ValkyriePhysicalProperties.footWidth / 2.0)));
-	      footGroundContactPoints.add(new Pair<String, Point2d>(jointMap.getJointBeforeFootName(robotSide), new Point2d(-ValkyriePhysicalProperties.footBack, ValkyriePhysicalProperties.footWidth / 2.0)));
+	      footGroundContactPoints.add(new Pair<String, Point2d>(jointMap.getJointBeforeFootName(robotSide), new Point2d(ValkyriePhysicalProperties.footLength / 2.0, -ValkyriePhysicalProperties.footWidth / 2.0)));
+	      footGroundContactPoints.add(new Pair<String, Point2d>(jointMap.getJointBeforeFootName(robotSide), new Point2d(ValkyriePhysicalProperties.footLength / 2.0, ValkyriePhysicalProperties.footWidth / 2.0)));
+	      footGroundContactPoints.add(new Pair<String, Point2d>(jointMap.getJointBeforeFootName(robotSide), new Point2d(-ValkyriePhysicalProperties.footLength / 2.0, -ValkyriePhysicalProperties.footWidth / 2.0)));
+	      footGroundContactPoints.add(new Pair<String, Point2d>(jointMap.getJointBeforeFootName(robotSide), new Point2d(-ValkyriePhysicalProperties.footLength / 2.0, ValkyriePhysicalProperties.footWidth / 2.0)));
 	
 	      
 	      for(Pair<String, Point2d> gc : footGroundContactPoints)
