@@ -5,6 +5,8 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import us.ihmc.valkyrie.kinematics.transmissions.InefficientPushrodTransmissionJacobian;
+import us.ihmc.valkyrie.kinematics.transmissions.InterpolatedPushRodTransmission;
+import us.ihmc.valkyrie.kinematics.transmissions.PushRodTransmissionInterface;
 import us.ihmc.valkyrie.kinematics.transmissions.PushRodTransmissionJoint;
 import us.ihmc.valkyrie.kinematics.util.ClosedFormJacobian;
 
@@ -21,8 +23,10 @@ public class ClosedFormJacobianTest
    {
       0.0, 0.2, -0.2, 0.2, 0.35, -0.35, 0.0
    };
-   private ClosedFormJacobian closedFormJacobian = new ClosedFormJacobian(PushRodTransmissionJoint.ANKLE);
+   private ClosedFormJacobian closedFormJacobianAnkle = new ClosedFormJacobian(PushRodTransmissionJoint.ANKLE);
+   private ClosedFormJacobian closedFormJacobianAnkleRenishaws = new ClosedFormJacobian(PushRodTransmissionJoint.ANKLE);
    private ClosedFormJacobian closedFormJacobianWaist = new ClosedFormJacobian(PushRodTransmissionJoint.WAIST);
+   private ClosedFormJacobian closedFormJacobianWaistRenishaws = new ClosedFormJacobian(PushRodTransmissionJoint.WAIST);
    
    private double[] m11_matlab = new double[]
    {
@@ -90,8 +94,12 @@ public class ClosedFormJacobianTest
    {
       for (int i = 0; i < 7; i++)
       {
-         double[][] J = closedFormJacobian.getUpdatedTransform(-roll[i], -pitch[i]);
-         if (DEBUG) System.out.println(J[0][0] + ", " + J[0][1] + ", " + J[1][0] + ", " + J[1][1]);
+         double[][] J = closedFormJacobianAnkle.getUpdatedTransform( -roll[i], -pitch[i]);
+         if (DEBUG){
+            System.out.println(J[1][0] + ", " + J[1][1] + ", " + J[0][0] + ", " + J[0][1]);
+            System.out.println(-m11_matlab[i] + ", " + -m12_matlab[i] + ", " + -m21_matlab[i] + ", " + -m22_matlab[i]);
+            System.out.println(" ");
+         }
          assertEquals(J[1][0], -m11_matlab[i], TOLERANCE);
          assertEquals(J[1][1], -m12_matlab[i], TOLERANCE);
          assertEquals(J[0][0], -m21_matlab[i], TOLERANCE);
@@ -100,18 +108,18 @@ public class ClosedFormJacobianTest
    }
 
    @Test
-   public void testJacobianMatchesInefficientImplementationAnkle()
+   public void testEfficientMatchesInefficientJacobianAnkle()
    {
       InefficientPushrodTransmissionJacobian inefficientButReadablePushrodTransmission = new InefficientPushrodTransmissionJacobian(PushRodTransmissionJoint.ANKLE, null, null);
 
       for (int i = 0; i < 7; i++)
       {
-         double[][] J = closedFormJacobian.getUpdatedTransform(roll[i], pitch[i]);    // + 7.5*Math.PI/180.0);
+         double[][] J = closedFormJacobianAnkle.getUpdatedTransform( roll[i], pitch[i]);    // + 7.5*Math.PI/180.0);
 
-         double tau5_roll = J[1][0];
          double tau5_pitch = J[0][0];
-         double tau6_roll = J[1][1];
          double tau6_pitch = J[0][1];
+         double tau5_roll =  J[1][0];
+         double tau6_roll =  J[1][1];
 
          double[][] inefficientJacobian = new double[2][2];
          inefficientButReadablePushrodTransmission.computeJacobian(inefficientJacobian, pitch[i], roll[i]);
@@ -144,15 +152,15 @@ public void testJacobianMatchesMATLABWaist()
          System.out.println(J[0][0] + ", " + J[0][1] + ", " + J[1][0] + ", " + J[1][1]);
          System.out.println(m11_matlab_waist[i] + ", " + m12_matlab_waist[i] + ", " + m21_matlab_waist[i] + ", " + m22_matlab_waist[i]);         
       }
-      assertEquals(J[0][1], -m11_matlab_waist[i], TOLERANCE);
-      assertEquals(J[0][0], -m12_matlab_waist[i], TOLERANCE);
-      assertEquals(J[1][1], -m21_matlab_waist[i], TOLERANCE);
-      assertEquals(J[1][0], -m22_matlab_waist[i], TOLERANCE);
+      assertEquals(J[0][0], -m11_matlab_waist[i], TOLERANCE);
+      assertEquals(J[0][1], -m12_matlab_waist[i], TOLERANCE);
+      assertEquals(J[1][0], -m21_matlab_waist[i], TOLERANCE);
+      assertEquals(J[1][1], -m22_matlab_waist[i], TOLERANCE);
    }
 }
 
 //@Test
-public void testJacobianMatchesInefficientImplementationWaist()
+public void testEfficientMatchesInefficientJacobianWaist()
 {
    InefficientPushrodTransmissionJacobian inefficientButReadablePushrodTransmission = new InefficientPushrodTransmissionJacobian(PushRodTransmissionJoint.WAIST, null, null);
 
@@ -179,6 +187,74 @@ public void testJacobianMatchesInefficientImplementationWaist()
       assertEquals(tau6_roll, tau6_roll_jerry, TOLERANCE);
       assertEquals(tau5_pitch, tau5_pitch_jerry, TOLERANCE);
       assertEquals(tau6_pitch, tau6_pitch_jerry, TOLERANCE);
+   }
+}
+
+//@Test
+public void testEfficentMatchesInterpolatedJacobianWaist()
+{
+   closedFormJacobianWaistRenishaws.useFuteks(false);
+   for (int i = 0; i < 7; i++)
+   {
+      double[][] J = closedFormJacobianWaistRenishaws.getUpdatedTransform( roll[i], pitch[i] );
+
+      double tau5_pitch = J[0][0];  double tau6_pitch = J[0][1];
+      double tau5_roll = J[1][0];   double tau6_roll = J[1][1];
+
+      double[][] interpolatedJacobian = new double[2][2];
+      
+      InterpolatedPushRodTransmission interpolatedPushRodTransmission = new InterpolatedPushRodTransmission( "v1_waist", 1.0, 0.0 );
+
+      interpolatedJacobian = interpolatedPushRodTransmission.getInterpolatedActuatorToJointJacobian( pitch[i], roll[i] );
+
+      double tau5_pitch_inter = interpolatedJacobian[0][0];  double tau6_pitch_inter = interpolatedJacobian[0][1];
+      double tau5_roll_inter = interpolatedJacobian[1][0];   double tau6_roll_inter = interpolatedJacobian[1][1];
+
+      if (DEBUG)
+      {
+         System.out.println("tau5_roll_wills = " + tau5_roll + ", tau6_roll_wills = " + tau6_roll + ", tau5_pitch_wills = " + tau5_pitch + ", tau6_pitch_wills = " + tau6_pitch);
+         System.out.println("tau5_roll_inter = " + tau5_roll_inter + ", tau6_roll_inter = " + tau6_roll_inter + ", tau5_pitch_inter = " + tau5_pitch_inter + ", tau6_pitch_inter = " + tau6_pitch_inter);
+         System.out.println(" ");
+      }
+      assertEquals(tau5_roll, tau5_roll_inter, TOLERANCE);
+      assertEquals(tau6_roll, tau6_roll_inter, TOLERANCE);
+      assertEquals(tau5_pitch, tau5_pitch_inter, TOLERANCE);
+      assertEquals(tau6_pitch, tau6_pitch_inter, TOLERANCE);
+   }
+   
+}
+
+//@Test
+public void testEfficentMatchesInterpolatedJacobianAnkle()
+{
+   closedFormJacobianAnkleRenishaws.useFuteks(false);
+   for (int i = 0; i < 7; i++)
+   {
+      double[][] J = closedFormJacobianAnkleRenishaws.getUpdatedTransform( roll[i], pitch[i] );    // + 7.5*Math.PI/180.0);
+
+      double tau5_pitch = J[0][0];  double tau6_pitch = J[0][1];
+      double tau5_roll = J[1][0];   double tau6_roll = J[1][1];
+
+      double[][] interpolatedJacobian = new double[2][2];
+      
+      InterpolatedPushRodTransmission interpolatedPushRodTransmission = new InterpolatedPushRodTransmission( "v1_ankle", 1.0, 0.0 );
+
+      interpolatedJacobian = interpolatedPushRodTransmission.getInterpolatedActuatorToJointJacobian( pitch[i], roll[i] );
+
+      double tau5_pitch_inter = interpolatedJacobian[0][0];  double tau6_pitch_inter = interpolatedJacobian[0][1];
+      double tau5_roll_inter = interpolatedJacobian[1][0];   double tau6_roll_inter = interpolatedJacobian[1][1];
+
+      if (DEBUG)
+      {
+         System.out.println("tau5_roll_wills = " + tau5_roll + ", tau6_roll_wills = " + tau6_roll + ", tau5_pitch_wills = " + tau5_pitch + ", tau6_pitch_wills = " + tau6_pitch);
+         System.out.println("tau5_roll_inter = " + tau5_roll_inter + ", tau6_roll_inter = " + tau6_roll_inter + ", tau5_pitch_inter = " + tau5_pitch_inter + ", tau6_pitch_inter = " + tau6_pitch_inter);
+         System.out.println(" ");
+      }
+      
+      assertEquals(tau5_roll, tau5_roll_inter, TOLERANCE);
+      assertEquals(tau6_roll, tau6_roll_inter, TOLERANCE);
+      assertEquals(tau5_pitch, tau5_pitch_inter, TOLERANCE);
+      assertEquals(tau6_pitch, tau6_pitch_inter, TOLERANCE);
    }
 }
 
