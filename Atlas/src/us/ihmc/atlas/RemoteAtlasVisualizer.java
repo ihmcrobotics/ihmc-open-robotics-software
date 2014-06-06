@@ -4,6 +4,7 @@ import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardControllerListener;
 import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
+import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
 import us.ihmc.robotDataCommunication.YoVariableClient;
 
 import com.martiansoftware.jsap.FlaggedOption;
@@ -23,8 +24,8 @@ public class RemoteAtlasVisualizer
       
 //      SDFRobot robot = robotLoader.createRobot(jointMap, false);
 //      SliderBoardFactory sliderBoardFactory = GainControllerSliderBoard.getFactory();
-//      SliderBoardFactory sliderBoardFactory = WalkControllerSliderBoard.getFactory();
-      SliderBoardFactory sliderBoardFactory = JointAngleOffsetSliderBoard.getFactory();
+      SliderBoardFactory sliderBoardFactory = WalkControllerSliderBoard.getFactory();
+//      SliderBoardFactory sliderBoardFactory = JointAngleOffsetSliderBoard.getFactory();
 
       SliderBoardControllerListener scsYoVariablesUpdatedListener = new SliderBoardControllerListener(robotModel, bufferSize, sliderBoardFactory);
       scsYoVariablesUpdatedListener.addButton("requestStop", 1.0);
