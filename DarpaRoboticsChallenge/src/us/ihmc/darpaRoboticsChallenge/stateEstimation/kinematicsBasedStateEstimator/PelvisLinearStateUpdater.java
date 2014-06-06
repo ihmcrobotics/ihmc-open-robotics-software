@@ -111,8 +111,6 @@ public class PelvisLinearStateUpdater
    
    private final SixDoFJoint rootJoint;
    
-   private final StateEstimatorParameters stateEstimatorParameters;
-   
    private boolean initializeToActual = false;
    
    // Temporary variables
@@ -133,7 +131,6 @@ public class PelvisLinearStateUpdater
       this.estimatorDT = stateEstimatorParameters.getEstimatorDT();
       this.footSwitches = footSwitches;
       this.bipedFeet = bipedFeet;
-      this.stateEstimatorParameters = stateEstimatorParameters;
       
       twistCalculator = inverseDynamicsStructure.getTwistCalculator();
       rootJoint = inverseDynamicsStructure.getRootJoint();
@@ -247,18 +244,6 @@ public class PelvisLinearStateUpdater
       }
    }
 
-   public void startIMUDriftEstimation()
-   {
-      if (stateEstimatorParameters.estimateIMUDrift())
-         imuDriftCompensator.activateEstimation(true);
-   }
-   
-   public void startIMUDriftCompensation()
-   {
-      if (stateEstimatorParameters.compensateIMUDrift())
-         imuDriftCompensator.activateCompensation(true);
-   }
-   
    public void initialize()
    {
       initializeRobotState();

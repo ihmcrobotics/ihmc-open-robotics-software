@@ -242,11 +242,6 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       return drcStateEstimator;
    }
 
-   public DRCKinematicsBasedStateEstimator getDRCStateEstimator()
-   {
-      return drcStateEstimator;
-   }
-
    @Override
    public DynamicGraphicObjectsListRegistry getDynamicGraphicObjectsListRegistry()
    {
@@ -263,5 +258,4 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    {
       drcStateEstimator.initializeEstimatorToActual(initialCoMPosition, initialEstimationLinkOrientation);
    }
-
 }

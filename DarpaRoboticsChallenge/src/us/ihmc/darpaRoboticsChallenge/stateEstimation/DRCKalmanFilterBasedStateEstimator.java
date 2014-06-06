@@ -112,14 +112,4 @@ public class DRCKalmanFilterBasedStateEstimator implements DRCStateEstimatorInte
    {
       controlFlowGraphExecutorController.doControl();
    }
-
-   public void startIMUDriftEstimation()
-   {
-      // Not implemented
-   }
-
-   public void startIMUDriftCompensation()
-   {
-      // Not implemented
-   }
 }

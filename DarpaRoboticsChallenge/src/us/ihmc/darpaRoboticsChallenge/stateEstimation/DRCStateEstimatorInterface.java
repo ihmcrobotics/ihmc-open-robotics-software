@@ -11,9 +11,5 @@ public interface DRCStateEstimatorInterface extends RobotController
 {
    public abstract StateEstimator getStateEstimator();
 
-   public abstract void startIMUDriftEstimation();
-
-   public abstract void startIMUDriftCompensation();
-
    public abstract void initializeEstimatorToActual(Point3d initialCoMPosition, Quat4d initialEstimationLinkOrientation);
 }
