@@ -1,31 +1,5 @@
 package us.ihmc.atlas.initialSetup;
 
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.jointNames;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_elx;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_ely;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_shx;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_shy;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_wrx;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_wry;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_akx;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_aky;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_hpx;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_hpy;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_hpz;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_kny;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_arm_elx;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_arm_ely;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_arm_shx;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_arm_shy;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_arm_wrx;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_arm_wry;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_leg_akx;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_leg_aky;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_leg_hpx;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_leg_hpy;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_leg_hpz;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_leg_kny;
-
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
@@ -34,6 +8,8 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
+import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
@@ -65,33 +41,22 @@ public class AtlasSimInitialSetup implements DRCRobotInitialSetup<SDFRobot>
       if(!robotInitialized)
       {
          // Avoid singularities at startup
-         robot.getOneDegreeOfFreedomJoint(jointNames[l_leg_hpz]).setQ(0.0);
-         robot.getOneDegreeOfFreedomJoint(jointNames[l_leg_hpx]).setQ(0.062);
-         robot.getOneDegreeOfFreedomJoint(jointNames[l_leg_hpy]).setQ(-0.233);
-         robot.getOneDegreeOfFreedomJoint(jointNames[l_leg_kny]).setQ(0.518);
-         robot.getOneDegreeOfFreedomJoint(jointNames[l_leg_aky]).setQ(-0.276);
-         robot.getOneDegreeOfFreedomJoint(jointNames[l_leg_akx]).setQ(-0.062);
-         
-         robot.getOneDegreeOfFreedomJoint(jointNames[r_leg_hpz]).setQ(0.0);
-         robot.getOneDegreeOfFreedomJoint(jointNames[r_leg_hpx]).setQ(-0.062);
-         robot.getOneDegreeOfFreedomJoint(jointNames[r_leg_hpy]).setQ(-0.233);
-         robot.getOneDegreeOfFreedomJoint(jointNames[r_leg_kny]).setQ(0.518);
-         robot.getOneDegreeOfFreedomJoint(jointNames[r_leg_aky]).setQ(-0.276);
-         robot.getOneDegreeOfFreedomJoint(jointNames[r_leg_akx]).setQ(0.062);
-         
-         robot.getOneDegreeOfFreedomJoint(jointNames[l_arm_shy]).setQ(0.300);
-         robot.getOneDegreeOfFreedomJoint(jointNames[l_arm_shx]).setQ(-1.30);
-         robot.getOneDegreeOfFreedomJoint(jointNames[l_arm_ely]).setQ(2.00);
-         robot.getOneDegreeOfFreedomJoint(jointNames[l_arm_elx]).setQ(0.498);
-         robot.getOneDegreeOfFreedomJoint(jointNames[l_arm_wry]).setQ(0.000);
-         robot.getOneDegreeOfFreedomJoint(jointNames[l_arm_wrx]).setQ(-0.004);
-         
-         robot.getOneDegreeOfFreedomJoint(jointNames[r_arm_shy]).setQ(0.300);
-         robot.getOneDegreeOfFreedomJoint(jointNames[r_arm_shx]).setQ(1.30);
-         robot.getOneDegreeOfFreedomJoint(jointNames[r_arm_ely]).setQ(2.00);
-         robot.getOneDegreeOfFreedomJoint(jointNames[r_arm_elx]).setQ(-0.498);
-         robot.getOneDegreeOfFreedomJoint(jointNames[r_arm_wry]).setQ(0.000);
-         robot.getOneDegreeOfFreedomJoint(jointNames[r_arm_wrx]).setQ(0.004);
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW)).setQ(0.0);
+            robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL)).setQ(robotSide.negateIfRightSide(0.062));
+            robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH)).setQ(-0.233);
+            robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.KNEE)).setQ(0.518);
+            robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH)).setQ(-0.276);
+            robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_ROLL)).setQ(robotSide.negateIfRightSide(-0.062));
+            
+            robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH)).setQ(0.300);
+            robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL)).setQ(robotSide.negateIfRightSide(-1.30));
+            robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH)).setQ(2.00);
+            robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_ROLL)).setQ(robotSide.negateIfRightSide(0.498));
+            robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.WRIST_PITCH)).setQ(0.000);
+            robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.WRIST_ROLL)).setQ(robotSide.negateIfRightSide(-0.004));
+         }
          
          robot.update();
          robot.getRootJointToWorldTransform(rootToWorld);

@@ -33,18 +33,14 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParameters;
 
-import javax.vecmath.Vector3d;
-
 public class VariousWalkingProviderFromScriptFactory implements VariousWalkingProviderFactory
 {
    private final String filename;
    private final ScriptFileLoader scriptFileLoader;
-   private final Vector3d footstepOffset;
    
-   public VariousWalkingProviderFromScriptFactory(String filename, Vector3d footstepOffset)
+   public VariousWalkingProviderFromScriptFactory(String filename)
    {
       this.filename = filename;
-      this.footstepOffset = footstepOffset;
       try
       {
          this.scriptFileLoader = new ScriptFileLoader(filename);
@@ -56,17 +52,12 @@ public class VariousWalkingProviderFromScriptFactory implements VariousWalkingPr
       }
    }
 
-   public VariousWalkingProviderFromScriptFactory(String filename)
-   {
-      this(filename, new Vector3d(0.0,0.0,0.0));
-   }
-   
    public VariousWalkingProviders createVariousWalkingProviders(final DoubleYoVariable time, FullRobotModel fullRobotModel, WalkingControllerParameters walkingControllerParameters,
          CommonWalkingReferenceFrames referenceFrames, SideDependentList<ContactablePlaneBody> feet, ConstantTransferTimeCalculator transferTimeCalculator,
          ConstantSwingTimeCalculator swingTimeCalculator, YoVariableRegistry registry)
    {
       ScriptBasedFootstepProvider footstepProvider;
-     footstepProvider = new ScriptBasedFootstepProvider(scriptFileLoader, footstepOffset, time, feet, fullRobotModel, walkingControllerParameters, registry);
+     footstepProvider = new ScriptBasedFootstepProvider(scriptFileLoader, time, feet, fullRobotModel, walkingControllerParameters, registry);
       
       DesiredHandPoseProvider handPoseProvider = footstepProvider.getDesiredHandPoseProvider();
 
