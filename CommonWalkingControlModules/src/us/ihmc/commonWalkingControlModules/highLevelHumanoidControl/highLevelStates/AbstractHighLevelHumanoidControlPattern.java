@@ -477,9 +477,9 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
 
    protected void setTorqueControlJointsToZeroDersiredAcceleration()
    {
-      for (OneDoFJoint joint : torqueControlJoints)
+      for (int i = 0; i < torqueControlJoints.size(); i++)
       {
-         momentumBasedController.setOneDoFJointAcceleration(joint, 0.0);
+         momentumBasedController.setOneDoFJointAcceleration(torqueControlJoints.get(i), 0.0);
       }
    }
 

@@ -75,7 +75,9 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
    private final boolean showForceSensorFrames = false;
    private final DynamicGraphicReferenceFrame dynamicGraphicForceSensorMeasurementFrame, dynamicGraphicForceSensorFootFrame;
 
-  
+
+   private final AppearanceDefinition redAppearance = YoAppearance.Red();
+   private final AppearanceDefinition blueAppearance = YoAppearance.Blue();
 
    public WrenchBasedFootSwitch(String namePrefix, ForceSensorData forceSensorData, double footSwitchCoPThresholdFraction, double robotTotalWeight, ContactablePlaneBody contactablePlaneBody,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, double contactThresholdForce, YoVariableRegistry parentRegistry)
@@ -214,6 +216,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       readSensorData(footWrenchToPack);
    }
 
+   
    private boolean isCoPPastThreshold()
    {
       updateCoP();
@@ -230,7 +233,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
 
       pastThresholdFilter.update();
 
-      AppearanceDefinition appearanceDefinition = pastThresholdFilter.getBooleanValue() ? YoAppearance.Red() : YoAppearance.Blue();
+      AppearanceDefinition appearanceDefinition = pastThresholdFilter.getBooleanValue() ? redAppearance : blueAppearance;
 
       footswitchCOPBagOfBalls.setBall(resolvedCoP3d, appearanceDefinition, 0);
 
