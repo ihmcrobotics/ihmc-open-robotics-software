@@ -2,6 +2,8 @@ package us.ihmc.darpaRoboticsChallenge;
 
 import java.util.ArrayList;
 
+
+
 import us.ihmc.sensorProcessing.sensors.ForceSensorData;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -13,8 +15,10 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 
+/*
+ * Compute YoVariables of ForceSensor measurement projected onto it's predecessor joints. Useful for checking sensor consistence.
+ */
 public class ForceSensorToJointTorqueProjector implements  RobotController
-
 {   
    private final ForceSensorData forceSensorData;
    private final YoVariableRegistry registry;
@@ -22,8 +26,8 @@ public class ForceSensorToJointTorqueProjector implements  RobotController
 
 
    private final Wrench tempWrench = new Wrench();
-   private final ArrayList<Pair<FrameVector,DoubleYoVariable>> yoFootTorqueInJoints;
-   private final int numberOfJointFromFoot = 2;
+   private final ArrayList<Pair<FrameVector,DoubleYoVariable>> yoTorqueInJoints;
+   private final int numberOfJointFromSensor = 2;
 
    public ForceSensorToJointTorqueProjector(String namePrefix, ForceSensorData forceSensorData, RigidBody sensorLinkBody) 
    {
@@ -32,12 +36,12 @@ public class ForceSensorToJointTorqueProjector implements  RobotController
       this.forceSensorData = forceSensorData;
 
       //ground reaction wrench on joints
-      yoFootTorqueInJoints = new ArrayList<>();
+      yoTorqueInJoints = new ArrayList<>();
       RigidBody currentBody = sensorLinkBody;
-      for(int i=0;i<numberOfJointFromFoot;i++)
+      for(int i=0;i<numberOfJointFromSensor;i++)
       {
          FrameVector jAxis = ((OneDoFJoint)currentBody.getParentJoint()).getJointAxis();
-         yoFootTorqueInJoints.add(new Pair<>(jAxis,new DoubleYoVariable("NegGRFWrenchIn"+ currentBody.getParentJoint().getName(), registry)));
+         yoTorqueInJoints.add(new Pair<>(jAxis,new DoubleYoVariable("NegGRFWrenchIn"+ currentBody.getParentJoint().getName(), registry)));
          currentBody=currentBody.getParentJoint().getPredecessor();
       }
    }
@@ -69,9 +73,9 @@ public class ForceSensorToJointTorqueProjector implements  RobotController
    public void doControl()
    {
       forceSensorData.packWrench(tempWrench);
-      for(int i = 0; i < yoFootTorqueInJoints.size(); i++)
+      for(int i = 0; i < yoTorqueInJoints.size(); i++)
       {
-         Pair<FrameVector, DoubleYoVariable> pair = yoFootTorqueInJoints.get(i);
+         Pair<FrameVector, DoubleYoVariable> pair = yoTorqueInJoints.get(i);
          tempWrench.changeFrame(pair.first().getReferenceFrame());
          tempFrameVector.setToZero(tempWrench.getExpressedInFrame());
          tempWrench.packAngularPart(tempFrameVector);
