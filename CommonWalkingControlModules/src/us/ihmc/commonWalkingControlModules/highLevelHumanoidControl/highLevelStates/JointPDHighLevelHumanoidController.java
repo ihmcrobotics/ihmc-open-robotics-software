@@ -1,9 +1,8 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
@@ -17,7 +16,7 @@ public class JointPDHighLevelHumanoidController extends HighLevelBehavior
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final DoubleYoVariable gainScaling = new DoubleYoVariable("hl_gainScaling", registry);
    
-   private final Set<OneDoFJoint> oneDoFJoints; 
+   private final ArrayList<OneDoFJoint> oneDoFJoints; 
    
    private final HashMap<OneDoFJoint, DoubleYoVariable> kpJoints, kdJoints, q_dJoints, desiredTorques;
    private final HashMap<OneDoFJoint, AlphaFilteredYoVariable> qd_filtered_Joints;
@@ -43,14 +42,15 @@ public class JointPDHighLevelHumanoidController extends HighLevelBehavior
       
       if (initialKpGains == null)
       {
-         oneDoFJoints = new HashSet<OneDoFJoint>();
+         this.oneDoFJoints = new ArrayList<>();
          return; 
       }
       
-      this.oneDoFJoints = initialKpGains.keySet();
+      this.oneDoFJoints = new ArrayList<>(initialKpGains.keySet());
       
-      for (OneDoFJoint joint : oneDoFJoints)
+      for (int i = 0; i < this.oneDoFJoints.size(); i++)
       {
+         OneDoFJoint joint = oneDoFJoints.get(i);
          DoubleYoVariable kp = new DoubleYoVariable("hl_" + joint.getName()+ CommonNames.k_q_p, registry);
          kp.set(initialKpGains.get(joint));
          kpJoints.put(joint, kp);
@@ -79,8 +79,9 @@ public class JointPDHighLevelHumanoidController extends HighLevelBehavior
    @Override
    public void doAction()
    {
-      for (OneDoFJoint joint : oneDoFJoints)
-      {         
+      for (int i = 0; i < this.oneDoFJoints.size(); i++)
+      {
+         OneDoFJoint joint = oneDoFJoints.get(i);      
          DoubleYoVariable desiredPosition = q_dJoints.get(joint);
 
 //         YoFunctionGenerator functionGenerator = functionGenerators.get(joint);
@@ -104,8 +105,9 @@ public class JointPDHighLevelHumanoidController extends HighLevelBehavior
    @Override
    public void doTransitionIntoAction()
    {      
-      for (OneDoFJoint joint : oneDoFJoints)
-      {  
+      for (int i = 0; i < this.oneDoFJoints.size(); i++)
+      {
+         OneDoFJoint joint = oneDoFJoints.get(i); 
          YoFunctionGenerator functionGenerator = functionGenerators.get(joint);
          functionGenerator.setOffset(joint.getQ());
          q_dJoints.get(joint).set(joint.getQ());

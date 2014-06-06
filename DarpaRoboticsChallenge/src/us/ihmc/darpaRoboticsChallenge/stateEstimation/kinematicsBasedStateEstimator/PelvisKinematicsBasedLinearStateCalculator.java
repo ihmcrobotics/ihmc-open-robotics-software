@@ -96,6 +96,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
    private final FramePoint2d tempCoP = new FramePoint2d();
    private final FrameVector tempCoPOffset = new FrameVector();
    private final SideDependentList<FrameLineSegment2d> tempLineSegments = new SideDependentList<FrameLineSegment2d>();
+   private final RobotSide[] singleElementRobotSideArray = new RobotSide[1];
 
    public PelvisKinematicsBasedLinearStateCalculator(FullInverseDynamicsStructure inverseDynamicsStructure, SideDependentList<ContactablePlaneBody> bipedFeet,
          double estimatorDT, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
@@ -381,7 +382,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
    public void estimatePelvisLinearStateForDoubleSupport(SideDependentList<WrenchBasedFootSwitch> footSwitches)
    {
-      estimatePelvisLinearState(footSwitches, RobotSide.values());
+      estimatePelvisLinearState(footSwitches, RobotSide.values);
    }
 
    public void estimatePelvisLinearStateForSingleSupport(FramePoint pelvisPosition, SideDependentList<WrenchBasedFootSwitch> footSwitches, RobotSide trustedSide)
@@ -390,7 +391,13 @@ public class PelvisKinematicsBasedLinearStateCalculator
       updateFootPosition(trustedSide.getOppositeSide(), pelvisPosition);
    }
 
-   private void estimatePelvisLinearState(SideDependentList<WrenchBasedFootSwitch> footSwitches, RobotSide...listOfTrustedSides)
+   private void estimatePelvisLinearState(SideDependentList<WrenchBasedFootSwitch> footSwitches, RobotSide trustedSide)
+   {
+      singleElementRobotSideArray[0] = trustedSide;
+      estimatePelvisLinearState(footSwitches, singleElementRobotSideArray);
+   }
+   
+   private void estimatePelvisLinearState(SideDependentList<WrenchBasedFootSwitch> footSwitches, RobotSide[] listOfTrustedSides)
    {
       if (!kinematicsIsUpToDate.getBooleanValue())
          throw new RuntimeException("Leg kinematics needs to be updated before trying to estimate the pelvis position/linear velocity.");
