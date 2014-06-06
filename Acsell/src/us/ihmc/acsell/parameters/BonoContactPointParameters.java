@@ -104,10 +104,10 @@ public class BonoContactPointParameters extends DRCRobotContactPointParameters
          Transform3D ankleToSoleFrame = BonoPhysicalProperties.getAnkleToSoleFrameTransform(robotSide);
 
          ArrayList<Pair<String, Point2d>> footGroundContactPoints = new ArrayList<Pair<String, Point2d>>();
-         footGroundContactPoints.add(new Pair<String, Point2d>(jointMap.getJointBeforeFootName(robotSide), new Point2d(BonoPhysicalProperties.footForward, -BonoPhysicalProperties.footWidth / 2.0)));
-         footGroundContactPoints.add(new Pair<String, Point2d>(jointMap.getJointBeforeFootName(robotSide), new Point2d(BonoPhysicalProperties.footForward, BonoPhysicalProperties.footWidth / 2.0)));
-         footGroundContactPoints.add(new Pair<String, Point2d>(jointMap.getJointBeforeFootName(robotSide), new Point2d(-BonoPhysicalProperties.footBack, -BonoPhysicalProperties.footWidth / 2.0)));
-         footGroundContactPoints.add(new Pair<String, Point2d>(jointMap.getJointBeforeFootName(robotSide), new Point2d(-BonoPhysicalProperties.footBack, BonoPhysicalProperties.footWidth / 2.0)));
+         footGroundContactPoints.add(new Pair<String, Point2d>(jointMap.getJointBeforeFootName(robotSide), new Point2d(BonoPhysicalProperties.footLength / 2.0, -BonoPhysicalProperties.footWidth / 2.0)));
+         footGroundContactPoints.add(new Pair<String, Point2d>(jointMap.getJointBeforeFootName(robotSide), new Point2d(BonoPhysicalProperties.footLength / 2.0, BonoPhysicalProperties.footWidth / 2.0)));
+         footGroundContactPoints.add(new Pair<String, Point2d>(jointMap.getJointBeforeFootName(robotSide), new Point2d(-BonoPhysicalProperties.footLength / 2.0, -BonoPhysicalProperties.footWidth / 2.0)));
+         footGroundContactPoints.add(new Pair<String, Point2d>(jointMap.getJointBeforeFootName(robotSide), new Point2d(-BonoPhysicalProperties.footLength / 2.0, BonoPhysicalProperties.footWidth / 2.0)));
 
          for (Pair<String, Point2d> gc : footGroundContactPoints)
          {
