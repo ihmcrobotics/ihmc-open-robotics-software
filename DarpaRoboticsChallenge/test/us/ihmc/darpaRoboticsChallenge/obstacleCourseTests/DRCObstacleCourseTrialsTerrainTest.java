@@ -6,6 +6,7 @@ import javax.vecmath.Point3d;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFRobot;
@@ -112,7 +113,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       slipRandomOnEachStepPerturber.setProbabilityOfSlip(0.6);
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(29.0);
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(24.0);
 
       drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
       drcSimulationTestHelper.checkNothingChanged();
@@ -169,7 +170,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       SlipRandomOnNextStepPerturber slipRandomOnEachStepPerturber = new SlipRandomOnNextStepPerturber(robot, 1201L);
       slipRandomOnEachStepPerturber.setTranslationRangeToSlipNextStep(new double[]{0.03, 0.03, 0.0}, new double[]{0.04, 0.06, 0.005});
       slipRandomOnEachStepPerturber.setRotationRangeToSlipNextStep(new double[]{0.0, 0.0, 0.0}, new double[]{0.2, 0.05, 0.02});
-      slipRandomOnEachStepPerturber.setSlipAfterStepTimeDeltaRange(0.01, 0.5);
+      slipRandomOnEachStepPerturber.setSlipAfterStepTimeDeltaRange(0.01, 0.1);
       slipRandomOnEachStepPerturber.setSlipPercentSlipPerTickRange(0.01, 0.03);
       slipRandomOnEachStepPerturber.setProbabilityOfSlip(0.0);
       robot.setController(slipRandomOnEachStepPerturber, 10);
@@ -212,8 +213,9 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
 
       BambooTools.reportTestFinishedMessage();
    }
-
-   //@Test //ignored due to need to rerecord
+   
+   @Ignore // due to need to rerecord
+   @Test
    public void testTrialsTerrainCinderblockFieldPartTwoScript() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();

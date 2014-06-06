@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.media.j3d.Transform3D;
-import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -48,14 +47,14 @@ public class ScriptBasedFootstepProvider implements FootstepProvider
    private final DoubleYoVariable time;
    private final DoubleYoVariable scriptEventStartTime, scriptEventDuration;
 
-   private final Vector3d footstepOffset;
+   private final FullRobotModel fullRobotModel;
    
-   public ScriptBasedFootstepProvider(ScriptFileLoader scriptFileLoader, Vector3d footstepOffset, DoubleYoVariable time, SideDependentList<ContactablePlaneBody> bipedFeet,
+   public ScriptBasedFootstepProvider(ScriptFileLoader scriptFileLoader, DoubleYoVariable time, SideDependentList<ContactablePlaneBody> bipedFeet,
          FullRobotModel fullRobotModel, WalkingControllerParameters walkingControllerParameters, YoVariableRegistry registry)
    {
       this.time = time;
       this.bipedFeet = bipedFeet;
-      this.footstepOffset = footstepOffset;
+      this.fullRobotModel = fullRobotModel;
       
       this.scriptEventStartTime = new DoubleYoVariable("scriptEventStartTime", registry);
       this.scriptEventDuration = new DoubleYoVariable("scriptEventDuration", registry);
@@ -67,6 +66,8 @@ public class ScriptBasedFootstepProvider implements FootstepProvider
    
    private void loadScriptFileIfNecessary()
    {      
+      FramePoint soleInRootJointFrame = new FramePoint(bipedFeet.get(RobotSide.LEFT).getPlaneFrame());
+      soleInRootJointFrame.changeFrame(fullRobotModel.getRootJoint().getFrameAfterJoint());
       if (loadedScriptFile) return;
       
 //      //TODO: Get to work for more than just left foot frame.
@@ -136,7 +137,6 @@ public class ScriptBasedFootstepProvider implements FootstepProvider
          ContactablePlaneBody contactableBody = bipedFeet.get(robotSide);
 
          FramePose footstepPose = new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
-         footstepPose.addPositionInFrame(footstepOffset);
          PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footstepPose);
          ReferenceFrame soleReferenceFrame = FootstepUtils.createSoleFrame(footstepPoseFrame, contactableBody);
 

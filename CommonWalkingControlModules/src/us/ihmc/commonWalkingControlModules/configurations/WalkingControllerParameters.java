@@ -1,9 +1,8 @@
 package us.ihmc.commonWalkingControlModules.configurations;
 
-import us.ihmc.robotSide.SideDependentList;
-
 import javax.media.j3d.Transform3D;
-import javax.vecmath.Vector3d;
+
+import us.ihmc.robotSide.SideDependentList;
 
 public interface WalkingControllerParameters extends HeadOrientationControllerParameters, ManipulationControllerParameters
 {
@@ -158,6 +157,4 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract double getSideLengthOfBoundingBoxForFootstepHeight();
    
    public abstract double getDesiredTouchdownVelocity();
-
-   public abstract Vector3d getFootstepOffsetForScripts();
 }
