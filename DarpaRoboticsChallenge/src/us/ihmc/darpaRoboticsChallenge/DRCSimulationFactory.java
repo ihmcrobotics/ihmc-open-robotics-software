@@ -128,8 +128,7 @@ public class DRCSimulationFactory
       if (scsInitialSetup.getInitializeEstimatorToActual())
       {
          System.err.println("Warning! Initializing Estimator to Actual!");
-         DRCStateEstimatorInterface drcStateEstimator = drcEstimatorThread.getDRCStateEstimator();
-         initializeEstimatorToActual(drcStateEstimator, robotInitialSetup, simulatedRobot, drcRobotModel.getJointMap());
+         initializeEstimatorToActual(drcEstimatorThread, robotInitialSetup, simulatedRobot, drcRobotModel.getJointMap());
       }
 
       simulatedRobot.setController(multiThreadedRobotController);
@@ -142,7 +141,7 @@ public class DRCSimulationFactory
       robotModel.setJointDamping(simulatedRobot);
    }
 
-   private static void initializeEstimatorToActual(DRCStateEstimatorInterface drcStateEstimator, DRCRobotInitialSetup<SDFRobot> robotInitialSetup,
+   private static void initializeEstimatorToActual(DRCEstimatorThread drcStateEstimator, DRCRobotInitialSetup<SDFRobot> robotInitialSetup,
          SDFRobot simulatedRobot, DRCRobotJointMap jointMap)
    {
       // The following is to get the initial CoM position from the robot. 

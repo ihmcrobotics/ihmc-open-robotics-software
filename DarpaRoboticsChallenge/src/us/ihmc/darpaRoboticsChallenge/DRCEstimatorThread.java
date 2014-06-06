@@ -3,6 +3,9 @@ package us.ihmc.darpaRoboticsChallenge;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
+
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactablePlaneBody;
@@ -254,6 +257,11 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    public long nextWakeupTime()
    {
       throw new RuntimeException("Estimator thread should not wake up based on clock");
+   }
+
+   public void initializeEstimatorToActual(Point3d initialCoMPosition, Quat4d initialEstimationLinkOrientation)
+   {
+      drcStateEstimator.initializeEstimatorToActual(initialCoMPosition, initialEstimationLinkOrientation);
    }
 
 }
