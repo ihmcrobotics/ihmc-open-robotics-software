@@ -488,9 +488,14 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       return 1500.0;
    }
 
+   public double getSupportSingularityEscapeMultiplier()
+   {
+      return -30; //negative as knee axis are -y direction
+   }
+
    public double getSwingSingularityEscapeMultiplier()
    {
-      return runningOnRealRobot ? 50.0 : 200.0;
+      return -(runningOnRealRobot ? 50.0 : 200.0); //negative as knee axis are -y direction
    }
 
    public boolean doPrepareManipulationForLocomotion()
