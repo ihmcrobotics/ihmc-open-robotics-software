@@ -390,6 +390,11 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
       return Double.POSITIVE_INFINITY;
    }
 
+   public double getSupportSingularityEscapeMultiplier()
+   {
+      return 30; 
+   }
+
    public double getSwingSingularityEscapeMultiplier()
    {
       return runningOnRealRobot ? 50.0 : 200.0;
