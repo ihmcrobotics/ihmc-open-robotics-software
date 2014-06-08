@@ -467,6 +467,10 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       if (!runningOnRealRobot) return Double.POSITIVE_INFINITY;
       return 1500.0;
    }
+   public double getSupportSingularityEscapeMultiplier()
+   {
+      return 30;
+   }
 
    public double getSwingSingularityEscapeMultiplier()
    {
