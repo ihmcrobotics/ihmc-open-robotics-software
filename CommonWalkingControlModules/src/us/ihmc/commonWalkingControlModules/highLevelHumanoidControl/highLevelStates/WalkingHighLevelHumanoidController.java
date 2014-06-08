@@ -489,7 +489,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       double singularityEscapeMultiplierForSwing = walkingControllerParameters.getSwingSingularityEscapeMultiplier();
       singularityEscapeNullspaceMultiplierSwingLeg.set(singularityEscapeMultiplierForSwing);
-      singularityEscapeNullspaceMultiplierSupportLeg.set(30.0);
+      singularityEscapeNullspaceMultiplierSupportLeg.set(walkingControllerParameters.getSupportSingularityEscapeMultiplier());
       singularityEscapeNullspaceMultiplierSupportLegLocking.set(0.0); // -0.5);
       double minJacobianDeterminantForSingularityEscape = 0.035;
 

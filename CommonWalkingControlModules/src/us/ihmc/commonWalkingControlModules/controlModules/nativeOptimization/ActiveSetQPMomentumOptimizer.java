@@ -263,19 +263,21 @@ public class ActiveSetQPMomentumOptimizer implements MomentumOptimizerInterface,
       }
       if(iter <0)
       {
+         boolean tryAgain=false;
+         if(tryAgain)
          {
-          iter = solveNative(
-              A.getData(), b.getData(), C.getData(), 
-              Jp.getData(),pp.getData(),
-              Js.getData(), ps.getData(), Ws.getData(), 
-              WRho.getData(), Lambda.getData(), 
-              WRhoSmoother.getData(), 
-              rhoPrevMean.getData(), WRhoCoPPenalty.getData(),
-              QRho.getData(), c.getData(), rhoMin.getData(), 
-              vd.getData(), rho.getData(),  // in/out
-              activeSet
-          );
-         System.out.println("Try again, iter=" + iter +"\n -----");
+            iter = solveNative(
+                A.getData(), b.getData(), C.getData(), 
+                Jp.getData(),pp.getData(),
+                Js.getData(), ps.getData(), Ws.getData(), 
+                WRho.getData(), Lambda.getData(), 
+                WRhoSmoother.getData(), 
+                rhoPrevMean.getData(), WRhoCoPPenalty.getData(),
+                QRho.getData(), c.getData(), rhoMin.getData(), 
+                vd.getData(), rho.getData(),  // in/out
+                activeSet
+            );
+          System.out.println("Try again, iter=" + iter +"\n -----");
          }
 
          if(saveNoConvergeProblem)
