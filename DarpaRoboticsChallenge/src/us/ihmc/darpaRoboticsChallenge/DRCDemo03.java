@@ -3,7 +3,6 @@ package us.ihmc.darpaRoboticsChallenge;
 import java.io.IOException;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepTimingParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelState;
@@ -27,7 +26,7 @@ public abstract class DRCDemo03
    private final DRCSimulationFactory drcSimulation;
    private final DRCDemoEnvironmentWithBoxAndSteeringWheel environment;
 
-   public DRCDemo03(DRCGuiInitialSetup guiInitialSetup, AutomaticSimulationRunner automaticSimulationRunner, int simulationDataBufferSize,
+   public DRCDemo03(DRCGuiInitialSetup guiInitialSetup,
                     DRCRobotModel robotModel, DRCRobotInitialSetup<SDFRobot> robotInitialSetup)
    {
       DRCSCSInitialSetup scsInitialSetup;
@@ -37,7 +36,6 @@ public abstract class DRCDemo03
       environment = new DRCDemoEnvironmentWithBoxAndSteeringWheel(dynamicGraphicObjectsListRegistry);
       scsInitialSetup = new DRCSCSInitialSetup(environment, robotModel.getSimulateDT());
       
-      scsInitialSetup.setSimulationDataBufferSize(simulationDataBufferSize);
       scsInitialSetup.setInitializeEstimatorToActual(true);
 
       double dt = scsInitialSetup.getDT();
@@ -93,14 +91,7 @@ public abstract class DRCDemo03
 
       setUpJoyStick(simulationConstructionSet);
 
-      if (automaticSimulationRunner != null)
-      {
-         drcSimulation.start(automaticSimulationRunner);
-      }
-      else
-      {
-         drcSimulation.start(null);
-      }
+      drcSimulation.start(null);
    }
 
    private void setUpJoyStick(SimulationConstructionSet simulationConstructionSet)

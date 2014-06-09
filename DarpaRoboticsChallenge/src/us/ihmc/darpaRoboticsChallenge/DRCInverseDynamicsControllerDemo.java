@@ -7,7 +7,6 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
@@ -41,11 +40,8 @@ public class DRCInverseDynamicsControllerDemo
    private final DRCSimulationFactory drcSimulation;
 
    public DRCInverseDynamicsControllerDemo(DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
-                                    DRCSCSInitialSetup scsInitialSetup, AutomaticSimulationRunner automaticSimulationRunner,
-                                    int simulationDataBufferSize, DRCRobotModel model)
+                                    DRCSCSInitialSetup scsInitialSetup, DRCRobotModel model)
    {
-      scsInitialSetup.setSimulationDataBufferSize(simulationDataBufferSize);
-
       double dt = scsInitialSetup.getDT();
       int recordFrequency = (int) Math.round(model.getControllerDT() / dt);
       if (recordFrequency < 1)
@@ -73,14 +69,7 @@ public class DRCInverseDynamicsControllerDemo
       
       new InverseDynamicsJointController.GravityCompensationSliderBoard(simulationConstructionSet, model.createFullRobotModel(), simulationConstructionSet.getRootRegistry(), "desiredHeight", 0.5, 2.0);
       
-      if (automaticSimulationRunner != null)
-      {
-         drcSimulation.start(automaticSimulationRunner);
-      }
-      else
-      {
-         drcSimulation.start(null);
-      }
+      drcSimulation.start(null);
    }
 
    public SimulationConstructionSet getSimulationConstructionSet()

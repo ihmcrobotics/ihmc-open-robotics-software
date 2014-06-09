@@ -105,7 +105,7 @@ public enum AtlasRobotVersion {
 	
 	private void createTransforms()
 	{
-		for(RobotSide robotSide : RobotSide.values())
+		for(RobotSide robotSide : RobotSide.values)
 		{
 			Vector3f centerOfHandToWristTranslation = new Vector3f();
 			float[] angles = new float[3];

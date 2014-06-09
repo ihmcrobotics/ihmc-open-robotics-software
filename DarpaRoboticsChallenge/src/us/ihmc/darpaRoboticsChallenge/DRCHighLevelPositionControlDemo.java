@@ -7,7 +7,6 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
@@ -38,10 +37,8 @@ public class DRCHighLevelPositionControlDemo
 
 
    public DRCHighLevelPositionControlDemo(DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
-                                    DRCSCSInitialSetup scsInitialSetup, AutomaticSimulationRunner automaticSimulationRunner,
-                                    int simulationDataBufferSize, DRCRobotModel model)
+                                    DRCSCSInitialSetup scsInitialSetup, DRCRobotModel model)
    {
-      scsInitialSetup.setSimulationDataBufferSize(simulationDataBufferSize);
 
       WalkingControllerParameters drcControlParameters = model.getWalkingControlParameters();
       ArmControllerParameters armControllerParameters = model.getArmControllerParameters();
@@ -65,14 +62,7 @@ public class DRCHighLevelPositionControlDemo
       drcSimulation.getRobot().setController(controller);
       controller.initialize();
       
-      if (automaticSimulationRunner != null)
-      {
-         drcSimulation.start(automaticSimulationRunner);
-      }
-      else
-      {
-         drcSimulation.start(null);
-      }
+      drcSimulation.start(null);
    }
 
    public SimulationConstructionSet getSimulationConstructionSet()
