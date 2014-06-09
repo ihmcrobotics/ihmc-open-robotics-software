@@ -14,7 +14,6 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.GroundProfile;
@@ -50,7 +49,6 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
 
    private BlockingSimulationRunner blockingSimulationRunner;
    private DRCSimulationFactory drcSimulation;
-   private RobotVisualizer robotVisualizer;
 
    @Before
    public void showMemoryUsageBeforeTest()
@@ -78,12 +76,6 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       {
          drcSimulation.dispose();
          drcSimulation = null;
-      }
-
-      if (robotVisualizer != null)
-      {
-         robotVisualizer.close();
-         robotVisualizer = null;
       }
 
       GlobalTimer.clearTimers();
@@ -124,7 +116,6 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
             cheatWithGroundHeightAtForFootstep, useLoadOfContactPointsForTheFeet);
 
       drcSimulation = track.getDrcSimulation();
-      robotVisualizer = track.getRobotVisualizer();
 
       SimulationConstructionSet scs = track.getSimulationConstructionSet();
       scs.setGroundVisible(false);
@@ -207,7 +198,6 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
             cheatWithGroundHeightAtForFootstep, useLoadOfContactPointsForTheFeet);
 
       drcSimulation = track.getDrcSimulation();
-      robotVisualizer = track.getRobotVisualizer();
 
       SimulationConstructionSet scs = track.getSimulationConstructionSet();
       scs.setGroundVisible(false);
