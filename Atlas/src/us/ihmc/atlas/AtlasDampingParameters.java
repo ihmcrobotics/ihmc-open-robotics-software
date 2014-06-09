@@ -138,21 +138,5 @@ public class AtlasDampingParameters
          simulatedRobot.getOneDegreeOfFreedomJoint(orderedJointNames[i]).setDamping(getAtlasDamping(i));
       }
       
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         if(handModel == DRCHandType.SANDIA)
-            for (int i = 0; i < ROSSandiaJointMap.numberOfJointsPerHand; i++)
-            {
-               try
-               {
-                  simulatedRobot.getOneDegreeOfFreedomJoint(ROSSandiaJointMap.handNames.get(robotSide)[i]).setDamping(
-                        AtlasDampingParameters.getSandiaHandDamping(robotSide, i));
-               }
-               catch (NullPointerException e)
-               {
-                  System.err.println("NullPointerException for the joint: " + ROSSandiaJointMap.handNames.get(robotSide)[i]);
-               }
-            }
-      }
    }
 }
