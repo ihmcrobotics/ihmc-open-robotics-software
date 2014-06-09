@@ -339,13 +339,13 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
 
    public double getMaxAccelerationPelvisOrientation()
    {
-      if (!runningOnRealRobot) return 18.0;
+      if (!runningOnRealRobot) return 36.0; // 18.0;
       return 12.0; 
    }
 
    public double getMaxJerkPelvisOrientation()
    {
-      if (!runningOnRealRobot) return 270.0;
+      if (!runningOnRealRobot) return 540.0; // 270.0;
       return 180.0; 
    }
 
@@ -380,13 +380,13 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    
    public double getMaxAccelerationUpperBody()
    {
-      if (!runningOnRealRobot) return 18.0; //100.0;
+      if (!runningOnRealRobot) return 36.0; // 18.0; //100.0;
       return 6.0;
    }
    
    public double getMaxJerkUpperBody()
    {
-      if (!runningOnRealRobot) return 270.0; //1000.0;
+      if (!runningOnRealRobot) return 540.0; // 270.0; //1000.0;
       return 60.0;
    }
    
