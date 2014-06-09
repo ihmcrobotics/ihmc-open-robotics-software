@@ -5,7 +5,6 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.PIDLidarTorqueController;
@@ -32,7 +31,6 @@ import com.yobotics.simulationconstructionset.robotController.AbstractThreadedRo
 import com.yobotics.simulationconstructionset.robotController.MultiThreadedRobotController;
 import com.yobotics.simulationconstructionset.robotController.SingleThreadedRobotController;
 import com.yobotics.simulationconstructionset.util.ground.TerrainObject;
-import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class DRCSimulationFactory
 {
@@ -182,22 +180,15 @@ public class DRCSimulationFactory
       return scs;
    }
 
-   public void start(AutomaticSimulationRunner automaticSimulationRunner)
+   public void start()
    {
       Thread simThread = new Thread(scs, "SCS simulation thread");
       simThread.start();
-
-      if (automaticSimulationRunner != null)
-      {
-         try
-         {
-            automaticSimulationRunner.automaticallyRunSimulation(scs);
-         }
-         catch (SimulationExceededMaximumTimeException e)
-         {
-            throw new RuntimeException("Simulation Exceeded maximum runtime!");
-         }
-      }
+   }
+   
+   public void simulate()
+   {
+      scs.simulate();
    }
 
    public void dispose()

@@ -61,7 +61,7 @@ public class DRCFlatGroundWalkingTrack
       ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, DRCConfigParameters.contactTresholdForceForSCS, footForceSensorNames);
       drcSimulation = new DRCSimulationFactory(model, controllerFactory, null, robotInitialSetup, scsInitialSetup, guiInitialSetup, null);
 
-      drcSimulation.start(null);
+      drcSimulation.start();
    }
 
    public SimulationConstructionSet getSimulationConstructionSet()

@@ -91,7 +91,7 @@ public abstract class DRCDemo03
 
       setUpJoyStick(simulationConstructionSet);
 
-      drcSimulation.start(null);
+      drcSimulation.start();
    }
 
    private void setUpJoyStick(SimulationConstructionSet simulationConstructionSet)
