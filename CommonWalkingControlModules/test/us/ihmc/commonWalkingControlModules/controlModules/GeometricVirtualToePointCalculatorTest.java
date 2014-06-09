@@ -341,7 +341,10 @@ public class GeometricVirtualToePointCalculatorTest
 
             double alpha = distanceAlongPath / distanceOfCopPath;
 
-            FramePoint2d newCopDesired = FramePoint2d.morph(copDesiredStart, copDesiredEnd, alpha);
+//            FramePoint2d newCopDesired = FramePoint2d.morph(copDesiredStart, copDesiredEnd, alpha);
+            FramePoint2d newCopDesired = new FramePoint2d();
+            newCopDesired.interpolate(copDesiredStart, copDesiredEnd, alpha);
+
 
             SideDependentList<FramePoint2d> newVirtualToePoints = new SideDependentList<FramePoint2d>();
 

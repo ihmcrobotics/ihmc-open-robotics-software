@@ -134,7 +134,10 @@ public class TrajectoryDesiredCapturePointCalculator implements DesiredCapturePo
       endPoint.changeFrame(startPoint.getReferenceFrame());
 
       capturePointTrajectory.computeTrajectory(processedSensors.getTime());
-      return FramePoint2d.morph(startPoint, endPoint, capturePointTrajectory.getPosition());
+//    return FramePoint2d.morph(startPoint, endPoint, capturePointTrajectory.getPosition());
+      FramePoint2d frame = new FramePoint2d();
+      frame.interpolate(startPoint, endPoint, capturePointTrajectory.getPosition());
+      return frame;
    }
 
    private FramePoint2d computeTransferToDoubleSupport(BipedSupportPolygons bipedSupportPolygons)
