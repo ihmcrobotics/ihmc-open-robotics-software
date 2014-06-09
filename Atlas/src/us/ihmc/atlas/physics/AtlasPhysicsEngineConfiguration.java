@@ -30,17 +30,16 @@ public class AtlasPhysicsEngineConfiguration implements ScsCollisionConfigure
 
    private DRCRobotJointMap jointMap;
    private SDFRobot sdfRobot;
-   private AtlasPhysicalProperties properties = new AtlasPhysicalProperties();
 
-   public AtlasPhysicsEngineConfiguration(DRCRobotJointMap jointMap , SDFRobot sdfRobot )
+   public AtlasPhysicsEngineConfiguration(DRCRobotJointMap jointMap, SDFRobot sdfRobot)
    {
       this.jointMap = jointMap;
       this.sdfRobot = sdfRobot;
    }
 
    @Override
-   public void setup( Robot robot ,  ScsCollisionDetector collisionDetector) {
-
+   public void setup(Robot robot, ScsCollisionDetector collisionDetector)
+   {
 
       String leftFootJointName = jointMap.getJointBeforeFootName(RobotSide.LEFT);
       String rightFootJointName = jointMap.getJointBeforeFootName(RobotSide.RIGHT);
@@ -52,25 +51,25 @@ public class AtlasPhysicsEngineConfiguration implements ScsCollisionConfigure
       Link rightLink = rightFootJoint.getLink();
 
       FactoryCollisionShape factoryShape = collisionDetector.getShapeFactory();
-      CollisionShapeDescription collisionFoot = factoryShape.createBox(properties.foot_length/2,properties.foot_width/2,0.05);
+      CollisionShapeDescription collisionFoot = factoryShape.createBox(AtlasPhysicalProperties.footLength / 2, AtlasPhysicalProperties.footWidth / 2, 0.05);
 
-//      public static final double ankleHeight = 0.084;
-      Transform3D ankleToSole =  TransformTools.createTranslationTransform(new Vector3d(0.0, 0.0, 0.084));//AtlasPhysicalProperties.ankle_to_sole_frame_tranform;
+      //      public static final double ankleHeight = 0.084;
+      Transform3D ankleToSole = TransformTools.createTranslationTransform(new Vector3d(0.0, 0.0, 0.084));//AtlasPhysicalProperties.ankle_to_sole_frame_tranform;
       Transform3D soleToAnkle = new Transform3D();
       ankleToSole.invert(soleToAnkle);
 
-      factoryShape.addShape(leftLink,soleToAnkle,collisionFoot,GROUP_FEET,GROUP_GROUND);
-      factoryShape.addShape(rightLink,soleToAnkle,collisionFoot,GROUP_FEET,GROUP_GROUND);
+      factoryShape.addShape(leftLink, soleToAnkle, collisionFoot, GROUP_FEET, GROUP_GROUND);
+      factoryShape.addShape(rightLink, soleToAnkle, collisionFoot, GROUP_FEET, GROUP_GROUND);
 
       // HACK.  Add the ground plane
-      CollisionShapeDescription collisionGround = factoryShape.createBox(20,20,0.1);
+      CollisionShapeDescription collisionGround = factoryShape.createBox(20, 20, 0.1);
 
       FloatingJoint groundJoint = new FloatingJoint("ground", "ground", new Vector3d(), robot);
       Link linkGround = new Link("Ground Plane Hack");
       linkGround.setMass(1000);
       linkGround.setMomentOfInertia(0.1 * 100, 0.1 * 100, 0.1 * 100);
 
-      factoryShape.addShape(linkGround,null,collisionGround,GROUP_GROUND,0xFFFFFFFF);
+      factoryShape.addShape(linkGround, null, collisionGround, GROUP_GROUND, 0xFFFFFFFF);
 
       groundJoint.setLink(linkGround);
       groundJoint.setPositionAndVelocity(0.0, 0.0, -0.1, 0.0, 0.0, 0.0);

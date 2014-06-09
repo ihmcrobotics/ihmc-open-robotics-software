@@ -266,7 +266,7 @@ public class AtlasJointMap extends DRCRobotJointMap
    @Override
    public SideDependentList<Transform3D> getAnkleToSoleFrameTransform()
    {
-      return new SideDependentList<Transform3D>(AtlasPhysicalProperties.ankle_to_sole_frame_tranform, AtlasPhysicalProperties.ankle_to_sole_frame_tranform);
+      return new SideDependentList<Transform3D>(AtlasPhysicalProperties.ankleToSoleFrameTranform, AtlasPhysicalProperties.ankleToSoleFrameTranform);
    }
 
    @Override

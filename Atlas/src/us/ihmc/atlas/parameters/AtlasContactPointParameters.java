@@ -44,15 +44,15 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
    private static final ArrayList<Point2d> footGroundContactPoints = new ArrayList<Point2d>();
    static
    {
-      footGroundContactPoints.add(new Point2d(-AtlasPhysicalProperties.foot_length / 2.0, -(AtlasPhysicalProperties.foot_width / 2.0)));
-      footGroundContactPoints.add(new Point2d(-AtlasPhysicalProperties.foot_length / 2.0, AtlasPhysicalProperties.foot_width / 2.0));
-      footGroundContactPoints.add(new Point2d( AtlasPhysicalProperties.foot_length / 2.0, -(AtlasPhysicalProperties.toe_width / 2.0)));
-      footGroundContactPoints.add(new Point2d( AtlasPhysicalProperties.foot_length / 2.0, AtlasPhysicalProperties.toe_width / 2.0));
+      footGroundContactPoints.add(new Point2d(-AtlasPhysicalProperties.footLength / 2.0, -(AtlasPhysicalProperties.footWidth / 2.0)));
+      footGroundContactPoints.add(new Point2d(-AtlasPhysicalProperties.footLength / 2.0, AtlasPhysicalProperties.footWidth / 2.0));
+      footGroundContactPoints.add(new Point2d( AtlasPhysicalProperties.footLength / 2.0, -(AtlasPhysicalProperties.toeWidth / 2.0)));
+      footGroundContactPoints.add(new Point2d( AtlasPhysicalProperties.footLength / 2.0, AtlasPhysicalProperties.toeWidth / 2.0));
       //Added contact points between corners
       if (DRCConfigParameters.USE_SIX_CONTACT_POINTS_PER_FOOT)
       {
-         footGroundContactPoints.add(new Point2d(AtlasPhysicalProperties.foot_start_toetaper_from_back, -(AtlasPhysicalProperties.foot_width / 2.0)));
-         footGroundContactPoints.add(new Point2d(AtlasPhysicalProperties.foot_start_toetaper_from_back, AtlasPhysicalProperties.foot_width / 2.0));
+         footGroundContactPoints.add(new Point2d(AtlasPhysicalProperties.footStartToetaperFromBack, -(AtlasPhysicalProperties.footWidth / 2.0)));
+         footGroundContactPoints.add(new Point2d(AtlasPhysicalProperties.footStartToetaperFromBack, AtlasPhysicalProperties.footWidth / 2.0));
       }
    }
 
@@ -62,14 +62,14 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
       int nSubdivisionsX = 3;
       int nSubdivisionsY = 2;
 
-      double lengthSubdivision = AtlasPhysicalProperties.foot_length / (nSubdivisionsX + 1.0);
-      double widthSubdivision = AtlasPhysicalProperties.foot_width / (nSubdivisionsY + 1.0);
+      double lengthSubdivision = AtlasPhysicalProperties.footLength / (nSubdivisionsX + 1.0);
+      double widthSubdivision = AtlasPhysicalProperties.footWidth / (nSubdivisionsY + 1.0);
 
-      double offsetX = -AtlasPhysicalProperties.foot_back;
+      double offsetX = -AtlasPhysicalProperties.footBack;
 
       for (int i = 0; i <= nSubdivisionsX + 1; i++)
       {
-         double offsetY = -AtlasPhysicalProperties.foot_width / 2.0;
+         double offsetY = -AtlasPhysicalProperties.footWidth / 2.0;
          for (int j = 0; j <= nSubdivisionsY + 1; j++)
          {
             Point2d contactPointOffset = new Point2d(offsetX, offsetY);
@@ -153,7 +153,7 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
          {
             // add ankle joint contact points on each corner of the foot
             Point3d gcOffset = new Point3d(footGC.getX(), footGC.getY(), 0.0);
-            AtlasPhysicalProperties.ankle_to_sole_frame_tranform.transform(gcOffset);
+            AtlasPhysicalProperties.ankleToSoleFrameTranform.transform(gcOffset);
             jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(jointMap.getJointBeforeFootName(robotSide), new Vector3d(gcOffset)));
          }
         

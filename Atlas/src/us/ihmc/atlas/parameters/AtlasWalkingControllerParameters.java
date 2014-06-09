@@ -208,7 +208,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
 
    public double getFootForwardOffset()
    {
-      return AtlasPhysicalProperties.foot_forward;
+      return AtlasPhysicalProperties.footForward;
    }
    
    public double getFootSwitchCoPThresholdFraction()
@@ -218,7 +218,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
 
    public double getFootBackwardOffset()
    {
-      return AtlasPhysicalProperties.foot_back;
+      return AtlasPhysicalProperties.footBack;
    }
    
    public double getAnkleHeight()
@@ -529,22 +529,22 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
 
    public double getFootWidth()
    {
-      return AtlasPhysicalProperties.foot_width;
+      return AtlasPhysicalProperties.footWidth;
    }
 
    public double getToeWidth()
    {
-      return AtlasPhysicalProperties.toe_width;
+      return AtlasPhysicalProperties.toeWidth;
    }
 
    public double getFootLength()
    {
-      return AtlasPhysicalProperties.foot_length;
+      return AtlasPhysicalProperties.footLength;
    }
 
    public double getFoot_start_toetaper_from_back()
    {
-      return AtlasPhysicalProperties.foot_start_toetaper_from_back;
+      return AtlasPhysicalProperties.footStartToetaperFromBack;
    }
 
    public double getSideLengthOfBoundingBoxForFootstepHeight()
