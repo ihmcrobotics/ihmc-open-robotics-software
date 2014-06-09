@@ -114,8 +114,9 @@ public class PlaneContactWrenchProcessor
 
    public void initialize()
    {
-      for (ContactablePlaneBody contactablePlaneBody : contactablePlaneBodies)
+      for(int i = 0; i < contactablePlaneBodies.size(); i++)
       {
+         ContactablePlaneBody contactablePlaneBody = contactablePlaneBodies.get(i);
          FramePoint footCenter = FootstepUtils.calculateFootCenter(contactablePlaneBody);
          footCenter.changeFrame(contactablePlaneBody.getPlaneFrame());
          cops.put(contactablePlaneBody, footCenter.toFramePoint2d());
