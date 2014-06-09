@@ -77,6 +77,9 @@ public class DRCConfigParameters
    public static final int CONTROLLER_CLOUD_DISPATCHER_BACKEND_TCP_PORT = 5002;
    public static final int PPS_PROVIDER_PORT = 5050;
 
+   // Log images from the primary camera
+   public static boolean LOG_PRIMARY_CAMERA_IMAGES = false;
+
    public static boolean LIDAR_ADJUSTMENT_ACTIVE = false;
 
    public static boolean USE_POINT_CLOUD_INSTEAD_OF_LIDAR = false;
