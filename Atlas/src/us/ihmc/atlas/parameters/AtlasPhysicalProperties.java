@@ -1,12 +1,10 @@
 package us.ihmc.atlas.parameters;
 
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
-import us.ihmc.utilities.Pair;
-import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
-import us.ihmc.utilities.math.geometry.TransformTools;
-
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
+
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
+import us.ihmc.utilities.math.geometry.TransformTools;
 
 public class AtlasPhysicalProperties extends DRCRobotPhysicalProperties
 {
@@ -25,19 +23,9 @@ public class AtlasPhysicalProperties extends DRCRobotPhysicalProperties
    public static final double shinLength = 0.374;
    public static final double thighLength = 0.422;
 
-   {
-      armJointLimits.put(ArmJointName.SHOULDER_PITCH, new Pair<Double, Double>(-2 * Math.PI, 2 * Math.PI));
-      armJointLimits.put(ArmJointName.SHOULDER_ROLL, new Pair<Double, Double>(-2 * Math.PI, 2 * Math.PI));
-      armJointLimits.put(ArmJointName.ELBOW_PITCH, new Pair<Double, Double>(-2 * Math.PI, 2 * Math.PI));
-      armJointLimits.put(ArmJointName.ELBOW_ROLL, new Pair<Double, Double>(-2 * Math.PI, 2 * Math.PI));
-      armJointLimits.put(ArmJointName.WRIST_PITCH, new Pair<Double, Double>(-2 * Math.PI, 2 * Math.PI));
-      armJointLimits.put(ArmJointName.WRIST_ROLL, new Pair<Double, Double>(-2 * Math.PI, 2 * Math.PI));
-   }
-
    @Override
    public double getAnkleHeight()
    {
       return ankleHeight;
    }
-
 }
