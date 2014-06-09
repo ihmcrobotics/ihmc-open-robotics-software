@@ -7,6 +7,7 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.Pair;
 
@@ -31,4 +32,6 @@ public abstract class DRCRobotContactPointParameters
    public abstract List<Pair<String, Vector3d>> getJointNameGroundContactPointMap();
 
    public abstract SideDependentList<ArrayList<Point2d>> getFootGroundContactPointsInSoleFrameForController();
+   
+   public abstract ContactableBodiesFactory getContactableBodiesFactory();
 }
