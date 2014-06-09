@@ -256,7 +256,9 @@ public class GeometricVirtualToePointCalculator implements VirtualToePointCalcul
                else
                {
                computeVTPMorphPercent(coPDesiredInZUp, upcomingSupportSide, robotSide, intersections);
-               vtp = FramePoint2d.morph(intersections[0], intersections[1], vtpMorphPercent.getDoubleValue());
+//               vtp = FramePoint2d.morph(intersections[0], intersections[1], vtpMorphPercent.getDoubleValue());
+               vtp = new FramePoint2d();
+               vtp.interpolate(intersections[0], intersections[1], vtpMorphPercent.getDoubleValue());
                }
             } else
             {
