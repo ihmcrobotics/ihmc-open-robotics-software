@@ -2,8 +2,6 @@ package us.ihmc.atlas;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.initialSetup.VRCTask1InVehicleHovering;
-import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
-import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCDemo03;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -16,10 +14,10 @@ import com.martiansoftware.jsap.JSAPResult;
 
 public class AtlasDemo03 extends DRCDemo03
 {
-   public AtlasDemo03(DRCGuiInitialSetup guiInitialSetup, AutomaticSimulationRunner automaticSimulationRunner, int simulationDataBufferSize,
+   public AtlasDemo03(DRCGuiInitialSetup guiInitialSetup,
          DRCRobotModel robotModel, DRCRobotInitialSetup<SDFRobot> robotInitialSetup)
    {
-      super(guiInitialSetup, automaticSimulationRunner, simulationDataBufferSize, robotModel, robotInitialSetup);
+      super(guiInitialSetup, robotModel, robotInitialSetup);
    }
 
    public static void main(String[] args) throws JSAPException
@@ -52,16 +50,14 @@ public class AtlasDemo03 extends DRCDemo03
          e.printStackTrace();
          return;
       }
-      
-      AutomaticSimulationRunner automaticSimulationRunner = null;
+     
 
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false);
 
-      int simulationDataBufferSize = 16000;
 //      String ipAddress = null;
 //      int portNumber = -1;
       
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = new VRCTask1InVehicleHovering(0.0); // new VRCTask1InVehicleInitialSetup(-0.03); // DrivingDRCRobotInitialSetup();
-      new AtlasDemo03(guiInitialSetup, automaticSimulationRunner, simulationDataBufferSize, model, robotInitialSetup);
+      new AtlasDemo03(guiInitialSetup, model, robotInitialSetup);
    }
 }

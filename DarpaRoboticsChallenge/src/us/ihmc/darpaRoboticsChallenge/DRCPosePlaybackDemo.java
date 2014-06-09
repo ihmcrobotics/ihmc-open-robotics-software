@@ -7,7 +7,6 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
@@ -42,7 +41,7 @@ public class DRCPosePlaybackDemo
    private final ControllerFactory controllerFactory;
 
    public DRCPosePlaybackDemo(DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup, DRCSCSInitialSetup scsInitialSetup,
-         AutomaticSimulationRunner automaticSimulationRunner, PosePlaybackPacket posePlaybackPacket, DRCRobotModel model)
+         PosePlaybackPacket posePlaybackPacket, DRCRobotModel model)
    {
       WalkingControllerParameters walkingControlParameters = model.getWalkingControlParameters();
       ArmControllerParameters armControlParameters = model.getArmControllerParameters();
@@ -68,7 +67,7 @@ public class DRCPosePlaybackDemo
       robot.setController(controller);
       controller.initialize();
 
-      drcSimulation.start(automaticSimulationRunner);
+      drcSimulation.start(null);
    }
 
    public SimulationConstructionSet getSimulationConstructionSet()

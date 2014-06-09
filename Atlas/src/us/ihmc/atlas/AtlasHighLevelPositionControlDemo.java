@@ -1,7 +1,6 @@
 package us.ihmc.atlas;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCHighLevelPositionControlDemo;
 import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
@@ -32,7 +31,6 @@ public class AtlasHighLevelPositionControlDemo
       if (model == null)
          throw new RuntimeException("No robot model selected");
       
-      AutomaticSimulationRunner automaticSimulationRunner = null;
 
       SliderBoardFactory sliderBoardFactory = WalkControllerSliderBoard.getFactory();
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false, sliderBoardFactory);
@@ -47,7 +45,6 @@ public class AtlasHighLevelPositionControlDemo
       double initialYaw = 0.0;
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = model.getDefaultRobotInitialSetup(groundHeight + ROBOT_FLOATING_HEIGHT, initialYaw);
 
-      new DRCHighLevelPositionControlDemo(robotInitialSetup, guiInitialSetup, scsInitialSetup,
-                                    automaticSimulationRunner, 16000, model);
+      new DRCHighLevelPositionControlDemo(robotInitialSetup, guiInitialSetup, scsInitialSetup, model);
    }
 }
