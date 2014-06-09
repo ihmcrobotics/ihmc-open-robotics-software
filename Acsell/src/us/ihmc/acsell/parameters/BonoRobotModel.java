@@ -141,7 +141,7 @@ public class BonoRobotModel implements DRCRobotModel
    
    //XXX: fix this
    @Override
-   public DRCRobotContactPointParameters getContactPointParamaters(boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsToFeetOnly)
+   public DRCRobotContactPointParameters getContactPointParameters(boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsToFeetOnly)
    {
       return new BonoContactPointParameters(getJointMap());
    }
