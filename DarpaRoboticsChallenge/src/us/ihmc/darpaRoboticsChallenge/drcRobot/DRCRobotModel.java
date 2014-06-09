@@ -22,52 +22,51 @@ public interface DRCRobotModel
 {
    //TODO: RobotBoundingBoxes.java
 
-   public boolean isRunningOnRealRobot();
-   
-   public ArmControllerParameters getArmControllerParameters();
+   public abstract boolean isRunningOnRealRobot();
 
-   public WalkingControllerParameters getWalkingControlParameters();
+   public abstract ArmControllerParameters getArmControllerParameters();
 
-   public WalkingControllerParameters getMultiContactControllerParameters();
-   
-   public WalkingControllerParameters getDrivingControllerParameters();
-   
-   public StateEstimatorParameters getStateEstimatorParameters();
-   
-   public DRCRobotContactPointParameters getContactPointParameters(boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsToFeetOnly);
+   public abstract WalkingControllerParameters getWalkingControlParameters();
 
-   public DRCRobotPhysicalProperties getPhysicalProperties();
+   public abstract WalkingControllerParameters getMultiContactControllerParameters();
 
-   public DRCRobotJointMap getJointMap();
-   
-   public DRCRobotSensorInformation getSensorInformation();
+   public abstract WalkingControllerParameters getDrivingControllerParameters();
 
-   public DRCRobotInitialSetup<SDFRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw);
+   public abstract StateEstimatorParameters getStateEstimatorParameters();
 
-   public ScsCollisionConfigure getPhysicsConfigure( SDFRobot robotModel );
+   public abstract DRCRobotContactPointParameters getContactPointParameters(boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsToFeetOnly);
 
-   public DRCOutputWriter getOutputWriterWithAccelerationIntegration(DRCOutputWriter drcOutputWriter, boolean runningOnRealRobot);
-   
-   public void setJointDamping(SDFRobot simulatedRobot);
-   
-   public HandModel getHandModel();
-   
-   public Transform getOffsetHandFromWrist(RobotSide side);
+   public abstract DRCRobotPhysicalProperties getPhysicalProperties();
 
-   public SDFFullRobotModel createFullRobotModel();
-   
-   public SDFRobot createSdfRobot(boolean createCollisionMeshes);
-   
-   public double getSimulateDT();
-   
-   public double getEstimatorDT();
-   
-   public double getControllerDT();
+   public abstract DRCRobotJointMap getJointMap();
 
-   public GeneralizedSDFRobotModel getGeneralizedRobotModel();
+   public abstract DRCRobotSensorInformation getSensorInformation();
 
-   public PPSTimestampOffsetProvider getPPSTimestampOffsetProvider();
+   public abstract DRCRobotInitialSetup<SDFRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw);
 
-   public DRCSensorSuiteManager getSensorSuiteManager(URI rosCoreURI);
-   
+   public abstract ScsCollisionConfigure getPhysicsConfigure(SDFRobot robotModel);
+
+   public abstract DRCOutputWriter getOutputWriterWithAccelerationIntegration(DRCOutputWriter drcOutputWriter, boolean runningOnRealRobot);
+
+   public abstract void setJointDamping(SDFRobot simulatedRobot);
+
+   public abstract HandModel getHandModel();
+
+   public abstract Transform getOffsetHandFromWrist(RobotSide side);
+
+   public abstract SDFFullRobotModel createFullRobotModel();
+
+   public abstract SDFRobot createSdfRobot(boolean createCollisionMeshes);
+
+   public abstract double getSimulateDT();
+
+   public abstract double getEstimatorDT();
+
+   public abstract double getControllerDT();
+
+   public abstract GeneralizedSDFRobotModel getGeneralizedRobotModel();
+
+   public abstract PPSTimestampOffsetProvider getPPSTimestampOffsetProvider();
+
+   public abstract DRCSensorSuiteManager getSensorSuiteManager(URI rosCoreURI);
 }
