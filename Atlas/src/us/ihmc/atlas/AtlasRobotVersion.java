@@ -12,7 +12,7 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 
 public enum AtlasRobotVersion {
-	ATLAS_NO_HANDS_ADDED_MASS, ATLAS_SANDIA_HANDS, ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS, DRC_NO_HANDS, DRC_HANDS, DRC_EXTENDED_HANDS, DRC_HOOKS, DRC_TASK_HOSE, DRC_EXTENDED_HOOKS;
+	ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS, DRC_NO_HANDS, DRC_HANDS, DRC_EXTENDED_HANDS, DRC_HOOKS, DRC_TASK_HOSE, DRC_EXTENDED_HOOKS;
 	
 	private static Class<ModelRoot> modelRoot = ModelRoot.class;
 	private static String[] resourceDirectories;
@@ -26,13 +26,9 @@ public enum AtlasRobotVersion {
 		case DRC_TASK_HOSE:
 			return DRCHandType.IROBOT;
 
-		case ATLAS_SANDIA_HANDS:
-			return DRCHandType.SANDIA;
-
 		case DRC_HOOKS:
 			return DRCHandType.HOOK;
 			
-		case ATLAS_NO_HANDS_ADDED_MASS:
 		case DRC_NO_HANDS:
 		case ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS:
 		case DRC_EXTENDED_HOOKS:
@@ -59,20 +55,11 @@ public enum AtlasRobotVersion {
 	public boolean hasHookHands() {
 		return getHandModel() == DRCHandType.HOOK;
 	}
-	
-	public boolean hasSandiaHands() {
-		return getHandModel() == DRCHandType.SANDIA;
-	}
 
 	public String getSdfFile() {
 		switch (this)
 	      {
 	         case ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS :
-	            return "GFE/atlas.sdf";
-	         case ATLAS_SANDIA_HANDS :
-	            return "GFE/atlas_sandia_hands.sdf";
-	         case ATLAS_NO_HANDS_ADDED_MASS :
-	            return "GFE/atlas_addedmass.sdf";
 	         case DRC_NO_HANDS:
 	            return "GFE/drc_no_hands.sdf";
 	         case DRC_HANDS:
@@ -143,14 +130,6 @@ public enum AtlasRobotVersion {
 				angles[0] = (float) robotSide.negateIfLeftSide(Math.toRadians(-90));
 				angles[1] = 0.0f;   
 				angles[2] = (float) robotSide.negateIfLeftSide(Math.toRadians(0));
-			}
-			
-			else if (hasSandiaHands())
-			{
-				centerOfHandToWristTranslation = new Vector3f(0.10f, (float) robotSide.negateIfLeftSide(0.018f), 0.05f);
-				angles[0] = (float) robotSide.negateIfLeftSide(Math.toRadians(90));
-				angles[1] = 0.0f;   
-				angles[2] = (float) robotSide.negateIfLeftSide(Math.toRadians(40));
 			}
 			Quaternion centerOfHandToWristRotation = new Quaternion(angles);
 			offsetHandFromWrist.set(robotSide, new Transform(centerOfHandToWristTranslation, centerOfHandToWristRotation));
