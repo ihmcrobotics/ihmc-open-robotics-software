@@ -19,7 +19,7 @@ public class AtlasPhysicalProperties extends DRCRobotPhysicalProperties
    public static final double footBack = 0.09;    // 0.06;   //0.082;    // 0.07;
    public static final double footStartToetaperFromBack = 0.195;
    public static final double footForward = footLength - footBack;    // 0.16;   //0.178;    // 0.18;
-   public static final Transform3D ankleToSoleFrameTranform = TransformTools.createTranslationTransform(new Vector3d(footLength / 2.0 - footBack, 0.0, -ankleHeight));
+   public static final Transform3D ankleToSoleFrameTransform = TransformTools.createTranslationTransform(new Vector3d(footLength / 2.0 - footBack, 0.0, -ankleHeight));
    public static final double shinLength = 0.374;
    public static final double thighLength = 0.422;
 
