@@ -13,7 +13,6 @@ import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.bambooTools.BambooTools;
-import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPose;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
 import us.ihmc.commonWalkingControlModules.posePlayback.PosePlaybackPacket;
@@ -167,7 +166,6 @@ public class ValkyriePosePlaybackDemoTest
 
    private SimulationConstructionSet startPosePlaybackSim(PosePlaybackPacket posePlaybackPacket)
    {
-      AutomaticSimulationRunner automaticSimulationRunner = null;
 
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false, null);
       double floatingHeight = 0.3;
@@ -181,7 +179,7 @@ public class ValkyriePosePlaybackDemoTest
       scsInitialSetup.setSimulationDataBufferSize(16000);
       scsInitialSetup.setTimePerRecordTick(valkyrieRobotModel.getControllerDT());
 
-      DRCPosePlaybackDemo drcPosePlaybackDemo = new DRCPosePlaybackDemo(robotInitialSetup, guiInitialSetup, scsInitialSetup, automaticSimulationRunner, posePlaybackPacket, valkyrieRobotModel);
+      DRCPosePlaybackDemo drcPosePlaybackDemo = new DRCPosePlaybackDemo(robotInitialSetup, guiInitialSetup, scsInitialSetup, posePlaybackPacket, valkyrieRobotModel);
       drcSimulation = drcPosePlaybackDemo.getDRCSimulation();
       return drcPosePlaybackDemo.getSimulationConstructionSet();
    }
