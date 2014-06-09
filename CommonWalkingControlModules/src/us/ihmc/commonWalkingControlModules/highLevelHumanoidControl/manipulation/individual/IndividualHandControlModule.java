@@ -104,11 +104,11 @@ public class IndividualHandControlModule
    private final DoubleYoVariable maxAccelerationArmTaskspace, maxJerkArmTaskspace;
    
    public IndividualHandControlModule(DoubleYoVariable simulationTime, RobotSide robotSide, FullRobotModel fullRobotModel, TwistCalculator twistCalculator,
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, double gravity, double controlDT, ReferenceFrame midHandPositionControlFrame,
+         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, ReferenceFrame midHandPositionControlFrame,
          SE3PDGains taskspaceControlGains, MomentumBasedController momentumBasedController, int jacobianId, ArmControllerParameters armControlParameters,
          ControlStatusProducer controlStatusProducer, YoVariableRegistry parentRegistry)
    {
-      this.controlDT = controlDT;
+      this.controlDT = momentumBasedController.getControlDT();
       
       GeometricJacobian jacobian = momentumBasedController.getJacobian(jacobianId);
       

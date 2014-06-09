@@ -108,7 +108,7 @@ public class ManipulationControlModule
    {
       VariableChangedListener listener = new VariableChangedListener()
       {
-         public void variableChanged(YoVariable v)
+         public void variableChanged(YoVariable<?> v)
          {
             kdArmTaskspace.set(GainCalculator.computeDerivativeGain(kpArmTaskspace.getDoubleValue(), zetaArmTaskspace.getDoubleValue()));
 
@@ -170,12 +170,6 @@ public class ManipulationControlModule
       directControlManipulationTaskDispatcher = new DirectControlManipulationTaskDispatcher(fullRobotModel, parameters, armControlParameters, handPoseProvider,
               handLoadBearingProvider, handPositionControlFrames, individualHandControlModules, pipeline, taskspaceControlGains, momentumBasedController,
               registry);
-
-//    HighLevelToroidManipulationState toroidManipulationState = new HighLevelToroidManipulationState(yoTime, fullRobotModel, twistCalculator,
-//                                                                  handPositionControlFrames, handControllers, jacobians, torusPoseProvider,
-//                                                                  momentumBasedController, dynamicGraphicObjectsListRegistry, parentRegistry);
-
-
    }
 
    private SideDependentList<IndividualHandControlModule> createIndividualHandControlModules(DoubleYoVariable yoTime, FullRobotModel fullRobotModel,
@@ -189,11 +183,9 @@ public class ManipulationControlModule
       {
 
          int jacobianId = jacobianIds.get(robotSide);
-         double gravityZ = momentumBasedController.getGravityZ();
-         double controlDT = momentumBasedController.getControlDT();
 
          IndividualHandControlModule individualHandControlModule = new IndividualHandControlModule(yoTime, robotSide, fullRobotModel, twistCalculator,
-                                                                      dynamicGraphicObjectsListRegistry, gravityZ, controlDT, midHandPositionControlFrames.get(robotSide),
+                                                                      dynamicGraphicObjectsListRegistry, midHandPositionControlFrames.get(robotSide),
                                                                       taskspaceControlGains, momentumBasedController, jacobianId, armControlParameters, controlStatusProducer, registry);
          individualHandControlModules.put(robotSide, individualHandControlModule);
       }
