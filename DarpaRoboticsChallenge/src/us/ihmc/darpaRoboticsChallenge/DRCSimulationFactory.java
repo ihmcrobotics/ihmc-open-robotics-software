@@ -16,7 +16,6 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCSimulationOutputWriter;
-import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCStateEstimatorInterface;
 import us.ihmc.robotDataCommunication.VisualizerUtils;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
