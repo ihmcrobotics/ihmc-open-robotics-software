@@ -488,8 +488,9 @@ public class WalkOnTheEdgesManager
    {
       List<FramePoint> toePoints = getToePointsCopy(supportFoot);
       ArrayList<FramePoint2d> points = new ArrayList<FramePoint2d>();
-      for (FramePoint toePoint : toePoints)
+      for(int i = 0; i < toePoints.size(); i++)
       {
+         FramePoint toePoint = toePoints.get(i);
          toePoint.changeFrame(worldFrame);
          points.add(toePoint.toFramePoint2d());
       }
@@ -523,8 +524,9 @@ public class WalkOnTheEdgesManager
 //         allPoints.add(framePoint.toFramePoint2d());
 //      }
       
-      for (FramePoint framePoint : leadingFootPoints)
+      for(int i = 0; i < leadingFootPoints.size(); i++)
       {
+         FramePoint framePoint = leadingFootPoints.get(i);
          framePoint.changeFrame(worldFrame);
          allPoints.add(framePoint.toFramePoint2d());
       }
@@ -537,8 +539,9 @@ public class WalkOnTheEdgesManager
       List<FramePoint> footPoints = foot.getContactPointsCopy();
 
       List<FramePoint2d> allPoints = new ArrayList<FramePoint2d>();
-      for (FramePoint framePoint : footPoints)
+      for(int i = 0; i < footPoints.size(); i++)
       {
+         FramePoint framePoint = footPoints.get(i);
          framePoint.changeFrame(worldFrame);
          allPoints.add(framePoint.toFramePoint2d());
       }

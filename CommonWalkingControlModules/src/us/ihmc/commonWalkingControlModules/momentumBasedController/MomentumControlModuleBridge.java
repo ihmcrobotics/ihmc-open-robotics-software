@@ -326,32 +326,37 @@ public class MomentumControlModuleBridge implements MomentumControlModule
    private static void setMomentumModuleDataObject(MomentumControlModule momentumControlModule, MomentumModuleDataObject momentumModuleDataObject)
    {
       ArrayList<DesiredRateOfChangeOfMomentumCommand> desiredRateOfChangeOfMomentumCommands = momentumModuleDataObject.getDesiredRateOfChangeOfMomentumCommands();
-      for (DesiredRateOfChangeOfMomentumCommand desiredRateOfChangeOfMomentumCommand : desiredRateOfChangeOfMomentumCommands)
+      for(int i = 0; i < desiredRateOfChangeOfMomentumCommands.size(); i++)
       {
+         DesiredRateOfChangeOfMomentumCommand desiredRateOfChangeOfMomentumCommand = desiredRateOfChangeOfMomentumCommands.get(i);
          setDesiredRateOfChangeOfMomentum(momentumControlModule, desiredRateOfChangeOfMomentumCommand);
       }
 
       ArrayList<DesiredJointAccelerationCommand> desiredJointAccelerationCommands = momentumModuleDataObject.getDesiredJointAccelerationCommands();
-      for (DesiredJointAccelerationCommand desiredJointAccelerationCommand : desiredJointAccelerationCommands)
+      for(int i = 0; i < desiredJointAccelerationCommands.size(); i++)
       {
+         DesiredJointAccelerationCommand desiredJointAccelerationCommand = desiredJointAccelerationCommands.get(i);
          setDesiredJointAcceleration(momentumControlModule, desiredJointAccelerationCommand);
       }
 
       ArrayList<DesiredSpatialAccelerationCommand> desiredSpatialAccelerationCommands = momentumModuleDataObject.getDesiredSpatialAccelerationCommands();
-      for (DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand : desiredSpatialAccelerationCommands)
+      for(int i = 0; i < desiredSpatialAccelerationCommands.size(); i++)
       {
+         DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand = desiredSpatialAccelerationCommands.get(i);
          setDesiredSpatialAcceleration(momentumControlModule, desiredSpatialAccelerationCommand);
       }
 
       ArrayList<DesiredPointAccelerationCommand> desiredPointAccelerationCommands = momentumModuleDataObject.getDesiredPointAccelerationCommands();
-      for (DesiredPointAccelerationCommand desiredPointAccelerationCommand : desiredPointAccelerationCommands)
+      for(int i = 0; i < desiredPointAccelerationCommands.size(); i++)
       {
+         DesiredPointAccelerationCommand desiredPointAccelerationCommand = desiredPointAccelerationCommands.get(i);
          setDesiredPointAcceleration(momentumControlModule, desiredPointAccelerationCommand);
       }
 
       ArrayList<ExternalWrenchCommand> externalWrenchCommands = momentumModuleDataObject.getExternalWrenchCommands();
-      for (ExternalWrenchCommand externalWrenchCommand : externalWrenchCommands)
+      for(int i = 0; i < externalWrenchCommands.size(); i++)
       {
+         ExternalWrenchCommand externalWrenchCommand = externalWrenchCommands.get(i);
          setExternalWrenchToCompensateFor(momentumControlModule, externalWrenchCommand);
       }
    }
