@@ -38,7 +38,7 @@ do
 done
 
 
-echo cp sdf/*sdf ~/workspace/DarpaRoboticsChallenge/src/us/ihmc/darpaRoboticsChallenge/models/GFE/
+echo cp sdf/*sdf ../../src/us/ihmc/darpaRoboticsChallenge/models/GFE/
 
 
 #roslauch ./show_in_rviz.launch &
