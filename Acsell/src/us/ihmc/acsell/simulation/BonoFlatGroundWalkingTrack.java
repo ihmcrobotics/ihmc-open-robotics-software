@@ -2,7 +2,6 @@ package us.ihmc.acsell.simulation;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.acsell.parameters.BonoRobotModel;
-import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTrack;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
@@ -18,7 +17,6 @@ public class BonoFlatGroundWalkingTrack
    public static void main(String[] args)
    {
       BonoRobotModel robotModel = new BonoRobotModel(false, false);
-      AutomaticSimulationRunner automaticSimulationRunner = null;
       SliderBoardFactory sliderBoardFactory = WalkControllerSliderBoard.getFactory();
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false, sliderBoardFactory);
 
@@ -37,7 +35,6 @@ public class BonoFlatGroundWalkingTrack
       boolean cheatWithGroundHeightAtForFootstep = false;
 
       new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup,
-                                    useVelocityAndHeadingScript, automaticSimulationRunner, 16000, cheatWithGroundHeightAtForFootstep,
-                                    robotModel);
+                                    useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, robotModel);
    }
 }
