@@ -25,7 +25,8 @@ public class RosCameraReceiver extends CameraDataReceiver
    private final DRCRobotCameraParamaters cameraParameters;
 
    public RosCameraReceiver(final DRCRobotCameraParamaters cameraParameters, final RobotPoseBuffer robotPoseBuffer, final VideoSettings videoSettings,
-         final RosMainNode rosMainNode, final DRCNetworkProcessorNetworkingManager networkingManager, PPSTimestampOffsetProvider ppsTimestampOffsetProvider)
+         final RosMainNode rosMainNode, final DRCNetworkProcessorNetworkingManager networkingManager, PPSTimestampOffsetProvider ppsTimestampOffsetProvider,
+         final CameraLogger logger )
    {
       super(robotPoseBuffer, videoSettings, networkingManager, ppsTimestampOffsetProvider);
 
@@ -64,6 +65,10 @@ public class RosCameraReceiver extends CameraDataReceiver
                {
                   rosTransformFromHeadBaseToCamera.setIdentity();
                }
+            }
+
+            if( logger != null ) {
+               logger.log(image, timeStamp);
             }
 
             updateLeftEyeImage(rosTransformFromHeadBaseToCamera, image, timeStamp, DRCSensorParameters.DUMMY_FILED_OF_VIEW); //fov should come from intrinsic packet

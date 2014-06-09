@@ -48,7 +48,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    private static final boolean CREATE_DYNAMICALLY_CONSISTENT_NULLSPACE_EVALUATOR = false;
    private static final boolean SHOW_INERTIA_GRAPHICS = false;
    private static final boolean SHOW_REFERENCE_FRAMES = false;
-   private static final boolean SHOW_JOINTAXIS_ZALIGN_FRAMES = true;
+   private static final boolean SHOW_JOINTAXIS_ZALIGN_FRAMES = false;
  
    
    private final YoVariableRegistry registry = new YoVariableRegistry("DRCControllerThread");
