@@ -23,8 +23,7 @@ public class ValkyrieInverseDynamicsControllerDemo
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, true);
       GroundProfile groundProfile = new FlatGroundProfile(groundHeight);
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, model.getSimulateDT());
-      AutomaticSimulationRunner automaticSimulationRunner = null;
       
-      new DRCInverseDynamicsControllerDemo(robotInitialSetup, guiInitialSetup, scsInitialSetup, automaticSimulationRunner, 16000, model);
+      new DRCInverseDynamicsControllerDemo(robotInitialSetup, guiInitialSetup, scsInitialSetup, model);
    }
 }
