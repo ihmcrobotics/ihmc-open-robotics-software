@@ -12,7 +12,6 @@ import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.bambooTools.BambooTools;
-import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
@@ -379,11 +378,8 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
          armControllerParameters, GroundProfile groundProfile, boolean drawGroundProfile,
          boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep, boolean useLoadOfContactPointsForTheFeet)
    {
-      AutomaticSimulationRunner automaticSimulationRunner = null;
       DRCGuiInitialSetup guiInitialSetup = createGUIInitialSetup();
       
-      int simulationDataBufferSize = 16000;
-
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotModel.getSimulateDT(), useLoadOfContactPointsForTheFeet);
       scsInitialSetup.setDrawGroundProfile(drawGroundProfile);
@@ -392,8 +388,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
          scsInitialSetup.setInitializeEstimatorToActual(true);
 
       DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup,
-                                                               scsInitialSetup, useVelocityAndHeadingScript, automaticSimulationRunner, simulationDataBufferSize,
-                                                               cheatWithGroundHeightAtForFootstep, robotModel);
+                                                               scsInitialSetup, useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, robotModel);
 
       SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
       scs.setGroundVisible(false);

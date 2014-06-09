@@ -1,13 +1,11 @@
 package us.ihmc.atlas;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTrack;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.validation.YoVariableThreadAccessValidator;
 import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
 import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
 import us.ihmc.graphics3DAdapter.GroundProfile;
@@ -24,7 +22,6 @@ public class AtlasFlatGroundWalkingTrack
    
    public static void main(String[] args) throws JSAPException
    {
-      YoVariableThreadAccessValidator.registerAccessValidator();
       
       DRCRobotModel model = null;
       model = AtlasRobotModelFactory.selectModelFromFlag(args, false, false);
@@ -35,8 +32,6 @@ public class AtlasFlatGroundWalkingTrack
       if (model == null)
           throw new RuntimeException("No robot model selected");
       
-      AutomaticSimulationRunner automaticSimulationRunner = null;
-
       SliderBoardFactory sliderBoardFactory = WalkControllerSliderBoard.getFactory();
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false, sliderBoardFactory);
       
@@ -63,7 +58,7 @@ public class AtlasFlatGroundWalkingTrack
       boolean cheatWithGroundHeightAtForFootstep = false;
 
       new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript,
-                                    automaticSimulationRunner, 16000, cheatWithGroundHeightAtForFootstep, model);
+                                    cheatWithGroundHeightAtForFootstep, model);
    }
 
    private static BumpyGroundProfile createBumpyGroundProfile()

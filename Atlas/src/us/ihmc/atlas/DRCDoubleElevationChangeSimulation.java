@@ -1,7 +1,6 @@
 package us.ihmc.atlas;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTrack;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
@@ -51,7 +50,6 @@ public class DRCDoubleElevationChangeSimulation
       final double stepHeight = 0.05;
       final boolean stepUp = false;
       
-      AutomaticSimulationRunner automaticSimulationRunner = null;
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false);
 
       final double groundHeight = 0.0;
@@ -66,8 +64,7 @@ public class DRCDoubleElevationChangeSimulation
       boolean cheatWithGroundHeightAtForFootstep = false;
 
       DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup, 
-                                                               useVelocityAndHeadingScript, automaticSimulationRunner, 16000, cheatWithGroundHeightAtForFootstep,
-                                                               model);
+                                                               useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, model);
       
       ((BooleanYoVariable) drcFlatGroundWalkingTrack.getSimulationConstructionSet().getVariable("walk")).set(true);
       ((DoubleYoVariable) drcFlatGroundWalkingTrack.getSimulationConstructionSet().getVariable("desiredVelocityX")).set(1.0);

@@ -1,7 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
@@ -22,15 +21,14 @@ public class DRCFlatGroundWalkingTrack
    private final YoVariableServer robotVisualizer;
 
    public DRCFlatGroundWalkingTrack(DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
-                                    DRCSCSInitialSetup scsInitialSetup, boolean useVelocityAndHeadingScript, AutomaticSimulationRunner automaticSimulationRunner,
-                                    int simulationDataBufferSize, boolean cheatWithGroundHeightAtForFootstep, DRCRobotModel model)
+                                    DRCSCSInitialSetup scsInitialSetup, boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep,
+                                    DRCRobotModel model)
    {
       WalkingControllerParameters walkingControlParameters = model.getWalkingControlParameters();
       ArmControllerParameters armControllerParameters = model.getArmControllerParameters();
 
 //    scsInitialSetup = new DRCSCSInitialSetup(TerrainType.FLAT);
-      scsInitialSetup.setSimulationDataBufferSize(simulationDataBufferSize);
-
+      
       double dt = scsInitialSetup.getDT();
       int recordFrequency = (int) Math.round(model.getControllerDT() / dt);
       if (recordFrequency < 1)
@@ -63,14 +61,7 @@ public class DRCFlatGroundWalkingTrack
       ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, DRCConfigParameters.contactTresholdForceForSCS, footForceSensorNames);
       drcSimulation = new DRCSimulationFactory(model, controllerFactory, null, robotInitialSetup, scsInitialSetup, guiInitialSetup, null);
 
-      if (automaticSimulationRunner != null)
-      {
-         drcSimulation.start(automaticSimulationRunner);
-      }
-      else
-      {
-         drcSimulation.start(null);
-      }
+      drcSimulation.start(null);
       
       if (robotVisualizer != null)
       {

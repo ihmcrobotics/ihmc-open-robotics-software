@@ -253,12 +253,8 @@ public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTest
 	}
 
 	private DRCFlatGroundWalkingTrack setupTrack(DRCRobotModel robotModel) {
-		AutomaticSimulationRunner automaticSimulationRunner = null;
 		DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false);
 		guiInitialSetup.setIsGuiShown(SHOW_GUI);
-
-		int simulationDataBufferSize = 16000;
-
 		GroundProfile groundProfile = new FlatGroundProfile();
 
 		DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(
@@ -271,8 +267,7 @@ public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTest
 
 		DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(
 				robotInitialSetup, guiInitialSetup, scsInitialSetup, true,
-				automaticSimulationRunner, simulationDataBufferSize, false,
-				robotModel);
+				false, robotModel);
 
 		drcSimulation = drcFlatGroundWalkingTrack.getDrcSimulation();
 		return drcFlatGroundWalkingTrack;

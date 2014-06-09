@@ -11,7 +11,6 @@ import org.junit.Before;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.bambooTools.BambooTools;
-import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
@@ -194,10 +193,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
 
    private DRCFlatGroundWalkingTrack setupFlatGroundSimulationTrack(DRCRobotModel robotModel)
    {
-      AutomaticSimulationRunner automaticSimulationRunner = null;
       DRCGuiInitialSetup guiInitialSetup = createGUIInitialSetup();
-
-      int simulationDataBufferSize = 16000;
       
       GroundProfile groundProfile = new FlatGroundProfile();
       
@@ -210,8 +206,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
       
       DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup,
-                                                               scsInitialSetup, useVelocityAndHeadingScript, automaticSimulationRunner, simulationDataBufferSize,
-                                                               cheatWithGroundHeightAtForFootstep, robotModel);
+                                                               scsInitialSetup, useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, robotModel);
 
       SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
 
