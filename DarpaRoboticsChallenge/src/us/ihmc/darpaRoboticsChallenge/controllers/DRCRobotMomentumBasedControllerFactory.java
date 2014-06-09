@@ -8,7 +8,6 @@ import javax.vecmath.Point2d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactablePlaneBody;
-import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.RobotControllerUpdatablesAdapter;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
@@ -33,7 +32,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
-public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
+public class DRCRobotMomentumBasedControllerFactory
 {
    private final HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory;
    private final double contactTresholdForce;
@@ -46,7 +45,6 @@ public class DRCRobotMomentumBasedControllerFactory implements ControllerFactory
       this.footSensorNames = footSensorNames;
    }
 
-   @Override
    public RobotController getController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, double controlDT, double gravity, DoubleYoVariable yoTime,
                                         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, TwistCalculator twistCalculator,
                                         CenterOfMassJacobian centerOfMassJacobian, ForceSensorDataHolder forceSensorDataHolder, LidarControllerInterface lidarControllerInterface,
