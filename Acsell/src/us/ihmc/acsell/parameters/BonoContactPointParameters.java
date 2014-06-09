@@ -1,5 +1,8 @@
 package us.ihmc.acsell.parameters;
 
+import static us.ihmc.acsell.parameters.BonoPhysicalProperties.*;
+import static us.ihmc.acsell.parameters.BonoPhysicalProperties.footLength;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,6 +12,7 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.robotSide.RobotSide;
@@ -18,6 +22,8 @@ import us.ihmc.utilities.math.geometry.RotationFunctions;
 
 public class BonoContactPointParameters extends DRCRobotContactPointParameters
 {
+   private final ContactableBodiesFactory contactableBodiesFactory = new ContactableBodiesFactory();
+
    private final Vector3d pelvisBoxOffset = new Vector3d(-0.100000, 0.000000, -0.050000);
    private final double pelvisBoxSizeX = 0.100000;
    private final double pelvisBoxSizeY = 0.150000;
@@ -104,10 +110,11 @@ public class BonoContactPointParameters extends DRCRobotContactPointParameters
          Transform3D ankleToSoleFrame = BonoPhysicalProperties.getAnkleToSoleFrameTransform(robotSide);
 
          ArrayList<Pair<String, Point2d>> footGCs = new ArrayList<Pair<String, Point2d>>();
-         footGCs.add(new Pair<String, Point2d>(jointMap.getJointBeforeFootName(robotSide), new Point2d(BonoPhysicalProperties.footLength / 2.0, -BonoPhysicalProperties.footWidth / 2.0)));
-         footGCs.add(new Pair<String, Point2d>(jointMap.getJointBeforeFootName(robotSide), new Point2d(BonoPhysicalProperties.footLength / 2.0, BonoPhysicalProperties.footWidth / 2.0)));
-         footGCs.add(new Pair<String, Point2d>(jointMap.getJointBeforeFootName(robotSide), new Point2d(-BonoPhysicalProperties.footLength / 2.0, -BonoPhysicalProperties.footWidth / 2.0)));
-         footGCs.add(new Pair<String, Point2d>(jointMap.getJointBeforeFootName(robotSide), new Point2d(-BonoPhysicalProperties.footLength / 2.0, BonoPhysicalProperties.footWidth / 2.0)));
+         String jointBeforeFootName = jointMap.getJointBeforeFootName(robotSide);
+         footGCs.add(new Pair<String, Point2d>(jointBeforeFootName, new Point2d(footLength / 2.0, -footWidth / 2.0)));
+         footGCs.add(new Pair<String, Point2d>(jointBeforeFootName, new Point2d(footLength / 2.0, footWidth / 2.0)));
+         footGCs.add(new Pair<String, Point2d>(jointBeforeFootName, new Point2d(-footLength / 2.0, -footWidth / 2.0)));
+         footGCs.add(new Pair<String, Point2d>(jointBeforeFootName, new Point2d(-footLength / 2.0, footWidth / 2.0)));
 
          for (Pair<String, Point2d> footGC : footGCs)
          {
@@ -118,6 +125,20 @@ public class BonoContactPointParameters extends DRCRobotContactPointParameters
             jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(footGC.first(), new Vector3d(gcOffset)));
          }
       }
+
+      setupContactableBodiesFactory(jointMap);
+   }
+
+   private void setupContactableBodiesFactory(DRCRobotJointMap jointMap)
+   {
+      contactableBodiesFactory.addPelvisContactParameters(pelvisContactPoints, pelvisContactPointTransform);
+      contactableBodiesFactory.addPelvisBackContactParameters(pelvisBackContactPoints, pelvisBackContactPointTransform);
+      contactableBodiesFactory.addChestBackContactParameters(chestBackContactPoints, chestBackContactPointTransform);
+      SideDependentList<String> namesOfJointsBeforeThighs = new SideDependentList<String>();
+      for (RobotSide robotSide : RobotSide.values)
+         namesOfJointsBeforeThighs.put(robotSide, jointMap.getNameOfJointBeforeThigh(robotSide));
+      contactableBodiesFactory.addThighContactParameters(namesOfJointsBeforeThighs, thighContactPoints, thighContactPointTransforms);
+      contactableBodiesFactory.addFootContactParameters(getFootGroundContactPointsInSoleFrameForController());
    }
 
    @Override
@@ -178,5 +199,11 @@ public class BonoContactPointParameters extends DRCRobotContactPointParameters
    public SideDependentList<ArrayList<Point2d>> getFootGroundContactPointsInSoleFrameForController()
    {
       return footGroundContactPoints;
+   }
+
+   @Override
+   public ContactableBodiesFactory getContactableBodiesFactory()
+   {
+      return contactableBodiesFactory;
    }
 }
