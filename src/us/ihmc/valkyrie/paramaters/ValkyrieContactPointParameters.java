@@ -101,6 +101,7 @@ public class ValkyrieContactPointParameters extends DRCRobotContactPointParamete
 
          thighContactPoints.put(robotSide, offsetsForSide);
       }
+
       for (RobotSide robotSide : RobotSide.values)
       {
          controllerContactPointsInSoleFrame.put(robotSide, new ArrayList<Point2d>());
