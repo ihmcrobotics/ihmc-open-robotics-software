@@ -1,7 +1,6 @@
 package us.ihmc.valkyrie.simulation;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTrack;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
@@ -19,8 +18,6 @@ public class ValkyrieFlatGroundWalkingTrack
 
    public static void main(String[] args)
    {
-      AutomaticSimulationRunner automaticSimulationRunner = null;
-
       DRCRobotModel robotModel = new ValkyrieRobotModel(false, false);
       SliderBoardFactory sliderBoardFactory = WalkControllerSliderBoard.getFactory();
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false, sliderBoardFactory);      
@@ -39,7 +36,7 @@ public class ValkyrieFlatGroundWalkingTrack
       boolean cheatWithGroundHeightAtForFootstep = false;
 
       new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript,
-                                    automaticSimulationRunner, 16000, cheatWithGroundHeightAtForFootstep, robotModel);
+                                    cheatWithGroundHeightAtForFootstep, robotModel);
    }
 
 }
