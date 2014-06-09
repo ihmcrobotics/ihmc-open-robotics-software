@@ -8,7 +8,6 @@ import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.bambooTools.BambooTools;
-import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
 import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTrack;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
@@ -136,11 +135,8 @@ public abstract class DRCPushInDoubleSupportTest implements MultiRobotTestInterf
 	}
 
 	private DRCFlatGroundWalkingTrack setupTrack(DRCRobotModel robotModel) {
-		AutomaticSimulationRunner automaticSimulationRunner = null;
 		DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false);
 		guiInitialSetup.setIsGuiShown(SHOW_GUI);
-
-		int simulationDataBufferSize = 16000;
 
 		GroundProfile groundProfile = new FlatGroundProfile();
 
@@ -154,8 +150,7 @@ public abstract class DRCPushInDoubleSupportTest implements MultiRobotTestInterf
 
 		DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(
 				robotInitialSetup, guiInitialSetup, scsInitialSetup, true,
-				automaticSimulationRunner, simulationDataBufferSize, false,
-				robotModel);
+				false, robotModel);
 
 		drcSimulation = drcFlatGroundWalkingTrack.getDrcSimulation();
 		return drcFlatGroundWalkingTrack;

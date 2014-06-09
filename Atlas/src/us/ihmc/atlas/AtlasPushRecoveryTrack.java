@@ -4,7 +4,6 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTrack;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
@@ -42,7 +41,6 @@ public class AtlasPushRecoveryTrack
       GroundProfile groundProfile = new FlatGroundProfile(groundHeight);
 
       YoVariableThreadAccessValidator.registerAccessValidator();
-      AutomaticSimulationRunner automaticSimulationRunner = null;
       SliderBoardFactory sliderBoardFactory = WalkControllerSliderBoard.getFactory();
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false, sliderBoardFactory);
 
@@ -57,7 +55,7 @@ public class AtlasPushRecoveryTrack
       boolean cheatWithGroundHeightAtForFootstep = false;
 
       DRCFlatGroundWalkingTrack track = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript,
-            automaticSimulationRunner, 16000, cheatWithGroundHeightAtForFootstep, model);
+            cheatWithGroundHeightAtForFootstep, model);
 
       SDFRobot robot = track.getDrcSimulation().getRobot();
       SDFFullRobotModel fullRobotModel = model.createFullRobotModel();
