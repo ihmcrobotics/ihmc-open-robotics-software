@@ -69,7 +69,7 @@ public class DRCInverseDynamicsControllerDemo
       
       new InverseDynamicsJointController.GravityCompensationSliderBoard(simulationConstructionSet, model.createFullRobotModel(), simulationConstructionSet.getRootRegistry(), "desiredHeight", 0.5, 2.0);
       
-      drcSimulation.start(null);
+      drcSimulation.start();
    }
 
    public SimulationConstructionSet getSimulationConstructionSet()

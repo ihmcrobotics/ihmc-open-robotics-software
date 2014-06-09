@@ -62,7 +62,7 @@ public class DRCHighLevelPositionControlDemo
       drcSimulation.getRobot().setController(controller);
       controller.initialize();
       
-      drcSimulation.start(null);
+      drcSimulation.start();
    }
 
    public SimulationConstructionSet getSimulationConstructionSet()
