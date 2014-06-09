@@ -1,5 +1,7 @@
 package us.ihmc.valkyrie.paramaters;
 
+import static us.ihmc.valkyrie.paramaters.ValkyriePhysicalProperties.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,21 +26,21 @@ public class ValkyrieContactPointParameters extends DRCRobotContactPointParamete
    private final double pelvisBoxSizeY = 0.150000;
    private final double pelvisBoxSizeZ = 0.200000;
    private final Transform3D pelvisContactPointTransform = new Transform3D();
-   private final List<Point2d> pelvisContacts = new ArrayList<Point2d>();
+   private final List<Point2d> pelvisContactPoints = new ArrayList<Point2d>();
    private final Transform3D pelvisBackContactPointTransform = new Transform3D();
-   private final List<Point2d> pelvisBackContacts = new ArrayList<Point2d>();
+   private final List<Point2d> pelvisBackContactPoints = new ArrayList<Point2d>();
 
    private final Vector3d chestBoxOffset = new Vector3d(0.044600, 0.000000, 0.186900);
    private final double chestBoxSizeX = 0.318800;
    private final double chestBoxSizeY = 0.240000;
    private final double chestBoxSizeZ = 0.316200;
    private final Transform3D chestBackContactPointTransform = new Transform3D();
-   private final List<Point2d> chestBackContacts = new ArrayList<Point2d>();
+   private final List<Point2d> chestBackContactPoints = new ArrayList<Point2d>();
    private final SideDependentList<Transform3D> thighContactPointTransforms = new SideDependentList<Transform3D>();
    private final SideDependentList<List<Point2d>> thighContactPoints = new SideDependentList<List<Point2d>>();
 
    private final List<Pair<String, Vector3d>> jointNameGroundContactPointMap = new ArrayList<Pair<String, Vector3d>>();
-   private final SideDependentList<ArrayList<Point2d>> controllerContactPointsInSoleFrame = new SideDependentList<>();
+   private final SideDependentList<ArrayList<Point2d>> footGroundContactPoints = new SideDependentList<>();
 
    public ValkyrieContactPointParameters(DRCRobotJointMap jointMap)
    {
@@ -46,10 +48,10 @@ public class ValkyrieContactPointParameters extends DRCRobotContactPointParamete
       t0.add(pelvisBoxOffset);
       pelvisContactPointTransform.setTranslation(t0);
 
-      pelvisContacts.add(new Point2d(pelvisBoxSizeX / 2.0, pelvisBoxSizeY / 2.0));
-      pelvisContacts.add(new Point2d(pelvisBoxSizeX / 2.0, -pelvisBoxSizeY / 2.0));
-      pelvisContacts.add(new Point2d(-pelvisBoxSizeX / 2.0, pelvisBoxSizeY / 2.0));
-      pelvisContacts.add(new Point2d(-pelvisBoxSizeX / 2.0, -pelvisBoxSizeY / 2.0));
+      pelvisContactPoints.add(new Point2d(pelvisBoxSizeX / 2.0, pelvisBoxSizeY / 2.0));
+      pelvisContactPoints.add(new Point2d(pelvisBoxSizeX / 2.0, -pelvisBoxSizeY / 2.0));
+      pelvisContactPoints.add(new Point2d(-pelvisBoxSizeX / 2.0, pelvisBoxSizeY / 2.0));
+      pelvisContactPoints.add(new Point2d(-pelvisBoxSizeX / 2.0, -pelvisBoxSizeY / 2.0));
 
       Matrix3d r0 = new Matrix3d();
       RotationFunctions.setYawPitchRoll(r0, 0.0, Math.PI / 2.0, 0.0);
@@ -58,10 +60,10 @@ public class ValkyrieContactPointParameters extends DRCRobotContactPointParamete
       Vector3d t1 = new Vector3d(-pelvisBoxSizeX / 2.0, 0.0, 0.0);
       t1.add(pelvisBoxOffset);
       pelvisBackContactPointTransform.setTranslation(t1);
-      pelvisBackContacts.add(new Point2d(-pelvisBoxSizeZ / 2.0, pelvisBoxSizeY / 2.0));
-      pelvisBackContacts.add(new Point2d(-pelvisBoxSizeZ / 2.0, -pelvisBoxSizeY / 2.0));
-      pelvisBackContacts.add(new Point2d(pelvisBoxSizeZ / 2.0, pelvisBoxSizeY / 2.0));
-      pelvisBackContacts.add(new Point2d(pelvisBoxSizeZ / 2.0, -pelvisBoxSizeY / 2.0));
+      pelvisBackContactPoints.add(new Point2d(-pelvisBoxSizeZ / 2.0, pelvisBoxSizeY / 2.0));
+      pelvisBackContactPoints.add(new Point2d(-pelvisBoxSizeZ / 2.0, -pelvisBoxSizeY / 2.0));
+      pelvisBackContactPoints.add(new Point2d(pelvisBoxSizeZ / 2.0, pelvisBoxSizeY / 2.0));
+      pelvisBackContactPoints.add(new Point2d(pelvisBoxSizeZ / 2.0, -pelvisBoxSizeY / 2.0));
 
       Matrix3d r1 = new Matrix3d();
       RotationFunctions.setYawPitchRoll(r1, 0.0, Math.PI / 2.0, 0.0);
@@ -71,10 +73,10 @@ public class ValkyrieContactPointParameters extends DRCRobotContactPointParamete
       t2.add(chestBoxOffset);
       chestBackContactPointTransform.setTranslation(t2);
 
-      chestBackContacts.add(new Point2d(0.0, chestBoxSizeY / 2.0));
-      chestBackContacts.add(new Point2d(0.0, -chestBoxSizeY / 2.0));
-      chestBackContacts.add(new Point2d(chestBoxSizeZ / 2.0, chestBoxSizeY / 2.0));
-      chestBackContacts.add(new Point2d(chestBoxSizeZ / 2.0, -chestBoxSizeY / 2.0));
+      chestBackContactPoints.add(new Point2d(0.0, chestBoxSizeY / 2.0));
+      chestBackContactPoints.add(new Point2d(0.0, -chestBoxSizeY / 2.0));
+      chestBackContactPoints.add(new Point2d(chestBoxSizeZ / 2.0, chestBoxSizeY / 2.0));
+      chestBackContactPoints.add(new Point2d(chestBoxSizeZ / 2.0, -chestBoxSizeY / 2.0));
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -104,26 +106,23 @@ public class ValkyrieContactPointParameters extends DRCRobotContactPointParamete
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         controllerContactPointsInSoleFrame.put(robotSide, new ArrayList<Point2d>());
+         footGroundContactPoints.put(robotSide, new ArrayList<Point2d>());
          Transform3D ankleToSoleFrame = ValkyriePhysicalProperties.getAnkleToSoleFrameTransform(robotSide);
 
-         ArrayList<Pair<String, Point2d>> footGroundContactPoints = new ArrayList<>();
-         footGroundContactPoints.add(new Pair<String, Point2d>(jointMap.getJointBeforeFootName(robotSide), new Point2d(
-               ValkyriePhysicalProperties.footLength / 2.0, -ValkyriePhysicalProperties.footWidth / 2.0)));
-         footGroundContactPoints.add(new Pair<String, Point2d>(jointMap.getJointBeforeFootName(robotSide), new Point2d(
-               ValkyriePhysicalProperties.footLength / 2.0, ValkyriePhysicalProperties.footWidth / 2.0)));
-         footGroundContactPoints.add(new Pair<String, Point2d>(jointMap.getJointBeforeFootName(robotSide), new Point2d(
-               -ValkyriePhysicalProperties.footLength / 2.0, -ValkyriePhysicalProperties.footWidth / 2.0)));
-         footGroundContactPoints.add(new Pair<String, Point2d>(jointMap.getJointBeforeFootName(robotSide), new Point2d(
-               -ValkyriePhysicalProperties.footLength / 2.0, ValkyriePhysicalProperties.footWidth / 2.0)));
+         ArrayList<Pair<String, Point2d>> footGCs = new ArrayList<>();
+         String jointBeforeFootName = jointMap.getJointBeforeFootName(robotSide);
+         footGCs.add(new Pair<String, Point2d>(jointBeforeFootName, new Point2d(footLength / 2.0, -footWidth / 2.0)));
+         footGCs.add(new Pair<String, Point2d>(jointBeforeFootName, new Point2d(footLength / 2.0, footWidth / 2.0)));
+         footGCs.add(new Pair<String, Point2d>(jointBeforeFootName, new Point2d(-footLength / 2.0, -footWidth / 2.0)));
+         footGCs.add(new Pair<String, Point2d>(jointBeforeFootName, new Point2d(-footLength / 2.0, footWidth / 2.0)));
 
-         for (Pair<String, Point2d> gc : footGroundContactPoints)
+         for (Pair<String, Point2d> footGC : footGCs)
          {
-            controllerContactPointsInSoleFrame.get(robotSide).add(gc.second());
+            footGroundContactPoints.get(robotSide).add(footGC.second());
 
-            Point3d gcOffset = new Point3d(gc.second().getX(), gc.second().getY(), 0.0);
+            Point3d gcOffset = new Point3d(footGC.second().getX(), footGC.second().getY(), 0.0);
             ankleToSoleFrame.transform(gcOffset);
-            jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(gc.first(), new Vector3d(gcOffset)));
+            jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(footGC.first(), new Vector3d(gcOffset)));
          }
       }
    }
@@ -137,7 +136,7 @@ public class ValkyrieContactPointParameters extends DRCRobotContactPointParamete
    @Override
    public List<Point2d> getPelvisContactPoints()
    {
-      return pelvisContacts;
+      return pelvisContactPoints;
    }
 
    @Override
@@ -149,7 +148,7 @@ public class ValkyrieContactPointParameters extends DRCRobotContactPointParamete
    @Override
    public List<Point2d> getPelvisBackContactPoints()
    {
-      return pelvisBackContacts;
+      return pelvisBackContactPoints;
    }
 
    @Override
@@ -161,7 +160,7 @@ public class ValkyrieContactPointParameters extends DRCRobotContactPointParamete
    @Override
    public List<Point2d> getChestBackContactPoints()
    {
-      return chestBackContacts;
+      return chestBackContactPoints;
    }
 
    @Override
@@ -178,7 +177,7 @@ public class ValkyrieContactPointParameters extends DRCRobotContactPointParamete
 
    public SideDependentList<ArrayList<Point2d>> getControllerContactPointsInSoleFrame()
    {
-      return controllerContactPointsInSoleFrame;
+      return footGroundContactPoints;
    }
 
    @Override
@@ -190,7 +189,7 @@ public class ValkyrieContactPointParameters extends DRCRobotContactPointParamete
    @Override
    public SideDependentList<ArrayList<Point2d>> getFootGroundContactPointsInSoleFrameForController()
    {
-      return controllerContactPointsInSoleFrame;
+      return footGroundContactPoints;
    }
 
    @Override
