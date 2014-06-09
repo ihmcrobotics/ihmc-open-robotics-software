@@ -119,7 +119,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       DRCRobotJointMap jointMap = robotModel.getJointMap();
       DRCRobotPhysicalProperties physicalProperties = robotModel.getPhysicalProperties();
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
-      DRCRobotContactPointParameters contactPointParamaters = robotModel.getContactPointParamaters(false, false);
+      DRCRobotContactPointParameters contactPointParamaters = robotModel.getContactPointParameters(false, false);
 
 
       controllerReferenceFrames = new ReferenceFrames(controllerFullRobotModel, jointMap, physicalProperties.getAnkleHeight());
@@ -144,7 +144,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    }
 
    public static RobotController createMomentumBasedController(SDFFullRobotModel controllerModel, ReferenceFrames referenceFramesForController,
-         DRCRobotSensorInformation sensorInformation, DRCRobotContactPointParameters contactPointPatamaters, ControllerFactory controllerFactory,
+         DRCRobotSensorInformation sensorInformation, DRCRobotContactPointParameters contactPointParameters, ControllerFactory controllerFactory,
          LidarControllerInterface lidarControllerInterface, DoubleYoVariable yoTime, double controlDT, double gravity,
          ForceSensorDataHolder forceSensorDataHolderForController, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
          YoVariableRegistry registry, GlobalDataProducer dataProducer)
@@ -160,7 +160,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
 
       RobotController robotController = controllerFactory.getController(controllerModel, referenceFramesForController, controlDT, gravity, yoTime,
             dynamicGraphicObjectsListRegistry, twistCalculator, centerOfMassJacobian, forceSensorDataHolderForController,
-            lidarControllerInterface, dataProducer, contactPointPatamaters.getFootGroundContactPointsInSoleFrameForController());
+            lidarControllerInterface, dataProducer, contactPointParameters.getFootGroundContactPointsInSoleFrameForController());
       final ModularSensorProcessor sensorProcessor = createSensorProcessor(twistCalculator, centerOfMassJacobian, referenceFramesForController);
 
       ModularRobotController modularRobotController = new ModularRobotController("DRCMomentumBasedController");

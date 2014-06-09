@@ -170,7 +170,7 @@ public class AtlasRobotModel implements DRCRobotModel
    }
 
    @Override
-   public DRCRobotContactPointParameters getContactPointParamaters(boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsToFeetOnly)
+   public DRCRobotContactPointParameters getContactPointParameters(boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsToFeetOnly)
    {
       return new AtlasContactPointParameters(selectedVersion,getJointMap(),addLoadsOfContactPoints,addLoadsOfContactPointsToFeetOnly);
    }
