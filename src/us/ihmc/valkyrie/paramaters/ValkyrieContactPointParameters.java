@@ -191,25 +191,4 @@ public class ValkyrieContactPointParameters extends DRCRobotContactPointParamete
    {
       return footGroundContactPoints;
    }
-
-   @Override
-   public List<Pair<String, Vector3d>> getFootContactPoints(RobotSide robotSide)
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   @Override
-   public List<Pair<String, Vector3d>> getThighContactPoints(RobotSide robotSide)
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   @Override
-   public List<Pair<String, Vector3d>> getHandContactPoints(RobotSide robotSide)
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
 }
