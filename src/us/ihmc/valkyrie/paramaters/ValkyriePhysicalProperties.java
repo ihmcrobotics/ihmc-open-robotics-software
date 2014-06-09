@@ -1,15 +1,11 @@
 package us.ihmc.valkyrie.paramaters;
 
-
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
-import us.ihmc.utilities.Pair;
-import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
-
 
 public class ValkyriePhysicalProperties extends DRCRobotPhysicalProperties
 {
@@ -35,16 +31,6 @@ public class ValkyriePhysicalProperties extends DRCRobotPhysicalProperties
       }
    }
 
-   {
-      // XXX: nathan: need to update Valkyrie joint limits to match available joints
-      armJointLimits.put(ArmJointName.SHOULDER_PITCH, new Pair<Double, Double>(-2 * Math.PI, 2 * Math.PI));
-      armJointLimits.put(ArmJointName.SHOULDER_ROLL, new Pair<Double, Double>(-2 * Math.PI, 2 * Math.PI));
-      armJointLimits.put(ArmJointName.ELBOW_PITCH, new Pair<Double, Double>(-2 * Math.PI, 2 * Math.PI));
-      armJointLimits.put(ArmJointName.ELBOW_ROLL, new Pair<Double, Double>(-2 * Math.PI, 2 * Math.PI));
-      armJointLimits.put(ArmJointName.WRIST_PITCH, new Pair<Double, Double>(-2 * Math.PI, 2 * Math.PI));
-      armJointLimits.put(ArmJointName.WRIST_ROLL, new Pair<Double, Double>(-2 * Math.PI, 2 * Math.PI));
-   }
-
    @Override
    public double getAnkleHeight()
    {
@@ -55,5 +41,4 @@ public class ValkyriePhysicalProperties extends DRCRobotPhysicalProperties
    {
       return ankleToSoleFrameTransforms.get(side);
    }
-
 }
