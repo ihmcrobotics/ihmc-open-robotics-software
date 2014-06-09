@@ -9,16 +9,13 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Fl
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.robotSide.SideDependentList;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 
 public class DRCFlatGroundWalkingTrack
 {   
-   private static final boolean START_YOVARIABLE_SERVER = false; 
    private final DRCSimulationFactory drcSimulation;
-   private final YoVariableServer robotVisualizer;
 
    public DRCFlatGroundWalkingTrack(DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
                                     DRCSCSInitialSetup scsInitialSetup, boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep,
@@ -46,15 +43,6 @@ public class DRCFlatGroundWalkingTrack
          highLevelHumanoidControllerFactory.setupForCheatingUsingGroundHeightAtForFootstepProvider(scsInitialSetup.getGroundProfile());
       }
 
-      if (START_YOVARIABLE_SERVER)
-      {
-         throw new RuntimeException("Something about chickens and eggs");
-         //robotVisualizer = new YoVariableServer(robotInterface.getRobot().getRobotsYoVariableRegistry(), DRCLocalConfigParameters.DEFAULT_YOVARIABLE_SERVER_PORT, DRCConfigParameters.ESTIMATOR_DT, dynamicGraphicObjectsListRegistry);
-      }
-      else
-      {
-         robotVisualizer = null;
-      }
       
       SideDependentList<String> footForceSensorNames = model.getSensorInformation().getFeetForceSensorNames();
       
@@ -62,11 +50,6 @@ public class DRCFlatGroundWalkingTrack
       drcSimulation = new DRCSimulationFactory(model, controllerFactory, null, robotInitialSetup, scsInitialSetup, guiInitialSetup, null);
 
       drcSimulation.start(null);
-      
-      if (robotVisualizer != null)
-      {
-         robotVisualizer.start();
-      }
    }
 
    public SimulationConstructionSet getSimulationConstructionSet()
@@ -77,10 +60,5 @@ public class DRCFlatGroundWalkingTrack
    public DRCSimulationFactory getDrcSimulation()
    {
       return drcSimulation;
-   }
-
-   public YoVariableServer getRobotVisualizer()
-   {
-      return robotVisualizer;
    }
 }
