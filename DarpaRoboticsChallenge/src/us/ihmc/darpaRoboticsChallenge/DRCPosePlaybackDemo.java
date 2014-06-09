@@ -9,7 +9,6 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepTimingParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.PolyvalentHighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelState;
@@ -38,7 +37,7 @@ public class DRCPosePlaybackDemo
    private DRCSimulationFactory drcSimulation;
 
    private final PolyvalentHighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory;
-   private final ControllerFactory controllerFactory;
+   private final DRCRobotMomentumBasedControllerFactory controllerFactory;
 
    public DRCPosePlaybackDemo(DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup, DRCSCSInitialSetup scsInitialSetup,
          PosePlaybackPacket posePlaybackPacket, DRCRobotModel model)

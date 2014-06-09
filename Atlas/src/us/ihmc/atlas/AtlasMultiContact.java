@@ -14,7 +14,6 @@ import us.ihmc.atlas.initialSetup.PushUpDRCRobotInitialSetup;
 import us.ihmc.atlas.parameters.AtlasRobotMultiContactControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MultiContactTestHumanoidControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
@@ -113,7 +112,7 @@ public class AtlasMultiContact
 
       MultiContactTestHumanoidControllerFactory highLevelHumanoidControllerFactory = new MultiContactTestHumanoidControllerFactory(namesOfJointsBeforeHands,
             handContactPointTransforms, handContactPoints, footContactSides, handContactSides, controllerParameters, armControllerParameters);
-      ControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, DRCConfigParameters.contactTresholdForceForSCS, sensorInformation.getFeetForceSensorNames());
+      DRCRobotMomentumBasedControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, DRCConfigParameters.contactTresholdForceForSCS, sensorInformation.getFeetForceSensorNames());
 
       drcSimulation = new DRCSimulationFactory(robotModel, controllerFactory, environment.getTerrainObject(), robotInitialSetup, scsInitialSetup,
             guiInitialSetup, null);
