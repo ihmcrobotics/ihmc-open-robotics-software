@@ -140,7 +140,7 @@ public class ICPAndMomentumBasedController
    private final DoubleYoVariable capturePointOffsetY = new DoubleYoVariable("capturePointOffsetY", registry);
    private final FrameVector2d capturePointOffsetHack2d = new FrameVector2d();
    
-   protected void computeCapturePoint()
+   public void computeCapturePoint()
    {
       centerOfMassPosition.setToZero(momentumBasedController.getCenterOfMassFrame());
       momentumBasedController.getCenterOfMassJacobian().packCenterOfMassVelocity(centerOfMassVelocity);
