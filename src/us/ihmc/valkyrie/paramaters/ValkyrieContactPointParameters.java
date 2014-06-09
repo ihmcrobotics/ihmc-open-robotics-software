@@ -11,6 +11,7 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.robotSide.RobotSide;
@@ -20,6 +21,7 @@ import us.ihmc.utilities.math.geometry.RotationFunctions;
 
 public class ValkyrieContactPointParameters extends DRCRobotContactPointParameters
 {
+   private final ContactableBodiesFactory contactableBodiesFactory = new ContactableBodiesFactory();
 
    private final Vector3d pelvisBoxOffset = new Vector3d(-0.100000, 0.000000, -0.050000);
    private final double pelvisBoxSizeX = 0.100000;
@@ -125,6 +127,20 @@ public class ValkyrieContactPointParameters extends DRCRobotContactPointParamete
             jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(footGC.first(), new Vector3d(gcOffset)));
          }
       }
+
+      setupContactableBodiesFactory(jointMap);
+   }
+
+   private void setupContactableBodiesFactory(DRCRobotJointMap jointMap)
+   {
+      contactableBodiesFactory.addPelvisContactParameters(pelvisContactPoints, pelvisContactPointTransform);
+      contactableBodiesFactory.addPelvisBackContactParameters(pelvisBackContactPoints, pelvisBackContactPointTransform);
+      contactableBodiesFactory.addChestBackContactParameters(chestBackContactPoints, chestBackContactPointTransform);
+      SideDependentList<String> namesOfJointsBeforeThighs = new SideDependentList<>();
+      for (RobotSide robotSide : RobotSide.values)
+         namesOfJointsBeforeThighs.put(robotSide, jointMap.getNameOfJointBeforeThigh(robotSide));
+      contactableBodiesFactory.addThighContactParameters(namesOfJointsBeforeThighs, thighContactPoints, thighContactPointTransforms);
+      contactableBodiesFactory.addFootContactParameters(getFootGroundContactPointsInSoleFrameForController());
    }
 
    @Override
@@ -175,11 +191,6 @@ public class ValkyrieContactPointParameters extends DRCRobotContactPointParamete
       return thighContactPoints;
    }
 
-   public SideDependentList<ArrayList<Point2d>> getControllerContactPointsInSoleFrame()
-   {
-      return footGroundContactPoints;
-   }
-
    @Override
    public List<Pair<String, Vector3d>> getJointNameGroundContactPointMap()
    {
@@ -190,5 +201,11 @@ public class ValkyrieContactPointParameters extends DRCRobotContactPointParamete
    public SideDependentList<ArrayList<Point2d>> getFootGroundContactPointsInSoleFrameForController()
    {
       return footGroundContactPoints;
+   }
+
+   @Override
+   public ContactableBodiesFactory getContactableBodiesFactory()
+   {
+      return contactableBodiesFactory;
    }
 }
