@@ -22,18 +22,6 @@ import us.ihmc.utilities.math.geometry.RotationFunctions;
 
 public class AtlasContactPointParameters extends DRCRobotContactPointParameters
 {
-
-   // Enable joint limits
-   public static boolean ENABLE_JOINT_VELOCITY_TORQUE_LIMITS = false;
-
-   static
-   {
-      if (!ENABLE_JOINT_VELOCITY_TORQUE_LIMITS)
-      {
-         System.err.println("Running with torque and velocity limits disabled, do not check in !!");
-      }
-   }
-
    private final Vector3d pelvisBoxOffset = new Vector3d(-0.100000, 0.000000, -0.050000);
    private final double pelvisBoxSizeX = 0.100000;
    private final double pelvisBoxSizeY = 0.150000;
@@ -60,19 +48,19 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
    private final List<Pair<String, Vector3d>> chestBackContactPoints = new ArrayList<Pair<String, Vector3d>>();
    private final List<Pair<String, Vector3d>> jointNameGroundContactPointMap = new ArrayList<Pair<String, Vector3d>>();
 
-   public static final ArrayList<Point2d> ground_contact_point_offset_from_foot = new ArrayList<Point2d>();
+   private static final ArrayList<Point2d> controllerContactPointsInSoleFrame = new ArrayList<Point2d>();
 
    static
    {
-      ground_contact_point_offset_from_foot.add(new Point2d(-AtlasPhysicalProperties.foot_length / 2.0, -(AtlasPhysicalProperties.foot_width / 2.0)));
-      ground_contact_point_offset_from_foot.add(new Point2d(-AtlasPhysicalProperties.foot_length / 2.0, AtlasPhysicalProperties.foot_width / 2.0));
-      ground_contact_point_offset_from_foot.add(new Point2d( AtlasPhysicalProperties.foot_length / 2.0, -(AtlasPhysicalProperties.toe_width / 2.0)));
-      ground_contact_point_offset_from_foot.add(new Point2d( AtlasPhysicalProperties.foot_length / 2.0, AtlasPhysicalProperties.toe_width / 2.0));
+      controllerContactPointsInSoleFrame.add(new Point2d(-AtlasPhysicalProperties.foot_length / 2.0, -(AtlasPhysicalProperties.foot_width / 2.0)));
+      controllerContactPointsInSoleFrame.add(new Point2d(-AtlasPhysicalProperties.foot_length / 2.0, AtlasPhysicalProperties.foot_width / 2.0));
+      controllerContactPointsInSoleFrame.add(new Point2d( AtlasPhysicalProperties.foot_length / 2.0, -(AtlasPhysicalProperties.toe_width / 2.0)));
+      controllerContactPointsInSoleFrame.add(new Point2d( AtlasPhysicalProperties.foot_length / 2.0, AtlasPhysicalProperties.toe_width / 2.0));
       //Added contact points between corners
       if (DRCConfigParameters.USE_SIX_CONTACT_POINTS_PER_FOOT)
       {
-         ground_contact_point_offset_from_foot.add(new Point2d(AtlasPhysicalProperties.foot_start_toetaper_from_back, -(AtlasPhysicalProperties.foot_width / 2.0)));
-         ground_contact_point_offset_from_foot.add(new Point2d(AtlasPhysicalProperties.foot_start_toetaper_from_back, AtlasPhysicalProperties.foot_width / 2.0));
+         controllerContactPointsInSoleFrame.add(new Point2d(AtlasPhysicalProperties.foot_start_toetaper_from_back, -(AtlasPhysicalProperties.foot_width / 2.0)));
+         controllerContactPointsInSoleFrame.add(new Point2d(AtlasPhysicalProperties.foot_start_toetaper_from_back, AtlasPhysicalProperties.foot_width / 2.0));
       }
    }
 
@@ -172,7 +160,7 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
          if (addLoadsOfContactPointsForFeetOnly)
             contactPointOffsetList = ground_loads_of_contact_point_offset_from_foot;
          else
-            contactPointOffsetList = ground_contact_point_offset_from_foot;
+            contactPointOffsetList = controllerContactPointsInSoleFrame;
 
          for (Point2d footv3d : contactPointOffsetList)
          {
@@ -356,6 +344,6 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
    @Override
    public SideDependentList<ArrayList<Point2d>> getFootGroundContactPointsInSoleFrameForController()
    {
-      return new SideDependentList<>(ground_contact_point_offset_from_foot, ground_contact_point_offset_from_foot);
+      return new SideDependentList<>(controllerContactPointsInSoleFrame, controllerContactPointsInSoleFrame);
    }
 }

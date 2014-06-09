@@ -25,6 +25,18 @@ import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
 
 public class AtlasJointMap extends DRCRobotJointMap
 {
+
+   // Enable joint limits
+   public static boolean ENABLE_JOINT_VELOCITY_TORQUE_LIMITS = false;
+
+   static
+   {
+      if (!ENABLE_JOINT_VELOCITY_TORQUE_LIMITS)
+      {
+         System.err.println("Running with torque and velocity limits disabled, do not check in !!");
+      }
+   }
+
    public static final String chestName = "utorso";
    public static final String pelvisName = "pelvis";
    public static final String headName = "head";
@@ -233,7 +245,7 @@ public class AtlasJointMap extends DRCRobotJointMap
    @Override
    public boolean isTorqueVelocityLimitsEnabled()
    {
-      return AtlasContactPointParameters.ENABLE_JOINT_VELOCITY_TORQUE_LIMITS;
+      return ENABLE_JOINT_VELOCITY_TORQUE_LIMITS;
    }
 
    @Override
