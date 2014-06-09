@@ -6,7 +6,6 @@ import org.junit.Test;
 
 import us.ihmc.atlas.AtlasMultiContact.MultiContactTask;
 import us.ihmc.bambooTools.BambooTools;
-import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCSimulationFactory;
@@ -117,13 +116,10 @@ public class AtlasMultiContactTest
    private AtlasMultiContact setupSimulation()
    {
       final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS;
-      AutomaticSimulationRunner automaticSimulationRunner = null;
       DRCGuiInitialSetup guiInitialSetup = createGUIInitialSetup();
 
-      int simulationDataBufferSize = 16000;
-
       AtlasMultiContact drcMultiContact = new AtlasMultiContact(new AtlasRobotModel(ATLAS_ROBOT_VERSION, false, false), guiInitialSetup,
-            automaticSimulationRunner, simulationDataBufferSize, MultiContactTask.DEFAULT);
+            MultiContactTask.DEFAULT);
       SimulationConstructionSet scs = drcMultiContact.getSimulationConstructionSet();
 
       setupCameraForUnitTest(scs);

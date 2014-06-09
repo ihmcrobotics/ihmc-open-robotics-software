@@ -12,7 +12,6 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.initialSetup.MultiContactDRCRobotInitialSetup;
 import us.ihmc.atlas.initialSetup.PushUpDRCRobotInitialSetup;
 import us.ihmc.atlas.parameters.AtlasRobotMultiContactControllerParameters;
-import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.ControllerFactory;
@@ -39,7 +38,7 @@ import com.yobotics.simulationconstructionset.util.inputdevices.MidiSliderBoard;
 
 public class AtlasMultiContact
 {
-   private static final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.DRC_NO_HANDS;
+   private static final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS;
    
    private final DRCSimulationFactory drcSimulation;
    private final MultiContactTestEnvironment environment;
@@ -47,8 +46,7 @@ public class AtlasMultiContact
    public static enum  MultiContactTask {DEFAULT, PUSHUP} ;
    
    
-   public AtlasMultiContact(AtlasRobotModel robotModel, DRCGuiInitialSetup guiInitialSetup, AutomaticSimulationRunner automaticSimulationRunner,
-                          int simulationDataBufferSize, MultiContactTask task)
+   public AtlasMultiContact(AtlasRobotModel robotModel, DRCGuiInitialSetup guiInitialSetup, MultiContactTask task)
    {
 
       DRCSCSInitialSetup scsInitialSetup;
@@ -78,7 +76,6 @@ public class AtlasMultiContact
 
       environment = new MultiContactTestEnvironment(robotInitialSetup, robotModel, footContactSides, handContactSides);
       scsInitialSetup = new DRCSCSInitialSetup(environment, robotModel.getSimulateDT());
-      scsInitialSetup.setSimulationDataBufferSize(simulationDataBufferSize);
 
       double dt = scsInitialSetup.getDT();
       int recordFrequency = (int) Math.round(robotModel.getControllerDT() / dt);
@@ -140,14 +137,7 @@ public class AtlasMultiContact
       simulationConstructionSet.setCameraPosition(6.0, -2.0, 4.5);
       simulationConstructionSet.setCameraFix(-0.44, -0.17, 0.75);
 
-      if (automaticSimulationRunner != null)
-      {
-         drcSimulation.start(automaticSimulationRunner);
-      }
-      else
-      {
-         drcSimulation.start(null);
-      }
+      drcSimulation.start(null);
    }
    
    public DRCSimulationFactory getDRCSimulation()
@@ -162,13 +152,10 @@ public class AtlasMultiContact
 
    public static void main(String[] args) throws JSAPException
    {
-      AutomaticSimulationRunner automaticSimulationRunner = null;
 
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, true);
 
-      int simulationDataBufferSize = 16000;
-      new AtlasMultiContact(new AtlasRobotModel(ATLAS_ROBOT_VERSION, false, false), guiInitialSetup, automaticSimulationRunner, simulationDataBufferSize,
-                          MultiContactTask.DEFAULT);
+      new AtlasMultiContact(new AtlasRobotModel(ATLAS_ROBOT_VERSION, false, false), guiInitialSetup, MultiContactTask.DEFAULT);
    }
 
 }
