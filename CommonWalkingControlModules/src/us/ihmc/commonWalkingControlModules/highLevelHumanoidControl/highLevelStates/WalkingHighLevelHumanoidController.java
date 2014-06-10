@@ -1805,7 +1805,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    }
 
    // FIXME: don't override
-   public void doMotionControlInternal()
+   private void doMotionControlInternal()
    {
       for (RobotSide robotSide : RobotSide.values)
       {
