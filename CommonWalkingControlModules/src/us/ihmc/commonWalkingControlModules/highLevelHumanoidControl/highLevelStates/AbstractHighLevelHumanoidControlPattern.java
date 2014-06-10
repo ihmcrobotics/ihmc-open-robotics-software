@@ -91,9 +91,9 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
 
    private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
 
-   private final VariousWalkingProviders variousWalkingProviders;
+   protected final VariousWalkingProviders variousWalkingProviders;
 
-// private final VariousWalkingManagers variousWalkingManagers;
+   protected final VariousWalkingManagers variousWalkingManagers;
 
    protected final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
 
@@ -110,7 +110,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
 
       this.variousWalkingProviders = variousWalkingProviders;
 
-//    this.variousWalkingManagers = variousWalkingManagers;
+      this.variousWalkingManagers = variousWalkingManagers;
 
       this.dynamicGraphicObjectsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
 
@@ -124,7 +124,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
       referenceFrames = momentumBasedController.getReferenceFrames();
 
       feet = momentumBasedController.getContactablePlaneFeet();
-      handPalms = momentumBasedController.getContactablePlaneHandsWithFingersBentBack();
+      handPalms = momentumBasedController.getContactablePlaneHands();
 
       this.desiredHeadOrientationProvider = variousWalkingProviders.getDesiredHeadOrientationProvider();
       this.headOrientationManager = variousWalkingManagers.getHeadOrientationManager();
@@ -319,6 +319,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
 
    public void initialize()
    {
+      variousWalkingManagers.initializeManagers();
       variousWalkingProviders.clearPoseProviders();
       callUpdatables();
    }

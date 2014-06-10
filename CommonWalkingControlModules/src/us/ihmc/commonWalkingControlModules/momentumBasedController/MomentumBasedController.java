@@ -74,7 +74,7 @@ public class MomentumBasedController
    private final CommonWalkingReferenceFrames referenceFrames;
    private final TwistCalculator twistCalculator;
 
-   private final SideDependentList<ContactablePlaneBody> feet, handsWithFingersBentBack, thighs;
+   private final SideDependentList<ContactablePlaneBody> feet, hands, thighs;
    private final ContactablePlaneBody pelvis, pelvisBack;
 
    private final List<ContactablePlaneBody> contactablePlaneBodyList;
@@ -166,7 +166,7 @@ public class MomentumBasedController
 
       // Initialize the contactable bodies
       this.feet = feet;
-      this.handsWithFingersBentBack = handsWithFingersBentBack;
+      this.hands = handsWithFingersBentBack;
       this.thighs = thighs;
       this.pelvis = pelvis;
       this.pelvisBack = pelvisBack;
@@ -764,14 +764,14 @@ public class MomentumBasedController
       return feet;
    }
 
-   public SideDependentList<ContactablePlaneBody> getContactablePlaneHandsWithFingersBentBack()
+   public SideDependentList<ContactablePlaneBody> getContactablePlaneHands()
    {
-      return handsWithFingersBentBack;
+      return hands;
    }
 
-   public ContactablePlaneBody getContactablePlaneHandWithFingersBentBack(RobotSide robotSide)
+   public ContactablePlaneBody getContactablePlaneHand(RobotSide robotSide)
    {
-      return handsWithFingersBentBack.get(robotSide);
+      return hands.get(robotSide);
    }
 
    public SideDependentList<ContactablePlaneBody> getContactablePlaneThighs()

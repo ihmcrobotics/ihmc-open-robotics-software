@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
+import org.apache.commons.lang.mutable.MutableBoolean;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.endEffector.FootControlModule;
@@ -12,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlModuleBridge.MomentumControlModuleType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootPoseProvider;
+import us.ihmc.commonWalkingControlModules.packets.HandLoadBearingPacket;
 import us.ihmc.commonWalkingControlModules.trajectories.ChangeableConfigurationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantConfigurationProvider;
 import us.ihmc.robotSide.RobotSide;
@@ -25,7 +28,10 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 
+import com.yobotics.simulationconstructionset.VariableChangedListener;
+import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.trajectory.ConstantDoubleProvider;
 
@@ -35,6 +41,8 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
    private final static MomentumControlModuleType MOMENTUM_CONTROL_MODULE_TO_USE = MomentumControlModuleType.OPT_NULLSPACE;
 
    private final YoFramePoint desiredCoMPosition = new YoFramePoint("desiredCoM", worldFrame, registry);
+   private final YoFrameOrientation desiredPelvisYawPitchRoll = new YoFrameOrientation("desiredPelvis", worldFrame, registry);
+   private final YoFrameOrientation desiredChestYawPitchRoll = new YoFrameOrientation("desiredChest", worldFrame, registry);
 
    private final DesiredFootPoseProvider footPoseProvider;
 
@@ -43,13 +51,14 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
 
    private final CoMBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule;
    private final OneDoFJoint[] neckJoints;
+   
+   private final SideDependentList<MutableBoolean> initializeHandsInContact = new SideDependentList<>(new MutableBoolean(), new MutableBoolean());
+   private final SideDependentList<MutableBoolean> initializeFeetInContact = new SideDependentList<>(new MutableBoolean(), new MutableBoolean());
 
    public MultiContactTestHumanoidController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
-           CoMBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule,
-           MomentumBasedController momentumBasedController,
-           WalkingControllerParameters walkingControllerParameters, 
-           LidarControllerInterface lidarControllerInterface,
-           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+         CoMBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule, MomentumBasedController momentumBasedController,
+         WalkingControllerParameters walkingControllerParameters, LidarControllerInterface lidarControllerInterface,
+         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       super(variousWalkingProviders, variousWalkingManagers, momentumBasedController, walkingControllerParameters, lidarControllerInterface, controllerState);
 
@@ -60,13 +69,47 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
       RigidBody chest = fullRobotModel.getChest();
 
       int spineJacobianId = momentumBasedController.getOrCreateGeometricJacobian(pelvis, chest, chest.getBodyFixedFrame());
-      variousWalkingManagers.getChestOrientationManager().setUp(pelvis, spineJacobianId, 100.0, 100.0, 100.0, 20.0, 20.0, 20.0);
+      chestOrientationManager.setUp(pelvis, spineJacobianId, 100.0, 100.0, 100.0, 20.0, 20.0, 20.0);
 
       this.neckJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(chest, fullRobotModel.getHead()), OneDoFJoint.class);
 
+      desiredPelvisYawPitchRoll.attachVariableChangedListener(new VariableChangedListener()
+      {
+         private final FrameOrientation tempOrientation = new FrameOrientation(desiredPelvisYawPitchRoll.getReferenceFrame());
+         
+         @Override
+         public void variableChanged(YoVariable<?> v)
+         {
+            desiredPelvisYawPitchRoll.getFrameOrientation(tempOrientation);
+            desiredPelvisOrientation.set(tempOrientation);
+         }
+      });
+
+      desiredChestYawPitchRoll.attachVariableChangedListener(new VariableChangedListener()
+      {
+         private final FrameOrientation tempOrientation = new FrameOrientation(desiredChestYawPitchRoll.getReferenceFrame());
+         private final FrameVector zeroFrameVector = new FrameVector(desiredChestYawPitchRoll.getReferenceFrame());
+         
+         @Override
+         public void variableChanged(YoVariable<?> v)
+         {
+            desiredChestYawPitchRoll.getFrameOrientation(tempOrientation);
+            chestOrientationManager.setDesireds(tempOrientation, zeroFrameVector, zeroFrameVector);
+         }
+      });
+      
       setupFootControlModules();
    }
 
+   public void initializeContactStates(SideDependentList<Boolean> areHandsInContact, SideDependentList<Boolean> areFeetInContact)
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         initializeHandsInContact.get(robotSide).setValue(areHandsInContact.get(robotSide));
+         initializeFeetInContact.get(robotSide).setValue(areFeetInContact.get(robotSide));
+      }
+   }
+   
    protected void setupFootControlModules()
    {
       for (RobotSide robotSide : RobotSide.values)
@@ -110,6 +153,17 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
       // keep desired pelvis orientation as it is
       desiredPelvisAngularVelocity.set(0.0, 0.0, 0.0);
       desiredPelvisAngularAcceleration.set(0.0, 0.0, 0.0);
+      
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         if (initializeHandsInContact.get(robotSide).booleanValue())
+         {
+            HandLoadBearingPacket handLoadBearingPacket = new HandLoadBearingPacket(robotSide, true);
+            variousWalkingProviders.getDesiredHandLoadBearingProvider().consumeObject(handLoadBearingPacket);
+         }
+         
+         setFootInContact(robotSide, initializeFeetInContact.get(robotSide).booleanValue());
+      }
    }
 
    protected void doCoMControl()
@@ -147,7 +201,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
       }
    }
 
-   public void setFootInContact(RobotSide robotSide, boolean inContact)
+   private void setFootInContact(RobotSide robotSide, boolean inContact)
    {
       if (feet == null)
          return;
@@ -159,22 +213,6 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
       else
       {
          setContactStateForSwing(robotSide);
-      }
-   }
-
-   public void setHandInContact(RobotSide robotSide, boolean inContact)
-   {
-      ContactablePlaneBody handPalm = handPalms.get(robotSide);
-
-      if (inContact)
-      {
-         // TODO: If we know the surface normal here, use it.
-         FrameVector normalContactVector = null;
-         momentumBasedController.setPlaneContactStateFullyConstrained(handPalm, coefficientOfFriction.getDoubleValue(), normalContactVector);
-      }
-      else
-      {
-         momentumBasedController.setPlaneContactStateFree(handPalm);
       }
    }
 
