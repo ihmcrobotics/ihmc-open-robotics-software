@@ -11,7 +11,6 @@ public class DesiredHandLoadBearingProvider implements ObjectConsumer<HandLoadBe
 {
    private SideDependentList<AtomicInteger> hasLoadBearingBeenRequested = new SideDependentList<AtomicInteger>();
 
-
    public DesiredHandLoadBearingProvider()
    {
       for (RobotSide robotSide : RobotSide.values)
@@ -33,6 +32,6 @@ public class DesiredHandLoadBearingProvider implements ObjectConsumer<HandLoadBe
    public void consumeObject(HandLoadBearingPacket object)
    {
       RobotSide robotSide = object.getRobotSide();
-      hasLoadBearingBeenRequested.get(robotSide).set(object.isLoadBearing()?1:0);
+      hasLoadBearingBeenRequested.get(robotSide).set(object.isLoadBearing() ? 1 : 0);
    }
 }
