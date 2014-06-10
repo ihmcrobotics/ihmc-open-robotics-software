@@ -3,14 +3,9 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
-import javax.media.j3d.Transform3D;
-import javax.vecmath.Point2d;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
@@ -46,12 +41,9 @@ import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.DampedLeastSquaresSolver;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
-import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 import us.ihmc.utilities.screwTheory.TotalMassCalculator;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
@@ -65,21 +57,16 @@ import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParamete
 
 public class MultiContactTestHumanoidControllerFactory implements HighLevelHumanoidControllerFactory
 {
-   private final SideDependentList<String> namesOfJointsBeforeHands;
-   private final SideDependentList<Transform3D> handContactPointTransforms;
-   private final SideDependentList<List<Point2d>> handContactPoints;
+   private final ContactableBodiesFactory contactableBodiesFactory;
    private final RobotSide[] footContactSides;
    private final RobotSide[] handContactSides;
    private final WalkingControllerParameters walkingControllerParameters;
    private final ArmControllerParameters armControllerParameters;
 
-   public MultiContactTestHumanoidControllerFactory(SideDependentList<String> namesOfJointsBeforeHands,
-           SideDependentList<Transform3D> handContactPointTransforms, SideDependentList<List<Point2d>> handContactPoints, RobotSide[] footContactSides,
+   public MultiContactTestHumanoidControllerFactory(ContactableBodiesFactory contactableBodiesFactory, RobotSide[] footContactSides,
            RobotSide[] handContactSides, WalkingControllerParameters walkingControllerParameters, ArmControllerParameters armControllerParameters)
    {
-      this.namesOfJointsBeforeHands = namesOfJointsBeforeHands;
-      this.handContactPointTransforms = handContactPointTransforms;
-      this.handContactPoints = handContactPoints;
+      this.contactableBodiesFactory = contactableBodiesFactory;
       this.footContactSides = footContactSides;
       this.handContactSides = handContactSides;
       this.walkingControllerParameters = walkingControllerParameters;
@@ -95,23 +82,7 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
       LinkedHashMap<ContactablePlaneBody, RigidBody> contactablePlaneBodiesAndBases = new LinkedHashMap<ContactablePlaneBody, RigidBody>();
 
       // TODO: code duplication from driving controller
-      InverseDynamicsJoint[] allJoints = ScrewTools.computeSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
-      SideDependentList<ContactablePlaneBody> hands = new SideDependentList<ContactablePlaneBody>();
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         InverseDynamicsJoint[] jointBeforeHandArray = ScrewTools.findJointsWithNames(allJoints, namesOfJointsBeforeHands.get(robotSide));
-         if (jointBeforeHandArray.length != 1)
-            throw new RuntimeException("Incorrect number of joints before hand found: " + jointBeforeHandArray.length);
-
-         RigidBody handBody = jointBeforeHandArray[0].getSuccessor();
-
-         ReferenceFrame afterHipFrame = handBody.getParentJoint().getFrameAfterJoint();
-         ReferenceFrame handContactsFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(robotSide.getCamelCaseNameForStartOfExpression()
-                                               + "HandContact", afterHipFrame, handContactPointTransforms.get(robotSide));
-
-         ContactablePlaneBody hand = new ListOfPointsContactablePlaneBody(handBody, handContactsFrame, handContactPoints.get(robotSide));
-         hands.put(robotSide, hand);
-      }
+      SideDependentList<ContactablePlaneBody> hands = contactableBodiesFactory.createHandContactableBodies(fullRobotModel.getRootJoint().getSuccessor());
 
       for (ContactablePlaneBody contactablePlaneBody : feet.values())
       {

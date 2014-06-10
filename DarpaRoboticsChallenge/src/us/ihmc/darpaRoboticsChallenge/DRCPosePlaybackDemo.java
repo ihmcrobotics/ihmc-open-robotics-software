@@ -10,6 +10,7 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepTimingParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.PolyvalentHighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.PosePlaybackControllerFactory;
@@ -46,14 +47,15 @@ public class DRCPosePlaybackDemo
       ArmControllerParameters armControlParameters = model.getArmControllerParameters();
 
       FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulation(walkingControlParameters);
+      ContactableBodiesFactory contactableBodiesFactory = model.getContactPointParameters(false, false).getContactableBodiesFactory();
 
-      highLevelHumanoidControllerFactory = new PolyvalentHighLevelHumanoidControllerFactory(null, footstepTimingParameters, walkingControlParameters,
+      highLevelHumanoidControllerFactory = new PolyvalentHighLevelHumanoidControllerFactory(contactableBodiesFactory, footstepTimingParameters, walkingControlParameters,
             walkingControlParameters, armControlParameters, false, false, false, JOINT_PD_CONTROL);
       highLevelHumanoidControllerFactory.addHighLevelBehaviorFactory(new PosePlaybackControllerFactory(posePlaybackPacket, true));
 
       SideDependentList<String> footForceSensorNames = model.getSensorInformation().getFeetForceSensorNames();
 
-      controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, DRCConfigParameters.contactTresholdForceForSCS,
+      controllerFactory = new DRCRobotMomentumBasedControllerFactory(contactableBodiesFactory, highLevelHumanoidControllerFactory, DRCConfigParameters.contactTresholdForceForSCS,
             footForceSensorNames);
 
       drcSimulation = new DRCSimulationFactory(model, controllerFactory, null, robotInitialSetup, scsInitialSetup, guiInitialSetup, null);

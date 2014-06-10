@@ -4,12 +4,11 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepTimingParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactPointInformation;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.PolyvalentHighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelState;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControllerFactory;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCContactPointInformationFactory;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.robotSide.SideDependentList;
@@ -39,14 +38,13 @@ public class DRCFlatGroundWalkingTrack
 
       FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulation(walkingControlParameters);
       
-      DRCRobotJointMap jointMap = model.getJointMap();
       WalkingControllerParameters drcRobotParameters = model.getWalkingControlParameters();
       WalkingControllerParameters drcRobotMultiContactParameters = model.getMultiContactControllerParameters();
-      ContactPointInformation contactPointInformation = DRCContactPointInformationFactory.createContactPointInformation(jointMap,
-            model.getContactPointParameters(false, false));
+      DRCRobotContactPointParameters contactPointParameters = model.getContactPointParameters(false, false);
+      ContactableBodiesFactory contactableBodiesFactory = contactPointParameters.getContactableBodiesFactory();
 
       PolyvalentHighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory = new PolyvalentHighLevelHumanoidControllerFactory(
-            contactPointInformation, footstepTimingParameters, drcRobotParameters, drcRobotMultiContactParameters, armControllerParameters,
+            contactableBodiesFactory, footstepTimingParameters, drcRobotParameters, drcRobotMultiContactParameters, armControllerParameters,
             useVelocityAndHeadingScript, false, useFastTouchdowns, HighLevelState.WALKING);
       
       if (cheatWithGroundHeightAtForFootstep)
@@ -57,7 +55,7 @@ public class DRCFlatGroundWalkingTrack
       
       SideDependentList<String> footForceSensorNames = model.getSensorInformation().getFeetForceSensorNames();
       
-      DRCRobotMomentumBasedControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(highLevelHumanoidControllerFactory, DRCConfigParameters.contactTresholdForceForSCS, footForceSensorNames);
+      DRCRobotMomentumBasedControllerFactory controllerFactory = new DRCRobotMomentumBasedControllerFactory(contactableBodiesFactory, highLevelHumanoidControllerFactory, DRCConfigParameters.contactTresholdForceForSCS, footForceSensorNames);
       drcSimulation = new DRCSimulationFactory(model, controllerFactory, null, robotInitialSetup, scsInitialSetup, guiInitialSetup, null);
 
       drcSimulation.start();

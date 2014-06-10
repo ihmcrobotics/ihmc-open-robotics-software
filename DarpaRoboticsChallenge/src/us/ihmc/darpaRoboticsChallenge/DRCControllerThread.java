@@ -13,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
 import us.ihmc.darpaRoboticsChallenge.controllers.ConstrainedCenterOfMassJacobianEvaluator;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadDataSynchronizer;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
@@ -119,15 +118,13 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       DRCRobotJointMap jointMap = robotModel.getJointMap();
       DRCRobotPhysicalProperties physicalProperties = robotModel.getPhysicalProperties();
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
-      DRCRobotContactPointParameters contactPointParamaters = robotModel.getContactPointParameters(false, false);
-
 
       controllerReferenceFrames = new ReferenceFrames(controllerFullRobotModel, jointMap, physicalProperties.getAnkleHeight());
       controllerReferenceFrames.visualize(dynamicGraphicObjectsListRegistry, registry);
 
       robotController = createMomentumBasedController(controllerFullRobotModel, controllerReferenceFrames, sensorInformation,
-            contactPointParamaters, controllerFactory, lidarControllerInterface, controllerTime, robotModel.getControllerDT(), gravity, forceSensorDataHolderForController,
-            dynamicGraphicObjectsListRegistry, registry, dataProducer);
+            controllerFactory, lidarControllerInterface, controllerTime, robotModel.getControllerDT(), gravity, forceSensorDataHolderForController, dynamicGraphicObjectsListRegistry,
+            registry, dataProducer);
       
       firstTick.set(true);
       registry.addChild(robotController.getYoVariableRegistry());
@@ -144,10 +141,10 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    }
 
    public static RobotController createMomentumBasedController(SDFFullRobotModel controllerModel, ReferenceFrames referenceFramesForController,
-         DRCRobotSensorInformation sensorInformation, DRCRobotContactPointParameters contactPointParameters, DRCRobotMomentumBasedControllerFactory controllerFactory,
-         LidarControllerInterface lidarControllerInterface, DoubleYoVariable yoTime, double controlDT, double gravity,
-         ForceSensorDataHolder forceSensorDataHolderForController, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
-         YoVariableRegistry registry, GlobalDataProducer dataProducer)
+         DRCRobotSensorInformation sensorInformation, DRCRobotMomentumBasedControllerFactory controllerFactory, LidarControllerInterface lidarControllerInterface,
+         DoubleYoVariable yoTime, double controlDT, double gravity, ForceSensorDataHolder forceSensorDataHolderForController,
+         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry registry,
+         GlobalDataProducer dataProducer)
    {
       CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(controllerModel.getElevator());
 
@@ -160,7 +157,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
 
       RobotController robotController = controllerFactory.getController(controllerModel, referenceFramesForController, controlDT, gravity, yoTime,
             dynamicGraphicObjectsListRegistry, twistCalculator, centerOfMassJacobian, forceSensorDataHolderForController,
-            lidarControllerInterface, dataProducer, contactPointParameters.getFootGroundContactPointsInSoleFrameForController());
+            lidarControllerInterface, dataProducer);
       final ModularSensorProcessor sensorProcessor = createSensorProcessor(twistCalculator, centerOfMassJacobian, referenceFramesForController);
 
       ModularRobotController modularRobotController = new ModularRobotController("DRCMomentumBasedController");
