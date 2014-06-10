@@ -698,7 +698,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    private void setContactStateForSwing(RobotSide robotSide)
    {
       // Initialize desired foot pose to the actual, so no surprising behavior
-      ReferenceFrame footFrame = footControlModules.get(robotSide).getEndEffectorFrame();
+      ReferenceFrame footFrame = footControlModules.get(robotSide).getFootFrame();
       desiredFootConfigurationProviders.get(robotSide).set(new FramePose(footFrame));
 
       footControlModules.get(robotSide).doSingularityEscapeBeforeTransitionToNextState();
