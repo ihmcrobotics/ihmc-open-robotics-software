@@ -16,10 +16,10 @@ import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.HandContactParameters;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -38,7 +38,7 @@ public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInter
    private final RobotSide[] handContactSides;
 
    public MultiContactTestEnvironment(DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCRobotModel robotModel,
-                                      RobotSide[] footContactSides, RobotSide[] handContactSides)
+                                      RobotSide[] footContactSides, RobotSide[] handContactSides, SideDependentList<Transform3D> invisibleContactablePlaneHandContactPointTransforms)
    {
       DRCRobotJointMap jointMap = robotModel.getJointMap();
       DRCRobotPhysicalProperties physicalProperties = robotModel.getPhysicalProperties();
@@ -55,10 +55,10 @@ public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInter
       this.footContactSides = footContactSides;
       this.handContactSides = handContactSides;
 
-      combinedTerrainObject = createCombinedTerrainObject(referenceFramesForEnvironmentSetup, fullRobotModelForEnvironmentSetup);
+      combinedTerrainObject = createCombinedTerrainObject(referenceFramesForEnvironmentSetup, fullRobotModelForEnvironmentSetup, invisibleContactablePlaneHandContactPointTransforms);
    }
 
-   private CombinedTerrainObject createCombinedTerrainObject(CommonWalkingReferenceFrames referenceFramesForEnvironmentSetup, FullRobotModel fullRobotModel)
+   private CombinedTerrainObject createCombinedTerrainObject(CommonWalkingReferenceFrames referenceFramesForEnvironmentSetup, FullRobotModel fullRobotModel, SideDependentList<Transform3D> invisibleContactablePlaneHandContactPointTransforms)
    {
       CombinedTerrainObject combinedTerrainObject = new CombinedTerrainObject(getClass().getSimpleName());
       for (RobotSide robotSide : footContactSides)
@@ -73,7 +73,7 @@ public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInter
          ReferenceFrame handFrame = fullRobotModel.getHand(robotSide).getParentJoint().getFrameAfterJoint();
          Transform3D handToWorld = handFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
          Transform3D handContactPlaneToWorld = new Transform3D();
-         handContactPlaneToWorld.mul(handToWorld, HandContactParameters.invisibleContactablePlaneHandContactPointTransforms.get(robotSide));
+         handContactPlaneToWorld.mul(handToWorld, invisibleContactablePlaneHandContactPointTransforms.get(robotSide));
          combinedTerrainObject.addTerrainObject(createConvexPolygonTerrainObject(handContactPlaneToWorld));
       }
 
