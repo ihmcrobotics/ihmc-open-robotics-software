@@ -134,7 +134,7 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
 //      TorusManipulationProvider torusManipulationProvider = new TorusManipulationProvider();
       DesiredFootPoseProvider footPoseProvider = new DesiredFootPoseProvider();
 
-      DesiredHandLoadBearingProvider handLoadBearingProvider = null;
+      DesiredHandLoadBearingProvider handLoadBearingProvider = new DesiredHandLoadBearingProvider();
       FootstepProvider footstepProvider = null;
       HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = null;
       DesiredHeadOrientationProvider headOrientationProvider = null;
@@ -155,27 +155,20 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
 
       VariousWalkingManagers variousWalkingManagers = VariousWalkingManagers.create(momentumBasedController, yoTime, variousWalkingProviders, walkingControllerParameters,
             armControllerParameters, registry);
-      
+      variousWalkingManagers.initializeManagers();
+
       MultiContactTestHumanoidController multiContactBehavior = new MultiContactTestHumanoidController(variousWalkingProviders, variousWalkingManagers,
                                                                    momentumRateOfChangeControlModule,
                                                                    momentumBasedController, walkingControllerParameters, null,
                                                                    dynamicGraphicObjectsListRegistry);
 
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         multiContactBehavior.setFootInContact(robotSide, false);
-         multiContactBehavior.setHandInContact(robotSide, false);
-      }
-
+      SideDependentList<Boolean> areHandsInContact = new SideDependentList<Boolean>(false, false);
+      SideDependentList<Boolean> areFeetInContact = new SideDependentList<>(false, false);
       for (RobotSide robotSide : footContactSides)
-      {
-         multiContactBehavior.setFootInContact(robotSide, true);
-      }
-
+         areFeetInContact.put(robotSide, true);
       for (RobotSide robotSide : handContactSides)
-      {
-         multiContactBehavior.setHandInContact(robotSide, true);
-      }
+         areHandsInContact.put(robotSide, true);
+      multiContactBehavior.initializeContactStates(areHandsInContact, areFeetInContact);
 
       ArrayList<HighLevelBehavior> highLevelBehaviors = new ArrayList<>();
       highLevelBehaviors.add(multiContactBehavior);

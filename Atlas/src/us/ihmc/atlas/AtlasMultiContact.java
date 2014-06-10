@@ -79,6 +79,7 @@ public class AtlasMultiContact
       if (recordFrequency < 1)
          recordFrequency = 1;
       scsInitialSetup.setRecordFrequency(recordFrequency);
+      scsInitialSetup.setInitializeEstimatorToActual(true);
 
       ArmControllerParameters armControllerParameters = robotModel.getArmControllerParameters();
 
@@ -113,13 +114,13 @@ public class AtlasMultiContact
       MidiSliderBoard sliderBoard = new MidiSliderBoard(simulationConstructionSet);
       sliderBoard.setSlider(1, "desiredCoMX", simulationConstructionSet, -0.2, 0.2);
       sliderBoard.setSlider(2, "desiredCoMY", simulationConstructionSet, -0.2, 0.2);
-      sliderBoard.setSlider(3, "desiredCoMZ", simulationConstructionSet, -0.5, 1.2);
+      sliderBoard.setSlider(3, "desiredCoMZ", simulationConstructionSet, 0.5, 1.5);
       sliderBoard.setSlider(4, "desiredPelvisYaw", simulationConstructionSet, -Math.PI / 8.0, Math.PI / 8.0);
-      sliderBoard.setSlider(5, "desiredPelvisPitch", simulationConstructionSet, -Math.PI, Math.PI);
+      sliderBoard.setSlider(5, "desiredPelvisPitch", simulationConstructionSet, -Math.PI / 8.0, Math.PI / 8.0);
       sliderBoard.setSlider(6, "desiredPelvisRoll", simulationConstructionSet, -Math.PI / 8.0, Math.PI / 8.0);
-      sliderBoard.setKnob(1, "desiredChestOrientationYaw", simulationConstructionSet, -Math.PI / 8.0, Math.PI / 8.0);
-      sliderBoard.setKnob(2, "desiredChestOrientationPitch", simulationConstructionSet, -Math.PI / 8.0, Math.PI / 8.0);
-      sliderBoard.setKnob(3, "desiredChestOrientationRoll", simulationConstructionSet, -Math.PI / 8.0, Math.PI / 8.0);
+      sliderBoard.setKnob(1, "desiredChestYaw", simulationConstructionSet, -Math.PI / 8.0, Math.PI / 8.0);
+      sliderBoard.setKnob(2, "desiredChestPitch", simulationConstructionSet, -Math.PI / 8.0, Math.PI / 8.0);
+      sliderBoard.setKnob(3, "desiredChestRoll", simulationConstructionSet, -Math.PI / 8.0, Math.PI / 8.0);
 
       simulationConstructionSet.setCameraPosition(6.0, -2.0, 4.5);
       simulationConstructionSet.setCameraFix(-0.44, -0.17, 0.75);

@@ -127,6 +127,10 @@ public class VariousWalkingManagers
       return headOrientationControlModule;
    }
 
+   public void initializeManagers()
+   {
+      manipulationControlModule.initialize();
+   }
 
    public HeadOrientationManager getHeadOrientationManager()
    {
