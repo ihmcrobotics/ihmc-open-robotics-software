@@ -199,8 +199,6 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          requestedFootLoadBearing.get(robotSide).addVariableChangedListener(loadBearingVariableChangedListener);
          requestedThighLoadBearing.get(robotSide).addVariableChangedListener(loadBearingVariableChangedListener);
       }
-
-      initialize();
    }
 
    private VariableChangedListener createPelvisGainsChangedListener()
