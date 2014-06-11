@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
+import java.util.List;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
@@ -8,8 +10,11 @@ import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccele
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
+import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
+import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
@@ -30,6 +35,7 @@ public abstract class FootControlState extends State<ConstraintType>
    protected static final double coefficientOfFriction = 0.8;
    protected static final double minJacobianDeterminant = 0.035;
    protected static final double desiredZAccelerationIntoGround = 0.0;
+   protected static final double EPSILON_POINT_ON_EDGE = 1e-2;
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    
    protected final ContactablePlaneBody contactableBody;
@@ -61,6 +67,8 @@ public abstract class FootControlState extends State<ConstraintType>
    private final BooleanYoVariable doSingularityEscape;
    protected final DenseMatrix64F selectionMatrix;
    protected final BooleanYoVariable forceFootAccelerateIntoGround;
+   protected boolean isCoPOnEdge;
+   protected FrameLineSegment2d edgeToRotateAbout;
    
    protected final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
    
@@ -93,6 +101,7 @@ public abstract class FootControlState extends State<ConstraintType>
       
       this.legSingularityAndKneeCollapseAvoidanceControlModule = legSingularityAndKneeCollapseAvoidanceControlModule;
       
+      edgeToRotateAbout = new FrameLineSegment2d(contactableBody.getPlaneFrame());
       rootBody = momentumBasedController.getTwistCalculator().getRootBody();
       taskspaceConstraintData.set(rootBody, contactableBody.getRigidBody());
       jacobian = momentumBasedController.getJacobian(jacobianId);
@@ -160,6 +169,36 @@ public abstract class FootControlState extends State<ConstraintType>
          nullspaceMultiplier.set(Double.NaN);
          nullspaceMultipliers.reshape(0, 1);
          doSingularityEscape.set(false);
+      }
+   }
+   
+   private final FrameConvexPolygon2d contactPolygon = new FrameConvexPolygon2d();
+   private final FrameOrientation currentOrientation = new FrameOrientation();
+   protected void determineCoPOnEdge()
+   {
+      FramePoint2d cop = momentumBasedController.getCoP(contactableBody);
+
+      if (cop == null)
+      {
+         isCoPOnEdge = false;
+      }
+      else
+      {
+         List<FramePoint2d> contactPoints = contactableBody.getContactPoints2d();
+         contactPolygon.setIncludingFrameAndUpdate(contactPoints);
+         cop.changeFrame(contactPolygon.getReferenceFrame());
+         FrameLineSegment2d closestEdge = contactPolygon.getClosestEdge(cop);
+         boolean copOnEdge = closestEdge.distance(cop) < EPSILON_POINT_ON_EDGE;
+         boolean hasCoPBeenOnEdge = isCoPOnEdge;
+         if (copOnEdge && !hasCoPBeenOnEdge)
+         {
+            currentOrientation.set(contactableBody.getBodyFrame());
+            currentOrientation.changeFrame(worldFrame);
+//            orientationFix.set(currentOrientation);
+         }
+         isCoPOnEdge = copOnEdge;
+
+         edgeToRotateAbout = closestEdge;
       }
    }
 }

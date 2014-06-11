@@ -23,6 +23,7 @@ public class FullyConstrainedState extends FootControlState
    
    private final BooleanYoVariable requestHoldPosition;
    private final FrameVector fullyConstrainedNormalContactVector;
+   private final BooleanYoVariable doFancyOnToesControl;
    
    public FullyConstrainedState(YoFramePoint yoDesiredPosition,
          YoFrameVector yoDesiredLinearVelocity, YoFrameVector yoDesiredLinearAcceleration,
@@ -31,7 +32,7 @@ public class FullyConstrainedState extends FootControlState
          BooleanYoVariable requestHoldPosition, EnumYoVariable<ConstraintType> requestedState,
          int jacobianId, DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange,
          BooleanYoVariable doSingularityEscape, FrameVector fullyConstrainedNormalContactVector,
-         BooleanYoVariable forceFootAccelerateIntoGround,
+         BooleanYoVariable forceFootAccelerateIntoGround, BooleanYoVariable doFancyOnToesControl,
          LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule)
    {
       super(ConstraintType.FULL, yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration,
@@ -42,6 +43,7 @@ public class FullyConstrainedState extends FootControlState
       
       this.requestHoldPosition = requestHoldPosition;
       this.fullyConstrainedNormalContactVector = fullyConstrainedNormalContactVector;
+      this.doFancyOnToesControl = doFancyOnToesControl;
    }
 
    public void doTransitionIntoAction()
@@ -58,15 +60,14 @@ public class FullyConstrainedState extends FootControlState
    public void doSpecificAction()
    {
       // is false on the real robot anyway
-//      if (doFancyOnToesControl.getBooleanValue())
-//         determineCoPOnEdge();
+      if (doFancyOnToesControl.getBooleanValue())
+         determineCoPOnEdge();
 
       if (USE_SUPPORT_FOOT_HOLD_POSITION_STATE)
       {
-//         if (isCoPOnEdge.getBooleanValue() && doFancyOnToesControl.getBooleanValue())
-//            requestedState.set(ConstraintType.HOLD_POSITION);
-//         else 
-         if (requestHoldPosition != null && requestHoldPosition.getBooleanValue())
+         if (isCoPOnEdge && doFancyOnToesControl.getBooleanValue())
+            requestedState.set(ConstraintType.HOLD_POSITION);
+         else if (requestHoldPosition != null && requestHoldPosition.getBooleanValue())
             requestedState.set(ConstraintType.HOLD_POSITION);
       }
       

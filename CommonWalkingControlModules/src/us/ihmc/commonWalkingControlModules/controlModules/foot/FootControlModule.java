@@ -86,7 +86,6 @@ public class FootControlModule
    private static final int NUMBER_OF_CONTACTS_POINTS_TO_ROTATE_ABOUT = 2;
    private static final boolean USE_TOEOFF_FOOT_HOLD_POSITION = true;
    private static final boolean CORRECT_SWING_CONSIDERING_JOINT_LIMITS = true;
-   private static final double EPSILON_POINT_ON_EDGE = 1e-2;
    
    private boolean visualize = false;
    
@@ -98,7 +97,7 @@ public class FootControlModule
    private final RigidBody rootBody;
    private final EnumYoVariable<ConstraintType> _requestedState;
    private final DoubleYoVariable desiredOnEdgeAngle;
-   private final YoFrameLineSegment2d edgeToRotateAbout;
+//   private final YoFrameLineSegment2d edgeToRotateAbout;
    private final BooleanYoVariable isCoPOnEdge;
    private final BooleanYoVariable doSingularityEscape;
    private final BooleanYoVariable waitSingularityEscapeBeforeTransitionToNextState;
@@ -144,7 +143,7 @@ public class FootControlModule
    private final DoubleYoVariable holdKpx, holdKpy, holdKpz, holdKdz, holdKpRoll, holdKpPitch, holdKpYaw, holdZeta;
    private final DoubleYoVariable toeOffKpx, toeOffKpy, toeOffKpz, toeOffKpRoll, toeOffKpPitch, toeOffKpYaw, toeOffZeta;
    
-//   private final BooleanYoVariable doFancyOnToesControl;
+   private final BooleanYoVariable doFancyOnToesControl;
    
    private final BooleanYoVariable isHoldPositionRequested;
    
@@ -217,7 +216,7 @@ public class FootControlModule
       footSpatialAccelerationControlModule = new RigidBodySpatialAccelerationControlModule(namePrefix, twistCalculator, rigidBody, bodyFrame, controlDT, registry);
       spatialAccelerationProjector = new SpatialAccelerationProjector(namePrefix + "SpatialAccelerationProjector", registry);
       desiredOnEdgeAngle = new DoubleYoVariable(namePrefix + "DesiredOnEdgeAngle", registry);
-      edgeToRotateAbout = new YoFrameLineSegment2d(namePrefix + "Edge", "", contactablePlaneBody.getPlaneFrame(), registry);
+//      edgeToRotateAbout = new YoFrameLineSegment2d(namePrefix + "Edge", "", contactablePlaneBody.getPlaneFrame(), registry);
       isCoPOnEdge = new BooleanYoVariable(namePrefix + "IsCoPOnEdge", registry);
       doSingularityEscape = new BooleanYoVariable(namePrefix + "DoSingularityEscape", registry);
       waitSingularityEscapeBeforeTransitionToNextState = new BooleanYoVariable(namePrefix + "WaitSingularityEscapeBeforeTransitionToNextState", registry);
@@ -273,11 +272,11 @@ public class FootControlModule
       toeOffKpYaw = new DoubleYoVariable(namePrefix + "ToeOffKpYaw", registry);
       toeOffZeta = new DoubleYoVariable(namePrefix + "ToeOffZeta", registry);
 
-//      doFancyOnToesControl = new BooleanYoVariable(contactablePlaneBody.getName() + "DoFancyOnToesControl", registry);
-//      if (walkingControllerParameters.isRunningOnRealRobot())
-//         doFancyOnToesControl.set(false);
-//      else
-//         doFancyOnToesControl.set(true);
+      doFancyOnToesControl = new BooleanYoVariable(contactablePlaneBody.getName() + "DoFancyOnToesControl", registry);
+      if (walkingControllerParameters.isRunningOnRealRobot())
+         doFancyOnToesControl.set(false);
+      else
+         doFancyOnToesControl.set(true);
       
       stateMachine = new StateMachine<ConstraintType>(namePrefix + "State", namePrefix + "SwitchTime", ConstraintType.class, t, registry);
 
@@ -390,7 +389,7 @@ public class FootControlModule
             _yoDesiredLinearAcceleration, footSpatialAccelerationControlModule, momentumBasedController,
             _contactableBody, requestHoldPosition, _requestedState, _jacobianId, nullspaceMultiplier,
             jacobianDeterminantInRange, doSingularityEscape, fullyConstrainedNormalContactVector,
-            _forceFootAccelerateIntoGround, _legSingularityAndKneeCollapseAvoidanceControlModule));
+            _forceFootAccelerateIntoGround, doFancyOnToesControl, _legSingularityAndKneeCollapseAvoidanceControlModule));
       states.add(new HoldPositionState());
       states.add(new SwingState(swingTimeProvider, initialPositionProvider, initialVelocityProvider,
             finalPositionProvider, finalVelocityProvider, initialOrientationProvider,
@@ -725,7 +724,7 @@ public class FootControlModule
 
             if (useTrajectory || useMaximumPitchAngle)
             {
-               FrameVector2d axisOfRotation2d = edgeToRotateAbout.getFrameLineSegment2d().getVectorCopy();
+               FrameVector2d axisOfRotation2d = edgeToRotateAbout.getVectorCopy();
                FrameVector axisOfRotation = new FrameVector(axisOfRotation2d.getReferenceFrame(), axisOfRotation2d.getX(), axisOfRotation2d.getY(), 0.0);
                axisOfRotation.normalize();
                axisOfRotation.changeFrame(footAcceleration.getExpressedInFrame());
@@ -746,7 +745,7 @@ public class FootControlModule
          }
          else
          {
-            spatialAccelerationProjector.projectAcceleration(footAcceleration, edgeToRotateAbout.getFrameLineSegment2d());
+            spatialAccelerationProjector.projectAcceleration(footAcceleration, edgeToRotateAbout);
 
             setTaskspaceConstraint(footAcceleration);
          }
@@ -909,7 +908,7 @@ public class FootControlModule
          
          determineCoPOnEdge();
 
-         if (!isCoPOnEdge.getBooleanValue() && (isHoldPositionRequested == null || !isHoldPositionRequested.getBooleanValue()))
+         if (!isCoPOnEdge && (isHoldPositionRequested == null || !isHoldPositionRequested.getBooleanValue()))
             requestedState.set(ConstraintType.FULL);
          
          yoDesiredPosition.set(desiredPosition);
@@ -1097,7 +1096,7 @@ public class FootControlModule
 
          accelerationControlModule.reset();
 
-         isCoPOnEdge.set(false);
+         isCoPOnEdge = false;
          initializeTrajectory();
 
          isTrajectoryDone.set(false);
@@ -1361,35 +1360,35 @@ public class FootControlModule
 //      footSpatialAccelerationControlModule.setOrientationDerivativeGains(dOrientation, dOrientation, dOrientation);
 //   }
 
-   private final FrameConvexPolygon2d contactPolygon = new FrameConvexPolygon2d();
-   private final FrameOrientation currentOrientation = new FrameOrientation();
-   private void determineCoPOnEdge()
-   {
-      FramePoint2d cop = _momentumBasedController.getCoP(_contactableBody);
-
-      if (cop == null)
-      {
-         isCoPOnEdge.set(false);
-      }
-      else
-      {
-         List<FramePoint2d> contactPoints = _contactableBody.getContactPoints2d();
-         contactPolygon.setIncludingFrameAndUpdate(contactPoints);
-         cop.changeFrame(contactPolygon.getReferenceFrame());
-         FrameLineSegment2d closestEdge = contactPolygon.getClosestEdge(cop);
-         boolean copOnEdge = closestEdge.distance(cop) < EPSILON_POINT_ON_EDGE;
-         boolean hasCoPBeenOnEdge = isCoPOnEdge.getBooleanValue();
-         if (copOnEdge && !hasCoPBeenOnEdge)
-         {
-            currentOrientation.set(getFootFrame());
-            currentOrientation.changeFrame(worldFrame);
-            orientationFix.set(currentOrientation);
-         }
-         isCoPOnEdge.set(copOnEdge);
-
-         this.edgeToRotateAbout.setFrameLineSegment2d(closestEdge);
-      }
-   }
+//   private final FrameConvexPolygon2d contactPolygon = new FrameConvexPolygon2d();
+//   private final FrameOrientation currentOrientation = new FrameOrientation();
+//   private void determineCoPOnEdge()
+//   {
+//      FramePoint2d cop = _momentumBasedController.getCoP(_contactableBody);
+//
+//      if (cop == null)
+//      {
+//         isCoPOnEdge.set(false);
+//      }
+//      else
+//      {
+//         List<FramePoint2d> contactPoints = _contactableBody.getContactPoints2d();
+//         contactPolygon.setIncludingFrameAndUpdate(contactPoints);
+//         cop.changeFrame(contactPolygon.getReferenceFrame());
+//         FrameLineSegment2d closestEdge = contactPolygon.getClosestEdge(cop);
+//         boolean copOnEdge = closestEdge.distance(cop) < EPSILON_POINT_ON_EDGE;
+//         boolean hasCoPBeenOnEdge = isCoPOnEdge.getBooleanValue();
+//         if (copOnEdge && !hasCoPBeenOnEdge)
+//         {
+//            currentOrientation.set(getFootFrame());
+//            currentOrientation.changeFrame(worldFrame);
+//            orientationFix.set(currentOrientation);
+//         }
+//         isCoPOnEdge.set(copOnEdge);
+//
+//         this.edgeToRotateAbout.setFrameLineSegment2d(closestEdge);
+//      }
+//   }
 
    public ReferenceFrame getFootFrame()
    {
