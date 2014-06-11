@@ -1,0 +1,20 @@
+dependencies {
+	testCompile group: 'junit', name: 'junit', version: '4.11'
+	compile group: 'us.ihmc.thirdparty.j3d', name: 'vecmath', version: 'x'
+	compile group: 'us.ihmc.thirdparty.j3d', name: 'j3dcore', version: 'x'
+	compile group: 'us.ihmc.thirdparty.j3d', name: 'j3dutils', version: 'x'
+	compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv', version: 'x'
+	compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-xuggler', version: 'x'
+	compile group: 'us.ihmc.thirdparty', name: 'ddogleg', version: 'x'
+	compile group: 'us.ihmc.thirdparty', name: 'ejml', version: 'x'
+	compile group: 'us.ihmc.thirdparty', name: 'georegression', version: 'x'
+	compile group: 'xuggle', name: 'xuggle-xuggler', version: '5.4'
+	compile group: 'com.thoughtworks.xstream', name: 'xstream', version: '1.4.4' //1.4.7
+	compile group: 'org.jfree', name: 'jfreechart', version: '1.0.17'
+	compile group: 'org.jfree', name: 'jcommon', version: '1.0.17'
+	compile group: 'net.sourceforge.jexcelapi', name: 'jxl', version: '2.6.12'
+	
+	
+	compile project(':IHMCUtilities')
+	compile project(':Plotting')
+}
