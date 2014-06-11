@@ -129,7 +129,8 @@ public class VariousWalkingManagers
 
    public void initializeManagers()
    {
-      manipulationControlModule.initialize();
+      if (manipulationControlModule != null)
+         manipulationControlModule.initialize();
    }
 
    public HeadOrientationManager getHeadOrientationManager()
