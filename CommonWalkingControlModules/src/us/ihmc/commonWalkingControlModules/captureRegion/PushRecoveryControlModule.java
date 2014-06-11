@@ -38,7 +38,7 @@ public class PushRecoveryControlModule
    private static final double REDUCE_SWING_TIME_COEFFICIENT = 0.6;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final boolean useICPProjection = false;
+   private final boolean useICPProjection = true;
 
    private final BooleanYoVariable enablePushRecoveryFromDoubleSupport;
    private final ICPAndMomentumBasedController icpAndMomentumBasedController;
