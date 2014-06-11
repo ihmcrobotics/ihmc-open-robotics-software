@@ -16,8 +16,8 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkOnTheEdgesManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.LegSingularityAndKneeCollapseAvoidanceControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.LegSingularityAndKneeCollapseAvoidanceControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
@@ -491,7 +491,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       singularityEscapeNullspaceMultiplierSwingLeg.set(singularityEscapeMultiplierForSwing);
       singularityEscapeNullspaceMultiplierSupportLeg.set(walkingControllerParameters.getSupportSingularityEscapeMultiplier());
       singularityEscapeNullspaceMultiplierSupportLegLocking.set(0.0); // -0.5);
-      double minJacobianDeterminantForSingularityEscape = 0.035;
 
       swingKpXY.set(walkingControllerParameters.getSwingKpXY());
       swingKpZ.set(walkingControllerParameters.getSwingKpZ());
@@ -543,7 +542,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          VariableChangedListener swingGainsChangedListener = createEndEffectorGainsChangedListener(footControlModule);
          swingGainsChangedListener.variableChanged(null);
 
-         footControlModule.setParameters(minJacobianDeterminantForSingularityEscape, singularityEscapeNullspaceMultiplierSwingLeg.getDoubleValue());
+         footControlModule.setParameters(singularityEscapeNullspaceMultiplierSwingLeg.getDoubleValue());
          footControlModules.put(robotSide, footControlModule);
       }
    }
