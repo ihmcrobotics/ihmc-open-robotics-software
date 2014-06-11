@@ -4,8 +4,8 @@ import org.apache.commons.lang.mutable.MutableBoolean;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.endEffector.FootControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.endEffector.FootControlModule.ConstraintType;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingManagers;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;

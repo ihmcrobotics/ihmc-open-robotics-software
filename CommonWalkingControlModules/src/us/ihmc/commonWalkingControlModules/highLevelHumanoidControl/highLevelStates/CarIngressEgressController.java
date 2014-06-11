@@ -12,8 +12,8 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisDesiredsHandler;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.endEffector.FootControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.endEffector.FootControlModule.ConstraintType;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingManagers;
