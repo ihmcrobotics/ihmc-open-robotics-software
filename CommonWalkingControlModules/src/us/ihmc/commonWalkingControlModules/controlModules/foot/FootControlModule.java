@@ -416,7 +416,7 @@ public class FootControlModule
             momentumBasedController.getReferenceFrames().getFootFrame(robotSide),
             momentumBasedController.getFullRobotModel().getFoot(robotSide), twistCalculator);
       
-      List<State<ConstraintType>> states = new ArrayList<State<ConstraintType>>();
+      List<FootControlState> states = new ArrayList<FootControlState>();
       states.add(new TouchdownOnToesState(pitchTouchdownTrajectoryGenerator));
       states.add(new TouchdownOnHeelState(pitchTouchdownTrajectoryGenerator));
       states.add(new OnToesState(maximumTakeoffAngle));
@@ -491,11 +491,11 @@ public class FootControlModule
       contactStatesMap.put(ConstraintType.TOES_TOUCHDOWN, contactStatesMap.get(ConstraintType.TOES));
    }
 
-   private void setUpStateMachine(List<State<ConstraintType>> states)
+   private void setUpStateMachine(List<FootControlState> states)
    {
-      for (State<ConstraintType> state : states)
+      for (FootControlState state : states)
       {
-         for (State<ConstraintType> stateToTransitionTo : states)
+         for (FootControlState stateToTransitionTo : states)
          {
             FootStateTransitionCondition footStateTransitionCondition = new FootStateTransitionCondition(stateToTransitionTo);
             state.addStateTransition(new StateTransition<ConstraintType>(stateToTransitionTo.getStateEnum(), footStateTransitionCondition,
@@ -592,7 +592,7 @@ public class FootControlModule
       return stateMachine.getCurrentStateEnum();
    }
 
-   private abstract class OnEdgeState extends State<ConstraintType>
+   private abstract class OnEdgeState extends FootControlState
    {
       private final DoubleTrajectoryGenerator onEdgePitchAngleTrajectoryGenerator;
       private final List<FramePoint2d> edgeContactPoints;
@@ -659,7 +659,7 @@ public class FootControlModule
          desiredRollToHold = desiredOrientation.getRoll();
       }
 
-      public void doAction()
+      public void doSpecificAction()
       {
          desiredOrientation.setToZero(contactableBody.getBodyFrame());
          desiredOrientation.changeFrame(worldFrame);
@@ -831,9 +831,9 @@ public class FootControlModule
          copyOriginalContactPointPositions();
       }
       
-      public void doAction()
+      public void doSpecificAction()
       {
-         super.doAction();
+         super.doSpecificAction();
          
          shrinkFootSizeToMidToe();
 
@@ -898,7 +898,7 @@ public class FootControlModule
       }
    }
 
-   private class FullyConstrainedState extends State<ConstraintType>
+   private class FullyConstrainedState extends FootControlState
    {
       public FullyConstrainedState()
       {
@@ -917,7 +917,7 @@ public class FootControlModule
          footSpatialAccelerationControlModule.setOrientationDerivativeGains(supportKdRoll.getDoubleValue(), supportKdPitch.getDoubleValue(), supportKdYaw.getDoubleValue());
       }
 
-      public void doAction()
+      public void doSpecificAction()
       {
          if (doFancyOnToesControl.getBooleanValue())
             determineCoPOnEdge();
@@ -970,7 +970,7 @@ public class FootControlModule
       }
    }
 
-   private class HoldPositionState extends State<ConstraintType>
+   private class HoldPositionState extends FootControlState
    {
       private final FrameVector holdPositionNormalContactVector = new FrameVector();
       
@@ -1001,7 +1001,7 @@ public class FootControlModule
          desiredAngularAcceleration.setToZero(worldFrame);
       }
 
-      public void doAction()
+      public void doSpecificAction()
       {
          setHoldPositionStateGains();
          
@@ -1169,7 +1169,7 @@ public class FootControlModule
     * 
     * E.g. the MoveStraightState and the SwingState extend this class and implement the trajectory related methods.
     */
-   private abstract class UnconstrainedState extends State<ConstraintType>
+   private abstract class UnconstrainedState extends FootControlState
    {
       public UnconstrainedState(ConstraintType constraintType)
       {
@@ -1209,7 +1209,7 @@ public class FootControlModule
          }
       }
 
-      public void doAction()
+      public void doSpecificAction()
       {
          if (doSingularityEscape.getBooleanValue())
          {
@@ -1341,7 +1341,7 @@ public class FootControlModule
    {
       private final ConstraintType stateEnum;
 
-      public FootStateTransitionCondition(State<ConstraintType> stateToTransitionTo)
+      public FootStateTransitionCondition(FootControlState stateToTransitionTo)
       {
          this.stateEnum = stateToTransitionTo.getStateEnum();
       }
