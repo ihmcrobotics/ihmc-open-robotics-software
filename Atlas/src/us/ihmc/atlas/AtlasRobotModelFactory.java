@@ -17,8 +17,14 @@ import com.martiansoftware.jsap.JSAPResult;
 
 public class AtlasRobotModelFactory
 {
-   private static String[] AvailableRobotModels = { "ATLAS_NO_HANDS_ADDED_MASS", "ATLAS_SANDIA_HANDS",
-         "ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS", "DRC_NO_HANDS", "DRC_HANDS", "DRC_EXTENDED_HANDS", "DRC_HOOKS", "DRC_TASK_HOSE", "DRC_EXTENDED_HOOKS" };
+   private static String[] AvailableRobotModels = new String[AtlasRobotVersion.values().length];
+   static
+   {
+      for (AtlasRobotVersion version : AtlasRobotVersion.values())
+      {
+         AvailableRobotModels[version.ordinal()] = version.toString();
+      }
+   }
 
    public static AtlasRobotModel createDRCRobotModel(String robotModelAsString, boolean runningOnRealRobot, boolean headless)
    {

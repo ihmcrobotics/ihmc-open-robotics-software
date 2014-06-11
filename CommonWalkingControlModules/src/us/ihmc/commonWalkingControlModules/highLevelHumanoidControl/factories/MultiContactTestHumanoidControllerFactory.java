@@ -155,7 +155,6 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelHuman
 
       VariousWalkingManagers variousWalkingManagers = VariousWalkingManagers.create(momentumBasedController, yoTime, variousWalkingProviders, walkingControllerParameters,
             armControllerParameters, registry);
-      variousWalkingManagers.initializeManagers();
 
       MultiContactTestHumanoidController multiContactBehavior = new MultiContactTestHumanoidController(variousWalkingProviders, variousWalkingManagers,
                                                                    momentumRateOfChangeControlModule,
