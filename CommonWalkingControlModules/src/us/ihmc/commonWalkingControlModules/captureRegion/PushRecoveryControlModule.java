@@ -251,7 +251,7 @@ public class PushRecoveryControlModule
             return false;
          }
 
-         footstepWasProjectedInCaptureRegion.set(footstepAdjustor.adjustFootstep(nextFootstep, capturePoint2d, captureRegionCalculator.getCaptureRegion()));
+         footstepWasProjectedInCaptureRegion.set(footstepAdjustor.adjustFootstep(nextFootstep, footPolygon.getCentroid(), captureRegionCalculator.getCaptureRegion()));
 
          return footstepWasProjectedInCaptureRegion.getBooleanValue();
       }

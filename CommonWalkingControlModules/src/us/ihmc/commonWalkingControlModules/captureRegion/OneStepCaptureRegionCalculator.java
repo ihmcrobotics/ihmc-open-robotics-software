@@ -24,7 +24,7 @@ public class OneStepCaptureRegionCalculator
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final int MAX_CAPTURE_REGION_POLYGON_POINTS = 20;
    private static final int KINEMATIC_LIMIT_POINTS = 8;
-   private double reachableRegionCutoffAngle = 0.80;
+   private double reachableRegionCutoffAngle = 1.0;
    
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);

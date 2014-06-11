@@ -50,7 +50,7 @@ public class FootstepAdjustor
     * This function takes a footstep and a captureRegion and if necessary projects the footstep
     * into the capture region. Returns true if the footstep was changed.
     */
-   public boolean adjustFootstep(Footstep footstep, FramePoint2d icp, FrameConvexPolygon2d captureRegion)
+   public boolean adjustFootstep(Footstep footstep, FramePoint2d supportCentroid, FrameConvexPolygon2d captureRegion)
    {
       boolean footstepChanged = false;
 
@@ -86,13 +86,13 @@ public class FootstepAdjustor
       }
 
       // No overlap between touch-down polygon and capture region.
-      projectFootstepInCaptureRegion(footstep, icp, desiredSteppingRegion);
+      projectFootstepInCaptureRegion(footstep, supportCentroid, desiredSteppingRegion);
       updateVisualizer();
       return footstepChanged;
    }
 
    private final FramePoint2d nextStep2d = new FramePoint2d();
-   private final FramePoint2d capturePoint = new FramePoint2d();
+   private final FramePoint2d projection = new FramePoint2d();
    private final FrameVector2d direction = new FrameVector2d();
    private final FrameConvexPolygon2d adjustedTouchdownFootPolygon = new FrameConvexPolygon2d();
 
@@ -101,18 +101,18 @@ public class FootstepAdjustor
     * Might be a bit conservative it should be sufficient to slightly overlap the capture region
     * and the touch-down polygon.
     */
-   private void projectFootstepInCaptureRegion(Footstep footstep, FramePoint2d icp, FrameConvexPolygon2d captureRegion)
+   private void projectFootstepInCaptureRegion(Footstep footstep, FramePoint2d projectionPoint, FrameConvexPolygon2d captureRegion)
    {
-      capturePoint.setIncludingFrame(icp);
-      capturePoint.changeFrame(footstep.getReferenceFrame());
+      projection.setIncludingFrame(projectionPoint);
+      projection.changeFrame(footstep.getReferenceFrame());
 
       // move the position of the footstep to the capture region centroid
       nextStep2d.setIncludingFrame(captureRegion.getCentroid());
       nextStep2d.changeFrame(footstep.getReferenceFrame());
       
-      // move the position as far away from the capture point as possible
+      // move the position as far away from the projectionPoint as possible
       direction.setIncludingFrame(nextStep2d);
-      direction.sub(capturePoint);
+      direction.sub(projection);
       direction.normalize();
       direction.scale(10.0);
       nextStep2d.add(direction);

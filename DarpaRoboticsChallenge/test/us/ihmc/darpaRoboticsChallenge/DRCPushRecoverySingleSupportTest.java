@@ -9,7 +9,6 @@ import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.bambooTools.BambooTools;
-import us.ihmc.commonWalkingControlModules.automaticSimulationRunner.AutomaticSimulationRunner;
 import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCPushRobotController;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -33,7 +32,7 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateTransition
 
 public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTestInterface 
 {
-	private final static boolean SHOW_GUI = false;
+	private final static boolean KEEP_SCS_UP = false;
 	private final static boolean VISUALIZE_FORCE = false;
 	
 	private double swingTime;
@@ -54,7 +53,7 @@ public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTest
 	@After
 	public void destroySimulationAndRecycleMemory()
 	{
-		if (SHOW_GUI)
+		if (KEEP_SCS_UP)
 		{
 			ThreadTools.sleepForever();
 		}
@@ -254,7 +253,7 @@ public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTest
 
 	private DRCFlatGroundWalkingTrack setupTrack(DRCRobotModel robotModel) {
 		DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false);
-		guiInitialSetup.setIsGuiShown(SHOW_GUI);
+		guiInitialSetup.setIsGuiShown(true);
 		GroundProfile groundProfile = new FlatGroundProfile();
 
 		DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(
