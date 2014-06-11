@@ -136,10 +136,6 @@ public class FootControlModule
 
    private final int rootToFootJacobianId;
 
-   private final FramePoint desiredPosition = new FramePoint(worldFrame);
-   private final FrameVector desiredLinearVelocity = new FrameVector(worldFrame);
-   private final FrameVector desiredLinearAcceleration = new FrameVector(worldFrame);
-
    private final FrameOrientation desiredOrientation = new FrameOrientation(worldFrame);
    private final FrameOrientation trajectoryOrientation = new FrameOrientation(worldFrame);
    private final FrameVector desiredAngularVelocity = new FrameVector(worldFrame);
@@ -199,10 +195,8 @@ public class FootControlModule
          DoubleTrajectoryGenerator pitchTouchdownTrajectoryGenerator, DoubleProvider maximumTakeoffAngle,
          BooleanYoVariable requestHoldPosition, WalkingControllerParameters walkingControllerParameters,
          
-         // TODO: reduce number passed variables.
          DoubleProvider swingTimeProvider, PositionProvider initialPositionProvider,
-         /*VectorProvider initialVelocityProvider,*/ PositionProvider finalPositionProvider,
-         OrientationProvider initialOrientationProvider, /*VectorProvider finalDesiredVelocityProvider,*/
+         PositionProvider finalPositionProvider, OrientationProvider initialOrientationProvider,
          OrientationProvider finalOrientationProvider, TrajectoryParametersProvider trajectoryParametersProvider,
          
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
@@ -620,7 +614,8 @@ public class FootControlModule
 
       public OnEdgeState(ConstraintType stateEnum, List<FramePoint2d> edgeContactPoints, DoubleProvider maximumPitchAngleOnEdge)
       {
-         super(stateEnum);
+         super(stateEnum, yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration,
+               footSpatialAccelerationControlModule);
          this.onEdgePitchAngleTrajectoryGenerator = null;
          this.maximumPitchAngleOnEdge = maximumPitchAngleOnEdge;
          useTrajectory = false;
@@ -714,9 +709,9 @@ public class FootControlModule
             desiredAngularAcceleration.setIncludingFrame(contactableBody.getBodyFrame(), 0.0, footPitchdd, 0.0);
             desiredAngularAcceleration.changeFrame(worldFrame);
 
-            footSpatialAccelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity,
+            accelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity,
                   desiredAngularVelocity, desiredLinearAcceleration, desiredAngularAcceleration, rootBody);
-            footSpatialAccelerationControlModule.packAcceleration(footAcceleration);
+            accelerationControlModule.packAcceleration(footAcceleration);
          }
 
          if (momentumBasedController.isUsingOptimizationMomentumControlModule())
@@ -902,7 +897,8 @@ public class FootControlModule
    {
       public FullyConstrainedState()
       {
-         super(ConstraintType.FULL);
+         super(ConstraintType.FULL, yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration,
+               footSpatialAccelerationControlModule);
       }
 
       public void doTransitionIntoAction()
@@ -914,7 +910,7 @@ public class FootControlModule
       private void setFullyConstrainedStateGains()
       {
          setGains(0.0, 0.0, 0.0);
-         footSpatialAccelerationControlModule.setOrientationDerivativeGains(supportKdRoll.getDoubleValue(), supportKdPitch.getDoubleValue(), supportKdYaw.getDoubleValue());
+         accelerationControlModule.setOrientationDerivativeGains(supportKdRoll.getDoubleValue(), supportKdPitch.getDoubleValue(), supportKdYaw.getDoubleValue());
       }
 
       public void doSpecificAction()
@@ -952,9 +948,9 @@ public class FootControlModule
             desiredLinearAcceleration.setToZero(worldFrame);
             desiredAngularAcceleration.setToZero(worldFrame);
 
-            footSpatialAccelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity,
+            accelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity,
                   desiredLinearAcceleration, desiredAngularAcceleration, rootBody);
-            footSpatialAccelerationControlModule.packAcceleration(footAcceleration);
+            accelerationControlModule.packAcceleration(footAcceleration);
          }
 
          if (forceFootAccelerateIntoGround.getBooleanValue())
@@ -976,7 +972,8 @@ public class FootControlModule
       
       public HoldPositionState()
       {
-         super(ConstraintType.HOLD_POSITION);
+         super(ConstraintType.HOLD_POSITION, yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration,
+               footSpatialAccelerationControlModule);
       }
 
       public void doTransitionIntoAction()
@@ -1011,9 +1008,9 @@ public class FootControlModule
             requestedState.set(ConstraintType.FULL);
          
          yoDesiredPosition.set(desiredPosition);
-         footSpatialAccelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity,
+         accelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity,
                desiredLinearAcceleration, desiredAngularAcceleration, rootBody);
-         footSpatialAccelerationControlModule.packAcceleration(footAcceleration);
+         accelerationControlModule.packAcceleration(footAcceleration);
 
          if (forceFootAccelerateIntoGround.getBooleanValue())
             footAcceleration.setLinearPartZ(footAcceleration.getLinearPartZ() + desiredZAccelerationIntoGround.getDoubleValue());
@@ -1173,7 +1170,8 @@ public class FootControlModule
    {
       public UnconstrainedState(ConstraintType constraintType)
       {
-         super(constraintType);
+         super(constraintType, yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration,
+               footSpatialAccelerationControlModule);
       }
 
       /**
@@ -1192,7 +1190,7 @@ public class FootControlModule
       {
          legSingularityAndKneeCollapseAvoidanceControlModule.setCheckVelocityForSwingSingularityAvoidance(true);
 
-         footSpatialAccelerationControlModule.reset();
+         accelerationControlModule.reset();
 
          isCoPOnEdge.set(false);
          initializeTrajectory();
@@ -1227,9 +1225,9 @@ public class FootControlModule
 
          legSingularityAndKneeCollapseAvoidanceControlModule.correctSwingFootTrajectoryForSingularityAvoidance(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
 
-         footSpatialAccelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity,
+         accelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity,
                desiredLinearAcceleration, desiredAngularAcceleration, rootBody);
-         footSpatialAccelerationControlModule.packAcceleration(footAcceleration);
+         accelerationControlModule.packAcceleration(footAcceleration);
 
          setTaskspaceConstraint(footAcceleration);
 
@@ -1327,7 +1325,7 @@ public class FootControlModule
          trajectoryWasReplanned.set(false);
          isUnconstrained.set(false);
 
-         footSpatialAccelerationControlModule.reset();
+         accelerationControlModule.reset();
 
          if (visualize)
          {
@@ -1507,11 +1505,6 @@ public class FootControlModule
       
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
-      
-      desiredLinearVelocity.changeFrame(worldFrame);
-      yoDesiredLinearVelocity.set(desiredLinearVelocity);
-      desiredLinearAcceleration.changeFrame(worldFrame);
-      yoDesiredLinearAcceleration.set(desiredLinearAcceleration);
       
       coefficientOfFrictionFiltered.update();
       momentumBasedController.setPlaneContactCoefficientOfFriction(contactableBody, coefficientOfFrictionFiltered.getDoubleValue());
