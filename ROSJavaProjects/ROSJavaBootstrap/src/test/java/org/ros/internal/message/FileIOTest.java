@@ -11,7 +11,7 @@ public class FileIOTest
    @Test
    public void test() throws IOException
    {
-      File rootDirectory = new File("/home/graythomas/workspace/ROSJavaProjects/ROSJavaBootstrap/ROSMessagesAndServices");
+      File rootDirectory = new File("ROSMessagesAndServices");
       System.out.println(rootDirectory.getAbsoluteFile().getCanonicalFile());
       System.out.println(rootDirectory.isDirectory());
       assert(rootDirectory.isDirectory());
