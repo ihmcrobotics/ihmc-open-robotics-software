@@ -50,7 +50,7 @@ public class DRCHighLevelPositionControlDemo
 
       FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulation(drcControlParameters);
       
-      ContactableBodiesFactory contactableBodiesFactory = model.getContactPointParameters(false, false).getContactableBodiesFactory();
+      ContactableBodiesFactory contactableBodiesFactory = model.getContactPointParameters().getContactableBodiesFactory();
       
       PolyvalentHighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory = new PolyvalentHighLevelHumanoidControllerFactory(contactableBodiesFactory,
             footstepTimingParameters, drcControlParameters, drcControlParameters, armControllerParameters, false, false, false, TASKSPACE_POSITION_CONTROL);
