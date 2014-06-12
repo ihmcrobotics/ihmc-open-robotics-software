@@ -107,7 +107,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
-   public WalkingControllerParameters getWalkingControlParameters()
+   public WalkingControllerParameters getWalkingControllerParameters()
    {
       return walkingControllerParameters;
    }
@@ -233,7 +233,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public WalkingControllerParameters getDrivingControllerParameters()
    {
-      return getWalkingControlParameters();
+      return getWalkingControllerParameters();
    }
 
    @Override
