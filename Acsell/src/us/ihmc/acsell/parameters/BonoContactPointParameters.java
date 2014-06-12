@@ -135,7 +135,7 @@ public class BonoContactPointParameters extends DRCRobotContactPointParameters
       contactableBodiesFactory.addPelvisBackContactParameters(pelvisBackContactPoints, pelvisBackContactPointTransform);
       contactableBodiesFactory.addChestBackContactParameters(chestBackContactPoints, chestBackContactPointTransform);
       contactableBodiesFactory.addThighContactParameters(jointMap.getNameOfJointBeforeThighs(), thighContactPoints, thighContactPointTransforms);
-      contactableBodiesFactory.addFootContactParameters(getFootGroundContactPointsInSoleFrameForController());
+      contactableBodiesFactory.addFootContactParameters(getFootContactPoints());
    }
 
    @Override
@@ -193,7 +193,7 @@ public class BonoContactPointParameters extends DRCRobotContactPointParameters
    }
 
    @Override
-   public SideDependentList<ArrayList<Point2d>> getFootGroundContactPointsInSoleFrameForController()
+   public SideDependentList<ArrayList<Point2d>> getFootContactPoints()
    {
       return footGroundContactPoints;
    }
@@ -202,5 +202,17 @@ public class BonoContactPointParameters extends DRCRobotContactPointParameters
    public ContactableBodiesFactory getContactableBodiesFactory()
    {
       return contactableBodiesFactory;
+   }
+
+   @Override
+   public SideDependentList<Transform3D> getHandContactPointTransforms()
+   {
+      return null;
+   }
+
+   @Override
+   public SideDependentList<List<Point2d>> getHandContactPoints()
+   {
+      return null;
    }
 }
