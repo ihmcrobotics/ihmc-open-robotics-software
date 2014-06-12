@@ -19,6 +19,8 @@ public class HoldPositionState extends FootControlState
    private final BooleanYoVariable requestHoldPosition;
    private final FrameVector fullyConstrainedNormalContactVector;
    
+   private double holdZeta, holdKpx, holdKpy, holdKpz, holdKdz, holdKpRoll, holdKpPitch, holdKpYaw;
+   
    public HoldPositionState(YoFramePoint yoDesiredPosition,
          YoFrameVector yoDesiredLinearVelocity, YoFrameVector yoDesiredLinearAcceleration,
          RigidBodySpatialAccelerationControlModule accelerationControlModule,
@@ -59,6 +61,7 @@ public class HoldPositionState extends FootControlState
 
    public void doSpecificAction()
    {
+      setHoldPositionStateGains();
       determineCoPOnEdge();
 
       if (!isCoPOnEdge && (requestHoldPosition == null || !requestHoldPosition.getBooleanValue()))
@@ -81,8 +84,21 @@ public class HoldPositionState extends FootControlState
       yoDesiredPosition.setToNaN();
    }
    
-   public void setHoldPositionStateGains(double holdZeta, double holdKpx, double holdKpy,
-         double holdKpz, double holdKdz, double holdKpRoll, double holdKpPitch, double holdKpYaw)
+   public void setHoldGains(double holdZeta, double holdKpx, double holdKpy,
+         double holdKpz, double holdKdz, double holdKpRoll, double holdKpPitch,
+         double holdKpYaw)
+   {
+      this.holdZeta = holdZeta;
+      this.holdKpx = holdKpx;
+      this.holdKpy = holdKpy;
+      this.holdKpz = holdKpz;
+      this.holdKdz = holdKdz;
+      this.holdKpRoll = holdKpRoll;
+      this.holdKpPitch = holdKpPitch;
+      this.holdKpYaw = holdKpYaw;
+   }
+   
+   private void setHoldPositionStateGains()
    {
       double dxPosition = GainCalculator.computeDerivativeGain(holdKpx, holdZeta);
       double dyPosition = GainCalculator.computeDerivativeGain(holdKpy, holdZeta);

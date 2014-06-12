@@ -437,7 +437,7 @@ public class FootControlModule
       this.holdKpPitch.set(holdKpOrientation);
       this.holdKpYaw.set(holdKpOrientation);
       
-      holdPositionState.setHoldPositionStateGains(this.holdZeta.getDoubleValue(), this.holdKpx.getDoubleValue(),
+      holdPositionState.setHoldGains(this.holdZeta.getDoubleValue(), this.holdKpx.getDoubleValue(),
             this.holdKpy.getDoubleValue(), this.holdKpz.getDoubleValue(), this.holdKdz.getDoubleValue(),
             this.holdKpRoll.getDoubleValue(), this.holdKpPitch.getDoubleValue(), this.holdKpYaw.getDoubleValue());
    }
