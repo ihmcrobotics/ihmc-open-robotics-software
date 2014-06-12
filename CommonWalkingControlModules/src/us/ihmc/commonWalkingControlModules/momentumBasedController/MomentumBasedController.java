@@ -633,7 +633,8 @@ public class MomentumBasedController
    public void setPlaneContactStateFree(ContactablePlaneBody contactableBody)
    {
       YoPlaneContactState yoPlaneContactState = yoPlaneContactStates.get(contactableBody);
-      yoPlaneContactState.clear();
+      if (yoPlaneContactState != null)
+         yoPlaneContactState.clear();
    }
 
    public ReferenceFrame getCenterOfMassFrame()
