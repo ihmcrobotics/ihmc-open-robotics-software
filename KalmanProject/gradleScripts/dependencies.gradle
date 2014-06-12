@@ -6,19 +6,8 @@ dependencies {
     compile group: 'us.ihmc.thirdparty.j3d', name: 'vecmath', version: 'x' 
     compile group: 'us.ihmc.thirdparty', name: 'ejml', version: '0.25'    
     compile group: 'us.ihmc.thirdparty', name: 'jama', version: 'x' 
-  
-    compile group: 'commons-lang', name: 'commons-lang', version: '2.6' 
-    compile group: 'commons-collections', name: 'commons-collections', version: '3.2.1' 
-    compile group: 'us.ihmc.thirdparty', name: 'georegression', version: 'x'    
-    compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv', version: 'x' 
-    compile group: 'us.ihmc.thirdparty', name: 'ddogleg', version: 'x' 
-    compile group: 'org.apache.poi', name: 'poi', version: '3.9' 
-    compile group: 'us.ihmc.thirdparty', name: 'concavehull', version: 'x'   
-    compile group: 'us.ihmc.thirdparty', name: 'projectbubo', version: 'x'   
-    compile group: 'org.vividsolutions', name: 'jts', version: '1.13' 
-    compile group: 'jfree', name: 'jfreechart', version: '1.0.7' 
-    compile group: 'org.apache.commons', name: 'commons-math3', version: '3.2' 
-    compile group: 'org.jgrapht', name: 'jgrapht-jdk1.5', version: '0.7.3' 
+    compile group: 'org.tmatesoft.svnkit', name: 'svnkit', version: '1.8.5'  
+    compile group: 'xuggle', name: 'xuggle-xuggler', version: '5.4'  
       
     compile project(':Graphics3DAdapter')
     compile project(':SimulationConstructionSet')
