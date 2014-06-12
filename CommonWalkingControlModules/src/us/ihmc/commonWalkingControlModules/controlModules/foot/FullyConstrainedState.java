@@ -10,6 +10,7 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
@@ -35,13 +36,13 @@ public class FullyConstrainedState extends AbstractFootControlState
          BooleanYoVariable doSingularityEscape, FrameVector fullyConstrainedNormalContactVector,
          BooleanYoVariable forceFootAccelerateIntoGround, BooleanYoVariable doFancyOnToesControl,
          LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule,
-         RobotSide robotSide)
+         RobotSide robotSide, YoVariableRegistry registry)
    {
       super(ConstraintType.FULL, yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration,
             accelerationControlModule, momentumBasedController, contactableBody, requestedState,
             jacobianId, nullspaceMultiplier, jacobianDeterminantInRange,
             doSingularityEscape, forceFootAccelerateIntoGround,
-            legSingularityAndKneeCollapseAvoidanceControlModule, robotSide);
+            legSingularityAndKneeCollapseAvoidanceControlModule, robotSide, registry);
       
       this.requestHoldPosition = requestHoldPosition;
       this.fullyConstrainedNormalContactVector = fullyConstrainedNormalContactVector;

@@ -10,6 +10,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.GainCalculator;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
@@ -38,7 +39,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
          DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange,
          BooleanYoVariable doSingularityEscape, BooleanYoVariable forceFootAccelerateIntoGround,
          LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule,
-         RobotSide robotSide,
+         RobotSide robotSide, YoVariableRegistry registry,
          
          BooleanYoVariable isTrajectoryDone, BooleanYoVariable isUnconstrained)
    {
@@ -46,7 +47,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
             accelerationControlModule, momentumBasedController, contactableBody,
             requestedState, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange,
             doSingularityEscape, forceFootAccelerateIntoGround, legSingularityAndKneeCollapseAvoidanceControlModule,
-            robotSide);
+            robotSide, registry);
       
       this.isTrajectoryDone = isTrajectoryDone;
       this.isUnconstrained = isUnconstrained;
