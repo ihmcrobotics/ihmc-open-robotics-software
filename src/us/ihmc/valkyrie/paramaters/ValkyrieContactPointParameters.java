@@ -136,10 +136,7 @@ public class ValkyrieContactPointParameters extends DRCRobotContactPointParamete
       contactableBodiesFactory.addPelvisContactParameters(pelvisContactPoints, pelvisContactPointTransform);
       contactableBodiesFactory.addPelvisBackContactParameters(pelvisBackContactPoints, pelvisBackContactPointTransform);
       contactableBodiesFactory.addChestBackContactParameters(chestBackContactPoints, chestBackContactPointTransform);
-      SideDependentList<String> namesOfJointsBeforeThighs = new SideDependentList<>();
-      for (RobotSide robotSide : RobotSide.values)
-         namesOfJointsBeforeThighs.put(robotSide, jointMap.getNameOfJointBeforeThigh(robotSide));
-      contactableBodiesFactory.addThighContactParameters(namesOfJointsBeforeThighs, thighContactPoints, thighContactPointTransforms);
+      contactableBodiesFactory.addThighContactParameters(jointMap.getNameOfJointBeforeThighs(), thighContactPoints, thighContactPointTransforms);
       contactableBodiesFactory.addFootContactParameters(getFootGroundContactPointsInSoleFrameForController());
    }
 
