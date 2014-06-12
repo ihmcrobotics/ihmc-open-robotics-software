@@ -95,7 +95,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
       ScrewTestTools.setRandomVelocities(allJoints, random);
       OneDoFJoint[] oneDoFJoints = ScrewTools.filterJoints(allJoints, OneDoFJoint.class);
 
-      SideDependentList<ContactablePlaneBody> feet = createFeet(fullRobotModel, referenceFrames,robotModel.getWalkingControlParameters());
+      SideDependentList<ContactablePlaneBody> feet = createFeet(fullRobotModel, referenceFrames,robotModel.getWalkingControllerParameters());
       YoVariableRegistry registry = new YoVariableRegistry("test");
       double coefficientOfFriction = 1.0;
 
@@ -183,7 +183,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
 //    ScrewTestTools.setRandomVelocities(allJoints, random);
       OneDoFJoint[] oneDoFJoints = ScrewTools.filterJoints(allJoints, OneDoFJoint.class);
 
-      SideDependentList<ContactablePlaneBody> feet = createFeet(fullRobotModel, referenceFrames,robotModel.getWalkingControlParameters());
+      SideDependentList<ContactablePlaneBody> feet = createFeet(fullRobotModel, referenceFrames,robotModel.getWalkingControllerParameters());
       YoVariableRegistry registry = new YoVariableRegistry("test");
       double coefficientOfFriction = 1.0;
 

@@ -164,7 +164,7 @@ public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTe
    {
       DRCRobotModel robotModel = getRobotModel();
       DRCRobotPhysicalProperties physicalProperties = robotModel.getPhysicalProperties();
-      walkingParamaters = robotModel.getWalkingControlParameters();
+      walkingParamaters = robotModel.getWalkingControllerParameters();
       fullRobotModel = robotModel.createFullRobotModel();
       referenceFrames = new ReferenceFrames(fullRobotModel, robotModel.getJointMap(), physicalProperties.getAnkleHeight());
       bipedFeet = DRCOperatorUserInterface.setupBipedFeet(referenceFrames, fullRobotModel, walkingParamaters);

@@ -61,7 +61,7 @@ public class AtlasSimpleStanceController {
 
 	      DRCRobotInitialSetup<SDFRobot> intialSetup = model.getDefaultRobotInitialSetup(0, 0);
 	      intialSetup.initializeRobot(robot, jointMap);
-	      WalkingControllerParameters walkingControlParams = model.getWalkingControlParameters();
+	      WalkingControllerParameters walkingControlParams = model.getWalkingControllerParameters();
 	      double footForward =  walkingControlParams.getFootForwardOffset();
 	      double footBack = walkingControlParams.getFootBackwardOffset();
 	      double footWidth = walkingControlParams.getFootWidth();

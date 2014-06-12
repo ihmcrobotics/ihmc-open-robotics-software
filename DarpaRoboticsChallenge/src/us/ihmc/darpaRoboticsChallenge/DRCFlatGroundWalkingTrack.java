@@ -23,7 +23,7 @@ public class DRCFlatGroundWalkingTrack
                                     DRCSCSInitialSetup scsInitialSetup, boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep,
                                     DRCRobotModel model)
    {
-      WalkingControllerParameters walkingControlParameters = model.getWalkingControlParameters();
+      WalkingControllerParameters walkingControlParameters = model.getWalkingControllerParameters();
       ArmControllerParameters armControllerParameters = model.getArmControllerParameters();
 
 //    scsInitialSetup = new DRCSCSInitialSetup(TerrainType.FLAT);
@@ -38,7 +38,7 @@ public class DRCFlatGroundWalkingTrack
 
       FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulation(walkingControlParameters);
       
-      WalkingControllerParameters drcRobotParameters = model.getWalkingControlParameters();
+      WalkingControllerParameters drcRobotParameters = model.getWalkingControllerParameters();
       WalkingControllerParameters drcRobotMultiContactParameters = model.getMultiContactControllerParameters();
       DRCRobotContactPointParameters contactPointParameters = model.getContactPointParameters();
       ContactableBodiesFactory contactableBodiesFactory = contactPointParameters.getContactableBodiesFactory();

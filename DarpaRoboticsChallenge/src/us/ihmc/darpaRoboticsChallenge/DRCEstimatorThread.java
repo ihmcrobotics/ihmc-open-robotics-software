@@ -218,7 +218,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          String namePrefix = bipedFeet.get(robotSide).getName() + "StateEstimator";
 
          //         double footSwitchCoPThresholdFraction = 0.01;
-         WalkingControllerParameters walkingControllerParameters = drcRobotModel.getWalkingControlParameters();
+         WalkingControllerParameters walkingControllerParameters = drcRobotModel.getWalkingControllerParameters();
          double footSwitchCoPThresholdFraction = walkingControllerParameters.getFootSwitchCoPThresholdFraction();
          double contactTresholdForce = DRCConfigParameters.contactTresholdForceForGazebo;
          WrenchBasedFootSwitch wrenchBasedFootSwitchForEstimator = new WrenchBasedFootSwitch(namePrefix, footForceSensorForEstimator,

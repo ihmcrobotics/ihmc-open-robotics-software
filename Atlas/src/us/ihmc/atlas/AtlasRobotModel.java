@@ -98,7 +98,7 @@ public class AtlasRobotModel implements DRCRobotModel
    }
 
    @Override
-   public WalkingControllerParameters getWalkingControlParameters()
+   public WalkingControllerParameters getWalkingControllerParameters()
    {
       return walkingControllerParameters;
    }
