@@ -1,6 +1,16 @@
 package us.ihmc.acsell.parameters;
 
-import static us.ihmc.acsell.parameters.BonoOrderedJointNames.*;
+import static us.ihmc.acsell.parameters.BonoOrderedJointNames.back_lbx;
+import static us.ihmc.acsell.parameters.BonoOrderedJointNames.back_mby;
+import static us.ihmc.acsell.parameters.BonoOrderedJointNames.back_ubz;
+import static us.ihmc.acsell.parameters.BonoOrderedJointNames.forcedSideDependentJointNames;
+import static us.ihmc.acsell.parameters.BonoOrderedJointNames.jointNames;
+import static us.ihmc.acsell.parameters.BonoOrderedJointNames.l_leg_kny;
+import static us.ihmc.acsell.parameters.BonoOrderedJointNames.l_leg_lax;
+import static us.ihmc.acsell.parameters.BonoOrderedJointNames.l_leg_lhy;
+import static us.ihmc.acsell.parameters.BonoOrderedJointNames.l_leg_mhx;
+import static us.ihmc.acsell.parameters.BonoOrderedJointNames.l_leg_uay;
+import static us.ihmc.acsell.parameters.BonoOrderedJointNames.l_leg_uhz;
 
 import java.util.EnumMap;
 import java.util.HashSet;
@@ -11,7 +21,6 @@ import java.util.Set;
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -25,15 +34,17 @@ import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
 /**
  * Created by dstephen on 2/14/14.
  */
-public class BonoJointMap extends DRCRobotJointMap
+public class BonoJointMap implements DRCRobotJointMap
 {
    public static final String chestName = "utorso";
    public static final String pelvisName = "pelvis";
    public static final String headName = null;
 
    private final SpineJointName[] spineJoints = { SpineJointName.SPINE_ROLL, SpineJointName.SPINE_PITCH, SpineJointName.SPINE_YAW };
-   private final LegJointName[] legJoints = { LegJointName.HIP_ROLL, LegJointName.HIP_YAW, LegJointName.HIP_PITCH, LegJointName.KNEE, LegJointName.ANKLE_ROLL,
-         LegJointName.ANKLE_PITCH };
+   private final LegJointName[] legJoints = { LegJointName.HIP_ROLL, LegJointName.HIP_YAW, LegJointName.HIP_PITCH, LegJointName.KNEE, LegJointName.ANKLE_ROLL, LegJointName.ANKLE_PITCH };
+   private final NeckJointName[] neckJoints = {};
+   private final ArmJointName[] armJoints = {};
+
 
    protected final LinkedHashMap<String, JointRole> jointRoles = new LinkedHashMap<String, JointRole>();
    private final LinkedHashMap<String, Pair<RobotSide, LimbName>> limbNames = new LinkedHashMap<String, Pair<RobotSide, LimbName>>();
@@ -47,10 +58,9 @@ public class BonoJointMap extends DRCRobotJointMap
    private final SideDependentList<EnumMap<ArmJointName, String>> armJointStrings = SideDependentList.createListOfEnumMaps(ArmJointName.class);
    private final EnumMap<SpineJointName, String> spineJointStrings = new EnumMap<SpineJointName, String>(SpineJointName.class);
 
-   private final DRCRobotContactPointParameters contactPointParamaters;
+   private final BonoContactPointParameters contactPointParameters;
 
-   private final NeckJointName[] neckJoints = {};
-   private final ArmJointName[] armJoints = {};
+   private final SideDependentList<String> nameOfJointsBeforeThighs = new SideDependentList<String>();
 
    public BonoJointMap()
    {
@@ -88,7 +98,12 @@ public class BonoJointMap extends DRCRobotJointMap
          jointRoles.put(spineJointString, JointRole.SPINE);
       }
 
-      contactPointParamaters = new BonoContactPointParameters(this);
+      contactPointParameters = new BonoContactPointParameters(this);
+
+      for (RobotSide robtSide : RobotSide.values)
+      {
+         nameOfJointsBeforeThighs.put(robtSide, legJointStrings.get(robtSide).get(LegJointName.HIP_PITCH));
+      }
    }
 
    @Override
@@ -116,9 +131,15 @@ public class BonoJointMap extends DRCRobotJointMap
    }
 
    @Override
+   public BonoContactPointParameters getContactPointParameters()
+   {
+      return contactPointParameters;
+   }
+
+   @Override
    public List<Pair<String, Vector3d>> getJointNameGroundContactPointMap()
    {
-      return contactPointParamaters.getJointNameGroundContactPointMap();
+      return contactPointParameters.getJointNameGroundContactPointMap();
    }
 
    @Override
@@ -229,13 +250,13 @@ public class BonoJointMap extends DRCRobotJointMap
    }
 
    @Override
-   public String getNameOfJointBeforeThigh(RobotSide robotSide)
+   public SideDependentList<String> getNameOfJointBeforeThighs()
    {
-      return legJointStrings.get(robotSide).get(LegJointName.HIP_PITCH);
+      return nameOfJointsBeforeThighs;
    }
 
    @Override
-   public String getNameOfJointBeforeHand(RobotSide robotSide)
+   public SideDependentList<String> getNameOfJointBeforeHands()
    {
       return null;
    }

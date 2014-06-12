@@ -134,10 +134,7 @@ public class BonoContactPointParameters extends DRCRobotContactPointParameters
       contactableBodiesFactory.addPelvisContactParameters(pelvisContactPoints, pelvisContactPointTransform);
       contactableBodiesFactory.addPelvisBackContactParameters(pelvisBackContactPoints, pelvisBackContactPointTransform);
       contactableBodiesFactory.addChestBackContactParameters(chestBackContactPoints, chestBackContactPointTransform);
-      SideDependentList<String> namesOfJointsBeforeThighs = new SideDependentList<String>();
-      for (RobotSide robotSide : RobotSide.values)
-         namesOfJointsBeforeThighs.put(robotSide, jointMap.getNameOfJointBeforeThigh(robotSide));
-      contactableBodiesFactory.addThighContactParameters(namesOfJointsBeforeThighs, thighContactPoints, thighContactPointTransforms);
+      contactableBodiesFactory.addThighContactParameters(jointMap.getNameOfJointBeforeThighs(), thighContactPoints, thighContactPointTransforms);
       contactableBodiesFactory.addFootContactParameters(getFootGroundContactPointsInSoleFrameForController());
    }
 
