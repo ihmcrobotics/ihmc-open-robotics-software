@@ -10,6 +10,8 @@ import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccele
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
+import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -18,6 +20,7 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.SpatialMotionVector;
@@ -32,12 +35,13 @@ import com.yobotics.simulationconstructionset.util.statemachines.State;
 
 public abstract class AbstractFootControlState extends State<ConstraintType>
 {
+   // magic numbers:
    protected static final double coefficientOfFriction = 0.8;
    protected static final double minJacobianDeterminant = 0.035;
    protected static final double desiredZAccelerationIntoGround = 0.0;
    protected static final double EPSILON_POINT_ON_EDGE = 1e-2;
-   protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    
+   protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    protected final ContactablePlaneBody contactableBody;
    protected final RigidBody rootBody;
    protected final EnumYoVariable<ConstraintType> requestedState;
@@ -60,15 +64,20 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
    protected final TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
    protected final int jacobianId;
    
-   private final DenseMatrix64F nullspaceMultipliers = new DenseMatrix64F(0, 1);
-   private final DoubleYoVariable nullspaceMultiplier;
-   private final GeometricJacobian jacobian;
-   private final BooleanYoVariable jacobianDeterminantInRange;
-   private final BooleanYoVariable doSingularityEscape;
+   protected final DenseMatrix64F nullspaceMultipliers = new DenseMatrix64F(0, 1);
+   protected final DoubleYoVariable nullspaceMultiplier;
+   protected final GeometricJacobian jacobian;
+   protected final BooleanYoVariable jacobianDeterminantInRange;
+   protected final BooleanYoVariable doSingularityEscape;
    protected final DenseMatrix64F selectionMatrix;
    protected final BooleanYoVariable forceFootAccelerateIntoGround;
    protected boolean isCoPOnEdge;
    protected FrameLineSegment2d edgeToRotateAbout;
+   
+   protected final OneDoFJoint hipYawJoint;
+   protected final OneDoFJoint kneeJoint;
+   protected final OneDoFJoint ankleRollJoint;
+   protected final OneDoFJoint anklePitchJoint;
    
    protected final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
    
@@ -79,7 +88,8 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
          EnumYoVariable<ConstraintType> requestedState, int jacobianId,
          DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange,
          BooleanYoVariable doSingularityEscape, BooleanYoVariable forceFootAccelerateIntoGround,
-         LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule)
+         LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule,
+         RobotSide robotSide)
    {
       super(stateEnum);
       
@@ -100,6 +110,11 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
       this.forceFootAccelerateIntoGround = forceFootAccelerateIntoGround;
       
       this.legSingularityAndKneeCollapseAvoidanceControlModule = legSingularityAndKneeCollapseAvoidanceControlModule;
+      
+      this.hipYawJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.HIP_YAW);
+      this.kneeJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.KNEE);
+      this.ankleRollJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.ANKLE_ROLL);
+      this.anklePitchJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.ANKLE_PITCH);
       
       edgeToRotateAbout = new FrameLineSegment2d(contactableBody.getPlaneFrame());
       rootBody = momentumBasedController.getTwistCalculator().getRootBody();
