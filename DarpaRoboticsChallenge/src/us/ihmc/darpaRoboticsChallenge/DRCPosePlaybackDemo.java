@@ -47,7 +47,7 @@ public class DRCPosePlaybackDemo
       ArmControllerParameters armControlParameters = model.getArmControllerParameters();
 
       FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulation(walkingControlParameters);
-      ContactableBodiesFactory contactableBodiesFactory = model.getContactPointParameters(false, false).getContactableBodiesFactory();
+      ContactableBodiesFactory contactableBodiesFactory = model.getContactPointParameters().getContactableBodiesFactory();
 
       highLevelHumanoidControllerFactory = new PolyvalentHighLevelHumanoidControllerFactory(contactableBodiesFactory, footstepTimingParameters, walkingControlParameters,
             walkingControlParameters, armControlParameters, false, false, false, JOINT_PD_CONTROL);

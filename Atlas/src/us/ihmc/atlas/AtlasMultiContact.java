@@ -19,7 +19,6 @@ import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCSimulationFactory;
 import us.ihmc.darpaRoboticsChallenge.MultiContactTestEnvironment;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControllerFactory;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.robotSide.RobotSide;
@@ -67,7 +66,8 @@ public class AtlasMultiContact
       }
 
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
-      DRCRobotContactPointParameters contactPointParameters = robotModel.getContactPointParameters(false, false);
+      AtlasContactPointParameters contactPointParameters = robotModel.getContactPointParameters();
+      contactPointParameters.createInvisibleHandContactPoints();
       ContactableBodiesFactory contactableBodiesFactory = contactPointParameters.getContactableBodiesFactory();
 
       environment = new MultiContactTestEnvironment(robotInitialSetup, robotModel, footContactSides, handContactSides,

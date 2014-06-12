@@ -40,7 +40,7 @@ public class DRCFlatGroundWalkingTrack
       
       WalkingControllerParameters drcRobotParameters = model.getWalkingControlParameters();
       WalkingControllerParameters drcRobotMultiContactParameters = model.getMultiContactControllerParameters();
-      DRCRobotContactPointParameters contactPointParameters = model.getContactPointParameters(false, false);
+      DRCRobotContactPointParameters contactPointParameters = model.getContactPointParameters();
       ContactableBodiesFactory contactableBodiesFactory = contactPointParameters.getContactableBodiesFactory();
 
       PolyvalentHighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory = new PolyvalentHighLevelHumanoidControllerFactory(
