@@ -11,8 +11,6 @@ import org.ejml.alg.dense.mult.VectorVectorMult;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
@@ -22,8 +20,6 @@ import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivatives
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationProvider;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.NullspaceCalculator;
-import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -55,6 +51,7 @@ import com.yobotics.simulationconstructionset.util.trajectory.YoVelocityProvider
 
 public class FootControlModule
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final YoVariableRegistry _registry;
    private final ContactablePlaneBody _contactableBody;
 
@@ -69,7 +66,6 @@ public class FootControlModule
    private final SpatialAccelerationProjector _spatialAccelerationProjector;
    private final GeometricJacobian jacobian;
    private final int _jacobianId;
-   private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 //   private final RigidBody rootBody;
    private final EnumYoVariable<ConstraintType> _requestedState;
 //   private final DoubleYoVariable desiredOnEdgeAngle;
@@ -131,12 +127,12 @@ public class FootControlModule
    
    private final LegSingularityAndKneeCollapseAvoidanceControlModule _legSingularityAndKneeCollapseAvoidanceControlModule;
    
-   private final DoubleYoVariable controlledKneeToeOffQdd, kneeToeOffGain, kneeToeOffQDesired, kneeToeOffDamp;
+//   private final DoubleYoVariable controlledKneeToeOffQdd, kneeToeOffGain, kneeToeOffQDesired, kneeToeOffDamp;
    
 //   private final ReferenceFrame desiredOrientationFrame, correctedDesiredOrientationFrame;
 //   private final DynamicGraphicReferenceFrame desiredOrientationFrameGraphic, correctedDesiredOrientationFrameGraphic;
    
-   private final DoubleYoVariable alphaShrinkFootSizeForToeOff;
+//   private final DoubleYoVariable alphaShrinkFootSizeForToeOff;
    
 //   private final WalkingControllerParameters walkingControllerParameters;
 //   private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
@@ -181,8 +177,8 @@ public class FootControlModule
 
       this._registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       
-      alphaShrinkFootSizeForToeOff = new DoubleYoVariable(namePrefix + "AlphaShrinkFootSizeForToeOff", _registry);
-      alphaShrinkFootSizeForToeOff.set(0.0);
+//      alphaShrinkFootSizeForToeOff = new DoubleYoVariable(namePrefix + "AlphaShrinkFootSizeForToeOff", _registry);
+//      alphaShrinkFootSizeForToeOff.set(0.0);
       
       this._contactableBody = contactablePlaneBody;
 //      this.hipYawJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.HIP_YAW);
@@ -240,14 +236,14 @@ public class FootControlModule
 //      holdKpYaw = new DoubleYoVariable(namePrefix + "HoldKpYaw", registry);
 //      holdZeta = new DoubleYoVariable(namePrefix + "HoldZeta", registry);
       
-      kneeToeOffGain = new DoubleYoVariable(namePrefix + "KneeToeOffGain", _registry);
-      kneeToeOffQDesired   = new DoubleYoVariable(namePrefix + "KneeToeOffQDesired", _registry);
-      kneeToeOffDamp = new DoubleYoVariable(namePrefix + "KneeToeOffDamp", _registry);
-      controlledKneeToeOffQdd = new DoubleYoVariable(namePrefix + "KneeToeOffQdd_d", _registry);
-      // Work really fine in sim, but makes the robot do crazy toe-off
-      kneeToeOffGain.set(0.0);
-      kneeToeOffQDesired.set(0.7);
-      kneeToeOffDamp.set(0.0);
+//      kneeToeOffGain = new DoubleYoVariable(namePrefix + "KneeToeOffGain", _registry);
+//      kneeToeOffQDesired   = new DoubleYoVariable(namePrefix + "KneeToeOffQDesired", _registry);
+//      kneeToeOffDamp = new DoubleYoVariable(namePrefix + "KneeToeOffDamp", _registry);
+//      controlledKneeToeOffQdd = new DoubleYoVariable(namePrefix + "KneeToeOffQdd_d", _registry);
+//      // Work really fine in sim, but makes the robot do crazy toe-off
+//      kneeToeOffGain.set(0.0);
+//      kneeToeOffQDesired.set(0.7);
+//      kneeToeOffDamp.set(0.0);
 
 //      toeOffKpx = new DoubleYoVariable(namePrefix + "ToeOffKpx", _registry);
 //      toeOffKpy = new DoubleYoVariable(namePrefix + "ToeOffKpy", _registry);
@@ -360,13 +356,34 @@ public class FootControlModule
             momentumBasedController.getFullRobotModel().getFoot(robotSide), twistCalculator);
       
       List<AbstractFootControlState> states = new ArrayList<AbstractFootControlState>();
-      touchdownOnToesState = new TouchdownOnToesState(pitchTouchdownTrajectoryGenerator);
+      touchdownOnToesState = new TouchdownOnToesState(pitchTouchdownTrajectoryGenerator,
+            
+            _yoDesiredPosition, _yoDesiredLinearVelocity, _yoDesiredLinearAcceleration, _accelerationControlModule,
+            _momentumBasedController, _contactableBody, _requestedState, _jacobianId, _nullspaceMultiplier,
+            _jacobianDeterminantInRange, _doSingularityEscape, _forceFootAccelerateIntoGround,
+            _legSingularityAndKneeCollapseAvoidanceControlModule, _robotSide,_registry,
+            
+            _spatialAccelerationProjector);
       states.add(touchdownOnToesState);
       
-      touchdwonOnHeelState = new TouchdownOnHeelState(pitchTouchdownTrajectoryGenerator);
+      touchdwonOnHeelState = new TouchdownOnHeelState(pitchTouchdownTrajectoryGenerator,
+            
+            _yoDesiredPosition, _yoDesiredLinearVelocity, _yoDesiredLinearAcceleration, _accelerationControlModule,
+            _momentumBasedController, _contactableBody, _requestedState, _jacobianId, _nullspaceMultiplier,
+            _jacobianDeterminantInRange, _doSingularityEscape, _forceFootAccelerateIntoGround,
+            _legSingularityAndKneeCollapseAvoidanceControlModule, _robotSide,_registry,
+            
+            _spatialAccelerationProjector);
       states.add(touchdwonOnHeelState);
       
-      onToesState = new OnToesState(maximumTakeoffAngle);
+      onToesState = new OnToesState(maximumTakeoffAngle,
+            
+            _yoDesiredPosition, _yoDesiredLinearVelocity, _yoDesiredLinearAcceleration, _accelerationControlModule,
+            _momentumBasedController, _contactableBody, _requestedState, _jacobianId, _nullspaceMultiplier,
+            _jacobianDeterminantInRange, _doSingularityEscape, _forceFootAccelerateIntoGround,
+            _legSingularityAndKneeCollapseAvoidanceControlModule, _robotSide,_registry,
+            
+            _spatialAccelerationProjector, contactStatesMap);
       states.add(onToesState);
       
       states.add(new FullyConstrainedState(_yoDesiredPosition, _yoDesiredLinearVelocity,
@@ -784,159 +801,159 @@ public class FootControlModule
 //      }
 //   }
 
-   private class TouchdownOnHeelState extends AbstractOnEdgeState
-   {
-      public TouchdownOnHeelState(DoubleTrajectoryGenerator pitchTouchdownTrajectoryGenerator)
-      {
-         super(ConstraintType.HEEL_TOUCHDOWN, pitchTouchdownTrajectoryGenerator,
-               
-               _yoDesiredPosition, _yoDesiredLinearVelocity,
-               _yoDesiredLinearAcceleration, _accelerationControlModule, _momentumBasedController,
-               _contactableBody, _requestedState, _jacobianId, _nullspaceMultiplier,
-               _jacobianDeterminantInRange, _doSingularityEscape,
-               _forceFootAccelerateIntoGround, _legSingularityAndKneeCollapseAvoidanceControlModule,
-               _robotSide, _registry,
-               _spatialAccelerationProjector);
-      }
+//   private class TouchdownOnHeelState extends AbstractOnEdgeState
+//   {
+//      public TouchdownOnHeelState(DoubleTrajectoryGenerator pitchTouchdownTrajectoryGenerator)
+//      {
+//         super(ConstraintType.HEEL_TOUCHDOWN, pitchTouchdownTrajectoryGenerator,
+//               
+//               _yoDesiredPosition, _yoDesiredLinearVelocity,
+//               _yoDesiredLinearAcceleration, _accelerationControlModule, _momentumBasedController,
+//               _contactableBody, _requestedState, _jacobianId, _nullspaceMultiplier,
+//               _jacobianDeterminantInRange, _doSingularityEscape,
+//               _forceFootAccelerateIntoGround, _legSingularityAndKneeCollapseAvoidanceControlModule,
+//               _robotSide, _registry,
+//               _spatialAccelerationProjector);
+//      }
+//
+//      @Override
+//      public void doTransitionIntoAction()
+//      {
+//         super.doTransitionIntoAction();
+//         setTouchdownOnEdgeGains();
+//      }
+//   }
 
-      @Override
-      public void doTransitionIntoAction()
-      {
-         super.doTransitionIntoAction();
-         setTouchdownOnEdgeGains();
-      }
-   }
+//   private class TouchdownOnToesState extends AbstractOnEdgeState
+//   {
+//      public TouchdownOnToesState(DoubleTrajectoryGenerator pitchTouchdownTrajectoryGenerator)
+//      {
+//         super(ConstraintType.TOES_TOUCHDOWN, pitchTouchdownTrajectoryGenerator,
+//               
+//               _yoDesiredPosition, _yoDesiredLinearVelocity,
+//               _yoDesiredLinearAcceleration, _accelerationControlModule, _momentumBasedController,
+//               _contactableBody, _requestedState, _jacobianId, _nullspaceMultiplier,
+//               _jacobianDeterminantInRange, _doSingularityEscape,
+//               _forceFootAccelerateIntoGround, _legSingularityAndKneeCollapseAvoidanceControlModule,
+//               _robotSide, _registry,
+//               _spatialAccelerationProjector);
+//      }
+//
+//      @Override
+//      public void doTransitionIntoAction()
+//      {
+//         super.doTransitionIntoAction();
+//         setTouchdownOnEdgeGains();
+//      }
+//   }
 
-   private class TouchdownOnToesState extends AbstractOnEdgeState
-   {
-      public TouchdownOnToesState(DoubleTrajectoryGenerator pitchTouchdownTrajectoryGenerator)
-      {
-         super(ConstraintType.TOES_TOUCHDOWN, pitchTouchdownTrajectoryGenerator,
-               
-               _yoDesiredPosition, _yoDesiredLinearVelocity,
-               _yoDesiredLinearAcceleration, _accelerationControlModule, _momentumBasedController,
-               _contactableBody, _requestedState, _jacobianId, _nullspaceMultiplier,
-               _jacobianDeterminantInRange, _doSingularityEscape,
-               _forceFootAccelerateIntoGround, _legSingularityAndKneeCollapseAvoidanceControlModule,
-               _robotSide, _registry,
-               _spatialAccelerationProjector);
-      }
-
-      @Override
-      public void doTransitionIntoAction()
-      {
-         super.doTransitionIntoAction();
-         setTouchdownOnEdgeGains();
-      }
-   }
-
-   private class OnToesState extends AbstractOnEdgeState
-   {
-      private final YoPlaneContactState contactState = momentumBasedController.getContactState(contactableBody);
-      private final List<YoContactPoint> contactPoints = contactState.getContactPoints();
-      private final List<FramePoint> originalContactPointPositions;
-      
-      private final FramePoint2d singleToeContactPoint;
-
-      public OnToesState(DoubleProvider maximumTakeoffAngle)
-      {
-         super(ConstraintType.TOES, maximumTakeoffAngle,
-               
-               _yoDesiredPosition, _yoDesiredLinearVelocity,
-               _yoDesiredLinearAcceleration, _accelerationControlModule, _momentumBasedController,
-               _contactableBody, _requestedState, _jacobianId, _nullspaceMultiplier,
-               _jacobianDeterminantInRange, _doSingularityEscape,
-               _forceFootAccelerateIntoGround, _legSingularityAndKneeCollapseAvoidanceControlModule,
-               _robotSide, _registry,
-               _spatialAccelerationProjector);
-
-         singleToeContactPoint = new FramePoint2d(edgeContactPoints.get(0).getReferenceFrame());
-         singleToeContactPoint.interpolate(edgeContactPoints.get(0), edgeContactPoints.get(1), 0.5);
-         
-         originalContactPointPositions = new ArrayList<FramePoint>(contactPoints.size());
-         copyOriginalContactPointPositions();
-      }
-      
-      public void doSpecificAction()
-      {
-         super.doSpecificAction();
-         
-         shrinkFootSizeToMidToe();
-
-         // TODO Hack to do singularity escape since the motion constraint handler doesn't handle it with the given selection matrix 
-         controlledKneeToeOffQdd.set(kneeToeOffGain.getDoubleValue() * Math.max(0.0, kneeToeOffQDesired.getDoubleValue() - kneeJoint.getQ()) - kneeToeOffDamp.getDoubleValue() * kneeJoint.getQd());
-         momentumBasedController.setOneDoFJointAcceleration(kneeJoint, controlledKneeToeOffQdd.getDoubleValue());
-      }
-
-      private void copyOriginalContactPointPositions()
-      {
-         for (int i = 0; i < contactPoints.size(); i++)
-         {
-            originalContactPointPositions.add(new FramePoint(contactPoints.get(i).getPosition()));
-         }
-      }
-
-      private void resetContactPointPositions()
-      {
-         for (int i = 0; i < contactPoints.size(); i++)
-         {
-            contactPoints.get(i).getPosition().set(originalContactPointPositions.get(i));
-         }
-      }
-      
-      private void shrinkFootSizeToMidToe()
-      {
-         double alphaShrink = alphaShrinkFootSizeForToeOff.getDoubleValue();
-         for (int i = 0; i < contactPoints.size(); i++)
-         {
-            FramePoint position = contactPoints.get(i).getPosition();
-            position.setX(alphaShrink * position.getX() + (1.0 - alphaShrink) * singleToeContactPoint.getX());
-            position.setY(alphaShrink * position.getY() + (1.0 - alphaShrink) * singleToeContactPoint.getY());
-         }
-      }
-      
-      @Override
-      public void doTransitionIntoAction()
-      {
-         super.doTransitionIntoAction();
-
-         if (useMaximumPitchAngle)
-         {
-            setOnToesFreeMotionGains();
-         }
-         else
-         {
-            setGains(0.0, 500.0, 1.0);
-         }
-         
-         //alphaShrinkFootSizeForToeOff
-         
-         momentumBasedController.setPlaneContactState(contactableBody, contactStatesMap.get(ConstraintType.TOES));
-      }
-
-      public void doTransitionOutOfAction()
-      {
-         super.doTransitionOutOfAction();
-
-         resetContactPointPositions();
-         
-         controlledKneeToeOffQdd.set(0.0);
-      }
-      
-      private void setOnToesFreeMotionGains()
-      {
-         double kPosition = 0.0;
-         double dPosition = GainCalculator.computeDerivativeGain(0.0, toeOffZeta);
-         double dxOrientation = GainCalculator.computeDerivativeGain(toeOffKpRoll, toeOffZeta);
-         double dyOrientation = GainCalculator.computeDerivativeGain(toeOffKpPitch, toeOffZeta);
-         double dzOrientation = GainCalculator.computeDerivativeGain(toeOffKpYaw, toeOffZeta);
-
-         accelerationControlModule.setPositionProportionalGains(kPosition, kPosition, kPosition);
-         accelerationControlModule.setPositionDerivativeGains(dPosition, dPosition, dPosition);
-         accelerationControlModule.setOrientationProportionalGains(toeOffKpRoll, toeOffKpPitch, toeOffKpYaw);
-         accelerationControlModule.setOrientationDerivativeGains(dxOrientation, dyOrientation, dzOrientation);
-      }
-   }
+//   private class OnToesState extends AbstractOnEdgeState
+//   {
+//      private final YoPlaneContactState contactState = momentumBasedController.getContactState(contactableBody);
+//      private final List<YoContactPoint> contactPoints = contactState.getContactPoints();
+//      private final List<FramePoint> originalContactPointPositions;
+//      
+//      private final FramePoint2d singleToeContactPoint;
+//
+//      public OnToesState(DoubleProvider maximumTakeoffAngle)
+//      {
+//         super(ConstraintType.TOES, maximumTakeoffAngle,
+//               
+//               _yoDesiredPosition, _yoDesiredLinearVelocity,
+//               _yoDesiredLinearAcceleration, _accelerationControlModule, _momentumBasedController,
+//               _contactableBody, _requestedState, _jacobianId, _nullspaceMultiplier,
+//               _jacobianDeterminantInRange, _doSingularityEscape,
+//               _forceFootAccelerateIntoGround, _legSingularityAndKneeCollapseAvoidanceControlModule,
+//               _robotSide, _registry,
+//               _spatialAccelerationProjector);
+//
+//         singleToeContactPoint = new FramePoint2d(edgeContactPoints.get(0).getReferenceFrame());
+//         singleToeContactPoint.interpolate(edgeContactPoints.get(0), edgeContactPoints.get(1), 0.5);
+//         
+//         originalContactPointPositions = new ArrayList<FramePoint>(contactPoints.size());
+//         copyOriginalContactPointPositions();
+//      }
+//      
+//      public void doSpecificAction()
+//      {
+//         super.doSpecificAction();
+//         
+//         shrinkFootSizeToMidToe();
+//
+//         // TODO Hack to do singularity escape since the motion constraint handler doesn't handle it with the given selection matrix 
+//         controlledKneeToeOffQdd.set(kneeToeOffGain.getDoubleValue() * Math.max(0.0, kneeToeOffQDesired.getDoubleValue() - kneeJoint.getQ()) - kneeToeOffDamp.getDoubleValue() * kneeJoint.getQd());
+//         momentumBasedController.setOneDoFJointAcceleration(kneeJoint, controlledKneeToeOffQdd.getDoubleValue());
+//      }
+//
+//      private void copyOriginalContactPointPositions()
+//      {
+//         for (int i = 0; i < contactPoints.size(); i++)
+//         {
+//            originalContactPointPositions.add(new FramePoint(contactPoints.get(i).getPosition()));
+//         }
+//      }
+//
+//      private void resetContactPointPositions()
+//      {
+//         for (int i = 0; i < contactPoints.size(); i++)
+//         {
+//            contactPoints.get(i).getPosition().set(originalContactPointPositions.get(i));
+//         }
+//      }
+//      
+//      private void shrinkFootSizeToMidToe()
+//      {
+//         double alphaShrink = alphaShrinkFootSizeForToeOff.getDoubleValue();
+//         for (int i = 0; i < contactPoints.size(); i++)
+//         {
+//            FramePoint position = contactPoints.get(i).getPosition();
+//            position.setX(alphaShrink * position.getX() + (1.0 - alphaShrink) * singleToeContactPoint.getX());
+//            position.setY(alphaShrink * position.getY() + (1.0 - alphaShrink) * singleToeContactPoint.getY());
+//         }
+//      }
+//      
+//      @Override
+//      public void doTransitionIntoAction()
+//      {
+//         super.doTransitionIntoAction();
+//
+//         if (useMaximumPitchAngle)
+//         {
+//            setOnToesFreeMotionGains();
+//         }
+//         else
+//         {
+//            setGains(0.0, 500.0, 1.0);
+//         }
+//         
+//         //alphaShrinkFootSizeForToeOff
+//         
+//         momentumBasedController.setPlaneContactState(contactableBody, contactStatesMap.get(ConstraintType.TOES));
+//      }
+//
+//      public void doTransitionOutOfAction()
+//      {
+//         super.doTransitionOutOfAction();
+//
+//         resetContactPointPositions();
+//         
+//         controlledKneeToeOffQdd.set(0.0);
+//      }
+//      
+//      private void setOnToesFreeMotionGains()
+//      {
+//         double kPosition = 0.0;
+//         double dPosition = GainCalculator.computeDerivativeGain(0.0, toeOffZeta);
+//         double dxOrientation = GainCalculator.computeDerivativeGain(toeOffKpRoll, toeOffZeta);
+//         double dyOrientation = GainCalculator.computeDerivativeGain(toeOffKpPitch, toeOffZeta);
+//         double dzOrientation = GainCalculator.computeDerivativeGain(toeOffKpYaw, toeOffZeta);
+//
+//         accelerationControlModule.setPositionProportionalGains(kPosition, kPosition, kPosition);
+//         accelerationControlModule.setPositionDerivativeGains(dPosition, dPosition, dPosition);
+//         accelerationControlModule.setOrientationProportionalGains(toeOffKpRoll, toeOffKpPitch, toeOffKpYaw);
+//         accelerationControlModule.setOrientationDerivativeGains(dxOrientation, dyOrientation, dzOrientation);
+//      }
+//   }
 
 //   private class SwingState extends AbstractUnconstrainedState
 //   {

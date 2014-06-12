@@ -36,6 +36,7 @@ import com.yobotics.simulationconstructionset.util.statemachines.State;
 
 public abstract class AbstractFootControlState extends State<ConstraintType>
 {
+   protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    protected final YoVariableRegistry registry;
    
    // magic numbers:
@@ -44,7 +45,6 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
    protected static final double desiredZAccelerationIntoGround = 0.0;
    protected static final double EPSILON_POINT_ON_EDGE = 1e-2;
    
-   protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    protected final ContactablePlaneBody contactableBody;
    protected final RigidBody rootBody;
    protected final EnumYoVariable<ConstraintType> requestedState;
