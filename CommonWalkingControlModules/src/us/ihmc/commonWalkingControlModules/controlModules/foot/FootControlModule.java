@@ -65,7 +65,7 @@ public class FootControlModule
 
 //   private boolean visualize = false;
    
-   private final RigidBodySpatialAccelerationControlModule footSpatialAccelerationControlModule;
+   private final RigidBodySpatialAccelerationControlModule _accelerationControlModule;
    private final SpatialAccelerationProjector _spatialAccelerationProjector;
    private final GeometricJacobian jacobian;
    private final int _jacobianId;
@@ -198,7 +198,7 @@ public class FootControlModule
       
       ReferenceFrame bodyFrame = contactablePlaneBody.getBodyFrame();
 //      rootToFootJacobianId = momentumBasedController.getOrCreateGeometricJacobian(rootBody, jacobian.getEndEffector(), rootBody.getBodyFixedFrame());
-      footSpatialAccelerationControlModule = new RigidBodySpatialAccelerationControlModule(namePrefix, twistCalculator, rigidBody, bodyFrame, controlDT, _registry);
+      _accelerationControlModule = new RigidBodySpatialAccelerationControlModule(namePrefix, twistCalculator, rigidBody, bodyFrame, controlDT, _registry);
       _spatialAccelerationProjector = new SpatialAccelerationProjector(namePrefix + "SpatialAccelerationProjector", _registry);
 //      desiredOnEdgeAngle = new DoubleYoVariable(namePrefix + "DesiredOnEdgeAngle", _registry);
 //      edgeToRotateAbout = new YoFrameLineSegment2d(namePrefix + "Edge", "", contactablePlaneBody.getPlaneFrame(), registry);
@@ -370,14 +370,14 @@ public class FootControlModule
       states.add(onToesState);
       
       states.add(new FullyConstrainedState(_yoDesiredPosition, _yoDesiredLinearVelocity,
-            _yoDesiredLinearAcceleration, footSpatialAccelerationControlModule, _momentumBasedController,
+            _yoDesiredLinearAcceleration, _accelerationControlModule, _momentumBasedController,
             _contactableBody, requestHoldPosition, _requestedState, _jacobianId, _nullspaceMultiplier,
             _jacobianDeterminantInRange, _doSingularityEscape, fullyConstrainedNormalContactVector,
             _forceFootAccelerateIntoGround, doFancyOnToesControl, _legSingularityAndKneeCollapseAvoidanceControlModule,
             _robotSide,_registry));
       
       holdPositionState = new HoldPositionState(_yoDesiredPosition, _yoDesiredLinearVelocity, _yoDesiredLinearAcceleration,
-            footSpatialAccelerationControlModule, _momentumBasedController, _contactableBody, requestHoldPosition,
+            _accelerationControlModule, _momentumBasedController, _contactableBody, requestHoldPosition,
             _requestedState, _jacobianId, _nullspaceMultiplier, _jacobianDeterminantInRange, _doSingularityEscape,
             fullyConstrainedNormalContactVector, _forceFootAccelerateIntoGround,
             _legSingularityAndKneeCollapseAvoidanceControlModule,
@@ -389,7 +389,7 @@ public class FootControlModule
             finalOrientationProvider, trajectoryParametersProvider,
             
             _yoDesiredPosition, _yoDesiredLinearVelocity,
-            _yoDesiredLinearAcceleration, footSpatialAccelerationControlModule, _momentumBasedController,
+            _yoDesiredLinearAcceleration, _accelerationControlModule, _momentumBasedController,
             _contactableBody, _requestedState, _jacobianId, _nullspaceMultiplier,
             _jacobianDeterminantInRange, _doSingularityEscape,
             _forceFootAccelerateIntoGround, _legSingularityAndKneeCollapseAvoidanceControlModule,
@@ -402,7 +402,7 @@ public class FootControlModule
             finalPositionProvider, initialOrientationProvider, finalOrientationProvider,
             
             _yoDesiredPosition, _yoDesiredLinearVelocity,
-            _yoDesiredLinearAcceleration, footSpatialAccelerationControlModule, _momentumBasedController,
+            _yoDesiredLinearAcceleration, _accelerationControlModule, _momentumBasedController,
             _contactableBody, _requestedState, _jacobianId, _nullspaceMultiplier,
             _jacobianDeterminantInRange, _doSingularityEscape,
             _forceFootAccelerateIntoGround, _legSingularityAndKneeCollapseAvoidanceControlModule,
@@ -417,8 +417,8 @@ public class FootControlModule
    public void setMaxAccelerationAndJerk(double maxPositionAcceleration, double maxPositionJerk, 
          double maxOrientationAcceleration, double maxOrientationJerk)
    {
-      footSpatialAccelerationControlModule.setPositionMaxAccelerationAndJerk(maxPositionAcceleration, maxPositionJerk);
-      footSpatialAccelerationControlModule.setOrientationMaxAccelerationAndJerk(maxOrientationAcceleration, maxOrientationJerk);
+      _accelerationControlModule.setPositionMaxAccelerationAndJerk(maxPositionAcceleration, maxPositionJerk);
+      _accelerationControlModule.setOrientationMaxAccelerationAndJerk(maxOrientationAcceleration, maxOrientationJerk);
       
    }
    
@@ -791,7 +791,7 @@ public class FootControlModule
          super(ConstraintType.HEEL_TOUCHDOWN, pitchTouchdownTrajectoryGenerator,
                
                _yoDesiredPosition, _yoDesiredLinearVelocity,
-               _yoDesiredLinearAcceleration, footSpatialAccelerationControlModule, _momentumBasedController,
+               _yoDesiredLinearAcceleration, _accelerationControlModule, _momentumBasedController,
                _contactableBody, _requestedState, _jacobianId, _nullspaceMultiplier,
                _jacobianDeterminantInRange, _doSingularityEscape,
                _forceFootAccelerateIntoGround, _legSingularityAndKneeCollapseAvoidanceControlModule,
@@ -814,7 +814,7 @@ public class FootControlModule
          super(ConstraintType.TOES_TOUCHDOWN, pitchTouchdownTrajectoryGenerator,
                
                _yoDesiredPosition, _yoDesiredLinearVelocity,
-               _yoDesiredLinearAcceleration, footSpatialAccelerationControlModule, _momentumBasedController,
+               _yoDesiredLinearAcceleration, _accelerationControlModule, _momentumBasedController,
                _contactableBody, _requestedState, _jacobianId, _nullspaceMultiplier,
                _jacobianDeterminantInRange, _doSingularityEscape,
                _forceFootAccelerateIntoGround, _legSingularityAndKneeCollapseAvoidanceControlModule,
@@ -843,7 +843,7 @@ public class FootControlModule
          super(ConstraintType.TOES, maximumTakeoffAngle,
                
                _yoDesiredPosition, _yoDesiredLinearVelocity,
-               _yoDesiredLinearAcceleration, footSpatialAccelerationControlModule, _momentumBasedController,
+               _yoDesiredLinearAcceleration, _accelerationControlModule, _momentumBasedController,
                _contactableBody, _requestedState, _jacobianId, _nullspaceMultiplier,
                _jacobianDeterminantInRange, _doSingularityEscape,
                _forceFootAccelerateIntoGround, _legSingularityAndKneeCollapseAvoidanceControlModule,
