@@ -8,7 +8,6 @@ import javax.media.j3d.Transform3D;
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.SDFJointNameMap;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -31,7 +30,6 @@ import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
 import us.ihmc.valkyrie.io.ValkyrieOutputWriterWithAccelerationIntegration;
 import us.ihmc.valkyrie.models.ModelRoot;
 import us.ihmc.valkyrie.paramaters.ValkyrieArmControllerParameters;
-import us.ihmc.valkyrie.paramaters.ValkyrieContactPointParameters;
 import us.ihmc.valkyrie.paramaters.ValkyrieJointMap;
 import us.ihmc.valkyrie.paramaters.ValkyriePhysicalProperties;
 import us.ihmc.valkyrie.paramaters.ValkyrieSensorInformation;
@@ -47,66 +45,61 @@ import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
 public class ValkyrieRobotModel implements DRCRobotModel
 {
    private static final boolean PRINT_MODEL = false;
-   
+
    private static Class<ModelRoot> valModelRoot = ModelRoot.class;
    private final ArmControllerParameters armControllerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
-   private final DRCRobotContactPointParameters contactPointParamaters;
-   private StateEstimatorParameters stateEstimatorParamaters;
+   private final StateEstimatorParameters stateEstimatorParamaters;
    private final DRCRobotPhysicalProperties physicalProperties;
-   private DRCRobotSensorInformation sensorInformation;
+   private final DRCRobotSensorInformation sensorInformation;
    private final DRCRobotJointMap jointMap;
    private final String robotName = "VALKYRIE";
    private final SideDependentList<Transform> offsetHandFromWrist = new SideDependentList<Transform>();
 
-   
-   private final String[] resourceDirectories = {
-         valModelRoot.getResource("").getFile(),
-         valModelRoot.getResource("V1/").getFile(),
-         valModelRoot.getResource("V1/sdf/").getFile(),
-         valModelRoot.getResource("V1/meshes/").getFile(),
-         valModelRoot.getResource("V1/meshes/2013_05_16/").getFile(),
-         };
-   
+   private final String[] resourceDirectories = { valModelRoot.getResource("").getFile(), valModelRoot.getResource("V1/").getFile(),
+         valModelRoot.getResource("V1/sdf/").getFile(), valModelRoot.getResource("V1/meshes/").getFile(),
+         valModelRoot.getResource("V1/meshes/2013_05_16/").getFile(), };
+
    private final JaxbSDFLoader loader;
    private final boolean runningOnRealRobot;
-   
+
    public ValkyrieRobotModel(boolean runningOnRealRobot, boolean headless)
    {
       this.runningOnRealRobot = runningOnRealRobot;
-      this.jointMap = new ValkyrieJointMap();
-      this.physicalProperties = new ValkyriePhysicalProperties();
-      this.sensorInformation = new ValkyrieSensorInformation();
-      this.armControllerParameters = new ValkyrieArmControllerParameters(runningOnRealRobot);
-      this.walkingControllerParameters = new ValkyrieWalkingControllerParameters(jointMap, runningOnRealRobot);
-      this.contactPointParamaters = new ValkyrieContactPointParameters(jointMap);
-      if(headless)
+
+      jointMap = new ValkyrieJointMap();
+      physicalProperties = new ValkyriePhysicalProperties();
+      sensorInformation = new ValkyrieSensorInformation();
+
+      if (headless)
       {
-         this.loader = DRCRobotSDFLoader.loadDRCRobot(new String[]{}, getSdfFileAsStream(), true);
+         this.loader = DRCRobotSDFLoader.loadDRCRobot(new String[] {}, getSdfFileAsStream(), true);
       }
       else
       {
          this.loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSdfFileAsStream(), false);
       }
-      
-      SDFJointNameMap jointMap = getJointMap();
-      for(String forceSensorNames : ValkyrieSensorInformation.forceSensorNames)
+
+      for (String forceSensorNames : ValkyrieSensorInformation.forceSensorNames)
       {
          Transform3D transform = new Transform3D();
-         if(forceSensorNames.equals("LeftAnkle"))
+         if (forceSensorNames.equals("LeftAnkle"))
          {
             transform.set(ValkyrieSensorInformation.transformFromMeasurementToAnkleZUpFrames.get(RobotSide.LEFT));
          }
-         else if(forceSensorNames.equals("RightAnkle"))
+         else if (forceSensorNames.equals("RightAnkle"))
          {
-            transform.set(ValkyrieSensorInformation.transformFromMeasurementToAnkleZUpFrames.get(RobotSide.RIGHT));               
+            transform.set(ValkyrieSensorInformation.transformFromMeasurementToAnkleZUpFrames.get(RobotSide.RIGHT));
          }
-            
+
          loader.addForceSensor(jointMap, forceSensorNames, forceSensorNames, transform);
       }
-      
+
+      armControllerParameters = new ValkyrieArmControllerParameters(runningOnRealRobot);
+      walkingControllerParameters = new ValkyrieWalkingControllerParameters(jointMap, runningOnRealRobot);
+      stateEstimatorParamaters = new ValkyrieStateEstimatorParameters(runningOnRealRobot, getEstimatorDT());
    }
-   
+
    @Override
    public ArmControllerParameters getArmControllerParameters()
    {
@@ -122,10 +115,6 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public StateEstimatorParameters getStateEstimatorParameters()
    {
-      if(stateEstimatorParamaters == null)
-      {
-         stateEstimatorParamaters = new ValkyrieStateEstimatorParameters(runningOnRealRobot, getEstimatorDT());
-      }
       return stateEstimatorParamaters;
    }
 
@@ -144,26 +133,26 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public Transform getOffsetHandFromWrist(RobotSide side)
    {
-//      if (offsetHandFromWrist.get(side) == null)
-//      {
-         createTransforms();
-//      }
+      //      if (offsetHandFromWrist.get(side) == null)
+      //      {
+      createTransforms();
+      //      }
 
       return offsetHandFromWrist.get(side);
    }
-   
+
    private void createTransforms()
    {
-      for(RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values())
       {
          Vector3f centerOfHandToWristTranslation = new Vector3f();
          float[] angles = new float[3];
 
-            centerOfHandToWristTranslation = new Vector3f(0f, (float) robotSide.negateIfLeftSide(0.015f), -0.06f);
-            angles[0] = (float) robotSide.negateIfLeftSide(Math.toRadians(90));
-            angles[1] = 0.0f;   
-            angles[2] = (float) robotSide.negateIfLeftSide(Math.toRadians(90));
-//       
+         centerOfHandToWristTranslation = new Vector3f(0f, (float) robotSide.negateIfLeftSide(0.015f), -0.06f);
+         angles[0] = (float) robotSide.negateIfLeftSide(Math.toRadians(90));
+         angles[1] = 0.0f;
+         angles[2] = (float) robotSide.negateIfLeftSide(Math.toRadians(90));
+         //       
          Quaternion centerOfHandToWristRotation = new Quaternion(angles);
          offsetHandFromWrist.set(robotSide, new Transform(centerOfHandToWristTranslation, centerOfHandToWristRotation));
       }
@@ -209,16 +198,16 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
-   public DRCRobotContactPointParameters getContactPointParameters(boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsToFeetOnly)
+   public DRCRobotContactPointParameters getContactPointParameters()
    {
-      return contactPointParamaters;
+      return jointMap.getContactPointParameters();
    }
 
    @Override
    public DRCOutputWriter getOutputWriterWithAccelerationIntegration(DRCOutputWriter valkyrieOutputWriter, boolean runningOnRealRobot)
    {
-      ValkyrieOutputWriterWithAccelerationIntegration valkyrieOutputWriterWithAccelerationIntegration =
-            new ValkyrieOutputWriterWithAccelerationIntegration(valkyrieOutputWriter, getControllerDT(), runningOnRealRobot);
+      ValkyrieOutputWriterWithAccelerationIntegration valkyrieOutputWriterWithAccelerationIntegration = new ValkyrieOutputWriterWithAccelerationIntegration(
+            valkyrieOutputWriter, getControllerDT(), runningOnRealRobot);
 
       valkyrieOutputWriterWithAccelerationIntegration.setAlphaDesiredVelocity(0.98, 0.0);
       valkyrieOutputWriterWithAccelerationIntegration.setAlphaDesiredPosition(0.0, 0.0);
@@ -238,7 +227,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public HandModel getHandModel()
    {
-	   return null;
+      return null;
    }
 
    @Override
@@ -264,7 +253,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    {
       SDFRobot sdfRobot = loader.createRobot(jointMap, createCollisionMeshes);
 
-      if (PRINT_MODEL) 
+      if (PRINT_MODEL)
       {
          System.out.println("\nValkyrieRobotModel Link Masses:");
 
@@ -278,7 +267,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
 
       return sdfRobot;
    }
-   
+
    @Override
    public double getSimulateDT()
    {
@@ -288,7 +277,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public double getEstimatorDT()
    {
-      return 0.002;  
+      return 0.002;
    }
 
    @Override
@@ -296,7 +285,6 @@ public class ValkyrieRobotModel implements DRCRobotModel
    {
       return 0.006;
    }
-   
 
    @Override
    public GeneralizedSDFRobotModel getGeneralizedRobotModel()

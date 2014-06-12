@@ -21,7 +21,7 @@ import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
 import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
 
-public class ValkyrieJointMap extends DRCRobotJointMap
+public class ValkyrieJointMap implements DRCRobotJointMap
 {
    public static final String chestName = "v1Trunk";
    public static final String pelvisName = "v1Pelvis";
@@ -46,6 +46,9 @@ public class ValkyrieJointMap extends DRCRobotJointMap
    private final EnumMap<NeckJointName, String> neckJointStrings = new EnumMap<>(NeckJointName.class);
 
    private final ValkyrieContactPointParameters contactPointParameters;
+
+   private final SideDependentList<String> nameOfJointsBeforeThighs = new SideDependentList<>();
+   private final SideDependentList<String> nameOfJointsBeforeHands = new SideDependentList<>();
 
    public ValkyrieJointMap()
    {
@@ -109,6 +112,12 @@ public class ValkyrieJointMap extends DRCRobotJointMap
       }
 
       contactPointParameters = new ValkyrieContactPointParameters(this);
+      
+      for (RobotSide robtSide : RobotSide.values)
+      {
+         nameOfJointsBeforeThighs.put(robtSide, legJointStrings.get(robtSide).get(LegJointName.HIP_PITCH));
+         nameOfJointsBeforeHands.put(robtSide, armJointStrings.get(robtSide).get(ArmJointName.WRIST_PITCH));
+      }
    }
 
    private String getRobotSidePrefix(RobotSide robotSide)
@@ -117,15 +126,15 @@ public class ValkyrieJointMap extends DRCRobotJointMap
    }
 
    @Override
-   public String getNameOfJointBeforeHand(RobotSide robotSide)
+   public SideDependentList<String> getNameOfJointBeforeHands()
    {
-      return armJointStrings.get(robotSide).get(ArmJointName.WRIST_PITCH);
+      return nameOfJointsBeforeHands;
    }
 
    @Override
-   public String getNameOfJointBeforeThigh(RobotSide robotSide)
+   public SideDependentList<String> getNameOfJointBeforeThighs()
    {
-      return legJointStrings.get(robotSide).get(LegJointName.HIP_PITCH);
+      return nameOfJointsBeforeThighs;
    }
 
    @Override
@@ -216,6 +225,12 @@ public class ValkyrieJointMap extends DRCRobotJointMap
    public String getJointBeforeFootName(RobotSide robotSide)
    {
       return legJointStrings.get(robotSide).get(LegJointName.ANKLE_ROLL);
+   }
+
+   @Override
+   public ValkyrieContactPointParameters getContactPointParameters()
+   {
+      return contactPointParameters;
    }
 
    @Override
