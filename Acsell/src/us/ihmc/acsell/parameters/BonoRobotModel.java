@@ -8,7 +8,6 @@ import javax.media.j3d.Transform3D;
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.SDFJointNameMap;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.acsell.controlParameters.BonoArmControlParameters;
 import us.ihmc.acsell.controlParameters.BonoStateEstimatorParameters;
@@ -18,7 +17,6 @@ import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameter
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParameters;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
@@ -36,52 +34,68 @@ import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
 
 public class BonoRobotModel implements DRCRobotModel
 {
+   private static final double SIMULATE_DT = 0.0001;
+   private static final double CONTROLLER_DT = 0.006;
+   private static final double ESTIMATOR_DT = 0.001;
 
-   private static Class<BonoRobotModel> thisClass = BonoRobotModel.class;
-   private static String[] resourceDirectories;
-   
+   private final String[] resourceDirectories;
+
    private final boolean runningOnRealRobot;
-   private JaxbSDFLoader loader;
-   private DRCRobotSensorInformation sensorInformation;
-   
-   
+   private final JaxbSDFLoader loader;
+   private final BonoJointMap jointMap = new BonoJointMap();
+   private final DRCRobotSensorInformation sensorInformation;
+   private final BonoArmControlParameters armControlParameters;
+   private final BonoWalkingControllerParameters walkingControllerParameters;
+   private final BonoWalkingControllerParameters multiContactControllerParameters;
+
    public BonoRobotModel(boolean runningOnRealRobot, boolean headless)
    {
-     this.runningOnRealRobot = runningOnRealRobot;
-     sensorInformation = new BonoSensorInformation();
-     if(headless)
-     {
-        this.loader = DRCRobotSDFLoader.loadDRCRobot(new String[]{}, getSdfFileAsStream(), true);
-     }
-     else
-     {
-        this.loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSdfFileAsStream(), false);        
-     }
-     
-     SDFJointNameMap jointMap = getJointMap();
-     for(String forceSensorNames : getSensorInformation().getForceSensorNames())
-     {
-        loader.addForceSensor(jointMap, forceSensorNames, forceSensorNames, new Transform3D());
-     }
-     
+      this.runningOnRealRobot = runningOnRealRobot;
+      sensorInformation = new BonoSensorInformation();
+      if (headless)
+      {
+         this.loader = DRCRobotSDFLoader.loadDRCRobot(new String[] {}, getSdfFileAsStream(), true);
+      }
+      else
+      {
+         this.loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSdfFileAsStream(), false);
+      }
+
+      for (String forceSensorNames : getSensorInformation().getForceSensorNames())
+      {
+         loader.addForceSensor(jointMap, forceSensorNames, forceSensorNames, new Transform3D());
+      }
+
+      resourceDirectories = new String[] { getClass().getResource("../models/axl/axl_description").getFile() };
+
+      armControlParameters = new BonoArmControlParameters(runningOnRealRobot);
+      walkingControllerParameters = new BonoWalkingControllerParameters(runningOnRealRobot);
+      multiContactControllerParameters = new BonoWalkingControllerParameters();
    }
 
    @Override
    public ArmControllerParameters getArmControllerParameters()
    {
-      return new BonoArmControlParameters(runningOnRealRobot);
+      return armControlParameters;
    }
 
    @Override
    public WalkingControllerParameters getWalkingControlParameters()
    {
-      return new BonoWalkingControllerParameters(runningOnRealRobot);
+      return walkingControllerParameters;
+   }
+
+   @Override
+   public WalkingControllerParameters getMultiContactControllerParameters()
+   {
+      return multiContactControllerParameters;
    }
 
    @Override
    public StateEstimatorParameters getStateEstimatorParameters()
    {
-      return new BonoStateEstimatorParameters(runningOnRealRobot, getEstimatorDT());
+      BonoStateEstimatorParameters stateEstimatorParameters = new BonoStateEstimatorParameters(runningOnRealRobot, getEstimatorDT());
+      return stateEstimatorParameters;
    }
 
    @Override
@@ -91,9 +105,9 @@ public class BonoRobotModel implements DRCRobotModel
    }
 
    @Override
-   public DRCRobotJointMap getJointMap()
+   public BonoJointMap getJointMap()
    {
-      return new BonoJointMap();
+      return jointMap;
    }
 
    @Override
@@ -109,16 +123,12 @@ public class BonoRobotModel implements DRCRobotModel
 
    private String[] getResourceDirectories()
    {
-      if (resourceDirectories == null)
-      {
-         resourceDirectories = new String[] { thisClass.getResource("../models/axl/axl_description").getFile() };
-      }
       return resourceDirectories;
    }
 
    private InputStream getSdfFileAsStream()
    {
-      return thisClass.getResourceAsStream(getSdfFile());
+      return getClass().getResourceAsStream(getSdfFile());
    }
 
    @Override
@@ -133,19 +143,13 @@ public class BonoRobotModel implements DRCRobotModel
       return new BonoInitialSetup(groundHeight, initialYaw);
    }
 
-   @Override
-   public WalkingControllerParameters getMultiContactControllerParameters()
-   {
-      return new BonoWalkingControllerParameters();
-   }
-   
    //XXX: fix this
    @Override
-   public DRCRobotContactPointParameters getContactPointParameters(boolean addLoadsOfContactPoints, boolean addLoadsOfContactPointsToFeetOnly)
+   public DRCRobotContactPointParameters getContactPointParameters()
    {
-      return new BonoContactPointParameters(getJointMap());
+      return jointMap.getContactPointParameters();
    }
-   
+
    @Override
    public DRCOutputWriter getOutputWriterWithAccelerationIntegration(DRCOutputWriter drcOutputWriter, boolean runningOnRealRobot)
    {
@@ -161,7 +165,7 @@ public class BonoRobotModel implements DRCRobotModel
    @Override
    public HandModel getHandModel()
    {
-	   return null;
+      return null;
    }
 
    @Override
@@ -181,7 +185,7 @@ public class BonoRobotModel implements DRCRobotModel
    {
       return sensorInformation;
    }
-   
+
    @Override
    public SDFFullRobotModel createFullRobotModel()
    {
@@ -197,19 +201,19 @@ public class BonoRobotModel implements DRCRobotModel
    @Override
    public double getSimulateDT()
    {
-      return 0.0001;
+      return SIMULATE_DT;
    }
 
    @Override
    public double getEstimatorDT()
    {
-      return 0.001;
+      return ESTIMATOR_DT;
    }
 
    @Override
    public double getControllerDT()
    {
-      return 0.006;
+      return CONTROLLER_DT;
    }
 
    @Override
@@ -217,7 +221,7 @@ public class BonoRobotModel implements DRCRobotModel
    {
       return loader.getGeneralizedSDFRobotModel(getJointMap().getModelName());
    }
-   
+
    @Override
    public PPSTimestampOffsetProvider getPPSTimestampOffsetProvider()
    {
