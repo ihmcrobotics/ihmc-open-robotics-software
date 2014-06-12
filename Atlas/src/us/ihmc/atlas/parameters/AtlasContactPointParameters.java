@@ -209,6 +209,33 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
       contactableBodiesFactory.addHandContactParameters(nameOfJointBeforeHands, handContactPoints, handContactPointTransforms);
    }
 
+   public void createHandKnobContactPoints()
+   {
+      if (handContactPointsHaveBeenCreated)
+         throw new RuntimeException("Contact points for the hands have already been created");
+      else
+         handContactPointsHaveBeenCreated = true;
+
+      SideDependentList<String> nameOfJointBeforeHands = jointMap.getNameOfJointBeforeHands();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         Transform3D handContactPointTransform = new Transform3D();
+         handContactPointTransform.setTranslation(new Vector3d(0.0, 0.0, robotSide.negateIfRightSide(0.01)));
+         handContactPointTransforms.put(robotSide, handContactPointTransform);
+
+         handContactPoints.put(robotSide, new ArrayList<Point2d>());
+         handContactPoints.get(robotSide).add(new Point2d(0.0, robotSide.negateIfRightSide(0.13)));
+
+         for (Point2d point : handContactPoints.get(robotSide))
+         {
+            Point3d point3d = new Point3d(point.getX(), point.getY(), 0.0);
+            handContactPointTransforms.get(robotSide).transform(point3d);
+            jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(nameOfJointBeforeHands.get(robotSide), new Vector3d(point3d)));
+         }
+      }
+      contactableBodiesFactory.addHandContactParameters(nameOfJointBeforeHands, handContactPoints, handContactPointTransforms);
+   }
+
    @Override
    public Transform3D getPelvisContactPointTransform()
    {

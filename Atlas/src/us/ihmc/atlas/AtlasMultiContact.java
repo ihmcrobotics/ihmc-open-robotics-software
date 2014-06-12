@@ -45,8 +45,6 @@ public class AtlasMultiContact
 
    public AtlasMultiContact(AtlasRobotModel robotModel, DRCGuiInitialSetup guiInitialSetup, MultiContactTask task)
    {
-      DRCSCSInitialSetup scsInitialSetup;
-
       RobotSide[] footContactSides;
       RobotSide[] handContactSides;
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup;
@@ -72,7 +70,7 @@ public class AtlasMultiContact
 
       environment = new MultiContactTestEnvironment(robotInitialSetup, robotModel, footContactSides, handContactSides,
             contactPointParameters.getHandContactPointTransforms());
-      scsInitialSetup = new DRCSCSInitialSetup(environment, robotModel.getSimulateDT());
+      DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(environment, robotModel.getSimulateDT());
 
       double dt = scsInitialSetup.getDT();
       int recordFrequency = (int) Math.round(robotModel.getControllerDT() / dt);
