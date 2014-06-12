@@ -28,6 +28,7 @@ import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.GainCalculator;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
@@ -35,6 +36,8 @@ import com.yobotics.simulationconstructionset.util.statemachines.State;
 
 public abstract class AbstractFootControlState extends State<ConstraintType>
 {
+   protected final YoVariableRegistry registry;
+   
    // magic numbers:
    protected static final double coefficientOfFriction = 0.8;
    protected static final double minJacobianDeterminant = 0.035;
@@ -89,10 +92,11 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
          DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange,
          BooleanYoVariable doSingularityEscape, BooleanYoVariable forceFootAccelerateIntoGround,
          LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule,
-         RobotSide robotSide)
+         RobotSide robotSide, YoVariableRegistry registry)
    {
       super(stateEnum);
       
+      this.registry = registry;
       this.contactableBody = contactableBody;
       this.requestedState = requestedState;
       

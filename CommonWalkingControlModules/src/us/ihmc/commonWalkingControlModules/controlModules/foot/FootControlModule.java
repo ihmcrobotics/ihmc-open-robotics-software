@@ -9,7 +9,6 @@ import javax.vecmath.Vector3d;
 
 import org.ejml.alg.dense.mult.VectorVectorMult;
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
@@ -17,19 +16,10 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
-import us.ihmc.commonWalkingControlModules.kinematics.SpatialAccelerationProjector;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
-import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationProvider;
-import us.ihmc.commonWalkingControlModules.trajectories.SimpleTwoWaypointTrajectoryParameters;
-import us.ihmc.commonWalkingControlModules.trajectories.SoftTouchdownPositionTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePositionTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointPositionTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointTrajectoryGeneratorWithPushRecovery;
-import us.ihmc.commonWalkingControlModules.trajectories.WrapperForMultiplePositionTrajectoryGenerators;
 import us.ihmc.robotSide.RobotSide;
-import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.math.NullspaceCalculator;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -37,11 +27,8 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
-import us.ihmc.utilities.screwTheory.SpatialMotionVector;
-import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
@@ -50,7 +37,6 @@ import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.GainCalculator;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
@@ -62,15 +48,13 @@ import com.yobotics.simulationconstructionset.util.trajectory.CurrentLinearVeloc
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionProvider;
-import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParametersProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.VectorProvider;
-import com.yobotics.simulationconstructionset.util.trajectory.YoVariableDoubleProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.YoVelocityProvider;
 
 public class FootControlModule
 {
-   private final YoVariableRegistry registry;
+   private final YoVariableRegistry _registry;
    private final ContactablePlaneBody _contactableBody;
 
    public enum ConstraintType
@@ -78,19 +62,16 @@ public class FootControlModule
       FULL, HOLD_POSITION, HEEL_TOUCHDOWN, TOES_TOUCHDOWN, TOES, SWING, MOVE_STRAIGHT
    }
 
-   private static final int NUMBER_OF_CONTACTS_POINTS_TO_ROTATE_ABOUT = 2;
-   private static final boolean USE_TOEOFF_FOOT_HOLD_POSITION = true;
-   
-   private boolean visualize = false;
+//   private boolean visualize = false;
    
    private final RigidBodySpatialAccelerationControlModule footSpatialAccelerationControlModule;
-   private final SpatialAccelerationProjector spatialAccelerationProjector;
+//   private final SpatialAccelerationProjector spatialAccelerationProjector;
    private final GeometricJacobian jacobian;
    private final int _jacobianId;
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final RigidBody rootBody;
+//   private final RigidBody rootBody;
    private final EnumYoVariable<ConstraintType> _requestedState;
-   private final DoubleYoVariable desiredOnEdgeAngle;
+//   private final DoubleYoVariable desiredOnEdgeAngle;
 //   private final YoFrameLineSegment2d edgeToRotateAbout;
 //   private final BooleanYoVariable isCoPOnEdge;
    private final BooleanYoVariable _doSingularityEscape;
@@ -108,7 +89,6 @@ public class FootControlModule
    private final BooleanYoVariable isUnconstrained;
 
    private final StateMachine<ConstraintType> stateMachine;
-   // set every tick, so should not need to be YoVariablized
    
 //   private final DenseMatrix64F nullspaceMultipliers = new DenseMatrix64F(0, 1);
 //   private final DenseMatrix64F selectionMatrix;
@@ -119,12 +99,12 @@ public class FootControlModule
    private final BooleanYoVariable _forceFootAccelerateIntoGround;
 //   private final DoubleYoVariable desiredZAccelerationIntoGround;
 
-   private final int rootToFootJacobianId;
+//   private final int rootToFootJacobianId;
 
    private final EnumMap<ConstraintType, boolean[]> contactStatesMap = new EnumMap<ConstraintType, boolean[]>(ConstraintType.class);
 
-   private final List<FramePoint2d> toeContactPoints, heelContactPoints;
-   private final FramePoint2d singleToeContactPoint;
+//   private final List<FramePoint2d> toeContactPoints, heelContactPoints;
+//   private final FramePoint2d singleToeContactPoint;
 
 //   private final OneDoFJoint hipYawJoint;
 //   private final OneDoFJoint kneeJoint;
@@ -135,7 +115,7 @@ public class FootControlModule
 
 //   private final DoubleYoVariable swingKpXY, swingKpZ, swingKpOrientation, swingZetaXYZ, swingZetaOrientation;
 //   private final DoubleYoVariable holdKpx, holdKpy, holdKpz, holdKdz, holdKpRoll, holdKpPitch, holdKpYaw, holdZeta;
-   private final DoubleYoVariable toeOffKpx, toeOffKpy, toeOffKpz, toeOffKpRoll, toeOffKpPitch, toeOffKpYaw, toeOffZeta;
+//   private final DoubleYoVariable toeOffKpx, toeOffKpy, toeOffKpz, toeOffKpRoll, toeOffKpPitch, toeOffKpYaw, toeOffZeta;
    
    private final BooleanYoVariable doFancyOnToesControl;
    
@@ -152,21 +132,24 @@ public class FootControlModule
    
    private final DoubleYoVariable controlledKneeToeOffQdd, kneeToeOffGain, kneeToeOffQDesired, kneeToeOffDamp;
    
-   private final ReferenceFrame desiredOrientationFrame, correctedDesiredOrientationFrame;
-   private final DynamicGraphicReferenceFrame desiredOrientationFrameGraphic, correctedDesiredOrientationFrameGraphic;
+//   private final ReferenceFrame desiredOrientationFrame, correctedDesiredOrientationFrame;
+//   private final DynamicGraphicReferenceFrame desiredOrientationFrameGraphic, correctedDesiredOrientationFrameGraphic;
    
    private final DoubleYoVariable alphaShrinkFootSizeForToeOff;
    
-   private final WalkingControllerParameters walkingControllerParameters;
-   private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
+//   private final WalkingControllerParameters walkingControllerParameters;
+//   private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
 
-   private final BooleanYoVariable replanTrajectory;
+//   private final BooleanYoVariable replanTrajectory;
 //   private final BooleanYoVariable trajectoryWasReplanned;
-   private final YoVariableDoubleProvider swingTimeRemaining;
+//   private final YoVariableDoubleProvider swingTimeRemaining;
    
    private final HoldPositionState holdPositionState;
    private final SwingState swingState;
    private final MoveStraightState moveStraightState;
+   private final TouchdownOnToesState touchdownOnToesState;
+   private final TouchdownOnHeelState touchdwonOnHeelState;
+   private final OnToesState onToesState;
    
    private final RobotSide _robotSide;
 
@@ -181,8 +164,8 @@ public class FootControlModule
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
    {
       this._robotSide = robotSide;
-      this.walkingControllerParameters = walkingControllerParameters;
-      this.dynamicGraphicObjectsListRegistry = dynamicGraphicObjectsListRegistry;
+//      this.walkingControllerParameters = walkingControllerParameters;
+//      this.dynamicGraphicObjectsListRegistry = dynamicGraphicObjectsListRegistry;
       
       this._jacobianId = jacobianId;
       jacobian = momentumBasedController.getJacobian(jacobianId);
@@ -195,9 +178,9 @@ public class FootControlModule
       DoubleYoVariable t = momentumBasedController.getYoTime();
       twistCalculator = momentumBasedController.getTwistCalculator();
 
-      this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      this._registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       
-      alphaShrinkFootSizeForToeOff = new DoubleYoVariable(namePrefix + "AlphaShrinkFootSizeForToeOff", registry);
+      alphaShrinkFootSizeForToeOff = new DoubleYoVariable(namePrefix + "AlphaShrinkFootSizeForToeOff", _registry);
       alphaShrinkFootSizeForToeOff.set(0.0);
       
       this._contactableBody = contactablePlaneBody;
@@ -205,37 +188,37 @@ public class FootControlModule
 //      this.kneeJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.KNEE);
 //      this.ankleRollJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.ANKLE_ROLL);
 //      this.anklePitchJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.ANKLE_PITCH);
-      this.rootBody = twistCalculator.getRootBody();
-      this._requestedState = EnumYoVariable.create(namePrefix + "RequestedState", "", ConstraintType.class, registry, true);
+//      this.rootBody = twistCalculator.getRootBody();
+      this._requestedState = EnumYoVariable.create(namePrefix + "RequestedState", "", ConstraintType.class, _registry, true);
       this._momentumBasedController = momentumBasedController;
       this.isHoldPositionRequested = requestHoldPosition;
       
       fullyConstrainedNormalContactVector = new FrameVector(contactablePlaneBody.getPlaneFrame(), 0.0, 0.0, 1.0);
       
       ReferenceFrame bodyFrame = contactablePlaneBody.getBodyFrame();
-      rootToFootJacobianId = momentumBasedController.getOrCreateGeometricJacobian(rootBody, jacobian.getEndEffector(), rootBody.getBodyFixedFrame());
-      footSpatialAccelerationControlModule = new RigidBodySpatialAccelerationControlModule(namePrefix, twistCalculator, rigidBody, bodyFrame, controlDT, registry);
-      spatialAccelerationProjector = new SpatialAccelerationProjector(namePrefix + "SpatialAccelerationProjector", registry);
-      desiredOnEdgeAngle = new DoubleYoVariable(namePrefix + "DesiredOnEdgeAngle", registry);
+//      rootToFootJacobianId = momentumBasedController.getOrCreateGeometricJacobian(rootBody, jacobian.getEndEffector(), rootBody.getBodyFixedFrame());
+      footSpatialAccelerationControlModule = new RigidBodySpatialAccelerationControlModule(namePrefix, twistCalculator, rigidBody, bodyFrame, controlDT, _registry);
+//      spatialAccelerationProjector = new SpatialAccelerationProjector(namePrefix + "SpatialAccelerationProjector", _registry);
+//      desiredOnEdgeAngle = new DoubleYoVariable(namePrefix + "DesiredOnEdgeAngle", _registry);
 //      edgeToRotateAbout = new YoFrameLineSegment2d(namePrefix + "Edge", "", contactablePlaneBody.getPlaneFrame(), registry);
 //      isCoPOnEdge = new BooleanYoVariable(namePrefix + "IsCoPOnEdge", registry);
-      _doSingularityEscape = new BooleanYoVariable(namePrefix + "DoSingularityEscape", registry);
-      waitSingularityEscapeBeforeTransitionToNextState = new BooleanYoVariable(namePrefix + "WaitSingularityEscapeBeforeTransitionToNextState", registry);
+      _doSingularityEscape = new BooleanYoVariable(namePrefix + "DoSingularityEscape", _registry);
+      waitSingularityEscapeBeforeTransitionToNextState = new BooleanYoVariable(namePrefix + "WaitSingularityEscapeBeforeTransitionToNextState", _registry);
 //      minJacobianDeterminant = new DoubleYoVariable(namePrefix + "MinJacobianDeterminant", registry);
-      jacobianDeterminant = new DoubleYoVariable(namePrefix + "JacobianDeterminant", registry);
-      _jacobianDeterminantInRange = new BooleanYoVariable(namePrefix + "JacobianDeterminantInRange", registry);
-      _nullspaceMultiplier = new DoubleYoVariable(namePrefix + "NullspaceMultiplier", registry);
+      jacobianDeterminant = new DoubleYoVariable(namePrefix + "JacobianDeterminant", _registry);
+      _jacobianDeterminantInRange = new BooleanYoVariable(namePrefix + "JacobianDeterminantInRange", _registry);
+      _nullspaceMultiplier = new DoubleYoVariable(namePrefix + "NullspaceMultiplier", _registry);
       nullspaceCalculator = new NullspaceCalculator(jacobian.getNumberOfColumns(), true);
-      singularityEscapeNullspaceMultiplier = new DoubleYoVariable(namePrefix + "SingularityEscapeNullspaceMultiplier", registry);
-      isTrajectoryDone = new BooleanYoVariable(namePrefix + "IsTrajectoryDone", registry);
-      edgeControlOrientationDamping = new DoubleYoVariable(namePrefix + "EdgeControlOrientationDamping", registry);
-      isUnconstrained = new BooleanYoVariable(namePrefix + "IsUnconstrained", registry);
+      singularityEscapeNullspaceMultiplier = new DoubleYoVariable(namePrefix + "SingularityEscapeNullspaceMultiplier", _registry);
+      isTrajectoryDone = new BooleanYoVariable(namePrefix + "IsTrajectoryDone", _registry);
+      edgeControlOrientationDamping = new DoubleYoVariable(namePrefix + "EdgeControlOrientationDamping", _registry);
+      isUnconstrained = new BooleanYoVariable(namePrefix + "IsUnconstrained", _registry);
       
-      _forceFootAccelerateIntoGround = new BooleanYoVariable(namePrefix + "ForceFootAccelerateIntoGround", registry);
+      _forceFootAccelerateIntoGround = new BooleanYoVariable(namePrefix + "ForceFootAccelerateIntoGround", _registry);
 //      desiredZAccelerationIntoGround = new DoubleYoVariable(namePrefix + "DesiredZAccelerationIntoGround", registry);
 //      desiredZAccelerationIntoGround.set(0.0); //-2.0);
 
-      footTouchDownGain = new DoubleYoVariable(namePrefix + "footTouchDownGain", registry);
+      footTouchDownGain = new DoubleYoVariable(namePrefix + "footTouchDownGain", _registry);
       footTouchDownGain.set(10);
 
       // remove and test:
@@ -256,30 +239,30 @@ public class FootControlModule
 //      holdKpYaw = new DoubleYoVariable(namePrefix + "HoldKpYaw", registry);
 //      holdZeta = new DoubleYoVariable(namePrefix + "HoldZeta", registry);
       
-      kneeToeOffGain = new DoubleYoVariable(namePrefix + "KneeToeOffGain", registry);
-      kneeToeOffQDesired   = new DoubleYoVariable(namePrefix + "KneeToeOffQDesired", registry);
-      kneeToeOffDamp = new DoubleYoVariable(namePrefix + "KneeToeOffDamp", registry);
-      controlledKneeToeOffQdd = new DoubleYoVariable(namePrefix + "KneeToeOffQdd_d", registry);
+      kneeToeOffGain = new DoubleYoVariable(namePrefix + "KneeToeOffGain", _registry);
+      kneeToeOffQDesired   = new DoubleYoVariable(namePrefix + "KneeToeOffQDesired", _registry);
+      kneeToeOffDamp = new DoubleYoVariable(namePrefix + "KneeToeOffDamp", _registry);
+      controlledKneeToeOffQdd = new DoubleYoVariable(namePrefix + "KneeToeOffQdd_d", _registry);
       // Work really fine in sim, but makes the robot do crazy toe-off
       kneeToeOffGain.set(0.0);
       kneeToeOffQDesired.set(0.7);
       kneeToeOffDamp.set(0.0);
 
-      toeOffKpx = new DoubleYoVariable(namePrefix + "ToeOffKpx", registry);
-      toeOffKpy = new DoubleYoVariable(namePrefix + "ToeOffKpy", registry);
-      toeOffKpz = new DoubleYoVariable(namePrefix + "ToeOffKpz", registry);
-      toeOffKpRoll = new DoubleYoVariable(namePrefix + "ToeOffKpRoll", registry);
-      toeOffKpPitch = new DoubleYoVariable(namePrefix + "ToeOffKpPitch", registry);
-      toeOffKpYaw = new DoubleYoVariable(namePrefix + "ToeOffKpYaw", registry);
-      toeOffZeta = new DoubleYoVariable(namePrefix + "ToeOffZeta", registry);
+//      toeOffKpx = new DoubleYoVariable(namePrefix + "ToeOffKpx", _registry);
+//      toeOffKpy = new DoubleYoVariable(namePrefix + "ToeOffKpy", _registry);
+//      toeOffKpz = new DoubleYoVariable(namePrefix + "ToeOffKpz", _registry);
+//      toeOffKpRoll = new DoubleYoVariable(namePrefix + "ToeOffKpRoll", _registry);
+//      toeOffKpPitch = new DoubleYoVariable(namePrefix + "ToeOffKpPitch", _registry);
+//      toeOffKpYaw = new DoubleYoVariable(namePrefix + "ToeOffKpYaw", _registry);
+//      toeOffZeta = new DoubleYoVariable(namePrefix + "ToeOffZeta", _registry);
 
-      doFancyOnToesControl = new BooleanYoVariable(contactablePlaneBody.getName() + "DoFancyOnToesControl", registry);
+      doFancyOnToesControl = new BooleanYoVariable(contactablePlaneBody.getName() + "DoFancyOnToesControl", _registry);
       if (walkingControllerParameters.isRunningOnRealRobot())
          doFancyOnToesControl.set(false);
       else
          doFancyOnToesControl.set(true);
       
-      stateMachine = new StateMachine<ConstraintType>(namePrefix + "State", namePrefix + "SwitchTime", ConstraintType.class, t, registry);
+      stateMachine = new StateMachine<ConstraintType>(namePrefix + "State", namePrefix + "SwitchTime", ConstraintType.class, t, _registry);
 
 //      orientationFix = new YoFrameQuaternion(namePrefix + "OrientationFix", ReferenceFrame.getWorldFrame(), registry);
 
@@ -292,37 +275,30 @@ public class FootControlModule
       this.velocitySignForSingularityEscape = 1;
       jointVelocities = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(jacobian.getJointsInOrder()), 1);
 
-      toeContactPoints = getEdgeContactPoints2d(contactablePlaneBody, ConstraintType.TOES);
-      heelContactPoints = getEdgeContactPoints2d(contactablePlaneBody, ConstraintType.HEEL_TOUCHDOWN);
-      
-      singleToeContactPoint = new FramePoint2d(toeContactPoints.get(0).getReferenceFrame());
-      singleToeContactPoint.interpolate(toeContactPoints.get(0), toeContactPoints.get(1), 0.5);
+//      toeContactPoints = getEdgeContactPoints2d(contactablePlaneBody, ConstraintType.TOES);
+//      heelContactPoints = getEdgeContactPoints2d(contactablePlaneBody, ConstraintType.HEEL_TOUCHDOWN);
+//      
+//      singleToeContactPoint = new FramePoint2d(toeContactPoints.get(0).getReferenceFrame());
+//      singleToeContactPoint.interpolate(toeContactPoints.get(0), toeContactPoints.get(1), 0.5);
 
-      _yoDesiredLinearVelocity = new YoFrameVector(namePrefix + "DesiredLinearVelocity", worldFrame, registry);
-      _yoDesiredLinearAcceleration = new YoFrameVector(namePrefix + "DesiredLinearAcceleration", worldFrame, registry);
-      _yoDesiredPosition = new YoFramePoint(namePrefix + "DesiredPosition", worldFrame, registry);
+      _yoDesiredLinearVelocity = new YoFrameVector(namePrefix + "DesiredLinearVelocity", worldFrame, _registry);
+      _yoDesiredLinearAcceleration = new YoFrameVector(namePrefix + "DesiredLinearAcceleration", worldFrame, _registry);
+      _yoDesiredPosition = new YoFramePoint(namePrefix + "DesiredPosition", worldFrame, _registry);
       _yoDesiredPosition.setToNaN();
       
       setupContactStatesMap();
-      parentRegistry.addChild(registry);
+      parentRegistry.addChild(_registry);
       
-      _legSingularityAndKneeCollapseAvoidanceControlModule = new LegSingularityAndKneeCollapseAvoidanceControlModule(namePrefix, contactablePlaneBody, robotSide, walkingControllerParameters, momentumBasedController, dynamicGraphicObjectsListRegistry, registry);
+      _legSingularityAndKneeCollapseAvoidanceControlModule = new LegSingularityAndKneeCollapseAvoidanceControlModule(namePrefix, contactablePlaneBody, robotSide, walkingControllerParameters, momentumBasedController, dynamicGraphicObjectsListRegistry, _registry);
       
-      replanTrajectory = new BooleanYoVariable(namePrefix + "replanTrajectory", registry);
+//      replanTrajectory = new BooleanYoVariable(namePrefix + "replanTrajectory", _registry);
 //      trajectoryWasReplanned = new BooleanYoVariable(namePrefix + "trajectoryWasReplanned", registry);
-      swingTimeRemaining = new YoVariableDoubleProvider(namePrefix + "SwingTimeRemaining", registry);
+//      swingTimeRemaining = new YoVariableDoubleProvider(namePrefix + "SwingTimeRemaining", _registry);
       
-      visualize = visualize && dynamicGraphicObjectsListRegistry != null;
-      
-      if (visualize)
-      {
-         System.out.println("visualize for FootControlModule currently broken because of ongoing refactor");
-         
-         desiredOrientationFrame = null;
-         correctedDesiredOrientationFrame = null;
-         
-         desiredOrientationFrameGraphic = null;
-         correctedDesiredOrientationFrameGraphic = null;
+//      visualize = visualize && dynamicGraphicObjectsListRegistry != null;
+//      
+//      if (visualize)
+//      {
 //         desiredOrientationFrame = new ReferenceFrame(namePrefix + "DesiredOrientationFrame", worldFrame)
 //         {
 //            private final FramePoint footPosition = new FramePoint();
@@ -364,18 +340,18 @@ public class FootControlModule
 //
 //         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("JointLimitCorrection", desiredOrientationFrameGraphic);
 //         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("JointLimitCorrection", correctedDesiredOrientationFrameGraphic);
-      }
-      else
-      {
-         desiredOrientationFrame = null;
-         correctedDesiredOrientationFrame = null;
-         
-         desiredOrientationFrameGraphic = null;
-         correctedDesiredOrientationFrameGraphic = null;
-      }
+//      }
+//      else
+//      {
+//         desiredOrientationFrame = null;
+//         correctedDesiredOrientationFrame = null;
+//         
+//         desiredOrientationFrameGraphic = null;
+//         correctedDesiredOrientationFrameGraphic = null;
+//      }
       
       YoVelocityProvider finalVelocityProvider =
-            new YoVelocityProvider(namePrefix + "TouchdownVelocity", ReferenceFrame.getWorldFrame(), registry);
+            new YoVelocityProvider(namePrefix + "TouchdownVelocity", ReferenceFrame.getWorldFrame(), _registry);
       finalVelocityProvider.set(new Vector3d(0.0, 0.0, walkingControllerParameters.getDesiredTouchdownVelocity()));
       
       VectorProvider initialVelocityProvider = new CurrentLinearVelocityProvider(
@@ -383,23 +359,28 @@ public class FootControlModule
             momentumBasedController.getFullRobotModel().getFoot(robotSide), twistCalculator);
       
       List<AbstractFootControlState> states = new ArrayList<AbstractFootControlState>();
-      states.add(new TouchdownOnToesState(pitchTouchdownTrajectoryGenerator));
-      states.add(new TouchdownOnHeelState(pitchTouchdownTrajectoryGenerator));
-      states.add(new OnToesState(maximumTakeoffAngle));
+      touchdownOnToesState = new TouchdownOnToesState(pitchTouchdownTrajectoryGenerator);
+      states.add(touchdownOnToesState);
+      
+      touchdwonOnHeelState = new TouchdownOnHeelState(pitchTouchdownTrajectoryGenerator);
+      states.add(touchdwonOnHeelState);
+      
+      onToesState = new OnToesState(maximumTakeoffAngle);
+      states.add(onToesState);
       
       states.add(new FullyConstrainedState(_yoDesiredPosition, _yoDesiredLinearVelocity,
-            _yoDesiredLinearAcceleration, footSpatialAccelerationControlModule, momentumBasedController,
+            _yoDesiredLinearAcceleration, footSpatialAccelerationControlModule, _momentumBasedController,
             _contactableBody, requestHoldPosition, _requestedState, _jacobianId, _nullspaceMultiplier,
             _jacobianDeterminantInRange, _doSingularityEscape, fullyConstrainedNormalContactVector,
             _forceFootAccelerateIntoGround, doFancyOnToesControl, _legSingularityAndKneeCollapseAvoidanceControlModule,
-            _robotSide));
+            _robotSide,_registry));
       
       holdPositionState = new HoldPositionState(_yoDesiredPosition, _yoDesiredLinearVelocity, _yoDesiredLinearAcceleration,
             footSpatialAccelerationControlModule, _momentumBasedController, _contactableBody, requestHoldPosition,
             _requestedState, _jacobianId, _nullspaceMultiplier, _jacobianDeterminantInRange, _doSingularityEscape,
             fullyConstrainedNormalContactVector, _forceFootAccelerateIntoGround,
             _legSingularityAndKneeCollapseAvoidanceControlModule,
-            _robotSide);
+            _robotSide, _registry);
       states.add(holdPositionState);
       
       swingState = new SwingState(swingTimeProvider, initialPositionProvider, initialVelocityProvider,
@@ -407,24 +388,24 @@ public class FootControlModule
             finalOrientationProvider, trajectoryParametersProvider,
             
             _yoDesiredPosition, _yoDesiredLinearVelocity,
-            _yoDesiredLinearAcceleration, footSpatialAccelerationControlModule, momentumBasedController,
+            _yoDesiredLinearAcceleration, footSpatialAccelerationControlModule, _momentumBasedController,
             _contactableBody, _requestedState, _jacobianId, _nullspaceMultiplier,
             _jacobianDeterminantInRange, _doSingularityEscape,
             _forceFootAccelerateIntoGround, _legSingularityAndKneeCollapseAvoidanceControlModule,
-            _robotSide,
+            _robotSide, _registry,
             
-            isTrajectoryDone, isUnconstrained);
+            isTrajectoryDone, isUnconstrained, dynamicGraphicObjectsListRegistry, walkingControllerParameters);
       states.add(swingState);
       
       moveStraightState = new MoveStraightState(swingTimeProvider, initialPositionProvider,
             finalPositionProvider, initialOrientationProvider, finalOrientationProvider,
             
             _yoDesiredPosition, _yoDesiredLinearVelocity,
-            _yoDesiredLinearAcceleration, footSpatialAccelerationControlModule, momentumBasedController,
+            _yoDesiredLinearAcceleration, footSpatialAccelerationControlModule, _momentumBasedController,
             _contactableBody, _requestedState, _jacobianId, _nullspaceMultiplier,
             _jacobianDeterminantInRange, _doSingularityEscape,
             _forceFootAccelerateIntoGround, _legSingularityAndKneeCollapseAvoidanceControlModule,
-            _robotSide,
+            _robotSide, _registry,
             
             isTrajectoryDone, isUnconstrained);
       states.add(moveStraightState);
@@ -471,15 +452,20 @@ public class FootControlModule
 
    public void setToeOffGains(double toeOffKpXY, double toeOffKpOrientation, double toeOffZeta)
    {
-      this.toeOffZeta.set(toeOffZeta);
-      this.toeOffKpx.set(toeOffKpXY);
-      this.toeOffKpy.set(toeOffKpXY);
+//      this.toeOffZeta.set(toeOffZeta);
+//      this.toeOffKpx.set(toeOffKpXY);
+//      this.toeOffKpy.set(toeOffKpXY);
+//      
+//      this.toeOffKpz.set(0.0);
+//      
+//      this.toeOffKpRoll.set(toeOffKpOrientation);
+//      this.toeOffKpPitch.set(toeOffKpOrientation);
+//      this.toeOffKpYaw.set(toeOffKpOrientation);
+      double toeOffKpz = 0.0;
+      touchdownOnToesState.setToeOffGains(toeOffZeta, toeOffKpXY, toeOffKpXY, toeOffKpz, toeOffKpOrientation, toeOffKpOrientation, toeOffKpOrientation);
+      touchdwonOnHeelState.setToeOffGains(toeOffZeta, toeOffKpXY, toeOffKpXY, toeOffKpz, toeOffKpOrientation, toeOffKpOrientation, toeOffKpOrientation);
+      onToesState.setToeOffGains(toeOffZeta, toeOffKpXY, toeOffKpXY, toeOffKpz, toeOffKpOrientation, toeOffKpOrientation, toeOffKpOrientation);
       
-      this.toeOffKpz.set(0.0);
-      
-      this.toeOffKpRoll.set(toeOffKpOrientation);
-      this.toeOffKpPitch.set(toeOffKpOrientation);
-      this.toeOffKpYaw.set(toeOffKpOrientation);
    }
    
    private void setupContactStatesMap()
@@ -520,8 +506,7 @@ public class FootControlModule
    
    public void replanTrajectory(double swingTimeRemaining)
    {
-      this.swingTimeRemaining.set(swingTimeRemaining);
-      this.replanTrajectory.set(true);
+      swingState.replanTrajectory(swingTimeRemaining);
    }
 
    public void doSingularityEscape(boolean doSingularityEscape)
@@ -599,210 +584,217 @@ public class FootControlModule
       return stateMachine.getCurrentStateEnum();
    }
 
-   private abstract class AbstractOnEdgeState extends AbstractFootControlState
-   {
-      private final DoubleTrajectoryGenerator onEdgePitchAngleTrajectoryGenerator;
-      private final List<FramePoint2d> edgeContactPoints;
-      private final List<FramePoint> desiredEdgeContactPositions;
-      private final DoubleProvider maximumPitchAngleOnEdge;
-      protected final boolean useTrajectory, useMaximumPitchAngle;
-      // Just to make sure we're not trying to do singularity escape
-      // (the MotionConstraintHandler crashes when using point jacobian and singularity escape)
-      private final DenseMatrix64F onEdgeNullspaceMultipliers = new DenseMatrix64F(0, 1);
-      
-      private final Twist footTwist = new Twist();
-      
-      private double desiredYawToHold = 0.0;
-      private double desiredRollToHold = 0.0;
-      private final double[] tempYawPitchRoll = new double[3];
-
-      private final FramePoint contactPointPosition = new FramePoint();
-      private final FrameVector contactPointLinearVelocity = new FrameVector();
-      private final FramePoint proportionalPart = new FramePoint();
-      private final FrameVector derivativePart = new FrameVector();
-      
-      private double toeOffKdx = GainCalculator.computeDerivativeGain(toeOffKpx.getDoubleValue(), toeOffZeta.getDoubleValue());      
-      private double toeOffKdy = GainCalculator.computeDerivativeGain(toeOffKpy.getDoubleValue(), toeOffZeta.getDoubleValue());      
-      private double toeOffKdz = GainCalculator.computeDerivativeGain(toeOffKpz.getDoubleValue(), toeOffZeta.getDoubleValue());
-
-      public AbstractOnEdgeState(ConstraintType stateEnum, List<FramePoint2d> edgeContactPoints, DoubleProvider maximumPitchAngleOnEdge)
-      {
-         super(stateEnum, _yoDesiredPosition, _yoDesiredLinearVelocity, _yoDesiredLinearAcceleration,
-               footSpatialAccelerationControlModule, _momentumBasedController, _contactableBody,
-               _requestedState, _jacobianId, _nullspaceMultiplier, _jacobianDeterminantInRange,
-               _doSingularityEscape, _forceFootAccelerateIntoGround, _legSingularityAndKneeCollapseAvoidanceControlModule,
-               _robotSide);
-         this.onEdgePitchAngleTrajectoryGenerator = null;
-         this.maximumPitchAngleOnEdge = maximumPitchAngleOnEdge;
-         useTrajectory = false;
-         useMaximumPitchAngle = maximumPitchAngleOnEdge != null;
-
-         if (edgeContactPoints.size() != NUMBER_OF_CONTACTS_POINTS_TO_ROTATE_ABOUT)
-            throw new RuntimeException("Number of contacts not handled for OnEdgeState: " + edgeContactPoints.size());
-
-         this.edgeContactPoints = edgeContactPoints;
-         desiredEdgeContactPositions = new ArrayList<FramePoint>();
-         for (int i = 0; i < 2; i++)
-            desiredEdgeContactPositions.add(edgeContactPoints.get(i).toFramePoint());
-      }
-
-      public void doTransitionIntoAction()
-      {
-         toeOffKdx = GainCalculator.computeDerivativeGain(toeOffKpx.getDoubleValue(), toeOffZeta.getDoubleValue());      
-         toeOffKdy = GainCalculator.computeDerivativeGain(toeOffKpy.getDoubleValue(), toeOffZeta.getDoubleValue());      
-         toeOffKdz = GainCalculator.computeDerivativeGain(toeOffKpz.getDoubleValue(), toeOffZeta.getDoubleValue());
-         
-         edgeToRotateAbout.set(edgeContactPoints.get(0), edgeContactPoints.get(1));
-         for (int i = 0; i < 2; i++)
-         {
-            desiredEdgeContactPositions.get(i).setIncludingFrame(edgeContactPoints.get(i).getReferenceFrame(), edgeContactPoints.get(i).getX(), edgeContactPoints.get(i).getY(), 0.0);
-            desiredEdgeContactPositions.get(i).changeFrame(rootBody.getBodyFixedFrame());
-         }
-         
-         if (onEdgePitchAngleTrajectoryGenerator != null)
-         {
-            onEdgePitchAngleTrajectoryGenerator.initialize();
-         }
-         
-         desiredOrientation.setToZero(contactableBody.getBodyFrame());
-         desiredOrientation.changeFrame(worldFrame);
-         desiredYawToHold = desiredOrientation.getYaw();
-         desiredRollToHold = desiredOrientation.getRoll();
-      }
-
-      public void doSpecificAction()
-      {
-         desiredOrientation.setToZero(contactableBody.getBodyFrame());
-         desiredOrientation.changeFrame(worldFrame);
-         desiredOrientation.getYawPitchRoll(tempYawPitchRoll);
-
-         twistCalculator.packRelativeTwist(footTwist, rootBody, contactableBody.getRigidBody());
-         footTwist.changeFrame(contactableBody.getBodyFrame());
-
-         boolean blockToMaximumPitch = useMaximumPitchAngle && tempYawPitchRoll[1] > maximumPitchAngleOnEdge.getValue();
-
-         double footPitch = 0.0, footPitchd = 0.0, footPitchdd = 0.0;
-
-         desiredPosition.setToZero(contactableBody.getBodyFrame());
-         desiredPosition.changeFrame(worldFrame);
-
-         if (useTrajectory)
-         {
-            onEdgePitchAngleTrajectoryGenerator.compute(getTimeInCurrentState());
-            footPitch = onEdgePitchAngleTrajectoryGenerator.getValue();
-            footPitchd = onEdgePitchAngleTrajectoryGenerator.getVelocity();
-            footPitchdd = onEdgePitchAngleTrajectoryGenerator.getAcceleration();
-            desiredOnEdgeAngle.set(footPitch);
-         }
-         else if (useMaximumPitchAngle)
-         {
-            if (blockToMaximumPitch)
-            {
-               footPitch = maximumPitchAngleOnEdge.getValue();
-               footPitchd = 0.0;
-               footPitchdd = 0.0;
-            }
-            else
-            {
-               footPitch = desiredOrientation.getPitch();
-               footPitchd = footTwist.getAngularPartY();
-               footPitchdd = 0.0;
-            }
-         }
-
-         if (useTrajectory || useMaximumPitchAngle)
-         {
-            if (USE_TOEOFF_FOOT_HOLD_POSITION)
-               desiredOrientation.setYawPitchRoll(desiredYawToHold, footPitch, desiredRollToHold);
-            else
-               desiredOrientation.setYawPitchRoll(tempYawPitchRoll[0], footPitch, tempYawPitchRoll[2]);
-
-            desiredLinearVelocity.setToZero(worldFrame);
-            desiredAngularVelocity.setIncludingFrame(contactableBody.getBodyFrame(), 0.0, footPitchd, 0.0);
-            desiredAngularVelocity.changeFrame(worldFrame);
-
-            desiredLinearAcceleration.setToZero(worldFrame);
-            desiredAngularAcceleration.setIncludingFrame(contactableBody.getBodyFrame(), 0.0, footPitchdd, 0.0);
-            desiredAngularAcceleration.changeFrame(worldFrame);
-
-            accelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity,
-                  desiredAngularVelocity, desiredLinearAcceleration, desiredAngularAcceleration, rootBody);
-            accelerationControlModule.packAcceleration(footAcceleration);
-         }
-
-         if (momentumBasedController.isUsingOptimizationMomentumControlModule())
-         {
-            
-            for (int i = 0; i < edgeContactPoints.size(); i++)
-            {
-               FramePoint2d contactPoint2d = edgeContactPoints.get(i);
-               contactPointPosition.setIncludingFrame(contactPoint2d.getReferenceFrame(), contactPoint2d.getX(), contactPoint2d.getY(), 0.0);
-               
-               contactPointPosition.changeFrame(footTwist.getBaseFrame());
-               footTwist.changeFrame(footTwist.getBaseFrame());
-               footTwist.packVelocityOfPointFixedInBodyFrame(contactPointLinearVelocity, contactPointPosition);
-               contactPointPosition.changeFrame(rootBody.getBodyFixedFrame());
-
-               proportionalPart.changeFrame(rootBody.getBodyFixedFrame());
-               proportionalPart.sub(desiredEdgeContactPositions.get(i), contactPointPosition);
-               proportionalPart.scale(toeOffKpx.getDoubleValue(), toeOffKpy.getDoubleValue(), toeOffKpz.getDoubleValue());
-               
-               derivativePart.setToZero(rootBody.getBodyFixedFrame());
-               derivativePart.sub(contactPointLinearVelocity);
-               derivativePart.scale(toeOffKdx, toeOffKdy, toeOffKdz);
-               
-               desiredLinearAcceleration.setToZero(rootBody.getBodyFixedFrame());
-               desiredLinearAcceleration.add(proportionalPart);
-               desiredLinearAcceleration.add(derivativePart);
-
-               if (forceFootAccelerateIntoGround.getBooleanValue())
-                  desiredLinearAcceleration.setZ(desiredZAccelerationIntoGround);
-               
-               momentumBasedController.setDesiredPointAcceleration(rootToFootJacobianId, contactPointPosition, desiredLinearAcceleration);
-            }
-
-            if (useTrajectory || useMaximumPitchAngle)
-            {
-               FrameVector2d axisOfRotation2d = edgeToRotateAbout.getVectorCopy();
-               FrameVector axisOfRotation = new FrameVector(axisOfRotation2d.getReferenceFrame(), axisOfRotation2d.getX(), axisOfRotation2d.getY(), 0.0);
-               axisOfRotation.normalize();
-               axisOfRotation.changeFrame(footAcceleration.getExpressedInFrame());
-
-               selectionMatrix.reshape(2, SpatialMotionVector.SIZE);
-               selectionMatrix.set(0, 0, axisOfRotation.getX());
-               selectionMatrix.set(0, 1, axisOfRotation.getY());
-               selectionMatrix.set(0, 2, axisOfRotation.getZ());
-               selectionMatrix.set(1, 0, 0.0);
-               selectionMatrix.set(1, 1, 0.0);
-               selectionMatrix.set(1, 2, 1.0);
-
-               footAcceleration.changeBodyFrameNoRelativeAcceleration(jacobian.getEndEffectorFrame());
-               footAcceleration.changeFrameNoRelativeMotion(jacobian.getEndEffectorFrame());
-               taskspaceConstraintData.set(footAcceleration, onEdgeNullspaceMultipliers, selectionMatrix);
-               momentumBasedController.setDesiredSpatialAcceleration(jacobianId, taskspaceConstraintData);
-            }
-         }
-         else
-         {
-            spatialAccelerationProjector.projectAcceleration(footAcceleration, edgeToRotateAbout);
-
-            setTaskspaceConstraint(footAcceleration);
-         }
-      }
-
-      public void doTransitionOutOfAction()
-      {
-         // TODO: kind of a hack
-         selectionMatrix.reshape(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
-         CommonOps.setIdentity(selectionMatrix);
-      }
-   }
+//   private abstract class AbstractOnEdgeState extends AbstractFootControlState
+//   {
+//      private final DoubleTrajectoryGenerator onEdgePitchAngleTrajectoryGenerator;
+//      private final List<FramePoint2d> edgeContactPoints;
+//      private final List<FramePoint> desiredEdgeContactPositions;
+//      private final DoubleProvider maximumPitchAngleOnEdge;
+//      protected final boolean useTrajectory, useMaximumPitchAngle;
+//      // Just to make sure we're not trying to do singularity escape
+//      // (the MotionConstraintHandler crashes when using point jacobian and singularity escape)
+//      private final DenseMatrix64F onEdgeNullspaceMultipliers = new DenseMatrix64F(0, 1);
+//      
+//      private final Twist footTwist = new Twist();
+//      
+//      private double desiredYawToHold = 0.0;
+//      private double desiredRollToHold = 0.0;
+//      private final double[] tempYawPitchRoll = new double[3];
+//
+//      private final FramePoint contactPointPosition = new FramePoint();
+//      private final FrameVector contactPointLinearVelocity = new FrameVector();
+//      private final FramePoint proportionalPart = new FramePoint();
+//      private final FrameVector derivativePart = new FrameVector();
+//      
+//      private double toeOffKdx = GainCalculator.computeDerivativeGain(toeOffKpx.getDoubleValue(), toeOffZeta.getDoubleValue());      
+//      private double toeOffKdy = GainCalculator.computeDerivativeGain(toeOffKpy.getDoubleValue(), toeOffZeta.getDoubleValue());      
+//      private double toeOffKdz = GainCalculator.computeDerivativeGain(toeOffKpz.getDoubleValue(), toeOffZeta.getDoubleValue());
+//
+//      public AbstractOnEdgeState(ConstraintType stateEnum, List<FramePoint2d> edgeContactPoints, DoubleProvider maximumPitchAngleOnEdge)
+//      {
+//         super(stateEnum, _yoDesiredPosition, _yoDesiredLinearVelocity, _yoDesiredLinearAcceleration,
+//               footSpatialAccelerationControlModule, _momentumBasedController, _contactableBody,
+//               _requestedState, _jacobianId, _nullspaceMultiplier, _jacobianDeterminantInRange,
+//               _doSingularityEscape, _forceFootAccelerateIntoGround, _legSingularityAndKneeCollapseAvoidanceControlModule,
+//               _robotSide, _registry);
+//         this.onEdgePitchAngleTrajectoryGenerator = null;
+//         this.maximumPitchAngleOnEdge = maximumPitchAngleOnEdge;
+//         useTrajectory = false;
+//         useMaximumPitchAngle = maximumPitchAngleOnEdge != null;
+//
+//         if (edgeContactPoints.size() != NUMBER_OF_CONTACTS_POINTS_TO_ROTATE_ABOUT)
+//            throw new RuntimeException("Number of contacts not handled for OnEdgeState: " + edgeContactPoints.size());
+//
+//         this.edgeContactPoints = edgeContactPoints;
+//         desiredEdgeContactPositions = new ArrayList<FramePoint>();
+//         for (int i = 0; i < 2; i++)
+//            desiredEdgeContactPositions.add(edgeContactPoints.get(i).toFramePoint());
+//      }
+//
+//      public void doTransitionIntoAction()
+//      {
+//         toeOffKdx = GainCalculator.computeDerivativeGain(toeOffKpx.getDoubleValue(), toeOffZeta.getDoubleValue());      
+//         toeOffKdy = GainCalculator.computeDerivativeGain(toeOffKpy.getDoubleValue(), toeOffZeta.getDoubleValue());      
+//         toeOffKdz = GainCalculator.computeDerivativeGain(toeOffKpz.getDoubleValue(), toeOffZeta.getDoubleValue());
+//         
+//         edgeToRotateAbout.set(edgeContactPoints.get(0), edgeContactPoints.get(1));
+//         for (int i = 0; i < 2; i++)
+//         {
+//            desiredEdgeContactPositions.get(i).setIncludingFrame(edgeContactPoints.get(i).getReferenceFrame(), edgeContactPoints.get(i).getX(), edgeContactPoints.get(i).getY(), 0.0);
+//            desiredEdgeContactPositions.get(i).changeFrame(rootBody.getBodyFixedFrame());
+//         }
+//         
+//         if (onEdgePitchAngleTrajectoryGenerator != null)
+//         {
+//            onEdgePitchAngleTrajectoryGenerator.initialize();
+//         }
+//         
+//         desiredOrientation.setToZero(contactableBody.getBodyFrame());
+//         desiredOrientation.changeFrame(worldFrame);
+//         desiredYawToHold = desiredOrientation.getYaw();
+//         desiredRollToHold = desiredOrientation.getRoll();
+//      }
+//
+//      public void doSpecificAction()
+//      {
+//         desiredOrientation.setToZero(contactableBody.getBodyFrame());
+//         desiredOrientation.changeFrame(worldFrame);
+//         desiredOrientation.getYawPitchRoll(tempYawPitchRoll);
+//
+//         twistCalculator.packRelativeTwist(footTwist, rootBody, contactableBody.getRigidBody());
+//         footTwist.changeFrame(contactableBody.getBodyFrame());
+//
+//         boolean blockToMaximumPitch = useMaximumPitchAngle && tempYawPitchRoll[1] > maximumPitchAngleOnEdge.getValue();
+//
+//         double footPitch = 0.0, footPitchd = 0.0, footPitchdd = 0.0;
+//
+//         desiredPosition.setToZero(contactableBody.getBodyFrame());
+//         desiredPosition.changeFrame(worldFrame);
+//
+//         if (useTrajectory)
+//         {
+//            onEdgePitchAngleTrajectoryGenerator.compute(getTimeInCurrentState());
+//            footPitch = onEdgePitchAngleTrajectoryGenerator.getValue();
+//            footPitchd = onEdgePitchAngleTrajectoryGenerator.getVelocity();
+//            footPitchdd = onEdgePitchAngleTrajectoryGenerator.getAcceleration();
+//            desiredOnEdgeAngle.set(footPitch);
+//         }
+//         else if (useMaximumPitchAngle)
+//         {
+//            if (blockToMaximumPitch)
+//            {
+//               footPitch = maximumPitchAngleOnEdge.getValue();
+//               footPitchd = 0.0;
+//               footPitchdd = 0.0;
+//            }
+//            else
+//            {
+//               footPitch = desiredOrientation.getPitch();
+//               footPitchd = footTwist.getAngularPartY();
+//               footPitchdd = 0.0;
+//            }
+//         }
+//
+//         if (useTrajectory || useMaximumPitchAngle)
+//         {
+//            if (USE_TOEOFF_FOOT_HOLD_POSITION)
+//               desiredOrientation.setYawPitchRoll(desiredYawToHold, footPitch, desiredRollToHold);
+//            else
+//               desiredOrientation.setYawPitchRoll(tempYawPitchRoll[0], footPitch, tempYawPitchRoll[2]);
+//
+//            desiredLinearVelocity.setToZero(worldFrame);
+//            desiredAngularVelocity.setIncludingFrame(contactableBody.getBodyFrame(), 0.0, footPitchd, 0.0);
+//            desiredAngularVelocity.changeFrame(worldFrame);
+//
+//            desiredLinearAcceleration.setToZero(worldFrame);
+//            desiredAngularAcceleration.setIncludingFrame(contactableBody.getBodyFrame(), 0.0, footPitchdd, 0.0);
+//            desiredAngularAcceleration.changeFrame(worldFrame);
+//
+//            accelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity,
+//                  desiredAngularVelocity, desiredLinearAcceleration, desiredAngularAcceleration, rootBody);
+//            accelerationControlModule.packAcceleration(footAcceleration);
+//         }
+//
+//         if (momentumBasedController.isUsingOptimizationMomentumControlModule())
+//         {
+//            
+//            for (int i = 0; i < edgeContactPoints.size(); i++)
+//            {
+//               FramePoint2d contactPoint2d = edgeContactPoints.get(i);
+//               contactPointPosition.setIncludingFrame(contactPoint2d.getReferenceFrame(), contactPoint2d.getX(), contactPoint2d.getY(), 0.0);
+//               
+//               contactPointPosition.changeFrame(footTwist.getBaseFrame());
+//               footTwist.changeFrame(footTwist.getBaseFrame());
+//               footTwist.packVelocityOfPointFixedInBodyFrame(contactPointLinearVelocity, contactPointPosition);
+//               contactPointPosition.changeFrame(rootBody.getBodyFixedFrame());
+//
+//               proportionalPart.changeFrame(rootBody.getBodyFixedFrame());
+//               proportionalPart.sub(desiredEdgeContactPositions.get(i), contactPointPosition);
+//               proportionalPart.scale(toeOffKpx.getDoubleValue(), toeOffKpy.getDoubleValue(), toeOffKpz.getDoubleValue());
+//               
+//               derivativePart.setToZero(rootBody.getBodyFixedFrame());
+//               derivativePart.sub(contactPointLinearVelocity);
+//               derivativePart.scale(toeOffKdx, toeOffKdy, toeOffKdz);
+//               
+//               desiredLinearAcceleration.setToZero(rootBody.getBodyFixedFrame());
+//               desiredLinearAcceleration.add(proportionalPart);
+//               desiredLinearAcceleration.add(derivativePart);
+//
+//               if (forceFootAccelerateIntoGround.getBooleanValue())
+//                  desiredLinearAcceleration.setZ(desiredZAccelerationIntoGround);
+//               
+//               momentumBasedController.setDesiredPointAcceleration(rootToFootJacobianId, contactPointPosition, desiredLinearAcceleration);
+//            }
+//
+//            if (useTrajectory || useMaximumPitchAngle)
+//            {
+//               FrameVector2d axisOfRotation2d = edgeToRotateAbout.getVectorCopy();
+//               FrameVector axisOfRotation = new FrameVector(axisOfRotation2d.getReferenceFrame(), axisOfRotation2d.getX(), axisOfRotation2d.getY(), 0.0);
+//               axisOfRotation.normalize();
+//               axisOfRotation.changeFrame(footAcceleration.getExpressedInFrame());
+//
+//               selectionMatrix.reshape(2, SpatialMotionVector.SIZE);
+//               selectionMatrix.set(0, 0, axisOfRotation.getX());
+//               selectionMatrix.set(0, 1, axisOfRotation.getY());
+//               selectionMatrix.set(0, 2, axisOfRotation.getZ());
+//               selectionMatrix.set(1, 0, 0.0);
+//               selectionMatrix.set(1, 1, 0.0);
+//               selectionMatrix.set(1, 2, 1.0);
+//
+//               footAcceleration.changeBodyFrameNoRelativeAcceleration(jacobian.getEndEffectorFrame());
+//               footAcceleration.changeFrameNoRelativeMotion(jacobian.getEndEffectorFrame());
+//               taskspaceConstraintData.set(footAcceleration, onEdgeNullspaceMultipliers, selectionMatrix);
+//               momentumBasedController.setDesiredSpatialAcceleration(jacobianId, taskspaceConstraintData);
+//            }
+//         }
+//         else
+//         {
+//            spatialAccelerationProjector.projectAcceleration(footAcceleration, edgeToRotateAbout);
+//
+//            setTaskspaceConstraint(footAcceleration);
+//         }
+//      }
+//
+//      public void doTransitionOutOfAction()
+//      {
+//         // TODO: kind of a hack
+//         selectionMatrix.reshape(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
+//         CommonOps.setIdentity(selectionMatrix);
+//      }
+//   }
 
    private class TouchdownOnHeelState extends AbstractOnEdgeState
    {
       public TouchdownOnHeelState(DoubleTrajectoryGenerator pitchTouchdownTrajectoryGenerator)
       {
-         super(ConstraintType.HEEL_TOUCHDOWN, heelContactPoints, pitchTouchdownTrajectoryGenerator);
+         super(ConstraintType.HEEL_TOUCHDOWN, pitchTouchdownTrajectoryGenerator,
+               
+               _yoDesiredPosition, _yoDesiredLinearVelocity,
+               _yoDesiredLinearAcceleration, footSpatialAccelerationControlModule, _momentumBasedController,
+               _contactableBody, _requestedState, _jacobianId, _nullspaceMultiplier,
+               _jacobianDeterminantInRange, _doSingularityEscape,
+               _forceFootAccelerateIntoGround, _legSingularityAndKneeCollapseAvoidanceControlModule,
+               _robotSide, _registry);
       }
 
       @Override
@@ -817,7 +809,14 @@ public class FootControlModule
    {
       public TouchdownOnToesState(DoubleTrajectoryGenerator pitchTouchdownTrajectoryGenerator)
       {
-         super(ConstraintType.TOES_TOUCHDOWN, heelContactPoints, pitchTouchdownTrajectoryGenerator);
+         super(ConstraintType.TOES_TOUCHDOWN, pitchTouchdownTrajectoryGenerator,
+               
+               _yoDesiredPosition, _yoDesiredLinearVelocity,
+               _yoDesiredLinearAcceleration, footSpatialAccelerationControlModule, _momentumBasedController,
+               _contactableBody, _requestedState, _jacobianId, _nullspaceMultiplier,
+               _jacobianDeterminantInRange, _doSingularityEscape,
+               _forceFootAccelerateIntoGround, _legSingularityAndKneeCollapseAvoidanceControlModule,
+               _robotSide, _registry);
       }
 
       @Override
@@ -833,11 +832,23 @@ public class FootControlModule
       private final YoPlaneContactState contactState = momentumBasedController.getContactState(contactableBody);
       private final List<YoContactPoint> contactPoints = contactState.getContactPoints();
       private final List<FramePoint> originalContactPointPositions;
+      
+      private final FramePoint2d singleToeContactPoint;
 
       public OnToesState(DoubleProvider maximumTakeoffAngle)
       {
-         super(ConstraintType.TOES, toeContactPoints, maximumTakeoffAngle);
+         super(ConstraintType.TOES, maximumTakeoffAngle,
+               
+               _yoDesiredPosition, _yoDesiredLinearVelocity,
+               _yoDesiredLinearAcceleration, footSpatialAccelerationControlModule, _momentumBasedController,
+               _contactableBody, _requestedState, _jacobianId, _nullspaceMultiplier,
+               _jacobianDeterminantInRange, _doSingularityEscape,
+               _forceFootAccelerateIntoGround, _legSingularityAndKneeCollapseAvoidanceControlModule,
+               _robotSide, _registry);
 
+         singleToeContactPoint = new FramePoint2d(edgeContactPoints.get(0).getReferenceFrame());
+         singleToeContactPoint.interpolate(edgeContactPoints.get(0), edgeContactPoints.get(1), 0.5);
+         
          originalContactPointPositions = new ArrayList<FramePoint>(contactPoints.size());
          copyOriginalContactPointPositions();
       }
@@ -907,173 +918,187 @@ public class FootControlModule
          
          controlledKneeToeOffQdd.set(0.0);
       }
-   }
-
-   private class SwingState extends AbstractUnconstrainedState
-   {
-      private final boolean visualizeSwingTrajectory = true;
-
-      private final PositionTrajectoryGenerator positionTrajectoryGenerator, pushRecoveryPositionTrajectoryGenerator;
-      private final OrientationInterpolationTrajectoryGenerator orientationTrajectoryGenerator;      
       
-      public SwingState(DoubleProvider swingTimeProvider, PositionProvider initialPositionProvider, VectorProvider initialVelocityProvider,
-            PositionProvider finalPositionProvider, VectorProvider finalVelocityProvider, OrientationProvider initialOrientationProvider,
-            OrientationProvider finalOrientationProvider, TrajectoryParametersProvider trajectoryParametersProvider,
-            
-            YoFramePoint yoDesiredPosition, YoFrameVector yoDesiredLinearVelocity, YoFrameVector yoDesiredLinearAcceleration,
-            RigidBodySpatialAccelerationControlModule accelerationControlModule,
-            MomentumBasedController momentumBasedController, ContactablePlaneBody contactableBody,
-            EnumYoVariable<ConstraintType> requestedState, int jacobianId, 
-            DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange,
-            BooleanYoVariable doSingularityEscape, BooleanYoVariable forceFootAccelerateIntoGround,
-            LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule,
-            RobotSide robotSide,
-            
-            BooleanYoVariable isTrajectoryDone, BooleanYoVariable isUnconstrained)
+      private void setOnToesFreeMotionGains()
       {
-         super(ConstraintType.SWING, yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration,
-               accelerationControlModule, momentumBasedController, contactableBody,
-               requestedState, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange,
-               doSingularityEscape, forceFootAccelerateIntoGround, legSingularityAndKneeCollapseAvoidanceControlModule,
-               robotSide,
-               
-               isTrajectoryDone, isUnconstrained);
+         double kPosition = 0.0;
+         double dPosition = GainCalculator.computeDerivativeGain(0.0, toeOffZeta);
+         double dxOrientation = GainCalculator.computeDerivativeGain(toeOffKpRoll, toeOffZeta);
+         double dyOrientation = GainCalculator.computeDerivativeGain(toeOffKpPitch, toeOffZeta);
+         double dzOrientation = GainCalculator.computeDerivativeGain(toeOffKpYaw, toeOffZeta);
 
-         RigidBody rigidBody = contactableBody.getRigidBody();
-         String namePrefix = rigidBody.getName();
-
-         ArrayList<PositionTrajectoryGenerator> positionTrajectoryGenerators = new ArrayList<PositionTrajectoryGenerator>();
-         ArrayList<PositionTrajectoryGenerator> pushRecoveryPositionTrajectoryGenerators = new ArrayList<PositionTrajectoryGenerator>();
-
-         if (trajectoryParametersProvider == null)
-         {
-            trajectoryParametersProvider = new TrajectoryParametersProvider(new SimpleTwoWaypointTrajectoryParameters());
-         }
-
-         PositionTrajectoryGenerator swingTrajectoryGenerator = new TwoWaypointPositionTrajectoryGenerator(namePrefix + "Swing", worldFrame,
-               swingTimeProvider, initialPositionProvider, initialVelocityProvider, finalPositionProvider, finalVelocityProvider,
-               trajectoryParametersProvider, registry, dynamicGraphicObjectsListRegistry, walkingControllerParameters, visualizeSwingTrajectory);
-
-         PositionTrajectoryGenerator touchdownTrajectoryGenerator = new SoftTouchdownPositionTrajectoryGenerator(namePrefix + "Touchdown", worldFrame,
-               finalPositionProvider, finalVelocityProvider, swingTimeProvider, registry);
-
-         PositionTrajectoryGenerator pushRecoverySwingTrajectoryGenerator = new TwoWaypointTrajectoryGeneratorWithPushRecovery(
-               namePrefix + "PushRecoverySwing", worldFrame, swingTimeProvider, swingTimeRemaining, initialPositionProvider,
-               initialVelocityProvider, finalPositionProvider, finalVelocityProvider, trajectoryParametersProvider, registry,
-               dynamicGraphicObjectsListRegistry, swingTrajectoryGenerator, walkingControllerParameters, visualizeSwingTrajectory);
-
-         positionTrajectoryGenerators.add(swingTrajectoryGenerator);
-         positionTrajectoryGenerators.add(touchdownTrajectoryGenerator);
-
-         pushRecoveryPositionTrajectoryGenerators.add(pushRecoverySwingTrajectoryGenerator);
-         pushRecoveryPositionTrajectoryGenerators.add(touchdownTrajectoryGenerator);
-
-         positionTrajectoryGenerator = new WrapperForMultiplePositionTrajectoryGenerators(positionTrajectoryGenerators, namePrefix, registry);
-
-         pushRecoveryPositionTrajectoryGenerator = new WrapperForMultiplePositionTrajectoryGenerators(pushRecoveryPositionTrajectoryGenerators, namePrefix
-               + "PushRecoveryTrajectoryGenerator", registry);
-
-         orientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator(namePrefix + "SwingFootOrientation", worldFrame,
-               swingTimeProvider, initialOrientationProvider, finalOrientationProvider, registry);
-      }
-
-      protected void initializeTrajectory()
-      {
-         positionTrajectoryGenerator.initialize();
-         orientationTrajectoryGenerator.initialize();
-
-         trajectoryWasReplanned = false;
-         replanTrajectory.set(false);
-      }
-
-      protected void computeAndPackTrajectory()
-      {
-         if (replanTrajectory.getBooleanValue()) // This seems like a bad place for this?
-         {
-            pushRecoveryPositionTrajectoryGenerator.initialize();
-            replanTrajectory.set(false);
-            trajectoryWasReplanned = true;
-         }
-
-         if (!trajectoryWasReplanned)
-         {
-            boolean isDone = positionTrajectoryGenerator.isDone() && orientationTrajectoryGenerator.isDone();
-            isTrajectoryDone.set(isDone);
-
-            positionTrajectoryGenerator.compute(getTimeInCurrentState());
-
-            positionTrajectoryGenerator.packLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
-         }
-         else
-         {
-            boolean isDone = pushRecoveryPositionTrajectoryGenerator.isDone() && orientationTrajectoryGenerator.isDone();
-            isTrajectoryDone.set(isDone);
-
-            pushRecoveryPositionTrajectoryGenerator.compute(getTimeInCurrentState());
-
-            pushRecoveryPositionTrajectoryGenerator.packLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
-         }
-
-         orientationTrajectoryGenerator.compute(getTimeInCurrentState());
-         orientationTrajectoryGenerator.packAngularData(trajectoryOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+         accelerationControlModule.setPositionProportionalGains(kPosition, kPosition, kPosition);
+         accelerationControlModule.setPositionDerivativeGains(dPosition, dPosition, dPosition);
+         accelerationControlModule.setOrientationProportionalGains(toeOffKpRoll, toeOffKpPitch, toeOffKpYaw);
+         accelerationControlModule.setOrientationDerivativeGains(dxOrientation, dyOrientation, dzOrientation);
       }
    }
 
-   private class MoveStraightState extends AbstractUnconstrainedState
-   {
-      private StraightLinePositionTrajectoryGenerator positionTrajectoryGenerator;
-      private OrientationInterpolationTrajectoryGenerator orientationTrajectoryGenerator;
+//   private class SwingState extends AbstractUnconstrainedState
+//   {
+//      private final boolean visualizeSwingTrajectory = true;
+//
+//      private final PositionTrajectoryGenerator positionTrajectoryGenerator, pushRecoveryPositionTrajectoryGenerator;
+//      private final OrientationInterpolationTrajectoryGenerator orientationTrajectoryGenerator;      
+//      
+//      public SwingState(DoubleProvider swingTimeProvider, PositionProvider initialPositionProvider, VectorProvider initialVelocityProvider,
+//            PositionProvider finalPositionProvider, VectorProvider finalVelocityProvider, OrientationProvider initialOrientationProvider,
+//            OrientationProvider finalOrientationProvider, TrajectoryParametersProvider trajectoryParametersProvider,
+//            
+//            YoFramePoint yoDesiredPosition, YoFrameVector yoDesiredLinearVelocity, YoFrameVector yoDesiredLinearAcceleration,
+//            RigidBodySpatialAccelerationControlModule accelerationControlModule,
+//            MomentumBasedController momentumBasedController, ContactablePlaneBody contactableBody,
+//            EnumYoVariable<ConstraintType> requestedState, int jacobianId, 
+//            DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange,
+//            BooleanYoVariable doSingularityEscape, BooleanYoVariable forceFootAccelerateIntoGround,
+//            LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule,
+//            RobotSide robotSide,
+//            
+//            BooleanYoVariable isTrajectoryDone, BooleanYoVariable isUnconstrained)
+//      {
+//         super(ConstraintType.SWING, yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration,
+//               accelerationControlModule, momentumBasedController, contactableBody,
+//               requestedState, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange,
+//               doSingularityEscape, forceFootAccelerateIntoGround, legSingularityAndKneeCollapseAvoidanceControlModule,
+//               robotSide, _registry,
+//               
+//               isTrajectoryDone, isUnconstrained);
+//
+//         RigidBody rigidBody = contactableBody.getRigidBody();
+//         String namePrefix = rigidBody.getName();
+//
+//         ArrayList<PositionTrajectoryGenerator> positionTrajectoryGenerators = new ArrayList<PositionTrajectoryGenerator>();
+//         ArrayList<PositionTrajectoryGenerator> pushRecoveryPositionTrajectoryGenerators = new ArrayList<PositionTrajectoryGenerator>();
+//
+//         if (trajectoryParametersProvider == null)
+//         {
+//            trajectoryParametersProvider = new TrajectoryParametersProvider(new SimpleTwoWaypointTrajectoryParameters());
+//         }
+//
+//         PositionTrajectoryGenerator swingTrajectoryGenerator = new TwoWaypointPositionTrajectoryGenerator(namePrefix + "Swing", worldFrame,
+//               swingTimeProvider, initialPositionProvider, initialVelocityProvider, finalPositionProvider, finalVelocityProvider,
+//               trajectoryParametersProvider, registry, dynamicGraphicObjectsListRegistry, walkingControllerParameters, visualizeSwingTrajectory);
+//
+//         PositionTrajectoryGenerator touchdownTrajectoryGenerator = new SoftTouchdownPositionTrajectoryGenerator(namePrefix + "Touchdown", worldFrame,
+//               finalPositionProvider, finalVelocityProvider, swingTimeProvider, registry);
+//
+//         PositionTrajectoryGenerator pushRecoverySwingTrajectoryGenerator = new TwoWaypointTrajectoryGeneratorWithPushRecovery(
+//               namePrefix + "PushRecoverySwing", worldFrame, swingTimeProvider, swingTimeRemaining, initialPositionProvider,
+//               initialVelocityProvider, finalPositionProvider, finalVelocityProvider, trajectoryParametersProvider, registry,
+//               dynamicGraphicObjectsListRegistry, swingTrajectoryGenerator, walkingControllerParameters, visualizeSwingTrajectory);
+//
+//         positionTrajectoryGenerators.add(swingTrajectoryGenerator);
+//         positionTrajectoryGenerators.add(touchdownTrajectoryGenerator);
+//
+//         pushRecoveryPositionTrajectoryGenerators.add(pushRecoverySwingTrajectoryGenerator);
+//         pushRecoveryPositionTrajectoryGenerators.add(touchdownTrajectoryGenerator);
+//
+//         positionTrajectoryGenerator = new WrapperForMultiplePositionTrajectoryGenerators(positionTrajectoryGenerators, namePrefix, registry);
+//
+//         pushRecoveryPositionTrajectoryGenerator = new WrapperForMultiplePositionTrajectoryGenerators(pushRecoveryPositionTrajectoryGenerators, namePrefix
+//               + "PushRecoveryTrajectoryGenerator", registry);
+//
+//         orientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator(namePrefix + "SwingFootOrientation", worldFrame,
+//               swingTimeProvider, initialOrientationProvider, finalOrientationProvider, registry);
+//      }
+//
+//      protected void initializeTrajectory()
+//      {
+//         positionTrajectoryGenerator.initialize();
+//         orientationTrajectoryGenerator.initialize();
+//
+//         trajectoryWasReplanned = false;
+//         replanTrajectory.set(false);
+//      }
+//
+//      protected void computeAndPackTrajectory()
+//      {
+//         if (replanTrajectory.getBooleanValue()) // This seems like a bad place for this?
+//         {
+//            pushRecoveryPositionTrajectoryGenerator.initialize();
+//            replanTrajectory.set(false);
+//            trajectoryWasReplanned = true;
+//         }
+//
+//         if (!trajectoryWasReplanned)
+//         {
+//            boolean isDone = positionTrajectoryGenerator.isDone() && orientationTrajectoryGenerator.isDone();
+//            isTrajectoryDone.set(isDone);
+//
+//            positionTrajectoryGenerator.compute(getTimeInCurrentState());
+//
+//            positionTrajectoryGenerator.packLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
+//         }
+//         else
+//         {
+//            boolean isDone = pushRecoveryPositionTrajectoryGenerator.isDone() && orientationTrajectoryGenerator.isDone();
+//            isTrajectoryDone.set(isDone);
+//
+//            pushRecoveryPositionTrajectoryGenerator.compute(getTimeInCurrentState());
+//
+//            pushRecoveryPositionTrajectoryGenerator.packLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
+//         }
+//
+//         orientationTrajectoryGenerator.compute(getTimeInCurrentState());
+//         orientationTrajectoryGenerator.packAngularData(trajectoryOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+//      }
+//   }
 
-      public MoveStraightState(DoubleProvider footTrajectoryTimeProvider, PositionProvider initialPositionProvider,
-            PositionProvider finalPositionProvider, OrientationProvider initialOrientationProvider, OrientationProvider finalOrientationProvider,
-            
-            YoFramePoint yoDesiredPosition, YoFrameVector yoDesiredLinearVelocity, YoFrameVector yoDesiredLinearAcceleration,
-            RigidBodySpatialAccelerationControlModule accelerationControlModule,
-            MomentumBasedController momentumBasedController, ContactablePlaneBody contactableBody,
-            EnumYoVariable<ConstraintType> requestedState, int jacobianId,
-            DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange,
-            BooleanYoVariable doSingularityEscape, BooleanYoVariable forceFootAccelerateIntoGround,
-            LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule,
-            RobotSide robotSide,
-            
-            BooleanYoVariable isTrajectoryDone, BooleanYoVariable isUnconstrained)
-      {
-         super(ConstraintType.MOVE_STRAIGHT, yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration,
-               accelerationControlModule, momentumBasedController, contactableBody,
-               requestedState, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange,
-               doSingularityEscape, forceFootAccelerateIntoGround, legSingularityAndKneeCollapseAvoidanceControlModule,
-               robotSide,
-               
-               isTrajectoryDone, isUnconstrained);
-
-         RigidBody rigidBody = contactableBody.getRigidBody();
-         String namePrefix = rigidBody.getName();
-
-         positionTrajectoryGenerator = new StraightLinePositionTrajectoryGenerator(namePrefix + "FootPosition", worldFrame, footTrajectoryTimeProvider,
-               initialPositionProvider, finalPositionProvider, registry);
-
-         orientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator(namePrefix + "Orientation", worldFrame, footTrajectoryTimeProvider,
-               initialOrientationProvider, finalOrientationProvider, registry);
-      }
-
-      protected void initializeTrajectory()
-      {
-         positionTrajectoryGenerator.initialize();
-         orientationTrajectoryGenerator.initialize();
-      }
-
-      protected void computeAndPackTrajectory()
-      {
-         boolean isDone = positionTrajectoryGenerator.isDone() && orientationTrajectoryGenerator.isDone();
-         isTrajectoryDone.set(isDone);
-
-         positionTrajectoryGenerator.compute(getTimeInCurrentState());
-         orientationTrajectoryGenerator.compute(getTimeInCurrentState());
-
-         positionTrajectoryGenerator.packLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
-         orientationTrajectoryGenerator.packAngularData(trajectoryOrientation, desiredAngularVelocity, desiredAngularAcceleration);
-      }
-   }
+//   private class MoveStraightState extends AbstractUnconstrainedState
+//   {
+//      private StraightLinePositionTrajectoryGenerator positionTrajectoryGenerator;
+//      private OrientationInterpolationTrajectoryGenerator orientationTrajectoryGenerator;
+//
+//      public MoveStraightState(DoubleProvider footTrajectoryTimeProvider, PositionProvider initialPositionProvider,
+//            PositionProvider finalPositionProvider, OrientationProvider initialOrientationProvider, OrientationProvider finalOrientationProvider,
+//            
+//            YoFramePoint yoDesiredPosition, YoFrameVector yoDesiredLinearVelocity, YoFrameVector yoDesiredLinearAcceleration,
+//            RigidBodySpatialAccelerationControlModule accelerationControlModule,
+//            MomentumBasedController momentumBasedController, ContactablePlaneBody contactableBody,
+//            EnumYoVariable<ConstraintType> requestedState, int jacobianId,
+//            DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange,
+//            BooleanYoVariable doSingularityEscape, BooleanYoVariable forceFootAccelerateIntoGround,
+//            LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule,
+//            RobotSide robotSide,
+//            
+//            BooleanYoVariable isTrajectoryDone, BooleanYoVariable isUnconstrained)
+//      {
+//         super(ConstraintType.MOVE_STRAIGHT, yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration,
+//               accelerationControlModule, momentumBasedController, contactableBody,
+//               requestedState, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange,
+//               doSingularityEscape, forceFootAccelerateIntoGround, legSingularityAndKneeCollapseAvoidanceControlModule,
+//               robotSide,
+//               
+//               isTrajectoryDone, isUnconstrained);
+//
+//         RigidBody rigidBody = contactableBody.getRigidBody();
+//         String namePrefix = rigidBody.getName();
+//
+//         positionTrajectoryGenerator = new StraightLinePositionTrajectoryGenerator(namePrefix + "FootPosition", worldFrame, footTrajectoryTimeProvider,
+//               initialPositionProvider, finalPositionProvider, registry);
+//
+//         orientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator(namePrefix + "Orientation", worldFrame, footTrajectoryTimeProvider,
+//               initialOrientationProvider, finalOrientationProvider, registry);
+//      }
+//
+//      protected void initializeTrajectory()
+//      {
+//         positionTrajectoryGenerator.initialize();
+//         orientationTrajectoryGenerator.initialize();
+//      }
+//
+//      protected void computeAndPackTrajectory()
+//      {
+//         boolean isDone = positionTrajectoryGenerator.isDone() && orientationTrajectoryGenerator.isDone();
+//         isTrajectoryDone.set(isDone);
+//
+//         positionTrajectoryGenerator.compute(getTimeInCurrentState());
+//         orientationTrajectoryGenerator.compute(getTimeInCurrentState());
+//
+//         positionTrajectoryGenerator.packLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
+//         orientationTrajectoryGenerator.packAngularData(trajectoryOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+//      }
+//   }
 
 //   /**
 //    * The unconstrained state is used if the foot is moved free in space without constrains. Depending on the type of trajectory
@@ -1333,34 +1358,34 @@ public class FootControlModule
 //      footSpatialAccelerationControlModule.setOrientationDerivativeGains(dxOrientation, dyOrientation, dzOrientation);
 //   }
 
-   private void setOnToesFreeMotionGains()
-   {
-      double kPosition = 0.0;
-      double dPosition = GainCalculator.computeDerivativeGain(0.0, toeOffZeta.getDoubleValue());
-      double dxOrientation = GainCalculator.computeDerivativeGain(toeOffKpRoll.getDoubleValue(), toeOffZeta.getDoubleValue());
-      double dyOrientation = GainCalculator.computeDerivativeGain(toeOffKpPitch.getDoubleValue(), toeOffZeta.getDoubleValue());
-      double dzOrientation = GainCalculator.computeDerivativeGain(toeOffKpYaw.getDoubleValue(), toeOffZeta.getDoubleValue());
+//   private void setOnToesFreeMotionGains()
+//   {
+//      double kPosition = 0.0;
+//      double dPosition = GainCalculator.computeDerivativeGain(0.0, toeOffZeta.getDoubleValue());
+//      double dxOrientation = GainCalculator.computeDerivativeGain(toeOffKpRoll.getDoubleValue(), toeOffZeta.getDoubleValue());
+//      double dyOrientation = GainCalculator.computeDerivativeGain(toeOffKpPitch.getDoubleValue(), toeOffZeta.getDoubleValue());
+//      double dzOrientation = GainCalculator.computeDerivativeGain(toeOffKpYaw.getDoubleValue(), toeOffZeta.getDoubleValue());
+//
+//      footSpatialAccelerationControlModule.setPositionProportionalGains(kPosition, kPosition, kPosition);
+//      footSpatialAccelerationControlModule.setPositionDerivativeGains(dPosition, dPosition, dPosition);
+//      footSpatialAccelerationControlModule.setOrientationProportionalGains(toeOffKpRoll.getDoubleValue(), toeOffKpPitch.getDoubleValue(), toeOffKpYaw.getDoubleValue());
+//      footSpatialAccelerationControlModule.setOrientationDerivativeGains(dxOrientation, dyOrientation, dzOrientation);
+//   }
 
-      footSpatialAccelerationControlModule.setPositionProportionalGains(kPosition, kPosition, kPosition);
-      footSpatialAccelerationControlModule.setPositionDerivativeGains(dPosition, dPosition, dPosition);
-      footSpatialAccelerationControlModule.setOrientationProportionalGains(toeOffKpRoll.getDoubleValue(), toeOffKpPitch.getDoubleValue(), toeOffKpYaw.getDoubleValue());
-      footSpatialAccelerationControlModule.setOrientationDerivativeGains(dxOrientation, dyOrientation, dzOrientation);
-   }
-
-   private void setTouchdownOnEdgeGains()
-   {
-      double kPosition = 0.0;
-      double dPosition = GainCalculator.computeDerivativeGain(kPosition, 1.0);
-      double kxzOrientation = 300.0;
-      double kyOrientation = 0.0;
-      double dxzOrientation = GainCalculator.computeDerivativeGain(kxzOrientation, 0.4);
-      double dyOrientation = GainCalculator.computeDerivativeGain(kxzOrientation, 0.4); //Only damp the pitch velocity
-
-      footSpatialAccelerationControlModule.setPositionProportionalGains(kPosition, kPosition, kPosition);
-      footSpatialAccelerationControlModule.setPositionDerivativeGains(dPosition, dPosition, dPosition);
-      footSpatialAccelerationControlModule.setOrientationProportionalGains(kxzOrientation, kyOrientation, kxzOrientation);
-      footSpatialAccelerationControlModule.setOrientationDerivativeGains(dxzOrientation, dyOrientation, dxzOrientation);
-   }
+//   private void setTouchdownOnEdgeGains()
+//   {
+//      double kPosition = 0.0;
+//      double dPosition = GainCalculator.computeDerivativeGain(kPosition, 1.0);
+//      double kxzOrientation = 300.0;
+//      double kyOrientation = 0.0;
+//      double dxzOrientation = GainCalculator.computeDerivativeGain(kxzOrientation, 0.4);
+//      double dyOrientation = GainCalculator.computeDerivativeGain(kxzOrientation, 0.4); //Only damp the pitch velocity
+//
+//      footSpatialAccelerationControlModule.setPositionProportionalGains(kPosition, kPosition, kPosition);
+//      footSpatialAccelerationControlModule.setPositionDerivativeGains(dPosition, dPosition, dPosition);
+//      footSpatialAccelerationControlModule.setOrientationProportionalGains(kxzOrientation, kyOrientation, kxzOrientation);
+//      footSpatialAccelerationControlModule.setOrientationDerivativeGains(dxzOrientation, dyOrientation, dxzOrientation);
+//   }
 
 //   private void setGains(double kPosition, double kOrientation, double zeta)
 //   {
@@ -1477,24 +1502,24 @@ public class FootControlModule
       return getCurrentConstraintType() == ConstraintType.HEEL_TOUCHDOWN || getCurrentConstraintType() == ConstraintType.TOES_TOUCHDOWN;
    }
 
-   private List<FramePoint2d> getEdgeContactPoints2d(ContactablePlaneBody contactableBody, ConstraintType constraintType)
-   {
-      FrameVector direction = new FrameVector(contactableBody.getBodyFrame(), 1.0, 0.0, 0.0);
-      if (constraintType == ConstraintType.HEEL_TOUCHDOWN)
-         direction.scale(-1.0);
-
-      List<FramePoint> contactPoints = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(contactableBody.getContactPointsCopy(), direction,
-            NUMBER_OF_CONTACTS_POINTS_TO_ROTATE_ABOUT);
-
-      List<FramePoint2d> contactPoints2d = new ArrayList<FramePoint2d>(contactPoints.size());
-      for (FramePoint contactPoint : contactPoints)
-      {
-         contactPoint.changeFrame(contactableBody.getPlaneFrame());
-         contactPoints2d.add(contactPoint.toFramePoint2d());
-      }
-
-      return contactPoints2d;
-   }
+//   private List<FramePoint2d> getEdgeContactPoints2d(ContactablePlaneBody contactableBody, ConstraintType constraintType)
+//   {
+//      FrameVector direction = new FrameVector(contactableBody.getBodyFrame(), 1.0, 0.0, 0.0);
+//      if (constraintType == ConstraintType.HEEL_TOUCHDOWN)
+//         direction.scale(-1.0);
+//
+//      List<FramePoint> contactPoints = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(contactableBody.getContactPointsCopy(), direction,
+//            NUMBER_OF_CONTACTS_POINTS_TO_ROTATE_ABOUT);
+//
+//      List<FramePoint2d> contactPoints2d = new ArrayList<FramePoint2d>(contactPoints.size());
+//      for (FramePoint contactPoint : contactPoints)
+//      {
+//         contactPoint.changeFrame(contactableBody.getPlaneFrame());
+//         contactPoints2d.add(contactPoint.toFramePoint2d());
+//      }
+//
+//      return contactPoints2d;
+//   }
 
    private boolean[] getOnEdgeContactPointStates(ContactablePlaneBody contactableBody, ConstraintType constraintType)
    {
