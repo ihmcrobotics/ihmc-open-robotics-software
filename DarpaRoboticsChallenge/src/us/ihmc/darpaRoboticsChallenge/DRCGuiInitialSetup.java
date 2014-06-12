@@ -28,7 +28,7 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
    private final boolean groundProfileVisible;
    private final boolean drawPlaneAtZ0;
    private final SliderBoardFactory sliderBoardFactory;
-   
+
    public DRCGuiInitialSetup(boolean groundProfileVisible, boolean drawPlaneAtZeroHeight)
    {
       this(groundProfileVisible, drawPlaneAtZeroHeight, null, true);
@@ -46,13 +46,14 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
       this.sliderBoardFactory = sliderBoardFactory;
       this.isGuiShown = showGUI;
    }
+
    public void initializeGUI(SimulationConstructionSet scs, Robot robot)
    {
       // use
       // public void initializeGUI(SimulationConstructionSet scs, Robot robot, DRCRobotModel robotModel)
       throw new RuntimeException("Should not be here. This function is a relict of the GuiInitialSetup interface.");
    }
-   
+
    public void initializeGUI(SimulationConstructionSet scs, Robot robot, DRCRobotModel robotModel)
    {
       CameraConfiguration behindPelvis = new CameraConfiguration("BehindPelvis");
@@ -65,23 +66,23 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
 
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       DRCRobotCameraParamaters[] cameraInfo = sensorInformation.getCameraParamaters();
-      for(int i = 0; i < cameraInfo.length; i ++)
+      for (int i = 0; i < cameraInfo.length; i++)
       {
          CameraConfiguration camera = new CameraConfiguration(cameraInfo[i].getCameraNameInSdf());
          camera.setCameraMount(cameraInfo[i].getCameraNameInSdf());
          scs.setupCamera(camera);
       }
-           
+
       scs.setGroundVisible(groundProfileVisible);
-      
+
       if (drawPlaneAtZ0)
       {
          Graphics3DObject planeAtZ0 = new Graphics3DObject();
          planeAtZ0.addHeightMap(new FlatGroundProfile(), 100, 100, null);
          scs.addStaticLinkGraphics(planeAtZ0);
       }
-      
-      if(!is3dGraphicsShown)
+
+      if (!is3dGraphicsShown)
       {
          scs.hideViewport();
       }
@@ -91,7 +92,7 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
          scs.hideAllDynamicGraphicObjects();
          scs.setDynamicGraphicObjectsListVisible("wrenchVisualizer", true);
       }
-      
+
       if (SHOW_EXPORT_TORQUE_AND_SPEED)
       {
          JButton exportTorqueAndSpeedButton = new JButton("Export Torque And Speed");
@@ -99,12 +100,17 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
          exportTorqueAndSpeedButton.addActionListener(dataExporter);
          scs.addButton(exportTorqueAndSpeedButton);
       }
-      
+
       //TODO: Clean this up!
       GeneralizedSDFRobotModel generalizedSDFRobotModel = robotModel.getGeneralizedRobotModel();
-      
-      if (DRCLocalConfigParameters.MAKE_SLIDER_BOARD && sliderBoardFactory != null)
-         sliderBoardFactory.makeSliderBoard(scs, scs.getRootRegistry(), generalizedSDFRobotModel);
+
+      if (DRCLocalConfigParameters.MAKE_SLIDER_BOARD)
+      {
+         if (sliderBoardFactory != null)
+         {
+            sliderBoardFactory.makeSliderBoard(scs, scs.getRootRegistry(), generalizedSDFRobotModel);
+         }
+      }
    }
 
    public boolean isGuiShown()
@@ -119,11 +125,11 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
 
    public Graphics3DAdapter getGraphics3DAdapter()
    {
-      if(isGuiShown && is3dGraphicsShown)
+      if (isGuiShown && is3dGraphicsShown)
       {
          return new JMEGraphics3dAdapter();
       }
-      else if(isGuiShown)
+      else if (isGuiShown)
       {
          return new NullGraphics3DAdapter();
       }
