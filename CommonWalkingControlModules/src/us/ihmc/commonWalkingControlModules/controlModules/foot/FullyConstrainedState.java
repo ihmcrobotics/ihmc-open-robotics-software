@@ -12,7 +12,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.utilities.math.geometry.FrameVector;
 
-public class FullyConstrainedState extends FootControlState
+public class FullyConstrainedState extends AbstractFootControlState
 {
    private static final boolean USE_SUPPORT_FOOT_HOLD_POSITION_STATE = true;
    private static final boolean USE_SUPPORT_DAMPING = true;

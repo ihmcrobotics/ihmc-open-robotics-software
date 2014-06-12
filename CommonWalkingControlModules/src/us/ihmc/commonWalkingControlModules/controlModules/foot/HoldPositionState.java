@@ -13,7 +13,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.utilities.math.geometry.FrameVector;
 
-public class HoldPositionState extends FootControlState
+public class HoldPositionState extends AbstractFootControlState
 {
    private final FrameVector holdPositionNormalContactVector = new FrameVector();
    private final BooleanYoVariable requestHoldPosition;

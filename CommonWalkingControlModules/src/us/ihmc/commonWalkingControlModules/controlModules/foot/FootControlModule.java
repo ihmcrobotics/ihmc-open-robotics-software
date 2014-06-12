@@ -31,9 +31,6 @@ import us.ihmc.commonWalkingControlModules.trajectories.WrapperForMultiplePositi
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.math.NullspaceCalculator;
-import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
-import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
-import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -54,9 +51,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.GainCalculator;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameLineSegment2d;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameQuaternion;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
@@ -98,7 +93,7 @@ public class FootControlModule
    private final EnumYoVariable<ConstraintType> _requestedState;
    private final DoubleYoVariable desiredOnEdgeAngle;
 //   private final YoFrameLineSegment2d edgeToRotateAbout;
-   private final BooleanYoVariable isCoPOnEdge;
+//   private final BooleanYoVariable isCoPOnEdge;
    private final BooleanYoVariable doSingularityEscape;
    private final BooleanYoVariable waitSingularityEscapeBeforeTransitionToNextState;
 //   private final DoubleYoVariable minJacobianDeterminant;
@@ -108,7 +103,7 @@ public class FootControlModule
    private final BooleanYoVariable isTrajectoryDone;
    private final DoubleYoVariable edgeControlOrientationDamping;
    private final int velocitySignForSingularityEscape;
-   private final YoFrameQuaternion orientationFix;
+//   private final YoFrameQuaternion orientationFix;
    private final DoubleYoVariable jacobianDeterminant;
    private final BooleanYoVariable jacobianDeterminantInRange;
    private final BooleanYoVariable isUnconstrained;
@@ -140,7 +135,7 @@ public class FootControlModule
    private final DoubleYoVariable footTouchDownGain;
 
    private final DoubleYoVariable swingKpXY, swingKpZ, swingKpOrientation, swingZetaXYZ, swingZetaOrientation;
-   private final DoubleYoVariable holdKpx, holdKpy, holdKpz, holdKdz, holdKpRoll, holdKpPitch, holdKpYaw, holdZeta;
+//   private final DoubleYoVariable holdKpx, holdKpy, holdKpz, holdKdz, holdKpRoll, holdKpPitch, holdKpYaw, holdZeta;
    private final DoubleYoVariable toeOffKpx, toeOffKpy, toeOffKpz, toeOffKpRoll, toeOffKpPitch, toeOffKpYaw, toeOffZeta;
    
    private final BooleanYoVariable doFancyOnToesControl;
@@ -219,7 +214,7 @@ public class FootControlModule
       spatialAccelerationProjector = new SpatialAccelerationProjector(namePrefix + "SpatialAccelerationProjector", registry);
       desiredOnEdgeAngle = new DoubleYoVariable(namePrefix + "DesiredOnEdgeAngle", registry);
 //      edgeToRotateAbout = new YoFrameLineSegment2d(namePrefix + "Edge", "", contactablePlaneBody.getPlaneFrame(), registry);
-      isCoPOnEdge = new BooleanYoVariable(namePrefix + "IsCoPOnEdge", registry);
+//      isCoPOnEdge = new BooleanYoVariable(namePrefix + "IsCoPOnEdge", registry);
       doSingularityEscape = new BooleanYoVariable(namePrefix + "DoSingularityEscape", registry);
       waitSingularityEscapeBeforeTransitionToNextState = new BooleanYoVariable(namePrefix + "WaitSingularityEscapeBeforeTransitionToNextState", registry);
 //      minJacobianDeterminant = new DoubleYoVariable(namePrefix + "MinJacobianDeterminant", registry);
@@ -248,14 +243,14 @@ public class FootControlModule
       swingZetaXYZ = new DoubleYoVariable(namePrefix + "SwingZetaXYZ", registry);
       swingZetaOrientation = new DoubleYoVariable(namePrefix + "SwingZetaOrientation", registry);
 
-      holdKpx = new DoubleYoVariable(namePrefix + "HoldKpx", registry);
-      holdKpy = new DoubleYoVariable(namePrefix + "HoldKpy", registry);
-      holdKpz = new DoubleYoVariable(namePrefix + "HoldKpz", registry);
-      holdKdz = new DoubleYoVariable(namePrefix + "HoldKdz", registry);
-      holdKpRoll = new DoubleYoVariable(namePrefix + "HoldKpRoll", registry);
-      holdKpPitch = new DoubleYoVariable(namePrefix + "HoldKpPitch", registry);
-      holdKpYaw = new DoubleYoVariable(namePrefix + "HoldKpYaw", registry);
-      holdZeta = new DoubleYoVariable(namePrefix + "HoldZeta", registry);
+//      holdKpx = new DoubleYoVariable(namePrefix + "HoldKpx", registry);
+//      holdKpy = new DoubleYoVariable(namePrefix + "HoldKpy", registry);
+//      holdKpz = new DoubleYoVariable(namePrefix + "HoldKpz", registry);
+//      holdKdz = new DoubleYoVariable(namePrefix + "HoldKdz", registry);
+//      holdKpRoll = new DoubleYoVariable(namePrefix + "HoldKpRoll", registry);
+//      holdKpPitch = new DoubleYoVariable(namePrefix + "HoldKpPitch", registry);
+//      holdKpYaw = new DoubleYoVariable(namePrefix + "HoldKpYaw", registry);
+//      holdZeta = new DoubleYoVariable(namePrefix + "HoldZeta", registry);
       
       kneeToeOffGain = new DoubleYoVariable(namePrefix + "KneeToeOffGain", registry);
       kneeToeOffQDesired   = new DoubleYoVariable(namePrefix + "KneeToeOffQDesired", registry);
@@ -282,7 +277,7 @@ public class FootControlModule
       
       stateMachine = new StateMachine<ConstraintType>(namePrefix + "State", namePrefix + "SwitchTime", ConstraintType.class, t, registry);
 
-      orientationFix = new YoFrameQuaternion(namePrefix + "OrientationFix", ReferenceFrame.getWorldFrame(), registry);
+//      orientationFix = new YoFrameQuaternion(namePrefix + "OrientationFix", ReferenceFrame.getWorldFrame(), registry);
 
       // TODO: make this be able to do other selection matrices
 //      selectionMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
@@ -383,7 +378,7 @@ public class FootControlModule
             momentumBasedController.getReferenceFrames().getFootFrame(robotSide),
             momentumBasedController.getFullRobotModel().getFoot(robotSide), twistCalculator);
       
-      List<FootControlState> states = new ArrayList<FootControlState>();
+      List<AbstractFootControlState> states = new ArrayList<AbstractFootControlState>();
       states.add(new TouchdownOnToesState(pitchTouchdownTrajectoryGenerator));
       states.add(new TouchdownOnHeelState(pitchTouchdownTrajectoryGenerator));
       states.add(new OnToesState(maximumTakeoffAngle));
@@ -426,20 +421,20 @@ public class FootControlModule
    
    public void setHoldGains(double holdKpXY, double holdKpOrientation, double holdZeta)
    {
-      this.holdZeta.set(holdZeta);
-      this.holdKpx.set(holdKpXY);
-      this.holdKpy.set(holdKpXY);
-      
-      this.holdKpz.set(0.0);
-      this.holdKdz.set(GainCalculator.computeDerivativeGain(this.holdKpz.getDoubleValue(), this.holdZeta.getDoubleValue()));
-      
-      this.holdKpRoll.set(holdKpOrientation);
-      this.holdKpPitch.set(holdKpOrientation);
-      this.holdKpYaw.set(holdKpOrientation);
-      
-      holdPositionState.setHoldGains(this.holdZeta.getDoubleValue(), this.holdKpx.getDoubleValue(),
-            this.holdKpy.getDoubleValue(), this.holdKpz.getDoubleValue(), this.holdKdz.getDoubleValue(),
-            this.holdKpRoll.getDoubleValue(), this.holdKpPitch.getDoubleValue(), this.holdKpYaw.getDoubleValue());
+//      this.holdZeta.set(holdZeta);
+//      this.holdKpx.set(holdKpXY);
+//      this.holdKpy.set(holdKpXY);
+//      
+//      this.holdKpz.set(0.0);
+//      this.holdKdz.set(GainCalculator.computeDerivativeGain(this.holdKpz.getDoubleValue(), this.holdZeta.getDoubleValue()));
+//      
+//      this.holdKpRoll.set(holdKpOrientation);
+//      this.holdKpPitch.set(holdKpOrientation);
+//      this.holdKpYaw.set(holdKpOrientation);
+      double holdKpz = 0.0;
+      double holdKdz = GainCalculator.computeDerivativeGain(holdKpz, holdZeta);
+      holdPositionState.setHoldGains(holdZeta, holdKpXY, holdKpXY, holdKpz, holdKdz,
+            holdKpOrientation, holdKpOrientation, holdKpOrientation);
    }
 
    public void setToeOffGains(double toeOffKpXY, double toeOffKpOrientation, double toeOffZeta)
@@ -471,11 +466,11 @@ public class FootControlModule
       contactStatesMap.put(ConstraintType.TOES_TOUCHDOWN, contactStatesMap.get(ConstraintType.TOES));
    }
 
-   private void setUpStateMachine(List<FootControlState> states)
+   private void setUpStateMachine(List<AbstractFootControlState> states)
    {
-      for (FootControlState state : states)
+      for (AbstractFootControlState state : states)
       {
-         for (FootControlState stateToTransitionTo : states)
+         for (AbstractFootControlState stateToTransitionTo : states)
          {
             FootStateTransitionCondition footStateTransitionCondition = new FootStateTransitionCondition(stateToTransitionTo);
             state.addStateTransition(new StateTransition<ConstraintType>(stateToTransitionTo.getStateEnum(), footStateTransitionCondition,
@@ -572,7 +567,7 @@ public class FootControlModule
       return stateMachine.getCurrentStateEnum();
    }
 
-   private abstract class OnEdgeState extends FootControlState
+   private abstract class AbstractOnEdgeState extends AbstractFootControlState
    {
       private final DoubleTrajectoryGenerator onEdgePitchAngleTrajectoryGenerator;
       private final List<FramePoint2d> edgeContactPoints;
@@ -598,7 +593,7 @@ public class FootControlModule
       private double toeOffKdy = GainCalculator.computeDerivativeGain(toeOffKpy.getDoubleValue(), toeOffZeta.getDoubleValue());      
       private double toeOffKdz = GainCalculator.computeDerivativeGain(toeOffKpz.getDoubleValue(), toeOffZeta.getDoubleValue());
 
-      public OnEdgeState(ConstraintType stateEnum, List<FramePoint2d> edgeContactPoints, DoubleProvider maximumPitchAngleOnEdge)
+      public AbstractOnEdgeState(ConstraintType stateEnum, List<FramePoint2d> edgeContactPoints, DoubleProvider maximumPitchAngleOnEdge)
       {
          super(stateEnum, _yoDesiredPosition, _yoDesiredLinearVelocity, _yoDesiredLinearAcceleration,
                footSpatialAccelerationControlModule, _momentumBasedController, _contactableBody,
@@ -770,7 +765,7 @@ public class FootControlModule
       }
    }
 
-   private class TouchdownOnHeelState extends OnEdgeState
+   private class TouchdownOnHeelState extends AbstractOnEdgeState
    {
       public TouchdownOnHeelState(DoubleTrajectoryGenerator pitchTouchdownTrajectoryGenerator)
       {
@@ -785,7 +780,7 @@ public class FootControlModule
       }
    }
 
-   private class TouchdownOnToesState extends OnEdgeState
+   private class TouchdownOnToesState extends AbstractOnEdgeState
    {
       public TouchdownOnToesState(DoubleTrajectoryGenerator pitchTouchdownTrajectoryGenerator)
       {
@@ -800,7 +795,7 @@ public class FootControlModule
       }
    }
 
-   private class OnToesState extends OnEdgeState
+   private class OnToesState extends AbstractOnEdgeState
    {
       private final YoPlaneContactState contactState = momentumBasedController.getContactState(contactableBody);
       private final List<YoContactPoint> contactPoints = contactState.getContactPoints();
@@ -881,7 +876,7 @@ public class FootControlModule
       }
    }
 
-   private class SwingState extends UnconstrainedState
+   private class SwingState extends AbstractUnconstrainedState
    {
       private final boolean visualizeSwingTrajectory = true;
 
@@ -975,7 +970,7 @@ public class FootControlModule
       }
    }
 
-   private class MoveStraightState extends UnconstrainedState
+   private class MoveStraightState extends AbstractUnconstrainedState
    {
       private StraightLinePositionTrajectoryGenerator positionTrajectoryGenerator;
       private OrientationInterpolationTrajectoryGenerator orientationTrajectoryGenerator;
@@ -1020,9 +1015,9 @@ public class FootControlModule
     * 
     * E.g. the MoveStraightState and the SwingState extend this class and implement the trajectory related methods.
     */
-   private abstract class UnconstrainedState extends FootControlState
+   private abstract class AbstractUnconstrainedState extends AbstractFootControlState
    {
-      public UnconstrainedState(ConstraintType constraintType)
+      public AbstractUnconstrainedState(ConstraintType constraintType)
       {
          super(constraintType, _yoDesiredPosition, _yoDesiredLinearVelocity, _yoDesiredLinearAcceleration,
                footSpatialAccelerationControlModule, _momentumBasedController, _contactableBody,
@@ -1195,7 +1190,7 @@ public class FootControlModule
    {
       private final ConstraintType stateEnum;
 
-      public FootStateTransitionCondition(FootControlState stateToTransitionTo)
+      public FootStateTransitionCondition(AbstractFootControlState stateToTransitionTo)
       {
          this.stateEnum = stateToTransitionTo.getStateEnum();
       }
