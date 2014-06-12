@@ -448,6 +448,7 @@ public class FootControlModule
 //      this.swingZetaXYZ.set(swingZetaXYZ);
 //      this.swingZetaOrientation.set(swingZetaOrientation);
       swingState.setSwingGains(swingKpXY, swingKpZ, swingKpOrientation, swingZetaXYZ, swingZetaOrientation);
+      moveStraightState.setSwingGains(swingKpXY, swingKpZ, swingKpOrientation, swingZetaXYZ, swingZetaOrientation);
    }
    
    public void setHoldGains(double holdKpXY, double holdKpOrientation, double holdZeta)
