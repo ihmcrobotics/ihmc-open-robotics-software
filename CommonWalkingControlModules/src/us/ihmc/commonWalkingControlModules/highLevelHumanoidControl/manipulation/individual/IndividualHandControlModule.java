@@ -252,6 +252,7 @@ public class IndividualHandControlModule
       addTransitionToPlaneLoadBearing(requestedState, taskSpacePositionControlState, loadBearingControlState);
       addRequestedStateTransition(requestedState, true, loadBearingControlState, taskSpacePositionControlState);
       addRequestedStateTransition(requestedState, false, jointSpaceHandControlState, loadBearingControlState);
+      addRequestedStateTransition(requestedState, false, loadBearingControlState, jointSpaceHandControlState);
 
       stateMachine.addState(jointSpaceHandControlState);
       stateMachine.addState(taskSpacePositionControlState);
@@ -402,7 +403,6 @@ public class IndividualHandControlModule
 
    public void requestLoadBearing()
    {
-      System.err.println("IndividualHandControlModule: TODO: create correct switch to load bearing based on GUI inputs");
       requestedState.set(loadBearingControlState.getStateEnum());
    }
 
