@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
+import us.ihmc.commonWalkingControlModules.kinematics.SpatialAccelerationProjector;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationProvider;
@@ -65,7 +66,7 @@ public class FootControlModule
 //   private boolean visualize = false;
    
    private final RigidBodySpatialAccelerationControlModule footSpatialAccelerationControlModule;
-//   private final SpatialAccelerationProjector spatialAccelerationProjector;
+   private final SpatialAccelerationProjector _spatialAccelerationProjector;
    private final GeometricJacobian jacobian;
    private final int _jacobianId;
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -198,7 +199,7 @@ public class FootControlModule
       ReferenceFrame bodyFrame = contactablePlaneBody.getBodyFrame();
 //      rootToFootJacobianId = momentumBasedController.getOrCreateGeometricJacobian(rootBody, jacobian.getEndEffector(), rootBody.getBodyFixedFrame());
       footSpatialAccelerationControlModule = new RigidBodySpatialAccelerationControlModule(namePrefix, twistCalculator, rigidBody, bodyFrame, controlDT, _registry);
-//      spatialAccelerationProjector = new SpatialAccelerationProjector(namePrefix + "SpatialAccelerationProjector", _registry);
+      _spatialAccelerationProjector = new SpatialAccelerationProjector(namePrefix + "SpatialAccelerationProjector", _registry);
 //      desiredOnEdgeAngle = new DoubleYoVariable(namePrefix + "DesiredOnEdgeAngle", _registry);
 //      edgeToRotateAbout = new YoFrameLineSegment2d(namePrefix + "Edge", "", contactablePlaneBody.getPlaneFrame(), registry);
 //      isCoPOnEdge = new BooleanYoVariable(namePrefix + "IsCoPOnEdge", registry);
@@ -794,7 +795,8 @@ public class FootControlModule
                _contactableBody, _requestedState, _jacobianId, _nullspaceMultiplier,
                _jacobianDeterminantInRange, _doSingularityEscape,
                _forceFootAccelerateIntoGround, _legSingularityAndKneeCollapseAvoidanceControlModule,
-               _robotSide, _registry);
+               _robotSide, _registry,
+               _spatialAccelerationProjector);
       }
 
       @Override
@@ -816,7 +818,8 @@ public class FootControlModule
                _contactableBody, _requestedState, _jacobianId, _nullspaceMultiplier,
                _jacobianDeterminantInRange, _doSingularityEscape,
                _forceFootAccelerateIntoGround, _legSingularityAndKneeCollapseAvoidanceControlModule,
-               _robotSide, _registry);
+               _robotSide, _registry,
+               _spatialAccelerationProjector);
       }
 
       @Override
@@ -844,7 +847,8 @@ public class FootControlModule
                _contactableBody, _requestedState, _jacobianId, _nullspaceMultiplier,
                _jacobianDeterminantInRange, _doSingularityEscape,
                _forceFootAccelerateIntoGround, _legSingularityAndKneeCollapseAvoidanceControlModule,
-               _robotSide, _registry);
+               _robotSide, _registry,
+               _spatialAccelerationProjector);
 
          singleToeContactPoint = new FramePoint2d(edgeContactPoints.get(0).getReferenceFrame());
          singleToeContactPoint.interpolate(edgeContactPoints.get(0), edgeContactPoints.get(1), 0.5);
