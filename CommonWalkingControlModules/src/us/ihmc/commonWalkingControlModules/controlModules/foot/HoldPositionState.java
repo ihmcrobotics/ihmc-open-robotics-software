@@ -1,5 +1,12 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.math.geometry.FrameVector;
+
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
@@ -7,19 +14,13 @@ import com.yobotics.simulationconstructionset.util.GainCalculator;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.utilities.math.geometry.FrameVector;
-
 public class HoldPositionState extends AbstractFootControlState
 {
    private final FrameVector holdPositionNormalContactVector = new FrameVector();
    private final BooleanYoVariable requestHoldPosition;
    private final FrameVector fullyConstrainedNormalContactVector;
    
-   private double holdZeta, holdKpx, holdKpy, holdKpz, holdKdz, holdKpRoll, holdKpPitch, holdKpYaw;
+   private double holdZeta, holdKpx, holdKpy, holdKpz, /*holdKdz,*/ holdKpRoll, holdKpPitch, holdKpYaw;
    
    public HoldPositionState(YoFramePoint yoDesiredPosition,
          YoFrameVector yoDesiredLinearVelocity, YoFrameVector yoDesiredLinearAcceleration,
@@ -28,12 +29,14 @@ public class HoldPositionState extends AbstractFootControlState
          BooleanYoVariable requestHoldPosition, EnumYoVariable<ConstraintType> requestedState, int jacobianId,
          DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange,
          BooleanYoVariable doSingularityEscape, FrameVector fullyConstrainedNormalContactVector,
-         BooleanYoVariable forceFootAccelerateIntoGround, LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule)
+         BooleanYoVariable forceFootAccelerateIntoGround, LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule,
+         RobotSide robotSide)
    {
       super(ConstraintType.HOLD_POSITION, yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration,
             accelerationControlModule, momentumBasedController, contactableBody, requestedState,
             jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape,
-            forceFootAccelerateIntoGround, legSingularityAndKneeCollapseAvoidanceControlModule);
+            forceFootAccelerateIntoGround, legSingularityAndKneeCollapseAvoidanceControlModule,
+            robotSide);
    
       this.requestHoldPosition = requestHoldPosition;
       this.fullyConstrainedNormalContactVector = fullyConstrainedNormalContactVector;
@@ -92,7 +95,7 @@ public class HoldPositionState extends AbstractFootControlState
       this.holdKpx = holdKpx;
       this.holdKpy = holdKpy;
       this.holdKpz = holdKpz;
-      this.holdKdz = holdKdz;
+//      this.holdKdz = holdKdz;
       this.holdKpRoll = holdKpRoll;
       this.holdKpPitch = holdKpPitch;
       this.holdKpYaw = holdKpYaw;

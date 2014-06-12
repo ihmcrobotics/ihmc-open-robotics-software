@@ -80,7 +80,6 @@ public class FootControlModule
 
    private static final int NUMBER_OF_CONTACTS_POINTS_TO_ROTATE_ABOUT = 2;
    private static final boolean USE_TOEOFF_FOOT_HOLD_POSITION = true;
-   private static final boolean CORRECT_SWING_CONSIDERING_JOINT_LIMITS = true;
    
    private boolean visualize = false;
    
@@ -94,10 +93,10 @@ public class FootControlModule
    private final DoubleYoVariable desiredOnEdgeAngle;
 //   private final YoFrameLineSegment2d edgeToRotateAbout;
 //   private final BooleanYoVariable isCoPOnEdge;
-   private final BooleanYoVariable doSingularityEscape;
+   private final BooleanYoVariable _doSingularityEscape;
    private final BooleanYoVariable waitSingularityEscapeBeforeTransitionToNextState;
 //   private final DoubleYoVariable minJacobianDeterminant;
-   private final DoubleYoVariable nullspaceMultiplier;
+   private final DoubleYoVariable _nullspaceMultiplier;
    private final NullspaceCalculator nullspaceCalculator;
    private final DoubleYoVariable singularityEscapeNullspaceMultiplier;
    private final BooleanYoVariable isTrajectoryDone;
@@ -105,7 +104,7 @@ public class FootControlModule
    private final int velocitySignForSingularityEscape;
 //   private final YoFrameQuaternion orientationFix;
    private final DoubleYoVariable jacobianDeterminant;
-   private final BooleanYoVariable jacobianDeterminantInRange;
+   private final BooleanYoVariable _jacobianDeterminantInRange;
    private final BooleanYoVariable isUnconstrained;
 
    private final StateMachine<ConstraintType> stateMachine;
@@ -127,14 +126,14 @@ public class FootControlModule
    private final List<FramePoint2d> toeContactPoints, heelContactPoints;
    private final FramePoint2d singleToeContactPoint;
 
-   private final OneDoFJoint hipYawJoint;
-   private final OneDoFJoint kneeJoint;
-   private final OneDoFJoint ankleRollJoint;
-   private final OneDoFJoint anklePitchJoint;
+//   private final OneDoFJoint hipYawJoint;
+//   private final OneDoFJoint kneeJoint;
+//   private final OneDoFJoint ankleRollJoint;
+//   private final OneDoFJoint anklePitchJoint;
    
    private final DoubleYoVariable footTouchDownGain;
 
-   private final DoubleYoVariable swingKpXY, swingKpZ, swingKpOrientation, swingZetaXYZ, swingZetaOrientation;
+//   private final DoubleYoVariable swingKpXY, swingKpZ, swingKpOrientation, swingZetaXYZ, swingZetaOrientation;
 //   private final DoubleYoVariable holdKpx, holdKpy, holdKpz, holdKdz, holdKpRoll, holdKpPitch, holdKpYaw, holdZeta;
    private final DoubleYoVariable toeOffKpx, toeOffKpy, toeOffKpz, toeOffKpRoll, toeOffKpPitch, toeOffKpYaw, toeOffZeta;
    
@@ -162,10 +161,14 @@ public class FootControlModule
    private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
 
    private final BooleanYoVariable replanTrajectory;
-   private final BooleanYoVariable trajectoryWasReplanned;
+//   private final BooleanYoVariable trajectoryWasReplanned;
    private final YoVariableDoubleProvider swingTimeRemaining;
    
    private final HoldPositionState holdPositionState;
+   private final SwingState swingState;
+   private final MoveStraightState moveStraightState;
+   
+   private final RobotSide _robotSide;
 
    public FootControlModule(double controlDT, ContactablePlaneBody contactablePlaneBody, int jacobianId, RobotSide robotSide,
          DoubleTrajectoryGenerator pitchTouchdownTrajectoryGenerator, DoubleProvider maximumTakeoffAngle,
@@ -177,6 +180,7 @@ public class FootControlModule
          
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
    {
+      this._robotSide = robotSide;
       this.walkingControllerParameters = walkingControllerParameters;
       this.dynamicGraphicObjectsListRegistry = dynamicGraphicObjectsListRegistry;
       
@@ -197,10 +201,10 @@ public class FootControlModule
       alphaShrinkFootSizeForToeOff.set(0.0);
       
       this._contactableBody = contactablePlaneBody;
-      this.hipYawJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.HIP_YAW);
-      this.kneeJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.KNEE);
-      this.ankleRollJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.ANKLE_ROLL);
-      this.anklePitchJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.ANKLE_PITCH);
+//      this.hipYawJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.HIP_YAW);
+//      this.kneeJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.KNEE);
+//      this.ankleRollJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.ANKLE_ROLL);
+//      this.anklePitchJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.ANKLE_PITCH);
       this.rootBody = twistCalculator.getRootBody();
       this._requestedState = EnumYoVariable.create(namePrefix + "RequestedState", "", ConstraintType.class, registry, true);
       this._momentumBasedController = momentumBasedController;
@@ -215,12 +219,12 @@ public class FootControlModule
       desiredOnEdgeAngle = new DoubleYoVariable(namePrefix + "DesiredOnEdgeAngle", registry);
 //      edgeToRotateAbout = new YoFrameLineSegment2d(namePrefix + "Edge", "", contactablePlaneBody.getPlaneFrame(), registry);
 //      isCoPOnEdge = new BooleanYoVariable(namePrefix + "IsCoPOnEdge", registry);
-      doSingularityEscape = new BooleanYoVariable(namePrefix + "DoSingularityEscape", registry);
+      _doSingularityEscape = new BooleanYoVariable(namePrefix + "DoSingularityEscape", registry);
       waitSingularityEscapeBeforeTransitionToNextState = new BooleanYoVariable(namePrefix + "WaitSingularityEscapeBeforeTransitionToNextState", registry);
 //      minJacobianDeterminant = new DoubleYoVariable(namePrefix + "MinJacobianDeterminant", registry);
       jacobianDeterminant = new DoubleYoVariable(namePrefix + "JacobianDeterminant", registry);
-      jacobianDeterminantInRange = new BooleanYoVariable(namePrefix + "JacobianDeterminantInRange", registry);
-      nullspaceMultiplier = new DoubleYoVariable(namePrefix + "NullspaceMultiplier", registry);
+      _jacobianDeterminantInRange = new BooleanYoVariable(namePrefix + "JacobianDeterminantInRange", registry);
+      _nullspaceMultiplier = new DoubleYoVariable(namePrefix + "NullspaceMultiplier", registry);
       nullspaceCalculator = new NullspaceCalculator(jacobian.getNumberOfColumns(), true);
       singularityEscapeNullspaceMultiplier = new DoubleYoVariable(namePrefix + "SingularityEscapeNullspaceMultiplier", registry);
       isTrajectoryDone = new BooleanYoVariable(namePrefix + "IsTrajectoryDone", registry);
@@ -237,11 +241,11 @@ public class FootControlModule
       // remove and test:
       momentumBasedController.setPlaneContactCoefficientOfFriction(_contactableBody, 0.8);
       
-      swingKpXY = new DoubleYoVariable(namePrefix + "SwingKpXY", registry);
-      swingKpZ = new DoubleYoVariable(namePrefix + "SwingKpZ", registry);
-      swingKpOrientation = new DoubleYoVariable(namePrefix + "SwingKpOrientation", registry);
-      swingZetaXYZ = new DoubleYoVariable(namePrefix + "SwingZetaXYZ", registry);
-      swingZetaOrientation = new DoubleYoVariable(namePrefix + "SwingZetaOrientation", registry);
+//      swingKpXY = new DoubleYoVariable(namePrefix + "SwingKpXY", registry);
+//      swingKpZ = new DoubleYoVariable(namePrefix + "SwingKpZ", registry);
+//      swingKpOrientation = new DoubleYoVariable(namePrefix + "SwingKpOrientation", registry);
+//      swingZetaXYZ = new DoubleYoVariable(namePrefix + "SwingZetaXYZ", registry);
+//      swingZetaOrientation = new DoubleYoVariable(namePrefix + "SwingZetaOrientation", registry);
 
 //      holdKpx = new DoubleYoVariable(namePrefix + "HoldKpx", registry);
 //      holdKpy = new DoubleYoVariable(namePrefix + "HoldKpy", registry);
@@ -305,7 +309,7 @@ public class FootControlModule
       _legSingularityAndKneeCollapseAvoidanceControlModule = new LegSingularityAndKneeCollapseAvoidanceControlModule(namePrefix, contactablePlaneBody, robotSide, walkingControllerParameters, momentumBasedController, dynamicGraphicObjectsListRegistry, registry);
       
       replanTrajectory = new BooleanYoVariable(namePrefix + "replanTrajectory", registry);
-      trajectoryWasReplanned = new BooleanYoVariable(namePrefix + "trajectoryWasReplanned", registry);
+//      trajectoryWasReplanned = new BooleanYoVariable(namePrefix + "trajectoryWasReplanned", registry);
       swingTimeRemaining = new YoVariableDoubleProvider(namePrefix + "SwingTimeRemaining", registry);
       
       visualize = visualize && dynamicGraphicObjectsListRegistry != null;
@@ -382,22 +386,48 @@ public class FootControlModule
       states.add(new TouchdownOnToesState(pitchTouchdownTrajectoryGenerator));
       states.add(new TouchdownOnHeelState(pitchTouchdownTrajectoryGenerator));
       states.add(new OnToesState(maximumTakeoffAngle));
+      
       states.add(new FullyConstrainedState(_yoDesiredPosition, _yoDesiredLinearVelocity,
             _yoDesiredLinearAcceleration, footSpatialAccelerationControlModule, momentumBasedController,
-            _contactableBody, requestHoldPosition, _requestedState, _jacobianId, nullspaceMultiplier,
-            jacobianDeterminantInRange, doSingularityEscape, fullyConstrainedNormalContactVector,
-            _forceFootAccelerateIntoGround, doFancyOnToesControl, _legSingularityAndKneeCollapseAvoidanceControlModule));
+            _contactableBody, requestHoldPosition, _requestedState, _jacobianId, _nullspaceMultiplier,
+            _jacobianDeterminantInRange, _doSingularityEscape, fullyConstrainedNormalContactVector,
+            _forceFootAccelerateIntoGround, doFancyOnToesControl, _legSingularityAndKneeCollapseAvoidanceControlModule,
+            _robotSide));
+      
       holdPositionState = new HoldPositionState(_yoDesiredPosition, _yoDesiredLinearVelocity, _yoDesiredLinearAcceleration,
             footSpatialAccelerationControlModule, _momentumBasedController, _contactableBody, requestHoldPosition,
-            _requestedState, _jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape,
+            _requestedState, _jacobianId, _nullspaceMultiplier, _jacobianDeterminantInRange, _doSingularityEscape,
             fullyConstrainedNormalContactVector, _forceFootAccelerateIntoGround,
-            _legSingularityAndKneeCollapseAvoidanceControlModule);
+            _legSingularityAndKneeCollapseAvoidanceControlModule,
+            _robotSide);
       states.add(holdPositionState);
-      states.add(new SwingState(swingTimeProvider, initialPositionProvider, initialVelocityProvider,
+      
+      swingState = new SwingState(swingTimeProvider, initialPositionProvider, initialVelocityProvider,
             finalPositionProvider, finalVelocityProvider, initialOrientationProvider,
-            finalOrientationProvider, trajectoryParametersProvider));
-      states.add(new MoveStraightState(swingTimeProvider, initialPositionProvider,
-            finalPositionProvider, initialOrientationProvider, finalOrientationProvider));
+            finalOrientationProvider, trajectoryParametersProvider,
+            
+            _yoDesiredPosition, _yoDesiredLinearVelocity,
+            _yoDesiredLinearAcceleration, footSpatialAccelerationControlModule, momentumBasedController,
+            _contactableBody, _requestedState, _jacobianId, _nullspaceMultiplier,
+            _jacobianDeterminantInRange, _doSingularityEscape,
+            _forceFootAccelerateIntoGround, _legSingularityAndKneeCollapseAvoidanceControlModule,
+            _robotSide,
+            
+            isTrajectoryDone, isUnconstrained);
+      states.add(swingState);
+      
+      moveStraightState = new MoveStraightState(swingTimeProvider, initialPositionProvider,
+            finalPositionProvider, initialOrientationProvider, finalOrientationProvider,
+            
+            _yoDesiredPosition, _yoDesiredLinearVelocity,
+            _yoDesiredLinearAcceleration, footSpatialAccelerationControlModule, momentumBasedController,
+            _contactableBody, _requestedState, _jacobianId, _nullspaceMultiplier,
+            _jacobianDeterminantInRange, _doSingularityEscape,
+            _forceFootAccelerateIntoGround, _legSingularityAndKneeCollapseAvoidanceControlModule,
+            _robotSide,
+            
+            isTrajectoryDone, isUnconstrained);
+      states.add(moveStraightState);
 
       setUpStateMachine(states);
    }
@@ -412,11 +442,12 @@ public class FootControlModule
    
    public void setSwingGains(double swingKpXY, double swingKpZ, double swingKpOrientation, double swingZetaXYZ, double swingZetaOrientation)
    {
-      this.swingKpXY.set(swingKpXY);
-      this.swingKpZ.set(swingKpZ);
-      this.swingKpOrientation.set(swingKpOrientation);
-      this.swingZetaXYZ.set(swingZetaXYZ);
-      this.swingZetaOrientation.set(swingZetaOrientation);
+//      this.swingKpXY.set(swingKpXY);
+//      this.swingKpZ.set(swingKpZ);
+//      this.swingKpOrientation.set(swingKpOrientation);
+//      this.swingZetaXYZ.set(swingZetaXYZ);
+//      this.swingZetaOrientation.set(swingZetaOrientation);
+      swingState.setSwingGains(swingKpXY, swingKpZ, swingKpOrientation, swingZetaXYZ, swingZetaOrientation);
    }
    
    public void setHoldGains(double holdKpXY, double holdKpOrientation, double holdZeta)
@@ -494,14 +525,14 @@ public class FootControlModule
 
    public void doSingularityEscape(boolean doSingularityEscape)
    {
-      this.doSingularityEscape.set(doSingularityEscape);
-      this.nullspaceMultiplier.set(singularityEscapeNullspaceMultiplier.getDoubleValue());
+      this._doSingularityEscape.set(doSingularityEscape);
+      this._nullspaceMultiplier.set(singularityEscapeNullspaceMultiplier.getDoubleValue());
    }
 
    public void doSingularityEscape(double temporarySingularityEscapeNullspaceMultiplier)
    {
-      doSingularityEscape.set(true);
-      this.nullspaceMultiplier.set(temporarySingularityEscapeNullspaceMultiplier);
+      _doSingularityEscape.set(true);
+      this._nullspaceMultiplier.set(temporarySingularityEscapeNullspaceMultiplier);
    }
 
    public void doSingularityEscapeBeforeTransitionToNextState()
@@ -517,7 +548,7 @@ public class FootControlModule
 
    public boolean isInSingularityNeighborhood()
    {
-      return jacobianDeterminantInRange.getBooleanValue();
+      return _jacobianDeterminantInRange.getBooleanValue();
    }
 
    public void forceConstrainedFootToAccelerateIntoGround(boolean accelerateIntoGround)
@@ -597,8 +628,9 @@ public class FootControlModule
       {
          super(stateEnum, _yoDesiredPosition, _yoDesiredLinearVelocity, _yoDesiredLinearAcceleration,
                footSpatialAccelerationControlModule, _momentumBasedController, _contactableBody,
-               _requestedState, _jacobianId, nullspaceMultiplier, jacobianDeterminantInRange,
-               doSingularityEscape, _forceFootAccelerateIntoGround, _legSingularityAndKneeCollapseAvoidanceControlModule);
+               _requestedState, _jacobianId, _nullspaceMultiplier, _jacobianDeterminantInRange,
+               _doSingularityEscape, _forceFootAccelerateIntoGround, _legSingularityAndKneeCollapseAvoidanceControlModule,
+               _robotSide);
          this.onEdgePitchAngleTrajectoryGenerator = null;
          this.maximumPitchAngleOnEdge = maximumPitchAngleOnEdge;
          useTrajectory = false;
@@ -881,14 +913,30 @@ public class FootControlModule
       private final boolean visualizeSwingTrajectory = true;
 
       private final PositionTrajectoryGenerator positionTrajectoryGenerator, pushRecoveryPositionTrajectoryGenerator;
-
-      private final OrientationInterpolationTrajectoryGenerator orientationTrajectoryGenerator;
-
+      private final OrientationInterpolationTrajectoryGenerator orientationTrajectoryGenerator;      
+      
       public SwingState(DoubleProvider swingTimeProvider, PositionProvider initialPositionProvider, VectorProvider initialVelocityProvider,
             PositionProvider finalPositionProvider, VectorProvider finalVelocityProvider, OrientationProvider initialOrientationProvider,
-            OrientationProvider finalOrientationProvider, TrajectoryParametersProvider trajectoryParametersProvider)
+            OrientationProvider finalOrientationProvider, TrajectoryParametersProvider trajectoryParametersProvider,
+            
+            YoFramePoint yoDesiredPosition, YoFrameVector yoDesiredLinearVelocity, YoFrameVector yoDesiredLinearAcceleration,
+            RigidBodySpatialAccelerationControlModule accelerationControlModule,
+            MomentumBasedController momentumBasedController, ContactablePlaneBody contactableBody,
+            EnumYoVariable<ConstraintType> requestedState, int jacobianId, 
+            DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange,
+            BooleanYoVariable doSingularityEscape, BooleanYoVariable forceFootAccelerateIntoGround,
+            LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule,
+            RobotSide robotSide,
+            
+            BooleanYoVariable isTrajectoryDone, BooleanYoVariable isUnconstrained)
       {
-         super(ConstraintType.SWING);
+         super(ConstraintType.SWING, yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration,
+               accelerationControlModule, momentumBasedController, contactableBody,
+               requestedState, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange,
+               doSingularityEscape, forceFootAccelerateIntoGround, legSingularityAndKneeCollapseAvoidanceControlModule,
+               robotSide,
+               
+               isTrajectoryDone, isUnconstrained);
 
          RigidBody rigidBody = contactableBody.getRigidBody();
          String namePrefix = rigidBody.getName();
@@ -933,7 +981,7 @@ public class FootControlModule
          positionTrajectoryGenerator.initialize();
          orientationTrajectoryGenerator.initialize();
 
-         trajectoryWasReplanned.set(false);
+         trajectoryWasReplanned = false;
          replanTrajectory.set(false);
       }
 
@@ -943,10 +991,10 @@ public class FootControlModule
          {
             pushRecoveryPositionTrajectoryGenerator.initialize();
             replanTrajectory.set(false);
-            trajectoryWasReplanned.set(true);
+            trajectoryWasReplanned = true;
          }
 
-         if (!trajectoryWasReplanned.getBooleanValue())
+         if (!trajectoryWasReplanned)
          {
             boolean isDone = positionTrajectoryGenerator.isDone() && orientationTrajectoryGenerator.isDone();
             isTrajectoryDone.set(isDone);
@@ -976,9 +1024,26 @@ public class FootControlModule
       private OrientationInterpolationTrajectoryGenerator orientationTrajectoryGenerator;
 
       public MoveStraightState(DoubleProvider footTrajectoryTimeProvider, PositionProvider initialPositionProvider,
-            PositionProvider finalPositionProvider, OrientationProvider initialOrientationProvider, OrientationProvider finalOrientationProvider)
+            PositionProvider finalPositionProvider, OrientationProvider initialOrientationProvider, OrientationProvider finalOrientationProvider,
+            
+            YoFramePoint yoDesiredPosition, YoFrameVector yoDesiredLinearVelocity, YoFrameVector yoDesiredLinearAcceleration,
+            RigidBodySpatialAccelerationControlModule accelerationControlModule,
+            MomentumBasedController momentumBasedController, ContactablePlaneBody contactableBody,
+            EnumYoVariable<ConstraintType> requestedState, int jacobianId,
+            DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange,
+            BooleanYoVariable doSingularityEscape, BooleanYoVariable forceFootAccelerateIntoGround,
+            LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule,
+            RobotSide robotSide,
+            
+            BooleanYoVariable isTrajectoryDone, BooleanYoVariable isUnconstrained)
       {
-         super(ConstraintType.MOVE_STRAIGHT);
+         super(ConstraintType.MOVE_STRAIGHT, yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration,
+               accelerationControlModule, momentumBasedController, contactableBody,
+               requestedState, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange,
+               doSingularityEscape, forceFootAccelerateIntoGround, legSingularityAndKneeCollapseAvoidanceControlModule,
+               robotSide,
+               
+               isTrajectoryDone, isUnconstrained);
 
          RigidBody rigidBody = contactableBody.getRigidBody();
          String namePrefix = rigidBody.getName();
@@ -1009,182 +1074,182 @@ public class FootControlModule
       }
    }
 
-   /**
-    * The unconstrained state is used if the foot is moved free in space without constrains. Depending on the type of trajectory
-    * this can either be a movement along a straight line or (in case of walking) a swing motion.
-    * 
-    * E.g. the MoveStraightState and the SwingState extend this class and implement the trajectory related methods.
-    */
-   private abstract class AbstractUnconstrainedState extends AbstractFootControlState
-   {
-      public AbstractUnconstrainedState(ConstraintType constraintType)
-      {
-         super(constraintType, _yoDesiredPosition, _yoDesiredLinearVelocity, _yoDesiredLinearAcceleration,
-               footSpatialAccelerationControlModule, _momentumBasedController, _contactableBody,
-               _requestedState, _jacobianId, nullspaceMultiplier, jacobianDeterminantInRange,
-               doSingularityEscape, _forceFootAccelerateIntoGround, _legSingularityAndKneeCollapseAvoidanceControlModule);
-      }
-
-      /**
-       * initializes all the trajectories
-       */
-      protected abstract void initializeTrajectory();
-
-      /**
-       * compute the and pack the following variables:
-       * desiredPosition, desiredLinearVelocity, desiredLinearAcceleration,
-       * trajectoryOrientation, desiredAngularVelocity, desiredAngularAcceleration
-       */
-      protected abstract void computeAndPackTrajectory();
-
-      public void doTransitionIntoAction()
-      {
-         legSingularityAndKneeCollapseAvoidanceControlModule.setCheckVelocityForSwingSingularityAvoidance(true);
-
-         accelerationControlModule.reset();
-
-         isCoPOnEdge = false;
-         initializeTrajectory();
-
-         isTrajectoryDone.set(false);
-         isUnconstrained.set(true);
-
-         setSwingControlGains(swingKpXY.getDoubleValue(), swingKpZ.getDoubleValue(), swingKpOrientation.getDoubleValue(), swingZetaXYZ.getDoubleValue(), swingZetaOrientation.getDoubleValue());
-
-         if (visualize)
-         {
-            desiredOrientationFrameGraphic.showGraphicObject();
-            correctedDesiredOrientationFrameGraphic.showGraphicObject();
-         }
-      }
-
-      public void doSpecificAction()
-      {
-         if (doSingularityEscape.getBooleanValue())
-         {
-            initializeTrajectory();
-         }
-
-         computeAndPackTrajectory();
-
-         yoDesiredPosition.set(desiredPosition);
-
-         desiredOrientation.setAndChangeFrame(trajectoryOrientation);
-
-         if (CORRECT_SWING_CONSIDERING_JOINT_LIMITS)
-            correctInputsAccordingToJointLimits();
-
-         legSingularityAndKneeCollapseAvoidanceControlModule.correctSwingFootTrajectoryForSingularityAvoidance(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
-
-         accelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity,
-               desiredLinearAcceleration, desiredAngularAcceleration, rootBody);
-         accelerationControlModule.packAcceleration(footAcceleration);
-
-         setTaskspaceConstraint(footAcceleration);
-
-         updateVisualizers();
-      }
-
-      private final double[] desiredYawPitchRoll = new double[3];
-      private final double epsilon = 1e-3;
-
-      // TODO Pretty much hackish...
-      private void correctInputsAccordingToJointLimits()
-      {
-         ReferenceFrame frameBeforeHipYawJoint = hipYawJoint.getFrameBeforeJoint();
-         desiredOrientation.changeFrame(frameBeforeHipYawJoint);
-         desiredOrientation.getYawPitchRoll(desiredYawPitchRoll);
-         if (desiredYawPitchRoll[0] > hipYawJoint.getJointLimitUpper() - epsilon)
-         {
-            desiredYawPitchRoll[0] = hipYawJoint.getJointLimitUpper();
-            desiredAngularVelocity.changeFrame(frameBeforeHipYawJoint);
-            desiredAngularVelocity.setZ(Math.min(0.0, desiredAngularVelocity.getZ()));
-            desiredAngularAcceleration.changeFrame(frameBeforeHipYawJoint);
-            desiredAngularAcceleration.setZ(Math.min(0.0, desiredAngularVelocity.getZ()));
-         }
-         else if (desiredYawPitchRoll[0] < hipYawJoint.getJointLimitLower() + epsilon)
-         {
-            desiredYawPitchRoll[0] = hipYawJoint.getJointLimitLower();
-            desiredAngularVelocity.changeFrame(frameBeforeHipYawJoint);
-            desiredAngularVelocity.setZ(Math.max(0.0, desiredAngularVelocity.getZ()));
-            desiredAngularAcceleration.changeFrame(frameBeforeHipYawJoint);
-            desiredAngularAcceleration.setZ(Math.max(0.0, desiredAngularVelocity.getZ()));
-         }
-         desiredOrientation.setYawPitchRoll(desiredYawPitchRoll);
-
-         ReferenceFrame frameBeforeAnklePitchJoint = anklePitchJoint.getFrameBeforeJoint();
-         desiredOrientation.changeFrame(frameBeforeAnklePitchJoint);
-         desiredOrientation.getYawPitchRoll(desiredYawPitchRoll);
-         if (desiredYawPitchRoll[1] > anklePitchJoint.getJointLimitUpper() - epsilon)
-         {
-            desiredYawPitchRoll[1] = anklePitchJoint.getJointLimitUpper();
-            desiredAngularVelocity.changeFrame(frameBeforeAnklePitchJoint);
-            desiredAngularVelocity.setY(Math.min(0.0, desiredAngularVelocity.getY()));
-            desiredAngularAcceleration.changeFrame(frameBeforeAnklePitchJoint);
-            desiredAngularAcceleration.setY(Math.min(0.0, desiredAngularVelocity.getY()));
-         }
-         else if (desiredYawPitchRoll[1] < anklePitchJoint.getJointLimitLower() + epsilon)
-         {
-            desiredYawPitchRoll[1] = anklePitchJoint.getJointLimitLower();
-            desiredAngularVelocity.changeFrame(frameBeforeAnklePitchJoint);
-            desiredAngularVelocity.setY(Math.max(0.0, desiredAngularVelocity.getY()));
-            desiredAngularAcceleration.changeFrame(frameBeforeAnklePitchJoint);
-            desiredAngularAcceleration.setY(Math.max(0.0, desiredAngularVelocity.getY()));
-         }
-         desiredOrientation.setYawPitchRoll(desiredYawPitchRoll);
-
-         ReferenceFrame frameBeforeAnkleRollJoint = ankleRollJoint.getFrameBeforeJoint();
-         desiredOrientation.changeFrame(frameBeforeAnkleRollJoint);
-         desiredOrientation.getYawPitchRoll(desiredYawPitchRoll);
-         if (desiredYawPitchRoll[2] > ankleRollJoint.getJointLimitUpper() - epsilon)
-         {
-            desiredYawPitchRoll[2] = ankleRollJoint.getJointLimitUpper();
-            desiredAngularVelocity.changeFrame(frameBeforeAnkleRollJoint);
-            desiredAngularVelocity.setX(Math.min(0.0, desiredAngularVelocity.getX()));
-            desiredAngularAcceleration.changeFrame(frameBeforeAnkleRollJoint);
-            desiredAngularAcceleration.setX(Math.min(0.0, desiredAngularVelocity.getX()));
-         }
-         else if (desiredYawPitchRoll[2] < ankleRollJoint.getJointLimitLower() + epsilon)
-         {
-            desiredYawPitchRoll[2] = ankleRollJoint.getJointLimitLower();
-            desiredAngularVelocity.changeFrame(frameBeforeAnkleRollJoint);
-            desiredAngularVelocity.setX(Math.max(0.0, desiredAngularVelocity.getX()));
-            desiredAngularAcceleration.changeFrame(frameBeforeAnkleRollJoint);
-            desiredAngularAcceleration.setX(Math.max(0.0, desiredAngularVelocity.getX()));
-         }
-         desiredOrientation.setYawPitchRoll(desiredYawPitchRoll);
-
-         desiredOrientation.changeFrame(worldFrame);
-         desiredAngularVelocity.changeFrame(worldFrame);
-         desiredAngularAcceleration.changeFrame(worldFrame);
-      }
-
-      private final void updateVisualizers()
-      {
-         if (!visualize)
-            return;
-
-         desiredOrientationFrame.update();
-         correctedDesiredOrientationFrame.update();
-         desiredOrientationFrameGraphic.update();
-         correctedDesiredOrientationFrameGraphic.update();
-      }
-
-      public void doTransitionOutOfAction()
-      {
-         yoDesiredPosition.setToNaN();
-         trajectoryWasReplanned.set(false);
-         isUnconstrained.set(false);
-
-         accelerationControlModule.reset();
-
-         if (visualize)
-         {
-            desiredOrientationFrameGraphic.hideGraphicObject();
-            correctedDesiredOrientationFrameGraphic.hideGraphicObject();
-         }
-      }
-   }
+//   /**
+//    * The unconstrained state is used if the foot is moved free in space without constrains. Depending on the type of trajectory
+//    * this can either be a movement along a straight line or (in case of walking) a swing motion.
+//    * 
+//    * E.g. the MoveStraightState and the SwingState extend this class and implement the trajectory related methods.
+//    */
+//   private abstract class AbstractUnconstrainedState extends AbstractFootControlState
+//   {
+//      public AbstractUnconstrainedState(ConstraintType constraintType)
+//      {
+//         super(constraintType, _yoDesiredPosition, _yoDesiredLinearVelocity, _yoDesiredLinearAcceleration,
+//               footSpatialAccelerationControlModule, _momentumBasedController, _contactableBody,
+//               _requestedState, _jacobianId, nullspaceMultiplier, jacobianDeterminantInRange,
+//               doSingularityEscape, _forceFootAccelerateIntoGround, _legSingularityAndKneeCollapseAvoidanceControlModule);
+//      }
+//
+//      /**
+//       * initializes all the trajectories
+//       */
+//      protected abstract void initializeTrajectory();
+//
+//      /**
+//       * compute the and pack the following variables:
+//       * desiredPosition, desiredLinearVelocity, desiredLinearAcceleration,
+//       * trajectoryOrientation, desiredAngularVelocity, desiredAngularAcceleration
+//       */
+//      protected abstract void computeAndPackTrajectory();
+//
+//      public void doTransitionIntoAction()
+//      {
+//         legSingularityAndKneeCollapseAvoidanceControlModule.setCheckVelocityForSwingSingularityAvoidance(true);
+//
+//         accelerationControlModule.reset();
+//
+//         isCoPOnEdge = false;
+//         initializeTrajectory();
+//
+//         isTrajectoryDone.set(false);
+//         isUnconstrained.set(true);
+//
+//         setSwingControlGains(swingKpXY.getDoubleValue(), swingKpZ.getDoubleValue(), swingKpOrientation.getDoubleValue(), swingZetaXYZ.getDoubleValue(), swingZetaOrientation.getDoubleValue());
+//
+//         if (visualize)
+//         {
+//            desiredOrientationFrameGraphic.showGraphicObject();
+//            correctedDesiredOrientationFrameGraphic.showGraphicObject();
+//         }
+//      }
+//
+//      public void doSpecificAction()
+//      {
+//         if (doSingularityEscape.getBooleanValue())
+//         {
+//            initializeTrajectory();
+//         }
+//
+//         computeAndPackTrajectory();
+//
+//         yoDesiredPosition.set(desiredPosition);
+//
+//         desiredOrientation.setAndChangeFrame(trajectoryOrientation);
+//
+//         if (CORRECT_SWING_CONSIDERING_JOINT_LIMITS)
+//            correctInputsAccordingToJointLimits();
+//
+//         legSingularityAndKneeCollapseAvoidanceControlModule.correctSwingFootTrajectoryForSingularityAvoidance(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
+//
+//         accelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity,
+//               desiredLinearAcceleration, desiredAngularAcceleration, rootBody);
+//         accelerationControlModule.packAcceleration(footAcceleration);
+//
+//         setTaskspaceConstraint(footAcceleration);
+//
+//         updateVisualizers();
+//      }
+//
+//      private final double[] desiredYawPitchRoll = new double[3];
+//      private final double epsilon = 1e-3;
+//
+//      // TODO Pretty much hackish...
+//      private void correctInputsAccordingToJointLimits()
+//      {
+//         ReferenceFrame frameBeforeHipYawJoint = hipYawJoint.getFrameBeforeJoint();
+//         desiredOrientation.changeFrame(frameBeforeHipYawJoint);
+//         desiredOrientation.getYawPitchRoll(desiredYawPitchRoll);
+//         if (desiredYawPitchRoll[0] > hipYawJoint.getJointLimitUpper() - epsilon)
+//         {
+//            desiredYawPitchRoll[0] = hipYawJoint.getJointLimitUpper();
+//            desiredAngularVelocity.changeFrame(frameBeforeHipYawJoint);
+//            desiredAngularVelocity.setZ(Math.min(0.0, desiredAngularVelocity.getZ()));
+//            desiredAngularAcceleration.changeFrame(frameBeforeHipYawJoint);
+//            desiredAngularAcceleration.setZ(Math.min(0.0, desiredAngularVelocity.getZ()));
+//         }
+//         else if (desiredYawPitchRoll[0] < hipYawJoint.getJointLimitLower() + epsilon)
+//         {
+//            desiredYawPitchRoll[0] = hipYawJoint.getJointLimitLower();
+//            desiredAngularVelocity.changeFrame(frameBeforeHipYawJoint);
+//            desiredAngularVelocity.setZ(Math.max(0.0, desiredAngularVelocity.getZ()));
+//            desiredAngularAcceleration.changeFrame(frameBeforeHipYawJoint);
+//            desiredAngularAcceleration.setZ(Math.max(0.0, desiredAngularVelocity.getZ()));
+//         }
+//         desiredOrientation.setYawPitchRoll(desiredYawPitchRoll);
+//
+//         ReferenceFrame frameBeforeAnklePitchJoint = anklePitchJoint.getFrameBeforeJoint();
+//         desiredOrientation.changeFrame(frameBeforeAnklePitchJoint);
+//         desiredOrientation.getYawPitchRoll(desiredYawPitchRoll);
+//         if (desiredYawPitchRoll[1] > anklePitchJoint.getJointLimitUpper() - epsilon)
+//         {
+//            desiredYawPitchRoll[1] = anklePitchJoint.getJointLimitUpper();
+//            desiredAngularVelocity.changeFrame(frameBeforeAnklePitchJoint);
+//            desiredAngularVelocity.setY(Math.min(0.0, desiredAngularVelocity.getY()));
+//            desiredAngularAcceleration.changeFrame(frameBeforeAnklePitchJoint);
+//            desiredAngularAcceleration.setY(Math.min(0.0, desiredAngularVelocity.getY()));
+//         }
+//         else if (desiredYawPitchRoll[1] < anklePitchJoint.getJointLimitLower() + epsilon)
+//         {
+//            desiredYawPitchRoll[1] = anklePitchJoint.getJointLimitLower();
+//            desiredAngularVelocity.changeFrame(frameBeforeAnklePitchJoint);
+//            desiredAngularVelocity.setY(Math.max(0.0, desiredAngularVelocity.getY()));
+//            desiredAngularAcceleration.changeFrame(frameBeforeAnklePitchJoint);
+//            desiredAngularAcceleration.setY(Math.max(0.0, desiredAngularVelocity.getY()));
+//         }
+//         desiredOrientation.setYawPitchRoll(desiredYawPitchRoll);
+//
+//         ReferenceFrame frameBeforeAnkleRollJoint = ankleRollJoint.getFrameBeforeJoint();
+//         desiredOrientation.changeFrame(frameBeforeAnkleRollJoint);
+//         desiredOrientation.getYawPitchRoll(desiredYawPitchRoll);
+//         if (desiredYawPitchRoll[2] > ankleRollJoint.getJointLimitUpper() - epsilon)
+//         {
+//            desiredYawPitchRoll[2] = ankleRollJoint.getJointLimitUpper();
+//            desiredAngularVelocity.changeFrame(frameBeforeAnkleRollJoint);
+//            desiredAngularVelocity.setX(Math.min(0.0, desiredAngularVelocity.getX()));
+//            desiredAngularAcceleration.changeFrame(frameBeforeAnkleRollJoint);
+//            desiredAngularAcceleration.setX(Math.min(0.0, desiredAngularVelocity.getX()));
+//         }
+//         else if (desiredYawPitchRoll[2] < ankleRollJoint.getJointLimitLower() + epsilon)
+//         {
+//            desiredYawPitchRoll[2] = ankleRollJoint.getJointLimitLower();
+//            desiredAngularVelocity.changeFrame(frameBeforeAnkleRollJoint);
+//            desiredAngularVelocity.setX(Math.max(0.0, desiredAngularVelocity.getX()));
+//            desiredAngularAcceleration.changeFrame(frameBeforeAnkleRollJoint);
+//            desiredAngularAcceleration.setX(Math.max(0.0, desiredAngularVelocity.getX()));
+//         }
+//         desiredOrientation.setYawPitchRoll(desiredYawPitchRoll);
+//
+//         desiredOrientation.changeFrame(worldFrame);
+//         desiredAngularVelocity.changeFrame(worldFrame);
+//         desiredAngularAcceleration.changeFrame(worldFrame);
+//      }
+//
+//      private final void updateVisualizers()
+//      {
+//         if (!visualize)
+//            return;
+//
+//         desiredOrientationFrame.update();
+//         correctedDesiredOrientationFrame.update();
+//         desiredOrientationFrameGraphic.update();
+//         correctedDesiredOrientationFrameGraphic.update();
+//      }
+//
+//      public void doTransitionOutOfAction()
+//      {
+//         yoDesiredPosition.setToNaN();
+//         trajectoryWasReplanned.set(false);
+//         isUnconstrained.set(false);
+//
+//         accelerationControlModule.reset();
+//
+//         if (visualize)
+//         {
+//            desiredOrientationFrameGraphic.hideGraphicObject();
+//            correctedDesiredOrientationFrameGraphic.hideGraphicObject();
+//         }
+//      }
+//   }
 
    private class FootStateTransitionCondition implements StateTransitionCondition
    {
@@ -1209,7 +1274,7 @@ public class FootControlModule
 
          boolean singularityEscapeDone = true;
 
-         if (doSingularityEscape.getBooleanValue() && waitSingularityEscapeBeforeTransitionToNextState.getBooleanValue())
+         if (_doSingularityEscape.getBooleanValue() && waitSingularityEscapeBeforeTransitionToNextState.getBooleanValue())
          {
             nullspaceCalculator.setMatrix(jacobian.getJacobianMatrix(), 1);
             DenseMatrix64F nullspace = nullspaceCalculator.getNullspace();
@@ -1218,7 +1283,7 @@ public class FootControlModule
 
             int velocitySign = (int) Math.round(Math.signum(nullspaceVelocityDotProduct));
             boolean velocitySignOK = velocitySign == velocitySignForSingularityEscape;
-            if (jacobianDeterminantInRange.getBooleanValue() || !velocitySignOK)
+            if (_jacobianDeterminantInRange.getBooleanValue() || !velocitySignOK)
             {
                singularityEscapeDone = false;
             }
@@ -1233,23 +1298,23 @@ public class FootControlModule
       public void doTransitionAction()
       {
          _requestedState.set(null);
-         doSingularityEscape.set(false);
+         _doSingularityEscape.set(false);
          waitSingularityEscapeBeforeTransitionToNextState.set(false);
       }
    }
 
    // TODO: don't hardcode this here:
-   private void setSwingControlGains(double kxyPosition, double kzPosition, double kOrientation, double zetaXYZ, double zetaOrientation)
-   {
-      double dxyPosition = GainCalculator.computeDerivativeGain(kxyPosition, zetaXYZ);
-      double dzPosition = GainCalculator.computeDerivativeGain(kzPosition, zetaXYZ);
-      double dOrientation = GainCalculator.computeDerivativeGain(kOrientation, zetaOrientation);
-
-      footSpatialAccelerationControlModule.setPositionProportionalGains(kxyPosition, kxyPosition, kzPosition);
-      footSpatialAccelerationControlModule.setPositionDerivativeGains(dxyPosition, dxyPosition, dzPosition);
-      footSpatialAccelerationControlModule.setOrientationProportionalGains(kOrientation, kOrientation, kOrientation);
-      footSpatialAccelerationControlModule.setOrientationDerivativeGains(dOrientation, dOrientation, dOrientation);
-   }
+//   private void setSwingControlGains(double kxyPosition, double kzPosition, double kOrientation, double zetaXYZ, double zetaOrientation)
+//   {
+//      double dxyPosition = GainCalculator.computeDerivativeGain(kxyPosition, zetaXYZ);
+//      double dzPosition = GainCalculator.computeDerivativeGain(kzPosition, zetaXYZ);
+//      double dOrientation = GainCalculator.computeDerivativeGain(kOrientation, zetaOrientation);
+//
+//      footSpatialAccelerationControlModule.setPositionProportionalGains(kxyPosition, kxyPosition, kzPosition);
+//      footSpatialAccelerationControlModule.setPositionDerivativeGains(dxyPosition, dxyPosition, dzPosition);
+//      footSpatialAccelerationControlModule.setOrientationProportionalGains(kOrientation, kOrientation, kOrientation);
+//      footSpatialAccelerationControlModule.setOrientationDerivativeGains(dOrientation, dOrientation, dOrientation);
+//   }
 
 //   // TODO Should we maintain the pitch and roll?
 //   private final void setHoldPositionStateGains()
