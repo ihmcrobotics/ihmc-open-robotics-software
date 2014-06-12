@@ -11,7 +11,7 @@ public class WallWorld extends CombinedTerrainObject
 
       addBox(-5, 0.75, 5, 2, 4);
       
-      addBox(-10, -10, 10, 10, 1);
+      addBox(-10, -10, 10, 10, -0.1, 0.0);
    }
 
    
