@@ -43,7 +43,7 @@ public class DRCPosePlaybackDemo
    public DRCPosePlaybackDemo(DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup, DRCSCSInitialSetup scsInitialSetup,
          PosePlaybackPacket posePlaybackPacket, DRCRobotModel model)
    {
-      WalkingControllerParameters walkingControlParameters = model.getWalkingControlParameters();
+      WalkingControllerParameters walkingControlParameters = model.getWalkingControllerParameters();
       ArmControllerParameters armControlParameters = model.getArmControllerParameters();
 
       FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulation(walkingControlParameters);

@@ -45,7 +45,7 @@ public class DRCInverseDynamicsControllerDemo
          recordFrequency = 1;
       scsInitialSetup.setRecordFrequency(recordFrequency);
 
-      WalkingControllerParameters walkingControlParameters = model.getWalkingControlParameters();
+      WalkingControllerParameters walkingControlParameters = model.getWalkingControllerParameters();
       ArmControllerParameters armControlParameters = model.getArmControllerParameters();
 
       FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulation(walkingControlParameters);

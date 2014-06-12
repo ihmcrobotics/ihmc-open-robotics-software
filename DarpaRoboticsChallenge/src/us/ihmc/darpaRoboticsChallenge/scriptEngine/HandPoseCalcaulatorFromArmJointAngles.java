@@ -32,7 +32,7 @@ public class HandPoseCalcaulatorFromArmJointAngles
    public HandPoseCalcaulatorFromArmJointAngles(DRCRobotModel robotModel)
    {
       jointMap = robotModel.getJointMap();
-      drcRobotWalkingControllerParameters = robotModel.getWalkingControlParameters();
+      drcRobotWalkingControllerParameters = robotModel.getWalkingControllerParameters();
       fullRobotModel = robotModel.createFullRobotModel();
 
       for (RobotSide robotSide : RobotSide.values())

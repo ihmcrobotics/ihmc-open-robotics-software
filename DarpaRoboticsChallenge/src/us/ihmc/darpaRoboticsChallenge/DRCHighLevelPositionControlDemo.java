@@ -40,7 +40,7 @@ public class DRCHighLevelPositionControlDemo
                                     DRCSCSInitialSetup scsInitialSetup, DRCRobotModel model)
    {
 
-      WalkingControllerParameters drcControlParameters = model.getWalkingControlParameters();
+      WalkingControllerParameters drcControlParameters = model.getWalkingControllerParameters();
       ArmControllerParameters armControllerParameters = model.getArmControllerParameters();
       double dt = scsInitialSetup.getDT();
       int recordFrequency = (int) Math.round(model.getControllerDT() / dt);

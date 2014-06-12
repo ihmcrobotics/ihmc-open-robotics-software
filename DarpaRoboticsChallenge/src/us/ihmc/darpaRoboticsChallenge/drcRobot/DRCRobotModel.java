@@ -26,7 +26,7 @@ public interface DRCRobotModel
 
    public abstract ArmControllerParameters getArmControllerParameters();
 
-   public abstract WalkingControllerParameters getWalkingControlParameters();
+   public abstract WalkingControllerParameters getWalkingControllerParameters();
 
    public abstract WalkingControllerParameters getMultiContactControllerParameters();
 
