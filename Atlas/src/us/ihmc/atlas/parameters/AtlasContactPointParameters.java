@@ -287,13 +287,13 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
    @Override
    public SideDependentList<Transform3D> getHandContactPointTransforms()
    {
-      return thighContactPointTransforms;
+      return handContactPointTransforms;
    }
 
    @Override
    public SideDependentList<List<Point2d>> getHandContactPoints()
    {
-      return thighContactPoints;
+      return handContactPoints;
    }
 
    @Override
