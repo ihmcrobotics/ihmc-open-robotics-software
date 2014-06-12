@@ -8,13 +8,14 @@ import javax.vecmath.Quat4d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.WrenchBasedFootSwitch;
 import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
 import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadDataSynchronizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParameters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
@@ -34,9 +35,7 @@ import us.ihmc.utilities.ForceSensorDefinition;
 import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.math.TimeTools;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.AtomicSettableTimestampProvider;
-import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.TotalMassCalculator;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
@@ -201,20 +200,12 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry registry)
    {
       DRCRobotPhysicalProperties physicalProperties = drcRobotModel.getPhysicalProperties();
+      DRCRobotJointMap jointMap = drcRobotModel.getJointMap();
       FullInverseDynamicsStructure inverseDynamicsStructure = DRCControllerThread.createInverseDynamicsStructure(estimatorFullRobotModel);
 
-      SideDependentList<ContactablePlaneBody> bipedFeet = new SideDependentList<ContactablePlaneBody>();
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         RigidBody footBody = estimatorFullRobotModel.getFoot(robotSide);
-         ReferenceFrames estimatorReferenceFrames = new ReferenceFrames(estimatorFullRobotModel, drcRobotModel.getJointMap(),
-               physicalProperties.getAnkleHeight());
-         ReferenceFrame soleFrame = estimatorReferenceFrames.getSoleFrame(robotSide);
-         ListOfPointsContactablePlaneBody foot = new ListOfPointsContactablePlaneBody(footBody, soleFrame, contactPointParamaters
-               .getFootGroundContactPointsInSoleFrameForController().get(robotSide));
-
-         bipedFeet.put(robotSide, foot);
-      }
+      ReferenceFrames estimatorReferenceFrames = new ReferenceFrames(estimatorFullRobotModel, jointMap, physicalProperties.getAnkleHeight());
+      ContactableBodiesFactory contactableBodiesFactory = jointMap.getContactPointParameters().getContactableBodiesFactory();
+      SideDependentList<ContactablePlaneBody> bipedFeet = contactableBodiesFactory.createFootContactableBodies(estimatorFullRobotModel, estimatorReferenceFrames);
 
       double gravityMagnitude = Math.abs(gravity);
       double totalRobotWeight = TotalMassCalculator.computeSubTreeMass(estimatorFullRobotModel.getElevator()) * gravityMagnitude;

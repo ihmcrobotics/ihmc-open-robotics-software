@@ -71,7 +71,7 @@ public class AtlasMultiContact
       ContactableBodiesFactory contactableBodiesFactory = contactPointParameters.getContactableBodiesFactory();
 
       environment = new MultiContactTestEnvironment(robotInitialSetup, robotModel, footContactSides, handContactSides,
-            AtlasContactPointParameters.invisibleContactablePlaneHandContactPointTransforms);
+            contactPointParameters.getHandContactPointTransforms());
       scsInitialSetup = new DRCSCSInitialSetup(environment, robotModel.getSimulateDT());
 
       double dt = scsInitialSetup.getDT();

@@ -46,30 +46,9 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
 
    private final List<Pair<String, Vector3d>> jointNameGroundContactPointMap = new ArrayList<Pair<String, Vector3d>>();
 
-   public static final SideDependentList<Transform3D> invisibleContactablePlaneHandContactPointTransforms = new SideDependentList<Transform3D>();
-   static
-   {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         invisibleContactablePlaneHandContactPointTransforms.put(robotSide, new Transform3D());
-      }
-   }
-
-   public static final SideDependentList<List<Point2d>> invisibleContactablePlaneHandContactPoints = new SideDependentList<List<Point2d>>();
-   static
-   {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         double y0 = 0.0;
-         List<Point2d> list = new ArrayList<Point2d>();
-         list.add(new Point2d(-0.05, -0.05 + y0));
-         list.add(new Point2d(-0.05, 0.05 + y0));
-         list.add(new Point2d(0.05, 0.05 + y0));
-         list.add(new Point2d(0.05, -0.05 + y0));
-
-         invisibleContactablePlaneHandContactPoints.put(robotSide, list);
-      }
-   }
+   private boolean handContactPointsHaveBeenCreated = false;
+   private final SideDependentList<Transform3D> handContactPointTransforms = new SideDependentList<>();
+   private final SideDependentList<List<Point2d>> handContactPoints = new SideDependentList<>();
 
    private final SideDependentList<ArrayList<Point2d>> footGroundContactPoints = new SideDependentList<>();
 
@@ -198,23 +177,36 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
             jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(jointMap.getJointBeforeFootName(robotSide), new Vector3d(gcOffset)));
          }
       }
-      contactableBodiesFactory.addFootContactParameters(getFootGroundContactPointsInSoleFrameForController());
+      contactableBodiesFactory.addFootContactParameters(footGroundContactPoints);
    }
 
    public void createInvisibleHandContactPoints()
    {
+      if (handContactPointsHaveBeenCreated)
+         throw new RuntimeException("Contact points for the hands have already been created");
+      else
+         handContactPointsHaveBeenCreated = true;
+
       SideDependentList<String> nameOfJointBeforeHands = jointMap.getNameOfJointBeforeHands();
       for (RobotSide robotSide : RobotSide.values)
       {
-         for (Point2d point : invisibleContactablePlaneHandContactPoints.get(robotSide))
+         handContactPointTransforms.put(robotSide, new Transform3D());
+
+         double y0 = 0.0;
+         handContactPoints.put(robotSide, new ArrayList<Point2d>());
+         handContactPoints.get(robotSide).add(new Point2d(-0.05, -0.05 + y0));
+         handContactPoints.get(robotSide).add(new Point2d(-0.05, 0.05 + y0));
+         handContactPoints.get(robotSide).add(new Point2d(0.05, 0.05 + y0));
+         handContactPoints.get(robotSide).add(new Point2d(0.05, -0.05 + y0));
+
+         for (Point2d point : handContactPoints.get(robotSide))
          {
             Point3d point3d = new Point3d(point.getX(), point.getY(), 0.0);
-            invisibleContactablePlaneHandContactPointTransforms.get(robotSide).transform(point3d);
+            handContactPointTransforms.get(robotSide).transform(point3d);
             jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(nameOfJointBeforeHands.get(robotSide), new Vector3d(point3d)));
          }
       }
-      contactableBodiesFactory.addHandContactParameters(nameOfJointBeforeHands, invisibleContactablePlaneHandContactPoints,
-            invisibleContactablePlaneHandContactPointTransforms);
+      contactableBodiesFactory.addHandContactParameters(nameOfJointBeforeHands, handContactPoints, handContactPointTransforms);
    }
 
    @Override
@@ -266,13 +258,25 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
    }
 
    @Override
+   public SideDependentList<Transform3D> getHandContactPointTransforms()
+   {
+      return thighContactPointTransforms;
+   }
+
+   @Override
+   public SideDependentList<List<Point2d>> getHandContactPoints()
+   {
+      return thighContactPoints;
+   }
+
+   @Override
    public List<Pair<String, Vector3d>> getJointNameGroundContactPointMap()
    {
       return jointNameGroundContactPointMap;
    }
 
    @Override
-   public SideDependentList<ArrayList<Point2d>> getFootGroundContactPointsInSoleFrameForController()
+   public SideDependentList<ArrayList<Point2d>> getFootContactPoints()
    {
       return footGroundContactPoints;
    }
