@@ -31,7 +31,11 @@ public abstract class DRCRobotContactPointParameters
 
    public abstract List<Pair<String, Vector3d>> getJointNameGroundContactPointMap();
 
-   public abstract SideDependentList<ArrayList<Point2d>> getFootGroundContactPointsInSoleFrameForController();
+   public abstract SideDependentList<ArrayList<Point2d>> getFootContactPoints();
    
    public abstract ContactableBodiesFactory getContactableBodiesFactory();
+
+   public abstract SideDependentList<Transform3D> getHandContactPointTransforms();
+
+   public abstract SideDependentList<List<Point2d>> getHandContactPoints();
 }
