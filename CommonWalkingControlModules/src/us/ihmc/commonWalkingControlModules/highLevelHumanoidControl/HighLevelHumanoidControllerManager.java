@@ -10,8 +10,6 @@ import us.ihmc.commonWalkingControlModules.packets.DesiredHighLevelStateProvider
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
-import com.yobotics.simulationconstructionset.VariableChangedListener;
-import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
@@ -38,7 +36,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
       DoubleYoVariable yoTime = momentumBasedController.getYoTime();
       this.stateMachine = setUpStateMachine(highLevelBehaviors, yoTime, registry);
       requestedHighLevelState.set(initialBehavior);
-      
+
       if (variousWalkingProviders != null)
          this.highLevelStateProvider = variousWalkingProviders.getDesiredHighLevelStateProvider();
       else
@@ -90,21 +88,6 @@ public class HighLevelHumanoidControllerManager implements RobotController
       this.requestedHighLevelState.set(requestedHighLevelState);
    }
    
-   public void addVariableChangedListenerToRequestedHighLevelState(final VariableChangedListener variableChangedListener, final HighLevelState stateEnum)
-   {
-      requestedHighLevelState.addVariableChangedListener(new VariableChangedListener()
-      {
-         @Override
-         public void variableChanged(YoVariable<?> v)
-         {
-            if (requestedHighLevelState.valueEquals(stateEnum))
-            {
-               variableChangedListener.variableChanged(v);
-            }
-         }
-      });
-   }
-
    public void initialize()
    {
       momentumBasedController.initialize();
