@@ -30,7 +30,7 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 
-public abstract class FootControlState extends State<ConstraintType>
+public abstract class AbstractFootControlState extends State<ConstraintType>
 {
    protected static final double coefficientOfFriction = 0.8;
    protected static final double minJacobianDeterminant = 0.035;
@@ -72,7 +72,7 @@ public abstract class FootControlState extends State<ConstraintType>
    
    protected final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
    
-   public FootControlState(ConstraintType stateEnum, YoFramePoint yoDesiredPosition,
+   public AbstractFootControlState(ConstraintType stateEnum, YoFramePoint yoDesiredPosition,
          YoFrameVector yoDesiredLinearVelocity, YoFrameVector yoDesiredLinearAcceleration,
          RigidBodySpatialAccelerationControlModule accelerationControlModule,
          MomentumBasedController momentumBasedController, ContactablePlaneBody contactableBody,
@@ -194,7 +194,6 @@ public abstract class FootControlState extends State<ConstraintType>
          {
             currentOrientation.set(contactableBody.getBodyFrame());
             currentOrientation.changeFrame(worldFrame);
-//            orientationFix.set(currentOrientation);
          }
          isCoPOnEdge = copOnEdge;
 
