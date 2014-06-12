@@ -169,6 +169,8 @@ public class FootControlModule
    private final BooleanYoVariable replanTrajectory;
    private final BooleanYoVariable trajectoryWasReplanned;
    private final YoVariableDoubleProvider swingTimeRemaining;
+   
+   private final HoldPositionState holdPositionState;
 
    public FootControlModule(double controlDT, ContactablePlaneBody contactablePlaneBody, int jacobianId, RobotSide robotSide,
          DoubleTrajectoryGenerator pitchTouchdownTrajectoryGenerator, DoubleProvider maximumTakeoffAngle,
@@ -390,7 +392,12 @@ public class FootControlModule
             _contactableBody, requestHoldPosition, _requestedState, _jacobianId, nullspaceMultiplier,
             jacobianDeterminantInRange, doSingularityEscape, fullyConstrainedNormalContactVector,
             _forceFootAccelerateIntoGround, doFancyOnToesControl, _legSingularityAndKneeCollapseAvoidanceControlModule));
-      states.add(new HoldPositionState());
+      holdPositionState = new HoldPositionState(_yoDesiredPosition, _yoDesiredLinearVelocity, _yoDesiredLinearAcceleration,
+            footSpatialAccelerationControlModule, _momentumBasedController, _contactableBody, requestHoldPosition,
+            _requestedState, _jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape,
+            fullyConstrainedNormalContactVector, _forceFootAccelerateIntoGround,
+            _legSingularityAndKneeCollapseAvoidanceControlModule);
+      states.add(holdPositionState);
       states.add(new SwingState(swingTimeProvider, initialPositionProvider, initialVelocityProvider,
             finalPositionProvider, finalVelocityProvider, initialOrientationProvider,
             finalOrientationProvider, trajectoryParametersProvider));
@@ -429,6 +436,10 @@ public class FootControlModule
       this.holdKpRoll.set(holdKpOrientation);
       this.holdKpPitch.set(holdKpOrientation);
       this.holdKpYaw.set(holdKpOrientation);
+      
+      holdPositionState.setHoldPositionStateGains(this.holdZeta.getDoubleValue(), this.holdKpx.getDoubleValue(),
+            this.holdKpy.getDoubleValue(), this.holdKpz.getDoubleValue(), this.holdKdz.getDoubleValue(),
+            this.holdKpRoll.getDoubleValue(), this.holdKpPitch.getDoubleValue(), this.holdKpYaw.getDoubleValue());
    }
 
    public void setToeOffGains(double toeOffKpXY, double toeOffKpOrientation, double toeOffZeta)
@@ -870,65 +881,6 @@ public class FootControlModule
       }
    }
 
-   private class HoldPositionState extends FootControlState
-   {
-      private final FrameVector holdPositionNormalContactVector = new FrameVector();
-      
-      public HoldPositionState()
-      {
-         super(ConstraintType.HOLD_POSITION, _yoDesiredPosition, _yoDesiredLinearVelocity, _yoDesiredLinearAcceleration,
-               footSpatialAccelerationControlModule, _momentumBasedController, _contactableBody, _requestedState,
-               _jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape,
-               _forceFootAccelerateIntoGround, _legSingularityAndKneeCollapseAvoidanceControlModule);
-      }
-
-      public void doTransitionIntoAction()
-      {
-         // Remember the previous contact normal, in case the foot leaves the ground and rotates
-         holdPositionNormalContactVector.setIncludingFrame(fullyConstrainedNormalContactVector);
-         holdPositionNormalContactVector.changeFrame(worldFrame);
-         momentumBasedController.setPlaneContactStateNormalContactVector(contactableBody, holdPositionNormalContactVector);
-
-         desiredPosition.setToZero(contactableBody.getBodyFrame());
-         desiredPosition.changeFrame(worldFrame);
-
-         desiredOrientation.setToZero(contactableBody.getBodyFrame());
-         desiredOrientation.changeFrame(worldFrame);
-         
-         desiredLinearVelocity.setToZero(worldFrame);
-         desiredAngularVelocity.setToZero(worldFrame);
-
-         desiredLinearAcceleration.setToZero(worldFrame);
-         desiredAngularAcceleration.setToZero(worldFrame);
-      }
-
-      public void doSpecificAction()
-      {
-         setHoldPositionStateGains();
-         
-         determineCoPOnEdge();
-
-         if (!isCoPOnEdge && (isHoldPositionRequested == null || !isHoldPositionRequested.getBooleanValue()))
-            requestedState.set(ConstraintType.FULL);
-         
-         yoDesiredPosition.set(desiredPosition);
-         accelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity,
-               desiredLinearAcceleration, desiredAngularAcceleration, rootBody);
-         accelerationControlModule.packAcceleration(footAcceleration);
-
-         if (forceFootAccelerateIntoGround.getBooleanValue())
-            footAcceleration.setLinearPartZ(footAcceleration.getLinearPartZ() + desiredZAccelerationIntoGround);
-         
-         setTaskspaceConstraint(footAcceleration);
-      }
-
-      @Override
-      public void doTransitionOutOfAction()
-      {
-         yoDesiredPosition.setToNaN();
-      }
-   }
-
    private class SwingState extends UnconstrainedState
    {
       private final boolean visualizeSwingTrajectory = true;
@@ -1304,21 +1256,21 @@ public class FootControlModule
       footSpatialAccelerationControlModule.setOrientationDerivativeGains(dOrientation, dOrientation, dOrientation);
    }
 
-   // TODO Should we maintain the pitch and roll?
-   private final void setHoldPositionStateGains()
-   {
-      double dxPosition = GainCalculator.computeDerivativeGain(holdKpx.getDoubleValue(), holdZeta.getDoubleValue());
-      double dyPosition = GainCalculator.computeDerivativeGain(holdKpy.getDoubleValue(), holdZeta.getDoubleValue());
-      double dzPosition = GainCalculator.computeDerivativeGain(holdKpz.getDoubleValue(), holdZeta.getDoubleValue());
-      double dxOrientation = GainCalculator.computeDerivativeGain(holdKpRoll.getDoubleValue(), holdZeta.getDoubleValue());
-      double dyOrientation = GainCalculator.computeDerivativeGain(holdKpPitch.getDoubleValue(), holdZeta.getDoubleValue());
-      double dzOrientation = GainCalculator.computeDerivativeGain(holdKpYaw.getDoubleValue(), holdZeta.getDoubleValue());
-
-      footSpatialAccelerationControlModule.setPositionProportionalGains(holdKpx.getDoubleValue(), holdKpy.getDoubleValue(), holdKpz.getDoubleValue());
-      footSpatialAccelerationControlModule.setPositionDerivativeGains(dxPosition, dyPosition, dzPosition);
-      footSpatialAccelerationControlModule.setOrientationProportionalGains(holdKpRoll.getDoubleValue(), holdKpPitch.getDoubleValue(), holdKpYaw.getDoubleValue());
-      footSpatialAccelerationControlModule.setOrientationDerivativeGains(dxOrientation, dyOrientation, dzOrientation);
-   }
+//   // TODO Should we maintain the pitch and roll?
+//   private final void setHoldPositionStateGains()
+//   {
+//      double dxPosition = GainCalculator.computeDerivativeGain(holdKpx.getDoubleValue(), holdZeta.getDoubleValue());
+//      double dyPosition = GainCalculator.computeDerivativeGain(holdKpy.getDoubleValue(), holdZeta.getDoubleValue());
+//      double dzPosition = GainCalculator.computeDerivativeGain(holdKpz.getDoubleValue(), holdZeta.getDoubleValue());
+//      double dxOrientation = GainCalculator.computeDerivativeGain(holdKpRoll.getDoubleValue(), holdZeta.getDoubleValue());
+//      double dyOrientation = GainCalculator.computeDerivativeGain(holdKpPitch.getDoubleValue(), holdZeta.getDoubleValue());
+//      double dzOrientation = GainCalculator.computeDerivativeGain(holdKpYaw.getDoubleValue(), holdZeta.getDoubleValue());
+//
+//      footSpatialAccelerationControlModule.setPositionProportionalGains(holdKpx.getDoubleValue(), holdKpy.getDoubleValue(), holdKpz.getDoubleValue());
+//      footSpatialAccelerationControlModule.setPositionDerivativeGains(dxPosition, dyPosition, dzPosition);
+//      footSpatialAccelerationControlModule.setOrientationProportionalGains(holdKpRoll.getDoubleValue(), holdKpPitch.getDoubleValue(), holdKpYaw.getDoubleValue());
+//      footSpatialAccelerationControlModule.setOrientationDerivativeGains(dxOrientation, dyOrientation, dzOrientation);
+//   }
 
    private void setOnToesFreeMotionGains()
    {
