@@ -1229,6 +1229,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                   icpProjectionTimeOffset = pushRecoveryModule.computeTimeToProjectDesiredICPToClosestPointOnTrajectoryToActualICP(capturePoint2d, constantCenterOfPressure, startICP, finalDesiredICP, omega0) - captureTime;
                }
             }
+            
+            if(pushRecoveryModule.isRecovering())
+            {
+               desiredICPVelocityLocal.setToZero();
+            }
          }
 
          moveICPToInsideOfFootAtEndOfSwing(supportSide, transferToFootstepLocation, swingTimeCalculationProvider.getValue(), swingTimeRemaining,

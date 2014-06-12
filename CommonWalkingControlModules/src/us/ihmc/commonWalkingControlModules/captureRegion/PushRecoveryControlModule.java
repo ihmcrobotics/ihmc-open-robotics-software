@@ -30,6 +30,8 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateTransition
 
 public class PushRecoveryControlModule
 {
+   private static final boolean ENABLE = false;
+   
    private static final double MINIMUM_TIME_BEFORE_RECOVER_WITH_REDUCED_POLYGON = 6;
    private static final double DOUBLESUPPORT_SUPPORT_POLYGON_SCALE = 0.85;
    private static final double TRUST_TIME_SCALE = 0.9;
@@ -58,6 +60,7 @@ public class PushRecoveryControlModule
    private double defaultSwingTime;
    private double reducedSwinTime;
    private Footstep recoverFromDoubleSupportFallFootStep;
+   private final BooleanYoVariable recovering;
    private BooleanYoVariable readyToGrabNextFootstep;
    private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
    
@@ -77,7 +80,7 @@ public class PushRecoveryControlModule
       this.stateMachine = stateMachine;
       this.swingTimeCalculationProvider = swingTimeCalculationProvider;
 
-      enablePushRecovery.set(false);
+      enablePushRecovery.set(ENABLE);
 
       this.enablePushRecoveryFromDoubleSupport = new BooleanYoVariable("enablePushRecoveryFromDoubleSupport", registry);
       this.enablePushRecoveryFromDoubleSupport.set(false);
@@ -89,7 +92,8 @@ public class PushRecoveryControlModule
       orientationStateVisualizer = new OrientationStateVisualizer(dynamicGraphicObjectsListRegistry, registry);
 
       footstepWasProjectedInCaptureRegion = new BooleanYoVariable("footstepWasProjectedInCaptureRegion", registry);
-
+      recovering = new BooleanYoVariable("recovering", registry);
+      
       capturePointTrajectoryLine = new YoFrameLine2d(getClass().getSimpleName(), "CapturePointTrajectoryLine", ReferenceFrame.getWorldFrame(), registry);
       projectedCapturePoint = new Point2d();
       projectedCapturePointArtifact = new PointArtifact("ProjectedCapturePointArtifact", projectedCapturePoint);
@@ -111,6 +115,7 @@ public class PushRecoveryControlModule
    public void reset()
    {
       footstepWasProjectedInCaptureRegion.set(false);
+      recovering.set(false);
       recoverFromDoubleSupportFallFootStep = null;
       captureRegionCalculator.hideCaptureRegion();
 
@@ -253,6 +258,10 @@ public class PushRecoveryControlModule
 
          footstepWasProjectedInCaptureRegion.set(footstepAdjustor.adjustFootstep(nextFootstep, footPolygon.getCentroid(), captureRegionCalculator.getCaptureRegion()));
 
+         if(footstepWasProjectedInCaptureRegion.getBooleanValue())
+         {
+            recovering.set(true);
+         }
          return footstepWasProjectedInCaptureRegion.getBooleanValue();
       }
       return false;
@@ -329,5 +338,10 @@ public class PushRecoveryControlModule
    public boolean useICPProjection()
    {
       return this.useICPProjection;
+   }
+   
+   public boolean isRecovering()
+   {
+      return recovering.getBooleanValue();
    }
 }
