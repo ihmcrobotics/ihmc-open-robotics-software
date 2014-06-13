@@ -11,7 +11,8 @@ dependencies {
     compile group: 'us.ihmc.thirdparty.gdata', name: 'gdata-core', version: 'x'
     compile group: 'com.google.guava', name: 'guava', version: '17.0' //earlier version used 13.0.1
     compile group: 'us.ihmc.thirdparty', name: 'NonlinearOptimization', version: 'x'
-    
+    compile group: 'xuggle', name: 'xuggle-xuggler', version: '5.4'
+    compile group: 'org.tmatesoft.svnkit', name: 'svnkit', version: '1.8.5'
     
     compile project(':IHMCUtilities')
     compile project(':CapturePointCalculator')

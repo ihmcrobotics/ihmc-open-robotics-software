@@ -26,7 +26,7 @@ dependencies {
 	compile group: 'com.jcraft', name: 'jsch', version: '0.1.51'
 	compile group: 'commons-codec', name: 'commons-codec', version: '1.9'
 	compile group: 'org.apache.commons', name: 'commons-math3', version: '3.1.1'
-	compile group: 'org.bidib.jbidib.orb.qbang.rxtx', name: 'rxtxcomm', version: '2.2'
+	compile group: 'org.bidib.jbidib.org.qbang.rxtx', name: 'rxtxcomm', version: '2.2'
 	compile group: 'com.google.guava', name: 'guava', version: '17.0'
 	compile group: 'org.jeromq', name: 'jeromq', version: '0.2.0'
 	compile group: 'org.zeromq', name: 'jeromq', version: '0.3.0'
@@ -50,4 +50,5 @@ dependencies {
 	compile project(':SensorProcessing')
 	compile project(':SimulationConstructionSet')
 	compile project(':UserInterface')
+	compile project(':IHMCROSTools')
 }
