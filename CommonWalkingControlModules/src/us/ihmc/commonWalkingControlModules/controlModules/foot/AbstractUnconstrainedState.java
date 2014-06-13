@@ -78,12 +78,6 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       isUnconstrained.set(true);
 
       setSwingControlGains(swingKpXY, swingKpZ, swingKpOrientation, swingZetaXYZ, swingZetaOrientation);
-
-//      if (visualize)
-//      {
-//         desiredOrientationFrameGraphic.showGraphicObject();
-//         correctedDesiredOrientationFrameGraphic.showGraphicObject();
-//      }
    }
 
    public void doSpecificAction()
@@ -109,8 +103,6 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       accelerationControlModule.packAcceleration(footAcceleration);
 
       setTaskspaceConstraint(footAcceleration);
-
-//      updateVisualizers();
    }
 
    private final double[] desiredYawPitchRoll = new double[3];
@@ -187,17 +179,6 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       desiredAngularAcceleration.changeFrame(worldFrame);
    }
 
-//   private final void updateVisualizers()
-//   {
-//      if (!visualize)
-//         return;
-//
-//      desiredOrientationFrame.update();
-//      correctedDesiredOrientationFrame.update();
-//      desiredOrientationFrameGraphic.update();
-//      correctedDesiredOrientationFrameGraphic.update();
-//   }
-
    public void doTransitionOutOfAction()
    {
       yoDesiredPosition.setToNaN();
@@ -205,12 +186,6 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       isUnconstrained.set(false);
 
       accelerationControlModule.reset();
-
-//      if (visualize)
-//      {
-//         desiredOrientationFrameGraphic.hideGraphicObject();
-//         correctedDesiredOrientationFrameGraphic.hideGraphicObject();
-//      }
    }
    
    public void setSwingGains(double swingKpXY, double swingKpZ, double swingKpOrientation,
