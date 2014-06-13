@@ -1,0 +1,29 @@
+dependencies {
+	testCompile group: 'junit', name: 'junit', version: '4.11'
+	compile group: 'us.ihmc.thirdparty.j3d', name: 'vecmath', version: 'x'
+	compile group: 'us.ihmc.thirdparty.j3d', name: 'j3dutils', version: 'x'
+	compile group: 'us.ihmc.thirdparty.j3d', name: 'j3dcore', version: 'x'
+	compile group: 'com.google.protobuf', name: 'protobuf-java', version: '2.4.1'
+	compile group: 'net.sf.trove4j', name: 'trove4j', version: '3.0.3'
+	compile group: 'xuggle', name: 'xuggle-xuggler', version: 'null'
+	
+	compile group: 'org.jeromq', name: 'jeromq', version: '0.2.0' //for ZError
+	compile group: 'org.zeromq', name: 'jeromq', version: '0.3.3' //need both
+	compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
+	compile group: 'commons-lang', name: 'commons-lang', version: '2.6'
+	compile group: 'com.google.guava', name: 'guava', version: '17.0'
+	
+	compile project(':IHMCRealtime')
+	compile project(':SDFLoader')
+	compile project(':CommonWalkingControlModules')
+	compile project(':SimulationConstructionSet')
+	compile project(':Graphics3DAdapter')
+	compile project(':IHMCUtilities')
+	compile project(':Plotting')
+	compile project(':3DModelLoaders')
+	compile project(':JMEGraphics3DAdapter')
+	compile project(':CapturePointCalculator')
+	compile project(':IHMCControlFlow')
+	compile project(':KalmanProject')
+	compile project(':SensorProcessing')
+}
