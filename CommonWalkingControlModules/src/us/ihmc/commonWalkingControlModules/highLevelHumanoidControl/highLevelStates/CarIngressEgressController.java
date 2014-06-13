@@ -128,7 +128,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
                                      MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters,
                                      LidarControllerInterface lidarControllerInterface)
    {
-      super(variousWalkingProviders, variousWalkingManagers, momentumBasedController, walkingControllerParameters, lidarControllerInterface, controllerState);
+      super(variousWalkingProviders, variousWalkingManagers, momentumBasedController, walkingControllerParameters, controllerState);
 
       setupManagers(variousWalkingManagers);
 
@@ -409,7 +409,6 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       doFootControl();
       doArmControl();
       doHeadControl();
-      doLidarJointControl();
       doChestControl();
       doCoMControl();
       doPelvisControl();
