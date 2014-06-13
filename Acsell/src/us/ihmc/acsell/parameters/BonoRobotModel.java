@@ -38,7 +38,7 @@ public class BonoRobotModel implements DRCRobotModel
    private static final double CONTROLLER_DT = 0.006;
    private static final double ESTIMATOR_DT = 0.001;
 
-   private final String[] resourceDirectories;
+   private final String[] resourceDirectories = new String[] { getClass().getResource("../models/axl/axl_description").getFile() };
 
    private final boolean runningOnRealRobot;
    private final JaxbSDFLoader loader;
@@ -52,6 +52,7 @@ public class BonoRobotModel implements DRCRobotModel
    {
       this.runningOnRealRobot = runningOnRealRobot;
       sensorInformation = new BonoSensorInformation();
+
       if (headless)
       {
          this.loader = DRCRobotSDFLoader.loadDRCRobot(new String[] {}, getSdfFileAsStream(), true);
@@ -66,7 +67,6 @@ public class BonoRobotModel implements DRCRobotModel
          loader.addForceSensor(jointMap, forceSensorNames, forceSensorNames, new Transform3D());
       }
 
-      resourceDirectories = new String[] { getClass().getResource("../models/axl/axl_description").getFile() };
 
       armControlParameters = new BonoArmControlParameters(runningOnRealRobot);
       walkingControllerParameters = new BonoWalkingControllerParameters(runningOnRealRobot);
