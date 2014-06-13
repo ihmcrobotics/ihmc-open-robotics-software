@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.controllers;
+package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
 import java.util.ArrayList;
 
@@ -11,12 +11,6 @@ import us.ihmc.commonWalkingControlModules.controllers.RobotControllerUpdatables
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepTimingParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHumanoidControllerManager;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelBehaviorFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactoryHelper;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingManagers;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviderFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.DoNothingBehavior;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelState;
@@ -54,7 +48,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
-public class DRCRobotMomentumBasedControllerFactory
+public class MomentumBasedControllerFactory
 {
    private static final boolean CREATE_YOVARIABLE_WALKING_PROVIDERS = false;
    
@@ -92,7 +86,7 @@ public class DRCRobotMomentumBasedControllerFactory
    private final SideDependentList<String> footSensorNames;
    private final ContactableBodiesFactory contactableBodiesFactory;
 
-   public DRCRobotMomentumBasedControllerFactory(ContactableBodiesFactory contactableBodiesFactory, double contactTresholdForce,
+   public MomentumBasedControllerFactory(ContactableBodiesFactory contactableBodiesFactory, double contactTresholdForce,
          SideDependentList<String> footSensorNames, FootstepTimingParameters footstepTimingParameters, WalkingControllerParameters walkingControllerParameters,
          ArmControllerParameters armControllerParameters, boolean USE_HEADING_AND_VELOCITY_SCRIPT, boolean useFastTouchdowns, HighLevelState initialBehavior)
    {

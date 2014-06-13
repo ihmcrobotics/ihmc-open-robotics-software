@@ -3,6 +3,7 @@ package us.ihmc.darpaRoboticsChallenge;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.CenterOfMassJacobianUpdater;
 import us.ihmc.commonWalkingControlModules.sensors.CommonWalkingReferenceFramesUpdater;
@@ -11,7 +12,6 @@ import us.ihmc.commonWalkingControlModules.sensors.TwistUpdater;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaElipsoidsVisualizer;
 import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
 import us.ihmc.darpaRoboticsChallenge.controllers.ConstrainedCenterOfMassJacobianEvaluator;
-import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadDataSynchronizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -94,7 +94,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    
    private final BooleanYoVariable runController = new BooleanYoVariable("runController", registry);
    
-   public DRCControllerThread(DRCRobotModel robotModel, DRCRobotMomentumBasedControllerFactory controllerFactory, LidarControllerInterface lidarControllerInterface,
+   public DRCControllerThread(DRCRobotModel robotModel, MomentumBasedControllerFactory controllerFactory, LidarControllerInterface lidarControllerInterface,
          ThreadDataSynchronizer threadDataSynchronizer, DRCOutputWriter outputWriter, GlobalDataProducer dataProducer, RobotVisualizer robotVisualizer,
          double gravity)
    {
@@ -141,7 +141,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    }
 
    public static RobotController createMomentumBasedController(SDFFullRobotModel controllerModel, ReferenceFrames referenceFramesForController,
-         DRCRobotSensorInformation sensorInformation, DRCRobotMomentumBasedControllerFactory controllerFactory, LidarControllerInterface lidarControllerInterface,
+         DRCRobotSensorInformation sensorInformation, MomentumBasedControllerFactory controllerFactory, LidarControllerInterface lidarControllerInterface,
          DoubleYoVariable yoTime, double controlDT, double gravity, ForceSensorDataHolder forceSensorDataHolderForController,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry registry,
          GlobalDataProducer dataProducer)
