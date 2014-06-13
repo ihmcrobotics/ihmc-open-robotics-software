@@ -114,9 +114,9 @@ public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTest
 		
 		// setup all parameters
       Vector3d forceDirection = new Vector3d(0.0, 1.0, 0.0);
-      double magnitude = 800.0;
+      double magnitude = 750.0;
       double duration = 0.04;
-		double percentInSwing = 0.1;
+		double percentInSwing = 0.2;
 		RobotSide side = RobotSide.LEFT;
 		
 		// apply the push
@@ -180,7 +180,7 @@ public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTest
 
 		// setup all parameters
 		Vector3d forceDirection = new Vector3d(-0.5, 1.0, 0.0);
-		double magnitude = 900;
+		double magnitude = 800;
 		double duration = 0.05;
 		double percentInSwing = 0.2;
       RobotSide side = RobotSide.LEFT;
@@ -198,7 +198,7 @@ public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTest
 		setupTest(getRobotModel());
 
 	   // setup all parameters
-      Vector3d forceDirection = new Vector3d(1.0, 1.0, 0.0);
+      Vector3d forceDirection = new Vector3d(0.5, 1.0, 0.0);
       double magnitude = 800.0;
       double duration = 0.05;
       double percentInSwing = 0.4;
