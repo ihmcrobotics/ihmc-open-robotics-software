@@ -7,16 +7,23 @@ repositories {
     }
 
     /**
-     * SWT Maven repository, local proxy
-     */
-    maven{
-        url "https://bengal.ihmc.us/nexus/content/repositories/swt-repo/"
-    }
-
-    /**
      * Vendored third-party jars
      */
     maven{
         url "https://bengal.ihmc.us/nexus/content/repositories/thirdparty/"
+    }
+
+    /**
+     * Xuggle Maven repository
+     */
+    maven{
+        url "https://bengal.ihmc.us/nexus/content/repositories/xuggle/"
+    }
+
+    /**
+     * SVNKit Official repository
+     */
+    maven{
+        url "https://bengal.ihmc.us/nexus/content/repositories/SVNKit/"
     }
 }

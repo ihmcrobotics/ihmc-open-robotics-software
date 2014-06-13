@@ -33,7 +33,7 @@ dependencies {
 	
 	compile project(':IHMCUtilities')
 	testCompile project(':IHMCUtilities').sourceSets.test.output
-        compile project(':Plotting')
+    compile project(':Plotting')
 	compile project(':3DModelLoaders')
 	compile project(':Graphics3DAdapter')
 	compile project(':JMEGraphics3DAdapter')

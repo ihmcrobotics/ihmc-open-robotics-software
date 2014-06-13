@@ -3,6 +3,8 @@ dependencies {
     compile group: 'us.ihmc.thirdparty.j3d', name: 'j3dcore', version: 'x'
     compile group: 'us.ihmc.thirdparty.j3d', name: 'vecmath', version: 'x' 
     compile group: 'commons-lang', name: 'commons-lang', version: '2.6'
+    compile group: 'xuggle', name: 'xuggle-xuggler', version: '5.4'
+    compile group: 'org.tmatesoft.svnkit', name: 'svnkit', version: '1.8.5'
        
     compile project(':SimulationConstructionSet')
     compile project(':CommonWalkingControlModules')
