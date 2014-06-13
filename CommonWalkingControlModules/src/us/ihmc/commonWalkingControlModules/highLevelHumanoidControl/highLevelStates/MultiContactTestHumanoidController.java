@@ -6,7 +6,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlane
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
-import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingManagers;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CoMBasedMomentumRateOfChangeControlModule;
@@ -57,8 +56,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
 
    public MultiContactTestHumanoidController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
          CoMBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule, MomentumBasedController momentumBasedController,
-         WalkingControllerParameters walkingControllerParameters, LidarControllerInterface lidarControllerInterface,
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+         WalkingControllerParameters walkingControllerParameters, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       super(variousWalkingProviders, variousWalkingManagers, momentumBasedController, walkingControllerParameters, controllerState);
 

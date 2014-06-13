@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepTimingParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.PolyvalentHighLevelHumanoidControllerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelPositionControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelState;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -31,8 +32,6 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPositi
 
 public class DRCHighLevelPositionControlDemo
 {
-   private static final HighLevelState TASKSPACE_POSITION_CONTROL = HighLevelState.JOINT_PD_CONTROL;
-   
    private final DRCSimulationFactory drcSimulation;
 
 
@@ -40,7 +39,7 @@ public class DRCHighLevelPositionControlDemo
                                     DRCSCSInitialSetup scsInitialSetup, DRCRobotModel model)
    {
 
-      WalkingControllerParameters drcControlParameters = model.getWalkingControllerParameters();
+      WalkingControllerParameters walkingControllerParameters = model.getWalkingControllerParameters();
       ArmControllerParameters armControllerParameters = model.getArmControllerParameters();
       double dt = scsInitialSetup.getDT();
       int recordFrequency = (int) Math.round(model.getControllerDT() / dt);
@@ -48,12 +47,13 @@ public class DRCHighLevelPositionControlDemo
          recordFrequency = 1;
       scsInitialSetup.setRecordFrequency(recordFrequency);
 
-      FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulation(drcControlParameters);
+      FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulation(walkingControllerParameters);
       
       ContactableBodiesFactory contactableBodiesFactory = model.getContactPointParameters().getContactableBodiesFactory();
       
       PolyvalentHighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory = new PolyvalentHighLevelHumanoidControllerFactory(contactableBodiesFactory,
-            footstepTimingParameters, drcControlParameters, drcControlParameters, armControllerParameters, false, false, false, TASKSPACE_POSITION_CONTROL);
+            footstepTimingParameters, walkingControllerParameters, armControllerParameters, false, false, HighLevelState.DO_NOTHING_BEHAVIOR);
+      highLevelHumanoidControllerFactory.addHighLevelBehaviorFactory(new HighLevelPositionControllerFactory(true));
 
       SideDependentList<String> footForceSensorNames = model.getSensorInformation().getFeetForceSensorNames();
       

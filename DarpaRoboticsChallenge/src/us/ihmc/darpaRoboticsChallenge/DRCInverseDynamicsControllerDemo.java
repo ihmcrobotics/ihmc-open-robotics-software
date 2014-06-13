@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.PolyvalentHighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.InverseDynamicsJointController;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.InverseDynamicsJointControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
@@ -32,8 +33,6 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPositi
 
 public class DRCInverseDynamicsControllerDemo
 {
-   private static final HighLevelState INVERSE_DYNAMICS_JOINT_CONTROL = HighLevelState.INVERSE_DYNAMICS_JOINT_CONTROL;
-
    private final DRCSimulationFactory drcSimulation;
 
    public DRCInverseDynamicsControllerDemo(DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
@@ -45,15 +44,16 @@ public class DRCInverseDynamicsControllerDemo
          recordFrequency = 1;
       scsInitialSetup.setRecordFrequency(recordFrequency);
 
-      WalkingControllerParameters walkingControlParameters = model.getWalkingControllerParameters();
-      ArmControllerParameters armControlParameters = model.getArmControllerParameters();
+      WalkingControllerParameters walkingControllerParameters = model.getWalkingControllerParameters();
+      ArmControllerParameters armControllerParameters = model.getArmControllerParameters();
 
-      FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulation(walkingControlParameters);
+      FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulation(walkingControllerParameters);
       ContactableBodiesFactory contactableBodiesFactory = model.getContactPointParameters().getContactableBodiesFactory();
 
       PolyvalentHighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory = new PolyvalentHighLevelHumanoidControllerFactory(
-            contactableBodiesFactory, footstepTimingParameters, walkingControlParameters, walkingControlParameters, armControlParameters, false, false, false,
-            INVERSE_DYNAMICS_JOINT_CONTROL);
+            contactableBodiesFactory, footstepTimingParameters, walkingControllerParameters, armControllerParameters, false, false,
+            HighLevelState.DO_NOTHING_BEHAVIOR);
+      highLevelHumanoidControllerFactory.addHighLevelBehaviorFactory(new InverseDynamicsJointControllerFactory(true));
 
       SideDependentList<String> footForceSensorNames = model.getSensorInformation().getFeetForceSensorNames();
 
