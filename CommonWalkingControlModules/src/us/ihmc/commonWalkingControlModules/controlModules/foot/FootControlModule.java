@@ -83,8 +83,8 @@ public class FootControlModule
    private final HoldPositionState holdPositionState;
    private final SwingState swingState;
    private final MoveStraightState moveStraightState;
-   private final TouchdownOnToesState touchdownOnToesState;
-   private final TouchdownOnHeelState touchdwonOnHeelState;
+   private final TouchdownState touchdownOnToesState;
+   private final TouchdownState touchdwonOnHeelState;
    private final OnToesState onToesState;
    
    public FootControlModule(double controlDT, ContactablePlaneBody contactableBody, int jacobianId, RobotSide robotSide,
@@ -155,7 +155,7 @@ public class FootControlModule
       setupContactStatesMap();
       
       List<AbstractFootControlState> states = new ArrayList<AbstractFootControlState>();
-      touchdownOnToesState = new TouchdownOnToesState(pitchTouchdownTrajectoryGenerator,
+      touchdownOnToesState = new TouchdownState(ConstraintType.TOES_TOUCHDOWN, pitchTouchdownTrajectoryGenerator,
             yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration, accelerationControlModule,
             momentumBasedController, contactableBody, requestedState, jacobianId, nullspaceMultiplier,
             jacobianDeterminantInRange, doSingularityEscape, forceFootAccelerateIntoGround,
@@ -163,7 +163,7 @@ public class FootControlModule
             spatialAccelerationProjector);
       states.add(touchdownOnToesState);
       
-      touchdwonOnHeelState = new TouchdownOnHeelState(pitchTouchdownTrajectoryGenerator,
+      touchdwonOnHeelState = new TouchdownState(ConstraintType.HEEL_TOUCHDOWN, pitchTouchdownTrajectoryGenerator,
             yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration, accelerationControlModule,
             momentumBasedController, contactableBody, requestedState, jacobianId, nullspaceMultiplier,
             jacobianDeterminantInRange, doSingularityEscape, forceFootAccelerateIntoGround,
