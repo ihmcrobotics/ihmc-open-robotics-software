@@ -33,8 +33,6 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPositi
 
 public class DRCPosePlaybackDemo
 {
-   private static final HighLevelState JOINT_PD_CONTROL = HighLevelState.JOINT_PD_CONTROL;
-
    private DRCSimulationFactory drcSimulation;
 
    private final PolyvalentHighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory;
@@ -43,14 +41,14 @@ public class DRCPosePlaybackDemo
    public DRCPosePlaybackDemo(DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup, DRCSCSInitialSetup scsInitialSetup,
          PosePlaybackPacket posePlaybackPacket, DRCRobotModel model)
    {
-      WalkingControllerParameters walkingControlParameters = model.getWalkingControllerParameters();
-      ArmControllerParameters armControlParameters = model.getArmControllerParameters();
+      WalkingControllerParameters walkingControllerParameters = model.getWalkingControllerParameters();
+      ArmControllerParameters armControllerParameters = model.getArmControllerParameters();
 
-      FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulation(walkingControlParameters);
+      FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulation(walkingControllerParameters);
       ContactableBodiesFactory contactableBodiesFactory = model.getContactPointParameters().getContactableBodiesFactory();
 
-      highLevelHumanoidControllerFactory = new PolyvalentHighLevelHumanoidControllerFactory(contactableBodiesFactory, footstepTimingParameters, walkingControlParameters,
-            walkingControlParameters, armControlParameters, false, false, false, JOINT_PD_CONTROL);
+      highLevelHumanoidControllerFactory = new PolyvalentHighLevelHumanoidControllerFactory(contactableBodiesFactory, footstepTimingParameters, walkingControllerParameters,
+            armControllerParameters, false, false, HighLevelState.DO_NOTHING_BEHAVIOR);
       highLevelHumanoidControllerFactory.addHighLevelBehaviorFactory(new PosePlaybackControllerFactory(posePlaybackPacket, true));
 
       SideDependentList<String> footForceSensorNames = model.getSensorInformation().getFeetForceSensorNames();

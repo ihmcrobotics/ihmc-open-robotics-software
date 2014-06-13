@@ -1,8 +1,5 @@
 package us.ihmc.darpaRoboticsChallenge.controllers;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.RobotControllerUpdatablesAdapter;
@@ -18,7 +15,6 @@ import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.TotalMassCalculator;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
@@ -34,7 +30,8 @@ public class DRCRobotMomentumBasedControllerFactory
    private final SideDependentList<String> footSensorNames;
    private final ContactableBodiesFactory contactableBodiesFactory;
 
-    public DRCRobotMomentumBasedControllerFactory(ContactableBodiesFactory contactableBodiesFactory, HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory, double contactTresholdForce, SideDependentList<String> footSensorNames)
+   public DRCRobotMomentumBasedControllerFactory(ContactableBodiesFactory contactableBodiesFactory,
+         HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory, double contactTresholdForce, SideDependentList<String> footSensorNames)
    {
       this.highLevelHumanoidControllerFactory = highLevelHumanoidControllerFactory;
       this.contactTresholdForce = contactTresholdForce;
@@ -55,15 +52,9 @@ public class DRCRobotMomentumBasedControllerFactory
 
       SideDependentList<FootSwitchInterface> footSwitches = createFootSwitches(bipedFeet, forceSensorDataHolder, totalRobotWeight, dynamicGraphicObjectsListRegistry, specificRegistry);
 
-      Map<OneDoFJoint, Double> initialPositionControlKpGains = new HashMap<OneDoFJoint, Double>();
-      Map<OneDoFJoint, Double> initialPositionControlKdGains = new HashMap<OneDoFJoint, Double>();
-
-      // TODO: Generalize setting up the gain maps.  No knowledge of the model at this stage in the game but this shouldn't be Atlas specific
-//      AtlasJointPDGains.createMaps(fullRobotModel, initialPositionControlKpGains, initialPositionControlKdGains);
-
-      RobotController highLevelHumanoidController = highLevelHumanoidControllerFactory.create(fullRobotModel,
-            initialPositionControlKpGains, initialPositionControlKdGains, referenceFrames, null, yoTime, gravityZ, twistCalculator, centerOfMassJacobian,
-            bipedFeet, controlDT, footSwitches, lidarControllerInterface, dynamicGraphicObjectsListRegistry, specificRegistry, forceSensorDataHolder);
+      RobotController highLevelHumanoidController = highLevelHumanoidControllerFactory.create(fullRobotModel, referenceFrames, null, yoTime, gravityZ,
+            twistCalculator, centerOfMassJacobian, bipedFeet, controlDT, footSwitches, lidarControllerInterface, dynamicGraphicObjectsListRegistry,
+            specificRegistry, forceSensorDataHolder);
 
       highLevelHumanoidController.getYoVariableRegistry().addChild(specificRegistry);
 

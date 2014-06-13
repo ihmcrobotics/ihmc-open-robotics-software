@@ -38,14 +38,13 @@ public class DRCFlatGroundWalkingTrack
 
       FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulation(walkingControlParameters);
       
-      WalkingControllerParameters drcRobotParameters = model.getWalkingControllerParameters();
-      WalkingControllerParameters drcRobotMultiContactParameters = model.getMultiContactControllerParameters();
+      WalkingControllerParameters walkingControllerParameters = model.getWalkingControllerParameters();
       DRCRobotContactPointParameters contactPointParameters = model.getContactPointParameters();
       ContactableBodiesFactory contactableBodiesFactory = contactPointParameters.getContactableBodiesFactory();
 
       PolyvalentHighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory = new PolyvalentHighLevelHumanoidControllerFactory(
-            contactableBodiesFactory, footstepTimingParameters, drcRobotParameters, drcRobotMultiContactParameters, armControllerParameters,
-            useVelocityAndHeadingScript, false, useFastTouchdowns, HighLevelState.WALKING);
+            contactableBodiesFactory, footstepTimingParameters, walkingControllerParameters, armControllerParameters, useVelocityAndHeadingScript, useFastTouchdowns,
+            HighLevelState.WALKING);
       
       if (cheatWithGroundHeightAtForFootstep)
       {

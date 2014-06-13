@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingManagers;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.posePlayback.PosePlaybackController;
 import us.ihmc.commonWalkingControlModules.posePlayback.PosePlaybackPacket;
@@ -19,7 +21,8 @@ public class PosePlaybackControllerFactory implements HighLevelBehaviorFactory
    }
 
    @Override
-   public HighLevelBehavior createHighLevelBehavior(MomentumBasedController momentumBasedController, ICPAndMomentumBasedController icpAndMomentumBasedController)
+   public HighLevelBehavior createHighLevelBehavior(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
+         MomentumBasedController momentumBasedController, ICPAndMomentumBasedController icpAndMomentumBasedController)
    {
       FullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
       DoubleYoVariable yoTime = momentumBasedController.getYoTime();
