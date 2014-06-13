@@ -15,9 +15,10 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGenerator;
 
-public class TouchdownOnHeelState extends AbstractOnEdgeState
+public class TouchdownState extends AbstractOnEdgeState
 {
-   public TouchdownOnHeelState(DoubleTrajectoryGenerator pitchTouchdownTrajectoryGenerator,
+   public TouchdownState(ConstraintType constraintType,
+         DoubleTrajectoryGenerator pitchTouchdownTrajectoryGenerator,
          
          YoFramePoint yoDesiredPosition, YoFrameVector yoDesiredLinearVelocity, YoFrameVector yoDesiredLinearAcceleration,
          RigidBodySpatialAccelerationControlModule accelerationControlModule,
@@ -30,7 +31,7 @@ public class TouchdownOnHeelState extends AbstractOnEdgeState
          
          SpatialAccelerationProjector spatialAccelerationProjector)
    {
-      super(ConstraintType.HEEL_TOUCHDOWN, pitchTouchdownTrajectoryGenerator,
+      super(constraintType, pitchTouchdownTrajectoryGenerator,
             
             yoDesiredPosition, yoDesiredLinearVelocity,
             yoDesiredLinearAcceleration, accelerationControlModule, momentumBasedController,
