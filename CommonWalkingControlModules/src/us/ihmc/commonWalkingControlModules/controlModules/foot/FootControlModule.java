@@ -254,7 +254,7 @@ public class FootControlModule
    public void setToeOffGains(double toeOffKpXY, double toeOffKpOrientation, double toeOffZeta)
    {
       double toeOffKpz = 0.0;
-      touchdownOnToesState.setToeOffGains(toeOffZeta, toeOffKpXY, toeOffKpXY, toeOffKpz, toeOffKpOrientation, toeOffKpOrientation, toeOffKpOrientation);
+      touchdownOnToesState.setToeOffGains(toeOffZeta, toeOffKpXY, toeOffKpXY, toeOffKpz,toeOffKpOrientation, toeOffKpOrientation, toeOffKpOrientation);
       touchdwonOnHeelState.setToeOffGains(toeOffZeta, toeOffKpXY, toeOffKpXY, toeOffKpz, toeOffKpOrientation, toeOffKpOrientation, toeOffKpOrientation);
       onToesState.setToeOffGains(toeOffZeta, toeOffKpXY, toeOffKpXY, toeOffKpz, toeOffKpOrientation, toeOffKpOrientation, toeOffKpOrientation);
    }
@@ -283,7 +283,7 @@ public class FootControlModule
          {
             FootStateTransitionCondition footStateTransitionCondition = new FootStateTransitionCondition(stateToTransitionTo);
             state.addStateTransition(new StateTransition<ConstraintType>(stateToTransitionTo.getStateEnum(), footStateTransitionCondition,
-                  new FootStateTransitionAction()));
+                  new FootStateTransitionAction(requestedState, doSingularityEscape, waitSingularityEscapeBeforeTransitionToNextState)));
          }
       }
 
@@ -413,16 +413,6 @@ public class FootControlModule
          }
 
          return singularityEscapeDone;
-      }
-   }
-
-   public class FootStateTransitionAction implements StateTransitionAction
-   {
-      public void doTransitionAction()
-      {
-         requestedState.set(null);
-         doSingularityEscape.set(false);
-         waitSingularityEscapeBeforeTransitionToNextState.set(false);
       }
    }
 
