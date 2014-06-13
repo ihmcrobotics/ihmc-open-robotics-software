@@ -2,6 +2,8 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import java.util.ArrayList;
 
+import javax.vecmath.Vector3d;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
@@ -15,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointPositionTraje
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointTrajectoryGeneratorWithPushRecovery;
 import us.ihmc.commonWalkingControlModules.trajectories.WrapperForMultiplePositionTrajectoryGenerators;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
@@ -24,12 +27,14 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
+import com.yobotics.simulationconstructionset.util.trajectory.CurrentLinearVelocityProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParametersProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.VectorProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.YoVariableDoubleProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.YoVelocityProvider;
 
 public class SwingState extends AbstractUnconstrainedState
 {
@@ -41,8 +46,8 @@ public class SwingState extends AbstractUnconstrainedState
    private final PositionTrajectoryGenerator positionTrajectoryGenerator, pushRecoveryPositionTrajectoryGenerator;
    private final OrientationInterpolationTrajectoryGenerator orientationTrajectoryGenerator;      
    
-   public SwingState(DoubleProvider swingTimeProvider, PositionProvider initialPositionProvider, VectorProvider initialVelocityProvider,
-         PositionProvider finalPositionProvider, VectorProvider finalVelocityProvider, OrientationProvider initialOrientationProvider,
+   public SwingState(DoubleProvider swingTimeProvider, PositionProvider initialPositionProvider,
+         PositionProvider finalPositionProvider, OrientationProvider initialOrientationProvider,
          OrientationProvider finalOrientationProvider, TrajectoryParametersProvider trajectoryParametersProvider,
          
          YoFramePoint yoDesiredPosition, YoFrameVector yoDesiredLinearVelocity, YoFrameVector yoDesiredLinearAcceleration,
@@ -75,6 +80,14 @@ public class SwingState extends AbstractUnconstrainedState
       ArrayList<PositionTrajectoryGenerator> positionTrajectoryGenerators = new ArrayList<PositionTrajectoryGenerator>();
       ArrayList<PositionTrajectoryGenerator> pushRecoveryPositionTrajectoryGenerators = new ArrayList<PositionTrajectoryGenerator>();
 
+      YoVelocityProvider finalVelocityProvider =
+            new YoVelocityProvider(namePrefix + "TouchdownVelocity", ReferenceFrame.getWorldFrame(), registry);
+      finalVelocityProvider.set(new Vector3d(0.0, 0.0, walkingControllerParameters.getDesiredTouchdownVelocity()));
+      VectorProvider initialVelocityProvider = new CurrentLinearVelocityProvider(
+            momentumBasedController.getReferenceFrames().getFootFrame(robotSide),
+            momentumBasedController.getFullRobotModel().getFoot(robotSide),
+            momentumBasedController.getTwistCalculator());
+      
       if (trajectoryParametersProvider == null)
       {
          trajectoryParametersProvider = new TrajectoryParametersProvider(new SimpleTwoWaypointTrajectoryParameters());
