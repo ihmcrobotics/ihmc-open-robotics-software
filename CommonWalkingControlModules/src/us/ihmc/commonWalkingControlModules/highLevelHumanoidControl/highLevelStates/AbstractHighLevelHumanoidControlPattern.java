@@ -9,7 +9,6 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
-import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingManagers;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
@@ -63,8 +62,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
    protected final HeadOrientationManager headOrientationManager;
    protected final ManipulationControlModule manipulationControlModule;
 
-   private final LidarControllerInterface lidarControllerInterface;
-
    private final OneDoFJoint jointForExtendedNeckPitchRange;
    private final List<OneDoFJoint> torqueControlJoints = new ArrayList<OneDoFJoint>();
    protected final OneDoFJoint[] positionControlJoints;
@@ -103,8 +100,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
    private final DoubleYoVariable maxJerkPelvisOrientation = new DoubleYoVariable("maxJerkPelvisOrientation", registry);
 
    public AbstractHighLevelHumanoidControlPattern(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
-           MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters,
-           LidarControllerInterface lidarControllerInterface, HighLevelState controllerState)
+         MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters, HighLevelState controllerState)
    {
       super(controllerState);
 
@@ -131,7 +127,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
       this.chestOrientationManager = variousWalkingManagers.getChestOrientationManager();
       this.manipulationControlModule = variousWalkingManagers.getManipulationControlModule();
 
-      this.lidarControllerInterface = lidarControllerInterface;
       this.walkingControllerParameters = walkingControllerParameters;
 
       // Setup jacobians for legs and arms
@@ -290,10 +285,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
 
       }
 
-      // Lidar joint
-      if (lidarControllerInterface != null)
-         unconstrainedJoints.remove(lidarControllerInterface.getLidarJoint());
-
       // Head joints
       unconstrainedJoints.removeAll(Arrays.asList(headOrientationControlJoints));
       if (jointForExtendedNeckPitchRange != null)
@@ -340,7 +331,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
       doFootControl();
       doArmControl();
       doHeadControl();
-      doLidarJointControl();
       doChestControl();
       doCoMControl();
       doPelvisControl();
@@ -349,12 +339,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
       setTorqueControlJointsToZeroDersiredAcceleration();
 
       momentumBasedController.doSecondaryControl();
-   }
-
-   protected void doLidarJointControl()
-   {
-      if ((lidarControllerInterface != null) && (lidarControllerInterface.getLidarJoint() != null))
-         momentumBasedController.setOneDoFJointAcceleration(lidarControllerInterface.getLidarJoint(), 0.0);
    }
 
    protected void doHeadControl()

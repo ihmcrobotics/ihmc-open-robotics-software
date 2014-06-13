@@ -311,7 +311,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          InstantaneousCapturePointPlanner instantaneousCapturePointPlanner, ICPAndMomentumBasedController icpAndMomentumBasedController,
          MomentumBasedController momentumBasedController, WalkingStatusReporter walkingStatusReporter)
    {
-      super(variousWalkingProviders, variousWalkingManagers, momentumBasedController, walkingControllerParameters, lidarControllerInterface, controllerState);
+      super(variousWalkingProviders, variousWalkingManagers, momentumBasedController, walkingControllerParameters, controllerState);
 
       super.addUpdatables(icpAndMomentumBasedController.getUpdatables());
 
@@ -1828,7 +1828,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       doFootControl();
       doArmControl();
       doHeadControl();
-      doLidarJointControl();
 
       //    doCoMControl(); //TODO: Should we be doing this too?
       doChestControl();
