@@ -129,7 +129,6 @@ public class MomentumBasedControllerFactory
          CenterOfMassJacobian centerOfMassJacobian, ForceSensorDataHolder forceSensorDataHolder, LidarControllerInterface lidarControllerInterface,
          GlobalDataProducer dataProducer)
    {
-      YoVariableRegistry specificRegistry = new YoVariableRegistry("specific");
       SideDependentList<ContactablePlaneBody> feet = contactableBodiesFactory.createFootContactableBodies(fullRobotModel, referenceFrames);
 
       double gravityZ = Math.abs(gravity);
@@ -137,7 +136,7 @@ public class MomentumBasedControllerFactory
       double totalRobotWeight = totalMass * gravityZ;
 
       SideDependentList<FootSwitchInterface> footSwitches = createFootSwitches(feet, forceSensorDataHolder, totalRobotWeight,
-            dynamicGraphicObjectsListRegistry, specificRegistry);
+            dynamicGraphicObjectsListRegistry, registry);
 
 
       /////////////////////////////////////////////////////////////////////////////////////////////
@@ -267,7 +266,7 @@ public class MomentumBasedControllerFactory
 
       RobotController ret = highLevelHumanoidControllerManager;
       
-      ret.getYoVariableRegistry().addChild(specificRegistry);
+      ret.getYoVariableRegistry().addChild(registry);
 
       if (dynamicGraphicObjectsListRegistry != null)
       {
