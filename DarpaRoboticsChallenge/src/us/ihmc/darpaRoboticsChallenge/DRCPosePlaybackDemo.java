@@ -11,10 +11,10 @@ import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameter
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepTimingParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.PosePlaybackControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelState;
 import us.ihmc.commonWalkingControlModules.posePlayback.PosePlaybackPacket;
-import us.ihmc.darpaRoboticsChallenge.controllers.DRCRobotMomentumBasedControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -34,7 +34,7 @@ public class DRCPosePlaybackDemo
 {
    private DRCSimulationFactory drcSimulation;
 
-   private final DRCRobotMomentumBasedControllerFactory controllerFactory;
+   private final MomentumBasedControllerFactory controllerFactory;
 
    public DRCPosePlaybackDemo(DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup, DRCSCSInitialSetup scsInitialSetup,
          PosePlaybackPacket posePlaybackPacket, DRCRobotModel model)
@@ -46,7 +46,7 @@ public class DRCPosePlaybackDemo
       ContactableBodiesFactory contactableBodiesFactory = model.getContactPointParameters().getContactableBodiesFactory();
 
       SideDependentList<String> footForceSensorNames = model.getSensorInformation().getFeetForceSensorNames();
-      controllerFactory = new DRCRobotMomentumBasedControllerFactory(contactableBodiesFactory, DRCConfigParameters.contactTresholdForceForSCS,
+      controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, DRCConfigParameters.contactTresholdForceForSCS,
             footForceSensorNames, footstepTimingParameters, walkingControllerParameters, armControllerParameters, false, false,
             HighLevelState.DO_NOTHING_BEHAVIOR);
       controllerFactory.addHighLevelBehaviorFactory(new PosePlaybackControllerFactory(posePlaybackPacket, true));
