@@ -5,9 +5,6 @@ import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
 
-import org.ejml.alg.dense.mult.VectorVectorMult;
-import org.ejml.data.DenseMatrix64F;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
@@ -17,13 +14,11 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationProvider;
 import us.ihmc.robotSide.RobotSide;
-import us.ihmc.utilities.math.NullspaceCalculator;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
@@ -37,8 +32,6 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
-import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionAction;
-import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionProvider;
@@ -46,8 +39,6 @@ import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParamete
 
 public class FootControlModule
 {
-   private static final int velocitySignForSingularityEscape = 1;
-   
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final YoVariableRegistry registry;
    private final ContactablePlaneBody contactableBody;
@@ -62,7 +53,7 @@ public class FootControlModule
 
    private final RigidBodySpatialAccelerationControlModule accelerationControlModule;
    private final SpatialAccelerationProjector spatialAccelerationProjector;
-   private final DenseMatrix64F jointVelocities;
+//   private final DenseMatrix64F jointVelocities;
    private final MomentumBasedController momentumBasedController;
 
    private final DoubleYoVariable jacobianDeterminant;
@@ -75,7 +66,7 @@ public class FootControlModule
    private final DoubleYoVariable singularityEscapeNullspaceMultiplier;
    private final DoubleYoVariable nullspaceMultiplier;
    private final GeometricJacobian jacobian;
-   private final NullspaceCalculator nullspaceCalculator;
+//   private final NullspaceCalculator nullspaceCalculator;
    
    private final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
 
@@ -135,7 +126,7 @@ public class FootControlModule
       jacobianDeterminant = new DoubleYoVariable(namePrefix + "JacobianDeterminant", registry);
       jacobianDeterminantInRange = new BooleanYoVariable(namePrefix + "JacobianDeterminantInRange", registry);
       nullspaceMultiplier = new DoubleYoVariable(namePrefix + "NullspaceMultiplier", registry);
-      nullspaceCalculator = new NullspaceCalculator(jacobian.getNumberOfColumns(), true);
+//      nullspaceCalculator = new NullspaceCalculator(jacobian.getNumberOfColumns(), true);
       singularityEscapeNullspaceMultiplier = new DoubleYoVariable(namePrefix + "SingularityEscapeNullspaceMultiplier", registry);
       isTrajectoryDone = new BooleanYoVariable(namePrefix + "IsTrajectoryDone", registry);
       isUnconstrained = new BooleanYoVariable(namePrefix + "IsUnconstrained", registry);
@@ -152,7 +143,7 @@ public class FootControlModule
       else
          doFancyOnToesControl.set(true);
       
-      jointVelocities = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(jacobian.getJointsInOrder()), 1);
+//      jointVelocities = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(jacobian.getJointsInOrder()), 1);
       
       legSingularityAndKneeCollapseAvoidanceControlModule =
             new LegSingularityAndKneeCollapseAvoidanceControlModule(namePrefix, contactableBody, robotSide,
@@ -281,7 +272,8 @@ public class FootControlModule
       {
          for (AbstractFootControlState stateToTransitionTo : states)
          {
-            FootStateTransitionCondition footStateTransitionCondition = new FootStateTransitionCondition(stateToTransitionTo);
+            FootStateTransitionCondition footStateTransitionCondition = new FootStateTransitionCondition(stateToTransitionTo,
+                  jacobian, requestedState, doSingularityEscape, jacobianDeterminantInRange, waitSingularityEscapeBeforeTransitionToNextState);
             state.addStateTransition(new StateTransition<ConstraintType>(stateToTransitionTo.getStateEnum(), footStateTransitionCondition,
                   new FootStateTransitionAction(requestedState, doSingularityEscape, waitSingularityEscapeBeforeTransitionToNextState)));
          }
@@ -372,48 +364,6 @@ public class FootControlModule
    public ConstraintType getCurrentConstraintType()
    {
       return stateMachine.getCurrentStateEnum();
-   }
-
-   private class FootStateTransitionCondition implements StateTransitionCondition
-   {
-      private final ConstraintType stateEnum;
-
-      public FootStateTransitionCondition(AbstractFootControlState stateToTransitionTo)
-      {
-         this.stateEnum = stateToTransitionTo.getStateEnum();
-      }
-
-      public boolean checkCondition()
-      {
-         boolean transitionRequested = requestedState.getEnumValue() == stateEnum;
-
-         if (!transitionRequested)
-            return false;
-         
-         boolean isTransitionToCurrentState = requestedState.getEnumValue() == getCurrentConstraintType();
-         
-         if (isTransitionToCurrentState)
-            return false;
-
-         boolean singularityEscapeDone = true;
-
-         if (doSingularityEscape.getBooleanValue() && waitSingularityEscapeBeforeTransitionToNextState.getBooleanValue())
-         {
-            nullspaceCalculator.setMatrix(jacobian.getJacobianMatrix(), 1);
-            DenseMatrix64F nullspace = nullspaceCalculator.getNullspace();
-            ScrewTools.packJointVelocitiesMatrix(jacobian.getJointsInOrder(), jointVelocities);
-            double nullspaceVelocityDotProduct = VectorVectorMult.innerProd(nullspace, jointVelocities);
-
-            int velocitySign = (int) Math.round(Math.signum(nullspaceVelocityDotProduct));
-            boolean velocitySignOK = velocitySign == velocitySignForSingularityEscape;
-            if (jacobianDeterminantInRange.getBooleanValue() || !velocitySignOK)
-            {
-               singularityEscapeDone = false;
-            }
-         }
-
-         return singularityEscapeDone;
-      }
    }
 
    public ReferenceFrame getFootFrame()
