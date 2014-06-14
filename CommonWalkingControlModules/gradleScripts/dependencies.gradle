@@ -1,3 +1,4 @@
+evaluationDependsOn(':IHMCUtilities')
 
 dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
@@ -22,4 +23,6 @@ dependencies {
     compile project(':SensorProcessing')
     compile project(':Graphics3DAdapter')
     compile project(':SimulationConstructionSet')
+
+    testCompile project(':IHMCUtilities').sourceSets.test.output
 }

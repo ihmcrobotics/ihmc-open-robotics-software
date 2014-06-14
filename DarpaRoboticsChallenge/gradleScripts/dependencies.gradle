@@ -1,4 +1,5 @@
 evaluationDependsOn(':IHMCUtilities')
+evaluationDependsOn(':CommonWalkingControlModules')
 
 dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
@@ -40,7 +41,6 @@ dependencies {
 	compile project(':IHMCControlFlow')
 	compile project(':IHMCSystemIdentification')
 	compile project(':IHMCUtilities')
-	testCompile project(':IHMCUtilities').sourceSets.test.output
 	compile project(':ImageProcessing')
 	compile project(':JMEGraphics3DAdapter')
     compile project(':Plotting')
@@ -51,4 +51,7 @@ dependencies {
 	compile project(':SimulationConstructionSet')
 	compile project(':UserInterface')
 	compile project(':IHMCROSTools')
+
+	testCompile project(':CommonWalkingControlModules').sourceSets.test.output
+	testCompile project(':IHMCUtilities').sourceSets.test.output
 }
