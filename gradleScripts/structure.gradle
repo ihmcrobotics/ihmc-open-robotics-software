@@ -1,5 +1,6 @@
 String baseDir = getProjectDir()
 new File(baseDir + File.separator + 'src').mkdir()
+new File(baseDir + File.separator + 'generated').mkdir()
 new File(baseDir + File.separator + 'test').mkdir()
 new File(baseDir + File.separator + 'resources').mkdir()
 new File(baseDir + File.separator + 'gradleScripts').mkdir()
@@ -8,7 +9,7 @@ new File(baseDir + File.separator + 'gradleScripts' + File.separator + 'dependen
 sourceSets {
     main {
         java {
-            srcDirs = ['src']
+            srcDirs = ['src', 'generated']
         }
 
         resources {
