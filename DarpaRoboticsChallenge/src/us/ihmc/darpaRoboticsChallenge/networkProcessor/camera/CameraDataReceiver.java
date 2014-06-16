@@ -8,6 +8,8 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import org.ros.message.Time;
+
 import us.ihmc.darpaRoboticsChallenge.driving.DRCStereoListener;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.messages.controller.RobotPoseData;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.RobotPoseBuffer;
@@ -18,6 +20,7 @@ import us.ihmc.graphics3DAdapter.camera.CompressedVideoHandler;
 import us.ihmc.graphics3DAdapter.camera.VideoPacket;
 import us.ihmc.graphics3DAdapter.camera.VideoSettings;
 import us.ihmc.graphics3DAdapter.camera.VideoSettings.VideoCompressionKey;
+import us.ihmc.utilities.ros.RosPoseStampedPublisher;
 
 public abstract class CameraDataReceiver
 {
@@ -27,8 +30,12 @@ public abstract class CameraDataReceiver
 
    private final Point3d cameraPosition = new Point3d();
    private final Quat4d cameraOrientation = new Quat4d();
-   private final Vector3d tempVector = new Vector3d();
+   private final Vector3d cameraPositionVector = new Vector3d();
 
+   private final Vector3d rootPosition = new Vector3d();
+   private final Quat4d rootOrientation = new Quat4d();
+   
+   
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
    private final Transform3D identityTransform = new Transform3D();
    private final Transform3D cameraPose;
@@ -46,10 +53,10 @@ public abstract class CameraDataReceiver
    
    protected void updateLeftEyeImage(BufferedImage bufferedImage, long timeStamp, double fov)
    {
-      updateLeftEyeImage(identityTransform, bufferedImage, timeStamp, fov);
+      updateLeftEyeImage(null,null,identityTransform, bufferedImage, timeStamp, fov);
    }
 
-   protected void updateLeftEyeImage(Transform3D additionalTransformFromBaseToCamera, BufferedImage bufferedImage, long timeStamp, double fov)
+   protected void updateLeftEyeImage(RosPoseStampedPublisher cameraPosePublisher,RosPoseStampedPublisher rootPosePublisher, Transform3D additionalTransformFromBaseToCamera, BufferedImage bufferedImage, long timeStamp, double fov)
    {
       for (int i = 0; i < stereoListeners.size(); i++)
       {
@@ -64,9 +71,15 @@ public abstract class CameraDataReceiver
 
       cameraPose.set(robotPoseData.getCameraPose());
       cameraPose.mul(additionalTransformFromBaseToCamera);
-      cameraPose.get(cameraOrientation, tempVector);
-      cameraPosition.set(tempVector);
+      cameraPose.get(cameraOrientation, cameraPositionVector);
+      cameraPosition.set(cameraPositionVector);
       compressedVideoDataServer.updateImage(bufferedImage, timeStamp, cameraPosition, cameraOrientation, fov);
+      
+      if(cameraPosePublisher!=null && rootPosePublisher != null){
+         robotPoseData.getPelvisPose().get(rootOrientation,rootPosition);
+         rootPosePublisher.publish("/world", rootPosition, rootOrientation, Time.fromMillis(timeStamp));
+         cameraPosePublisher.publish("/world", cameraPositionVector, cameraOrientation, Time.fromMillis(timeStamp));
+      }
    }
 
    protected void updateRightEyeImage(BufferedImage bufferedImage, long timeStamp, double fov)
