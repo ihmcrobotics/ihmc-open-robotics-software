@@ -14,7 +14,9 @@ import us.ihmc.darpaRoboticsChallenge.ros.ROSNativeTransformTools;
 import us.ihmc.graphics3DAdapter.camera.VideoSettings;
 import us.ihmc.utilities.kinematics.TimeStampedTransform3D;
 import us.ihmc.utilities.ros.RosImageSubscriber;
+import us.ihmc.utilities.ros.RosJointStatePublisher;
 import us.ihmc.utilities.ros.RosMainNode;
+import us.ihmc.utilities.ros.RosPoseStampedPublisher;
 
 public class RosCameraReceiver extends CameraDataReceiver
 {
@@ -23,6 +25,10 @@ public class RosCameraReceiver extends CameraDataReceiver
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
    private final ROSNativeTransformTools rosTransformProvider;
    private final DRCRobotCameraParamaters cameraParameters;
+   
+   
+   private static RosPoseStampedPublisher cameraPosePublisher;
+   private static RosPoseStampedPublisher rootPosePublisher;
 
    public RosCameraReceiver(final DRCRobotCameraParamaters cameraParameters, final RobotPoseBuffer robotPoseBuffer, final VideoSettings videoSettings,
          final RosMainNode rosMainNode, final DRCNetworkProcessorNetworkingManager networkingManager, PPSTimestampOffsetProvider ppsTimestampOffsetProvider,
@@ -45,7 +51,14 @@ public class RosCameraReceiver extends CameraDataReceiver
 
       //XXX: move the multiSense setup out of DRC
       //      setupMultisenseResolution(rosMainNode);
+      
+      //Ros publishers for Camera info
 
+      cameraPosePublisher = new RosPoseStampedPublisher(false);
+      rootPosePublisher = new RosPoseStampedPublisher(false);
+      rosMainNode.attachPublisher("/Atlas/root_pose", rootPosePublisher);
+      rosMainNode.attachPublisher("/Atlas/camera_pose", cameraPosePublisher);
+      
       RosImageSubscriber imageSubscriberSubscriber = new RosImageSubscriber()
       {
          @Override
@@ -71,12 +84,14 @@ public class RosCameraReceiver extends CameraDataReceiver
                logger.log(image, timeStamp);
             }
 
-            updateLeftEyeImage(rosTransformFromHeadBaseToCamera, image, timeStamp, DRCSensorParameters.DUMMY_FILED_OF_VIEW); //fov should come from intrinsic packet
+            updateLeftEyeImage(cameraPosePublisher,rootPosePublisher,rosTransformFromHeadBaseToCamera, image, timeStamp, DRCSensorParameters.DUMMY_FILED_OF_VIEW); //fov should come from intrinsic packet
+            
          }
       };
       rosMainNode.attachSubscriber(cameraParameters.getRosCompressedTopicName(), imageSubscriberSubscriber);
    }
 
+     
    private void getFrameToCameraTransform(long rosTimestamp)
    {
       if (ppsTimestampOffsetProvider.offsetIsDetermined())
