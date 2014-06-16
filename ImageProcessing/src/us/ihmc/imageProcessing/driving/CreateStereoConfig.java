@@ -1,6 +1,6 @@
 package us.ihmc.imageProcessing.driving;
 
-import boofcv.misc.BoofMiscOps;
+import boofcv.io.UtilIO;
 import boofcv.struct.calib.IntrinsicParameters;
 import boofcv.struct.calib.StereoParameters;
 import georegression.struct.se.Se3_F64;
@@ -43,6 +43,6 @@ public class CreateStereoConfig {
 
 		stereo.setRightToLeft(rightToLeft);
 
-		BoofMiscOps.saveXML(stereo,"stereo_simulation.xml");
+      UtilIO.saveXML(stereo, "stereo_simulation.xml");
 	}
 }

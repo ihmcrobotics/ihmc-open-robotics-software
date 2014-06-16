@@ -3,23 +3,19 @@ package us.ihmc.atlas.calib;
 import boofcv.alg.geo.PerspectiveOps;
 import boofcv.alg.geo.calibration.PlanarCalibrationTarget;
 import boofcv.factory.calib.FactoryPlanarCalibrationTarget;
-import boofcv.misc.BoofMiscOps;
+import boofcv.io.UtilIO;
 import boofcv.struct.calib.IntrinsicParameters;
-
 import com.yobotics.simulationconstructionset.IndexChangedListener;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicCoordinateSystem;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePose;
-
 import georegression.struct.point.Point2D_F64;
 import georegression.struct.point.Vector3D_F64;
 import georegression.struct.se.Se3_F64;
-
 import org.ddogleg.optimization.FactoryOptimization;
 import org.ddogleg.optimization.UnconstrainedLeastSquares;
 import org.ddogleg.optimization.UtilOptimize;
-
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
@@ -38,7 +34,6 @@ import javax.swing.*;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
-
 import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -138,7 +133,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
 
       //Set Camera Info
       String intrinsicFile = "../DarpaRoboticsChallenge/data/calibration_images/intrinsic_ros.xml";
-      IntrinsicParameters intrinsic = BoofMiscOps.loadXML(intrinsicFile);
+      IntrinsicParameters intrinsic = UtilIO.loadXML(intrinsicFile);
       double fovh = Math.atan(intrinsic.getCx() / intrinsic.getFx()) + Math.atan((intrinsic.width - intrinsic.getCx()) / intrinsic.getFx());
       System.out.println("Set fov to " + Math.toDegrees(fovh) + "degs from " + intrinsicFile);
       scs.setFieldOfView(fovh);
@@ -359,7 +354,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
 
    public void loadData(String directory) throws IOException
    {
-      intrinsic = BoofMiscOps.loadXML("../DarpaRoboticsChallenge/data/calibration_images/intrinsic_ros.xml");
+      intrinsic = UtilIO.loadXML("../DarpaRoboticsChallenge/data/calibration_images/intrinsic_ros.xml");
 
       File[] files = new File(directory).listFiles();
 

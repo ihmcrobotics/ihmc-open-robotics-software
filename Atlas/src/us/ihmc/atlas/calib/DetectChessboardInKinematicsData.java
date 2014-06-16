@@ -9,8 +9,8 @@ import boofcv.alg.geo.calibration.Zhang99DecomposeHomography;
 import boofcv.core.image.ConvertBufferedImage;
 import boofcv.factory.calib.FactoryPlanarCalibrationTarget;
 import boofcv.gui.feature.VisualizeFeatures;
+import boofcv.io.UtilIO;
 import boofcv.io.image.UtilImageIO;
-import boofcv.misc.BoofMiscOps;
 import boofcv.struct.calib.IntrinsicParameters;
 import boofcv.struct.image.ImageFloat32;
 import georegression.struct.point.Point2D_F64;
@@ -105,7 +105,7 @@ public class DetectChessboardInKinematicsData
       if (!directory.isDirectory())
          throw new RuntimeException("Not directory");
 
-      IntrinsicParameters intrinsic = BoofMiscOps.loadXML("../DarpaRoboticsChallenge/data/calibration_images/intrinsic_ros.xml");
+      IntrinsicParameters intrinsic = UtilIO.loadXML("../DarpaRoboticsChallenge/data/calibration_images/intrinsic_ros.xml");
       DenseMatrix64F K = PerspectiveOps.calibrationMatrix(intrinsic, null);
 
       PlanarCalibrationTarget target = FactoryPlanarCalibrationTarget.gridChess(boardWidth, boardHeight, 0.03);

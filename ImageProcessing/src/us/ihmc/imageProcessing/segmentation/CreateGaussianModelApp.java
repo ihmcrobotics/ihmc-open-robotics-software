@@ -1,6 +1,6 @@
 package us.ihmc.imageProcessing.segmentation;
 
-import boofcv.misc.BoofMiscOps;
+import boofcv.io.UtilIO;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -60,6 +60,6 @@ public class CreateGaussianModelApp {
       model = GaussianColorClassifier.train(new FileInputStream("hood.txt"));
       model.print();
 
-      BoofMiscOps.saveXML(model,"gaussian_hood.xml");
+      UtilIO.saveXML(model, "gaussian_hood.xml");
    }
 }
