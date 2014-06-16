@@ -65,7 +65,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    
    private static final SideDependentList<String> wristForceSensorNames = new SideDependentList<String>("LeftForearmSupinator", "RightForearmSupinator");
    private static final String lidarSensorName = "/v1/Ibeo_sensor";
-   private static final String lidarJointName = "";//"Ibeo_sensor_joint";
+   private static final String lidarJointName = null;//"Ibeo_sensor_joint";
    private static final String lidarTopic = "/ibeo/points";//"Ibeo_sensor_joint";
    
    private static int forheadCameraId = 0;
