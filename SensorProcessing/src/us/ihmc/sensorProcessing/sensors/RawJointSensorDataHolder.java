@@ -30,6 +30,12 @@ public class RawJointSensorDataHolder
       {
          throw new RuntimeException("Source name does not equal name");
       }
+      
+      setQ_raw(source.getQ_raw());
+      setQ_out_raw(source.getQ_out_raw());
+      setQd_out_raw(source.getQd_out_raw());
+      setQd_raw(source.getQd_raw());
+      setF_raw(source.getF_raw());
    }
 
    
