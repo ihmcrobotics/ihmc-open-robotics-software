@@ -2,7 +2,7 @@ repositories {
     /**
      * Maven central repository, local proxy
      */
-    maven{
+     maven{
         url "https://bengal.ihmc.us/nexus/content/repositories/central/"
     }
 
@@ -14,6 +14,10 @@ repositories {
     }
     
     maven{
-    	url "https://bengal.ihmc.us/nexus/content/repositories/xuggle/"
+        url "https://bengal.ihmc.us/nexus/content/repositories/xuggle/"
+    }
+
+    maven{
+        url "https://bengal.ihmc.us/nexus/content/repositories/SVNKit/"
     }
 }
