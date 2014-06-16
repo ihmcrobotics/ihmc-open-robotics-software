@@ -103,7 +103,6 @@ public class DRCConfigParameters
    public static final double OCTREE_RESOLUTION_WHEN_NOT_USING_RESOLUTION_SPHERE = 0.025;
    public static final double FOOTSTEP_FITTING_BUFFER_SIZE = -0.01;
 
-   public static final boolean DO_AUTOMATED_STANDPREP = true;
 
    // Hand Controller
    public static final boolean USE_PURE_POSITION_CONTROL_FOR_HANDS = false;
