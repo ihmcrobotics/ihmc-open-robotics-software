@@ -21,7 +21,7 @@ public class CarIngressEgressControllerFactory implements HighLevelBehaviorFacto
    public HighLevelBehavior createHighLevelBehavior(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
          MomentumBasedController momentumBasedController, ICPAndMomentumBasedController icpAndMomentumBasedController)
    {
-      return new CarIngressEgressController(variousWalkingProviders, variousWalkingManagers, momentumBasedController, multiContactControllerParameters, null);
+      return new CarIngressEgressController(variousWalkingProviders, variousWalkingManagers, momentumBasedController, multiContactControllerParameters);
    }
 
    @Override

@@ -1,7 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
@@ -24,6 +23,7 @@ import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
+import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
@@ -94,7 +94,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    
    private final BooleanYoVariable runController = new BooleanYoVariable("runController", registry);
    
-   public DRCControllerThread(DRCRobotModel robotModel, MomentumBasedControllerFactory controllerFactory, LidarControllerInterface lidarControllerInterface,
+   public DRCControllerThread(DRCRobotModel robotModel, MomentumBasedControllerFactory controllerFactory,
          ThreadDataSynchronizer threadDataSynchronizer, DRCOutputWriter outputWriter, GlobalDataProducer dataProducer, RobotVisualizer robotVisualizer,
          double gravity)
    {
@@ -118,13 +118,15 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       DRCRobotJointMap jointMap = robotModel.getJointMap();
       DRCRobotPhysicalProperties physicalProperties = robotModel.getPhysicalProperties();
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
-
+      OneDoFJoint lidarJoint = controllerFullRobotModel.getOneDoFJointByName(robotModel.getSensorInformation().getLidarJointName());
+      
+      
       controllerReferenceFrames = new ReferenceFrames(controllerFullRobotModel, jointMap, physicalProperties.getAnkleHeight());
       controllerReferenceFrames.visualize(dynamicGraphicObjectsListRegistry, registry);
 
       robotController = createMomentumBasedController(controllerFullRobotModel, controllerReferenceFrames, sensorInformation,
-            controllerFactory, lidarControllerInterface, controllerTime, robotModel.getControllerDT(), gravity, forceSensorDataHolderForController, dynamicGraphicObjectsListRegistry,
-            registry, dataProducer);
+            controllerFactory, controllerTime, robotModel.getControllerDT(), gravity, forceSensorDataHolderForController, dynamicGraphicObjectsListRegistry,
+            registry, dataProducer, lidarJoint);
       
       firstTick.set(true);
       registry.addChild(robotController.getYoVariableRegistry());
@@ -141,23 +143,20 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    }
 
    public static RobotController createMomentumBasedController(SDFFullRobotModel controllerModel, ReferenceFrames referenceFramesForController,
-         DRCRobotSensorInformation sensorInformation, MomentumBasedControllerFactory controllerFactory, LidarControllerInterface lidarControllerInterface,
-         DoubleYoVariable yoTime, double controlDT, double gravity, ForceSensorDataHolder forceSensorDataHolderForController,
+         DRCRobotSensorInformation sensorInformation, MomentumBasedControllerFactory controllerFactory, DoubleYoVariable yoTime, double controlDT, double gravity, ForceSensorDataHolder forceSensorDataHolderForController,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry registry,
-         GlobalDataProducer dataProducer)
+         GlobalDataProducer dataProducer, InverseDynamicsJoint... jointsToIgnore)
    {
       CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(controllerModel.getElevator());
 
       FullInverseDynamicsStructure inverseDynamicsStructureForController = createInverseDynamicsStructure(controllerModel);
 
-      OneDoFJoint lidarJoint = controllerModel.getOneDoFJointByName(sensorInformation.getLidarJointName());
-      lidarControllerInterface.setLidarJoint(lidarJoint);
 
       TwistCalculator twistCalculator = inverseDynamicsStructureForController.getTwistCalculator();
 
       RobotController robotController = controllerFactory.getController(controllerModel, referenceFramesForController, controlDT, gravity, yoTime,
             dynamicGraphicObjectsListRegistry, twistCalculator, centerOfMassJacobian, forceSensorDataHolderForController,
-            lidarControllerInterface, dataProducer);
+            dataProducer, jointsToIgnore);
       final ModularSensorProcessor sensorProcessor = createSensorProcessor(twistCalculator, centerOfMassJacobian, referenceFramesForController);
 
       ModularRobotController modularRobotController = new ModularRobotController("DRCMomentumBasedController");

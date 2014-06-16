@@ -5,9 +5,8 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
-import us.ihmc.commonWalkingControlModules.controllers.PIDLidarTorqueController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
+import us.ihmc.darpaRoboticsChallenge.controllers.PIDLidarTorqueController;
 import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadDataSynchronizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -90,8 +89,8 @@ public class DRCSimulationFactory
       StateEstimatorParameters stateEstimatorParameters = drcRobotModel.getStateEstimatorParameters();
       SensorNoiseParameters sensorNoiseParameters = scsInitialSetup.getSimulatedSensorNoiseParameters();
 
-      LidarControllerInterface lidarControllerInterface = new PIDLidarTorqueController(DRCConfigParameters.LIDAR_SPINDLE_VELOCITY,
-            drcRobotModel.getSimulateDT());
+      PIDLidarTorqueController lidarControllerInterface = new PIDLidarTorqueController(simulatedRobot,
+            drcRobotModel.getSensorInformation().getLidarJointName(), DRCConfigParameters.LIDAR_SPINDLE_VELOCITY, drcRobotModel.getSimulateDT());
       SensorReaderFactory sensorReaderFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(simulatedRobot, sensorNoiseParameters,
             stateEstimatorParameters.getSensorFilterParameters(), drcRobotModel.getSensorInformation().getIMUSensorsToUse());
 
@@ -105,7 +104,7 @@ public class DRCSimulationFactory
       drcEstimatorThread = new DRCEstimatorThread(drcRobotModel, sensorReaderFactory, threadDataSynchronizer, globalDataProducer,
             null, drcRobotModel.getEstimatorDT(), gravity);
 
-      drcControllerThread = new DRCControllerThread(drcRobotModel, controllerFactory, lidarControllerInterface, threadDataSynchronizer, drcOutputWriter,
+      drcControllerThread = new DRCControllerThread(drcRobotModel, controllerFactory, threadDataSynchronizer, drcOutputWriter,
             globalDataProducer, null, gravity);
 
       if (RUN_MULTI_THREADED)
@@ -129,7 +128,7 @@ public class DRCSimulationFactory
       }
 
       simulatedRobot.setController(multiThreadedRobotController);
-      simulatedRobot.setController(lidarControllerInterface, estimatorTicksPerSimulationTick);
+      simulatedRobot.setController(lidarControllerInterface);
       simulatedRobot.setController(simulatedDRCRobotTimeProvider);
    }
 

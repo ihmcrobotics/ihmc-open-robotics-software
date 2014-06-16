@@ -1,17 +1,20 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.errorHandling.WalkingStatusReporter;
-import com.yobotics.simulationconstructionset.util.errorHandling.WalkingStatusReporter.ErrorType;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.BlindWalkingToDestinationDesiredFootstepCalculator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.ComponentBasedDesiredFootstepCalculator;
-import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.*;
+import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
+import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingUpdater;
+import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScript;
+import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.ManualDesiredVelocityControlModule;
+import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.RateBasedDesiredHeadingControlModule;
+import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.SimpleDesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.OldMomentumControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
@@ -25,11 +28,17 @@ import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.math.DampedLeastSquaresSolver;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.*;
+import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
+import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.ScrewTools;
+import us.ihmc.utilities.screwTheory.SpatialMotionVector;
+import us.ihmc.utilities.screwTheory.TwistCalculator;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.errorHandling.WalkingStatusReporter;
+import com.yobotics.simulationconstructionset.util.errorHandling.WalkingStatusReporter.ErrorType;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class HighLevelHumanoidControllerFactoryHelper
 {
@@ -112,7 +121,7 @@ public class HighLevelHumanoidControllerFactoryHelper
    }
 
 
-   public static InverseDynamicsJoint[] computeJointsToOptimizeFor(FullRobotModel fullRobotModel, InverseDynamicsJoint lidarJoint)
+   public static InverseDynamicsJoint[] computeJointsToOptimizeFor(FullRobotModel fullRobotModel, InverseDynamicsJoint... jointsToRemove)
    {
       List<InverseDynamicsJoint> joints = new ArrayList<InverseDynamicsJoint>();
       InverseDynamicsJoint[] allJoints = ScrewTools.computeSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
@@ -128,9 +137,12 @@ public class HighLevelHumanoidControllerFactoryHelper
          }
       }
 
-      if (lidarJoint != null)
+      if (jointsToRemove != null)
       {
-         joints.remove(lidarJoint);
+         for(InverseDynamicsJoint joint : jointsToRemove)
+         {
+            joints.remove(joint);            
+         }
       }
 
       return joints.toArray(new InverseDynamicsJoint[joints.size()]);
@@ -138,7 +150,7 @@ public class HighLevelHumanoidControllerFactoryHelper
 
    public static OldMomentumControlModule createOldMomentumControlModule(WalkingControllerParameters walkingControllerParameters,
            FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, double gravityZ, TwistCalculator twistCalculator, double controlDT,
-           LidarControllerInterface lidarControllerInterface, YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+           YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       GroundReactionWrenchDistributor groundReactionWrenchDistributor = null;
       ContactPointGroundReactionWrenchDistributor contactPointGroundReactionWrenchDistributor =
@@ -161,14 +173,9 @@ public class HighLevelHumanoidControllerFactoryHelper
       return oldMomentumControlModule;
    }
 
-   public static MomentumOptimizationSettings createMomentumOptimizationSettings(FullRobotModel fullRobotModel,
-           LidarControllerInterface lidarControllerInterface, YoVariableRegistry registry)
+   public static MomentumOptimizationSettings createMomentumOptimizationSettings(FullRobotModel fullRobotModel, YoVariableRegistry registry, InverseDynamicsJoint... jointsToIgnore)
    {
-      OneDoFJoint lidarJoint = null;
-      if (lidarControllerInterface != null)
-         lidarJoint = lidarControllerInterface.getLidarJoint();
-
-      InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerFactoryHelper.computeJointsToOptimizeFor(fullRobotModel, lidarJoint);
+      InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerFactoryHelper.computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
 
       MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings(jointsToOptimizeFor, registry);
       momentumOptimizationSettings.setDampedLeastSquaresFactor(0.05);

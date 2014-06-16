@@ -15,7 +15,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccele
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
-import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingManagers;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
@@ -125,8 +124,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
 
    public CarIngressEgressController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
-                                     MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters,
-                                     LidarControllerInterface lidarControllerInterface)
+                                     MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters)
    {
       super(variousWalkingProviders, variousWalkingManagers, momentumBasedController, walkingControllerParameters, controllerState);
 
