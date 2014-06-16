@@ -15,7 +15,6 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.RosCameraInfoRecie
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.RosCameraReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.GazeboLidarDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.LidarFilter;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.RobotBoundingBoxes;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosNativeNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
@@ -23,6 +22,7 @@ import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingMa
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosServiceClient;
+import dynamic_reconfigure.DoubleParameter;
 import dynamic_reconfigure.Reconfigure;
 import dynamic_reconfigure.ReconfigureRequest;
 import dynamic_reconfigure.ReconfigureResponse;
@@ -76,6 +76,12 @@ public class MultiSenseSensorManager
                resolutionParam.setValue("2048x1088");
                request.getConfig().getStrs().add(resolutionParam);
 
+               DoubleParameter fpsParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(DoubleParameter._TYPE);
+               fpsParam.setName("fps");
+               fpsParam.setValue(30.0);
+               request.getConfig().getDoubles().add(fpsParam);
+               
+               
                multiSenseClient.call(request, new ServiceResponseListener<ReconfigureResponse>()
                {
 
