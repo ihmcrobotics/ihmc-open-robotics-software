@@ -316,14 +316,8 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       }
    }
 
-   public void waitUntilComputationIsDone()
-   {
-      // Do nothing.
-   }
-
    public void initialize()
    {
       startComputation();
-      waitUntilComputationIsDone();
    }
 }

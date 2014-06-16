@@ -29,6 +29,7 @@ public class RemoteAtlasVisualizer
 
       SliderBoardControllerListener scsYoVariablesUpdatedListener = new SliderBoardControllerListener(robotModel, bufferSize, sliderBoardFactory);
       scsYoVariablesUpdatedListener.addButton("requestStop", 1.0);
+      scsYoVariablesUpdatedListener.addButton("setWristForceSensorsToZero", 1.0);
       
       
       YoVariableClient client = new YoVariableClient(host, port, scsYoVariablesUpdatedListener, "remote", showOverheadView);
