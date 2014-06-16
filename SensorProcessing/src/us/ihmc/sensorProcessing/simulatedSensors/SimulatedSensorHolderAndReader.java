@@ -197,7 +197,6 @@ public class SimulatedSensorHolderAndReader implements SensorReader
       }
 
       sensorProcessing.startComputation();
-      sensorProcessing.waitUntilComputationIsDone();
 
       step.increment();
       
