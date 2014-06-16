@@ -5,7 +5,6 @@ public class RawJointSensorDataHolder
    private final String name;
    
    private boolean useOutputEncoder = false;
-   private double q_out_offset;
    
    private double q_raw;
    private double q_out_raw;
@@ -36,6 +35,7 @@ public class RawJointSensorDataHolder
       setQd_out_raw(source.getQd_out_raw());
       setQd_raw(source.getQd_raw());
       setF_raw(source.getF_raw());
+      setUsesOutputEncoder(source.isUseOutputEncoder());
    }
 
    
@@ -110,15 +110,4 @@ public class RawJointSensorDataHolder
    {
       this.qd_out_raw = qd_out_raw;
    }
-
-   public double getQ_out_offset()
-   {
-      return q_out_offset;
-   }
-
-   public void setQ_out_offset(double q_out_offset)
-   {
-      this.q_out_offset = q_out_offset;
-   }
-
 }
