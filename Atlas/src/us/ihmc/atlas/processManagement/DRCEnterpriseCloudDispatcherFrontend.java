@@ -503,7 +503,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
                super.insertString(offs, str, a);
          }
       });
-      leftHandField.setText("45");
+      leftHandField.setText("35");
 
       rightHandField = new JTextField(2);
       rightHandField.setDocument(new PlainDocument()
