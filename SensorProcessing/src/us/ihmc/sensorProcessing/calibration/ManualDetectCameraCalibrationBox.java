@@ -9,8 +9,8 @@ import boofcv.alg.geo.calibration.Zhang99DecomposeHomography;
 import boofcv.core.image.ConvertBufferedImage;
 import boofcv.factory.calib.FactoryPlanarCalibrationTarget;
 import boofcv.gui.image.ShowImages;
+import boofcv.io.UtilIO;
 import boofcv.io.image.UtilImageIO;
-import boofcv.misc.BoofMiscOps;
 import boofcv.struct.calib.IntrinsicParameters;
 import boofcv.struct.image.ImageFloat32;
 import georegression.geometry.GeometryMath_F64;
@@ -149,7 +149,7 @@ public class ManualDetectCameraCalibrationBox
 
       BufferedImage image = UtilImageIO.loadImage(directory + "hack.jpg");
 
-      IntrinsicParameters intrinsic = BoofMiscOps.loadXML(directory+"intrinsic.xml");
+      IntrinsicParameters intrinsic = UtilIO.loadXML(directory + "intrinsic.xml");
 //            new IntrinsicParameters(image.getWidth()/2,image.getHeight()/2,0,
 //            image.getWidth()/2,image.getHeight()/2,image.getWidth(),image.getHeight(),false,null);
 

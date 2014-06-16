@@ -2,8 +2,8 @@ package us.ihmc.imageProcessing.segmentation;
 
 import boofcv.core.image.ConvertBufferedImage;
 import boofcv.gui.image.ShowImages;
+import boofcv.io.UtilIO;
 import boofcv.io.image.UtilImageIO;
-import boofcv.misc.BoofMiscOps;
 import boofcv.struct.image.ImageFloat32;
 import boofcv.struct.image.ImageUInt8;
 import boofcv.struct.image.MultiSpectral;
@@ -45,7 +45,7 @@ public class DisplayClassificationsApp extends JPanel
 //      BufferedImage input = ConfigurationLoader.loadImage("media/drcsim_2_6/left000001.png");
 //      BufferedImage input = ConfigurationLoader.loadImage("media/drcsim_2_6/left04.png");
       BufferedImage input = UtilImageIO.loadImage("../ImageProcessing/data/key_left00000.ppm");
-      Gaussian3D_F64 model = BoofMiscOps.loadXML("gaussian_hood.xml");
+      Gaussian3D_F64 model = UtilIO.loadXML("gaussian_hood.xml");
 //      Gaussian3D_F64 model = ConfigurationLoader.loadXML("models/drcsim_2_6/gaussian_car_color.xml");
 
       if( model == null )

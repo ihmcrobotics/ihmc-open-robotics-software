@@ -12,6 +12,7 @@ import boofcv.alg.filter.binary.ThresholdImageOps;
 import boofcv.alg.misc.ImageStatistics;
 import boofcv.core.image.ConvertBufferedImage;
 import boofcv.factory.feature.detect.interest.FactoryInterestPoint;
+import boofcv.factory.feature.detect.line.ConfigHoughPolar;
 import boofcv.factory.feature.detect.line.FactoryDetectLineAlgs;
 import boofcv.gui.binary.VisualizeBinaryData;
 import boofcv.struct.ConnectRule;
@@ -175,8 +176,8 @@ public class DRCRoadDetectionTest implements VideoListener, KeyListener
            Class<D> derivType)
    {
       T input = ConvertBufferedImage.convertFromSingle(image, null, imageType);
-      DetectLineHoughPolar<T, D> detector = FactoryDetectLineAlgs.houghPolar(localMaxRadius, minCounts, resolutionRange, resolutionAngle, edgeThreshold,
-              maxLines, imageType, derivType);
+      DetectLineHoughPolar<T, D> detector = FactoryDetectLineAlgs.houghPolar(new ConfigHoughPolar(localMaxRadius, minCounts, resolutionRange,
+            resolutionAngle, edgeThreshold, maxLines), imageType, derivType);
       List<LineParametric2D_F32> found = detector.detect(input);
 
       return found;
