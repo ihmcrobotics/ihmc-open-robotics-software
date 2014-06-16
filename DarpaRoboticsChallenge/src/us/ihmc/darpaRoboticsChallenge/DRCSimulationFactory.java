@@ -89,8 +89,6 @@ public class DRCSimulationFactory
       StateEstimatorParameters stateEstimatorParameters = drcRobotModel.getStateEstimatorParameters();
       SensorNoiseParameters sensorNoiseParameters = scsInitialSetup.getSimulatedSensorNoiseParameters();
 
-      PIDLidarTorqueController lidarControllerInterface = new PIDLidarTorqueController(simulatedRobot,
-            drcRobotModel.getSensorInformation().getLidarJointName(), DRCConfigParameters.LIDAR_SPINDLE_VELOCITY, drcRobotModel.getSimulateDT());
       SensorReaderFactory sensorReaderFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(simulatedRobot, sensorNoiseParameters,
             stateEstimatorParameters.getSensorFilterParameters(), drcRobotModel.getSensorInformation().getIMUSensorsToUse());
 
@@ -128,7 +126,13 @@ public class DRCSimulationFactory
       }
 
       simulatedRobot.setController(multiThreadedRobotController);
-      simulatedRobot.setController(lidarControllerInterface);
+      
+      if(drcRobotModel.getSensorInformation().getLidarJointName() != null)
+      {
+         PIDLidarTorqueController lidarControllerInterface = new PIDLidarTorqueController(simulatedRobot,
+               drcRobotModel.getSensorInformation().getLidarJointName(), DRCConfigParameters.LIDAR_SPINDLE_VELOCITY, drcRobotModel.getSimulateDT());
+         simulatedRobot.setController(lidarControllerInterface);
+      }
       simulatedRobot.setController(simulatedDRCRobotTimeProvider);
    }
 
