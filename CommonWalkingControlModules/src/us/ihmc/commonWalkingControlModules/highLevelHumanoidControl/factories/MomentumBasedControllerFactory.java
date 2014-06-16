@@ -6,7 +6,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controllers.LidarControllerInterface;
 import us.ihmc.commonWalkingControlModules.controllers.RobotControllerUpdatablesAdapter;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepTimingParameters;
@@ -39,6 +38,7 @@ import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
+import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.TotalMassCalculator;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
@@ -126,8 +126,8 @@ public class MomentumBasedControllerFactory
 
    public RobotController getController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, double controlDT, double gravity,
          DoubleYoVariable yoTime, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, TwistCalculator twistCalculator,
-         CenterOfMassJacobian centerOfMassJacobian, ForceSensorDataHolder forceSensorDataHolder, LidarControllerInterface lidarControllerInterface,
-         GlobalDataProducer dataProducer)
+         CenterOfMassJacobian centerOfMassJacobian, ForceSensorDataHolder forceSensorDataHolder, GlobalDataProducer dataProducer,
+         InverseDynamicsJoint... jointsToIgnore)
    {
       SideDependentList<ContactablePlaneBody> feet = contactableBodiesFactory.createFootContactableBodies(fullRobotModel, referenceFrames);
 
@@ -161,7 +161,7 @@ public class MomentumBasedControllerFactory
               walkingControllerParameters.getCMPAccelerationLimit());
 
       MomentumOptimizationSettings momentumOptimizationSettings = HighLevelHumanoidControllerFactoryHelper.createMomentumOptimizationSettings(fullRobotModel,
-                                                                     lidarControllerInterface, registry);
+            registry, jointsToIgnore);
 
       // No longer need old one. Don't create it.
       // TODO: Remove OldMomentumControlModule completely once QP stuff is solidified.
@@ -244,10 +244,9 @@ public class MomentumBasedControllerFactory
       double desiredPelvisPitch = 0.0;
       TransferTimeCalculationProvider transferTimeCalculationProvider = new TransferTimeCalculationProvider("providedTransferTime", registry,
             transferTimeCalculator, transferTime);
-      WalkingHighLevelHumanoidController walkingBehavior = new WalkingHighLevelHumanoidController(variousWalkingProviders, variousWalkingManagers, footSwitches,
-                                                              centerOfMassHeightTrajectoryGenerator, transferTimeCalculationProvider, desiredPelvisPitch,
-                                                              walkingControllerParameters, iCPBasedLinearMomentumRateOfChangeControlModule, null,
-                                                              instantaneousCapturePointPlanner, icpAndMomentumBasedController, momentumBasedController, null);
+      WalkingHighLevelHumanoidController walkingBehavior = new WalkingHighLevelHumanoidController(variousWalkingProviders, variousWalkingManagers,
+            footSwitches, centerOfMassHeightTrajectoryGenerator, transferTimeCalculationProvider, desiredPelvisPitch, walkingControllerParameters,
+            iCPBasedLinearMomentumRateOfChangeControlModule, instantaneousCapturePointPlanner, icpAndMomentumBasedController, momentumBasedController, null);
       highLevelBehaviors.add(walkingBehavior);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
