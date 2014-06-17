@@ -406,8 +406,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       coefficientOfFriction.set(0.0); // TODO Remove coefficient of friction from the abstract high level stuff and let the EndEffector controlModule deal with it
 
-      setupLegJacobians(fullRobotModel);
-
       this.walkOnTheEdgesProviders = new WalkOnTheEdgesProviders(walkingControllerParameters, registry);
       walkOnTheEdgesManager = new WalkOnTheEdgesManager(walkingControllerParameters, walkOnTheEdgesProviders, feet, footControlModules, registry);
       this.centerOfMassHeightTrajectoryGenerator.attachWalkOnToesManager(walkOnTheEdgesManager);
@@ -520,13 +518,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          DoubleTrajectoryGenerator footTouchdownPitchTrajectoryGenerator = walkOnTheEdgesProviders.getFootTouchdownPitchTrajectoryGenerator(robotSide);
 
-         int jacobianId = legJacobianIds.get(robotSide);
-
          BooleanYoVariable requestHoldPosition = requestSupportFootToHoldPosition.get(robotSide);
 
          DoubleProvider maximumToeOffAngleProvider = walkOnTheEdgesProviders.getMaximumToeOffAngleProvider();
          
-         FootControlModule footControlModule = new FootControlModule(jacobianId, robotSide, footTouchdownPitchTrajectoryGenerator,
+         FootControlModule footControlModule = new FootControlModule(robotSide, footTouchdownPitchTrajectoryGenerator,
                  maximumToeOffAngleProvider, requestHoldPosition, walkingControllerParameters, swingTimeCalculationProvider,
                  /*initialVelocityProvider,*/ swingFootFinalPositionProvider,
                  /*finalDesiredVelocityProvider,*/ finalFootOrientationProvider, trajectoryParametersProvider, dynamicGraphicObjectsListRegistry,
