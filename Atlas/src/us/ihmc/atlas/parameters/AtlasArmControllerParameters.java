@@ -7,9 +7,9 @@ public class AtlasArmControllerParameters implements ArmControllerParameters
 {
    private final boolean runningOnRealRobot;
    
-   public static final double[] kp = { 60.0, 60.0, 40.0, 40.0, 30.0, 40.0};
-   public static final double[] ki = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-   public static final double[] kd = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+   public static final double[] kp = { 30.0, 30.0, 30.0, 30.0, 30.0, 30.0};
+   public static final double[] ki = { 5.0, 5.0, 5.0, 5.0, 5.0, 5.0 };
+   public static final double[] kd = { 5.0, 5.0, 5.0, 5.0, 5.0, 5.0 };
    public static final double[] ff_qd_ds = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
    public static final double[] qerr_maxs = { 10.0, 10.0, 10.0, 10.0, 10.0, 10.0 };
    
