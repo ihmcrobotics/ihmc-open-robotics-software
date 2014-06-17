@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccele
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
+import us.ihmc.commonWalkingControlModules.trajectories.CurrentOrientationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.SimpleTwoWaypointTrajectoryParameters;
@@ -49,7 +50,7 @@ public class SwingState extends AbstractUnconstrainedState
    private final OrientationInterpolationTrajectoryGenerator orientationTrajectoryGenerator;
 
    public SwingState(DoubleProvider swingTimeProvider,
-         PositionProvider finalPositionProvider, OrientationProvider initialOrientationProvider,
+         PositionProvider finalPositionProvider,
          OrientationProvider finalOrientationProvider, TrajectoryParametersProvider trajectoryParametersProvider,
          
          YoFramePoint yoDesiredPosition, YoFrameVector yoDesiredLinearVelocity, YoFrameVector yoDesiredLinearAcceleration,
@@ -86,8 +87,9 @@ public class SwingState extends AbstractUnconstrainedState
             new YoVelocityProvider(namePrefix + "TouchdownVelocity", ReferenceFrame.getWorldFrame(), registry);
       finalVelocityProvider.set(new Vector3d(0.0, 0.0, walkingControllerParameters.getDesiredTouchdownVelocity()));
       CommonWalkingReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
+      ReferenceFrame footFrame = referenceFrames.getFootFrame(robotSide);
       VectorProvider initialVelocityProvider = new CurrentLinearVelocityProvider(
-            referenceFrames.getFootFrame(robotSide),
+            footFrame,
             momentumBasedController.getFullRobotModel().getFoot(robotSide),
             momentumBasedController.getTwistCalculator());
       
@@ -96,7 +98,8 @@ public class SwingState extends AbstractUnconstrainedState
          trajectoryParametersProvider = new TrajectoryParametersProvider(new SimpleTwoWaypointTrajectoryParameters());
       }
 
-      PositionProvider initialPositionProvider = new FrameBasedPositionSource(referenceFrames.getFootFrame(robotSide));
+      PositionProvider initialPositionProvider = new FrameBasedPositionSource(footFrame);
+      OrientationProvider initialOrientationProvider = new CurrentOrientationProvider(worldFrame, footFrame);
       
       PositionTrajectoryGenerator swingTrajectoryGenerator = new TwoWaypointPositionTrajectoryGenerator(namePrefix + "Swing", worldFrame,
             swingTimeProvider, initialPositionProvider, initialVelocityProvider, finalPositionProvider, finalVelocityProvider,

@@ -5,10 +5,12 @@ import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccele
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
+import us.ihmc.commonWalkingControlModules.trajectories.CurrentOrientationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePositionTrajectoryGenerator;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
@@ -27,7 +29,7 @@ public class MoveStraightState extends AbstractUnconstrainedState
    private OrientationInterpolationTrajectoryGenerator orientationTrajectoryGenerator;
 
    public MoveStraightState(DoubleProvider footTrajectoryTimeProvider,
-         PositionProvider finalPositionProvider, OrientationProvider initialOrientationProvider, OrientationProvider finalOrientationProvider,
+         PositionProvider finalPositionProvider, OrientationProvider finalOrientationProvider,
          
          YoFramePoint yoDesiredPosition, YoFrameVector yoDesiredLinearVelocity, YoFrameVector yoDesiredLinearAcceleration,
          RigidBodySpatialAccelerationControlModule accelerationControlModule,
@@ -53,7 +55,10 @@ public class MoveStraightState extends AbstractUnconstrainedState
       
       CommonWalkingReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
 
-      PositionProvider initialPositionProvider = new FrameBasedPositionSource(referenceFrames.getFootFrame(robotSide));
+      // TODO Check if it is necessary to implement a initial position provider using the previous desired instead of the current. (Sylvain)
+      ReferenceFrame footFrame = referenceFrames.getFootFrame(robotSide);
+      PositionProvider initialPositionProvider = new FrameBasedPositionSource(footFrame);
+      OrientationProvider initialOrientationProvider = new CurrentOrientationProvider(worldFrame, footFrame);
       
       positionTrajectoryGenerator = new StraightLinePositionTrajectoryGenerator(namePrefix + "FootPosition", worldFrame, footTrajectoryTimeProvider,
             initialPositionProvider, finalPositionProvider, registry);
