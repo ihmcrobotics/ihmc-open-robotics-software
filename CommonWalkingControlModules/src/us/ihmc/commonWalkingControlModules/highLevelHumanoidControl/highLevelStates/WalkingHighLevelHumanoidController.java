@@ -322,7 +322,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       doPrepareManipulationForLocomotion.set(walkingControllerParameters.doPrepareManipulationForLocomotion());
 
       FootstepProvider footstepProvider = variousWalkingProviders.getFootstepProvider();
-      HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = variousWalkingProviders.getMapFromFootstepsToTrajectoryParameters();
       this.reinitializeControllerProvider = variousWalkingProviders.getReinitializeWalkingControllerProvider();
 
       if (dynamicGraphicObjectsListRegistry == null)
@@ -368,7 +367,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       this.transferTimeCalculationProvider = transferTimeCalculationProvider;
 
       this.trajectoryParametersProvider = new TrajectoryParametersProvider(new SimpleTwoWaypointTrajectoryParameters());
-      this.mapFromFootstepsToTrajectoryParameters = mapFromFootstepsToTrajectoryParameters;
+      this.mapFromFootstepsToTrajectoryParameters = variousWalkingProviders.getMapFromFootstepsToTrajectoryParameters();
       this.footSwitches = footSwitches;
       this.icpBasedMomentumRateOfChangeControlModule = momentumRateOfChangeControlModule;
 
@@ -542,8 +541,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       ResetICPTrajectoryAction resetICPTrajectoryAction = new ResetICPTrajectoryAction();
       for (RobotSide robotSide : RobotSide.values)
       {
-         FootControlModule swingFootControlModule = footControlModules.get(robotSide.getOppositeSide());
-         StopWalkingCondition stopWalkingCondition = new StopWalkingCondition(swingFootControlModule);
+         StopWalkingCondition stopWalkingCondition = new StopWalkingCondition();
 
          ArrayList<StateTransitionAction> stopWalkingStateTransitionActions = new ArrayList<StateTransitionAction>();
          stopWalkingStateTransitionActions.add(resetICPTrajectoryAction);
@@ -563,16 +561,14 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          singleSupportState.addStateTransition(toDoubleSupport2);
 
          ContactablePlaneBody sameSideFoot = feet.get(robotSide);
-         SingleSupportToTransferToCondition doneWithSingleSupportAndTransferToOppositeSideCondition = new SingleSupportToTransferToCondition(sameSideFoot,
-               swingFootControlModule);
+         SingleSupportToTransferToCondition doneWithSingleSupportAndTransferToOppositeSideCondition = new SingleSupportToTransferToCondition(sameSideFoot);
          StateTransition<WalkingState> toTransferOppositeSide = new StateTransition<WalkingState>(transferStateEnums.get(robotSide.getOppositeSide()),
                doneWithSingleSupportAndTransferToOppositeSideCondition);
          singleSupportState.addStateTransition(toTransferOppositeSide);
 
          // Sometimes need transfer to same side when two steps are commanded on the same side. Otherwise, the feet cross over.
          ContactablePlaneBody oppositeSideFoot = feet.get(robotSide.getOppositeSide());
-         SingleSupportToTransferToCondition doneWithSingleSupportAndTransferToSameSideCondition = new SingleSupportToTransferToCondition(oppositeSideFoot,
-               swingFootControlModule);
+         SingleSupportToTransferToCondition doneWithSingleSupportAndTransferToSameSideCondition = new SingleSupportToTransferToCondition(oppositeSideFoot);
          StateTransition<WalkingState> toTransferSameSide = new StateTransition<WalkingState>(transferStateEnums.get(robotSide),
                doneWithSingleSupportAndTransferToSameSideCondition);
          singleSupportState.addStateTransition(toTransferSameSide);
@@ -1485,9 +1481,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    {
       private final ContactablePlaneBody nextSwingFoot;
 
-      public SingleSupportToTransferToCondition(ContactablePlaneBody nextSwingFoot, FootControlModule endEffectorControlModule)
+      public SingleSupportToTransferToCondition(ContactablePlaneBody nextSwingFoot)
       {
-         super(endEffectorControlModule);
+         super();
 
          this.nextSwingFoot = nextSwingFoot;
       }
@@ -1513,7 +1509,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    {
       private boolean footSwitchActivated;
       
-      public DoneWithSingleSupportCondition(FootControlModule endEffectorControlModule)
+      public DoneWithSingleSupportCondition()
       {
       }
 
@@ -1596,9 +1592,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private class StopWalkingCondition extends DoneWithSingleSupportCondition
    {
-      public StopWalkingCondition(FootControlModule endEffectorControlModule)
+      public StopWalkingCondition()
       {
-         super(endEffectorControlModule);
+         super();
       }
 
       public boolean checkCondition()
@@ -1958,8 +1954,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       return zddDesired;
    }
 
-   private final SideDependentList<Double> legLengths = new SideDependentList<Double>();
-
    private void correctCoMHeight(FrameVector2d desiredICPVelocity, double zCurrent, CoMHeightTimeDerivativesData comHeightData, boolean checkForKneeCollapsing,
          boolean checkForStraightKnee)
    {
@@ -1970,11 +1964,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          leadingLegFirst = new RobotSide[] { trailingLeg.getEnumValue().getOppositeSide(), trailingLeg.getEnumValue() };
       else
          leadingLegFirst = RobotSide.values;
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         legLengths.put(robotSide, footControlModules.get(robotSide).updateAndGetLegLength());
-      }
 
       // Correct, if necessary, the CoM height trajectory to avoid the knee to collapse
       if (checkForKneeCollapsing)
