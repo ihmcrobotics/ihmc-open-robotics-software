@@ -122,7 +122,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
          desiredConfigurationProviders.put(robotSide, desiredConfigurationProvider);
 
          ConstantDoubleProvider footTrajectoryTimeProvider = new ConstantDoubleProvider(1.0);
-         FootControlModule footControlModule = new FootControlModule(foot, jacobianId, robotSide, null, null,
+         FootControlModule footControlModule = new FootControlModule(jacobianId, robotSide, null, null,
                null, walkingControllerParameters, footTrajectoryTimeProvider, currentConfigurationProvider, /*null,*/ desiredConfigurationProvider, 
                currentConfigurationProvider, /*null,*/ desiredConfigurationProvider, null, null,
                momentumBasedController, registry);
