@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlane
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePositionTrajectoryGenerator;
@@ -17,6 +18,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.FrameBasedPositionSource;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionProvider;
 
 public class MoveStraightState extends AbstractUnconstrainedState
@@ -24,7 +26,7 @@ public class MoveStraightState extends AbstractUnconstrainedState
    private StraightLinePositionTrajectoryGenerator positionTrajectoryGenerator;
    private OrientationInterpolationTrajectoryGenerator orientationTrajectoryGenerator;
 
-   public MoveStraightState(DoubleProvider footTrajectoryTimeProvider, PositionProvider initialPositionProvider,
+   public MoveStraightState(DoubleProvider footTrajectoryTimeProvider,
          PositionProvider finalPositionProvider, OrientationProvider initialOrientationProvider, OrientationProvider finalOrientationProvider,
          
          YoFramePoint yoDesiredPosition, YoFrameVector yoDesiredLinearVelocity, YoFrameVector yoDesiredLinearAcceleration,
@@ -48,7 +50,11 @@ public class MoveStraightState extends AbstractUnconstrainedState
 
       RigidBody rigidBody = contactableBody.getRigidBody();
       String namePrefix = rigidBody.getName();
+      
+      CommonWalkingReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
 
+      PositionProvider initialPositionProvider = new FrameBasedPositionSource(referenceFrames.getFootFrame(robotSide));
+      
       positionTrajectoryGenerator = new StraightLinePositionTrajectoryGenerator(namePrefix + "FootPosition", worldFrame, footTrajectoryTimeProvider,
             initialPositionProvider, finalPositionProvider, registry);
 
