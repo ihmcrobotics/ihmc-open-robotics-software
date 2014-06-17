@@ -98,7 +98,6 @@ import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParamete
 import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParametersProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryWaypointGenerationMethod;
 import com.yobotics.simulationconstructionset.util.trajectory.YoPositionProvider;
-import com.yobotics.simulationconstructionset.util.trajectory.YoVariableDoubleProvider;
 
 public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoidControlPattern
 {
@@ -255,11 +254,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final BooleanYoVariable desiredECMPinSupportPolygon = new BooleanYoVariable("desiredECMPinSupportPolygon", registry);
    private YoFramePoint ecmpViz = new YoFramePoint("ecmpViz", worldFrame, registry);
 
-   private final YoVariableDoubleProvider totalEstimatedToeOffTimeProvider = new YoVariableDoubleProvider("totalEstimatedToeOffTimeProvider", registry);
-
    private final DoubleYoVariable singularityEscapeNullspaceMultiplierSwingLeg = new DoubleYoVariable("singularityEscapeNullspaceMultiplierSwingLeg", registry);
-   private final DoubleYoVariable singularityEscapeNullspaceMultiplierSupportLeg = new DoubleYoVariable("singularityEscapeNullspaceMultiplierSupportLeg",
-         registry);
+   private final DoubleYoVariable singularityEscapeNullspaceMultiplierSupportLeg = new DoubleYoVariable("singularityEscapeNullspaceMultiplierSupportLeg", registry);
    private final DoubleYoVariable singularityEscapeNullspaceMultiplierSupportLegLocking = new DoubleYoVariable("singularityEscapeNullspaceMultiplierSupportLegLocking", registry);
 
    private final VariousWalkingProviders variousWalkingProviders;
@@ -419,8 +415,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       amountToBeInsideSingleSupport.set(0.0);
       amountToBeInsideDoubleSupport.set(0.03); // 0.02);    // TODO: necessary for stairs...
       transferTimeCalculationProvider.updateTransferTime();
-
-      totalEstimatedToeOffTimeProvider.set(transferTimeCalculationProvider.getValue());
 
       stopInDoubleSupporTrajectoryTime.set(0.5);
       this.userDesiredPelvisPitch.set(desiredPelvisPitch);
@@ -898,8 +892,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                setOnToesContactState(trailingLeg);
                icpAndMomentumBasedController.updateBipedSupportPolygons(bipedSupportPolygons); // need to always update biped support polygons after a change to the contact states
                ecmpBasedToeOffHasBeenInitialized.set(true);
-
-               totalEstimatedToeOffTimeProvider.set(remainingToeOffTime);
             }
          }
       }
