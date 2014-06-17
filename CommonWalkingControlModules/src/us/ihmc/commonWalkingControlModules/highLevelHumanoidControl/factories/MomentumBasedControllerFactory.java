@@ -173,27 +173,26 @@ public class MomentumBasedControllerFactory
 
       if (CREATE_YOVARIABLE_WALKING_PROVIDERS)
       {
-         variousWalkingProviders = VariousWalkingProviders.createUsingYoVariables(fullRobotModel, walkingControllerParameters, referenceFrames, feet,
-                 transferTimeCalculator, swingTimeCalculator, registry);
+         variousWalkingProviders = VariousWalkingProviders.createUsingYoVariables(fullRobotModel, walkingControllerParameters, referenceFrames, feet, registry);
       }
-      
+
       else if (variousWalkingProviderFactory != null)
       {
          variousWalkingProviders = variousWalkingProviderFactory.createVariousWalkingProviders(yoTime, fullRobotModel, walkingControllerParameters,
-                 referenceFrames, feet, transferTimeCalculator, swingTimeCalculator, registry);
+               referenceFrames, feet, transferTimeCalculator, swingTimeCalculator, registry);
          if (variousWalkingProviders == null)
             throw new RuntimeException("Couldn't create various walking providers!");
       }
-      
+
       else if (objectCommunicator != null)
       {
          variousWalkingProviders = VariousWalkingProviders.createUsingObjectCommunicator(footstepTimingParameters, objectCommunicator, fullRobotModel,
-                 walkingControllerParameters, referenceFrames, feet, transferTimeCalculator, swingTimeCalculator, registry);
+               walkingControllerParameters, referenceFrames, feet, transferTimeCalculator, swingTimeCalculator, registry);
       }
       else
       {
          variousWalkingProviders = VariousWalkingProviders.createUsingComponentBasedDesiredFootstepCalculator(fullRobotModel, referenceFrames, feet, controlDT,
-                 updatables, USE_HEADING_AND_VELOCITY_SCRIPT, groundProfileForCheatingOnStepHeight, walkingControllerParameters, registry);
+               updatables, USE_HEADING_AND_VELOCITY_SCRIPT, groundProfileForCheatingOnStepHeight, walkingControllerParameters, registry);
       }
 
       /////////////////////////////////////////////////////////////////////////////////////////////

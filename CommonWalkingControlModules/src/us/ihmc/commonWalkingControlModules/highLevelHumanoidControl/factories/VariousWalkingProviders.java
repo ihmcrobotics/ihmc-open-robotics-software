@@ -319,9 +319,8 @@ public class VariousWalkingProviders
 
    }
 
-   public static VariousWalkingProviders createForStairClimbing(WalkingControllerParameters walkingControllerParameters,
-           VaryingStairGroundProfile groundProfile, SideDependentList<ContactablePlaneBody> bipedFeet, CommonWalkingReferenceFrames referenceFrames,
-           DesiredHeadingControlModule desiredHeadingControlModule, FullRobotModel fullRobotModel, YoVariableRegistry registry)
+   public static VariousWalkingProviders createForStairClimbing(VaryingStairGroundProfile groundProfile, SideDependentList<ContactablePlaneBody> bipedFeet,
+         CommonWalkingReferenceFrames referenceFrames, DesiredHeadingControlModule desiredHeadingControlModule, YoVariableRegistry registry)
    {
       VaryingStairDesiredFootstepCalculator desiredFootstepCalculator = new VaryingStairDesiredFootstepCalculator(groundProfile, bipedFeet, referenceFrames,
                                                                            desiredHeadingControlModule, registry);
@@ -355,8 +354,7 @@ public class VariousWalkingProviders
    }
 
    public static VariousWalkingProviders createUsingYoVariables(FullRobotModel fullRobotModel, WalkingControllerParameters walkingControllerParameters,
-         CommonWalkingReferenceFrames referenceFrames, SideDependentList<ContactablePlaneBody> bipedFeet, ConstantTransferTimeCalculator transferTimeCalculator,
-         ConstantSwingTimeCalculator swingTimeCalculator, YoVariableRegistry registry)
+         CommonWalkingReferenceFrames referenceFrames, SideDependentList<ContactablePlaneBody> bipedFeet, YoVariableRegistry registry)
    {
       DesiredHandPoseProvider handPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame());
 
