@@ -87,7 +87,7 @@ public class FootControlModule
    private final TouchdownState touchdwonOnHeelState;
    private final OnToesState onToesState;
    
-   public FootControlModule(double controlDT, ContactablePlaneBody contactableBody, int jacobianId, RobotSide robotSide,
+   public FootControlModule(ContactablePlaneBody contactableBody, int jacobianId, RobotSide robotSide,
          DoubleTrajectoryGenerator pitchTouchdownTrajectoryGenerator, DoubleProvider maximumTakeoffAngle,
          BooleanYoVariable requestHoldPosition, WalkingControllerParameters walkingControllerParameters,
          
@@ -119,7 +119,7 @@ public class FootControlModule
       
       ReferenceFrame bodyFrame = contactableBody.getBodyFrame();
       TwistCalculator twistCalculator = momentumBasedController.getTwistCalculator();
-      accelerationControlModule = new RigidBodySpatialAccelerationControlModule(namePrefix, twistCalculator, rigidBody, bodyFrame, controlDT, registry);
+      accelerationControlModule = new RigidBodySpatialAccelerationControlModule(namePrefix, twistCalculator, rigidBody, bodyFrame, momentumBasedController.getControlDT(), registry);
       spatialAccelerationProjector = new SpatialAccelerationProjector(namePrefix + "SpatialAccelerationProjector", registry);
       doSingularityEscape = new BooleanYoVariable(namePrefix + "DoSingularityEscape", registry);
       waitSingularityEscapeBeforeTransitionToNextState = new BooleanYoVariable(namePrefix + "WaitSingularityEscapeBeforeTransitionToNextState", registry);

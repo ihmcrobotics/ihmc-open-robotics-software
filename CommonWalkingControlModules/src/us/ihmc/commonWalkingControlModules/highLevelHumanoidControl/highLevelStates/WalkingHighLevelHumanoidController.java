@@ -532,11 +532,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          DoubleProvider maximumToeOffAngleProvider = walkOnTheEdgesProviders.getMaximumToeOffAngleProvider();
          PositionProvider initialPositionProvider = new FrameBasedPositionSource(referenceFrames.getFootFrame(robotSide));
          
-         FootControlModule footControlModule = new FootControlModule(controlDT, bipedFoot, jacobianId, robotSide,
-                 footTouchdownPitchTrajectoryGenerator, maximumToeOffAngleProvider, requestHoldPosition, walkingControllerParameters,
-                 swingTimeCalculationProvider, initialPositionProvider, /*initialVelocityProvider,*/ swingFootFinalPositionProvider,
-                 initialOrientationProvider, /*finalDesiredVelocityProvider,*/ finalFootOrientationProvider, trajectoryParametersProvider,
-                 dynamicGraphicObjectsListRegistry, momentumBasedController, registry);
+         FootControlModule footControlModule = new FootControlModule(bipedFoot, jacobianId, robotSide, footTouchdownPitchTrajectoryGenerator,
+                 maximumToeOffAngleProvider, requestHoldPosition, walkingControllerParameters, swingTimeCalculationProvider,
+                 initialPositionProvider, /*initialVelocityProvider,*/ swingFootFinalPositionProvider, initialOrientationProvider,
+                 /*finalDesiredVelocityProvider,*/ finalFootOrientationProvider, trajectoryParametersProvider, dynamicGraphicObjectsListRegistry,
+                 momentumBasedController, registry);
 
          VariableChangedListener swingGainsChangedListener = createEndEffectorGainsChangedListener(footControlModule);
          swingGainsChangedListener.variableChanged(null);

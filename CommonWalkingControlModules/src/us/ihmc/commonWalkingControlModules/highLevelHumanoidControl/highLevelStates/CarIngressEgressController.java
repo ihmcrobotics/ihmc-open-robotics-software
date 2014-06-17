@@ -283,10 +283,10 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          DoubleTrajectoryGenerator onToesTrajectory = new ThirdOrderPolynomialTrajectoryGenerator(sideString + bodyName, onToesInitialPitchProvider,
                                                          onToesInitialPitchVelocityProvider, onToesFinalPitchProvider, trajectoryTimeProvider, registry);
 
-         FootControlModule footControlModule = new FootControlModule(controlDT, foot, jacobianId, robotSide, null,
-               onToesTrajectory, null, walkingControllerParameters, footTrajectoryTimeProvider, initialConfigurationProvider,
-               /*null,*/ desiredConfigurationProvider, initialConfigurationProvider, /*null,*/ desiredConfigurationProvider, null,
-               null, momentumBasedController, registry);
+         FootControlModule footControlModule = new FootControlModule(foot, jacobianId, robotSide, null, onToesTrajectory,
+               null, walkingControllerParameters, footTrajectoryTimeProvider, initialConfigurationProvider, /*null,*/ desiredConfigurationProvider,
+               initialConfigurationProvider, /*null,*/ desiredConfigurationProvider, null, null,
+               momentumBasedController, registry);
          footControlModule.setSwingGains(100.0, 200.0, 200.0, 1.0, 1.0);
          footControlModule.setHoldGains(100.0, 200.0, 0.1);
          footControlModule.setToeOffGains(0.0, 200.0, 0.1);
