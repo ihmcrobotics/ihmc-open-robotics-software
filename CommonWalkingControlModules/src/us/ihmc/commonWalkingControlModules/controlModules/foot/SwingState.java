@@ -62,17 +62,13 @@ public class SwingState extends AbstractUnconstrainedState
          LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule,
          RobotSide robotSide, YoVariableRegistry registry,
          
-         BooleanYoVariable isTrajectoryDone, BooleanYoVariable isUnconstrained,
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
-         WalkingControllerParameters walkingControllerParameters)
+         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, WalkingControllerParameters walkingControllerParameters)
    {
       super(ConstraintType.SWING, yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration,
             accelerationControlModule, momentumBasedController, contactableBody,
             requestedState, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange,
             doSingularityEscape, forceFootAccelerateIntoGround, legSingularityAndKneeCollapseAvoidanceControlModule,
-            robotSide, registry,
-            
-            isTrajectoryDone, isUnconstrained);
+            robotSide, registry);
       
       RigidBody rigidBody = contactableBody.getRigidBody();
       String namePrefix = rigidBody.getName();
@@ -148,18 +144,12 @@ public class SwingState extends AbstractUnconstrainedState
 
       if (!trajectoryWasReplanned)
       {
-         boolean isDone = positionTrajectoryGenerator.isDone() && orientationTrajectoryGenerator.isDone();
-         isTrajectoryDone.set(isDone);
-
          positionTrajectoryGenerator.compute(getTimeInCurrentState());
 
          positionTrajectoryGenerator.packLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
       }
       else
       {
-         boolean isDone = pushRecoveryPositionTrajectoryGenerator.isDone() && orientationTrajectoryGenerator.isDone();
-         isTrajectoryDone.set(isDone);
-
          pushRecoveryPositionTrajectoryGenerator.compute(getTimeInCurrentState());
 
          pushRecoveryPositionTrajectoryGenerator.packLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);

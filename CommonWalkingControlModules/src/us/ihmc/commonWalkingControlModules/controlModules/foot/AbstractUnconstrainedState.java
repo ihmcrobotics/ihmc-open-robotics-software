@@ -25,8 +25,6 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
 {
    private static final boolean CORRECT_SWING_CONSIDERING_JOINT_LIMITS = true;
    
-   protected final BooleanYoVariable isTrajectoryDone;
-   protected final BooleanYoVariable isUnconstrained;
    protected boolean trajectoryWasReplanned;
    
    protected double swingKpXY, swingKpZ, swingKpOrientation, swingZetaXYZ, swingZetaOrientation;
@@ -39,18 +37,13 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
          DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange,
          BooleanYoVariable doSingularityEscape, BooleanYoVariable forceFootAccelerateIntoGround,
          LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule,
-         RobotSide robotSide, YoVariableRegistry registry,
-         
-         BooleanYoVariable isTrajectoryDone, BooleanYoVariable isUnconstrained)
+         RobotSide robotSide, YoVariableRegistry registry)
    {
       super(constraintType, yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration,
             accelerationControlModule, momentumBasedController, contactableBody,
             requestedState, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange,
             doSingularityEscape, forceFootAccelerateIntoGround, legSingularityAndKneeCollapseAvoidanceControlModule,
             robotSide, registry);
-      
-      this.isTrajectoryDone = isTrajectoryDone;
-      this.isUnconstrained = isUnconstrained;
    }
 
    /**
@@ -73,9 +66,6 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
 
       isCoPOnEdge = false;
       initializeTrajectory();
-
-      isTrajectoryDone.set(false);
-      isUnconstrained.set(true);
 
       setSwingControlGains(swingKpXY, swingKpZ, swingKpOrientation, swingZetaXYZ, swingZetaOrientation);
    }
@@ -183,7 +173,6 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    {
       yoDesiredPosition.setToNaN();
       trajectoryWasReplanned = false;
-      isUnconstrained.set(false);
 
       accelerationControlModule.reset();
    }

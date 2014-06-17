@@ -38,17 +38,13 @@ public class MoveStraightState extends AbstractUnconstrainedState
          DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange,
          BooleanYoVariable doSingularityEscape, BooleanYoVariable forceFootAccelerateIntoGround,
          LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule,
-         RobotSide robotSide, YoVariableRegistry registry,
-         
-         BooleanYoVariable isTrajectoryDone, BooleanYoVariable isUnconstrained)
+         RobotSide robotSide, YoVariableRegistry registry)
    {
       super(ConstraintType.MOVE_STRAIGHT, yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration,
             accelerationControlModule, momentumBasedController, contactableBody,
             requestedState, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange,
             doSingularityEscape, forceFootAccelerateIntoGround, legSingularityAndKneeCollapseAvoidanceControlModule,
-            robotSide, registry,
-            
-            isTrajectoryDone, isUnconstrained);
+            robotSide, registry);
 
       RigidBody rigidBody = contactableBody.getRigidBody();
       String namePrefix = rigidBody.getName();
@@ -75,9 +71,6 @@ public class MoveStraightState extends AbstractUnconstrainedState
 
    protected void computeAndPackTrajectory()
    {
-      boolean isDone = positionTrajectoryGenerator.isDone() && orientationTrajectoryGenerator.isDone();
-      isTrajectoryDone.set(isDone);
-
       positionTrajectoryGenerator.compute(getTimeInCurrentState());
       orientationTrajectoryGenerator.compute(getTimeInCurrentState());
 
