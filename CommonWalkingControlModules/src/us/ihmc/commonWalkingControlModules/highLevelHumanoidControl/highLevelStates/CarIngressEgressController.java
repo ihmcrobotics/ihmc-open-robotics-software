@@ -265,7 +265,6 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       for (RobotSide robotSide : RobotSide.values)
       {
          ContactablePlaneBody foot = feet.get(robotSide);
-         int jacobianId = legJacobianIds.get(robotSide);
 
          String bodyName = foot.getRigidBody().getName();
          String sideString = robotSide.getCamelCaseNameForStartOfExpression();
@@ -283,7 +282,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          DoubleTrajectoryGenerator onToesTrajectory = new ThirdOrderPolynomialTrajectoryGenerator(sideString + bodyName, onToesInitialPitchProvider,
                                                          onToesInitialPitchVelocityProvider, onToesFinalPitchProvider, trajectoryTimeProvider, registry);
 
-         FootControlModule footControlModule = new FootControlModule(jacobianId, robotSide, null, onToesTrajectory,
+         FootControlModule footControlModule = new FootControlModule(robotSide, null, onToesTrajectory,
                null, walkingControllerParameters, footTrajectoryTimeProvider, /*null,*/ desiredConfigurationProvider,
                /*null,*/ desiredConfigurationProvider, null, null,
                momentumBasedController, registry);

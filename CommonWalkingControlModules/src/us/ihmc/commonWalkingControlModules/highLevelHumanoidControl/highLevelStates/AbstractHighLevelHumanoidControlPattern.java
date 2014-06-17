@@ -70,7 +70,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
    protected final YoFrameVector desiredPelvisAngularVelocity = new YoFrameVector("desiredPelvisAngularVelocity", worldFrame, registry);
 
    protected final YoFrameVector desiredPelvisAngularAcceleration = new YoFrameVector("desiredPelvisAngularAcceleration", worldFrame, registry);
-   protected final SideDependentList<Integer> legJacobianIds = new SideDependentList<Integer>();
    protected final SideDependentList<FootControlModule> footControlModules = new SideDependentList<FootControlModule>();
    protected final FullRobotModel fullRobotModel;
    protected final MomentumBasedController momentumBasedController;
@@ -129,8 +128,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
 
       this.walkingControllerParameters = walkingControllerParameters;
 
-      // Setup jacobians for legs and arms
-      setupLegJacobians(fullRobotModel);
       coefficientOfFriction.set(1.0);
 
       setUpperBodyControlGains(walkingControllerParameters.getKpUpperBody(), walkingControllerParameters.getZetaUpperBody(),
@@ -195,7 +192,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
       this.maxJerkUpperBody.set(maxJerk);
    }
 
-
    private VariableChangedListener createPelvisOrientationGainsChangedListener()
    {
       VariableChangedListener listener = new VariableChangedListener()
@@ -217,17 +213,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
       maxJerkPelvisOrientation.addVariableChangedListener(listener);
 
       return listener;
-   }
-
-
-   protected void setupLegJacobians(FullRobotModel fullRobotModel)
-   {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         RigidBody endEffector = fullRobotModel.getFoot(robotSide);
-         int jacobianId = momentumBasedController.getOrCreateGeometricJacobian(fullRobotModel.getPelvis(), endEffector, endEffector.getBodyFixedFrame());
-         legJacobianIds.put(robotSide, jacobianId);
-      }
    }
 
    protected OneDoFJoint setupJointForExtendedNeckPitchRange()
