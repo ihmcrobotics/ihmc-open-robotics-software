@@ -7,10 +7,10 @@ import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
 public class SwingTimeCalculationProvider implements DoubleProvider
 {
    private static int instanceNumber = 0;
-   private final SwingTimeCalculator swingTimeCalculator;
+   private final ConstantSwingTimeCalculator swingTimeCalculator;
    private final DoubleYoVariable swingTime;
 
-   public SwingTimeCalculationProvider(String name, YoVariableRegistry parentRegistry, SwingTimeCalculator swingTimeCalculator, double defaultSwingTime)
+   public SwingTimeCalculationProvider(String name, YoVariableRegistry parentRegistry, ConstantSwingTimeCalculator swingTimeCalculator, double defaultSwingTime)
    {
       YoVariableRegistry registry = new YoVariableRegistry("swingTimeCalculationProvider"+instanceNumber++);
       parentRegistry.addChild(registry);
@@ -24,9 +24,9 @@ public class SwingTimeCalculationProvider implements DoubleProvider
       return swingTime.getDoubleValue();
    }
    
-   public void setSwingTimeByDistance(double stepLength)
+   public void updateSwingTime()
    {
-      swingTime.set(swingTimeCalculator.getSwingTime(stepLength));
+      swingTime.set(swingTimeCalculator.getSwingTime());
    }
 
    public void setSwingTime(double time)

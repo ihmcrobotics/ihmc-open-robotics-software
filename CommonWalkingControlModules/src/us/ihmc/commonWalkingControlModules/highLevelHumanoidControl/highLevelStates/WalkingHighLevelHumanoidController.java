@@ -45,7 +45,6 @@ import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivatives
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesSmoother;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMXYTimeDerivativesData;
-import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalculator;
 import us.ihmc.commonWalkingControlModules.trajectories.ContactStatesAndUpcomingFootstepData;
 import us.ihmc.commonWalkingControlModules.trajectories.FlatThenPolynomialCoMHeightTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.MaximumConstantJerkFinalToeOffAngleComputer;
@@ -54,7 +53,6 @@ import us.ihmc.commonWalkingControlModules.trajectories.OrientationTrajectoryGen
 import us.ihmc.commonWalkingControlModules.trajectories.SettableOrientationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.SimpleTwoWaypointTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculationProvider;
-import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculator;
 import us.ihmc.commonWalkingControlModules.trajectories.TransferTimeCalculationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointTrajectoryUtils;
 import us.ihmc.commonWalkingControlModules.trajectories.WalkOnTheEdgesProviders;
@@ -86,7 +84,6 @@ import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.util.GainCalculator;
 import com.yobotics.simulationconstructionset.util.PDController;
 import com.yobotics.simulationconstructionset.util.errorHandling.WalkingStatusReporter;
-import com.yobotics.simulationconstructionset.util.errorHandling.WalkingStatusReporter.ErrorType;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
@@ -137,9 +134,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final DoubleYoVariable desiredCoMHeightFromTrajectory = new DoubleYoVariable("desiredCoMHeightFromTrajectory", registry);
    private final DoubleYoVariable desiredCoMHeightVelocityFromTrajectory = new DoubleYoVariable("desiredCoMHeightVelocityFromTrajectory", registry);
    private final DoubleYoVariable desiredCoMHeightAccelerationFromTrajectory = new DoubleYoVariable("desiredCoMHeightAccelerationFromTrajectory", registry);
-   private final DoubleYoVariable desiredCoMHeightBeforeSmoothing = new DoubleYoVariable("desiredCoMHeightBeforeSmoothing", registry);
-   private final DoubleYoVariable desiredCoMHeightVelocityBeforeSmoothing = new DoubleYoVariable("desiredCoMHeightVelocityBeforeSmoothing", registry);
-   private final DoubleYoVariable desiredCoMHeightAccelerationBeforeSmoothing = new DoubleYoVariable("desiredCoMHeightAccelerationBeforeSmoothing", registry);
+//   private final DoubleYoVariable desiredCoMHeightBeforeSmoothing = new DoubleYoVariable("desiredCoMHeightBeforeSmoothing", registry);
+//   private final DoubleYoVariable desiredCoMHeightVelocityBeforeSmoothing = new DoubleYoVariable("desiredCoMHeightVelocityBeforeSmoothing", registry);
+//   private final DoubleYoVariable desiredCoMHeightAccelerationBeforeSmoothing = new DoubleYoVariable("desiredCoMHeightAccelerationBeforeSmoothing", registry);
    private final DoubleYoVariable desiredCoMHeightCorrected = new DoubleYoVariable("desiredCoMHeightCorrected", registry);
    private final DoubleYoVariable desiredCoMHeightVelocityCorrected = new DoubleYoVariable("desiredCoMHeightVelocityCorrected", registry);
    private final DoubleYoVariable desiredCoMHeightAccelerationCorrected = new DoubleYoVariable("desiredCoMHeightAccelerationCorrected", registry);
@@ -301,10 +298,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    public WalkingHighLevelHumanoidController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
          SideDependentList<FootSwitchInterface> footSwitches, CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator,
-         TransferTimeCalculationProvider transferTimeCalculationProvider, double desiredPelvisPitch, WalkingControllerParameters walkingControllerParameters,
-         ICPBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule, InstantaneousCapturePointPlanner instantaneousCapturePointPlanner,
-         ICPAndMomentumBasedController icpAndMomentumBasedController, MomentumBasedController momentumBasedController,
-         WalkingStatusReporter walkingStatusReporter)
+         TransferTimeCalculationProvider transferTimeCalculationProvider, SwingTimeCalculationProvider swingTimeCalculationProvider, double desiredPelvisPitch,
+         WalkingControllerParameters walkingControllerParameters, ICPBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule,
+         InstantaneousCapturePointPlanner instantaneousCapturePointPlanner, ICPAndMomentumBasedController icpAndMomentumBasedController,
+         MomentumBasedController momentumBasedController, WalkingStatusReporter walkingStatusReporter)
    {
       super(variousWalkingProviders, variousWalkingManagers, momentumBasedController, walkingControllerParameters, controllerState);
 
@@ -371,11 +368,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       // this.finalDesiredICPCalculator = finalDesiredICPCalculator;
       this.centerOfMassHeightTrajectoryGenerator = centerOfMassHeightTrajectoryGenerator;
 
-      // Swing Time Provider:
-      double swingTime = walkingControllerParameters.getDefaultSwingTime();
-      SwingTimeCalculator swingTimeCalculator = new ConstantSwingTimeCalculator(swingTime, registry);
-      this.swingTimeCalculationProvider = new SwingTimeCalculationProvider("providedSwingTime", registry, swingTimeCalculator, swingTime);
-
+      this.swingTimeCalculationProvider = swingTimeCalculationProvider;
       this.transferTimeCalculationProvider = transferTimeCalculationProvider;
 
       this.trajectoryParametersProvider = new TrajectoryParametersProvider(new SimpleTwoWaypointTrajectoryParameters());
@@ -432,7 +425,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       minOrbitalEnergyForSingleSupport.set(0.007); // 0.008
       amountToBeInsideSingleSupport.set(0.0);
       amountToBeInsideDoubleSupport.set(0.03); // 0.02);    // TODO: necessary for stairs...
-      transferTimeCalculationProvider.setTransferTime();
+      transferTimeCalculationProvider.updateTransferTime();
 
       totalEstimatedToeOffTimeProvider.set(transferTimeCalculationProvider.getValue());
 
@@ -1150,7 +1143,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       private final FrameOrientation desiredPelvisOrientationToPack;
       private final FrameVector desiredPelvisAngularVelocityToPack;
       private final FrameVector desiredPelvisAngularAccelerationToPack;
-      private final ErrorType[] singleSupportErrorToMonitor = new ErrorType[] { ErrorType.COM_Z, ErrorType.ICP_X, ErrorType.ICP_Y, ErrorType.PELVIS_ORIENTATION };
 
       private final FramePoint2d desiredICPLocal = new FramePoint2d();
       private final FrameVector2d desiredICPVelocityLocal = new FrameVector2d();
@@ -1159,7 +1151,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       private Footstep nextFootstep;
       private double captureTime;
-      private double defaultSwingTime;
       private double icpProjectionTimeOffset;
 
       public SingleSupportState(RobotSide robotSide)
@@ -1169,7 +1160,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          this.desiredPelvisOrientationToPack = new FrameOrientation(worldFrame);
          this.desiredPelvisAngularVelocityToPack = new FrameVector(fullRobotModel.getRootJoint().getFrameAfterJoint());
          this.desiredPelvisAngularAccelerationToPack = new FrameVector(fullRobotModel.getRootJoint().getFrameAfterJoint());
-         defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
          this.icpProjectionTimeOffset = 0.0;
       }
 
@@ -1259,6 +1249,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          captureTime = 0.0;
          hasICPPlannerFinished.set(false);
          trailingLeg.set(null);
+         swingTimeCalculationProvider.updateSwingTime();
 
          footSwitches.get(swingSide).reset();
 
@@ -1321,7 +1312,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 //            swingTimeCalculationProvider.useFastSwingTime(); // to remove
 //         }
          
-         transferTimeCalculationProvider.setTransferTime();
+         transferTimeCalculationProvider.updateTransferTime();
          
          updateFootstepParameters();
 

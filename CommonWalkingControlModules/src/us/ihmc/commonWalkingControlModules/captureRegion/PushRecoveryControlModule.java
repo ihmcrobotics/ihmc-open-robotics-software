@@ -57,8 +57,7 @@ public class PushRecoveryControlModule
 
    private boolean recoveringFromDoubleSupportFall;
    private boolean usingReducedSwingTime;
-   private double defaultSwingTime;
-   private double reducedSwinTime;
+   private double reducedSwingTime;
    private Footstep recoverFromDoubleSupportFallFootStep;
    private final BooleanYoVariable recovering;
    private BooleanYoVariable readyToGrabNextFootstep;
@@ -123,7 +122,7 @@ public class PushRecoveryControlModule
       {
          if (usingReducedSwingTime)
          {
-            this.swingTimeCalculationProvider.setSwingTime(defaultSwingTime);
+            this.swingTimeCalculationProvider.updateSwingTime();
             usingReducedSwingTime = false;
          }
          recoveringFromDoubleSupportFall = false;
@@ -240,10 +239,9 @@ public class PushRecoveryControlModule
                && (captureRegionCalculator.getCaptureRegionArea() < PushRecoveryControlModule.MINIMUN_CAPTURE_REGION_AREA || Double
                      .isNaN(captureRegionCalculator.getCaptureRegionArea())))
          {
-            this.defaultSwingTime = this.swingTimeCalculationProvider.getValue();
-            reducedSwinTime = swingTimeRemaining * REDUCE_SWING_TIME_COEFFICIENT;
-            this.swingTimeCalculationProvider.setSwingTime(reducedSwinTime);
-            captureRegionCalculator.calculateCaptureRegion(swingSide, reducedSwinTime, capturePoint2d, omega0, footPolygon);
+            reducedSwingTime = swingTimeRemaining * REDUCE_SWING_TIME_COEFFICIENT;
+            this.swingTimeCalculationProvider.setSwingTime(reducedSwingTime);
+            captureRegionCalculator.calculateCaptureRegion(swingSide, reducedSwingTime, capturePoint2d, omega0, footPolygon);
 
             //TODO: now actually if the capture region area is still NaN or too small we can re-reduce the swing time or prepare to fall
 
@@ -322,7 +320,7 @@ public class PushRecoveryControlModule
 
    public double getTrustTimeToConsiderSwingFinished()
    {
-      return this.reducedSwinTime * TRUST_TIME_SCALE;
+      return this.reducedSwingTime * TRUST_TIME_SCALE;
    }
 
    public void setRecoveringFromDoubleSupportState(boolean value)
