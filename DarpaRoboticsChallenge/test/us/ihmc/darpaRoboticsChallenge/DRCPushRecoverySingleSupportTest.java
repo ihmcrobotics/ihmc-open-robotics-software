@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.bambooTools.BambooTools;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCPushRobotController;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -16,6 +17,7 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.GroundProfile;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
@@ -23,6 +25,7 @@ import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
+import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.time.GlobalTimer;
 import com.yobotics.simulationconstructionset.util.FlatGroundProfile;
@@ -36,8 +39,7 @@ public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTest
 	private final static boolean VISUALIZE_FORCE = false;
 	
 	private double swingTime;
-	private SingleSupportStartCondition swingStartConditionRight;
-	private SingleSupportStartCondition swingStartConditionLeft;
+	private SideDependentList<SingleSupportStartCondition> swingStartConditions = new SideDependentList<>();
 
 	private DRCPushRobotController pushRobotController;
 	private BlockingSimulationRunner blockingSimulationRunner;
@@ -234,15 +236,14 @@ public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTest
       // get YoVariables
       BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper", "walk");
       BooleanYoVariable enable = (BooleanYoVariable) scs.getVariable("PushRecoveryControlModule", "enablePushRecovery");
-      String prefixLeft = fullRobotModel.getFoot(RobotSide.LEFT).getName();
-      String prefixRight = fullRobotModel.getFoot(RobotSide.RIGHT).getName();
-      final BooleanYoVariable rightFootInSwing = (BooleanYoVariable) scs.getVariable(
-            prefixRight + "FootControlModule", prefixRight + "IsUnconstrained");
-      final BooleanYoVariable leftFootInSwing = (BooleanYoVariable) scs.getVariable(
-            prefixLeft + "FootControlModule", prefixLeft + "IsUnconstrained");
-      swingStartConditionRight = new SingleSupportStartCondition(rightFootInSwing);
-      swingStartConditionLeft = new SingleSupportStartCondition(leftFootInSwing);
       
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         String prefix = fullRobotModel.getFoot(robotSide).getName();
+         @SuppressWarnings("unchecked")
+         final EnumYoVariable<ConstraintType> footConstraintType = (EnumYoVariable<ConstraintType>) scs.getVariable(prefix + "FootControlModule", prefix + "State");
+         swingStartConditions.put(robotSide, new SingleSupportStartCondition(footConstraintType));
+      }
       // simulate for a while
       enable.set(true);
       walk.set(false);
@@ -277,48 +278,24 @@ public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTest
    {
       double delay = swingTime * percentInSwing;
       
-      if(side == RobotSide.LEFT)
-      {
-         pushRobotController.applyForceDelayed(swingStartConditionLeft, delay, forceDirection, magnitude, duration);
-      }
-      else
-      {
-         pushRobotController.applyForceDelayed(swingStartConditionRight, delay, forceDirection, magnitude, duration);
-      }
+      pushRobotController.applyForceDelayed(swingStartConditions.get(side), delay, forceDirection, magnitude, duration);
       
       blockingSimulationRunner.simulateAndBlock(8.0);
    }
 	
 	private class SingleSupportStartCondition implements StateTransitionCondition
    {
-      private final BooleanYoVariable footInSwing;
-      private boolean isInSwing;
+      private final EnumYoVariable<ConstraintType> footConstraintType;
       
-      public SingleSupportStartCondition(BooleanYoVariable footInSwing)
+      public SingleSupportStartCondition(EnumYoVariable<ConstraintType> footConstraintType)
       {
-         this.footInSwing = footInSwing;
+         this.footConstraintType = footConstraintType;
       }
 
       @Override
       public boolean checkCondition()
       {
-         if(isInSwing)
-         {
-            if(!footInSwing.getBooleanValue())
-            {
-               isInSwing = false;
-            }
-            
-            return false;
-         }
-         
-         if(footInSwing.getBooleanValue())
-         {
-            isInSwing = true;
-            return true;
-         }
-         
-         return false;
+         return footConstraintType.getEnumValue() == ConstraintType.SWING;
       }
    }
 }
