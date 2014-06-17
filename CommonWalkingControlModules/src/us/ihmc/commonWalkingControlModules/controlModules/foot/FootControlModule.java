@@ -87,7 +87,7 @@ public class FootControlModule
    private final TouchdownState touchdwonOnHeelState;
    private final OnToesState onToesState;
    
-   public FootControlModule(ContactablePlaneBody contactableBody, int jacobianId, RobotSide robotSide,
+   public FootControlModule(int jacobianId, RobotSide robotSide,
          DoubleTrajectoryGenerator pitchTouchdownTrajectoryGenerator, DoubleProvider maximumTakeoffAngle,
          BooleanYoVariable requestHoldPosition, WalkingControllerParameters walkingControllerParameters,
          
@@ -99,6 +99,7 @@ public class FootControlModule
          YoVariableRegistry parentRegistry)
    {
       // remove and test:
+      contactableBody = momentumBasedController.getContactableFeet().get(robotSide);
       momentumBasedController.setPlaneContactCoefficientOfFriction(contactableBody, 0.8);
       
       RigidBody rigidBody = contactableBody.getRigidBody();
@@ -110,7 +111,6 @@ public class FootControlModule
       if (rigidBody != jacobian.getEndEffector())
          throw new RuntimeException("contactablePlaneBody does not match jacobian end effector!");
       
-      this.contactableBody = contactableBody;
       this.requestedState = EnumYoVariable.create(namePrefix + "RequestedState", "", ConstraintType.class, registry, true);
       this.momentumBasedController = momentumBasedController;
       this.requestHoldPosition = requestHoldPosition;

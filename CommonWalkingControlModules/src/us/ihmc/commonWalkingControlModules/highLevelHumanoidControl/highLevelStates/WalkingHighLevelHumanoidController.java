@@ -532,7 +532,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          DoubleProvider maximumToeOffAngleProvider = walkOnTheEdgesProviders.getMaximumToeOffAngleProvider();
          PositionProvider initialPositionProvider = new FrameBasedPositionSource(referenceFrames.getFootFrame(robotSide));
          
-         FootControlModule footControlModule = new FootControlModule(bipedFoot, jacobianId, robotSide, footTouchdownPitchTrajectoryGenerator,
+         FootControlModule footControlModule = new FootControlModule(jacobianId, robotSide, footTouchdownPitchTrajectoryGenerator,
                  maximumToeOffAngleProvider, requestHoldPosition, walkingControllerParameters, swingTimeCalculationProvider,
                  initialPositionProvider, /*initialVelocityProvider,*/ swingFootFinalPositionProvider, initialOrientationProvider,
                  /*finalDesiredVelocityProvider,*/ finalFootOrientationProvider, trajectoryParametersProvider, dynamicGraphicObjectsListRegistry,
