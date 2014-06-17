@@ -21,7 +21,7 @@ public class TransferTimeCalculationProvider implements DoubleProvider
       return transferTime.getDoubleValue();
    }
    
-   public void setTransferTime()
+   public void updateTransferTime()
    {
       transferTime.set(transferTimeCalculator.getTransferTime());
    }

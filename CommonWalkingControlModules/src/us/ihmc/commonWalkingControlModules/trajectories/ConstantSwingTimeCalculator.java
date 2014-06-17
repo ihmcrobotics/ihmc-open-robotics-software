@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
-public class ConstantSwingTimeCalculator implements SwingTimeCalculator
+public class ConstantSwingTimeCalculator
 {
    private final DoubleYoVariable swingTime;
    
@@ -13,7 +13,7 @@ public class ConstantSwingTimeCalculator implements SwingTimeCalculator
       this.swingTime.set(swingTime);
    }
    
-   public double getSwingTime(double stepLength)
+   public double getSwingTime()
    {
       return swingTime.getDoubleValue();
    }

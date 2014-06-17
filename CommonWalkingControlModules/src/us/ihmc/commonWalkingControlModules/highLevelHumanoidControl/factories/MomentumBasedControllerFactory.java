@@ -29,6 +29,7 @@ import us.ihmc.commonWalkingControlModules.sensors.WrenchBasedFootSwitch;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalculator;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantTransferTimeCalculator;
 import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.TransferTimeCalculationProvider;
 import us.ihmc.graphics3DAdapter.GroundProfile;
 import us.ihmc.robotSide.RobotSide;
@@ -241,10 +242,11 @@ public class MomentumBasedControllerFactory
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the WalkingHighLevelHumanoidController /////////////////////////////////////////////
       double desiredPelvisPitch = 0.0;
-      TransferTimeCalculationProvider transferTimeCalculationProvider = new TransferTimeCalculationProvider("providedTransferTime", registry,
-            transferTimeCalculator, transferTime);
+      TransferTimeCalculationProvider transferTimeCalculationProvider = new TransferTimeCalculationProvider("providedTransferTime", registry, transferTimeCalculator, transferTime);
+      SwingTimeCalculationProvider swingTimeCalculationProvider = new SwingTimeCalculationProvider("providedSwingTime", registry, swingTimeCalculator, swingTime);
+
       WalkingHighLevelHumanoidController walkingBehavior = new WalkingHighLevelHumanoidController(variousWalkingProviders, variousWalkingManagers,
-            footSwitches, centerOfMassHeightTrajectoryGenerator, transferTimeCalculationProvider, desiredPelvisPitch, walkingControllerParameters,
+            footSwitches, centerOfMassHeightTrajectoryGenerator, transferTimeCalculationProvider, swingTimeCalculationProvider, desiredPelvisPitch, walkingControllerParameters,
             iCPBasedLinearMomentumRateOfChangeControlModule, instantaneousCapturePointPlanner, icpAndMomentumBasedController, momentumBasedController, null);
       highLevelBehaviors.add(walkingBehavior);
 
