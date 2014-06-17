@@ -91,7 +91,7 @@ public class FootControlModule
          DoubleTrajectoryGenerator pitchTouchdownTrajectoryGenerator, DoubleProvider maximumTakeoffAngle,
          BooleanYoVariable requestHoldPosition, WalkingControllerParameters walkingControllerParameters,
          
-         DoubleProvider swingTimeProvider, PositionProvider initialPositionProvider,
+         DoubleProvider swingTimeProvider,
          PositionProvider finalPositionProvider, OrientationProvider initialOrientationProvider,
          OrientationProvider finalOrientationProvider, TrajectoryParametersProvider trajectoryParametersProvider,
          
@@ -194,7 +194,7 @@ public class FootControlModule
             robotSide, registry);
       states.add(holdPositionState);
       
-      swingState = new SwingState(swingTimeProvider, initialPositionProvider,
+      swingState = new SwingState(swingTimeProvider,
             finalPositionProvider, initialOrientationProvider,
             finalOrientationProvider, trajectoryParametersProvider,
             yoDesiredPosition, yoDesiredLinearVelocity,
@@ -206,7 +206,7 @@ public class FootControlModule
             isTrajectoryDone, isUnconstrained, dynamicGraphicObjectsListRegistry, walkingControllerParameters);
       states.add(swingState);
       
-      moveStraightState = new MoveStraightState(swingTimeProvider, initialPositionProvider,
+      moveStraightState = new MoveStraightState(swingTimeProvider,
             finalPositionProvider, initialOrientationProvider, finalOrientationProvider,
             yoDesiredPosition, yoDesiredLinearVelocity,
             yoDesiredLinearAcceleration, accelerationControlModule, momentumBasedController,
