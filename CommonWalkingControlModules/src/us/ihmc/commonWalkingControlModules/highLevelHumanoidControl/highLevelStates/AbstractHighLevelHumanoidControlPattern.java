@@ -119,8 +119,8 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
       twistCalculator = momentumBasedController.getTwistCalculator();
       referenceFrames = momentumBasedController.getReferenceFrames();
 
-      feet = momentumBasedController.getContactablePlaneFeet();
-      handPalms = momentumBasedController.getContactablePlaneHands();
+      feet = momentumBasedController.getContactableFeet();
+      handPalms = momentumBasedController.getContactableHands();
 
       this.desiredHeadOrientationProvider = variousWalkingProviders.getDesiredHeadOrientationProvider();
       this.headOrientationManager = variousWalkingManagers.getHeadOrientationManager();

@@ -136,8 +136,8 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       elevator = fullRobotModel.getElevator();
       pelvis = fullRobotModel.getPelvis();
       contactableThighs = momentumBasedController.getContactablePlaneThighs();
-      contactablePelvis = momentumBasedController.getContactablePlanePelvis();
-      contactablePelvisBack = momentumBasedController.getContactablePlanePelvisBack();
+      contactablePelvis = momentumBasedController.getContactablePelvis();
+      contactablePelvisBack = momentumBasedController.getContactablePelvisBack();
 
       this.pelvisDesiredsHandler = variousWalkingManagers.getPelvisDesiredsHandler();
 
