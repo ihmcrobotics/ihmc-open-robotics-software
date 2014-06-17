@@ -550,11 +550,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       {
          FootControlModule swingFootControlModule = footControlModules.get(robotSide.getOppositeSide());
          StopWalkingCondition stopWalkingCondition = new StopWalkingCondition(swingFootControlModule);
-         ResetSwingTrajectoryDoneAction resetSwingTrajectoryDoneAction = new ResetSwingTrajectoryDoneAction(swingFootControlModule);
 
          ArrayList<StateTransitionAction> stopWalkingStateTransitionActions = new ArrayList<StateTransitionAction>();
          stopWalkingStateTransitionActions.add(resetICPTrajectoryAction);
-         stopWalkingStateTransitionActions.add(resetSwingTrajectoryDoneAction);
 
          State<WalkingState> transferState = new DoubleSupportState(robotSide);
          StateTransition<WalkingState> toDoubleSupport = new StateTransition<WalkingState>(doubleSupportState.getStateEnum(), stopWalkingCondition,
@@ -574,7 +572,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          SingleSupportToTransferToCondition doneWithSingleSupportAndTransferToOppositeSideCondition = new SingleSupportToTransferToCondition(sameSideFoot,
                swingFootControlModule);
          StateTransition<WalkingState> toTransferOppositeSide = new StateTransition<WalkingState>(transferStateEnums.get(robotSide.getOppositeSide()),
-               doneWithSingleSupportAndTransferToOppositeSideCondition, resetSwingTrajectoryDoneAction);
+               doneWithSingleSupportAndTransferToOppositeSideCondition);
          singleSupportState.addStateTransition(toTransferOppositeSide);
 
          // Sometimes need transfer to same side when two steps are commanded on the same side. Otherwise, the feet cross over.
@@ -582,7 +580,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          SingleSupportToTransferToCondition doneWithSingleSupportAndTransferToSameSideCondition = new SingleSupportToTransferToCondition(oppositeSideFoot,
                swingFootControlModule);
          StateTransition<WalkingState> toTransferSameSide = new StateTransition<WalkingState>(transferStateEnums.get(robotSide),
-               doneWithSingleSupportAndTransferToSameSideCondition, resetSwingTrajectoryDoneAction);
+               doneWithSingleSupportAndTransferToSameSideCondition);
          singleSupportState.addStateTransition(toTransferSameSide);
 
          stateMachine.addState(singleSupportState);
@@ -1598,21 +1596,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          double minimumSwingTime = swingTimeCalculationProvider.getValue() * minimumSwingFraction.getDoubleValue();
 
          return stateMachine.timeInCurrentState() > minimumSwingTime;
-      }
-   }
-
-   private class ResetSwingTrajectoryDoneAction implements StateTransitionAction
-   {
-      private FootControlModule endEffectorControlModule;
-
-      public ResetSwingTrajectoryDoneAction(FootControlModule endEffectorControlModule)
-      {
-         this.endEffectorControlModule = endEffectorControlModule;
-      }
-
-      public void doTransitionAction()
-      {
-         endEffectorControlModule.resetTrajectoryDone();
       }
    }
 

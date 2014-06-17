@@ -59,8 +59,6 @@ public class FootControlModule
 
    private final DoubleYoVariable jacobianDeterminant;
    private final BooleanYoVariable jacobianDeterminantInRange;
-   private final BooleanYoVariable isUnconstrained;
-   private final BooleanYoVariable isTrajectoryDone;
 
    private final BooleanYoVariable doSingularityEscape;
    private final BooleanYoVariable waitSingularityEscapeBeforeTransitionToNextState;
@@ -132,8 +130,6 @@ public class FootControlModule
       nullspaceMultiplier = new DoubleYoVariable(namePrefix + "NullspaceMultiplier", registry);
 //      nullspaceCalculator = new NullspaceCalculator(jacobian.getNumberOfColumns(), true);
       singularityEscapeNullspaceMultiplier = new DoubleYoVariable(namePrefix + "SingularityEscapeNullspaceMultiplier", registry);
-      isTrajectoryDone = new BooleanYoVariable(namePrefix + "IsTrajectoryDone", registry);
-      isUnconstrained = new BooleanYoVariable(namePrefix + "IsUnconstrained", registry);
       forceFootAccelerateIntoGround = new BooleanYoVariable(namePrefix + "ForceFootAccelerateIntoGround", registry);
       
       yoDesiredLinearVelocity = new YoFrameVector(namePrefix + "DesiredLinearVelocity", worldFrame, registry);
@@ -207,7 +203,7 @@ public class FootControlModule
             jacobianDeterminantInRange, doSingularityEscape,
             forceFootAccelerateIntoGround, legSingularityAndKneeCollapseAvoidanceControlModule,
             robotSide, registry,
-            isTrajectoryDone, isUnconstrained, dynamicGraphicObjectsListRegistry, walkingControllerParameters);
+            dynamicGraphicObjectsListRegistry, walkingControllerParameters);
       states.add(swingState);
       
       moveStraightState = new MoveStraightState(swingTimeProvider,
@@ -217,8 +213,7 @@ public class FootControlModule
             contactableFoot, requestedState, jacobianId, nullspaceMultiplier,
             jacobianDeterminantInRange, doSingularityEscape,
             forceFootAccelerateIntoGround, legSingularityAndKneeCollapseAvoidanceControlModule,
-            robotSide, registry,
-            isTrajectoryDone, isUnconstrained);
+            robotSide, registry);
       states.add(moveStraightState);
 
       setUpStateMachine(states);
@@ -381,16 +376,6 @@ public class FootControlModule
       
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
-   }
-
-   public boolean isTrajectoryDone()
-   {
-      return isTrajectoryDone.getBooleanValue();
-   }
-
-   public void resetTrajectoryDone()
-   {
-      isTrajectoryDone.set(false);
    }
 
    // Used to restart the current state reseting the current state time
