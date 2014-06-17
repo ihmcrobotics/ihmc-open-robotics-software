@@ -15,7 +15,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.M
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootPoseProvider;
 import us.ihmc.commonWalkingControlModules.packets.HandLoadBearingPacket;
 import us.ihmc.commonWalkingControlModules.trajectories.ChangeableConfigurationProvider;
-import us.ihmc.commonWalkingControlModules.trajectories.ConstantConfigurationProvider;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -112,10 +111,8 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         ContactablePlaneBody foot = feet.get(robotSide);
          int jacobianId = legJacobianIds.get(robotSide);
 
-         final ConstantConfigurationProvider currentConfigurationProvider = new ConstantConfigurationProvider(new FramePose(foot.getBodyFrame()));
          final ChangeableConfigurationProvider desiredConfigurationProvider =
             new ChangeableConfigurationProvider(footPoseProvider.getDesiredFootPose(robotSide));
 
@@ -124,7 +121,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
          ConstantDoubleProvider footTrajectoryTimeProvider = new ConstantDoubleProvider(1.0);
          FootControlModule footControlModule = new FootControlModule(jacobianId, robotSide, null, null,
                null, walkingControllerParameters, footTrajectoryTimeProvider, /*null,*/ desiredConfigurationProvider, 
-               currentConfigurationProvider, /*null,*/ desiredConfigurationProvider, null, null,
+               /*null,*/ desiredConfigurationProvider, null, null,
                momentumBasedController, registry);
          
          footControlModule.setSwingGains(100.0, 200.0, 200.0, 1.0, 1.0);

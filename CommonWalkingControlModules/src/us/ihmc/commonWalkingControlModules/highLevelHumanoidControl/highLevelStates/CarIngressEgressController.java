@@ -285,7 +285,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
          FootControlModule footControlModule = new FootControlModule(jacobianId, robotSide, null, onToesTrajectory,
                null, walkingControllerParameters, footTrajectoryTimeProvider, /*null,*/ desiredConfigurationProvider,
-               initialConfigurationProvider, /*null,*/ desiredConfigurationProvider, null, null,
+               /*null,*/ desiredConfigurationProvider, null, null,
                momentumBasedController, registry);
          footControlModule.setSwingGains(100.0, 200.0, 200.0, 1.0, 1.0);
          footControlModule.setHoldGains(100.0, 200.0, 0.1);

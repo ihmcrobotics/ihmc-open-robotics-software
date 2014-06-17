@@ -47,11 +47,9 @@ import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTrajectoryGener
 import us.ihmc.commonWalkingControlModules.trajectories.CoMXYTimeDerivativesData;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalculator;
 import us.ihmc.commonWalkingControlModules.trajectories.ContactStatesAndUpcomingFootstepData;
-import us.ihmc.commonWalkingControlModules.trajectories.CurrentOrientationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.FlatThenPolynomialCoMHeightTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.MaximumConstantJerkFinalToeOffAngleComputer;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.trajectories.OrientationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.SettableOrientationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.SimpleTwoWaypointTrajectoryParameters;
@@ -517,7 +515,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          String sideString = robotSide.getCamelCaseNameForStartOfExpression();
 
-         OrientationProvider initialOrientationProvider = new CurrentOrientationProvider(worldFrame, bipedFoot.getBodyFrame());
          SettableOrientationProvider finalFootOrientationProvider = new SettableOrientationProvider(sideString + "FinalFootOrientation", worldFrame, registry);
          finalFootOrientationProviders.put(robotSide, finalFootOrientationProvider);
 
@@ -531,7 +528,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          
          FootControlModule footControlModule = new FootControlModule(jacobianId, robotSide, footTouchdownPitchTrajectoryGenerator,
                  maximumToeOffAngleProvider, requestHoldPosition, walkingControllerParameters, swingTimeCalculationProvider,
-                 /*initialVelocityProvider,*/ swingFootFinalPositionProvider, initialOrientationProvider,
+                 /*initialVelocityProvider,*/ swingFootFinalPositionProvider,
                  /*finalDesiredVelocityProvider,*/ finalFootOrientationProvider, trajectoryParametersProvider, dynamicGraphicObjectsListRegistry,
                  momentumBasedController, registry);
 

@@ -92,7 +92,7 @@ public class FootControlModule
          BooleanYoVariable requestHoldPosition, WalkingControllerParameters walkingControllerParameters,
          
          DoubleProvider swingTimeProvider,
-         PositionProvider finalPositionProvider, OrientationProvider initialOrientationProvider,
+         PositionProvider finalPositionProvider,
          OrientationProvider finalOrientationProvider, TrajectoryParametersProvider trajectoryParametersProvider,
          
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, MomentumBasedController momentumBasedController,
@@ -195,7 +195,7 @@ public class FootControlModule
       states.add(holdPositionState);
       
       swingState = new SwingState(swingTimeProvider,
-            finalPositionProvider, initialOrientationProvider,
+            finalPositionProvider,
             finalOrientationProvider, trajectoryParametersProvider,
             yoDesiredPosition, yoDesiredLinearVelocity,
             yoDesiredLinearAcceleration, accelerationControlModule, momentumBasedController,
@@ -207,7 +207,7 @@ public class FootControlModule
       states.add(swingState);
       
       moveStraightState = new MoveStraightState(swingTimeProvider,
-            finalPositionProvider, initialOrientationProvider, finalOrientationProvider,
+            finalPositionProvider, finalOrientationProvider,
             yoDesiredPosition, yoDesiredLinearVelocity,
             yoDesiredLinearAcceleration, accelerationControlModule, momentumBasedController,
             contactableBody, requestedState, jacobianId, nullspaceMultiplier,
