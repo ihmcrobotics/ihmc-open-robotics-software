@@ -47,7 +47,6 @@ import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTrajectoryGener
 import us.ihmc.commonWalkingControlModules.trajectories.CoMXYTimeDerivativesData;
 import us.ihmc.commonWalkingControlModules.trajectories.ContactStatesAndUpcomingFootstepData;
 import us.ihmc.commonWalkingControlModules.trajectories.FlatThenPolynomialCoMHeightTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.trajectories.MaximumConstantJerkFinalToeOffAngleComputer;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.SettableOrientationProvider;
@@ -263,9 +262,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          registry);
    private final DoubleYoVariable singularityEscapeNullspaceMultiplierSupportLegLocking = new DoubleYoVariable("singularityEscapeNullspaceMultiplierSupportLegLocking", registry);
 
-   private double referenceTime = 0.22;
-   private MaximumConstantJerkFinalToeOffAngleComputer maximumConstantJerkFinalToeOffAngleComputer = new MaximumConstantJerkFinalToeOffAngleComputer();
-
    private final VariousWalkingProviders variousWalkingProviders;
    private final VariousWalkingManagers variousWalkingManagers;
 
@@ -402,8 +398,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       this.walkOnTheEdgesProviders = new WalkOnTheEdgesProviders(walkingControllerParameters, registry);
       walkOnTheEdgesManager = new WalkOnTheEdgesManager(walkingControllerParameters, walkOnTheEdgesProviders, feet, footControlModules, registry);
       this.centerOfMassHeightTrajectoryGenerator.attachWalkOnToesManager(walkOnTheEdgesManager);
-
-      maximumConstantJerkFinalToeOffAngleComputer.reinitialize(walkOnTheEdgesProviders.getMaximumToeOffAngle(), referenceTime);
 
       setupFootControlModules();
 
@@ -902,8 +896,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             if (walkOnTheEdgesManager.doToeOff())
             {
                double remainingToeOffTime = instantaneousCapturePointPlanner.getEstimatedTimeRemainingForState(yoTime.getDoubleValue());
-               walkOnTheEdgesProviders.setToeOffFinalAngle(maximumConstantJerkFinalToeOffAngleComputer.getMaximumFeasibleConstantJerkFinalToeOffAngle(
-                     walkOnTheEdgesProviders.getToeOffInitialAngle(trailingLeg), remainingToeOffTime));
+               // TODO Determine if we should get rid of all trajectory related stuff for toeoff as it hasn't ever worked
+//               walkOnTheEdgesProviders.computeToeOffFinalAngle(trailingLeg, remainingToeOffTime);
 
                setOnToesContactState(trailingLeg);
                icpAndMomentumBasedController.updateBipedSupportPolygons(bipedSupportPolygons); // need to always update biped support polygons after a change to the contact states
@@ -1314,8 +1308,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          
          updateFootstepParameters();
 
-         double stepPitch = nextFootstep.getOrientationInFrame(worldFrame).getYawPitchRoll()[1];
-         walkOnTheEdgesProviders.setToeOffInitialAngle(swingSide, stepPitch);
+         // TODO Determine if we should get rid of all trajectory related stuff for toeoff as it hasn't ever worked
+//         double stepPitch = nextFootstep.getOrientationInFrame(worldFrame).getYawPitchRoll()[1];
+//         walkOnTheEdgesProviders.setToeOffInitialAngle(swingSide, stepPitch);
 
          TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForSingleSupport(nextFootstep, swingSide);
          instantaneousCapturePointPlanner.initializeSingleSupport(transferToAndNextFootstepsData, yoTime.getDoubleValue());
