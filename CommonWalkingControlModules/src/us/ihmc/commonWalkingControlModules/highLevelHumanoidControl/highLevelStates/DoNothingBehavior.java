@@ -26,7 +26,7 @@ public class DoNothingBehavior extends HighLevelBehavior
       
       for (RobotSide robotSide : RobotSide.values)
       {
-         ContactablePlaneBody contactableFoot = momentumBasedController.getContactablePlaneFeet().get(robotSide);
+         ContactablePlaneBody contactableFoot = momentumBasedController.getContactableFeet().get(robotSide);
          footContactStates.put(robotSide, momentumBasedController.getContactState(contactableFoot));
       }
    }

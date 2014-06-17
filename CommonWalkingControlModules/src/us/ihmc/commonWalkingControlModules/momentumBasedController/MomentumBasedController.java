@@ -282,11 +282,6 @@ public class MomentumBasedController
       }
    }
 
-   public SideDependentList<ContactablePlaneBody> getFeet()
-   {
-      return feet;
-   }
-
    public void getFeetContactStates(ArrayList<PlaneContactState> feetContactStatesToPack)
    {
       for (RobotSide robotSide : RobotSide.values)
@@ -760,19 +755,14 @@ public class MomentumBasedController
       return admissibleDesiredGroundReactionTorque.getFrameVectorCopy();
    }
 
-   public SideDependentList<ContactablePlaneBody> getContactablePlaneFeet()
+   public SideDependentList<ContactablePlaneBody> getContactableFeet()
    {
       return feet;
    }
 
-   public SideDependentList<ContactablePlaneBody> getContactablePlaneHands()
+   public SideDependentList<ContactablePlaneBody> getContactableHands()
    {
       return hands;
-   }
-
-   public ContactablePlaneBody getContactablePlaneHand(RobotSide robotSide)
-   {
-      return hands.get(robotSide);
    }
 
    public SideDependentList<ContactablePlaneBody> getContactablePlaneThighs()
@@ -780,9 +770,14 @@ public class MomentumBasedController
       return thighs;
    }
 
-   public List<FramePoint> getContactPointsCopy(ContactablePlaneBody contactablePlaneBody)
+   public ContactablePlaneBody getContactablePelvis()
    {
-      return yoPlaneContactStates.get(contactablePlaneBody).getContactFramePointsInContactCopy();
+      return pelvis;
+   }
+
+   public ContactablePlaneBody getContactablePelvisBack()
+   {
+      return pelvisBack;
    }
 
    public void getContactPoints(ContactablePlaneBody contactablePlaneBody, List<FramePoint> contactPointListToPack)
@@ -806,16 +801,6 @@ public class MomentumBasedController
       {
          yoPlaneContactStateList.get(i).clear();
       }
-   }
-
-   public ContactablePlaneBody getContactablePlanePelvis()
-   {
-      return pelvis;
-   }
-
-   public ContactablePlaneBody getContactablePlanePelvisBack()
-   {
-      return pelvisBack;
    }
 
    public void setMomentumControlModuleToUse(MomentumControlModuleType momentumControlModuleToUse)
