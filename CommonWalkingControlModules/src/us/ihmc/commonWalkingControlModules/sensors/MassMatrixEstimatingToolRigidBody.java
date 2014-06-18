@@ -125,9 +125,12 @@ public class MassMatrixEstimatingToolRigidBody
       inverseDynamicsCalculator = new InverseDynamicsCalculator(ReferenceFrame.getWorldFrame(), new LinkedHashMap<RigidBody, Wrench>(),
             jointsToIgnore, spatialAccelerationCalculator, twistCalculator, doVelocityTerms);
 
-         
-         
-      RigidBody[] rigidBodies = ScrewTools.computeRigidBodiesInOrder(wristJoint);
+//      RigidBody[] rigidBodies = ScrewTools.computeRigidBodiesInOrder(wristJoint); //deprecated method
+      InverseDynamicsJoint[] wristJointContainer = {wristJoint};
+      RigidBody[] wristJointSuccessorArray = ScrewTools.computeSuccessors(wristJointContainer);
+      InverseDynamicsJoint[] joints = ScrewTools.computeSubtreeJoints(wristJointSuccessorArray[0]);
+      RigidBody[] rigidBodies = ScrewTools.computeConnectedBodies(joints, false);
+      
       this.comCalculator = new CenterOfMassCalculator(rigidBodies, wristFrame);
       calculatedObjectWrench = new Wrench(wristFrame, wristFrame);
       

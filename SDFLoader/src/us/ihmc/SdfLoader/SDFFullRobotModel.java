@@ -124,9 +124,13 @@ public class SDFFullRobotModel implements FullRobotModel
       }
 
 
-      lowerBody = ScrewTools.computeRigidBodiesInOrder(elevator, excludeBodiesForLowerBody);
-      upperBody = ScrewTools.computeRigidBodiesInOrder(pelvis, excludeBodiesForUpperBody);
-
+//      lowerBody = ScrewTools.computeRigidBodiesInOrder(elevator, excludeBodiesForLowerBody); //deprecated method
+      InverseDynamicsJoint[] lowerBodyJoints = ScrewTools.computeSubtreeJoints(elevator);
+      lowerBody = ScrewTools.computeConnectedBodies(lowerBodyJoints, false);
+//    upperBody = ScrewTools.computeRigidBodiesInOrder(pelvis, excludeBodiesForUpperBody); //deprecated method
+      InverseDynamicsJoint[] upperBodyJoints = ScrewTools.computeSubtreeJoints(pelvis);
+      upperBody = ScrewTools.computeConnectedBodies(upperBodyJoints, false);
+      
       
       for(RobotSide robotSide : RobotSide.values)
       {
