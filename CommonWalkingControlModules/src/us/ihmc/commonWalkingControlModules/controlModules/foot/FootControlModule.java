@@ -9,12 +9,13 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlane
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.kinematics.SpatialAccelerationProjector;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
-import us.ihmc.commonWalkingControlModules.trajectories.OrientationProvider;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -35,8 +36,7 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGenerator;
-import com.yobotics.simulationconstructionset.util.trajectory.PositionProvider;
-import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParametersProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParameters;
 
 public class FootControlModule
 {
@@ -86,16 +86,9 @@ public class FootControlModule
    private final TouchdownState touchdwonOnHeelState;
    private final OnToesState onToesState;
    
-   public FootControlModule(RobotSide robotSide,
-         DoubleTrajectoryGenerator pitchTouchdownTrajectoryGenerator, DoubleProvider maximumTakeoffAngle,
-         BooleanYoVariable requestHoldPosition, WalkingControllerParameters walkingControllerParameters,
-         
-         DoubleProvider swingTimeProvider,
-         PositionProvider finalPositionProvider,
-         OrientationProvider finalOrientationProvider, TrajectoryParametersProvider trajectoryParametersProvider,
-         
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, MomentumBasedController momentumBasedController,
-         YoVariableRegistry parentRegistry)
+   public FootControlModule(RobotSide robotSide, DoubleTrajectoryGenerator pitchTouchdownTrajectoryGenerator, DoubleProvider maximumTakeoffAngle,
+         BooleanYoVariable requestHoldPosition, WalkingControllerParameters walkingControllerParameters, DoubleProvider swingTimeProvider,
+         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
    {
       // remove and test:
       contactableFoot = momentumBasedController.getContactableFeet().get(robotSide);
@@ -195,8 +188,6 @@ public class FootControlModule
       states.add(holdPositionState);
       
       swingState = new SwingState(swingTimeProvider,
-            finalPositionProvider,
-            finalOrientationProvider, trajectoryParametersProvider,
             yoDesiredPosition, yoDesiredLinearVelocity,
             yoDesiredLinearAcceleration, accelerationControlModule, momentumBasedController,
             contactableFoot, requestedState, jacobianId, nullspaceMultiplier,
@@ -207,7 +198,6 @@ public class FootControlModule
       states.add(swingState);
       
       moveStraightState = new MoveStraightState(swingTimeProvider,
-            finalPositionProvider, finalOrientationProvider,
             yoDesiredPosition, yoDesiredLinearVelocity,
             yoDesiredLinearAcceleration, accelerationControlModule, momentumBasedController,
             contactableFoot, requestedState, jacobianId, nullspaceMultiplier,
@@ -432,5 +422,15 @@ public class FootControlModule
    public void correctCoMHeightTrajectoryForUnreachableFootStep(CoMHeightTimeDerivativesData comHeightDataToCorrect)
    {
       legSingularityAndKneeCollapseAvoidanceControlModule.correctCoMHeightTrajectoryForUnreachableFootStep(comHeightDataToCorrect, getCurrentConstraintType());
+   }
+
+   public void setFootStep(Footstep footstep, TrajectoryParameters trajectoryParameters)
+   {
+      swingState.setFootstep(footstep, trajectoryParameters);
+   }
+
+   public void setFootPose(FramePose footPose)
+   {
+      moveStraightState.setFootPose(footPose);
    }
 }
