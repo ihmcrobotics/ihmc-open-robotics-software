@@ -92,7 +92,8 @@ public class MassMatrixEstimatingToolRigidBody
    
    
    
-   public MassMatrixEstimatingToolRigidBody(String name, final InverseDynamicsJoint wristJoint, final FullRobotModel fullRobotModel, double gravity, double controlDT, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public MassMatrixEstimatingToolRigidBody(String name, final InverseDynamicsJoint wristJoint, final FullRobotModel fullRobotModel, double gravity, 
+         double controlDT, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       this.registry = new YoVariableRegistry(name);
       this.gravity = gravity;
@@ -101,14 +102,10 @@ public class MassMatrixEstimatingToolRigidBody
       this.handFixedFrame = wristJoint.getSuccessor().getBodyFixedFrame();
       this.wristFrame = wristJoint.getFrameAfterJoint();
       
-      
-      
-      
       this.elevatorFrame = fullRobotModel.getElevatorFrame();
       toolFrame = new PoseReferenceFrame(name + "Frame", elevatorFrame);
       
       RigidBodyInertia inertia = new RigidBodyInertia(toolFrame, new Matrix3d(), 0.0);
-      
       
       this.toolJoint = new SixDoFJoint("toolJoint", fullRobotModel.getElevator(), fullRobotModel.getElevator().getBodyFixedFrame());
       this.toolBody = new RigidBody("toolBody", inertia, toolJoint);
@@ -125,12 +122,8 @@ public class MassMatrixEstimatingToolRigidBody
       inverseDynamicsCalculator = new InverseDynamicsCalculator(ReferenceFrame.getWorldFrame(), new LinkedHashMap<RigidBody, Wrench>(),
             jointsToIgnore, spatialAccelerationCalculator, twistCalculator, doVelocityTerms);
 
-//      RigidBody[] rigidBodies = ScrewTools.computeRigidBodiesInOrder(wristJoint); //deprecated method
-      InverseDynamicsJoint[] wristJointContainer = {wristJoint};
-      RigidBody[] wristJointSuccessorArray = ScrewTools.computeSuccessors(wristJointContainer);
-      InverseDynamicsJoint[] joints = ScrewTools.computeSubtreeJoints(wristJointSuccessorArray[0]);
-      RigidBody[] rigidBodies = ScrewTools.computeConnectedBodies(joints, false);
-      
+      RigidBody[] rigidBodies = ScrewTools.computeSubtreeSuccessors(wristJoint);
+     
       this.comCalculator = new CenterOfMassCalculator(rigidBodies, wristFrame);
       calculatedObjectWrench = new Wrench(wristFrame, wristFrame);
       
