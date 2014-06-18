@@ -7,9 +7,10 @@ public class AtlasArmControllerParameters implements ArmControllerParameters
 {
    private final boolean runningOnRealRobot;
    
-   public static final double[] kp = { 30.0, 30.0, 30.0, 30.0, 30.0, 30.0};
-   public static final double[] ki = { 5.0, 5.0, 5.0, 5.0, 5.0, 5.0 };
-   public static final double[] kd = { 5.0, 5.0, 5.0, 5.0, 5.0, 5.0 };
+   // PD parameters tuned with Ziegler Nichols on June 22, 2014
+   public static final double[] kp = { 3.2, 2.56, 10.4, 10.4, 65.6, 39.2};
+   public static final double[] ki = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+   public static final double[] kd = { 0.1, 0.156, 0.268, 0.321, 0.394, 0.206};
    public static final double[] ff_qd_ds = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
    public static final double[] qerr_maxs = { 10.0, 10.0, 10.0, 10.0, 10.0, 10.0 };
    
