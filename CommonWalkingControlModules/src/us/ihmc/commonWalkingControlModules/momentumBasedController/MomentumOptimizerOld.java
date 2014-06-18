@@ -56,7 +56,8 @@ public abstract class MomentumOptimizerOld implements Lmdif_fcn
 
    public MomentumOptimizerOld(RigidBody elevator, ReferenceFrame centerOfMassFrame, double controlDT, YoVariableRegistry parentRegistry)
    {
-      this.jointsInOrder = ScrewTools.computeJointsInOrder(elevator);
+//      this.jointsInOrder = ScrewTools.computeJointsInOrder(elevator); //deprecated method
+      this.jointsInOrder = ScrewTools.computeSubtreeJoints(elevator); 
       int nDegreesOfFreedom = ScrewTools.computeDegreesOfFreedom(jointsInOrder);
 
       jointVelocitiesMatrix = new DenseMatrix64F(nDegreesOfFreedom, 1);
