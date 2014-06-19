@@ -110,8 +110,12 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
 
    public boolean doToeOffIfPossible()
    {
-      if (!runningOnRealRobot) return true;
-      return false;
+      return !runningOnRealRobot;
+   }
+
+   public double getMaximumToeOffAngle()
+   {
+      return Math.toRadians(45.0);
    }
 
    public boolean doToeTouchdownIfPossible()
@@ -119,9 +123,19 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       return false;
    }
 
+   public double getToeTouchdownAngle()
+   {
+      return Math.toRadians(20.0);
+   }
+
    public boolean doHeelTouchdownIfPossible()
    {
       return false;
+   }
+
+   public double getHeelTouchdownAngle()
+   {
+      return Math.toRadians(-20.0);
    }
 
    public String[] getDefaultHeadOrientationControlJointNames()
