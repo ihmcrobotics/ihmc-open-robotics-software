@@ -5,7 +5,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccele
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.robotSide.RobotSide;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -23,8 +22,6 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
  */
 public abstract class AbstractUnconstrainedState extends AbstractFootControlState
 {
-   private static final boolean CORRECT_SWING_CONSIDERING_JOINT_LIMITS = true;
-
    protected boolean trajectoryWasReplanned;
 
    protected double swingKpXY, swingKpZ, swingKpOrientation, swingZetaXYZ, swingZetaOrientation;
@@ -78,9 +75,6 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
 
       desiredOrientation.setAndChangeFrame(trajectoryOrientation);
 
-      if (CORRECT_SWING_CONSIDERING_JOINT_LIMITS)
-         correctInputsAccordingToJointLimits();
-
       legSingularityAndKneeCollapseAvoidanceControlModule.correctSwingFootTrajectoryForSingularityAvoidance(desiredPosition, desiredLinearVelocity,
             desiredLinearAcceleration);
 
@@ -89,80 +83,6 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       accelerationControlModule.packAcceleration(footAcceleration);
 
       setTaskspaceConstraint(footAcceleration);
-   }
-
-   private final double[] desiredYawPitchRoll = new double[3];
-   private final double epsilon = 1e-3;
-
-   // TODO Pretty much hackish...
-   private void correctInputsAccordingToJointLimits()
-   {
-      ReferenceFrame frameBeforeHipYawJoint = hipYawJoint.getFrameBeforeJoint();
-      desiredOrientation.changeFrame(frameBeforeHipYawJoint);
-      desiredOrientation.getYawPitchRoll(desiredYawPitchRoll);
-      if (desiredYawPitchRoll[0] > hipYawJoint.getJointLimitUpper() - epsilon)
-      {
-         desiredYawPitchRoll[0] = hipYawJoint.getJointLimitUpper();
-         desiredAngularVelocity.changeFrame(frameBeforeHipYawJoint);
-         desiredAngularVelocity.setZ(Math.min(0.0, desiredAngularVelocity.getZ()));
-         desiredAngularAcceleration.changeFrame(frameBeforeHipYawJoint);
-         desiredAngularAcceleration.setZ(Math.min(0.0, desiredAngularVelocity.getZ()));
-      }
-      else if (desiredYawPitchRoll[0] < hipYawJoint.getJointLimitLower() + epsilon)
-      {
-         desiredYawPitchRoll[0] = hipYawJoint.getJointLimitLower();
-         desiredAngularVelocity.changeFrame(frameBeforeHipYawJoint);
-         desiredAngularVelocity.setZ(Math.max(0.0, desiredAngularVelocity.getZ()));
-         desiredAngularAcceleration.changeFrame(frameBeforeHipYawJoint);
-         desiredAngularAcceleration.setZ(Math.max(0.0, desiredAngularVelocity.getZ()));
-      }
-      desiredOrientation.setYawPitchRoll(desiredYawPitchRoll);
-
-      ReferenceFrame frameBeforeAnklePitchJoint = anklePitchJoint.getFrameBeforeJoint();
-      desiredOrientation.changeFrame(frameBeforeAnklePitchJoint);
-      desiredOrientation.getYawPitchRoll(desiredYawPitchRoll);
-      if (desiredYawPitchRoll[1] > anklePitchJoint.getJointLimitUpper() - epsilon)
-      {
-         desiredYawPitchRoll[1] = anklePitchJoint.getJointLimitUpper();
-         desiredAngularVelocity.changeFrame(frameBeforeAnklePitchJoint);
-         desiredAngularVelocity.setY(Math.min(0.0, desiredAngularVelocity.getY()));
-         desiredAngularAcceleration.changeFrame(frameBeforeAnklePitchJoint);
-         desiredAngularAcceleration.setY(Math.min(0.0, desiredAngularVelocity.getY()));
-      }
-      else if (desiredYawPitchRoll[1] < anklePitchJoint.getJointLimitLower() + epsilon)
-      {
-         desiredYawPitchRoll[1] = anklePitchJoint.getJointLimitLower();
-         desiredAngularVelocity.changeFrame(frameBeforeAnklePitchJoint);
-         desiredAngularVelocity.setY(Math.max(0.0, desiredAngularVelocity.getY()));
-         desiredAngularAcceleration.changeFrame(frameBeforeAnklePitchJoint);
-         desiredAngularAcceleration.setY(Math.max(0.0, desiredAngularVelocity.getY()));
-      }
-      desiredOrientation.setYawPitchRoll(desiredYawPitchRoll);
-
-      ReferenceFrame frameBeforeAnkleRollJoint = ankleRollJoint.getFrameBeforeJoint();
-      desiredOrientation.changeFrame(frameBeforeAnkleRollJoint);
-      desiredOrientation.getYawPitchRoll(desiredYawPitchRoll);
-      if (desiredYawPitchRoll[2] > ankleRollJoint.getJointLimitUpper() - epsilon)
-      {
-         desiredYawPitchRoll[2] = ankleRollJoint.getJointLimitUpper();
-         desiredAngularVelocity.changeFrame(frameBeforeAnkleRollJoint);
-         desiredAngularVelocity.setX(Math.min(0.0, desiredAngularVelocity.getX()));
-         desiredAngularAcceleration.changeFrame(frameBeforeAnkleRollJoint);
-         desiredAngularAcceleration.setX(Math.min(0.0, desiredAngularVelocity.getX()));
-      }
-      else if (desiredYawPitchRoll[2] < ankleRollJoint.getJointLimitLower() + epsilon)
-      {
-         desiredYawPitchRoll[2] = ankleRollJoint.getJointLimitLower();
-         desiredAngularVelocity.changeFrame(frameBeforeAnkleRollJoint);
-         desiredAngularVelocity.setX(Math.max(0.0, desiredAngularVelocity.getX()));
-         desiredAngularAcceleration.changeFrame(frameBeforeAnkleRollJoint);
-         desiredAngularAcceleration.setX(Math.max(0.0, desiredAngularVelocity.getX()));
-      }
-      desiredOrientation.setYawPitchRoll(desiredYawPitchRoll);
-
-      desiredOrientation.changeFrame(worldFrame);
-      desiredAngularVelocity.changeFrame(worldFrame);
-      desiredAngularAcceleration.changeFrame(worldFrame);
    }
 
    public void doTransitionOutOfAction()
