@@ -2,8 +2,6 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Vector3d;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
@@ -41,7 +39,6 @@ import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParamete
 import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParametersProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.VectorProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.YoVariableDoubleProvider;
-import com.yobotics.simulationconstructionset.util.trajectory.YoVelocityProvider;
 
 public class SwingState extends AbstractUnconstrainedState
 {
@@ -56,14 +53,13 @@ public class SwingState extends AbstractUnconstrainedState
    private final YoSE3ConfigurationProvider finalConfigurationProvider;
    private final TrajectoryParametersProvider trajectoryParametersProvider = new TrajectoryParametersProvider(new SimpleTwoWaypointTrajectoryParameters());
 
-   public SwingState(DoubleProvider swingTimeProvider, YoFramePoint yoDesiredPosition, YoFrameVector yoDesiredLinearVelocity,
+   public SwingState(DoubleProvider swingTimeProvider, VectorProvider touchdownVelocityProvider, YoFramePoint yoDesiredPosition, YoFrameVector yoDesiredLinearVelocity,
          YoFrameVector yoDesiredLinearAcceleration, RigidBodySpatialAccelerationControlModule accelerationControlModule,
          MomentumBasedController momentumBasedController, ContactablePlaneBody contactableBody, EnumYoVariable<ConstraintType> requestedState, int jacobianId,
          DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape,
          LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule, RobotSide robotSide,
-         YoVariableRegistry registry,
-
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, WalkingControllerParameters walkingControllerParameters)
+         YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+         WalkingControllerParameters walkingControllerParameters)
    {
       super(ConstraintType.SWING, yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration, accelerationControlModule, momentumBasedController,
             contactableBody, requestedState, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape,
@@ -79,8 +75,6 @@ public class SwingState extends AbstractUnconstrainedState
       ArrayList<PositionTrajectoryGenerator> positionTrajectoryGenerators = new ArrayList<PositionTrajectoryGenerator>();
       ArrayList<PositionTrajectoryGenerator> pushRecoveryPositionTrajectoryGenerators = new ArrayList<PositionTrajectoryGenerator>();
 
-      YoVelocityProvider finalVelocityProvider = new YoVelocityProvider(namePrefix + "TouchdownVelocity", ReferenceFrame.getWorldFrame(), registry);
-      finalVelocityProvider.set(new Vector3d(0.0, 0.0, walkingControllerParameters.getDesiredTouchdownVelocity()));
       CommonWalkingReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
       ReferenceFrame footFrame = referenceFrames.getFootFrame(robotSide);
       VectorProvider initialVelocityProvider = new CurrentLinearVelocityProvider(footFrame, momentumBasedController.getFullRobotModel().getFoot(robotSide),
@@ -90,15 +84,15 @@ public class SwingState extends AbstractUnconstrainedState
       OrientationProvider initialOrientationProvider = new CurrentOrientationProvider(worldFrame, footFrame);
 
       PositionTrajectoryGenerator swingTrajectoryGenerator = new TwoWaypointPositionTrajectoryGenerator(namePrefix + "Swing", worldFrame, swingTimeProvider,
-            initialPositionProvider, initialVelocityProvider, finalConfigurationProvider, finalVelocityProvider, trajectoryParametersProvider, registry,
+            initialPositionProvider, initialVelocityProvider, finalConfigurationProvider, touchdownVelocityProvider, trajectoryParametersProvider, registry,
             dynamicGraphicObjectsListRegistry, walkingControllerParameters, visualizeSwingTrajectory);
 
       PositionTrajectoryGenerator touchdownTrajectoryGenerator = new SoftTouchdownPositionTrajectoryGenerator(namePrefix + "Touchdown", worldFrame,
-            finalConfigurationProvider, finalVelocityProvider, swingTimeProvider, registry);
+            finalConfigurationProvider, touchdownVelocityProvider, swingTimeProvider, registry);
 
       PositionTrajectoryGenerator pushRecoverySwingTrajectoryGenerator = new TwoWaypointTrajectoryGeneratorWithPushRecovery(namePrefix + "PushRecoverySwing",
             worldFrame, swingTimeProvider, swingTimeRemaining, initialPositionProvider, initialVelocityProvider, finalConfigurationProvider,
-            finalVelocityProvider, trajectoryParametersProvider, registry, dynamicGraphicObjectsListRegistry, swingTrajectoryGenerator,
+            touchdownVelocityProvider, trajectoryParametersProvider, registry, dynamicGraphicObjectsListRegistry, swingTrajectoryGenerator,
             walkingControllerParameters, visualizeSwingTrajectory);
 
       positionTrajectoryGenerators.add(swingTrajectoryGenerator);
