@@ -47,9 +47,6 @@ import com.yobotics.simulationconstructionset.VariableChangedListener;
 import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.util.GainCalculator;
 import com.yobotics.simulationconstructionset.util.trajectory.ConstantDoubleProvider;
-import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
-import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGenerator;
-import com.yobotics.simulationconstructionset.util.trajectory.ThirdOrderPolynomialTrajectoryGenerator;
 
 public class CarIngressEgressController extends AbstractHighLevelHumanoidControlPattern
 {
@@ -266,24 +263,14 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       {
          ContactablePlaneBody foot = feet.get(robotSide);
 
-         String bodyName = foot.getRigidBody().getName();
-         String sideString = robotSide.getCamelCaseNameForStartOfExpression();
-
          final ChangeableConfigurationProvider initialConfigurationProvider = new ChangeableConfigurationProvider(new FramePose(foot.getBodyFrame()));
          final ChangeableConfigurationProvider desiredConfigurationProvider = new ChangeableConfigurationProvider(new FramePose(foot.getBodyFrame()));
 
          initialFootConfigurationProviders.put(robotSide, initialConfigurationProvider);
          desiredFootConfigurationProviders.put(robotSide, desiredConfigurationProvider);
 
-         DoubleProvider onToesInitialPitchProvider = new ConstantDoubleProvider(0.0);
-         DoubleProvider onToesInitialPitchVelocityProvider = new ConstantDoubleProvider(0.0);
-         DoubleProvider onToesFinalPitchProvider = new ConstantDoubleProvider(Math.PI / 4.0);
-
-         DoubleTrajectoryGenerator onToesTrajectory = new ThirdOrderPolynomialTrajectoryGenerator(sideString + bodyName, onToesInitialPitchProvider,
-                                                         onToesInitialPitchVelocityProvider, onToesFinalPitchProvider, trajectoryTimeProvider, registry);
-
-         FootControlModule footControlModule = new FootControlModule(robotSide, null, onToesTrajectory, walkingControllerParameters,
-               footTrajectoryTimeProvider, null, momentumBasedController, registry);
+         FootControlModule footControlModule = new FootControlModule(robotSide, walkingControllerParameters, footTrajectoryTimeProvider, null,
+               momentumBasedController, registry);
          footControlModule.setSwingGains(100.0, 200.0, 200.0, 1.0, 1.0);
          footControlModule.setHoldGains(100.0, 200.0, 0.1);
          footControlModule.setToeOffGains(0.0, 200.0, 0.1);

@@ -12,7 +12,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
-import us.ihmc.commonWalkingControlModules.trajectories.WalkOnTheEdgesProviders;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
@@ -50,6 +49,7 @@ public class WalkOnTheEdgesManager
 
    private final BooleanYoVariable doToeOffIfPossible = new BooleanYoVariable("doToeOffIfPossible", registry);
    private final BooleanYoVariable doToeOff = new BooleanYoVariable("doToeOff", registry);
+   private final DoubleYoVariable jacobianDeterminantThresholdForToeOff = new DoubleYoVariable("jacobianDeterminantThresholdForToeOff", registry);
 
    private final BooleanYoVariable doToeTouchdownIfPossible = new BooleanYoVariable("doToeTouchdownIfPossible", registry);
    private final BooleanYoVariable doToeTouchdown = new BooleanYoVariable("doToeTouchdown", registry);
@@ -81,7 +81,6 @@ public class WalkOnTheEdgesManager
    private final FramePoint tempTrailingFootPositionInWorld = new FramePoint();
    
    private final WalkingControllerParameters walkingControllerParameters;
-   private final WalkOnTheEdgesProviders walkOnTheEdgesProviders;
 
    private final SideDependentList<DoubleYoVariable> angleFootsWithDesired = new SideDependentList<DoubleYoVariable>(
          new DoubleYoVariable("angleFootWithDesiredLeft", registry), new DoubleYoVariable("angleFootWithDesiredRight", registry));
@@ -96,7 +95,7 @@ public class WalkOnTheEdgesManager
    private final double inPlaceWidth;
    private final double footLength;
 
-   public WalkOnTheEdgesManager(WalkingControllerParameters walkingControllerParameters, WalkOnTheEdgesProviders walkOnTheEdgesProviders,
+   public WalkOnTheEdgesManager(WalkingControllerParameters walkingControllerParameters,
          SideDependentList<? extends ContactablePlaneBody> feet, SideDependentList<FootControlModule> footEndEffectorControlModules,
          YoVariableRegistry parentRegistry)
    {
@@ -106,7 +105,6 @@ public class WalkOnTheEdgesManager
       this.doHeelTouchdownIfPossible.set(walkingControllerParameters.doHeelTouchdownIfPossible());
       
       this.walkingControllerParameters = walkingControllerParameters;
-      this.walkOnTheEdgesProviders = walkOnTheEdgesProviders;
       
       this.feet = feet;
       this.footEndEffectorControlModules = footEndEffectorControlModules;
@@ -121,6 +119,7 @@ public class WalkOnTheEdgesManager
 
       minStepLengthForToeOff.set(Math.max(0.10, footLength));
       minStepHeightForToeOff.set(0.10);
+      jacobianDeterminantThresholdForToeOff.set(0.10);
 
       minStepLengthForToeTouchdown.set(0.40);
 
@@ -206,8 +205,8 @@ public class WalkOnTheEdgesManager
          return;
       }
 
-      FootControlModule trailingEndEffectorControlModule = footEndEffectorControlModules.get(trailingLeg);
-      doToeOff.set(Math.abs(trailingEndEffectorControlModule.getJacobianDeterminant()) < walkOnTheEdgesProviders.getJacobianDeterminantThresholdForToeOff());
+      FootControlModule rearFootControlModule = footEndEffectorControlModules.get(trailingLeg);
+      doToeOff.set(Math.abs(rearFootControlModule.getJacobianDeterminant()) < jacobianDeterminantThresholdForToeOff.getDoubleValue());
    }
 
    private boolean isFrontFootWellPositionedForToeOff(RobotSide trailingLeg, ReferenceFrame frontFootFrame)
@@ -322,9 +321,6 @@ public class WalkOnTheEdgesManager
       {
          boolean frontFootWellPositionedForToeTouchdown = isFrontFootWellPositionedForToeTouchdown(nextTrailingLeg, nextFrontFootFrame);
          doToeTouchdown.set(frontFootWellPositionedForToeTouchdown);
-         
-         if (doToeTouchdown.getBooleanValue())
-            walkOnTheEdgesProviders.setToeTouchdownInitialPitch();
       }
       
       if (!doHeelTouchdownIfPossible.getBooleanValue() || doToeTouchdown.getBooleanValue())
@@ -335,12 +331,9 @@ public class WalkOnTheEdgesManager
       
       boolean frontFootWellPositionedForHeelTouchdown = isFrontFootWellPositionedForHeelTouchdown(nextTrailingLeg, nextFrontFootFrame);
       doHeelTouchdown.set(frontFootWellPositionedForHeelTouchdown);
-      
-      if (doHeelTouchdown.getBooleanValue())
-         walkOnTheEdgesProviders.setHeelTouchdownInitialPitch();
    }
 
-   public Footstep createFootstepForEdgeTouchdown(Footstep footstepToModify)
+   public Footstep createFootstepForEdgeTouchdown(Footstep footstepToModify, double touchdownInitialPitch)
    {
       desiredFootstep = new Footstep(footstepToModify);
       if (!doToeTouchdown.getBooleanValue() && !doHeelTouchdown.getBooleanValue())
@@ -352,7 +345,7 @@ public class WalkOnTheEdgesManager
       FrameOrientation newOrientation = oldPose.getOrientationCopy();
       FramePoint newPosition = oldPose.getPostionCopy();
       double[] yawPitchRoll = newOrientation.getYawPitchRoll();
-      yawPitchRoll[1] += walkOnTheEdgesProviders.getTouchdownInitialPitch();
+      yawPitchRoll[1] += touchdownInitialPitch;
       newOrientation.setYawPitchRoll(yawPitchRoll);
       
       Vector3d ankleToEdge, edgeToAnkle;
@@ -380,35 +373,6 @@ public class WalkOnTheEdgesManager
       PoseReferenceFrame newReferenceFrame = new PoseReferenceFrame("newPoseFrame", newPose);
 
       return Footstep.copyChangePoseFrame(footstepToModify, newReferenceFrame);
-   }
-
-   public void updateTouchdownInitialAngularVelocity()
-   {
-      if (!doToeTouchdown.getBooleanValue() && !doHeelTouchdown.getBooleanValue())
-         return;
-      
-      Vector3d edgeToAnkle;
-      
-      if (doToeTouchdown.getBooleanValue())
-         edgeToAnkle = new Vector3d(-walkingControllerParameters.getFootForwardOffset(), 0.0, walkingControllerParameters.getAnkleHeight());
-      else
-         edgeToAnkle = new Vector3d(walkingControllerParameters.getFootBackwardOffset(), 0.0, walkingControllerParameters.getAnkleHeight());
-      
-      Transform3D rotationByPitch = new Transform3D();
-      rotationByPitch.rotY(-walkOnTheEdgesProviders.getTouchdownInitialPitch());
-      rotationByPitch.transform(edgeToAnkle);
-
-      Vector3d orthonormalToHeelToAnkle = new Vector3d(edgeToAnkle);
-      Transform3D perpendicularRotation = new Transform3D();
-      perpendicularRotation.rotY(-Math.PI / 2.0);
-      perpendicularRotation.transform(orthonormalToHeelToAnkle);
-      orthonormalToHeelToAnkle.normalize();
-
-      Vector3d linearVelocity = new Vector3d();
-      walkOnTheEdgesProviders.getTouchdownDesiredVelocity(linearVelocity);
-      double angularSpeed = -orthonormalToHeelToAnkle.dot(linearVelocity) / edgeToAnkle.length();
-
-      walkOnTheEdgesProviders.setTouchdownInitialAngularVelocityProvider(angularSpeed);
    }
 
    public boolean willLandOnEdge()

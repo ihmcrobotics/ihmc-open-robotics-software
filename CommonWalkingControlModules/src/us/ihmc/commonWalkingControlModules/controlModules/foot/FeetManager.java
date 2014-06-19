@@ -9,7 +9,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Va
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
-import us.ihmc.commonWalkingControlModules.trajectories.WalkOnTheEdgesProviders;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -23,7 +22,6 @@ import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
-import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParameters;
 
 public class FeetManager
@@ -37,7 +35,6 @@ public class FeetManager
    private final SideDependentList<FootControlModule> footControlModules = new SideDependentList<>();
 
    private final WalkOnTheEdgesManager walkOnTheEdgesManager;
-   private final WalkOnTheEdgesProviders walkOnTheEdgesProviders;
 
    private final SideDependentList<? extends ContactablePlaneBody> feet;
 
@@ -74,7 +71,6 @@ public class FeetManager
          DoubleProvider swingTimeProvider, VariousWalkingProviders variousWalkingProviders, SideDependentList<FootSwitchInterface> footSwitches,
          YoVariableRegistry parentRegistry)
    {
-
       double singularityEscapeMultiplierForSwing = walkingControllerParameters.getSwingSingularityEscapeMultiplier();
       singularityEscapeNullspaceMultiplierSwingLeg.set(singularityEscapeMultiplierForSwing);
       singularityEscapeNullspaceMultiplierSupportLeg.set(walkingControllerParameters.getSupportSingularityEscapeMultiplier());
@@ -101,19 +97,16 @@ public class FeetManager
 
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
 
-      this.walkOnTheEdgesProviders = new WalkOnTheEdgesProviders(walkingControllerParameters, registry);
       feet = momentumBasedController.getContactableFeet();
-      walkOnTheEdgesManager = new WalkOnTheEdgesManager(walkingControllerParameters, walkOnTheEdgesProviders, feet, footControlModules, registry);
+      walkOnTheEdgesManager = new WalkOnTheEdgesManager(walkingControllerParameters, feet, footControlModules, registry);
 
       this.footSwitches = footSwitches;
       pelvisZUpFrame = momentumBasedController.getReferenceFrames().getPelvisZUpFrame();
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         DoubleTrajectoryGenerator pitchTouchdownTrajectoryGenerator = walkOnTheEdgesProviders.getFootTouchdownPitchTrajectoryGenerator(robotSide);
-         DoubleProvider maximumTakeoffAngle = walkOnTheEdgesProviders.getMaximumToeOffAngleProvider();
-         FootControlModule footControlModule = new FootControlModule(robotSide, pitchTouchdownTrajectoryGenerator, maximumTakeoffAngle,
-               walkingControllerParameters, swingTimeProvider, dynamicGraphicObjectsListRegistry, momentumBasedController, registry);
+         FootControlModule footControlModule = new FootControlModule(robotSide, walkingControllerParameters, swingTimeProvider,
+               dynamicGraphicObjectsListRegistry, momentumBasedController, registry);
 
          VariableChangedListener swingGainsChangedListener = createEndEffectorGainsChangedListener(footControlModule);
          swingGainsChangedListener.variableChanged(null);

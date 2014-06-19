@@ -54,7 +54,6 @@ import us.ihmc.commonWalkingControlModules.trajectories.SimpleTwoWaypointTraject
 import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.TransferTimeCalculationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointTrajectoryUtils;
-import us.ihmc.commonWalkingControlModules.trajectories.WalkOnTheEdgesProviders;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -92,8 +91,6 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionAction;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
-import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
-import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParameters;
 import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryWaypointGenerationMethod;
 
@@ -274,7 +271,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final DoubleYoVariable swingMaxOrientationJerk = new DoubleYoVariable("swingMaxOrientationJerk", registry);
    private final YoFramePoint2dInPolygonCoordinate doubleSupportDesiredICP;
    private final WalkOnTheEdgesManager walkOnTheEdgesManager;
-   private final WalkOnTheEdgesProviders walkOnTheEdgesProviders;
 
    private final BooleanYoVariable doPrepareManipulationForLocomotion = new BooleanYoVariable("doPrepareManipulationForLocomotion", registry);
 
@@ -377,8 +373,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       coefficientOfFriction.set(0.0); // TODO Remove coefficient of friction from the abstract high level stuff and let the EndEffector controlModule deal with it
 
-      this.walkOnTheEdgesProviders = new WalkOnTheEdgesProviders(walkingControllerParameters, registry);
-      walkOnTheEdgesManager = new WalkOnTheEdgesManager(walkingControllerParameters, walkOnTheEdgesProviders, feet, footControlModules, registry);
+      walkOnTheEdgesManager = new WalkOnTheEdgesManager(walkingControllerParameters, feet, footControlModules, registry);
       this.centerOfMassHeightTrajectoryGenerator.attachWalkOnToesManager(walkOnTheEdgesManager);
 
       setupFootControlModules();
@@ -469,13 +464,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          // TODO: If we know the surface normal here, use it.
          momentumBasedController.setPlaneContactStateFullyConstrained(bipedFoot);
 
-         DoubleTrajectoryGenerator footTouchdownPitchTrajectoryGenerator = walkOnTheEdgesProviders.getFootTouchdownPitchTrajectoryGenerator(robotSide);
-
-         DoubleProvider maximumToeOffAngleProvider = walkOnTheEdgesProviders.getMaximumToeOffAngleProvider();
-         
-         FootControlModule footControlModule = new FootControlModule(robotSide, footTouchdownPitchTrajectoryGenerator, maximumToeOffAngleProvider,
-               walkingControllerParameters, swingTimeCalculationProvider, dynamicGraphicObjectsListRegistry, momentumBasedController,
-               registry);
+         FootControlModule footControlModule = new FootControlModule(robotSide, walkingControllerParameters, swingTimeCalculationProvider,
+               dynamicGraphicObjectsListRegistry, momentumBasedController, registry);
 
          VariableChangedListener swingGainsChangedListener = createEndEffectorGainsChangedListener(footControlModule);
          swingGainsChangedListener.variableChanged(null);
@@ -1231,10 +1221,15 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          walkOnTheEdgesManager.updateEdgeTouchdownStatus(swingSide.getOppositeSide(), nextFootstep);
 
-         if (walkOnTheEdgesManager.willLandOnEdge())
+         FootControlModule swingFootControlModule = footControlModules.get(swingSide);
+         if (walkOnTheEdgesManager.willLandOnHeel())
          {
-            nextFootstep = walkOnTheEdgesManager.createFootstepForEdgeTouchdown(nextFootstep);
-            walkOnTheEdgesManager.updateTouchdownInitialAngularVelocity();
+            nextFootstep = walkOnTheEdgesManager.createFootstepForEdgeTouchdown(nextFootstep, swingFootControlModule.getHeelTouchdownInitialAngle());
+            nextFootstepHasBeenReplaced = true;
+         }
+         else if (walkOnTheEdgesManager.willLandOnToes())
+         {
+            nextFootstep = walkOnTheEdgesManager.createFootstepForEdgeTouchdown(nextFootstep, swingFootControlModule.getToeTouchdownInitialAngle());
             nextFootstepHasBeenReplaced = true;
          }
 
