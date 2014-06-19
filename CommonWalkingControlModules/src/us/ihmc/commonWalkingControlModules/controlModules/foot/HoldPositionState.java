@@ -20,25 +20,21 @@ public class HoldPositionState extends AbstractFootControlState
    private final FrameVector holdPositionNormalContactVector = new FrameVector();
    private final BooleanYoVariable requestHoldPosition;
    private final FrameVector fullyConstrainedNormalContactVector;
-   
-   private double holdZeta, holdKpx, holdKpy, holdKpz, /*holdKdz,*/ holdKpRoll, holdKpPitch, holdKpYaw;
-   
-   public HoldPositionState(YoFramePoint yoDesiredPosition,
-         YoFrameVector yoDesiredLinearVelocity, YoFrameVector yoDesiredLinearAcceleration,
-         RigidBodySpatialAccelerationControlModule accelerationControlModule,
-         MomentumBasedController momentumBasedController, ContactablePlaneBody contactableBody,
-         BooleanYoVariable requestHoldPosition, EnumYoVariable<ConstraintType> requestedState, int jacobianId,
-         DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange,
-         BooleanYoVariable doSingularityEscape, FrameVector fullyConstrainedNormalContactVector,
-         BooleanYoVariable forceFootAccelerateIntoGround, LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule,
-         RobotSide robotSide, YoVariableRegistry registry)
+
+   private double holdZeta, holdKpx, holdKpy, holdKpz, /* holdKdz, */holdKpRoll, holdKpPitch, holdKpYaw;
+
+   public HoldPositionState(YoFramePoint yoDesiredPosition, YoFrameVector yoDesiredLinearVelocity, YoFrameVector yoDesiredLinearAcceleration,
+         RigidBodySpatialAccelerationControlModule accelerationControlModule, MomentumBasedController momentumBasedController,
+         ContactablePlaneBody contactableBody, BooleanYoVariable requestHoldPosition, EnumYoVariable<ConstraintType> requestedState, int jacobianId,
+         DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape,
+         FrameVector fullyConstrainedNormalContactVector,
+         LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule, RobotSide robotSide,
+         YoVariableRegistry registry)
    {
-      super(ConstraintType.HOLD_POSITION, yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration,
-            accelerationControlModule, momentumBasedController, contactableBody, requestedState,
-            jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape,
-            forceFootAccelerateIntoGround, legSingularityAndKneeCollapseAvoidanceControlModule,
-            robotSide, registry);
-   
+      super(ConstraintType.HOLD_POSITION, yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration, accelerationControlModule,
+            momentumBasedController, contactableBody, requestedState, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape,
+            legSingularityAndKneeCollapseAvoidanceControlModule, robotSide, registry);
+
       this.requestHoldPosition = requestHoldPosition;
       this.fullyConstrainedNormalContactVector = fullyConstrainedNormalContactVector;
    }
@@ -55,7 +51,7 @@ public class HoldPositionState extends AbstractFootControlState
 
       desiredOrientation.setToZero(contactableBody.getBodyFrame());
       desiredOrientation.changeFrame(worldFrame);
-      
+
       desiredLinearVelocity.setToZero(worldFrame);
       desiredAngularVelocity.setToZero(worldFrame);
 
@@ -70,15 +66,12 @@ public class HoldPositionState extends AbstractFootControlState
 
       if (!isCoPOnEdge && (requestHoldPosition == null || !requestHoldPosition.getBooleanValue()))
          requestedState.set(ConstraintType.FULL);
-      
+
       yoDesiredPosition.set(desiredPosition);
       accelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity,
             desiredLinearAcceleration, desiredAngularAcceleration, rootBody);
       accelerationControlModule.packAcceleration(footAcceleration);
 
-      if (forceFootAccelerateIntoGround.getBooleanValue())
-         footAcceleration.setLinearPartZ(footAcceleration.getLinearPartZ() + desiredZAccelerationIntoGround);
-      
       setTaskspaceConstraint(footAcceleration);
    }
 
@@ -87,21 +80,20 @@ public class HoldPositionState extends AbstractFootControlState
    {
       yoDesiredPosition.setToNaN();
    }
-   
-   public void setHoldGains(double holdZeta, double holdKpx, double holdKpy,
-         double holdKpz, double holdKdz, double holdKpRoll, double holdKpPitch,
+
+   public void setHoldGains(double holdZeta, double holdKpx, double holdKpy, double holdKpz, double holdKdz, double holdKpRoll, double holdKpPitch,
          double holdKpYaw)
    {
       this.holdZeta = holdZeta;
       this.holdKpx = holdKpx;
       this.holdKpy = holdKpy;
       this.holdKpz = holdKpz;
-//      this.holdKdz = holdKdz;
+      //      this.holdKdz = holdKdz;
       this.holdKpRoll = holdKpRoll;
       this.holdKpPitch = holdKpPitch;
       this.holdKpYaw = holdKpYaw;
    }
-   
+
    private void setHoldPositionStateGains()
    {
       double dxPosition = GainCalculator.computeDerivativeGain(holdKpx, holdZeta);

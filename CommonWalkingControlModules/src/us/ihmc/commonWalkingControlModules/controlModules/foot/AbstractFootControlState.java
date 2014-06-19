@@ -38,17 +38,16 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
 {
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    protected final YoVariableRegistry registry;
-   
+
    // magic numbers:
    protected static final double coefficientOfFriction = 0.8;
    protected static final double minJacobianDeterminant = 0.035;
-   protected static final double desiredZAccelerationIntoGround = 0.0;
    protected static final double EPSILON_POINT_ON_EDGE = 1e-2;
-   
+
    protected final ContactablePlaneBody contactableBody;
    protected final RigidBody rootBody;
    protected final EnumYoVariable<ConstraintType> requestedState;
-   
+
    protected final FramePoint desiredPosition = new FramePoint(worldFrame);
    protected final FrameVector desiredLinearVelocity = new FrameVector(worldFrame);
    protected final FrameVector desiredLinearAcceleration = new FrameVector(worldFrame);
@@ -57,106 +56,101 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
    protected final FrameOrientation desiredOrientation = new FrameOrientation(worldFrame);
    protected final FrameOrientation trajectoryOrientation = new FrameOrientation(worldFrame);
    protected final SpatialAccelerationVector footAcceleration = new SpatialAccelerationVector();
-   
+
    protected final YoFramePoint yoDesiredPosition;
    protected final YoFrameVector yoDesiredLinearVelocity;
    protected final YoFrameVector yoDesiredLinearAcceleration;
-   
+
    protected final RigidBodySpatialAccelerationControlModule accelerationControlModule;
    protected final MomentumBasedController momentumBasedController;
    protected final TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
    protected final int jacobianId;
-   
+
    protected final DenseMatrix64F nullspaceMultipliers = new DenseMatrix64F(0, 1);
    protected final DoubleYoVariable nullspaceMultiplier;
    protected final GeometricJacobian jacobian;
    protected final BooleanYoVariable jacobianDeterminantInRange;
    protected final BooleanYoVariable doSingularityEscape;
    protected final DenseMatrix64F selectionMatrix;
-   protected final BooleanYoVariable forceFootAccelerateIntoGround;
    protected boolean isCoPOnEdge;
    protected FrameLineSegment2d edgeToRotateAbout;
-   
+
    protected final OneDoFJoint hipYawJoint;
    protected final OneDoFJoint kneeJoint;
    protected final OneDoFJoint ankleRollJoint;
    protected final OneDoFJoint anklePitchJoint;
-   
+
    protected final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
-   
-   public AbstractFootControlState(ConstraintType stateEnum, YoFramePoint yoDesiredPosition,
-         YoFrameVector yoDesiredLinearVelocity, YoFrameVector yoDesiredLinearAcceleration,
-         RigidBodySpatialAccelerationControlModule accelerationControlModule,
-         MomentumBasedController momentumBasedController, ContactablePlaneBody contactableBody,
-         EnumYoVariable<ConstraintType> requestedState, int jacobianId,
-         DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange,
-         BooleanYoVariable doSingularityEscape, BooleanYoVariable forceFootAccelerateIntoGround,
-         LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule,
-         RobotSide robotSide, YoVariableRegistry registry)
+
+   public AbstractFootControlState(ConstraintType stateEnum, YoFramePoint yoDesiredPosition, YoFrameVector yoDesiredLinearVelocity,
+         YoFrameVector yoDesiredLinearAcceleration, RigidBodySpatialAccelerationControlModule accelerationControlModule,
+         MomentumBasedController momentumBasedController, ContactablePlaneBody contactableBody, EnumYoVariable<ConstraintType> requestedState, int jacobianId,
+         DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape,
+         LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule, RobotSide robotSide,
+         YoVariableRegistry registry)
    {
       super(stateEnum);
-      
+
       this.registry = registry;
       this.contactableBody = contactableBody;
       this.requestedState = requestedState;
-      
+
       this.yoDesiredPosition = yoDesiredPosition;
       this.yoDesiredLinearVelocity = yoDesiredLinearVelocity;
       this.yoDesiredLinearAcceleration = yoDesiredLinearAcceleration;
-      
+
       this.accelerationControlModule = accelerationControlModule;
       this.momentumBasedController = momentumBasedController;
       this.jacobianId = jacobianId;
-      
+
       this.nullspaceMultiplier = nullspaceMultiplier;
       this.jacobianDeterminantInRange = jacobianDeterminantInRange;
       this.doSingularityEscape = doSingularityEscape;
-      this.forceFootAccelerateIntoGround = forceFootAccelerateIntoGround;
-      
+
       this.legSingularityAndKneeCollapseAvoidanceControlModule = legSingularityAndKneeCollapseAvoidanceControlModule;
-      
+
       this.hipYawJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.HIP_YAW);
       this.kneeJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.KNEE);
       this.ankleRollJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.ANKLE_ROLL);
       this.anklePitchJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.ANKLE_PITCH);
-      
+
       edgeToRotateAbout = new FrameLineSegment2d(contactableBody.getPlaneFrame());
       rootBody = momentumBasedController.getTwistCalculator().getRootBody();
       taskspaceConstraintData.set(rootBody, contactableBody.getRigidBody());
       jacobian = momentumBasedController.getJacobian(jacobianId);
-      
+
       selectionMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
       CommonOps.setIdentity(selectionMatrix);
    }
-   
+
    public abstract void doSpecificAction();
-   
+
    public void doAction()
    {
       legSingularityAndKneeCollapseAvoidanceControlModule.update();
       computeNullspaceMultipliers();
-      
+
       doSpecificAction();
-      
+
       momentumBasedController.setPlaneContactCoefficientOfFriction(contactableBody, coefficientOfFriction);
-      
+
       desiredLinearVelocity.changeFrame(worldFrame);
       yoDesiredLinearVelocity.set(desiredLinearVelocity);
       desiredLinearAcceleration.changeFrame(worldFrame);
       yoDesiredLinearAcceleration.set(desiredLinearAcceleration);
    }
-   
+
    protected void setGains(double kPosition, double kOrientation, double zeta)
    {
       double dPosition = GainCalculator.computeDerivativeGain(kPosition, zeta);
       double dOrientation = GainCalculator.computeDerivativeGain(kOrientation, zeta);
-      
+
       accelerationControlModule.setPositionProportionalGains(kPosition, kPosition, kPosition);
       accelerationControlModule.setPositionDerivativeGains(dPosition, dPosition, dPosition);
       accelerationControlModule.setOrientationProportionalGains(kOrientation, kOrientation, kOrientation);
       accelerationControlModule.setOrientationDerivativeGains(dOrientation, dOrientation, dOrientation);
    }
-   
+
    protected void setTaskspaceConstraint(SpatialAccelerationVector footAcceleration)
    {
       ReferenceFrame bodyFixedFrame = contactableBody.getRigidBody().getBodyFixedFrame();
@@ -165,7 +159,7 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
       taskspaceConstraintData.set(footAcceleration, nullspaceMultipliers, selectionMatrix);
       momentumBasedController.setDesiredSpatialAcceleration(jacobianId, taskspaceConstraintData);
    }
-   
+
    private void computeNullspaceMultipliers()
    {
       double det = jacobian.det();
@@ -190,9 +184,10 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
          doSingularityEscape.set(false);
       }
    }
-   
+
    private final FrameConvexPolygon2d contactPolygon = new FrameConvexPolygon2d();
    private final FrameOrientation currentOrientation = new FrameOrientation();
+
    protected void determineCoPOnEdge()
    {
       FramePoint2d cop = momentumBasedController.getCoP(contactableBody);
