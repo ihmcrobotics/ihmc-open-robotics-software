@@ -275,6 +275,11 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
       return 1.0;
    }
 
+   public double getDefaultDesiredPelvisPitch()
+   {
+      return 0.0;
+   }
+
    public double getKpPelvisOrientation()
    {
       return 100.0;
