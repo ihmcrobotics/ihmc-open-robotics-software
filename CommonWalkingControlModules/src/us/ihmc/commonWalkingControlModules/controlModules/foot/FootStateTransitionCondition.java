@@ -15,7 +15,7 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateTransition
 public class FootStateTransitionCondition implements StateTransitionCondition
 {
    private static final int velocitySignForSingularityEscape = 1;
-   
+
    private final ConstraintType stateEnum;
    private final GeometricJacobian jacobian;
    private final EnumYoVariable<ConstraintType> requestedState;
@@ -25,19 +25,17 @@ public class FootStateTransitionCondition implements StateTransitionCondition
    private final BooleanYoVariable jacobianDeterminantInRange;
    private final BooleanYoVariable waitSingularityEscapeBeforeTransitionToNextState;
 
-   public FootStateTransitionCondition(AbstractFootControlState stateToTransitionTo,
-         GeometricJacobian jacobian, EnumYoVariable<ConstraintType> requestedState,
-         BooleanYoVariable doSingularityEscape, BooleanYoVariable jacobianDeterminantInRange,
-         BooleanYoVariable waitSingularityEscapeBeforeTransitionToNextState)
+   public FootStateTransitionCondition(AbstractFootControlState stateToTransitionTo, GeometricJacobian jacobian, EnumYoVariable<ConstraintType> requestedState,
+         BooleanYoVariable doSingularityEscape, BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable waitSingularityEscapeBeforeTransitionToNextState)
    {
       this.stateEnum = stateToTransitionTo.getStateEnum();
-      
+
       this.jacobian = jacobian;
       this.requestedState = requestedState;
       this.doSingularityEscape = doSingularityEscape;
       this.jacobianDeterminantInRange = jacobianDeterminantInRange;
       this.waitSingularityEscapeBeforeTransitionToNextState = waitSingularityEscapeBeforeTransitionToNextState;
-      
+
       nullspaceCalculator = new NullspaceCalculator(jacobian.getNumberOfColumns(), true);
       jointVelocities = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(jacobian.getJointsInOrder()), 1);
    }
@@ -48,7 +46,7 @@ public class FootStateTransitionCondition implements StateTransitionCondition
 
       if (!transitionRequested)
          return false;
-      
+
       // this should never happen - is already checked in setContactState() in FootControlModule
 //      boolean isTransitionToCurrentState = requestedState.getEnumValue() == getCurrentConstraintType();
 //      
