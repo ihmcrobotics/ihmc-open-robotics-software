@@ -241,13 +241,12 @@ public class MomentumBasedControllerFactory
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the WalkingHighLevelHumanoidController /////////////////////////////////////////////
-      double desiredPelvisPitch = 0.0;
       TransferTimeCalculationProvider transferTimeCalculationProvider = new TransferTimeCalculationProvider("providedTransferTime", registry, transferTimeCalculator, transferTime);
       SwingTimeCalculationProvider swingTimeCalculationProvider = new SwingTimeCalculationProvider("providedSwingTime", registry, swingTimeCalculator, swingTime);
 
       WalkingHighLevelHumanoidController walkingBehavior = new WalkingHighLevelHumanoidController(variousWalkingProviders, variousWalkingManagers,
-            footSwitches, centerOfMassHeightTrajectoryGenerator, transferTimeCalculationProvider, swingTimeCalculationProvider, desiredPelvisPitch, walkingControllerParameters,
-            iCPBasedLinearMomentumRateOfChangeControlModule, instantaneousCapturePointPlanner, icpAndMomentumBasedController, momentumBasedController, null);
+            centerOfMassHeightTrajectoryGenerator, transferTimeCalculationProvider, swingTimeCalculationProvider, walkingControllerParameters, iCPBasedLinearMomentumRateOfChangeControlModule,
+            instantaneousCapturePointPlanner, icpAndMomentumBasedController, momentumBasedController, null);
       highLevelBehaviors.add(walkingBehavior);
 
       /////////////////////////////////////////////////////////////////////////////////////////////

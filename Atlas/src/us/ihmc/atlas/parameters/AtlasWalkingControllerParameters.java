@@ -323,7 +323,12 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       if (!runningOnRealRobot) return 0.8; //1.0;
       return 0.4;
    }
-   
+
+   public double getDefaultDesiredPelvisPitch()
+   {
+      return 0.0;
+   }
+
    public double getKpPelvisOrientation()
    {
       if (!runningOnRealRobot) return 80.0; //100.0;

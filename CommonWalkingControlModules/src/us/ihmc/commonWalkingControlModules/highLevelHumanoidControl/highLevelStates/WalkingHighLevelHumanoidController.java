@@ -281,11 +281,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final BooleanYoVariable doPrepareManipulationForLocomotion = new BooleanYoVariable("doPrepareManipulationForLocomotion", registry);
 
    public WalkingHighLevelHumanoidController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
-         SideDependentList<FootSwitchInterface> footSwitches, CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator,
-         TransferTimeCalculationProvider transferTimeCalculationProvider, SwingTimeCalculationProvider swingTimeCalculationProvider, double desiredPelvisPitch,
-         WalkingControllerParameters walkingControllerParameters, ICPBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule,
-         InstantaneousCapturePointPlanner instantaneousCapturePointPlanner, ICPAndMomentumBasedController icpAndMomentumBasedController,
-         MomentumBasedController momentumBasedController, WalkingStatusReporter walkingStatusReporter)
+         CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator, TransferTimeCalculationProvider transferTimeCalculationProvider,
+         SwingTimeCalculationProvider swingTimeCalculationProvider, WalkingControllerParameters walkingControllerParameters,
+         ICPBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule, InstantaneousCapturePointPlanner instantaneousCapturePointPlanner,
+         ICPAndMomentumBasedController icpAndMomentumBasedController, MomentumBasedController momentumBasedController,
+         WalkingStatusReporter walkingStatusReporter)
    {
       super(variousWalkingProviders, variousWalkingManagers, momentumBasedController, walkingControllerParameters, controllerState);
 
@@ -355,7 +355,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       this.transferTimeCalculationProvider = transferTimeCalculationProvider;
 
       this.mapFromFootstepsToTrajectoryParameters = variousWalkingProviders.getMapFromFootstepsToTrajectoryParameters();
-      this.footSwitches = footSwitches;
+      this.footSwitches = momentumBasedController.getFootSwitches();
       this.icpBasedMomentumRateOfChangeControlModule = momentumRateOfChangeControlModule;
 
       this.instantaneousCapturePointPlanner = instantaneousCapturePointPlanner;
@@ -406,7 +406,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       transferTimeCalculationProvider.updateTransferTime();
 
       stopInDoubleSupporTrajectoryTime.set(0.5);
-      this.userDesiredPelvisPitch.set(desiredPelvisPitch);
+      this.userDesiredPelvisPitch.set(walkingControllerParameters.getDefaultDesiredPelvisPitch());
 
       additionalSwingTimeForICP.set(0.1);
       minimumSwingFraction.set(0.5); // 0.8);
