@@ -829,9 +829,9 @@ public class MomentumBasedController
       return robotJacobianHolder.getJacobian(jacobianId);
    }
 
-   public FootSwitchInterface getFootSwitch(RobotSide robotSide)
+   public SideDependentList<FootSwitchInterface> getFootSwitches()
    {
-      return footSwitches.get(robotSide);
+      return footSwitches;
    }
 
    public DynamicGraphicObjectsListRegistry getDynamicGraphicObjectsListRegistry()

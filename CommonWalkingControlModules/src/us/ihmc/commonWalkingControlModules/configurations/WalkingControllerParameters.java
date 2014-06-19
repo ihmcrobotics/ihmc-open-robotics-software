@@ -78,6 +78,8 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 
    public abstract double getCMPAccelerationLimit();
 
+   public abstract double getDefaultDesiredPelvisPitch();
+
    public abstract double getKpPelvisOrientation();
 
    public abstract double getZetaPelvisOrientation();
