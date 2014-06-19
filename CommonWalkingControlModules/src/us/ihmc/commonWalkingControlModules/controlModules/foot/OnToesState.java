@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
@@ -30,7 +29,6 @@ public class OnToesState extends AbstractOnEdgeState
    private final List<FramePoint> originalContactPointPositions;
 
    private final FramePoint2d singleToeContactPoint;
-   private final EnumMap<ConstraintType, boolean[]> contactStatesMap;
 
    double alphaShrinkFootSizeForToeOff = 0.0;
    double kneeToeOffGain = 0.0;
@@ -43,15 +41,11 @@ public class OnToesState extends AbstractOnEdgeState
          MomentumBasedController momentumBasedController, ContactablePlaneBody contactableBody, EnumYoVariable<ConstraintType> requestedState, int jacobianId,
          DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape,
          LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule, RobotSide robotSide,
-         YoVariableRegistry registry, EnumMap<ConstraintType, boolean[]> contactStatesMap)
+         YoVariableRegistry registry)
    {
-      super(ConstraintType.TOES, maximumTakeoffAngle,
-
-      yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration, accelerationControlModule, momentumBasedController, contactableBody,
-            requestedState, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape,
+      super(ConstraintType.TOES, maximumTakeoffAngle, yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration, accelerationControlModule,
+            momentumBasedController, contactableBody, requestedState, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape,
             legSingularityAndKneeCollapseAvoidanceControlModule, robotSide, registry);
-
-      this.contactStatesMap = contactStatesMap;
 
       singleToeContactPoint = new FramePoint2d(edgeContactPoints.get(0).getReferenceFrame());
       singleToeContactPoint.interpolate(edgeContactPoints.get(0), edgeContactPoints.get(1), 0.5);
@@ -111,10 +105,6 @@ public class OnToesState extends AbstractOnEdgeState
       {
          setGains(0.0, 500.0, 1.0);
       }
-
-      //alphaShrinkFootSizeForToeOff
-
-      momentumBasedController.setPlaneContactState(contactableBody, contactStatesMap.get(ConstraintType.TOES));
    }
 
    public void doTransitionOutOfAction()
