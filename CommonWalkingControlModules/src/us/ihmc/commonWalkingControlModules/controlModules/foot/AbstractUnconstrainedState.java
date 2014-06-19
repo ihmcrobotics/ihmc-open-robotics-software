@@ -24,26 +24,21 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 public abstract class AbstractUnconstrainedState extends AbstractFootControlState
 {
    private static final boolean CORRECT_SWING_CONSIDERING_JOINT_LIMITS = true;
-   
+
    protected boolean trajectoryWasReplanned;
-   
+
    protected double swingKpXY, swingKpZ, swingKpOrientation, swingZetaXYZ, swingZetaOrientation;
-   
-   public AbstractUnconstrainedState(ConstraintType constraintType,
-         YoFramePoint yoDesiredPosition, YoFrameVector yoDesiredLinearVelocity, YoFrameVector yoDesiredLinearAcceleration,
-         RigidBodySpatialAccelerationControlModule accelerationControlModule,
-         MomentumBasedController momentumBasedController, ContactablePlaneBody contactableBody,
-         EnumYoVariable<ConstraintType> requestedState, int jacobianId,
-         DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange,
-         BooleanYoVariable doSingularityEscape, BooleanYoVariable forceFootAccelerateIntoGround,
-         LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule,
-         RobotSide robotSide, YoVariableRegistry registry)
+
+   public AbstractUnconstrainedState(ConstraintType constraintType, YoFramePoint yoDesiredPosition, YoFrameVector yoDesiredLinearVelocity,
+         YoFrameVector yoDesiredLinearAcceleration, RigidBodySpatialAccelerationControlModule accelerationControlModule,
+         MomentumBasedController momentumBasedController, ContactablePlaneBody contactableBody, EnumYoVariable<ConstraintType> requestedState, int jacobianId,
+         DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape,
+         LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule, RobotSide robotSide,
+         YoVariableRegistry registry)
    {
-      super(constraintType, yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration,
-            accelerationControlModule, momentumBasedController, contactableBody,
-            requestedState, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange,
-            doSingularityEscape, forceFootAccelerateIntoGround, legSingularityAndKneeCollapseAvoidanceControlModule,
-            robotSide, registry);
+      super(constraintType, yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration, accelerationControlModule, momentumBasedController,
+            contactableBody, requestedState, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape,
+            legSingularityAndKneeCollapseAvoidanceControlModule, robotSide, registry);
    }
 
    /**
@@ -86,7 +81,8 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       if (CORRECT_SWING_CONSIDERING_JOINT_LIMITS)
          correctInputsAccordingToJointLimits();
 
-      legSingularityAndKneeCollapseAvoidanceControlModule.correctSwingFootTrajectoryForSingularityAvoidance(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
+      legSingularityAndKneeCollapseAvoidanceControlModule.correctSwingFootTrajectoryForSingularityAvoidance(desiredPosition, desiredLinearVelocity,
+            desiredLinearAcceleration);
 
       accelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity,
             desiredLinearAcceleration, desiredAngularAcceleration, rootBody);
@@ -176,9 +172,8 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
 
       accelerationControlModule.reset();
    }
-   
-   public void setSwingGains(double swingKpXY, double swingKpZ, double swingKpOrientation,
-         double swingZetaXYZ, double swingZetaOrientation)
+
+   public void setSwingGains(double swingKpXY, double swingKpZ, double swingKpOrientation, double swingZetaXYZ, double swingZetaOrientation)
    {
       this.swingKpXY = swingKpXY;
       this.swingKpZ = swingKpZ;
@@ -186,9 +181,8 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       this.swingZetaXYZ = swingZetaXYZ;
       this.swingZetaOrientation = swingZetaOrientation;
    }
-   
-   private void setSwingControlGains(double kxyPosition, double kzPosition,
-         double kOrientation, double zetaXYZ, double zetaOrientation)
+
+   private void setSwingControlGains(double kxyPosition, double kzPosition, double kOrientation, double zetaXYZ, double zetaOrientation)
    {
       double dxyPosition = GainCalculator.computeDerivativeGain(kxyPosition, zetaXYZ);
       double dzPosition = GainCalculator.computeDerivativeGain(kzPosition, zetaXYZ);

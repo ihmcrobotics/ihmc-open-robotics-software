@@ -16,26 +16,20 @@ import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGe
 
 public class TouchdownState extends AbstractOnEdgeState
 {
-   public TouchdownState(ConstraintType constraintType,
-         DoubleTrajectoryGenerator pitchTouchdownTrajectoryGenerator,
-         
-         YoFramePoint yoDesiredPosition, YoFrameVector yoDesiredLinearVelocity, YoFrameVector yoDesiredLinearAcceleration,
-         RigidBodySpatialAccelerationControlModule accelerationControlModule,
-         MomentumBasedController momentumBasedController, ContactablePlaneBody contactableBody,
-         EnumYoVariable<ConstraintType> requestedState, int jacobianId, 
-         DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange,
-         BooleanYoVariable doSingularityEscape, BooleanYoVariable forceFootAccelerateIntoGround,
-         LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule,
-         RobotSide robotSide, YoVariableRegistry registry)
+   public TouchdownState(ConstraintType constraintType, DoubleTrajectoryGenerator pitchTouchdownTrajectoryGenerator,
+
+   YoFramePoint yoDesiredPosition, YoFrameVector yoDesiredLinearVelocity, YoFrameVector yoDesiredLinearAcceleration,
+         RigidBodySpatialAccelerationControlModule accelerationControlModule, MomentumBasedController momentumBasedController,
+         ContactablePlaneBody contactableBody, EnumYoVariable<ConstraintType> requestedState, int jacobianId, DoubleYoVariable nullspaceMultiplier,
+         BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape,
+         LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule, RobotSide robotSide,
+         YoVariableRegistry registry)
    {
       super(constraintType, pitchTouchdownTrajectoryGenerator,
-            
-            yoDesiredPosition, yoDesiredLinearVelocity,
-            yoDesiredLinearAcceleration, accelerationControlModule, momentumBasedController,
-            contactableBody, requestedState, jacobianId, nullspaceMultiplier,
-            jacobianDeterminantInRange, doSingularityEscape,
-            forceFootAccelerateIntoGround, legSingularityAndKneeCollapseAvoidanceControlModule,
-            robotSide, registry);
+
+      yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration, accelerationControlModule, momentumBasedController, contactableBody,
+            requestedState, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape,
+            legSingularityAndKneeCollapseAvoidanceControlModule, robotSide, registry);
    }
 
    @Override

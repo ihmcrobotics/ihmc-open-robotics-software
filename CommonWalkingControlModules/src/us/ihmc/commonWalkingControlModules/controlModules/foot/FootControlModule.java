@@ -68,7 +68,6 @@ public class FootControlModule
    
    private final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
 
-   private final BooleanYoVariable forceFootAccelerateIntoGround;
    private final BooleanYoVariable requestHoldPosition;
    private final FrameVector fullyConstrainedNormalContactVector;
    
@@ -129,7 +128,6 @@ public class FootControlModule
       nullspaceMultiplier = new DoubleYoVariable(namePrefix + "NullspaceMultiplier", registry);
       //      nullspaceCalculator = new NullspaceCalculator(jacobian.getNumberOfColumns(), true);
       singularityEscapeNullspaceMultiplier = new DoubleYoVariable(namePrefix + "SingularityEscapeNullspaceMultiplier", registry);
-      forceFootAccelerateIntoGround = new BooleanYoVariable(namePrefix + "ForceFootAccelerateIntoGround", registry);
 
       yoDesiredLinearVelocity = new YoFrameVector(namePrefix + "DesiredLinearVelocity", worldFrame, registry);
       yoDesiredLinearAcceleration = new YoFrameVector(namePrefix + "DesiredLinearAcceleration", worldFrame, registry);
@@ -155,41 +153,41 @@ public class FootControlModule
       List<AbstractFootControlState> states = new ArrayList<AbstractFootControlState>();
       touchdownOnToesState = new TouchdownState(ConstraintType.TOES_TOUCHDOWN, pitchTouchdownTrajectoryGenerator, yoDesiredPosition, yoDesiredLinearVelocity,
             yoDesiredLinearAcceleration, accelerationControlModule, momentumBasedController, contactableFoot, requestedState, jacobianId, nullspaceMultiplier,
-            jacobianDeterminantInRange, doSingularityEscape, forceFootAccelerateIntoGround, legSingularityAndKneeCollapseAvoidanceControlModule, robotSide,
+            jacobianDeterminantInRange, doSingularityEscape, legSingularityAndKneeCollapseAvoidanceControlModule, robotSide,
             registry);
       states.add(touchdownOnToesState);
 
       touchdwonOnHeelState = new TouchdownState(ConstraintType.HEEL_TOUCHDOWN, pitchTouchdownTrajectoryGenerator, yoDesiredPosition, yoDesiredLinearVelocity,
             yoDesiredLinearAcceleration, accelerationControlModule, momentumBasedController, contactableFoot, requestedState, jacobianId, nullspaceMultiplier,
-            jacobianDeterminantInRange, doSingularityEscape, forceFootAccelerateIntoGround, legSingularityAndKneeCollapseAvoidanceControlModule, robotSide,
+            jacobianDeterminantInRange, doSingularityEscape, legSingularityAndKneeCollapseAvoidanceControlModule, robotSide,
             registry);
       states.add(touchdwonOnHeelState);
 
       onToesState = new OnToesState(maximumTakeoffAngle, yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration, accelerationControlModule,
             momentumBasedController, contactableFoot, requestedState, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape,
-            forceFootAccelerateIntoGround, legSingularityAndKneeCollapseAvoidanceControlModule, robotSide, registry, contactStatesMap);
+            legSingularityAndKneeCollapseAvoidanceControlModule, robotSide, registry, contactStatesMap);
       states.add(onToesState);
 
       states.add(new FullyConstrainedState(yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration, accelerationControlModule,
             momentumBasedController, contactableFoot, requestHoldPosition, requestedState, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange,
-            doSingularityEscape, fullyConstrainedNormalContactVector, forceFootAccelerateIntoGround, doFancyOnToesControl,
+            doSingularityEscape, fullyConstrainedNormalContactVector, doFancyOnToesControl,
             legSingularityAndKneeCollapseAvoidanceControlModule, robotSide, registry));
 
       holdPositionState = new HoldPositionState(yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration, accelerationControlModule,
             momentumBasedController, contactableFoot, requestHoldPosition, requestedState, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange,
-            doSingularityEscape, fullyConstrainedNormalContactVector, forceFootAccelerateIntoGround, legSingularityAndKneeCollapseAvoidanceControlModule,
+            doSingularityEscape, fullyConstrainedNormalContactVector, legSingularityAndKneeCollapseAvoidanceControlModule,
             robotSide, registry);
       states.add(holdPositionState);
 
       swingState = new SwingState(swingTimeProvider, yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration, accelerationControlModule,
             momentumBasedController, contactableFoot, requestedState, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape,
-            forceFootAccelerateIntoGround, legSingularityAndKneeCollapseAvoidanceControlModule, robotSide, registry, dynamicGraphicObjectsListRegistry,
+            legSingularityAndKneeCollapseAvoidanceControlModule, robotSide, registry, dynamicGraphicObjectsListRegistry,
             walkingControllerParameters);
       states.add(swingState);
 
       moveStraightState = new MoveStraightState(swingTimeProvider, yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration,
             accelerationControlModule, momentumBasedController, contactableFoot, requestedState, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange,
-            doSingularityEscape, forceFootAccelerateIntoGround, legSingularityAndKneeCollapseAvoidanceControlModule, robotSide, registry);
+            doSingularityEscape, legSingularityAndKneeCollapseAvoidanceControlModule, robotSide, registry);
       states.add(moveStraightState);
 
       setUpStateMachine(states);
@@ -293,11 +291,6 @@ public class FootControlModule
    public boolean isInSingularityNeighborhood()
    {
       return jacobianDeterminantInRange.getBooleanValue();
-   }
-
-   public void forceConstrainedFootToAccelerateIntoGround(boolean accelerateIntoGround)
-   {
-      forceFootAccelerateIntoGround.set(accelerateIntoGround);
    }
 
    public void setParameters(double singularityEscapeNullspaceMultiplier)

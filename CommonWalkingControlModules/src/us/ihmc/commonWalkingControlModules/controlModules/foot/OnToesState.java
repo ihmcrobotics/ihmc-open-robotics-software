@@ -28,50 +28,42 @@ public class OnToesState extends AbstractOnEdgeState
    private final YoPlaneContactState contactState = momentumBasedController.getContactState(contactableBody);
    private final List<YoContactPoint> contactPoints = contactState.getContactPoints();
    private final List<FramePoint> originalContactPointPositions;
-   
+
    private final FramePoint2d singleToeContactPoint;
    private final EnumMap<ConstraintType, boolean[]> contactStatesMap;
-   
+
    double alphaShrinkFootSizeForToeOff = 0.0;
    double kneeToeOffGain = 0.0;
    double kneeToeOffQDesired = 0.7;
    double kneeToeOffDamp = 0.0;
    double controlledKneeToeOffQdd;
 
-   public OnToesState(DoubleProvider maximumTakeoffAngle,
-         
-         YoFramePoint yoDesiredPosition, YoFrameVector yoDesiredLinearVelocity, YoFrameVector yoDesiredLinearAcceleration,
-         RigidBodySpatialAccelerationControlModule accelerationControlModule,
-         MomentumBasedController momentumBasedController, ContactablePlaneBody contactableBody,
-         EnumYoVariable<ConstraintType> requestedState, int jacobianId, 
-         DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange,
-         BooleanYoVariable doSingularityEscape, BooleanYoVariable forceFootAccelerateIntoGround,
-         LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule,
-         RobotSide robotSide, YoVariableRegistry registry,
-         EnumMap<ConstraintType, boolean[]> contactStatesMap)
+   public OnToesState(DoubleProvider maximumTakeoffAngle, YoFramePoint yoDesiredPosition, YoFrameVector yoDesiredLinearVelocity,
+         YoFrameVector yoDesiredLinearAcceleration, RigidBodySpatialAccelerationControlModule accelerationControlModule,
+         MomentumBasedController momentumBasedController, ContactablePlaneBody contactableBody, EnumYoVariable<ConstraintType> requestedState, int jacobianId,
+         DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape,
+         LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule, RobotSide robotSide,
+         YoVariableRegistry registry, EnumMap<ConstraintType, boolean[]> contactStatesMap)
    {
       super(ConstraintType.TOES, maximumTakeoffAngle,
-            
-            yoDesiredPosition, yoDesiredLinearVelocity,
-            yoDesiredLinearAcceleration, accelerationControlModule, momentumBasedController,
-            contactableBody, requestedState, jacobianId, nullspaceMultiplier,
-            jacobianDeterminantInRange, doSingularityEscape,
-            forceFootAccelerateIntoGround, legSingularityAndKneeCollapseAvoidanceControlModule,
-            robotSide, registry);
+
+      yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration, accelerationControlModule, momentumBasedController, contactableBody,
+            requestedState, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape,
+            legSingularityAndKneeCollapseAvoidanceControlModule, robotSide, registry);
 
       this.contactStatesMap = contactStatesMap;
-      
+
       singleToeContactPoint = new FramePoint2d(edgeContactPoints.get(0).getReferenceFrame());
       singleToeContactPoint.interpolate(edgeContactPoints.get(0), edgeContactPoints.get(1), 0.5);
-      
+
       originalContactPointPositions = new ArrayList<FramePoint>(contactPoints.size());
       copyOriginalContactPointPositions();
    }
-   
+
    public void doSpecificAction()
    {
       super.doSpecificAction();
-      
+
       shrinkFootSizeToMidToe();
 
       // TODO Hack to do singularity escape since the motion constraint handler doesn't handle it with the given selection matrix 
@@ -94,7 +86,7 @@ public class OnToesState extends AbstractOnEdgeState
          contactPoints.get(i).getPosition().set(originalContactPointPositions.get(i));
       }
    }
-   
+
    private void shrinkFootSizeToMidToe()
    {
       double alphaShrink = alphaShrinkFootSizeForToeOff;
@@ -105,7 +97,7 @@ public class OnToesState extends AbstractOnEdgeState
          position.setY(alphaShrink * position.getY() + (1.0 - alphaShrink) * singleToeContactPoint.getY());
       }
    }
-   
+
    @Override
    public void doTransitionIntoAction()
    {
@@ -119,9 +111,9 @@ public class OnToesState extends AbstractOnEdgeState
       {
          setGains(0.0, 500.0, 1.0);
       }
-      
+
       //alphaShrinkFootSizeForToeOff
-      
+
       momentumBasedController.setPlaneContactState(contactableBody, contactStatesMap.get(ConstraintType.TOES));
    }
 
@@ -130,10 +122,10 @@ public class OnToesState extends AbstractOnEdgeState
       super.doTransitionOutOfAction();
 
       resetContactPointPositions();
-      
+
       controlledKneeToeOffQdd = 0.0;
    }
-   
+
    private void setOnToesFreeMotionGains()
    {
       double kPosition = 0.0;

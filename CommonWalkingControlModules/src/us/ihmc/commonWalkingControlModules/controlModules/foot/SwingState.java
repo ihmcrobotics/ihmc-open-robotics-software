@@ -60,14 +60,13 @@ public class SwingState extends AbstractUnconstrainedState
          YoFrameVector yoDesiredLinearAcceleration, RigidBodySpatialAccelerationControlModule accelerationControlModule,
          MomentumBasedController momentumBasedController, ContactablePlaneBody contactableBody, EnumYoVariable<ConstraintType> requestedState, int jacobianId,
          DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape,
-         BooleanYoVariable forceFootAccelerateIntoGround,
          LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule, RobotSide robotSide,
          YoVariableRegistry registry,
 
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, WalkingControllerParameters walkingControllerParameters)
    {
       super(ConstraintType.SWING, yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration, accelerationControlModule, momentumBasedController,
-            contactableBody, requestedState, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, forceFootAccelerateIntoGround,
+            contactableBody, requestedState, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape,
             legSingularityAndKneeCollapseAvoidanceControlModule, robotSide, registry);
 
       RigidBody rigidBody = contactableBody.getRigidBody();
