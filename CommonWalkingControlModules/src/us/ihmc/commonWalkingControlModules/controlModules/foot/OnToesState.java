@@ -9,7 +9,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
-import us.ihmc.commonWalkingControlModules.kinematics.SpatialAccelerationProjector;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -49,8 +48,6 @@ public class OnToesState extends AbstractOnEdgeState
          BooleanYoVariable doSingularityEscape, BooleanYoVariable forceFootAccelerateIntoGround,
          LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule,
          RobotSide robotSide, YoVariableRegistry registry,
-         
-         SpatialAccelerationProjector spatialAccelerationProjector,
          EnumMap<ConstraintType, boolean[]> contactStatesMap)
    {
       super(ConstraintType.TOES, maximumTakeoffAngle,
@@ -60,9 +57,7 @@ public class OnToesState extends AbstractOnEdgeState
             contactableBody, requestedState, jacobianId, nullspaceMultiplier,
             jacobianDeterminantInRange, doSingularityEscape,
             forceFootAccelerateIntoGround, legSingularityAndKneeCollapseAvoidanceControlModule,
-            robotSide, registry,
-            
-            spatialAccelerationProjector);
+            robotSide, registry);
 
       this.contactStatesMap = contactStatesMap;
       

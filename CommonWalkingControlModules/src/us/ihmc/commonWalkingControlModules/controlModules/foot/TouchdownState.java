@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
-import us.ihmc.commonWalkingControlModules.kinematics.SpatialAccelerationProjector;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.robotSide.RobotSide;
 
@@ -27,9 +26,7 @@ public class TouchdownState extends AbstractOnEdgeState
          DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange,
          BooleanYoVariable doSingularityEscape, BooleanYoVariable forceFootAccelerateIntoGround,
          LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule,
-         RobotSide robotSide, YoVariableRegistry registry,
-         
-         SpatialAccelerationProjector spatialAccelerationProjector)
+         RobotSide robotSide, YoVariableRegistry registry)
    {
       super(constraintType, pitchTouchdownTrajectoryGenerator,
             
@@ -38,9 +35,7 @@ public class TouchdownState extends AbstractOnEdgeState
             contactableBody, requestedState, jacobianId, nullspaceMultiplier,
             jacobianDeterminantInRange, doSingularityEscape,
             forceFootAccelerateIntoGround, legSingularityAndKneeCollapseAvoidanceControlModule,
-            robotSide, registry,
-            
-            spatialAccelerationProjector);
+            robotSide, registry);
    }
 
    @Override
