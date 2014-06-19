@@ -165,7 +165,7 @@ public class FootControlModule
 
       onToesState = new OnToesState(maximumTakeoffAngle, yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration, accelerationControlModule,
             momentumBasedController, contactableFoot, requestedState, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape,
-            legSingularityAndKneeCollapseAvoidanceControlModule, robotSide, registry, contactStatesMap);
+            legSingularityAndKneeCollapseAvoidanceControlModule, robotSide, registry);
       states.add(onToesState);
 
       states.add(new FullyConstrainedState(yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration, accelerationControlModule,
