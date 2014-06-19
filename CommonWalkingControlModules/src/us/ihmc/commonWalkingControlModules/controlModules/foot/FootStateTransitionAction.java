@@ -11,16 +11,15 @@ public class FootStateTransitionAction implements StateTransitionAction
    EnumYoVariable<ConstraintType> requestedState;
    private final BooleanYoVariable doSingularityEscape;
    private final BooleanYoVariable waitSingularityEscapeBeforeTransitionToNextState;
-   
-   public FootStateTransitionAction(EnumYoVariable<ConstraintType> requestedState,
-         BooleanYoVariable doSingularityEscape,
+
+   public FootStateTransitionAction(EnumYoVariable<ConstraintType> requestedState, BooleanYoVariable doSingularityEscape,
          BooleanYoVariable waitSingularityEscapeBeforeTransitionToNextState)
    {
       this.requestedState = requestedState;
       this.doSingularityEscape = doSingularityEscape;
       this.waitSingularityEscapeBeforeTransitionToNextState = waitSingularityEscapeBeforeTransitionToNextState;
    }
-   
+
    public void doTransitionAction()
    {
       requestedState.set(null);
