@@ -17,7 +17,6 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.VariableChangedListener;
 import com.yobotics.simulationconstructionset.YoVariable;
@@ -36,8 +35,6 @@ public class FeetManager
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final SideDependentList<FootControlModule> footControlModules = new SideDependentList<>();
-
-   private final SideDependentList<BooleanYoVariable> requestSupportFootToHoldPosition = new SideDependentList<BooleanYoVariable>();
 
    private final WalkOnTheEdgesManager walkOnTheEdgesManager;
    private final WalkOnTheEdgesProviders walkOnTheEdgesProviders;
@@ -113,14 +110,9 @@ public class FeetManager
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
-
-         BooleanYoVariable requestHoldPosition = new BooleanYoVariable(sidePrefix + "RequestSupportFootToHoldPosition", registry);
-         requestSupportFootToHoldPosition.put(robotSide, requestHoldPosition);
-
          DoubleTrajectoryGenerator pitchTouchdownTrajectoryGenerator = walkOnTheEdgesProviders.getFootTouchdownPitchTrajectoryGenerator(robotSide);
          DoubleProvider maximumTakeoffAngle = walkOnTheEdgesProviders.getMaximumToeOffAngleProvider();
-         FootControlModule footControlModule = new FootControlModule(robotSide, pitchTouchdownTrajectoryGenerator, maximumTakeoffAngle, requestHoldPosition,
+         FootControlModule footControlModule = new FootControlModule(robotSide, pitchTouchdownTrajectoryGenerator, maximumTakeoffAngle,
                walkingControllerParameters, swingTimeProvider, dynamicGraphicObjectsListRegistry, momentumBasedController, registry);
 
          VariableChangedListener swingGainsChangedListener = createEndEffectorGainsChangedListener(footControlModule);

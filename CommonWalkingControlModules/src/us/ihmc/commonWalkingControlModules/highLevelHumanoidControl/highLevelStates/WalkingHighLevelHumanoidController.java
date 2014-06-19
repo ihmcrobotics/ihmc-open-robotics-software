@@ -174,8 +174,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final YoFramePoint2d finalDesiredICPInWorld = new YoFramePoint2d("finalDesiredICPInWorld", "", worldFrame, registry);
 
    private final SideDependentList<FootSwitchInterface> footSwitches;
-   private final DoubleYoVariable footLoadThresholdToHoldPosition = new DoubleYoVariable("footLoadThresholdToHoldPosition", registry);
-   private final SideDependentList<BooleanYoVariable> requestSupportFootToHoldPosition = new SideDependentList<BooleanYoVariable>();
 
    private final DoubleYoVariable maxICPErrorBeforeSingleSupport = new DoubleYoVariable("maxICPErrorBeforeSingleSupport", registry);
 
@@ -423,8 +421,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       moveICPAwayAtEndOfSwingDistance.set(0.04); // 0.08);
       singleSupportTimeLeftBeforeShift.set(0.26);
 
-      footLoadThresholdToHoldPosition.set(0.2);
-
       if (DESIREDICP_FROM_POLYGON_COORDINATE)
       {
          doubleSupportDesiredICP = new YoFramePoint2dInPolygonCoordinate("desiredICP", registry);
@@ -439,13 +435,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private void setupFootControlModules()
    {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         BooleanYoVariable requestHoldPosition = new BooleanYoVariable(robotSide.getCamelCaseNameForStartOfExpression() + "RequestSupportFootToHoldPosition",
-               registry);
-         requestSupportFootToHoldPosition.put(robotSide, requestHoldPosition);
-      }
-
       // TODO: Pull these up to a higher level.
       // TODO: Move these to DRCRobotWalkingControlParameters:
 
@@ -480,16 +469,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          // TODO: If we know the surface normal here, use it.
          momentumBasedController.setPlaneContactStateFullyConstrained(bipedFoot);
 
-         String sideString = robotSide.getCamelCaseNameForStartOfExpression();
-
          DoubleTrajectoryGenerator footTouchdownPitchTrajectoryGenerator = walkOnTheEdgesProviders.getFootTouchdownPitchTrajectoryGenerator(robotSide);
-
-         BooleanYoVariable requestHoldPosition = requestSupportFootToHoldPosition.get(robotSide);
 
          DoubleProvider maximumToeOffAngleProvider = walkOnTheEdgesProviders.getMaximumToeOffAngleProvider();
          
          FootControlModule footControlModule = new FootControlModule(robotSide, footTouchdownPitchTrajectoryGenerator, maximumToeOffAngleProvider,
-               requestHoldPosition, walkingControllerParameters, swingTimeCalculationProvider, dynamicGraphicObjectsListRegistry, momentumBasedController,
+               walkingControllerParameters, swingTimeCalculationProvider, dynamicGraphicObjectsListRegistry, momentumBasedController,
                registry);
 
          VariableChangedListener swingGainsChangedListener = createEndEffectorGainsChangedListener(footControlModule);
@@ -1738,11 +1723,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    // FIXME: don't override
    private void doMotionControlInternal()
    {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         requestSupportFootToHoldPosition.get(robotSide).set(footSwitches.get(robotSide).computeFootLoadPercentage() < footLoadThresholdToHoldPosition.getDoubleValue());
-      }
-
       momentumBasedController.doPrioritaryControl();
       super.callUpdatables();
 

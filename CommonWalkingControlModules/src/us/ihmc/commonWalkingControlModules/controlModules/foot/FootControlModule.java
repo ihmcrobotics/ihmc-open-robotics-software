@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalcul
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.kinematics.SpatialAccelerationProjector;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
@@ -86,8 +87,11 @@ public class FootControlModule
    private final TouchdownState touchdwonOnHeelState;
    private final OnToesState onToesState;
    
+   private final FootSwitchInterface footSwitch;
+   private final DoubleYoVariable footLoadThresholdToHoldPosition;
+   
    public FootControlModule(RobotSide robotSide, DoubleTrajectoryGenerator pitchTouchdownTrajectoryGenerator, DoubleProvider maximumTakeoffAngle,
-         BooleanYoVariable requestHoldPosition, WalkingControllerParameters walkingControllerParameters, DoubleProvider swingTimeProvider,
+         WalkingControllerParameters walkingControllerParameters, DoubleProvider swingTimeProvider,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
    {
       // remove and test:
@@ -108,7 +112,11 @@ public class FootControlModule
       
       this.requestedState = EnumYoVariable.create(namePrefix + "RequestedState", "", ConstraintType.class, registry, true);
       this.momentumBasedController = momentumBasedController;
-      this.requestHoldPosition = requestHoldPosition;
+
+      this.requestHoldPosition = new BooleanYoVariable(namePrefix + "RequestedHoldPosition", registry);
+      footSwitch = momentumBasedController.getFootSwitches().get(robotSide);
+      footLoadThresholdToHoldPosition = new DoubleYoVariable("footLoadThresholdToHoldPosition", registry);
+      footLoadThresholdToHoldPosition.set(0.2);
       
       fullyConstrainedNormalContactVector = new FrameVector(contactableFoot.getPlaneFrame(), 0.0, 0.0, 1.0);
       
@@ -362,6 +370,7 @@ public class FootControlModule
 
    public void doControl()
    {
+      requestHoldPosition.set(footSwitch.computeFootLoadPercentage() < footLoadThresholdToHoldPosition.getDoubleValue());
       jacobianDeterminant.set(jacobian.det());
       
       stateMachine.checkTransitionConditions();
