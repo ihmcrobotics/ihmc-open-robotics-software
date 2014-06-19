@@ -101,14 +101,29 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       return true; 
    }
 
+   public double getMaximumToeOffAngle()
+   {
+      return Math.toRadians(45.0);
+   }
+
    public boolean doToeTouchdownIfPossible()
    {
       return false;
    }
 
+   public double getToeTouchdownAngle()
+   {
+      return Math.toRadians(20.0);
+   }
+
    public boolean doHeelTouchdownIfPossible()
    {
       return false;
+   }
+
+   public double getHeelTouchdownAngle()
+   {
+      return Math.toRadians(-20.0);
    }
 
    public String[] getDefaultHeadOrientationControlJointNames()

@@ -19,11 +19,11 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract double getFootForwardOffset();
 
    public abstract double getFootBackwardOffset();
-   
+
    public abstract double getFootWidth();
-   
+
    public abstract double getToeWidth();
-   
+
    public abstract double getFootLength();
 
    public abstract double getAnkleHeight();
@@ -43,12 +43,18 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract boolean stayOnToes();
 
    public abstract boolean doToeOffIfPossible();
-   
+
+   public abstract double getMaximumToeOffAngle();
+
    public abstract double getFootSwitchCoPThresholdFraction();
 
    public abstract boolean doToeTouchdownIfPossible();
 
+   public abstract double getToeTouchdownAngle();
+
    public abstract boolean doHeelTouchdownIfPossible();
+
+   public abstract double getHeelTouchdownAngle();
 
    public abstract double getFinalToeOffPitchAngularVelocity();
 
@@ -109,7 +115,7 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract double getSwingKpXY();
 
    public abstract double getSwingKpZ();
-   
+
    public abstract double getSwingHeightMaxForPushRecoveryTrajectory();
 
    public abstract double getSwingKpOrientation();
@@ -159,6 +165,6 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract double getFoot_start_toetaper_from_back();
 
    public abstract double getSideLengthOfBoundingBoxForFootstepHeight();
-   
+
    public abstract double getDesiredTouchdownVelocity();
 }
