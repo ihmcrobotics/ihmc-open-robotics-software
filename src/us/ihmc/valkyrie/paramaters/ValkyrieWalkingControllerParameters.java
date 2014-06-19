@@ -351,6 +351,11 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       return 0.4;
    }
 
+   public double getDefaultDesiredPelvisPitch()
+   {
+      return 0.0;
+   }
+
    public double getKpPelvisOrientation()
    {
       if (!runningOnRealRobot) return 100.0;
