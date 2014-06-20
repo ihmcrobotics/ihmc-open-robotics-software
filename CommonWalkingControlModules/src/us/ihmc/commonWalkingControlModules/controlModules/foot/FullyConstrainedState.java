@@ -51,7 +51,9 @@ public class FullyConstrainedState extends AbstractFootControlState
 
    private void setFullyConstrainedStateGains()
    {
-      setGains(0.0, 0.0, 0.0);
+      accelerationControlModule.setPositionProportionalGains(0.0, 0.0, 0.0);
+      accelerationControlModule.setPositionDerivativeGains(0.0, 0.0, 0.0);
+      accelerationControlModule.setOrientationProportionalGains(0.0, 0.0, 0.0);
       accelerationControlModule.setOrientationDerivativeGains(supportKdRoll, supportKdPitch, supportKdYaw);
    }
 
