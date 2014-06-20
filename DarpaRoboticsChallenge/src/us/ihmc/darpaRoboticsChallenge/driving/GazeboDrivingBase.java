@@ -28,7 +28,7 @@ import java.awt.image.DataBuffer;
 public abstract class GazeboDrivingBase extends AbstractNodeMain
 {
 	private static final boolean COLOR_IMAGE = true;
-	private static final String STEREO_NAMESPACE = "/multisense_sl/camera/";
+	private static final String STEREO_NAMESPACE = "/multisense/camera/";
    private static final String IMAGE = "image_raw" + (COLOR_IMAGE ? "/compressed" : "/compressed");
 
 	private static boolean RECORD = false;
