@@ -14,7 +14,7 @@ import us.ihmc.utilities.ros.RosMultisensePPSSubscriber;
 
 public class AtlasPPSTimestampOffsetProvider implements PPSTimestampOffsetProvider
 {
-   private static final String MULTISENSE_SL_PPS_TOPIC = "/multisense_sl/pps";
+   private static final String MULTISENSE_SL_PPS_TOPIC = "/multisense/pps";
    private RosMultisensePPSSubscriber ppsSubscriber;
    private final AtomicLong currentTimeStampOffset = new AtomicLong(0);
    private ZMQ.Socket requester;

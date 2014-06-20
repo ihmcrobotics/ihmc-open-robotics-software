@@ -18,7 +18,7 @@ import us.ihmc.utilities.keyboardAndMouse.RepeatingReleasedEventsFixer;
 public class GazeboCameraBenchmarker extends AbstractNodeMain
 {
 	public static final String MASTER = "http://localhost:11311";
-	public static final String TOPIC_NAME = "/multisense_sl/camera/left/image_raw/compressed";
+	public static final String TOPIC_NAME = "/multisense/camera/left/image_raw/compressed";
 	
 	private Subscriber<sensor_msgs.CompressedImage> cameraSubscriber;
 	private String topicName;

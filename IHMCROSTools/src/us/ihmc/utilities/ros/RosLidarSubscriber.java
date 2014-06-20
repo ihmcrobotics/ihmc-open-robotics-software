@@ -1,5 +1,8 @@
 package us.ihmc.utilities.ros;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import sensor_msgs.LaserScan;
 import us.ihmc.utilities.lidar.polarLidar.LidarScan;
 import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
@@ -62,4 +65,22 @@ public abstract class RosLidarSubscriber extends AbstractRosTopicSubscriber<sens
 
    protected abstract void newScan(LidarScan polarLidarScan);
 
+   public static void main(String[] args) throws URISyntaxException{
+      RosLidarSubscriber temp = new RosLidarSubscriber()
+      {
+         
+         @Override
+         protected void newScan(LidarScan polarLidarScan)
+         {
+            System.out.println("something");
+            
+         }
+      };
+            RosMainNode rosMainNode = new RosMainNode(new URI("http://10.66.171.44:11311"), "darpaRoboticsChallange/RosLidarSubscriber");
+            rosMainNode.attachSubscriber("/multisense/lidar_scan", temp);
+
+             rosMainNode.execute();
+   }
+   
 }
+
