@@ -11,7 +11,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.robotSide.RobotSide;
-import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -20,7 +19,6 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.SpatialMotionVector;
@@ -73,11 +71,6 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
    protected boolean isCoPOnEdge;
    protected FrameLineSegment2d edgeToRotateAbout;
 
-   protected final OneDoFJoint hipYawJoint;
-   protected final OneDoFJoint kneeJoint;
-   protected final OneDoFJoint ankleRollJoint;
-   protected final OneDoFJoint anklePitchJoint;
-
    public AbstractFootControlState(ConstraintType stateEnum, YoFramePoint yoDesiredPosition, YoFrameVector yoDesiredLinearVelocity,
          YoFrameVector yoDesiredLinearAcceleration, RigidBodySpatialAccelerationControlModule accelerationControlModule,
          MomentumBasedController momentumBasedController, ContactablePlaneBody contactableBody, int jacobianId, DoubleYoVariable nullspaceMultiplier,
@@ -99,11 +92,6 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
       this.nullspaceMultiplier = nullspaceMultiplier;
       this.jacobianDeterminantInRange = jacobianDeterminantInRange;
       this.doSingularityEscape = doSingularityEscape;
-
-      this.hipYawJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.HIP_YAW);
-      this.kneeJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.KNEE);
-      this.ankleRollJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.ANKLE_ROLL);
-      this.anklePitchJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.ANKLE_PITCH);
 
       edgeToRotateAbout = new FrameLineSegment2d(contactableBody.getPlaneFrame());
       rootBody = momentumBasedController.getTwistCalculator().getRootBody();
