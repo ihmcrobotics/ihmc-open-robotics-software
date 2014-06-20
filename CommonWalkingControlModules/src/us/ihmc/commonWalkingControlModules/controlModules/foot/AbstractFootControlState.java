@@ -27,7 +27,6 @@ import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.GainCalculator;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
@@ -46,7 +45,6 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
 
    protected final ContactablePlaneBody contactableBody;
    protected final RigidBody rootBody;
-   protected final EnumYoVariable<ConstraintType> requestedState;
 
    protected final FramePoint desiredPosition = new FramePoint(worldFrame);
    protected final FrameVector desiredLinearVelocity = new FrameVector(worldFrame);
@@ -84,8 +82,8 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
 
    public AbstractFootControlState(ConstraintType stateEnum, YoFramePoint yoDesiredPosition, YoFrameVector yoDesiredLinearVelocity,
          YoFrameVector yoDesiredLinearAcceleration, RigidBodySpatialAccelerationControlModule accelerationControlModule,
-         MomentumBasedController momentumBasedController, ContactablePlaneBody contactableBody, EnumYoVariable<ConstraintType> requestedState, int jacobianId,
-         DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape,
+         MomentumBasedController momentumBasedController, ContactablePlaneBody contactableBody, int jacobianId, DoubleYoVariable nullspaceMultiplier,
+         BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape,
          LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule, RobotSide robotSide,
          YoVariableRegistry registry)
    {
@@ -93,7 +91,6 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
 
       this.registry = registry;
       this.contactableBody = contactableBody;
-      this.requestedState = requestedState;
 
       this.yoDesiredPosition = yoDesiredPosition;
       this.yoDesiredLinearVelocity = yoDesiredLinearVelocity;
