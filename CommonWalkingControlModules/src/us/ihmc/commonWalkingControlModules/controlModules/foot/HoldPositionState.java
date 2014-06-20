@@ -28,13 +28,10 @@ public class HoldPositionState extends AbstractFootControlState
          RigidBodySpatialAccelerationControlModule accelerationControlModule, MomentumBasedController momentumBasedController,
          ContactablePlaneBody contactableBody, BooleanYoVariable requestHoldPosition, EnumYoVariable<ConstraintType> requestedState, int jacobianId,
          DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape,
-         FrameVector fullyConstrainedNormalContactVector,
-         LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule, RobotSide robotSide,
-         YoVariableRegistry registry)
+         FrameVector fullyConstrainedNormalContactVector, RobotSide robotSide, YoVariableRegistry registry)
    {
       super(ConstraintType.HOLD_POSITION, yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration, accelerationControlModule,
-            momentumBasedController, contactableBody, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape,
-            legSingularityAndKneeCollapseAvoidanceControlModule, robotSide, registry);
+            momentumBasedController, contactableBody, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, robotSide, registry);
 
       this.requestHoldPosition = requestHoldPosition;
       this.fullyConstrainedNormalContactVector = fullyConstrainedNormalContactVector;

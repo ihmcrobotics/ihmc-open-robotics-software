@@ -65,12 +65,12 @@ public class TouchdownState extends AbstractFootControlState
          YoFramePoint yoDesiredPosition, YoFrameVector yoDesiredLinearVelocity, YoFrameVector yoDesiredLinearAcceleration,
          RigidBodySpatialAccelerationControlModule accelerationControlModule, MomentumBasedController momentumBasedController,
          ContactablePlaneBody contactableBody, int jacobianId, DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange,
-         BooleanYoVariable doSingularityEscape, LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule,
-         RobotSide robotSide, YoVariableRegistry registry)
+         BooleanYoVariable doSingularityEscape, RobotSide robotSide,
+         YoVariableRegistry registry)
    {
       super(stateEnum, yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration, accelerationControlModule, momentumBasedController,
             contactableBody, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape,
-            legSingularityAndKneeCollapseAvoidanceControlModule, robotSide, registry);
+            robotSide, registry);
 
       this.walkingControllerParameters = walkingControllerParameters;
       this.touchdownVelocityProvider = touchdownVelocityProvider;

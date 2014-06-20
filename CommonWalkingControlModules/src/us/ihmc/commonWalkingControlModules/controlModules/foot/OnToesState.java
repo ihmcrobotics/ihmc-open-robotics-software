@@ -72,13 +72,10 @@ public class OnToesState extends AbstractFootControlState
    public OnToesState(WalkingControllerParameters walkingControllerParameters, YoFramePoint yoDesiredPosition, YoFrameVector yoDesiredLinearVelocity,
          YoFrameVector yoDesiredLinearAcceleration, RigidBodySpatialAccelerationControlModule accelerationControlModule,
          MomentumBasedController momentumBasedController, ContactablePlaneBody contactableBody, int jacobianId, DoubleYoVariable nullspaceMultiplier,
-         BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape,
-         LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule, RobotSide robotSide,
-         YoVariableRegistry registry)
+         BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape, RobotSide robotSide, YoVariableRegistry registry)
    {
       super(ConstraintType.TOES, yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration, accelerationControlModule, momentumBasedController,
-            contactableBody, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape,
-            legSingularityAndKneeCollapseAvoidanceControlModule, robotSide, registry);
+            contactableBody, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, robotSide, registry);
 
       rootToFootJacobianId = momentumBasedController.getOrCreateGeometricJacobian(rootBody, jacobian.getEndEffector(), rootBody.getBodyFixedFrame());
 
