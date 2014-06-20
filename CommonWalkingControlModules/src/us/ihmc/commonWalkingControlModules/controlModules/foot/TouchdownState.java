@@ -24,7 +24,6 @@ import us.ihmc.utilities.screwTheory.Twist;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.GainCalculator;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
@@ -43,7 +42,7 @@ public class TouchdownState extends AbstractFootControlState
    private final DoubleTrajectoryGenerator onEdgePitchAngleTrajectoryGenerator;
    private final YoVariableDoubleProvider touchdownInitialPitchProvider;
    private final YoVariableDoubleProvider touchdownInitialAngularVelocityProvider;
-   
+
    private final List<FramePoint2d> edgeContactPoints;
    private final List<FramePoint> desiredEdgeContactPositions;
 
@@ -57,20 +56,20 @@ public class TouchdownState extends AbstractFootControlState
    private final FrameVector derivativePart = new FrameVector();
 
    private final int rootToFootJacobianId;
-   
+
    private final WalkingControllerParameters walkingControllerParameters;
-   
+
    private final VectorProvider touchdownVelocityProvider;
 
-   public TouchdownState(ConstraintType stateEnum, WalkingControllerParameters walkingControllerParameters, VectorProvider touchdownVelocityProvider, YoFramePoint yoDesiredPosition,
-         YoFrameVector yoDesiredLinearVelocity, YoFrameVector yoDesiredLinearAcceleration, RigidBodySpatialAccelerationControlModule accelerationControlModule,
-         MomentumBasedController momentumBasedController, ContactablePlaneBody contactableBody, EnumYoVariable<ConstraintType> requestedState, int jacobianId,
-         DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape,
-         LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule, RobotSide robotSide,
-         YoVariableRegistry registry)
+   public TouchdownState(ConstraintType stateEnum, WalkingControllerParameters walkingControllerParameters, VectorProvider touchdownVelocityProvider,
+         YoFramePoint yoDesiredPosition, YoFrameVector yoDesiredLinearVelocity, YoFrameVector yoDesiredLinearAcceleration,
+         RigidBodySpatialAccelerationControlModule accelerationControlModule, MomentumBasedController momentumBasedController,
+         ContactablePlaneBody contactableBody, int jacobianId, DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange,
+         BooleanYoVariable doSingularityEscape, LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule,
+         RobotSide robotSide, YoVariableRegistry registry)
    {
       super(stateEnum, yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration, accelerationControlModule, momentumBasedController,
-            contactableBody, requestedState, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape,
+            contactableBody, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape,
             legSingularityAndKneeCollapseAvoidanceControlModule, robotSide, registry);
 
       this.walkingControllerParameters = walkingControllerParameters;
@@ -78,14 +77,14 @@ public class TouchdownState extends AbstractFootControlState
       rootToFootJacobianId = momentumBasedController.getOrCreateGeometricJacobian(rootBody, jacobian.getEndEffector(), rootBody.getBodyFixedFrame());
 
       String namePrefix = contactableBody.getName();
-      
+
       if (stateEnum == ConstraintType.TOES_TOUCHDOWN)
          namePrefix += "Toe";
       else
          namePrefix += "Heel";
 
       touchdownInitialPitchProvider = new YoVariableDoubleProvider(namePrefix + "TouchdownPitch", registry);
-      
+
       if (stateEnum == ConstraintType.TOES_TOUCHDOWN)
       {
          touchdownInitialPitchProvider.set(walkingControllerParameters.getToeTouchdownAngle());
@@ -94,10 +93,10 @@ public class TouchdownState extends AbstractFootControlState
       {
          touchdownInitialPitchProvider.set(walkingControllerParameters.getHeelTouchdownAngle());
       }
-      
+
       touchdownInitialAngularVelocityProvider = new YoVariableDoubleProvider(namePrefix + "TouchdownPitchAngularVelocity", registry);
       DoubleProvider touchdownTrajectoryTime = new ConstantDoubleProvider(walkingControllerParameters.getDefaultTransferTime() / 3.0);
-      
+
       this.onEdgePitchAngleTrajectoryGenerator = new ConstantVelocityTrajectoryGenerator(namePrefix + "FootTouchdownPitchTrajectoryGenerator",
             touchdownInitialPitchProvider, touchdownInitialAngularVelocityProvider, touchdownTrajectoryTime, registry);
 
@@ -220,7 +219,8 @@ public class TouchdownState extends AbstractFootControlState
       if (getStateEnum() == ConstraintType.HEEL_TOUCHDOWN)
          direction.scale(-1.0);
 
-      List<FramePoint> contactPoints = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(contactableBody.getContactPointsCopy(), direction, NUMBER_OF_CONTACTS_POINTS_TO_ROTATE_ABOUT);
+      List<FramePoint> contactPoints = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(contactableBody.getContactPointsCopy(), direction,
+            NUMBER_OF_CONTACTS_POINTS_TO_ROTATE_ABOUT);
 
       List<FramePoint2d> contactPoints2d = new ArrayList<FramePoint2d>(contactPoints.size());
       for (FramePoint contactPoint : contactPoints)
@@ -231,7 +231,7 @@ public class TouchdownState extends AbstractFootControlState
 
       return contactPoints2d;
    }
-   
+
    public double getTouchdownInitialPitchAngle()
    {
       return touchdownInitialPitchProvider.getValue();
@@ -240,12 +240,12 @@ public class TouchdownState extends AbstractFootControlState
    private void updateTouchdownInitialAngularVelocity()
    {
       Vector3d edgeToAnkle;
-      
+
       if (getStateEnum() == ConstraintType.TOES_TOUCHDOWN)
          edgeToAnkle = new Vector3d(-walkingControllerParameters.getFootForwardOffset(), 0.0, walkingControllerParameters.getAnkleHeight());
       else
          edgeToAnkle = new Vector3d(walkingControllerParameters.getFootBackwardOffset(), 0.0, walkingControllerParameters.getAnkleHeight());
-      
+
       Transform3D rotationByPitch = new Transform3D();
       rotationByPitch.rotY(-touchdownInitialPitchProvider.getValue());
       rotationByPitch.transform(edgeToAnkle);

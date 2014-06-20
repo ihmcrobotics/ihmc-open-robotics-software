@@ -27,6 +27,8 @@ public class FullyConstrainedState extends AbstractFootControlState
    private final FrameVector fullyConstrainedNormalContactVector;
    private final BooleanYoVariable doFancyOnToesControl;
 
+   private final EnumYoVariable<ConstraintType> requestedState;
+
    public FullyConstrainedState(YoFramePoint yoDesiredPosition, YoFrameVector yoDesiredLinearVelocity, YoFrameVector yoDesiredLinearAcceleration,
          RigidBodySpatialAccelerationControlModule accelerationControlModule, MomentumBasedController momentumBasedController,
          ContactablePlaneBody contactableBody, BooleanYoVariable requestHoldPosition, EnumYoVariable<ConstraintType> requestedState, int jacobianId,
@@ -36,12 +38,13 @@ public class FullyConstrainedState extends AbstractFootControlState
          YoVariableRegistry registry)
    {
       super(ConstraintType.FULL, yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration, accelerationControlModule, momentumBasedController,
-            contactableBody, requestedState, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape,
+            contactableBody, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape,
             legSingularityAndKneeCollapseAvoidanceControlModule, robotSide, registry);
 
       this.requestHoldPosition = requestHoldPosition;
       this.fullyConstrainedNormalContactVector = fullyConstrainedNormalContactVector;
       this.doFancyOnToesControl = doFancyOnToesControl;
+      this.requestedState = requestedState;
    }
 
    public void doTransitionIntoAction()

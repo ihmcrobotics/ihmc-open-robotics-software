@@ -20,6 +20,7 @@ public class HoldPositionState extends AbstractFootControlState
    private final FrameVector holdPositionNormalContactVector = new FrameVector();
    private final BooleanYoVariable requestHoldPosition;
    private final FrameVector fullyConstrainedNormalContactVector;
+   private final EnumYoVariable<ConstraintType> requestedState;
 
    private double holdZeta, holdKpx, holdKpy, holdKpz, /* holdKdz, */holdKpRoll, holdKpPitch, holdKpYaw;
 
@@ -32,11 +33,12 @@ public class HoldPositionState extends AbstractFootControlState
          YoVariableRegistry registry)
    {
       super(ConstraintType.HOLD_POSITION, yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration, accelerationControlModule,
-            momentumBasedController, contactableBody, requestedState, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape,
+            momentumBasedController, contactableBody, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape,
             legSingularityAndKneeCollapseAvoidanceControlModule, robotSide, registry);
 
       this.requestHoldPosition = requestHoldPosition;
       this.fullyConstrainedNormalContactVector = fullyConstrainedNormalContactVector;
+      this.requestedState = requestedState;
    }
 
    public void doTransitionIntoAction()
