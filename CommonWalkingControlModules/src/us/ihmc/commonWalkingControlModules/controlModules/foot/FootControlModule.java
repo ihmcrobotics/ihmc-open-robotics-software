@@ -30,7 +30,6 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.GainCalculator;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
@@ -91,11 +90,12 @@ public class FootControlModule
    private final DoubleYoVariable footLoadThresholdToHoldPosition;
 
    public FootControlModule(RobotSide robotSide, WalkingControllerParameters walkingControllerParameters, DoubleProvider swingTimeProvider,
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
+         MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
    {
       // remove and test:
       contactableFoot = momentumBasedController.getContactableFeet().get(robotSide);
       momentumBasedController.setPlaneContactCoefficientOfFriction(contactableFoot, 0.8);
+      momentumBasedController.setPlaneContactStateFullyConstrained(contactableFoot);
 
       RigidBody foot = contactableFoot.getRigidBody();
       String namePrefix = foot.getName();
@@ -145,7 +145,7 @@ public class FootControlModule
       //      jointVelocities = new DenseMatrix64F(ScrewTools.computeDegreesOfFreedom(jacobian.getJointsInOrder()), 1);
 
       legSingularityAndKneeCollapseAvoidanceControlModule = new LegSingularityAndKneeCollapseAvoidanceControlModule(namePrefix, contactableFoot, robotSide,
-            walkingControllerParameters, momentumBasedController, dynamicGraphicObjectsListRegistry, registry);
+            walkingControllerParameters, momentumBasedController, registry);
 
       // set up states and state machine
       DoubleYoVariable time = momentumBasedController.getYoTime();
@@ -186,7 +186,7 @@ public class FootControlModule
 
       swingState = new SwingState(swingTimeProvider, touchdownVelocityProvider, yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration,
             accelerationControlModule, momentumBasedController, contactableFoot, requestedState, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange,
-            doSingularityEscape, legSingularityAndKneeCollapseAvoidanceControlModule, robotSide, registry, dynamicGraphicObjectsListRegistry,
+            doSingularityEscape, legSingularityAndKneeCollapseAvoidanceControlModule, robotSide, registry,
             walkingControllerParameters);
       states.add(swingState);
 
@@ -261,9 +261,9 @@ public class FootControlModule
       stateMachine.setCurrentState(ConstraintType.FULL);
    }
 
-   public void replanTrajectory(double swingTimeRemaining)
+   public void replanTrajectory(Footstep footstep, double swingTimeRemaining)
    {
-      swingState.replanTrajectory(swingTimeRemaining);
+      swingState.replanTrajectory(footstep, swingTimeRemaining);
    }
 
    public void doSingularityEscape(boolean doSingularityEscape)
@@ -383,11 +383,6 @@ public class FootControlModule
       return contactPointStates;
    }
 
-   public double updateAndGetLegLength()
-   {
-      return legSingularityAndKneeCollapseAvoidanceControlModule.updateAndGetLegLength();
-   }
-
    public void correctCoMHeightTrajectoryForSingularityAvoidance(FrameVector2d comXYVelocity, CoMHeightTimeDerivativesData comHeightDataToCorrect,
          double zCurrent, ReferenceFrame pelvisZUpFrame)
    {
@@ -407,7 +402,7 @@ public class FootControlModule
       legSingularityAndKneeCollapseAvoidanceControlModule.correctCoMHeightTrajectoryForUnreachableFootStep(comHeightDataToCorrect, getCurrentConstraintType());
    }
 
-   public void setFootStep(Footstep footstep, TrajectoryParameters trajectoryParameters)
+   public void setFootstep(Footstep footstep, TrajectoryParameters trajectoryParameters)
    {
       swingState.setFootstep(footstep, trajectoryParameters);
    }

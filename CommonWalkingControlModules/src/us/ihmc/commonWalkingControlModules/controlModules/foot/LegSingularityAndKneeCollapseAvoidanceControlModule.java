@@ -42,7 +42,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
    private static final boolean USE_SINGULARITY_AVOIDANCE_SWING = true; // Limit the swing foot motion according to the leg motion range.
    public static final boolean USE_SINGULARITY_AVOIDANCE_SUPPORT = true; // Progressively limit the CoM height as the support leg(s) are getting more straight
    private static final boolean USE_UNREACHABLE_FOOTSTEP_CORRECTION = true; // Lower the CoM if a footstep is unreachable
-   public static final boolean USE_COLLAPSE_AVOIDANCE = true; // Try to avoid the knee from collapsing by limiting how low the CoM can be
+   private static final boolean USE_COLLAPSE_AVOIDANCE = false; // Try to avoid the knee from collapsing by limiting how low the CoM can be
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final ReferenceFrame endEffectorFrame;
@@ -138,7 +138,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
    
    public LegSingularityAndKneeCollapseAvoidanceControlModule(String namePrefix, ContactablePlaneBody contactablePlaneBody, final RobotSide robotSide,
          WalkingControllerParameters walkingControllerParameters, final MomentumBasedController momentumBasedController,
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+         YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
@@ -270,6 +270,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          }
       };
       
+      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
       visualize = visualize && dynamicGraphicObjectsListRegistry != null;
       moreVisualizers = visualize && moreVisualizers;
 

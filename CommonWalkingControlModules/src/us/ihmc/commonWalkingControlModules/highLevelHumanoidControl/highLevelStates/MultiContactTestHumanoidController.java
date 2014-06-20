@@ -4,8 +4,6 @@ import org.apache.commons.lang.mutable.MutableBoolean;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingManagers;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CoMBasedMomentumRateOfChangeControlModule;
@@ -21,7 +19,6 @@ import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
@@ -31,7 +28,6 @@ import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
-import com.yobotics.simulationconstructionset.util.trajectory.ConstantDoubleProvider;
 
 public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoidControlPattern
 {
@@ -94,8 +90,6 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
             chestOrientationManager.setDesireds(tempOrientation, zeroFrameVector, zeroFrameVector);
          }
       });
-      
-      setupFootControlModules();
    }
 
    public void initializeContactStates(SideDependentList<Boolean> areHandsInContact, SideDependentList<Boolean> areFeetInContact)
@@ -107,27 +101,6 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
       }
    }
    
-   protected void setupFootControlModules()
-   {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         final ChangeableConfigurationProvider desiredConfigurationProvider =
-            new ChangeableConfigurationProvider(footPoseProvider.getDesiredFootPose(robotSide));
-
-         desiredConfigurationProviders.put(robotSide, desiredConfigurationProvider);
-
-         ConstantDoubleProvider footTrajectoryTimeProvider = new ConstantDoubleProvider(1.0);
-         FootControlModule footControlModule = new FootControlModule(robotSide, walkingControllerParameters, footTrajectoryTimeProvider, null,
-               momentumBasedController, registry);
-         
-         footControlModule.setSwingGains(100.0, 200.0, 200.0, 1.0, 1.0);
-         footControlModule.setHoldGains(100.0, 200.0, 0.1);
-         footControlModule.setToeOffGains(0.0, 200.0, 0.1);
-
-         footControlModules.put(robotSide, footControlModule);
-      }
-   }
-
    public void initialize()
    {
       super.initialize();
@@ -177,8 +150,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
          {
             FramePose newFootPose = footPoseProvider.getDesiredFootPose(robotSide);
             desiredConfigurationProviders.get(foot).set(newFootPose);
-            footControlModules.get(robotSide).setFootPose(newFootPose);
-            footControlModules.get(robotSide).resetCurrentState();
+            feetManager.requestMoveStraight(robotSide, newFootPose);
          }
       }
 
@@ -200,26 +172,11 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
 
       if (inContact)
       {
-         setFlatFootContactState(robotSide);
+         feetManager.setFlatFootContactState(robotSide);
       }
       else
       {
-         setContactStateForSwing(robotSide);
+         feetManager.setContactStateForMoveStraight(robotSide);
       }
-   }
-
-   private void setFlatFootContactState(RobotSide robotSide)
-   {
-      footControlModules.get(robotSide).setContactState(ConstraintType.FULL);
-   }
-
-   private void setContactStateForSwing(RobotSide robotSide)
-   {
-      // Initialize desired foot pose to the actual, so no surprising behavior
-      ReferenceFrame footFrame = footControlModules.get(robotSide).getFootFrame();
-      desiredConfigurationProviders.get(robotSide).set(new FramePose(footFrame));
-
-      footControlModules.get(robotSide).doSingularityEscapeBeforeTransitionToNextState();
-      footControlModules.get(robotSide).setContactState(ConstraintType.MOVE_STRAIGHT);
    }
 }

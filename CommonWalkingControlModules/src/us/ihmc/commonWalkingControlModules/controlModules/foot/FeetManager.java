@@ -5,12 +5,14 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.WalkOnTheEdgesManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
@@ -20,7 +22,6 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.VariableChangedListener;
 import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParameters;
 
@@ -39,6 +40,7 @@ public class FeetManager
    private final SideDependentList<? extends ContactablePlaneBody> feet;
 
    private final ReferenceFrame pelvisZUpFrame;
+   private final SideDependentList<ReferenceFrame> ankleZUpFrames;
 
    private final SideDependentList<FootSwitchInterface> footSwitches;
 
@@ -67,9 +69,9 @@ public class FeetManager
    private final DoubleYoVariable singularityEscapeNullspaceMultiplierSupportLegLocking = new DoubleYoVariable(
          "singularityEscapeNullspaceMultiplierSupportLegLocking", registry);
 
+   // TODO Needs to be cleaned up someday... (Sylvain)
    public FeetManager(MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters,
-         DoubleProvider swingTimeProvider, VariousWalkingProviders variousWalkingProviders, SideDependentList<FootSwitchInterface> footSwitches,
-         YoVariableRegistry parentRegistry)
+         DoubleProvider swingTimeProvider, YoVariableRegistry parentRegistry)
    {
       double singularityEscapeMultiplierForSwing = walkingControllerParameters.getSwingSingularityEscapeMultiplier();
       singularityEscapeNullspaceMultiplierSwingLeg.set(singularityEscapeMultiplierForSwing);
@@ -95,24 +97,27 @@ public class FeetManager
       swingMaxOrientationAcceleration.set(walkingControllerParameters.getSwingMaxOrientationAcceleration());
       swingMaxOrientationJerk.set(walkingControllerParameters.getSwingMaxOrientationJerk());
 
-      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
-
       feet = momentumBasedController.getContactableFeet();
       walkOnTheEdgesManager = new WalkOnTheEdgesManager(walkingControllerParameters, feet, footControlModules, registry);
 
-      this.footSwitches = footSwitches;
-      pelvisZUpFrame = momentumBasedController.getReferenceFrames().getPelvisZUpFrame();
+      this.footSwitches = momentumBasedController.getFootSwitches();
+      CommonWalkingReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
+      pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
+      ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         FootControlModule footControlModule = new FootControlModule(robotSide, walkingControllerParameters, swingTimeProvider,
-               dynamicGraphicObjectsListRegistry, momentumBasedController, registry);
+         FootControlModule footControlModule = new FootControlModule(robotSide, walkingControllerParameters, swingTimeProvider, momentumBasedController,
+               registry);
+         footControlModule.setParameters(singularityEscapeMultiplierForSwing);
 
          VariableChangedListener swingGainsChangedListener = createEndEffectorGainsChangedListener(footControlModule);
          swingGainsChangedListener.variableChanged(null);
 
          footControlModules.put(robotSide, footControlModule);
       }
+
+      parentRegistry.addChild(registry);
    }
 
    private VariableChangedListener createEndEffectorGainsChangedListener(final FootControlModule endEffectorControlModule)
@@ -160,14 +165,38 @@ public class FeetManager
       }
    }
 
-   public void setFootstep(RobotSide robotSide, Footstep footstep, TrajectoryParameters trajectoryParameters)
+   public void requestSwing(RobotSide upcomingSwingSide, Footstep footstep, TrajectoryParameters trajectoryParameters)
    {
-      footControlModules.get(robotSide).setFootStep(footstep, trajectoryParameters);
+      if (!footstep.getTrustHeight())
+      {
+         FramePoint supportAnklePosition = new FramePoint(ankleZUpFrames.get(upcomingSwingSide.getOppositeSide()));
+         supportAnklePosition.changeFrame(footstep.getReferenceFrame());
+         double newHeight = supportAnklePosition.getZ();
+
+         footstep = Footstep.copyButChangeHeight(footstep, newHeight);
+      }
+
+      walkOnTheEdgesManager.updateEdgeTouchdownStatus(upcomingSwingSide.getOppositeSide(), footstep);
+      FootControlModule footControlModule = footControlModules.get(upcomingSwingSide);
+
+      if (walkOnTheEdgesManager.willLandOnHeel())
+      {
+         footstep = walkOnTheEdgesManager.createFootstepForEdgeTouchdown(footstep, footControlModule.getHeelTouchdownInitialAngle());
+      }
+      else if (walkOnTheEdgesManager.willLandOnToes())
+      {
+         footstep = walkOnTheEdgesManager.createFootstepForEdgeTouchdown(footstep, footControlModule.getToeTouchdownInitialAngle());
+      }
+
+      footControlModule.setFootstep(footstep, trajectoryParameters);
+      setContactStateForSwing(upcomingSwingSide);
    }
-   
-   public void setFootPose(RobotSide robotSide, FramePose footPose)
+
+   public void requestMoveStraight(RobotSide robotSide, FramePose footPose)
    {
-      footControlModules.get(robotSide).setFootPose(footPose);
+      FootControlModule footControlModule = footControlModules.get(robotSide);
+      footControlModule.setFootPose(footPose);
+      footControlModule.resetCurrentState();
    }
 
    public boolean isInEdgeTouchdownState(RobotSide robotSide)
@@ -180,9 +209,9 @@ public class FeetManager
       return footControlModules.get(robotSide).getCurrentConstraintType();
    }
 
-   public void replanTrajectory(RobotSide swingSide, double swingTimeRemaining)
+   public void replanSwingTrajectory(RobotSide swingSide, Footstep footstep, double swingTimeRemaining)
    {
-      footControlModules.get(swingSide).replanTrajectory(swingTimeRemaining);
+      footControlModules.get(swingSide).replanTrajectory(footstep, swingTimeRemaining);
    }
 
    public boolean isInSingularityNeighborhood(RobotSide robotSide)
@@ -205,8 +234,7 @@ public class FeetManager
       return footControlModules.get(robotSide).isInFlatSupportState();
    }
 
-   public void correctCoMHeight(RobotSide trailingLeg, FrameVector2d desiredICPVelocity, double zCurrent, CoMHeightTimeDerivativesData comHeightData,
-         boolean checkForKneeCollapsing, boolean checkForStraightKnee)
+   public void correctCoMHeight(RobotSide trailingLeg, FrameVector2d desiredICPVelocity, double zCurrent, CoMHeightTimeDerivativesData comHeightData)
    {
       RobotSide[] leadingLegFirst;
       if (trailingLeg != null)
@@ -215,29 +243,74 @@ public class FeetManager
          leadingLegFirst = RobotSide.values;
 
       // Correct, if necessary, the CoM height trajectory to avoid the knee to collapse
-      if (checkForKneeCollapsing)
+      for (RobotSide robotSide : RobotSide.values)
       {
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            footControlModules.get(robotSide).correctCoMHeightTrajectoryForCollapseAvoidance(desiredICPVelocity, comHeightData, zCurrent, pelvisZUpFrame,
-                  footSwitches.get(robotSide).computeFootLoadPercentage());
-         }
+         footControlModules.get(robotSide).correctCoMHeightTrajectoryForCollapseAvoidance(desiredICPVelocity, comHeightData, zCurrent, pelvisZUpFrame,
+               footSwitches.get(robotSide).computeFootLoadPercentage());
       }
 
       // Correct, if necessary, the CoM height trajectory to avoid straight knee
-      if (checkForStraightKnee)
+      for (RobotSide robotSide : leadingLegFirst)
       {
-         for (RobotSide robotSide : leadingLegFirst)
-         {
-            FootControlModule footControlModule = footControlModules.get(robotSide);
-            footControlModule.correctCoMHeightTrajectoryForSingularityAvoidance(desiredICPVelocity, comHeightData, zCurrent, pelvisZUpFrame);
-         }
+         FootControlModule footControlModule = footControlModules.get(robotSide);
+         footControlModule.correctCoMHeightTrajectoryForSingularityAvoidance(desiredICPVelocity, comHeightData, zCurrent, pelvisZUpFrame);
       }
 
       // Do that after to make sure the swing foot will land
       for (RobotSide robotSide : RobotSide.values)
       {
          footControlModules.get(robotSide).correctCoMHeightTrajectoryForUnreachableFootStep(comHeightData);
+      }
+   }
+
+   public void initializeContactStatesForDoubleSupport(RobotSide transferToSide)
+   {
+      if (stayOnToes())
+      {
+         for (RobotSide robotSide : RobotSide.values)
+            setOnToesContactState(robotSide);
+      }
+      else if (transferToSide == null)
+      {
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            if (!isInEdgeTouchdownState(robotSide))
+               setFlatFootContactState(robotSide);
+         }
+      }
+      else if (willLandOnToes())
+      {
+         setTouchdownOnToesContactState(transferToSide);
+      }
+      else if (willLandOnHeel())
+      {
+         setTouchdownOnHeelContactState(transferToSide);
+      }
+      else
+      {
+         if (getCurrentConstraintType(transferToSide.getOppositeSide()) == ConstraintType.SWING) // That case happens when doing 2 steps on same side
+            setFlatFootContactState(transferToSide.getOppositeSide());
+         setFlatFootContactState(transferToSide); // still need to determine contact state for trailing leg. This is done in doAction as soon as the previous ICP trajectory is done
+      }
+
+      reset();
+   }
+
+   public void updateContactStatesInDoubleSupport(RobotSide transferToSide)
+   {
+      if (transferToSide == null)
+      {
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            if ((isInEdgeTouchdownState(robotSide) && isEdgeTouchDownDone(robotSide)) || (getCurrentConstraintType(robotSide) == ConstraintType.TOES))
+               setFlatFootContactState(robotSide);
+         }
+      }
+      else
+      {
+         if ((isInEdgeTouchdownState(transferToSide) && isEdgeTouchDownDone(transferToSide))
+               || (getCurrentConstraintType(transferToSide) == ConstraintType.TOES))
+            setFlatFootContactState(transferToSide);
       }
    }
 
@@ -287,8 +360,111 @@ public class FeetManager
       endEffectorControlModule.setContactState(ConstraintType.SWING);
    }
 
+   public void setContactStateForMoveStraight(RobotSide robotSide)
+   {
+      ReferenceFrame footFrame = footControlModules.get(robotSide).getFootFrame();
+      footControlModules.get(robotSide).setFootPose(new FramePose(footFrame));
+      footControlModules.get(robotSide).doSingularityEscapeBeforeTransitionToNextState();
+      footControlModules.get(robotSide).setContactState(ConstraintType.MOVE_STRAIGHT);
+   }
+
    public WalkOnTheEdgesManager getWalkOnTheEdgesManager()
    {
       return walkOnTheEdgesManager;
+   }
+
+   public boolean isEdgeTouchDownDone(RobotSide robotSide)
+   {
+      return walkOnTheEdgesManager.isEdgeTouchDownDone(robotSide);
+   }
+
+   public void requestToeOffBasedOnICP(RobotSide trailingLeg, FramePoint2d desiredICP, FramePoint2d finalDesiredICP)
+   {
+      walkOnTheEdgesManager.updateToeOffStatusBasedOnICP(trailingLeg, desiredICP, finalDesiredICP);
+      
+      if (doToeOff())
+         setOnToesContactState(trailingLeg);
+   }
+
+   public boolean doToeOff()
+   {
+      return walkOnTheEdgesManager.doToeOff();
+   }
+
+   public void requestToeOffBasedOnECMP(RobotSide trailingLeg, FramePoint2d desiredECMP, FramePoint2d desiredICP, FramePoint2d currentICP)
+   {
+      walkOnTheEdgesManager.updateToeOffStatusBasedOnECMP(trailingLeg, desiredECMP, desiredICP, currentICP);
+      if (doToeOff())
+         setOnToesContactState(trailingLeg);
+   }
+
+   public boolean stayOnToes()
+   {
+      return walkOnTheEdgesManager.stayOnToes();
+   }
+
+   public boolean willLandOnToes()
+   {
+      return walkOnTheEdgesManager.willLandOnToes();
+   }
+
+   public boolean willLandOnHeel()
+   {
+      return walkOnTheEdgesManager.willLandOnHeel();
+   }
+
+   public void reset()
+   {
+      walkOnTheEdgesManager.reset();
+   }
+
+   public void updateEdgeTouchdownStatus(RobotSide supportLeg, Footstep nextFootstep)
+   {
+      walkOnTheEdgesManager.updateEdgeTouchdownStatus(supportLeg, nextFootstep);
+   }
+
+   public Footstep createFootstepForEdgeTouchdown(Footstep footstepToModify, double touchdownInitialPitch)
+   {
+      return walkOnTheEdgesManager.createFootstepForEdgeTouchdown(footstepToModify, touchdownInitialPitch);
+   }
+
+   public double getHeelTouchdownInitialAngle(RobotSide robotSide)
+   {
+      return footControlModules.get(robotSide).getHeelTouchdownInitialAngle();
+   }
+
+   public double getToeTouchdownInitialAngle(RobotSide robotSide)
+   {
+      return footControlModules.get(robotSide).getToeTouchdownInitialAngle();
+   }
+
+   public void updateOnToesTriangle(FramePoint2d finalDesiredICP, RobotSide supportSide)
+   {
+      walkOnTheEdgesManager.updateOnToesTriangle(finalDesiredICP, supportSide);
+   }
+
+   public boolean doToeOffIfPossible()
+   {
+      return walkOnTheEdgesManager.doToeOffIfPossible();
+   }
+
+   public boolean isOnToesTriangleLargeEnough()
+   {
+      return walkOnTheEdgesManager.isOnToesTriangleLargeEnough();
+   }
+
+   public void lockKnee(RobotSide robotSide)
+   {
+      footControlModules.get(robotSide).doSingularityEscape(singularityEscapeNullspaceMultiplierSupportLegLocking.getDoubleValue());
+   }
+
+   public void doSupportSingularityEscape(RobotSide robotSide)
+   {
+      footControlModules.get(robotSide).doSingularityEscape(singularityEscapeNullspaceMultiplierSupportLeg.getDoubleValue());
+   }
+
+   public void resetCurrentState(RobotSide robotSide)
+   {
+      footControlModules.get(robotSide).resetCurrentState();
    }
 }

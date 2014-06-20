@@ -7,7 +7,7 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingManagers;
@@ -61,6 +61,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
    protected final ChestOrientationManager chestOrientationManager;
    protected final HeadOrientationManager headOrientationManager;
    protected final ManipulationControlModule manipulationControlModule;
+   protected final FeetManager feetManager;
 
    private final OneDoFJoint jointForExtendedNeckPitchRange;
    private final List<OneDoFJoint> torqueControlJoints = new ArrayList<OneDoFJoint>();
@@ -70,7 +71,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
    protected final YoFrameVector desiredPelvisAngularVelocity = new YoFrameVector("desiredPelvisAngularVelocity", worldFrame, registry);
 
    protected final YoFrameVector desiredPelvisAngularAcceleration = new YoFrameVector("desiredPelvisAngularAcceleration", worldFrame, registry);
-   protected final SideDependentList<FootControlModule> footControlModules = new SideDependentList<FootControlModule>();
    protected final FullRobotModel fullRobotModel;
    protected final MomentumBasedController momentumBasedController;
    protected final WalkingControllerParameters walkingControllerParameters;
@@ -125,6 +125,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
       this.headOrientationManager = variousWalkingManagers.getHeadOrientationManager();
       this.chestOrientationManager = variousWalkingManagers.getChestOrientationManager();
       this.manipulationControlModule = variousWalkingManagers.getManipulationControlModule();
+      this.feetManager = variousWalkingManagers.getFeetManager();
 
       this.walkingControllerParameters = walkingControllerParameters;
 
@@ -384,10 +385,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
 
    protected void doFootControl()
    {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         footControlModules.get(robotSide).doControl();
-      }
+      feetManager.compute();
    }
 
    protected void doArmControl()

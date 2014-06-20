@@ -12,8 +12,6 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisDesiredsHandler;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingManagers;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
@@ -74,14 +72,10 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    private final OrientationInterpolationTrajectoryGenerator chestOrientationTrajectoryGenerator;
    private double chestTrajectoryStartTime = 0.0;
 
-   private final BooleanYoVariable l_footDoHeelOff = new BooleanYoVariable("l_footDoHeelOff", registry);
-   private final BooleanYoVariable r_footDoHeelOff = new BooleanYoVariable("r_footDoHeelOff", registry);
-   private final SideDependentList<BooleanYoVariable> doToeOff = new SideDependentList<BooleanYoVariable>(l_footDoHeelOff, r_footDoHeelOff);
+   private final BooleanYoVariable l_footDoToeOff = new BooleanYoVariable("l_footDoToeOff", registry);
+   private final BooleanYoVariable r_footDoToeOff = new BooleanYoVariable("r_footDoToeOff", registry);
+   private final SideDependentList<BooleanYoVariable> doToeOff = new SideDependentList<BooleanYoVariable>(l_footDoToeOff, r_footDoToeOff);
 
-   private final SideDependentList<ChangeableConfigurationProvider> initialFootConfigurationProviders = new SideDependentList<ChangeableConfigurationProvider>();
-   private final SideDependentList<ChangeableConfigurationProvider> desiredFootConfigurationProviders = new SideDependentList<ChangeableConfigurationProvider>();
-
-   private final ConstantDoubleProvider footTrajectoryTimeProvider = new ConstantDoubleProvider(1.0);
    private final ConstantDoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(2.0);
 
    private final SideDependentList<ContactablePlaneBody> contactableThighs;
@@ -104,9 +98,9 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    private BooleanYoVariable requestedLeftThighLoadBearing = new BooleanYoVariable("requestedLeftThighLoadBearing", registry);
    private BooleanYoVariable requestedRightThighLoadBearing = new BooleanYoVariable("requestedRightThighLoadBearing", registry);
    private SideDependentList<BooleanYoVariable> requestedFootLoadBearing = new SideDependentList<BooleanYoVariable>(requestedLeftFootLoadBearing,
-                                                                              requestedRightFootLoadBearing);
+         requestedRightFootLoadBearing);
    private SideDependentList<BooleanYoVariable> requestedThighLoadBearing = new SideDependentList<BooleanYoVariable>(requestedLeftThighLoadBearing,
-                                                                               requestedRightThighLoadBearing);
+         requestedRightThighLoadBearing);
    private final PelvisDesiredsHandler pelvisDesiredsHandler;
    private final DoubleYoVariable carIngressPelvisPositionKp = new DoubleYoVariable("carIngressPelvisPositionKp", registry);
    private final DoubleYoVariable carIngressPelvisPositionZeta = new DoubleYoVariable("carIngressPelvisPositionZeta", registry);
@@ -119,9 +113,8 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    private final DoubleYoVariable carIngressHeadOrientationKp = new DoubleYoVariable("carIngressHeadOrientationKp", registry);
    private final DoubleYoVariable carIngressHeadOrientationZeta = new DoubleYoVariable("carIngressHeadOrientationZeta", registry);
 
-
    public CarIngressEgressController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
-                                     MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters)
+         MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters)
    {
       super(variousWalkingProviders, variousWalkingManagers, momentumBasedController, walkingControllerParameters, controllerState);
 
@@ -146,7 +139,8 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
       // Setup the pelvis trajectory generator
       pelvisPositionControlFrame = fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint();
-      this.pelvisController = new RigidBodySpatialAccelerationControlModule("pelvis", twistCalculator, fullRobotModel.getPelvis(), pelvisPositionControlFrame, controlDT, registry);
+      this.pelvisController = new RigidBodySpatialAccelerationControlModule("pelvis", twistCalculator, fullRobotModel.getPelvis(), pelvisPositionControlFrame,
+            controlDT, registry);
 
       carIngressPelvisPositionKp.set(100.0);
       carIngressPelvisPositionZeta.set(1.0);
@@ -155,11 +149,10 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
       VariableChangedListener pelvisGainsChangedListener = createPelvisGainsChangedListener();
 
-
       pelvisGainsChangedListener.variableChanged(null);
 
-
-      pelvisJacobianId = momentumBasedController.getOrCreateGeometricJacobian(fullRobotModel.getElevator(), fullRobotModel.getPelvis(), fullRobotModel.getPelvis().getBodyFixedFrame());
+      pelvisJacobianId = momentumBasedController.getOrCreateGeometricJacobian(fullRobotModel.getElevator(), fullRobotModel.getPelvis(), fullRobotModel
+            .getPelvis().getBodyFixedFrame());
 
       initialPelvisConfigurationProvider = new ChangeableConfigurationProvider(new FramePose(pelvisPositionControlFrame));
       desiredPelvisConfigurationProvider = new ChangeableConfigurationProvider(new FramePose(pelvisPositionControlFrame));
@@ -176,8 +169,6 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       finalDesiredChestOrientation = new SettableOrientationProvider("finalDesiredChest", worldFrame, registry);
       chestOrientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator("chest", worldFrame, trajectoryTimeProvider,
             initialDesiredChestOrientation, finalDesiredChestOrientation, registry);
-
-      setupFootControlModules();
 
       VariableChangedListener heelOffVariableChangedListener = new ToeOffYoVariableChangedListener();
       for (RobotSide robotSide : RobotSide.values)
@@ -204,19 +195,20 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          {
             double kPelvisPosition = carIngressPelvisPositionKp.getDoubleValue();
             double dPelvisPosition = GainCalculator.computeDerivativeGain(kPelvisPosition, carIngressPelvisPositionZeta.getDoubleValue());
-            pelvisController.setPositionProportionalGains(kPelvisPosition , kPelvisPosition, kPelvisPosition);
+            pelvisController.setPositionProportionalGains(kPelvisPosition, kPelvisPosition, kPelvisPosition);
             pelvisController.setPositionDerivativeGains(dPelvisPosition, dPelvisPosition, dPelvisPosition);
 
             double kPelvisOrientation = carIngressPelvisOrientationKp.getDoubleValue();
             double dPelvisOrientation = GainCalculator.computeDerivativeGain(kPelvisOrientation, carIngressPelvisOrientationZeta.getDoubleValue());
             pelvisController.setOrientationProportionalGains(kPelvisOrientation, kPelvisOrientation, kPelvisOrientation);
             pelvisController.setOrientationDerivativeGains(dPelvisOrientation, dPelvisOrientation, dPelvisOrientation);
-         }};
+         }
+      };
 
-         carIngressPelvisPositionKp.addVariableChangedListener(ret);
-         carIngressPelvisPositionZeta.addVariableChangedListener(ret);
-         carIngressPelvisOrientationKp.addVariableChangedListener(ret);
-         carIngressPelvisOrientationZeta.addVariableChangedListener(ret);
+      carIngressPelvisPositionKp.addVariableChangedListener(ret);
+      carIngressPelvisPositionZeta.addVariableChangedListener(ret);
+      carIngressPelvisOrientationKp.addVariableChangedListener(ret);
+      carIngressPelvisOrientationZeta.addVariableChangedListener(ret);
 
       return ret;
    }
@@ -231,10 +223,11 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
             double chestZeta = carIngressChestOrientationZeta.getDoubleValue();
             double chestKd = GainCalculator.computeDerivativeGain(chestKp, chestZeta);
             chestOrientationManager.setControlGains(chestKp, chestKd);
-         }};
+         }
+      };
 
-         carIngressChestOrientationKp.addVariableChangedListener(ret);
-         carIngressChestOrientationZeta.addVariableChangedListener(ret);
+      carIngressChestOrientationKp.addVariableChangedListener(ret);
+      carIngressChestOrientationZeta.addVariableChangedListener(ret);
 
       return ret;
    }
@@ -249,34 +242,13 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
             double headZeta = carIngressHeadOrientationZeta.getDoubleValue();
             double headKd = GainCalculator.computeDerivativeGain(headKp, headZeta);
             headOrientationManager.setControlGains(headKp, headKd);
-         }};
+         }
+      };
 
-         carIngressHeadOrientationKp.addVariableChangedListener(ret);
-         carIngressHeadOrientationZeta.addVariableChangedListener(ret);
+      carIngressHeadOrientationKp.addVariableChangedListener(ret);
+      carIngressHeadOrientationZeta.addVariableChangedListener(ret);
 
       return ret;
-   }
-
-   protected void setupFootControlModules()
-   {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         ContactablePlaneBody foot = feet.get(robotSide);
-
-         final ChangeableConfigurationProvider initialConfigurationProvider = new ChangeableConfigurationProvider(new FramePose(foot.getBodyFrame()));
-         final ChangeableConfigurationProvider desiredConfigurationProvider = new ChangeableConfigurationProvider(new FramePose(foot.getBodyFrame()));
-
-         initialFootConfigurationProviders.put(robotSide, initialConfigurationProvider);
-         desiredFootConfigurationProviders.put(robotSide, desiredConfigurationProvider);
-
-         FootControlModule footControlModule = new FootControlModule(robotSide, walkingControllerParameters, footTrajectoryTimeProvider, null,
-               momentumBasedController, registry);
-         footControlModule.setSwingGains(100.0, 200.0, 200.0, 1.0, 1.0);
-         footControlModule.setHoldGains(100.0, 200.0, 0.1);
-         footControlModule.setToeOffGains(0.0, 200.0, 0.1);
-
-         footControlModules.put(robotSide, footControlModule);
-      }
    }
 
    private RigidBody baseForChestOrientationControl;
@@ -339,18 +311,17 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       pelvisPositionTrajectoryGenerator.initialize();
       pelvisOrientationTrajectoryGenerator.initialize();
 
-
-//      FrameOrientation initialDesiredChestOrientation;
-//      if (chestOrientationManager.areDesiredsValid())
-//      {
-//         System.out.println("desired chest orientation valid: initializing to desired");
-//         initialDesiredChestOrientation = chestOrientationManager.getDesiredChestOrientation();
-//      }
-//      else
-//      {
-//         System.out.println("desired chest orientation invalid: initializing to current");
-//         initialDesiredChestOrientation = new FrameOrientation(chestPositionControlFrame);
-//      }
+      //      FrameOrientation initialDesiredChestOrientation;
+      //      if (chestOrientationManager.areDesiredsValid())
+      //      {
+      //         System.out.println("desired chest orientation valid: initializing to desired");
+      //         initialDesiredChestOrientation = chestOrientationManager.getDesiredChestOrientation();
+      //      }
+      //      else
+      //      {
+      //         System.out.println("desired chest orientation invalid: initializing to current");
+      //         initialDesiredChestOrientation = new FrameOrientation(chestPositionControlFrame);
+      //      }
 
       FrameOrientation initialDesiredChestOrientation = new FrameOrientation(chestPositionControlFrame);
       initialDesiredChestOrientation.changeFrame(this.initialDesiredChestOrientation.getReferenceFrame());
@@ -359,11 +330,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
       chestTrajectoryStartTime = yoTime.getDoubleValue();
       chestOrientationTrajectoryGenerator.initialize();
-
-      for (RobotSide robotSide : RobotSide.values)
-         footControlModules.get(robotSide).resetCurrentState();
    }
-
 
    private void initializeContacts()
    {
@@ -387,7 +354,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       callUpdatables();
       updateLoadBearingStates();
 
-//      doContactPointControl();
+      //      doContactPointControl();
       doFootControl();
       doArmControl();
       doHeadControl();
@@ -473,7 +440,6 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       desiredAngularVelocity.changeFrame(this.desiredPelvisAngularVelocity.getReferenceFrame());
       desiredAngularAcceleration.changeFrame(this.desiredPelvisAngularAcceleration.getReferenceFrame());
 
-
       desiredPelvisOrientation.set(desiredOrientation);
       desiredPelvisAngularVelocity.set(desiredAngularVelocity);
       desiredPelvisAngularAcceleration.set(desiredAngularAcceleration);
@@ -497,35 +463,27 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          }
       }
 
-         chestOrientationTrajectoryGenerator.compute(yoTime.getDoubleValue() - chestTrajectoryStartTime);
-         FrameOrientation desiredOrientation = new FrameOrientation(chestPositionControlFrame);
-         FrameVector desiredAngularVelocity = new FrameVector(chestPositionControlFrame);
-         FrameVector desiredAngularAcceleration = new FrameVector(chestPositionControlFrame);
-         chestOrientationTrajectoryGenerator.get(desiredOrientation);
-         chestOrientationTrajectoryGenerator.packAngularVelocity(desiredAngularVelocity);
-         chestOrientationTrajectoryGenerator.packAngularAcceleration(desiredAngularAcceleration);
+      chestOrientationTrajectoryGenerator.compute(yoTime.getDoubleValue() - chestTrajectoryStartTime);
+      FrameOrientation desiredOrientation = new FrameOrientation(chestPositionControlFrame);
+      FrameVector desiredAngularVelocity = new FrameVector(chestPositionControlFrame);
+      FrameVector desiredAngularAcceleration = new FrameVector(chestPositionControlFrame);
+      chestOrientationTrajectoryGenerator.get(desiredOrientation);
+      chestOrientationTrajectoryGenerator.packAngularVelocity(desiredAngularVelocity);
+      chestOrientationTrajectoryGenerator.packAngularAcceleration(desiredAngularAcceleration);
 
-         chestOrientationManager.setDesireds(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+      chestOrientationManager.setDesireds(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
 
-         super.doChestControl();
+      super.doChestControl();
    }
 
    protected void doFootControl()
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         ContactablePlaneBody foot = feet.get(robotSide);
-
-         if (footPoseProvider!= null && footPoseProvider.checkForNewPose(robotSide) && !requestedFootLoadBearing.get(robotSide).getBooleanValue())
+         if (footPoseProvider != null && footPoseProvider.checkForNewPose(robotSide) && !requestedFootLoadBearing.get(robotSide).getBooleanValue())
          {
-            FramePose oldFootPose = new FramePose(foot.getBodyFrame());
-            desiredFootConfigurationProviders.get(robotSide).get(oldFootPose);
-            initialFootConfigurationProviders.get(robotSide).set(oldFootPose);
-
             FramePose newFootPose = footPoseProvider.getDesiredFootPose(robotSide);
-            desiredFootConfigurationProviders.get(robotSide).set(newFootPose);
-            footControlModules.get(robotSide).setFootPose(newFootPose);
-            footControlModules.get(robotSide).resetCurrentState();
+            feetManager.requestMoveStraight(robotSide, newFootPose);
          }
       }
 
@@ -602,11 +560,11 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
       if (inContact)
       {
-         setFlatFootContactState(robotSide);
+         feetManager.setFlatFootContactState(robotSide);
       }
       else
       {
-         setContactStateForSwing(robotSide);
+         feetManager.setContactStateForMoveStraight(robotSide);
       }
    }
 
@@ -671,26 +629,6 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       }
    }
 
-   private void setOnToesContactState(RobotSide robotSide)
-   {
-      footControlModules.get(robotSide).setContactState(ConstraintType.TOES);
-   }
-
-   private void setFlatFootContactState(RobotSide robotSide)
-   {
-      footControlModules.get(robotSide).setContactState(ConstraintType.FULL);
-   }
-
-   private void setContactStateForSwing(RobotSide robotSide)
-   {
-      // Initialize desired foot pose to the actual, so no surprising behavior
-      ReferenceFrame footFrame = footControlModules.get(robotSide).getFootFrame();
-      desiredFootConfigurationProviders.get(robotSide).set(new FramePose(footFrame));
-
-      footControlModules.get(robotSide).doSingularityEscapeBeforeTransitionToNextState();
-      footControlModules.get(robotSide).setContactState(ConstraintType.MOVE_STRAIGHT);
-   }
-
    private class LoadBearingVariableChangedListener implements VariableChangedListener
    {
       public void variableChanged(YoVariable<?> v)
@@ -728,12 +666,11 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
             {
                if (doToeOff.get(robotSide).getBooleanValue())
                {
-                  setOnToesContactState(robotSide);
+                  feetManager.setOnToesContactState(robotSide);
                }
                else
                {
-                  setFlatFootContactState(robotSide
-                        );
+                  feetManager.setFlatFootContactState(robotSide);
                }
             }
          }
