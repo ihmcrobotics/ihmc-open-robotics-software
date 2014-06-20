@@ -20,17 +20,17 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    private static int blackfly_right_camera_id = 3;
    private static int primaryCameraId = multisense_sl_left_camera_id;
    
-   private static final String multisenseBaseTFName = "/head";
-   private static final String camera_string_base = "/multisense_sl";
+   private static final String camera_string_base = "/multisense";
+   private static final String multisenseBaseTFName = camera_string_base+"/head";
    private static final String left_camera_name = "stereo_camera_left";
    private static final String left_camera_topic = camera_string_base + "/left/image_rect_color/compressed";
    private static final String left_info_camera_topic = camera_string_base +"/left/camera_info";
-   private static final String left_frame_name = "/left_camera_frame";
+   private static final String left_frame_name = camera_string_base+"/left_camera_frame";
    
    private static final String right_camera_name = "stereo_camera_right";
    private static final String right_camera_topic = camera_string_base + "/right/image_rect/compressed";
    private static final String right_info_camera_topic = camera_string_base +"/right/camera_info";
-   private static final String right_frame_name = "/right_camera_frame";
+   private static final String right_frame_name = camera_string_base+"/right_camera_frame";
    
    private final static String fisheye_left_camera_topic = "/blackfly/camera/left/compressed";
    private final static String leftFisheyeCameraName = "l_situational_awareness_camera";
@@ -38,9 +38,16 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    private final static String fisheye_right_camera_topic = "/blackfly/camera/right/compressed";
    private final static String rightFisheyeCameraName = "r_situational_awareness_camera";
    
-   public static final String lidarJointName = "hokuyo_joint";
+   /*
+    * multisense driver publishes tf from /multisense/head_root -> /multisense/head_hokuyo_frame
+    * This has to be acquired runtime (not hardcoded here) from tf since it includes lidar-camera pose calibration information
+    * The new model does not contain hokuyo_joint anymore (which may still be used by gazebo)
+    * change since multisense 3.0
+    * -Tingfan Wu
+    */
+   public static final String lidarJointName = "head"; //this has to match LidarDataReceiver::LIDAR_HEAD_FRAME; gazebo should use: "hokuyo_joint"; 
    public static final String lidarSensorName = "head_hokuyo_sensor";
-   public static final String multisense_laser_topic_string = "/laser/scan";
+   public static final String multisense_laser_topic_string = camera_string_base+"/lidar_scan";
    public static final String bodyIMUSensor = "pelvis_imu_sensor";
    public static final String[] imuSensorsToUse = { bodyIMUSensor };
    
