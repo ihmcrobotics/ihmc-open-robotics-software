@@ -78,14 +78,10 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
    protected final OneDoFJoint ankleRollJoint;
    protected final OneDoFJoint anklePitchJoint;
 
-   protected final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
-
    public AbstractFootControlState(ConstraintType stateEnum, YoFramePoint yoDesiredPosition, YoFrameVector yoDesiredLinearVelocity,
          YoFrameVector yoDesiredLinearAcceleration, RigidBodySpatialAccelerationControlModule accelerationControlModule,
          MomentumBasedController momentumBasedController, ContactablePlaneBody contactableBody, int jacobianId, DoubleYoVariable nullspaceMultiplier,
-         BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape,
-         LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule, RobotSide robotSide,
-         YoVariableRegistry registry)
+         BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape, RobotSide robotSide, YoVariableRegistry registry)
    {
       super(stateEnum);
 
@@ -103,8 +99,6 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
       this.nullspaceMultiplier = nullspaceMultiplier;
       this.jacobianDeterminantInRange = jacobianDeterminantInRange;
       this.doSingularityEscape = doSingularityEscape;
-
-      this.legSingularityAndKneeCollapseAvoidanceControlModule = legSingularityAndKneeCollapseAvoidanceControlModule;
 
       this.hipYawJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.HIP_YAW);
       this.kneeJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.KNEE);
@@ -124,7 +118,6 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
 
    public void doAction()
    {
-      legSingularityAndKneeCollapseAvoidanceControlModule.update();
       computeNullspaceMultipliers();
 
       doSpecificAction();
