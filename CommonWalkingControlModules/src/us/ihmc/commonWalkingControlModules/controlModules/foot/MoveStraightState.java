@@ -5,9 +5,8 @@ import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccele
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
-import us.ihmc.commonWalkingControlModules.trajectories.CurrentOrientationProvider;
+import us.ihmc.commonWalkingControlModules.trajectories.CurrentConfigurationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.trajectories.OrientationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePositionTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.YoSE3ConfigurationProvider;
 import us.ihmc.robotSide.RobotSide;
@@ -22,8 +21,6 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
-import com.yobotics.simulationconstructionset.util.trajectory.FrameBasedPositionSource;
-import com.yobotics.simulationconstructionset.util.trajectory.PositionProvider;
 
 public class MoveStraightState extends AbstractUnconstrainedState
 {
@@ -52,14 +49,14 @@ public class MoveStraightState extends AbstractUnconstrainedState
 
       // TODO Check if it is necessary to implement a initial position provider using the previous desired instead of the current. (Sylvain)
       ReferenceFrame footFrame = referenceFrames.getFootFrame(robotSide);
-      PositionProvider initialPositionProvider = new FrameBasedPositionSource(footFrame);
-      OrientationProvider initialOrientationProvider = new CurrentOrientationProvider(worldFrame, footFrame);
+      CurrentConfigurationProvider initialConfigurationProvider = new CurrentConfigurationProvider(footFrame);
+
 
       positionTrajectoryGenerator = new StraightLinePositionTrajectoryGenerator(namePrefix + "FootPosition", worldFrame, footTrajectoryTimeProvider,
-            initialPositionProvider, finalConfigurationProvider, registry);
+            initialConfigurationProvider, finalConfigurationProvider, registry);
 
       orientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator(namePrefix + "Orientation", worldFrame, footTrajectoryTimeProvider,
-            initialOrientationProvider, finalConfigurationProvider, registry);
+            initialConfigurationProvider, finalConfigurationProvider, registry);
    }
 
    public void setFootPose(FramePose footPose)

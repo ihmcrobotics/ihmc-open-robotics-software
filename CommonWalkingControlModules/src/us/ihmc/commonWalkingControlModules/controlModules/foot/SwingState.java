@@ -9,9 +9,8 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
-import us.ihmc.commonWalkingControlModules.trajectories.CurrentOrientationProvider;
+import us.ihmc.commonWalkingControlModules.trajectories.CurrentConfigurationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.trajectories.OrientationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.SimpleTwoWaypointTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.SoftTouchdownPositionTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointPositionTrajectoryGenerator;
@@ -32,8 +31,6 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.trajectory.CurrentLinearVelocityProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
-import com.yobotics.simulationconstructionset.util.trajectory.FrameBasedPositionSource;
-import com.yobotics.simulationconstructionset.util.trajectory.PositionProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParameters;
 import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParametersProvider;
@@ -80,18 +77,17 @@ public class SwingState extends AbstractUnconstrainedState
       VectorProvider initialVelocityProvider = new CurrentLinearVelocityProvider(footFrame, momentumBasedController.getFullRobotModel().getFoot(robotSide),
             momentumBasedController.getTwistCalculator());
 
-      PositionProvider initialPositionProvider = new FrameBasedPositionSource(footFrame);
-      OrientationProvider initialOrientationProvider = new CurrentOrientationProvider(worldFrame, footFrame);
+      CurrentConfigurationProvider initialConfigurationProvider = new CurrentConfigurationProvider(footFrame);
 
       PositionTrajectoryGenerator swingTrajectoryGenerator = new TwoWaypointPositionTrajectoryGenerator(namePrefix + "Swing", worldFrame, swingTimeProvider,
-            initialPositionProvider, initialVelocityProvider, finalConfigurationProvider, touchdownVelocityProvider, trajectoryParametersProvider, registry,
+            initialConfigurationProvider, initialVelocityProvider, finalConfigurationProvider, touchdownVelocityProvider, trajectoryParametersProvider, registry,
             dynamicGraphicObjectsListRegistry, walkingControllerParameters, visualizeSwingTrajectory);
 
       PositionTrajectoryGenerator touchdownTrajectoryGenerator = new SoftTouchdownPositionTrajectoryGenerator(namePrefix + "Touchdown", worldFrame,
             finalConfigurationProvider, touchdownVelocityProvider, swingTimeProvider, registry);
 
       PositionTrajectoryGenerator pushRecoverySwingTrajectoryGenerator = new TwoWaypointTrajectoryGeneratorWithPushRecovery(namePrefix + "PushRecoverySwing",
-            worldFrame, swingTimeProvider, swingTimeRemaining, initialPositionProvider, initialVelocityProvider, finalConfigurationProvider,
+            worldFrame, swingTimeProvider, swingTimeRemaining, initialConfigurationProvider, initialVelocityProvider, finalConfigurationProvider,
             touchdownVelocityProvider, trajectoryParametersProvider, registry, dynamicGraphicObjectsListRegistry, swingTrajectoryGenerator,
             walkingControllerParameters, visualizeSwingTrajectory);
 
@@ -107,7 +103,7 @@ public class SwingState extends AbstractUnconstrainedState
             + "PushRecoveryTrajectoryGenerator", registry);
 
       orientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator(namePrefix + "SwingFootOrientation", worldFrame, swingTimeProvider,
-            initialOrientationProvider, finalConfigurationProvider, registry);
+            initialConfigurationProvider, finalConfigurationProvider, registry);
    }
 
    protected void initializeTrajectory()
