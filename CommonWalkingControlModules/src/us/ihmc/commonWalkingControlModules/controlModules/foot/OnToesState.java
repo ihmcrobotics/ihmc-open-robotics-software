@@ -14,10 +14,12 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 import us.ihmc.utilities.screwTheory.Twist;
 
@@ -68,6 +70,8 @@ public class OnToesState extends AbstractFootControlState
    double kneeToeOffQDesired = 0.7;
    double kneeToeOffDamp = 0.0;
    double controlledKneeToeOffQdd;
+   
+   private final OneDoFJoint kneeJoint;
 
    public OnToesState(WalkingControllerParameters walkingControllerParameters, YoFramePoint yoDesiredPosition, YoFrameVector yoDesiredLinearVelocity,
          YoFrameVector yoDesiredLinearAcceleration, RigidBodySpatialAccelerationControlModule accelerationControlModule,
@@ -96,6 +100,8 @@ public class OnToesState extends AbstractFootControlState
 
       originalContactPointPositions = new ArrayList<FramePoint>(contactPoints.size());
       copyOriginalContactPointPositions();
+      
+      kneeJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.KNEE);
    }
 
    public void doSpecificAction()
