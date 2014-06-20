@@ -45,7 +45,7 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
     * change since multisense 3.0
     * -Tingfan Wu
     */
-   public static final String lidarJointName = "head"; //this has to match LidarDataReceiver::LIDAR_HEAD_FRAME; gazebo should use: "hokuyo_joint"; 
+   private final String lidarJointName; //this has to match LidarDataReceiver::LIDAR_HEAD_FRAME; gazebo should use: "hokuyo_joint"; 
    public static final String lidarSensorName = "head_hokuyo_sensor";
    public static final String multisense_laser_topic_string = camera_string_base+"/lidar_scan";
    public static final String bodyIMUSensor = "pelvis_imu_sensor";
@@ -60,6 +60,8 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
          videoSetting = VideoSettingsFactory.get32kBitSettingsWide();
       }
       
+      lidarJointName = runningOnRealRobot ? "head" : "hokuyo_joint";
+
       cameraParamaters[0] = new DRCRobotCameraParamaters(left_camera_name, left_camera_topic, left_info_camera_topic, left_frame_name, multisenseBaseTFName, videoSetting, multisense_sl_left_camera_id);
       cameraParamaters[1] = new DRCRobotCameraParamaters(right_camera_name, right_camera_topic, right_info_camera_topic, right_frame_name, multisenseBaseTFName, videoSetting, multisense_sl_right_camera_id);
       
