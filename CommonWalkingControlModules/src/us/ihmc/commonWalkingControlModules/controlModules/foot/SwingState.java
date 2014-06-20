@@ -18,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointTrajectoryGen
 import us.ihmc.commonWalkingControlModules.trajectories.WrapperForMultiplePositionTrajectoryGenerators;
 import us.ihmc.commonWalkingControlModules.trajectories.YoSE3ConfigurationProvider;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
@@ -34,6 +35,7 @@ import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParameters;
 import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParametersProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryWaypointGenerationMethod;
 import com.yobotics.simulationconstructionset.util.trajectory.VectorProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.YoVariableDoubleProvider;
 
@@ -47,6 +49,7 @@ public class SwingState extends AbstractUnconstrainedState
    private final PositionTrajectoryGenerator positionTrajectoryGenerator, pushRecoveryPositionTrajectoryGenerator;
    private final OrientationInterpolationTrajectoryGenerator orientationTrajectoryGenerator;
 
+   private final CurrentConfigurationProvider initialConfigurationProvider;
    private final YoSE3ConfigurationProvider finalConfigurationProvider;
    private final TrajectoryParametersProvider trajectoryParametersProvider = new TrajectoryParametersProvider(new SimpleTwoWaypointTrajectoryParameters());
 
@@ -55,8 +58,7 @@ public class SwingState extends AbstractUnconstrainedState
          MomentumBasedController momentumBasedController, ContactablePlaneBody contactableBody, EnumYoVariable<ConstraintType> requestedState, int jacobianId,
          DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape,
          LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule, RobotSide robotSide,
-         YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
-         WalkingControllerParameters walkingControllerParameters)
+         YoVariableRegistry registry, WalkingControllerParameters walkingControllerParameters)
    {
       super(ConstraintType.SWING, yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration, accelerationControlModule, momentumBasedController,
             contactableBody, requestedState, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape,
@@ -77,8 +79,9 @@ public class SwingState extends AbstractUnconstrainedState
       VectorProvider initialVelocityProvider = new CurrentLinearVelocityProvider(footFrame, momentumBasedController.getFullRobotModel().getFoot(robotSide),
             momentumBasedController.getTwistCalculator());
 
-      CurrentConfigurationProvider initialConfigurationProvider = new CurrentConfigurationProvider(footFrame);
+      initialConfigurationProvider = new CurrentConfigurationProvider(footFrame);
 
+      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
       PositionTrajectoryGenerator swingTrajectoryGenerator = new TwoWaypointPositionTrajectoryGenerator(namePrefix + "Swing", worldFrame, swingTimeProvider,
             initialConfigurationProvider, initialVelocityProvider, finalConfigurationProvider, touchdownVelocityProvider, trajectoryParametersProvider, registry,
             dynamicGraphicObjectsListRegistry, walkingControllerParameters, visualizeSwingTrajectory);
@@ -141,19 +144,31 @@ public class SwingState extends AbstractUnconstrainedState
       orientationTrajectoryGenerator.packAngularData(trajectoryOrientation, desiredAngularVelocity, desiredAngularAcceleration);
    }
 
-   private final FramePose footStepPose = new FramePose();
+   private final FramePose newFootstepPose = new FramePose();
+   private final FramePoint oldFootstepPosition = new FramePoint();
 
    public void setFootstep(Footstep footstep, TrajectoryParameters trajectoryParameters)
    {
-      footstep.getPose(footStepPose);
-      footStepPose.changeFrame(worldFrame);
-      finalConfigurationProvider.setPose(footStepPose);
+      footstep.getPose(newFootstepPose);
+      newFootstepPose.changeFrame(worldFrame);
+      finalConfigurationProvider.setPose(newFootstepPose);
+      initialConfigurationProvider.get(oldFootstepPosition);
+      
+      newFootstepPose.changeFrame(worldFrame);
+      oldFootstepPosition.changeFrame(worldFrame);
+      
+      boolean worldFrameDeltaZAboveThreshold = 
+            Math.abs(newFootstepPose.getZ() - oldFootstepPosition.getZ()) > SimpleTwoWaypointTrajectoryParameters.getMinimumAnkleHeightDifferenceForStepOnOrOff();
+
+      if (worldFrameDeltaZAboveThreshold)
+         trajectoryParameters = new SimpleTwoWaypointTrajectoryParameters(TrajectoryWaypointGenerationMethod.STEP_ON_OR_OFF);
 
       trajectoryParametersProvider.set(trajectoryParameters);
    }
 
-   public void replanTrajectory(double swingTimeRemaining)
+   public void replanTrajectory(Footstep footstep, double swingTimeRemaining)
    {
+      setFootstep(footstep, trajectoryParametersProvider.getTrajectoryParameters());
       this.swingTimeRemaining.set(swingTimeRemaining);
       this.replanTrajectory.set(true);
    }
