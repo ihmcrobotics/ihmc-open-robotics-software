@@ -26,7 +26,6 @@ import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.GainCalculator;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
@@ -116,17 +115,6 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
       yoDesiredLinearVelocity.set(desiredLinearVelocity);
       desiredLinearAcceleration.changeFrame(worldFrame);
       yoDesiredLinearAcceleration.set(desiredLinearAcceleration);
-   }
-
-   protected void setGains(double kPosition, double kOrientation, double zeta)
-   {
-      double dPosition = GainCalculator.computeDerivativeGain(kPosition, zeta);
-      double dOrientation = GainCalculator.computeDerivativeGain(kOrientation, zeta);
-
-      accelerationControlModule.setPositionProportionalGains(kPosition, kPosition, kPosition);
-      accelerationControlModule.setPositionDerivativeGains(dPosition, dPosition, dPosition);
-      accelerationControlModule.setOrientationProportionalGains(kOrientation, kOrientation, kOrientation);
-      accelerationControlModule.setOrientationDerivativeGains(dOrientation, dOrientation, dOrientation);
    }
 
    protected void setTaskspaceConstraint(SpatialAccelerationVector footAcceleration)
