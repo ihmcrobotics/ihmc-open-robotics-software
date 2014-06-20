@@ -4,7 +4,8 @@ public class RawJointSensorDataHolder
 {
    private final String name;
    
-   private boolean useOutputEncoder = false;
+   private boolean useOutputEncoderQ = false;
+   private boolean useOutputEncoderQd = false;
    
    private double q_raw;
    private double q_out_raw;
@@ -35,20 +36,31 @@ public class RawJointSensorDataHolder
       setQd_out_raw(source.getQd_out_raw());
       setQd_raw(source.getQd_raw());
       setF_raw(source.getF_raw());
-      setUsesOutputEncoder(source.isUseOutputEncoder());
+      setUsesOutputEncoderQ(source.isUseOutputEncoderQ());
+      setUsesOutputEncoderQd(source.isUseOutputEncoderQd());
    }
 
    
    
-   public boolean isUseOutputEncoder()
+   public boolean isUseOutputEncoderQ()
    {
-      return useOutputEncoder;
+      return useOutputEncoderQ;
+   }
+   
+   public boolean isUseOutputEncoderQd()
+   {
+      return useOutputEncoderQd;
    }
 
    
-   public void setUsesOutputEncoder(boolean useOutputEncoder)
+   public void setUsesOutputEncoderQ(boolean useOutputEncoder)
    {
-      this.useOutputEncoder = useOutputEncoder;
+      this.useOutputEncoderQ = useOutputEncoder;
+   }
+   
+   public void setUsesOutputEncoderQd(boolean useOutputEncoder)
+   {
+      this.useOutputEncoderQd = useOutputEncoder;
    }
 
    
