@@ -46,6 +46,8 @@ public class FootControlModule
    {
       FULL, HOLD_POSITION, HEEL_TOUCHDOWN, TOES_TOUCHDOWN, TOES, SWING, MOVE_STRAIGHT
    }
+   
+   protected static final double coefficientOfFriction = 0.8;
 
    private final StateMachine<ConstraintType> stateMachine;
    private final EnumYoVariable<ConstraintType> requestedState;
@@ -87,7 +89,7 @@ public class FootControlModule
    {
       // remove and test:
       contactableFoot = momentumBasedController.getContactableFeet().get(robotSide);
-      momentumBasedController.setPlaneContactCoefficientOfFriction(contactableFoot, 0.8);
+      momentumBasedController.setPlaneContactCoefficientOfFriction(contactableFoot, coefficientOfFriction);
       momentumBasedController.setPlaneContactStateFullyConstrained(contactableFoot);
 
       RigidBody foot = contactableFoot.getRigidBody();
@@ -332,6 +334,9 @@ public class FootControlModule
 
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
+      
+      // test:
+//      momentumBasedController.setPlaneContactCoefficientOfFriction(contactableFoot, coefficientOfFriction);
    }
 
    // Used to restart the current state reseting the current state time

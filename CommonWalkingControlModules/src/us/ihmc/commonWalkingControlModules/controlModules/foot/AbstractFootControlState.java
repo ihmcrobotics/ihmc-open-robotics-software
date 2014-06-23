@@ -34,7 +34,6 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
    protected final YoVariableRegistry registry;
 
    // magic numbers:
-   protected static final double coefficientOfFriction = 0.8;
    protected static final double minJacobianDeterminant = 0.035;
    protected static final double EPSILON_POINT_ON_EDGE = 1e-2;
 
@@ -97,8 +96,6 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
       computeNullspaceMultipliers();
 
       doSpecificAction();
-
-      momentumBasedController.setPlaneContactCoefficientOfFriction(contactableBody, coefficientOfFriction);
    }
 
    protected void setTaskspaceConstraint(SpatialAccelerationVector footAcceleration)
