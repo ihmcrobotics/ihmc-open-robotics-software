@@ -13,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoFramePoint2dIn
 import us.ihmc.commonWalkingControlModules.captureRegion.PushRecoveryControlModule;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.LegSingularityAndKneeCollapseAvoidanceControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
@@ -391,16 +390,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       resetIntegratorsAfterSwing.set(true);
    }
 
-   private RobotSide getUpcomingSupportLeg()
-   {
-      return upcomingSupportLeg.getEnumValue();
-   }
-
-   private RobotSide getSupportLeg()
-   {
-      return supportLeg.getEnumValue();
-   }
-
    private void setUpStateMachine()
    {
       DoubleSupportState doubleSupportState = new DoubleSupportState(null);
@@ -502,7 +491,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          headGainsChangedListener.variableChanged(null);
       }
 
-      FrameOrientation initialDesiredPelvisOrientation = new FrameOrientation(referenceFrames.getAnkleZUpFrame(getUpcomingSupportLeg()));
+      FrameOrientation initialDesiredPelvisOrientation = new FrameOrientation(referenceFrames.getAnkleZUpFrame(upcomingSupportLeg.getEnumValue()));
       initialDesiredPelvisOrientation.changeFrame(worldFrame);
       double yaw = initialDesiredPelvisOrientation.getYawPitchRoll()[0];
       initialDesiredPelvisOrientation.setYawPitchRoll(yaw, userDesiredPelvisPitch.getDoubleValue(), userDesiredPelvisRoll.getDoubleValue());
@@ -810,7 +799,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          icpTrajectoryHasBeenInitialized.set(false);
          if (DEBUG)
             System.out.println("WalkingHighLevelHumanoidController: enteringDoubleSupportState");
-         setSupportLeg(null); // TODO: check if necessary
+         supportLeg.set(null); // TODO: check if necessary
 
          feetManager.initializeContactStatesForDoubleSupport(transferToSide);
          
@@ -1032,7 +1021,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             System.out.println("WalkingHighLevelHumanoidController: enteringSingleSupportState");
          RobotSide supportSide = swingSide.getOppositeSide();
 
-         setSupportLeg(supportSide);
+         supportLeg.set(supportSide);
 
          transferTimeCalculationProvider.updateTransferTime();
          
@@ -1086,14 +1075,14 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForSingleSupport(nextFootstep, swingSide);
          //FramePoint2d finalDesiredICP = getSingleSupportFinalDesiredICPForWalking(transferToAndNextFootstepsData, swingSide);
 
-         setSupportLeg(supportSide);
+         supportLeg.set(supportSide);
          icpAndMomentumBasedController.updateBipedSupportPolygons(bipedSupportPolygons);
 
          // Shouldn't have to do this init anymore since it's done above...
          // icpTrajectoryGenerator.initialize(desiredICP.getFramePoint2dCopy(), finalDesiredICP, swingTimeCalculationProvider.getValue(), omega0,
          // amountToBeInsideSingleSupport.getDoubleValue(), getSupportLeg(), yoTime.getDoubleValue());
 
-         centerOfMassHeightTrajectoryGenerator.initialize(transferToAndNextFootstepsData, getSupportLeg(), nextFootstep, getContactStatesList());
+         centerOfMassHeightTrajectoryGenerator.initialize(transferToAndNextFootstepsData, supportLeg.getEnumValue(), nextFootstep, getContactStatesList());
 
          if (DEBUG)
             System.out.println("WalkingHighLevelHumanoidController: nextFootstep will change now!");
@@ -1143,7 +1132,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          else
          {
             boolean doubleSupportTimeHasPassed = stateMachine.timeInCurrentState() > transferTimeCalculationProvider.getValue();
-            boolean transferringToThisRobotSide = transferToSide == getUpcomingSupportLeg();
+            boolean transferringToThisRobotSide = transferToSide == upcomingSupportLeg.getEnumValue();
 
             return transferringToThisRobotSide && doubleSupportTimeHasPassed;
          }
@@ -1173,7 +1162,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          {
             // TODO: not really nice, but it'll do:
             FlatThenPolynomialCoMHeightTrajectoryGenerator flatThenPolynomialCoMHeightTrajectoryGenerator = (FlatThenPolynomialCoMHeightTrajectoryGenerator) centerOfMassHeightTrajectoryGenerator;
-            double orbitalEnergy = flatThenPolynomialCoMHeightTrajectoryGenerator.computeOrbitalEnergyIfInitializedNow(getUpcomingSupportLeg());
+            double orbitalEnergy = flatThenPolynomialCoMHeightTrajectoryGenerator.computeOrbitalEnergyIfInitializedNow(upcomingSupportLeg.getEnumValue());
 
             // return transferICPTrajectoryDone.getBooleanValue() && orbitalEnergy > minOrbitalEnergy;
             return icpTrajectoryHasBeenInitialized.getBooleanValue() && (orbitalEnergy > minOrbitalEnergyForSingleSupport.getDoubleValue());
@@ -1233,7 +1222,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       public boolean checkCondition()
       {
-         RobotSide swingSide = getSupportLeg().getOppositeSide();
+         RobotSide swingSide = supportLeg.getEnumValue().getOppositeSide();
          hasMinimumTimePassed.set(hasMinimumTimePassed());
 
          if (!hasICPPlannerFinished.getBooleanValue())
@@ -1317,10 +1306,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       public boolean checkCondition()
       {
-            Footstep nextFootstep = upcomingFootstepList.getNextFootstep();
-            boolean readyToStopWalking = (upcomingFootstepList.isFootstepProviderEmpty() && (nextFootstep == null))
-                  && ((getSupportLeg() == null) || super.checkCondition());
-            return readyToStopWalking;
+         boolean isNextFootstepNull = upcomingFootstepList.getNextFootstep() == null;
+         boolean isSupportLegNull = supportLeg.getEnumValue() == null;
+         boolean noMoreFootsteps = upcomingFootstepList.isFootstepProviderEmpty() && isNextFootstepNull;
+
+         boolean readyToStopWalking = noMoreFootsteps && (isSupportLegNull || super.checkCondition());
+         return readyToStopWalking;
       }
    }
 
@@ -1342,7 +1333,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          FrameConvexPolygon2d footPolygon = computeFootPolygon(robotSide, referenceFrames.getAnkleZUpFrame(robotSide));
          footPolygon.getCentroid(centroid);
          centroid.changeFrame(ret.getReferenceFrame());
-         if (robotSide == getUpcomingSupportLeg())
+         if (robotSide == upcomingSupportLeg.getEnumValue())
             centroid.scale(trailingFootToLeadingFootFactor);
          else
             centroid.scale(1.0 - trailingFootToLeadingFootFactor);
@@ -1419,11 +1410,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       return toePoints;
    }
 
-   private void setSupportLeg(RobotSide supportLeg)
-   {
-      this.supportLeg.set(supportLeg);
-   }
-
    public void doMotionControl()
    {
       if (loopControllerForever.getBooleanValue())
@@ -1482,7 +1468,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       capturePointTrajectoryData.set(finalDesiredICPInWorld.getFramePoint2dCopy(), desiredICP.getFramePoint2dCopy(), desiredICPVelocity.getFrameVector2dCopy());
       icpBasedMomentumRateOfChangeControlModule.getDesiredCapturePointTrajectoryInputPort().setData(capturePointTrajectoryData);
 
-      icpBasedMomentumRateOfChangeControlModule.getSupportLegInputPort().setData(getSupportLeg());
+      icpBasedMomentumRateOfChangeControlModule.getSupportLegInputPort().setData(supportLeg.getEnumValue());
 
       icpBasedMomentumRateOfChangeControlModule.getDesiredCenterOfMassHeightAccelerationInputPort().setData(controlledCoMHeightAcceleration.getDoubleValue());
 
@@ -1527,7 +1513,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       centerOfMassHeightInputData.setContactStates(contactStatesList);
 
-      centerOfMassHeightInputData.setSupportLeg(getSupportLeg());
+      centerOfMassHeightInputData.setSupportLeg(supportLeg.getEnumValue());
 
       if (pushRecoveryModule.isEnabled() && pushRecoveryModule.isRecoveringFromDoubleSupportFall())
       {
