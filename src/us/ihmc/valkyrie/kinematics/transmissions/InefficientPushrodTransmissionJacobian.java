@@ -370,10 +370,10 @@ public class InefficientPushrodTransmissionJacobian
       tempCrossVector.cross(tempRVector, f6VectorInBottomFrame);
       jBottomJoint6.set(tempCrossVector.getX());
 
-      jacobianToPack[0][0] = jTopJoint5.getDoubleValue();
-      jacobianToPack[0][1] = jTopJoint6.getDoubleValue();
-      jacobianToPack[1][0] = jBottomJoint5.getDoubleValue();
-      jacobianToPack[1][1] = jBottomJoint6.getDoubleValue();
+      jacobianToPack[1][1] =  jTopJoint5.getDoubleValue();
+      jacobianToPack[0][1] =  jTopJoint6.getDoubleValue();
+      jacobianToPack[1][0] = -jBottomJoint5.getDoubleValue();
+      jacobianToPack[0][0] = -jBottomJoint6.getDoubleValue();
 
       if (visualize)
       {
