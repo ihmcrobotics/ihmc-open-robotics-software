@@ -84,7 +84,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <Eigen/Core>
 #include <Eigen/Cholesky>
-#include<iostream>
 
 namespace Eigen {
 
@@ -134,13 +133,13 @@ void delete_constraint(MatrixXd& R, MatrixXd& J, VectorXi& A, VectorXd& u,  int 
 double solve_quadprog2(LLT<MatrixXd,Lower> &chol,  double c1, VectorXd & g0,  
                       const MatrixXd & CE, const VectorXd & ce0,  
                       const MatrixXd & CI, const VectorXd & ci0, 
-                      VectorXd& x, int& iter);
+                      VectorXd& x);
 
 /* solve_quadprog is used for on-demand QP solving */
 inline double solve_quadprog(MatrixXd & G,  VectorXd & g0,  
                       const MatrixXd & CE, const VectorXd & ce0,  
                       const MatrixXd & CI, const VectorXd & ci0, 
-                      VectorXd& x, int& iter){
+                      VectorXd& x){
 						  
   LLT<MatrixXd,Lower> chol(G.cols());
   double c1;
@@ -151,9 +150,7 @@ inline double solve_quadprog(MatrixXd & G,  VectorXd & g0,
   /* decompose the matrix G in the form LL^T */
   chol.compute(G);
 
-  double retVal = solve_quadprog2(chol, c1, g0, CE, ce0, CI, ci0, x, iter);
-  std::cerr << "QuadProgIt" << iter << std::endl;
-  return retVal;
+  return solve_quadprog2(chol, c1, g0, CE, ce0, CI, ci0, x);
 
 }
 
@@ -161,7 +158,7 @@ inline double solve_quadprog(MatrixXd & G,  VectorXd & g0,
 inline double solve_quadprog2(LLT<MatrixXd,Lower> &chol,  double c1, VectorXd & g0,  
                       const MatrixXd & CE, const VectorXd & ce0,  
                       const MatrixXd & CI, const VectorXd & ci0, 
-                      VectorXd& x, int& iter)
+                      VectorXd& x)
 {
   int i, j, k, l; /* indices */
   int ip, me, mi;
@@ -179,8 +176,7 @@ inline double solve_quadprog2(LLT<MatrixXd,Lower> &chol,  double c1, VectorXd & 
     * and the full step length t2 */
   VectorXi A(m + p), A_old(m + p), iai(m + p), iaexcl(m+p);
   int q;
-  int iq;
-  iter=0;
+  int iq, iter = 0;
  	
   me = p; /* number of equality constraints */
   mi = m; /* number of inequality constraints */
@@ -252,15 +248,12 @@ inline double solve_quadprog2(LLT<MatrixXd,Lower> &chol,  double c1, VectorXd & 
     /* compute the new solution value */
     f_value += 0.5 * (t2 * t2) * z.dot(np);
     A(i) = -i - 1;
-   
-	//IT'S OK NOT TO ADD EQUALITY CONSTRAINT
+    
     if (!add_constraint(R, J, d, iq, R_norm))
     {
-		delete_constraint(R, J, A, u, p, iq, ip);
       // FIXME: it should raise an error
       // Equality constraints are linearly dependent
-	  // std::cerr<< "addconFailed "<<iter<<std::endl;
-      //return f_value;
+      return f_value;
     }
   }
   
@@ -298,7 +291,7 @@ l1:	iter++;
 	if (std::abs(psi) <= mi * std::numeric_limits<double>::epsilon() * c1 * c2* 100.0)
 	{
     /* numerically there are not infeasibilities anymore */
-    	q = iq;
+    q = iq;
 		return f_value;
   }
     
