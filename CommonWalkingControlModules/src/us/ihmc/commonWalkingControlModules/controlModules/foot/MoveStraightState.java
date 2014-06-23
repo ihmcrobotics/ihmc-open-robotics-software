@@ -17,8 +17,6 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
 
 public class MoveStraightState extends AbstractUnconstrainedState
@@ -28,14 +26,13 @@ public class MoveStraightState extends AbstractUnconstrainedState
 
    private final YoSE3ConfigurationProvider finalConfigurationProvider;
 
-   public MoveStraightState(DoubleProvider footTrajectoryTimeProvider, YoFramePoint yoDesiredPosition, YoFrameVector yoDesiredLinearVelocity,
-         YoFrameVector yoDesiredLinearAcceleration, RigidBodySpatialAccelerationControlModule accelerationControlModule,
+   public MoveStraightState(DoubleProvider footTrajectoryTimeProvider, RigidBodySpatialAccelerationControlModule accelerationControlModule,
          MomentumBasedController momentumBasedController, ContactablePlaneBody contactableBody, int jacobianId, DoubleYoVariable nullspaceMultiplier,
          BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape,
          LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule, RobotSide robotSide,
          YoVariableRegistry registry)
    {
-      super(ConstraintType.MOVE_STRAIGHT, yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration, accelerationControlModule,
+      super(ConstraintType.MOVE_STRAIGHT, accelerationControlModule,
             momentumBasedController, contactableBody, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape,
             legSingularityAndKneeCollapseAvoidanceControlModule, robotSide, registry);
 

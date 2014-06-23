@@ -26,8 +26,6 @@ import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 
 public abstract class AbstractFootControlState extends State<ConstraintType>
@@ -52,10 +50,6 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
    protected final FrameOrientation trajectoryOrientation = new FrameOrientation(worldFrame);
    protected final SpatialAccelerationVector footAcceleration = new SpatialAccelerationVector();
 
-   protected final YoFramePoint yoDesiredPosition;
-   protected final YoFrameVector yoDesiredLinearVelocity;
-   protected final YoFrameVector yoDesiredLinearAcceleration;
-
    protected final RigidBodySpatialAccelerationControlModule accelerationControlModule;
    protected final MomentumBasedController momentumBasedController;
    protected final TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
@@ -70,8 +64,7 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
    protected boolean isCoPOnEdge;
    protected FrameLineSegment2d edgeToRotateAbout;
 
-   public AbstractFootControlState(ConstraintType stateEnum, YoFramePoint yoDesiredPosition, YoFrameVector yoDesiredLinearVelocity,
-         YoFrameVector yoDesiredLinearAcceleration, RigidBodySpatialAccelerationControlModule accelerationControlModule,
+   public AbstractFootControlState(ConstraintType stateEnum, RigidBodySpatialAccelerationControlModule accelerationControlModule,
          MomentumBasedController momentumBasedController, ContactablePlaneBody contactableBody, int jacobianId, DoubleYoVariable nullspaceMultiplier,
          BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape, RobotSide robotSide, YoVariableRegistry registry)
    {
@@ -79,10 +72,6 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
 
       this.registry = registry;
       this.contactableBody = contactableBody;
-
-      this.yoDesiredPosition = yoDesiredPosition;
-      this.yoDesiredLinearVelocity = yoDesiredLinearVelocity;
-      this.yoDesiredLinearAcceleration = yoDesiredLinearAcceleration;
 
       this.accelerationControlModule = accelerationControlModule;
       this.momentumBasedController = momentumBasedController;
@@ -110,11 +99,6 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
       doSpecificAction();
 
       momentumBasedController.setPlaneContactCoefficientOfFriction(contactableBody, coefficientOfFriction);
-
-      desiredLinearVelocity.changeFrame(worldFrame);
-      yoDesiredLinearVelocity.set(desiredLinearVelocity);
-      desiredLinearAcceleration.changeFrame(worldFrame);
-      yoDesiredLinearAcceleration.set(desiredLinearAcceleration);
    }
 
    protected void setTaskspaceConstraint(SpatialAccelerationVector footAcceleration)
