@@ -1,6 +1,6 @@
 clear java
 % generate 1.6 classes
-!javac   ClassLoaderObjectInputStream.java
+%!javac   ClassLoaderObjectInputStream.java
 javaaddpath ../../classes/
 javaaddpath ../../../ThirdParty/ThirdPartyJars/EJML/EJML.jar
 javaaddpath ../../../IHMCUtilities/classes/
@@ -10,7 +10,8 @@ import java.io.*
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.*
 
 %problemDump = ['../../../Atlas/'  'ActiveSetQPMomentumOptimizer_diverence1399891506516816000'];
-problemDump = ['../../../Atlas/'  'ActiveSetQPMomentumOptimizer_diverence1399891506516816000'];
+%problemDump = ['../../../Atlas/'  'ActiveSetQPMomentumOptimizer_diverence1399891506516816000'];
+problemDump = '../../../ValkyrieHardwareDrivers/ActiveSetQPMomentumOptimizer_diverence1402652193717240000'
 % problemDump = 'test';
 fis = FileInputStream(problemDump);
 % ois = ObjectInputStream(fis);
@@ -57,19 +58,39 @@ bin = -rhoMin;
 x0 = [prevVd;prevRho];
 lb = [-inf(size(prevVd)); rhoMin];
 
+Aeq(end-4:end,:)=[];
+beq(end-4:end)=[];
+
+
 %%
 %xopt = fmincon(@(x) x'*Q*x+x'*f, x0,Ain, bin, Aeq, beq);
 %Aeq=Aeq(1:37,:);
-%beq=beq(1:37);
-[xopt, ~, stat]= fmincon(@(x) x'*Q*x+x'*f, x0,Ain, bin, Aeq, beq);
+%beq=beq(1:37);x\
 
-%
-active=[];
-[xopt2, act_opt, fail]=fastQP(Q,f,Aeq, beq, Ain, bin,active);
-fail
+disp('#--------------------------------------------')
+Q=(Q+Q')/2;
+param = optimset('Algorithm','active-set');
 
-
-%
+%[xopt, ~, stat]= quadprog(Q,f,Ain, bin, Aeq, beq,[],[],x0,param);
+A=[Aeq;Ain];b=[beq;bin];
+[nc nv]=size(A);
+addpath ~/matlablib/
+ub=[10000*ones(nDoF,1); inf(nRho,1)];
+lb=[-10000*ones(nDoF,1); -inf(nRho,1)];
+xopt = myqpsub(Q,f,[Aeq;Ain], [beq;bin],lb,ub, x0, size(Aeq,1),3,'quadprog', nc, nv,param);
 checkOpt(xopt, Q, f, Aeq, beq, Ain, bin)
+
+%
+Ain2= [eye(nDoF) zeros(nDoF,nRho); 
+    -eye(nDoF) zeros(nDoF,nRho); 
+    Ain];
+bin2=[10000*ones(nDoF,1);10000*ones(nDoF,1);bin];
+active=[];
+[xopt2, act_opt, fail]=fastQP(Q,f,Aeq, beq, Ain2, bin2 ,active);
 checkOpt(xopt2, Q, f, Aeq, beq, Ain, bin)
-mostViolation=max(Ain*xopt2 - bin)
+
+%% check constraints
+subplot(1,3,[1 2])
+imagesc(log(abs(Aeq)));colorbar
+subplot(1,3,3);
+imagesc(log(abs(beq)))
