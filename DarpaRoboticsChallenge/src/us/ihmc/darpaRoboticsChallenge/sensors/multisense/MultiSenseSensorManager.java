@@ -1,11 +1,8 @@
 package us.ihmc.darpaRoboticsChallenge.sensors.multisense;
 
-import org.ros.exception.RemoteException;
-import org.ros.node.NodeConfiguration;
-import org.ros.node.service.ServiceResponseListener;
-
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
+import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParamaters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ArmCalibrationHelper;
@@ -13,25 +10,18 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.CameraInfoReceiver
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.CameraLogger;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.RosCameraInfoReciever;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.RosCameraReceiver;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.GazeboLidarDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.LidarFilter;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.RosLidarDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosNativeNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.ros.RosMainNode;
-import us.ihmc.utilities.ros.RosServiceClient;
-import dynamic_reconfigure.DoubleParameter;
-import dynamic_reconfigure.Reconfigure;
-import dynamic_reconfigure.ReconfigureRequest;
-import dynamic_reconfigure.ReconfigureResponse;
-import dynamic_reconfigure.StrParameter;
 
 public class MultiSenseSensorManager
 {
    private final RosCameraReceiver cameraReceiver;
-   private final RosMainNode rosMainNode;
 
    public MultiSenseSensorManager(DRCRobotSensorInformation sensorInformation, RobotPoseBuffer sharedRobotPoseBuffer, RosMainNode rosMainNode,
          DRCNetworkProcessorNetworkingManager networkingManager, SDFFullRobotModel sharedFullRobotModel, ObjectCommunicator fieldComputerClient,
@@ -39,8 +29,6 @@ public class MultiSenseSensorManager
    {
 
       DRCRobotCameraParamaters cameraParamaters = sensorInformation.getPrimaryCameraParamaters();
-      this.rosMainNode = rosMainNode;
-
       CameraLogger logger = DRCConfigParameters.LOG_PRIMARY_CAMERA_IMAGES ? new CameraLogger("left") : null;
 
       cameraReceiver = new RosCameraReceiver(cameraParamaters, sharedRobotPoseBuffer, cameraParamaters.getVideoSettings(), rosMainNode, networkingManager,
@@ -49,63 +37,22 @@ public class MultiSenseSensorManager
       CameraInfoReceiver cameraInfoServer = new RosCameraInfoReciever(sensorInformation.getPrimaryCameraParamaters(), rosMainNode,
             networkingManager.getControllerStateHandler(),logger);
       networkingManager.getControllerCommandHandler().setIntrinsicServer(cameraInfoServer);
+      
+      double crc = DRCLocalConfigParameters.USING_REAL_HEAD ?  -.0010908f : 0;
+      boolean useRosForTransform = true;
 
-      new GazeboLidarDataReceiver(rosMainNode, sharedRobotPoseBuffer, networkingManager, sharedFullRobotModel, sensorInformation, fieldComputerClient,
-            rosNativeNetworkProcessor, ppsTimestampOffsetProvider, lidarDataFilter);
+      new RosLidarDataReceiver(rosMainNode, sharedRobotPoseBuffer, networkingManager, sharedFullRobotModel, sensorInformation, fieldComputerClient,
+            rosNativeNetworkProcessor, ppsTimestampOffsetProvider, lidarDataFilter, useRosForTransform, crc);
 
-      setMultisenseResolution();
-   }
-
-   private void setMultisenseResolution()
-   {
-      try
+      MultiSenseParamaterSetter.setMultisenseResolution(rosMainNode);
+      
+      if (RosNativeNetworkProcessor.hasNativeLibrary())
       {
-         final RosServiceClient<ReconfigureRequest, ReconfigureResponse> multiSenseClient = new RosServiceClient<ReconfigureRequest, ReconfigureResponse>(
-               Reconfigure._TYPE);
-         rosMainNode.attachServiceClient("multisense/set_parameters", multiSenseClient);
-
-         Thread setupThread = new Thread()
-         {
-            public void run()
-            {
-               multiSenseClient.waitTillConnected();
-               ReconfigureRequest request = multiSenseClient.getMessage();
-               StrParameter resolutionParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(StrParameter._TYPE);
-               resolutionParam.setName("resolution");
-               //resolutionParam.setValue("2048x1088x64");
-               //System.out.println("Setting multisense resolution to 2048x1088");
-               System.out.println("Setting multisense resolution to 1024x544x64");
-               resolutionParam.setValue("1024x544x64");
-               request.getConfig().getStrs().add(resolutionParam);
-
-               DoubleParameter fpsParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(DoubleParameter._TYPE);
-               fpsParam.setName("fps");
-               fpsParam.setValue(30.0);
-               request.getConfig().getDoubles().add(fpsParam);
-               
-               
-               multiSenseClient.call(request, new ServiceResponseListener<ReconfigureResponse>()
-               {
-
-                  public void onSuccess(ReconfigureResponse response)
-                  {
-                     System.out.println("Set resolution to " + response.getConfig().getStrs().get(0).getValue());
-                  }
-
-                  public void onFailure(RemoteException e)
-                  {
-                     e.printStackTrace();
-                  }
-               });
-            }
-         };
-
-         setupThread.start();
-
+         MultiSenseParamaterSetter.setupNativeROSCommunicator(rosNativeNetworkProcessor);
       }
-      catch (Exception e)
+      else
       {
-         System.err.println(e.getMessage());
+         MultiSenseParamaterSetter.setupMultisenseSpindleSpeedPublisher(rosMainNode);
       }
    }
 
