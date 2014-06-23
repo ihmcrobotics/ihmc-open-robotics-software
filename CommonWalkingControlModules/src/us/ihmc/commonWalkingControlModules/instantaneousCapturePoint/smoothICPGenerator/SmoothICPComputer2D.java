@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPG
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
-import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.InstantaneousCapturePointPlanner;
@@ -25,28 +24,29 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 public class SmoothICPComputer2D extends DoubleSupportFootCenterToToeICPComputer implements InstantaneousCapturePointPlanner
 {
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   
+
    private final DoubleYoVariable percentToScaleBackOnVelocity = new DoubleYoVariable("percentToScaleBackOnVelocity", registry);
    private final DoubleYoVariable deltaFootDistance = new DoubleYoVariable("deltaFootDistance", registry);
-   
+
    private final YoFramePoint initialFootPlacement = new YoFramePoint("initialFootPlacement", worldFrame, registry);
    private final YoFramePoint currentFootPlacement = new YoFramePoint("currentFootPlacement", worldFrame, registry);
    private final EnumYoVariable<RobotSide> currentTransferToSide = new EnumYoVariable<RobotSide>("currentTransferToSide", registry, RobotSide.class);
-   
+
    private final DoubleYoVariable percentIn = new DoubleYoVariable("percentIn", registry);
-   
+
    private final FramePoint footLocationTemp = new FramePoint();
    private final CommonWalkingReferenceFrames referenceFrames;
-   
+
    private final DoubleYoVariable alphaDeltaFootPosition = new DoubleYoVariable("alphaDeltaFootPosition", registry);
-   private final AlphaFilteredYoFrameVector deltaFootPosition = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector("deltaFootPosition", "", registry, alphaDeltaFootPosition, worldFrame);
+   private final AlphaFilteredYoFrameVector deltaFootPosition = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector("deltaFootPosition", "", registry,
+         alphaDeltaFootPosition, worldFrame);
    private final Vector3d deltaVectorTemp = new Vector3d();
-   
-   public SmoothICPComputer2D(CommonWalkingReferenceFrames referenceFrames, double dt, double doubleSupportFirstStepFraction, int maxNumberOfConsideredFootsteps, YoVariableRegistry parentRegistry,
-                              DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+
+   public SmoothICPComputer2D(CommonWalkingReferenceFrames referenceFrames, double dt, double doubleSupportFirstStepFraction,
+         int maxNumberOfConsideredFootsteps, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       super(dt, doubleSupportFirstStepFraction, maxNumberOfConsideredFootsteps, parentRegistry, dynamicGraphicObjectsListRegistry);
-      
+
       alphaDeltaFootPosition.set(0.65);
       this.referenceFrames = referenceFrames;
    }
@@ -56,7 +56,8 @@ public class SmoothICPComputer2D extends DoubleSupportFootCenterToToeICPComputer
    private final Vector3d icpAccelerationToPackTemp = new Vector3d();
    private final Point3d ecmpToPackTemp = new Point3d();
 
-   public void getICPPositionAndVelocity(FramePoint2d icpPostionToPack, FrameVector2d icpVelocityToPack, FramePoint2d ecmpToPack, FramePoint2d actualICP, double time)
+   public void getICPPositionAndVelocity(FramePoint2d icpPostionToPack, FrameVector2d icpVelocityToPack, FramePoint2d ecmpToPack, FramePoint2d actualICP,
+         double time)
    {
       super.computeICPPositionVelocityAcceleration(icpPostionToPackTemp, icpVelocityToPackTemp, icpAccelerationToPackTemp, ecmpToPackTemp, time);
 
@@ -65,110 +66,104 @@ public class SmoothICPComputer2D extends DoubleSupportFootCenterToToeICPComputer
       if ((transferToSide != null) && isPerformingICPDoubleSupport())
       {
          getFootPlacement(transferToSide, currentFootPlacement);
-         
+
          double deltaX = currentFootPlacement.getX() - initialFootPlacement.getX();
          double deltaY = currentFootPlacement.getY() - initialFootPlacement.getY();
          deltaFootPosition.update(deltaX, deltaY, 0.0);
          deltaFootDistance.set(deltaFootPosition.length());
-         
+
          //TODO: Do the delta proportionally to how long remaining better...
-         
+
          double timeInState = super.getTimeInState(time);
          double timeLeft = super.getEstimatedTimeRemainingForState(time);
-         
+
          double percentIn = timeInState / (timeInState + timeLeft);
-          
+
          percentIn = MathTools.clipToMinMax(percentIn, 0.0, 1.0);
          this.percentIn.set(percentIn);
          deltaFootPosition.scale(percentIn);
-         
+
          deltaVectorTemp.setX(deltaFootPosition.getX());
          deltaVectorTemp.setY(deltaFootPosition.getY());
          icpPostionToPackTemp.add(deltaVectorTemp);
-         
+
          // Scale back on the velocity if the foot slipped a lot.
          // And when coming to the end of the trajectory.
          // This is very hackish. We should make the trajectories better so we don't have
          // to do this...
-         percentToScaleBackOnVelocity.set(1.0 - deltaFootDistance.getDoubleValue()/0.04);
+         percentToScaleBackOnVelocity.set(1.0 - deltaFootDistance.getDoubleValue() / 0.04);
          percentToScaleBackOnVelocity.set(MathTools.clipToMinMax(percentToScaleBackOnVelocity.getDoubleValue(), 0.0, 1.0));
-         
+
          // At 95% in, should be at zero velocity.
-         double percentToScaleDownAtEnd = 1.0 - (percentIn)/0.95;
+         double percentToScaleDownAtEnd = 1.0 - (percentIn) / 0.95;
          percentToScaleDownAtEnd = MathTools.clipToMinMax(percentToScaleDownAtEnd, 0.0, 1.0);
          percentToScaleBackOnVelocity.set(percentToScaleBackOnVelocity.getDoubleValue() * percentToScaleDownAtEnd);
          icpVelocityToPackTemp.scale(percentToScaleBackOnVelocity.getDoubleValue());
       }
-      
+
       icpPostionToPack.checkReferenceFrameMatch(worldFrame);
       icpVelocityToPack.checkReferenceFrameMatch(worldFrame);
       ecmpToPack.checkReferenceFrameMatch(worldFrame);
-      
+
       icpPostionToPack.set(icpPostionToPackTemp.getX(), icpPostionToPackTemp.getY());
       icpVelocityToPack.set(icpVelocityToPackTemp.getX(), icpVelocityToPackTemp.getY());
       ecmpToPack.set(ecmpToPackTemp.getX(), ecmpToPackTemp.getY());
    }
-   
+
    private final Point3d initialICPPositionTemp = new Point3d();
-   
+
    public void initializeDoubleSupportInitialTransfer(TransferToAndNextFootstepsData transferToAndNextFootstepsData, Point2d initialICPPosition,
          double initialTime)
    {
       deltaFootPosition.reset();
-      
+
       initialICPPositionTemp.set(initialICPPosition.getX(), initialICPPosition.getY(), 0.0);
-      initializeDoubleSupportInitialTransfer(transferToAndNextFootstepsData, initialICPPositionTemp,
-            initialTime);
+      initializeDoubleSupportInitialTransfer(transferToAndNextFootstepsData, initialICPPositionTemp, initialTime);
    }
-   
 
    public FramePoint2d getFinalDesiredICP()
    {
       Point3d upcomingCornerPoint = super.getUpcomingCornerPoint();
-      
+
       //TODO: Need to use Frames throughout here, or don't assume this!
       FramePoint2d ret = new FramePoint2d(ReferenceFrame.getWorldFrame(), upcomingCornerPoint.getX(), upcomingCornerPoint.getY());
       return ret;
    }
-   
+
    public FramePoint2d getConstantCenterOfPressure()
    {
       // Returns first element in list of constant centers of pressure from ICP planner.
       return super.getConstantCentersOfPressure().get(0).getFramePoint2dCopy();
    }
 
-
    @Override
    public void initializeSingleSupport(TransferToAndNextFootstepsData transferToAndNextFootstepsData, double initialTime)
    {
       deltaFootPosition.reset();
-      
+
       super.initializeSingleSupport(transferToAndNextFootstepsData, initialTime);
    }
-
 
    @Override
    public void reInitializeSingleSupport(TransferToAndNextFootstepsData transferToAndNextFootstepsData, double currentTime)
    {
       deltaFootPosition.reset();
-      
+
       super.reInitializeSingleSupport(transferToAndNextFootstepsData, currentTime);
    }
-
 
    @Override
    public void initializeDoubleSupport(TransferToAndNextFootstepsData transferToAndNextFootstepsData, double initialTime)
    {
       deltaFootPosition.reset();
-      
+
       RobotSide transferToSide = transferToAndNextFootstepsData.getTransferToSide();
-      
+
       currentTransferToSide.set(transferToSide);
       getFootPlacement(transferToSide, initialFootPlacement);
-      
+
       super.initializeDoubleSupport(transferToAndNextFootstepsData, initialTime);
    }
-
 
    private void getFootPlacement(RobotSide transferToSide, YoFramePoint footPlacementToPack)
    {
@@ -176,11 +171,10 @@ public class SmoothICPComputer2D extends DoubleSupportFootCenterToToeICPComputer
       {
          footLocationTemp.setToZero(referenceFrames.getSoleFrame(transferToSide));
          footLocationTemp.changeFrame(ReferenceFrame.getWorldFrame());
-         
-         footPlacementToPack.set(footLocationTemp);
-      } 
-   }
 
+         footPlacementToPack.set(footLocationTemp);
+      }
+   }
 
    @Override
    public void reset(double time)
@@ -189,13 +183,11 @@ public class SmoothICPComputer2D extends DoubleSupportFootCenterToToeICPComputer
       super.reset(time);
    }
 
-
    @Override
    public boolean isDone(double time)
    {
       return super.isDone(time);
    }
-
 
    @Override
    public double getEstimatedTimeRemainingForState(double time)
@@ -209,12 +201,9 @@ public class SmoothICPComputer2D extends DoubleSupportFootCenterToToeICPComputer
       return super.isPerformingICPDoubleSupport();
    }
 
-
    @Override
    public double getTimeInState(double time)
    {
       return super.getTimeInState(time);
    }
-
-
 }
