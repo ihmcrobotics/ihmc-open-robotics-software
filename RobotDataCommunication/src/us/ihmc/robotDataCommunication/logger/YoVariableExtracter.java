@@ -181,42 +181,46 @@ public class YoVariableExtracter
       {
          List<YoVariable> results = result.getSelectedValuesList();
          
-         for(YoVariable variable : results)
-         {
-            printVariable(variable);
-         }
+         printVariable(results);
       }
 
-      private void printVariable(YoVariable variable)
+      private void printVariable(List<YoVariable> variables)
       {
-         int offset = variables.indexOf(variable);
-         ByteBuffer buffer = ByteBuffer.allocate(8);
+         int[] offsets = new int[variables.size()];
+         StringBuffer result[] = new StringBuffer[variables.size()];
+         
+         for(int i = 0; i < variables.size(); i++)
+         {
+            YoVariable variable = variables.get(i);
+            result[i] = new StringBuffer();
+            result[i].append(variable.getName());
+            result[i].append(" = [");
+            offsets[i] = this.variables.indexOf(variable);
+         }
+         ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
          LongBuffer longBuffer = buffer.asLongBuffer();
          StringBuffer t = new StringBuffer();
-         StringBuffer result = new StringBuffer();
-         result.append(variable.getName());
-         result.append(" = [");
          
          t.append("t = [");
          try
          {
             long tick = 0;
             
+            logChannel.position(0);
             while(logChannel.size() > tick * bufferSize)
             {
-               logChannel.position(tick * bufferSize);
                buffer.clear();
                logChannel.read(buffer);
                t.append(longBuffer.get(0));
                t.append(",");
                
-               logChannel.position(tick * bufferSize + 8 * (1 + offset));
-               buffer.clear();
-               logChannel.read(buffer);
-               
-               variable.setValueFromLongBits(longBuffer.get(0), false);
-               variable.getValueString(result);
-               result.append(",");
+               for(int i = 0; i < variables.size(); i++)
+               {
+                  YoVariable variable = variables.get(i);
+                  variable.setValueFromLongBits(longBuffer.get(1 + offsets[i]), false);
+                  variable.getValueString(result[i]);
+                  result[i].append(",");
+               }
                
                tick++;
                if(tick % 10000 == 0)
@@ -226,16 +230,22 @@ public class YoVariableExtracter
                }
             }
             System.out.println();
-            result.deleteCharAt(result.length() - 1);
+            
+            StringBuffer combine = new StringBuffer();
             t.deleteCharAt(t.length() - 1);
-            result.append("];");
-            result.append(System.lineSeparator());
             t.append("];");
             t.append(System.lineSeparator());
-            t.append(result);
-            Path path = Paths.get(variable.getName() + ".m");
-            Files.write(path, t.toString().getBytes());
-            System.out.println("Wrote " + variable.getName() + " to " + path);
+            combine.append(t);
+            for(int i = 0; i < variables.size(); i++)
+            {
+               result[i].deleteCharAt(result[i].length() - 1);
+               result[i].append("];");
+               result[i].append(System.lineSeparator());
+               combine.append(result[i]);
+            }
+            Path path = Paths.get(variables.get(0).getName() + ".m");
+            Files.write(path, combine.toString().getBytes());
+            System.out.println("Wrote " + variables.get(0) + " to " + path);
          }
          catch (IOException e)
          {
