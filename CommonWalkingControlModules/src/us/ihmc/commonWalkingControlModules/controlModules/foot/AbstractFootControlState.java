@@ -93,12 +93,12 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
 
    public void doAction()
    {
+      computeNullspaceMultipliers();
       doSpecificAction();
    }
 
    protected void setTaskspaceConstraint(SpatialAccelerationVector footAcceleration)
    {
-      computeNullspaceMultipliers();
       ReferenceFrame bodyFixedFrame = contactableBody.getRigidBody().getBodyFixedFrame();
       footAcceleration.changeBodyFrameNoRelativeAcceleration(bodyFixedFrame);
       footAcceleration.changeFrameNoRelativeMotion(bodyFixedFrame);
