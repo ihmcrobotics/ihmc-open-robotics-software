@@ -81,8 +81,15 @@ public class BonoSensorInformation implements DRCRobotSensorInformation
    }
 
    @Override
-   public String getLidarTopic()
+   public String getLidarScanTopic()
    {
+      return null;
+   }
+
+   @Override
+   public String getLidarJointTopic()
+   {
+      // TODO Auto-generated method stub
       return null;
    }
 }
