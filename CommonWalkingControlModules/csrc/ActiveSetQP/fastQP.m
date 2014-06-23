@@ -40,6 +40,8 @@ function [x,active,fail] = fastQP(Q,f,Aeq,beq,Ain,bin,active)
         
     end
     QinvAteq = Qinv*Aeq';
+    
+    
 
     while(1)
 
@@ -62,13 +64,14 @@ function [x,active,fail] = fastQP(Q,f,Aeq,beq,Ain,bin,active)
             break; 
         end
  
-        violated = find( Ain*x-bin >= 1e-8);   
+        violated = find( Ain*x-bin >0);   
+        %fprintf('#violated %d\n', length(violated));
         if isempty(violated) && all(lamIneq >= eps)
             break; 
         end
         
         active = active(lamIneq >= 0,:);
-        active = unique([active;violated])
+        active = unique([active;violated]);
         
         Aact = [Ain(active,:)];
         bact = [bin(active,:)];

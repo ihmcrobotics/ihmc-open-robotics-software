@@ -15,6 +15,8 @@ extern "C" {
 JNIEXPORT void JNICALL Java_Test_inverse
   (JNIEnv *, jclass, jdoubleArray, jdoubleArray, jdoubleArray, jint, jint);
 
+JNIEXPORT void inverse(double* m1, double* m2,double* r, int nRow, int nCol);
+
 #ifdef __cplusplus
 }
 #endif

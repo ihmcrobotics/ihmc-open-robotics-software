@@ -129,7 +129,14 @@ int fastQPThatTakesQinv(vector< MatrixXd* > QinvblkDiag, const VectorXd& f, cons
 			}
 
 			lam.resize(QinvAt.cols());
+#if 1
 			lam = -(A*QinvAt).ldlt().solve(b + (f.transpose()*QinvAt).transpose());
+			//lam = -(A*QinvAt + MatrixXd::Identity(A.rows(),A.rows())*1e-4).ldlt().solve(b + (f.transpose()*QinvAt).transpose());
+#else
+			JacobiSVD<MatrixXd> svd(A*QinvAt , ComputeThinU | ComputeThinV);
+			lam = -svd.solve(b + (f.transpose()*QinvAt).transpose());
+			SingularValueType sigmas=svd.singularValues();
+#endif
 			x = minusQinvf - QinvAt*lam;
 			lamIneq = lam.tail(lam.size() - M);
 		} else {
