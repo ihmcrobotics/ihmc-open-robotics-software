@@ -80,12 +80,22 @@ if(UNIX)
 	include_directories(${PC_EIGEN_INCLUDE_DIRS})
 endif()
 
+include_directories(ActiveSetQP/qpOASES-3.0beta/include)
+FILE(GLOB qpOASES_SOURCE "ActiveSetQP/qpOASES-3.0beta/src/*.cpp")
+LIST(APPEND qpOASES_SOURCE "OASESConstrainedQPSolver.cpp")
+
+add_library(qpOASES ${qpOASES_SOURCE})
+add_library(OASESConstrainedQPSolver SHARED  ${qpOASES_SOURCE})
+set(qpOASES_SHARED OUTPUT_NAME "OASESConstrainedQPSolver")
+
 add_library(ActiveSetQPMomentumOptimizer SHARED ActiveSetQPMomentumOptimizer.cpp ActiveSetQP/QP.cpp)
+add_executable(testQuadProg ActiveSetQP/testQuadProg.cpp)
 if(NOT WIN32)
-	target_link_libraries(ActiveSetQPMomentumOptimizer m)
+	target_link_libraries(ActiveSetQPMomentumOptimizer m qpOASES)
+	target_link_libraries(testQuadProg m qpOASES)
 endif()
 add_subdirectory(ActiveSetQP)
 
 
 #INSTALL(TARGETS LeeGoswamiForceOptimizer LeeGoswamiCoPAndNormalTorqueOptimizer ContactPointWrenchOptimizer MomentumOptimizer CVXWithCylinder CylinderAndPlaneContactForceOptimizer CVXMomentumOptimizerWithGRFSmoother CVXMomentumOptimizerWithGRFPenalizedSmoother ActiveSetQPMomentumOptimizer RUNTIME DESTINATION lib LIBRARY DESTINATION lib)
-INSTALL(TARGETS CVXMomentumOptimizerWithGRFPenalizedSmoother ActiveSetQPMomentumOptimizer RUNTIME DESTINATION lib LIBRARY DESTINATION lib)
+INSTALL(TARGETS CVXMomentumOptimizerWithGRFPenalizedSmoother ActiveSetQPMomentumOptimizer OASESConstrainedQPSolver RUNTIME DESTINATION lib LIBRARY DESTINATION lib)
