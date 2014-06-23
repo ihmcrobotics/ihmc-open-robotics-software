@@ -187,8 +187,14 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    }
 
    @Override
-   public String getLidarTopic()
+   public String getLidarScanTopic()
    {
       return lidarTopic;
+   }
+
+   @Override
+   public String getLidarJointTopic()
+   {
+      return null;
    }
 }
