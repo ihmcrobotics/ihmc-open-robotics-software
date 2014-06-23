@@ -23,7 +23,7 @@ public class OASESConstrainedQPSolver extends ConstrainedQPSolver
     static{
           if(System.getProperty("jna.library.path")==null)
             System.setProperty("jna.library.path",System.getProperty("java.library.path"));
-          Native.register("OASESConstrainedQPSolver_rel");
+          Native.register("OASESConstrainedQPSolver_msz");
     }
    
    int nWSR, nvar, ncon;
