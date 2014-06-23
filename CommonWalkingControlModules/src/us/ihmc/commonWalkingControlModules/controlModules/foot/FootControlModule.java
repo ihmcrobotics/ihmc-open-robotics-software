@@ -47,7 +47,7 @@ public class FootControlModule
       FULL, HOLD_POSITION, HEEL_TOUCHDOWN, TOES_TOUCHDOWN, TOES, SWING, MOVE_STRAIGHT
    }
    
-   protected static final double coefficientOfFriction = 0.8;
+   private static final double coefficientOfFriction = 0.8;
 
    private final StateMachine<ConstraintType> stateMachine;
    private final EnumYoVariable<ConstraintType> requestedState;
