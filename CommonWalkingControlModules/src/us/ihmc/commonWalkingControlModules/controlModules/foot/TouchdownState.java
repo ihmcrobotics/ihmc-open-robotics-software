@@ -26,8 +26,6 @@ import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.GainCalculator;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.trajectory.ConstantDoubleProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.ConstantVelocityTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
@@ -62,13 +60,12 @@ public class TouchdownState extends AbstractFootControlState
    private final VectorProvider touchdownVelocityProvider;
 
    public TouchdownState(ConstraintType stateEnum, WalkingControllerParameters walkingControllerParameters, VectorProvider touchdownVelocityProvider,
-         YoFramePoint yoDesiredPosition, YoFrameVector yoDesiredLinearVelocity, YoFrameVector yoDesiredLinearAcceleration,
          RigidBodySpatialAccelerationControlModule accelerationControlModule, MomentumBasedController momentumBasedController,
          ContactablePlaneBody contactableBody, int jacobianId, DoubleYoVariable nullspaceMultiplier, BooleanYoVariable jacobianDeterminantInRange,
          BooleanYoVariable doSingularityEscape, RobotSide robotSide,
          YoVariableRegistry registry)
    {
-      super(stateEnum, yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration, accelerationControlModule, momentumBasedController,
+      super(stateEnum, accelerationControlModule, momentumBasedController,
             contactableBody, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape,
             robotSide, registry);
 

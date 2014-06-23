@@ -27,8 +27,6 @@ import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.GainCalculator;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.trajectory.YoVariableDoubleProvider;
 
 public class OnToesState extends AbstractFootControlState
@@ -73,12 +71,11 @@ public class OnToesState extends AbstractFootControlState
    
    private final OneDoFJoint kneeJoint;
 
-   public OnToesState(WalkingControllerParameters walkingControllerParameters, YoFramePoint yoDesiredPosition, YoFrameVector yoDesiredLinearVelocity,
-         YoFrameVector yoDesiredLinearAcceleration, RigidBodySpatialAccelerationControlModule accelerationControlModule,
+   public OnToesState(WalkingControllerParameters walkingControllerParameters, RigidBodySpatialAccelerationControlModule accelerationControlModule,
          MomentumBasedController momentumBasedController, ContactablePlaneBody contactableBody, int jacobianId, DoubleYoVariable nullspaceMultiplier,
          BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape, RobotSide robotSide, YoVariableRegistry registry)
    {
-      super(ConstraintType.TOES, yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration, accelerationControlModule, momentumBasedController,
+      super(ConstraintType.TOES, accelerationControlModule, momentumBasedController,
             contactableBody, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, robotSide, registry);
 
       rootToFootJacobianId = momentumBasedController.getOrCreateGeometricJacobian(rootBody, jacobian.getEndEffector(), rootBody.getBodyFixedFrame());

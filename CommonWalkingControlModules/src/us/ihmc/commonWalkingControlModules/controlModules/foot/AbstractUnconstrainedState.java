@@ -8,6 +8,7 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.utilities.screwTheory.RigidBody;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -33,15 +34,17 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    private final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
    
    private final OneDoFJoint hipYawJoint, anklePitchJoint, ankleRollJoint;
+   
+   private final YoFramePoint yoDesiredPosition;
+   private final YoFrameVector yoDesiredLinearVelocity;
 
-   public AbstractUnconstrainedState(ConstraintType constraintType, YoFramePoint yoDesiredPosition, YoFrameVector yoDesiredLinearVelocity,
-         YoFrameVector yoDesiredLinearAcceleration, RigidBodySpatialAccelerationControlModule accelerationControlModule,
+   public AbstractUnconstrainedState(ConstraintType constraintType, RigidBodySpatialAccelerationControlModule accelerationControlModule,
          MomentumBasedController momentumBasedController, ContactablePlaneBody contactableBody, int jacobianId, DoubleYoVariable nullspaceMultiplier,
          BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape,
          LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule, RobotSide robotSide,
          YoVariableRegistry registry)
    {
-      super(constraintType, yoDesiredPosition, yoDesiredLinearVelocity, yoDesiredLinearAcceleration, accelerationControlModule, momentumBasedController,
+      super(constraintType, accelerationControlModule, momentumBasedController,
             contactableBody, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape,
             robotSide, registry);
       
@@ -50,6 +53,13 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       this.hipYawJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.HIP_YAW);
       this.ankleRollJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.ANKLE_ROLL);
       this.anklePitchJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.ANKLE_PITCH);
+   
+      RigidBody foot = contactableBody.getRigidBody();
+      String namePrefix = foot.getName() + "_" + constraintType.toString().toLowerCase() + "_";
+      yoDesiredLinearVelocity = new YoFrameVector(namePrefix + "DesiredLinearVelocity", worldFrame, registry);
+      yoDesiredLinearVelocity.setToNaN();
+      yoDesiredPosition = new YoFramePoint(namePrefix + "DesiredPosition", worldFrame, registry);
+      yoDesiredPosition.setToNaN();
    }
 
    /**
@@ -85,8 +95,6 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
 
       computeAndPackTrajectory();
 
-      yoDesiredPosition.set(desiredPosition);
-
       desiredOrientation.setAndChangeFrame(trajectoryOrientation);
 
       if (CORRECT_SWING_CONSIDERING_JOINT_LIMITS)
@@ -100,6 +108,11 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       accelerationControlModule.packAcceleration(footAcceleration);
 
       setTaskspaceConstraint(footAcceleration);
+      
+      desiredPosition.changeFrame(worldFrame);
+      yoDesiredPosition.set(desiredPosition);
+      desiredLinearVelocity.changeFrame(worldFrame);
+      yoDesiredLinearVelocity.set(desiredLinearVelocity);
    }
 
    private final double[] desiredYawPitchRoll = new double[3];
@@ -179,6 +192,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    public void doTransitionOutOfAction()
    {
       yoDesiredPosition.setToNaN();
+      yoDesiredLinearVelocity.setToNaN();
       trajectoryWasReplanned = false;
 
       accelerationControlModule.reset();
