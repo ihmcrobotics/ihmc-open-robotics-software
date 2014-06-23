@@ -14,7 +14,9 @@ public interface DRCRobotSensorInformation
 
    public abstract String getLidarJointName();
 
-   public abstract String getLidarTopic();
+   public abstract String getLidarScanTopic();
+
+   public abstract String getLidarJointTopic();
 
    public abstract String[] getForceSensorNames();
 
