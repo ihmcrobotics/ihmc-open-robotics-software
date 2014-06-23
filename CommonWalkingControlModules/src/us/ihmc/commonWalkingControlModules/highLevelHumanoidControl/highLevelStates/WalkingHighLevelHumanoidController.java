@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlane
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoFramePoint2dInPolygonCoordinate;
 import us.ihmc.commonWalkingControlModules.captureRegion.PushRecoveryControlModule;
+import us.ihmc.commonWalkingControlModules.captureRegion.PushRecoveryControlModule.IsFallingFromDoubleSupportCondition;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.LegSingularityAndKneeCollapseAvoidanceControlModule;
@@ -103,11 +104,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final BooleanYoVariable alreadyBeenInDoubleSupportOnce;
 
-   private static enum WalkingState
-   {
-      LEFT_SUPPORT, RIGHT_SUPPORT, TRANSFER_TO_LEFT_SUPPORT, TRANSFER_TO_RIGHT_SUPPORT, DOUBLE_SUPPORT
-   }
-
    private final static boolean DEBUG = false;
 
    private final StateMachine<WalkingState> stateMachine;
@@ -130,11 +126,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final DoubleYoVariable desiredCoMHeightAccelerationAfterSmoothing = new DoubleYoVariable("desiredCoMHeightAccelerationAfterSmoothing", registry);
 
    private final PDController centerOfMassHeightController;
-   private final SideDependentList<WalkingState> singleSupportStateEnums = new SideDependentList<WalkingState>(WalkingState.LEFT_SUPPORT,
-         WalkingState.RIGHT_SUPPORT);
-
-   private final SideDependentList<WalkingState> transferStateEnums = new SideDependentList<WalkingState>(WalkingState.TRANSFER_TO_LEFT_SUPPORT,
-         WalkingState.TRANSFER_TO_RIGHT_SUPPORT);
 
    private final YoFramePoint2d transferToFootstep = new YoFramePoint2d("transferToFootstep", worldFrame, registry);
 
@@ -348,7 +339,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       pushRecoveryModule = new PushRecoveryControlModule(momentumBasedController, walkingControllerParameters, readyToGrabNextFootstep, 
                                                          icpAndMomentumBasedController, stateMachine, registry, swingTimeCalculationProvider);
 
-      setUpStateMachine();
+      setupStateMachine();
       readyToGrabNextFootstep.set(true);
 
       dwellInSingleSupportDuration.set(0.2);
@@ -390,7 +381,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       resetIntegratorsAfterSwing.set(true);
    }
 
-   private void setUpStateMachine()
+   private void setupStateMachine()
    {
       DoubleSupportState doubleSupportState = new DoubleSupportState(null);
 
@@ -399,56 +390,42 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       ResetICPTrajectoryAction resetICPTrajectoryAction = new ResetICPTrajectoryAction();
       for (RobotSide robotSide : RobotSide.values)
       {
-         StopWalkingCondition stopWalkingCondition = new StopWalkingCondition();
+         ContactablePlaneBody sameSideFoot = feet.get(robotSide);
+         ContactablePlaneBody oppositeSideFoot = feet.get(robotSide.getOppositeSide());
 
-         ArrayList<StateTransitionAction> stopWalkingStateTransitionActions = new ArrayList<StateTransitionAction>();
-         stopWalkingStateTransitionActions.add(resetICPTrajectoryAction);
+         WalkingState doubleSupportStateEnum = doubleSupportState.getStateEnum();
+         WalkingState singleSupportStateEnum = WalkingState.getSingleSupportState(robotSide);
+         WalkingState transferStateEnum = WalkingState.getTransferState(robotSide);
+         WalkingState oppTransferStateEnum = WalkingState.getTransferState(robotSide.getOppositeSide());
 
          State<WalkingState> transferState = new DoubleSupportState(robotSide);
-         StateTransition<WalkingState> toDoubleSupport = new StateTransition<WalkingState>(doubleSupportState.getStateEnum(), stopWalkingCondition,
-               stopWalkingStateTransitionActions);
-         transferState.addStateTransition(toDoubleSupport);
-         StateTransition<WalkingState> toSingleSupport = new StateTransition<WalkingState>(singleSupportStateEnums.get(robotSide),
-               new DoneWithTransferCondition(robotSide));
-         transferState.addStateTransition(toSingleSupport);
-         stateMachine.addState(transferState);
-         
          State<WalkingState> singleSupportState = new SingleSupportState(robotSide);
-         StateTransition<WalkingState> toDoubleSupport2 = new StateTransition<WalkingState>(doubleSupportState.getStateEnum(), stopWalkingCondition,
-               stopWalkingStateTransitionActions);
+
+         StopWalkingCondition stopWalkingCondition = new StopWalkingCondition();
+         DoneWithTransferCondition doneWithTransferCondition = new DoneWithTransferCondition(robotSide);
+         SingleSupportToTransferToCondition singleSupportToTransferToOppositeSideCondition = new SingleSupportToTransferToCondition(sameSideFoot);
+         SingleSupportToTransferToCondition singleSupportToTransferToSameSideCondition = new SingleSupportToTransferToCondition(oppositeSideFoot);
+         StartWalkingCondition startWalkingCondition = new StartWalkingCondition(robotSide);
+         IsFallingFromDoubleSupportCondition isFallingFromDoubleSupportCondition = pushRecoveryModule.new IsFallingFromDoubleSupportCondition(robotSide);
+
+         StateTransition<WalkingState> toDoubleSupport = new StateTransition<WalkingState>(doubleSupportStateEnum, stopWalkingCondition, resetICPTrajectoryAction);
+         StateTransition<WalkingState> toSingleSupport = new StateTransition<WalkingState>(singleSupportStateEnum, doneWithTransferCondition);
+         StateTransition<WalkingState> toDoubleSupport2 = new StateTransition<WalkingState>(doubleSupportStateEnum, stopWalkingCondition, resetICPTrajectoryAction);
+         StateTransition<WalkingState> toTransferOppositeSide = new StateTransition<WalkingState>(oppTransferStateEnum, singleSupportToTransferToOppositeSideCondition);
+         StateTransition<WalkingState> toTransferSameSide = new StateTransition<WalkingState>(transferStateEnum, singleSupportToTransferToSameSideCondition);
+         StateTransition<WalkingState> toTransfer = new StateTransition<WalkingState>(transferStateEnum, startWalkingCondition);
+         StateTransition<WalkingState> toFalling = new StateTransition<WalkingState>(singleSupportStateEnum, isFallingFromDoubleSupportCondition);
+
+         transferState.addStateTransition(toDoubleSupport);
+         transferState.addStateTransition(toSingleSupport);
          singleSupportState.addStateTransition(toDoubleSupport2);
-
-         ContactablePlaneBody sameSideFoot = feet.get(robotSide);
-         SingleSupportToTransferToCondition doneWithSingleSupportAndTransferToOppositeSideCondition = new SingleSupportToTransferToCondition(sameSideFoot);
-         StateTransition<WalkingState> toTransferOppositeSide = new StateTransition<WalkingState>(transferStateEnums.get(robotSide.getOppositeSide()),
-               doneWithSingleSupportAndTransferToOppositeSideCondition);
          singleSupportState.addStateTransition(toTransferOppositeSide);
-
-         // Sometimes need transfer to same side when two steps are commanded on the same side. Otherwise, the feet cross over.
-         ContactablePlaneBody oppositeSideFoot = feet.get(robotSide.getOppositeSide());
-         SingleSupportToTransferToCondition doneWithSingleSupportAndTransferToSameSideCondition = new SingleSupportToTransferToCondition(oppositeSideFoot);
-         StateTransition<WalkingState> toTransferSameSide = new StateTransition<WalkingState>(transferStateEnums.get(robotSide),
-               doneWithSingleSupportAndTransferToSameSideCondition);
          singleSupportState.addStateTransition(toTransferSameSide);
-
-         stateMachine.addState(singleSupportState);
-      }
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         StateTransition<WalkingState> toTransfer = new StateTransition<WalkingState>(transferStateEnums.get(robotSide),
-               new DoneWithDoubleSupportCondition(robotSide));
          doubleSupportState.addStateTransition(toTransfer);
-      }
+         doubleSupportState.addStateTransition(toFalling);
 
-//      if (pushRecoveryModule.isEnabled())
-      {
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            StateTransition<WalkingState> toFalling = new StateTransition<WalkingState>(singleSupportStateEnums.get(robotSide),
-                  pushRecoveryModule.new IsFallingFromDoubleSupport(robotSide));
-            doubleSupportState.addStateTransition(toFalling);
-         }
+         stateMachine.addState(transferState);
+         stateMachine.addState(singleSupportState);
       }
    }
 
@@ -546,7 +523,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       public DoubleSupportState(RobotSide transferToSide)
       {
-         super((transferToSide == null) ? WalkingState.DOUBLE_SUPPORT : transferStateEnums.get(transferToSide));
+         super((transferToSide == null) ? WalkingState.DOUBLE_SUPPORT : WalkingState.getTransferState(transferToSide));
          this.transferToSide = transferToSide;
       }
 
@@ -906,10 +883,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       private double captureTime;
       private double icpProjectionTimeOffset;
 
-      public SingleSupportState(RobotSide robotSide)
+      public SingleSupportState(RobotSide supportSide)
       {
-         super(singleSupportStateEnums.get(robotSide));
-         this.swingSide = robotSide.getOppositeSide();
+         super(WalkingState.getSingleSupportState(supportSide));
+         this.swingSide = supportSide.getOppositeSide();
          this.desiredPelvisOrientationToPack = new FrameOrientation(worldFrame);
          this.desiredPelvisAngularVelocityToPack = new FrameVector(fullRobotModel.getRootJoint().getFrameAfterJoint());
          this.desiredPelvisAngularAccelerationToPack = new FrameVector(fullRobotModel.getRootJoint().getFrameAfterJoint());
@@ -1116,11 +1093,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       }
    }
 
-   public class DoneWithDoubleSupportCondition implements StateTransitionCondition
+   public class StartWalkingCondition implements StateTransitionCondition
    {
       private final RobotSide transferToSide;
 
-      public DoneWithDoubleSupportCondition(RobotSide robotSide)
+      public StartWalkingCondition(RobotSide robotSide)
       {
          this.transferToSide = robotSide;
       }

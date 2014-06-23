@@ -129,7 +129,7 @@ public class PushRecoveryControlModule
       }
    }
 
-   public class IsFallingFromDoubleSupport implements StateTransitionCondition
+   public class IsFallingFromDoubleSupportCondition implements StateTransitionCondition
    {
       private final FramePoint2d capturePoint2d = new FramePoint2d();
       private RobotSide swingSide = null;
@@ -144,7 +144,7 @@ public class PushRecoveryControlModule
       private Footstep currentFootstep = null;
       private boolean isICPOutside;
 
-      public IsFallingFromDoubleSupport(RobotSide robotSide)
+      public IsFallingFromDoubleSupportCondition(RobotSide robotSide)
       {
          this.transferToSide = robotSide;
          this.scaleTransformation.setScale(DOUBLESUPPORT_SUPPORT_POLYGON_SCALE);
