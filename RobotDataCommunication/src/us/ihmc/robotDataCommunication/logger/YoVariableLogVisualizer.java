@@ -14,6 +14,7 @@ import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.SDFJointNameMap;
 import us.ihmc.robotDataCommunication.VisualizerUtils;
 import us.ihmc.robotDataCommunication.YoVariableHandshakeParser;
+import us.ihmc.robotDataCommunication.logger.util.FileSelectionDialog;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
@@ -34,30 +35,7 @@ public class YoVariableLogVisualizer
 
       if (logFile == null)
       {
-         final FileDialog fileDialog = new FileDialog((Frame) null, "Choose logging directory");
-         fileDialog.setMode(FileDialog.LOAD);
-         
-         fileDialog.setFilenameFilter(new FilenameFilter()
-         {
-            
-            @Override
-            public boolean accept(File dir, String name)
-            {
-               return ("robotData.log".equals(name));
-            }
-         });
-         
-         fileDialog.setVisible(true);         
-         String filename = fileDialog.getDirectory();
-         if(filename != null)
-         {
-            logFile = new File(filename);
-         }
-         else
-         {
-            System.err.println("No file selected, closing");
-         }
-         
+         logFile = FileSelectionDialog.loadDirectoryWithFileNamed("robotData.log");
       }
       
       if(logFile != null)
