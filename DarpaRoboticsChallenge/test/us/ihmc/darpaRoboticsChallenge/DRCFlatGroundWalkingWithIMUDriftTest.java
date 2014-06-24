@@ -32,8 +32,8 @@ import com.yobotics.simulationconstructionset.util.simulationTesting.NothingChan
 
 public abstract class DRCFlatGroundWalkingWithIMUDriftTest implements MultiRobotTestInterface
 {
-   private static final boolean ALWAYS_SHOW_GUI = true;
-   public static final boolean KEEP_SCS_UP = true;
+   private static final boolean ALWAYS_SHOW_GUI = false;
+   public static final boolean KEEP_SCS_UP = false;
 
    private static final boolean CREATE_MOVIE = BambooTools.doMovieCreation();
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
