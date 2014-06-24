@@ -87,7 +87,6 @@ public class FootControlModule
    public FootControlModule(RobotSide robotSide, WalkingControllerParameters walkingControllerParameters, DoubleProvider swingTimeProvider,
          MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
    {
-      // remove and test:
       contactableFoot = momentumBasedController.getContactableFeet().get(robotSide);
       momentumBasedController.setPlaneContactCoefficientOfFriction(contactableFoot, coefficientOfFriction);
       momentumBasedController.setPlaneContactStateFullyConstrained(contactableFoot);
@@ -322,11 +321,6 @@ public class FootControlModule
       return stateMachine.getCurrentStateEnum();
    }
 
-   public ReferenceFrame getFootFrame()
-   {
-      return contactableFoot.getBodyFrame();
-   }
-
    public void doControl()
    {
       legSingularityAndKneeCollapseAvoidanceControlModule.update();
@@ -335,9 +329,6 @@ public class FootControlModule
 
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
-      
-      // test:
-//      momentumBasedController.setPlaneContactCoefficientOfFriction(contactableFoot, coefficientOfFriction);
    }
 
    // Used to restart the current state reseting the current state time
