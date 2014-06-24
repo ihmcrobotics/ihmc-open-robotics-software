@@ -1,8 +1,4 @@
-<object-stream>
-  <long>1</long>
-  <us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
-    <heightOffset>0.08</heightOffset>
-  </us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+<object-stream> 
   <long>1</long>
   <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList>
     <footstepDataList>
