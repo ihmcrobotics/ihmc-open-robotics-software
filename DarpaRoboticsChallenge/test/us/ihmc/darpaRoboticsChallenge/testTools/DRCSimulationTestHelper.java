@@ -19,7 +19,6 @@ import us.ihmc.darpaRoboticsChallenge.DRCDemo01StartingLocation;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseDemo;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseSimulation;
-import us.ihmc.darpaRoboticsChallenge.DRCSimulationFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
 import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
@@ -41,44 +40,38 @@ public class DRCSimulationTestHelper
 {
    private final DRCObstacleCourseSimulation drcSimulation;
    private final ScriptedFootstepDataListObjectCommunicator networkObjectCommunicator;
-   
+
    private final boolean checkNothingChanged;
    private final NothingChangedVerifier nothingChangedVerifier;
    private BlockingSimulationRunner blockingSimulationRunner;
    private final WalkingControllerParameters walkingControlParameters;
-   
+
    private final boolean createMovie;
-   
+
    private final DRCRobotModel robotModel;
 
-   public DRCSimulationTestHelper(String name, String scriptFilename, DRCDemo01StartingLocation selectedLocation,
-         boolean checkNothingChanged, boolean showGUI, boolean createMovie, DRCRobotModel robotModel)
-   {
-      this(name, scriptFilename, selectedLocation, checkNothingChanged, showGUI, createMovie, false, robotModel);
-   }
-   
-   public DRCSimulationTestHelper(String name, String scriptFilename, DRCDemo01StartingLocation selectedLocation, boolean checkNothingChanged, boolean showGUI, boolean createMovie, boolean createLoadOfContactPointForTheFeet,
-         DRCRobotModel robotModel)
+   public DRCSimulationTestHelper(String name, String scriptFilename, DRCDemo01StartingLocation selectedLocation, boolean checkNothingChanged, boolean showGUI,
+         boolean createMovie, DRCRobotModel robotModel)
    {
       networkObjectCommunicator = new ScriptedFootstepDataListObjectCommunicator("Team");
       this.walkingControlParameters = robotModel.getWalkingControllerParameters();
       this.checkNothingChanged = checkNothingChanged;
       this.createMovie = createMovie;
       this.robotModel = robotModel;
-      if (createMovie) showGUI = true;
-      
+      if (createMovie)
+         showGUI = true;
+
       boolean automaticallyStartSimulation = false;
       boolean startDRCNetworkProcessor = false;
 
       boolean initializeEstimatorToActual = true;
-      
+
       SliderBoardFactory sliderBoardFactory = WalkControllerSliderBoard.getFactory();
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false, sliderBoardFactory, showGUI);
-      
-      drcSimulation = DRCObstacleCourseDemo.startDRCSim(scriptFilename, networkObjectCommunicator, selectedLocation, guiInitialSetup, initializeEstimatorToActual,
-            automaticallyStartSimulation, startDRCNetworkProcessor, createLoadOfContactPointForTheFeet, false,robotModel);
-           
-      
+
+      drcSimulation = DRCObstacleCourseDemo.startDRCSim(scriptFilename, networkObjectCommunicator, selectedLocation, guiInitialSetup,
+            initializeEstimatorToActual, automaticallyStartSimulation, startDRCNetworkProcessor, false, robotModel);
+
       blockingSimulationRunner = new BlockingSimulationRunner(drcSimulation.getSimulationConstructionSet(), 60.0 * 10.0);
 
       if (checkNothingChanged)
@@ -95,7 +88,7 @@ public class DRCSimulationTestHelper
    {
       return blockingSimulationRunner;
    }
-   
+
    public SimulationConstructionSet getSimulationConstructionSet()
    {
       return drcSimulation.getSimulationConstructionSet();
@@ -103,12 +96,10 @@ public class DRCSimulationTestHelper
 
    public ScriptedFootstepGenerator createScriptedFootstepGenerator()
    {
-      DRCSimulationFactory simulation = drcSimulation.getSimulation();
-
       FullRobotModel fullRobotModel = robotModel.createFullRobotModel();
       ReferenceFrames referenceFrames = new ReferenceFrames(fullRobotModel, robotModel.getJointMap(), robotModel.getPhysicalProperties().getAnkleHeight());
 
-      ScriptedFootstepGenerator scriptedFootstepGenerator = new ScriptedFootstepGenerator(referenceFrames, fullRobotModel,walkingControlParameters);
+      ScriptedFootstepGenerator scriptedFootstepGenerator = new ScriptedFootstepGenerator(referenceFrames, fullRobotModel, walkingControlParameters);
 
       return scriptedFootstepGenerator;
    }
@@ -123,7 +114,7 @@ public class DRCSimulationTestHelper
          stringsToIgnore.add("nano");
          stringsToIgnore.add("milli");
          stringsToIgnore.add("Timer");
-         
+
          boolean writeNewBaseFile = nothingChangedVerifier.getWriteNewBaseFile();
 
          double maxPercentDifference = 0.001;
@@ -151,7 +142,7 @@ public class DRCSimulationTestHelper
    {
       return drcSimulation.getRobot();
    }
-   
+
    public DRCObstacleCourseSimulation getDRCSimulation()
    {
       return drcSimulation;
@@ -182,13 +173,13 @@ public class DRCSimulationTestHelper
          simulateAndBlock(simulationTime);
          return true;
       }
-      catch(Exception e)
+      catch (Exception e)
       {
          System.err.println("Caught exception in SimulationTestHelper.simulateAndBlockAndCatchExceptions. Exception = /n" + e);
          throw e;
       }
    }
-   
+
    public void createMovie(String simplifiedRobotModelName, SimulationConstructionSet scs, int callStackHeight)
    {
       if (createMovie)
@@ -196,7 +187,7 @@ public class DRCSimulationTestHelper
          BambooTools.createMovieAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(simplifiedRobotModelName, scs, callStackHeight);
       }
    }
-   
+
    public RobotSide[] createRobotSidesStartingFrom(RobotSide robotSide, int length)
    {
       RobotSide[] ret = new RobotSide[length];
@@ -209,15 +200,15 @@ public class DRCSimulationTestHelper
 
       return ret;
    }
-   
+
    public void setupCameraForUnitTest(SimulationConstructionSet scs, Point3d cameraFix, Point3d cameraPosition)
    {
       CameraConfiguration cameraConfiguration = new CameraConfiguration("testCamera");
-      
+
       Random randomForSlightlyMovingCameraSoThatYouTubeVideosAreDifferent = new Random();
       Vector3d randomCameraOffset = RandomTools.generateRandomVector(randomForSlightlyMovingCameraSoThatYouTubeVideosAreDifferent, 0.05);
       cameraFix.add(randomCameraOffset);
-      
+
       cameraConfiguration.setCameraFix(cameraFix);
       cameraConfiguration.setCameraPosition(cameraPosition);
       cameraConfiguration.setCameraTracking(false, true, true, false);

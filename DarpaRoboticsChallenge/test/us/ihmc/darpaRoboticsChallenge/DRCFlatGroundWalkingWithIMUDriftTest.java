@@ -48,7 +48,6 @@ public abstract class DRCFlatGroundWalkingWithIMUDriftTest implements MultiRobot
    private static final double defaultWalkingTimeDuration = BambooTools.isEveryCommitBuild() ? 45.0 : 90.0;
    private static final boolean useVelocityAndHeadingScript = true;
    private static final boolean cheatWithGroundHeightAtForFootstep = false;
-   private static final boolean useLoadOfContactPointsForTheFeet = false;
    private static final boolean drawGroundProfile = false;
 
    @Before
@@ -167,7 +166,7 @@ public abstract class DRCFlatGroundWalkingWithIMUDriftTest implements MultiRobot
       DRCGuiInitialSetup guiInitialSetup = createGUIInitialSetup();
       GroundProfile groundProfile = new FlatGroundProfile();
       
-      DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotModel.getSimulateDT(), useLoadOfContactPointsForTheFeet);
+      DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotModel.getSimulateDT());
       scsInitialSetup.setDrawGroundProfile(drawGroundProfile);
       scsInitialSetup.setSimulatedSensorNoiseParameters(DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersZeroNoise());
       

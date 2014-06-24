@@ -44,9 +44,6 @@ public class DRCConfigParameters
 
    public static final boolean USE_PERFECT_SENSORS = false;
 
-   // Add more contact points on the feet
-   public static boolean CREATE_LOAD_OF_CONTACT_POINTS_FEET = false;
-
    static
    {
       if (USE_PERFECT_SENSORS)
