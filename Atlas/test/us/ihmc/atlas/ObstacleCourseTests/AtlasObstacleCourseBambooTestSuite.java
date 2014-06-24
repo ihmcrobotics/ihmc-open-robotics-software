@@ -8,9 +8,7 @@ import us.ihmc.utilities.test.JUnitTestSuiteConstructor;
 @RunWith(Suite.class)
 @Suite.SuiteClasses(
 {
-   AtlasObstacleCourseFlatTest.class,
-   AtlasObstacleCourseRampsTest.class,
-   AtlasObstacleCourseSteppingStonesTest.class
+   AtlasObstacleCourseEveryBuildTest.class
 })
 
 public class AtlasObstacleCourseBambooTestSuite
