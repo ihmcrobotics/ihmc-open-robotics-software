@@ -26,7 +26,6 @@ public class ComparePushRodTransmissionsTest
    private static final boolean DEBUG = false;
    private static final boolean VISUALIZE = false;
    
-
    @Test
    public void testCompareInefficientToEfficientAnkle()
    {
@@ -87,6 +86,7 @@ public class ComparePushRodTransmissionsTest
       double epsilon = 1e-7;
 
       compareTwoPushRodTransmissionInterfaces(random, epsilon, inefficientPushrodTransmission, interpolatedPushRodTransmission, registry, dynamicGraphicObjectsListRegistry);
+      
    }
    
    @Ignore

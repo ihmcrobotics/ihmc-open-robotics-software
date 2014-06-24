@@ -101,12 +101,12 @@ public class ClosedFormJacobianTest
          double[][] J = closedFormJacobianAnkle.getUpdatedTransform( -roll[i], -pitch[i]);
          if (DEBUG){
             System.out.println("m11_java: " + J[0][0] + ", m12_java: " + J[0][1] + ", m21_java: " + J[1][0] + ", m22_java: " + J[1][1]);
-            System.out.println("m11_matlab: " + m12_matlab[i] + ", m12_matlab: " + -m22_matlab[i] + ", m21_matlab: " + m11_matlab[i] + ", m22_matlab: " + -m21_matlab[i]);         
+            System.out.println("m11_matlab: " + m12_matlab[i] + ", m12_matlab: " + m11_matlab[i] + ", m21_matlab: " + -m22_matlab[i] + ", m22_matlab: " + -m21_matlab[i]);         
             System.out.println(" ");
          }
          assertEquals(J[0][0],  m12_matlab[i], TOLERANCE);
-         assertEquals(J[0][1], -m22_matlab[i], TOLERANCE);
-         assertEquals(J[1][0],  m11_matlab[i], TOLERANCE);
+         assertEquals(J[0][1],  m11_matlab[i], TOLERANCE);
+         assertEquals(J[1][0], -m22_matlab[i], TOLERANCE);
          assertEquals(J[1][1], -m21_matlab[i], TOLERANCE);
       }
    }
@@ -132,15 +132,15 @@ public class ClosedFormJacobianTest
          double m21_jerry = inefficientJacobian[1][0];
          double m22_jerry = inefficientJacobian[1][1];
 
-         if (DEBUG)
+         if(DEBUG)
          {
             System.out.println("m11_will = " + m11_will + ", m12_will = " + m12_will + ", m21_will = " + m21_will + ", m22_will = " + m22_will);
             System.out.println("m11_jerry = " + m11_jerry + ", m12_jerry = " + m12_jerry + ", m21_jerry = " + m21_jerry + ", m22_jerry = " + m22_jerry);
          }
-         assertEquals(m11_will, -m22_jerry, TOLERANCE);
+         assertEquals(m11_will, m11_jerry, TOLERANCE);
          assertEquals(m12_will, m12_jerry, TOLERANCE);
-         assertEquals(m21_will, -m21_jerry, TOLERANCE);
-         assertEquals(m22_will, m11_jerry, TOLERANCE);
+         assertEquals(m21_will, m21_jerry, TOLERANCE);
+         assertEquals(m22_will, m22_jerry, TOLERANCE);
       }
    }
 
@@ -152,12 +152,12 @@ public void testJacobianMatchesMATLABWaist()
       double[][] J = closedFormJacobianWaist.getUpdatedTransform( roll[i], pitch[i] );
       if(DEBUG){
          System.out.println("m11_java: " + J[0][0] + ", m12_java: " + J[0][1] + ", m21_java: " + J[1][0] + ", m22_java: " + J[1][1]);
-         System.out.println("m11_matlab: " + m22_matlab_waist[i] + ", m12_matlab: " + -m12_matlab_waist[i] + ", m21_matlab: " + m21_matlab_waist[i] + ", m22_matlab: " + -m11_matlab_waist[i]);         
+         System.out.println("m11_matlab: " + m21_matlab_waist[i] + ", m12_matlab: " + m22_matlab_waist[i] + ", m21_matlab: " + -m11_matlab_waist[i] + ", m22_matlab: " + -m12_matlab_waist[i]);         
       }
-      assertEquals(J[0][0], m22_matlab_waist[i], TOLERANCE);
-      assertEquals(J[0][1], -m12_matlab_waist[i], TOLERANCE);
-      assertEquals(J[1][0], m21_matlab_waist[i], TOLERANCE);
-      assertEquals(J[1][1], -m11_matlab_waist[i], TOLERANCE);
+      assertEquals(J[0][0], m21_matlab_waist[i], TOLERANCE);
+      assertEquals(J[0][1], m22_matlab_waist[i], TOLERANCE);
+      assertEquals(J[1][0], -m11_matlab_waist[i], TOLERANCE);
+      assertEquals(J[1][1], -m12_matlab_waist[i], TOLERANCE);
    }
 }
 
@@ -207,7 +207,7 @@ public void testEfficentMatchesInterpolatedJacobianWaist()
       
       InterpolatedPushRodTransmission interpolatedPushRodTransmission = new InterpolatedPushRodTransmission( "v1_waist", 1.0, 0.0 );
 
-      interpolatedJacobian = interpolatedPushRodTransmission.getInterpolatedActuatorToJointJacobian( pitch[i], roll[i] );
+      interpolatedJacobian = interpolatedPushRodTransmission.getInterpolatedActuatorToJointJacobian( pitch[i], roll[i] , PushRodTransmissionJoint.WAIST);
 
       double m11_inter = interpolatedJacobian[0][0]; double m12_inter = interpolatedJacobian[0][1];
       double m21_inter = interpolatedJacobian[1][0]; double m22_inter = interpolatedJacobian[1][1];
@@ -218,14 +218,11 @@ public void testEfficentMatchesInterpolatedJacobianWaist()
          System.out.println("m11_inter = " + m11_inter + ", m12_inter = " + m12_inter + ", m21_inter = " + m21_inter + ", m22_inter = " + m22_inter);
          System.out.println(" ");
       }
-      
       assertEquals(m11_will, m11_inter, TOLERANCE_GOOD_ENOUGH_FOR_GOVERNMENT_WORK);
       assertEquals(m12_will, m12_inter, TOLERANCE_GOOD_ENOUGH_FOR_GOVERNMENT_WORK);
       assertEquals(m21_will, m21_inter, TOLERANCE_GOOD_ENOUGH_FOR_GOVERNMENT_WORK);
       assertEquals(m22_will, m22_inter, TOLERANCE_GOOD_ENOUGH_FOR_GOVERNMENT_WORK);
-      
    }
-   
 }
 
 @Test
@@ -243,7 +240,7 @@ public void testEfficentMatchesInterpolatedJacobianAnkle()
       
       InterpolatedPushRodTransmission interpolatedPushRodTransmission = new InterpolatedPushRodTransmission( "v1_ankle", 1.0, 0.0 );
 
-      interpolatedJacobian = interpolatedPushRodTransmission.getInterpolatedActuatorToJointJacobian( pitch[i], roll[i] );
+      interpolatedJacobian = interpolatedPushRodTransmission.getInterpolatedActuatorToJointJacobian( pitch[i], roll[i], PushRodTransmissionJoint.ANKLE);
 
       double m11_inter = -interpolatedJacobian[0][0];  double m12_inter = interpolatedJacobian[0][1];
       double m21_inter = -interpolatedJacobian[1][0];   double m22_inter = interpolatedJacobian[1][1];
