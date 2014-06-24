@@ -8,17 +8,20 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
-import us.ihmc.darpaRoboticsChallenge.DRCDemo01StartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
+import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
+import us.ihmc.graphics3DAdapter.GroundProfile;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import com.yobotics.simulationconstructionset.util.FlatGroundProfile;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestInterface
@@ -60,19 +63,18 @@ public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestI
    {
       BambooTools.reportTestStartedMessage();
 
-      DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DEFAULT;
-
       String scriptName = "scripts/ExerciseAndJUnitScripts/SimpleFlatGroundScript.xml";
       String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(DRCObstacleCourseFlatTest.class, scriptName);
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCSimpleFlatGroundScriptTest", fileName, selectedLocation,
-              checkNothingChanged, showGUI, createMovie, getRobotModel());
+      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = getRobotModel().getDefaultRobotInitialSetup(0.0, 0.0);
+      GroundProfile flatGround = new FlatGroundProfile();
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCSimpleFlatGroundScriptTest", fileName, robotInitialSetup, checkNothingChanged, showGUI, createMovie, getRobotModel(), flatGround);
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       setupCameraForWalkingUpToRamp(simulationConstructionSet);
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(20.0);
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -86,10 +88,9 @@ public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestI
    {
       BambooTools.reportTestStartedMessage();
 
-      DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DEFAULT;
-
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingUpToRampLongStepsTest", "", selectedLocation, checkNothingChanged,
-            showGUI, createMovie, getRobotModel());
+      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = getRobotModel().getDefaultRobotInitialSetup(0.0, 0.0);
+      GroundProfile flatGround = new FlatGroundProfile();
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingUpToRampLongStepsTest", "", robotInitialSetup, checkNothingChanged, showGUI, createMovie, getRobotModel(), flatGround);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
@@ -106,7 +107,7 @@ public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestI
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(15.0);
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -122,7 +123,7 @@ public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestI
       Point3d cameraFix = new Point3d(1.8375, -0.16, 0.89);
       Point3d cameraPosition = new Point3d(1.10, 8.30, 1.37);
 
-      drcSimulationTestHelper.setupCameraForUnitTest(scs, cameraFix, cameraPosition);
+      drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
 
   

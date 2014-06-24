@@ -78,7 +78,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(30.0);
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -115,7 +115,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       slipRandomOnEachStepPerturber.setProbabilityOfSlip(0.6);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(24.0);
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -142,7 +142,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(15.0);
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -180,7 +180,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       slipRandomOnEachStepPerturber.setProbabilityOfSlip(1.0);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(14.0);
       
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -206,7 +206,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(40.0);
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -233,7 +233,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(40.0);
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -258,7 +258,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(25.0);
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 //ThreadTools.sleepForever();
       assertTrue(success);
@@ -284,7 +284,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(25.0);
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -310,7 +310,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(50.0);
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -392,7 +392,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
          success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(8.0);
       }
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -405,7 +405,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       Point3d cameraFix = new Point3d(3.6214, 2.5418, 0.5);
       Point3d cameraPosition = new Point3d(6.6816, -0.5441, 1.5);
 
-      drcSimulationTestHelper.setupCameraForUnitTest(scs, cameraFix, cameraPosition);
+      drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
 
    private void setupCameraForWalkingOverHurdles(SimulationConstructionSet scs)
@@ -413,7 +413,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       Point3d cameraFix = new Point3d(4.9246, 4.0338, 0.5);
       Point3d cameraPosition = new Point3d(8.1885, 1.1641, 1.5);
 
-      drcSimulationTestHelper.setupCameraForUnitTest(scs, cameraFix, cameraPosition);
+      drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
 
    private void setupCameraForWalkingOverCinderblockField(SimulationConstructionSet scs)
@@ -421,7 +421,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       Point3d cameraFix = new Point3d(7.8655, 6.8947, 0.5);
       Point3d cameraPosition = new Point3d(10.2989, 18.7661, 3.2746);
 
-      drcSimulationTestHelper.setupCameraForUnitTest(scs, cameraFix, cameraPosition);
+      drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
 
    private void setupCameraForWalkingOverSlantedCinderblockField(SimulationConstructionSet scs)
@@ -429,7 +429,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       Point3d cameraFix = new Point3d(9.7689, 9.0724, 0.5);
       Point3d cameraPosition = new Point3d(8.0254, 16.6036, 2.5378);
 
-      drcSimulationTestHelper.setupCameraForUnitTest(scs, cameraFix, cameraPosition);
+      drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
 
    private void setupCameraForWalkingOverFlatCinderblockField(SimulationConstructionSet scs)
@@ -437,7 +437,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       Point3d cameraFix = new Point3d(7.447, 7.0966, 0.5);
       Point3d cameraPosition = new Point3d(6.3809, 14.6839, 2.7821);
 
-      drcSimulationTestHelper.setupCameraForUnitTest(scs, cameraFix, cameraPosition);
+      drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
 
    /*

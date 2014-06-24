@@ -80,7 +80,7 @@ public abstract class DRCObstacleCourseSteppingStonesTest implements MultiRobotT
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(13.0);
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -101,7 +101,7 @@ public abstract class DRCObstacleCourseSteppingStonesTest implements MultiRobotT
       Point3d cameraFix = new Point3d(-8.6, -0.1, 0.94);
       Point3d cameraPosition = new Point3d(-14.0, -5.0, 2.7);
 
-      drcSimulationTestHelper.setupCameraForUnitTest(scs, cameraFix, cameraPosition);
+      drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
 
    private FootstepDataList createFootstepsForWalkingOverEasySteppingStones(ScriptedFootstepGenerator scriptedFootstepGenerator)

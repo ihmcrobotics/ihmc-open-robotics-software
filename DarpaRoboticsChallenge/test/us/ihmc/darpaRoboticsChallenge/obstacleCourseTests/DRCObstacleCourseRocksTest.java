@@ -87,7 +87,7 @@ public abstract class DRCObstacleCourseRocksTest implements MultiRobotTestInterf
          success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(6.0);
       }
       
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -101,7 +101,7 @@ public abstract class DRCObstacleCourseRocksTest implements MultiRobotTestInterf
       Point3d cameraFix = new Point3d(0.1, 3.2, 0.5);
       Point3d cameraPosition = new Point3d(-2.8, 4.8, 1.5);
 
-      drcSimulationTestHelper.setupCameraForUnitTest(scs, cameraFix, cameraPosition);
+      drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
 
   

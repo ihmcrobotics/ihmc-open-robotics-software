@@ -75,7 +75,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(9.5);
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -106,7 +106,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(13.0);
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -119,6 +119,6 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       Point3d cameraFix = new Point3d(13.2664, 13.03, 0.75);
       Point3d cameraPosition = new Point3d(9.50, 15.59, 1.87);
 
-      drcSimulationTestHelper.setupCameraForUnitTest(scs, cameraFix, cameraPosition);
+      drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
 }
