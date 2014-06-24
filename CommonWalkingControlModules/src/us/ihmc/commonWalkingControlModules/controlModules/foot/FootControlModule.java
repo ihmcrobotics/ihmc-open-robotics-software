@@ -181,7 +181,7 @@ public class FootControlModule
             robotSide, registry);
       states.add(moveStraightState);
 
-      setUpStateMachine(states);
+      setupStateMachine(states);
    }
 
    public void setMaxAccelerationAndJerk(double maxPositionAcceleration, double maxPositionJerk, double maxOrientationAcceleration, double maxOrientationJerk)
@@ -226,8 +226,9 @@ public class FootControlModule
       contactStatesMap.put(ConstraintType.TOES_TOUCHDOWN, contactStatesMap.get(ConstraintType.TOES));
    }
 
-   private void setUpStateMachine(List<AbstractFootControlState> states)
+   private void setupStateMachine(List<AbstractFootControlState> states)
    {
+      // TODO Clean that up (Sylvain)
       for (AbstractFootControlState state : states)
       {
          for (AbstractFootControlState stateToTransitionTo : states)
