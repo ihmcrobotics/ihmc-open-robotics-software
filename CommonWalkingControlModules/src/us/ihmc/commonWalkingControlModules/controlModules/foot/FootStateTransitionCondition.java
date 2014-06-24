@@ -47,12 +47,6 @@ public class FootStateTransitionCondition implements StateTransitionCondition
       if (!transitionRequested)
          return false;
 
-      // this should never happen - is already checked in setContactState() in FootControlModule
-//      boolean isTransitionToCurrentState = requestedState.getEnumValue() == getCurrentConstraintType();
-//      
-//      if (isTransitionToCurrentState)
-//         return false;
-
       boolean singularityEscapeDone = true;
 
       if (doSingularityEscape.getBooleanValue() && waitSingularityEscapeBeforeTransitionToNextState.getBooleanValue())
