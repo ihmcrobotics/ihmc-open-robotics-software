@@ -362,7 +362,7 @@ public class FeetManager
 
    public void setContactStateForMoveStraight(RobotSide robotSide)
    {
-      ReferenceFrame footFrame = footControlModules.get(robotSide).getFootFrame();
+      ReferenceFrame footFrame = feet.get(robotSide).getBodyFrame();
       footControlModules.get(robotSide).setFootPose(new FramePose(footFrame));
       footControlModules.get(robotSide).doSingularityEscapeBeforeTransitionToNextState();
       footControlModules.get(robotSide).setContactState(ConstraintType.MOVE_STRAIGHT);
