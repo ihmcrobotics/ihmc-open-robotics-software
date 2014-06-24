@@ -80,19 +80,19 @@ public class AtlasWristLoopKinematicCalibrator extends AtlasCalibrationDataViewe
 	  final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.DRC_NO_HANDS;
 	  final boolean RUNNING_ON_REAL_ROBOT = DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT;
 
-      AtlasWristLoopKinematicCalibrator calib = new AtlasWristLoopKinematicCalibrator(ATLAS_ROBOT_VERSION, RUNNING_ON_REAL_ROBOT);
-      //calib.loadData("data/coupledWristLog_20131204");
-      calib.loadData("data/coupledWristLog_20131206_1");
+      AtlasWristLoopKinematicCalibrator calibrator = new AtlasWristLoopKinematicCalibrator(ATLAS_ROBOT_VERSION, RUNNING_ON_REAL_ROBOT);
+      //calibrator.loadData("data/coupledWristLog_20131204");
+      calibrator.loadData("data/coupledWristLog_20131206_1");
 
       // calJointNames order is the prm order
-      ArrayList<String> calJointNames = CalibUtil.toStringArrayList(calib.getArmJoints());
-      KinematicCalibrationWristLoopResidual residualFunc = new KinematicCalibrationWristLoopResidual(calib.fullRobotModel, calJointNames, (ArrayList) calib.q);
+      ArrayList<String> calibrationJointNames = CalibUtil.toStringArrayList(calibrator.getArmJoints());
+      KinematicCalibrationWristLoopResidual residualFunc = new KinematicCalibrationWristLoopResidual(calibrator.fullRobotModel, calibrationJointNames, calibrator.q);
 
       double[] prm = new double[residualFunc.getNumOfInputsN()];
 
       //initial
       double[] residual0 = residualFunc.calcResiduals(prm);
-      calib.calibrate(residualFunc, prm, 100);
+      calibrator.calibrate(residualFunc, prm, 100);
       double[] residual = residualFunc.calcResiduals(prm);
 
 
@@ -110,20 +110,20 @@ public class AtlasWristLoopKinematicCalibrator extends AtlasCalibrationDataViewe
       if (start_scs)
       {
          //Yovariables for display
-         YoFramePose yoResidual0 = new YoFramePose("residual0", "", ReferenceFrame.getWorldFrame(), calib.registry);
-         YoFramePose yoResidual = new YoFramePose("residual", "", ReferenceFrame.getWorldFrame(), calib.registry);
+         YoFramePose yoResidual0 = new YoFramePose("residual0", "", ReferenceFrame.getWorldFrame(), calibrator.registry);
+         YoFramePose yoResidual = new YoFramePose("residual", "", ReferenceFrame.getWorldFrame(), calibrator.registry);
 
-         calib.createDisplay(calib.q.size());
-         calib.attachIndexChangedListener();
-         calib.createQoutYoVariables();
+         calibrator.createDisplay(calibrator.q.size());
+         calibrator.attachIndexChangedListener();
+         calibrator.createQoutYoVariables();
 
-         for (int i = 0; i < calib.q.size(); i++)
+         for (int i = 0; i < calibrator.q.size(); i++)
          {
-            CalibUtil.setRobotModelFromData(calib.fullRobotModel, CalibUtil.addQ((Map) calib.q.get(i), qoffset));
+            CalibUtil.setRobotModelFromData(calibrator.fullRobotModel, CalibUtil.addQ((Map) calibrator.q.get(i), qoffset));
             yoResidual0.setXYZYawPitchRoll(Arrays.copyOfRange(residual0, i * RESIDUAL_DOF, i * RESIDUAL_DOF + 6));
             yoResidual.setXYZYawPitchRoll(Arrays.copyOfRange(residual, i * RESIDUAL_DOF, i * RESIDUAL_DOF + 6));
-            calib.updateQoutYoVariables(i);
-            calib.displayUpdate(i);
+            calibrator.updateQoutYoVariables(i);
+            calibrator.displayUpdate(i);
          }
       }
 
