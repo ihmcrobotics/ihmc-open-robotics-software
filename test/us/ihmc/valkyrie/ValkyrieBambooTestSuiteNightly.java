@@ -9,6 +9,7 @@ import org.junit.runners.Suite;
    ValkyrieObstacleCourseRampsTest.class,
    ValkyrieObstacleCourseFlatTest.class,
    ValkyrieObstacleCourseTrialsTerrainTest.class,
+   ValkyrieObstacleCourseEveryBuildTest.class,
    ValkyriePushInSingleSupportTest.class
 })
 
