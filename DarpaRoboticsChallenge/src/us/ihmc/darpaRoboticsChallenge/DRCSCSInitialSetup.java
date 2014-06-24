@@ -38,37 +38,25 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
 //   private SensorNoiseParameters simulatedSensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersZeroNoise();
    private SensorNoiseParameters simulatedSensorNoiseParameters = null; // Same as zero noise, but doesn't create sensor corruptors
    private boolean initializeEstimatorToActual = false;
-   private final boolean useSoftGroundContactGains;
    
    private final CommonTerrain commonTerrain;
 
    private DynamicIntegrationMethod dynamicIntegrationMethod = DynamicIntegrationMethod.EULER_DOUBLE_STEPS;
    
-   public DRCSCSInitialSetup(GroundProfile groundProfile, double simulateDT, boolean useSoftGroundContactGains)
+   public DRCSCSInitialSetup(GroundProfile groundProfile, double simulateDT)
    {
       commonTerrain = new CommonTerrain(groundProfile);
       this.simulateDT = simulateDT;
-      this.useSoftGroundContactGains = useSoftGroundContactGains;
-   }
-   
-   public DRCSCSInitialSetup(GroundProfile groundProfile, double simulateDT)
-   {
-      this(groundProfile, simulateDT, false);
    }
 
    public DRCSCSInitialSetup(TerrainType terrainType, double simulateDT)
    {
-      this(CommonTerrain.setUpTerrain(terrainType), simulateDT, false);
-   }
-
-   public DRCSCSInitialSetup(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, double simulateDT, boolean useSoftGroundContactGains)
-   {
-      this(commonAvatarEnvironmentInterface.getTerrainObject(), simulateDT, useSoftGroundContactGains);
+      this(CommonTerrain.setUpTerrain(terrainType), simulateDT);
    }
 
    public DRCSCSInitialSetup(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, double simulateDT)
    {
-      this(commonAvatarEnvironmentInterface, simulateDT, false);
+      this(commonAvatarEnvironmentInterface.getTerrainObject(), simulateDT);
    }
 
    public ScsPhysics createPhysics(ScsCollisionConfigure collisionConfigure, YoVariableRegistry registry)
@@ -87,35 +75,14 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
       robot.setGravity(gravity);
 
       double groundKz, groundBz, groundKxy, groundBxy;
-      
-//      groundKz = 500.0;
-//      groundBz = 300.0;
-//      groundKxy = 50000.0;
-//      groundBxy = 2000.0;
-      
-      if (useSoftGroundContactGains)
-      {
-         groundKz = 800.0;
-         groundBz = 800.0;
-         groundKxy = 10000.0;
-         groundBxy = 800.0;
-      }
-      else
-      {
-         groundKz = 2000.0;
-         groundBz = 1500.0;
-         groundKxy = 50000.0;
-         groundBxy = 2000.0;
-      }
 
-//      double alphaStick = 1.0;
-//      double alphaSlip = 0.5;
-//      LinearStickSlipGroundContactModel groundContactModel = new LinearStickSlipGroundContactModel(robot, groundKxy, groundBxy, groundKz, groundBz, alphaSlip,
-//                                                                alphaStick, robot.getRobotsYoVariableRegistry());
+      groundKz = 2000.0;
+      groundBz = 1500.0;
+      groundKxy = 50000.0;
+      groundBxy = 2000.0;
 
       LinearGroundContactModel groundContactModel = new LinearGroundContactModel(robot, groundKxy, groundBxy, groundKz, groundBz,
             robot.getRobotsYoVariableRegistry());
-
 
       if ((commonTerrain.getSteppingStones() != null) && (dynamicGraphicObjectsListRegistry != null))
          commonTerrain.registerSteppingStonesArtifact(dynamicGraphicObjectsListRegistry);

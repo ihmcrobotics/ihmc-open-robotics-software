@@ -97,7 +97,6 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
 
       boolean useVelocityAndHeadingScript = false;
       boolean cheatWithGroundHeightAtForFootstep = true;
-      boolean useLoadOfContactPointsForTheFeet = false;
 
       if (checkNothingChanged) maximumWalkTime = 3.0;
       
@@ -113,7 +112,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       double rampEndX = combinedTerrainObjectAndRampEndX.second();
       
       DRCFlatGroundWalkingTrack track = setupSimulationTrack(drcControlParameters, armControllerParameters, combinedTerrainObject, drawGroundProfile, useVelocityAndHeadingScript,
-            cheatWithGroundHeightAtForFootstep, useLoadOfContactPointsForTheFeet);
+            cheatWithGroundHeightAtForFootstep);
 
       drcSimulation = track.getDrcSimulation();
 
@@ -181,7 +180,6 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
 
       boolean useVelocityAndHeadingScript = false;
       boolean cheatWithGroundHeightAtForFootstep = true;
-      boolean useLoadOfContactPointsForTheFeet = true;
       
       WalkingControllerParameters drcControlParameters = robotModel.getWalkingControllerParameters();
       ArmControllerParameters armControllerParameters = robotModel.getArmControllerParameters();
@@ -195,7 +193,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       double rampEndX = combinedTerrainObjectAndRampEndX.second();
       
       DRCFlatGroundWalkingTrack track = setupSimulationTrack(drcControlParameters, armControllerParameters, combinedTerrainObject, drawGroundProfile, useVelocityAndHeadingScript,
-            cheatWithGroundHeightAtForFootstep, useLoadOfContactPointsForTheFeet);
+            cheatWithGroundHeightAtForFootstep);
 
       drcSimulation = track.getDrcSimulation();
 
@@ -307,7 +305,6 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
 
       boolean useVelocityAndHeadingScript = true;
       boolean cheatWithGroundHeightAtForFootstep = false;
-      boolean useLoadOfContactPointsForTheFeet = false;
 
       GroundProfile groundProfile = createBumpyGroundProfile();
       boolean drawGroundProfile = true;
@@ -315,7 +312,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       WalkingControllerParameters drcControlParameters = robotModel.getWalkingControllerParameters();
       ArmControllerParameters armControllerParameters = robotModel.getArmControllerParameters();
       DRCFlatGroundWalkingTrack track = setupSimulationTrack(drcControlParameters, armControllerParameters, groundProfile, drawGroundProfile,
-            useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, useLoadOfContactPointsForTheFeet);
+            useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep);
 
       drcSimulation = track.getDrcSimulation();
       SimulationConstructionSet scs = track.getSimulationConstructionSet();
@@ -366,12 +363,12 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
 
    private DRCFlatGroundWalkingTrack setupSimulationTrack(WalkingControllerParameters drcControlParameters, ArmControllerParameters
          armControllerParameters, GroundProfile groundProfile, boolean drawGroundProfile,
-         boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep, boolean useLoadOfContactPointsForTheFeet)
+         boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep)
    {
       DRCGuiInitialSetup guiInitialSetup = createGUIInitialSetup();
       
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
-      DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotModel.getSimulateDT(), useLoadOfContactPointsForTheFeet);
+      DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotModel.getSimulateDT());
       scsInitialSetup.setDrawGroundProfile(drawGroundProfile);
       
       if (cheatWithGroundHeightAtForFootstep)

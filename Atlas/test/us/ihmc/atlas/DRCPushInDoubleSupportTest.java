@@ -33,126 +33,124 @@ import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimu
 
 public abstract class DRCPushInDoubleSupportTest implements MultiRobotTestInterface
 {
-	private final static boolean SHOW_GUI = true;
-	private final static boolean VISUALIZE_FORCE = true;
+   private final static boolean SHOW_GUI = true;
+   private final static boolean VISUALIZE_FORCE = true;
 
-	private DRCPushRobotController pushRobotController;
-	private BlockingSimulationRunner blockingSimulationRunner;
-	private DRCSimulationFactory drcSimulation;
-	private RobotVisualizer robotVisualizer;
+   private DRCPushRobotController pushRobotController;
+   private BlockingSimulationRunner blockingSimulationRunner;
+   private DRCSimulationFactory drcSimulation;
+   private RobotVisualizer robotVisualizer;
 
-	@Before
-	public void showMemoryUsageBeforeTest() {
-		MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass()
-				.getSimpleName() + " before test.");
-	}
+   @Before
+   public void showMemoryUsageBeforeTest()
+   {
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+   }
 
-	@After
-	public void destroySimulationAndRecycleMemory() {
-		if (SHOW_GUI) {
-			ThreadTools.sleepForever();
-		}
+   @After
+   public void destroySimulationAndRecycleMemory()
+   {
+      if (SHOW_GUI)
+      {
+         ThreadTools.sleepForever();
+      }
 
-		// Do this here in case a test fails. That way the memory will be
-		// recycled.
-		if (blockingSimulationRunner != null) {
-			blockingSimulationRunner.destroySimulation();
-			blockingSimulationRunner = null;
-		}
+      // Do this here in case a test fails. That way the memory will be
+      // recycled.
+      if (blockingSimulationRunner != null)
+      {
+         blockingSimulationRunner.destroySimulation();
+         blockingSimulationRunner = null;
+      }
 
-		if (drcSimulation != null) {
-			drcSimulation.dispose();
-			drcSimulation = null;
-		}
+      if (drcSimulation != null)
+      {
+         drcSimulation.dispose();
+         drcSimulation = null;
+      }
 
-		if (robotVisualizer != null) {
-			robotVisualizer.close();
-			robotVisualizer = null;
-		}
+      if (robotVisualizer != null)
+      {
+         robotVisualizer.close();
+         robotVisualizer = null;
+      }
 
-		GlobalTimer.clearTimers();
-		TimerTaskScheduler.cancelAndReset();
-		AsyncContinuousExecutor.cancelAndReset();
+      GlobalTimer.clearTimers();
+      TimerTaskScheduler.cancelAndReset();
+      AsyncContinuousExecutor.cancelAndReset();
 
-		MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass()
-				.getSimpleName() + " after test.");
-	}
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+   }
 
-	@Test
-	public void TestPushInDoubleSupport() throws SimulationExceededMaximumTimeException,InterruptedException 
-	{
-		BambooTools.reportTestStartedMessage();
-		
-		DRCFlatGroundWalkingTrack track = setupTest(getRobotModel());
-		SimulationConstructionSet scs = track.getSimulationConstructionSet();
+   @Test
+   public void TestPushInDoubleSupport() throws SimulationExceededMaximumTimeException, InterruptedException
+   {
+      BambooTools.reportTestStartedMessage();
 
-		double forceMagnitude = 350.0;
-		double forceDuration = 0.15;
-		Vector3d forceDirection = new Vector3d(1.0, 0.0, 0.0);
+      DRCFlatGroundWalkingTrack track = setupTest(getRobotModel());
+      SimulationConstructionSet scs = track.getSimulationConstructionSet();
 
-		blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
+      double forceMagnitude = 350.0;
+      double forceDuration = 0.15;
+      Vector3d forceDirection = new Vector3d(1.0, 0.0, 0.0);
 
-		@SuppressWarnings("deprecation")
-		BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("walk");
-		@SuppressWarnings("deprecation")
-		BooleanYoVariable enable = (BooleanYoVariable) scs
-				.getVariable("enablePushRecovery");
-		@SuppressWarnings("deprecation")
-		BooleanYoVariable enableDS = (BooleanYoVariable) scs
-				.getVariable("enablePushRecoveryFromDoubleSupport");
+      blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
-		// enable push recovery
-		enable.set(true);
-		enableDS.set(true);
+      @SuppressWarnings("deprecation")
+      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("walk");
+      @SuppressWarnings("deprecation")
+      BooleanYoVariable enable = (BooleanYoVariable) scs.getVariable("enablePushRecovery");
+      @SuppressWarnings("deprecation")
+      BooleanYoVariable enableDS = (BooleanYoVariable) scs.getVariable("enablePushRecoveryFromDoubleSupport");
 
-		// simulate until atlas is in swing
-		walk.set(false);
-		blockingSimulationRunner.simulateAndBlock(3.0);
+      // enable push recovery
+      enable.set(true);
+      enableDS.set(true);
 
-		// push the robot
-		pushRobotController.applyForce(forceDirection, forceMagnitude,
-				forceDuration);
+      // simulate until atlas is in swing
+      walk.set(false);
+      blockingSimulationRunner.simulateAndBlock(3.0);
 
-		// simulate for a little while longer
-		blockingSimulationRunner.simulateAndBlock(forceDuration + 5.0);
-		
-		BambooTools.reportTestFinishedMessage();
-	}
+      // push the robot
+      pushRobotController.applyForce(forceDirection, forceMagnitude, forceDuration);
 
-	private DRCFlatGroundWalkingTrack setupTest(DRCRobotModel robotModel)
-			throws SimulationExceededMaximumTimeException, InterruptedException {
-		DRCFlatGroundWalkingTrack track = setupTrack(robotModel);
-		FullRobotModel fullRobotModel = robotModel.createFullRobotModel();
-		pushRobotController = new DRCPushRobotController(track
-				.getDrcSimulation().getRobot(), fullRobotModel);
-		
-		if(VISUALIZE_FORCE)
+      // simulate for a little while longer
+      blockingSimulationRunner.simulateAndBlock(forceDuration + 5.0);
+
+      BambooTools.reportTestFinishedMessage();
+   }
+
+   private DRCFlatGroundWalkingTrack setupTest(DRCRobotModel robotModel) throws SimulationExceededMaximumTimeException, InterruptedException
+   {
+      DRCFlatGroundWalkingTrack track = setupTrack(robotModel);
+      FullRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      pushRobotController = new DRCPushRobotController(track.getDrcSimulation().getRobot(), fullRobotModel);
+
+      if (VISUALIZE_FORCE)
       {
          track.getSimulationConstructionSet().addDynamicGraphicObject(pushRobotController.getForceVisualizer());
       }
-		
-		return track;
-	}
 
-	private DRCFlatGroundWalkingTrack setupTrack(DRCRobotModel robotModel) {
-		DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false);
-		guiInitialSetup.setIsGuiShown(SHOW_GUI);
+      return track;
+   }
 
-		GroundProfile groundProfile = new FlatGroundProfile();
+   private DRCFlatGroundWalkingTrack setupTrack(DRCRobotModel robotModel)
+   {
+      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false);
+      guiInitialSetup.setIsGuiShown(SHOW_GUI);
 
-		DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(
-				groundProfile, robotModel.getSimulateDT(), false);
-		scsInitialSetup.setInitializeEstimatorToActual(true);
-		scsInitialSetup.setDrawGroundProfile(true);
+      GroundProfile groundProfile = new FlatGroundProfile();
 
-		DRCRobotInitialSetup<SDFRobot> robotInitialSetup = robotModel
-				.getDefaultRobotInitialSetup(0.0, 0.0);
+      DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotModel.getSimulateDT());
+      scsInitialSetup.setInitializeEstimatorToActual(true);
+      scsInitialSetup.setDrawGroundProfile(true);
 
-		DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(
-				robotInitialSetup, guiInitialSetup, scsInitialSetup, true,
-				false, robotModel);
+      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
 
-		drcSimulation = drcFlatGroundWalkingTrack.getDrcSimulation();
-		return drcFlatGroundWalkingTrack;
-	}
+      DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup, true, false,
+            robotModel);
+
+      drcSimulation = drcFlatGroundWalkingTrack.getDrcSimulation();
+      return drcFlatGroundWalkingTrack;
+   }
 }

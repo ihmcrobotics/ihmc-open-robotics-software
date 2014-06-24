@@ -15,18 +15,17 @@ import us.ihmc.robotSide.SideDependentList;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 
 public class DRCFlatGroundWalkingTrack
-{   
+{
    private final DRCSimulationFactory drcSimulation;
 
-   public DRCFlatGroundWalkingTrack(DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
-                                    DRCSCSInitialSetup scsInitialSetup, boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep,
-                                    DRCRobotModel model)
+   public DRCFlatGroundWalkingTrack(DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup, DRCSCSInitialSetup scsInitialSetup,
+         boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep, DRCRobotModel model)
    {
       WalkingControllerParameters walkingControlParameters = model.getWalkingControllerParameters();
       ArmControllerParameters armControllerParameters = model.getArmControllerParameters();
 
-//    scsInitialSetup = new DRCSCSInitialSetup(TerrainType.FLAT);
-      
+      //    scsInitialSetup = new DRCSCSInitialSetup(TerrainType.FLAT);
+
       double dt = scsInitialSetup.getDT();
       int recordFrequency = (int) Math.round(model.getControllerDT() / dt);
       if (recordFrequency < 1)
@@ -36,13 +35,13 @@ public class DRCFlatGroundWalkingTrack
       boolean useFastTouchdowns = false;
 
       FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulation(walkingControlParameters);
-      
+
       WalkingControllerParameters walkingControllerParameters = model.getWalkingControllerParameters();
       DRCRobotContactPointParameters contactPointParameters = model.getContactPointParameters();
       ContactableBodiesFactory contactableBodiesFactory = contactPointParameters.getContactableBodiesFactory();
 
       SideDependentList<String> footForceSensorNames = model.getSensorInformation().getFeetForceSensorNames();
-      
+
       MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory,
             DRCConfigParameters.contactTresholdForceForSCS, footForceSensorNames, footstepTimingParameters, walkingControllerParameters,
             armControllerParameters, useVelocityAndHeadingScript, useFastTouchdowns, HighLevelState.WALKING);
