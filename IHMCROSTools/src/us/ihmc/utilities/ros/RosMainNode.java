@@ -35,6 +35,11 @@ public class RosMainNode implements NodeMain
       this.graphName = graphName;
    }
 
+   public boolean isStarted()
+   {
+      return isStarted;
+   }
+   
    public void attachServiceClient(String topicName, RosServiceClient<? extends Message, ? extends Message> client)
    {
       checkNotStarted();
@@ -79,7 +84,6 @@ public class RosMainNode implements NodeMain
    @SuppressWarnings({"unchecked", "rawtypes"})
    public void onStart(ConnectedNode connectedNode)
    {
-      isStarted = true;
 
       for (Entry<String, RosTopicSubscriberInterface<? extends Message>> entry : subscribers.entrySet())
       {
@@ -117,6 +121,7 @@ public class RosMainNode implements NodeMain
             throw new RuntimeException(e);
          }
       }
+      isStarted = true;
    }
 
    public void onShutdown(Node node)
