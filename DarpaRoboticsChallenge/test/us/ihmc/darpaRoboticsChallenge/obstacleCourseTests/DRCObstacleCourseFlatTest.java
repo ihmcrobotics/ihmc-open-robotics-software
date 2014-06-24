@@ -100,31 +100,6 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
    }
 
    @Test
-   public void testSimpleFlatGroundScript() throws SimulationExceededMaximumTimeException
-   {
-      BambooTools.reportTestStartedMessage();
-
-      DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DEFAULT;
-
-      String scriptName = "scripts/ExerciseAndJUnitScripts/SimpleFlatGroundScript.xml";
-      String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(DRCObstacleCourseFlatTest.class, scriptName);
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCSimpleFlatGroundScriptTest", fileName, selectedLocation,
-              checkNothingChanged, showGUI, createMovie, getRobotModel());
-      SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
-      setupCameraForWalkingUpToRamp(simulationConstructionSet);
-
-      ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(20.0);
-
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
-      drcSimulationTestHelper.checkNothingChanged();
-
-      assertTrue(success);
-
-      BambooTools.reportTestFinishedMessage();
-   }
-
-   @Test
    public void testSimpleFlatGroundScriptWithRandomFootSlip() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -436,39 +411,6 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
 
       FootstepDataList footstepDataList = createFootstepsForWalkingUpToRampShortSteps(scriptedFootstepGenerator);
-      drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
-
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(15.0);
-
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
-      drcSimulationTestHelper.checkNothingChanged();
-
-      assertTrue(success);
-
-      BambooTools.reportTestFinishedMessage();
-   }
-
-   @Test
-   public void testWalkingUpToRampWithLongSteps() throws SimulationExceededMaximumTimeException
-   {
-      BambooTools.reportTestStartedMessage();
-
-      DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DEFAULT;
-
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingUpToRampLongStepsTest", "", selectedLocation, checkNothingChanged,
-            showGUI, createMovie, getRobotModel());
-
-      SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
-      ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
-
-      setupCameraForWalkingUpToRamp(simulationConstructionSet);
-
-      ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
-
-      FootstepDataList footstepDataList = createFootstepsForWalkingOnFlatLongSteps(scriptedFootstepGenerator);
-
-      // FootstepDataList footstepDataList = createFootstepsForTwoLongFlatSteps(scriptedFootstepGenerator);
       drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(15.0);
