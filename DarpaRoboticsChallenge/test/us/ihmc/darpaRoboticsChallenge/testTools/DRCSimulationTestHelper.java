@@ -10,35 +10,52 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.bambooTools.BambooTools;
+import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepTimingParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.BlindWalkingPacket;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.CarIngressEgressControllerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelState;
 import us.ihmc.commonWalkingControlModules.packets.ComHeightPacket;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
+import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCDemo01StartingLocation;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseDemo;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseSimulation;
+import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
+import us.ihmc.darpaRoboticsChallenge.DRCSimulationFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.darpaRoboticsChallenge.scriptEngine.VariousWalkingProviderFromScriptFactory;
 import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
 import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
+import us.ihmc.graphics3DAdapter.GroundProfile;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.time.GlobalTimer;
+import com.yobotics.simulationconstructionset.util.ground.TerrainObject;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import com.yobotics.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
 
 public class DRCSimulationTestHelper
 {
-   private final DRCObstacleCourseSimulation drcSimulation;
+   private final SimulationConstructionSet scs;
+   private final SDFRobot sdfRobot;
+   private final DRCSimulationFactory drcSimulationFactory;
    private final ScriptedFootstepDataListObjectCommunicator networkObjectCommunicator;
 
    private final boolean checkNothingChanged;
@@ -50,7 +67,76 @@ public class DRCSimulationTestHelper
 
    private final DRCRobotModel robotModel;
 
-   public DRCSimulationTestHelper(String name, String scriptFilename, DRCDemo01StartingLocation selectedLocation, boolean checkNothingChanged, boolean showGUI,
+   public DRCSimulationTestHelper(String name, String scriptFileName, DRCRobotInitialSetup<SDFRobot> robotInitialSetup, boolean checkNothingChanged,
+         boolean showGUI, boolean createMovie, DRCRobotModel robotModel, TerrainObject terrainObject)
+   {
+      this(name, scriptFileName, robotInitialSetup, checkNothingChanged, showGUI, createMovie, robotModel, (GroundProfile) terrainObject);
+   }
+
+   public DRCSimulationTestHelper(String name, String scriptFileName, DRCRobotInitialSetup<SDFRobot> robotInitialSetup, boolean checkNothingChanged,
+         boolean showGUI, boolean createMovie, DRCRobotModel robotModel, GroundProfile groundProfile)
+   {
+      networkObjectCommunicator = new ScriptedFootstepDataListObjectCommunicator("Team");
+      this.walkingControlParameters = robotModel.getWalkingControllerParameters();
+      this.robotModel = robotModel;
+      this.checkNothingChanged = checkNothingChanged;
+      this.createMovie = createMovie;
+      if (createMovie)
+         showGUI = true;
+
+      boolean groundProfileVisible = !(groundProfile instanceof TerrainObject);
+
+      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(groundProfileVisible, false, WalkControllerSliderBoard.getFactory(), showGUI);
+      DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotModel.getSimulateDT());
+      scsInitialSetup.setInitializeEstimatorToActual(true);
+      scsInitialSetup.setDrawGroundProfile(false);
+      if (groundProfile != null)
+         robotInitialSetup.setInitialGroundHeight(groundProfile.heightAt(0, 0, 0));
+
+      ArmControllerParameters armControllerParameters = robotModel.getArmControllerParameters();
+
+      FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulation(walkingControlParameters);
+
+      WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
+      WalkingControllerParameters multiContactControllerParameters = robotModel.getMultiContactControllerParameters();
+      ContactableBodiesFactory contactableBodiesFactory = robotModel.getContactPointParameters().getContactableBodiesFactory();
+
+      SideDependentList<String> footForceSensorNames = robotModel.getSensorInformation().getFeetForceSensorNames();
+      MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory,
+            DRCConfigParameters.contactTresholdForceForSCS, footForceSensorNames, footstepTimingParameters, walkingControllerParameters,
+            armControllerParameters, false, false, HighLevelState.WALKING);
+      controllerFactory.addHighLevelBehaviorFactory(new CarIngressEgressControllerFactory(multiContactControllerParameters, false));
+      controllerFactory.setupForCheatingUsingGroundHeightAtForFootstepProvider(scsInitialSetup.getGroundProfile());
+      GlobalDataProducer globalDataProducer = new GlobalDataProducer(networkObjectCommunicator);
+      controllerFactory.setupForNetworkedFootstepProvider(globalDataProducer);
+
+      if ((scriptFileName != null) && (!scriptFileName.equals("")))
+      {
+         VariousWalkingProviderFromScriptFactory variousWalkingProviderFactory = new VariousWalkingProviderFromScriptFactory(scriptFileName);
+         controllerFactory.setVariousWalkingProviderFactory(variousWalkingProviderFactory);
+      }
+      
+      TerrainObject environmentTerrain = null;
+      if (groundProfile instanceof TerrainObject)
+         environmentTerrain = (TerrainObject) groundProfile;
+      drcSimulationFactory = new DRCSimulationFactory(robotModel, controllerFactory, environmentTerrain, robotInitialSetup, scsInitialSetup,
+            guiInitialSetup, globalDataProducer);
+      scs = drcSimulationFactory.getSimulationConstructionSet();
+      sdfRobot = drcSimulationFactory.getRobot();
+      drcSimulationFactory.start();
+      blockingSimulationRunner = new BlockingSimulationRunner(scs, 60.0 * 10.0);
+
+      if (checkNothingChanged)
+      {
+         nothingChangedVerifier = new NothingChangedVerifier(name, scs);
+      }
+      else
+      {
+         nothingChangedVerifier = null;
+      }
+   }
+
+   public DRCSimulationTestHelper(String name, String scriptFileName, DRCDemo01StartingLocation selectedLocation, boolean checkNothingChanged, boolean showGUI,
          boolean createMovie, DRCRobotModel robotModel)
    {
       networkObjectCommunicator = new ScriptedFootstepDataListObjectCommunicator("Team");
@@ -69,14 +155,17 @@ public class DRCSimulationTestHelper
       SliderBoardFactory sliderBoardFactory = WalkControllerSliderBoard.getFactory();
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false, sliderBoardFactory, showGUI);
 
-      drcSimulation = DRCObstacleCourseDemo.startDRCSim(scriptFilename, networkObjectCommunicator, selectedLocation, guiInitialSetup,
-            initializeEstimatorToActual, automaticallyStartSimulation, startDRCNetworkProcessor, false, robotModel);
+      DRCObstacleCourseSimulation drcSimulation = DRCObstacleCourseDemo.startDRCSim(scriptFileName, networkObjectCommunicator, selectedLocation,
+            guiInitialSetup, initializeEstimatorToActual, automaticallyStartSimulation, startDRCNetworkProcessor, false, robotModel);
 
-      blockingSimulationRunner = new BlockingSimulationRunner(drcSimulation.getSimulationConstructionSet(), 60.0 * 10.0);
+      scs = drcSimulation.getSimulationConstructionSet();
+      sdfRobot = drcSimulation.getRobot();
+      drcSimulationFactory = drcSimulation.getSimulation();
+      blockingSimulationRunner = new BlockingSimulationRunner(scs, 60.0 * 10.0);
 
       if (checkNothingChanged)
       {
-         nothingChangedVerifier = new NothingChangedVerifier(name, drcSimulation.getSimulationConstructionSet());
+         nothingChangedVerifier = new NothingChangedVerifier(name, scs);
       }
       else
       {
@@ -91,7 +180,7 @@ public class DRCSimulationTestHelper
 
    public SimulationConstructionSet getSimulationConstructionSet()
    {
-      return drcSimulation.getSimulationConstructionSet();
+      return scs;
    }
 
    public ScriptedFootstepGenerator createScriptedFootstepGenerator()
@@ -140,12 +229,7 @@ public class DRCSimulationTestHelper
 
    public SDFRobot getRobot()
    {
-      return drcSimulation.getRobot();
-   }
-
-   public DRCObstacleCourseSimulation getDRCSimulation()
-   {
-      return drcSimulation;
+      return sdfRobot;
    }
 
    public void simulateAndBlock(double simulationTime) throws SimulationExceededMaximumTimeException
@@ -157,9 +241,9 @@ public class DRCSimulationTestHelper
    {
       blockingSimulationRunner.destroySimulation();
       blockingSimulationRunner = null;
-      if (drcSimulation != null && drcSimulation.getSimulation() != null)
+      if (drcSimulationFactory != null)
       {
-         drcSimulation.getSimulation().dispose();
+         drcSimulationFactory.dispose();
       }
       GlobalTimer.clearTimers();
       TimerTaskScheduler.cancelAndReset();
@@ -180,7 +264,7 @@ public class DRCSimulationTestHelper
       }
    }
 
-   public void createMovie(String simplifiedRobotModelName, SimulationConstructionSet scs, int callStackHeight)
+   public void createMovie(String simplifiedRobotModelName, int callStackHeight)
    {
       if (createMovie)
       {
@@ -201,7 +285,7 @@ public class DRCSimulationTestHelper
       return ret;
    }
 
-   public void setupCameraForUnitTest(SimulationConstructionSet scs, Point3d cameraFix, Point3d cameraPosition)
+   public void setupCameraForUnitTest(Point3d cameraFix, Point3d cameraPosition)
    {
       CameraConfiguration cameraConfiguration = new CameraConfiguration("testCamera");
 

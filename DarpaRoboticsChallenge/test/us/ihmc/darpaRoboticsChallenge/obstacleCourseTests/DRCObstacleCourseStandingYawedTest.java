@@ -73,7 +73,7 @@ import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimu
          ThreadTools.sleep(1000);
          boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
          
-         drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
+         drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
          drcSimulationTestHelper.checkNothingChanged();
 
          assertTrue(success);
@@ -87,7 +87,7 @@ import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimu
          Point3d cameraFix = new Point3d(0.1, 3.2, 0.5);
          Point3d cameraPosition = new Point3d(-2.8, 4.8, 1.5);
 
-         drcSimulationTestHelper.setupCameraForUnitTest(scs, cameraFix, cameraPosition);
+         drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
       }
 
    }

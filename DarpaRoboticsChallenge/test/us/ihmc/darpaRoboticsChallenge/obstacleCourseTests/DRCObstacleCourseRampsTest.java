@@ -92,7 +92,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(18.0);
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -169,7 +169,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(16.0);
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 2);
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 2);
 
       drcSimulationTestHelper.checkNothingChanged();
       assertTrue(success);
@@ -203,7 +203,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       Point3d cameraFix = new Point3d(5.0, -0.2, 0.89);
       Point3d cameraPosition = new Point3d(5.0, 7.8, 1.6);
 
-      drcSimulationTestHelper.setupCameraForUnitTest(scs, cameraFix, cameraPosition);
+      drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
    
    private void setupCameraForWalkingOverEasySteppingStones(SimulationConstructionSet scs)
@@ -211,7 +211,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       Point3d cameraFix = new Point3d(-8.6, -0.1, 0.94);
       Point3d cameraPosition = new Point3d(-14.0, -5.0, 2.7);
 
-      drcSimulationTestHelper.setupCameraForUnitTest(scs, cameraFix, cameraPosition);
+      drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
 
    

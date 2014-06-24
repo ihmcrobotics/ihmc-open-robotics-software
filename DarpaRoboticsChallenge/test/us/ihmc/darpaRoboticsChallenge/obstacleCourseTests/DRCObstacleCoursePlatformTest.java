@@ -85,7 +85,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
          success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
       }
       
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -115,7 +115,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
 
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -146,7 +146,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
       
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), simulationConstructionSet, 1);
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
       
       assertTrue(success);
@@ -159,7 +159,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       Point3d cameraFix = new Point3d(-3.0, -4.6, 0.8);
       Point3d cameraPosition = new Point3d(-11.5, -5.8, 2.5);
 
-      drcSimulationTestHelper.setupCameraForUnitTest(scs, cameraFix, cameraPosition);
+      drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
    
    private void setupCameraForWalkingOverMediumPlatform(SimulationConstructionSet scs)
@@ -167,7 +167,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       Point3d cameraFix = new Point3d(-3.9, -5.6, 0.55);
       Point3d cameraPosition = new Point3d(-7.5, -2.3, 0.58);
 
-      drcSimulationTestHelper.setupCameraForUnitTest(scs, cameraFix, cameraPosition);
+      drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
    
    private void setupCameraForWalkingOffOfMediumPlatform(SimulationConstructionSet scs)
@@ -175,7 +175,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       Point3d cameraFix = new Point3d(-3.9, -5.6, 0.55);
       Point3d cameraPosition = new Point3d(-7.6, -2.4, 0.58);
 
-      drcSimulationTestHelper.setupCameraForUnitTest(scs, cameraFix, cameraPosition);
+      drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
 
 
