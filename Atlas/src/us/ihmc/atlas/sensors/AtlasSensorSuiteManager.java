@@ -78,16 +78,17 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       {
          rosNativeNetworkProcessor = null;
       }
-
+     
       MultiSenseSensorManager multiSenseSensorManager = new MultiSenseSensorManager(sensorInformation, robotPoseBuffer, rosMainNode, networkingManager,
             sdfFullRobotModel, objectCommunicator, rosNativeNetworkProcessor, ppsTimestampOffsetProvider, lidarDataFilter);
 
       new FishEyeDataReceiver(robotPoseBuffer, sensorInformation.getPrimaryCameraParamaters().getVideoSettings(), rosMainNode, networkingManager,
             DRCSensorParameters.DEFAULT_FIELD_OF_VIEW, ppsTimestampOffsetProvider);
+    
       new AtlasRosPublisher(objectCommunicator, rosMainNode, sdfFullRobotModel, ppsTimestampOffsetProvider, robotPoseBuffer);
       ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
-
-      rosMainNode.execute();
+      rosMainNode.execute();     
+     
       if (DRCConfigParameters.CALIBRATE_ARM_MODE)
       {
          ArmCalibrationHelper armCalibrationHelper = new ArmCalibrationHelper(objectCommunicator, networkingManager, jointMap);
