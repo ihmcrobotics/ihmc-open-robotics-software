@@ -13,8 +13,11 @@ import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
+
 public class InefficientPushrodTransmissionJacobianTest
 {
+   private double TOLERANCE = 1e-7;
+   private boolean DEBUG = false;
    private final boolean visualizeAndKeepUp = false;
 
    @Test
@@ -220,10 +223,14 @@ public class InefficientPushrodTransmissionJacobianTest
 
    private void assertJacobianEquals(double[][] jacobian, double j00, double j01, double j10, double j11)
    {
-      assertEquals(jacobian[0][0], j00, 1e-7);
-      assertEquals(jacobian[0][1], j01, 1e-7);
-      assertEquals(jacobian[1][0], j10, 1e-7);
-      assertEquals(jacobian[1][1], j11, 1e-7);
+      assertEquals(jacobian[1][1], j00, TOLERANCE);
+      assertEquals(jacobian[1][0], j01, TOLERANCE);
+      assertEquals(-jacobian[0][1], j10, TOLERANCE);
+      assertEquals(-jacobian[0][0], j11, TOLERANCE);
+      if(DEBUG){
+         System.out.println("jacobian: "+ jacobian[1][1] + ", " + jacobian[1][0] +", "+ -jacobian[0][1] +", "+ -jacobian[0][0]);
+         System.out.println("j: " + j00 + ", " + j01 + ", " + j10 + ", " + j11 );
+      }
 
    }
 
