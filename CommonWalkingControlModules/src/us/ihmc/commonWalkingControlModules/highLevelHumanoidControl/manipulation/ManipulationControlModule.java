@@ -13,7 +13,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.taskExecutor.Task;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandLoadBearingProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandPoseProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.HandPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -160,7 +160,7 @@ public class ManipulationControlModule
                                   SideDependentList<ReferenceFrame> handPositionControlFrames, SideDependentList<Integer> jacobianIds, 
                                   ArmControllerParameters armControlParameters, ControlStatusProducer controlStatusProducer)
    {
-      DesiredHandPoseProvider handPoseProvider = variousWalkingProviders.getDesiredHandPoseProvider();
+      HandPoseProvider handPoseProvider = variousWalkingProviders.getDesiredHandPoseProvider();
       DesiredHandLoadBearingProvider handLoadBearingProvider = variousWalkingProviders.getDesiredHandLoadBearingProvider();
 
       individualHandControlModules = createIndividualHandControlModules(yoTime, fullRobotModel, twistCalculator, dynamicGraphicObjectsListRegistry,

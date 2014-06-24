@@ -17,7 +17,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.ObjectConsumer;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
-public class DesiredHandPoseProvider implements ObjectConsumer<HandPosePacket>
+public class DesiredHandPoseProvider implements ObjectConsumer<HandPosePacket>, HandPoseProvider
 {
    private final SideDependentList<AtomicReference<HandPosePacket>> packets = new SideDependentList<AtomicReference<HandPosePacket>>();
 
