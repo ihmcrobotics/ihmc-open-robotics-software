@@ -34,7 +34,9 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHeadOrientatio
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBearingProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.HandPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ReinitializeWalkingControllerProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.UserDesiredHandPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.UserDesiredHeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.NetworkControlStatusProducer;
@@ -74,7 +76,7 @@ public class VariousWalkingProviders
    private final DesiredHeadOrientationProvider desiredHeadOrientationProvider;
    private final DesiredPelvisPoseProvider desiredPelvisPoseProvider;
    private final DesiredComHeightProvider desiredComHeightProvider;
-   private final DesiredHandPoseProvider desiredHandPoseProvider;
+   private final HandPoseProvider desiredHandPoseProvider;
    private final DesiredChestOrientationProvider desiredChestOrientationProvider;
    private final DesiredFootPoseProvider desiredFootPoseProvider;
    private final ReinitializeWalkingControllerProvider reinitializeWalkingControllerProvider;
@@ -91,7 +93,7 @@ public class VariousWalkingProviders
    public VariousWalkingProviders(FootstepProvider footstepProvider, HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters,
          DesiredHeadOrientationProvider desiredHeadOrientationProvider, DesiredComHeightProvider desiredComHeightProvider,
          DesiredPelvisPoseProvider desiredPelvisPoseProvider,
-         DesiredHandPoseProvider desiredHandPoseProvider, DesiredHandLoadBearingProvider desiredHandLoadBearingProvider,
+         HandPoseProvider desiredHandPoseProvider, DesiredHandLoadBearingProvider desiredHandLoadBearingProvider,
          DesiredChestOrientationProvider desiredChestOrientationProvider,
          DesiredFootPoseProvider footPoseProvider, DesiredFootStateProvider footStateProvider,
          DesiredHighLevelStateProvider desiredHighLevelStateProvider, DesiredThighLoadBearingProvider thighLoadBearingProvider,
@@ -173,7 +175,7 @@ public class VariousWalkingProviders
       return desiredPelvisLoadBearingProvider;
    }
    
-   public DesiredHandPoseProvider getDesiredHandPoseProvider()
+   public HandPoseProvider getDesiredHandPoseProvider()
    {
       return desiredHandPoseProvider;
    }
@@ -356,7 +358,7 @@ public class VariousWalkingProviders
    public static VariousWalkingProviders createUsingYoVariables(FullRobotModel fullRobotModel, WalkingControllerParameters walkingControllerParameters,
          CommonWalkingReferenceFrames referenceFrames, SideDependentList<ContactablePlaneBody> bipedFeet, YoVariableRegistry registry)
    {
-      DesiredHandPoseProvider handPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame());
+      HandPoseProvider handPoseProvider = new UserDesiredHandPoseProvider(fullRobotModel, walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame(), registry);
 
       LinkedHashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = new LinkedHashMap<Footstep, TrajectoryParameters>();
 
