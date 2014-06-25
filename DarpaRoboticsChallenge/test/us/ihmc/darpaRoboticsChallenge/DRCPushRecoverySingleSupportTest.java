@@ -36,6 +36,7 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateTransition
 public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTestInterface
 {
    private final static boolean KEEP_SCS_UP = false;
+   private final static boolean SHOW_GUI = false;
    private final static boolean VISUALIZE_FORCE = false;
 
    private double swingTime;
@@ -257,7 +258,7 @@ public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTest
    private DRCFlatGroundWalkingTrack setupTrack(DRCRobotModel robotModel)
    {
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false);
-      guiInitialSetup.setIsGuiShown(true);
+      guiInitialSetup.setIsGuiShown(SHOW_GUI);
       GroundProfile groundProfile = new FlatGroundProfile();
 
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotModel.getSimulateDT());
