@@ -124,7 +124,8 @@ public class FootstepGeneratorVisualizer
       }
 
       FramePose footstepPoseInWorld = footstepPose.changeFrameCopy(worldFrame);
-      FramePoint position = footstepPoseInWorld.getPositionCopy();
+      FramePoint position = new FramePoint();
+      footstepPoseInWorld.getPosition(position);
       position.setZ(position.getZ() + 0.0005);
       footstepPoseInWorld.setPosition(position);
 
