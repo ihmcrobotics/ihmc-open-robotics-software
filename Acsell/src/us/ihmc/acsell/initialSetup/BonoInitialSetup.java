@@ -61,7 +61,7 @@ public class BonoInitialSetup implements DRCRobotInitialSetup<SDFRobot>
       yawPitchRoll[0] = initialYaw;
       frameOrientation.setYawPitchRoll(yawPitchRoll);
 
-      robot.setOrientation(frameOrientation.getQuaternion());
+      robot.setOrientation(frameOrientation.getQuaternionCopy());
 
       robot.update();
    }
