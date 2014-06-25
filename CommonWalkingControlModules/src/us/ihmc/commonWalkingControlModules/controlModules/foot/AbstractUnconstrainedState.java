@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccele
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -55,7 +56,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       this.anklePitchJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.ANKLE_PITCH);
    
       RigidBody foot = contactableBody.getRigidBody();
-      String namePrefix = foot.getName() + "_" + constraintType.toString().toLowerCase() + "_";
+      String namePrefix = foot.getName() + FormattingTools.underscoredToCamelCase(constraintType.toString().toLowerCase(), true);
       yoDesiredLinearVelocity = new YoFrameVector(namePrefix + "DesiredLinearVelocity", worldFrame, registry);
       yoDesiredLinearVelocity.setToNaN();
       yoDesiredPosition = new YoFramePoint(namePrefix + "DesiredPosition", worldFrame, registry);
