@@ -23,7 +23,7 @@ dependencies {
     compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-visualize', version: '0.17'
     compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-sfm', version: '0.17'
 	compile group: 'us.ihmc.thirdparty', name: 'georegression', version: 'x'
-	compile group: 'us.ihmc.thirdparty', name: 'ejml', version: 'x'
+	compile group: 'com.googlecode.efficient-java-matrix-library', name: 'ejml', version: '0.25'
 	compile group: 'commons-lang', name: 'commons-lang', version: '2.6'
 	compile group: 'us.ihmc.thirdparty', name: 'ddogleg', version: 'x'
 	compile group: 'net.java.jinput', name: 'jinput', version: '2.0.5'
