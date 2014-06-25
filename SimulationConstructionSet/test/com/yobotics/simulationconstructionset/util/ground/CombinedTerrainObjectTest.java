@@ -8,11 +8,9 @@ import org.junit.Test;
 
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 import us.ihmc.utilities.test.JUnitTools;
-import vclip.ConvexPolygon;
 
 public class CombinedTerrainObjectTest
 {
-
    private CombinedTerrainObject combinedTerrainObject;
    private Point3d pointToCheck;
    private Point3d expected;
