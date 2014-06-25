@@ -64,7 +64,7 @@ public class OrientationMeasurementModelElementTest
 
          public void run()
          {
-            rootJoint.setRotation(orientationPort.getData().getMatrix3d());
+            rootJoint.setRotation(orientationPort.getData().getMatrix3dCopy());
             elevator.updateFramesRecursively();
          }
       };

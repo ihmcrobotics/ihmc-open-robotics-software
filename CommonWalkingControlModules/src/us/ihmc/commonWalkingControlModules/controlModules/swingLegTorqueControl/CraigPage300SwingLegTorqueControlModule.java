@@ -291,7 +291,7 @@ public class CraigPage300SwingLegTorqueControlModule implements SwingLegTorqueCo
    private static Transform3D createTransform(FrameOrientation orientation, FramePoint framePoint)
    {
       orientation.checkReferenceFrameMatch(framePoint);
-      Matrix3d rotationMatrix = orientation.getMatrix3d();
+      Matrix3d rotationMatrix = orientation.getMatrix3dCopy();
       Transform3D ret = new Transform3D(rotationMatrix, new Vector3d(framePoint.getPoint()), 1.0);
 
       return ret;

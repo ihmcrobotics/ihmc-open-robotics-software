@@ -135,8 +135,8 @@ public class OrientationAndPositionFullRobotModelUpdaterTest
    {
       FrameOrientation estimationFrameOrientation = new FrameOrientation(estimationFrame);
       estimationFrameOrientation.changeFrame(orientationPort.getData().getReferenceFrame());
-      Matrix3d rotationBack = estimationFrameOrientation.getMatrix3d();
-      Matrix3d rotation = orientationPort.getData().getMatrix3d();
+      Matrix3d rotationBack = estimationFrameOrientation.getMatrix3dCopy();
+      Matrix3d rotation = orientationPort.getData().getMatrix3dCopy();
       assertTrue(rotationBack.epsilonEquals(rotation, epsilon));
    }
 
