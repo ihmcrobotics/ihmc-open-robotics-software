@@ -5,7 +5,7 @@ dependencies {
     compile group: 'us.ihmc.thirdparty.j3d', name: 'vecmath', version: 'x'
     compile group: 'us.ihmc.thirdparty.j3d', name: 'j3dcore', version: 'x'
     compile group: 'us.ihmc.thirdparty.jme3', name: 'jme3-core', version: 'x'
-    compile group: 'us.ihmc.thirdparty', name: 'ejml', version: 'x'
+    compile group: 'com.googlecode.efficient-java-matrix-library', name: 'ejml', version: '0.25'
     compile group: 'us.ihmc.thirdparty', name: 'jama', version: 'x'
     compile group: 'commons-lang', name: 'commons-lang', version: '2.6'
     compile group: 'net.java.dev.jna', name: 'jna', version: '4.1.0' // earlier version used 3.4.0 

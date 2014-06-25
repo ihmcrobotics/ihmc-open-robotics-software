@@ -7,7 +7,7 @@ dependencies {
 	compile group: 'us.ihmc.thirdparty.jme3', name: 'jbullet', version: 'x'
 	compile group: 'us.ihmc.thirdparty', name: 'joystick', version: 'x'
 	compile group: 'us.ihmc.thirdparty', name: 'vrpn', version: 'x'
-	compile group: 'us.ihmc.thirdparty', name: 'ejml', version: 'x'
+	compile group: 'com.googlecode.efficient-java-matrix-library', name: 'ejml', version: '0.25'
 	compile group: 'us.ihmc.thirdparty', name: 'jama', version: 'x'
 	compile group: 'us.ihmc.thirdparty', name: 'vclip', version: 'x'
 	compile group: 'us.ihmc.thirdparty', name: 'georegression', version: 'x'
