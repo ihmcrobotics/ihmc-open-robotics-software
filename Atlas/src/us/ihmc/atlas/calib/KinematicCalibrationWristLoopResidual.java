@@ -102,8 +102,8 @@ public class KinematicCalibrationWristLoopResidual implements FunctionNtoM
             } else
             {
                assert (leftEE.getReferenceFrame() == rightEE.getReferenceFrame());
-               Matrix3d mLeft = leftEE.getOrientationCopy().getMatrix3d();
-               Matrix3d mRight = rightEE.getOrientationCopy().getMatrix3d();
+               Matrix3d mLeft = leftEE.getOrientationCopy().getMatrix3dCopy();
+               Matrix3d mRight = rightEE.getOrientationCopy().getMatrix3dCopy();
                Vector3d vDiff = CalibUtil.RotationDiff(mLeft, mRight);
                output[outputCounter++] = scaleRadToCM * vDiff.x;
                output[outputCounter++] = scaleRadToCM * vDiff.y;

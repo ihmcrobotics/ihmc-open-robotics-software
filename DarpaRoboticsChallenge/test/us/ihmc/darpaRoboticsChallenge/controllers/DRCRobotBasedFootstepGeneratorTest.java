@@ -113,7 +113,7 @@ public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTe
    private static void assertLastStepIsPointingCorrectly(Footstep footstep, Point3d destination)
    {
       Vector3d footstepOrientation = SIDESTEP ? new Vector3d(0.0, -1.0, 0.0) : new Vector3d(1.0, 0.0, 0.0);
-      footstep.getPoseCopy().getOrientationMatrix3d().transform(footstepOrientation);
+      footstep.getPoseCopy().getOrientationMatrix3dCopy().transform(footstepOrientation);
       footstepOrientation.normalize();
       Vector3d pathOrientation = new Vector3d(destination);
       pathOrientation.normalize();

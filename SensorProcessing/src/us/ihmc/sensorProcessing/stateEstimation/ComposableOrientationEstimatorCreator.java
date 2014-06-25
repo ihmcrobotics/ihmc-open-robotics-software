@@ -255,7 +255,7 @@ public class ComposableOrientationEstimatorCreator
          ReferenceFrame measurementFrame = firstOrientationSensorConfiguration.getMeasurementFrame();
          FrameOrientation estimationFrameOrientation = new FrameOrientation(estimationFrame);
          estimationFrameOrientation.changeFrame(measurementFrame);
-         Matrix3d estimationToMeasurement = estimationFrameOrientation.getMatrix3d();
+         Matrix3d estimationToMeasurement = estimationFrameOrientation.getMatrix3dCopy();
 
          // R^W_E
          Matrix3d estimationToWorld = new Matrix3d();
