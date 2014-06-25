@@ -105,7 +105,7 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
       CapturePointData capturePointData = capturePointInputPort.getData();
       CapturePointTrajectoryData desiredCapturePointTrajectory = desiredCapturePointTrajectoryInputPort.getData();
       FrameConvexPolygon2d supportPolygon = bipedSupportPolygonsInputPort.getData().getSupportPolygonInMidFeetZUp();
-      boolean projectIntoSupportPolygon = false;
+      boolean projectIntoSupportPolygon = desiredCapturePointTrajectory.isProjectCMPIntoSupportPolygon();
 
       FramePoint2d desiredCMP = icpProportionalController.doProportionalControl(capturePointData.getCapturePoint(), desiredCapturePointTrajectory.getFinalDesiredCapturePoint(),
                                    desiredCapturePointTrajectory.getDesiredCapturePoint(), desiredCapturePointTrajectory.getDesiredCapturePointVelocity(),

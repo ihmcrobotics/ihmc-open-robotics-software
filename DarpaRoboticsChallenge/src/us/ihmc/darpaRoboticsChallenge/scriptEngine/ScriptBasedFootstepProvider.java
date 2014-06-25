@@ -9,6 +9,7 @@ import javax.media.j3d.Transform3D;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepUtils;
@@ -16,8 +17,10 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepD
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.PauseCommand;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandPoseProvider;
 import us.ihmc.commonWalkingControlModules.packets.ComHeightPacket;
+import us.ihmc.commonWalkingControlModules.packets.FootPosePacket;
 import us.ihmc.commonWalkingControlModules.packets.HandPosePacket;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -30,7 +33,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
-public class ScriptBasedFootstepProvider implements FootstepProvider
+public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
 {
    private int footstepCounter = 0;
    private int completedFootstepCount = 0;
@@ -42,6 +45,7 @@ public class ScriptBasedFootstepProvider implements FootstepProvider
 
    private final DesiredHandPoseProvider desiredHandPoseProvider; 
    private final DesiredComHeightProvider desiredComHeightProvider;
+   private final DesiredFootPoseProvider desiredFootPoseProvider;
    private final ConcurrentLinkedQueue<Footstep> footstepQueue = new ConcurrentLinkedQueue<Footstep>();
    
    private final DoubleYoVariable time;
@@ -62,6 +66,8 @@ public class ScriptBasedFootstepProvider implements FootstepProvider
       this.scriptFileLoader = scriptFileLoader;
       desiredHandPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame());
       desiredComHeightProvider = new DesiredComHeightProvider();
+
+      desiredFootPoseProvider = new DesiredFootPoseProvider();
    }
    
    private void loadScriptFileIfNecessary()
@@ -98,6 +104,12 @@ public class ScriptBasedFootstepProvider implements FootstepProvider
          this.addFootstepDataList(footstepDataList);
          setupTimesForNewScriptEvent(0.5); // Arbitrary half second duration. With footsteps, it waits till they are done before looking for a new command.
       }
+      else if (scriptObject instanceof FootPosePacket)
+      { 
+         FootPosePacket footPosePacket = (FootPosePacket) scriptObject;
+         desiredFootPoseProvider.consumeObject(footPosePacket);
+         setupTimesForNewScriptEvent(0.5);
+      }
       else if (scriptObject instanceof HandPosePacket)
       {
          HandPosePacket handPosePacket = (HandPosePacket) scriptObject;
@@ -105,7 +117,6 @@ public class ScriptBasedFootstepProvider implements FootstepProvider
          
          setupTimesForNewScriptEvent(handPosePacket.getTrajectoryTime());
       }
-
       else if (scriptObject instanceof PauseCommand)
       {
          PauseCommand pauseCommand = (PauseCommand) scriptObject;
@@ -156,22 +167,18 @@ public class ScriptBasedFootstepProvider implements FootstepProvider
    @Override
    public Footstep poll()
    {
-      grabNewScriptEventIfNecessary();
       return footstepQueue.poll();
    }
 
    @Override
    public Footstep peek()
    {
-      grabNewScriptEventIfNecessary();
       return footstepQueue.peek();
    }
 
    @Override
    public Footstep peekPeek()
    {
-      grabNewScriptEventIfNecessary();
-
       Iterator<Footstep> iterator = footstepQueue.iterator();
 
       if (iterator.hasNext()) 
@@ -195,7 +202,6 @@ public class ScriptBasedFootstepProvider implements FootstepProvider
    @Override
    public boolean isEmpty()
    {
-      grabNewScriptEventIfNecessary();
       return footstepQueue.isEmpty();
    }
 
@@ -208,7 +214,6 @@ public class ScriptBasedFootstepProvider implements FootstepProvider
    @Override
    public int getNumberOfFootstepsToProvide()
    {
-      grabNewScriptEventIfNecessary();
       return footstepQueue.size();
    }
 
@@ -228,4 +233,14 @@ public class ScriptBasedFootstepProvider implements FootstepProvider
       return desiredComHeightProvider;
    }
 
+   public DesiredFootPoseProvider getDesiredFootPoseProvider()
+   {
+      return desiredFootPoseProvider;
+   }
+
+   @Override
+   public void update(double time)
+   {
+      grabNewScriptEventIfNecessary();
+   }
 }

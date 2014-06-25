@@ -125,8 +125,15 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
             HandLoadBearingPacket handLoadBearingPacket = new HandLoadBearingPacket(robotSide, true);
             variousWalkingProviders.getDesiredHandLoadBearingProvider().consumeObject(handLoadBearingPacket);
          }
-         
-         setFootInContact(robotSide, initializeFeetInContact.get(robotSide).booleanValue());
+
+         if (initializeFeetInContact.get(robotSide).booleanValue())
+         {
+            feetManager.setFlatFootContactState(robotSide);
+         }
+         else
+         {
+            feetManager.requestMoveStraight(robotSide, new FramePose(feet.get(robotSide).getBodyFrame()));
+         }
       }
    }
 
@@ -162,21 +169,6 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
       for (OneDoFJoint neckJoint : neckJoints)
       {
          momentumBasedController.doPDControl(neckJoint, 100.0, 20.0, 0.0, 0.0, 10.0, 1000.0);
-      }
-   }
-
-   private void setFootInContact(RobotSide robotSide, boolean inContact)
-   {
-      if (feet == null)
-         return;
-
-      if (inContact)
-      {
-         feetManager.setFlatFootContactState(robotSide);
-      }
-      else
-      {
-         feetManager.setContactStateForMoveStraight(robotSide);
       }
    }
 }

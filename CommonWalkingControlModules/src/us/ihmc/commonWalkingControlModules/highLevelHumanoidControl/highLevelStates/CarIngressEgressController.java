@@ -93,14 +93,9 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
    private BooleanYoVariable requestedPelvisLoadBearing = new BooleanYoVariable("requestedPelvisLoadBearing", registry);
    private BooleanYoVariable requestedPelvisBackLoadBearing = new BooleanYoVariable("requestedPelvisBackLoadBearing", registry);
-   private BooleanYoVariable requestedLeftFootLoadBearing = new BooleanYoVariable("requestedLeftFootLoadBearing", registry);
-   private BooleanYoVariable requestedRightFootLoadBearing = new BooleanYoVariable("requestedRightFootLoadBearing", registry);
    private BooleanYoVariable requestedLeftThighLoadBearing = new BooleanYoVariable("requestedLeftThighLoadBearing", registry);
    private BooleanYoVariable requestedRightThighLoadBearing = new BooleanYoVariable("requestedRightThighLoadBearing", registry);
-   private SideDependentList<BooleanYoVariable> requestedFootLoadBearing = new SideDependentList<BooleanYoVariable>(requestedLeftFootLoadBearing,
-         requestedRightFootLoadBearing);
-   private SideDependentList<BooleanYoVariable> requestedThighLoadBearing = new SideDependentList<BooleanYoVariable>(requestedLeftThighLoadBearing,
-         requestedRightThighLoadBearing);
+   private SideDependentList<BooleanYoVariable> requestedThighLoadBearing = new SideDependentList<BooleanYoVariable>(requestedLeftThighLoadBearing, requestedRightThighLoadBearing);
    private final PelvisDesiredsHandler pelvisDesiredsHandler;
    private final DoubleYoVariable carIngressPelvisPositionKp = new DoubleYoVariable("carIngressPelvisPositionKp", registry);
    private final DoubleYoVariable carIngressPelvisPositionZeta = new DoubleYoVariable("carIngressPelvisPositionZeta", registry);
@@ -182,7 +177,6 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       requestedPelvisBackLoadBearing.addVariableChangedListener(loadBearingVariableChangedListener);
       for (RobotSide robotSide : RobotSide.values)
       {
-         requestedFootLoadBearing.get(robotSide).addVariableChangedListener(loadBearingVariableChangedListener);
          requestedThighLoadBearing.get(robotSide).addVariableChangedListener(loadBearingVariableChangedListener);
       }
    }
@@ -341,8 +335,10 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         requestedFootLoadBearing.get(robotSide).set(isContactablePlaneBodyInContact(feet.get(robotSide)));
-         requestedFootLoadBearing.get(robotSide).notifyVariableChangedListeners();
+         if (isContactablePlaneBodyInContact(feet.get(robotSide)))
+            feetManager.setFlatFootContactState(robotSide);
+         else
+            feetManager.requestMoveStraight(robotSide, new FramePose(feet.get(robotSide).getBodyFrame()));
          requestedThighLoadBearing.get(robotSide).set(false); // Set to false there is no button in the GUI to change it anymore
          requestedThighLoadBearing.get(robotSide).notifyVariableChangedListeners();
       }
@@ -480,7 +476,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         if (footPoseProvider != null && footPoseProvider.checkForNewPose(robotSide) && !requestedFootLoadBearing.get(robotSide).getBooleanValue())
+         if (footPoseProvider != null && footPoseProvider.checkForNewPose(robotSide))
          {
             FramePose newFootPose = footPoseProvider.getDesiredFootPose(robotSide);
             feetManager.requestMoveStraight(robotSide, newFootPose);
@@ -530,12 +526,9 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         if (footPoseProvider.checkForNewPose(robotSide))
-            requestedFootLoadBearing.get(robotSide).set(false);
-
          // If the foot is already in load bearing state, do nothing:
          if (footLoadBearingProvider.checkForNewLoadBearingRequest(robotSide))
-            requestedFootLoadBearing.get(robotSide).set(true);
+            feetManager.setFlatFootContactState(robotSide);
 
          if (thighLoadBearingProvider.checkForNewLoadBearingState(robotSide))
             requestedThighLoadBearing.get(robotSide).set(thighLoadBearingProvider.getDesiredThighLoadBearingState(robotSide));
@@ -551,21 +544,6 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          return false;
       else
          return momentumBasedController.getContactState(contactablePlaneBody).inContact();
-   }
-
-   public void setFootInContact(RobotSide robotSide, boolean inContact)
-   {
-      if (feet == null)
-         return;
-
-      if (inContact)
-      {
-         feetManager.setFlatFootContactState(robotSide);
-      }
-      else
-      {
-         feetManager.setContactStateForMoveStraight(robotSide);
-      }
    }
 
    public void setHandInContact(RobotSide robotSide, boolean inContact)
@@ -644,9 +622,6 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
          for (RobotSide robotSide : RobotSide.values)
          {
-            if (v.equals(requestedFootLoadBearing.get(robotSide)))
-               setFootInContact(robotSide, requestedFootLoadBearing.get(robotSide).getBooleanValue());
-
             if (v.equals(requestedThighLoadBearing.get(robotSide)))
                setThighInContact(robotSide, requestedThighLoadBearing.get(robotSide).getBooleanValue());
          }

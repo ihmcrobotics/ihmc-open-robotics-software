@@ -196,7 +196,10 @@ public class FeetManager
    {
       FootControlModule footControlModule = footControlModules.get(robotSide);
       footControlModule.setFootPose(footPose);
-      footControlModule.resetCurrentState();
+      if (footControlModule.getCurrentConstraintType() == ConstraintType.MOVE_STRAIGHT)
+         footControlModule.resetCurrentState();
+      else
+         setContactStateForMoveStraight(robotSide);
    }
 
    public boolean isInEdgeTouchdownState(RobotSide robotSide)
@@ -332,7 +335,7 @@ public class FeetManager
       footControlModule.setContactState(ConstraintType.TOES, footNormalContactVector);
    }
 
-   public void setTouchdownOnHeelContactState(RobotSide robotSide)
+   private void setTouchdownOnHeelContactState(RobotSide robotSide)
    {
       footNormalContactVector.setIncludingFrame(worldFrame, 0.0, 0.0, 1.0);
       footControlModules.get(robotSide).setContactState(ConstraintType.HEEL_TOUCHDOWN, footNormalContactVector);
@@ -353,19 +356,18 @@ public class FeetManager
       footControlModules.get(robotSide).setContactState(ConstraintType.FULL, footNormalContactVector);
    }
 
-   public void setContactStateForSwing(RobotSide robotSide)
+   private void setContactStateForSwing(RobotSide robotSide)
    {
       FootControlModule endEffectorControlModule = footControlModules.get(robotSide);
       endEffectorControlModule.doSingularityEscape(true);
       endEffectorControlModule.setContactState(ConstraintType.SWING);
    }
 
-   public void setContactStateForMoveStraight(RobotSide robotSide)
+   private void setContactStateForMoveStraight(RobotSide robotSide)
    {
-      ReferenceFrame footFrame = feet.get(robotSide).getBodyFrame();
-      footControlModules.get(robotSide).setFootPose(new FramePose(footFrame));
-      footControlModules.get(robotSide).doSingularityEscapeBeforeTransitionToNextState();
-      footControlModules.get(robotSide).setContactState(ConstraintType.MOVE_STRAIGHT);
+      FootControlModule footControlModule = footControlModules.get(robotSide);
+      footControlModule.doSingularityEscapeBeforeTransitionToNextState();
+      footControlModule.setContactState(ConstraintType.MOVE_STRAIGHT);
    }
 
    public WalkOnTheEdgesManager getWalkOnTheEdgesManager()
