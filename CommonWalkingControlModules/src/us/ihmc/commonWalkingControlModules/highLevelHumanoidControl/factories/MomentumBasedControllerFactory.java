@@ -179,7 +179,7 @@ public class MomentumBasedControllerFactory
       else if (variousWalkingProviderFactory != null)
       {
          variousWalkingProviders = variousWalkingProviderFactory.createVariousWalkingProviders(yoTime, fullRobotModel, walkingControllerParameters,
-               referenceFrames, feet, transferTimeCalculator, swingTimeCalculator, registry);
+               referenceFrames, feet, transferTimeCalculator, swingTimeCalculator, updatables, registry);
          if (variousWalkingProviders == null)
             throw new RuntimeException("Couldn't create various walking providers!");
       }

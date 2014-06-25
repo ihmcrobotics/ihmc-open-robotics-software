@@ -17,6 +17,7 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
@@ -24,8 +25,6 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 
 public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractControlFlowElement implements ICPBasedMomentumRateOfChangeControlModule
 {
-   private static final boolean KEEP_CMP_INSIDE_SUPPORT_POLYGON = true; //false;
-   
    private final ControlFlowInputPort<Double> desiredCenterOfMassHeightAccelerationInputPort = createInputPort("desiredCenterOfMassHeightAccelerationInputPort");
    private final ControlFlowInputPort<BipedSupportPolygons> bipedSupportPolygonsInputPort = createInputPort("bipedSupportPolygonsInputPort");
    private final ControlFlowInputPort<RobotSide> supportLegInputPort = createInputPort("supportLegInputPort");
@@ -48,8 +47,9 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
    private final FramePoint centerOfMass;
    private final double gravityZ;
 
-   private final EnumYoVariable<RobotSide> supportLegPreviousTick = EnumYoVariable.create("supportLegPreviousTick", "", RobotSide.class, registry, true);
+   private final BooleanYoVariable keepCMPInsideSupportPolygon = new BooleanYoVariable("keepCMPInsideSupportPolygon", registry);
 
+   private final EnumYoVariable<RobotSide> supportLegPreviousTick = EnumYoVariable.create("supportLegPreviousTick", "", RobotSide.class, registry, true);
 
    public ICPBasedLinearMomentumRateOfChangeControlModule(ReferenceFrame centerOfMassFrame,
            double controlDT, double totalMass, double gravityZ, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
@@ -84,10 +84,12 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
       FramePoint2d desiredCapturePoint = desiredCapturePointTrajectory.getDesiredCapturePoint();
       FramePoint2d capturePoint = capturePointData.getCapturePoint();
       FrameConvexPolygon2d supportPolygon = bipedSupportPolygonsInputPort.getData().getSupportPolygonInMidFeetZUp();
+      boolean keepCmpInsideSupportPolygon = desiredCapturePointTrajectory.isProjectCMPIntoSupportPolygon();
+      keepCMPInsideSupportPolygon.set(keepCmpInsideSupportPolygon);
 
       FramePoint2d desiredCMP = icpProportionalController.doProportionalControl(capturePoint,
                                    desiredCapturePoint, finalDesiredCapturePoint, desiredCapturePointTrajectory.getDesiredCapturePointVelocity(),
-                                   capturePointData.getOmega0(), KEEP_CMP_INSIDE_SUPPORT_POLYGON, supportPolygon);
+                                   capturePointData.getOmega0(), keepCmpInsideSupportPolygon, supportPolygon);
       
 
       desiredCMP.changeFrame(this.controlledCMP.getReferenceFrame());

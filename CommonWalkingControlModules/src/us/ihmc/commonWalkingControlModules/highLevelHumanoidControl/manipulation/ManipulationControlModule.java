@@ -257,6 +257,16 @@ public class ManipulationControlModule
       pipeline.clear();
    }
 
+   public boolean isAtLeastOneHandLoadBearing()
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         if (individualHandControlModules.get(robotSide).isLoadBearing())
+            return true;
+      }
+      return false;
+   }
+
    public IndividualHandControlModule getIndividualHandControlModule(RobotSide robotSide)
    {
       return individualHandControlModules.get(robotSide);

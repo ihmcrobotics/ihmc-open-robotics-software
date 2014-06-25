@@ -1,10 +1,12 @@
 package us.ihmc.darpaRoboticsChallenge.scriptEngine;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviderFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
@@ -35,16 +37,14 @@ import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParamete
 
 public class VariousWalkingProviderFromScriptFactory implements VariousWalkingProviderFactory
 {
-   private final String filename;
    private final ScriptFileLoader scriptFileLoader;
-   
+
    public VariousWalkingProviderFromScriptFactory(String filename)
    {
-      this.filename = filename;
       try
       {
          this.scriptFileLoader = new ScriptFileLoader(filename);
-      } 
+      }
       catch (IOException e)
       {
          e.printStackTrace();
@@ -52,38 +52,39 @@ public class VariousWalkingProviderFromScriptFactory implements VariousWalkingPr
       }
    }
 
-   public VariousWalkingProviders createVariousWalkingProviders(final DoubleYoVariable time, FullRobotModel fullRobotModel, WalkingControllerParameters walkingControllerParameters,
-         CommonWalkingReferenceFrames referenceFrames, SideDependentList<ContactablePlaneBody> feet, ConstantTransferTimeCalculator transferTimeCalculator,
-         ConstantSwingTimeCalculator swingTimeCalculator, YoVariableRegistry registry)
+   public VariousWalkingProviders createVariousWalkingProviders(final DoubleYoVariable time, FullRobotModel fullRobotModel,
+         WalkingControllerParameters walkingControllerParameters, CommonWalkingReferenceFrames referenceFrames, SideDependentList<ContactablePlaneBody> feet,
+         ConstantTransferTimeCalculator transferTimeCalculator, ConstantSwingTimeCalculator swingTimeCalculator, ArrayList<Updatable> updatables, YoVariableRegistry registry)
    {
       ScriptBasedFootstepProvider footstepProvider;
-     footstepProvider = new ScriptBasedFootstepProvider(scriptFileLoader, time, feet, fullRobotModel, walkingControllerParameters, registry);
+      footstepProvider = new ScriptBasedFootstepProvider(scriptFileLoader, time, feet, fullRobotModel, walkingControllerParameters, registry);
+
+      updatables.add(footstepProvider);
       
       DesiredHandPoseProvider handPoseProvider = footstepProvider.getDesiredHandPoseProvider();
 
       LinkedHashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = new LinkedHashMap<Footstep, TrajectoryParameters>();
-      
-      DesiredHighLevelStateProvider highLevelStateProvider = null; 
-      DesiredHeadOrientationProvider headOrientationProvider = new UserDesiredHeadOrientationProvider(referenceFrames.getPelvisZUpFrame(), registry); 
+
+      DesiredHighLevelStateProvider highLevelStateProvider = null;
+      DesiredHeadOrientationProvider headOrientationProvider = new UserDesiredHeadOrientationProvider(referenceFrames.getPelvisZUpFrame(), registry);
       DesiredComHeightProvider desiredComHeightProvider = footstepProvider.getDesiredComHeightProvider();
       DesiredPelvisPoseProvider pelvisPoseProvider = null;
-      DesiredChestOrientationProvider chestOrientationProvider = null; 
-      DesiredFootPoseProvider footPoseProvider = null; 
-      ReinitializeWalkingControllerProvider reinitializeWalkingControllerProvider = null; 
+      DesiredChestOrientationProvider chestOrientationProvider = null;
+      DesiredFootPoseProvider footPoseProvider = footstepProvider.getDesiredFootPoseProvider();
+      ReinitializeWalkingControllerProvider reinitializeWalkingControllerProvider = null;
 
-      DesiredHandLoadBearingProvider handLoadBearingProvider = null; 
-      DesiredFootStateProvider footLoadBearingProvider = null; 
-      DesiredThighLoadBearingProvider thighLoadBearingProvider = null; 
-      DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider = null; 
-      
+      DesiredHandLoadBearingProvider handLoadBearingProvider = null;
+      DesiredFootStateProvider footLoadBearingProvider = null;
+      DesiredThighLoadBearingProvider thighLoadBearingProvider = null;
+      DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider = null;
+
       ControlStatusProducer controlStatusProducer = new SystemErrControlStatusProducer();
-      
-      VariousWalkingProviders variousProvidersFactory = new VariousWalkingProviders(footstepProvider, mapFromFootstepsToTrajectoryParameters,
-            headOrientationProvider, desiredComHeightProvider, pelvisPoseProvider, handPoseProvider, handLoadBearingProvider,
-            chestOrientationProvider, footPoseProvider, footLoadBearingProvider, highLevelStateProvider, thighLoadBearingProvider,
-            pelvisLoadBearingProvider, reinitializeWalkingControllerProvider, controlStatusProducer);
 
-      return variousProvidersFactory;
+      VariousWalkingProviders variousProviders = new VariousWalkingProviders(footstepProvider, mapFromFootstepsToTrajectoryParameters,
+            headOrientationProvider, desiredComHeightProvider, pelvisPoseProvider, handPoseProvider, handLoadBearingProvider, chestOrientationProvider,
+            footPoseProvider, footLoadBearingProvider, highLevelStateProvider, thighLoadBearingProvider, pelvisLoadBearingProvider,
+            reinitializeWalkingControllerProvider, controlStatusProducer);
+
+      return variousProviders;
    }
-
 }

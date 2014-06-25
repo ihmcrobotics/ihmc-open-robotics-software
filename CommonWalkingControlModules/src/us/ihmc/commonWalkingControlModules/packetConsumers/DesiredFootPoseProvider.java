@@ -1,10 +1,10 @@
 package us.ihmc.commonWalkingControlModules.packetConsumers;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.commonWalkingControlModules.packets.FootPosePacket;
 import us.ihmc.robotSide.RobotSide;
-import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.ObjectConsumer;
@@ -19,40 +19,49 @@ import us.ihmc.utilities.net.ObjectConsumer;
 
 public class DesiredFootPoseProvider implements ObjectConsumer<FootPosePacket>
 {
-   private final SideDependentList<AtomicReference<FootPosePacket>> footPosePacket = new SideDependentList<AtomicReference<FootPosePacket>>();
-   
-   private final SideDependentList<FramePose> desiredFootPoses = new SideDependentList<FramePose>();
+   private final AtomicReference<FootPosePacket> footPosePacket = new AtomicReference<FootPosePacket>();
+
+   /**
+    * -1 => null
+    *  0 => RobotSide.LEFT
+    *  1 => RobotSide.RIGHT
+    */
+   private final AtomicInteger footPoseSide = new AtomicInteger(-1);
+   private final FramePose desiredFootPose = new FramePose();
 
    public DesiredFootPoseProvider()
    {
-      FramePose pose = new FramePose(ReferenceFrame.getWorldFrame());
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         footPosePacket.put(robotSide, new AtomicReference<FootPosePacket>());
-         desiredFootPoses.put(robotSide, pose);
-      }
    }
 
    public boolean checkForNewPose(RobotSide robotSide)
    {
-      return footPosePacket.get(robotSide).get() != null;
+      return checkForNewPose() == robotSide;
+   }
+
+   public RobotSide checkForNewPose()
+   {
+      if (footPoseSide.get() == -1)
+         return null;
+      else
+         return footPoseSide.get() == 0 ? RobotSide.LEFT : RobotSide.RIGHT;
    }
 
    public FramePose getDesiredFootPose(RobotSide robotSide)
    {
-      FootPosePacket object = footPosePacket.get(robotSide).getAndSet(null);
-      if(object != null)
-      {         
-         
-         FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), object.getPosition(), object.getOrientation());
-         desiredFootPoses.put(robotSide, pose);
-      }
-      
-      return desiredFootPoses.get(robotSide);
+      FootPosePacket object = footPosePacket.getAndSet(null);
+      footPoseSide.set(-1);
+
+      if (object != null)
+         desiredFootPose.set(ReferenceFrame.getWorldFrame(), object.getPosition(), object.getOrientation());
+
+      return desiredFootPose;
    }
 
    public void consumeObject(FootPosePacket object)
    {
-      footPosePacket.get(object.getRobotSide()).set(object);
+      RobotSide robotSide = object.getRobotSide();
+      footPoseSide.set(robotSide == RobotSide.LEFT ? 0 : 1);
+
+      footPosePacket.set(object);
    }
 }

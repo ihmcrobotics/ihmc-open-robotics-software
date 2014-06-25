@@ -459,6 +459,11 @@ public class IndividualHandControlModule
       return stateMachine.getCurrentStateEnum() == IndividualHandControlState.OBJECT_MANIPULATION;
    }
 
+   public boolean isLoadBearing()
+   {
+      return stateMachine.getCurrentStateEnum() == IndividualHandControlState.LOAD_BEARING;
+   }
+
    public void holdPositionInBase()
    {
       holdPositionInFrame(base.getBodyFixedFrame(), base, taskspaceControlGains);
