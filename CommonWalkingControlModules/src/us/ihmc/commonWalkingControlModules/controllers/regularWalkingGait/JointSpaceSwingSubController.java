@@ -386,7 +386,7 @@ public class JointSpaceSwingSubController implements SwingSubController
       Footstep desiredFootstep = couplingRegistry.getDesiredFootstep();
       FramePose desiredFootstepPose = desiredFootstep.getPoseCopy();
       
-      FramePoint endPoint = new FramePoint(desiredFootstepPose.getPostionCopy());
+      FramePoint endPoint = new FramePoint(desiredFootstepPose.getPositionCopy());
       endPoint.changeFrame(desiredPositions.get(swingSide).getReferenceFrame());
       FrameOrientation endOrientation = new FrameOrientation(desiredFootstepPose.getOrientationCopy());
       endOrientation.changeFrame(desiredOrientations.get(swingSide).getReferenceFrame());
