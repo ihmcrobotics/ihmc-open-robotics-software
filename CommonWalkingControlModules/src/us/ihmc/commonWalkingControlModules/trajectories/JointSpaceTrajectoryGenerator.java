@@ -482,7 +482,9 @@ public class JointSpaceTrajectoryGenerator
          FrameVector bodyVelocityInTime = poseAndVelocity.second();
          bodyVelocityInTime.changeFrame(ReferenceFrame.getWorldFrame());
          
-         FramePoint bodyPoint = bodyFrameInTime.getPositionInFrame(ReferenceFrame.getWorldFrame());
+         FramePoint bodyPoint = new FramePoint();
+         bodyFrameInTime.getPosition(bodyPoint);
+         bodyPoint.changeFrame(ReferenceFrame.getWorldFrame());
          bagOfBalls.setBallLoop(bodyPoint);
          
          estimatedBodyPositionAtEndOfStep.set(bodyPoint);
