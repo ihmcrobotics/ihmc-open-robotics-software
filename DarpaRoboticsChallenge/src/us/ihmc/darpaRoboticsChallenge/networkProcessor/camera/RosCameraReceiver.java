@@ -71,7 +71,8 @@ public class RosCameraReceiver extends CameraDataReceiver
             {
                if ((rosTransformFromHeadBaseToCamera.getType() & Transform3D.IDENTITY) != 0)
                {
-                  getFrameToCameraTransform(timeStamp);
+                  //remove duplicate head->camera transform (already done in controller)
+//                  getFrameToCameraTransform(timeStamp);
                }
 
                if ((rosTransformFromHeadBaseToCamera.getType() & Transform3D.ZERO) != 0)
