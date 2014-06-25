@@ -83,7 +83,7 @@ public class DRCConfigParameters
    public static final boolean STREAM_VIDEO = true;
 
    // UI
-   public static final int UI_JOINT_CONFIGURATION_UPDATE_MILLIS = 10;
+   public static final int UI_JOINT_CONFIGURATION_UPDATE_MILLIS = 100;
    public static final boolean USE_COLLISIONS_MESHS_FOR_VISUALIZATION = false;
    public static final boolean USE_SLIDER_FOR_POSE_PLAYBACK = false;
    public static final boolean USE_SUPER_DUPER_HIGH_RESOLUTION_FOR_COMMS = false;
