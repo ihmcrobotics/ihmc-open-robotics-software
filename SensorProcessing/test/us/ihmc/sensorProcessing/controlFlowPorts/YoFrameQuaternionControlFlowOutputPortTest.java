@@ -41,7 +41,7 @@ public class YoFrameQuaternionControlFlowOutputPortTest
          controlFlowOutputPort.setData(dataIn);
          FrameOrientation dataOut = controlFlowOutputPort.getData();
 
-         assertTrue("Expected: " + dataIn + ", but was: " + dataOut, dataIn.getQuaternion().epsilonEquals(dataOut.getQuaternion(), EPS));
+         assertTrue("Expected: " + dataIn + ", but was: " + dataOut, dataIn.getQuaternionCopy().epsilonEquals(dataOut.getQuaternionCopy(), EPS));
       }
    }
 

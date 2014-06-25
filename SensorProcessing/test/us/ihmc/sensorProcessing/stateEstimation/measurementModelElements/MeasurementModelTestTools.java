@@ -102,7 +102,7 @@ public class MeasurementModelTestTools
          RotationFunctions.setAxisAngleBasedOnRotationVector(perturbationAxisAngle, perturbationRotationVector);
          Quat4d perturbationQuaternion = new Quat4d();
          perturbationQuaternion.set(perturbationAxisAngle);
-         perturbedQuaternion.mul(nominalState.getQuaternion(), perturbationQuaternion);
+         perturbedQuaternion.mul(nominalState.getQuaternionCopy(), perturbationQuaternion);
          FrameOrientation perturbedState = new FrameOrientation(nominalState.getReferenceFrame(), perturbedQuaternion);
          statePort.setData(perturbedState);
 

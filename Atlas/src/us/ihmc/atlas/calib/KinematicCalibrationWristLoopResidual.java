@@ -90,9 +90,9 @@ public class KinematicCalibrationWristLoopResidual implements FunctionNtoM
             double scaleRadToCM = 0.01 / (Math.PI / 8); //30deg -> 1cm
             if (QUAT_DIFF)
             {
-               Quat4d qErr = leftEE.getOrientationCopy().getQuaternion();
+               Quat4d qErr = leftEE.getOrientationCopy().getQuaternionCopy();
                qErr.inverse();
-               qErr.mul(rightEE.getOrientationCopy().getQuaternion());
+               qErr.mul(rightEE.getOrientationCopy().getQuaternionCopy());
                //qErr.normalize();
                AxisAngle4d axErr = new AxisAngle4d();
                axErr.set(qErr);
