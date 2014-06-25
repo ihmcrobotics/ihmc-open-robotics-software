@@ -851,7 +851,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 
 	private void updateChestAngle() 
 	{
-		Quat4d chestToWorld = processedSensors.getChestOrientationInFrame(ReferenceFrame.getWorldFrame()).getQuaternion();
+		Quat4d chestToWorld = processedSensors.getChestOrientationInFrame(ReferenceFrame.getWorldFrame()).getQuaternionCopy();
 		AxisAngle4d chestToWorldAxisAngle = new AxisAngle4d();
 		chestToWorldAxisAngle.set(chestToWorld);
 
