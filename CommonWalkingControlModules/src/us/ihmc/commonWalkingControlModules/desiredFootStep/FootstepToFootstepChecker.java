@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.AngleTools;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -19,19 +20,20 @@ public class FootstepToFootstepChecker
 {
    private static final boolean DEBUG = false;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static FramePose initialFramePose = new FramePose(worldFrame);
-   private static FramePose stanceFramePose = new FramePose(worldFrame);
-   private static FramePose endingFramePose = new FramePose(worldFrame);
-   private static FrameVector differenceVector;
+   private static final FramePose initialFramePose = new FramePose(worldFrame);
+   private static final FramePose stanceFramePose = new FramePose(worldFrame);
+   private static final FramePose endingFramePose = new FramePose(worldFrame);
+   private static final FrameVector differenceVector = new FrameVector();
+   private static final FramePoint tempFramePoint = new FramePoint();
 
-   private static double MAXIMUM_DELTA_R = 0.6;
-   private static double MAXIMUM_DELTA_R_SQUARED = MAXIMUM_DELTA_R * MAXIMUM_DELTA_R;
-   private static double MAXIMUM_DELTA_Z = 0.3;
+   private static final double MAXIMUM_DELTA_R = 0.6;
+   private static final double MAXIMUM_DELTA_R_SQUARED = MAXIMUM_DELTA_R * MAXIMUM_DELTA_R;
+   private static final double MAXIMUM_DELTA_Z = 0.3;
 
-   private static double MAXIMUM_DELTA_ROLL = Math.toRadians(15.0);    // 0.26
-   private static double MAXIMUM_DELTA_PITCH = Math.toRadians(15.0);    // 0.26
-   private static double MAXIMUM_DELTA_YAW = Math.toRadians(90.0);    // 1.57 radians
-   private static double MINIMUM_DELTA_YAW = Math.toRadians(26.0);
+   private static final double MAXIMUM_DELTA_ROLL = Math.toRadians(15.0);    // 0.26
+   private static final double MAXIMUM_DELTA_PITCH = Math.toRadians(15.0);    // 0.26
+   private static final double MAXIMUM_DELTA_YAW = Math.toRadians(90.0);    // 1.57 radians
+   private static final double MINIMUM_DELTA_YAW = Math.toRadians(26.0);
    
    private static final double semiCircleOffset = 0.14;    // From RangeOfStepGraphicsManager: Should have a unified source, not just a magic number.
 
@@ -42,8 +44,10 @@ public class FootstepToFootstepChecker
       stanceFootstep.getPose(stanceFramePose);
       endingFootstep.getPose(endingFramePose);
 
-      differenceVector = new FrameVector(endingFramePose.getPositionCopy());
-      differenceVector.sub(stanceFramePose.getPositionCopy());
+      endingFramePose.getPosition(tempFramePoint);
+      differenceVector.setIncludingFrame(tempFramePoint);
+      stanceFramePose.getPosition(tempFramePoint);
+      differenceVector.sub(tempFramePoint);
 
       // TODO: Best would be to base on kinematic and dynamic reachability (which would be robot dependent and not so much magic tuned numbers)
       // Would also catch unspecified kinematic coupling (e.g. coupling that may occur based on yaw and step height and others?)
@@ -171,7 +175,8 @@ public class FootstepToFootstepChecker
    {
       FrameVector offset = getPerpendicularOffset(stanceFootstepSide, stanceFramePose, semiCircleOffset);
 
-      differenceVector = new FrameVector(endingFramePose.getPositionCopy());
+      endingFramePose.getPosition(tempFramePoint);
+      differenceVector.setIncludingFrame(tempFramePoint);
       differenceVector.sub(offset);
       double stepDirection = Math.atan2(differenceVector.getY(), differenceVector.getX());
       double deltaStepDirection = AngleTools.computeAngleDifferenceMinusPiToPi(stepDirection, stanceFramePose.getYaw());
@@ -186,7 +191,8 @@ public class FootstepToFootstepChecker
       double offsetDirAngle = stanceFramePose.getYaw() + Math.PI / 2;
       FrameVector offset = new FrameVector(worldFrame, new double[] {Math.cos(offsetDirAngle) * sideOffset, Math.sin(offsetDirAngle) * sideOffset, 0});
 
-      FrameVector offsetStart = new FrameVector(stanceFramePose.getPositionCopy());
+      stanceFramePose.getPosition(tempFramePoint);
+      FrameVector offsetStart = new FrameVector(tempFramePoint);
       offsetStart.add(offset);
 
       return offsetStart;

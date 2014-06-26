@@ -50,7 +50,8 @@ public class SimpleWorldDesiredFootstepCalculator extends AbstractAdjustableDesi
 
          FramePose currentFootPose = new FramePose(footFrame);
 
-         FramePoint initialFootPosition = currentFootPose.getPositionCopy();
+         FramePoint initialFootPosition = new FramePoint();
+         currentFootPose.getPosition(initialFootPosition);
          YoFramePoint footstepPosition = footstepPositions.get(robotSide);
          initialFootPosition.changeFrame(footstepPosition.getReferenceFrame());
          footstepPosition.set(initialFootPosition);
