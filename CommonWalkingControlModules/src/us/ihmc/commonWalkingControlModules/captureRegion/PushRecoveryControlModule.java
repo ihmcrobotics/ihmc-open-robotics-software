@@ -31,7 +31,7 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateTransition
 public class PushRecoveryControlModule
 {
    private static final boolean ENABLE = false;
-   
+
    private static final double MINIMUM_TIME_BEFORE_RECOVER_WITH_REDUCED_POLYGON = 6;
    private static final double DOUBLESUPPORT_SUPPORT_POLYGON_SCALE = 0.85;
    private static final double TRUST_TIME_SCALE = 0.9;
@@ -62,7 +62,7 @@ public class PushRecoveryControlModule
    private final BooleanYoVariable recovering;
    private BooleanYoVariable readyToGrabNextFootstep;
    private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
-   
+
    private final YoFrameLine2d capturePointTrajectoryLine;
    private final YoFrameLine2dArtifact capturePointTrajectoryLineArtifact;
    private final PointArtifact projectedCapturePointArtifact;
@@ -92,15 +92,15 @@ public class PushRecoveryControlModule
 
       footstepWasProjectedInCaptureRegion = new BooleanYoVariable("footstepWasProjectedInCaptureRegion", registry);
       recovering = new BooleanYoVariable("recovering", registry);
-      
+
       capturePointTrajectoryLine = new YoFrameLine2d(getClass().getSimpleName(), "CapturePointTrajectoryLine", ReferenceFrame.getWorldFrame(), registry);
       projectedCapturePoint = new Point2d();
       projectedCapturePointArtifact = new PointArtifact("ProjectedCapturePointArtifact", projectedCapturePoint);
-      
-       this.capturePointTrajectoryLineArtifact= new YoFrameLine2dArtifact("CapturePointTrajectoryLineArtifact", capturePointTrajectoryLine, Color.red);
-       dynamicGraphicObjectsListRegistry.registerArtifact("CapturePointTrajectoryArtifact", capturePointTrajectoryLineArtifact);
-       dynamicGraphicObjectsListRegistry.registerArtifact("ProjectedCapturePointArtifact", projectedCapturePointArtifact);
-      
+
+      this.capturePointTrajectoryLineArtifact = new YoFrameLine2dArtifact("CapturePointTrajectoryLineArtifact", capturePointTrajectoryLine, Color.red);
+      dynamicGraphicObjectsListRegistry.registerArtifact("CapturePointTrajectoryArtifact", capturePointTrajectoryLineArtifact);
+      dynamicGraphicObjectsListRegistry.registerArtifact("ProjectedCapturePointArtifact", projectedCapturePointArtifact);
+
       parentRegistry.addChild(registry);
 
       reset();
@@ -236,8 +236,8 @@ public class PushRecoveryControlModule
          // TODO: now we check only for double support, but should be extended also for single support removing 'isRecoveringFromDoubleSupportFall()'
          if (isRecoveringFromDoubleSupportFall()
                && !usingReducedSwingTime
-               && (captureRegionCalculator.getCaptureRegionArea() < PushRecoveryControlModule.MINIMUN_CAPTURE_REGION_AREA || Double
-                     .isNaN(captureRegionCalculator.getCaptureRegionArea())))
+               && (captureRegionCalculator.getCaptureRegionArea() < PushRecoveryControlModule.MINIMUN_CAPTURE_REGION_AREA || 
+                     Double.isNaN(captureRegionCalculator.getCaptureRegionArea())))
          {
             reducedSwingTime = swingTimeRemaining * REDUCE_SWING_TIME_COEFFICIENT;
             this.swingTimeCalculationProvider.setSwingTime(reducedSwingTime);
@@ -250,13 +250,14 @@ public class PushRecoveryControlModule
 
          if (swingTimeRemaining < MINIMUM_TIME_TO_REPLAN)
          {
-            // do not replan if we are almost at touchdown
+            // do not re-plan if we are almost at touch-down
             return false;
          }
 
-         footstepWasProjectedInCaptureRegion.set(footstepAdjustor.adjustFootstep(nextFootstep, footPolygon.getCentroid(), captureRegionCalculator.getCaptureRegion()));
+         footstepWasProjectedInCaptureRegion.set(footstepAdjustor.adjustFootstep(nextFootstep, footPolygon.getCentroid(),
+               captureRegionCalculator.getCaptureRegion()));
 
-         if(footstepWasProjectedInCaptureRegion.getBooleanValue())
+         if (footstepWasProjectedInCaptureRegion.getBooleanValue())
          {
             recovering.set(true);
          }
@@ -268,13 +269,13 @@ public class PushRecoveryControlModule
    public double computeTimeToProjectDesiredICPToClosestPointOnTrajectoryToActualICP(FramePoint2d capturePoint2d, FramePoint2d constantCenterOfPressure,
          FramePoint2d initialICP, FramePoint2d finalDesiredICP, double omega0)
    {
-      FrameLine2d capturePointTrajectoryLine = new FrameLine2d(finalDesiredICP,initialICP);
+      FrameLine2d capturePointTrajectoryLine = new FrameLine2d(finalDesiredICP, initialICP);
       this.capturePointTrajectoryLine.setFrameLine2d(capturePointTrajectoryLine);
-      
+
       capturePointTrajectoryLine.orthogonalProjection(capturePoint2d);//project current capture point to desired capture point trajectory line
 
       projectedCapturePoint.set(capturePoint2d.getPointCopy());
-         
+
       return computeOffsetTimeToMoveDesiredICPToTrajectoryLine(capturePoint2d, constantCenterOfPressure, initialICP, finalDesiredICP, omega0);
    }
 
@@ -332,12 +333,12 @@ public class PushRecoveryControlModule
    {
       recoverFromDoubleSupportFallFootStep = recoverFootStep;
    }
-   
+
    public boolean useICPProjection()
    {
       return this.useICPProjection;
    }
-   
+
    public boolean isRecovering()
    {
       return recovering.getBooleanValue();
