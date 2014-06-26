@@ -33,8 +33,8 @@ import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimu
 
 public abstract class DRCPushRecoveryInDoubleSupportTest implements MultiRobotTestInterface
 {
-   private final static boolean SHOW_GUI = true;
-   private final static boolean VISUALIZE_FORCE = true;
+   private final static boolean SHOW_GUI = false;
+   private final static boolean VISUALIZE_FORCE = false;
 
    private DRCPushRobotController pushRobotController;
    private BlockingSimulationRunner blockingSimulationRunner;
