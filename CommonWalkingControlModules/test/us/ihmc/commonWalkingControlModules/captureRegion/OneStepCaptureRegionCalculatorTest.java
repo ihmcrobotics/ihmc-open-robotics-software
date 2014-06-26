@@ -366,7 +366,7 @@ public class OneStepCaptureRegionCalculatorTest
          super(name, ReferenceFrame.getWorldFrame());
       }
 
-      public void updateTransformToParent(Transform3D transformToParent)
+      protected void updateTransformToParent(Transform3D transformToParent)
       {
          transformToParent.setIdentity();
          transformToParent.setTranslation(offset);
@@ -413,7 +413,7 @@ public class OneStepCaptureRegionCalculatorTest
          {
             private static final long serialVersionUID = -261348843115593336L;
             @Override
-            public void updateTransformToParent(Transform3D transformToParent)
+            protected void updateTransformToParent(Transform3D transformToParent)
             {
                transformToParent.setTranslation(new Vector3d(0.0, robotSide.negateIfRightSide(0.15), 0.0));
             }

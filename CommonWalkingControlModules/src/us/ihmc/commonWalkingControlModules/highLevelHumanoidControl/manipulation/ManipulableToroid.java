@@ -152,7 +152,7 @@ public class ManipulableToroid
       }
 
       @Override
-      public void updateTransformToParent(Transform3D transformToParent)
+      protected void updateTransformToParent(Transform3D transformToParent)
       {
          yAxis.set(0.0, 0.0, 1.0);
          xAxis.cross(yAxis, zAxis);

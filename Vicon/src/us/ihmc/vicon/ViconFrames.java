@@ -39,7 +39,7 @@ public class ViconFrames
              */
             private static final long serialVersionUID = 8016047182514159403L;
 
-            public void updateTransformToParent(Transform3D transformToParent)
+            protected void updateTransformToParent(Transform3D transformToParent)
             {
                setTransformToParent(transformToParent);
             }

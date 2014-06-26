@@ -276,7 +276,7 @@ public class ICPProportionalController
       }
 
       @Override
-      public void updateTransformToParent(Transform3D transformToParent)
+      protected void updateTransformToParent(Transform3D transformToParent)
       {
          x.set(xAxis.getX(), xAxis.getY(), 0.0);
          z.set(0.0, 0.0, 1.0);

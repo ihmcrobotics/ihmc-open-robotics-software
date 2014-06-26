@@ -26,7 +26,7 @@ public class ViconReferenceFrame extends ReferenceFrame
    }
 
    @Override
-   public void updateTransformToParent(Transform3D transformToParent)
+   protected void updateTransformToParent(Transform3D transformToParent)
    {
       QuaternionPose pose = viconClient.getQuaternionPose(bodyName);
       if (pose == null)
