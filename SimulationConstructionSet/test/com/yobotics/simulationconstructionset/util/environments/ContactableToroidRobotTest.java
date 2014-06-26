@@ -19,7 +19,7 @@ public class ContactableToroidRobotTest
    {
       double majorRadius = ContactableToroidRobot.DEFAULT_RADIUS;
       double minorRadius = ContactableToroidRobot.DEFAULT_THICKNESS;
-      double delta = 1e-4;
+      double delta = 5e-4;
 
       ContactableToroidRobot bot = new ContactableToroidRobot("bot", new Transform3D());
 
@@ -54,7 +54,7 @@ public class ContactableToroidRobotTest
       
       double majorRadius = ContactableToroidRobot.DEFAULT_RADIUS;
       double minorRadius = ContactableToroidRobot.DEFAULT_THICKNESS;
-      double delta = 1e-4;
+      double delta = 5e-4;
       
       Vector3d randomVector = RandomTools.generateRandomVector(random);
       Transform3D transform3d = new Transform3D();
@@ -93,7 +93,7 @@ public class ContactableToroidRobotTest
       
       double majorRadius = ContactableToroidRobot.DEFAULT_RADIUS;
       double minorRadius = ContactableToroidRobot.DEFAULT_THICKNESS;
-      double delta = 1e-4;
+      double delta = 5e-4;
       
       Vector3d vector3d = RandomTools.generateRandomVector(random);
       Transform3D randomTransform = new Transform3D();
