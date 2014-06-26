@@ -1,5 +1,7 @@
 package com.yobotics.simulationconstructionset;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.BufferedReader;
@@ -15,10 +17,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Random;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -30,25 +28,6 @@ public class DataFileWriterTest
    @Rule
    public ExpectedException expectedException = ExpectedException.none();
 
-   @BeforeClass
-   public static void setUpBeforeClass() throws Exception
-   {
-   }
-
-   @AfterClass
-   public static void tearDownAfterClass() throws Exception
-   {
-   }
-
-   @Before
-   public void setUp() throws Exception
-   {
-   }
-
-   @After
-   public void tearDown() throws Exception
-   {
-   }
 
    @Test
    public void testDataFileWriterAndReader() throws IOException, RepeatDataBufferEntryException
@@ -285,5 +264,83 @@ public class DataFileWriterTest
       assertTrue(string2.equals(readBack2));
       assertTrue(string3.equals(readBack3));
    }
+   
+   
+   @Test (timeout=5000)
+   public void testWritingAndReadingALongStateFile() throws IOException
+   {
+      File fileOne = new File("fileOne.state");
+      
+      if (fileOne.exists()) fileOne.delete();
+      
+      long seed = 1776L;
+      int numberOfVariables = 2000; //12000 for when testing long files for efficiency;
+      Random random = new Random(seed);
+      ArrayList<YoVariable> variables = createALargeNumberOfVariables(random, numberOfVariables);
+      VarList originalVarList = new VarList("originalVarList");
+      originalVarList.addVariables(variables);
+      
+      writeALongStateFile(fileOne, variables);
+      
+      DataFileReader dataFileReader = new DataFileReader(fileOne);
+      
+      VarList newVarList = new VarList("newVarList");
+      boolean createMissingVariables = true;
+      boolean printErrorForMissingVariables = false;
+      YoVariableRegistry registry = new YoVariableRegistry("root");
+      
+      dataFileReader.readState(newVarList, createMissingVariables , printErrorForMissingVariables , registry);
+      
+      assertEquals(originalVarList.size(), newVarList.size());
+      
+      for (int i=0; i<originalVarList.size(); i++)
+      {
+         YoVariable originalVariable = originalVarList.getVariable(i);
+         YoVariable newVariable = newVarList.getVariable(originalVariable.getName());
+         
+         assertFalse(originalVariable == newVariable);
+         assertEquals(originalVariable.getValueAsDouble(), newVariable.getValueAsDouble(), 1e-7);
+         
+      }
+      
+      fileOne.delete();
+   }
+   
+   private void writeALongStateFile(File file, ArrayList<YoVariable> variables)
+   { 
+      DataFileWriter dataFileWriter = new DataFileWriter(file);
+      
+      boolean compress = false;
+      double recordDT =  0.001;
+      boolean binary = false;
+      dataFileWriter.writeState("model", recordDT, variables, binary, compress);
+   }
+  
+   
+   private ArrayList<YoVariable> createALargeNumberOfVariables(Random random, int numberOfVariables)
+   {
+      YoVariableRegistry rootRegistry = new YoVariableRegistry("rootRegistry");
+      YoVariableRegistry registryOne = new YoVariableRegistry("registryOne");
+      YoVariableRegistry registryTwo = new YoVariableRegistry("registryTwo");
+      YoVariableRegistry registryThree = new YoVariableRegistry("registryThree");
+
+      rootRegistry.addChild(registryOne);
+      registryOne.addChild(registryTwo);
+      registryTwo.addChild(registryThree);
+      
+      DoubleYoVariable t = new DoubleYoVariable("t", registryThree);
+      DoubleYoVariable time = new DoubleYoVariable("time", registryThree);
+      t.set(1.1);
+      time.set(2.2);
+
+      for (int i=0; i<numberOfVariables; i++)
+      {
+         DoubleYoVariable variable = new DoubleYoVariable("variable" + i, registryThree);
+         variable.set(Math.random());
+      }
+      
+      return rootRegistry.getAllVariablesIncludingDescendants();
+   }
+   
 
 }
