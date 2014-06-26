@@ -63,6 +63,7 @@ public class FootstepPathCoordinatorTest
       ConstantSwingTimeCalculator constantSwingTimeCalculator = new ConstantSwingTimeCalculator(0.6, registry);
       ConstantTransferTimeCalculator constantTransferTimeCalculator = new ConstantTransferTimeCalculator(0.3, registry);
       
+      @SuppressWarnings("deprecation")
       FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulationForTest();
       FootstepPathCoordinator footstepPathCoordinator = new FootstepPathCoordinator(footstepTimingParameters, objectCommunicator, blindWalkingToDestinationDesiredFootstepCalculator, constantSwingTimeCalculator, constantTransferTimeCalculator, registry);
       ArrayList<Footstep> footsteps = createRandomFootsteps(10);
@@ -90,6 +91,7 @@ public class FootstepPathCoordinatorTest
       ConstantSwingTimeCalculator constantSwingTimeCalculator = new ConstantSwingTimeCalculator(0.6, registry);
       ConstantTransferTimeCalculator constantTransferTimeCalculator = new ConstantTransferTimeCalculator(0.3, registry);
       
+      @SuppressWarnings("deprecation")
       FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulationForTest();
       FootstepPathCoordinator footstepPathCoordinator = new FootstepPathCoordinator(footstepTimingParameters, objectCommunicator, blindWalkingToDestinationDesiredFootstepCalculator, constantSwingTimeCalculator, constantTransferTimeCalculator, registry);
       
@@ -122,6 +124,7 @@ public class FootstepPathCoordinatorTest
       ConstantSwingTimeCalculator constantSwingTimeCalculator = new ConstantSwingTimeCalculator(0.6, registry);
       ConstantTransferTimeCalculator constantTransferTimeCalculator = new ConstantTransferTimeCalculator(0.3, registry);
       
+      @SuppressWarnings("deprecation")
       FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulationForTest();
       FootstepPathCoordinator footstepPathCoordinator = new FootstepPathCoordinator(footstepTimingParameters, objectCommunicator, blindWalkingToDestinationDesiredFootstepCalculator, constantSwingTimeCalculator, constantTransferTimeCalculator, registry);
      
@@ -163,6 +166,7 @@ public class FootstepPathCoordinatorTest
       ConstantSwingTimeCalculator constantSwingTimeCalculator = new ConstantSwingTimeCalculator(0.6, registry);
       ConstantTransferTimeCalculator constantTransferTimeCalculator = new ConstantTransferTimeCalculator(0.3, registry);
       
+      @SuppressWarnings("deprecation")
       FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulationForTest();
       FootstepPathCoordinator footstepPathCoordinator = new FootstepPathCoordinator(footstepTimingParameters, objectCommunicator, blindWalkingToDestinationDesiredFootstepCalculator, constantSwingTimeCalculator, constantTransferTimeCalculator, registry);
      
