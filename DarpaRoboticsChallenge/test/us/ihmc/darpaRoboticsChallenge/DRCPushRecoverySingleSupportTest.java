@@ -36,7 +36,7 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateTransition
 public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTestInterface
 {
    private final static boolean KEEP_SCS_UP = false;
-   private final static boolean SHOW_GUI = false;
+   private final static boolean SHOW_GUI = true;
    private final static boolean VISUALIZE_FORCE = false;
 
    private double swingTime;
