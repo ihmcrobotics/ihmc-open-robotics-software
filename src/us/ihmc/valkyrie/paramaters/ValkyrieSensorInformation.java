@@ -197,4 +197,16 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    {
       return null;
    }
+
+   @Override
+   public String getLidarBaseFrame()
+   {
+      return "";
+   }
+
+   @Override
+   public String getLidarEndFrame()
+   {
+      return "";
+   }
 }
