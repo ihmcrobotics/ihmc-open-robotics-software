@@ -109,7 +109,7 @@ public abstract class DRCPushInDoubleSupportTest implements MultiRobotTestInterf
 
       // simulate until atlas is in swing
       walk.set(false);
-      blockingSimulationRunner.simulateAndBlock(3.0);
+      blockingSimulationRunner.simulateAndBlock(6.0);
 
       // push the robot
       pushRobotController.applyForce(forceDirection, forceMagnitude, forceDuration);
