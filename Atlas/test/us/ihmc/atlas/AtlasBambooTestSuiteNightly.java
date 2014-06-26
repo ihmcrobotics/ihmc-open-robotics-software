@@ -11,6 +11,7 @@ import us.ihmc.atlas.posePlayback.AtlasPlaybackPoseInterpolatorTest;
    us.ihmc.atlas.AtlasFlatGroundRewindabilityTest.class,
    us.ihmc.atlas.AtlasBumpyAndShallowRampsWalkingTest.class,
    us.ihmc.atlas.AtlasPushInSingleSupportTest.class,
+   us.ihmc.atlas.AtlasPushInDoubleSupportTest.class,
 //   AtlasPlaybackPoseInterpolatorTest.class
 })
 public class AtlasBambooTestSuiteNightly
