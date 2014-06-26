@@ -19,9 +19,10 @@ import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
+@SuppressWarnings("deprecation")
 public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRobotTestInterface
 {
-	private Class thisClass = DRCObstacleCourseTrialsWalkingTaskTest.class;
+	private Class<DRCObstacleCourseTrialsWalkingTaskTest> thisClass = DRCObstacleCourseTrialsWalkingTaskTest.class;
    private static final boolean KEEP_SCS_UP = false;
 
 

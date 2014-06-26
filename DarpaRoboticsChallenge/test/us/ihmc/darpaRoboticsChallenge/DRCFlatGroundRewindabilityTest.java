@@ -26,6 +26,7 @@ import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimu
 import com.yobotics.simulationconstructionset.util.simulationRunner.SimulationRewindabilityVerifier;
 import com.yobotics.simulationconstructionset.util.simulationRunner.VariableDifference;
 
+@SuppressWarnings("deprecation")
 public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestInterface
 {
    private static final boolean SHOW_GUI = false;
