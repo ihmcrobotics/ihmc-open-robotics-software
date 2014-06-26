@@ -92,4 +92,16 @@ public class BonoSensorInformation implements DRCRobotSensorInformation
       // TODO Auto-generated method stub
       return null;
    }
+
+   @Override
+   public String getLidarBaseFrame()
+   {
+      return "";
+   }
+
+   @Override
+   public String getLidarEndFrame()
+   {
+      return "";
+   }
 }
