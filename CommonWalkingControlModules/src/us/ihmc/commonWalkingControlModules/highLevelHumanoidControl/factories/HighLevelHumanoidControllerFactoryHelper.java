@@ -15,40 +15,27 @@ import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndV
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.ManualDesiredVelocityControlModule;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.RateBasedDesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.SimpleDesiredHeadingControlModule;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.OldMomentumControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
-import us.ihmc.commonWalkingControlModules.wrenchDistribution.ContactPointGroundReactionWrenchDistributor;
-import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWrenchDistributor;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
-import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
-import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
-import us.ihmc.utilities.math.DampedLeastSquaresSolver;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
-import us.ihmc.utilities.screwTheory.SpatialMotionVector;
-import us.ihmc.utilities.screwTheory.TwistCalculator;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.errorHandling.WalkingStatusReporter;
-import com.yobotics.simulationconstructionset.util.errorHandling.WalkingStatusReporter.ErrorType;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class HighLevelHumanoidControllerFactoryHelper
 {
    public static BlindWalkingToDestinationDesiredFootstepCalculator getBlindWalkingToDestinationDesiredFootstepCalculator(
-           WalkingControllerParameters walkingControllerParameters, CommonWalkingReferenceFrames referenceFrames,
-           SideDependentList<ContactablePlaneBody> bipedFeet, YoVariableRegistry registry)
+         WalkingControllerParameters walkingControllerParameters, CommonWalkingReferenceFrames referenceFrames,
+         SideDependentList<ContactablePlaneBody> bipedFeet, YoVariableRegistry registry)
    {
-      BlindWalkingToDestinationDesiredFootstepCalculator desiredFootstepCalculator =
-         new BlindWalkingToDestinationDesiredFootstepCalculator(referenceFrames.getAnkleZUpReferenceFrames(), referenceFrames.getFootReferenceFrames(),
-            bipedFeet, registry);
+      BlindWalkingToDestinationDesiredFootstepCalculator desiredFootstepCalculator = new BlindWalkingToDestinationDesiredFootstepCalculator(
+            referenceFrames.getAnkleZUpReferenceFrames(), referenceFrames.getFootReferenceFrames(), bipedFeet, registry);
 
       desiredFootstepCalculator.setDesiredStepWidth(walkingControllerParameters.getInPlaceWidth());
       desiredFootstepCalculator.setDesiredStepForward(walkingControllerParameters.getDesiredStepForward());
@@ -60,10 +47,9 @@ public class HighLevelHumanoidControllerFactoryHelper
       return desiredFootstepCalculator;
    }
 
-
    public static ComponentBasedDesiredFootstepCalculator getDesiredFootstepCalculator(WalkingControllerParameters walkingControllerParameters,
-           CommonWalkingReferenceFrames referenceFrames, SideDependentList<ContactablePlaneBody> bipedFeet, double controlDT, YoVariableRegistry registry,
-           ArrayList<Updatable> updatables, boolean useHeadingAndVelocityScript)
+         CommonWalkingReferenceFrames referenceFrames, SideDependentList<ContactablePlaneBody> bipedFeet, double controlDT, YoVariableRegistry registry,
+         ArrayList<Updatable> updatables, boolean useHeadingAndVelocityScript)
    {
       ComponentBasedDesiredFootstepCalculator desiredFootstepCalculator;
       ManualDesiredVelocityControlModule desiredVelocityControlModule;
@@ -79,7 +65,7 @@ public class HighLevelHumanoidControllerFactoryHelper
          simpleDesiredHeadingControlModule.updateDesiredHeadingFrame();
          boolean cycleThroughAllEvents = true;
          HeadingAndVelocityEvaluationScript headingAndVelocityEvaluationScript = new HeadingAndVelocityEvaluationScript(cycleThroughAllEvents, controlDT,
-                                                                                    simpleDesiredHeadingControlModule, desiredVelocityControlModule, registry);
+               simpleDesiredHeadingControlModule, desiredVelocityControlModule, registry);
          updatables.add(headingAndVelocityEvaluationScript);
          desiredHeadingControlModule = simpleDesiredHeadingControlModule;
       }
@@ -92,7 +78,7 @@ public class HighLevelHumanoidControllerFactoryHelper
       updatables.add(new DesiredHeadingUpdater(desiredHeadingControlModule));
 
       desiredFootstepCalculator = new ComponentBasedDesiredFootstepCalculator(referenceFrames.getAnkleZUpReferenceFrames(),
-              referenceFrames.getFootReferenceFrames(), bipedFeet, desiredHeadingControlModule, desiredVelocityControlModule, registry);
+            referenceFrames.getFootReferenceFrames(), bipedFeet, desiredHeadingControlModule, desiredVelocityControlModule, registry);
 
       desiredFootstepCalculator.setInPlaceWidth(walkingControllerParameters.getInPlaceWidth());
       desiredFootstepCalculator.setMaxStepLength(walkingControllerParameters.getMaxStepLength());
@@ -102,24 +88,6 @@ public class HighLevelHumanoidControllerFactoryHelper
 
       return desiredFootstepCalculator;
    }
-
-   public static WalkingStatusReporter getWalkingStatusReporter(GlobalDataProducer dataProducer, YoVariableRegistry registry)
-   {
-      WalkingStatusReporter walkingStatusReporter = new WalkingStatusReporter(dataProducer);
-
-      DoubleYoVariable icpErrorX = (DoubleYoVariable) registry.getVariable("icpErrorX");
-      DoubleYoVariable icpErrorY = (DoubleYoVariable) registry.getVariable("icpErrorY");
-      Pair<Double, Double> icpXYBounds = new Pair<Double, Double>(-0.06, 0.06);
-      walkingStatusReporter.setErrorAndBounds(ErrorType.ICP_X, icpErrorX, icpXYBounds);
-      walkingStatusReporter.setErrorAndBounds(ErrorType.ICP_Y, icpErrorY, icpXYBounds);
-
-      DoubleYoVariable pelvisOrientationError = (DoubleYoVariable) registry.getVariable("pelvisOrientationError");
-      Pair<Double, Double> pelvisOrientationBounds = new Pair<Double, Double>(-0.2, 0.2);
-      walkingStatusReporter.setErrorAndBounds(ErrorType.PELVIS_ORIENTATION, pelvisOrientationError, pelvisOrientationBounds);
-
-      return walkingStatusReporter;
-   }
-
 
    public static InverseDynamicsJoint[] computeJointsToOptimizeFor(FullRobotModel fullRobotModel, InverseDynamicsJoint... jointsToRemove)
    {
@@ -139,41 +107,17 @@ public class HighLevelHumanoidControllerFactoryHelper
 
       if (jointsToRemove != null)
       {
-         for(InverseDynamicsJoint joint : jointsToRemove)
+         for (InverseDynamicsJoint joint : jointsToRemove)
          {
-            joints.remove(joint);            
+            joints.remove(joint);
          }
       }
 
       return joints.toArray(new InverseDynamicsJoint[joints.size()]);
    }
 
-   public static OldMomentumControlModule createOldMomentumControlModule(WalkingControllerParameters walkingControllerParameters,
-           FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, double gravityZ, TwistCalculator twistCalculator, double controlDT,
-           YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
-   {
-      GroundReactionWrenchDistributor groundReactionWrenchDistributor = null;
-      ContactPointGroundReactionWrenchDistributor contactPointGroundReactionWrenchDistributor =
-         new ContactPointGroundReactionWrenchDistributor(referenceFrames.getCenterOfMassFrame(), registry);
-      double[] diagonalCWeights = new double[]
-      {
-         1.0, 1.0, 1.0, 10.0, 10.0, 10.0
-      };
-      contactPointGroundReactionWrenchDistributor.setWeights(diagonalCWeights, 5.0, 0.001);
-      groundReactionWrenchDistributor = contactPointGroundReactionWrenchDistributor;
-
-      DampedLeastSquaresSolver jacobianSolver = new DampedLeastSquaresSolver(SpatialMotionVector.SIZE);
-      jacobianSolver.setAlpha(5e-2);
-
-      OldMomentumControlModule oldMomentumControlModule = new OldMomentumControlModule(fullRobotModel.getRootJoint(), gravityZ,
-                                                             groundReactionWrenchDistributor, referenceFrames.getCenterOfMassFrame(), controlDT,
-                                                             twistCalculator, jacobianSolver, registry, dynamicGraphicObjectsListRegistry);
-      oldMomentumControlModule.setGroundReactionWrenchBreakFrequencyHertz(walkingControllerParameters.getGroundReactionWrenchBreakFrequencyHertz());
-
-      return oldMomentumControlModule;
-   }
-
-   public static MomentumOptimizationSettings createMomentumOptimizationSettings(FullRobotModel fullRobotModel, YoVariableRegistry registry, InverseDynamicsJoint... jointsToIgnore)
+   public static MomentumOptimizationSettings createMomentumOptimizationSettings(FullRobotModel fullRobotModel, YoVariableRegistry registry,
+         InverseDynamicsJoint... jointsToIgnore)
    {
       InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerFactoryHelper.computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
 
