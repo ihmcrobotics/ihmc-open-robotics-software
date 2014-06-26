@@ -13,9 +13,7 @@ import us.ihmc.utilities.math.MathTools;
 public class VaryingStairGroundProfile implements GroundProfile
 {
    private final double xMin, xMax, yMin, yMax;
-   private final double
-      xTiles = 1.0, yTiles = 1.0;
-
+   
    private final double[] stepStartXValues;
    private final double[] groundHeights;
 
@@ -69,11 +67,6 @@ public class VaryingStairGroundProfile implements GroundProfile
       return xMin;
    }
 
-   public double getXTiles()
-   {
-      return xTiles;
-   }
-
    public double getYMax()
    {
       return yMax;
@@ -82,11 +75,6 @@ public class VaryingStairGroundProfile implements GroundProfile
    public double getYMin()
    {
       return yMin;
-   }
-
-   public double getYTiles()
-   {
-      return yTiles;
    }
 
    public double heightAt(double x, double y, double z)
