@@ -37,6 +37,7 @@ import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimu
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import com.yobotics.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
 
+@SuppressWarnings("deprecation")
 public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTestInterface
 {
    private static final boolean ALWAYS_SHOW_GUI = false;
@@ -135,8 +136,8 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
 
 //    DoubleYoVariable centerOfMassHeight = (DoubleYoVariable) scs.getVariable("ProcessedSensors.comPositionz");
       DoubleYoVariable comError = (DoubleYoVariable) scs.getVariable("positionError_comHeight");
-      DoubleYoVariable leftFootHeight = (DoubleYoVariable) scs.getVariable("p_leftFootPositionZ");
-      DoubleYoVariable rightFootHeight = (DoubleYoVariable) scs.getVariable("p_rightFootPositionZ");
+//      DoubleYoVariable leftFootHeight = (DoubleYoVariable) scs.getVariable("p_leftFootPositionZ");
+//      DoubleYoVariable rightFootHeight = (DoubleYoVariable) scs.getVariable("p_rightFootPositionZ");
 
       initiateMotion(standingTimeDuration, blockingSimulationRunner, walk);
       desiredSpeed.set(desiredVelocityValue);

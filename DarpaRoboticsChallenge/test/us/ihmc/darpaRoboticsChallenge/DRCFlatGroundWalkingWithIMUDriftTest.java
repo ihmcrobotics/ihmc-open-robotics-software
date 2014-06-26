@@ -30,6 +30,7 @@ import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimu
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import com.yobotics.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
 
+@SuppressWarnings("deprecation")
 public abstract class DRCFlatGroundWalkingWithIMUDriftTest implements MultiRobotTestInterface
 {
    private static final boolean ALWAYS_SHOW_GUI = false;
