@@ -22,7 +22,7 @@ public class VirtualLinkFromPinJoint extends VirtualLinkFromJoint
       {
          throw new RuntimeException("(this.referenceFrame != referenceFrame)");
       }
-      referenceFrame.set(((OneDegreeOfFreedomJoint) joint).getQ().getDoubleValue());
+      referenceFrame.setAndUpdate(((OneDegreeOfFreedomJoint) joint).getQ().getDoubleValue());
       referenceFrame.update();
    }
 }
