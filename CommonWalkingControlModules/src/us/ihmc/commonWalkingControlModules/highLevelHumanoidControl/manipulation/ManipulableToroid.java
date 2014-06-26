@@ -139,6 +139,7 @@ public class ManipulableToroid
 
    private class TorusLocatorFrame extends ReferenceFrame
    {
+      private static final long serialVersionUID = 7776724514563190641L;
       private final Vector3d origin = new Vector3d();
       private final Vector3d zAxis = new Vector3d(0.0, 0.0, 1.0);
 

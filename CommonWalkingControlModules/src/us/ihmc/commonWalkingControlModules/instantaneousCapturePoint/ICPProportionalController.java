@@ -252,7 +252,7 @@ public class ICPProportionalController
       }
    }
 
-   public class Vector2dZUpFrame extends ReferenceFrame
+   private class Vector2dZUpFrame extends ReferenceFrame
    {
       private static final long serialVersionUID = -1810366869361449743L;
       private final FrameVector2d xAxis;

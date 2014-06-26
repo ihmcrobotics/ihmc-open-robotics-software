@@ -190,7 +190,7 @@ public class PointPositionRotateSteeringWheelBehavior
          // R^B_S
          rotationFromGainOrientationToBody.getMatrix3d(tempMatrix);
          transform.set(tempMatrix);
-         xTangentialFrame.updateTransform(transform);
+         xTangentialFrame.setTransformAndUpdate(transform);
 
          if (xTangentialFrameViz != null)
             xTangentialFrameViz.update();
