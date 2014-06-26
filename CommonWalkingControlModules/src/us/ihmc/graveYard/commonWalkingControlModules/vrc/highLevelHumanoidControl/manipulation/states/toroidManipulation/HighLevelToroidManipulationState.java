@@ -1,6 +1,5 @@
 package us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.manipulation.states.toroidManipulation;
 
-import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulableToroid;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.taskExecutor.Task;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
@@ -27,16 +26,16 @@ public class HighLevelToroidManipulationState implements Task
    private final ToroidManipulationStateMachine toroidManipulationStateMachine;
 
    public HighLevelToroidManipulationState(double controlDT, DoubleYoVariable yoTime, FullRobotModel fullRobotModel, TwistCalculator twistCalculator,
-           SideDependentList<ReferenceFrame> handPositionControlFrames, SideDependentList<HandControllerInterface> handControllers,
-           SideDependentList<Integer> jacobianIds, TorusPoseProvider torusPoseProvider, MomentumBasedController momentumBasedController,
-           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+           SideDependentList<ReferenceFrame> handPositionControlFrames, SideDependentList<Integer> jacobianIds,
+           TorusPoseProvider torusPoseProvider, MomentumBasedController momentumBasedController, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+           YoVariableRegistry parentRegistry)
    {
       RigidBody toroidBase = fullRobotModel.getElevator();
       double gravityZ = momentumBasedController.getGravityZ();
       this.torusPoseProvider = torusPoseProvider;
       this.manipulableToroid = new ManipulableToroid("twoHandGrip", toroidBase, dynamicGraphicObjectsListRegistry, registry);
       this.toroidManipulationStateMachine = new ToroidManipulationStateMachine(yoTime, fullRobotModel, twistCalculator, manipulableToroid,
-              handPositionControlFrames, handControllers, jacobianIds, gravityZ, momentumBasedController, controlDT, registry, dynamicGraphicObjectsListRegistry);
+              handPositionControlFrames, jacobianIds, gravityZ, momentumBasedController, controlDT, registry, dynamicGraphicObjectsListRegistry);
 
       toroidManipulationStateMachine.setIndividualHandPositionControlGains(100.0, 20.0, 100.0, 20.0);
 

@@ -3,7 +3,6 @@ package us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidContr
 import java.util.EnumMap;
 
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
-import us.ihmc.commonWalkingControlModules.controllers.HandControllerInterface;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulableToroid;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
@@ -95,9 +94,8 @@ public class ToroidManipulationStateMachine
 
    public ToroidManipulationStateMachine(DoubleYoVariable simulationTime, FullRobotModel fullRobotModel, TwistCalculator twistCalculator,
            final ManipulableToroid toroidUpdater, SideDependentList<ReferenceFrame> handPositionControlFrames,
-           final SideDependentList<HandControllerInterface> handControllers, SideDependentList<Integer> jacobianIds, double gravityZ,
-           MomentumBasedController momentumBasedController, double controlDT, YoVariableRegistry parentRegistry,
-           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+           SideDependentList<Integer> jacobianIds, double gravityZ, MomentumBasedController momentumBasedController,
+           double controlDT, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       stateMachine = new StateMachine<ToroidManipulationState>(name, name + "SwitchTime", ToroidManipulationState.class, simulationTime, registry);
       moveToToroid1ExtraRadius.set(0.2);
@@ -192,10 +190,10 @@ public class ToroidManipulationStateMachine
          {
             if (grabSteeringWheel.getBooleanValue())
             {
-               for (RobotSide robotSide : RobotSide.values)
-               {
-                  handControllers.get(robotSide).closeFingers();
-               }
+//               for (RobotSide robotSide : RobotSide.values)
+//               {
+//                  handControllers.get(robotSide).closeFingers();
+//               }
             }
          }
       };
@@ -206,13 +204,13 @@ public class ToroidManipulationStateMachine
       {
          public boolean checkCondition()
          {
-            for (RobotSide robotSide : RobotSide.values)
-            {
-               if (!handControllers.get(robotSide).isOpen())
-               {
-                  return false;
-               }
-            }
+//            for (RobotSide robotSide : RobotSide.values)
+//            {
+//               if (!handControllers.get(robotSide).isOpen())
+//               {
+//                  return false;
+//               }
+//            }
 
             return true;
          }
@@ -232,10 +230,10 @@ public class ToroidManipulationStateMachine
       {
          public void doTransitionAction()
          {
-            for (RobotSide robotSide : RobotSide.values)
-            {
-               handControllers.get(robotSide).openFingers();
-            }
+//            for (RobotSide robotSide : RobotSide.values)
+//            {
+//               handControllers.get(robotSide).openFingers();
+//            }
 
             releasedToroid();
          }
