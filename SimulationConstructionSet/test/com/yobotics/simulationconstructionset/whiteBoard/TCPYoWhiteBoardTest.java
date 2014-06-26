@@ -22,8 +22,8 @@ public class TCPYoWhiteBoardTest extends YoWhiteBoardTest
       leftWhiteBoardThread.start();
       rightWhiteBoardThread.start();
 
-      int numberOfTests = 1000;
-      doASynchronizedWriteThenReadTest(leftWhiteBoard, rightWhiteBoard, numberOfTests, 1001, 2001);
+      int numberOfTests = 500;
+      doASynchronizedWriteThenReadTest(leftWhiteBoard, rightWhiteBoard, numberOfTests, 501, 1001);
    }
    
    
@@ -42,7 +42,7 @@ public class TCPYoWhiteBoardTest extends YoWhiteBoardTest
       leftWhiteBoardThread.start();
       rightWhiteBoardThread.start();
 
-      int numberOfTests = 1000;
-      doAnAsynchronousTest(leftWhiteBoard, rightWhiteBoard, numberOfTests, 1000, 2000);
+      int numberOfTests = 500;
+      doAnAsynchronousTest(leftWhiteBoard, rightWhiteBoard, numberOfTests, 500, 1000);
    }
 }

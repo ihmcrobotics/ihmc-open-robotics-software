@@ -32,26 +32,12 @@ import com.yobotics.simulationconstructionset.util.ground.steppingStones.Steppin
  * @author not attributable
  * @version 1.0
  */
-public class TestFindTentativeListOfPolygonsIntersectingTargetPolygon extends TestCase
+public class TestFindTentativeListOfPolygonsIntersectingTargetPolygon
 {
    private static final boolean VERBOSE = false;
    private static final boolean SHOW_PLOTTER = false;
 
-   public TestFindTentativeListOfPolygonsIntersectingTargetPolygon(String name)
-   {
-      super(name);
-   }
-
-   protected void setUp() throws Exception
-   {
-      super.setUp();
-   }
-
-   protected void tearDown() throws Exception
-   {
-      super.tearDown();
-   }
-
+   @Test
    public void testFindTentativeListOfPolygonsIntersectingTargetPolygon()
    {
 
@@ -140,7 +126,7 @@ public class TestFindTentativeListOfPolygonsIntersectingTargetPolygon extends Te
 
       try
       {
-         Thread.sleep(1000);
+         Thread.sleep(500);
       }
       catch (Exception ex)
       {
@@ -149,6 +135,7 @@ public class TestFindTentativeListOfPolygonsIntersectingTargetPolygon extends Te
 
    }
 
+   @Test
    public void testFindTentativeListOfPolygonsIntersectingTargetPolygonTwo()
    {
       PlotterPanel plotterpanel = createPlotterPanel();
@@ -197,7 +184,7 @@ public class TestFindTentativeListOfPolygonsIntersectingTargetPolygon extends Te
       displayPolygons(plotterpanel, polygon1);
       try
       {
-         Thread.sleep(1000);
+         Thread.sleep(500);
       }
       catch (Exception ex)
       {
@@ -205,6 +192,7 @@ public class TestFindTentativeListOfPolygonsIntersectingTargetPolygon extends Te
       }
    }
 
+   @Test
    public void testFindTentativeListOfPolygonsIntersectingTargetPolygonThree()
    {
       PlotterPanel plotterpanel = createPlotterPanel();
@@ -293,7 +281,7 @@ public class TestFindTentativeListOfPolygonsIntersectingTargetPolygon extends Te
 
       try
       {
-         Thread.sleep(1500);
+         Thread.sleep(500);
       }
       catch (Exception ex)
       {
@@ -301,6 +289,7 @@ public class TestFindTentativeListOfPolygonsIntersectingTargetPolygon extends Te
       }
    }
 
+   @Test
    public void testFindTentativeListOfPolygonsIntersectingTargetPolygonTiming()
    {
       Random random = new Random(1776L);

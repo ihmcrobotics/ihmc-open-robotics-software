@@ -17,7 +17,7 @@ public class LocalYoWhiteBoardTest extends YoWhiteBoardTest
 
       leftWhiteBoard.setMyBrotherWhiteBoard(rightWhiteBoard);
 
-      int numberOfTests = 10000;
+      int numberOfTests = 2000;
       doASynchronizedWriteThenReadTest(leftWhiteBoard, rightWhiteBoard, numberOfTests, 1000, 2000);
    }
    

@@ -34,7 +34,7 @@ public class UDPYoWhiteBoardTest extends YoWhiteBoardTest
 
       rightWhiteBoardThread.start();
 
-      int numberOfTests = 1000;
+      int numberOfTests = 500;
       doASynchronizedWriteThenReadTest(leftWhiteBoard, rightWhiteBoard, numberOfTests, 203, 207);
    }
    
@@ -66,7 +66,7 @@ public class UDPYoWhiteBoardTest extends YoWhiteBoardTest
 
       rightWhiteBoardThread.start();
 
-      int numberOfTests = 1000;
+      int numberOfTests = 500;
       this.doAnAsynchronousTest(leftWhiteBoard, rightWhiteBoard, numberOfTests, 234, 179);
    }
 
