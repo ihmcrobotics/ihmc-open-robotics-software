@@ -110,12 +110,12 @@ public class ManipulableToroid
       framePose.changeFrame(toroidBeforeJointFrame.getParent());
       FramePoint origin = copy.getPositionCopy();
       FrameVector zAxis = new FrameVector(copy.getReferenceFrame());
-      framePose.getOrientationMatrix3d(rotationMatrix);
+      framePose.getOrientation(rotationMatrix);
       rotationMatrix.getColumn(2, zAxis.getVector());
       toroidBeforeJointFrame.set(origin, zAxis);
 
       copy.changeFrame(toroidBeforeJointFrame);
-      copy.getOrientationMatrix3d(rotationMatrix);
+      copy.getOrientation(rotationMatrix);
       AxisAngle4d axisAngle = new AxisAngle4d();
       axisAngle.set(rotationMatrix);
       setQ(axisAngle.getAngle());
