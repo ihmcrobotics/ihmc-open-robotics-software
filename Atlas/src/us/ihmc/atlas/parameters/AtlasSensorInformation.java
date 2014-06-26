@@ -45,12 +45,14 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
     * -Tingfan Wu
     */
    private final String lidarJointName; //this has to match LidarDataReceiver::LIDAR_HEAD_FRAME; gazebo should use: "hokuyo_joint"; 
+   private final String lidarBaseFrame = "/multisense/head_root";
+   private final String lidarEndFrame = "/multisense/head_hokuyo_frame";
+   
    private static final String lidarSensorName = "head_hokuyo_sensor";
    private static final String lidarJointTopic = multisense_topic_base + "joint_states";
    private static final String multisense_laser_topic_string = multisense_topic_base+"/lidar_scan";
    private static final String bodyIMUSensor = "pelvis_imu_sensor";
    private static final String[] imuSensorsToUse = { bodyIMUSensor };
-   
    
    public AtlasSensorInformation(boolean runningOnRealRobot)
    {
@@ -138,5 +140,17 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    public String getLidarJointTopic()
    {
       return lidarJointTopic;
+   }
+
+   @Override
+   public String getLidarBaseFrame()
+   {
+      return lidarBaseFrame;
+   }
+
+   @Override
+   public String getLidarEndFrame()
+   {
+      return lidarEndFrame;
    }
 }

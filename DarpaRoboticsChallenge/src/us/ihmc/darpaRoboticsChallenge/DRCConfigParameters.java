@@ -17,6 +17,7 @@ public class DRCConfigParameters
    public static final boolean ENABLE_LAG_SIMULATION_ON_START = false;
    public static boolean CALIBRATE_ARM_MODE = false;
    public static boolean USE_CALIBRATED_JOINT_BIAS = true;
+   public static boolean ENABLE_QOUT_ENCODER = CALIBRATE_ARM_MODE;
 
 
    static
@@ -116,4 +117,6 @@ public class DRCConfigParameters
    public static final double contactTresholdForceForGazebo = 120.0;
 
    public static final boolean ALLOW_MODEL_CORRUPTION = false;
+
+   public static final boolean SEND_ROBOT_DATA_TO_ROS = true;
 }

@@ -21,29 +21,46 @@ import us.ihmc.utilities.ros.RosMainNode;
 
 public class MultiSenseSensorManager
 {
-   private final RosCameraReceiver cameraReceiver;
+   private RosCameraReceiver cameraReceiver;
+   
+   private final DRCRobotSensorInformation sensorInformation;
+   private final RobotPoseBuffer sharedRobotPoseBuffer;
+   private final RosMainNode rosMainNode;
+   private final DRCNetworkProcessorNetworkingManager networkingManager;
+   private final SDFFullRobotModel sharedFullRobotModel;
+   private final ObjectCommunicator fieldComputerClient;
+   private final RosNativeNetworkProcessor rosNativeNetworkProcessor;
+   private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
+   private final LidarFilter lidarDataFilter;
+   
+   private final double CRC = DRCLocalConfigParameters.USING_REAL_HEAD ?  -.0010908f : 0;
+   private final boolean USE_ROS_FOR_SENSOR_TRANSFORMS = true;
+
+   private DRCRobotCameraParamaters cameraParamaters;
+   
 
    public MultiSenseSensorManager(DRCRobotSensorInformation sensorInformation, RobotPoseBuffer sharedRobotPoseBuffer, RosMainNode rosMainNode,
          DRCNetworkProcessorNetworkingManager networkingManager, SDFFullRobotModel sharedFullRobotModel, ObjectCommunicator fieldComputerClient,
          RosNativeNetworkProcessor rosNativeNetworkProcessor, PPSTimestampOffsetProvider ppsTimestampOffsetProvider, LidarFilter lidarDataFilter)
    {
-
-      DRCRobotCameraParamaters cameraParamaters = sensorInformation.getPrimaryCameraParamaters();
-      CameraLogger logger = DRCConfigParameters.LOG_PRIMARY_CAMERA_IMAGES ? new CameraLogger("left") : null;
-
-      cameraReceiver = new RosCameraReceiver(cameraParamaters, sharedRobotPoseBuffer, cameraParamaters.getVideoSettings(), rosMainNode, networkingManager,
-            ppsTimestampOffsetProvider,logger);
-
-      CameraInfoReceiver cameraInfoServer = new RosCameraInfoReciever(sensorInformation.getPrimaryCameraParamaters(), rosMainNode,
-            networkingManager.getControllerStateHandler(),logger);
-      networkingManager.getControllerCommandHandler().setIntrinsicServer(cameraInfoServer);
-      
-      double crc = DRCLocalConfigParameters.USING_REAL_HEAD ?  -.0010908f : 0;
-      boolean useRosForTransform = true;
-
-      new RosLidarDataReceiver(rosMainNode, sharedRobotPoseBuffer, networkingManager, sharedFullRobotModel, sensorInformation, fieldComputerClient,
-            rosNativeNetworkProcessor, ppsTimestampOffsetProvider, lidarDataFilter, useRosForTransform, crc);
-
+      cameraParamaters = sensorInformation.getPrimaryCameraParamaters();
+      this.sensorInformation = sensorInformation;          
+      this.sharedRobotPoseBuffer = sharedRobotPoseBuffer;                
+      this.rosMainNode = rosMainNode;                              
+      this.networkingManager = networkingManager;          
+      this.sharedFullRobotModel = sharedFullRobotModel;               
+      this.fieldComputerClient = fieldComputerClient;               
+      this.rosNativeNetworkProcessor = rosNativeNetworkProcessor;  
+      this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
+      this.lidarDataFilter = lidarDataFilter;                          
+                                      
+      registerCameraReceivers();
+      registerLidarReceivers();
+      setMultiseSenseParams();
+   }
+   
+   private void setMultiseSenseParams()
+   {
       MultiSenseParamaterSetter.setMultisenseResolution(rosMainNode);
       
       if (RosNativeNetworkProcessor.hasNativeLibrary())
@@ -54,6 +71,24 @@ public class MultiSenseSensorManager
       {
          MultiSenseParamaterSetter.setupMultisenseSpindleSpeedPublisher(rosMainNode);
       }
+   }
+   
+   private void registerLidarReceivers()
+   {
+      new RosLidarDataReceiver(rosMainNode, sharedRobotPoseBuffer, networkingManager, sharedFullRobotModel, sensorInformation, fieldComputerClient,
+            rosNativeNetworkProcessor, ppsTimestampOffsetProvider, lidarDataFilter, USE_ROS_FOR_SENSOR_TRANSFORMS, CRC);
+   }
+   
+   private void registerCameraReceivers()
+   {
+      CameraLogger logger = DRCConfigParameters.LOG_PRIMARY_CAMERA_IMAGES ? new CameraLogger("left") : null;
+      cameraReceiver = new RosCameraReceiver(cameraParamaters, sharedRobotPoseBuffer, cameraParamaters.getVideoSettings(), rosMainNode, networkingManager,
+            ppsTimestampOffsetProvider,logger);
+
+      CameraInfoReceiver cameraInfoServer = new RosCameraInfoReciever(sensorInformation.getPrimaryCameraParamaters(), rosMainNode,
+            networkingManager.getControllerStateHandler(),logger);
+      
+      networkingManager.getControllerCommandHandler().setIntrinsicServer(cameraInfoServer);
    }
 
    public void registerCameraListener(ArmCalibrationHelper armCalibrationHelper)
