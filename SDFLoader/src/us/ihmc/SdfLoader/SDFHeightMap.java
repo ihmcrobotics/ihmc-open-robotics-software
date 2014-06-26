@@ -95,14 +95,4 @@ public class SDFHeightMap implements us.ihmc.graphics3DAdapter.HeightMap
       return yMax;
    }
 
-   public double getXTiles()
-   {
-      return 0;
-   }
-
-   public double getYTiles()
-   {
-      return 0;
-   }
-
 }
