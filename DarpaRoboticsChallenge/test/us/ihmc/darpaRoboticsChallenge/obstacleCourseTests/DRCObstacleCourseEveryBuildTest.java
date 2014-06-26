@@ -72,7 +72,7 @@ public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestI
       setupCameraForWalkingUpToRamp(simulationConstructionSet);
 
       ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(20.0);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(6.0);
 
       drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();

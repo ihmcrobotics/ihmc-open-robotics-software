@@ -1,11 +1,14 @@
 package com.yobotics.simulationconstructionset.ground;
 
+import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
+
 import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.graphics3DAdapter.GroundProfile;
 import us.ihmc.utilities.test.JUnitTools;
+
 import com.yobotics.simulationconstructionset.util.ShipCorridorGroundProfile;
 
 public class ShipCorridorGroundProfileTest 
@@ -54,7 +57,8 @@ public class ShipCorridorGroundProfileTest
 
             //Other Surface normal
             Vector3d surfaceNormalFromGroundProfile = new Vector3d();
-            groundProfile.surfaceNormalAt(x, y, z, surfaceNormalFromGroundProfile);
+            Point3d intersection = new Point3d();
+            groundProfile.closestIntersectionAndNormalAt(x, y, z, intersection, surfaceNormalFromGroundProfile);
             
             if(((initialHeight == 3.0)&&(finalHeight != 3.0)) || ((initialHeight != 3.0)&&(finalHeight == 3.0)) || ((initialHeight != 0.0)&&(finalHeight == 0.0)) || ((initialHeight == 0.0)&&(finalHeight != 0.0)))
             {

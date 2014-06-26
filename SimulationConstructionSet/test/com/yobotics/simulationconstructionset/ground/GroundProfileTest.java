@@ -1,6 +1,8 @@
 package com.yobotics.simulationconstructionset.ground;
 
+import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
+
 import org.junit.Test;
 
 import us.ihmc.graphics3DAdapter.GroundProfile;
@@ -34,7 +36,8 @@ public abstract class GroundProfileTest
          numericalSurfaceNormal.normalize();
 
          Vector3d surfaceNormalFromGroundProfile = new Vector3d();
-         groundProfile.surfaceNormalAt(x, y, z, surfaceNormalFromGroundProfile);
+         Point3d intersectionIgnore = new Point3d();
+         groundProfile.closestIntersectionAndNormalAt(x, y, z, intersectionIgnore, surfaceNormalFromGroundProfile);
          JUnitTools.assertTuple3dEquals(numericalSurfaceNormal, surfaceNormalFromGroundProfile, epsilon);
       }
    }
