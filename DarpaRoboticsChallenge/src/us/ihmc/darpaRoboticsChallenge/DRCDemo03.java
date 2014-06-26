@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
+import us.ihmc.graphics3DAdapter.HeightMapFromGroundProfile;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
@@ -85,7 +86,9 @@ public abstract class DRCDemo03
       if (SHOW_HEIGHTMAP)
       {
          Graphics3DObject planeAtZ0 = new Graphics3DObject();
-         planeAtZ0.addHeightMap(drcSimulation.getRobot().getGroundContactModel().getGroundProfile(), 1000, 1000, YoAppearance.Red());
+         
+         HeightMapFromGroundProfile heightMap = new HeightMapFromGroundProfile(drcSimulation.getRobot().getGroundContactModel().getGroundProfile());
+         planeAtZ0.addHeightMap(heightMap, 1000, 1000, YoAppearance.Red());
          simulationConstructionSet.addStaticLinkGraphics(planeAtZ0);
       }
 
