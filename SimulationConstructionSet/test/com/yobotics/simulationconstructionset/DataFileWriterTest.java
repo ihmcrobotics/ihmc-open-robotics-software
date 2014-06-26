@@ -101,7 +101,8 @@ public class DataFileWriterTest
    }
 
    private void testDataWriteReadIsTheSame(DataBuffer dataBuffer, ArrayList<YoVariable> allVariables, boolean binary, boolean compress,
-         boolean spreadsheetFormatted, Robot robot) throws IOException
+           boolean spreadsheetFormatted, Robot robot)
+           throws IOException
    {
       String filename = "testFile.data";
       if (spreadsheetFormatted)
@@ -119,7 +120,8 @@ public class DataFileWriterTest
       {
          dataFileWriter.writeSpreadsheetFormattedData(dataBuffer, allVariables);
 
-      } else
+      }
+      else
       {
          dataFileWriter.writeData(model, recordDT, dataBuffer, allVariables, binary, compress, robot);
       }
@@ -189,8 +191,8 @@ public class DataFileWriterTest
       inputStream.close();
       bufferedReader.close();
 
-      //      System.out.println(lineReadBack);
-      //      System.out.println(testString);
+      // System.out.println(lineReadBack);
+      // System.out.println(testString);
 
       assertTrue(testDouble == doubleReadBack);
       assertTrue(testString.equals(lineReadBack));
@@ -252,71 +254,72 @@ public class DataFileWriterTest
 
       reader.close();
 
-      //      System.out.println("String 1: " + string1);
-      //      System.out.println("String 2: " + string2);
-      //      System.out.println("String 3: " + string3);
+      // System.out.println("String 1: " + string1);
+      // System.out.println("String 2: " + string2);
+      // System.out.println("String 3: " + string3);
       //
-      //      System.out.println("Readback 1: " + readBack1);
-      //      System.out.println("Readback 2: " + readBack2);
-      //      System.out.println("Readback 3: " + readBack3);
+      // System.out.println("Readback 1: " + readBack1);
+      // System.out.println("Readback 2: " + readBack2);
+      // System.out.println("Readback 3: " + readBack3);
 
       assertTrue(string1.equals(readBack1));
       assertTrue(string2.equals(readBack2));
       assertTrue(string3.equals(readBack3));
    }
-   
-   
-   @Test (timeout=5000)
+
+
+   @Test(timeout = 5000)
    public void testWritingAndReadingALongStateFile() throws IOException
    {
       File fileOne = new File("fileOne.state");
-      
-      if (fileOne.exists()) fileOne.delete();
-      
+
+      if (fileOne.exists())
+         fileOne.delete();
+
       long seed = 1776L;
-      int numberOfVariables = 2000; //12000 for when testing long files for efficiency;
+      int numberOfVariables = 2000;    // 12000 for when testing long files for efficiency;
       Random random = new Random(seed);
       ArrayList<YoVariable> variables = createALargeNumberOfVariables(random, numberOfVariables);
       VarList originalVarList = new VarList("originalVarList");
       originalVarList.addVariables(variables);
-      
+
       writeALongStateFile(fileOne, variables);
-      
+
       DataFileReader dataFileReader = new DataFileReader(fileOne);
-      
+
       VarList newVarList = new VarList("newVarList");
       boolean createMissingVariables = true;
       boolean printErrorForMissingVariables = false;
       YoVariableRegistry registry = new YoVariableRegistry("root");
-      
-      dataFileReader.readState(newVarList, createMissingVariables , printErrorForMissingVariables , registry);
-      
+
+      dataFileReader.readState(newVarList, createMissingVariables, printErrorForMissingVariables, registry);
+
       assertEquals(originalVarList.size(), newVarList.size());
-      
-      for (int i=0; i<originalVarList.size(); i++)
+
+      for (int i = 0; i < originalVarList.size(); i++)
       {
          YoVariable originalVariable = originalVarList.getVariable(i);
          YoVariable newVariable = newVarList.getVariable(originalVariable.getName());
-         
+
          assertFalse(originalVariable == newVariable);
          assertEquals(originalVariable.getValueAsDouble(), newVariable.getValueAsDouble(), 1e-7);
-         
+
       }
-      
+
       fileOne.delete();
    }
-   
+
    private void writeALongStateFile(File file, ArrayList<YoVariable> variables)
-   { 
+   {
       DataFileWriter dataFileWriter = new DataFileWriter(file);
-      
+
       boolean compress = false;
-      double recordDT =  0.001;
+      double recordDT = 0.001;
       boolean binary = false;
       dataFileWriter.writeState("model", recordDT, variables, binary, compress);
    }
-  
-   
+
+
    private ArrayList<YoVariable> createALargeNumberOfVariables(Random random, int numberOfVariables)
    {
       YoVariableRegistry rootRegistry = new YoVariableRegistry("rootRegistry");
@@ -327,20 +330,20 @@ public class DataFileWriterTest
       rootRegistry.addChild(registryOne);
       registryOne.addChild(registryTwo);
       registryTwo.addChild(registryThree);
-      
+
       DoubleYoVariable t = new DoubleYoVariable("t", registryThree);
       DoubleYoVariable time = new DoubleYoVariable("time", registryThree);
       t.set(1.1);
       time.set(2.2);
 
-      for (int i=0; i<numberOfVariables; i++)
+      for (int i = 0; i < numberOfVariables; i++)
       {
          DoubleYoVariable variable = new DoubleYoVariable("variable" + i, registryThree);
          variable.set(Math.random());
       }
-      
+
       return rootRegistry.getAllVariablesIncludingDescendants();
    }
-   
+
 
 }
