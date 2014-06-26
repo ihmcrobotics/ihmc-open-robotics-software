@@ -25,11 +25,13 @@ public class DRCPoseCommunicator implements RawOutputWriter
    private final int WORKER_SLEEP_TIME_MILLIS = 1;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final ReferenceFrame headFrame;
    private final ReferenceFrame lidarFrame;
    private final ReferenceFrame cameraFrame;
    private final ReferenceFrame rootFrame;
 
    private final Transform3D rootTransform = new Transform3D();
+   private final Transform3D headTransform = new Transform3D();
    private final Transform3D cameraTransform = new Transform3D();
    private final Transform3D lidarTransform = new Transform3D();
 
@@ -51,6 +53,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
       this.jointConfigurationGathererAndProducer = jointConfigurationGathererAndProducer;
       this.timeProvider = timestampProvider;
 
+      headFrame = estimatorModel.getHeadBaseFrame();
       lidarFrame = estimatorModel.getLidarBaseFrame(sensorInformation.getLidarSensorName());
       cameraFrame = estimatorModel.getCameraFrame(sensorInformation.getPrimaryCameraParamaters().getCameraNameInSdf());
       rootFrame = estimatorModel.getRootJoint().getFrameAfterJoint();
@@ -119,6 +122,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
       rootFrame.getTransformToDesiredFrame(rootTransform, ReferenceFrame.getWorldFrame());
       cameraFrame.getTransformToDesiredFrame(cameraTransform, ReferenceFrame.getWorldFrame());
       lidarFrame.getTransformToDesiredFrame(lidarTransform, ReferenceFrame.getWorldFrame());
+      headFrame.getTransformToDesiredFrame(headTransform, ReferenceFrame.getWorldFrame());
 
       State state = stateRingBuffer.next();
       if (state == null)
@@ -128,7 +132,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
       
       long timestamp = timeProvider.getTimestamp();
       jointConfigurationGathererAndProducer.packEstimatorJoints(timestamp, state.jointData, numberOfJoints);
-      state.poseData.setAll(timestamp, rootTransform, cameraTransform, lidarTransform);
+      state.poseData.setAll(timestamp, rootTransform, cameraTransform, lidarTransform, headTransform);
 
       stateRingBuffer.commit();
    }

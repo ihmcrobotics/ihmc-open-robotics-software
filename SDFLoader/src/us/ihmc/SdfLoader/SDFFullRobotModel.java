@@ -500,4 +500,9 @@ public class SDFFullRobotModel implements FullRobotModel
       return soleFrames.get(robotSide);
    }
 
+   public ReferenceFrame getHeadBaseFrame()
+   {
+      return head.getParentJoint().getFrameAfterJoint();
+   }
+
 }

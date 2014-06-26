@@ -1,12 +1,13 @@
 package us.ihmc.utilities.ros;
 
-import geometry_msgs.Pose;
 import geometry_msgs.PoseStamped;
-import org.ros.message.Time;
-import std_msgs.Header;
 
-import javax.vecmath.Vector3d;
 import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
+
+import org.ros.message.Time;
+
+import std_msgs.Header;
 
 
 public class RosPoseStampedPublisher extends RosTopicPublisher<PoseStamped>

@@ -3,7 +3,6 @@ package us.ihmc.atlas.sensors;
 import java.net.URI;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.atlas.ros.AtlasRosPublisher;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
@@ -18,6 +17,8 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosNativeNetworkProce
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
+import us.ihmc.darpaRoboticsChallenge.ros.RosRobotJointStatePublisher;
+import us.ihmc.darpaRoboticsChallenge.ros.RosRobotPosePublisher;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.darpaRoboticsChallenge.sensors.multisense.MultiSenseSensorManager;
 import us.ihmc.utilities.net.LocalObjectCommunicator;
@@ -85,7 +86,12 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       new FishEyeDataReceiver(robotPoseBuffer, sensorInformation.getPrimaryCameraParamaters().getVideoSettings(), rosMainNode, networkingManager,
             DRCSensorParameters.DEFAULT_FIELD_OF_VIEW, ppsTimestampOffsetProvider);
     
-      new AtlasRosPublisher(objectCommunicator, rosMainNode, sdfFullRobotModel, ppsTimestampOffsetProvider, robotPoseBuffer);
+      if (DRCConfigParameters.SEND_ROBOT_DATA_TO_ROS)
+      {
+         new RosRobotPosePublisher(objectCommunicator, rosMainNode, robotPoseBuffer, "atlas");
+         new RosRobotJointStatePublisher(objectCommunicator, rosMainNode, jointMap.getOrderedJointNames());
+      }
+      
       ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
       rosMainNode.execute();     
      

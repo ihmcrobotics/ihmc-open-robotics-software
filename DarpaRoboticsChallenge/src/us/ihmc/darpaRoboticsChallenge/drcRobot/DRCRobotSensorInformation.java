@@ -25,4 +25,8 @@ public interface DRCRobotSensorInformation
    public abstract SideDependentList<String> getWristForceSensorNames();
 
    public abstract String getPrimaryBodyImu();
+
+   public abstract String getLidarBaseFrame();
+
+   public abstract String getLidarEndFrame();
 }
