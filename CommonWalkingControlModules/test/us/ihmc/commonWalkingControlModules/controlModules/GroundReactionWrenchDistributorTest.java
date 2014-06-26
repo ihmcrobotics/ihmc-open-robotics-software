@@ -526,7 +526,7 @@ public class GroundReactionWrenchDistributorTest
       PoseReferenceFrame afterJointFrame = new PoseReferenceFrame(name + "AfterJointFrame", comFrame);
       FramePose afterJointPose = new FramePose(ReferenceFrame.getWorldFrame(), afterJointInWorld);
       afterJointPose.changeFrame(comFrame);
-      afterJointFrame.updatePose(afterJointPose);
+      afterJointFrame.setPoseAndUpdate(afterJointPose);
       poses[index++]=afterJointPose;
 
       FramePose cylinderPose = new FramePose(ReferenceFrame.getWorldFrame(), cylinderInWorld);
@@ -946,7 +946,7 @@ public class GroundReactionWrenchDistributorTest
    {
       PoseReferenceFrame centerOfMassFrame = new PoseReferenceFrame("com", ReferenceFrame.getWorldFrame());
       FramePose centerOfMassPose = new FramePose(ReferenceFrame.getWorldFrame(), centerOfMassPosition, new Quat4d());
-      centerOfMassFrame.updatePose(centerOfMassPose);
+      centerOfMassFrame.setPoseAndUpdate(centerOfMassPose);
       centerOfMassFrame.update();
 
       return centerOfMassFrame;
@@ -1342,7 +1342,7 @@ public class GroundReactionWrenchDistributorTest
       Point2d pointInsideContact = generateRandomPointInsideContact(random, contactState);
       Point3d centerOfPressurePosition = new Point3d(pointInsideContact.getX(), pointInsideContact.getY(), 0.0);
       FramePose framePose = new FramePose(contactPlaneFrame, centerOfPressurePosition, new Quat4d());
-      centerOfPressureFrame.updatePose(framePose);
+      centerOfPressureFrame.setPoseAndUpdate(framePose);
       centerOfPressureFrame.update();
 
       return centerOfPressureFrame;

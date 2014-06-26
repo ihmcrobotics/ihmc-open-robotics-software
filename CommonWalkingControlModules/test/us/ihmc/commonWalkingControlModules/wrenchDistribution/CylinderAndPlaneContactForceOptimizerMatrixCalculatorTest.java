@@ -199,7 +199,7 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculatorTest
 
       planeContactModel.setup(0.3, contactPoints, normalContactVector, footFrame, Double.NaN, 0.15);    // TODO: don't use NaN. Currently not being used for anything though
 
-      footFrame.updatePose(pose);
+      footFrame.setPoseAndUpdate(pose);
    }
 
    public void addLeftHandAtCOMOrigin(List<EndEffector> endEffectorsWithDefinedContactModels)
@@ -238,7 +238,7 @@ public class CylinderAndPlaneContactForceOptimizerMatrixCalculatorTest
       endEffectorsWithDefinedContactModels.add(leftHand);
 
       cylinderCon.setup(mu, cylinderRadius, cylinderHalfHandWidth, cylinderTensileGripStrength, gripWeaknessFactor, handFrame, Double.NaN, Double.NaN);    // TODO: don't use NaN. Currently not being used for anything though
-      handFrame.updatePose(pose);
+      handFrame.setPoseAndUpdate(pose);
    }
 
    public void runSolver(List<EndEffector> endEffectorsWithDefinedContactModels, List<EndEffectorOutput> endEffectorsWithAssignedForces,

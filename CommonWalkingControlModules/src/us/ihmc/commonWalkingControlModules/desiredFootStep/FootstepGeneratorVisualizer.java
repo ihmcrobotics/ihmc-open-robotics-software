@@ -192,7 +192,7 @@ public class FootstepGeneratorVisualizer
    public static FramePose setupStanceFoot(SideDependentList<PoseReferenceFrame> soleFrames, SideDependentList<SixDoFJoint> sixDoFJoints)
    {
       FramePose startStanceFootPose = new FramePose(worldFrame, new Point3d(0.0, 0.2, 0.0), new Quat4d());
-      soleFrames.get(RobotSide.LEFT).updatePose(startStanceFootPose);
+      soleFrames.get(RobotSide.LEFT).setPoseAndUpdate(startStanceFootPose);
       soleFrames.get(RobotSide.LEFT).update();
       Point3d stanceAnklePosition = new Point3d();
       startStanceFootPose.getPosition(stanceAnklePosition);
@@ -205,7 +205,7 @@ public class FootstepGeneratorVisualizer
    public static FramePose setupSwingFoot(SideDependentList<PoseReferenceFrame> soleFrames, SideDependentList<SixDoFJoint> sixDoFJoints)
    {
       FramePose startSwingFootPose = new FramePose(worldFrame, new Point3d(0.0, -0.2, 0.0), new Quat4d());
-      soleFrames.get(RobotSide.RIGHT).updatePose(startSwingFootPose);
+      soleFrames.get(RobotSide.RIGHT).setPoseAndUpdate(startSwingFootPose);
       soleFrames.get(RobotSide.RIGHT).update();
       Point3d swingAnklePosition = new Point3d();
       startSwingFootPose.getPosition(swingAnklePosition);
