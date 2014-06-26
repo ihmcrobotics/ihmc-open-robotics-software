@@ -42,7 +42,7 @@ public class SimulationRewindabilityVerifierTest
       ArrayList<String> exceptions = new ArrayList<String>();
       SimulationRewindabilityVerifier verifier = new SimulationRewindabilityVerifier(scs1, scs2, exceptions);
       
-      int numTests = 10000;
+      int numTests = 5000;
       double maxDifferenceAllowed = 1e-12;
       
       ArrayList<VariableDifference> variableDifferences = verifier.checkRewindabilityWithSimpleMethod(numTests, maxDifferenceAllowed);
@@ -62,7 +62,7 @@ public class SimulationRewindabilityVerifierTest
       ArrayList<String> exceptions = new ArrayList<String>();
       SimulationRewindabilityVerifier verifier = new SimulationRewindabilityVerifier(scs1, scs2, exceptions);
       
-      int numTests = 10000;
+      int numTests = 5000;
       double maxDifferenceAllowed = 1e-12;
       
       ArrayList<VariableDifference> variableDifferences = verifier.checkRewindabilityWithSimpleMethod(numTests, maxDifferenceAllowed);
@@ -88,8 +88,8 @@ public class SimulationRewindabilityVerifierTest
       ArrayList<String> exceptions = new ArrayList<String>();
       SimulationRewindabilityVerifier verifier = new SimulationRewindabilityVerifier(scs1, scs2, exceptions);
       
-      int numTests = 10000;
-      int numTicksAhead = 1000;
+      int numTests = 4000;
+      int numTicksAhead = 800;
       
       double maxDifferenceAllowed = 1e-12;
       
