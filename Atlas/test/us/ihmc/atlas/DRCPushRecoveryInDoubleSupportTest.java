@@ -31,10 +31,10 @@ import com.yobotics.simulationconstructionset.util.FlatGroundProfile;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
-public abstract class DRCPushInDoubleSupportTest implements MultiRobotTestInterface
+public abstract class DRCPushRecoveryInDoubleSupportTest implements MultiRobotTestInterface
 {
-   private final static boolean SHOW_GUI = false;
-   private final static boolean VISUALIZE_FORCE = false;
+   private final static boolean SHOW_GUI = true;
+   private final static boolean VISUALIZE_FORCE = true;
 
    private DRCPushRobotController pushRobotController;
    private BlockingSimulationRunner blockingSimulationRunner;
