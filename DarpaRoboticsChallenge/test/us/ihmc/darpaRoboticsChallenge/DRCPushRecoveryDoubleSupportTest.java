@@ -1,4 +1,4 @@
-package us.ihmc.atlas;
+package us.ihmc.darpaRoboticsChallenge;
 
 import javax.vecmath.Vector3d;
 
@@ -13,7 +13,6 @@ import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTrack;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCSimulationFactory;
-import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCPushRobotController;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
@@ -31,7 +30,7 @@ import com.yobotics.simulationconstructionset.util.FlatGroundProfile;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
-public abstract class DRCPushRecoveryInDoubleSupportTest implements MultiRobotTestInterface
+public abstract class DRCPushRecoveryDoubleSupportTest implements MultiRobotTestInterface
 {
    private final static boolean SHOW_GUI = false;
    private final static boolean VISUALIZE_FORCE = false;
