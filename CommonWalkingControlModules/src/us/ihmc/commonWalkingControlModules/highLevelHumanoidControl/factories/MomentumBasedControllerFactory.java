@@ -245,7 +245,7 @@ public class MomentumBasedControllerFactory
 
       WalkingHighLevelHumanoidController walkingBehavior = new WalkingHighLevelHumanoidController(variousWalkingProviders, variousWalkingManagers,
             centerOfMassHeightTrajectoryGenerator, transferTimeCalculationProvider, swingTimeCalculationProvider, walkingControllerParameters, iCPBasedLinearMomentumRateOfChangeControlModule,
-            instantaneousCapturePointPlanner, icpAndMomentumBasedController, momentumBasedController, null);
+            instantaneousCapturePointPlanner, icpAndMomentumBasedController, momentumBasedController);
       highLevelBehaviors.add(walkingBehavior);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
