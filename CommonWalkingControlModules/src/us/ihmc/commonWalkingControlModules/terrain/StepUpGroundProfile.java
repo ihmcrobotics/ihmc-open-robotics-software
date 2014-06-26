@@ -10,8 +10,6 @@ import us.ihmc.graphics3DAdapter.GroundProfile;
 public class StepUpGroundProfile implements GroundProfile
 {
    private final double xMin, xMax, yMin, yMax;
-   private final double
-      xTiles = 1.0, yTiles = 1.0;
 
    private final double groundXStep;
    private final double groundZStep;
@@ -49,11 +47,6 @@ public class StepUpGroundProfile implements GroundProfile
       return xMin;
    }
 
-   public double getXTiles()
-   {
-      return xTiles;
-   }
-
    public double getYMax()
    {
       return yMax;
@@ -62,11 +55,6 @@ public class StepUpGroundProfile implements GroundProfile
    public double getYMin()
    {
       return yMin;
-   }
-
-   public double getYTiles()
-   {
-      return yTiles;
    }
 
    public double heightAt(double x, double y, double z)
