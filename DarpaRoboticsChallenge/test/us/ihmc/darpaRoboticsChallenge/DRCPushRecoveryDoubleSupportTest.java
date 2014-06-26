@@ -32,7 +32,8 @@ import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimu
 
 public abstract class DRCPushRecoveryDoubleSupportTest implements MultiRobotTestInterface
 {
-   private final static boolean SHOW_GUI = false;
+   private final static boolean KEEP_SCS_UP = false;
+   private final static boolean SHOW_GUI = true;
    private final static boolean VISUALIZE_FORCE = false;
 
    private DRCPushRobotController pushRobotController;
@@ -49,7 +50,7 @@ public abstract class DRCPushRecoveryDoubleSupportTest implements MultiRobotTest
    @After
    public void destroySimulationAndRecycleMemory()
    {
-      if (SHOW_GUI)
+      if (SHOW_GUI && KEEP_SCS_UP)
       {
          ThreadTools.sleepForever();
       }
