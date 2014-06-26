@@ -152,7 +152,7 @@ public class CommonCouplingRegistry implements CouplingRegistry
       this.desiredFootstep = desiredFootstep;
       if (desiredFootstep != null)
       {
-         footstepFrame.updatePose(desiredFootstep.getPoseCopy().changeFrameCopy(footstepFrame.getParent()));
+         footstepFrame.setPoseAndUpdate(desiredFootstep.getPoseCopy().changeFrameCopy(footstepFrame.getParent()));
          footstepFrame.update();
          if(footstepFrameGraphic != null)
          {

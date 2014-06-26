@@ -269,7 +269,7 @@ public class MassMatrixEstimatingToolRigidBody
       
       
       objectCoM.changeFrame(elevatorFrame);
-      toolFrame.updatePosition(objectCoM);
+      toolFrame.setPositionAndUpdate(objectCoM);
       
       
       FramePoint toolFramePoint = new FramePoint(toolFrame);

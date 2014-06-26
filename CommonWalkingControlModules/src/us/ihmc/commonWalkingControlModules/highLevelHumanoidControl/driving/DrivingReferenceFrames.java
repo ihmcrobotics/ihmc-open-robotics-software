@@ -31,7 +31,7 @@ public class DrivingReferenceFrames
 
    public void setVehicleFramePoseInWorld(FramePose pose)
    {
-      vehicleFrame.updatePose(pose);
+      vehicleFrame.setPoseAndUpdate(pose);
    }
 
    public ReferenceFrame getVehicleFrame()

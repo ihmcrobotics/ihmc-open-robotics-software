@@ -129,7 +129,7 @@ public class HandControlState<T extends Enum<T>> extends ToroidManipulationState
          handAcceleration.changeBodyFrameNoRelativeAcceleration(handFrame);
          handAcceleration.changeFrameNoRelativeMotion(handFrame);
 
-         desiredPositionFrames.get(robotSide).updatePose(desiredPosition, desiredOrientation);
+         desiredPositionFrames.get(robotSide).setPoseAndUpdate(desiredPosition, desiredOrientation);
          desiredPositionFrames.get(robotSide).update();
       }
 

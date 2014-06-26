@@ -193,7 +193,7 @@ public class CenterOfPressureResolverTest
       Transform3D transform3D = new Transform3D(rotationFromNormal, new Vector3d(planeReferencePoint), 1.0);
       FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame(), transform3D);
       
-      planeFrame.updatePose(framePose);
+      planeFrame.setPoseAndUpdate(framePose);
       planeFrame.update();
       return planeFrame;
    }
@@ -206,7 +206,7 @@ public class CenterOfPressureResolverTest
       transform3D.setTranslation(new Vector3d(frameCenterPoint));
       
       FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame(), transform3D);
-      translatedZUpFrame.updatePose(framePose);
+      translatedZUpFrame.setPoseAndUpdate(framePose);
       translatedZUpFrame.update();
       return translatedZUpFrame;
    }

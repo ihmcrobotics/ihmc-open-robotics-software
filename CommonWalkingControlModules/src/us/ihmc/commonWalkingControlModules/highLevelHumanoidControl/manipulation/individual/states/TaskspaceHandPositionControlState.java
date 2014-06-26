@@ -112,7 +112,7 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
 
    private void updateVisualizers()
    {
-      desiredPositionFrame.updatePose(desiredPosition, desiredOrientation);
+      desiredPositionFrame.setPoseAndUpdate(desiredPosition, desiredOrientation);
       desiredPositionFrame.update();
 
       for (DynamicGraphicReferenceFrame dynamicGraphicReferenceFrame : dynamicGraphicReferenceFrames)
