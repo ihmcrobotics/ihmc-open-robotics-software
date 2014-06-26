@@ -89,7 +89,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       if (DRCConfigParameters.SEND_ROBOT_DATA_TO_ROS)
       {
          new RosRobotPosePublisher(objectCommunicator, rosMainNode, robotPoseBuffer, "atlas");
-         new RosRobotJointStatePublisher(objectCommunicator, rosMainNode, jointMap.getOrderedJointNames());
+         new RosRobotJointStatePublisher(objectCommunicator, rosMainNode, jointMap.getOrderedJointNames(),"atlas");
       }
       
       ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);

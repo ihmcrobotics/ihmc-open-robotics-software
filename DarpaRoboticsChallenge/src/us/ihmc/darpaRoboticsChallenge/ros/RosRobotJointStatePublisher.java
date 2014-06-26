@@ -18,7 +18,7 @@ public class RosRobotJointStatePublisher implements ObjectConsumer<DRCJointConfi
    private final ArrayList<String> nameList = new ArrayList<String>();
    private final RosMainNode rosMainNode;
    
-   public RosRobotJointStatePublisher(ObjectCommunicator fieldComputer,final RosMainNode rosMainNode, String[] orderedJointNames )
+   public RosRobotJointStatePublisher(ObjectCommunicator fieldComputer,final RosMainNode rosMainNode, String[] orderedJointNames, String rosNameSpace )
    {
       this.rosMainNode = rosMainNode;
       this.wallTime = new WallTimeProvider();
@@ -28,7 +28,7 @@ public class RosRobotJointStatePublisher implements ObjectConsumer<DRCJointConfi
       {
          nameList.add(orderedJointNames[i]);
       }
-      
+      rosMainNode.attachPublisher("/" + rosNameSpace + "/joint_states", jointStatePublisher);
       fieldComputer.attachListener(DRCJointConfigurationData.class, this);
    }
    
