@@ -203,6 +203,14 @@ public class DRCSimulationTestHelper
          stringsToIgnore.add("nano");
          stringsToIgnore.add("milli");
          stringsToIgnore.add("Timer");
+         stringsToIgnore.add("startTime");
+         stringsToIgnore.add("actualEstimatorDT");
+         stringsToIgnore.add("nextExecutionTime");
+         stringsToIgnore.add("totalDelay");
+         stringsToIgnore.add("lastEstimatorClockStartTime");
+         stringsToIgnore.add("lastControllerClockTime");
+         stringsToIgnore.add("controllerStartTime");
+         stringsToIgnore.add("actualControlDT");
 
          boolean writeNewBaseFile = nothingChangedVerifier.getWriteNewBaseFile();
 
