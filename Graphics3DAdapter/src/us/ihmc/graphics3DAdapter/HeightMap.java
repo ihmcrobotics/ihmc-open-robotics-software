@@ -8,9 +8,5 @@ public interface HeightMap
    
    public abstract double getYMin();
    public abstract double getYMax();
-   
-   public abstract double getXTiles();
-   public abstract double getYTiles();
-   
-   
+    
 }
