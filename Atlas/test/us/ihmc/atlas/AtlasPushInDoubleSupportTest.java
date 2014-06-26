@@ -4,7 +4,7 @@ import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 
 
-public class AtlasPushInDoubleSupportTest extends DRCPushInDoubleSupportTest {
+public class AtlasPushInDoubleSupportTest extends DRCPushRecoveryInDoubleSupportTest {
 
 	@Override
 	public DRCRobotModel getRobotModel() {
