@@ -108,7 +108,8 @@ public class ManipulableToroid
       Matrix3d rotationMatrix = new Matrix3d();
 
       framePose.changeFrame(toroidBeforeJointFrame.getParent());
-      FramePoint origin = copy.getPositionCopy();
+      FramePoint origin = new FramePoint();
+      copy.getPosition(origin);
       FrameVector zAxis = new FrameVector(copy.getReferenceFrame());
       framePose.getOrientation(rotationMatrix);
       rotationMatrix.getColumn(2, zAxis.getVector());

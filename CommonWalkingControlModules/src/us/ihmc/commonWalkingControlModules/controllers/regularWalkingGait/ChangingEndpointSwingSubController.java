@@ -304,7 +304,8 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
       // Get the desired position of the swing foot
       Footstep desiredFootstep = couplingRegistry.getDesiredFootstep();
-      FramePoint endPoint = new FramePoint(desiredFootstep.getPoseCopy().getPositionCopy());
+      FramePoint endPoint = new FramePoint();
+      desiredFootstep.getPosition(endPoint);
 
       // Get the initial velocity of the swing foot
       FrameVector initialSwingVelocityVector = ankleVelocityCalculators.get(swingSide).getAnkleVelocityInWorldFrame();
@@ -489,8 +490,9 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       Footstep desiredFootstep = couplingRegistry.getDesiredFootstep();
       
       FramePose desiredFootstepPose = desiredFootstep.getPoseCopy();
-      FramePoint finalDesiredSwingFootPosition =
-         desiredFootstepPose.getPositionCopy().changeFrameCopy(this.finalDesiredSwingFootPosition.getReferenceFrame());
+      FramePoint finalDesiredSwingFootPosition = new FramePoint();
+      desiredFootstepPose.getPosition(finalDesiredSwingFootPosition);
+      finalDesiredSwingFootPosition.changeFrame(this.finalDesiredSwingFootPosition.getReferenceFrame());
       this.finalDesiredSwingFootPosition.set(finalDesiredSwingFootPosition);
       
       this.finalDesiredFootOrientationInWorldFrame.set(desiredFootstep.getOrientationInFrame(worldFrame));

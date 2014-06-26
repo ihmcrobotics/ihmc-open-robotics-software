@@ -82,12 +82,14 @@ public class EquivalentConstantCoPDesiredCoPControlModule implements DesiredCoPC
       lastTickSingleSupport.set(true);
 
       FrameConvexPolygon2d supportPolygon = couplingRegistry.getBipedSupportPolygons().getFootPolygonInAnkleZUp(supportLeg);
-      FramePoint2d desiredFinalCapturePoint = couplingRegistry.getDesiredFootstep().getPoseCopy().getPositionCopy().toFramePoint2d();
+      FramePoint desiredFinalCapturePoint = new FramePoint();
+      couplingRegistry.getDesiredFootstep().getPosition(desiredFinalCapturePoint);
+      FramePoint2d desiredFinalCapturePoint2d = desiredFinalCapturePoint.toFramePoint2d();
 //      double finalTime = couplingRegistry.getEstimatedSwingTimeRemaining() + 0.2;    // FIXME: hack
       double finalTime = Math.max(couplingRegistry.getEstimatedSwingTimeRemaining(), 50e-3);    // FIXME: hack
       double comHeight = computeCoMHeightUsingOneFoot(supportLeg);
 
-      computeDesiredCoP(supportPolygon, desiredFinalCapturePoint, finalTime, comHeight);
+      computeDesiredCoP(supportPolygon, desiredFinalCapturePoint2d, finalTime, comHeight);
 
       return desiredCenterOfPressure.getFramePoint2dCopy();
    }

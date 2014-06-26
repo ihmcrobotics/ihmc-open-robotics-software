@@ -272,7 +272,9 @@ public class OptimalSwingSubController implements SwingSubController
    {
       FramePose desiredFootstepPose = couplingRegistry.getDesiredFootstep().getPoseCopy();
 
-      FramePoint desiredSwingFootPosition = desiredFootstepPose.getPositionCopy().changeFrameCopy(desiredPositions.get(swingLeg).getReferenceFrame());
+      FramePoint desiredSwingFootPosition = new FramePoint();
+      desiredFootstepPose.getPosition(desiredSwingFootPosition);
+      desiredSwingFootPosition.changeFrame(desiredPositions.get(swingLeg).getReferenceFrame());
       FrameOrientation desiredSwingFootOrientation = desiredFootstepPose.getOrientationCopy().changeFrameCopy(desiredOrientations.get(swingLeg).getReferenceFrame());
 
       desiredPositions.get(swingLeg).set(desiredSwingFootPosition);
@@ -566,7 +568,8 @@ public class OptimalSwingSubController implements SwingSubController
 
       FramePose desiredFootstepPose = desiredFootstep.getPoseCopy();
 
-      FramePoint endPoint = new FramePoint(desiredFootstepPose.getPositionCopy());
+      FramePoint endPoint = new FramePoint();
+      desiredFootstepPose.getPosition(endPoint);
       endPoint.changeFrame(desiredPositions.get(swingLeg).getReferenceFrame());
       FrameOrientation endOrientation = new FrameOrientation(desiredFootstepPose.getOrientationCopy());
       endOrientation.changeFrame(desiredOrientations.get(swingLeg).getReferenceFrame());
