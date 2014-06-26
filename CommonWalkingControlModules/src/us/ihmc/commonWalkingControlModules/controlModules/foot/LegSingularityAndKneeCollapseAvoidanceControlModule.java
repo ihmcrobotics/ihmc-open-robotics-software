@@ -228,7 +228,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          private final FramePoint hipPitchPosition = new FramePoint();
 
          @Override
-         public void updateTransformToParent(Transform3D transformToParent)
+         protected void updateTransformToParent(Transform3D transformToParent)
          {
             tempPoint.setToZero(frameBeforeHipPitchJoint);
             tempPoint.changeFrame(endEffectorFrame);
@@ -254,7 +254,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          private final FramePoint anklePitchPosition = new FramePoint();
 
          @Override
-         public void updateTransformToParent(Transform3D transformToParent)
+         protected void updateTransformToParent(Transform3D transformToParent)
          {
             tempPoint.setToZero(frameBeforeHipPitchJoint);
             tempPoint.changeFrame(endEffectorFrame);

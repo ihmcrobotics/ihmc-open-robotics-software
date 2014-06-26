@@ -146,7 +146,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
             private static final long serialVersionUID = -1926704435608610401L;
             private final Vector3d copOffset = new Vector3d();
             @Override
-            public void updateTransformToParent(Transform3D transformToParent)
+            protected void updateTransformToParent(Transform3D transformToParent)
             {
                transformToParent.setIdentity();
                copFilteredInFootFrame.get(copOffset);

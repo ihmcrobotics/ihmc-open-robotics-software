@@ -160,7 +160,7 @@ public class CaptureRegionCalculatorTest
          super(name, ReferenceFrame.getWorldFrame());
       }
 
-      public void updateTransformToParent(Transform3D transformToParent)
+      protected void updateTransformToParent(Transform3D transformToParent)
       {
          transformToParent.setIdentity();
          transformToParent.setTranslation(offset);

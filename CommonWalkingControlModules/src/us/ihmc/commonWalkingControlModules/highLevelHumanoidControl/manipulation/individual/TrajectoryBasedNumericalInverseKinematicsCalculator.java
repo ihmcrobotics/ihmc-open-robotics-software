@@ -134,7 +134,7 @@ public class TrajectoryBasedNumericalInverseKinematicsCalculator
          private static final long serialVersionUID = -2964609854840695124L;
 
          @Override
-         public void updateTransformToParent(Transform3D transformToParent)
+         protected void updateTransformToParent(Transform3D transformToParent)
          {
             frameToControlPoseOf.getTransformToDesiredFrame(transformToParent, endEffectorFrame);
          }

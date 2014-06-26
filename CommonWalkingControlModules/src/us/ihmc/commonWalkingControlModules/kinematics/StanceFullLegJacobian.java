@@ -238,7 +238,7 @@ public class StanceFullLegJacobian
       }
 
       @Override
-      public void updateTransformToParent(Transform3D transformToParent)
+      protected void updateTransformToParent(Transform3D transformToParent)
       {
          transformToParent.setTranslation(new Vector3d(vtpX, 0.0, -footHeight));
       }
@@ -262,7 +262,7 @@ public class StanceFullLegJacobian
       }
 
       @Override
-      public void updateTransformToParent(Transform3D transformToParent)
+      protected void updateTransformToParent(Transform3D transformToParent)
       {
          transformToParent.setTranslation(new Vector3d(0.0, vtpY, 0.0));
       }

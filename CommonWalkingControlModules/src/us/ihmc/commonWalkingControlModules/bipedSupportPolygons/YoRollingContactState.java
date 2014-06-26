@@ -45,7 +45,7 @@ public class YoRollingContactState implements PlaneContactState, ModifiableConta
          private static final long serialVersionUID = 6993243554111815201L;
 
          @Override
-         public void updateTransformToParent(Transform3D transformToParent)
+         protected void updateTransformToParent(Transform3D transformToParent)
          {
             transformToParent.set(transformFromContactFrameToBodyFrame);
          }
