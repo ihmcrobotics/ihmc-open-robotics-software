@@ -130,7 +130,7 @@ public class DataFileWriterTest
       DataBuffer readBackBuffer = new DataBuffer(dataBuffer.getBufferSize());
       YoVariableRegistry readBackRegistry = new YoVariableRegistry("rootRegistry");
 
-      VarList newVars = new VarList("newVars");
+      YoVariableList newVars = new YoVariableList("newVars");
 
       dataFileReader.readData(newVars, readBackRegistry, readBackBuffer);
 
@@ -280,14 +280,14 @@ public class DataFileWriterTest
       int numberOfVariables = 2000;    // 12000 for when testing long files for efficiency;
       Random random = new Random(seed);
       ArrayList<YoVariable> variables = createALargeNumberOfVariables(random, numberOfVariables);
-      VarList originalVarList = new VarList("originalVarList");
+      YoVariableList originalVarList = new YoVariableList("originalVarList");
       originalVarList.addVariables(variables);
 
       writeALongStateFile(fileOne, variables);
 
       DataFileReader dataFileReader = new DataFileReader(fileOne);
 
-      VarList newVarList = new VarList("newVarList");
+      YoVariableList newVarList = new YoVariableList("newVarList");
       boolean createMissingVariables = true;
       boolean printErrorForMissingVariables = false;
       YoVariableRegistry registry = new YoVariableRegistry("root");
