@@ -122,8 +122,8 @@ public class InefficientPushrodTransmissionJacobian
       transformFromActuatorSlide6FrameToBoneFrame.rotY(-actuatorSlider6PitchRotation);
       transformFromActuatorSlide6FrameToBoneFrame.setTranslation(new Vector3d(rod6PointInBoneFrame));
 
-      actuator5SlideFrame.updateTransform(transformFromActuatorSlide5FrameToBoneFrame);
-      actuator6SlideFrame.updateTransform(transformFromActuatorSlide6FrameToBoneFrame);
+      actuator5SlideFrame.setTransformAndUpdate(transformFromActuatorSlide5FrameToBoneFrame);
+      actuator6SlideFrame.setTransformAndUpdate(transformFromActuatorSlide6FrameToBoneFrame);
       
       beforeBottomJointFrame.updateTranslation(new FrameVector(afterTopJointFrame, 0.0, 0.0, -heightOfTopAxisAboveBottomAxis));
 
@@ -252,8 +252,8 @@ public class InefficientPushrodTransmissionJacobian
       computeRotationTransform(topJointTransform3D, topJointAngle, topJointAxis);
       computeRotationTransform(bottomJointTransform3D, bottomJointAngle, bottomJointAxis);
 
-      afterTopJointFrame.updateTransform(topJointTransform3D);
-      bottomFrame.updateTransform(bottomJointTransform3D);
+      afterTopJointFrame.setTransformAndUpdate(topJointTransform3D);
+      bottomFrame.setTransformAndUpdate(bottomJointTransform3D);
 
       b5InBottomFrame.setIncludingFrame(bottomFrame, rodBottom5);   
       b6InBottomFrame.setIncludingFrame(bottomFrame, rodBottom6);   
