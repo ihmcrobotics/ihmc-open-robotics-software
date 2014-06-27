@@ -25,6 +25,7 @@ import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import com.yobotics.simulationconstructionset.util.ground.CylinderTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
+import com.yobotics.simulationconstructionset.util.ground.RotatableBoxTerrainObject3D;
 import com.yobotics.simulationconstructionset.util.ground.RotatableCinderBlockTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject3D;
@@ -77,18 +78,12 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
    {
       combinedTerrainObject = new CombinedTerrainObject("Rocks with a wall");
       combinedTerrainObject3D = new CombinedTerrainObject3D("DRCDemo01NavigationEnvironment");
-
-//      Box3d box = new Box3d(1.0, 0.5, 0.1);
-//      box.setTranslation(new Vector3d(0.0, 3.0, 0.0));
-//      box.setYawPitchRoll(0.0, 0.0, 0.5);
-//      combinedTerrainObject3D.addRotatableBox(box, YoAppearance.Red());
       
       // addCalibrationCube();
       combinedTerrainObject3D.addTerrainObject(setUpPath1Rocks3D("Path1 Rocks"));
-//      combinedTerrainObject.addTerrainObject(setUpPath1Rocks("Path1 Rocks"));
 
       // setUpPath2SmallCones(combinedTerrainObject);
-      combinedTerrainObject.addTerrainObject(setUpPath3RampsWithLargeBlocks("Path3 Ramps With Large Blocks"));
+      combinedTerrainObject3D.addTerrainObject(setUpPath3RampsWithLargeBlocks3D("Path3 Ramps With Large Blocks"));
       combinedTerrainObject.addTerrainObject(setUpPath4DRCTrialsTrainingWalkingCourse("Path 4 Walking Course"));
 
       // combinedTerrainObject.addTerrainObject(setUpPath4DRCTrialsTrainingWalkingCourseDifficult());
@@ -308,11 +303,6 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       
       return combinedTerrainObject;
    }
-
-   private TerrainObject setUpPath1Rocks(String name)
-   {
-      return addRocks(name);
-   }
    
    private TerrainObject3D setUpPath1Rocks3D(String name)
    {
@@ -349,9 +339,9 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
    }
 
-   private static CombinedTerrainObject setUpPath3RampsWithLargeBlocks(String name)
+   private static CombinedTerrainObject3D setUpPath3RampsWithLargeBlocks3D(String name)
    {
-      CombinedTerrainObject combinedTerrainObject = new CombinedTerrainObject(name);
+      CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D(name);
 
       AppearanceDefinition color = YoAppearance.DarkGray();
 
@@ -359,20 +349,20 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
       float rampHeight = 0.625f;
 
-      setUpRamp(combinedTerrainObject, 5.0f, 0.0f, 2.0f, 3.0f, rampHeight, color);
-      setUpWall(combinedTerrainObject, new double[] {7.0f, 0.0f}, .5f, 1.0f, rampHeight, 0, color);
+      setUpRamp3D(combinedTerrainObject, 5.0f, 0.0f, 2.0f, 3.0f, rampHeight, color);
+      setUpWall3D(combinedTerrainObject, new double[] {7.0f, 0.0f}, .5f, 1.0f, rampHeight, 0, color);
 
-      setUpWall(combinedTerrainObject, new double[] {7.75f, 0.0f}, 2f, .5f, rampHeight, 0, color);
-      setUpWall(combinedTerrainObject, new double[] {8.5f, 0f}, .5f, .75f, rampHeight - 0.1, 0, color);
+      setUpWall3D(combinedTerrainObject, new double[] {7.75f, 0.0f}, 2f, .5f, rampHeight, 0, color);
+      setUpWall3D(combinedTerrainObject, new double[] {8.5f, 0f}, .5f, .75f, rampHeight - 0.1, 0, color);
 
-      setUpWall(combinedTerrainObject, new double[] {8.5f, .75f}, .5f, .75f, rampHeight, 0, color);
+      setUpWall3D(combinedTerrainObject, new double[] {8.5f, .75f}, .5f, .75f, rampHeight, 0, color);
 
-      setUpWall(combinedTerrainObject, new double[] {8.5f, -0.66f}, .25f, 1f, rampHeight, 0, color);
+      setUpWall3D(combinedTerrainObject, new double[] {8.5f, -0.66f}, .25f, 1f, rampHeight, 0, color);
 
-      setUpWall(combinedTerrainObject, new double[] {8.5f, -1.045f}, .25f, 1f, rampHeight, 0, color);
+      setUpWall3D(combinedTerrainObject, new double[] {8.5f, -1.045f}, .25f, 1f, rampHeight, 0, color);
 
-      setUpWall(combinedTerrainObject, new double[] {9.25f, 0f}, 2.0f, 0.5f, rampHeight, 0, color);
-      setUpRamp(combinedTerrainObject, 11f, 0f, 2.0f, -3.0f, rampHeight, color);
+      setUpWall3D(combinedTerrainObject, new double[] {9.25f, 0f}, 2.0f, 0.5f, rampHeight, 0, color);
+      setUpRamp3D(combinedTerrainObject, 11f, 0f, 2.0f, -3.0f, rampHeight, color);
 
       // Do this for a long ramp for testing:
       // rampHeight = 1.0f;
@@ -381,6 +371,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       return combinedTerrainObject;
    }
 
+   
    private void testRotatableRampsSetupForGraphicsAndCollision(CombinedTerrainObject combinedTerrainObject)
    {
       double courseAngleDeg = 45.0;
@@ -1345,37 +1336,6 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       return combinedTerrainObject3D;
    }
    
-   private CombinedTerrainObject addRocks(String name)
-   {
-      CombinedTerrainObject combinedTerrainObject = new CombinedTerrainObject(name);
-
-      for (int i = 0; i < NUM_ROCKS; i++)
-      {
-         double centroidHeight = random.nextDouble() * MAX_ROCK_CENTROID_HEIGHT;
-         Vector3d normal = generateRandomUpFacingNormal();
-
-         double[] approximateCentroid = generateRandomApproximateCentroid(i);
-
-         double[][] vertices = generateRandomRockVertices(approximateCentroid[0], approximateCentroid[1]);
-
-         addRock(combinedTerrainObject, normal, centroidHeight, vertices);
-      }
-
-      Graphics3DObject linkGraphics = new Graphics3DObject();
-
-//    linkGraphics.rotate(Math.PI / 2, Axis.Y);
-//    linkGraphics.rotate(Math.toRadians(-courseAngleDeg), Axis.X);
-      linkGraphics.translate(new Vector3d(2, 2, 0));
-
-
-      linkGraphics.addModelFile(UIResourceGetter.getResource("models/QAPlanGrid.3DS"));
-
-
-      combinedTerrainObject.addStaticLinkGraphics(linkGraphics);
-
-      return combinedTerrainObject;
-   }
-
    private static double[] rotateAroundOrigin(double[] xy, double angdeg)
    {
       double x = xy[0];
@@ -1468,6 +1428,19 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       combinedTerrainObject.addTerrainObject(rock);
    }
 
+   private static void setUpWall3D(CombinedTerrainObject3D combinedTerrainObject, double[] xy, double width, double length, double height, double yawDegrees,
+         AppearanceDefinition app)
+   {
+      double x = xy[0];
+      double y = xy[1];
+      Transform3D location = new Transform3D();
+      location.rotZ(Math.toRadians(yawDegrees));
+
+      location.setTranslation(new Vector3d(x, y, height / 2));
+      RotatableBoxTerrainObject3D newBox = new RotatableBoxTerrainObject3D(new Box3d(location, length, width, height), app);
+      combinedTerrainObject.addTerrainObject(newBox);
+   }
+
    private static void setUpWall(CombinedTerrainObject combinedTerrainObject, double[] xy, double width, double length, double height, double yawDegrees,
                                  AppearanceDefinition app)
    {
@@ -1502,6 +1475,12 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
    private static void setUpRamp(CombinedTerrainObject combinedTerrainObject, double x, double y, double width, double length, double height,
                                  AppearanceDefinition app)
+   {
+      combinedTerrainObject.addRamp(x - length / 2.0, y - width / 2.0, x + length / 2.0, y + width / 2.0, height, app);
+   }
+   
+   private static void setUpRamp3D(CombinedTerrainObject3D combinedTerrainObject, double x, double y, double width, double length, double height,
+         AppearanceDefinition app)
    {
       combinedTerrainObject.addRamp(x - length / 2.0, y - width / 2.0, x + length / 2.0, y + width / 2.0, height, app);
    }
