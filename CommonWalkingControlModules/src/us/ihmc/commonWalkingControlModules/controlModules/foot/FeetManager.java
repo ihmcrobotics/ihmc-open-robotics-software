@@ -212,9 +212,9 @@ public class FeetManager
       return footControlModules.get(robotSide).getCurrentConstraintType();
    }
 
-   public void replanSwingTrajectory(RobotSide swingSide, Footstep footstep, double swingTimeRemaining)
+   public void replanSwingTrajectory(RobotSide swingSide, Footstep footstep, double swingTimeRemaining, boolean useLowHeightTrajectory)
    {
-      footControlModules.get(swingSide).replanTrajectory(footstep, swingTimeRemaining);
+      footControlModules.get(swingSide).replanTrajectory(footstep, swingTimeRemaining,useLowHeightTrajectory);
    }
 
    public boolean isInSingularityNeighborhood(RobotSide robotSide)

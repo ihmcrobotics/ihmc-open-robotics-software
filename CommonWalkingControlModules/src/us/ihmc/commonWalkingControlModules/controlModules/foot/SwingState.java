@@ -143,7 +143,7 @@ public class SwingState extends AbstractUnconstrainedState
    private final FramePose newFootstepPose = new FramePose();
    private final FramePoint oldFootstepPosition = new FramePoint();
 
-   public void setFootstep(Footstep footstep, TrajectoryParameters trajectoryParameters)
+   public void setFootstep(Footstep footstep, TrajectoryParameters trajectoryParameters, boolean useLowHeightTrajectory)
    {
       footstep.getPose(newFootstepPose);
       newFootstepPose.changeFrame(worldFrame);
@@ -157,14 +157,23 @@ public class SwingState extends AbstractUnconstrainedState
             .getMinimumAnkleHeightDifferenceForStepOnOrOff();
 
       if (worldFrameDeltaZAboveThreshold)
+      {
          trajectoryParameters = new SimpleTwoWaypointTrajectoryParameters(TrajectoryWaypointGenerationMethod.STEP_ON_OR_OFF);
+      }
+      else
+      {
+         if (useLowHeightTrajectory)
+         {
+            trajectoryParameters = new SimpleTwoWaypointTrajectoryParameters(TrajectoryWaypointGenerationMethod.LOW_HEIGHT);
+         }
+      }
 
       trajectoryParametersProvider.set(trajectoryParameters);
    }
 
-   public void replanTrajectory(Footstep footstep, double swingTimeRemaining)
+   public void replanTrajectory(Footstep footstep, double swingTimeRemaining, boolean useLowHeightTrajectory)
    {
-      setFootstep(footstep, trajectoryParametersProvider.getTrajectoryParameters());
+      setFootstep(footstep, trajectoryParametersProvider.getTrajectoryParameters(), useLowHeightTrajectory);
       this.swingTimeRemaining.set(swingTimeRemaining);
       this.replanTrajectory.set(true);
    }

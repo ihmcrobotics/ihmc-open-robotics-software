@@ -247,9 +247,9 @@ public class FootControlModule
       stateMachine.setCurrentState(ConstraintType.FULL);
    }
 
-   public void replanTrajectory(Footstep footstep, double swingTimeRemaining)
+   public void replanTrajectory(Footstep footstep, double swingTimeRemaining, boolean useLowHeightTrajectory)
    {
-      swingState.replanTrajectory(footstep, swingTimeRemaining);
+      swingState.replanTrajectory(footstep, swingTimeRemaining, useLowHeightTrajectory);
    }
 
    public void doSingularityEscape(boolean doSingularityEscape)
@@ -386,7 +386,7 @@ public class FootControlModule
 
    public void setFootstep(Footstep footstep, TrajectoryParameters trajectoryParameters)
    {
-      swingState.setFootstep(footstep, trajectoryParameters);
+      swingState.setFootstep(footstep, trajectoryParameters,false);
    }
 
    public void setFootPose(FramePose footPose)
