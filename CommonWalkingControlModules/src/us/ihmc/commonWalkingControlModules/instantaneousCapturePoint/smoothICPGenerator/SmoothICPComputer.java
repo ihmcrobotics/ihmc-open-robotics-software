@@ -282,8 +282,10 @@ public class SmoothICPComputer
          }
          else
          {
-            icpPostionTempOne.set(footLocationList.get(0).getPointCopy());
-            icpPostionTempOne.add(footLocationList.get(1).getPointCopy());
+            footLocationList.get(0).get(icpPostionTempOne);
+            Point3d tempPoint = new Point3d();
+            footLocationList.get(1).get(tempPoint);
+            icpPostionTempOne.add(tempPoint);
             icpPostionTempOne.scale(0.5);
 
             hasBeenInitialized.set(true);

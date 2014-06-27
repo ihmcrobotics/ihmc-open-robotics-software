@@ -361,7 +361,11 @@ public class FootstepDataTest
             FramePoint sentFramePoint = sentFootstep.getExpectedContactPoints().get(j);
             FramePoint receivedFramePoint = receivedFootstep.getExpectedContactPoints().get(j);
             
-            JUnitTools.assertTuple3dEquals(sentFramePoint.getPointCopy(), receivedFramePoint.getPointCopy(), 1e-4);
+            Point3d expected = new Point3d();
+            Point3d actual = new Point3d();
+            sentFramePoint.get(expected);
+            receivedFramePoint.get(actual);
+            JUnitTools.assertTuple3dEquals(expected, actual, 1e-4);
 //            assertTrue(sentFramePoint.epsilonEquals(receivedFramePoint, 0.0001));
          }
       }
