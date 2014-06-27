@@ -27,6 +27,7 @@ import com.yobotics.simulationconstructionset.util.ground.CylinderTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.RotatableCinderBlockTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject;
+import com.yobotics.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject3D;
 import com.yobotics.simulationconstructionset.util.ground.TerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.TerrainObject3D;
 import com.yobotics.simulationconstructionset.util.ground.TrussWithSimpleCollisions;
@@ -76,9 +77,15 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
    {
       combinedTerrainObject = new CombinedTerrainObject("Rocks with a wall");
       combinedTerrainObject3D = new CombinedTerrainObject3D("DRCDemo01NavigationEnvironment");
+
+//      Box3d box = new Box3d(1.0, 0.5, 0.1);
+//      box.setTranslation(new Vector3d(0.0, 3.0, 0.0));
+//      box.setYawPitchRoll(0.0, 0.0, 0.5);
+//      combinedTerrainObject3D.addRotatableBox(box, YoAppearance.Red());
       
       // addCalibrationCube();
-      combinedTerrainObject.addTerrainObject(setUpPath1Rocks("Path1 Rocks"));
+      combinedTerrainObject3D.addTerrainObject(setUpPath1Rocks3D("Path1 Rocks"));
+//      combinedTerrainObject.addTerrainObject(setUpPath1Rocks("Path1 Rocks"));
 
       // setUpPath2SmallCones(combinedTerrainObject);
       combinedTerrainObject.addTerrainObject(setUpPath3RampsWithLargeBlocks("Path3 Ramps With Large Blocks"));
@@ -305,6 +312,11 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
    private TerrainObject setUpPath1Rocks(String name)
    {
       return addRocks(name);
+   }
+   
+   private TerrainObject3D setUpPath1Rocks3D(String name)
+   {
+      return addRocks3D(name);
    }
 
    private void setUpPath2SmallCones()
@@ -1302,6 +1314,37 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       
    }
 
+   private CombinedTerrainObject3D addRocks3D(String name)
+   {
+      CombinedTerrainObject3D combinedTerrainObject3D = new CombinedTerrainObject3D(name);
+
+      for (int i = 0; i < NUM_ROCKS; i++)
+      {
+         double centroidHeight = random.nextDouble() * MAX_ROCK_CENTROID_HEIGHT;
+         Vector3d normal = generateRandomUpFacingNormal();
+
+         double[] approximateCentroid = generateRandomApproximateCentroid(i);
+
+         double[][] vertices = generateRandomRockVertices(approximateCentroid[0], approximateCentroid[1]);
+
+         addRock3D(combinedTerrainObject3D, normal, centroidHeight, vertices);
+      }
+
+      Graphics3DObject linkGraphics = new Graphics3DObject();
+
+//    linkGraphics.rotate(Math.PI / 2, Axis.Y);
+//    linkGraphics.rotate(Math.toRadians(-courseAngleDeg), Axis.X);
+      linkGraphics.translate(new Vector3d(2, 2, 0));
+
+
+      linkGraphics.addModelFile(UIResourceGetter.getResource("models/QAPlanGrid.3DS"));
+
+
+      combinedTerrainObject3D.addStaticLinkGraphics(linkGraphics);
+
+      return combinedTerrainObject3D;
+   }
+   
    private CombinedTerrainObject addRocks(String name)
    {
       CombinedTerrainObject combinedTerrainObject = new CombinedTerrainObject(name);
@@ -1391,6 +1434,23 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       return vertices;
    }
 
+   private static void addRock3D(CombinedTerrainObject3D combinedTerrainObject, Vector3d normal, double centroidHeight, double[][] vertices)
+   {
+      AppearanceDefinition color = YoAppearance.DarkGray();
+
+      ArrayList<Point2d> vertexPoints = new ArrayList<Point2d>();
+
+      for (double[] point : vertices)
+      {
+         Point2d point2d = new Point2d(point);
+         vertexPoints.add(point2d);
+      }
+
+      ConvexPolygon2d convexPolygon = new ConvexPolygon2d(vertexPoints);
+      RotatableConvexPolygonTerrainObject3D rock = new RotatableConvexPolygonTerrainObject3D(normal, convexPolygon, centroidHeight, color);
+      combinedTerrainObject.addTerrainObject(rock);
+   }
+   
    private static void addRock(CombinedTerrainObject combinedTerrainObject, Vector3d normal, double centroidHeight, double[][] vertices)
    {
       AppearanceDefinition color = YoAppearance.DarkGray();
