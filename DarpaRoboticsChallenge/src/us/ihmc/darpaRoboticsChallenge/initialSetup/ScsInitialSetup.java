@@ -31,7 +31,7 @@ public interface ScsInitialSetup
    public abstract double getGravity();
    public abstract ScsPhysics createPhysics( ScsCollisionConfigure collisionConfigure , YoVariableRegistry registry );
    public abstract GroundProfile getGroundProfile();
-   public abstract SteppingStones getSteppingStones();
+//   public abstract SteppingStones getSteppingStones();
    public abstract DynamicIntegrationMethod getDynamicIntegrationMethod();
 
    public abstract boolean getInitializeEstimatorToActual(); //TODO: Probably should be somewhere else, but where?
