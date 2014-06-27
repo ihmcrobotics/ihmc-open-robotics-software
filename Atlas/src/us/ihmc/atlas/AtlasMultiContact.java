@@ -105,7 +105,7 @@ public class AtlasMultiContact
             armControllerParameters, false, false, HighLevelState.DO_NOTHING_BEHAVIOR);
       controllerFactory.addHighLevelBehaviorFactory(new MultiContactTestHumanoidControllerFactory(controllerParameters, footContactSides, handContactSides, true));
 
-      drcSimulation = new DRCSimulationFactory(robotModel, controllerFactory, environment.getTerrainObject(), robotInitialSetup, scsInitialSetup,
+      drcSimulation = new DRCSimulationFactory(robotModel, controllerFactory, environment.getTerrainObject().getLinkGraphics(), robotInitialSetup, scsInitialSetup,
             guiInitialSetup, null);
 
       simulationConstructionSet = drcSimulation.getSimulationConstructionSet();
