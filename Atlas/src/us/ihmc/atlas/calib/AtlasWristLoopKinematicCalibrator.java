@@ -4,8 +4,10 @@ import com.yobotics.simulationconstructionset.DataBuffer;
 import com.yobotics.simulationconstructionset.IndexChangedListener;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePose;
 
+import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -21,9 +23,9 @@ import java.util.Map;
 
 public class AtlasWristLoopKinematicCalibrator extends AtlasCalibrationDataViewer
 {
-   public AtlasWristLoopKinematicCalibrator(AtlasRobotVersion atlasVersion, boolean runningOnRealRobot)
+   public AtlasWristLoopKinematicCalibrator(DRCRobotModel robotModel)
    {
-      super(atlasVersion, runningOnRealRobot);
+      super(robotModel);
    }
 
    public void attachIndexChangedListener()
@@ -80,9 +82,11 @@ public class AtlasWristLoopKinematicCalibrator extends AtlasCalibrationDataViewe
    public static void main(String[] arg)
    {
 	  final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.DRC_NO_HANDS;
-	  final boolean RUNNING_ON_REAL_ROBOT = DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT;
+	  final boolean RUNNING_ON_REAL_ROBOT = true;
+	  
+	  DRCRobotModel robotModel = new AtlasRobotModel(ATLAS_ROBOT_VERSION, RUNNING_ON_REAL_ROBOT, RUNNING_ON_REAL_ROBOT);
 
-      AtlasWristLoopKinematicCalibrator calibrator = new AtlasWristLoopKinematicCalibrator(ATLAS_ROBOT_VERSION, RUNNING_ON_REAL_ROBOT);
+      AtlasWristLoopKinematicCalibrator calibrator = new AtlasWristLoopKinematicCalibrator(robotModel);
       //calibrator.loadData("data/coupledWristLog_20131204");
       calibrator.loadData("data/coupledWristLog_20131206_1");
 
