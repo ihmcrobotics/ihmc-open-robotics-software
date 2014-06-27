@@ -29,8 +29,8 @@ public class DRCNetworkProcessorEnterpriseCloudDispatcherBackend implements Runn
 
    private final byte[] buffer;
 
-   private static String scsMachineIPAddress = DRCLocalConfigParameters.ROBOT_CONTROLLER_IP_ADDRESS;
-   private static String rosMasterURI = DRCConfigParameters.ROS_MASTER_URI;
+   private static String scsMachineIPAddress;
+   private static String rosMasterURI;
 
    private static String[] javaArgs = new String[] {"-Xms2048m", "-Xmx2048m"};
 
@@ -147,7 +147,7 @@ public class DRCNetworkProcessorEnterpriseCloudDispatcherBackend implements Runn
    {
       if (!networkProcessorSpawner.hasRunningProcesses())
       {
-         networkProcessorSpawner.spawn(AtlasNetworkProcessor.class, javaArgs, new String[] {"--ros-uri", rosMasterURI, "--scs-ip", scsMachineIPAddress, "-m", robotModel});
+         networkProcessorSpawner.spawn(AtlasNetworkProcessor.class, javaArgs, new String[] {"--ros-uri", rosMasterURI, "--scs-ip", scsMachineIPAddress, "-m", robotModel, "-realRobot"});
 
          try
          {

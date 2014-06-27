@@ -1,23 +1,43 @@
 package us.ihmc.atlas.calib;
 
-import boofcv.alg.geo.PerspectiveOps;
-import boofcv.alg.geo.calibration.PlanarCalibrationTarget;
-import boofcv.factory.calib.FactoryPlanarCalibrationTarget;
-import boofcv.io.UtilIO;
-import boofcv.struct.calib.IntrinsicParameters;
-import com.yobotics.simulationconstructionset.IndexChangedListener;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicCoordinateSystem;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePose;
+import static java.lang.Double.parseDouble;
 import georegression.struct.point.Point2D_F64;
 import georegression.struct.point.Vector3D_F64;
 import georegression.struct.se.Se3_F64;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
+import javax.imageio.ImageIO;
+import javax.media.j3d.Transform3D;
+import javax.swing.ImageIcon;
+import javax.swing.JCheckBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+
 import org.ddogleg.optimization.FactoryOptimization;
 import org.ddogleg.optimization.UnconstrainedLeastSquares;
 import org.ddogleg.optimization.UtilOptimize;
+
+import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
@@ -27,24 +47,17 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import boofcv.alg.geo.PerspectiveOps;
+import boofcv.alg.geo.calibration.PlanarCalibrationTarget;
+import boofcv.factory.calib.FactoryPlanarCalibrationTarget;
+import boofcv.io.UtilIO;
+import boofcv.struct.calib.IntrinsicParameters;
 
-import javax.imageio.ImageIO;
-import javax.media.j3d.Transform3D;
-import javax.swing.*;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-import java.awt.*;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.*;
-
-import static java.lang.Double.parseDouble;
+import com.yobotics.simulationconstructionset.IndexChangedListener;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicCoordinateSystem;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePose;
 
 public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
 {   
@@ -74,9 +87,9 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
    private PlanarCalibrationTarget calibGrid = FactoryPlanarCalibrationTarget.gridChess(
          DetectChessboardInKinematicsData.boardWidth, DetectChessboardInKinematicsData.boardHeight, 0.03);
 
-   public AtlasHeadLoopKinematicCalibrator(AtlasRobotVersion atlasVersion, boolean runningOnRealRobot)
+   public AtlasHeadLoopKinematicCalibrator(DRCRobotModel robotModel)
    {
-      super(atlasVersion, runningOnRealRobot);
+      super(robotModel);
       ypLeftEE = new YoFramePoint("leftEE", ReferenceFrame.getWorldFrame(), registry);
       ypRightEE = new YoFramePoint("rightEE", ReferenceFrame.getWorldFrame(), registry);
       yposeLeftEE = new YoFramePose("leftPoseEE", "", ReferenceFrame.getWorldFrame(), registry);
@@ -468,8 +481,11 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
    public static void main(String[] arg) throws InterruptedException, IOException
    {
 	  final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.DRC_NO_HANDS;
-	  final boolean RUNNING_ON_REAL_ROBOT = DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT;
-      AtlasHeadLoopKinematicCalibrator calib = new AtlasHeadLoopKinematicCalibrator(ATLAS_ROBOT_VERSION, RUNNING_ON_REAL_ROBOT);
+	  final boolean RUNNING_ON_REAL_ROBOT = true;
+	  
+	  DRCRobotModel robotModel = new AtlasRobotModel(ATLAS_ROBOT_VERSION,RUNNING_ON_REAL_ROBOT, RUNNING_ON_REAL_ROBOT);
+	  
+      AtlasHeadLoopKinematicCalibrator calib = new AtlasHeadLoopKinematicCalibrator(robotModel);
       calib.loadData("data/armCalibratoin20131209/calibration_right");
       calib.optimizeData();
 

@@ -36,10 +36,9 @@ public class AtlasKinematicCalibrator
    IntegerYoVariable yoIndex;
 
 
-   public AtlasKinematicCalibrator(AtlasRobotVersion atlasVersion, boolean runningOnRealRobot)
+   public AtlasKinematicCalibrator(DRCRobotModel robotModel)
    {
       //load robot
-	  DRCRobotModel robotModel = new AtlasRobotModel(atlasVersion, runningOnRealRobot, runningOnRealRobot);
       robot = robotModel.createSdfRobot(false);
       registry = robot.getRobotsYoVariableRegistry();
       fullRobotModel = robotModel.createFullRobotModel();

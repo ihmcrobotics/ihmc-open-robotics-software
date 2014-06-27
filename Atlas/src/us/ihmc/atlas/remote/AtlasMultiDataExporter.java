@@ -25,7 +25,6 @@ import org.apache.batik.dom.util.HashTable;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
@@ -70,7 +69,6 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
    public static void main(String[] args) throws IOException
    { 
 	  final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.DRC_NO_HANDS;
-      final boolean RUNNING_ON_REAL_ROBOT = DRCLocalConfigParameters.RUNNING_ON_REAL_ROBOT;
       String[] jointNamesInOrder;
       String[] vars = null;
       int numberOfEntries = 0;
