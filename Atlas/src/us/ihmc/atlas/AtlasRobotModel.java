@@ -22,6 +22,7 @@ import us.ihmc.atlas.sensors.AtlasSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCNetworkParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
@@ -62,6 +63,7 @@ public class AtlasRobotModel implements DRCRobotModel
    private final AtlasStateEstimatorParameters stateEstimatorParameters;
    private final AtlasRobotMultiContactControllerParameters multiContactControllerParameters;
    private final AtlasDrivingControllerParameters drivingControllerParameters;
+   private final AtlasNetworkParameters networkParameters;
 
    public AtlasRobotModel(AtlasRobotVersion atlasVersion, boolean runningOnRealRobot, boolean headless)
    {
@@ -89,6 +91,7 @@ public class AtlasRobotModel implements DRCRobotModel
       stateEstimatorParameters = new AtlasStateEstimatorParameters(jointMap, runningOnRealRobot, getEstimatorDT());
       multiContactControllerParameters = new AtlasRobotMultiContactControllerParameters();
       drivingControllerParameters = new AtlasDrivingControllerParameters();
+      networkParameters = new AtlasNetworkParameters(runningOnRealRobot);
    }
 
    @Override
@@ -271,5 +274,11 @@ public class AtlasRobotModel implements DRCRobotModel
    public DRCSensorSuiteManager getSensorSuiteManager(URI rosCoreURI)
    {
       return new AtlasSensorSuiteManager(rosCoreURI, getPPSTimestampOffsetProvider(), sensorInformation, getJointMap());
+   }
+
+   @Override
+   public DRCNetworkParameters getNetworkParameters()
+   {
+	   return networkParameters;
    }
 }

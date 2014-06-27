@@ -69,4 +69,6 @@ public interface DRCRobotModel
    public abstract PPSTimestampOffsetProvider getPPSTimestampOffsetProvider();
 
    public abstract DRCSensorSuiteManager getSensorSuiteManager(URI rosCoreURI);
+   
+   public abstract DRCNetworkParameters getNetworkParameters();
 }
