@@ -7,7 +7,9 @@ import us.ihmc.commonWalkingControlModules.terrain.CommonTerrain;
 import us.ihmc.commonWalkingControlModules.terrain.TerrainType;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.ScsInitialSetup;
 import us.ihmc.graphics3DAdapter.GroundProfile;
+import us.ihmc.graphics3DAdapter.HeightMapFromGroundProfile;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 
 import com.yobotics.simulationconstructionset.DynamicIntegrationMethod;
@@ -39,13 +41,16 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
    private SensorNoiseParameters simulatedSensorNoiseParameters = null; // Same as zero noise, but doesn't create sensor corruptors
    private boolean initializeEstimatorToActual = false;
    
-   private final CommonTerrain commonTerrain;
-
+//   private final CommonTerrain commonTerrain;
+   private final GroundProfile groundProfile;
+   
    private DynamicIntegrationMethod dynamicIntegrationMethod = DynamicIntegrationMethod.EULER_DOUBLE_STEPS;
    
    public DRCSCSInitialSetup(GroundProfile groundProfile, double simulateDT)
    {
-      commonTerrain = new CommonTerrain(groundProfile);
+//      commonTerrain = new CommonTerrain(groundProfile);
+      
+      this.groundProfile = groundProfile;
       this.simulateDT = simulateDT;
    }
 
@@ -84,11 +89,12 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
       LinearGroundContactModel groundContactModel = new LinearGroundContactModel(robot, groundKxy, groundBxy, groundKz, groundBz,
             robot.getRobotsYoVariableRegistry());
 
-      if ((commonTerrain.getSteppingStones() != null) && (dynamicGraphicObjectsListRegistry != null))
-         commonTerrain.registerSteppingStonesArtifact(dynamicGraphicObjectsListRegistry);
+//      if ((commonTerrain.getSteppingStones() != null) && (dynamicGraphicObjectsListRegistry != null))
+//         commonTerrain.registerSteppingStonesArtifact(dynamicGraphicObjectsListRegistry);
 
-      groundContactModel.setGroundProfile(commonTerrain.getGroundProfile());
-
+//      groundContactModel.setGroundProfile(commonTerrain.getGroundProfile());
+      groundContactModel.setGroundProfile(groundProfile);
+      
       // TODO: change this to scs.setGroundContactModel(groundContactModel);
       robot.setGroundContactModel(groundContactModel);
    }
@@ -113,15 +119,29 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
       return simulationDataBufferSize;
    }
 
+   private ArrayList<Graphics3DObject> createGroundLinkGraphicsFromGroundProfile(GroundProfile groundProfile)
+   {
+      ArrayList<Graphics3DObject> ret = new ArrayList<Graphics3DObject>();
+
+      Graphics3DObject texturedGroundLinkGraphics = new Graphics3DObject();
+
+      HeightMapFromGroundProfile heightMap = new HeightMapFromGroundProfile(groundProfile);
+      texturedGroundLinkGraphics.addHeightMap(heightMap, 300, 300, YoAppearance.DarkGreen());
+      ret.add(texturedGroundLinkGraphics);
+
+      return ret;
+   }
+   
    public void initializeSimulation(SimulationConstructionSet scs)
    {
       scs.setDT(simulateDT, recordFrequency);
 
       if (drawGroundProfile)
       {
-         boolean drawGroundBelow = false;
+//         boolean drawGroundBelow = false;
          
-         ArrayList<Graphics3DObject> groundLinkGraphics = commonTerrain.createLinkGraphics(drawGroundBelow);
+//         ArrayList<Graphics3DObject> groundLinkGraphics = commonTerrain.createLinkGraphics(drawGroundBelow);
+         ArrayList<Graphics3DObject> groundLinkGraphics = createGroundLinkGraphicsFromGroundProfile(groundProfile);
          scs.addStaticLinkGraphics(groundLinkGraphics);
       }
       
@@ -189,13 +209,14 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
    
    public GroundProfile getGroundProfile()
    {
-      return commonTerrain.getGroundProfile();
+      return groundProfile;
+//      return commonTerrain.getGroundProfile();
    }
 
-   public SteppingStones getSteppingStones()
-   {
-      return commonTerrain.getSteppingStones();
-   }
+//   public SteppingStones getSteppingStones()
+//   {
+//      return commonTerrain.getSteppingStones();
+//   }
    
    public boolean getDrawGroundProfile()
    {

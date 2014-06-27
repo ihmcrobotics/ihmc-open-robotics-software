@@ -28,7 +28,7 @@ public class DRCDemo01EnvironmentViewer
    
    Robot robot = new Robot("NotARobot");
    private double gravity = -9.81;
-   CommonTerrain commonTerrain;
+//   CommonTerrain commonTerrain;
    
    
    DRCDemo01EnvironmentViewer()
@@ -42,7 +42,7 @@ public class DRCDemo01EnvironmentViewer
 //      robot.addStaticLinkGraphics(commonAvatarEnvironmentInterface.getTerrainObject().getLinkGraphics());
       
       GroundProfile groundProfile = commonAvatarEnvironmentInterface.getTerrainObject();
-      commonTerrain = new CommonTerrain(groundProfile);
+//      commonTerrain = new CommonTerrain(groundProfile);
 
       
       robot.setGravity(gravity);
@@ -55,7 +55,7 @@ public class DRCDemo01EnvironmentViewer
     LinearGroundContactModel groundContactModel = new LinearGroundContactModel(robot, groundKxy, groundBxy, groundKz, groundBz,
           robot.getRobotsYoVariableRegistry());
 
-    groundContactModel.setGroundProfile(commonTerrain.getGroundProfile());
+    groundContactModel.setGroundProfile(groundProfile);
 
     robot.setGroundContactModel(groundContactModel);
     robot.setDynamicIntegrationMethod(DynamicIntegrationMethod.EULER_DOUBLE_STEPS);
