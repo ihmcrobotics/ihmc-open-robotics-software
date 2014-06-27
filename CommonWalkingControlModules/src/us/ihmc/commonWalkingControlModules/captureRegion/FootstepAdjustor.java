@@ -126,7 +126,8 @@ public class FootstepAdjustor
       calculateTouchdownFootPolygon(footstep, captureRegion.getReferenceFrame(), adjustedTouchdownFootPolygon);
    }
 
-   private final FramePoint2d centroid = new FramePoint2d();
+   private final FramePoint2d centroid2d = new FramePoint2d();
+   private final FramePoint centroid3d = new FramePoint();
 
    /**
     * This function takes a footstep and calculates the touch-down polygon in the
@@ -134,14 +135,14 @@ public class FootstepAdjustor
     */
    private void calculateTouchdownFootPolygon(Footstep footstep, ReferenceFrame desiredFrame, FrameConvexPolygon2d polygonToPack)
    {
-      FramePoint centroid3d = footstep.getPosition();
-      centroid.setIncludingFrame(centroid3d.getReferenceFrame(), centroid3d.getX(), centroid3d.getY());
-      centroid.changeFrame(desiredFrame);
+      footstep.getPosition(centroid3d);
+      centroid3d.getFramePoint2d(centroid2d);
+      centroid2d.changeFrame(desiredFrame);
 
       List<FramePoint> expectedContactPoints = footstep.getExpectedContactPoints();
       polygonToPack.setIncludingFrameByProjectionOntoXYPlaneAndUpdate(desiredFrame, expectedContactPoints);
       // shrink the polygon for safety by pulling all the corner points towards the center
-      polygonToPack.scale(centroid, SHRINK_TOUCHDOWN_POLYGON_FACTOR);
+      polygonToPack.scale(centroid2d, SHRINK_TOUCHDOWN_POLYGON_FACTOR);
    }
 
    /**
