@@ -512,14 +512,14 @@ public class SmoothICPComputerTest
          footLocations.add(firstStepLocation);
 
          stepSide = stepSide.getOppositeSide();
-         previousStepLocation.set(firstStepLocation.getFramePointCopy().getPointCopy());
+         firstStepLocation.get(previousStepLocation);
 
          YoFramePoint secondStepLocation = new YoFramePoint("stepListElementSecondSquaredUpStep", "", ReferenceFrame.getWorldFrame(), registry);
          secondStepLocation.set(-0.5, stepSide.negateIfRightSide(halfStepWidth), height);
          footLocations.add(secondStepLocation);
 
          stepSide = stepSide.getOppositeSide();
-         previousStepLocation.set(secondStepLocation.getFramePointCopy().getPointCopy());
+         secondStepLocation.get(previousStepLocation);
       }
 
       double headingDirection = 0.0;
