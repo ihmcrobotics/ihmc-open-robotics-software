@@ -12,6 +12,7 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCNetworkParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -55,6 +56,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private final DRCRobotJointMap jointMap;
    private final String robotName = "VALKYRIE";
    private final SideDependentList<Transform> offsetHandFromWrist = new SideDependentList<Transform>();
+   private final ValkyrieNetworkParameters networkParameters;
 
    private final String[] resourceDirectories = { valModelRoot.getResource("").getFile(), valModelRoot.getResource("V1/").getFile(),
          valModelRoot.getResource("V1/sdf/").getFile(), valModelRoot.getResource("V1/meshes/").getFile(),
@@ -98,6 +100,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
       armControllerParameters = new ValkyrieArmControllerParameters(runningOnRealRobot);
       walkingControllerParameters = new ValkyrieWalkingControllerParameters(jointMap, runningOnRealRobot);
       stateEstimatorParamaters = new ValkyrieStateEstimatorParameters(runningOnRealRobot, getEstimatorDT());
+      networkParameters = new ValkyrieNetworkParameters(runningOnRealRobot);
    }
 
    @Override
@@ -308,6 +311,12 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public DRCSensorSuiteManager getSensorSuiteManager(URI rosCoreURI)
    {
       return new ValkyrieSensorSuiteManager(rosCoreURI, getPPSTimestampOffsetProvider(), sensorInformation);
+   }
+
+   @Override
+   public DRCNetworkParameters getNetworkParameters()
+   {
+	   return networkParameters;
    }
 
 }
