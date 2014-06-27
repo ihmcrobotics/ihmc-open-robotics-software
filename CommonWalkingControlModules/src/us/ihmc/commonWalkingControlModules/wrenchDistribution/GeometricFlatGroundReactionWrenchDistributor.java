@@ -200,8 +200,7 @@ public class GeometricFlatGroundReactionWrenchDistributor implements GroundReact
       FramePoint position = new FramePoint(virtualToePoint2d.getReferenceFrame());
       position.setXY(virtualToePoint2d);
       FrameOrientation orientation = new FrameOrientation(virtualToePoint2d.getReferenceFrame());
-      FramePose pose = new FramePose(position, orientation);
-      vtpFrame.setPoseAndUpdate(pose);
+      vtpFrame.setPoseAndUpdate(position, orientation);
       vtpFrame.update();
       
       return vtpFrame;
