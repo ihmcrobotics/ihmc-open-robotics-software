@@ -112,6 +112,8 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
 
    private void updateVisualizers()
    {
+      desiredPosition.changeFrame(worldFrame);
+      desiredOrientation.changeFrame(worldFrame);
       desiredPositionFrame.setPoseAndUpdate(desiredPosition, desiredOrientation);
       desiredPositionFrame.update();
 
