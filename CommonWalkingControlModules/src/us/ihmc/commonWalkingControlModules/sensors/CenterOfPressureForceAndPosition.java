@@ -7,12 +7,11 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrameHolder;
-import us.ihmc.utilities.math.geometry.ReferenceFrameMismatchException;
 
 /**
  * Object to hold pressure Point3d and Force Vector3d
  */
-public class CenterOfPressureForceAndPosition implements ReferenceFrameHolder
+public class CenterOfPressureForceAndPosition extends ReferenceFrameHolder
 {
    private ReferenceFrame referenceFrame;
    private final Point3d centerOfPressure;
@@ -74,21 +73,13 @@ public class CenterOfPressureForceAndPosition implements ReferenceFrameHolder
       this.referenceFrame = desiredFrame;
    }
 
-   public void checkReferenceFrameMatch(ReferenceFrameHolder referenceFrameHolder)
-   {
-      referenceFrame.checkReferenceFrameMatch(referenceFrameHolder.getReferenceFrame());
-   }
-
-   public void checkReferenceFrameMatch(ReferenceFrame frame) throws ReferenceFrameMismatchException
-   {
-      referenceFrame.checkReferenceFrameMatch(frame);
-   }
-
+   @Override
    public ReferenceFrame getReferenceFrame()
    {
       return referenceFrame;
    }
 
+   @Override
    public ReferenceFrameHolder changeFrameCopy(ReferenceFrame desiredFrame)
    {
       CenterOfPressureForceAndPosition ret = new CenterOfPressureForceAndPosition(this);
