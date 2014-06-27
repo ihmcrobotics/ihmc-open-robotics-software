@@ -27,6 +27,7 @@ public class FootstepAdjustor
 {
    private static final boolean VISUALIZE = true;
    private static final double SHRINK_TOUCHDOWN_POLYGON_FACTOR = 0.5;
+   private static final double DISTANCE_FROM_KINEMATIC_LIMIT = 0.05;
 
    private final YoVariableRegistry registry = new YoVariableRegistry("FootstepAdjustor");
 
@@ -121,6 +122,9 @@ public class FootstepAdjustor
       captureRegion.orthogonalProjection(nextStep2d);
       nextStep2d.changeFrame(footstep.getReferenceFrame());
       
+      direction.normalize();
+      direction.scale(DISTANCE_FROM_KINEMATIC_LIMIT);
+      nextStep2d.sub(direction);
       footstep.setPositionChangeOnlyXY(nextStep2d);
 
       calculateTouchdownFootPolygon(footstep, captureRegion.getReferenceFrame(), adjustedTouchdownFootPolygon);
