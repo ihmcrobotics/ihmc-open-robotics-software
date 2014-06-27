@@ -938,6 +938,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                   
                   icpProjectionTimeOffset = pushRecoveryModule.computeTimeToProjectDesiredICPToClosestPointOnTrajectoryToActualICP(capturePoint2d, constantCenterOfPressure, startICP, finalDesiredICP, omega0) - captureTime;
                }
+               
+               removeAllUpcomingFootstepsAndStand();
             }
             
             if(pushRecoveryModule.isRecovering())
@@ -976,6 +978,34 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
       }
 
+      // once the footsteps are refactored this should be rewritten to remove all upcoming footsteps and add
+      // a footstep that brings the robot in a standing position.
+      private void removeAllUpcomingFootstepsAndStand()
+      {
+         int numberOfUpcomingFootsteps = upcomingFootstepList.getNumberOfFootstepsToProvide();
+         if(numberOfUpcomingFootsteps > 1000)
+            return;
+         
+         while (numberOfUpcomingFootsteps > 0)
+         {
+            readyToGrabNextFootstep.set(true);
+            upcomingFootstepList.checkForFootsteps(readyToGrabNextFootstep, upcomingSupportLeg, feet);
+            upcomingFootstepList.notifyComplete();
+            numberOfUpcomingFootsteps--;
+         }
+         
+         FramePoint2d neutralPosition = nextFootstep.getPosition2dCopy();
+         double y = swingSide == RobotSide.LEFT ? -0.3 : 0.3; 
+         FrameVector2d translate = new FrameVector2d(neutralPosition.getReferenceFrame(), 0.0, y);
+         neutralPosition.add(translate);
+         
+         Footstep next = upcomingFootstepList.getNextFootstep();
+         if(next != null)
+         {
+            next.setPositionChangeOnlyXY(neutralPosition);
+         }
+      }
+      
       @Override
       public void doTransitionIntoAction()
       {
