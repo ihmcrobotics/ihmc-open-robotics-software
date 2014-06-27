@@ -56,7 +56,8 @@ public class SimpleWorldDesiredFootstepCalculator extends AbstractAdjustableDesi
          initialFootPosition.changeFrame(footstepPosition.getReferenceFrame());
          footstepPosition.set(initialFootPosition);
 
-         FrameOrientation initialFootOrientation = currentFootPose.getOrientationCopy();
+         FrameOrientation initialFootOrientation = new FrameOrientation();
+         currentFootPose.getOrientation(initialFootOrientation);
          YoFrameOrientation footstepOrientation = footstepOrientations.get(robotSide);
          initialFootOrientation.changeFrame(footstepOrientation.getReferenceFrame());
          footstepOrientation.set(initialFootOrientation);
