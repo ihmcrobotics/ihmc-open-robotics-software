@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.terrain.CommonTerrain;
 import us.ihmc.commonWalkingControlModules.terrain.TerrainType;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.ScsInitialSetup;
 import us.ihmc.graphics3DAdapter.GroundProfile;
+import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.HeightMapFromGroundProfile;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -25,7 +26,8 @@ import com.yobotics.simulationconstructionset.physics.collision.bullet.JBulletCo
 import com.yobotics.simulationconstructionset.physics.visualize.DefaultCollisionVisualize;
 import com.yobotics.simulationconstructionset.util.LinearGroundContactModel;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.ground.steppingStones.SteppingStones;
+import com.yobotics.simulationconstructionset.util.ground.TerrainObject;
+import com.yobotics.simulationconstructionset.util.ground.TerrainObject3D;
 
 public class DRCSCSInitialSetup implements ScsInitialSetup
 {
@@ -43,6 +45,7 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
    
 //   private final CommonTerrain commonTerrain;
    private final GroundProfile groundProfile;
+   private final GroundProfile3D groundProfile3D;
    
    private DynamicIntegrationMethod dynamicIntegrationMethod = DynamicIntegrationMethod.EULER_DOUBLE_STEPS;
    
@@ -51,6 +54,7 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
 //      commonTerrain = new CommonTerrain(groundProfile);
       
       this.groundProfile = groundProfile;
+      this.groundProfile3D = null;
       this.simulateDT = simulateDT;
    }
 
@@ -61,7 +65,12 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
 
    public DRCSCSInitialSetup(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, double simulateDT)
    {
-      this(commonAvatarEnvironmentInterface.getTerrainObject(), simulateDT);
+      TerrainObject terrainObject = commonAvatarEnvironmentInterface.getTerrainObject();
+      TerrainObject3D terrainObject3D = commonAvatarEnvironmentInterface.getTerrainObject3D();
+
+      this.groundProfile = terrainObject;
+      this.groundProfile3D = terrainObject3D;
+      this.simulateDT = simulateDT;
    }
 
    public ScsPhysics createPhysics(ScsCollisionConfigure collisionConfigure, YoVariableRegistry registry)
@@ -93,7 +102,8 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
 //         commonTerrain.registerSteppingStonesArtifact(dynamicGraphicObjectsListRegistry);
 
 //      groundContactModel.setGroundProfile(commonTerrain.getGroundProfile());
-      groundContactModel.setGroundProfile(groundProfile);
+      if (groundProfile != null) groundContactModel.setGroundProfile(groundProfile);
+      if (groundProfile3D != null) groundContactModel.setGroundProfile3D(groundProfile3D);
       
       // TODO: change this to scs.setGroundContactModel(groundContactModel);
       robot.setGroundContactModel(groundContactModel);
@@ -211,6 +221,11 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
    {
       return groundProfile;
 //      return commonTerrain.getGroundProfile();
+   }
+   
+   public GroundProfile3D getGroundProfile3D()
+   {
+      return groundProfile3D;
    }
 
 //   public SteppingStones getSteppingStones()
