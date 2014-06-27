@@ -925,7 +925,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                updateFootstepParameters();
                
                captureTime = stateMachine.timeInCurrentState();
-               feetManager.replanSwingTrajectory(swingSide, nextFootstep, swingTimeCalculationProvider.getValue() - captureTime);
+               feetManager.replanSwingTrajectory(swingSide, nextFootstep, swingTimeCalculationProvider.getValue() - captureTime, pushRecoveryModule.isRecoveringFromDoubleSupportFall());
 
                TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForSingleSupport(nextFootstep, swingSide);
                instantaneousCapturePointPlanner.initializeSingleSupport(transferToAndNextFootstepsData, yoTime.getDoubleValue() - captureTime);
