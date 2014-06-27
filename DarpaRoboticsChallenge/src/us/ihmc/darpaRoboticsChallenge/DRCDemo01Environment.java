@@ -15,14 +15,14 @@ import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.util.environments.SelectableObjectListener;
-import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject;
-import com.yobotics.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject;
+import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject3D;
+import com.yobotics.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject3D;
 import com.yobotics.simulationconstructionset.util.ground.TerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.TerrainObject3D;
 
 public class DRCDemo01Environment implements CommonAvatarEnvironmentInterface
 {
-   private final CombinedTerrainObject combinedTerrainObject;
+   private final CombinedTerrainObject3D combinedTerrainObject;
 
    private final Random random = new Random(1989L);
    
@@ -45,7 +45,7 @@ public class DRCDemo01Environment implements CommonAvatarEnvironmentInterface
    
    public DRCDemo01Environment()
    {
-      combinedTerrainObject = new CombinedTerrainObject("Rocks with a wall");
+      combinedTerrainObject = new CombinedTerrainObject3D("Rocks with a wall");
       addWall();
       addPillars();
       addRocks();
@@ -126,7 +126,7 @@ public class DRCDemo01Environment implements CommonAvatarEnvironmentInterface
       }
       
       ConvexPolygon2d convexPolygon = new ConvexPolygon2d(vertexPoints);
-      RotatableConvexPolygonTerrainObject rock = new RotatableConvexPolygonTerrainObject(normal, convexPolygon, centroidHeight, YoAppearance.Red());
+      RotatableConvexPolygonTerrainObject3D rock = new RotatableConvexPolygonTerrainObject3D(normal, convexPolygon, centroidHeight, YoAppearance.Red());
       this.combinedTerrainObject.addTerrainObject(rock);
    }
 
@@ -146,7 +146,7 @@ public class DRCDemo01Environment implements CommonAvatarEnvironmentInterface
       pointList.add(wallPoint3);
       
       ConvexPolygon2d convexPolygon = new ConvexPolygon2d(pointList);
-      RotatableConvexPolygonTerrainObject rightWall = new RotatableConvexPolygonTerrainObject(normal, convexPolygon, centroidHeight, YoAppearance.Brown());
+      RotatableConvexPolygonTerrainObject3D rightWall = new RotatableConvexPolygonTerrainObject3D(normal, convexPolygon, centroidHeight, YoAppearance.Brown());
       combinedTerrainObject.addTerrainObject(rightWall);
    }
    
@@ -185,19 +185,19 @@ public class DRCDemo01Environment implements CommonAvatarEnvironmentInterface
          ConvexPolygon2d convexPolygon = new ConvexPolygon2d(points);
          AppearanceDefinition appearance = YoAppearance.Brown();
 //         YoAppearance.makeTransparent(appearance, 0.7f);
-         RotatableConvexPolygonTerrainObject pillar = new RotatableConvexPolygonTerrainObject(normal, convexPolygon, centroidHeight, appearance);
+         RotatableConvexPolygonTerrainObject3D pillar = new RotatableConvexPolygonTerrainObject3D(normal, convexPolygon, centroidHeight, appearance);
          combinedTerrainObject.addTerrainObject(pillar);
       }
    }
 
    public TerrainObject getTerrainObject()
    {
-      return combinedTerrainObject;
+      return null;
    }
    
    public TerrainObject3D getTerrainObject3D()
    {
-      return null;
+      return combinedTerrainObject;
    }
 
    public ArrayList<Robot> getEnvironmentRobots()

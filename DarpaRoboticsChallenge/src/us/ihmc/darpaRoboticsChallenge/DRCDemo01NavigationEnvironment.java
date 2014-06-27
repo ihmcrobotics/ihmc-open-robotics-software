@@ -21,10 +21,8 @@ import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.util.environments.SelectableObjectListener;
-import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import com.yobotics.simulationconstructionset.util.ground.CylinderTerrainObject;
-import com.yobotics.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.RotatableBoxTerrainObject3D;
 import com.yobotics.simulationconstructionset.util.ground.RotatableCinderBlockTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject;
@@ -35,7 +33,6 @@ import com.yobotics.simulationconstructionset.util.ground.TrussWithSimpleCollisi
 
 public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentInterface
 {
-   private final CombinedTerrainObject combinedTerrainObject;
    private final CombinedTerrainObject3D combinedTerrainObject3D;
 
    private final Random random = new Random(1989L);
@@ -76,7 +73,6 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
    public DRCDemo01NavigationEnvironment()
    {
-      combinedTerrainObject = new CombinedTerrainObject("Rocks with a wall");
       combinedTerrainObject3D = new CombinedTerrainObject3D("DRCDemo01NavigationEnvironment");
       
       // addCalibrationCube();
@@ -84,20 +80,20 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
       // setUpPath2SmallCones(combinedTerrainObject);
       combinedTerrainObject3D.addTerrainObject(setUpPath3RampsWithLargeBlocks3D("Path3 Ramps With Large Blocks"));
-      combinedTerrainObject.addTerrainObject(setUpPath4DRCTrialsTrainingWalkingCourse("Path 4 Walking Course"));
+      combinedTerrainObject3D.addTerrainObject(setUpPath4DRCTrialsTrainingWalkingCourse("Path 4 Walking Course"));
 
       // combinedTerrainObject.addTerrainObject(setUpPath4DRCTrialsTrainingWalkingCourseDifficult());
-      combinedTerrainObject.addTerrainObject(setUpPathDRCTrialsLadder("Ladder"));
-      combinedTerrainObject.addTerrainObject(setUpTrialsQuals("Quals"));
+      combinedTerrainObject3D.addTerrainObject(setUpPathDRCTrialsLadder("Ladder"));
+      combinedTerrainObject3D.addTerrainObject(setUpTrialsQuals("Quals"));
 
-      combinedTerrainObject.addTerrainObject(setUpPath5NarrowDoor("Path5 Narrow Door"));
-      combinedTerrainObject.addTerrainObject(setUpPath6Barriers("Path6 Barriers"));
-      combinedTerrainObject.addTerrainObject(setUpPath7Stairs("Path7 Stairs"));
-      combinedTerrainObject.addTerrainObject(setUpPath8RampsWithSteppingStones("Path8 Ramps with Stepping Stones"));
+      combinedTerrainObject3D.addTerrainObject(setUpPath5NarrowDoor("Path5 Narrow Door"));
+      combinedTerrainObject3D.addTerrainObject(setUpPath6Barriers("Path6 Barriers"));
+      combinedTerrainObject3D.addTerrainObject(setUpPath7Stairs("Path7 Stairs"));
+      combinedTerrainObject3D.addTerrainObject(setUpPath8RampsWithSteppingStones("Path8 Ramps with Stepping Stones"));
 
-      combinedTerrainObject.addTerrainObject(setUpGround("Ground"));
+      combinedTerrainObject3D.addTerrainObject(setUpGround("Ground"));
 
-      if (addLimboBar) addLimboBar(combinedTerrainObject);
+      if (addLimboBar) addLimboBar(combinedTerrainObject3D);
 
       // testRotatableRampsSetupForGraphicsAndCollision();
       // addFalseStair();
@@ -105,17 +101,17 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       if (VISUALIZE_BOUNDING_BOXES)
       {
          StringBuffer stringBuffer = new StringBuffer();
-         combinedTerrainObject.recursivelyPrintBoundingBoxes(stringBuffer);
+         combinedTerrainObject3D.recursivelyPrintBoundingBoxes(stringBuffer);
          System.out.println(stringBuffer);
 
-         combinedTerrainObject.recursivelyAddBoundingBoxVisualizerToLinkGraphics(YoAppearance.Purple());
+         combinedTerrainObject3D.recursivelyAddBoundingBoxVisualizerToLinkGraphics(YoAppearance.Purple());
       }
    }
 
    public void addCalibrationCube()
    {
       AppearanceDefinition app = YoAppearance.Beige();
-      setUpSlopedBox(combinedTerrainObject, 2, 2, .25, .5, .5, .5, 0, 0, app);
+      setUpSlopedBox(combinedTerrainObject3D, 2, 2, .25, .5, .5, .5, 0, 0, app);
    }
 
    private void addFalseStair()
@@ -134,12 +130,12 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       double[] centerPoint;
       double stairTopHeight = stepRise;
       centerPoint = rotateAroundOrigin(centerPointLocal, courseAngle);
-      setUpFloatingStair(combinedTerrainObject, centerPoint, stepWidth, stepTread, stepThickness, stairTopHeight, courseAngle, app);
+      setUpFloatingStair(combinedTerrainObject3D, centerPoint, stepWidth, stepTread, stepThickness, stairTopHeight, courseAngle, app);
    }
 
-   private static CombinedTerrainObject setUpPathDRCTrialsLadder(String name)
+   private static CombinedTerrainObject3D setUpPathDRCTrialsLadder(String name)
    {
-      CombinedTerrainObject combinedTerrainObject = new CombinedTerrainObject(name);
+      CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D(name);
 
       final double courseAngle = 3 * 45. / 2;
       final double courseStartDistance = 7;
@@ -331,9 +327,9 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
             cone2 = YoAppearance.Green();
          }
 
-         setUpCone(combinedTerrainObject, initialOffset + (i * coneSeparation) + coneColorSeparateion, -(initialOffset + (i * coneSeparation)), .25, .25, 0.5,
+         setUpCone(combinedTerrainObject3D, initialOffset + (i * coneSeparation) + coneColorSeparateion, -(initialOffset + (i * coneSeparation)), .25, .25, 0.5,
                    cone1);
-         setUpCone(combinedTerrainObject, initialOffset + (i * coneSeparation), -(initialOffset + (i * coneSeparation) + coneColorSeparateion), .25, .25, 0.45,
+         setUpCone(combinedTerrainObject3D, initialOffset + (i * coneSeparation), -(initialOffset + (i * coneSeparation) + coneColorSeparateion), .25, .25, 0.45,
                    cone2);
       }
 
@@ -372,7 +368,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
    }
 
    
-   private void testRotatableRampsSetupForGraphicsAndCollision(CombinedTerrainObject combinedTerrainObject)
+   private void testRotatableRampsSetupForGraphicsAndCollision(CombinedTerrainObject3D combinedTerrainObject)
    {
       double courseAngleDeg = 45.0;
       double startDistance = 4.0;
@@ -391,7 +387,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       color = YoAppearance.Gray();
       float rampHeight = 0.625f;
 
-      setUpRamp(combinedTerrainObject, 5.0f, 0.0f, 2.0f, 3.0f, rampHeight, color);
+      setUpRamp3D(combinedTerrainObject, 5.0f, 0.0f, 2.0f, 3.0f, rampHeight, color);
 
       // setUpGround();
       // 45,200
@@ -406,13 +402,13 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
       // location2.setTranslation(new Vector3d(0, 0, -2));
 
-      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, width1, width1, 1), texture);
+      RotatableBoxTerrainObject3D newBox = new RotatableBoxTerrainObject3D(new Box3d(location, width1, width1, 1), texture);
       combinedTerrainObject.addTerrainObject(newBox);
-      RotatableBoxTerrainObject newBox2 = new RotatableBoxTerrainObject(new Box3d(location2, width2, width2, 1), texture);
+      RotatableBoxTerrainObject3D newBox2 = new RotatableBoxTerrainObject3D(new Box3d(location2, width2, width2, 1), texture);
       combinedTerrainObject.addTerrainObject(newBox2);
    }
 
-   private static void setUpPath4DRCTrialsTrainingWalkingCourseDifficult(CombinedTerrainObject combinedTerrainObject)
+   private static void setUpPath4DRCTrialsTrainingWalkingCourseDifficult(CombinedTerrainObject3D combinedTerrainObject)
    {
       double courseAngleDeg = 45.0;
       double startDistance = 4.0;
@@ -481,9 +477,9 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
    }
 
-   private static CombinedTerrainObject setUpPath4DRCTrialsTrainingWalkingCourse(String name)
+   private static CombinedTerrainObject3D setUpPath4DRCTrialsTrainingWalkingCourse(String name)
    {
-      CombinedTerrainObject combinedTerrainObject = new CombinedTerrainObject(name);
+      CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D(name);
       
       double courseAngleDeg = 45.0;
       double startDistance = 4.0;
@@ -513,9 +509,9 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       return combinedTerrainObject;
    }
 
-   private CombinedTerrainObject setUpTrialsQuals(String name)
+   private CombinedTerrainObject3D setUpTrialsQuals(String name)
    {
-      CombinedTerrainObject combinedTerrainObject = new CombinedTerrainObject(name);
+      CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D(name);
 
       double courseAngleDeg = -45.0;
       double startDistance = 2.0;
@@ -621,7 +617,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       return combinedTerrainObject;
    }
 
-   private static void setUpStepOverObstacles(CombinedTerrainObject combinedTerrainObject, double courseAngleDeg, double startDistance, AppearanceDefinition color, final double sectionLength)
+   private static void setUpStepOverObstacles(CombinedTerrainObject3D combinedTerrainObject, double courseAngleDeg, double startDistance, AppearanceDefinition color, final double sectionLength)
    {
       double[] point = {startDistance + sectionLength * 0.75, sectionLength * 0.25};
       double[] newPoint = rotateAroundOrigin(point, courseAngleDeg);
@@ -654,7 +650,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
                      courseAngleDeg, color);
    }
 
-   private static void setUpTruss(CombinedTerrainObject combinedTerrainObject, double[] newPoint, double trussLength, double trussSide, double courseAngleDeg, AppearanceDefinition color)
+   private static void setUpTruss(CombinedTerrainObject3D combinedTerrainObject, double[] newPoint, double trussLength, double trussSide, double courseAngleDeg, AppearanceDefinition color)
    {
       AppearanceDefinition overrideColor = YoAppearance.White();    // color;
       overrideColor.setTransparency(0.95);
@@ -663,9 +659,9 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       combinedTerrainObject.addTerrainObject(truss);
    }
 
-   private static CombinedTerrainObject setUpCinderBlockFieldActual(String name, double courseAngle, double startDistance)
+   private static CombinedTerrainObject3D setUpCinderBlockFieldActual(String name, double courseAngle, double startDistance)
    {
-      CombinedTerrainObject combinedTerrainObject = new CombinedTerrainObject(name);
+      CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D(name);
       
       int nBlocksWide = 6;
       int nBlocksLong = 21;
@@ -820,7 +816,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       return combinedTerrainObject;
    }
 
-   private static void setUpCinderBlockField(CombinedTerrainObject combinedTerrainObject, double courseAngle, double startDistance)
+   private static void setUpCinderBlockField(CombinedTerrainObject3D combinedTerrainObject, double courseAngle, double startDistance)
    {
       int nBlocksWide = 6;
       int nBlocksLong = 31;
@@ -1047,10 +1043,10 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       }
    }
 
-   private static CombinedTerrainObject setUpMultipleUpDownRamps(String name, double courseAngleDegrees, double startDistance, int numberOfRamps, final double sectionLength,
+   private static CombinedTerrainObject3D setUpMultipleUpDownRamps(String name, double courseAngleDegrees, double startDistance, int numberOfRamps, final double sectionLength,
            AppearanceDefinition color)
    {
-      CombinedTerrainObject combinedTerrainObject = new CombinedTerrainObject(name);
+      CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D(name);
       
       for (int i = 1; i <= 2 * numberOfRamps; i = i + 2)
       {
@@ -1069,7 +1065,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       return combinedTerrainObject;
    }
 
-   private static double setUpTripHazards(CombinedTerrainObject combinedTerrainObject, double courseAngle, double startDistance, int[] numberOfStepOvers, final double sectionLength, AppearanceDefinition color)
+   private static double setUpTripHazards(CombinedTerrainObject3D combinedTerrainObject, double courseAngle, double startDistance, int[] numberOfStepOvers, final double sectionLength, AppearanceDefinition color)
    {
       double[] stepHeight = {0.0508, 0.1016};
       double[] stepWidth = {0.1016, 0.1016};
@@ -1088,14 +1084,14 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
                stepLength = (sectionLength) / Math.sin(Math.toRadians(degreesOffset[i]));
             double[] point = {startDistance + sectionLength / 4 + sectionLength / 2 * i, -sectionLength / 2 + j * sectionLength / (numberOfStepOvers[i] - 1)};
             double[] newPoint = rotateAroundOrigin(point, courseAngle);
-            setUpWall(combinedTerrainObject, newPoint, stepWidth[i], stepLength, stepHeight[i], courseAngle + degreesOffset[i], color);
+            setUpWall3D(combinedTerrainObject, newPoint, stepWidth[i], stepLength, stepHeight[i], courseAngle + degreesOffset[i], color);
          }
       }
 
       return startDistance;
    }
 
-   private static void setUpStraightHurdles(CombinedTerrainObject combinedTerrainObject, double courseAngle, double startDistance, int[] numberStraightHurdles)
+   private static void setUpStraightHurdles(CombinedTerrainObject3D combinedTerrainObject, double courseAngle, double startDistance, int[] numberStraightHurdles)
    {
       for (int i = 0; i < numberStraightHurdles.length; i++)
       {
@@ -1108,9 +1104,9 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       }
    }
 
-   private static CombinedTerrainObject setUpZigZagHurdles(String name, double courseAngle, double startDistance, int[] numberZigZagHurdles, double orientation)
+   private static CombinedTerrainObject3D setUpZigZagHurdles(String name, double courseAngle, double startDistance, int[] numberZigZagHurdles, double orientation)
    {
-      CombinedTerrainObject combinedTerrainObject = new CombinedTerrainObject(name);
+      CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D(name);
       
       double xOffset = cinderBlockLength / 4 * Math.cos(Math.toRadians(45));
       double yOffset = cinderBlockLength * Math.cos(Math.toRadians(45));
@@ -1133,29 +1129,29 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       return combinedTerrainObject;
    }
 
-   private static void setUpRampBlock(CombinedTerrainObject combinedTerrainObject, double[] point, int h, double deg)
+   private static void setUpRampBlock(CombinedTerrainObject3D combinedTerrainObject, double[] point, int h, double deg)
    {
       setUpRampBlock(combinedTerrainObject, point[0], point[1], h, deg);
    }
 
-   private static void setUpSkewedUprightBlockSquare(CombinedTerrainObject combinedTerrainObject, double[] point, int h, double deg)
+   private static void setUpSkewedUprightBlockSquare(CombinedTerrainObject3D combinedTerrainObject, double[] point, int h, double deg)
    {
       setUpSkewedUprightBlockSquare(combinedTerrainObject, point[0], point[1], h, deg);
    }
 
-   private static void setUpFlatSkewedBlockSquare(CombinedTerrainObject combinedTerrainObject, double[] point, int h, double deg)
+   private static void setUpFlatSkewedBlockSquare(CombinedTerrainObject3D combinedTerrainObject, double[] point, int h, double deg)
    {
       setUpFlatSkewedBlockSquare(combinedTerrainObject, point[0], point[1], h, deg);
    }
 
-   private static void setUpCinderBlockSquare(CombinedTerrainObject combinedTerrainObject, double[] point, int h, double deg)
+   private static void setUpCinderBlockSquare(CombinedTerrainObject3D combinedTerrainObject, double[] point, int h, double deg)
    {
       setUpCinderBlockSquare(combinedTerrainObject, point[0], point[1], h, deg);
    }
 
-   private CombinedTerrainObject setUpPath5NarrowDoor(String name)
+   private CombinedTerrainObject3D setUpPath5NarrowDoor(String name)
    {
-      CombinedTerrainObject combinedTerrainObject = new CombinedTerrainObject(name);
+      CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D(name);
 
       AppearanceDefinition color = YoAppearance.DarkGray();
 
@@ -1175,9 +1171,9 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       return combinedTerrainObject;
    }
 
-   private CombinedTerrainObject setUpPath6Barriers(String name)
+   private CombinedTerrainObject3D setUpPath6Barriers(String name)
    {
-      CombinedTerrainObject combinedTerrainObject = new CombinedTerrainObject(name);
+      CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D(name);
 
       AppearanceDefinition color = YoAppearance.DarkGray();
       double courseAngle = -135.0;
@@ -1204,9 +1200,9 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       return combinedTerrainObject;
    }
 
-   private CombinedTerrainObject setUpPath7Stairs(String name)
+   private CombinedTerrainObject3D setUpPath7Stairs(String name)
    {
-      CombinedTerrainObject combinedTerrainObject = new CombinedTerrainObject(name);
+      CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D(name);
 
       AppearanceDefinition color = YoAppearance.DarkGray();
       double courseAngle = 135;
@@ -1236,16 +1232,16 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       return combinedTerrainObject;
    }
 
-   private CombinedTerrainObject setUpPath8RampsWithSteppingStones(String name)
+   private CombinedTerrainObject3D setUpPath8RampsWithSteppingStones(String name)
    {
-      CombinedTerrainObject combinedTerrainObject = new CombinedTerrainObject(name);
+      CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D(name);
 
       AppearanceDefinition color = YoAppearance.DarkGray();
 
       float rampHeight = 0.3f;
 
       // ramp up and landing
-      setUpRamp(combinedTerrainObject, -5.0f, 0.0f, 3.0f, -3.0f, rampHeight, color);
+      setUpRamp3D(combinedTerrainObject, -5.0f, 0.0f, 3.0f, -3.0f, rampHeight, color);
       setUpWall(combinedTerrainObject, new double[] {-7.0f, 0.0f}, 3.0f, 1.0f, rampHeight, 0, color);
 
       // simple stepping stones, centered at x=-0.75m
@@ -1275,11 +1271,11 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
          // landing and ramp down
          setUpWall(combinedTerrainObject, new double[] {-15.5f, 0.5f}, 2.0f, 1.0f, rampHeight, 0, color);
-         setUpRamp(combinedTerrainObject, -17.5f, 0.5f, 2.0f, 3.0f, rampHeight, color);
+         setUpRamp3D(combinedTerrainObject, -17.5f, 0.5f, 2.0f, 3.0f, rampHeight, color);
       }
       else
       {
-         setUpRamp(combinedTerrainObject, -12.5f, 0.0f, 3.0f, 3.0f, rampHeight, color);
+         setUpRamp3D(combinedTerrainObject, -12.5f, 0.0f, 3.0f, 3.0f, rampHeight, color);
       }
 
       // Do this for a long ramp for testing:
@@ -1289,7 +1285,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       return combinedTerrainObject;
    }
 
-   private static void addLimboBar(CombinedTerrainObject combinedTerrainObject)
+   private static void addLimboBar(CombinedTerrainObject3D combinedTerrainObject)
    {
 
          double height = 1;
@@ -1411,7 +1407,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       combinedTerrainObject.addTerrainObject(rock);
    }
    
-   private static void addRock(CombinedTerrainObject combinedTerrainObject, Vector3d normal, double centroidHeight, double[][] vertices)
+   private static void addRock(CombinedTerrainObject3D combinedTerrainObject, Vector3d normal, double centroidHeight, double[][] vertices)
    {
       AppearanceDefinition color = YoAppearance.DarkGray();
 
@@ -1424,7 +1420,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       }
 
       ConvexPolygon2d convexPolygon = new ConvexPolygon2d(vertexPoints);
-      RotatableConvexPolygonTerrainObject rock = new RotatableConvexPolygonTerrainObject(normal, convexPolygon, centroidHeight, color);
+      RotatableConvexPolygonTerrainObject3D rock = new RotatableConvexPolygonTerrainObject3D(normal, convexPolygon, centroidHeight, color);
       combinedTerrainObject.addTerrainObject(rock);
    }
 
@@ -1441,7 +1437,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       combinedTerrainObject.addTerrainObject(newBox);
    }
 
-   private static void setUpWall(CombinedTerrainObject combinedTerrainObject, double[] xy, double width, double length, double height, double yawDegrees,
+   private static void setUpWall(CombinedTerrainObject3D combinedTerrainObject, double[] xy, double width, double length, double height, double yawDegrees,
                                  AppearanceDefinition app)
    {
       double x = xy[0];
@@ -1450,11 +1446,11 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       location.rotZ(Math.toRadians(yawDegrees));
 
       location.setTranslation(new Vector3d(x, y, height / 2));
-      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, length, width, height), app);
+      RotatableBoxTerrainObject3D newBox = new RotatableBoxTerrainObject3D(new Box3d(location, length, width, height), app);
       combinedTerrainObject.addTerrainObject(newBox);
    }
 
-   private static void setUpFloatingStair(CombinedTerrainObject combinedTerrainObject, double[] centerPoint, double width, double tread, double thickness,
+   private static void setUpFloatingStair(CombinedTerrainObject3D combinedTerrainObject, double[] centerPoint, double width, double tread, double thickness,
                                    double stairTopHeight, double yawDegrees, AppearanceDefinition app)
    {
       double xCenter = centerPoint[0];
@@ -1463,17 +1459,17 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       location.rotZ(Math.toRadians(yawDegrees));
 
       location.setTranslation(new Vector3d(xCenter, yCenter, stairTopHeight - thickness / 2));
-      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, tread, width, thickness), app);
+      RotatableBoxTerrainObject3D newBox = new RotatableBoxTerrainObject3D(new Box3d(location, tread, width, thickness), app);
       combinedTerrainObject.addTerrainObject(newBox);
    }
 
-   private static void setUpCone(CombinedTerrainObject combinedTerrainObject, double x, double y, double bottomWidth, double topWidth, double height,
+   private static void setUpCone(CombinedTerrainObject3D combinedTerrainObject, double x, double y, double bottomWidth, double topWidth, double height,
                                  AppearanceDefinition app)
    {
       combinedTerrainObject.addCone(x, y, bottomWidth, topWidth, height, app);
    }
 
-   private static void setUpRamp(CombinedTerrainObject combinedTerrainObject, double x, double y, double width, double length, double height,
+   private static void setUpRamp(CombinedTerrainObject3D combinedTerrainObject, double x, double y, double width, double length, double height,
                                  AppearanceDefinition app)
    {
       combinedTerrainObject.addRamp(x - length / 2.0, y - width / 2.0, x + length / 2.0, y + width / 2.0, height, app);
@@ -1485,7 +1481,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       combinedTerrainObject.addRamp(x - length / 2.0, y - width / 2.0, x + length / 2.0, y + width / 2.0, height, app);
    }
 
-   private static void setUpRotatedRamp(CombinedTerrainObject combinedTerrainObject, double xCenter, double yCenter, double width, double run, double rise,
+   private static void setUpRotatedRamp(CombinedTerrainObject3D combinedTerrainObject, double xCenter, double yCenter, double width, double run, double rise,
            double yawDegreesAboutCenter, AppearanceDefinition app)
    {
       combinedTerrainObject.addRotatedRamp(xCenter, yCenter, run, width, rise, yawDegreesAboutCenter, app);
@@ -1502,13 +1498,13 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
    // slanted block (square block on ramp, with # of square block support
    // layers: 0-3 typ)
 
-   private static void setUpCinderBlock(CombinedTerrainObject combinedTerrainObject, double xCenter, double yCenter, int numberFlatSupports, double yawDegrees)
+   private static void setUpCinderBlock(CombinedTerrainObject3D combinedTerrainObject, double xCenter, double yCenter, int numberFlatSupports, double yawDegrees)
    {
       double[] centerPoint = {xCenter, yCenter};
       setUpCinderBlock(combinedTerrainObject, centerPoint, numberFlatSupports, yawDegrees);
    }
 
-   private static void setUpCinderBlock(CombinedTerrainObject combinedTerrainObject, double[] centerPoint, int numberFlatSupports, double yawDegrees)
+   private static void setUpCinderBlock(CombinedTerrainObject3D combinedTerrainObject, double[] centerPoint, int numberFlatSupports, double yawDegrees)
    {
       if (numberFlatSupports < 0)
          return;
@@ -1528,7 +1524,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       combinedTerrainObject.addTerrainObject(newBox);
    }
 
-   private static void setUpSlopedBox(CombinedTerrainObject combinedTerrainObject, double xCenter, double yCenter, double zCenter, double xLength, double yLength,
+   private static void setUpSlopedBox(CombinedTerrainObject3D combinedTerrainObject, double xCenter, double yCenter, double zCenter, double xLength, double yLength,
                                double zLength, double slopeRadians, double yawDegrees, AppearanceDefinition app)
    {
       Transform3D location = new Transform3D();
@@ -1539,11 +1535,11 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       location.mul(tilt);
 
       location.setTranslation(new Vector3d(xCenter, yCenter, zCenter));
-      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, xLength, yLength, zLength), app);
+      RotatableBoxTerrainObject3D newBox = new RotatableBoxTerrainObject3D(new Box3d(location, xLength, yLength, zLength), app);
       combinedTerrainObject.addTerrainObject(newBox);
    }
 
-   private static void setUpSlopedCylinder(CombinedTerrainObject combinedTerrainObject, double xCenter, double yCenter, double zCenter, double xLength, double radius,
+   private static void setUpSlopedCylinder(CombinedTerrainObject3D combinedTerrainObject, double xCenter, double yCenter, double zCenter, double xLength, double radius,
                                     double slopeRadians, double yawDegrees, AppearanceDefinition app)
    {
       double pitchDownDegrees = Math.toDegrees(-slopeRadians + Math.PI / 2);
@@ -1553,7 +1549,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       combinedTerrainObject.addTerrainObject(newCylinder);
    }
 
-   private static void setUpSlopedCinderBlock(CombinedTerrainObject combinedTerrainObject, double xCenter, double yCenter, int numberFlatSupports, double yawDegrees)
+   private static void setUpSlopedCinderBlock(CombinedTerrainObject3D combinedTerrainObject, double xCenter, double yCenter, int numberFlatSupports, double yawDegrees)
    {
       if (numberFlatSupports < 0)
          return;
@@ -1574,7 +1570,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       combinedTerrainObject.addTerrainObject(newBox);
    }
 
-   private static void setUpCinderBlockSquare(CombinedTerrainObject combinedTerrainObject, double xCenter, double yCenter, int numberFlatSupports, double yawDegrees)
+   private static void setUpCinderBlockSquare(CombinedTerrainObject3D combinedTerrainObject, double xCenter, double yCenter, int numberFlatSupports, double yawDegrees)
    {
       double xOffset = 0, yOffset = cinderBlockWidth / 2;
       double[] xyRotated1 = rotateAroundOrigin(new double[] {xOffset, yOffset}, yawDegrees);
@@ -1587,14 +1583,14 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
          setUpCinderBlockSquare(combinedTerrainObject, xCenter, yCenter, numberFlatSupports - 1, yawDegrees + 90);
    }
 
-   private static void setUpFlatSkewedBlockSquare(CombinedTerrainObject combinedTerrainObject, double xCenter, double yCenter, int numberFlatSupports,
+   private static void setUpFlatSkewedBlockSquare(CombinedTerrainObject3D combinedTerrainObject, double xCenter, double yCenter, int numberFlatSupports,
            double yawDegrees)
    {
       setUpCinderBlockSquare(combinedTerrainObject, xCenter, yCenter, numberFlatSupports - 1, yawDegrees);
       setUpCinderBlock(combinedTerrainObject, xCenter, yCenter, numberFlatSupports, yawDegrees - 45);
    }
 
-   private static void setUpCinderBlockUpright(CombinedTerrainObject combinedTerrainObject, double xCenter, double yCenter, int numberFlatSupports, double yawDegrees)
+   private static void setUpCinderBlockUpright(CombinedTerrainObject3D combinedTerrainObject, double xCenter, double yCenter, int numberFlatSupports, double yawDegrees)
    {
       if (numberFlatSupports < 0)
          return;
@@ -1615,14 +1611,14 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       combinedTerrainObject.addTerrainObject(newBox);
    }
 
-   private static void setUpSkewedUprightBlockSquare(CombinedTerrainObject combinedTerrainObject, double xCenter, double yCenter, int numberFlatSupports,
+   private static void setUpSkewedUprightBlockSquare(CombinedTerrainObject3D combinedTerrainObject, double xCenter, double yCenter, int numberFlatSupports,
            double yawDegrees)
    {
       setUpCinderBlockSquare(combinedTerrainObject, xCenter, yCenter, numberFlatSupports - 1, yawDegrees);
       setUpCinderBlockUpright(combinedTerrainObject, xCenter, yCenter, numberFlatSupports, yawDegrees - 45);
    }
 
-   private static void setUpRampBlock(CombinedTerrainObject combinedTerrainObject, double xCenter, double yCenter, int numberFlatSupports, double yawDegrees)
+   private static void setUpRampBlock(CombinedTerrainObject3D combinedTerrainObject, double xCenter, double yCenter, int numberFlatSupports, double yawDegrees)
    {
       if (numberFlatSupports < 0)
          return;
@@ -1636,7 +1632,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       double[] xySupportRotatedOffset = rotateAroundOrigin(new double[] {(cinderBlockLength - rampRise) / 2, 0}, yawDegrees);
       blockSupportLocation.setTranslation(new Vector3d(xCenter + xySupportRotatedOffset[0], yCenter + xySupportRotatedOffset[1],
               rampRise / 2 + numberFlatSupports * cinderBlockHeight));
-      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(blockSupportLocation, rampRise, cinderBlockLength, rampRise),
+      RotatableBoxTerrainObject3D newBox = new RotatableBoxTerrainObject3D(new Box3d(blockSupportLocation, rampRise, cinderBlockLength, rampRise),
                                             cinderBlockAppearance);
       combinedTerrainObject.addTerrainObject(newBox);
 
@@ -1647,9 +1643,9 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       setUpSlopedCinderBlock(combinedTerrainObject, xCenter + xyRotated2[0], yCenter + xyRotated2[1], numberFlatSupports, yawDegrees);
    }
 
-   private static CombinedTerrainObject setUpGround(String name)
+   private static CombinedTerrainObject3D setUpGround(String name)
    {
-      CombinedTerrainObject combinedTerrainObject = new CombinedTerrainObject(name);
+      CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D(name);
       
       URL fileURL = DRCDemo01NavigationEnvironment.class.getResource("Textures/ground2.png");
       YoAppearanceTexture texture = new YoAppearanceTexture(fileURL);
@@ -1657,9 +1653,9 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       Transform3D location = new Transform3D();
       location.setTranslation(new Vector3d(0, 0, -0.5));
 
-      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, 45, 45, 1), texture);
+      RotatableBoxTerrainObject3D newBox = new RotatableBoxTerrainObject3D(new Box3d(location, 45, 45, 1), texture);
       combinedTerrainObject.addTerrainObject(newBox);
-      RotatableBoxTerrainObject newBox2 = new RotatableBoxTerrainObject(new Box3d(location, 200, 200, 0.75), YoAppearance.DarkGray());
+      RotatableBoxTerrainObject3D newBox2 = new RotatableBoxTerrainObject3D(new Box3d(location, 200, 200, 0.75), YoAppearance.DarkGray());
       combinedTerrainObject.addTerrainObject(newBox2);
 
       return combinedTerrainObject;
@@ -1667,7 +1663,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
    public TerrainObject getTerrainObject()
    {
-      return combinedTerrainObject;
+      return null;
    }
    
    public TerrainObject3D getTerrainObject3D()
