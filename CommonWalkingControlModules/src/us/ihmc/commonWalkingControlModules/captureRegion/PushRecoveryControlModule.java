@@ -1,10 +1,12 @@
 package us.ihmc.commonWalkingControlModules.captureRegion;
 
 import java.awt.Color;
+import java.util.List;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Point2d;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepUtils;
@@ -14,10 +16,14 @@ import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenc
 import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculationProvider;
 import us.ihmc.plotting.shapes.PointArtifact;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLine2d;
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
@@ -62,6 +68,7 @@ public class PushRecoveryControlModule
    private final BooleanYoVariable recovering;
    private BooleanYoVariable readyToGrabNextFootstep;
    private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
+   private final SideDependentList<? extends ContactablePlaneBody> feet;
 
    private final YoFrameLine2d capturePointTrajectoryLine;
    private final YoFrameLine2dArtifact capturePointTrajectoryLineArtifact;
@@ -70,7 +77,7 @@ public class PushRecoveryControlModule
 
    public PushRecoveryControlModule(MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters,
          BooleanYoVariable readyToGrabNextFootstep, ICPAndMomentumBasedController icpAndMomentumBasedController, StateMachine<?> stateMachine,
-         YoVariableRegistry parentRegistry, SwingTimeCalculationProvider swingTimeCalculationProvider)
+         YoVariableRegistry parentRegistry, SwingTimeCalculationProvider swingTimeCalculationProvider, SideDependentList<? extends ContactablePlaneBody> feet)
    {
       this.momentumBasedController = momentumBasedController;
       this.readyToGrabNextFootstep = readyToGrabNextFootstep;
@@ -78,6 +85,7 @@ public class PushRecoveryControlModule
       this.referenceFrames = momentumBasedController.getReferenceFrames();
       this.stateMachine = stateMachine;
       this.swingTimeCalculationProvider = swingTimeCalculationProvider;
+      this.feet = feet;
 
       enablePushRecovery.set(ENABLE);
 
@@ -205,7 +213,7 @@ public class PushRecoveryControlModule
                      return false;
                   }
 
-                  currentFootstep = FootstepUtils.getCurrentFootstep(swingSide, referenceFrames, momentumBasedController.getContactableFeet());
+                  currentFootstep = createFootstepAtCurrentLocation(swingSide);
 
                   readyToGrabNextFootstep.set(false);
                   momentumBasedController.getUpcomingSupportLeg().set(transferToSide.getOppositeSide());
@@ -277,6 +285,24 @@ public class PushRecoveryControlModule
       projectedCapturePoint.set(capturePoint2d.getPointCopy());
 
       return computeOffsetTimeToMoveDesiredICPToTrajectoryLine(capturePoint2d, constantCenterOfPressure, initialICP, finalDesiredICP, omega0);
+   }
+   
+   private Footstep createFootstepAtCurrentLocation(RobotSide robotSide)
+   {
+      ContactablePlaneBody foot = feet.get(robotSide);
+      ReferenceFrame footReferenceFrame = foot.getRigidBody().getParentJoint().getFrameAfterJoint();
+      FramePose framePose = new FramePose(footReferenceFrame);
+      framePose.changeFrame(worldFrame);
+
+      PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("poseReferenceFrame", framePose);
+
+      ReferenceFrame soleReferenceFrame = FootstepUtils.createSoleFrame(poseReferenceFrame, foot);
+      List<FramePoint> expectedContactPoints = FootstepUtils.getContactPointsInFrame(foot, soleReferenceFrame);
+      boolean trustHeight = true;
+
+      Footstep footstep = new Footstep(foot, poseReferenceFrame, soleReferenceFrame, expectedContactPoints, trustHeight);
+
+      return footstep;
    }
 
    private double computeOffsetTimeToMoveDesiredICPToTrajectoryLine(FramePoint2d capturePoint, FramePoint2d constantCenterOfPressure, FramePoint2d initialICP,

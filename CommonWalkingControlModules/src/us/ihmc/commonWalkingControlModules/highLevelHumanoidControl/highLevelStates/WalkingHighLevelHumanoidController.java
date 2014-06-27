@@ -340,7 +340,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             initialPelvisOrientationProvider, finalPelvisOrientationProvider, registry);
 
       pushRecoveryModule = new PushRecoveryControlModule(momentumBasedController, walkingControllerParameters, readyToGrabNextFootstep, 
-                                                         icpAndMomentumBasedController, stateMachine, registry, swingTimeCalculationProvider);
+                                                         icpAndMomentumBasedController, stateMachine, registry, swingTimeCalculationProvider, feet);
 
       setupStateMachine();
       readyToGrabNextFootstep.set(true);
