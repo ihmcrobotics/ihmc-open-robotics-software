@@ -110,9 +110,12 @@ public class FootstepToFootstepChecker
       boolean endingPoseIsOnWrongSide = isOnWrongSide(stanceFootstepSide, stanceFramePose, endingFramePose);
       boolean stancePoseIsOnWrongSide = isOnWrongSide(stanceFootstepSide.getOppositeSide(), endingFramePose, stanceFramePose);
 
-      FramePoint2d initialPoint = new FramePoint2d(initialFramePose.getPosition2dCopy());
-      FramePoint2d stancePoint = new FramePoint2d(stanceFramePose.getPosition2dCopy());
-      FramePoint2d endPoint = new FramePoint2d(endingFramePose.getPosition2dCopy());
+      FramePoint2d initialPoint = new FramePoint2d();
+      initialFramePose.getPosition2d(initialPoint);
+      FramePoint2d stancePoint = new FramePoint2d();
+      stanceFramePose.getPosition2d(stancePoint);
+      FramePoint2d endPoint = new FramePoint2d();
+      endingFramePose.getPosition2d(endPoint);
 
       boolean swingsThroughStanceLeg;
       if ((initialPoint.getX() == endPoint.getX()) && (initialPoint.getY() == endPoint.getY()))
