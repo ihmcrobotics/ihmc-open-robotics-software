@@ -35,6 +35,7 @@ import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
 import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
 import us.ihmc.graphics3DAdapter.GroundProfile;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
+import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.AsyncContinuousExecutor;
@@ -119,7 +120,9 @@ public class DRCSimulationTestHelper
       TerrainObject environmentTerrain = null;
       if (groundProfile instanceof TerrainObject)
          environmentTerrain = (TerrainObject) groundProfile;
-      drcSimulationFactory = new DRCSimulationFactory(robotModel, controllerFactory, environmentTerrain.getLinkGraphics(), robotInitialSetup, scsInitialSetup,
+      
+      Graphics3DObject environmentGraphics = environmentTerrain == null ? null : environmentTerrain.getLinkGraphics();
+      drcSimulationFactory = new DRCSimulationFactory(robotModel, controllerFactory, environmentGraphics, robotInitialSetup, scsInitialSetup,
             guiInitialSetup, globalDataProducer);
       scs = drcSimulationFactory.getSimulationConstructionSet();
       sdfRobot = drcSimulationFactory.getRobot();
