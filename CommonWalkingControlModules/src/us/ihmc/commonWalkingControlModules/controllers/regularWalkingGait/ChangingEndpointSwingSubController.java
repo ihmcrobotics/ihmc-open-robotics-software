@@ -587,7 +587,8 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 //    Orientation endOrientation = desiredFootStep.getFootstepPose().getOrientation().changeFrameCopy(endSwingOrientation.getReferenceFrame());
 //    endSwingOrientation.set(endOrientation);
 
-      FrameOrientation endOrientation = desiredFootStep.getPoseCopy().getOrientationCopy();
+      FrameOrientation endOrientation = new FrameOrientation();
+      desiredFootStep.getOrientation(endOrientation);
       ReferenceFrame supportFootAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(swingSide.getOppositeSide());
       endSwingOrientations.get(swingSide).set(endOrientation.changeFrameCopy(supportFootAnkleZUpFrame));
    }

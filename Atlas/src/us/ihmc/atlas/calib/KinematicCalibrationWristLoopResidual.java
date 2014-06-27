@@ -90,20 +90,27 @@ public class KinematicCalibrationWristLoopResidual implements FunctionNtoM
             double scaleRadToCM = 0.01 / (Math.PI / 8); //30deg -> 1cm
             if (QUAT_DIFF)
             {
-               Quat4d qErr = leftEE.getOrientationCopy().getQuaternionCopy();
+               Quat4d leftEEQuat = new Quat4d();
+               Quat4d rightEEQuat = new Quat4d();
+               leftEE.getOrientation(leftEEQuat);
+               rightEE.getOrientation(rightEEQuat);
+               Quat4d qErr = new Quat4d(leftEEQuat);
                qErr.inverse();
-               qErr.mul(rightEE.getOrientationCopy().getQuaternionCopy());
+               qErr.mul(rightEEQuat);
                //qErr.normalize();
                AxisAngle4d axErr = new AxisAngle4d();
                axErr.set(qErr);
                output[outputCounter++] = scaleRadToCM * axErr.getX() * axErr.getAngle();
                output[outputCounter++] = scaleRadToCM * axErr.getY() * axErr.getAngle();
                output[outputCounter++] = scaleRadToCM * axErr.getZ() * axErr.getAngle();
-            } else
+            }
+            else
             {
                assert (leftEE.getReferenceFrame() == rightEE.getReferenceFrame());
-               Matrix3d mLeft = leftEE.getOrientationCopy().getMatrix3dCopy();
-               Matrix3d mRight = rightEE.getOrientationCopy().getMatrix3dCopy();
+               Matrix3d mLeft = new Matrix3d();
+               Matrix3d mRight = new Matrix3d();
+               leftEE.getOrientation(mLeft);
+               rightEE.getOrientation(mRight);
                Vector3d vDiff = CalibUtil.RotationDiff(mLeft, mRight);
                output[outputCounter++] = scaleRadToCM * vDiff.x;
                output[outputCounter++] = scaleRadToCM * vDiff.y;

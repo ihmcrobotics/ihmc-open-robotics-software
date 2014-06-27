@@ -389,7 +389,8 @@ public class JointSpaceSwingSubController implements SwingSubController
       FramePoint endPoint = new FramePoint();
       desiredFootstepPose.getPosition(endPoint);
       endPoint.changeFrame(desiredPositions.get(swingSide).getReferenceFrame());
-      FrameOrientation endOrientation = new FrameOrientation(desiredFootstepPose.getOrientationCopy());
+      FrameOrientation endOrientation = new FrameOrientation();
+      desiredFootstepPose.getOrientation(endOrientation);
       endOrientation.changeFrame(desiredOrientations.get(swingSide).getReferenceFrame());
       
       // Setup the orientation trajectory

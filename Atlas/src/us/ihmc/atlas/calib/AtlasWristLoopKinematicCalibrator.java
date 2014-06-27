@@ -12,6 +12,7 @@ import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
+import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 
 import java.util.ArrayList;
@@ -41,19 +42,20 @@ public class AtlasWristLoopKinematicCalibrator extends AtlasCalibrationDataViewe
 
    private void debugPrint(int index)
    {
-      CalibUtil.setRobotModelFromData(fullRobotModel, (Map) q.get(index));
+      CalibUtil.setRobotModelFromData(fullRobotModel, q.get(index));
       FramePose leftEE = new FramePose(fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM), new Point3d(+0.00179, +0.13516, +0.01176), CalibUtil.quat0);
       FramePose rightEE = new FramePose(fullRobotModel.getEndEffectorFrame(RobotSide.RIGHT, LimbName.ARM), new Point3d(+0.00179,-0.13516, -0.01176), CalibUtil.quat0);
 
       leftEE.changeFrame(ReferenceFrame.getWorldFrame());
       rightEE.changeFrame(ReferenceFrame.getWorldFrame());
       {
-
-         System.out.println("r_axLeft: " + CalibUtil.Matrix3dToAxisAngle3d(leftEE.getOrientationCopy().getMatrix3dCopy()));
-         System.out.println("r_axRight: " + CalibUtil.Matrix3dToAxisAngle3d(rightEE.getOrientationCopy().getMatrix3dCopy()));
-         System.out.println("r_axDiff: " + CalibUtil.RotationDiff(
-               leftEE.getOrientationCopy().getMatrix3dCopy(),
-               rightEE.getOrientationCopy().getMatrix3dCopy()));
+         Matrix3d leftEEOrientation = new Matrix3d();
+         Matrix3d rightEEOrientation = new Matrix3d();
+         leftEE.getOrientation(leftEEOrientation);
+         rightEE.getOrientation(rightEEOrientation);
+         System.out.println("r_axLeft: " + CalibUtil.Matrix3dToAxisAngle3d(leftEEOrientation));
+         System.out.println("r_axRight: " + CalibUtil.Matrix3dToAxisAngle3d(rightEEOrientation));
+         System.out.println("r_axDiff: " + CalibUtil.RotationDiff(leftEEOrientation, rightEEOrientation));
       }
    }
 
@@ -119,7 +121,7 @@ public class AtlasWristLoopKinematicCalibrator extends AtlasCalibrationDataViewe
 
          for (int i = 0; i < calibrator.q.size(); i++)
          {
-            CalibUtil.setRobotModelFromData(calibrator.fullRobotModel, CalibUtil.addQ((Map) calibrator.q.get(i), qoffset));
+            CalibUtil.setRobotModelFromData(calibrator.fullRobotModel, CalibUtil.addQ(calibrator.q.get(i), qoffset));
             yoResidual0.setXYZYawPitchRoll(Arrays.copyOfRange(residual0, i * RESIDUAL_DOF, i * RESIDUAL_DOF + 6));
             yoResidual.setXYZYawPitchRoll(Arrays.copyOfRange(residual, i * RESIDUAL_DOF, i * RESIDUAL_DOF + 6));
             calibrator.updateQoutYoVariables(i);
