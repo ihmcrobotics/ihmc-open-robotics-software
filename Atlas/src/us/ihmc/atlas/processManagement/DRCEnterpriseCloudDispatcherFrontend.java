@@ -417,7 +417,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
             else
             {
                String[] javaArgs = new String[] {"-Xms4096m", "-Xmx4096m"};
-               String[] programArgs = new String[] {"-m", selectRobotModelRadioButtonGroup.getSelection().getActionCommand(), "-realRobot"};
+               String[] programArgs = new String[] {"-m", selectRobotModelRadioButtonGroup.getSelection().getActionCommand(), "--realRobot"};
 
                uiSpawner.spawn(AtlasOperatorUserInterface.class, javaArgs, programArgs, new ExitListener()
                {
