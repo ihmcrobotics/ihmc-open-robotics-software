@@ -18,6 +18,7 @@ import com.yobotics.simulationconstructionset.util.environments.SelectableObject
 import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.TerrainObject;
+import com.yobotics.simulationconstructionset.util.ground.TerrainObject3D;
 
 public class DRCDemo01Environment implements CommonAvatarEnvironmentInterface
 {
@@ -192,6 +193,11 @@ public class DRCDemo01Environment implements CommonAvatarEnvironmentInterface
    public TerrainObject getTerrainObject()
    {
       return combinedTerrainObject;
+   }
+   
+   public TerrainObject3D getTerrainObject3D()
+   {
+      return null;
    }
 
    public ArrayList<Robot> getEnvironmentRobots()

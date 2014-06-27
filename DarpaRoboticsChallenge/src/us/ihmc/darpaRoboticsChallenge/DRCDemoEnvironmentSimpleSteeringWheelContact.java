@@ -29,6 +29,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.Contactable;
 import com.yobotics.simulationconstructionset.util.ground.TerrainObject;
+import com.yobotics.simulationconstructionset.util.ground.TerrainObject3D;
 
 public class DRCDemoEnvironmentSimpleSteeringWheelContact implements CommonAvatarEnvironmentInterface
 {
@@ -88,6 +89,11 @@ public class DRCDemoEnvironmentSimpleSteeringWheelContact implements CommonAvata
    public TerrainObject getTerrainObject()
    {
       return combinedTerrainObject;
+   }
+   
+   public TerrainObject3D getTerrainObject3D()
+   {
+      return null;
    }
 
    public List<Robot> getEnvironmentRobots()

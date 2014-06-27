@@ -1,5 +1,8 @@
 package us.ihmc.darpaRoboticsChallenge.initialSetup;
 
+import us.ihmc.graphics3DAdapter.GroundProfile;
+import us.ihmc.graphics3DAdapter.GroundProfile3D;
+
 import com.yobotics.simulationconstructionset.DynamicIntegrationMethod;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
@@ -7,8 +10,6 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
 import com.yobotics.simulationconstructionset.physics.ScsPhysics;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.ground.steppingStones.SteppingStones;
-import us.ihmc.graphics3DAdapter.GroundProfile;
 
 /*
  * SCS Initial Setup
@@ -31,6 +32,7 @@ public interface ScsInitialSetup
    public abstract double getGravity();
    public abstract ScsPhysics createPhysics( ScsCollisionConfigure collisionConfigure , YoVariableRegistry registry );
    public abstract GroundProfile getGroundProfile();
+   public abstract GroundProfile3D getGroundProfile3D();
 //   public abstract SteppingStones getSteppingStones();
    public abstract DynamicIntegrationMethod getDynamicIntegrationMethod();
 

@@ -30,6 +30,7 @@ import com.yobotics.simulationconstructionset.util.environments.SelectableObject
 import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.TerrainObject;
+import com.yobotics.simulationconstructionset.util.ground.TerrainObject3D;
 
 public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInterface
 {
@@ -121,6 +122,11 @@ public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInter
    {
       return combinedTerrainObject;
    }
+   
+   public TerrainObject3D getTerrainObject3D()
+   {
+      return null;
+   }
 
    public List<Robot> getEnvironmentRobots()
    {
@@ -141,4 +147,5 @@ public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInter
    {
       // empty
    }
+
 }

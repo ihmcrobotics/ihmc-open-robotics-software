@@ -22,16 +22,19 @@ import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.util.environments.SelectableObjectListener;
 import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject;
+import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import com.yobotics.simulationconstructionset.util.ground.CylinderTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.RotatableCinderBlockTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.TerrainObject;
+import com.yobotics.simulationconstructionset.util.ground.TerrainObject3D;
 import com.yobotics.simulationconstructionset.util.ground.TrussWithSimpleCollisions;
 
 public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentInterface
 {
    private final CombinedTerrainObject combinedTerrainObject;
+   private final CombinedTerrainObject3D combinedTerrainObject3D;
 
    private final Random random = new Random(1989L);
 
@@ -72,7 +75,8 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
    public DRCDemo01NavigationEnvironment()
    {
       combinedTerrainObject = new CombinedTerrainObject("Rocks with a wall");
-
+      combinedTerrainObject3D = new CombinedTerrainObject3D("DRCDemo01NavigationEnvironment");
+      
       // addCalibrationCube();
       combinedTerrainObject.addTerrainObject(setUpPath1Rocks("Path1 Rocks"));
 
@@ -1625,6 +1629,11 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
    public TerrainObject getTerrainObject()
    {
       return combinedTerrainObject;
+   }
+   
+   public TerrainObject3D getTerrainObject3D()
+   {
+      return combinedTerrainObject3D;
    }
 
    public ArrayList<Robot> getEnvironmentRobots()

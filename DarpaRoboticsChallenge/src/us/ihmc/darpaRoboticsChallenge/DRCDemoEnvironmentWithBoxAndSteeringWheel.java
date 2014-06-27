@@ -10,7 +10,9 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.Contactable;
 import com.yobotics.simulationconstructionset.util.ground.TerrainObject;
+import com.yobotics.simulationconstructionset.util.ground.TerrainObject3D;
 import com.yobotics.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
+
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.driving.VehicleObject;
 import us.ihmc.darpaRoboticsChallenge.controllers.SteeringWheelDisturbanceController;
@@ -19,6 +21,7 @@ import us.ihmc.utilities.math.geometry.Box3d;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -137,6 +140,11 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
    public TerrainObject getTerrainObject()
    {
       return combinedTerrainObject;
+   }
+   
+   public TerrainObject3D getTerrainObject3D()
+   {
+      return null;
    }
 
    public List<Robot> getEnvironmentRobots()
