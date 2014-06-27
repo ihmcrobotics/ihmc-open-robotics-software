@@ -16,6 +16,7 @@ import us.ihmc.acsell.initialSetup.BonoInitialSetup;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCNetworkParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
@@ -238,5 +239,11 @@ public class BonoRobotModel implements DRCRobotModel
    public DRCSensorSuiteManager getSensorSuiteManager(URI rosCoreURI)
    {
       return null;
+   }
+
+   @Override
+   public DRCNetworkParameters getNetworkParameters()
+   {
+	   return null;
    }
 }
