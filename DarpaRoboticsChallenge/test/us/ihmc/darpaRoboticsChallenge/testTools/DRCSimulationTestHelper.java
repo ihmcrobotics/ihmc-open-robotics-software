@@ -119,7 +119,7 @@ public class DRCSimulationTestHelper
       TerrainObject environmentTerrain = null;
       if (groundProfile instanceof TerrainObject)
          environmentTerrain = (TerrainObject) groundProfile;
-      drcSimulationFactory = new DRCSimulationFactory(robotModel, controllerFactory, environmentTerrain, robotInitialSetup, scsInitialSetup,
+      drcSimulationFactory = new DRCSimulationFactory(robotModel, controllerFactory, environmentTerrain.getLinkGraphics(), robotInitialSetup, scsInitialSetup,
             guiInitialSetup, globalDataProducer);
       scs = drcSimulationFactory.getSimulationConstructionSet();
       sdfRobot = drcSimulationFactory.getRobot();

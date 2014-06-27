@@ -56,7 +56,7 @@ public abstract class DRCDemo03
       
       MomentumBasedControllerFactory controllerFactory = DRCObstacleCourseSimulation.createDRCMultiControllerFactory(null, dataProducer, footstepTimingParameters,initialBehavior,robotModel);
 
-      drcSimulation = new DRCSimulationFactory(robotModel, controllerFactory, environment.getTerrainObject(), robotInitialSetup, scsInitialSetup,
+      drcSimulation = new DRCSimulationFactory(robotModel, controllerFactory, environment.getTerrainObject().getLinkGraphics(), robotInitialSetup, scsInitialSetup,
             guiInitialSetup, dataProducer);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulation.getSimulationConstructionSet();

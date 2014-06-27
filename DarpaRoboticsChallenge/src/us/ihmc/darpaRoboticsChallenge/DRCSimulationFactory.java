@@ -14,6 +14,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCSimulationOutputWriter;
+import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.robotDataCommunication.VisualizerUtils;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
@@ -29,7 +30,6 @@ import com.yobotics.simulationconstructionset.UnreasonableAccelerationException;
 import com.yobotics.simulationconstructionset.robotController.AbstractThreadedRobotController;
 import com.yobotics.simulationconstructionset.robotController.MultiThreadedRobotController;
 import com.yobotics.simulationconstructionset.robotController.SingleThreadedRobotController;
-import com.yobotics.simulationconstructionset.util.ground.TerrainObject;
 
 public class DRCSimulationFactory
 {
@@ -46,7 +46,7 @@ public class DRCSimulationFactory
 
    private final SimulatedDRCRobotTimeProvider simulatedDRCRobotTimeProvider;
 
-   public DRCSimulationFactory(DRCRobotModel drcRobotModel, MomentumBasedControllerFactory controllerFactory, TerrainObject environmentTerrain,
+   public DRCSimulationFactory(DRCRobotModel drcRobotModel, MomentumBasedControllerFactory controllerFactory, Graphics3DObject environmentGraphics,
          DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCSCSInitialSetup scsInitialSetup, DRCGuiInitialSetup guiInitialSetup,
          GlobalDataProducer globalDataProducer)
    {
@@ -70,9 +70,9 @@ public class DRCSimulationFactory
 
       guiInitialSetup.initializeGUI(scs, simulatedRobot, drcRobotModel);
 
-      if (environmentTerrain != null)
+      if (environmentGraphics != null)
       {
-         scs.addStaticLinkGraphics(environmentTerrain.getLinkGraphics());
+         scs.addStaticLinkGraphics(environmentGraphics);
       }
 
       scsInitialSetup.initializeRobot(simulatedRobot, null);
