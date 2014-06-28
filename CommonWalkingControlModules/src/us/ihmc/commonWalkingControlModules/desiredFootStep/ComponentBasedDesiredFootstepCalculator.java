@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlane
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredVelocityControlModule;
 import us.ihmc.graphics3DAdapter.GroundProfile;
+import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.MathTools;
@@ -47,7 +48,7 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
    private final DesiredHeadingControlModule desiredHeadingControlModule;
    private final DesiredVelocityControlModule desiredVelocityControlModule;
 
-   private GroundProfile groundProfile;
+   private HeightMap heightMap;
 
    public ComponentBasedDesiredFootstepCalculator(SideDependentList<? extends ReferenceFrame> ankleZUpFrames,
            SideDependentList<? extends ReferenceFrame> ankleFrames, SideDependentList<? extends ContactablePlaneBody> bipedFeet,
@@ -65,9 +66,9 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
       matchSupportFootPlane.set(false);
    }
 
-   public void setGroundProfile(GroundProfile groundProfile)
+   public void setGroundProfile(HeightMap heightMap)
    {
-      this.groundProfile = groundProfile;
+      this.heightMap = heightMap;
    }
 
    public void initializeDesiredFootstep(RobotSide supportLegSide)
@@ -245,7 +246,7 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
 
       double footstepMinZ = DesiredFootstepCalculatorTools.computeMinZPointWithRespectToAnkleInWorldFrame(swingFootToWorldRotation, upcomingSwingFoot);
 
-      if (groundProfile == null)
+      if (heightMap == null)
       {
          /*
           * Assume that the ground height is constant.
@@ -291,7 +292,7 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
           */
 
          footstepPosition.changeFrame(ReferenceFrame.getWorldFrame());
-         double groundZ = groundProfile.heightAt(footstepPosition.getX(), footstepPosition.getY(), 0.0);
+         double groundZ = heightMap.heightAt(footstepPosition.getX(), footstepPosition.getY(), 0.0);
          double ankleHeight = FootstepUtils.getSoleToAnkleHeight(upcomingSwingFoot);
          double ankleZ = groundZ + ankleHeight;
 

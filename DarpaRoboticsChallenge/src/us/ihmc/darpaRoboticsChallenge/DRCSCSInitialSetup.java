@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.terrain.TerrainType;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.ScsInitialSetup;
 import us.ihmc.graphics3DAdapter.GroundProfile;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
+import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.graphics3DAdapter.HeightMapFromGroundProfile;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -231,6 +232,22 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
    public GroundProfile3D getGroundProfile3D()
    {
       return groundProfile3D;
+   }
+   
+   public HeightMap getHeightMap()
+   {
+      HeightMap ret = null;
+      
+      if (groundProfile3D != null)
+      {
+         ret = groundProfile3D.getHeightMapIfAvailable();
+      }
+      if (ret == null)
+      {
+         ret = groundProfile;
+      }
+      
+      return ret;
    }
 
 //   public SteppingStones getSteppingStones()
