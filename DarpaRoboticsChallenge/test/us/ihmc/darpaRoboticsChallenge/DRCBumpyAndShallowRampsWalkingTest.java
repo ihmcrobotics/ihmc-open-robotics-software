@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.GroundProfile;
+import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -33,6 +34,7 @@ import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.time.GlobalTimer;
 import com.yobotics.simulationconstructionset.util.ground.BumpyGroundProfile;
 import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject;
+import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import com.yobotics.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
@@ -40,7 +42,7 @@ import com.yobotics.simulationconstructionset.util.simulationTesting.NothingChan
 @SuppressWarnings("deprecation")
 public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTestInterface
 {
-   private static final boolean ALWAYS_SHOW_GUI = false;
+   private static final boolean ALWAYS_SHOW_GUI = true; //false;
    private static final boolean KEEP_SCS_UP = false;
 
    private static final boolean CREATE_MOVIE = BambooTools.doMovieCreation();
@@ -106,13 +108,13 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       
 //      drcControlParameters.setNominalHeightAboveAnkle(drcControlParameters.nominalHeightAboveAnkle() - 0.03);    // Need to do this or the leg goes straight and the robot falls.
 
-      Pair<CombinedTerrainObject, Double> combinedTerrainObjectAndRampEndX = createRamp();
-      CombinedTerrainObject combinedTerrainObject = combinedTerrainObjectAndRampEndX.first();
+      Pair<CombinedTerrainObject3D, Double> combinedTerrainObjectAndRampEndX = createRamp();
+      CombinedTerrainObject3D combinedTerrainObject = combinedTerrainObjectAndRampEndX.first();
       boolean drawGroundProfile = false;
 
       double rampEndX = combinedTerrainObjectAndRampEndX.second();
       
-      DRCFlatGroundWalkingTrack track = setupSimulationTrack(drcControlParameters, armControllerParameters, combinedTerrainObject, drawGroundProfile, useVelocityAndHeadingScript,
+      DRCFlatGroundWalkingTrack track = setupSimulationTrack(drcControlParameters, armControllerParameters, null, combinedTerrainObject, drawGroundProfile, useVelocityAndHeadingScript,
             cheatWithGroundHeightAtForFootstep);
 
       drcSimulation = track.getDrcSimulation();
@@ -187,13 +189,13 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       
 //      drcControlParameters.setNominalHeightAboveAnkle(drcControlParameters.nominalHeightAboveAnkle() - 0.03);    // Need to do this or the leg goes straight and the robot falls.
 
-      Pair<CombinedTerrainObject, Double> combinedTerrainObjectAndRampEndX = createRandomBlocks(); 
-      CombinedTerrainObject combinedTerrainObject = combinedTerrainObjectAndRampEndX.first();
+      Pair<CombinedTerrainObject3D, Double> combinedTerrainObjectAndRampEndX = createRandomBlocks(); 
+      CombinedTerrainObject3D combinedTerrainObject = combinedTerrainObjectAndRampEndX.first();
       boolean drawGroundProfile = false;
 
       double rampEndX = combinedTerrainObjectAndRampEndX.second();
       
-      DRCFlatGroundWalkingTrack track = setupSimulationTrack(drcControlParameters, armControllerParameters, combinedTerrainObject, drawGroundProfile, useVelocityAndHeadingScript,
+      DRCFlatGroundWalkingTrack track = setupSimulationTrack(drcControlParameters, armControllerParameters, null, combinedTerrainObject, drawGroundProfile, useVelocityAndHeadingScript,
             cheatWithGroundHeightAtForFootstep);
 
       drcSimulation = track.getDrcSimulation();
@@ -238,7 +240,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       createMovie(scs);
    }
    
-   private Pair<CombinedTerrainObject, Double> createRamp()
+   private Pair<CombinedTerrainObject3D, Double> createRamp()
    {
       double rampSlopeUp = 0.1;
       double rampSlopeDown = 0.08;
@@ -256,7 +258,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       double landingEndX = landingStartX + landingLength;
       double rampEndX = landingEndX + rampXLength1;
 
-      CombinedTerrainObject combinedTerrainObject = new CombinedTerrainObject("JustARamp");
+      CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D("JustARamp");
 
       AppearanceDefinition appearance = YoAppearance.Green();
       combinedTerrainObject.addRamp(rampXStart0, rampYStart, landingStartX, rampYEnd, landingHeight, appearance);
@@ -265,12 +267,12 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
 
       combinedTerrainObject.addBox(rampXStart0 - 2.0, rampYStart, rampEndX + 2.0, rampYEnd, -0.05, 0.0);
       
-      return new Pair<CombinedTerrainObject, Double>(combinedTerrainObject, rampEndX);
+      return new Pair<CombinedTerrainObject3D, Double>(combinedTerrainObject, rampEndX);
    }
    
-   private Pair<CombinedTerrainObject, Double> createRandomBlocks()
+   private Pair<CombinedTerrainObject3D, Double> createRandomBlocks()
    {
-      CombinedTerrainObject combinedTerrainObject = new CombinedTerrainObject("RandomBlocks");
+      CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D("RandomBlocks");
 
       Random random = new Random(1776L);
       int numberOfBoxes = 200;
@@ -293,7 +295,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
          combinedTerrainObject.addBox(xStart, yStart, xEnd, yEnd, zStart, zEnd, YoAppearance.Green());
       }
       
-      return new Pair<CombinedTerrainObject, Double>(combinedTerrainObject, xMax);
+      return new Pair<CombinedTerrainObject3D, Double>(combinedTerrainObject, xMax);
    }
    
    @Test
@@ -312,7 +314,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       
       WalkingControllerParameters drcControlParameters = robotModel.getWalkingControllerParameters();
       ArmControllerParameters armControllerParameters = robotModel.getArmControllerParameters();
-      DRCFlatGroundWalkingTrack track = setupSimulationTrack(drcControlParameters, armControllerParameters, groundProfile, drawGroundProfile,
+      DRCFlatGroundWalkingTrack track = setupSimulationTrack(drcControlParameters, armControllerParameters, groundProfile, null, drawGroundProfile,
             useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep);
 
       drcSimulation = track.getDrcSimulation();
@@ -363,13 +365,23 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
    boolean setupForCheatingUsingGroundHeightAtForFootstepProvider = false;
 
    private DRCFlatGroundWalkingTrack setupSimulationTrack(WalkingControllerParameters drcControlParameters, ArmControllerParameters
-         armControllerParameters, GroundProfile groundProfile, boolean drawGroundProfile,
+         armControllerParameters, GroundProfile groundProfile, GroundProfile3D groundProfile3D, boolean drawGroundProfile,
          boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep)
    {
       DRCGuiInitialSetup guiInitialSetup = createGUIInitialSetup();
       
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
-      DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotModel.getSimulateDT());
+      
+      DRCSCSInitialSetup scsInitialSetup;
+      
+      if (groundProfile != null)
+      {
+         scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotModel.getSimulateDT());
+      }
+      else
+      {
+         scsInitialSetup = new DRCSCSInitialSetup(groundProfile3D, robotModel.getSimulateDT());
+      }
       scsInitialSetup.setDrawGroundProfile(drawGroundProfile);
       
       if (cheatWithGroundHeightAtForFootstep)
