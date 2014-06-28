@@ -2,9 +2,9 @@ package us.ihmc.darpaRoboticsChallenge.environment;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 
-import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject;
+import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 
-public class WallWorld extends CombinedTerrainObject
+public class WallWorld extends CombinedTerrainObject3D
 {
 
    public WallWorld()
