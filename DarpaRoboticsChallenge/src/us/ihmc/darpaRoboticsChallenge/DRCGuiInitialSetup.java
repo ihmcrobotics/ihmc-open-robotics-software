@@ -9,7 +9,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.GuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
-import us.ihmc.graphics3DAdapter.HeightMapFromGroundProfile;
+import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.graphics3DAdapter.NullGraphics3DAdapter;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
@@ -80,7 +80,7 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
       {
          Graphics3DObject planeAtZ0 = new Graphics3DObject();
          
-         HeightMapFromGroundProfile heightMap = new HeightMapFromGroundProfile(new FlatGroundProfile());
+         HeightMap heightMap = new FlatGroundProfile();
          planeAtZ0.addHeightMap(heightMap, 100, 100, null);
          scs.addStaticLinkGraphics(planeAtZ0);
       }
