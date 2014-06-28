@@ -23,7 +23,7 @@ import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.util.environments.SelectableObjectListener;
 import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import com.yobotics.simulationconstructionset.util.ground.CylinderTerrainObject;
-import com.yobotics.simulationconstructionset.util.ground.RotatableBoxTerrainObject3D;
+import com.yobotics.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.RotatableCinderBlockTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.TerrainObject3D;
@@ -400,9 +400,9 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
       // location2.setTranslation(new Vector3d(0, 0, -2));
 
-      RotatableBoxTerrainObject3D newBox = new RotatableBoxTerrainObject3D(new Box3d(location, width1, width1, 1), texture);
+      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, width1, width1, 1), texture);
       combinedTerrainObject.addTerrainObject(newBox);
-      RotatableBoxTerrainObject3D newBox2 = new RotatableBoxTerrainObject3D(new Box3d(location2, width2, width2, 1), texture);
+      RotatableBoxTerrainObject newBox2 = new RotatableBoxTerrainObject(new Box3d(location2, width2, width2, 1), texture);
       combinedTerrainObject.addTerrainObject(newBox2);
    }
 
@@ -1431,7 +1431,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       location.rotZ(Math.toRadians(yawDegrees));
 
       location.setTranslation(new Vector3d(x, y, height / 2));
-      RotatableBoxTerrainObject3D newBox = new RotatableBoxTerrainObject3D(new Box3d(location, length, width, height), app);
+      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, length, width, height), app);
       combinedTerrainObject.addTerrainObject(newBox);
    }
 
@@ -1444,7 +1444,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       location.rotZ(Math.toRadians(yawDegrees));
 
       location.setTranslation(new Vector3d(x, y, height / 2));
-      RotatableBoxTerrainObject3D newBox = new RotatableBoxTerrainObject3D(new Box3d(location, length, width, height), app);
+      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, length, width, height), app);
       combinedTerrainObject.addTerrainObject(newBox);
    }
 
@@ -1457,7 +1457,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       location.rotZ(Math.toRadians(yawDegrees));
 
       location.setTranslation(new Vector3d(xCenter, yCenter, stairTopHeight - thickness / 2));
-      RotatableBoxTerrainObject3D newBox = new RotatableBoxTerrainObject3D(new Box3d(location, tread, width, thickness), app);
+      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, tread, width, thickness), app);
       combinedTerrainObject.addTerrainObject(newBox);
    }
 
@@ -1533,7 +1533,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       location.mul(tilt);
 
       location.setTranslation(new Vector3d(xCenter, yCenter, zCenter));
-      RotatableBoxTerrainObject3D newBox = new RotatableBoxTerrainObject3D(new Box3d(location, xLength, yLength, zLength), app);
+      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, xLength, yLength, zLength), app);
       combinedTerrainObject.addTerrainObject(newBox);
    }
 
@@ -1630,7 +1630,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       double[] xySupportRotatedOffset = rotateAroundOrigin(new double[] {(cinderBlockLength - rampRise) / 2, 0}, yawDegrees);
       blockSupportLocation.setTranslation(new Vector3d(xCenter + xySupportRotatedOffset[0], yCenter + xySupportRotatedOffset[1],
               rampRise / 2 + numberFlatSupports * cinderBlockHeight));
-      RotatableBoxTerrainObject3D newBox = new RotatableBoxTerrainObject3D(new Box3d(blockSupportLocation, rampRise, cinderBlockLength, rampRise),
+      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(blockSupportLocation, rampRise, cinderBlockLength, rampRise),
                                             cinderBlockAppearance);
       combinedTerrainObject.addTerrainObject(newBox);
 
@@ -1651,9 +1651,9 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       Transform3D location = new Transform3D();
       location.setTranslation(new Vector3d(0, 0, -0.5));
 
-      RotatableBoxTerrainObject3D newBox = new RotatableBoxTerrainObject3D(new Box3d(location, 45, 45, 1), texture);
+      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, 45, 45, 1), texture);
       combinedTerrainObject.addTerrainObject(newBox);
-      RotatableBoxTerrainObject3D newBox2 = new RotatableBoxTerrainObject3D(new Box3d(location, 200, 200, 0.75), YoAppearance.DarkGray());
+      RotatableBoxTerrainObject newBox2 = new RotatableBoxTerrainObject(new Box3d(location, 200, 200, 0.75), YoAppearance.DarkGray());
       combinedTerrainObject.addTerrainObject(newBox2);
 
       return combinedTerrainObject;
