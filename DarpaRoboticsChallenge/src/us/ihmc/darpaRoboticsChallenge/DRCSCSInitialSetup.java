@@ -57,6 +57,13 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
       this.groundProfile3D = null;
       this.simulateDT = simulateDT;
    }
+   
+   public DRCSCSInitialSetup(GroundProfile3D groundProfile, double simulateDT)
+   {      
+      this.groundProfile = null;
+      this.groundProfile3D = groundProfile;
+      this.simulateDT = simulateDT;
+   }
 
    public DRCSCSInitialSetup(TerrainType terrainType, double simulateDT)
    {
