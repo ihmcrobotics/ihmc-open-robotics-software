@@ -1,7 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge;
 
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
-import us.ihmc.graphics3DAdapter.GroundProfile;
+import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.jme.JMEGraphics3dAdapter;
 
@@ -41,7 +41,7 @@ public class DRCDemo01EnvironmentViewer
 //      robot.addStaticLink(staticLink);
 //      robot.addStaticLinkGraphics(commonAvatarEnvironmentInterface.getTerrainObject().getLinkGraphics());
       
-      GroundProfile groundProfile = commonAvatarEnvironmentInterface.getTerrainObject();
+      GroundProfile3D groundProfile3D = commonAvatarEnvironmentInterface.getTerrainObject3D();
 //      commonTerrain = new CommonTerrain(groundProfile);
 
       
@@ -55,7 +55,7 @@ public class DRCDemo01EnvironmentViewer
     LinearGroundContactModel groundContactModel = new LinearGroundContactModel(robot, groundKxy, groundBxy, groundKz, groundBz,
           robot.getRobotsYoVariableRegistry());
 
-    groundContactModel.setGroundProfile(groundProfile);
+    groundContactModel.setGroundProfile3D(groundProfile3D);
 
     robot.setGroundContactModel(groundContactModel);
     robot.setDynamicIntegrationMethod(DynamicIntegrationMethod.EULER_DOUBLE_STEPS);
@@ -83,10 +83,7 @@ public class DRCDemo01EnvironmentViewer
 
       if (SHOWGRAPHICS)
       {
-         TerrainObject environmentTerrain = commonAvatarEnvironmentInterface.getTerrainObject();
          TerrainObject3D environmentTerrain3D = commonAvatarEnvironmentInterface.getTerrainObject3D();
-         
-         if (environmentTerrain != null) scs.addStaticLinkGraphics(environmentTerrain.getLinkGraphics());
          if (environmentTerrain3D != null) scs.addStaticLinkGraphics(environmentTerrain3D.getLinkGraphics());
       }
 

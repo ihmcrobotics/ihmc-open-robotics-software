@@ -1660,11 +1660,6 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
       return combinedTerrainObject;
    }
-
-   public TerrainObject getTerrainObject()
-   {
-      return null;
-   }
    
    public TerrainObject3D getTerrainObject3D()
    {

@@ -72,10 +72,9 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
 
    public DRCSCSInitialSetup(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, double simulateDT)
    {
-      TerrainObject terrainObject = commonAvatarEnvironmentInterface.getTerrainObject();
       TerrainObject3D terrainObject3D = commonAvatarEnvironmentInterface.getTerrainObject3D();
 
-      this.groundProfile = terrainObject;
+      this.groundProfile = null;
       this.groundProfile3D = terrainObject3D;
       this.simulateDT = simulateDT;
    }
