@@ -1,5 +1,17 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.media.j3d.Transform3D;
+import javax.vecmath.Vector3d;
+
+import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.driving.VehicleObject;
+import us.ihmc.darpaRoboticsChallenge.controllers.SteeringWheelDisturbanceController;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.utilities.math.geometry.Box3d;
+
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.util.environments.ContactableStaticCylinderRobot;
@@ -8,26 +20,15 @@ import com.yobotics.simulationconstructionset.util.environments.SelectableObject
 import com.yobotics.simulationconstructionset.util.environments.SelectableObjectListener;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject;
+import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import com.yobotics.simulationconstructionset.util.ground.Contactable;
 import com.yobotics.simulationconstructionset.util.ground.TerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.TerrainObject3D;
 import com.yobotics.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
 
-import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.driving.VehicleObject;
-import us.ihmc.darpaRoboticsChallenge.controllers.SteeringWheelDisturbanceController;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.utilities.math.geometry.Box3d;
-
-import javax.media.j3d.Transform3D;
-import javax.vecmath.Vector3d;
-
-import java.util.ArrayList;
-import java.util.List;
-
 public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEnvironmentInterface
 {
-   private final CombinedTerrainObject combinedTerrainObject;
+   private final CombinedTerrainObject3D combinedTerrainObject;
 
    private final ArrayList<Robot> environmentRobots = new ArrayList<Robot>();
    private final ArrayList<ExternalForcePoint> contactPoints = new ArrayList<ExternalForcePoint>();
@@ -103,9 +104,9 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
       robot.createAvailableContactPoints(1, 30, 0.005, false);
    }
 
-   private CombinedTerrainObject createCombinedTerrainObject()
+   private CombinedTerrainObject3D createCombinedTerrainObject()
    {
-      CombinedTerrainObject terrainObject = new CombinedTerrainObject("carSeatBox");
+      CombinedTerrainObject3D terrainObject = new CombinedTerrainObject3D("carSeatBox");
 
       // mud_seat
 //      addBox(-0.1, 0.0, 0.81, 0.0, 0.0, 0.0, 0.6, 1.15, 0.1, terrainObject);
@@ -128,7 +129,7 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
       return terrainObject;
    }
 
-   private void addBox(double x, double y, double z, double roll, double pitch, double yaw, double sizeX, double sizeY, double sizeZ, CombinedTerrainObject terrainObject)
+   private void addBox(double x, double y, double z, double roll, double pitch, double yaw, double sizeX, double sizeY, double sizeZ, CombinedTerrainObject3D terrainObject)
    {
       Transform3D transform = new Transform3D();
       transform.setEuler(new Vector3d(roll, pitch, yaw));
@@ -139,12 +140,12 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
 
    public TerrainObject getTerrainObject()
    {
-      return combinedTerrainObject;
+      return null;
    }
    
    public TerrainObject3D getTerrainObject3D()
    {
-      return null;
+      return combinedTerrainObject;
    }
 
    public List<Robot> getEnvironmentRobots()
