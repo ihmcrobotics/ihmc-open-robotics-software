@@ -40,12 +40,12 @@ public class CombinedTerrainObjectTest
       Vector3d normalVector = new Vector3d(0.0, 0.0, 1.0);
       double[][] firstVertices = {{0.0,0.0},{1.0,0.0},{1.0,1.0},{0.0,1.0}};
       ConvexPolygon2d firstConvexPolygon = new ConvexPolygon2d(firstVertices);
-      RotatableConvexPolygonTerrainObject3D firstBox = new RotatableConvexPolygonTerrainObject3D(normalVector, firstConvexPolygon, 1.0);
+      RotatableConvexPolygonTerrainObject firstBox = new RotatableConvexPolygonTerrainObject(normalVector, firstConvexPolygon, 1.0);
       combinedTerrainObject.addTerrainObject(firstBox);
 
       double[][] secondVertices = {{-0.5,-0.5},{0.5,-0.5},{-0.5,0.5},{0.5,0.5}};
       ConvexPolygon2d secondConvexPolygon = new ConvexPolygon2d(secondVertices);
-      RotatableConvexPolygonTerrainObject3D secondBox = new RotatableConvexPolygonTerrainObject3D(normalVector, secondConvexPolygon, 0.5);
+      RotatableConvexPolygonTerrainObject secondBox = new RotatableConvexPolygonTerrainObject(normalVector, secondConvexPolygon, 0.5);
       combinedTerrainObject.addTerrainObject(secondBox);
    }
 

@@ -28,8 +28,7 @@ import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.util.environments.SelectableObjectListener;
 import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject3D;
-import com.yobotics.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject3D;
-import com.yobotics.simulationconstructionset.util.ground.TerrainObject;
+import com.yobotics.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.TerrainObject3D;
 
 public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInterface
@@ -96,7 +95,7 @@ public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInter
       double radius = 0.23;
       ConvexPolygon2d convexPolygon = createContactPolygon(centroid, nPoints, radius);
 
-      TerrainObject3D contact = new RotatableConvexPolygonTerrainObject3D(normal, convexPolygon, centroid.getZ(), YoAppearance.DarkGray());
+      TerrainObject3D contact = new RotatableConvexPolygonTerrainObject(normal, convexPolygon, centroid.getZ(), YoAppearance.DarkGray());
 
       return contact;
    }
