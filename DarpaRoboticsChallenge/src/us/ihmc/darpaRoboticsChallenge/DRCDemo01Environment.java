@@ -16,8 +16,7 @@ import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.util.environments.SelectableObjectListener;
 import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject3D;
-import com.yobotics.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject3D;
-import com.yobotics.simulationconstructionset.util.ground.TerrainObject;
+import com.yobotics.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.TerrainObject3D;
 
 public class DRCDemo01Environment implements CommonAvatarEnvironmentInterface
@@ -126,7 +125,7 @@ public class DRCDemo01Environment implements CommonAvatarEnvironmentInterface
       }
       
       ConvexPolygon2d convexPolygon = new ConvexPolygon2d(vertexPoints);
-      RotatableConvexPolygonTerrainObject3D rock = new RotatableConvexPolygonTerrainObject3D(normal, convexPolygon, centroidHeight, YoAppearance.Red());
+      RotatableConvexPolygonTerrainObject rock = new RotatableConvexPolygonTerrainObject(normal, convexPolygon, centroidHeight, YoAppearance.Red());
       this.combinedTerrainObject.addTerrainObject(rock);
    }
 
@@ -146,7 +145,7 @@ public class DRCDemo01Environment implements CommonAvatarEnvironmentInterface
       pointList.add(wallPoint3);
       
       ConvexPolygon2d convexPolygon = new ConvexPolygon2d(pointList);
-      RotatableConvexPolygonTerrainObject3D rightWall = new RotatableConvexPolygonTerrainObject3D(normal, convexPolygon, centroidHeight, YoAppearance.Brown());
+      RotatableConvexPolygonTerrainObject rightWall = new RotatableConvexPolygonTerrainObject(normal, convexPolygon, centroidHeight, YoAppearance.Brown());
       combinedTerrainObject.addTerrainObject(rightWall);
    }
    
@@ -185,7 +184,7 @@ public class DRCDemo01Environment implements CommonAvatarEnvironmentInterface
          ConvexPolygon2d convexPolygon = new ConvexPolygon2d(points);
          AppearanceDefinition appearance = YoAppearance.Brown();
 //         YoAppearance.makeTransparent(appearance, 0.7f);
-         RotatableConvexPolygonTerrainObject3D pillar = new RotatableConvexPolygonTerrainObject3D(normal, convexPolygon, centroidHeight, appearance);
+         RotatableConvexPolygonTerrainObject pillar = new RotatableConvexPolygonTerrainObject(normal, convexPolygon, centroidHeight, appearance);
          combinedTerrainObject.addTerrainObject(pillar);
       }
    }

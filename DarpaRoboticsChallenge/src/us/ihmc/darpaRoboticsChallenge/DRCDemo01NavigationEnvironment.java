@@ -26,8 +26,6 @@ import com.yobotics.simulationconstructionset.util.ground.CylinderTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.RotatableBoxTerrainObject3D;
 import com.yobotics.simulationconstructionset.util.ground.RotatableCinderBlockTerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject;
-import com.yobotics.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject3D;
-import com.yobotics.simulationconstructionset.util.ground.TerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.TerrainObject3D;
 import com.yobotics.simulationconstructionset.util.ground.TrussWithSimpleCollisions;
 
@@ -1403,7 +1401,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       }
 
       ConvexPolygon2d convexPolygon = new ConvexPolygon2d(vertexPoints);
-      RotatableConvexPolygonTerrainObject3D rock = new RotatableConvexPolygonTerrainObject3D(normal, convexPolygon, centroidHeight, color);
+      RotatableConvexPolygonTerrainObject rock = new RotatableConvexPolygonTerrainObject(normal, convexPolygon, centroidHeight, color);
       combinedTerrainObject.addTerrainObject(rock);
    }
    
@@ -1420,7 +1418,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       }
 
       ConvexPolygon2d convexPolygon = new ConvexPolygon2d(vertexPoints);
-      RotatableConvexPolygonTerrainObject3D rock = new RotatableConvexPolygonTerrainObject3D(normal, convexPolygon, centroidHeight, color);
+      RotatableConvexPolygonTerrainObject rock = new RotatableConvexPolygonTerrainObject(normal, convexPolygon, centroidHeight, color);
       combinedTerrainObject.addTerrainObject(rock);
    }
 
