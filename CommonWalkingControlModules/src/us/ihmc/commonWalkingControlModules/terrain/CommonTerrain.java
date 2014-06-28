@@ -20,7 +20,6 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 import com.yobotics.simulationconstructionset.util.ground.AlternatingSlopesGroundProfile;
 import com.yobotics.simulationconstructionset.util.ground.BumpyGroundProfile;
 import com.yobotics.simulationconstructionset.util.ground.GroundProfileFromFile;
-import com.yobotics.simulationconstructionset.util.ground.ObstacleCourse;
 import com.yobotics.simulationconstructionset.util.ground.RandomRockyGroundProfile;
 import com.yobotics.simulationconstructionset.util.ground.RollingGroundProfile;
 import com.yobotics.simulationconstructionset.util.ground.steppingStones.SteppingStone;
@@ -428,11 +427,6 @@ public class CommonTerrain
 
             break;
          }
-
-         case COURSE :
-            groundProfile = new ObstacleCourse();
-
-            break;
 
          case MOON :
             groundProfile = new GroundProfileFromFile("GroundModels" + File.separator + "moonNew.asc", new Transform3D());
