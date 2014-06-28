@@ -33,7 +33,7 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.scriptEngine.VariousWalkingProviderFromScriptFactory;
 import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
 import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
-import us.ihmc.graphics3DAdapter.GroundProfile;
+import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.robotSide.RobotSide;
@@ -47,7 +47,7 @@ import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.time.GlobalTimer;
-import com.yobotics.simulationconstructionset.util.ground.TerrainObject;
+import com.yobotics.simulationconstructionset.util.ground.TerrainObject3D;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import com.yobotics.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
@@ -69,13 +69,7 @@ public class DRCSimulationTestHelper
    private final DRCRobotModel robotModel;
 
    public DRCSimulationTestHelper(String name, String scriptFileName, DRCRobotInitialSetup<SDFRobot> robotInitialSetup, boolean checkNothingChanged,
-         boolean showGUI, boolean createMovie, DRCRobotModel robotModel, TerrainObject terrainObject)
-   {
-      this(name, scriptFileName, robotInitialSetup, checkNothingChanged, showGUI, createMovie, robotModel, (GroundProfile) terrainObject);
-   }
-
-   public DRCSimulationTestHelper(String name, String scriptFileName, DRCRobotInitialSetup<SDFRobot> robotInitialSetup, boolean checkNothingChanged,
-         boolean showGUI, boolean createMovie, DRCRobotModel robotModel, GroundProfile groundProfile)
+         boolean showGUI, boolean createMovie, DRCRobotModel robotModel, GroundProfile3D groundProfile)
    {
       networkObjectCommunicator = new ScriptedFootstepDataListObjectCommunicator("Team");
       this.walkingControlParameters = robotModel.getWalkingControllerParameters();
@@ -85,14 +79,14 @@ public class DRCSimulationTestHelper
       if (createMovie)
          showGUI = true;
 
-      boolean groundProfileVisible = !(groundProfile instanceof TerrainObject);
+      boolean groundProfileVisible = !(groundProfile instanceof TerrainObject3D);
 
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(groundProfileVisible, false, WalkControllerSliderBoard.getFactory(), showGUI);
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotModel.getSimulateDT());
       scsInitialSetup.setInitializeEstimatorToActual(true);
       scsInitialSetup.setDrawGroundProfile(false);
-      if (groundProfile != null)
-         robotInitialSetup.setInitialGroundHeight(groundProfile.heightAt(0, 0, 0));
+//      if (groundProfile != null)
+//         robotInitialSetup.setInitialGroundHeight(groundProfile.heightAt(0, 0, 0));
 
       ArmControllerParameters armControllerParameters = robotModel.getArmControllerParameters();
 
@@ -117,9 +111,9 @@ public class DRCSimulationTestHelper
          controllerFactory.setVariousWalkingProviderFactory(variousWalkingProviderFactory);
       }
       
-      TerrainObject environmentTerrain = null;
-      if (groundProfile instanceof TerrainObject)
-         environmentTerrain = (TerrainObject) groundProfile;
+      TerrainObject3D environmentTerrain = null;
+      if (groundProfile instanceof TerrainObject3D)
+         environmentTerrain = (TerrainObject3D) groundProfile;
       
       Graphics3DObject environmentGraphics = environmentTerrain == null ? null : environmentTerrain.getLinkGraphics();
       drcSimulationFactory = new DRCSimulationFactory(robotModel, controllerFactory, environmentGraphics, robotInitialSetup, scsInitialSetup,
