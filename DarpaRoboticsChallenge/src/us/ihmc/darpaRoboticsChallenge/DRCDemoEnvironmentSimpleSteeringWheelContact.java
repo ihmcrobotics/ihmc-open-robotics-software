@@ -12,7 +12,7 @@ import javax.vecmath.Vector3d;
 import org.apache.commons.math3.util.FastMath;
 
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
-import us.ihmc.graphics3DAdapter.GroundProfile;
+import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
@@ -26,14 +26,14 @@ import com.yobotics.simulationconstructionset.util.environments.ContactableToroi
 import com.yobotics.simulationconstructionset.util.environments.SelectableObject;
 import com.yobotics.simulationconstructionset.util.environments.SelectableObjectListener;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject;
+import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import com.yobotics.simulationconstructionset.util.ground.Contactable;
 import com.yobotics.simulationconstructionset.util.ground.TerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.TerrainObject3D;
 
 public class DRCDemoEnvironmentSimpleSteeringWheelContact implements CommonAvatarEnvironmentInterface
 {
-   private final CombinedTerrainObject combinedTerrainObject;
+   private final CombinedTerrainObject3D combinedTerrainObject;
    private final ArrayList<Robot> envRobots = new ArrayList<Robot>();
    private final ArrayList<ExternalForcePoint> contactPoints = new ArrayList<ExternalForcePoint>();
    private final ArrayList<Contactable> contactables = new ArrayList<Contactable>();
@@ -88,12 +88,12 @@ public class DRCDemoEnvironmentSimpleSteeringWheelContact implements CommonAvata
 
    public TerrainObject getTerrainObject()
    {
-      return combinedTerrainObject;
+      return null;
    }
    
    public TerrainObject3D getTerrainObject3D()
    {
-      return null;
+      return combinedTerrainObject;
    }
 
    public List<Robot> getEnvironmentRobots()
@@ -130,9 +130,9 @@ public class DRCDemoEnvironmentSimpleSteeringWheelContact implements CommonAvata
 
    }
 
-   private CombinedTerrainObject createCombinedTerrainObject()
+   private CombinedTerrainObject3D createCombinedTerrainObject()
    {
-      CombinedTerrainObject ret = new CombinedTerrainObject("simpleWheelTest");
+      CombinedTerrainObject3D ret = new CombinedTerrainObject3D("simpleWheelTest");
       ret.addBox(-10.0, -10.0, 10.0, 10.0, -0.05, 0.0, YoAppearance.RGBColor(0.35, 0.35, 0.35));
       return ret;
    }
@@ -149,7 +149,7 @@ public class DRCDemoEnvironmentSimpleSteeringWheelContact implements CommonAvata
       SimulationConstructionSet scs = new SimulationConstructionSet(robotArray, 36000);
       scs.setDT(1e-4, 20);
 
-      TerrainObject terrainObject = env.getTerrainObject();
+      TerrainObject3D terrainObject = env.getTerrainObject3D();
       scs.addStaticLinkGraphics(terrainObject.getLinkGraphics());
 
       scs.addDynamicGraphicObjectListRegistries(dynamicGraphicObjectsListRegistry);
@@ -158,7 +158,7 @@ public class DRCDemoEnvironmentSimpleSteeringWheelContact implements CommonAvata
       scs.startOnAThread();
    }
    
-   private GroundContactModel createGroundContactModel(Robot robot, GroundProfile groundProfile)
+   private GroundContactModel createGroundContactModel(Robot robot, GroundProfile3D groundProfile)
    {
       double kXY = 40000.0;
       double bXY = 10.0;
@@ -169,7 +169,7 @@ public class DRCDemoEnvironmentSimpleSteeringWheelContact implements CommonAvata
 
       GroundContactModel groundContactModel = new LinearStickSlipGroundContactModel(robot, kXY, bXY, kZ, bZ, alphaSlip, alphaStick,
                                                  robot.getRobotsYoVariableRegistry());
-      groundContactModel.setGroundProfile(groundProfile);
+      groundContactModel.setGroundProfile3D(groundProfile);
 
       return groundContactModel;
    }
