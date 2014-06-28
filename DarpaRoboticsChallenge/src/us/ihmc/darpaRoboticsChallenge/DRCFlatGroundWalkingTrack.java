@@ -47,7 +47,7 @@ public class DRCFlatGroundWalkingTrack
             armControllerParameters, useVelocityAndHeadingScript, useFastTouchdowns, HighLevelState.WALKING);
       if (cheatWithGroundHeightAtForFootstep)
       {
-         controllerFactory.setupForCheatingUsingGroundHeightAtForFootstepProvider(scsInitialSetup.getGroundProfile());
+         controllerFactory.setupForCheatingUsingGroundHeightAtForFootstepProvider(scsInitialSetup.getHeightMap());
       }
 
       drcSimulation = new DRCSimulationFactory(model, controllerFactory, null, robotInitialSetup, scsInitialSetup, guiInitialSetup, null);

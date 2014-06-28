@@ -10,4 +10,5 @@ public interface GroundProfile3D
    public abstract BoundingBox3d getBoundingBox();
    public abstract boolean isClose(double x, double y, double z);
    public abstract boolean checkIfInside(double x, double y, double z, Point3d intersectionToPack, Vector3d normalToPack);
+   public abstract HeightMap getHeightMapIfAvailable();
 }

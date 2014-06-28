@@ -32,6 +32,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajec
 import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.TransferTimeCalculationProvider;
 import us.ihmc.graphics3DAdapter.GroundProfile;
+import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.sensors.ForceSensorData;
@@ -69,7 +70,7 @@ public class MomentumBasedControllerFactory
    private final HighLevelState initialBehavior;
 
    private GlobalDataProducer objectCommunicator;
-   private GroundProfile groundProfileForCheatingOnStepHeight;
+   private HeightMap heightMapForCheatingOnStepHeight;
 
    private MomentumBasedController momentumBasedController = null;
    private ICPAndMomentumBasedController icpAndMomentumBasedController = null;
@@ -115,9 +116,9 @@ public class MomentumBasedControllerFactory
    }
 
 
-   public void setupForCheatingUsingGroundHeightAtForFootstepProvider(GroundProfile groundProfileForCheatingOnStepHeight)
+   public void setupForCheatingUsingGroundHeightAtForFootstepProvider(HeightMap heightMapForCheatingOnStepHeight)
    {
-      this.groundProfileForCheatingOnStepHeight = groundProfileForCheatingOnStepHeight;
+      this.heightMapForCheatingOnStepHeight = heightMapForCheatingOnStepHeight;
    }
 
    public void setVariousWalkingProviderFactory(VariousWalkingProviderFactory variousWalkingProviderFactory)
@@ -191,7 +192,7 @@ public class MomentumBasedControllerFactory
       else
       {
          variousWalkingProviders = VariousWalkingProviders.createUsingComponentBasedDesiredFootstepCalculator(fullRobotModel, referenceFrames, feet, controlDT,
-               updatables, USE_HEADING_AND_VELOCITY_SCRIPT, groundProfileForCheatingOnStepHeight, walkingControllerParameters, registry);
+               updatables, USE_HEADING_AND_VELOCITY_SCRIPT, heightMapForCheatingOnStepHeight, walkingControllerParameters, registry);
       }
 
       /////////////////////////////////////////////////////////////////////////////////////////////

@@ -101,7 +101,7 @@ public class DRCSimulationTestHelper
             DRCConfigParameters.contactTresholdForceForSCS, footForceSensorNames, footstepTimingParameters, walkingControllerParameters,
             armControllerParameters, false, false, HighLevelState.WALKING);
       controllerFactory.addHighLevelBehaviorFactory(new CarIngressEgressControllerFactory(multiContactControllerParameters, false));
-      controllerFactory.setupForCheatingUsingGroundHeightAtForFootstepProvider(scsInitialSetup.getGroundProfile());
+      controllerFactory.setupForCheatingUsingGroundHeightAtForFootstepProvider(scsInitialSetup.getHeightMap());
       GlobalDataProducer globalDataProducer = new GlobalDataProducer(networkObjectCommunicator);
       controllerFactory.setupForNetworkedFootstepProvider(globalDataProducer);
 

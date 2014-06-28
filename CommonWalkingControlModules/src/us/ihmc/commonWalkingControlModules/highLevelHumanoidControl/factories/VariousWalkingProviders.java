@@ -58,7 +58,7 @@ import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenc
 import us.ihmc.commonWalkingControlModules.terrain.VaryingStairGroundProfile;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalculator;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantTransferTimeCalculator;
-import us.ihmc.graphics3DAdapter.GroundProfile;
+import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
@@ -279,15 +279,15 @@ public class VariousWalkingProviders
 
    public static VariousWalkingProviders createUsingComponentBasedDesiredFootstepCalculator(FullRobotModel fullRobotModel,
            CommonWalkingReferenceFrames referenceFrames, SideDependentList<ContactablePlaneBody> bipedFeet, double controlDT, ArrayList<Updatable> updatables,
-           boolean useHeadingAndVelocityScript, GroundProfile groundProfileForCheatingOnStepHeight, WalkingControllerParameters walkingControllerParameters,
+           boolean useHeadingAndVelocityScript, HeightMap heightMapForCheatingOnStepHeight, WalkingControllerParameters walkingControllerParameters,
            YoVariableRegistry registry)
    {
       ComponentBasedDesiredFootstepCalculator desiredFootstepCalculator =
          HighLevelHumanoidControllerFactoryHelper.getDesiredFootstepCalculator(walkingControllerParameters, referenceFrames, bipedFeet, controlDT, registry,
             updatables, useHeadingAndVelocityScript);
-      if (groundProfileForCheatingOnStepHeight != null)
+      if (heightMapForCheatingOnStepHeight != null)
       {
-         desiredFootstepCalculator.setGroundProfile(groundProfileForCheatingOnStepHeight);
+         desiredFootstepCalculator.setGroundProfile(heightMapForCheatingOnStepHeight);
       }
 
       DesiredFootstepCalculatorFootstepProviderWrapper footstepProvider = new DesiredFootstepCalculatorFootstepProviderWrapper(desiredFootstepCalculator,

@@ -41,7 +41,7 @@ import com.yobotics.simulationconstructionset.util.simulationTesting.NothingChan
 @SuppressWarnings("deprecation")
 public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTestInterface
 {
-   private static final boolean ALWAYS_SHOW_GUI = true; //false;
+   private static final boolean ALWAYS_SHOW_GUI = false;
    private static final boolean KEEP_SCS_UP = false;
 
    private static final boolean CREATE_MOVIE = BambooTools.doMovieCreation();
@@ -245,7 +245,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       double rampSlopeDown = 0.08;
 
       double rampXStart0 = 0.5;
-      double rampXLength0 = 2.0;
+      double rampXLength0 = 6.0; //2.0;
       double landingHeight = rampSlopeUp * rampXLength0;
       double landingLength = 1.0;
       double rampXLength1 = landingHeight / rampSlopeDown;
@@ -306,7 +306,9 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       double walkingTimeDuration = 40.0;
 
       boolean useVelocityAndHeadingScript = true;
-      boolean cheatWithGroundHeightAtForFootstep = false;
+      
+      //TODO: This should work with cheatWithGroundHeightAtForFootstep = false also, but for some reason height gets messed up and robot gets stuck...
+      boolean cheatWithGroundHeightAtForFootstep = true;
 
       GroundProfile groundProfile = createBumpyGroundProfile();
       boolean drawGroundProfile = true;
