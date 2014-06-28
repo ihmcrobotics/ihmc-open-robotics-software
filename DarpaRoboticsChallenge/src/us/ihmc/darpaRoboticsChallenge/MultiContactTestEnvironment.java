@@ -27,14 +27,14 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.util.environments.SelectableObjectListener;
-import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject;
-import com.yobotics.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject;
+import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject3D;
+import com.yobotics.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject3D;
 import com.yobotics.simulationconstructionset.util.ground.TerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.TerrainObject3D;
 
 public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInterface
 {
-   private final CombinedTerrainObject combinedTerrainObject;
+   private final CombinedTerrainObject3D combinedTerrainObject;
    private final RobotSide[] footContactSides;
    private final RobotSide[] handContactSides;
 
@@ -59,9 +59,9 @@ public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInter
       combinedTerrainObject = createCombinedTerrainObject(referenceFramesForEnvironmentSetup, fullRobotModelForEnvironmentSetup, invisibleContactablePlaneHandContactPointTransforms);
    }
 
-   private CombinedTerrainObject createCombinedTerrainObject(CommonWalkingReferenceFrames referenceFramesForEnvironmentSetup, FullRobotModel fullRobotModel, SideDependentList<Transform3D> invisibleContactablePlaneHandContactPointTransforms)
+   private CombinedTerrainObject3D createCombinedTerrainObject(CommonWalkingReferenceFrames referenceFramesForEnvironmentSetup, FullRobotModel fullRobotModel, SideDependentList<Transform3D> invisibleContactablePlaneHandContactPointTransforms)
    {
-      CombinedTerrainObject combinedTerrainObject = new CombinedTerrainObject(getClass().getSimpleName());
+      CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D(getClass().getSimpleName());
       for (RobotSide robotSide : footContactSides)
       {
          ReferenceFrame soleFrame = referenceFramesForEnvironmentSetup.getSoleFrame(robotSide);
@@ -81,7 +81,7 @@ public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInter
       return combinedTerrainObject;
    }
 
-   private TerrainObject createConvexPolygonTerrainObject(Transform3D transformToWorld)
+   private TerrainObject3D createConvexPolygonTerrainObject(Transform3D transformToWorld)
    {
       Matrix3d rotationToWorld = new Matrix3d();
       transformToWorld.get(rotationToWorld);
@@ -96,7 +96,7 @@ public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInter
       double radius = 0.23;
       ConvexPolygon2d convexPolygon = createContactPolygon(centroid, nPoints, radius);
 
-      TerrainObject contact = new RotatableConvexPolygonTerrainObject(normal, convexPolygon, centroid.getZ(), YoAppearance.DarkGray());
+      TerrainObject3D contact = new RotatableConvexPolygonTerrainObject3D(normal, convexPolygon, centroid.getZ(), YoAppearance.DarkGray());
 
       return contact;
    }
@@ -120,12 +120,12 @@ public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInter
 
    public TerrainObject getTerrainObject()
    {
-      return combinedTerrainObject;
+      return null;
    }
    
    public TerrainObject3D getTerrainObject3D()
    {
-      return null;
+      return combinedTerrainObject;
    }
 
    public List<Robot> getEnvironmentRobots()
