@@ -26,7 +26,6 @@ import com.yobotics.simulationconstructionset.physics.collision.bullet.JBulletCo
 import com.yobotics.simulationconstructionset.physics.visualize.DefaultCollisionVisualize;
 import com.yobotics.simulationconstructionset.util.LinearGroundContactModel;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.ground.TerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.TerrainObject3D;
 
 public class DRCSCSInitialSetup implements ScsInitialSetup

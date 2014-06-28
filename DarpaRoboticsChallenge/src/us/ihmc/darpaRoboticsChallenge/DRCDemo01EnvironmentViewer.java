@@ -9,7 +9,6 @@ import com.yobotics.simulationconstructionset.DynamicIntegrationMethod;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.util.LinearGroundContactModel;
-import com.yobotics.simulationconstructionset.util.ground.TerrainObject;
 import com.yobotics.simulationconstructionset.util.ground.TerrainObject3D;
 
 public class DRCDemo01EnvironmentViewer
