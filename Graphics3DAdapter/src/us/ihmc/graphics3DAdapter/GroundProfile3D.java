@@ -8,7 +8,13 @@ import us.ihmc.utilities.math.geometry.BoundingBox3d;
 public interface GroundProfile3D
 {
    public abstract BoundingBox3d getBoundingBox();
+   
    public abstract boolean isClose(double x, double y, double z);
+   
+   /**
+    * Returns true if inside the ground object. If inside, must pack the intersection and normal. If not inside, packing those is optional.
+    */
    public abstract boolean checkIfInside(double x, double y, double z, Point3d intersectionToPack, Vector3d normalToPack);
+   
    public abstract HeightMap getHeightMapIfAvailable();
 }
