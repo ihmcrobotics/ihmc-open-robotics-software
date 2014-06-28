@@ -8,22 +8,17 @@ import java.net.URL;
 import javax.media.j3d.Transform3D;
 import javax.xml.bind.JAXBException;
 
-import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
 import us.ihmc.SdfLoader.SDFModelVisual;
-import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.SdfLoader.SDFWorldLoader;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.driving.VehicleModelObjectVisualizer;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCWorld;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.net.TimestampProvider;
 
+import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.util.ground.TerrainObject;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class DRCVehicleSDFLoader extends DRCWorld
 {
@@ -75,48 +70,6 @@ public class DRCVehicleSDFLoader extends DRCWorld
 
       Thread thread = new Thread(scs);
       thread.start();
-   }
-
-   public TerrainObject getTerrainObject()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   public SDFRobot getRobot()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   public SDFFullRobotModelFactory getFullRobotModelFactory()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   public DRCRobotJointMap getJointMap()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   public double getSimulateDT()
-   {
-      // TODO Auto-generated method stub
-      return 0;
-   }
-
-   public boolean simulateDelay()
-   {
-      // TODO Auto-generated method stub
-      return false;
-   }
-
-   public TimestampProvider getTimeStampProvider()
-   {
-      // TODO Auto-generated method stub
-      return null;
    }
    
 }
