@@ -18,6 +18,7 @@ import us.ihmc.utilities.net.ObjectCommunicator;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.ground.TerrainObject3D;
 import com.yobotics.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
 
 public abstract class DRCDemo03
@@ -55,8 +56,14 @@ public abstract class DRCDemo03
 
       
       MomentumBasedControllerFactory controllerFactory = DRCObstacleCourseSimulation.createDRCMultiControllerFactory(null, dataProducer, footstepTimingParameters,initialBehavior,robotModel);
-
-      drcSimulation = new DRCSimulationFactory(robotModel, controllerFactory, environment.getTerrainObject().getLinkGraphics(), robotInitialSetup, scsInitialSetup,
+      TerrainObject3D terrainObject3D = environment.getTerrainObject3D();
+      Graphics3DObject linkGraphics = null;
+      if (terrainObject3D != null)
+      {
+         linkGraphics = terrainObject3D.getLinkGraphics();
+      }
+      
+      drcSimulation = new DRCSimulationFactory(robotModel, controllerFactory, linkGraphics, robotInitialSetup, scsInitialSetup,
             guiInitialSetup, dataProducer);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulation.getSimulationConstructionSet();

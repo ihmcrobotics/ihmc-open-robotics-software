@@ -136,11 +136,6 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
       Box3d box = new Box3d(transform, sizeX, sizeY, sizeZ);
       terrainObject.addRotatableBox(box, YoAppearance.DarkGray());
    }
-
-   public TerrainObject getTerrainObject()
-   {
-      return null;
-   }
    
    public TerrainObject3D getTerrainObject3D()
    {

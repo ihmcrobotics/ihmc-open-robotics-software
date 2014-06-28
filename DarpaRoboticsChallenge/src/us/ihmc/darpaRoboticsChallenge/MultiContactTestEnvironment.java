@@ -117,11 +117,6 @@ public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInter
 
       return convexPolygon;
    }
-
-   public TerrainObject getTerrainObject()
-   {
-      return null;
-   }
    
    public TerrainObject3D getTerrainObject3D()
    {

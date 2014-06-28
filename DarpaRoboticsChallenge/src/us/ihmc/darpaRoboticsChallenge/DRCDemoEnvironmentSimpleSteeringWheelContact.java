@@ -85,11 +85,6 @@ public class DRCDemoEnvironmentSimpleSteeringWheelContact implements CommonAvata
       addContactPoints(pts);
       
    }
-
-   public TerrainObject getTerrainObject()
-   {
-      return null;
-   }
    
    public TerrainObject3D getTerrainObject3D()
    {

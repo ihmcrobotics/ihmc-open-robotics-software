@@ -189,11 +189,6 @@ public class DRCDemo01Environment implements CommonAvatarEnvironmentInterface
          combinedTerrainObject.addTerrainObject(pillar);
       }
    }
-
-   public TerrainObject getTerrainObject()
-   {
-      return null;
-   }
    
    public TerrainObject3D getTerrainObject3D()
    {
