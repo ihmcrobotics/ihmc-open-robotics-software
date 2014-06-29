@@ -141,7 +141,11 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
 
       Graphics3DObject texturedGroundLinkGraphics = new Graphics3DObject();
 
-      HeightMapFromGroundProfile heightMap = new HeightMapFromGroundProfile(groundProfile);
+      HeightMap heightMap = null;
+      
+      if (groundProfile != null) heightMap = groundProfile;
+      else if (groundProfile3D != null) heightMap = groundProfile3D.getHeightMapIfAvailable();
+      
       texturedGroundLinkGraphics.addHeightMap(heightMap, 300, 300, YoAppearance.DarkGreen());
       ret.add(texturedGroundLinkGraphics);
 
