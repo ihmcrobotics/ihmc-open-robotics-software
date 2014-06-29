@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.graphics3DAdapter.GroundProfile;
+import us.ihmc.utilities.math.geometry.BoundingBox3d;
 import us.ihmc.utilities.test.JUnitTools;
 
 import com.yobotics.simulationconstructionset.util.ShipCorridorGroundProfile;
@@ -31,9 +32,11 @@ public class ShipCorridorGroundProfileTest
    public void testSurfaceNormalAlongYAxis()
    {
       int nSteps = 1000;
-      double yStep = (groundProfile.getYMax() - groundProfile.getYMin()) / nSteps;
+      BoundingBox3d boundingBox = groundProfile.getBoundingBox();
+
+      double yStep = (boundingBox.getYMax() - boundingBox.getYMin()) / nSteps;
       double dy = 1e-8;
-      double x = (groundProfile.getXMax() - groundProfile.getXMin()) / 2.0;
+      double x = (boundingBox.getXMax() - boundingBox.getXMin()) / 2.0;
       double z = 0.0;
       double y = -2.5; //Start on the left side and move to the right side
 

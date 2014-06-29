@@ -147,7 +147,7 @@ public class SDFGraphics3DObject extends Graphics3DObject
                AppearanceDefinition app = DEFAULT_APPEARANCE;
                if(geometry.getHeightMap().getTextures() != null)
                {
-                  double width = heightMap.getXMax() - heightMap.getXMin();
+                  double width = heightMap.getBoundingBox().getXMax() - heightMap.getBoundingBox().getXMin();
                   HeightBasedTerrainBlend sdfTerrainBlend = new HeightBasedTerrainBlend(heightMap);
                   for(Texture text : geometry.getHeightMap().getTextures())
                   {

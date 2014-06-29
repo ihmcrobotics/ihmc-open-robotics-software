@@ -5,24 +5,29 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.GroundProfile;
+import us.ihmc.utilities.math.geometry.BoundingBox3d;
 
 
 public class StepUpGroundProfile implements GroundProfile
 {
-   private final double xMin, xMax, yMin, yMax;
+   private final BoundingBox3d boundingBox;
 
    private final double groundXStep;
    private final double groundZStep;
 
    public StepUpGroundProfile(double groundXStep, double groundZStep)
    {
-      this.xMin = -1.0;
-      this.xMax = 4.0;
-      this.yMin = -1.0;
-      this.yMax = 1.0;
+      double xMin = -1.0;
+      double xMax = 4.0;
+      double yMin = -1.0;
+      double yMax = 1.0;
 
       this.groundXStep = groundXStep;
       this.groundZStep = groundZStep;
+      
+      double zMin = Double.NEGATIVE_INFINITY;
+      double zMax = Double.POSITIVE_INFINITY;
+      boundingBox = new BoundingBox3d(xMin, yMin, zMin, xMax, yMax, zMax);
    }
 
    public void closestIntersectionAndNormalAt(double x, double y, double z, Point3d intersection, Vector3d normal)
@@ -35,26 +40,6 @@ public class StepUpGroundProfile implements GroundProfile
    public void closestIntersectionTo(double x, double y, double z, Point3d intersection)
    {
       intersection.set(x, y, heightAt(x, y, z));
-   }
-
-   public double getXMax()
-   {
-      return xMax;
-   }
-
-   public double getXMin()
-   {
-      return xMin;
-   }
-
-   public double getYMax()
-   {
-      return yMax;
-   }
-
-   public double getYMin()
-   {
-      return yMin;
    }
 
    public double heightAt(double x, double y, double z)
@@ -73,6 +58,11 @@ public class StepUpGroundProfile implements GroundProfile
    public void surfaceNormalAt(double x, double y, double z, Vector3d normal)
    {
       normal.set(0.0, 0.0, 1.0);
+   }
+   
+   public BoundingBox3d getBoundingBox()
+   {
+      return boundingBox;
    }
 
 }
