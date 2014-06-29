@@ -9,13 +9,15 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
-import us.ihmc.graphics3DAdapter.HeightMapFromGroundProfile;
+import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.net.LocalObjectCommunicator;
 import us.ihmc.utilities.net.ObjectCommunicator;
 
+import com.yobotics.simulationconstructionset.GroundContactModel;
+import com.yobotics.simulationconstructionset.HeightMapFromGroundContactModel;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.ground.TerrainObject3D;
@@ -94,7 +96,14 @@ public abstract class DRCDemo03
       {
          Graphics3DObject planeAtZ0 = new Graphics3DObject();
          
-         HeightMapFromGroundProfile heightMap = new HeightMapFromGroundProfile(drcSimulation.getRobot().getGroundContactModel().getGroundProfile());
+         HeightMap heightMap = null;
+         GroundContactModel groundContactModel = drcSimulation.getRobot().getGroundContactModel();
+
+         if (groundContactModel != null)
+         {
+            heightMap = HeightMapFromGroundContactModel.getHeightMap(groundContactModel);
+         }
+
          planeAtZ0.addHeightMap(heightMap, 1000, 1000, YoAppearance.Red());
          simulationConstructionSet.addStaticLinkGraphics(planeAtZ0);
       }
