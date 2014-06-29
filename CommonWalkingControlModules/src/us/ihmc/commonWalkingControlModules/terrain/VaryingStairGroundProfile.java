@@ -2,16 +2,16 @@ package us.ihmc.commonWalkingControlModules.terrain;
 
 import java.util.Arrays;
 
-import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DAdapter.GroundProfile;
 import us.ihmc.utilities.CheckTools;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
 
+import com.yobotics.simulationconstructionset.util.ground.GroundProfileFromHeightMap;
 
-public class VaryingStairGroundProfile implements GroundProfile
+
+public class VaryingStairGroundProfile extends GroundProfileFromHeightMap
 {
    private final BoundingBox3d boundingBox;
 
@@ -52,15 +52,12 @@ public class VaryingStairGroundProfile implements GroundProfile
       boundingBox = new BoundingBox3d(xMin, yMin, zMin, xMax, yMax, zMax);
    }
 
-   public void closestIntersectionAndNormalAt(double x, double y, double z, Point3d intersection, Vector3d normal)
+   public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
    {
-      closestIntersectionTo(x, y, z, intersection);
-      surfaceNormalAt(x, y, z, normal);
-   }
-
-   public void closestIntersectionTo(double x, double y, double z, Point3d intersection)
-   {
-      intersection.set(x, y, heightAt(x, y, z));
+      double height = heightAt(x, y, z);
+      surfaceNormalAt(x, y, z, normalToPack);
+      
+      return height;
    }
 
    public double heightAt(double x, double y, double z)
@@ -70,11 +67,6 @@ public class VaryingStairGroundProfile implements GroundProfile
       double height = computeGroundHeight(index);
 
       return height;
-   }
-
-   public boolean isClose(double x, double y, double z)
-   {
-      return true;
    }
 
    public void surfaceNormalAt(double x, double y, double z, Vector3d normal)

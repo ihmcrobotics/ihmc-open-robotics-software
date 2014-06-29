@@ -4,11 +4,12 @@ package us.ihmc.commonWalkingControlModules.terrain;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DAdapter.GroundProfile;
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
 
+import com.yobotics.simulationconstructionset.util.ground.GroundProfileFromHeightMap;
 
-public class StepUpGroundProfile implements GroundProfile
+
+public class StepUpGroundProfile extends GroundProfileFromHeightMap
 {
    private final BoundingBox3d boundingBox;
 
@@ -42,17 +43,20 @@ public class StepUpGroundProfile implements GroundProfile
       intersection.set(x, y, heightAt(x, y, z));
    }
 
+   public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
+   {
+      double height = heightAt(x, y, z);
+      surfaceNormalAt(x, y, z, normalToPack);
+      
+      return height;
+   }
+   
    public double heightAt(double x, double y, double z)
    {
       if (x > groundXStep)
          return groundZStep;
 
       return 0.0;
-   }
-
-   public boolean isClose(double x, double y, double z)
-   {
-      return true;
    }
 
    public void surfaceNormalAt(double x, double y, double z, Vector3d normal)
