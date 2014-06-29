@@ -8,12 +8,13 @@ import javax.vecmath.Vector3d;
 import us.ihmc.graphics3DAdapter.GroundProfile;
 import us.ihmc.utilities.CheckTools;
 import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.geometry.BoundingBox3d;
 
 
 public class VaryingStairGroundProfile implements GroundProfile
 {
-   private final double xMin, xMax, yMin, yMax;
-   
+   private final BoundingBox3d boundingBox;
+
    private final double[] stepStartXValues;
    private final double[] groundHeights;
 
@@ -39,11 +40,16 @@ public class VaryingStairGroundProfile implements GroundProfile
 
       double leadInX = 1.0;
       double leadOutX = 1.0;
-      this.xMin = startX - leadInX;
-      this.xMax = MathTools.max(stepStartXValues) + leadOutX;
+      double xMin = startX - leadInX;
+      double xMax = MathTools.max(stepStartXValues) + leadOutX;
 
-      this.yMin = -1.0;
-      this.yMax = 1.0;
+      double yMin = -1.0;
+      double yMax = 1.0;
+      
+      double zMin = Double.NEGATIVE_INFINITY;
+      double zMax = Double.POSITIVE_INFINITY;
+      
+      boundingBox = new BoundingBox3d(xMin, yMin, zMin, xMax, yMax, zMax);
    }
 
    public void closestIntersectionAndNormalAt(double x, double y, double z, Point3d intersection, Vector3d normal)
@@ -55,26 +61,6 @@ public class VaryingStairGroundProfile implements GroundProfile
    public void closestIntersectionTo(double x, double y, double z, Point3d intersection)
    {
       intersection.set(x, y, heightAt(x, y, z));
-   }
-
-   public double getXMax()
-   {
-      return xMax;
-   }
-
-   public double getXMin()
-   {
-      return xMin;
-   }
-
-   public double getYMax()
-   {
-      return yMax;
-   }
-
-   public double getYMin()
-   {
-      return yMin;
    }
 
    public double heightAt(double x, double y, double z)
@@ -118,5 +104,10 @@ public class VaryingStairGroundProfile implements GroundProfile
    public double computeGroundHeight(int index)
    {
       return groundHeights[index];
+   }
+   
+   public BoundingBox3d getBoundingBox()
+   {
+      return boundingBox;
    }
 }

@@ -6,6 +6,7 @@ import javax.vecmath.Vector3d;
 import org.junit.Test;
 
 import us.ihmc.graphics3DAdapter.GroundProfile;
+import us.ihmc.utilities.math.geometry.BoundingBox3d;
 import us.ihmc.utilities.test.JUnitTools;
 
 public abstract class GroundProfileTest
@@ -23,9 +24,12 @@ public abstract class GroundProfileTest
    public void testSurfaceNormalAlongXAxis()
    {
       int nSteps = 1000;
-      double xStep = (groundProfile.getXMax() - groundProfile.getXMin()) / nSteps;
+      
+      BoundingBox3d boundingBox = groundProfile.getBoundingBox();
+
+      double xStep = (boundingBox.getXMax() - boundingBox.getXMin()) / nSteps;
       double dx = 1e-8;
-      double y = (groundProfile.getYMax() - groundProfile.getYMin()) / 2.0;
+      double y = (boundingBox.getYMax() - boundingBox.getYMin()) / 2.0;
       double z = 0.0;
 
       for (int i = 0; i < nSteps; i++)
