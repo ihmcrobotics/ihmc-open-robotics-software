@@ -6,7 +6,7 @@ import javax.vecmath.Vector3d;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.graphics3DAdapter.GroundProfile;
+import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
 import us.ihmc.utilities.test.JUnitTools;
 
@@ -14,7 +14,7 @@ import com.yobotics.simulationconstructionset.util.ShipCorridorGroundProfile;
 
 public class ShipCorridorGroundProfileTest 
 {
-   private GroundProfile groundProfile;
+   private ShipCorridorGroundProfile groundProfile;
    private final double epsilon = 1e-6;
    private final boolean debug = false;
   
@@ -33,7 +33,7 @@ public class ShipCorridorGroundProfileTest
    {
       int nSteps = 1000;
       BoundingBox3d boundingBox = groundProfile.getBoundingBox();
-
+      
       double yStep = (boundingBox.getYMax() - boundingBox.getYMin()) / nSteps;
       double dy = 1e-8;
       double x = (boundingBox.getXMax() - boundingBox.getXMin()) / 2.0;
