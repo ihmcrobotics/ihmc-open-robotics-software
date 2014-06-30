@@ -14,8 +14,8 @@ import com.martiansoftware.jsap.JSAPResult;
 
 public class ValkyrieNetworkProcessor
 {
-   private static String rosMasterURI = DRCConfigParameters.ROS_MASTER_URI;
    private static final DRCRobotModel model = new ValkyrieRobotModel(true, true);
+   private static String rosMasterURI = "http://" + model.getNetworkParameters().getROSHostIP() + ":11311";
    
    public static void main(String[] args) throws URISyntaxException, JSAPException
    {

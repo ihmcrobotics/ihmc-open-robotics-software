@@ -37,7 +37,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
    }
 
    public void initializeSimulatedSensors(LocalObjectCommunicator scsCommunicator, RobotPoseBuffer robotPoseBuffer,
-         DRCNetworkProcessorNetworkingManager networkingManager, SDFFullRobotModel sdfFullRobotModel, LidarFilter lidarDataFilter)
+         DRCNetworkProcessorNetworkingManager networkingManager, SDFFullRobotModel sdfFullRobotModel, LidarFilter lidarDataFilter, String sensorURI)
    {
       new SCSCameraDataReceiver(robotPoseBuffer, sensorInformation.getPrimaryCameraParamaters(), scsCommunicator, networkingManager, ppsTimestampOffsetProvider);
       if(DRCConfigParameters.USE_POINT_CLOUD_INSTEAD_OF_LIDAR)
@@ -46,12 +46,12 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
                ppsTimestampOffsetProvider, lidarDataFilter);
       } else {
          new SCSLidarDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, sdfFullRobotModel, sensorInformation, scsCommunicator,
-               ppsTimestampOffsetProvider, lidarDataFilter);
+               ppsTimestampOffsetProvider, lidarDataFilter, sensorURI);
       }
    }
 
    public void initializePhysicalSensors(RobotPoseBuffer robotPoseBuffer, DRCNetworkProcessorNetworkingManager networkingManager,
-         SDFFullRobotModel sdfFullRobotModel, ObjectCommunicator objectCommunicator, LidarFilter lidarDataFilter)
+         SDFFullRobotModel sdfFullRobotModel, ObjectCommunicator objectCommunicator, LidarFilter lidarDataFilter, String sensorURI)
    {
       RosMainNode rosMainNode = new RosMainNode(rosCoreURI, "darpaRoboticsChallange/networkProcessor");
 
@@ -68,7 +68,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
 
       DRCRobotCameraParamaters cameraParamaters = sensorInformation.getPrimaryCameraParamaters();
 
-      new RosCameraReceiver(cameraParamaters, robotPoseBuffer, cameraParamaters.getVideoSettings(), rosMainNode, networkingManager, ppsTimestampOffsetProvider,null);
+      new RosCameraReceiver(cameraParamaters, robotPoseBuffer, cameraParamaters.getVideoSettings(), rosMainNode, networkingManager, ppsTimestampOffsetProvider,null, sensorURI);
 
       CameraInfoReceiver cameraInfoServer = new RosCameraInfoReciever(cameraParamaters, rosMainNode, networkingManager.getControllerStateHandler(),null);
       networkingManager.getControllerCommandHandler().setIntrinsicServer(cameraInfoServer);
