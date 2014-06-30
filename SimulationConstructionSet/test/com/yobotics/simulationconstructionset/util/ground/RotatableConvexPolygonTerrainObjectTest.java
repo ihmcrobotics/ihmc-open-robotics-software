@@ -323,25 +323,25 @@ public class RotatableConvexPolygonTerrainObjectTest
    @Test
    public void testGetXMin()
    {
-      assertEquals(-2.0, flatTopFaceOctagon3d.getXMin(), epsilon);
+      assertEquals(-2.0, flatTopFaceOctagon3d.getBoundingBox().getXMin(), epsilon);
    }
 
    @Test
    public void testGetXMax()
    {
-      assertEquals(2.0, flatTopFaceOctagon3d.getXMax(), epsilon);
+      assertEquals(2.0, flatTopFaceOctagon3d.getBoundingBox().getXMax(), epsilon);
    }
 
    @Test
    public void testGetYMin()
    {
-      assertEquals(-2.0, flatTopFaceOctagon3d.getYMin(), epsilon);
+      assertEquals(-2.0, flatTopFaceOctagon3d.getBoundingBox().getYMin(), epsilon);
    }
 
    @Test
    public void testGetYMax()
    {
-      assertEquals(2.0, flatTopFaceOctagon3d.getYMax(), epsilon);
+      assertEquals(2.0, flatTopFaceOctagon3d.getBoundingBox().getYMax(), epsilon);
    }
 
    public void testSetupInEnvironment()
