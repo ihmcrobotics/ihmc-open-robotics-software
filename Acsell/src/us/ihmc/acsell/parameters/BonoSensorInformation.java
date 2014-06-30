@@ -104,4 +104,10 @@ public class BonoSensorInformation implements DRCRobotSensorInformation
    {
       return "";
    }
+
+   @Override
+   public double getLidarCRC()
+   {
+      return 0;
+   }
 }
