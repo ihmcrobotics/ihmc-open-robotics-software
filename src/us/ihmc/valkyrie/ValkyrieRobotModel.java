@@ -22,13 +22,11 @@ import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.AlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
-import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
-import us.ihmc.valkyrie.io.ValkyrieOutputWriterWithAccelerationIntegration;
 import us.ihmc.valkyrie.models.ModelRoot;
 import us.ihmc.valkyrie.paramaters.ValkyrieArmControllerParameters;
 import us.ihmc.valkyrie.paramaters.ValkyrieJointMap;
@@ -204,20 +202,6 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public DRCRobotContactPointParameters getContactPointParameters()
    {
       return jointMap.getContactPointParameters();
-   }
-
-   @Override
-   public DRCOutputWriter getOutputWriterWithAccelerationIntegration(DRCOutputWriter valkyrieOutputWriter, boolean runningOnRealRobot)
-   {
-      ValkyrieOutputWriterWithAccelerationIntegration valkyrieOutputWriterWithAccelerationIntegration = new ValkyrieOutputWriterWithAccelerationIntegration(
-            valkyrieOutputWriter, getControllerDT(), runningOnRealRobot);
-
-      valkyrieOutputWriterWithAccelerationIntegration.setAlphaDesiredVelocity(0.98, 0.0);
-      valkyrieOutputWriterWithAccelerationIntegration.setAlphaDesiredPosition(0.0, 0.0);
-      valkyrieOutputWriterWithAccelerationIntegration.setVelocityGains(15.0, 0.0);
-      valkyrieOutputWriterWithAccelerationIntegration.setPositionGains(0.0, 0.0);
-
-      return valkyrieOutputWriterWithAccelerationIntegration;
    }
 
    //For Sim Only

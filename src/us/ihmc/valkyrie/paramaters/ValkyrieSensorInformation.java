@@ -209,4 +209,11 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    {
       return "";
    }
+   
+
+   @Override
+   public double getLidarCRC()
+   {
+      return 0;
+   }
 }
