@@ -29,4 +29,6 @@ public interface DRCRobotSensorInformation
    public abstract String getLidarBaseFrame();
 
    public abstract String getLidarEndFrame();
+   
+   public abstract double getLidarCRC();
 }

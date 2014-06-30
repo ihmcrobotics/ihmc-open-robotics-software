@@ -186,12 +186,6 @@ public class AtlasRobotModel implements DRCRobotModel
    }
 
    @Override
-   public DRCOutputWriter getOutputWriterWithAccelerationIntegration(DRCOutputWriter drcOutputWriter, boolean runningOnRealRobot)
-   {
-      throw new RuntimeException("Implement me!");
-   }
-
-   @Override
    public void setJointDamping(SDFRobot simulatedRobot)
    {
       AtlasDampingParameters.setDampingParameters(simulatedRobot, getHandType(), getJointMap());

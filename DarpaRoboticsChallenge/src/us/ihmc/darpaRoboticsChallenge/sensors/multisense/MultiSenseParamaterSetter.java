@@ -36,7 +36,7 @@ public class MultiSenseParamaterSetter
    
    public static void setupNativeROSCommunicator(RosNativeNetworkProcessor rosNativeNetworkProcessor)
    {
-      if (DRCLocalConfigParameters.USING_REAL_HEAD && DRCLocalConfigParameters.IS_HEAD_ATTACHED)
+      if (DRCLocalConfigParameters.IS_HEAD_ATTACHED)
       {
          String rosPrefix = "/opt/ros";
          if (useRosHydro(rosPrefix))
@@ -54,10 +54,6 @@ public class MultiSenseParamaterSetter
             System.out.println("using fuerte");
             shellOutSpindleSpeedCommand(fuerteSpindleSpeedShellString);
          }
-      }
-      else
-      {
-         rosNativeNetworkProcessor.setSpindleVelocity(DRCConfigParameters.LIDAR_SPINDLE_VELOCITY);
       }
    }
    
