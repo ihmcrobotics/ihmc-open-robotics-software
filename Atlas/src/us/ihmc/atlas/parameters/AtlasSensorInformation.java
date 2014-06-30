@@ -8,6 +8,8 @@ import us.ihmc.robotSide.SideDependentList;
 
 public class AtlasSensorInformation implements DRCRobotSensorInformation
 {
+   private static final double lidarCRCOnRealRobot = -.0010908f;
+
    public static final String[] forceSensorNames = { "l_leg_akx", "r_leg_akx", "l_arm_wrx", "r_arm_wrx" };
    public static final SideDependentList<String> feetForceSensorNames = new SideDependentList<String>("l_leg_akx", "r_leg_akx");
    public static final SideDependentList<String> handForceSensorNames = new SideDependentList<String>("l_arm_wrx", "r_arm_wrx");
@@ -54,6 +56,8 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    private static final String bodyIMUSensor = "pelvis_imu_sensor";
    private static final String[] imuSensorsToUse = { bodyIMUSensor };
    
+   private final double lidarCRC;
+   
    public AtlasSensorInformation(boolean runningOnRealRobot)
    {
       VideoSettingsH264LowLatency videoSetting = VideoSettingsFactory.get32kBitSettingsSquare();
@@ -69,6 +73,15 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
       
       cameraParamaters[2] = new DRCRobotCameraParamaters(leftFisheyeCameraName, fisheye_left_camera_topic, leftFisheyeCameraName, videoSetting, blackfly_left_camera_id);
       cameraParamaters[3] = new DRCRobotCameraParamaters(rightFisheyeCameraName, fisheye_right_camera_topic, rightFisheyeCameraName, videoSetting, blackfly_right_camera_id);
+      
+      if(runningOnRealRobot)
+      {
+         lidarCRC = lidarCRCOnRealRobot;
+      }
+      else
+      {
+         lidarCRC = 0.0;
+      }
    }
    
    @Override
@@ -152,5 +165,12 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    public String getLidarEndFrame()
    {
       return lidarEndFrame;
+   }
+   
+
+   @Override
+   public double getLidarCRC()
+   {
+      return lidarCRC;
    }
 }

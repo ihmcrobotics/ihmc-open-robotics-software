@@ -46,8 +46,6 @@ public interface DRCRobotModel
 
    public abstract ScsCollisionConfigure getPhysicsConfigure(SDFRobot robotModel);
 
-   public abstract DRCOutputWriter getOutputWriterWithAccelerationIntegration(DRCOutputWriter drcOutputWriter, boolean runningOnRealRobot);
-
    public abstract void setJointDamping(SDFRobot simulatedRobot);
 
    public abstract HandModel getHandModel();
