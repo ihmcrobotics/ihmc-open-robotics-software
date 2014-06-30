@@ -16,5 +16,5 @@ public interface GroundProfile3D
     */
    public abstract boolean checkIfInside(double x, double y, double z, Point3d intersectionToPack, Vector3d normalToPack);
    
-   public abstract HeightMap getHeightMapIfAvailable();
+   public abstract HeightMapWithNormals getHeightMapIfAvailable();
 }
