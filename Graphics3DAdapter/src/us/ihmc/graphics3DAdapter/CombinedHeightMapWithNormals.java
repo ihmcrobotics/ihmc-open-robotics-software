@@ -2,14 +2,16 @@ package us.ihmc.graphics3DAdapter;
 
 import java.util.ArrayList;
 
+import javax.vecmath.Vector3d;
+
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
 
-public class CombinedHeightMap implements HeightMap
+public class CombinedHeightMapWithNormals implements HeightMapWithNormals
 {
-   private final ArrayList<HeightMap> heightMaps = new ArrayList<>();
+   private final ArrayList<HeightMapWithNormals> heightMaps = new ArrayList<>();
    private BoundingBox3d boundingBox = null;
 
-   public void addHeightMap(HeightMap heightMap)
+   public void addHeightMap(HeightMapWithNormals heightMap)
    {
       this.heightMaps.add(heightMap);
 
@@ -17,6 +19,29 @@ public class CombinedHeightMap implements HeightMap
          boundingBox = heightMap.getBoundingBox();
       else
          boundingBox = BoundingBox3d.union(boundingBox, heightMap.getBoundingBox());
+   }
+
+
+   public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
+   {
+      Double heightAt = Double.NEGATIVE_INFINITY;
+      normalToPack.set(0.0, 0.0, 1.0);
+
+      for (int i = 0; i < heightMaps.size(); i++)
+      {
+         HeightMapWithNormals heightMap = heightMaps.get(i);
+         if (heightMap.getBoundingBox().isXYInside(x, y))
+         {
+            double localHeightAt = heightMap.heightAt(x, y, z);
+            if (localHeightAt > heightAt)
+            {
+               heightAt = localHeightAt;
+               heightMap.heightAndNormalAt(x, y, z, normalToPack);
+            }
+         }
+      }
+
+      return heightAt;
    }
 
    public double heightAt(double x, double y, double z)
