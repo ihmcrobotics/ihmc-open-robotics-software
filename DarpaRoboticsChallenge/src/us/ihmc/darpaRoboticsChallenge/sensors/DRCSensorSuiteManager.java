@@ -10,9 +10,9 @@ import us.ihmc.utilities.net.ObjectCommunicator;
 public interface DRCSensorSuiteManager
 {
    public void initializeSimulatedSensors(LocalObjectCommunicator scsCommunicator, RobotPoseBuffer robotPoseBuffer,
-         DRCNetworkProcessorNetworkingManager networkingManager, SDFFullRobotModel sdfFullRobotModel, LidarFilter lidarDataFilter);
+         DRCNetworkProcessorNetworkingManager networkingManager, SDFFullRobotModel sdfFullRobotModel, LidarFilter lidarDataFilter, String sensorURI);
 
    public void initializePhysicalSensors(RobotPoseBuffer robotPoseBuffer, DRCNetworkProcessorNetworkingManager networkingManager,
-         SDFFullRobotModel sdfFullRobotModel, ObjectCommunicator objectCommunicator, LidarFilter lidarDataFilter);
+         SDFFullRobotModel sdfFullRobotModel, ObjectCommunicator objectCommunicator, LidarFilter lidarDataFilter, String sensorURI);
 
 }

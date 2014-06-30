@@ -28,7 +28,7 @@ public class RosCameraReceiver extends CameraDataReceiver
 
    public RosCameraReceiver(final DRCRobotCameraParamaters cameraParameters, final RobotPoseBuffer robotPoseBuffer, final VideoSettings videoSettings,
          final RosMainNode rosMainNode, final DRCNetworkProcessorNetworkingManager networkingManager, final PPSTimestampOffsetProvider ppsTimestampOffsetProvider,
-         final CameraLogger logger )
+         final CameraLogger logger, String sensorURI)
    {
       super(robotPoseBuffer, videoSettings, networkingManager, ppsTimestampOffsetProvider);
 
@@ -37,7 +37,7 @@ public class RosCameraReceiver extends CameraDataReceiver
 
       if (cameraParameters.useRosToGenerateTransformFromBaseToCamera())
       {
-         rosTransformProvider = ROSNativeTransformTools.getInstance(DRCConfigParameters.ROS_MASTER_URI);
+         rosTransformProvider = ROSNativeTransformTools.getInstance(sensorURI);
          rosTransformProvider.connect();
       }
       else

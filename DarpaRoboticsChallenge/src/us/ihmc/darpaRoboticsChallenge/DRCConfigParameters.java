@@ -63,7 +63,6 @@ public class DRCConfigParameters
    public static final String CONSTELLATION_FIELD_COMPUTER_1_VPN_IP = "10.0.0.52";
    public static final String CONSTELLATION_FIELD_COMPUTER_2_VPN_IP = "10.0.0.53";
 
-   public static final String ROS_MASTER_URI = "http://" + DRCLocalConfigParameters.ROS_HOST_IP_ADDRESS + ":11311";
    public static final int CONTROLLER_TO_UI_TCP_PORT = 4893;
 
    public static final int NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT = 4895;

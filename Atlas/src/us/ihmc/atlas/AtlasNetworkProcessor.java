@@ -20,7 +20,6 @@ import com.martiansoftware.jsap.Switch;
 public class AtlasNetworkProcessor
 {
    private static String scsMachineIPAddress = DRCLocalConfigParameters.ROBOT_CONTROLLER_IP_ADDRESS;
-   private static String rosMasterURI = DRCConfigParameters.ROS_MASTER_URI;
 
    public static void main(String[] args) throws URISyntaxException, JSAPException
    {
@@ -69,6 +68,7 @@ public class AtlasNetworkProcessor
         	 scsMachineIPAddress = model.getNetworkParameters().getRobotControlComputerIP();
          }
 
+         String rosMasterURI;
          if (config.getString(rosURIFlag.getID()) != null)
          {
             rosMasterURI = config.getString(rosURIFlag.getID());
