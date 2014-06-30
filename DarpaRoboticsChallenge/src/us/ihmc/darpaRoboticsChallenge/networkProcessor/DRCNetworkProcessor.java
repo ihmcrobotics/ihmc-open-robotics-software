@@ -87,21 +87,21 @@ public class DRCNetworkProcessor
          }
       });
       
-      setSensorManager(robotModel.getSensorSuiteManager(rosUri),scsCommunicator);
+      setSensorManager(robotModel.getSensorSuiteManager(rosUri),scsCommunicator, "http://" + robotModel.getNetworkParameters().getROSHostIP() + ":11311");
       connect();
    }
 
-   private void setSensorManager(DRCSensorSuiteManager sensorSuiteManager, LocalObjectCommunicator localObjectCommunicator)
+   private void setSensorManager(DRCSensorSuiteManager sensorSuiteManager, LocalObjectCommunicator localObjectCommunicator, String sensorURI)
    {
       if (DRCLocalConfigParameters.ENABLE_CAMERA_AND_LIDAR)
       {
          if (useSimulatedSensors)
          {
-            sensorSuiteManager.initializeSimulatedSensors(localObjectCommunicator, robotPoseBuffer, networkingManager, fullRobotModel, lidarFilter);
+            sensorSuiteManager.initializeSimulatedSensors(localObjectCommunicator, robotPoseBuffer, networkingManager, fullRobotModel, lidarFilter, sensorURI);
          }
          else
          {
-            sensorSuiteManager.initializePhysicalSensors(robotPoseBuffer,networkingManager,fullRobotModel,fieldComputerClient, lidarFilter);
+            sensorSuiteManager.initializePhysicalSensors(robotPoseBuffer,networkingManager,fullRobotModel,fieldComputerClient, lidarFilter, sensorURI);
          }
       }
       else

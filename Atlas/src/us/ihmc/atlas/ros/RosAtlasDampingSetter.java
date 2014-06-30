@@ -154,7 +154,7 @@ public class RosAtlasDampingSetter
 
    public static void main(String[] args)
    {
-      RosAtlasDampingSetter rosAtlasSettingsSetter = new RosAtlasDampingSetter(DRCConfigParameters.ROS_MASTER_URI);
+      RosAtlasDampingSetter rosAtlasSettingsSetter = new RosAtlasDampingSetter("http://10.66.171.44:11311");
       rosAtlasSettingsSetter.setAtlasDampingParameters();
       System.exit(0);
    }

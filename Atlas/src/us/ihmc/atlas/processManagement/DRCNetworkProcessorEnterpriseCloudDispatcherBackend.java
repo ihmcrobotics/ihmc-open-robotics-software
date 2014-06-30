@@ -30,7 +30,7 @@ public class DRCNetworkProcessorEnterpriseCloudDispatcherBackend implements Runn
    private final byte[] buffer;
 
    private static String scsMachineIPAddress = DRCLocalConfigParameters.ROBOT_CONTROLLER_IP_ADDRESS;
-   private static String rosMasterURI = DRCConfigParameters.ROS_MASTER_URI;
+   private static String rosMasterURI = "http://10.66.171.44:11311";
 
    private static String[] javaArgs = new String[] {"-Xms2048m", "-Xmx2048m"};
 

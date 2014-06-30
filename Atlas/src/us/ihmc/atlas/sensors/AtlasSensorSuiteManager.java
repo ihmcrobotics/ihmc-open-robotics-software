@@ -42,7 +42,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
    @Override
    public void initializeSimulatedSensors(LocalObjectCommunicator scsCommunicator, RobotPoseBuffer robotPoseBuffer,
-         DRCNetworkProcessorNetworkingManager networkingManager, SDFFullRobotModel sdfFullRobotModel, LidarFilter lidarDataFilter)
+         DRCNetworkProcessorNetworkingManager networkingManager, SDFFullRobotModel sdfFullRobotModel, LidarFilter lidarDataFilter, String sensorURI)
    {
       SCSCameraDataReceiver cameraReceiver = new SCSCameraDataReceiver(robotPoseBuffer, sensorInformation.getPrimaryCameraParamaters(), scsCommunicator,
             networkingManager, ppsTimestampOffsetProvider);
@@ -53,7 +53,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
                ppsTimestampOffsetProvider, lidarDataFilter);
       } else {
          new SCSLidarDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, sdfFullRobotModel, sensorInformation, scsCommunicator,
-               ppsTimestampOffsetProvider, lidarDataFilter);
+               ppsTimestampOffsetProvider, lidarDataFilter, sensorURI);
       }
 
       if (DRCConfigParameters.CALIBRATE_ARM_MODE)
@@ -65,7 +65,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
    @Override
    public void initializePhysicalSensors(RobotPoseBuffer robotPoseBuffer, DRCNetworkProcessorNetworkingManager networkingManager,
-         SDFFullRobotModel sdfFullRobotModel, ObjectCommunicator objectCommunicator, LidarFilter lidarDataFilter)
+         SDFFullRobotModel sdfFullRobotModel, ObjectCommunicator objectCommunicator, LidarFilter lidarDataFilter, String sensorURI)
    {
       RosMainNode rosMainNode = new RosMainNode(rosCoreURI, "darpaRoboticsChallange/networkProcessor");
 
@@ -81,7 +81,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       }
      
       MultiSenseSensorManager multiSenseSensorManager = new MultiSenseSensorManager(sensorInformation, robotPoseBuffer, rosMainNode, networkingManager,
-            sdfFullRobotModel, objectCommunicator, rosNativeNetworkProcessor, ppsTimestampOffsetProvider, lidarDataFilter);
+            sdfFullRobotModel, objectCommunicator, rosNativeNetworkProcessor, ppsTimestampOffsetProvider, lidarDataFilter, sensorURI);
 
       new FishEyeDataReceiver(robotPoseBuffer, sensorInformation.getPrimaryCameraParamaters().getVideoSettings(), rosMainNode, networkingManager,
             DRCSensorParameters.DEFAULT_FIELD_OF_VIEW, ppsTimestampOffsetProvider);
