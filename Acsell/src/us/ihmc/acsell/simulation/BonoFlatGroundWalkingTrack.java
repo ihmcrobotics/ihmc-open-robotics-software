@@ -8,7 +8,7 @@ import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
 import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
-import us.ihmc.graphics3DAdapter.GroundProfile;
+import us.ihmc.graphics3DAdapter.GroundProfile3D;
 
 import com.yobotics.simulationconstructionset.util.FlatGroundProfile;
 
@@ -22,7 +22,7 @@ public class BonoFlatGroundWalkingTrack
 
 
       final double groundHeight = 0.0;
-      GroundProfile groundProfile = new FlatGroundProfile(groundHeight);
+      GroundProfile3D groundProfile = new FlatGroundProfile(groundHeight);
 
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotModel.getSimulateDT());
       scsInitialSetup.setDrawGroundProfile(true);
@@ -30,7 +30,6 @@ public class BonoFlatGroundWalkingTrack
 
       double initialYaw = 0.3;
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(groundHeight, initialYaw);
-
       boolean useVelocityAndHeadingScript = true;
       boolean cheatWithGroundHeightAtForFootstep = false;
 
