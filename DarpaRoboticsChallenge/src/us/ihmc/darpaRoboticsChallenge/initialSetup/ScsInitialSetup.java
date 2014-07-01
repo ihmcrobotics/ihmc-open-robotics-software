@@ -1,6 +1,5 @@
 package us.ihmc.darpaRoboticsChallenge.initialSetup;
 
-import us.ihmc.graphics3DAdapter.GroundProfile;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 
 import com.yobotics.simulationconstructionset.DynamicIntegrationMethod;
@@ -31,7 +30,6 @@ public interface ScsInitialSetup
    public abstract int getRecordFrequency();
    public abstract double getGravity();
    public abstract ScsPhysics createPhysics( ScsCollisionConfigure collisionConfigure , YoVariableRegistry registry );
-   public abstract GroundProfile getGroundProfile();
    public abstract GroundProfile3D getGroundProfile3D();
 //   public abstract SteppingStones getSteppingStones();
    public abstract DynamicIntegrationMethod getDynamicIntegrationMethod();

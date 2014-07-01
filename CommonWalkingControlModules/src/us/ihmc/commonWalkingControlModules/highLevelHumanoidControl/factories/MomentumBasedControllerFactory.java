@@ -31,7 +31,6 @@ import us.ihmc.commonWalkingControlModules.trajectories.ConstantTransferTimeCalc
 import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.TransferTimeCalculationProvider;
-import us.ihmc.graphics3DAdapter.GroundProfile;
 import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;

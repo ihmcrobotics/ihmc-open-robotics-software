@@ -8,7 +8,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
 import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
-import us.ihmc.graphics3DAdapter.GroundProfile;
+import us.ihmc.graphics3DAdapter.GroundProfile3D;
 
 import com.martiansoftware.jsap.JSAPException;
 import com.yobotics.simulationconstructionset.util.FlatGroundProfile;
@@ -37,7 +37,7 @@ public class AtlasFlatGroundWalkingTrack
       
       
       final double groundHeight = 0.0;
-      GroundProfile groundProfile;
+      GroundProfile3D groundProfile;
       if (USE_BUMPY_GROUND)
       {
          groundProfile = createBumpyGroundProfile();

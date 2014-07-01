@@ -13,7 +13,7 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.graphics3DAdapter.GroundProfile;
+import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.utilities.MemoryTools;
 
@@ -133,7 +133,7 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
       boolean useVelocityAndHeadingScript = true;
       boolean cheatWithGroundHeightAtForFootstep = false;
 
-      GroundProfile groundProfile = new FlatGroundProfile();
+      GroundProfile3D groundProfile = new FlatGroundProfile();
       DRCRobotModel robotModel = getRobotModel();
 
       DRCGuiInitialSetup guiInitialSetup = createGUIInitialSetup();

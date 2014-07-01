@@ -9,7 +9,6 @@ import javax.vecmath.Vector3d;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredVelocityControlModule;
-import us.ihmc.graphics3DAdapter.GroundProfile;
 import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;

@@ -13,7 +13,7 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.validation.YoVariableThreadAccessValidator;
 import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
 import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
-import us.ihmc.graphics3DAdapter.GroundProfile;
+import us.ihmc.graphics3DAdapter.GroundProfile3D;
 
 import com.martiansoftware.jsap.JSAPException;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
@@ -38,7 +38,7 @@ public class AtlasPushRecoveryTrack
       if (model == null)
          throw new RuntimeException("No robot model selected");
 
-      GroundProfile groundProfile = new FlatGroundProfile(groundHeight);
+      GroundProfile3D groundProfile = new FlatGroundProfile(groundHeight);
 
       YoVariableThreadAccessValidator.registerAccessValidator();
       SliderBoardFactory sliderBoardFactory = WalkControllerSliderBoard.getFactory();

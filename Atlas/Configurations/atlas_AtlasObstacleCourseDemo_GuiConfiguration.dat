@@ -48,15 +48,15 @@ Plotter,
  <Position Y>0.0</Position Y>
  <Position Z>0.0</Position Z>
  <Track Booleans>
-<Track>false</Track>
+<Track>true</Track>
 <Track X>true</Track X>
 <Track Y>true</Track Y>
-<Track Z>false</Track Z>
+<Track Z>true</Track Z>
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>-0.44</Fix X>
-<Fix Y>-0.17</Fix Y>
+<Fix X>4.129677445545759</Fix X>
+<Fix Y>4.872586937524806</Fix Y>
 <Fix Z>0.75</Fix Z>
 </Fix Position>
 </Canvas 1>

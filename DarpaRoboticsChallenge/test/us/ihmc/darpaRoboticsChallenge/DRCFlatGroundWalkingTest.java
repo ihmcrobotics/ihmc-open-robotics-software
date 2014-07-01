@@ -14,7 +14,7 @@ import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.graphics3DAdapter.GroundProfile;
+import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.MemoryTools;
@@ -195,7 +195,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
    {
       DRCGuiInitialSetup guiInitialSetup = createGUIInitialSetup();
       
-      GroundProfile groundProfile = new FlatGroundProfile();
+      GroundProfile3D groundProfile = new FlatGroundProfile();
       
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotModel.getSimulateDT());
       scsInitialSetup.setDrawGroundProfile(drawGroundProfile);
