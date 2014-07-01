@@ -6,13 +6,13 @@ import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
 
 public class SwingTimeCalculationProvider implements DoubleProvider
 {
-   private static int instanceNumber = 0;
+//   private int instanceNumber = 0;
    private final ConstantSwingTimeCalculator swingTimeCalculator;
    private final DoubleYoVariable swingTime;
 
    public SwingTimeCalculationProvider(String name, YoVariableRegistry parentRegistry, ConstantSwingTimeCalculator swingTimeCalculator, double defaultSwingTime)
    {
-      YoVariableRegistry registry = new YoVariableRegistry("swingTimeCalculationProvider"+instanceNumber++);
+      YoVariableRegistry registry = new YoVariableRegistry("swingTimeCalculationProvider");
       parentRegistry.addChild(registry);
       this.swingTime = new DoubleYoVariable(name, registry);
       this.swingTimeCalculator = swingTimeCalculator;
