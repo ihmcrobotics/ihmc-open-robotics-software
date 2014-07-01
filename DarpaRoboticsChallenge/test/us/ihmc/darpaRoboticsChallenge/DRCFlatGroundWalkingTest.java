@@ -6,6 +6,7 @@ import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 
+import com.yobotics.simulationconstructionset.util.simulationTesting.SimulationRunsSameWayTwiceVerifier;
 import org.junit.After;
 import org.junit.Before;
 
@@ -97,6 +98,24 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       DRCFlatGroundWalkingTrack track = setupFlatGroundSimulationTrack(robotModel);
 
       simulateAndAssertGoodWalking(track, runName, doPelvisYawWarmup);
+   }
+
+   protected void setupAndTestFlatGroundSimulationTrackTwice(DRCRobotModel robotModel) throws SimulationExceededMaximumTimeException
+   {
+      simulateAndAssertSimRunsSameWayTwice(robotModel);
+   }
+
+   private void simulateAndAssertSimRunsSameWayTwice(DRCRobotModel robotModel) throws SimulationExceededMaximumTimeException
+   {
+      SimulationConstructionSet scsOne = setupFlatGroundSimulationTrackForSameWayTwiceVerifier(robotModel).getSimulationConstructionSet();
+      SimulationConstructionSet scsTwo = setupFlatGroundSimulationTrackForSameWayTwiceVerifier(robotModel).getSimulationConstructionSet();
+
+      double walkingTimeDuration = 30.0;
+      SimulationRunsSameWayTwiceVerifier verifier = new SimulationRunsSameWayTwiceVerifier(scsOne, scsTwo, standingTimeDuration, walkingTimeDuration);
+
+      checkSimulationRunsSameWayTwice(verifier);
+
+      BambooTools.reportTestFinishedMessage();
    }
    
    private void simulateAndAssertGoodWalking(DRCFlatGroundWalkingTrack track, String runName, boolean doPelvisYawWarmup) throws SimulationExceededMaximumTimeException
@@ -217,6 +236,30 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       return drcFlatGroundWalkingTrack;
    }
 
+   private DRCFlatGroundWalkingTrack setupFlatGroundSimulationTrackForSameWayTwiceVerifier(DRCRobotModel robotModel)
+   {
+      DRCGuiInitialSetup guiInitialSetup = createGUIInitialSetup();
+
+      GroundProfile3D groundProfile = new FlatGroundProfile();
+
+      DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotModel.getSimulateDT());
+      scsInitialSetup.setDrawGroundProfile(drawGroundProfile);
+
+      if (cheatWithGroundHeightAtForFootstep)
+         scsInitialSetup.setInitializeEstimatorToActual(true);
+
+      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
+
+      DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup,
+            scsInitialSetup, useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, robotModel);
+
+      SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
+
+      setupCameraForUnitTest(scs);
+
+      return drcFlatGroundWalkingTrack;
+   }
+
    private void checkNothingChanged(NothingChangedVerifier nothingChangedVerifier)
    {
       ArrayList<String> stringsToIgnore = new ArrayList<String>();
@@ -229,6 +272,20 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       double maxPercentDifference = 0.001;
       nothingChangedVerifier.verifySameResultsAsPreviously(maxPercentDifference, stringsToIgnore);
       assertFalse("Had to write new base file. On next run nothing should change", writeNewBaseFile);
+   }
+
+   private void checkSimulationRunsSameWayTwice(SimulationRunsSameWayTwiceVerifier verifier) throws SimulationExceededMaximumTimeException
+   {
+      ArrayList<String> stringsToIgnore = new ArrayList<String>();
+      stringsToIgnore.add("nano");
+      stringsToIgnore.add("milli");
+      stringsToIgnore.add("Timer");
+      stringsToIgnore.add("actualControl");
+      stringsToIgnore.add("actualEstimator");
+      stringsToIgnore.add("totalDelay");
+
+      double maxPercentDifference = 0.000001;
+      assertTrue("Simulation did not run same way twice!", verifier.verifySimRunsSameWayTwice(maxPercentDifference, stringsToIgnore));
    }
 
    private DRCGuiInitialSetup createGUIInitialSetup()

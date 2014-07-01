@@ -1,7 +1,9 @@
 package us.ihmc.atlas;
 
+import org.junit.Assume;
 import org.junit.Test;
 
+import org.junit.internal.AssumptionViolatedException;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.bambooTools.BambooTools;
@@ -25,6 +27,24 @@ public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
 
       boolean doPelvisYawWarmup = true;
       setupAndTestFlatGroundSimulationTrack(robotModel, runName, doPelvisYawWarmup);
+   }
+
+   @Test
+   public void testFlatGroundWalkingRunsSameWayTwice() throws SimulationExceededMaximumTimeException
+   {
+      try
+      {
+         Assume.assumeTrue(BambooTools.isNightlyBuild());
+         BambooTools.reportTestStartedMessage();
+
+         robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, false, false);
+
+         setupAndTestFlatGroundSimulationTrackTwice(robotModel);
+      }
+      catch(AssumptionViolatedException e)
+      {
+         System.out.println("Not Nightly Build, skipping AtlasFlatGroundWalkingTest.testFlatGroundWalkingRunsSameWayTwice");
+      }
    }
 
    @Override
