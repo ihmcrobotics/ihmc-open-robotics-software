@@ -34,9 +34,6 @@ public class DRCNetworkProcessor
    private final RobotPoseBuffer robotPoseBuffer;
    private final LidarFilter lidarFilter;
    
-
-   private static String scsMachineIPAddress = DRCLocalConfigParameters.ROBOT_CONTROLLER_IP_ADDRESS;
-
    /*
     * This will become a stand-alone application in the final competition. Do
     * NOT pass in objects shared with the DRC simulation!
@@ -60,7 +57,7 @@ public class DRCNetworkProcessor
    {
       if (fieldComputerClientL == null)
       {
-         this.fieldComputerClient = new KryoObjectClient(scsMachineIPAddress, DRCConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT,
+         this.fieldComputerClient = new KryoObjectClient(robotModel.getNetworkParameters().getRobotControlComputerIP(), DRCConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT,
                new DRCNetClassList());
          ((KryoObjectClient) this.fieldComputerClient).setReconnectAutomatically(true);
       }

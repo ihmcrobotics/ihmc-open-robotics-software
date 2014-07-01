@@ -32,7 +32,6 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.AlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.AtlasPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
-import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.iRobot.model.iRobotHandModel;
 import us.ihmc.robotSide.RobotSide;

@@ -8,7 +8,6 @@ import org.zeromq.ZMQ;
 
 import std_msgs.Time;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosMultisensePPSSubscriber;
 
@@ -48,7 +47,7 @@ public class AtlasPPSTimestampOffsetProvider implements PPSTimestampOffsetProvid
    {
       ZMQ.Context context = ZMQ.context(1);
       requester = context.socket(ZMQ.REQ);
-      requester.connect("tcp://" + DRCLocalConfigParameters.ROBOT_CONTROLLER_IP_ADDRESS + ":" + DRCConfigParameters.PPS_PROVIDER_PORT);
+      requester.connect("tcp://10.66.171.20:" + DRCConfigParameters.PPS_PROVIDER_PORT);
    }
 
    @Override

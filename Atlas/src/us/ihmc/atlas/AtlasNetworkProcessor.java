@@ -3,8 +3,6 @@ package us.ihmc.atlas;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DummyController;
@@ -19,8 +17,6 @@ import com.martiansoftware.jsap.Switch;
 
 public class AtlasNetworkProcessor
 {
-   private static String scsMachineIPAddress = DRCLocalConfigParameters.ROBOT_CONTROLLER_IP_ADDRESS;
-
    public static void main(String[] args) throws URISyntaxException, JSAPException
    {
       JSAP jsap = new JSAP();
@@ -59,15 +55,6 @@ public class AtlasNetworkProcessor
     		  return;
     	  }
     	  
-         if (config.getString(scsIPFlag.getID()) != null)
-         {
-            scsMachineIPAddress = config.getString(scsIPFlag.getID());
-         }
-         else
-         {
-        	 scsMachineIPAddress = model.getNetworkParameters().getRobotControlComputerIP();
-         }
-
          String rosMasterURI;
          if (config.getString(rosURIFlag.getID()) != null)
          {

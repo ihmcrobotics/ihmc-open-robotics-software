@@ -14,7 +14,6 @@ import com.martiansoftware.jsap.JSAPResult;
 
 public class RemoteAtlasVisualizer
 {
-   public static final String defaultHost = DRCLocalConfigParameters.ROBOT_CONTROLLER_IP_ADDRESS;
    public static final int defaultPort = DRCLocalConfigParameters.DEFAULT_YOVARIABLE_SERVER_PORT;
    private final boolean showOverheadView = DRCLocalConfigParameters.SHOW_OVERHEAD_VIEW;
    
@@ -41,8 +40,7 @@ public class RemoteAtlasVisualizer
       int bufferSize = 16384;
       JSAP jsap = new JSAP();
       
-      FlaggedOption hostOption = new FlaggedOption("host").setStringParser(JSAP.STRING_PARSER).setRequired(false).setLongFlag("host").setShortFlag('L').setDefault(
-            defaultHost);
+      FlaggedOption hostOption = new FlaggedOption("host").setStringParser(JSAP.STRING_PARSER).setRequired(false).setLongFlag("host").setShortFlag('L');
       FlaggedOption portOption = new FlaggedOption("port").setStringParser(JSAP.INTEGER_PARSER).setRequired(false).setLongFlag("port").setShortFlag('p')
             .setDefault(String.valueOf(defaultPort));
       FlaggedOption robotModel = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(true).setStringParser(JSAP.STRING_PARSER);
@@ -56,9 +54,15 @@ public class RemoteAtlasVisualizer
       
       if (config.success())
       {
-         String host = config.getString("host");
+    	  DRCRobotModel model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), false, false);
+    	  
+    	  String host;
+    	  if (config.getString("host") != null)
+    		  host = config.getString("host");
+    	  else
+    		  host = model.getNetworkParameters().getRobotControlComputerIP();
+    	  
          int port = config.getInt("port");
-         DRCRobotModel model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), false, false);
          
          new RemoteAtlasVisualizer(host, port, bufferSize, model);         
       }
