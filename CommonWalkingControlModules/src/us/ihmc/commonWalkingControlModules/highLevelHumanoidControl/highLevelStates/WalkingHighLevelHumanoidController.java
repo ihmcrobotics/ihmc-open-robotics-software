@@ -1012,7 +1012,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          captureTime = 0.0;
          hasICPPlannerFinished.set(false);
          trailingLeg.set(null);
-         swingTimeCalculationProvider.updateSwingTime();
 
          footSwitches.get(swingSide).reset();
 
@@ -1023,6 +1022,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          else
          {
             nextFootstep = upcomingFootstepList.getNextFootstep();
+            swingTimeCalculationProvider.updateSwingTime();
          }
          
          if (nextFootstep != null)
