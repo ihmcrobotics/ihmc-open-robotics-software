@@ -110,7 +110,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       SimulationConstructionSet scsOne = setupFlatGroundSimulationTrackForSameWayTwiceVerifier(robotModel).getSimulationConstructionSet();
       SimulationConstructionSet scsTwo = setupFlatGroundSimulationTrackForSameWayTwiceVerifier(robotModel).getSimulationConstructionSet();
 
-      double walkingTimeDuration = 30.0;
+      double walkingTimeDuration = 20.0;
       SimulationRunsSameWayTwiceVerifier verifier = new SimulationRunsSameWayTwiceVerifier(scsOne, scsTwo, standingTimeDuration, walkingTimeDuration);
 
       checkSimulationRunsSameWayTwice(verifier);
