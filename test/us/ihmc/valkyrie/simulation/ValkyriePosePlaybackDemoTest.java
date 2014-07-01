@@ -22,7 +22,7 @@ import us.ihmc.darpaRoboticsChallenge.DRCPosePlaybackDemo;
 import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCSimulationFactory;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.graphics3DAdapter.GroundProfile;
+import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
@@ -172,7 +172,7 @@ public class ValkyriePosePlaybackDemoTest
       double groundHeight = 0.0;
       double initialYaw = 0.0;
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = valkyrieRobotModel.getDefaultRobotInitialSetup(groundHeight + floatingHeight, initialYaw);
-      GroundProfile groundProfile = new FlatGroundProfile(groundHeight);
+      GroundProfile3D groundProfile = new FlatGroundProfile(groundHeight);
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, valkyrieRobotModel.getSimulateDT());
       scsInitialSetup.setDrawGroundProfile(true);
       scsInitialSetup.setInitializeEstimatorToActual(true);
