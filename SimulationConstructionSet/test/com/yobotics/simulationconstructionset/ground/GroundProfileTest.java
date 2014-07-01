@@ -35,7 +35,7 @@ public abstract class GroundProfileTest
       for (int i = 0; i < nSteps; i++)
       {
          double x = i * xStep;
-         double dzdx = (groundProfile.heightAt(x + dx, y, z) - groundProfile.heightAt(x, y, z)) / dx;
+         double dzdx = (groundProfile.getHeightMapIfAvailable().heightAt(x + dx, y, z) - groundProfile.getHeightMapIfAvailable().heightAt(x, y, z)) / dx;
          Vector3d numericalSurfaceNormal = new Vector3d(-dzdx, 0.0, 1.0);
          numericalSurfaceNormal.normalize();
 
