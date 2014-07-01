@@ -6,7 +6,6 @@ import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
 import us.ihmc.commonWalkingControlModules.terrain.CommonTerrain;
 import us.ihmc.commonWalkingControlModules.terrain.TerrainType;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.ScsInitialSetup;
-import us.ihmc.graphics3DAdapter.GroundProfile;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
@@ -43,23 +42,12 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
    private boolean initializeEstimatorToActual = false;
    
 //   private final CommonTerrain commonTerrain;
-   private final GroundProfile groundProfile;
    private final GroundProfile3D groundProfile3D;
    
    private DynamicIntegrationMethod dynamicIntegrationMethod = DynamicIntegrationMethod.EULER_DOUBLE_STEPS;
    
-   public DRCSCSInitialSetup(GroundProfile groundProfile, double simulateDT)
-   {
-//      commonTerrain = new CommonTerrain(groundProfile);
-      
-      this.groundProfile = groundProfile;
-      this.groundProfile3D = null;
-      this.simulateDT = simulateDT;
-   }
-   
    public DRCSCSInitialSetup(GroundProfile3D groundProfile, double simulateDT)
    {      
-      this.groundProfile = null;
       this.groundProfile3D = groundProfile;
       this.simulateDT = simulateDT;
    }
@@ -73,7 +61,6 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
    {
       TerrainObject3D terrainObject3D = commonAvatarEnvironmentInterface.getTerrainObject3D();
 
-      this.groundProfile = null;
       this.groundProfile3D = terrainObject3D;
       this.simulateDT = simulateDT;
    }
@@ -107,7 +94,6 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
 //         commonTerrain.registerSteppingStonesArtifact(dynamicGraphicObjectsListRegistry);
 
 //      groundContactModel.setGroundProfile(commonTerrain.getGroundProfile());
-      if (groundProfile != null) groundContactModel.setGroundProfile(groundProfile);
       if (groundProfile3D != null) groundContactModel.setGroundProfile3D(groundProfile3D);
       
       // TODO: change this to scs.setGroundContactModel(groundContactModel);
@@ -134,7 +120,7 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
       return simulationDataBufferSize;
    }
 
-   private ArrayList<Graphics3DObject> createGroundLinkGraphicsFromGroundProfile(GroundProfile groundProfile)
+   private ArrayList<Graphics3DObject> createGroundLinkGraphicsFromGroundProfile(GroundProfile3D groundProfile)
    {
       ArrayList<Graphics3DObject> ret = new ArrayList<Graphics3DObject>();
 
@@ -160,7 +146,7 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
 //         boolean drawGroundBelow = false;
          
 //         ArrayList<Graphics3DObject> groundLinkGraphics = commonTerrain.createLinkGraphics(drawGroundBelow);
-         ArrayList<Graphics3DObject> groundLinkGraphics = createGroundLinkGraphicsFromGroundProfile(groundProfile);
+         ArrayList<Graphics3DObject> groundLinkGraphics = createGroundLinkGraphicsFromGroundProfile(groundProfile3D);
          scs.addStaticLinkGraphics(groundLinkGraphics);
       }
       
@@ -226,12 +212,6 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
       this.initializeEstimatorToActual = initializeEstimatorToActual;
    }
    
-   public GroundProfile getGroundProfile()
-   {
-      return groundProfile;
-//      return commonTerrain.getGroundProfile();
-   }
-   
    public GroundProfile3D getGroundProfile3D()
    {
       return groundProfile3D;
@@ -244,10 +224,6 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
       if (groundProfile3D != null)
       {
          ret = groundProfile3D.getHeightMapIfAvailable();
-      }
-      if (ret == null)
-      {
-         ret = groundProfile.getHeightMapIfAvailable();
       }
       
       return ret;

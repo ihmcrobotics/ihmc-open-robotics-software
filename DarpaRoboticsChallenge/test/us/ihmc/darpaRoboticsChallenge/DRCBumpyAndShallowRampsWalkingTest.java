@@ -16,7 +16,6 @@ import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameter
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.graphics3DAdapter.GroundProfile;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
@@ -310,7 +309,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       //TODO: This should work with cheatWithGroundHeightAtForFootstep = false also, but for some reason height gets messed up and robot gets stuck...
       boolean cheatWithGroundHeightAtForFootstep = true;
 
-      GroundProfile groundProfile = createBumpyGroundProfile();
+      GroundProfile3D groundProfile = createBumpyGroundProfile();
       boolean drawGroundProfile = true;
       
       WalkingControllerParameters drcControlParameters = robotModel.getWalkingControllerParameters();
@@ -366,7 +365,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
    boolean setupForCheatingUsingGroundHeightAtForFootstepProvider = false;
 
    private DRCFlatGroundWalkingTrack setupSimulationTrack(WalkingControllerParameters drcControlParameters, ArmControllerParameters
-         armControllerParameters, GroundProfile groundProfile, GroundProfile3D groundProfile3D, boolean drawGroundProfile,
+         armControllerParameters, GroundProfile3D groundProfile, GroundProfile3D groundProfile3D, boolean drawGroundProfile,
          boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep)
    {
       DRCGuiInitialSetup guiInitialSetup = createGUIInitialSetup();

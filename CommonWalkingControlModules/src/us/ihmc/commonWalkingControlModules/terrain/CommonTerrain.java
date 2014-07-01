@@ -9,7 +9,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.vecmath.Point2d;
 
-import us.ihmc.graphics3DAdapter.GroundProfile;
+import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.HeightMapWithNormals;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -29,7 +29,7 @@ import com.yobotics.simulationconstructionset.util.ground.steppingStones.Steppin
 public class CommonTerrain
 {
    private final SteppingStones steppingStones;
-   private final GroundProfile groundProfile;
+   private final GroundProfile3D groundProfile;
 
    public CommonTerrain(TerrainType terrainType)
    {
@@ -53,13 +53,13 @@ public class CommonTerrain
       }
    }
 
-   public CommonTerrain(GroundProfile groundProfile)
+   public CommonTerrain(GroundProfile3D groundProfile)
    {
       this.steppingStones = null;
       this.groundProfile = groundProfile;
    }
 
-   public GroundProfile getGroundProfile()
+   public GroundProfile3D getGroundProfile()
    {
       return groundProfile;
    }
@@ -347,9 +347,9 @@ public class CommonTerrain
    }
 
 
-   public static GroundProfile setUpTerrain(TerrainType terrainType)
+   public static GroundProfile3D setUpTerrain(TerrainType terrainType)
    {
-      GroundProfile groundProfile;
+      GroundProfile3D groundProfile;
       switch (terrainType)
       {
          case FLAT_Z_ZERO :
