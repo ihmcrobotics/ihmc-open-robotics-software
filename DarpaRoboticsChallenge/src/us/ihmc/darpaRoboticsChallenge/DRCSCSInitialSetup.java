@@ -143,7 +143,7 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
 
       HeightMap heightMap = null;
       
-      if (groundProfile != null) heightMap = groundProfile;
+      if (groundProfile != null) heightMap = groundProfile.getHeightMapIfAvailable();
       else if (groundProfile3D != null) heightMap = groundProfile3D.getHeightMapIfAvailable();
       
       texturedGroundLinkGraphics.addHeightMap(heightMap, 300, 300, YoAppearance.DarkGreen());
@@ -248,7 +248,7 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
       }
       if (ret == null)
       {
-         ret = groundProfile;
+         ret = groundProfile.getHeightMapIfAvailable();
       }
       
       return ret;
