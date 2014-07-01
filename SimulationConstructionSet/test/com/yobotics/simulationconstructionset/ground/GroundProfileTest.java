@@ -1,17 +1,16 @@
 package com.yobotics.simulationconstructionset.ground;
 
-import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
-import us.ihmc.graphics3DAdapter.GroundProfile;
+import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
 import us.ihmc.utilities.test.JUnitTools;
 
 public abstract class GroundProfileTest
 {
-   protected GroundProfile groundProfile;
+   protected GroundProfile3D groundProfile;
    private final double epsilon;
    private final boolean debug = true;
 

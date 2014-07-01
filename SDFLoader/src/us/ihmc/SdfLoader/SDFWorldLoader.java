@@ -9,7 +9,6 @@ import java.util.Map.Entry;
 import javax.xml.bind.JAXBException;
 
 import us.ihmc.SdfLoader.xmlDescription.SDFWorld.Road;
-import us.ihmc.graphics3DAdapter.GroundProfile;
 import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.jme.JMEGeneratedHeightMap;
