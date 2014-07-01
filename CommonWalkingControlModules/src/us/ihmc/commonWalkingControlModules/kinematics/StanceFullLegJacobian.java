@@ -154,7 +154,7 @@ public class StanceFullLegJacobian
        * A * Fxy + [B1 B2] * NxyzFz = 0
        * Fxy = -A^(-1) * [B1 B2] * FzNxyz
        */
-      torqueOnPelvis = torqueOnPelvis.changeFrameCopy(pelvisFrame);
+      torqueOnPelvis.changeFrame(pelvisFrame);
 
       Matrix vtpJacobianMatrix = new Matrix(6, vtpJacobian.getNumberOfColumns());
       MatrixTools.convertEJMLToJama(vtpJacobian.getJacobianMatrix(), vtpJacobianMatrix);

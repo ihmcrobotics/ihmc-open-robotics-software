@@ -35,13 +35,13 @@ public class StanceHeightCalculator
    public double getStanceHeightUsingOneFoot(RobotSide sideToGetStanceHeightFor)
    {
       FramePoint footOriginPosition = new FramePoint(footFrames.get(sideToGetStanceHeightFor));
-      footOriginPosition = footOriginPosition.changeFrameCopy(upperBodyFrame);
+      footOriginPosition.changeFrame(upperBodyFrame);
 
       // Now make a vector of it:
       FrameVector upperBodyToFoot = new FrameVector(footOriginPosition);
 
       // Get Z
-      upperBodyToFoot = upperBodyToFoot.changeFrameCopy(ReferenceFrame.getWorldFrame());
+      upperBodyToFoot.changeFrame(ReferenceFrame.getWorldFrame());
 
       double ret = -upperBodyToFoot.getZ();
       stanceHeight.get(sideToGetStanceHeightFor).set(ret);

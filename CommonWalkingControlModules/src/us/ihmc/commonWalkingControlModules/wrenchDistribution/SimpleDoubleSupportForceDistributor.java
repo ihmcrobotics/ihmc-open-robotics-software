@@ -27,7 +27,8 @@ public class SimpleDoubleSupportForceDistributor implements DoubleSupportForceDi
 
          zForcesInPelvisFrameToPack.put(robotSide, zForceInPelvisFrameTotal * legStrength);
 
-         FrameVector torque = torqueOnPelvisTotal.changeFrameCopy(pelvisFrame);
+         FrameVector torque = new FrameVector(torqueOnPelvisTotal);
+         torque.changeFrame(pelvisFrame);
          torque.scale(legStrength);
 
          torquesOnPelvis.set(robotSide, torque);

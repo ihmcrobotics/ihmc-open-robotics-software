@@ -126,8 +126,10 @@ public class EqConstCoPAndGuideLineCapturePointCoPControlModule implements Captu
 
       if (guideLine != null)
       {
-         guideLineWorld.setFrameLineSegment2d(guideLine.changeFrameCopy(world));
-         guideLine = guideLine.changeFrameCopy(supportPolygonFrame);
+         FrameLineSegment2d guideLineInWorld = new FrameLineSegment2d(guideLine);
+         guideLineInWorld.changeFrame(world);
+         guideLineWorld.setFrameLineSegment2d(guideLineInWorld);
+         guideLine.changeFrame(supportPolygonFrame);
          FrameLine2d shiftedParallelLine = createShiftedParallelLine(guideLine, currentCapturePoint2d);
          shiftedParallelLine.orthogonalProjection(desiredCenterOfPressure);
          movePointInsidePolygon(desiredCenterOfPressure, supportPolygon, shiftedParallelLine);
@@ -156,7 +158,9 @@ public class EqConstCoPAndGuideLineCapturePointCoPControlModule implements Captu
       FrameVector2d directionVector = guideLine.getVectorCopy();
       FrameLine2d shiftedParallelLine = new FrameLine2d(shiftedPoint, directionVector);
 
-      parallelLineWorld.setFrameLine2d(shiftedParallelLine.changeFrameCopy(world));
+      FrameLine2d shiftedParallelLineInWorld = new FrameLine2d(shiftedParallelLine);
+      shiftedParallelLineInWorld.changeFrame(world);
+      parallelLineWorld.setFrameLine2d(shiftedParallelLineInWorld);
 
       return shiftedParallelLine;
    }

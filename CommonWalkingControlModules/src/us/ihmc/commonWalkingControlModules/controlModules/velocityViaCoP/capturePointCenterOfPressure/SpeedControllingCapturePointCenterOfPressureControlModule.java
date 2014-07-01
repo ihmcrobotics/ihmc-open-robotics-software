@@ -99,7 +99,8 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       
       FrameVector2d guideLineUnitVector = guideLine.getNormalizedFrameVector();
       
-      FrameVector2d currentVelocityInFrame = currentVelocity.changeFrameCopy(guideLineUnitVector.getReferenceFrame());
+      FrameVector2d currentVelocityInFrame = new FrameVector2d(currentVelocity);
+      currentVelocityInFrame.changeFrame(guideLineUnitVector.getReferenceFrame());
       
       double currentVelocityProjectedIntoGuideLine = currentVelocityInFrame.dot(guideLineUnitVector);
       double velocityError = desiredVelocityMagnitude - currentVelocityProjectedIntoGuideLine;
@@ -108,7 +109,9 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       controlOffset.scale(-speedControlXKp.getDoubleValue() * velocityError);
       
       
-      FramePoint2d centerOfMassPositionInFrame = centerOfMassPosition.changeFrameCopy(controlOffset.getReferenceFrame()).toFramePoint2d();
+      FramePoint centerOfMassPositionInFrame = new FramePoint(centerOfMassPosition);
+      centerOfMassPositionInFrame.changeFrame(controlOffset.getReferenceFrame());
+      FramePoint2d centerOfMassPosition2dInFrame = centerOfMassPositionInFrame.toFramePoint2d();
 
       // Project CoM on control line
       FrameVector2d velocityT = new FrameVector2d(guideLineUnitVector.getReferenceFrame());
@@ -116,7 +119,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       velocityT.setY(guideLineUnitVector.getX());
 
 
-      FramePoint2d speedControlPosition = new FramePoint2d(centerOfMassPositionInFrame);
+      FramePoint2d speedControlPosition = new FramePoint2d(centerOfMassPosition2dInFrame);
       speedControlPosition.add(controlOffset);
       
 //      // Speed controller: Only increase speed for now
@@ -130,7 +133,9 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
          throw new RuntimeException("Not sure what to do when velocity is zero");
       
       FrameLine2d massLine = new FrameLine2d(speedControlPosition, velocityT);
-      comSpeedControllingLine.setFrameLine2d(massLine.changeFrameCopy(world));
+      FrameLine2d massLineInWorld = new FrameLine2d(massLine);
+      massLineInWorld.changeFrame(world);
+      comSpeedControllingLine.setFrameLine2d(massLineInWorld);
   
       return massLine;
    }
@@ -142,12 +147,15 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
     //TODO: This seems to have problems when the desired velocity and the desired heading are not alligned.
     // Otherwise it seems to be ok when they are aligned...
     
-    desiredVelocity = desiredVelocity.changeFrameCopy(desiredHeadingFrame);
+    desiredVelocity.changeFrame(desiredHeadingFrame);
     ReferenceFrame desiredVelocityFrame = desiredVelocity.getReferenceFrame();
     desiredVelocityFrame.checkReferenceFrameMatch(desiredHeadingFrame);
     
-    FrameVector2d currentVelocityInFrame = currentVelocity.changeFrameCopy(desiredVelocityFrame);
-    FramePoint2d centerOfMassPositionInFrame = centerOfMassPosition.changeFrameCopy(desiredVelocityFrame).toFramePoint2d();
+    FrameVector2d currentVelocityInFrame = new FrameVector2d(currentVelocity);
+    currentVelocityInFrame.changeFrame(desiredVelocityFrame);
+    FramePoint centerOfMassPositionInFrame = new FramePoint(centerOfMassPosition);
+    centerOfMassPositionInFrame.changeFrame(desiredVelocityFrame);
+    FramePoint2d centerOfMassPosition2dInFrame = centerOfMassPositionInFrame.toFramePoint2d();
 
     // Project CoM on control line
     FrameVector2d velocityT = new FrameVector2d(desiredVelocity);
@@ -155,7 +163,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
     velocityT.setY(desiredVelocity.getX());
 
 
-    FramePoint2d speedControlPosition = new FramePoint2d(centerOfMassPositionInFrame);
+    FramePoint2d speedControlPosition = new FramePoint2d(centerOfMassPosition2dInFrame);
 
     // Speed controller: Only increase speed for now
     speedControlPosition.setX(speedControlPosition.getX()
@@ -168,9 +176,11 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
        throw new RuntimeException("Not sure what to do when velocity is zero");
     
     FrameLine2d massLine = new FrameLine2d(speedControlPosition, velocityT);
-    comSpeedControllingLine.setFrameLine2d(massLine.changeFrameCopy(world));
-
-    return massLine.changeFrameCopy(currentFrame);
+    FrameLine2d massLineInWorld = new FrameLine2d(massLine);
+    massLineInWorld.changeFrame(world);
+   comSpeedControllingLine.setFrameLine2d(massLineInWorld);
+   massLine.changeFrame(currentFrame);
+    return massLine;
  }
 
    public void controlDoubleSupport(BipedSupportPolygons bipedSupportPolygons, FramePoint currentCapturePoint, FramePoint desiredCapturePoint,
@@ -239,10 +249,15 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
             farthestToDesiredCP.sub(delta);
 
             FrameLine2d iCPLine = new FrameLine2d(currentCapturePoint2d, farthestToDesiredCP);
-            capturePointLine.setFrameLine2d(iCPLine.changeFrameCopy(world));
+            FrameLine2d icpLineInWorld = new FrameLine2d(iCPLine);
+            icpLineInWorld.changeFrame(world);
+            capturePointLine.setFrameLine2d(icpLineInWorld);
             farthestToDesiredCP.changeFrame(world);
             
-            if (!supportPolygon.isPointInside(farthestToDesiredCP.changeFrameCopy(midFeetZUp))) // better than doing this before, because the changeFrameCopy might move it slightly outside the support polygon
+            FramePoint2d farthestToDesiredCPInMidFeet = new FramePoint2d(farthestToDesiredCP);
+            farthestToDesiredCPInMidFeet.changeFrame(midFeetZUp);
+            
+            if (!supportPolygon.isPointInside(farthestToDesiredCPInMidFeet)) // better than doing this before, because the changeFrameCopy might move it slightly outside the support polygon
                throw new RuntimeException("!supportPolygon.isPointInside(farthestToDesiredCP)");
 
             this.desiredCoP.set(farthestToDesiredCP);
@@ -279,10 +294,13 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       {
          // Create Line from desired Capture Point to instantaneous Capture Point
          FrameLine2d controlLine = new FrameLine2d(currentCapturePoint2d, desiredCapturePoint2d);
-         capturePointLine.setFrameLine2d(controlLine.changeFrameCopy(world));
+         FrameLine2d controlLineInWorld = new FrameLine2d(controlLine);
+         controlLineInWorld.changeFrame(world);
+         capturePointLine.setFrameLine2d(controlLineInWorld);
 
 
-         FrameVector2d comDirection = desiredVelocity.changeFrameCopy(midFeetZUp);
+         FrameVector2d comDirection = new FrameVector2d(desiredVelocity);
+         comDirection.changeFrame(midFeetZUp);
          comDirection.normalize();
          FrameVector2d controlDirection = controlLine.getNormalizedFrameVector();
          
@@ -388,8 +406,12 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
          desiredCenterOfPressure.changeFrame(footPolygon.getReferenceFrame());
          
          // Plot stuff
-         guideLineWorld.setFrameLineSegment2d(guideLine.changeFrameCopy(world));      
-         parallelLineWorld.setFrameLine2d(shiftedParallelLine.changeFrameCopy(world));
+         FrameLineSegment2d guideLineInWorld = new FrameLineSegment2d(guideLine);
+         guideLineInWorld.changeFrame(world);
+         guideLineWorld.setFrameLineSegment2d(guideLineInWorld);      
+         FrameLine2d shiftedParallelLineInWorld = new FrameLine2d(shiftedParallelLine);
+         shiftedParallelLineInWorld.changeFrame(world);
+         parallelLineWorld.setFrameLine2d(shiftedParallelLineInWorld);
          
          // FrameLineSegment2d desiredCaptureToDesiredCop = new FrameLineSegment2d(desiredCapturePoint2d, centerOfPressureDesired);
 

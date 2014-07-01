@@ -173,7 +173,7 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
          desiredFootstep = new Footstep(foot, poseReferenceFrame, soleFrame, expectedContactPoints, trustHeight);
       }
 
-      captureRegion = captureRegion.changeFrameCopy(ReferenceFrame.getWorldFrame());
+      captureRegion.changeFrame(ReferenceFrame.getWorldFrame());
 
       ArrayList<ConvexPolygon2d> captureRegionSteppingStonesIntersections = null;
       if (steppingStonesCaptureRegionIntersectionCalculator != null)
@@ -235,7 +235,7 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
       desiredSwingToPosition.setY(desiredSwingToPosition.getY() + stepDistance.getDoubleValue() * Math.sin(sideDependentStepAngle));
 
       desiredSwingToPosition.setZ(desiredSwingToPosition.getZ() + stepUp.getDoubleValue());
-      desiredSwingToPosition = desiredSwingToPosition.changeFrameCopy(ReferenceFrame.getWorldFrame());
+      desiredSwingToPosition.changeFrame(ReferenceFrame.getWorldFrame());
 
       return desiredSwingToPosition;
    }

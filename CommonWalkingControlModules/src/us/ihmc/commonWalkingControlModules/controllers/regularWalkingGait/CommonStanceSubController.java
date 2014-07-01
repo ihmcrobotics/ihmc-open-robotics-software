@@ -444,7 +444,7 @@ public class CommonStanceSubController implements StanceSubController
    public void doStopWalkingDoubleSupport(LowerBodyTorques lowerBodyTorquesToPack, RobotSide loadingLeg, double timeInState)
    {
       FrameVector zeroVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
-      zeroVelocity = zeroVelocity.changeFrameCopy(desiredHeadingControlModule.getDesiredHeadingFrame());
+      zeroVelocity.changeFrame(desiredHeadingControlModule.getDesiredHeadingFrame());
 
 //    desiredVelocityControlModule.setDesiredVelocity(zeroVelocity);
       FrameOrientation desiredPelvisOrientation = desiredPelvisOrientationControlModule.getDesiredPelvisOrientationDoubleSupportCopy();

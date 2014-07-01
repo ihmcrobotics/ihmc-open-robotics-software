@@ -115,7 +115,7 @@ public class CommonCapturePointCalculator implements CapturePointCalculatorInter
    {      
       ReferenceFrame capturePointFrame = getFrameToComputeCapturePointIn(supportLeg);
       
-      centerOfPressure = centerOfPressure.changeFrameCopy(capturePointFrame);
+      centerOfPressure.changeFrame(capturePointFrame);
 
       FrameVector comVelocity = processedSensors.getCenterOfMassVelocityInFrame(capturePointFrame);
       FramePoint centerOfMassPosition = processedSensors.getCenterOfMassPositionInFrame(capturePointFrame);

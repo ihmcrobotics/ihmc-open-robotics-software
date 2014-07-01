@@ -163,10 +163,12 @@ public class SmartCMPProjector
          edgeOneViz.setPositionToNaN();
          edgeTwoViz.setPositionToNaN();
 
-         FramePoint2d desiredCMPInWorld = desiredCMP.changeFrameCopy(ReferenceFrame.getWorldFrame());
+         FramePoint2d desiredCMPInWorld = new FramePoint2d(desiredCMP);
+         desiredCMPInWorld.changeFrame(ReferenceFrame.getWorldFrame());
          preProjectedCMPViz.setPosition(desiredCMPInWorld.getX() + 0.001, desiredCMPInWorld.getY(), 0.001);
 
-         FramePoint2d capturePointInWorld = capturePoint.changeFrameCopy(ReferenceFrame.getWorldFrame());
+         FramePoint2d capturePointInWorld = new FramePoint2d(capturePoint);
+         capturePointInWorld.changeFrame(ReferenceFrame.getWorldFrame());
          icpViz.setPosition(capturePointInWorld.getX() - 0.001, capturePointInWorld.getY(), 0.001);
       }
 
@@ -210,7 +212,8 @@ public class SmartCMPProjector
       {
          if (intersections.length > 0)
          {
-            FramePoint2d intersection0InWorld = intersections[0].changeFrameCopy(ReferenceFrame.getWorldFrame());
+            FramePoint2d intersection0InWorld = new FramePoint2d(intersections[0]);
+            intersection0InWorld.changeFrame(ReferenceFrame.getWorldFrame());
             edgeOneViz.setPosition(intersection0InWorld.getX(), intersection0InWorld.getY() + 0.001, 0.0005);
          }
          else
@@ -220,7 +223,8 @@ public class SmartCMPProjector
 
          if (intersections.length > 1)
          {
-            FramePoint2d intersection1InWorld = intersections[1].changeFrameCopy(ReferenceFrame.getWorldFrame());
+            FramePoint2d intersection1InWorld = new FramePoint2d(intersections[1]);
+            intersection1InWorld.changeFrame(ReferenceFrame.getWorldFrame());
             edgeTwoViz.setPosition(intersection1InWorld.getX(), intersection1InWorld.getY() - 0.001, 0.0005);
          }
          else
@@ -266,7 +270,8 @@ public class SmartCMPProjector
 
       if (VISUALIZE)
       {
-         FramePoint2d moveAwayFromEdgeInWorld = moveAwayFromEdge.changeFrameCopy(ReferenceFrame.getWorldFrame());
+         FramePoint2d moveAwayFromEdgeInWorld = new FramePoint2d(moveAwayFromEdge);
+         moveAwayFromEdgeInWorld.changeFrame(ReferenceFrame.getWorldFrame());
          moveAwayFromEdgeViz.setPosition(moveAwayFromEdgeInWorld.getX() - 0.002, moveAwayFromEdgeInWorld.getY() + 0.002, 0.0);
       }
 
@@ -316,7 +321,8 @@ public class SmartCMPProjector
 
       if (VISUALIZE)
       {
-         FramePoint2d desiredCMPInWorld = desiredCMP.changeFrameCopy(ReferenceFrame.getWorldFrame());
+         FramePoint2d desiredCMPInWorld = new FramePoint2d(desiredCMP);
+         desiredCMPInWorld.changeFrame(ReferenceFrame.getWorldFrame());
          projectedCMPViz.setPosition(desiredCMPInWorld.getX(), desiredCMPInWorld.getY(), 0.0);
       }
 

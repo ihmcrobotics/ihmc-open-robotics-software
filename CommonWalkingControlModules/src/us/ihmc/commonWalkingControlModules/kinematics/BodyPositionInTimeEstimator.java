@@ -73,7 +73,8 @@ public class BodyPositionInTimeEstimator
       currentUpperBodyVelocity.set(currentCoMVelocity);
       
       // LIPM Model in time
-      FramePoint currentCoMPositionInStanceFoot = currentCoMPosition.changeFrameCopy(ankleZUpFrames.get(swingFoot.getOppositeSide()));
+      FramePoint currentCoMPositionInStanceFoot = new FramePoint(currentCoMPosition);
+      currentCoMPositionInStanceFoot.changeFrame(ankleZUpFrames.get(swingFoot.getOppositeSide()));
       double comHeight = currentCoMPositionInStanceFoot.getZ();
       currentCoMHeight.set(comHeight);
       

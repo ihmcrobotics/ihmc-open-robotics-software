@@ -204,8 +204,8 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
       SideDependentList<BipedFootInterface> feet = new SideDependentList<BipedFootInterface>(leftFoot, rightFoot);
 
       FramePoint2d leftToRightFoot = new FramePoint2d(rightFootZUpFrame);
-      leftToRightFoot = leftToRightFoot.changeFrameCopy(bodyZUpFrame);
-      leftToRightFoot = leftToRightFoot.changeFrameCopy(leftFootZUpFrame);
+      leftToRightFoot.changeFrame(bodyZUpFrame);
+      leftToRightFoot.changeFrame(leftFootZUpFrame);
 
       RobotSide footInRear = null;    // RobotSide.LEFT;
       if (leftToRightFoot.getX() > 0.01)
@@ -304,33 +304,43 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
 
             for (RobotSide side : RobotSide.values)
             {
-               decisionPlotter.addPolygon(feet.get(side).getFlatFootPolygonInAnkleZUpCopy().changeFrameCopy(worldFrame), colors.get(side));
-               decisionPlotter.addFrameLine2d(onToesLines.get(side).changeFrameCopy(worldFrame), colors.get(side));
-               decisionPlotter.addFrameLine2d(onHeelLines.get(side).changeFrameCopy(worldFrame), colors.get(side));
+               FrameConvexPolygon2d flatFootPolygonInAnkleZUp = feet.get(side).getFlatFootPolygonInAnkleZUpCopy();
+               FrameLine2d onToesLine = new FrameLine2d(onToesLines.get(side));
+               FrameLine2d onHeelLine = new FrameLine2d(onHeelLines.get(side));
+               
+               flatFootPolygonInAnkleZUp.changeFrame(worldFrame);
+               onToesLine.changeFrame(worldFrame);
+               onHeelLine.changeFrame(worldFrame);
+
+               decisionPlotter.addPolygon(flatFootPolygonInAnkleZUp, colors.get(side));
+               decisionPlotter.addFrameLine2d(onToesLine, colors.get(side));
+               decisionPlotter.addFrameLine2d(onHeelLine, colors.get(side));
             }
 
             // Line pointing forward:
             decisionPlotter.addFrameLine2d(new FrameLine2d(worldFrame, new Line2d(new Point2d(0.0, 0.0), new Vector2d(1.0, 0.0))), Color.orange);
          }
 
+            FramePoint2d capturePointInWorld = new FramePoint2d(capturePointInMidFeetZUp);
+            capturePointInWorld.changeFrame(worldFrame);
 
          // Points. Right side only:
          if ((toeScores.get(RobotSide.RIGHT) > onToeDecisionThreshold.getDoubleValue())
                  && (heelScores.get(RobotSide.RIGHT) > onHeelDecisionThreshold.getDoubleValue()))
          {
-            decisionPlotter.addFramePoint2d(capturePointInMidFeetZUp.changeFrameCopy(worldFrame), Color.black);
+            decisionPlotter.addFramePoint2d(capturePointInWorld, Color.black);
          }
          else if (toeScores.get(RobotSide.RIGHT) > onToeDecisionThreshold.getDoubleValue())
          {
-            decisionPlotter.addFramePoint2d(capturePointInMidFeetZUp.changeFrameCopy(worldFrame), Color.green);
+            decisionPlotter.addFramePoint2d(capturePointInWorld, Color.green);
          }
          else if (heelScores.get(RobotSide.RIGHT) > onHeelDecisionThreshold.getDoubleValue())
          {
-            decisionPlotter.addFramePoint2d(capturePointInMidFeetZUp.changeFrameCopy(worldFrame), Color.red);
+            decisionPlotter.addFramePoint2d(capturePointInWorld, Color.red);
          }
          else
          {
-            decisionPlotter.addFramePoint2d(capturePointInMidFeetZUp.changeFrameCopy(worldFrame), Color.gray);
+            decisionPlotter.addFramePoint2d(capturePointInWorld , Color.gray);
          }
 
          decisionDebugCount++;
@@ -390,8 +400,12 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
 
       if (VISUALIZE)
       {
-         leftOnToesLineViz.setFrameLine2d(onToesLines.get(RobotSide.LEFT).changeFrameCopy(worldFrame));
-         rightOnToesLineViz.setFrameLine2d(onToesLines.get(RobotSide.RIGHT).changeFrameCopy(worldFrame));
+         FrameLine2d leftOnToesLine = new FrameLine2d(onToesLines.get(RobotSide.LEFT));
+         leftOnToesLine.changeFrame(worldFrame);
+         FrameLine2d rightOnToesLine = new FrameLine2d(onToesLines.get(RobotSide.LEFT));
+         rightOnToesLine.changeFrame(worldFrame);
+         leftOnToesLineViz.setFrameLine2d(leftOnToesLine);
+         rightOnToesLineViz.setFrameLine2d(rightOnToesLine);
       }
 
    }
@@ -401,8 +415,13 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
    protected static SideDependentList<FrameLine2d> getOnToesLines(SideDependentList<FramePoint[]> onToesPointsLists,
            SideDependentList<FrameConvexPolygon2d> footPolygonsInMidFeetZUp, ReferenceFrame bodyZUp)
    {
-      boolean legsCrossed = footPolygonsInMidFeetZUp.get(RobotSide.RIGHT).getCentroidCopy().changeFrameCopy(bodyZUp).getY()
-                            > footPolygonsInMidFeetZUp.get(RobotSide.LEFT).getCentroidCopy().changeFrameCopy(bodyZUp).getY();
+      FramePoint2d leftCentroid = new FramePoint2d();
+      FramePoint2d rightCentroid = new FramePoint2d();
+      footPolygonsInMidFeetZUp.get(RobotSide.LEFT).getCentroid(leftCentroid);
+      footPolygonsInMidFeetZUp.get(RobotSide.RIGHT).getCentroid(rightCentroid);
+      leftCentroid.changeFrame(bodyZUp);
+      rightCentroid.changeFrame(bodyZUp);
+      boolean legsCrossed = rightCentroid.getY() > leftCentroid.getY();
 
       // TODO: case feet crossed
       SideDependentList<FrameLine2d> onToesLines = new SideDependentList<FrameLine2d>();
@@ -484,8 +503,13 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
    protected static SideDependentList<FrameLine2d> getOnHeelLines(SideDependentList<FramePoint[]> onHeelPointsLists,
            SideDependentList<FrameConvexPolygon2d> footPolygonsInMidFeetZUp, ReferenceFrame bodyZUp)
    {
-      boolean legsCrossed = footPolygonsInMidFeetZUp.get(RobotSide.RIGHT).getCentroidCopy().changeFrameCopy(bodyZUp).getY()
-                            > footPolygonsInMidFeetZUp.get(RobotSide.LEFT).getCentroidCopy().changeFrameCopy(bodyZUp).getY();
+      FramePoint2d leftCentroid = new FramePoint2d();
+      FramePoint2d rightCentroid = new FramePoint2d();
+      footPolygonsInMidFeetZUp.get(RobotSide.LEFT).getCentroid(leftCentroid);
+      footPolygonsInMidFeetZUp.get(RobotSide.RIGHT).getCentroid(rightCentroid);
+      leftCentroid.changeFrame(bodyZUp);
+      rightCentroid.changeFrame(bodyZUp);
+      boolean legsCrossed = rightCentroid.getY() > leftCentroid.getY();
 
       // TODO: case feet crossed
       SideDependentList<FrameLine2d> onHeelLines = new SideDependentList<FrameLine2d>();

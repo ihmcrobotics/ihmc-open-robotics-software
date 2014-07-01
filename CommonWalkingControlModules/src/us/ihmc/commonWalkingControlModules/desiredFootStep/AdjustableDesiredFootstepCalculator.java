@@ -143,7 +143,8 @@ public class AdjustableDesiredFootstepCalculator extends AbstractAdjustableDesir
    {
       // This is where we want to adjust the width depending on "inside" or "outside" foot
       FrameVector2d desiredHeading = new FrameVector2d(desiredHeadingFrame, 1.0, 0.0);
-      FrameVector2d finalHeading = desiredHeadingControlModule.getFinalHeadingTarget().changeFrameCopy(desiredHeadingFrame);
+      FrameVector2d finalHeading = new FrameVector2d(desiredHeadingControlModule.getFinalHeadingTarget());
+      finalHeading.changeFrame(desiredHeadingFrame);
 
 //    FrameVector2d crossVector = new FrameVector2d(desiredHeading);
       double magCrossProductFromDesiredToFinalHeading = desiredHeading.cross(finalHeading);

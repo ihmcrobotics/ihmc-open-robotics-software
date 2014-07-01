@@ -194,7 +194,7 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
       if (control.getReferenceFrame() != midFeetZUp)
       {
          //       control = control.changeFrameCopy(bodyZUp);
-         control = control.changeFrameCopy(midFeetZUp);
+         control.changeFrame(midFeetZUp);
       }
 
       //    unfilteredXControl.val = K_capture_x.val * (desiredBalancePoint.getX() - current.getX());
@@ -222,7 +222,8 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
       control.setX(xCaptureControl.getDoubleValue());
       control.setY(yCaptureControl.getDoubleValue());
 
-      FramePoint centerOfPressureDesired = currentCapturePoint.changeFrameCopy(midFeetZUp);
+      FramePoint centerOfPressureDesired = new FramePoint(currentCapturePoint);
+      centerOfPressureDesired.changeFrame(midFeetZUp);
       centerOfPressureDesired.sub(control);
 
       // Make sure inside the polygon, if not, project along the line to the desired capture point, (not orthogonal!)
@@ -238,10 +239,7 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
          {
             // supportPolygon.orthogonalProjection(centerOfPressureDesired2d);
 
-            if (desiredCapturePoint.getReferenceFrame() != midFeetZUp)
-            {
-               desiredCapturePoint = desiredCapturePoint.changeFrameCopy(midFeetZUp);
-            }
+            desiredCapturePoint.changeFrame(midFeetZUp);
 
             FramePoint2d desiredCapturePoint2d = desiredCapturePoint.toFramePoint2d();
             FrameLineSegment2d desiredCaptureToDesiredCop = new FrameLineSegment2d(desiredCapturePoint2d, centerOfPressureDesired2d);
@@ -302,7 +300,10 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
          //       centerOfPressureDesiredMidFeet.setZ(0.0);
       }
 
-      centerOfPressureDesiredWorld.set(centerOfPressureDesiredMidFeet.getFramePointCopy().changeFrameCopy(world));
+      FramePoint temp = new FramePoint();
+      centerOfPressureDesiredMidFeet.getFrameTupleIncludingFrame(temp);
+      temp.changeFrame(world);
+      centerOfPressureDesiredWorld.set(temp);
    }
 
    public void controlSingleSupport(FramePoint currentCapturePoint, FrameLineSegment2d guideLine, FramePoint desiredCapturePoint, RobotSide supportLeg,
@@ -317,7 +318,11 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
       FramePoint2d currentCapturePoint2d = new FramePoint2d(currentCapturePoint.getReferenceFrame(), currentCapturePoint.getX(), currentCapturePoint.getY());
 
       if (guideLine != null)
-         guideLineWorld.setFrameLineSegment2d(guideLine.changeFrameCopy(world));
+      {
+         FrameLineSegment2d guideLineInWorld = new FrameLineSegment2d(guideLine);
+         guideLineInWorld.changeFrame(world);
+         guideLineWorld.setFrameLineSegment2d(guideLineInWorld);
+      }
 
       // Foot stuff:
       FrameConvexPolygon2d footPolygon = supportPolygons.getFootPolygonInAnkleZUp(supportLeg);
@@ -363,7 +368,9 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
 
          //       FrameLine2d shiftedParallelLine = new FrameLine2d(shiftedPoint, guideLine.getNormalizedFrameVector());
 
-         parallelLineWorld.setFrameLine2d(shiftedParallelLine.changeFrameCopy(world));
+         FrameLine2d shiftedParallelLineInWorld = new FrameLine2d(shiftedParallelLine);
+         shiftedParallelLineInWorld.changeFrame(world);
+         parallelLineWorld.setFrameLine2d(shiftedParallelLineInWorld);
 
          //       FramePoint finalDesiredSwingTargetInFootZUp = finalDesiredSwingTarget.changeFrameCopy(footPolygon.getReferenceFrame());
          //       FramePoint2d finalDesiredSwingTargetInFootZUp2d = new FramePoint2d(finalDesiredSwingTargetInFootZUp.getReferenceFrame(),
@@ -441,7 +448,10 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
          centerOfPressureDesiredAnkleZUp.get(supportLeg).set(desiredCenterOfPressure2d.getX(), desiredCenterOfPressure2d.getY(), 0.0);
       }
 
-      centerOfPressureDesiredWorld.set(centerOfPressureDesiredAnkleZUp.get(supportLeg).getFramePointCopy().changeFrameCopy(world));
+      FramePoint temp = new FramePoint();
+      centerOfPressureDesiredAnkleZUp.get(supportLeg).getFrameTupleIncludingFrame(temp);
+      temp.changeFrame(world);
+      centerOfPressureDesiredWorld.set(temp);
    }
 
    public void setKCaptureX(double kx)

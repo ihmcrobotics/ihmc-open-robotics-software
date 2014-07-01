@@ -254,7 +254,9 @@ public class DrivingFootControlModule
 
    public void initialize()
    {
-      initialToePointPosition.set(toePoint.changeFrameCopy(initialToePointPosition.getReferenceFrame()));
+      FramePoint toePointInFrame = new FramePoint(toePoint);
+      toePointInFrame.changeFrame(initialToePointPosition.getReferenceFrame());
+      initialToePointPosition.set(toePointInFrame);
    }
 
    public void doControl()
@@ -369,8 +371,9 @@ public class DrivingFootControlModule
       public void doTransitionIntoAction()
       {
          averageVelocityProvider.set(averageVelocity);
-         DrivingFootControlModule.this.finalToePointPosition.set(
-             targetPosition.changeFrameCopy(DrivingFootControlModule.this.finalToePointPosition.getReferenceFrame()));
+         FramePoint targetPositionInFrame = new FramePoint(targetPosition);
+         targetPositionInFrame.changeFrame(finalToePointPosition.getReferenceFrame());
+         finalToePointPosition.set(targetPositionInFrame);
          positionTrajectoryGenerator.initialize();
          trajectoryInitializationTime.set(time.getDoubleValue());
          nFootTasksRemaining.decrement();

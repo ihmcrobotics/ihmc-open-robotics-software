@@ -194,10 +194,12 @@ public class EquivalentConstantCoPDesiredCoPControlModule implements DesiredCoPC
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-      FramePoint2d desiredCenterOfPressureWorld = desiredCenterOfPressure.changeFrameCopy(worldFrame);
+      FramePoint2d desiredCenterOfPressureWorld = new FramePoint2d(desiredCenterOfPressure);
+      desiredCenterOfPressureWorld.changeFrame(worldFrame);
       this.desiredCenterOfPressure.update(desiredCenterOfPressureWorld.getX(), desiredCenterOfPressureWorld.getY(), 0.0);
 
-      FramePoint2d desiredFinalCapturePointWorld = desiredFinalCapturePoint.changeFrameCopy(worldFrame);
+      FramePoint2d desiredFinalCapturePointWorld = new FramePoint2d();
+      desiredFinalCapturePointWorld.changeFrame(worldFrame);
       this.desiredFinalCapturePoint.set(desiredFinalCapturePointWorld.getX(), desiredFinalCapturePointWorld.getY(), 0.0);
    }
 
