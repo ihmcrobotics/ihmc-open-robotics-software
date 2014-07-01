@@ -41,9 +41,10 @@ public class PushRecoveryControlModule
    private static final double MINIMUM_TIME_BEFORE_RECOVER_WITH_REDUCED_POLYGON = 6;
    private static final double DOUBLESUPPORT_SUPPORT_POLYGON_SCALE = 0.85;
    private static final double TRUST_TIME_SCALE = 0.9;
-   private static final double MINIMUM_TIME_TO_REPLAN = 0.07;
-   private static final double MINIMUN_CAPTURE_REGION_AREA = 0.005;
-   private static final double REDUCE_SWING_TIME_COEFFICIENT = 0.6;
+   private static final double MINIMUM_TIME_TO_REPLAN = 0.1;
+   private static final double MINIMUM_SWING_TIME_FOR_DOUBLE_SUPPORT_RECOVERY = 0.35;
+   private static final double MINIMUN_CAPTURE_REGION_PERCENTAGE_OF_FOOT_AREA = 2.5;
+   private static final double REDUCE_SWING_TIME_MULTIPLIER = 0.95;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final boolean useICPProjection = true;
@@ -240,20 +241,23 @@ public class PushRecoveryControlModule
       {
          captureRegionCalculator.calculateCaptureRegion(swingSide, swingTimeRemaining, capturePoint2d, omega0, footPolygon);
 
-         // If the capture region is too small we reduce the swing time. 
          // TODO: now we check only for double support, but should be extended also for single support removing 'isRecoveringFromDoubleSupportFall()'
-         if (isRecoveringFromDoubleSupportFall()
-               && !usingReducedSwingTime
-               && (captureRegionCalculator.getCaptureRegionArea() < PushRecoveryControlModule.MINIMUN_CAPTURE_REGION_AREA || 
-                     Double.isNaN(captureRegionCalculator.getCaptureRegionArea())))
+         if (isRecoveringFromDoubleSupportFall() && !usingReducedSwingTime)
          {
-            reducedSwingTime = swingTimeRemaining * REDUCE_SWING_TIME_COEFFICIENT;
-            this.swingTimeCalculationProvider.setSwingTime(reducedSwingTime);
-            captureRegionCalculator.calculateCaptureRegion(swingSide, reducedSwingTime, capturePoint2d, omega0, footPolygon);
-
-            //TODO: now actually if the capture region area is still NaN or too small we can re-reduce the swing time or prepare to fall
-
-            this.usingReducedSwingTime = true;
+            reducedSwingTime = computeMinimumSwingTime(swingSide, swingTimeRemaining, capturePoint2d, nextFootstep, omega0, footPolygon);
+            
+            if (reducedSwingTime < MINIMUM_SWING_TIME_FOR_DOUBLE_SUPPORT_RECOVERY)
+            {
+               // TODO prepare to fall or try to do 2-step recover
+               recoveringFromDoubleSupportFall = false;
+               return false;
+            }
+            
+            if(reducedSwingTime < swingTimeRemaining)
+            {
+               this.swingTimeCalculationProvider.setSwingTime(reducedSwingTime);
+               this.usingReducedSwingTime = true;
+            }            
          }
 
          if (swingTimeRemaining < MINIMUM_TIME_TO_REPLAN)
@@ -269,9 +273,28 @@ public class PushRecoveryControlModule
          {
             recovering.set(true);
          }
+         
          return footstepWasProjectedInCaptureRegion.getBooleanValue();
       }
       return false;
+   }
+   
+   private double computeMinimumSwingTime(RobotSide swingSide, double swingTimeRemaining, FramePoint2d capturePoint2d, Footstep nextFootstep, double omega0,
+         FrameConvexPolygon2d footPolygon)
+   {
+      double reducedSwingTime = swingTimeRemaining;
+      captureRegionCalculator.calculateCaptureRegion(swingSide, swingTimeRemaining, capturePoint2d, omega0, footPolygon);
+      
+      // If the capture region is too small we reduce the swing time. 
+      while (captureRegionCalculator.getCaptureRegionArea() < PushRecoveryControlModule.MINIMUN_CAPTURE_REGION_PERCENTAGE_OF_FOOT_AREA * footPolygon.getArea() || 
+                  Double.isNaN(captureRegionCalculator.getCaptureRegionArea()))
+      {
+         reducedSwingTime = reducedSwingTime * REDUCE_SWING_TIME_MULTIPLIER;
+         captureRegionCalculator.calculateCaptureRegion(swingSide, reducedSwingTime, capturePoint2d, omega0, footPolygon);
+      }
+      
+      return reducedSwingTime;
+      
    }
 
    public double computeTimeToProjectDesiredICPToClosestPointOnTrajectoryToActualICP(FramePoint2d capturePoint2d, FramePoint2d constantCenterOfPressure,
