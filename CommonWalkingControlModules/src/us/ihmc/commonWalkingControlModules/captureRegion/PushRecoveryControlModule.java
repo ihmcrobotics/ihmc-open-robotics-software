@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.captureRegion;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.media.j3d.Transform3D;
@@ -64,12 +65,14 @@ public class PushRecoveryControlModule
 
    private boolean recoveringFromDoubleSupportFall;
    private boolean usingReducedSwingTime;
-   private double reducedSwingTime;
+   private double reducedSwingTime, doubleSupportInitialSwingTime;
    private Footstep recoverFromDoubleSupportFallFootStep;
    private final BooleanYoVariable recovering;
    private BooleanYoVariable readyToGrabNextFootstep;
    private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
    private final SideDependentList<? extends ContactablePlaneBody> feet;
+   private final List<FramePoint> tempContactPoints;
+   private final FrameConvexPolygon2d tempFootPolygon;
 
    private final YoFrameLine2d capturePointTrajectoryLine;
    private final YoFrameLine2dArtifact capturePointTrajectoryLineArtifact;
@@ -105,6 +108,8 @@ public class PushRecoveryControlModule
       capturePointTrajectoryLine = new YoFrameLine2d(getClass().getSimpleName(), "CapturePointTrajectoryLine", ReferenceFrame.getWorldFrame(), registry);
       projectedCapturePoint = new Point2d();
       projectedCapturePointArtifact = new PointArtifact("ProjectedCapturePointArtifact", projectedCapturePoint);
+      tempContactPoints = new ArrayList<FramePoint>();
+      tempFootPolygon = new FrameConvexPolygon2d(worldFrame);
 
       this.capturePointTrajectoryLineArtifact = new YoFrameLine2dArtifact("CapturePointTrajectoryLineArtifact", capturePointTrajectoryLine, Color.red);
       dynamicGraphicObjectsListRegistry.registerArtifact("CapturePointTrajectoryArtifact", capturePointTrajectoryLineArtifact);
@@ -148,7 +153,7 @@ public class PushRecoveryControlModule
       private final Transform3D scaleTransformation = new Transform3D();
       private final FrameConvexPolygon2d reducedSupportPolygon;
       private final ReferenceFrame midFeetZUp;
-      private double capturePointYAxis;
+      private double capturePointYAxis, regularSwingTime;
       private FrameVector projectedCapturePoint;
       private Footstep currentFootstep = null;
       private boolean isICPOutside;
@@ -215,12 +220,29 @@ public class PushRecoveryControlModule
                   }
 
                   currentFootstep = createFootstepAtCurrentLocation(swingSide);
+                  capturePoint2d.changeFrame(worldFrame);
+                  
+                  regularSwingTime = swingTimeCalculationProvider.getValue();
+                  
+                  doubleSupportInitialSwingTime = computeInitialSwingTimeForDoubleSupportRecovery(swingSide, regularSwingTime, capturePoint2d);
 
-                  readyToGrabNextFootstep.set(false);
-                  momentumBasedController.getUpcomingSupportLeg().set(transferToSide.getOppositeSide());
-                  recoverFromDoubleSupportFallFootStep = currentFootstep;
-                  recoveringFromDoubleSupportFall = true;
-
+                  if (doubleSupportInitialSwingTime < MINIMUM_SWING_TIME_FOR_DOUBLE_SUPPORT_RECOVERY)
+                  {
+                     // TODO prepare to fall or try to do 2-step recover
+                     return false;
+                  }
+                  
+                  if(doubleSupportInitialSwingTime < regularSwingTime)
+                  {
+                     swingTimeCalculationProvider.setSwingTime(doubleSupportInitialSwingTime);
+                     usingReducedSwingTime = true;
+                     readyToGrabNextFootstep.set(false);
+                     momentumBasedController.getUpcomingSupportLeg().set(transferToSide.getOppositeSide());
+                     recoverFromDoubleSupportFallFootStep = currentFootstep;
+                     recoveringFromDoubleSupportFall = true;
+                     reducedSwingTime = doubleSupportInitialSwingTime;
+                  }
+                  
                   return true;
                }
 
@@ -241,25 +263,6 @@ public class PushRecoveryControlModule
       {
          captureRegionCalculator.calculateCaptureRegion(swingSide, swingTimeRemaining, capturePoint2d, omega0, footPolygon);
 
-         // TODO: now we check only for double support, but should be extended also for single support removing 'isRecoveringFromDoubleSupportFall()'
-         if (isRecoveringFromDoubleSupportFall() && !usingReducedSwingTime)
-         {
-            reducedSwingTime = computeMinimumSwingTime(swingSide, swingTimeRemaining, capturePoint2d, nextFootstep, omega0, footPolygon);
-            
-            if (reducedSwingTime < MINIMUM_SWING_TIME_FOR_DOUBLE_SUPPORT_RECOVERY)
-            {
-               // TODO prepare to fall or try to do 2-step recover
-               recoveringFromDoubleSupportFall = false;
-               return false;
-            }
-            
-            if(reducedSwingTime < swingTimeRemaining)
-            {
-               this.swingTimeCalculationProvider.setSwingTime(reducedSwingTime);
-               this.usingReducedSwingTime = true;
-            }            
-         }
-
          if (swingTimeRemaining < MINIMUM_TIME_TO_REPLAN)
          {
             // do not re-plan if we are almost at touch-down
@@ -279,8 +282,7 @@ public class PushRecoveryControlModule
       return false;
    }
    
-   private double computeMinimumSwingTime(RobotSide swingSide, double swingTimeRemaining, FramePoint2d capturePoint2d, Footstep nextFootstep, double omega0,
-         FrameConvexPolygon2d footPolygon)
+   private double computeMinimumSwingTime(RobotSide swingSide, double swingTimeRemaining, FramePoint2d capturePoint2d, double omega0, FrameConvexPolygon2d footPolygon)
    {
       double reducedSwingTime = swingTimeRemaining;
       captureRegionCalculator.calculateCaptureRegion(swingSide, swingTimeRemaining, capturePoint2d, omega0, footPolygon);
@@ -295,6 +297,14 @@ public class PushRecoveryControlModule
       
       return reducedSwingTime;
       
+   }
+   
+   private double computeInitialSwingTimeForDoubleSupportRecovery(RobotSide swingSide, double swingTimeRemaining, FramePoint2d capturePoint2d)
+   {
+      momentumBasedController.getContactPoints(feet.get(swingSide.getOppositeSide()), tempContactPoints);
+      tempFootPolygon.setIncludingFrameByProjectionOntoXYPlaneAndUpdate(momentumBasedController.getReferenceFrames().getAnkleZUpFrame(swingSide.getOppositeSide()), tempContactPoints);
+      
+      return computeMinimumSwingTime(swingSide, swingTimeRemaining, capturePoint2d, icpAndMomentumBasedController.getOmega0(), tempFootPolygon);
    }
 
    public double computeTimeToProjectDesiredICPToClosestPointOnTrajectoryToActualICP(FramePoint2d capturePoint2d, FramePoint2d constantCenterOfPressure,
