@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.wrenchDistribution;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -352,7 +351,8 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
    {
       FramePoint pointOnPlane = new FramePoint(soleFrame);
       FrameVector planeNormal = new FrameVector(soleFrame, 0.0, 0.0, 1.0);
-      FramePoint lineStart = footCoP.changeFrameCopy(soleFrame);
+      FramePoint lineStart = new FramePoint(footCoP);
+      lineStart.changeFrame(soleFrame);
       FramePoint lineEnd = new FramePoint(footCoP);    // start at VTP
       lineEnd.setZ(lineEnd.getZ() - 1.0);    // down an arbitrary amount in the frame in which the VTP is expressed
       lineEnd.changeFrame(soleFrame);    // then change frame to sole frame

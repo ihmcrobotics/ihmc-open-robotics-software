@@ -125,7 +125,8 @@ public class ToeOffVirtualToePointCalculator implements VirtualToePointCalculato
       FramePoint[] toePointsForFeet = toePoints.get(upcomingSwingLeg);
 
       // Choose toe points to use
-      FramePoint upcomingSupportFootPosition = footPoints.get(upcomingSupportLeg).changeFrameCopy(toePointsForFeet[0].getReferenceFrame());
+      FramePoint upcomingSupportFootPosition = new FramePoint(footPoints.get(upcomingSupportLeg));
+      upcomingSupportFootPosition.changeFrame(toePointsForFeet[0].getReferenceFrame());
 
       // If upcoming support foot is not in front of upcoming swing foot
       boolean useAlternateToePoints = !(toePointsForFeet[0].getX() < upcomingSupportFootPosition.getX() || toePointsForFeet[1].getX() < upcomingSupportFootPosition
@@ -136,8 +137,10 @@ public class ToeOffVirtualToePointCalculator implements VirtualToePointCalculato
          return;
       }
 
-      FramePoint insideToe = toePointsForFeet[0].changeFrameCopy(midFeetZUpFrame);
-      FramePoint outsideToe = toePointsForFeet[1].changeFrameCopy(midFeetZUpFrame);
+      FramePoint insideToe = new FramePoint(toePointsForFeet[0]);
+      insideToe.changeFrame(midFeetZUpFrame);
+      FramePoint outsideToe = new FramePoint(toePointsForFeet[1]);
+      outsideToe.changeFrame(midFeetZUpFrame);
       FrameVector adjustment = new FrameVector(referenceFrames.getFootFrame(upcomingSwingLeg), -1.0, 0.0, 0.0);
       adjustment.changeFrame(midFeetZUpFrame);
       adjustment.scale(pullBackSupportLine.getDoubleValue());
@@ -251,7 +254,9 @@ public class ToeOffVirtualToePointCalculator implements VirtualToePointCalculato
       adjustedSupportPolygon.addVertex(insideToe2d);
       adjustedSupportPolygon.addVertex(outsideToe2d);
       adjustedSupportPolygon.update();
-      vtpConvexPolygon.setFrameConvexPolygon2d(adjustedSupportPolygon.changeFrameCopy(worldFrame));
+      FrameConvexPolygon2d temp = new FrameConvexPolygon2d(adjustedSupportPolygon);
+      temp.changeFrame(worldFrame);
+      vtpConvexPolygon.setFrameConvexPolygon2d(temp);
 
       FrameLine2d connectingEdgeA = null;
       FrameLine2d connectingEdgeB = null;

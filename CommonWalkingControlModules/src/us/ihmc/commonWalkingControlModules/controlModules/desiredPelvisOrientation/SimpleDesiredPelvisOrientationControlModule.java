@@ -67,8 +67,8 @@ public class SimpleDesiredPelvisOrientationControlModule implements DesiredPelvi
       FramePoint leftKneeOrigin = new FramePoint(leftKneeFrame);
       FramePoint rightKneeOrigin = new FramePoint(rightKneeFrame);
 
-      leftKneeOrigin = leftKneeOrigin.changeFrameCopy(desiredHeadingFrame);
-      rightKneeOrigin = rightKneeOrigin.changeFrameCopy(desiredHeadingFrame);
+      leftKneeOrigin.changeFrame(desiredHeadingFrame);
+      rightKneeOrigin.changeFrame(desiredHeadingFrame);
 
       // Robot pelvis yaw is oriented at 90 deg about z axis from atan2 function's 0 orientation
       double desiredPelvisYaw = getDesiredPelvisYaw(leftKneeOrigin, rightKneeOrigin);

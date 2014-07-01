@@ -129,7 +129,7 @@ public class CapturabilityBasedDesiredFootstepAdjustor implements DesiredFootste
 
    private Footstep projectIntoSteppingStonesAndCaptureRegion(Footstep baseFootstep, RobotSide swingLegSide, FrameConvexPolygon2d captureRegion)
    {
-      captureRegion = captureRegion.changeFrameCopy(ReferenceFrame.getWorldFrame());
+      captureRegion.changeFrame(ReferenceFrame.getWorldFrame());
       ArrayList<ConvexPolygon2d> steppingStoneCaptureRegionIntersections =
          steppingStonesCaptureRegionIntersectionCalculator.findIntersectionsBetweenSteppingStonesAndCaptureRegion(captureRegion);
 

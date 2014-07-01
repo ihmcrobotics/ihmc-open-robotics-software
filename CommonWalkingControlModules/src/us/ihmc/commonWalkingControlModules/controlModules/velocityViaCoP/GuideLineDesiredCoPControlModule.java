@@ -136,7 +136,8 @@ public class GuideLineDesiredCoPControlModule implements DesiredCoPControlModule
          Footstep footstep = couplingRegistry.getDesiredFootstep();
          FramePoint finalDesiredSwingTarget = new FramePoint();
          footstep.getPosition(finalDesiredSwingTarget);
-         FrameVector2d desiredVelocityInSupportFootFrame = desiredVelocity.changeFrameCopy(supportFootAnkleZUpFrame);
+         FrameVector2d desiredVelocityInSupportFootFrame = new FrameVector2d(desiredVelocity);
+         desiredVelocityInSupportFootFrame.changeFrame(supportFootAnkleZUpFrame);
          guideLineCalculator.update(supportLeg, bipedSupportPolygons, capturePoint2d, finalDesiredSwingTarget, desiredVelocityInSupportFootFrame);
          guideLine = guideLineCalculator.getGuideLine(supportLeg);
          guideLine.changeFrame(supportFootAnkleZUpFrame);
@@ -145,7 +146,9 @@ public class GuideLineDesiredCoPControlModule implements DesiredCoPControlModule
       else
       {
          desiredCapturePoint = couplingRegistry.getBipedSupportPolygons().getSweetSpotCopy(supportLeg).toFramePoint();
-         desiredCapturePointInWorld.set(desiredCapturePoint.changeFrameCopy(world));
+         FramePoint temp = new FramePoint(desiredCapturePoint);
+         temp.changeFrame(world);
+         this.desiredCapturePointInWorld.set(temp);
       }
 
 
@@ -240,7 +243,9 @@ public class GuideLineDesiredCoPControlModule implements DesiredCoPControlModule
          desiredCapturePoint = bipedSupportPolygons.getSweetSpotCopy(loadingLeg).toFramePoint();
       }
 
-      this.desiredCapturePointInWorld.set(desiredCapturePoint.changeFrameCopy(ReferenceFrame.getWorldFrame()));
+      FramePoint temp = new FramePoint(desiredCapturePoint);
+      temp.changeFrame(world);
+      this.desiredCapturePointInWorld.set(temp);
 
       return desiredCapturePoint;
    }

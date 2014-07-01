@@ -597,7 +597,9 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 
 			
 			predictedICPWhenChestStops = predictICPWhenChestStopsIfWeSlowDownNow(icpActual, predictedCMPDuringChestSlowDown, predictedTimeToStopChestDuring(currentState));
-			predictedICPAtChestStopYo.set(predictedICPWhenChestStops.changeFrameCopy(ReferenceFrame.getWorldFrame()));
+			FramePoint2d predictedICPWhenChestStopsInWorld = new FramePoint2d(predictedICPWhenChestStops);
+			predictedICPWhenChestStopsInWorld.changeFrame(worldFrame);
+			predictedICPAtChestStopYo.set(predictedICPWhenChestStopsInWorld);
 
 			FrameVector2d vectorFromDesiredToPredictedICP = new FrameVector2d(desiredICPWhenChestStops, predictedICPWhenChestStops);
 
@@ -900,7 +902,9 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 		desiredCopDirection.put(BalancingUpperBodySubControllerState.OR_REC_DEC, -1.0);
 
 
-		icpDesired.set(new FramePoint2d(referenceFrames.getMidFeetZUpFrame()).changeFrameCopy(worldFrame));
+		FramePoint2d icpDesiredInWorld = new FramePoint2d(referenceFrames.getMidFeetZUpFrame());
+		icpDesiredInWorld.changeFrame(worldFrame);
+      icpDesired.set(icpDesiredInWorld);
 
 	}
 
@@ -1023,7 +1027,8 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 
 	private FramePoint2d computeDesiredCop(BalancingUpperBodySubControllerState state, ReferenceFrame desiredFrame, boolean clipToSupportPolygon)
 	{
-		FramePoint2d desiredCoP = getNominalCoP().changeFrameCopy(desiredFrame);
+		FramePoint2d desiredCoP = new FramePoint2d(getNominalCoP());
+		desiredCoP.changeFrame(desiredFrame);
 		desiredCoP.add(computeDesiredDeltaCop(state, desiredFrame, clipToSupportPolygon));
 
 		return desiredCoP;

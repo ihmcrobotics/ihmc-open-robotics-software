@@ -27,7 +27,6 @@ import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
-import us.ihmc.utilities.math.geometry.FramePose2d;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.ZUpFrame;
@@ -214,7 +213,7 @@ public class DesiredFootstepVisualizer
       //    System.out.println("desiredFootstep = " + desiredFootstep);
 
       FramePose pose = desiredFootstep.getPoseCopy();
-      pose = pose.changeFrameCopy(worldFrame);
+      pose.changeFrame(worldFrame);
       Transform3D transform = new Transform3D();
       pose.getTransformFromPoseToFrame(transform);
       sixDoFJoints.get(swingLegSide).setPositionAndRotation(transform);

@@ -31,7 +31,7 @@ public class DoubleAndSingleSupportDurationUpdater
    {
       ReferenceFrame supportAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(supportLeg);
       FrameVector2d desiredStepVector = new FrameVector2d(desiredFootstep.getPositionInFrame(supportAnkleZUpFrame).toFramePoint2d());
-      desiredVelocity = desiredVelocity.changeFrameCopy(supportAnkleZUpFrame);
+      desiredVelocity.changeFrame(supportAnkleZUpFrame);
       double desiredVelocityMagnitude = desiredVelocity.length();
       double stepDistanceAlongDesiredVelocity = desiredStepVector.dot(desiredVelocity) / desiredVelocityMagnitude;
       double bodyDisplacement = stepDistanceAlongDesiredVelocity;

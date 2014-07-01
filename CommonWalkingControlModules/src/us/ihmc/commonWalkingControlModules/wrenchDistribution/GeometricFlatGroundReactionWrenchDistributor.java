@@ -16,7 +16,6 @@ import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
-import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -116,7 +115,8 @@ public class GeometricFlatGroundReactionWrenchDistributor implements GroundReact
          
          for (FramePoint framePoint : contactPoints)
          {
-            FramePoint pointInWorld = framePoint.changeFrameCopy(worldFrame);
+            FramePoint pointInWorld = new FramePoint(framePoint);
+            pointInWorld.changeFrame(worldFrame);
             projectionsOnGround.add(pointInWorld.toFramePoint2d());
          }
          

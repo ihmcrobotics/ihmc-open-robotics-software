@@ -29,7 +29,7 @@ public class VelocityErrorCalculator
       FrameVector2d centerOfMassVelocity2d = centerOfMassVelocity.toFrameVector2d();
 
       FrameVector2d desiredCenterOfMassVelocity = desiredVelocityControlModule.getDesiredVelocity();
-      desiredCenterOfMassVelocity = desiredCenterOfMassVelocity.changeFrameCopy(referenceFrame);
+      desiredCenterOfMassVelocity.changeFrame(referenceFrame);
 
       FrameVector2d ret = new FrameVector2d(referenceFrame);
       ret.sub(desiredCenterOfMassVelocity, centerOfMassVelocity2d);

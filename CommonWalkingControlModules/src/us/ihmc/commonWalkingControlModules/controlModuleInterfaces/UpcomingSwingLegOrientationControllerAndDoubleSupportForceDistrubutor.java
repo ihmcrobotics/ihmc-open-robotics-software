@@ -50,8 +50,10 @@ public class UpcomingSwingLegOrientationControllerAndDoubleSupportForceDistrubut
    {
       RobotSide upcomingSupportLeg = upcomingSwingLeg.getOppositeSide();
       
-      FramePoint swingToePoint = toeMidPoints.get(upcomingSwingLeg).changeFrameCopy(midFeetZUpFrame);
-      FramePoint2d sweetPoint = couplingRegistry.getBipedSupportPolygons().getSweetSpotCopy(upcomingSupportLeg).changeFrameCopy(midFeetZUpFrame);
+      FramePoint swingToePoint = new FramePoint(toeMidPoints.get(upcomingSwingLeg));
+      swingToePoint.changeFrame(midFeetZUpFrame);
+      FramePoint2d sweetPoint = new FramePoint2d(couplingRegistry.getBipedSupportPolygons().getSweetSpotCopy(upcomingSupportLeg));
+      sweetPoint.changeFrame(midFeetZUpFrame);
       
       FramePoint2d swingToePoint2d = swingToePoint.toFramePoint2d();
       FrameLine2d controlLine = new FrameLine2d(swingToePoint2d, sweetPoint);
@@ -87,7 +89,8 @@ public class UpcomingSwingLegOrientationControllerAndDoubleSupportForceDistrubut
 
          zForcesInPelvisFrameToPack.put(robotSide, zForceInPelvisFrameTotal * legStrength);
 
-         FrameVector torque = torqueInPelvisFrameTotal.changeFrameCopy(pelvisFrame);
+         FrameVector torque = new FrameVector(torqueInPelvisFrameTotal);
+         torque.changeFrame(pelvisFrame);
          torque.scale(legStrength);
          
          if(robotSide.equals(upcomingSwingLeg) && useAlternateToePoints)

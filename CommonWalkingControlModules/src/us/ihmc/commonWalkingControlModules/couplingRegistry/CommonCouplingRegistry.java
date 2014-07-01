@@ -7,6 +7,7 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -143,7 +144,9 @@ public class CommonCouplingRegistry implements CouplingRegistry
 
    public FramePoint getCapturePointInFrame(ReferenceFrame desiredFrame)
    {
-      return capturePoint.changeFrameCopy(desiredFrame);
+      FramePoint ret = new FramePoint(capturePoint);
+      ret.changeFrame(desiredFrame);
+      return ret;
    }
 
 
@@ -152,7 +155,9 @@ public class CommonCouplingRegistry implements CouplingRegistry
       this.desiredFootstep = desiredFootstep;
       if (desiredFootstep != null)
       {
-         footstepFrame.setPoseAndUpdate(desiredFootstep.getPoseCopy().changeFrameCopy(footstepFrame.getParent()));
+         FramePose footstepPose = desiredFootstep.getPoseCopy();
+         footstepPose.changeFrame(footstepFrame.getParent());
+         footstepFrame.setPoseAndUpdate(footstepPose);
          footstepFrame.update();
          if(footstepFrameGraphic != null)
          {
@@ -276,7 +281,9 @@ public class CommonCouplingRegistry implements CouplingRegistry
 
    public void setDesiredCMP(FramePoint2d desiredCMP)
    {  
-      this.desiredCMP.set(desiredCMP.changeFrameCopy(ReferenceFrame.getWorldFrame()));
+      FramePoint2d temp = new FramePoint2d(desiredCMP);
+      temp.changeFrame(ReferenceFrame.getWorldFrame());
+      this.desiredCMP.set(temp);
    }
 
    public FramePoint2d getDesiredCMP()
@@ -292,7 +299,9 @@ public class CommonCouplingRegistry implements CouplingRegistry
 
    public FramePoint2d getDesiredCapturePointInFrame(ReferenceFrame desiredFrame)
    {
-      return desiredICP.changeFrameCopy(desiredFrame);
+      FramePoint2d ret = new FramePoint2d(desiredICP);
+      ret.changeFrame(desiredFrame);
+      return ret;
    }
 
 

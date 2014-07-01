@@ -126,7 +126,7 @@ public class YawPitchRollPelvisOrientationControlModule implements PelvisOrienta
 
    private double[] getDesiredYawPitchRollInWorldFrame(FrameOrientation desiredPelvisOrientation)
    {
-      desiredPelvisOrientation = desiredPelvisOrientation.changeFrameCopy(worldFrame);
+      desiredPelvisOrientation.changeFrame(worldFrame);
       double[] desiredYawPitchRoll = desiredPelvisOrientation.getYawPitchRoll();
 
       return desiredYawPitchRoll;

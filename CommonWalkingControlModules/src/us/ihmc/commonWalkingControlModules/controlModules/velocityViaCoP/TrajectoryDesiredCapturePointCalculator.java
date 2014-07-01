@@ -220,7 +220,10 @@ public class TrajectoryDesiredCapturePointCalculator implements DesiredCapturePo
       FrameVector2d perpendicularVector = startToEnd.getFrameVectorCopy();
       perpendicularVector.rotate90();
 
-      this.switchLine.setFrameLine2d(new FrameLine2d(endPoint.changeFrameCopy(ReferenceFrame.getWorldFrame()), perpendicularVector));
+      FramePoint2d endPointInWorld = new FramePoint2d(endPoint);
+      endPointInWorld.changeFrame(ReferenceFrame.getWorldFrame());
+      FrameLine2d frameLine2d = new FrameLine2d(endPointInWorld, perpendicularVector);
+      this.switchLine.setFrameLine2d(frameLine2d);
    }
    
    private void hideCaptureLineAndSwitchLine()
@@ -238,7 +241,8 @@ public class TrajectoryDesiredCapturePointCalculator implements DesiredCapturePo
       FramePoint2d startPoint = getStartPoint(bipedSupportPolygons);
       FramePoint2d endPoint = getSweetSpot(loadingLeg, bipedSupportPolygons);
       endPoint.changeFrame(startPoint.getReferenceFrame());
-      FramePoint2d pointToCheck = framePoint2d.changeFrameCopy(ReferenceFrame.getWorldFrame());
+      FramePoint2d pointToCheck = new FramePoint2d(framePoint2d);
+      pointToCheck.changeFrame(ReferenceFrame.getWorldFrame());
       
       computeCaptureLineAndSwitchLine(startPoint, endPoint);
 

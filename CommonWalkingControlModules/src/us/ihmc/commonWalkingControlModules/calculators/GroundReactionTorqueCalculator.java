@@ -83,7 +83,8 @@ public class GroundReactionTorqueCalculator
       
       //Move the start of the display vector just outside of the shank link
       FramePoint ankleOriginShifted = new FramePoint(ankleZupFrame, 0.0, robotSide.negateIfRightSide(0.07), 0.0);
-      groundTauStart.get(robotSide).set(ankleOriginShifted.changeFrameCopy(worldFrame));
+      ankleOriginShifted.changeFrame(worldFrame);
+      groundTauStart.get(robotSide).set(ankleOriginShifted);
       
 //      for (ContactPointName contactPointName : ContactPointName.values())
       final ArrayList<GroundContactPoint> contactPoints = contactPointList.get(robotSide);
@@ -93,7 +94,7 @@ public class GroundReactionTorqueCalculator
          // Compute r X f for each contact point. Use the ankle origin to calculate total moments about it
          FramePoint contactPointLocation = new FramePoint(worldFrame, groundContactPoint.x.getDoubleValue(), groundContactPoint.y.getDoubleValue(),
                                               groundContactPoint.z.getDoubleValue());
-         contactPointLocation = contactPointLocation.changeFrameCopy(ankleZupFrame);
+         contactPointLocation.changeFrame(ankleZupFrame);
 
          FrameVector vectorToContactPoint = new FrameVector(contactPointLocation);
          vectorToContactPoint.sub(ankleOrigin);
@@ -102,7 +103,7 @@ public class GroundReactionTorqueCalculator
          FrameVector groundReactionForce = new FrameVector(worldFrame, groundContactPoint.fx.getDoubleValue(), groundContactPoint.fy.getDoubleValue(),
                                               groundContactPoint.fz.getDoubleValue());
 
-         groundReactionForce = groundReactionForce.changeFrameCopy(ankleZupFrame);
+         groundReactionForce.changeFrame(ankleZupFrame);
 
          FrameVector torque = new FrameVector(ankleZupFrame);
          torque.cross(vectorToContactPoint, groundReactionForce);
@@ -111,7 +112,7 @@ public class GroundReactionTorqueCalculator
       }
 
 
-      ret = ret.changeFrameCopy(worldFrame);
+      ret.changeFrame(worldFrame);
       
       //For now, only display the z component. The other components over power the Z and then the Viz is worthless
       groundTau.get(robotSide).setZ(ret.getZ());

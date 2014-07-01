@@ -711,7 +711,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             FramePoint2d finalDesiredICP = instantaneousCapturePointPlanner.getFinalDesiredICP();
             double trajectoryTime = transferTimeCalculationProvider.getValue();
 
-            finalDesiredICPInWorld.set(finalDesiredICP.changeFrameCopy(worldFrame));
+            FramePoint2d temp = new FramePoint2d(finalDesiredICP);
+            temp.changeFrame(worldFrame);
+            finalDesiredICPInWorld.set(temp);
             finalDesiredICPAndTrajectoryTime = new Pair<FramePoint2d, Double>(finalDesiredICP, trajectoryTime);
          }
 

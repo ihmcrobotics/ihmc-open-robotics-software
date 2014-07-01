@@ -286,7 +286,8 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
 
 	public FrameVector2d computeTorqueVectorForDeltaCMP(FrameVector2d deltaCMP, boolean returnActuatorTorqueContributionOnly)
 	{		
-		FrameVector2d spineTorqueVectorCMP = deltaCMP.changeFrameCopy(worldFrame);
+		FrameVector2d spineTorqueVectorCMP = new FrameVector2d(deltaCMP);
+		spineTorqueVectorCMP.changeFrame(worldFrame);
 		spineTorqueVectorCMP.setX(-deltaCMP.getY());
 		spineTorqueVectorCMP.setY(deltaCMP.getX());
 		spineTorqueVectorCMP.scale( robotMass * gravity );

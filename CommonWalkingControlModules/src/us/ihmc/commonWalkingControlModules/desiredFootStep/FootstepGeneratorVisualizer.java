@@ -123,7 +123,8 @@ public class FootstepGeneratorVisualizer
          printIfDebug("Found association for rigidBody " + name);
       }
 
-      FramePose footstepPoseInWorld = footstepPose.changeFrameCopy(worldFrame);
+      FramePose footstepPoseInWorld = new FramePose(footstepPose);
+      footstepPoseInWorld.changeFrame(worldFrame);
       FramePoint position = new FramePoint();
       footstepPoseInWorld.getPosition(position);
       position.setZ(position.getZ() + 0.0005);

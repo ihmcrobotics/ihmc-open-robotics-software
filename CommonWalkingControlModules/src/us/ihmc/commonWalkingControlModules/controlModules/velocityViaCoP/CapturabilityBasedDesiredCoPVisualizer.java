@@ -132,7 +132,9 @@ public class CapturabilityBasedDesiredCoPVisualizer
 
    public void setGuideLine(FrameLineSegment2d guideLine)
    {
-      this.guideLine.setFrameLineSegment2d(guideLine.changeFrameCopy(world));
+      FrameLineSegment2d guideLineInWorld = new FrameLineSegment2d(guideLine);
+      guideLineInWorld.changeFrame(world);
+      this.guideLine.setFrameLineSegment2d(guideLineInWorld);
       hideDesiredCapturePoint();
    }
 

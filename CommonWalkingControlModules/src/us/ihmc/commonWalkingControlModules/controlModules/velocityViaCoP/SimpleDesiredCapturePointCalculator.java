@@ -88,7 +88,7 @@ public class SimpleDesiredCapturePointCalculator implements DesiredCapturePointC
       FramePoint2d desiredCapturePoint = couplingRegistry.getBipedSupportPolygons().getSweetSpotCopy(supportLeg);
       ReferenceFrame ankleZUpFrame = referenceFrames.getAnkleZUpFrame(supportLeg);
       desiredCapturePoint.changeFrame(ankleZUpFrame);
-      desiredVelocity = desiredVelocity.changeFrameCopy(ankleZUpFrame);
+      desiredVelocity.changeFrame(ankleZUpFrame);
 
       desiredCapturePoint.setX(desiredCapturePoint.getX() + kxx * desiredVelocity.getX());
       desiredCapturePoint.setY(desiredCapturePoint.getY() + kxy * Math.abs(desiredVelocity.getX()));

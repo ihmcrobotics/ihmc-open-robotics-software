@@ -133,7 +133,9 @@ public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePoint
 
       FrameVector2d frameVector2d = guideLine.getVectorCopy();
       FrameLine2d shiftedParallelLine = new FrameLine2d(shiftedPoint, frameVector2d);
-      parallelLineWorld.setFrameLine2d(shiftedParallelLine.changeFrameCopy(world));
+      FrameLine2d shiftedParallelLineInWorld = new FrameLine2d(shiftedParallelLine);
+      shiftedParallelLineInWorld.changeFrame(world);
+      parallelLineWorld.setFrameLine2d(shiftedParallelLineInWorld);
 
       // Create speed control line
       FrameLine2d massLine = createSpeedControlLine(new FrameLine2d(guideLine), desiredVelocity);
@@ -198,16 +200,20 @@ public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePoint
          {
             centerOfPressureDesired = doProportionalControl(capturePoint, desiredCapturePoint, desiredCapturePointVelocity, doubleSupportCaptureKp.getDoubleValue());
             hideControlLine();
-            centerOfPressureDesired.changeFrame(supportPolygon.getReferenceFrame());
             
-            desiredCoPBeforeProjection.set(centerOfPressureDesired.changeFrameCopy(world));
+            centerOfPressureDesired.changeFrame(world);
+            desiredCoPBeforeProjection.set(centerOfPressureDesired);
+            centerOfPressureDesired.changeFrame(supportPolygon.getReferenceFrame());
          }
          else
          {
-            speedControlLineWorld.setFrameLine2d(controlLine.changeFrameCopy(world));
+            FrameLine2d controlLineInWorld = new FrameLine2d(controlLine);
+            controlLineInWorld.changeFrame(world);
+            speedControlLineWorld.setFrameLine2d(controlLineInWorld);
 
             ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
-            FrameVector2d comDirection = desiredVelocity.changeFrameCopy(midFeetZUpFrame);
+            FrameVector2d comDirection = new FrameVector2d(desiredVelocity);
+            comDirection.changeFrame(midFeetZUpFrame);
             comDirection.normalize();
             FrameVector2d controlDirection = controlLine.getNormalizedFrameVector();
 
@@ -225,7 +231,9 @@ public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePoint
 
             centerOfPressureDesired.changeFrame(supportPolygon.getReferenceFrame());
          }
-         GeometryTools.movePointInsidePolygonAlongLine(centerOfPressureDesired, supportPolygon, controlLine.changeFrameCopy(supportPolygon.getReferenceFrame()));
+         FrameLine2d controlLineInSupportFrame = new FrameLine2d(controlLine);
+         controlLineInSupportFrame.changeFrame(supportPolygon.getReferenceFrame());
+         GeometryTools.movePointInsidePolygonAlongLine(centerOfPressureDesired, supportPolygon, controlLineInSupportFrame);
       }
       else
       {
@@ -286,10 +294,13 @@ public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePoint
       ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
       FrameVector2d currentVelocity = processedSensors.getCenterOfMassVelocityInFrame(midFeetZUpFrame).toFrameVector2d();
       FramePoint centerOfMassPosition = processedSensors.getCenterOfMassPositionInFrame(midFeetZUpFrame);
+      centerOfMassPosition.changeFrame(world);
+      currentVelocity.changeFrame(world);
+      desiredVelocity.changeFrame(world);
       
-      comPosition.set(centerOfMassPosition.changeFrameCopy(world));
-      actualVelocityInWorld.setXY(currentVelocity.changeFrameCopy(world));
-      desiredVelocityInWorld.setXY(desiredVelocity.changeFrameCopy(world));
+      comPosition.set(centerOfMassPosition);
+      actualVelocityInWorld.setXY(currentVelocity);
+      desiredVelocityInWorld.setXY(desiredVelocity);
       
       double desiredVelocityMagnitude = desiredVelocity.length();
 
@@ -299,7 +310,8 @@ public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePoint
 
       FrameVector2d guideLineUnitVector = guideLine.getNormalizedFrameVector();
 
-      FrameVector2d currentVelocityInFrame = currentVelocity.changeFrameCopy(guideLineUnitVector.getReferenceFrame());
+      FrameVector2d currentVelocityInFrame = new FrameVector2d(currentVelocity);
+      currentVelocityInFrame.changeFrame(guideLineUnitVector.getReferenceFrame());
 
       double currentVelocityProjectedIntoGuideLine = currentVelocityInFrame.dot(guideLineUnitVector);
       velocityError.set(desiredVelocityMagnitude - currentVelocityProjectedIntoGuideLine);
@@ -308,7 +320,10 @@ public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePoint
       controlOffset.scale(-speedControlXKp.getDoubleValue() * velocityError.getDoubleValue());
 
 
-      FramePoint2d centerOfMassPositionInFrame = centerOfMassPosition.changeFrameCopy(controlOffset.getReferenceFrame()).toFramePoint2d();
+      FramePoint centerOfMassPositionInFrame = new FramePoint(centerOfMassPosition);
+      centerOfMassPositionInFrame.changeFrame(controlOffset.getReferenceFrame());
+      FramePoint2d centerOfMassPosition2dInFrame = new FramePoint2d();
+      centerOfMassPositionInFrame.getFramePoint2d(centerOfMassPosition2dInFrame);
 
       // Project CoM on control line
       FrameVector2d velocityT = new FrameVector2d(guideLineUnitVector.getReferenceFrame());
@@ -316,7 +331,7 @@ public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePoint
       velocityT.setY(guideLineUnitVector.getX());
 
 
-      FramePoint2d speedControlPosition = new FramePoint2d(centerOfMassPositionInFrame);
+      FramePoint2d speedControlPosition = new FramePoint2d(centerOfMassPosition2dInFrame);
       speedControlPosition.add(controlOffset);
 
 //    // Speed controller: Only increase speed for now
@@ -330,7 +345,9 @@ public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePoint
          throw new RuntimeException("Not sure what to do when velocity is zero");
 
       FrameLine2d speedControlLine = new FrameLine2d(speedControlPosition, velocityT);
-      speedControlLineWorld.setFrameLine2d(speedControlLine.changeFrameCopy(world));
+      FrameLine2d speedControlLineInWorld = new FrameLine2d(speedControlLine);
+      speedControlLineInWorld.changeFrame(world);
+      speedControlLineWorld.setFrameLine2d(speedControlLineInWorld);
 
       return speedControlLine;
    }

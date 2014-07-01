@@ -137,7 +137,8 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
 //    double stepSideways = swingLegSide.negateIfRightSide(inPlaceWidth.getDoubleValue());    // maxStepLength.getDoubleValue() * velocityMagnitudeToLeftOfHeading;
 
 //    FrameVector2d desiredVelocityInSupportAnkleZUpFrame = desiredVelocity.changeFrameCopy(supportAnkleZUpFrame);
-      FrameVector2d desiredVelocityInHeadingFrame = desiredVelocity.changeFrameCopy(desiredHeadingFrame);
+      FrameVector2d desiredVelocityInHeadingFrame = new FrameVector2d(desiredVelocity);
+      desiredVelocityInHeadingFrame.changeFrame(desiredHeadingFrame);
 
       FrameVector2d desiredOffsetFromAnkle = new FrameVector2d(desiredHeadingFrame, 0.0, swingLegSide.negateIfRightSide(inPlaceWidth.getDoubleValue()));    // desiredVelocityInHeadingFrame);
       desiredOffsetFromAnkle.add(desiredVelocityInHeadingFrame);

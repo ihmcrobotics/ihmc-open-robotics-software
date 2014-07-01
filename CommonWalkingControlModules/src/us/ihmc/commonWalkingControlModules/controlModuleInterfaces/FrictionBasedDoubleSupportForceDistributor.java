@@ -85,7 +85,8 @@ public class FrictionBasedDoubleSupportForceDistributor implements DoubleSupport
 
          zForcesInPelvisFrameToPack.put(robotSide, zForceInPelvisFrameTotal * legStrength);
 
-         FrameVector torque = torqueInPelvisFrameTotal.changeFrameCopy(pelvisFrame);
+         FrameVector torque = new FrameVector(torqueInPelvisFrameTotal);
+         torque.changeFrame(pelvisFrame);
 
          torque.setX(torque.getX() * legStrength);
          torque.setY(torque.getY() * legStrength);

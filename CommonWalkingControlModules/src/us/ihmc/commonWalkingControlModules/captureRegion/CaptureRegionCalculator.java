@@ -315,7 +315,11 @@ public class CaptureRegionCalculator
          FrameConvexPolygon2d captureRegion = reachableRegions.get(supportLeg);
 
          if (DRAW_CAPTURE_REGION)
-            captureRegionGraphic.setFrameConvexPolygon2d(captureRegion.changeFrameCopy(worldFrame));
+         {
+            FrameConvexPolygon2d captureRegionInWorld = new FrameConvexPolygon2d(captureRegion);
+            captureRegionInWorld.changeFrame(worldFrame);
+            captureRegionGraphic.setFrameConvexPolygon2d(captureRegionInWorld);
+         }
          globalTimer.stopTimer();
 
          return captureRegion;
@@ -327,7 +331,9 @@ public class CaptureRegionCalculator
       ArrayList<FramePoint2d> captureRegionVertices = new ArrayList<FramePoint2d>();
       for (int i = 0; i < extremesOfFeasibleCOP.size(); i++)
       {
-         FramePoint2d copExtremeInWorld = extremesOfFeasibleCOP.get(i).changeFrameCopy(worldFrame);
+         FramePoint2d copExtremeInWorld = new FramePoint2d(extremesOfFeasibleCOP.get(i));
+         copExtremeInWorld.changeFrame(worldFrame);
+
          if (i < estimatedCOPExtremes.length)
             estimatedCOPExtremes[i].set(copExtremeInWorld.getX(), copExtremeInWorld.getY(), 0.0);
 
@@ -350,7 +356,8 @@ public class CaptureRegionCalculator
          // update position in plotter
          if (DRAW_CAPTURE_REGION)
          {
-            FramePoint predictedCapturePointInWorld = predictedExtremeCapturePoint.changeFrameCopy(worldFrame);
+            FramePoint predictedCapturePointInWorld = new FramePoint(predictedExtremeCapturePoint);
+            predictedCapturePointInWorld.changeFrame(worldFrame);
             if (i < captureRegionBestCaseVertices.length)
                captureRegionBestCaseVertices[i].set(predictedCapturePointInWorld);
          }
@@ -401,7 +408,9 @@ public class CaptureRegionCalculator
          // update position in plotter
          if (DRAW_CAPTURE_REGION)
          {
-            FramePoint2d kinematicExtremeInWorld = kinematicExtreme.changeFrameCopy(worldFrame);
+            FramePoint2d kinematicExtremeInWorld = new FramePoint2d(kinematicExtreme);
+            kinematicExtremeInWorld.changeFrame(worldFrame);
+
             if (i < captureRegionKinematicLimitVertices.length)
                captureRegionKinematicLimitVertices[i].set(kinematicExtremeInWorld.getX(), kinematicExtremeInWorld.getY(), 0.0);
          }
@@ -414,8 +423,8 @@ public class CaptureRegionCalculator
          double alphaFromAToB = ((double) (i + 1)) / ((double) (NUMBER_OF_POINTS_TO_APPROXIMATE_KINEMATIC_LIMITS + 1));
          FramePoint2d additionalKinematicPoint = getPointBetweenVectorsAtDistanceFromOriginCircular(directionLimits[0], directionLimits[directionLimits.length-1], alphaFromAToB,
                                                     kinematicRangeFromContactReferencePoint.getDoubleValue(), footCentroid);
-         captureRegionVertices.add(additionalKinematicPoint);
-         additionalKinematicPoint = additionalKinematicPoint.changeFrameCopy(worldFrame);
+         captureRegionVertices.add(new FramePoint2d(additionalKinematicPoint));
+         additionalKinematicPoint.changeFrame(worldFrame);
          additionalKinematicLimitPoints[i].set(additionalKinematicPoint.getX(), additionalKinematicPoint.getY(), 0.0);
       }
 
@@ -494,7 +503,11 @@ public class CaptureRegionCalculator
          if (captureRegion == null)
             captureRegionGraphic.setFrameConvexPolygon2d(null);
          else
-            captureRegionGraphic.setFrameConvexPolygon2d(captureRegion.changeFrameCopy(worldFrame));
+         {
+            FrameConvexPolygon2d captureRegionInWorld = new FrameConvexPolygon2d(captureRegion);
+            captureRegionInWorld.changeFrame(worldFrame);
+            captureRegionGraphic.setFrameConvexPolygon2d(captureRegionInWorld);
+         }
       }
 
       globalTimer.stopTimer();

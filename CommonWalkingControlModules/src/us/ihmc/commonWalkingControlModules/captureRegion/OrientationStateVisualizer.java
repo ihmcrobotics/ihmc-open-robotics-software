@@ -81,7 +81,8 @@ public class OrientationStateVisualizer
 	
 	public void updateReducedSupportPolygon(FrameConvexPolygon2d newReducedSupportPolygon)
 	{
-		reducedSupportPolygon = newReducedSupportPolygon.changeFrameCopy(worldFrame);
+		reducedSupportPolygon = new FrameConvexPolygon2d(newReducedSupportPolygon);
+		reducedSupportPolygon.changeFrame(worldFrame);
 		
 		try
 		{

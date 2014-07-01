@@ -590,14 +590,15 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       FrameOrientation endOrientation = new FrameOrientation();
       desiredFootStep.getOrientation(endOrientation);
       ReferenceFrame supportFootAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(swingSide.getOppositeSide());
-      endSwingOrientations.get(swingSide).set(endOrientation.changeFrameCopy(supportFootAnkleZUpFrame));
+      endOrientation.changeFrame(supportFootAnkleZUpFrame);
+      endSwingOrientations.get(swingSide).set(endOrientation);
    }
 
    private void initializeStartOrientationToMatchActual(RobotSide swingSide)
    {
       ReferenceFrame swingFootFrame = referenceFrames.getFootFrame(swingSide);
       FrameOrientation startOrientation = new FrameOrientation(swingFootFrame);
-      startOrientation = startOrientation.changeFrameCopy(referenceFrames.getAnkleZUpFrame(swingSide.getOppositeSide()));
+      startOrientation.changeFrame(referenceFrames.getAnkleZUpFrame(swingSide.getOppositeSide()));
       startSwingOrientations.get(swingSide).set(startOrientation);
    }
 
@@ -615,7 +616,8 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    {
       FramePoint currentPosition = new FramePoint(referenceFrames.getAnkleZUpFrame(swingSide));
       currentPosition.changeFrame(referenceFrames.getAnkleZUpFrame(swingSide.getOppositeSide()));
-      FramePoint desiredPosition = finalDesiredSwingFootPosition.getFramePointCopy().changeFrameCopy(referenceFrames.getAnkleZUpFrame(swingSide.getOppositeSide()));
+      FramePoint desiredPosition = new FramePoint(finalDesiredSwingFootPosition.getFramePointCopy());
+      desiredPosition.changeFrame(referenceFrames.getAnkleZUpFrame(swingSide.getOppositeSide()));
       positionErrorAtEndOfStepNorm.set(desiredPosition.distance(currentPosition));
       currentPosition.sub(desiredPosition);
       positionErrorAtEndOfStepX.set(currentPosition.getX());
