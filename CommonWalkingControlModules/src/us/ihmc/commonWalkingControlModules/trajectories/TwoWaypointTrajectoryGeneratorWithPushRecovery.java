@@ -63,6 +63,7 @@ public class TwoWaypointTrajectoryGeneratorWithPushRecovery implements PositionT
    private final BooleanYoVariable hasReplanned;
    private final double initialTime = 0.0;
    private final PositionTrajectoryGenerator nominalTrajectoryGenerator;
+   private final DoubleProvider swingTimeProvider;
 
    private FramePoint nominalTrajectoryPosition;
    private FrameVector nominalTrajectoryVelocity;
@@ -84,6 +85,7 @@ public class TwoWaypointTrajectoryGeneratorWithPushRecovery implements PositionT
             TrajectoryWaypointGenerationMethod.class);
 
       this.swingTimeRemainingProvider = swingTimeRemainingProvider;
+      this.swingTimeProvider = swingTimeProvider;
 
       this.hasReplanned = new BooleanYoVariable(namePrefix + "HasReplanned", this.registry);
       this.hasReplanned.set(false);
@@ -125,6 +127,7 @@ public class TwoWaypointTrajectoryGeneratorWithPushRecovery implements PositionT
 
    public void initialize()
    {
+      swingTime.set(swingTimeProvider.getValue());
       timeIntoStep.set(swingTime.getDoubleValue() - swingTimeRemainingProvider.getValue());
       pushRecoveryTrajectoryGenerator.setTimeIntoStep(timeIntoStep.getDoubleValue());
       pushRecoveryTrajectoryGenerator.initialize();
