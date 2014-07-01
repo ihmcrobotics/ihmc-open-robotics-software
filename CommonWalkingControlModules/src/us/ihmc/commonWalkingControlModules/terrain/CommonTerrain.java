@@ -10,7 +10,7 @@ import javax.swing.JFrame;
 import javax.vecmath.Point2d;
 
 import us.ihmc.graphics3DAdapter.GroundProfile;
-import us.ihmc.graphics3DAdapter.HeightMapFromGroundProfile;
+import us.ihmc.graphics3DAdapter.HeightMapWithNormals;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
@@ -93,7 +93,7 @@ public class CommonTerrain
          
          Graphics3DObject texturedGroundLinkGraphics = new Graphics3DObject();
          
-         HeightMapFromGroundProfile heightMap = new HeightMapFromGroundProfile(groundProfile);
+         HeightMapWithNormals heightMap = groundProfile.getHeightMapIfAvailable();
          texturedGroundLinkGraphics.addHeightMap(heightMap, 300, 300, YoAppearance.DarkGreen());
          ret.add(texturedGroundLinkGraphics);
          return ret;

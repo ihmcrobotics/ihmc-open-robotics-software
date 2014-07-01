@@ -9,7 +9,6 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.ScsInitialSetup;
 import us.ihmc.graphics3DAdapter.GroundProfile;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.HeightMap;
-import us.ihmc.graphics3DAdapter.HeightMapFromGroundProfile;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
