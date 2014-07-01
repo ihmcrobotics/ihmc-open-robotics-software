@@ -171,16 +171,17 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
    protected void updateDynamicGraphicsObjects(int index)
    {
       /*put yo-variablized objects here */
-      FramePoint
-            leftEE = new FramePoint(fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM), 0, 0.13, 0),
-            rightEE = new FramePoint(fullRobotModel.getEndEffectorFrame(RobotSide.RIGHT, LimbName.ARM), 0, -0.13, 0);
+      FramePoint leftEE = new FramePoint(fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM), 0, 0.13, 0);
+      FramePoint rightEE = new FramePoint(fullRobotModel.getEndEffectorFrame(RobotSide.RIGHT, LimbName.ARM), 0, -0.13, 0);
 
+      leftEE.changeFrame(CalibUtil.world);
+      rightEE.changeFrame(CalibUtil.world);
 
-      ypLeftEE.set(leftEE.changeFrameCopy(CalibUtil.world));
-      ypRightEE.set(rightEE.changeFrameCopy(CalibUtil.world));
+      ypLeftEE.set(leftEE);
+      ypRightEE.set(rightEE);
 
-      yposeLeftEE.set(new FramePose(leftEE, new FrameOrientation(leftEE.getReferenceFrame())).changeFrameCopy(CalibUtil.world));
-      yposeRightEE.set(new FramePose(rightEE, new FrameOrientation(rightEE.getReferenceFrame())).changeFrameCopy(CalibUtil.world));
+      yposeLeftEE.set(leftEE, new FrameOrientation(CalibUtil.world));
+      yposeRightEE.set(rightEE, new FrameOrientation(CalibUtil.world));
 
       updateBoard(index);
    }
@@ -188,8 +189,11 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
    private void scsAlignCameraToRobotCamera()
    {
       //Camera Pos(behind the eye 10cm), Fix(Eye farme origin)
-      FramePoint cameraPos = new FramePoint(cameraFrame, -0.01, 0, 0).changeFrameCopy(CalibUtil.world);
-      FramePoint cameraFix = new FramePoint(cameraFrame).changeFrameCopy(CalibUtil.world);
+      FramePoint cameraPos = new FramePoint(cameraFrame, -0.01, 0, 0);
+      FramePoint cameraFix = new FramePoint(cameraFrame);
+
+      cameraPos.changeFrame(CalibUtil.world);
+      cameraFix.changeFrame(CalibUtil.world);
       scs.setCameraPosition(cameraPos.getX(), cameraPos.getY(), cameraPos.getZ());
       scs.setCameraFix(cameraFix.getX(), cameraFix.getY(), cameraFix.getZ());
    }
@@ -200,7 +204,9 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       Transform3D imageToCamera = new Transform3D(new double[]{0, 0, 1, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 1});
       ReferenceFrame cameraImageFrame = ReferenceFrame.
             constructBodyFrameWithUnchangingTransformToParent("cameraImage", cameraFrame, imageToCamera);
-      yposeLeftCamera.set(new FramePose(cameraImageFrame).changeFrameCopy(CalibUtil.world));
+      FramePose poseLeftCamera = new FramePose(cameraImageFrame);
+      poseLeftCamera.changeFrame(CalibUtil.world);
+      yposeLeftCamera.set(poseLeftCamera);
 
       //update board
       Map<String, Object> mEntry = metaData.get(index);
@@ -208,7 +214,9 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
 //      System.out.println("Original Rot\n"+targetToCamera);
 
       //update
-      yposeBoard.set(new FramePose(cameraImageFrame, targetToCamera).changeFrameCopy(CalibUtil.world));
+      FramePose poseRightCamera = new FramePose(cameraImageFrame, targetToCamera);
+      poseRightCamera.changeFrame(CalibUtil.world);
+      yposeBoard.set(poseRightCamera);
 //      System.out.println("Index: "+ index);
 //      System.out.println(targetToCamera);
 

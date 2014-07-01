@@ -18,7 +18,6 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -64,16 +63,17 @@ public class AtlasCalibrationDataViewer extends AtlasKinematicCalibrator
    @Override
    protected void updateDynamicGraphicsObjects(int index)
    {
-      FramePoint
-            leftEE = new FramePoint(fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM), 0, 0.13, 0),
-            rightEE = new FramePoint(fullRobotModel.getEndEffectorFrame(RobotSide.RIGHT, LimbName.ARM), 0, -0.13, 0);
+      FramePoint leftEE = new FramePoint(fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM), 0, 0.13, 0);
+      FramePoint rightEE = new FramePoint(fullRobotModel.getEndEffectorFrame(RobotSide.RIGHT, LimbName.ARM), 0, -0.13, 0);
+      
+      leftEE.changeFrame(CalibUtil.world);
+      rightEE.changeFrame(CalibUtil.world);
 
+      ypLeftEE.set(leftEE);
+      ypRightEE.set(rightEE);
 
-      ypLeftEE.set(leftEE.changeFrameCopy(CalibUtil.world));
-      ypRightEE.set(rightEE.changeFrameCopy(CalibUtil.world));
-
-      yposeLeftEE.set(new FramePose(leftEE, new FrameOrientation(leftEE.getReferenceFrame())).changeFrameCopy(CalibUtil.world));
-      yposeRightEE.set(new FramePose(rightEE, new FrameOrientation(rightEE.getReferenceFrame())).changeFrameCopy(CalibUtil.world));
+      yposeLeftEE.set(leftEE, new FrameOrientation(CalibUtil.world));
+      yposeRightEE.set(rightEE, new FrameOrientation(CalibUtil.world));
    }
 
    public void createQoutYoVariables()
