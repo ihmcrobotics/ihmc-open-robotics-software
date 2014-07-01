@@ -9,7 +9,6 @@ import java.net.Socket;
 import us.ihmc.atlas.AtlasNetworkProcessor;
 import us.ihmc.atlas.AtlasRobotModelFactory;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.fixedPointRepresentation.UnsignedByteTools;
 import us.ihmc.utilities.net.tcpServer.DisconnectedException;
@@ -29,7 +28,7 @@ public class DRCNetworkProcessorEnterpriseCloudDispatcherBackend implements Runn
 
    private final byte[] buffer;
 
-   private static String scsMachineIPAddress = DRCLocalConfigParameters.ROBOT_CONTROLLER_IP_ADDRESS;
+   private static String scsMachineIPAddress = "http://10.66.171.20:11311";
    private static String rosMasterURI = "http://10.66.171.44:11311";
 
    private static String[] javaArgs = new String[] {"-Xms2048m", "-Xmx2048m"};
