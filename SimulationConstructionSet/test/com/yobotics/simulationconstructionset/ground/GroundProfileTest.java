@@ -40,8 +40,7 @@ public abstract class GroundProfileTest
          numericalSurfaceNormal.normalize();
 
          Vector3d surfaceNormalFromGroundProfile = new Vector3d();
-         Point3d intersectionIgnore = new Point3d();
-         groundProfile.closestIntersectionAndNormalAt(x, y, z, intersectionIgnore, surfaceNormalFromGroundProfile);
+         groundProfile.getHeightMapIfAvailable().heightAndNormalAt(x, y, z, surfaceNormalFromGroundProfile);
          JUnitTools.assertTuple3dEquals(numericalSurfaceNormal, surfaceNormalFromGroundProfile, epsilon);
       }
    }
