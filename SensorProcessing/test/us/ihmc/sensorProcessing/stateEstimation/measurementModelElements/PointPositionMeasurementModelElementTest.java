@@ -120,7 +120,8 @@ public class PointPositionMeasurementModelElementTest
 
    private void setMeasuredPointPositionToActual(FramePoint point, ControlFlowInputPort<PointPositionDataObject> pointPositionMeasurementInputPort)
    {
-      FramePoint pointInWorld = point.changeFrameCopy(ReferenceFrame.getWorldFrame());
+      FramePoint pointInWorld = new FramePoint(point);
+      pointInWorld.changeFrame(ReferenceFrame.getWorldFrame());
       PointPositionDataObject pointPositionDataObject = new PointPositionDataObject();
       boolean isPointPositionValid = true;
       pointPositionDataObject.set(point, pointInWorld, isPointPositionValid);
