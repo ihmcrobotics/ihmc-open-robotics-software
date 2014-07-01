@@ -13,7 +13,7 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.validation.YoVariableThreadAccessValidator;
 import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
 import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
-import us.ihmc.graphics3DAdapter.GroundProfile;
+import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 import com.martiansoftware.jsap.JSAPException;
@@ -30,7 +30,7 @@ public class ValkyriePushRecoveryTrack
       DRCRobotModel model = new ValkyrieRobotModel(false, false);
       final double groundHeight = 0.0;
 
-      GroundProfile groundProfile = new FlatGroundProfile(groundHeight);
+      GroundProfile3D groundProfile = new FlatGroundProfile(groundHeight);
 
       YoVariableThreadAccessValidator.registerAccessValidator();
       SliderBoardFactory sliderBoardFactory = WalkControllerSliderBoard.getFactory();

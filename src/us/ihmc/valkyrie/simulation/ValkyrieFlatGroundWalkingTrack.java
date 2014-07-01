@@ -8,7 +8,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
 import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
-import us.ihmc.graphics3DAdapter.GroundProfile;
+import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 import com.yobotics.simulationconstructionset.util.FlatGroundProfile;
@@ -23,7 +23,7 @@ public class ValkyrieFlatGroundWalkingTrack
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false, sliderBoardFactory);      
       
       final double groundHeight = 0.0;
-      GroundProfile groundProfile = new FlatGroundProfile(groundHeight);
+      GroundProfile3D groundProfile = new FlatGroundProfile(groundHeight);
 
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotModel.getSimulateDT());
       scsInitialSetup.setDrawGroundProfile(true);
