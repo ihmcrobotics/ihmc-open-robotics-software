@@ -19,7 +19,7 @@ dependencies {
     compile group: 'us.ihmc.thirdparty', name: 'ddogleg', version: 'x' 
     compile group: 'org.apache.poi', name: 'poi', version: '3.9' 
     compile group: 'us.ihmc.thirdparty', name: 'concavehull', version: 'x'   
-    compile group: 'us.ihmc.thirdparty', name: 'projectbubo', version: 'x'   
+    compile group: 'us.ihmc.thirdparty', name: 'bubo', version: '0.1'
     compile group: 'com.vividsolutions', name: 'jts', version: '1.13' 
     compile group: 'jfree', name: 'jfreechart', version: '1.0.7' 
     compile group: 'org.apache.commons', name: 'commons-math3', version: '3.2' 
