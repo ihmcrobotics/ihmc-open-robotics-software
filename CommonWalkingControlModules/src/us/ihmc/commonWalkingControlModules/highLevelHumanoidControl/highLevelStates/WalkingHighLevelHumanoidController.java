@@ -882,7 +882,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       private Footstep nextFootstep;
       private double captureTime;
-     // private double icpProjectionTimeOffset;
 
       public SingleSupportState(RobotSide supportSide)
       {
@@ -891,7 +890,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          this.desiredPelvisOrientationToPack = new FrameOrientation(worldFrame);
          this.desiredPelvisAngularVelocityToPack = new FrameVector(fullRobotModel.getRootJoint().getFrameAfterJoint());
          this.desiredPelvisAngularAccelerationToPack = new FrameVector(fullRobotModel.getRootJoint().getFrameAfterJoint());
-         //this.icpProjectionTimeOffset = 0.0;
       }
 
       @Override
