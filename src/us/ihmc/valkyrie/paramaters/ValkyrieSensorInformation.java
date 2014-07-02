@@ -106,7 +106,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    
    public ValkyrieSensorInformation()
    {
-      VideoSettingsH264LowLatency videoSetting = VideoSettingsFactory.get32kBitSettingsSquare();
+      VideoSettingsH264LowLatency videoSetting = VideoSettingsFactory.get32kBitSettingsWide();
       cameraParamaters[0] = new DRCRobotCameraParamaters(forheadCameraName,forheadCameraTopic,headLinkName,videoSetting,forheadCameraId);
       cameraParamaters[1] = new DRCRobotCameraParamaters(leftStereoCameraName,leftCameraTopic,headLinkName,videoSetting,leftHazardCameraId);
       cameraParamaters[2] = new DRCRobotCameraParamaters(rightStereoCameraName,rightCameraTopic,headLinkName,videoSetting,rightHazardCameraId);
