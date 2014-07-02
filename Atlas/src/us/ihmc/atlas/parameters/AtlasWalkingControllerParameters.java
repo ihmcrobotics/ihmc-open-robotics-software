@@ -13,7 +13,6 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
@@ -499,7 +498,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
 
    public boolean doPrepareManipulationForLocomotion()
    {
-      return DRCConfigParameters.HOLD_HANDS_IN_CHEST_FRAME_WHEN_WALKING;
+      return true;
    }
 
    public double getToeOffKpXY()
