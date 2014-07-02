@@ -79,12 +79,12 @@ public abstract class AbstractAdjustableDesiredFootstepCalculator implements Des
          desiredFootstep.getPose(footstepPose);
          YoFramePoint yoFramePoint = footstepPositions.get(swingLegSide);
          FramePoint footstepPosition = new FramePoint();
-         footstepPose.getPosition(footstepPosition);
+         footstepPose.getPositionIncludingFrame(footstepPosition);
          footstepPosition.changeFrame(yoFramePoint.getReferenceFrame());
          yoFramePoint.set(footstepPosition);
          YoFrameOrientation yoFrameOrientation = footstepOrientations.get(swingLegSide);
          FrameOrientation footstepOrientation = new FrameOrientation();
-         footstepPose.getOrientation(footstepOrientation);
+         footstepPose.getOrientationIncludingFrame(footstepOrientation);
          footstepOrientation.changeFrame(yoFrameOrientation.getReferenceFrame());
          yoFrameOrientation.set(footstepOrientation);
       }

@@ -373,7 +373,7 @@ public class IndividualHandControlModule
 
       Transform3D newTrackingFrameTransform = new Transform3D();
       newTrackingFrameTransform.mul(oldTrackingFrameTransform, transformFromNewTrackingFrameToOldTrackingFrame);
-      pose.set(trajectoryFrame, newTrackingFrameTransform);
+      pose.setPoseIncludingFrame(trajectoryFrame, newTrackingFrameTransform);
 
       return pose;
    }
@@ -396,7 +396,7 @@ public class IndividualHandControlModule
 
       Transform3D newTrackingFrameTransform = new Transform3D();
       newTrackingFrameTransform.mul(oldTrackingFrameTransform, transformFromNewTrackingFrameToOldTrackingFrame);
-      pose.set(trajectoryFrame, newTrackingFrameTransform);
+      pose.setPoseIncludingFrame(trajectoryFrame, newTrackingFrameTransform);
 
       return pose;
    }

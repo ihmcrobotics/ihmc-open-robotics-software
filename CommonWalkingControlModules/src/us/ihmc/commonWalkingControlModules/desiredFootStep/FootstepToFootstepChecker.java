@@ -44,9 +44,9 @@ public class FootstepToFootstepChecker
       stanceFootstep.getPose(stanceFramePose);
       endingFootstep.getPose(endingFramePose);
 
-      endingFramePose.getPosition(tempFramePoint);
+      endingFramePose.getPositionIncludingFrame(tempFramePoint);
       differenceVector.setIncludingFrame(tempFramePoint);
-      stanceFramePose.getPosition(tempFramePoint);
+      stanceFramePose.getPositionIncludingFrame(tempFramePoint);
       differenceVector.sub(tempFramePoint);
 
       // TODO: Best would be to base on kinematic and dynamic reachability (which would be robot dependent and not so much magic tuned numbers)
@@ -111,11 +111,11 @@ public class FootstepToFootstepChecker
       boolean stancePoseIsOnWrongSide = isOnWrongSide(stanceFootstepSide.getOppositeSide(), endingFramePose, stanceFramePose);
 
       FramePoint2d initialPoint = new FramePoint2d();
-      initialFramePose.getPosition2d(initialPoint);
+      initialFramePose.getPosition2dIncludingFrame(initialPoint);
       FramePoint2d stancePoint = new FramePoint2d();
-      stanceFramePose.getPosition2d(stancePoint);
+      stanceFramePose.getPosition2dIncludingFrame(stancePoint);
       FramePoint2d endPoint = new FramePoint2d();
-      endingFramePose.getPosition2d(endPoint);
+      endingFramePose.getPosition2dIncludingFrame(endPoint);
 
       boolean swingsThroughStanceLeg;
       if ((initialPoint.getX() == endPoint.getX()) && (initialPoint.getY() == endPoint.getY()))
@@ -178,7 +178,7 @@ public class FootstepToFootstepChecker
    {
       FrameVector offset = getPerpendicularOffset(stanceFootstepSide, stanceFramePose, semiCircleOffset);
 
-      endingFramePose.getPosition(tempFramePoint);
+      endingFramePose.getPositionIncludingFrame(tempFramePoint);
       differenceVector.setIncludingFrame(tempFramePoint);
       differenceVector.sub(offset);
       double stepDirection = Math.atan2(differenceVector.getY(), differenceVector.getX());
@@ -194,7 +194,7 @@ public class FootstepToFootstepChecker
       double offsetDirAngle = stanceFramePose.getYaw() + Math.PI / 2;
       FrameVector offset = new FrameVector(worldFrame, new double[] {Math.cos(offsetDirAngle) * sideOffset, Math.sin(offsetDirAngle) * sideOffset, 0});
 
-      stanceFramePose.getPosition(tempFramePoint);
+      stanceFramePose.getPositionIncludingFrame(tempFramePoint);
       FrameVector offsetStart = new FrameVector(tempFramePoint);
       offsetStart.add(offset);
 

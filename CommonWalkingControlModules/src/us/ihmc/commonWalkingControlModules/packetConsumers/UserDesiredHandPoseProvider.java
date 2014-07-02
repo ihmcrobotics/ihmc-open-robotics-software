@@ -82,7 +82,7 @@ public class UserDesiredHandPoseProvider implements HandPoseProvider
    {
       FramePose userDesiredHandPose = new FramePose(homePositions.get(robotSide));
       FramePoint position = new FramePoint();
-      userDesiredHandPose.getPosition(position);
+      userDesiredHandPose.getPositionIncludingFrame(position);
 
       position.setX(position.getX() + userHandPoseX.getDoubleValue());
       position.setY(position.getY() + userHandPoseY.getDoubleValue());

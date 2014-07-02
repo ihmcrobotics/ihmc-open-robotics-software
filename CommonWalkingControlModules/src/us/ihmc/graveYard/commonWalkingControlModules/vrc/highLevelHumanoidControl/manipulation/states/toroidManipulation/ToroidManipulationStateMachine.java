@@ -404,13 +404,13 @@ public class ToroidManipulationStateMachine
       public void get(FrameOrientation orientationToPack)
       {
          FramePose framePose = getFramePose();
-         framePose.getOrientation(orientationToPack);
+         framePose.getOrientationIncludingFrame(orientationToPack);
       }
 
       public void get(FramePoint positionToPack)
       {
          FramePose framePose = getFramePose();
-         framePose.getPosition(positionToPack);
+         framePose.getPositionIncludingFrame(positionToPack);
       }
 
       private FramePose getFramePose()

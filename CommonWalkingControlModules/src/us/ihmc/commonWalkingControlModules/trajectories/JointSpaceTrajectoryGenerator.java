@@ -483,7 +483,7 @@ public class JointSpaceTrajectoryGenerator
          bodyVelocityInTime.changeFrame(ReferenceFrame.getWorldFrame());
          
          FramePoint bodyPoint = new FramePoint();
-         bodyFrameInTime.getPosition(bodyPoint);
+         bodyFrameInTime.getPositionIncludingFrame(bodyPoint);
          bodyPoint.changeFrame(ReferenceFrame.getWorldFrame());
          bagOfBalls.setBallLoop(bodyPoint);
          

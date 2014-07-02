@@ -109,7 +109,7 @@ public class ManipulableToroid
 
       framePose.changeFrame(toroidBeforeJointFrame.getParent());
       FramePoint origin = new FramePoint();
-      copy.getPosition(origin);
+      copy.getPositionIncludingFrame(origin);
       FrameVector zAxis = new FrameVector(copy.getReferenceFrame());
       framePose.getOrientation(rotationMatrix);
       rotationMatrix.getColumn(2, zAxis.getVector());

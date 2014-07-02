@@ -342,11 +342,11 @@ public class WalkOnTheEdgesManager
       FramePose oldPose = footstepToModify.getPoseCopy();
 
       FrameOrientation oldOrientation = new FrameOrientation();
-      oldPose.getOrientation(oldOrientation);
+      oldPose.getOrientationIncludingFrame(oldOrientation);
       FrameOrientation newOrientation = new FrameOrientation();
-      oldPose.getOrientation(newOrientation);
+      oldPose.getOrientationIncludingFrame(newOrientation);
       FramePoint newPosition = new FramePoint();
-      oldPose.getPosition(newPosition);
+      oldPose.getPositionIncludingFrame(newPosition);
       double[] yawPitchRoll = newOrientation.getYawPitchRoll();
       yawPitchRoll[1] += touchdownInitialPitch;
       newOrientation.setYawPitchRoll(yawPitchRoll);
