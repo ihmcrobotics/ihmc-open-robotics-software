@@ -693,6 +693,6 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public double getContactThresholdForce()
    {
-      return 5.0;
+      return runningOnRealRobot ? 80.0 : 5.0;
    }
 }
