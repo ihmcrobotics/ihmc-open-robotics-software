@@ -54,6 +54,7 @@ public class DoubleSupportFootCenterToToeICPComputer
    private final DoubleYoVariable initialTime = new DoubleYoVariable("icpPlannerInitialTime", registry);
    private final BooleanYoVariable comeToStop = new BooleanYoVariable("icpPlannerComeToStop", registry);
    private final BooleanYoVariable atAStop = new BooleanYoVariable("icpPlannerAtAStop", registry);
+   private final BooleanYoVariable footCenterToToeICPComputerIsDone = new BooleanYoVariable("footCenterToToeICPComputerIsDone", registry);
 
    private final BooleanYoVariable isInitialTransfer = new BooleanYoVariable("icpPlannerIsInitialTransfer", registry);
 
@@ -650,8 +651,9 @@ public class DoubleSupportFootCenterToToeICPComputer
    public boolean isDone(double time)
    {
       computeTimeInStateAndEstimatedTimeRemaining(time);
+      footCenterToToeICPComputerIsDone.set(estimatedTimeRemainingForState.getDoubleValue() <= isDoneThreshold);
 
-      return (estimatedTimeRemainingForState.getDoubleValue() <= isDoneThreshold);
+      return (footCenterToToeICPComputerIsDone.getBooleanValue());
    }
 
    public double getEstimatedTimeRemainingForState(double time)

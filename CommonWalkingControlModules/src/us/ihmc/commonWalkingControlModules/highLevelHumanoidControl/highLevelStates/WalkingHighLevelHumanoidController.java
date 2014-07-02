@@ -233,6 +233,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final BooleanYoVariable doPrepareManipulationForLocomotion = new BooleanYoVariable("doPrepareManipulationForLocomotion", registry);
    
    private final BooleanYoVariable isInFlamingoStance = new BooleanYoVariable("isInFlamingoStance", registry);
+   private final DoubleYoVariable icpProjectionTimeOffset = new DoubleYoVariable("icpProjectionTimeOffset", registry);
 
    public WalkingHighLevelHumanoidController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
          CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator, TransferTimeCalculationProvider transferTimeCalculationProvider,
@@ -881,7 +882,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       private Footstep nextFootstep;
       private double captureTime;
-      private double icpProjectionTimeOffset;
+     // private double icpProjectionTimeOffset;
 
       public SingleSupportState(RobotSide supportSide)
       {
@@ -890,7 +891,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          this.desiredPelvisOrientationToPack = new FrameOrientation(worldFrame);
          this.desiredPelvisAngularVelocityToPack = new FrameVector(fullRobotModel.getRootJoint().getFrameAfterJoint());
          this.desiredPelvisAngularAccelerationToPack = new FrameVector(fullRobotModel.getRootJoint().getFrameAfterJoint());
-         this.icpProjectionTimeOffset = 0.0;
+         //this.icpProjectionTimeOffset = 0.0;
       }
 
       @Override
@@ -906,7 +907,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          capturePoint.getFrameTuple2dIncludingFrame(capturePoint2d);
          instantaneousCapturePointPlanner.getICPPositionAndVelocity(desiredICPLocal, desiredICPVelocityLocal, ecmpLocal, capturePoint2d,
-               yoTime.getDoubleValue() + icpProjectionTimeOffset);
+               yoTime.getDoubleValue() + icpProjectionTimeOffset.getDoubleValue());
 
          if (isInFlamingoStance.getBooleanValue() && footPoseProvider.checkForNewPose(swingSide))
             feetManager.requestMoveStraight(swingSide, footPoseProvider.getDesiredFootPose(swingSide));
@@ -938,7 +939,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                   FramePoint2d finalDesiredICP = instantaneousCapturePointPlanner.getFinalDesiredICP();
                   FramePoint2d startICP = instantaneousCapturePointPlanner.getSingleSupportStartICP();
                   
-                  icpProjectionTimeOffset = pushRecoveryModule.computeTimeToProjectDesiredICPToClosestPointOnTrajectoryToActualICP(capturePoint2d, constantCenterOfPressure, startICP, finalDesiredICP, omega0) - captureTime;
+                  icpProjectionTimeOffset.set(pushRecoveryModule.computeTimeToProjectDesiredICPToClosestPointOnTrajectoryToActualICP(capturePoint2d, constantCenterOfPressure, startICP, finalDesiredICP, omega0) - captureTime);
                }
                
                removeAllUpcomingFootstepsAndStand();
@@ -1128,6 +1129,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          if (pushRecoveryModule.isEnabled())
          {
             pushRecoveryModule.reset();
+            icpProjectionTimeOffset.set(0.0);
          }
 
          previousSupportSide.set(swingSide.getOppositeSide());
