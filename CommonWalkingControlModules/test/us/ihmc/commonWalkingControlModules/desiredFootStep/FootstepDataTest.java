@@ -351,8 +351,10 @@ public class FootstepDataTest
          assertTrue(sentFootstep.getBody().getName().equals(receivedFootstep.getBody().getName()));
          
          
-         FramePose sentPose = sentFootstep.getPoseCopy();
-         FramePose receivedPose = receivedFootstep.getPoseCopy();
+         FramePose sentPose = new FramePose();
+         sentFootstep.getPose(sentPose);
+         FramePose receivedPose = new FramePose();
+         receivedFootstep.getPose(receivedPose);
          
          assertTrue(sentPose.epsilonEquals(receivedPose, 0.0001));
 

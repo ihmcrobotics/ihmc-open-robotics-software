@@ -995,7 +995,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             numberOfUpcomingFootsteps--;
          }
          
-         FramePoint2d neutralPosition = nextFootstep.getPosition2dCopy();
+         FramePoint2d neutralPosition = new FramePoint2d();
+         nextFootstep.getPosition2d(neutralPosition);
          double y = swingSide == RobotSide.LEFT ? -0.3 : 0.3; 
          FrameVector2d translate = new FrameVector2d(neutralPosition.getReferenceFrame(), 0.0, y);
          neutralPosition.add(translate);
@@ -1061,7 +1062,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       private void updateFootstepParameters()
       {
-         transferToFootstep.set(nextFootstep.getPosition2dCopy());
+         FramePoint2d nextFootstepPosition = new FramePoint2d();
+         nextFootstep.getPosition2d(nextFootstepPosition);
+         transferToFootstep.set(nextFootstepPosition);
          RobotSide supportSide = swingSide.getOppositeSide();
          
          FrameOrientation orientation = new FrameOrientation(desiredPelvisOrientation.getReferenceFrame());

@@ -102,7 +102,8 @@ public class UserDesiredFootstepProvider implements FootstepProvider
 
    private Footstep createNextFootstep(Footstep previousFootstep, RobotSide swingLegSide)
    {
-      FramePose pose = previousFootstep.getPoseCopy();
+      FramePose pose = new FramePose();
+      previousFootstep.getPose(pose);
       PoseReferenceFrame referenceFrame = new PoseReferenceFrame("step" + userStepsNotifyCompleteCount.getIntegerValue(), pose);
       
       return createFootstep(referenceFrame, swingLegSide);

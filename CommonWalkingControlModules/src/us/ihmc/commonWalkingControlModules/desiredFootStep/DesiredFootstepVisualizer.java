@@ -212,7 +212,8 @@ public class DesiredFootstepVisualizer
 
       //    System.out.println("desiredFootstep = " + desiredFootstep);
 
-      FramePose pose = desiredFootstep.getPoseCopy();
+      FramePose pose = new FramePose();
+      desiredFootstep.getPose(pose);
       pose.changeFrame(worldFrame);
       Transform3D transform = new Transform3D();
       pose.getTransformFromPoseToFrame(transform);

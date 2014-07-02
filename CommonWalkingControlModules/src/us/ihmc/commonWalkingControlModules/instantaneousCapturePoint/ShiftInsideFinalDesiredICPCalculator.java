@@ -51,7 +51,8 @@ public class ShiftInsideFinalDesiredICPCalculator implements FinalDesiredICPCalc
    {
       Footstep transferToFootstep = transferToAndNextFootstepsData.getTransferToFootstep();
 
-      FramePose transferToFootstepAnklePose = transferToFootstep.getPoseCopy();
+      FramePose transferToFootstepAnklePose = new FramePose();
+      transferToFootstep.getPose(transferToFootstepAnklePose);
       ContactablePlaneBody transferToFootContactablePlaneBody = transferToAndNextFootstepsData.getTransferToFootContactablePlaneBody();
       FrameConvexPolygon2d transferToFootPolygonInSoleFrame = transferToAndNextFootstepsData.getTransferToFootPolygonInSoleFrame();
       RobotSide transferToSide = transferToAndNextFootstepsData.getTransferToSide();

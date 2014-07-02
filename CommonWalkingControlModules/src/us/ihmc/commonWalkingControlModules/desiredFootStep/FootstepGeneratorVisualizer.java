@@ -90,7 +90,8 @@ public class FootstepGeneratorVisualizer
    {
       printIfDebug("Adding footstep " + footstep);
 
-      FramePose footstepPose = footstep.getPoseCopy();
+      FramePose footstepPose = new FramePose();
+      footstep.getPose(footstepPose);
 
       String name = footstep.getBody().getName();
       YoFramePose contactPose = contactPosesHashMap.get(name);

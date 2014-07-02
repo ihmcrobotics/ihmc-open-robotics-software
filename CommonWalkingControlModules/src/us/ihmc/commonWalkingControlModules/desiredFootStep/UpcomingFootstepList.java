@@ -6,6 +6,7 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
@@ -72,7 +73,9 @@ public class UpcomingFootstepList
             nextFootstepIndex.set(nextFootstepList.size() - 1);
 
             upcomingSupportLeg.set(getRobotSide(nextFootstep.getBody(), bipedFeet).getOppositeSide());
-            nextFootstepPose.set(nextFootstep.getPoseCopy());
+            FramePose pose = new FramePose();
+            nextFootstep.getPose(pose);
+            nextFootstepPose.set(pose);
 
             readyToGrabNextFootstep.set(false);
 

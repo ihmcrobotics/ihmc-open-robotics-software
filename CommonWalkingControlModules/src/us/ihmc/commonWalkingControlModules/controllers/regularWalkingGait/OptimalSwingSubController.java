@@ -270,7 +270,8 @@ public class OptimalSwingSubController implements SwingSubController
 
    private void updateFinalDesiredPosition(RobotSide swingLeg)
    {
-      FramePose desiredFootstepPose = couplingRegistry.getDesiredFootstep().getPoseCopy();
+      FramePose desiredFootstepPose = new FramePose();
+      couplingRegistry.getDesiredFootstep().getPose(desiredFootstepPose);
 
       FramePoint desiredSwingFootPosition = new FramePoint();
       desiredFootstepPose.getPositionIncludingFrame(desiredSwingFootPosition);
@@ -568,7 +569,8 @@ public class OptimalSwingSubController implements SwingSubController
    {
       Footstep desiredFootstep = couplingRegistry.getDesiredFootstep();
 
-      FramePose desiredFootstepPose = desiredFootstep.getPoseCopy();
+      FramePose desiredFootstepPose = new FramePose();
+      desiredFootstep.getPose(desiredFootstepPose);
 
       FramePoint endPoint = new FramePoint();
       desiredFootstepPose.getPositionIncludingFrame(endPoint);

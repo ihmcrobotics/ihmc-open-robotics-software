@@ -489,7 +489,8 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    {
       Footstep desiredFootstep = couplingRegistry.getDesiredFootstep();
       
-      FramePose desiredFootstepPose = desiredFootstep.getPoseCopy();
+      FramePose desiredFootstepPose = new FramePose();
+      desiredFootstep.getPose(desiredFootstepPose);
       FramePoint finalDesiredSwingFootPosition = new FramePoint();
       desiredFootstepPose.getPositionIncludingFrame(finalDesiredSwingFootPosition);
       finalDesiredSwingFootPosition.changeFrame(this.finalDesiredSwingFootPosition.getReferenceFrame());
