@@ -62,11 +62,7 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    
    public AtlasSensorInformation(boolean runningOnRealRobot)
    {
-      VideoSettingsH264LowLatency videoSetting = VideoSettingsFactory.get32kBitSettingsSquare();
-      if(runningOnRealRobot)
-      {
-         videoSetting = VideoSettingsFactory.get32kBitSettingsWide();
-      }
+      VideoSettingsH264LowLatency videoSetting = VideoSettingsFactory.get32kBitSettingsWide();
       
       lidarJointName = runningOnRealRobot ? "head" : "hokuyo_joint";
 
