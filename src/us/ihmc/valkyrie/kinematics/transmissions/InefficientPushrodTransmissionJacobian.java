@@ -379,11 +379,19 @@ public class InefficientPushrodTransmissionJacobian
 
       if (visualize)
       {
-         t5Viz.setPosition(t5InTopFrame.changeFrameCopy(worldFrame));
-         t6Viz.setPosition(t6InTopFrame.changeFrameCopy(worldFrame));
+         FramePoint t5InWorld = new FramePoint(t5InTopFrame);
+         FramePoint t6InWorld = new FramePoint(t6InTopFrame);
+         t5InWorld.changeFrame(worldFrame);
+         t6InWorld.changeFrame(worldFrame);
+         t5Viz.setPosition(t5InWorld);
+         t6Viz.setPosition(t6InWorld);
 
-         b5Viz.setPosition(b5InBottomFrame.changeFrameCopy(worldFrame));
-         b6Viz.setPosition(b6InBottomFrame.changeFrameCopy(worldFrame));
+         FramePoint b5InWorld = new FramePoint(b5InBottomFrame);
+         FramePoint b6InWorld = new FramePoint(b6InBottomFrame);
+         b5InWorld.changeFrame(worldFrame);
+         b6InWorld.changeFrame(worldFrame);
+         b5Viz.setPosition(b5InWorld);
+         b6Viz.setPosition(b6InWorld);
 
          topFrameViz.update();
          afterTopJointFrameViz.update();
