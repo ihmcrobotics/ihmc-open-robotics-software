@@ -141,7 +141,7 @@ public class IMUSelectorAndDataConverter extends AbstractControlFlowElement
       
       transformFromEstimationToWorld.mul(transformFromIMUToWorld, transformFromEstimationFrameToIMUFrame);
       transformFromEstimationToWorld.get(rotationFromEstimationToWorld);
-      tempOrientationEstimationFrame.set(ReferenceFrame.getWorldFrame(), rotationFromEstimationToWorld);
+      tempOrientationEstimationFrame.setIncludingFrame(ReferenceFrame.getWorldFrame(), rotationFromEstimationToWorld);
       
       // Introduce simulated IMU drift
       tempOrientationEstimationFrame.getYawPitchRoll(estimationFrameYawPitchRoll);

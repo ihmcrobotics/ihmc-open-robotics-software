@@ -184,7 +184,7 @@ public class PointPositionRotateSteeringWheelBehavior
          tempMatrix.setColumn(1, y.getVector());
          tempMatrix.setColumn(2, z.getVector());
 
-         rotationFromGainOrientationToBody.set(steeringWheelFrame, tempMatrix);
+         rotationFromGainOrientationToBody.setIncludingFrame(steeringWheelFrame, tempMatrix);
          rotationFromGainOrientationToBody.changeFrame(positionController.getBodyFrame());
 
          // R^B_S

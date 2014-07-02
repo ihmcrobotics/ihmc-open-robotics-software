@@ -84,7 +84,7 @@ public class OrientationMeasurementModelElement extends AbstractMeasurementModel
       orientationOfMeasurementFrameInEstimationFrame.getQuaternion(measurmentFrameToEstimationFrame);
       
       // Compute orientationResidual as a quaternion
-      tempMeasuredOrientationFrameOrientation.set(ReferenceFrame.getWorldFrame(), orientationMeasurementInputPort.getData());
+      tempMeasuredOrientationFrameOrientation.setIncludingFrame(ReferenceFrame.getWorldFrame(), orientationMeasurementInputPort.getData());
       tempMeasuredOrientationFrameOrientation.getQuaternion(actualOrientationMeasurement);
      
       // Compute the estimated measurement

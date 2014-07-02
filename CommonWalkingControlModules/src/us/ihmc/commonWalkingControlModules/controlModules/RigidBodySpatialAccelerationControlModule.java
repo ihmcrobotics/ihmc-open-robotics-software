@@ -134,7 +134,7 @@ public class RigidBodySpatialAccelerationControlModule
       endEffectorPosition.setIncludingFrame(endEffectorPositionIn);
       endEffectorPosition.changeFrame(endEffectorFrame);
 
-      endEffectorOrientation.setAndChangeFrame(endEffectorOrientationIn);
+      endEffectorOrientation.setIncludingFrame(endEffectorOrientationIn);
       endEffectorOrientation.changeFrame(endEffectorFrame);
 
       poseToPack.setIncludingFrame(endEffectorPosition, endEffectorOrientation);
