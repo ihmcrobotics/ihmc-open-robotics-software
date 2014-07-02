@@ -99,7 +99,7 @@ public class FixedAxisOfRotationControlModule
 
    public void pack(FramePose desiredPose, Twist desiredTwist, SpatialAccelerationVector feedForward)
    {
-      desiredPose.set(this.desiredPose);
+      desiredPose.setPose(this.desiredPose);
       desiredTwist.set(this.desiredTwist);
       feedForward.set(this.feedForward);
    }

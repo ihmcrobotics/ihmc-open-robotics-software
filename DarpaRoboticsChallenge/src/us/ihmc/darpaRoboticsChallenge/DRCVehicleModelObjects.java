@@ -296,7 +296,7 @@ public class DRCVehicleModelObjects implements VehicleModelObjects
       FramePose framePose = new FramePose(vehicleReferenceFrame);
       Transform3D transform3D = getTransform(vehicleObject);
 
-      framePose.set(vehicleReferenceFrame, transform3D);
+      framePose.setPoseIncludingFrame(vehicleReferenceFrame, transform3D);
 
       return framePose;
    }

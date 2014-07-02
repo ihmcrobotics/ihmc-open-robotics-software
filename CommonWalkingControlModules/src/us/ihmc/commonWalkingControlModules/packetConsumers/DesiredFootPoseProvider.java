@@ -52,7 +52,7 @@ public class DesiredFootPoseProvider implements ObjectConsumer<FootPosePacket>
       footPoseSide.set(-1);
 
       if (object != null)
-         desiredFootPose.set(ReferenceFrame.getWorldFrame(), object.getPosition(), object.getOrientation());
+         desiredFootPose.setPoseIncludingFrame(ReferenceFrame.getWorldFrame(), object.getPosition(), object.getOrientation());
 
       return desiredFootPose;
    }
