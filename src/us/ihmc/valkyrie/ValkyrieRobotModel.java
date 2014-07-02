@@ -12,12 +12,12 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCNetworkParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.RobotNetworkParameters;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.AlwaysZeroOffsetPPSTimestampOffsetProvider;
@@ -44,6 +44,9 @@ import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
 public class ValkyrieRobotModel implements DRCRobotModel
 {
    private static final boolean PRINT_MODEL = false;
+   
+   private static final String VALKYRIE_NETWORK_CONFIG = "Configurations/valkyrie_network_config.ini";
+   private static final String DEFAULT_NETWORK_CONFIG =	"Configurations/localhost_network_config.ini";
 
    private static Class<ModelRoot> valModelRoot = ModelRoot.class;
    private final ArmControllerParameters armControllerParameters;
@@ -54,7 +57,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private final DRCRobotJointMap jointMap;
    private final String robotName = "VALKYRIE";
    private final SideDependentList<Transform> offsetHandFromWrist = new SideDependentList<Transform>();
-   private final ValkyrieNetworkParameters networkParameters;
+   private final RobotNetworkParameters networkParameters;
 
    private final String[] resourceDirectories = { valModelRoot.getResource("").getFile(), valModelRoot.getResource("V1/").getFile(),
          valModelRoot.getResource("V1/sdf/").getFile(), valModelRoot.getResource("V1/meshes/").getFile(),
@@ -98,7 +101,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
       armControllerParameters = new ValkyrieArmControllerParameters(runningOnRealRobot);
       walkingControllerParameters = new ValkyrieWalkingControllerParameters(jointMap, runningOnRealRobot);
       stateEstimatorParamaters = new ValkyrieStateEstimatorParameters(runningOnRealRobot, getEstimatorDT());
-      networkParameters = new ValkyrieNetworkParameters(runningOnRealRobot);
+      networkParameters = new RobotNetworkParameters(runningOnRealRobot ? VALKYRIE_NETWORK_CONFIG : DEFAULT_NETWORK_CONFIG);
    }
 
    @Override
@@ -298,7 +301,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
-   public DRCNetworkParameters getNetworkParameters()
+   public RobotNetworkParameters getNetworkParameters()
    {
 	   return networkParameters;
    }
