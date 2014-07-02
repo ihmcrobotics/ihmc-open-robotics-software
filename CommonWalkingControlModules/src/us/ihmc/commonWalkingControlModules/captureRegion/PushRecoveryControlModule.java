@@ -45,7 +45,7 @@ public class PushRecoveryControlModule
    private static final double MINIMUM_TIME_TO_REPLAN = 0.1;
    private static final double MINIMUM_SWING_TIME_FOR_DOUBLE_SUPPORT_RECOVERY = 0.35;
    private static final double MINIMUN_CAPTURE_REGION_PERCENTAGE_OF_FOOT_AREA = 2.5;
-   private static final double REDUCE_SWING_TIME_MULTIPLIER = 0.95;
+   private static final double REDUCE_SWING_TIME_MULTIPLIER = 0.9;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final boolean useICPProjection = true;
@@ -293,6 +293,10 @@ public class PushRecoveryControlModule
       {
          reducedSwingTime = reducedSwingTime * REDUCE_SWING_TIME_MULTIPLIER;
          captureRegionCalculator.calculateCaptureRegion(swingSide, reducedSwingTime, capturePoint2d, omega0, footPolygon);
+
+         // avoid infinite loops
+         if (reducedSwingTime < 0.1)
+            break;
       }
       
       return reducedSwingTime;
