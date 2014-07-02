@@ -101,7 +101,7 @@ public class CaptureRegionCalculatorTest
       }
       
       FrameConvexPolygon2d captureRegion = calculator.calculateCaptureRegion(supportSide, supportFoot, swingTimeRemaining);
-      captureRegion = captureRegion.changeFrameCopy(ReferenceFrame.getWorldFrame());
+      captureRegion.changeFrame(ReferenceFrame.getWorldFrame());
       
 //      System.out.println("captureRegion = " + captureRegion);
       

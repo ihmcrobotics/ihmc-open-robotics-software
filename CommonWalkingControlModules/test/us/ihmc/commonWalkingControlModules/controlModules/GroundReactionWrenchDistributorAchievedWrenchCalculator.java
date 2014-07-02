@@ -20,7 +20,8 @@ public class GroundReactionWrenchDistributorAchievedWrenchCalculator
 
       for (PlaneContactState planeContactState : contactStates)
       {
-         FrameVector contactForce = distributedWrench.getForce(planeContactState).changeFrameCopy(expressedInFrame);
+         FrameVector contactForce = new FrameVector(distributedWrench.getForce(planeContactState));
+         contactForce.changeFrame(expressedInFrame);
          totalForce.add(contactForce);
 
          double normalTorqueMagnitude = distributedWrench.getNormalTorque(planeContactState);
@@ -40,7 +41,9 @@ public class GroundReactionWrenchDistributorAchievedWrenchCalculator
          crossProductTorque.cross(contactForce, copToCoMVector);
 
          totalMoment.add(crossProductTorque);
-         totalMoment.add(normalTorque.changeFrameCopy(expressedInFrame));
+         FrameVector normalTorqueInExpressedFrame = new FrameVector(normalTorque);
+         normalTorqueInExpressedFrame.changeFrame(expressedInFrame);
+         totalMoment.add(normalTorqueInExpressedFrame);
       }
 
       SpatialForceVector achievedWrench = new SpatialForceVector(expressedInFrame, totalForce.getVector(), totalMoment.getVector());

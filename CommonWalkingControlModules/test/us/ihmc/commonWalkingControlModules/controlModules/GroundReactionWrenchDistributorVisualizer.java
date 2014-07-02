@@ -155,7 +155,9 @@ public class GroundReactionWrenchDistributorVisualizer
             FrameConvexPolygon2d frameConvexPolygon2d = new FrameConvexPolygon2d(contactPoints);
 
             YoFrameConvexPolygon2d yoFrameConvexPolygon2d = contactPolygonsWorld.get(i);
-            yoFrameConvexPolygon2d.setFrameConvexPolygon2d(frameConvexPolygon2d.changeFrameCopy(ReferenceFrame.getWorldFrame()));
+            FrameConvexPolygon2d temp = new FrameConvexPolygon2d(frameConvexPolygon2d);
+            temp.changeFrame(ReferenceFrame.getWorldFrame());
+            yoFrameConvexPolygon2d.setFrameConvexPolygon2d(temp);
 
             YoFramePoint contactCenterOfPressureForViz = contactCenterOfPressures.get(i);
             YoFrameVector contactForceForViz = contactForces.get(i);
@@ -168,11 +170,15 @@ public class GroundReactionWrenchDistributorVisualizer
             contactCenterOfPressureForViz.set(centerOfPressure);
 
             FrameVector contactForce = distributedWrench.getForce(contactState);
-            contactForceForViz.set(contactForce.changeFrameCopy(worldFrame));
+            FrameVector contactForceInWorld = new FrameVector(contactForce);
+            contactForceInWorld.changeFrame(worldFrame);
+            contactForceForViz.set(contactForceInWorld);
 
             double normalTorque = distributedWrench.getNormalTorque(contactState);
             FrameVector normalForce = new FrameVector(centerOfPressure2d.getReferenceFrame(), 0.0, 0.0, normalTorque);
-            contactMomentForViz.set(normalForce.changeFrameCopy(worldFrame));
+            FrameVector normalForceInWorld = new FrameVector(normalForce);
+            normalForceInWorld.changeFrame(worldFrame);
+            contactMomentForViz.set(normalForceInWorld);
          }
          
          
@@ -184,8 +190,13 @@ public class GroundReactionWrenchDistributorVisualizer
          SpatialForceVector achievedWrenchOnCenterOfMass = GroundReactionWrenchDistributorAchievedWrenchCalculator.computeAchievedWrench(distributedWrench,
                                                               desiredBodyWrench.getExpressedInFrame(), contactStates);
 
-         achievedForceWorld.set(achievedWrenchOnCenterOfMass.getLinearPartAsFrameVectorCopy().changeFrameCopy(worldFrame));
-         achievedMomentWorld.set(achievedWrenchOnCenterOfMass.getAngularPartAsFrameVectorCopy().changeFrameCopy(worldFrame));
+         FrameVector temp = new FrameVector();
+         achievedWrenchOnCenterOfMass.packLinearPart(temp);
+         temp.changeFrame(worldFrame);
+         achievedForceWorld.set(temp);
+         achievedWrenchOnCenterOfMass.packAngularPart(temp);
+         temp.changeFrame(worldFrame);
+         achievedMomentWorld.set(temp);
 
 
          scs.tickAndUpdate();
