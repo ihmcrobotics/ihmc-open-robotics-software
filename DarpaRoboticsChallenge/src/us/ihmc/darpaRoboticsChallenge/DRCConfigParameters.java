@@ -30,9 +30,6 @@ public class DRCConfigParameters
    public static final boolean USE_COLLISIONS_MESHS_FOR_VISUALIZATION = false;
    public static final boolean USE_SLIDER_FOR_POSE_PLAYBACK = false;
 
-   // LIDAR Configuration - LIDAR filtering parameters now in LidarFilterParameters
-   public static final double LIDAR_SPINDLE_VELOCITY = 5.1;
-
    // LIDAR Processor
    public static final boolean LIDAR_PROCESSOR_TIMING_REPORTING_ON = false;
    public static final double GRID_RESOLUTION = 0.025; // in meters

@@ -21,6 +21,8 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    private static final int blackfly_right_camera_id = 3;
    private static final int primaryCameraId = multisense_sl_left_camera_id;
    
+   private static final double lidar_spindle_velocity = 5.1;
+   
    private static final String multisense_topic_base = "/multisense";
    private static final String baseTfName = multisense_topic_base + "/head";
    private static final String left_camera_name = "stereo_camera_left";
@@ -172,5 +174,11 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    public double getLidarCRC()
    {
       return lidarCRC;
+   }
+
+   @Override
+   public double getLidarSpindleVelocity()
+   {
+      return lidar_spindle_velocity;
    }
 }
