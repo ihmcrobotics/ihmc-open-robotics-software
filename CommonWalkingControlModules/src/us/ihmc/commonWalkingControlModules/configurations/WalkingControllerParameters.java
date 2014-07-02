@@ -167,4 +167,6 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract double getSideLengthOfBoundingBoxForFootstepHeight();
 
    public abstract double getDesiredTouchdownVelocity();
+
+   public abstract double getContactThresholdForce();
 }

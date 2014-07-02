@@ -43,8 +43,8 @@ public class DRCFlatGroundWalkingTrack
       SideDependentList<String> footForceSensorNames = model.getSensorInformation().getFeetForceSensorNames();
 
       MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory,
-            DRCConfigParameters.contactTresholdForceForSCS, footForceSensorNames, footstepTimingParameters, walkingControllerParameters,
-            armControllerParameters, useVelocityAndHeadingScript, useFastTouchdowns, HighLevelState.WALKING);
+            footForceSensorNames, footstepTimingParameters, walkingControllerParameters, armControllerParameters,
+            useVelocityAndHeadingScript, useFastTouchdowns, HighLevelState.WALKING);
       if (cheatWithGroundHeightAtForFootstep)
       {
          controllerFactory.setupForCheatingUsingGroundHeightAtForFootstepProvider(scsInitialSetup.getHeightMap());

@@ -39,7 +39,6 @@ public class DRCConfigParameters
    public static final int CHEATING_POLARIS_PORT = 1543;
    public static final String CHEATING_POLARIS_HOST = "localhost";
 
-   public static final double contactTresholdForceForSCS = 5.0;
    public static final double contactTresholdForceForGazebo = 120.0;
 
    public static final boolean ALLOW_MODEL_CORRUPTION = false;

@@ -21,7 +21,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Mo
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelState;
 import us.ihmc.commonWalkingControlModules.packets.ComHeightPacket;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
-import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCDemo01StartingLocation;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseDemo;
@@ -98,8 +97,8 @@ public class DRCSimulationTestHelper
 
       SideDependentList<String> footForceSensorNames = robotModel.getSensorInformation().getFeetForceSensorNames();
       MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory,
-            DRCConfigParameters.contactTresholdForceForSCS, footForceSensorNames, footstepTimingParameters, walkingControllerParameters,
-            armControllerParameters, false, false, HighLevelState.WALKING);
+            footForceSensorNames, footstepTimingParameters, walkingControllerParameters, armControllerParameters,
+            false, false, HighLevelState.WALKING);
       controllerFactory.addHighLevelBehaviorFactory(new CarIngressEgressControllerFactory(multiContactControllerParameters, false));
       controllerFactory.setupForCheatingUsingGroundHeightAtForFootstepProvider(scsInitialSetup.getHeightMap());
       GlobalDataProducer globalDataProducer = new GlobalDataProducer(networkObjectCommunicator);
