@@ -143,9 +143,10 @@ public class ViconFrames
                ViconReferenceFrame drone = viconFrames.getBodyFrame(name);
 
                FramePose point = new FramePose(drone);
+               point.changeFrame(viconFrames.getViconWorldFrame());
 
                System.out.println(drone.isDataValid());
-               System.out.println(point.changeFrameCopy(viconFrames.getViconWorldFrame()));
+               System.out.println(point);
             }
             
           
