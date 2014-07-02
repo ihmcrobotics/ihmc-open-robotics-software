@@ -105,11 +105,11 @@ public class FootstepAdjustor
    private void projectFootstepInCaptureRegion(Footstep footstep, FramePoint2d projectionPoint, FrameConvexPolygon2d captureRegion)
    {
       projection.setIncludingFrame(projectionPoint);
-      projection.changeFrame(footstep.getReferenceFrame());
+      projection.changeFrame(footstep.getParentFrame());
 
       // move the position of the footstep to the capture region centroid
       nextStep2d.setIncludingFrame(captureRegion.getCentroid());
-      nextStep2d.changeFrame(footstep.getReferenceFrame());
+      nextStep2d.changeFrame(footstep.getParentFrame());
       
       // move the position as far away from the projectionPoint as possible
       direction.setIncludingFrame(nextStep2d);
@@ -120,7 +120,7 @@ public class FootstepAdjustor
       
       nextStep2d.changeFrame(captureRegion.getReferenceFrame());
       captureRegion.orthogonalProjection(nextStep2d);
-      nextStep2d.changeFrame(footstep.getReferenceFrame());
+      nextStep2d.changeFrame(footstep.getParentFrame());
       
       direction.normalize();
       direction.scale(DISTANCE_FROM_KINEMATIC_LIMIT);

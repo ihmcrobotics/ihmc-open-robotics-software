@@ -117,7 +117,7 @@ public class CapturabilityBasedDesiredFootstepAdjustor implements DesiredFootste
 
          nextStep2d.changeFrame(captureRegion.getReferenceFrame());
          captureRegion.orthogonalProjection(nextStep2d);
-         nextStep2d.changeFrame(baseFootstep.getReferenceFrame());
+         nextStep2d.changeFrame(baseFootstep.getParentFrame());
          baseFootstep.setPositionChangeOnlyXY(nextStep2d);
       }
       else
@@ -155,7 +155,7 @@ public class CapturabilityBasedDesiredFootstepAdjustor implements DesiredFootste
          nextStep2d.setX(newLocation.getX());
          nextStep2d.setY(newLocation.getY());
 
-         nextStep2d.changeFrame(baseFootstep.getReferenceFrame());
+         nextStep2d.changeFrame(baseFootstep.getParentFrame());
 
          baseFootstep.setPositionChangeOnlyXY(nextStep2d);
       }
