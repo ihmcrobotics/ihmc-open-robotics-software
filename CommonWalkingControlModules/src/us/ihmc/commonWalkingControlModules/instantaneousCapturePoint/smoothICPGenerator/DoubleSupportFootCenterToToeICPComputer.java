@@ -168,7 +168,7 @@ public class DoubleSupportFootCenterToToeICPComputer
             if (VISUALIZE)
             {
                DynamicGraphicPosition toeICPCornerPointViz = yoToeFramePoint.createDynamicGraphicPosition(toeICPCornerPointsName, icpCornerPointSize,
-                     YoAppearance.Black(), GraphicType.SOLID_BALL);
+                     YoAppearance.Chocolate(), GraphicType.SOLID_BALL);
                dynamicGraphicObjectsList.add(toeICPCornerPointViz);
                artifactList.add(toeICPCornerPointViz.createArtifact());
             }
@@ -184,7 +184,7 @@ public class DoubleSupportFootCenterToToeICPComputer
          if (VISUALIZE)
          {
             DynamicGraphicPosition constantFootCenterCentersOfPressureViz = yoFramePoint.createDynamicGraphicPosition(constantCoPName, icpCornerPointSize,
-                  YoAppearance.Black(), GraphicType.SOLID_BALL);
+                  YoAppearance.Green(), GraphicType.SOLID_BALL);
             dynamicGraphicObjectsList.add(constantFootCenterCentersOfPressureViz);
             artifactList.add(constantFootCenterCentersOfPressureViz.createArtifact());
          }
@@ -198,7 +198,7 @@ public class DoubleSupportFootCenterToToeICPComputer
             if (VISUALIZE)
             {
                DynamicGraphicPosition constantToeCentersOfPressureViz = toeFramePoint.createDynamicGraphicPosition(constantToeCoPName, icpCornerPointSize,
-                     YoAppearance.Black(), GraphicType.SOLID_BALL);
+                     YoAppearance.Blue(), GraphicType.SOLID_BALL);
                dynamicGraphicObjectsList.add(constantToeCentersOfPressureViz);
                artifactList.add(constantToeCentersOfPressureViz.createArtifact());
             }
