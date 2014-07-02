@@ -62,7 +62,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
    private ReconnectingTCPClient controllerClient;
    private final byte[] controllerBuffer;
 
-   private static String netProcMachineIpAddress = DRCLocalConfigParameters.NET_PROC_MACHINE_IP_ADDRESS;
+   private static String netProcMachineIpAddress = "192.168.6.206";
    private static String controllerMachineIpAddress = DRCLocalConfigParameters.ROBOT_CONTROLLER_MACHINE_IP_ADDRESS_FOR_DISPATCHER;
 
    private JFrame frame;

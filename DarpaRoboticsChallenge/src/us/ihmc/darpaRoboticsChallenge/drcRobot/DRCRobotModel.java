@@ -68,5 +68,5 @@ public interface DRCRobotModel
 
    public abstract DRCSensorSuiteManager getSensorSuiteManager(URI rosCoreURI);
    
-   public abstract DRCNetworkParameters getNetworkParameters();
+   public abstract RobotNetworkParameters getNetworkParameters();
 }
