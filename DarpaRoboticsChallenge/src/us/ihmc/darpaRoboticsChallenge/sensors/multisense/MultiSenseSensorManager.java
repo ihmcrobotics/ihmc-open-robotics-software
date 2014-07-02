@@ -59,20 +59,20 @@ public class MultiSenseSensorManager
                                       
       registerCameraReceivers();
       registerLidarReceivers();
-      setMultiseSenseParams();
+      setMultiseSenseParams(sensorInformation.getLidarSpindleVelocity());
    }
    
-   private void setMultiseSenseParams()
+   private void setMultiseSenseParams(double lidarSpindleVelocity)
    {
       MultiSenseParamaterSetter.setMultisenseResolution(rosMainNode);
       
       if (RosNativeNetworkProcessor.hasNativeLibrary())
       {
-         MultiSenseParamaterSetter.setupNativeROSCommunicator(rosNativeNetworkProcessor);
+         MultiSenseParamaterSetter.setupNativeROSCommunicator(rosNativeNetworkProcessor, lidarSpindleVelocity);
       }
       else
       {
-         MultiSenseParamaterSetter.setupMultisenseSpindleSpeedPublisher(rosMainNode);
+         MultiSenseParamaterSetter.setupMultisenseSpindleSpeedPublisher(rosMainNode, lidarSpindleVelocity);
       }
    }
    

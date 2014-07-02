@@ -7,34 +7,22 @@ import org.ros.exception.RemoteException;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.service.ServiceResponseListener;
 
-import dynamic_reconfigure.DoubleParameter;
-import dynamic_reconfigure.Reconfigure;
-import dynamic_reconfigure.ReconfigureRequest;
-import dynamic_reconfigure.ReconfigureResponse;
-import dynamic_reconfigure.StrParameter;
-import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosNativeNetworkProcessor;
 import us.ihmc.utilities.processManagement.ProcessStreamGobbler;
 import us.ihmc.utilities.ros.RosDoublePublisher;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosServiceClient;
+import dynamic_reconfigure.DoubleParameter;
+import dynamic_reconfigure.Reconfigure;
+import dynamic_reconfigure.ReconfigureRequest;
+import dynamic_reconfigure.ReconfigureResponse;
+import dynamic_reconfigure.StrParameter;
 
 public class MultiSenseParamaterSetter
 {
-   private static final String[] hydroSpindleSpeedShellString = {"sh", "-c",
-         ". /opt/ros/hydro/setup.sh; rosrun dynamic_reconfigure dynparam set /multisense motor_speed " + DRCConfigParameters.LIDAR_SPINDLE_VELOCITY
-               + "; rosrun dynamic_reconfigure dynparam set /multisense network_time_sync true"};
-
-   private static final String[] groovySpindleSpeedShellString = {"sh", "-c",
-           ". /opt/ros/groovy/setup.sh; rosrun dynamic_reconfigure dynparam set /multisense motor_speed " + DRCConfigParameters.LIDAR_SPINDLE_VELOCITY
-           + "; rosrun dynamic_reconfigure dynparam set /multisense network_time_sync true"};
-
-   private static final String[] fuerteSpindleSpeedShellString = {"sh", "-c",
-           ". /opt/ros/fuerte/setup.sh; rosrun dynamic_reconfigure dynparam set /multisense motor_speed " + DRCConfigParameters.LIDAR_SPINDLE_VELOCITY
-           + "; rosrun dynamic_reconfigure dynparam set /multisense network_time_sync true"};
    
-   public static void setupNativeROSCommunicator(RosNativeNetworkProcessor rosNativeNetworkProcessor)
+   public static void setupNativeROSCommunicator(RosNativeNetworkProcessor rosNativeNetworkProcessor, double lidarSpindleVelocity)
    {
       if (DRCLocalConfigParameters.IS_HEAD_ATTACHED)
       {
@@ -42,16 +30,25 @@ public class MultiSenseParamaterSetter
          if (useRosHydro(rosPrefix))
          {
             System.out.println("using hydro");
+            String[] hydroSpindleSpeedShellString = {"sh", "-c",
+                  ". /opt/ros/hydro/setup.sh; rosrun dynamic_reconfigure dynparam set /multisense motor_speed " + lidarSpindleVelocity
+                        + "; rosrun dynamic_reconfigure dynparam set /multisense network_time_sync true"};
             shellOutSpindleSpeedCommand(hydroSpindleSpeedShellString);
          }
          else if (useRosGroovy(rosPrefix))
          {
             System.out.println("using groovy");
+            String[] groovySpindleSpeedShellString = {"sh", "-c",
+                  ". /opt/ros/groovy/setup.sh; rosrun dynamic_reconfigure dynparam set /multisense motor_speed " + lidarSpindleVelocity
+                  + "; rosrun dynamic_reconfigure dynparam set /multisense network_time_sync true"};
             shellOutSpindleSpeedCommand(groovySpindleSpeedShellString);
          }
          else if (useRosFuerte(rosPrefix))
          {
             System.out.println("using fuerte");
+            String[] fuerteSpindleSpeedShellString = {"sh", "-c",
+                  ". /opt/ros/fuerte/setup.sh; rosrun dynamic_reconfigure dynparam set /multisense motor_speed " + lidarSpindleVelocity
+                  + "; rosrun dynamic_reconfigure dynparam set /multisense network_time_sync true"};
             shellOutSpindleSpeedCommand(fuerteSpindleSpeedShellString);
          }
       }
@@ -94,14 +91,14 @@ public class MultiSenseParamaterSetter
       return new File(rosPrefix + "/hydro").exists();
    }
 
-   public static void setupMultisenseSpindleSpeedPublisher(RosMainNode rosMainNode)
+   public static void setupMultisenseSpindleSpeedPublisher(RosMainNode rosMainNode, final double lidarSpindleVelocity)
    {
       final RosDoublePublisher rosDoublePublisher = new RosDoublePublisher(true)
       {
          @Override
          public void connected()
          {
-            publish(DRCConfigParameters.LIDAR_SPINDLE_VELOCITY);
+            publish(lidarSpindleVelocity);
          }
       };
       rosMainNode.attachPublisher("/multisense/set_spindle_speed", rosDoublePublisher);
