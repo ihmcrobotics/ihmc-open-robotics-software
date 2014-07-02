@@ -152,7 +152,7 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
          boolean hasCoPBeenOnEdge = isCoPOnEdge;
          if (copOnEdge && !hasCoPBeenOnEdge)
          {
-            currentOrientation.set(contactableBody.getBodyFrame());
+            currentOrientation.setToZero(contactableBody.getBodyFrame());
             currentOrientation.changeFrame(worldFrame);
          }
          isCoPOnEdge = copOnEdge;
