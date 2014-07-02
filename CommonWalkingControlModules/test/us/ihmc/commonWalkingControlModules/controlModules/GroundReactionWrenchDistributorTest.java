@@ -1050,7 +1050,7 @@ public class GroundReactionWrenchDistributorTest
 
    private void verifyForceIsInsideFrictionCone(FrameVector forceVector, PlaneContactState planeContactState, double coefficientOfFriction)
    {
-      forceVector = forceVector.changeFrameCopy(planeContactState.getPlaneFrame());
+      forceVector.changeFrame(planeContactState.getPlaneFrame());
 
       double normalForce = forceVector.getZ();
       double parallelForce = Math.sqrt(forceVector.getX() * forceVector.getX() + forceVector.getY() * forceVector.getY());
