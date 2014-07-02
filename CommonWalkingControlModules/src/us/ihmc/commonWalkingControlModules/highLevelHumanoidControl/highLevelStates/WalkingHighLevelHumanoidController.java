@@ -1310,7 +1310,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          
          if (pushRecoveryModule.isEnabled() && pushRecoveryModule.isRecoveringFromDoubleSupportFall())
          {
-            return stateMachine.timeInCurrentState() > pushRecoveryModule.getTrustTimeToConsiderSwingFinished();
+            if(stateMachine.timeInCurrentState() > pushRecoveryModule.getTrustTimeToConsiderSwingFinished())
+               return true;
          }
 
          if (DO_TRANSITION_WHEN_TIME_IS_UP)
