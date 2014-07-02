@@ -54,7 +54,7 @@ public class RemoteAtlasVisualizer
       
       if (config.success())
       {
-    	  DRCRobotModel model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), false, false);
+    	  DRCRobotModel model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), true, false);
     	  
     	  String host;
     	  if (config.getString("host") != null)
