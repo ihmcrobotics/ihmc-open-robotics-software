@@ -15,7 +15,7 @@ import com.martiansoftware.jsap.JSAPResult;
 public class RemoteAtlasVisualizer
 {
    public static final int defaultPort = DRCLocalConfigParameters.DEFAULT_YOVARIABLE_SERVER_PORT;
-   private final boolean showOverheadView = DRCLocalConfigParameters.SHOW_OVERHEAD_VIEW;
+   private final boolean showOverheadView = true;
    
    public RemoteAtlasVisualizer(String host, int port, int bufferSize, DRCRobotModel robotModel)
    {
