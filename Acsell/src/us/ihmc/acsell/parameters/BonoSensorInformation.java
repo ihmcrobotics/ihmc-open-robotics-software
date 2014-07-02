@@ -110,4 +110,10 @@ public class BonoSensorInformation implements DRCRobotSensorInformation
    {
       return 0;
    }
+
+   @Override
+   public double getLidarSpindleVelocity()
+   {
+      throw new RuntimeException("No LIDAR in Bono");
+   }
 }
