@@ -127,7 +127,7 @@ public class OrientationStateRobotModelUpdater extends AbstractControlFlowElemen
 
    private void updateRootJointRotation(SixDoFJoint rootJoint, FrameOrientation estimationLinkOrientation, ReferenceFrame estimationFrame)
    {
-      tempOrientationEstimatinLink.setAndChangeFrame(estimationLinkOrientation);
+      tempOrientationEstimatinLink.setIncludingFrame(estimationLinkOrientation);
 
       computeEstimationLinkToWorldTransform(tempEstimationLinkToWorld, tempOrientationEstimatinLink);
       computeRootJointToWorldTransform(rootJoint, estimationFrame, tempRootJointToWorld, tempEstimationLinkToWorld);

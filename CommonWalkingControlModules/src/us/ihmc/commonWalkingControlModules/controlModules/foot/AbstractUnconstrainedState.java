@@ -96,7 +96,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
 
       computeAndPackTrajectory();
 
-      desiredOrientation.setAndChangeFrame(trajectoryOrientation);
+      desiredOrientation.setIncludingFrame(trajectoryOrientation);
 
       if (CORRECT_SWING_CONSIDERING_JOINT_LIMITS)
          correctInputsAccordingToJointLimits();

@@ -256,7 +256,7 @@ public class OrientationAndPositionFullRobotModelUpdater implements Runnable
    private void updateRootJointConfiguration(SixDoFJoint rootJoint, ReferenceFrame estimationFrame)
    {
       tempCenterOfMassPositionState.setIncludingFrame(centerOfMassPositionPort.getData());
-      tempOrientationState.setAndChangeFrame(orientationPort.getData());
+      tempOrientationState.setIncludingFrame(orientationPort.getData());
 
       computeEstimationLinkTransform(estimationFrame, tempEstimationLinkToWorld, tempCenterOfMassPositionState, tempOrientationState);
       computeRootJointTransform(rootJoint, estimationFrame, tempRootJointToWorld, tempEstimationLinkToWorld);

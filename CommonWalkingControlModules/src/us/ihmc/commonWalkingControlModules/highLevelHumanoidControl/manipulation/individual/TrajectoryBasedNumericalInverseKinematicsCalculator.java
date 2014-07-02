@@ -317,7 +317,7 @@ public class TrajectoryBasedNumericalInverseKinematicsCalculator
 
       linearError.sub(desiredPositionPoint, currentPoint);
 
-      currentOrientation.setAndChangeFrame(endEffectorOrientationInFrameToControlPoseOf);
+      currentOrientation.setIncludingFrame(endEffectorOrientationInFrameToControlPoseOf);
       currentOrientation.changeFrame(baseFrameForIK);
 
       currentOrientation.getMatrix3d(currentOrientationMatrix);

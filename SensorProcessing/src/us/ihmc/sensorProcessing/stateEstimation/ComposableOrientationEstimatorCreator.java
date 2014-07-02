@@ -191,7 +191,7 @@ public class ComposableOrientationEstimatorCreator
 
       public void getEstimatedOrientation(FrameOrientation estimatedOrientationToPack)
       {
-         estimatedOrientationToPack.setAndChangeFrame(orientationStatePort.getData());
+         estimatedOrientationToPack.setIncludingFrame(orientationStatePort.getData());
       }
 
       public void getEstimatedAngularVelocity(FrameVector estimatedAngularVelocityToPack)
