@@ -49,7 +49,7 @@ public class UserDesiredHeadOrientationProvider extends DesiredHeadOrientationPr
          public void variableChanged(YoVariable<?> v)
          {
             isNewHeadOrientationInformationAvailable.set(true);
-            desiredHeadOrientation.set(headOrientationFrame, userDesiredHeadYaw.getDoubleValue(), userDesiredNeckPitch.getDoubleValue(),
+            desiredHeadOrientation.setIncludingFrame(headOrientationFrame, userDesiredHeadYaw.getDoubleValue(), userDesiredNeckPitch.getDoubleValue(),
                   userDesiredHeadRoll.getDoubleValue());
          }
       };
