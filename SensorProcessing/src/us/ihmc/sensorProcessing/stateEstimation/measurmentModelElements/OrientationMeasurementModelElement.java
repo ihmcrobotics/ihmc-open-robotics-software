@@ -79,7 +79,7 @@ public class OrientationMeasurementModelElement extends AbstractMeasurementModel
    {
       orientationStatePort.getData().getQuaternion(estimatedOrientationQuaternion);
 
-      orientationOfMeasurementFrameInEstimationFrame.set(measurementFrame);
+      orientationOfMeasurementFrameInEstimationFrame.setToZero(measurementFrame);
       orientationOfMeasurementFrameInEstimationFrame.changeFrame(estimationFrame);
       orientationOfMeasurementFrameInEstimationFrame.getQuaternion(measurmentFrameToEstimationFrame);
       

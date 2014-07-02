@@ -312,7 +312,7 @@ public class DrivingFootControlModule
 //
 //      desiredOrientation.set(drivingReferenceFrames.getObjectFrame(VehicleObject.GAS_PEDAL), rotationMatrix);
 
-      desiredOrientation.set(drivingReferenceFrames.getVehicleFrame());
+      desiredOrientation.setToZero(drivingReferenceFrames.getVehicleFrame());
       desiredOrientation.setYawPitchRoll(0.0, footPitch.getDoubleValue(), footRoll.getDoubleValue());
       desiredAngularVelocity.setToZero(toePointFrame);
       feedForwardAngularAcceleration.setToZero(toePointFrame);
