@@ -170,7 +170,7 @@ public class FeetManager
       if (!footstep.getTrustHeight())
       {
          FramePoint supportAnklePosition = new FramePoint(ankleZUpFrames.get(upcomingSwingSide.getOppositeSide()));
-         supportAnklePosition.changeFrame(footstep.getReferenceFrame());
+         supportAnklePosition.changeFrame(footstep.getParentFrame());
          double newHeight = supportAnklePosition.getZ();
 
          footstep = Footstep.copyButChangeHeight(footstep, newHeight);
