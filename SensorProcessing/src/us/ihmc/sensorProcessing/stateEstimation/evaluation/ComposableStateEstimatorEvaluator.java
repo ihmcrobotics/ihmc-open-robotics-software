@@ -242,6 +242,11 @@ public class ComposableStateEstimatorEvaluator
          {
             return false;
          }
+
+         public double getContactThresholdForce()
+         {
+            return 120.0;
+         }
       };
       
       JointAndIMUSensorMap sensorMap = null; // simulatedSensorHolderAndReaderFromRobotFactory.getSensorReader().getJointAndIMUSensorMap();

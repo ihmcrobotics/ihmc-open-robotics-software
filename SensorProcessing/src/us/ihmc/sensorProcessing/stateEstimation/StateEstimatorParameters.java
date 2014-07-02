@@ -55,4 +55,6 @@ public interface StateEstimatorParameters
    public abstract double getPelvisLinearVelocityAlphaNewTwist();
    
    public abstract boolean createFusedIMUSensor();
+
+   public abstract double getContactThresholdForce();
 }
