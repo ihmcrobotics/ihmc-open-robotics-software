@@ -243,4 +243,10 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
    {
       return false;
    }
+
+   @Override
+   public double getContactThresholdForce()
+   {
+      return 120.0;
+   }
 }
