@@ -79,15 +79,6 @@ public class CenterOfPressureForceAndPosition extends ReferenceFrameHolder
       return referenceFrame;
    }
 
-   @Override
-   public ReferenceFrameHolder changeFrameCopy(ReferenceFrame desiredFrame)
-   {
-      CenterOfPressureForceAndPosition ret = new CenterOfPressureForceAndPosition(this);
-      ret.changeFrame(desiredFrame);
-
-      return ret;
-   }
-
    public Point3d getCenterOfPressure()
    {
       return new Point3d(centerOfPressure);
