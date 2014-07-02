@@ -216,4 +216,10 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    {
       return 0;
    }
+
+   @Override
+   public double getLidarSpindleVelocity()
+   {
+      return 5.1;
+   }
 }
