@@ -242,4 +242,10 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    {
       return true;
    }
+
+   @Override
+   public double getContactThresholdForce()
+   {
+      return 120.0;
+   }
 }
