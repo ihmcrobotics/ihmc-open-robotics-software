@@ -1,37 +1,14 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+
+// Remove all parameters from this class and move to robot-specific interfaces. Change DRCConfigParametersTest to enforce less variables.
+@Deprecated
 public class DRCConfigParameters
 {
-   public static final boolean CORRUPT_SIMULATION_MODEL = false;
-
-   public static final boolean ALLOW_LAG_SIMULATION = true;
-   public static final boolean ENABLE_LAG_SIMULATION_ON_START = false;
    public static boolean CALIBRATE_ARM_MODE = false;
-   public static boolean USE_CALIBRATED_JOINT_BIAS = true;
-   public static boolean ENABLE_QOUT_ENCODER = CALIBRATE_ARM_MODE;
-
-   static
-   {
-      if (ALLOW_LAG_SIMULATION)
-      {
-         System.err.println("Warning: Allowing simulation of lag");
-      }
-
-      if (CALIBRATE_ARM_MODE)
-      {
-         System.err.println("Warning: Calibrate arm mode is on, qout is disabled");
-      }
-   }
 
    public static final boolean USE_HYDRA = false;
    public static final boolean USE_MINI_ATLAS = false;
-
-   public static final boolean LIMIT_CONTROLLER_OUTPUT_TORQUES = false; // true;//True causes hip oscillations or jerk in simulation
-
-   // Limit the controller to use only a certain percentage of maximum torque that the robot can provide
-   public static final double MAX_TORQUE_TO_USE_IN_PERCENT = 1.2;
-
-   public static final boolean SHOW_BANDWIDTH_DIALOG = false;
 
    // Networking
    public static final int NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT = 4895;
@@ -45,10 +22,8 @@ public class DRCConfigParameters
    public static boolean LOG_PRIMARY_CAMERA_IMAGES = false;
 
    public static boolean LIDAR_ADJUSTMENT_ACTIVE = false;
-
    public static boolean USE_POINT_CLOUD_INSTEAD_OF_LIDAR = false;
-   // Video Settings
-   public static final boolean STREAM_VIDEO = true;
+
 
    // UI
    public static final int UI_JOINT_CONFIGURATION_UPDATE_MILLIS = 100;
@@ -74,4 +49,5 @@ public class DRCConfigParameters
    public static final boolean ALLOW_MODEL_CORRUPTION = false;
 
    public static final boolean SEND_ROBOT_DATA_TO_ROS = true;
+   
 }
