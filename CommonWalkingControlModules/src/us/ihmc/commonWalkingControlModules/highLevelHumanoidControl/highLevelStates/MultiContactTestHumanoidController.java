@@ -73,7 +73,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
          @Override
          public void variableChanged(YoVariable<?> v)
          {
-            desiredPelvisYawPitchRoll.getFrameOrientation(tempOrientation);
+            desiredPelvisYawPitchRoll.getFrameOrientationIncludingFrame(tempOrientation);
             desiredPelvisOrientation.set(tempOrientation);
          }
       });
@@ -86,7 +86,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
          @Override
          public void variableChanged(YoVariable<?> v)
          {
-            desiredChestYawPitchRoll.getFrameOrientation(tempOrientation);
+            desiredChestYawPitchRoll.getFrameOrientationIncludingFrame(tempOrientation);
             chestOrientationManager.setDesireds(tempOrientation, zeroFrameVector, zeroFrameVector);
          }
       });

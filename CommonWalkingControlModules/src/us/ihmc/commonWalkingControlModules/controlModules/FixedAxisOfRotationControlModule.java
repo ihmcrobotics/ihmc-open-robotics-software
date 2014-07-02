@@ -54,7 +54,7 @@ public class FixedAxisOfRotationControlModule
       Vector3d translation = new Vector3d();
       bodyToBase.get(translation);
       this.initialPosition.set(translation);
-      this.initialOrientation.setRotation(bodyToBase);
+      this.initialOrientation.set(bodyToBase);
       
       axisOfRotation.changeFrame(baseFrame);
       offset.changeFrame(baseFrame);
