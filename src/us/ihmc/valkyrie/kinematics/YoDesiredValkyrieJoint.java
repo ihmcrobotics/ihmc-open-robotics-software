@@ -101,4 +101,12 @@ public class YoDesiredValkyrieJoint implements ValkyrieJointInterface
       this.qd_d.set(velocity);
    }
 
+   public void set(ValkyrieJointInterface valkyrieJoint)
+   {
+      setPosition(valkyrieJoint.getPosition());
+      setVelocity(valkyrieJoint.getVelocity());
+      setEffort(valkyrieJoint.getEffort());
+      
+   }
+
 }

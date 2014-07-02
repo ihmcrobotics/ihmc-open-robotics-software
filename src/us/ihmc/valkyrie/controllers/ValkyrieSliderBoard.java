@@ -37,7 +37,7 @@ public class ValkyrieSliderBoard
 {
    private enum ValkyrieSliderBoardType {ON_BOARD_POSITION, TORQUE_PD_CONTROL, WALKING, TUNING}
 
-   private final EnumYoVariable<ValkyrieSliderBoardController.ValkyrieSliderBoardSelectableJoints> selectedJoint, remoteSelectedJoint;
+   private final EnumYoVariable<ValkyrieSliderBoardSelectableJoints> selectedJoint, remoteSelectedJoint;
 
    private final LinkedHashMap<String, IntegerYoVariable> storedTurboIndex = new LinkedHashMap<>();
 
@@ -47,9 +47,9 @@ public class ValkyrieSliderBoard
    public ValkyrieSliderBoard(SimulationConstructionSet scs, YoVariableRegistry registry, GeneralizedSDFRobotModel generalizedSDFRobotModel,
                               ValkyrieSliderBoardType sliderBoardType)
    {
-      selectedJoint = new EnumYoVariable<>("selectedJoint", registry, ValkyrieSliderBoardController.ValkyrieSliderBoardSelectableJoints.class);
-      selectedJoint.set(ValkyrieSliderBoardController.ValkyrieSliderBoardSelectableJoints.RightKneeExtensor);
-      remoteSelectedJoint = (EnumYoVariable<ValkyrieSliderBoardController.ValkyrieSliderBoardSelectableJoints>) registry.getVariable(
+      selectedJoint = new EnumYoVariable<>("selectedJoint", registry, ValkyrieSliderBoardSelectableJoints.class);
+      selectedJoint.set(ValkyrieSliderBoardSelectableJoints.RightKneeExtensor);
+      remoteSelectedJoint = (EnumYoVariable<ValkyrieSliderBoardSelectableJoints>) registry.getVariable(
          "remoteroot.ValkyrieSliderBoardController.selectedJoint");
 
       remoteTurboIndex = (IntegerYoVariable) registry.getVariable("remoteroot.ValkyrieSliderBoardController.turboIndex");
@@ -90,8 +90,8 @@ public class ValkyrieSliderBoard
    private void setupSliderBoardForForceControl(YoVariableRegistry registry, GeneralizedSDFRobotModel generalizedSDFRobotModel,
            final SliderBoardConfigurationManager sliderBoardConfigurationManager)
    {
-      for (ValkyrieSliderBoardController.ValkyrieSliderBoardSelectableJoints jointId :
-              ValkyrieSliderBoardController.ValkyrieSliderBoardSelectableJoints.values())
+      for (ValkyrieSliderBoardSelectableJoints jointId :
+              ValkyrieSliderBoardSelectableJoints.values())
       {
          String jointName = jointId.toString();
          if (!jointName.contains("Ibeo"))
@@ -100,7 +100,7 @@ public class ValkyrieSliderBoard
 
             // knobs
 
-            sliderBoardConfigurationManager.setKnob(1, selectedJoint, 0, ValkyrieSliderBoardController.ValkyrieSliderBoardSelectableJoints.values().length - 1);
+            sliderBoardConfigurationManager.setKnob(1, selectedJoint, 0, ValkyrieSliderBoardSelectableJoints.values().length - 1);
 
             // sliders
             sliderBoardConfigurationManager.setSlider(1, pdControllerBaseName + "_q_d", registry,
@@ -174,7 +174,7 @@ public class ValkyrieSliderBoard
                            String turboName = turbos.get(0);
                            // knobs
                            sliderBoardConfigurationManager.setKnob(1, selectedJoint, 0,
-                                   ValkyrieSliderBoardController.ValkyrieSliderBoardSelectableJoints.values().length - 1);
+                                   ValkyrieSliderBoardSelectableJoints.values().length - 1);
                            sliderBoardConfigurationManager.setKnob(3, turboName + "_lowLevelKp", registry, 0.0, 60.0);
                            sliderBoardConfigurationManager.setKnob(4, turboName + "_lowLevelKd", registry, 0.0, .5);
                            sliderBoardConfigurationManager.setKnob(5, turboName + "_forceAlpha", registry, 0.0, 1.0);
@@ -209,7 +209,7 @@ public class ValkyrieSliderBoard
 
                               // knobs
                               sliderBoardConfigurationManager.setKnob(1, selectedJoint, 0,
-                                      ValkyrieSliderBoardController.ValkyrieSliderBoardSelectableJoints.values().length - 1);
+                                      ValkyrieSliderBoardSelectableJoints.values().length - 1);
                               sliderBoardConfigurationManager.setKnob(2, turboIndexMonitor, 0, 1);
                               sliderBoardConfigurationManager.setKnob(3, turboName + "_lowLevelKp", registry, 0.0, 0.1);
                               sliderBoardConfigurationManager.setKnob(4, turboName + "_lowLevelKd", registry, 0.0, 0.001);
@@ -339,15 +339,15 @@ public class ValkyrieSliderBoard
    private void setupSliderBoardForOnBoardPositionControl(YoVariableRegistry registry, GeneralizedSDFRobotModel generalizedSDFRobotModel,
            final SliderBoardConfigurationManager sliderBoardConfigurationManager)
    {
-      for (ValkyrieSliderBoardController.ValkyrieSliderBoardSelectableJoints jointId :
-              ValkyrieSliderBoardController.ValkyrieSliderBoardSelectableJoints.values())
+      for (ValkyrieSliderBoardSelectableJoints jointId :
+              ValkyrieSliderBoardSelectableJoints.values())
       {
          String jointName = jointId.toString();
          System.out.println(jointName);
 
          // knobs
 
-         sliderBoardConfigurationManager.setKnob(1, selectedJoint, 0, ValkyrieSliderBoardController.ValkyrieSliderBoardSelectableJoints.values().length - 1);
+         sliderBoardConfigurationManager.setKnob(1, selectedJoint, 0, ValkyrieSliderBoardSelectableJoints.values().length - 1);
 
          // sliders
          sliderBoardConfigurationManager.setSlider(1, jointName + CommonNames.q_d, registry,
