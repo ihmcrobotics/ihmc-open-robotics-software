@@ -83,15 +83,13 @@ public class MomentumBasedControllerFactory
 
    private ArrayList<HighLevelBehaviorFactory> highLevelBehaviorFactories = new ArrayList<>();
 
-   private final double contactTresholdForce;
    private final SideDependentList<String> footSensorNames;
    private final ContactableBodiesFactory contactableBodiesFactory;
 
-   public MomentumBasedControllerFactory(ContactableBodiesFactory contactableBodiesFactory, double contactTresholdForce,
-         SideDependentList<String> footSensorNames, FootstepTimingParameters footstepTimingParameters, WalkingControllerParameters walkingControllerParameters,
-         ArmControllerParameters armControllerParameters, boolean USE_HEADING_AND_VELOCITY_SCRIPT, boolean useFastTouchdowns, HighLevelState initialBehavior)
+   public MomentumBasedControllerFactory(ContactableBodiesFactory contactableBodiesFactory, SideDependentList<String> footSensorNames,
+         FootstepTimingParameters footstepTimingParameters, WalkingControllerParameters walkingControllerParameters, ArmControllerParameters armControllerParameters,
+         boolean USE_HEADING_AND_VELOCITY_SCRIPT, boolean useFastTouchdowns, HighLevelState initialBehavior)
    {
-      this.contactTresholdForce = contactTresholdForce;
       this.footSensorNames = footSensorNames;
       this.contactableBodiesFactory = contactableBodiesFactory;
       this.initialBehavior = initialBehavior;
@@ -284,8 +282,9 @@ public class MomentumBasedControllerFactory
       for (RobotSide robotSide : RobotSide.values)
       {
          ForceSensorData footForceSensor = forceSensorDataHolder.getByName(footSensorNames.get(robotSide));
+         double contactThresholdForce = walkingControllerParameters.getContactThresholdForce();
          WrenchBasedFootSwitch wrenchBasedFootSwitch = new WrenchBasedFootSwitch(bipedFeet.get(robotSide).getName(), footForceSensor, 0.02, totalRobotWeight,
-               bipedFeet.get(robotSide), dynamicGraphicObjectsListRegistry, contactTresholdForce, registry);
+               bipedFeet.get(robotSide), dynamicGraphicObjectsListRegistry, contactThresholdForce, registry);
          footSwitches.put(robotSide, wrenchBasedFootSwitch);
       }
 

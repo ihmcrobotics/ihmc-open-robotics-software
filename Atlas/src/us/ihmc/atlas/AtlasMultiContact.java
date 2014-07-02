@@ -15,7 +15,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MultiContactTestHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelState;
-import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCSimulationFactory;
@@ -101,8 +100,8 @@ public class AtlasMultiContact
       };
 
       MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(
-            contactableBodiesFactory, DRCConfigParameters.contactTresholdForceForSCS, sensorInformation.getFeetForceSensorNames(), null, controllerParameters,
-            armControllerParameters, false, false, HighLevelState.DO_NOTHING_BEHAVIOR);
+            contactableBodiesFactory, sensorInformation.getFeetForceSensorNames(), null, controllerParameters, armControllerParameters,
+            false, false, HighLevelState.DO_NOTHING_BEHAVIOR);
       controllerFactory.addHighLevelBehaviorFactory(new MultiContactTestHumanoidControllerFactory(controllerParameters, footContactSides, handContactSides, true));
 
       drcSimulation = new DRCSimulationFactory(robotModel, controllerFactory, environment.getTerrainObject3D().getLinkGraphics(), robotInitialSetup, scsInitialSetup,

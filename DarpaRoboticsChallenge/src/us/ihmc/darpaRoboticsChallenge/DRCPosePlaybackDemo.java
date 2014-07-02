@@ -46,9 +46,8 @@ public class DRCPosePlaybackDemo
       ContactableBodiesFactory contactableBodiesFactory = model.getContactPointParameters().getContactableBodiesFactory();
 
       SideDependentList<String> footForceSensorNames = model.getSensorInformation().getFeetForceSensorNames();
-      controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, DRCConfigParameters.contactTresholdForceForSCS,
-            footForceSensorNames, footstepTimingParameters, walkingControllerParameters, armControllerParameters, false, false,
-            HighLevelState.DO_NOTHING_BEHAVIOR);
+      controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, footForceSensorNames,
+            footstepTimingParameters, walkingControllerParameters, armControllerParameters, false, false, HighLevelState.DO_NOTHING_BEHAVIOR);
       controllerFactory.addHighLevelBehaviorFactory(new PosePlaybackControllerFactory(posePlaybackPacket, true));
 
       drcSimulation = new DRCSimulationFactory(model, controllerFactory, null, robotInitialSetup, scsInitialSetup, guiInitialSetup, null);

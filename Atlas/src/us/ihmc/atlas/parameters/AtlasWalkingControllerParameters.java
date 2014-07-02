@@ -90,51 +90,61 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       }
    }
    
+   @Override
    public boolean stayOnToes()
    {
       return false; // Not working for now
    }
    
+   @Override
    public boolean doToeOffIfPossible()
    {
       return true; 
    }
 
+   @Override
    public double getMaximumToeOffAngle()
    {
       return Math.toRadians(45.0);
    }
 
+   @Override
    public boolean doToeTouchdownIfPossible()
    {
       return false;
    }
 
+   @Override
    public double getToeTouchdownAngle()
    {
       return Math.toRadians(20.0);
    }
 
+   @Override
    public boolean doHeelTouchdownIfPossible()
    {
       return false;
    }
 
+   @Override
    public double getHeelTouchdownAngle()
    {
       return Math.toRadians(-20.0);
    }
 
+   @Override
    public String[] getDefaultHeadOrientationControlJointNames()
    {
       return new String[] {jointNames[back_bkz], jointNames[neck_ry]}; 
    }
    
+   @Override
    public String[] getDefaultChestOrientationControlJointNames()
    {
       return new String[]{};
    }
 
+   @Override
    public boolean checkOrbitalEnergyCondition()
    {
       return false;
@@ -160,16 +170,19 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
 //   private double nominalHeightAboveGround = 0.80;  // NOTE: used to be 0.76, jojo        
 //   private double maximumHeightAboveGround = 0.84;  // NOTE: used to be 0.82, jojo        
    
+   @Override
    public double minimumHeightAboveAnkle()
    {
       return minimumHeightAboveGround;
    }
    
+   @Override
    public double nominalHeightAboveAnkle()
    {
       return nominalHeightAboveGround;
    }
    
+   @Override
    public double maximumHeightAboveAnkle()
    {
       return maximumHeightAboveGround;
@@ -180,175 +193,208 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       this.nominalHeightAboveGround = nominalHeightAboveAnkle;
    }
 
+   @Override
    public double getGroundReactionWrenchBreakFrequencyHertz()
    {
       return 7.0;
    }
 
+   @Override
    public boolean resetDesiredICPToCurrentAtStartOfSwing()
    {
       return false;
    }
 
+   @Override
    public double getUpperNeckPitchLimit()
    {
       return neck_pitch_upper_limit;
    }
 
+   @Override
    public double getLowerNeckPitchLimit()
    {
       return neck_pitch_lower_limit;
    }
 
+   @Override
    public double getHeadYawLimit()
    {
       return head_yaw_limit;
    }
 
+   @Override
    public double getHeadRollLimit()
    {
       return head_roll_limit;
    }
 
+   @Override
    public String getJointNameForExtendedPitchRange()
    {
       return jointNames[back_bky];
    }
 
+   @Override
    public boolean finishSwingWhenTrajectoryDone()
    {
       return false;
    }
 
+   @Override
    public double getFootForwardOffset()
    {
       return AtlasPhysicalProperties.footForward;
    }
    
+   @Override
    public double getFootSwitchCoPThresholdFraction()
    {
 	   return 0.02;
    }
 
+   @Override
    public double getFootBackwardOffset()
    {
       return AtlasPhysicalProperties.footBack;
    }
    
+   @Override
    public double getAnkleHeight()
    {
       return AtlasPhysicalProperties.ankleHeight;
    }
 
+   @Override
    public double getLegLength()
    {
       return AtlasPhysicalProperties.shinLength + AtlasPhysicalProperties.thighLength;
    }
    
+   @Override
    public double getMinLegLengthBeforeCollapsingSingleSupport()
    {
       return min_leg_length_before_collapsing_single_support;
    }
 
+   @Override
    public double getFinalToeOffPitchAngularVelocity()
    {
       return 3.5;
    }
 
+   @Override
    public double getInPlaceWidth()
    {
       return 0.25;
    }
 
+   @Override
    public double getDesiredStepForward()
    {
       return 0.5; //0.35;
    }
   
+   @Override
    public double getMaxStepLength()
    {
        return 0.6; //0.5; //0.35;
    }
 
+   @Override
    public double getMinStepWidth()
    {
       return 0.15;
    }
 
+   @Override
    public double getMaxStepWidth()
    {
       return 0.6; //0.4;
    }
 
+   @Override
    public double getStepPitch()
    {
       return 0.0;
    }
 
+   @Override
    public double getCaptureKpParallelToMotion()
    {
       if (!runningOnRealRobot) return 1.0;
       return 1.0; 
    }
 
+   @Override
    public double getCaptureKpOrthogonalToMotion()
    {      
       if (!runningOnRealRobot) return 1.0; 
       return 1.0; 
    }
    
+   @Override
    public double getCaptureKi()
    {      
       if (!runningOnRealRobot) return 4.0;
       return 4.0; 
    }
    
+   @Override
    public double getCaptureKiBleedoff()
    {      
       return 0.9; 
    }
    
+   @Override
    public double getCaptureFilterBreakFrequencyInHz()
    {
       if (!runningOnRealRobot) return 16.0; //Double.POSITIVE_INFINITY;
       return 16.0;
    }
    
+   @Override
    public double getCMPRateLimit()
    {
       if (!runningOnRealRobot) return 60.0; 
       return 6.0; //3.0; //4.0; //3.0;
    }
 
+   @Override
    public double getCMPAccelerationLimit()
    {
       if (!runningOnRealRobot) return 2000.0;
       return 200.0; //80.0; //40.0;
    }
    
+   @Override
    public double getKpCoMHeight()
    {
       if (!runningOnRealRobot) return 40.0;
       return 40.0; //20.0; 
    }
 
+   @Override
    public double getZetaCoMHeight()
    {
       if (!runningOnRealRobot) return 0.8; //1.0;
       return 0.4;
    }
 
+   @Override
    public double getDefaultDesiredPelvisPitch()
    {
       return 0.0;
    }
 
+   @Override
    public double getKpPelvisOrientation()
    {
       if (!runningOnRealRobot) return 80.0; //100.0;
       return 80.0; //30.0; 
    }
 
+   @Override
    public double getZetaPelvisOrientation()
    {
       if (!runningOnRealRobot) return 0.8; //1.0;
@@ -356,120 +402,141 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    }
    
 
+   @Override
    public double getMaxAccelerationPelvisOrientation()
    {
       if (!runningOnRealRobot) return 36.0; // 18.0;
       return 12.0; 
    }
 
+   @Override
    public double getMaxJerkPelvisOrientation()
    {
       if (!runningOnRealRobot) return 540.0; // 270.0;
       return 180.0; 
    }
 
+   @Override
    public double getKpHeadOrientation()
    {
       if (!runningOnRealRobot) return 40.0;
       return 40.0; 
    }
 
+   @Override
    public double getZetaHeadOrientation()
    {
       if (!runningOnRealRobot) return 0.8; //1.0;
       return 0.4;
    }
 
+   @Override
    public double getTrajectoryTimeHeadOrientation()
    {
       return 3.0;
    }
 
+   @Override
    public double getKpUpperBody()
    {
       if (!runningOnRealRobot) return 80.0; //100.0;
       return 80.0; //40.0;
    }
 
+   @Override
    public double getZetaUpperBody()
    {
       if (!runningOnRealRobot) return 0.8; //1.0;
       return 0.25;
    }
    
+   @Override
    public double getMaxAccelerationUpperBody()
    {
       if (!runningOnRealRobot) return 36.0; // 18.0; //100.0;
       return 6.0;
    }
    
+   @Override
    public double getMaxJerkUpperBody()
    {
       if (!runningOnRealRobot) return 540.0; // 270.0; //1000.0;
       return 60.0;
    }
    
+   @Override
    public double getSwingKpXY()
    {
       return 100.0;
    }
    
+   @Override
    public double getSwingHeightMaxForPushRecoveryTrajectory()
    {
       return 0.12;
    }
    
+   @Override
    public double getSwingKpZ()
    {
       return 200.0;
    }
    
+   @Override
    public double getSwingKpOrientation()
    {
       return 200.0;
    }
    
+   @Override
    public double getSwingZetaXYZ()
    {
       if (!runningOnRealRobot) return 0.7;
       return 0.25;
    }
    
+   @Override
    public double getSwingZetaOrientation()
    {
       if (!runningOnRealRobot) return 0.7;
       return 0.7; 
    }
 
+   @Override
    public double getHoldKpXY()
    {
       return 100.0;
    }
    
+   @Override
    public double getHoldKpOrientation()
    {
       if (!runningOnRealRobot) return 100.0;
       return 200.0;
    }
    
+   @Override
    public double getHoldZeta()
    {
       if (!runningOnRealRobot) return 1.0;
       return 0.2;
    }
 
+   @Override
    public double getSwingMaxPositionAcceleration()
    {
       if (!runningOnRealRobot) return Double.POSITIVE_INFINITY;
       return 10.0;
    }
    
+   @Override
    public double getSwingMaxPositionJerk()
    {
       if (!runningOnRealRobot) return Double.POSITIVE_INFINITY;
       return 150.0;
    }
    
+   @Override
    public double getSwingMaxOrientationAcceleration()
    {
       if (!runningOnRealRobot) return Double.POSITIVE_INFINITY;
@@ -481,102 +548,122 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
 	   return 0.15;
    }
    
+   @Override
    public double getSwingMaxOrientationJerk()
    {
       if (!runningOnRealRobot) return Double.POSITIVE_INFINITY;
       return 1500.0;
    }
+   @Override
    public double getSupportSingularityEscapeMultiplier()
    {
       return 30;
    }
 
+   @Override
    public double getSwingSingularityEscapeMultiplier()
    {
       return runningOnRealRobot ? 50.0 : 200.0;
    }
 
+   @Override
    public boolean doPrepareManipulationForLocomotion()
    {
       return true;
    }
 
+   @Override
    public double getToeOffKpXY()
    {
       return 100.0;
    }
 
+   @Override
    public double getToeOffKpOrientation()
    {
       return 200.0;
    }
 
+   @Override
    public double getToeOffZeta()
    {
       return 0.4;
    }
 
+   @Override
    public boolean isRunningOnRealRobot()
    {
       return runningOnRealRobot;
    }
 
+   @Override
    public double getDefaultTransferTime()
    {
       return runningOnRealRobot ? 1.5 : 0.25;
    }
 
+   @Override
    public double getDefaultSwingTime()
    {
       return runningOnRealRobot ? 1.5 : 0.60;
    }
 
+   @Override
    public double getPelvisPitchUpperLimit()
    {
       return pelvis_pitch_upper_limit;
    }
    
+   @Override
    public double getPelvisPitchLowerLimit()
    {
       return pelvis_pitch_lower_limit;
    }
 
+   @Override
    public boolean isPelvisPitchReversed()
    {
       return false;
    }
 
+   @Override
    public double getFootWidth()
    {
       return AtlasPhysicalProperties.footWidth;
    }
 
+   @Override
    public double getToeWidth()
    {
       return AtlasPhysicalProperties.toeWidth;
    }
 
+   @Override
    public double getFootLength()
    {
       return AtlasPhysicalProperties.footLength;
    }
 
+   @Override
    public double getFoot_start_toetaper_from_back()
    {
       return AtlasPhysicalProperties.footStartToetaperFromBack;
    }
 
+   @Override
    public double getSideLengthOfBoundingBoxForFootstepHeight()
    {
       return (1 + 0.3) * 2 * Math.sqrt(getFootForwardOffset() * getFootForwardOffset()
             + 0.25 * getFootWidth() * getFootWidth());
    }
    
+   @Override
    public SideDependentList<Transform3D> getDesiredHandPosesWithRespectToChestFrame()
    {
       return handPosesWithRespectToChestFrame;
    }
 
+   @Override
    public Map<OneDoFJoint, Double> getDefaultArmJointPositions(FullRobotModel fullRobotModel, RobotSide robotSide)
    {
       Map<OneDoFJoint, Double> jointPositions = new LinkedHashMap<OneDoFJoint, Double>();
@@ -599,6 +686,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    }
 
 
+   @Override
    public Map<OneDoFJoint, Double> getMinTaskspaceArmJointPositions(FullRobotModel fullRobotModel, RobotSide robotSide)
    {
       Map<OneDoFJoint, Double> ret = new LinkedHashMap<OneDoFJoint, Double>();
@@ -609,6 +697,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       return ret;
    }
 
+   @Override
    public Map<OneDoFJoint, Double> getMaxTaskspaceArmJointPositions(FullRobotModel fullRobotModel, RobotSide robotSide)
    {
       Map<OneDoFJoint, Double> ret = new LinkedHashMap<OneDoFJoint, Double>();
@@ -619,14 +708,21 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       return ret;
    }
    
+   @Override
    public SideDependentList<Transform3D> getHandControlFramesWithRespectToFrameAfterWrist()
    {
       return handControlFramesWithRespectToFrameAfterWrist;
    }
 
+   @Override
    public double getDesiredTouchdownVelocity()
    {
       return -0.3;
    }
-}
 
+   @Override
+   public double getContactThresholdForce()
+   {
+      return 5.0;
+   }
+}
