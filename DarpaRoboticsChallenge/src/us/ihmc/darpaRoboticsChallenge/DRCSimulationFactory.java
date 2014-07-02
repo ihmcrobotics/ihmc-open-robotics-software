@@ -64,7 +64,7 @@ public class DRCSimulationFactory
 
       if (guiInitialSetup.isGuiShown())
       {
-         VisualizerUtils.createOverheadPlotter(scs, DRCLocalConfigParameters.SHOW_OVERHEAD_VIEW, drcControllerThread.getDynamicGraphicObjectsListRegistry(),
+         VisualizerUtils.createOverheadPlotter(scs, guiInitialSetup.isShowOverheadView(), drcControllerThread.getDynamicGraphicObjectsListRegistry(),
                drcEstimatorThread.getDynamicGraphicObjectsListRegistry());
       }
 

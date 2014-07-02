@@ -24,11 +24,14 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
 {
    private static final boolean SHOW_ONLY_WRENCH_VISUALIZER = false;
    private static final boolean SHOW_EXPORT_TORQUE_AND_SPEED = true;
+   private static final boolean SHOW_OVERHEAD_VIEW = true;
+   
    private boolean isGuiShown = true;
    private boolean is3dGraphicsShown = true;
    private final boolean groundProfileVisible;
    private final boolean drawPlaneAtZ0;
    private final SliderBoardFactory sliderBoardFactory;
+   private boolean showOverheadView = SHOW_OVERHEAD_VIEW;
 
    public DRCGuiInitialSetup(boolean groundProfileVisible, boolean drawPlaneAtZeroHeight)
    {
@@ -145,5 +148,15 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
    public void setIs3dGraphicsShown(boolean is3dGraphicsShown)
    {
       this.is3dGraphicsShown = is3dGraphicsShown;
+   }
+
+   public boolean isShowOverheadView()
+   {
+      return showOverheadView;
+   }
+
+   public void setShowOverheadView(boolean showOverheadView)
+   {
+      this.showOverheadView = showOverheadView;
    }
 }
