@@ -103,7 +103,7 @@ public abstract class DRCPushRecoveryDoubleSupportTest implements MultiRobotTest
       enable.set(true);
       enableDS.set(true);
 
-      // simulate until atlas is in swing
+      // disable walking
       walk.set(false);
       blockingSimulationRunner.simulateAndBlock(6.0);
 
@@ -112,6 +112,48 @@ public abstract class DRCPushRecoveryDoubleSupportTest implements MultiRobotTest
 
       // simulate for a little while longer
       blockingSimulationRunner.simulateAndBlock(forceDuration + 5.0);
+
+      BambooTools.reportTestFinishedMessage();
+   }
+   
+   @Test
+   public void TestPushInDoubleSupportAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      DRCFlatGroundWalkingTrack track = setupTest(getRobotModel());
+      SimulationConstructionSet scs = track.getSimulationConstructionSet();
+
+      double forceMagnitude = 350.0;
+      double forceDuration = 0.15;
+      Vector3d forceDirection = new Vector3d(1.0, 0.0, 0.0);
+
+      blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
+
+      @SuppressWarnings("deprecation")
+      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("walk");
+      @SuppressWarnings("deprecation")
+      BooleanYoVariable enable = (BooleanYoVariable) scs.getVariable("enablePushRecovery");
+      @SuppressWarnings("deprecation")
+      BooleanYoVariable enableDS = (BooleanYoVariable) scs.getVariable("enablePushRecoveryFromDoubleSupport");
+
+      // enable push recovery
+      enable.set(true);
+      enableDS.set(true);
+
+      // disable walking
+      walk.set(false);
+      blockingSimulationRunner.simulateAndBlock(6.0);
+
+      // push the robot
+      pushRobotController.applyForce(forceDirection, forceMagnitude, forceDuration);
+
+      // simulate for a little while longer
+      blockingSimulationRunner.simulateAndBlock(forceDuration + 2.0);
+      
+      //re-enable walking
+      walk.set(true);
+      blockingSimulationRunner.simulateAndBlock(6.0);
 
       BambooTools.reportTestFinishedMessage();
    }
