@@ -1,7 +1,6 @@
 package us.ihmc.atlas.parameters;
 
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
-import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 
 public class AtlasArmControllerParameters implements ArmControllerParameters
 {
@@ -119,12 +118,12 @@ public class AtlasArmControllerParameters implements ArmControllerParameters
    @Override
    public boolean useInverseKinematicsTaskspaceControl()
    {
-      return DRCConfigParameters.USE_INVERSE_KINEMATICS_TASKSPACE_CONTROL;
+      return false;
    }
 
    @Override
    public boolean doLowLevelPositionControl()
    {
-      return runningOnRealRobot && DRCConfigParameters.USE_LOW_LEVEL_POSITION_CONTROL_FOR_HANDS;
+      return runningOnRealRobot && true;
    }
 }
