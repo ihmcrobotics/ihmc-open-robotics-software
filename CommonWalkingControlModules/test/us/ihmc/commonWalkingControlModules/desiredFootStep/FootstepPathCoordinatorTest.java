@@ -260,8 +260,7 @@ public class FootstepPathCoordinatorTest
 
    private void compareFootsteps(Footstep footstep1, Footstep footstep2)
    {
-      assertTrue(footstep1.getBody().getName().equals(footstep2.getBody().getName()));
-      assertTrue(footstep1.getPoseCopy().epsilonEquals(footstep2.getPoseCopy(), 0.0001));
+      assertTrue(footstep1.epsilonEquals(footstep2, 0.0001));
       for (int j = 0; j < footstep1.getExpectedContactPoints().size(); j++)
       {
          FramePoint framePoint = footstep1.getExpectedContactPoints().get(j);

@@ -339,7 +339,8 @@ public class WalkOnTheEdgesManager
       if (!doToeTouchdown.getBooleanValue() && !doHeelTouchdown.getBooleanValue())
          return footstepToModify;
 
-      FramePose oldPose = footstepToModify.getPoseCopy();
+      FramePose oldPose = new FramePose();
+      footstepToModify.getPose(oldPose);
 
       FrameOrientation oldOrientation = new FrameOrientation();
       oldPose.getOrientationIncludingFrame(oldOrientation);

@@ -115,7 +115,7 @@ public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTe
    {
       Vector3d footstepOrientation = SIDESTEP ? new Vector3d(0.0, -1.0, 0.0) : new Vector3d(1.0, 0.0, 0.0);
       Matrix3d rotation = new Matrix3d();
-      footstep.getPoseCopy().getOrientation(rotation);
+      footstep.getOrientation(rotation);
       rotation.transform(footstepOrientation);
       footstepOrientation.normalize();
       Vector3d pathOrientation = new Vector3d(destination);
@@ -141,7 +141,7 @@ public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTe
    {
       for (Footstep footstep : footSteps)
       {
-         assertEquals(walkingParamaters.getAnkleHeight(), footstep.getPoseCopy().getZ(), eps);
+         assertEquals(walkingParamaters.getAnkleHeight(), footstep.getZ(), eps);
       }
    }
 

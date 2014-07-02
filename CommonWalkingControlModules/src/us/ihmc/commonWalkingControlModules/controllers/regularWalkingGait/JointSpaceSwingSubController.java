@@ -384,7 +384,8 @@ public class JointSpaceSwingSubController implements SwingSubController
    private void updateDesiredPositions(RobotSide swingSide)
    {
       Footstep desiredFootstep = couplingRegistry.getDesiredFootstep();
-      FramePose desiredFootstepPose = desiredFootstep.getPoseCopy();
+      FramePose desiredFootstepPose = new FramePose();
+      desiredFootstep.getPose(desiredFootstepPose);
       
       FramePoint endPoint = new FramePoint();
       desiredFootstepPose.getPositionIncludingFrame(endPoint);
