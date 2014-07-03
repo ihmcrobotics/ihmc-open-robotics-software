@@ -363,8 +363,14 @@ public class DesiredFootstepVisualizer
       //                                                                                    desiredHeadingControlModule,
       //                                                                                    parentRegistry);
 
+      ReferenceFrame footBodyFrame = desiredFootstepVisualizer.getBipedFeet().get(RobotSide.LEFT).getFrameAfterParentJoint();
+      ReferenceFrame footPlaneFrame = desiredFootstepVisualizer.getBipedFeet().get(RobotSide.LEFT).getSoleFrame();
+      Transform3D transformFromFootBodyFrameToFootPlaneFrame = footBodyFrame.getTransformToDesiredFrame(footPlaneFrame);
+      Vector3d trans = new Vector3d();
+      transformFromFootBodyFrameToFootPlaneFrame.get(trans);
+      double ankleHeight = trans.getZ();
       ComponentBasedDesiredFootstepCalculator desiredFootstepCalculator = new ComponentBasedDesiredFootstepCalculator(
-            desiredFootstepVisualizer.getAnkleZUpFrames(), desiredFootstepVisualizer.getFootFrames(), desiredFootstepVisualizer.getBipedFeet(),
+            ankleHeight, desiredFootstepVisualizer.getAnkleZUpFrames(), desiredFootstepVisualizer.getFootFrames(), desiredFootstepVisualizer.getBipedFeet(),
             desiredHeadingControlModule, desiredVelocityControlModule, parentRegistry);
       desiredFootstepCalculator.setInPlaceWidth(0.4);
       desiredFootstepCalculator.setMaxStepLength(0.6);
