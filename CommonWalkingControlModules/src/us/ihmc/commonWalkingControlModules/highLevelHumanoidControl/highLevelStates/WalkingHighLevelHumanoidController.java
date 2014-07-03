@@ -1082,7 +1082,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          desiredPelvisOrientation.get(orientation);
          initialPelvisOrientationProvider.setOrientation(orientation);
 
-         FrameOrientation finalPelvisOrientation = nextFootstep.getOrientationInFrame(worldFrame);
+         FrameOrientation finalPelvisOrientation = new FrameOrientation();
+         nextFootstep.getOrientationIncludingFrame(finalPelvisOrientation);
+         finalPelvisOrientation.changeFrame(worldFrame);
          FrameOrientation tempOrientation = new FrameOrientation();
          tempOrientation.interpolate(orientation, finalPelvisOrientation, 0.5);
          finalPelvisOrientation.setYawPitchRoll(tempOrientation.getYaw(), 0.0, 0.0);

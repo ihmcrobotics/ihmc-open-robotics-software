@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait;
 
+import javax.vecmath.Matrix3d;
+
 import us.ihmc.commonWalkingControlModules.configurations.BalanceOnOneLegConfiguration;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.PreSwingControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.SwingLegTorqueControlModule;
@@ -323,7 +325,10 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       endPoint.changeFrame(finalDesiredSwingFootPosition.getReferenceFrame());
       finalDesiredSwingFootPosition.set(endPoint);
       
-      this.finalDesiredFootOrientationInWorldFrame.set(desiredFootstep.getOrientationInFrame(worldFrame));
+      FrameOrientation desiredFootstepOrientation = new FrameOrientation();
+      desiredFootstep.getOrientationIncludingFrame(desiredFootstepOrientation);
+      desiredFootstepOrientation.changeFrame(worldFrame);
+      this.finalDesiredFootOrientationInWorldFrame.set(desiredFootstepOrientation);
       
       swingLegTorqueControlModule.setAnkleGainsDefault(swingSide);
       footSwitches.get(swingSide).reset();
@@ -496,7 +501,10 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       finalDesiredSwingFootPosition.changeFrame(this.finalDesiredSwingFootPosition.getReferenceFrame());
       this.finalDesiredSwingFootPosition.set(finalDesiredSwingFootPosition);
       
-      this.finalDesiredFootOrientationInWorldFrame.set(desiredFootstep.getOrientationInFrame(worldFrame));
+      FrameOrientation desiredFootstepOrientation = new FrameOrientation();
+      desiredFootstep.getOrientationIncludingFrame(desiredFootstepOrientation);
+      desiredFootstepOrientation.changeFrame(worldFrame);
+      this.finalDesiredFootOrientationInWorldFrame.set(desiredFootstepOrientation);
       
       ReferenceFrame cartesianTrajectoryGeneratorFrame = trajectoryGenerator.getReferenceFrame();
       finalDesiredSwingFootPosition.changeFrame(cartesianTrajectoryGeneratorFrame);
