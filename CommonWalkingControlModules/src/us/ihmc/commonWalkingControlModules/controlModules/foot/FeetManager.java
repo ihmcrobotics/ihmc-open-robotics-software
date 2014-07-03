@@ -180,11 +180,11 @@ public class FeetManager
 
       if (walkOnTheEdgesManager.willLandOnHeel())
       {
-         footstep = walkOnTheEdgesManager.createFootstepForEdgeTouchdown(footstep, footControlModule.getHeelTouchdownInitialAngle());
+         walkOnTheEdgesManager.modifyFootstepForEdgeTouchdown(footstep, footControlModule.getHeelTouchdownInitialAngle());
       }
       else if (walkOnTheEdgesManager.willLandOnToes())
       {
-         footstep = walkOnTheEdgesManager.createFootstepForEdgeTouchdown(footstep, footControlModule.getToeTouchdownInitialAngle());
+         walkOnTheEdgesManager.modifyFootstepForEdgeTouchdown(footstep, footControlModule.getToeTouchdownInitialAngle());
       }
 
       footControlModule.setFootstep(footstep, trajectoryParameters);
@@ -422,11 +422,6 @@ public class FeetManager
    public void updateEdgeTouchdownStatus(RobotSide supportLeg, Footstep nextFootstep)
    {
       walkOnTheEdgesManager.updateEdgeTouchdownStatus(supportLeg, nextFootstep);
-   }
-
-   public Footstep createFootstepForEdgeTouchdown(Footstep footstepToModify, double touchdownInitialPitch)
-   {
-      return walkOnTheEdgesManager.createFootstepForEdgeTouchdown(footstepToModify, touchdownInitialPitch);
    }
 
    public double getHeelTouchdownInitialAngle(RobotSide robotSide)
