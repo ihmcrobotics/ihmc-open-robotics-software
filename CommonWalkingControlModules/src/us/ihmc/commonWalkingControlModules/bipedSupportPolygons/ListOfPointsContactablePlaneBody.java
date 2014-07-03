@@ -54,7 +54,7 @@ public class ListOfPointsContactablePlaneBody implements ContactablePlaneBody
       return ret;
    }
 
-   public ReferenceFrame getBodyFrame()
+   public ReferenceFrame getFrameAfterParentJoint()
    {
       return rigidBody.getParentJoint().getFrameAfterJoint();
    }

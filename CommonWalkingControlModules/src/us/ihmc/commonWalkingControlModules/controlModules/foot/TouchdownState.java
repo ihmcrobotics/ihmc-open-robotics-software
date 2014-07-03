@@ -121,22 +121,22 @@ public class TouchdownState extends AbstractFootControlState
          onEdgePitchAngleTrajectoryGenerator.initialize();
       }
 
-      desiredOrientation.setToZero(contactableBody.getBodyFrame());
+      desiredOrientation.setToZero(contactableBody.getFrameAfterParentJoint());
       desiredOrientation.changeFrame(worldFrame);
    }
 
    public void doSpecificAction()
    {
-      desiredOrientation.setToZero(contactableBody.getBodyFrame());
+      desiredOrientation.setToZero(contactableBody.getFrameAfterParentJoint());
       desiredOrientation.changeFrame(worldFrame);
       desiredOrientation.getYawPitchRoll(tempYawPitchRoll);
 
       momentumBasedController.getTwistCalculator().packRelativeTwist(footTwist, rootBody, contactableBody.getRigidBody());
-      footTwist.changeFrame(contactableBody.getBodyFrame());
+      footTwist.changeFrame(contactableBody.getFrameAfterParentJoint());
 
       double footPitch = 0.0, footPitchd = 0.0, footPitchdd = 0.0;
 
-      desiredPosition.setToZero(contactableBody.getBodyFrame());
+      desiredPosition.setToZero(contactableBody.getFrameAfterParentJoint());
       desiredPosition.changeFrame(worldFrame);
 
       onEdgePitchAngleTrajectoryGenerator.compute(getTimeInCurrentState());
@@ -148,11 +148,11 @@ public class TouchdownState extends AbstractFootControlState
       desiredOrientation.setYawPitchRoll(tempYawPitchRoll[0], footPitch, tempYawPitchRoll[2]);
 
       desiredLinearVelocity.setToZero(worldFrame);
-      desiredAngularVelocity.setIncludingFrame(contactableBody.getBodyFrame(), 0.0, footPitchd, 0.0);
+      desiredAngularVelocity.setIncludingFrame(contactableBody.getFrameAfterParentJoint(), 0.0, footPitchd, 0.0);
       desiredAngularVelocity.changeFrame(worldFrame);
 
       desiredLinearAcceleration.setToZero(worldFrame);
-      desiredAngularAcceleration.setIncludingFrame(contactableBody.getBodyFrame(), 0.0, footPitchdd, 0.0);
+      desiredAngularAcceleration.setIncludingFrame(contactableBody.getFrameAfterParentJoint(), 0.0, footPitchdd, 0.0);
       desiredAngularAcceleration.changeFrame(worldFrame);
 
       accelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity,
@@ -212,7 +212,7 @@ public class TouchdownState extends AbstractFootControlState
 
    private List<FramePoint2d> getEdgeContactPoints2d()
    {
-      FrameVector direction = new FrameVector(contactableBody.getBodyFrame(), 1.0, 0.0, 0.0);
+      FrameVector direction = new FrameVector(contactableBody.getFrameAfterParentJoint(), 1.0, 0.0, 0.0);
       if (getStateEnum() == ConstraintType.HEEL_TOUCHDOWN)
          direction.scale(-1.0);
 

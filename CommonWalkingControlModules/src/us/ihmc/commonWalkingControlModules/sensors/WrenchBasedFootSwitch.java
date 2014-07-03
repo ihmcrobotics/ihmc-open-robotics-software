@@ -89,14 +89,14 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
 
       yoFootForce = new YoFrameVector(namePrefix + "Force", forceSensorData.getMeasurementFrame(), registry);
       yoFootTorque = new YoFrameVector(namePrefix + "Torque", forceSensorData.getMeasurementFrame(), registry);
-      yoFootForceInFoot = new YoFrameVector(namePrefix + "ForceFootFrame", contactablePlaneBody.getBodyFrame(), registry);
-      yoFootTorqueInFoot = new YoFrameVector(namePrefix + "TorqueFootFrame", contactablePlaneBody.getBodyFrame(), registry);
+      yoFootForceInFoot = new YoFrameVector(namePrefix + "ForceFootFrame", contactablePlaneBody.getFrameAfterParentJoint(), registry);
+      yoFootTorqueInFoot = new YoFrameVector(namePrefix + "TorqueFootFrame", contactablePlaneBody.getFrameAfterParentJoint(), registry);
 
       if(showForceSensorFrames && dynamicGraphicObjectsListRegistry!=null)
       {
          final double scale=1.0;
          dynamicGraphicForceSensorMeasurementFrame = new DynamicGraphicReferenceFrame(forceSensorData.getMeasurementFrame(), registry, .6*scale, YoAppearance.Yellow());
-         dynamicGraphicForceSensorFootFrame = new DynamicGraphicReferenceFrame(contactablePlaneBody.getBodyFrame(), registry, scale, YoAppearance.AliceBlue());
+         dynamicGraphicForceSensorFootFrame = new DynamicGraphicReferenceFrame(contactablePlaneBody.getFrameAfterParentJoint(), registry, scale, YoAppearance.AliceBlue());
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(namePrefix+"MeasFrame",dynamicGraphicForceSensorMeasurementFrame);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(namePrefix+"FootFrame",dynamicGraphicForceSensorFootFrame);
       }
@@ -264,7 +264,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       footForce.setToZero(footWrench.getExpressedInFrame());
       footWrench.packLinearPart(footForce);
       yoFootForce.set(footForce);
-      footForce.changeFrame(contactablePlaneBody.getBodyFrame());
+      footForce.changeFrame(contactablePlaneBody.getFrameAfterParentJoint());
       yoFootForceInFoot.set(footForce);
       footForceMagnitude.set(footForce.length());
 
@@ -274,7 +274,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       footTorque.setToZero(footWrench.getExpressedInFrame());
       footWrench.packAngularPart(footTorque);
       yoFootTorque.set(footTorque);
-      footTorque.changeFrame(contactablePlaneBody.getBodyFrame());
+      footTorque.changeFrame(contactablePlaneBody.getFrameAfterParentJoint());
       yoFootTorqueInFoot.set(footTorque);
 
       updateSensorVisualizer();

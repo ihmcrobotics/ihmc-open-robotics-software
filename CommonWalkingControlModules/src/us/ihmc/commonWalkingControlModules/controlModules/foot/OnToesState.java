@@ -103,18 +103,18 @@ public class OnToesState extends AbstractFootControlState
 
    public void doSpecificAction()
    {
-      desiredOrientation.setToZero(contactableBody.getBodyFrame());
+      desiredOrientation.setToZero(contactableBody.getFrameAfterParentJoint());
       desiredOrientation.changeFrame(worldFrame);
       desiredOrientation.getYawPitchRoll(tempYawPitchRoll);
 
       momentumBasedController.getTwistCalculator().packRelativeTwist(footTwist, rootBody, contactableBody.getRigidBody());
-      footTwist.changeFrame(contactableBody.getBodyFrame());
+      footTwist.changeFrame(contactableBody.getFrameAfterParentJoint());
 
       boolean blockToMaximumPitch = tempYawPitchRoll[1] > maximumToeOffAngleProvider.getValue();
 
       double footPitch = 0.0, footPitchd = 0.0, footPitchdd = 0.0;
 
-      desiredPosition.setToZero(contactableBody.getBodyFrame());
+      desiredPosition.setToZero(contactableBody.getFrameAfterParentJoint());
       desiredPosition.changeFrame(worldFrame);
 
       if (blockToMaximumPitch)
@@ -136,11 +136,11 @@ public class OnToesState extends AbstractFootControlState
          desiredOrientation.setYawPitchRoll(tempYawPitchRoll[0], footPitch, tempYawPitchRoll[2]);
 
       desiredLinearVelocity.setToZero(worldFrame);
-      desiredAngularVelocity.setIncludingFrame(contactableBody.getBodyFrame(), 0.0, footPitchd, 0.0);
+      desiredAngularVelocity.setIncludingFrame(contactableBody.getFrameAfterParentJoint(), 0.0, footPitchd, 0.0);
       desiredAngularVelocity.changeFrame(worldFrame);
 
       desiredLinearAcceleration.setToZero(worldFrame);
-      desiredAngularAcceleration.setIncludingFrame(contactableBody.getBodyFrame(), 0.0, footPitchdd, 0.0);
+      desiredAngularAcceleration.setIncludingFrame(contactableBody.getFrameAfterParentJoint(), 0.0, footPitchdd, 0.0);
       desiredAngularAcceleration.changeFrame(worldFrame);
 
       accelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity,
@@ -239,7 +239,7 @@ public class OnToesState extends AbstractFootControlState
          desiredEdgeContactPositions.get(i).changeFrame(rootBody.getBodyFixedFrame());
       }
 
-      desiredOrientation.setToZero(contactableBody.getBodyFrame());
+      desiredOrientation.setToZero(contactableBody.getFrameAfterParentJoint());
       desiredOrientation.changeFrame(worldFrame);
       desiredYawToHold = desiredOrientation.getYaw();
       desiredRollToHold = desiredOrientation.getRoll();
@@ -286,7 +286,7 @@ public class OnToesState extends AbstractFootControlState
 
    protected List<FramePoint2d> getEdgeContactPoints2d()
    {
-      FrameVector direction = new FrameVector(contactableBody.getBodyFrame(), 1.0, 0.0, 0.0);
+      FrameVector direction = new FrameVector(contactableBody.getFrameAfterParentJoint(), 1.0, 0.0, 0.0);
 
       List<FramePoint> contactPoints = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(contactableBody.getContactPointsCopy(), direction,
             NUMBER_OF_CONTACTS_POINTS_TO_ROTATE_ABOUT);

@@ -521,7 +521,7 @@ public class ResizableBipedFoot implements BipedFootInterface
 
    public ReferenceFrame getFootFrame()
    {
-      return getBodyFrame();
+      return getFrameAfterParentJoint();
    }
 
    public FrameConvexPolygon2d getContactPolygon()
@@ -553,7 +553,7 @@ public class ResizableBipedFoot implements BipedFootInterface
       return ret;
    }
 
-   public ReferenceFrame getBodyFrame()
+   public ReferenceFrame getFrameAfterParentJoint()
    {
       return footFrame;
    }

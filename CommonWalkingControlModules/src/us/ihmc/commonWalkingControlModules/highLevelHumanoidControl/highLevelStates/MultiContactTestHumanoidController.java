@@ -132,7 +132,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
          }
          else
          {
-            feetManager.requestMoveStraight(robotSide, new FramePose(feet.get(robotSide).getBodyFrame()));
+            feetManager.requestMoveStraight(robotSide, new FramePose(feet.get(robotSide).getFrameAfterParentJoint()));
          }
       }
    }

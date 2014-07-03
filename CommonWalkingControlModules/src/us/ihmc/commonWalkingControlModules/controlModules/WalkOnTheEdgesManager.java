@@ -197,7 +197,7 @@ public class WalkOnTheEdgesManager
    private void isReadyToSwitchToToeOff(RobotSide trailingLeg)
    {
       RobotSide leadingLeg = trailingLeg.getOppositeSide();
-      ReferenceFrame frontFootFrame = feet.get(leadingLeg).getBodyFrame();
+      ReferenceFrame frontFootFrame = feet.get(leadingLeg).getFrameAfterParentJoint();
 
       if (!isFrontFootWellPositionedForToeOff(trailingLeg, frontFootFrame))
       {
@@ -211,7 +211,7 @@ public class WalkOnTheEdgesManager
 
    private boolean isFrontFootWellPositionedForToeOff(RobotSide trailingLeg, ReferenceFrame frontFootFrame)
    {
-      ReferenceFrame trailingFootFrame = feet.get(trailingLeg).getBodyFrame();
+      ReferenceFrame trailingFootFrame = feet.get(trailingLeg).getFrameAfterParentJoint();
       tempLeadingFootPosition.setToZero(frontFootFrame);
       tempTrailingFootPosition.setToZero(trailingFootFrame);
       tempLeadingFootPosition.changeFrame(trailingFootFrame);
@@ -252,7 +252,7 @@ public class WalkOnTheEdgesManager
    @SuppressWarnings("unused")
    private boolean isFrontFootWellPositionedForToeTouchdown(RobotSide trailingLeg, ReferenceFrame frontFootFrame)
    {
-      ReferenceFrame trailingFootFrame = feet.get(trailingLeg).getBodyFrame();
+      ReferenceFrame trailingFootFrame = feet.get(trailingLeg).getFrameAfterParentJoint();
       tempLeadingFootPosition.setToZero(frontFootFrame);
       tempTrailingFootPosition.setToZero(trailingFootFrame);
       tempLeadingFootPosition.changeFrame(trailingFootFrame);
@@ -285,7 +285,7 @@ public class WalkOnTheEdgesManager
 
    private boolean isFrontFootWellPositionedForHeelTouchdown(RobotSide trailingLeg, ReferenceFrame frontFootFrame)
    {
-      ReferenceFrame trailingFootFrame = feet.get(trailingLeg).getBodyFrame();
+      ReferenceFrame trailingFootFrame = feet.get(trailingLeg).getFrameAfterParentJoint();
       tempLeadingFootPosition.setToZero(frontFootFrame);
       tempTrailingFootPosition.setToZero(trailingFootFrame);
       tempLeadingFootPosition.changeFrame(trailingFootFrame);
@@ -311,7 +311,7 @@ public class WalkOnTheEdgesManager
       if (nextFootstep != null)
          nextFrontFootFrame = nextFootstep.getPoseReferenceFrame();
       else
-         nextFrontFootFrame = feet.get(nextTrailingLeg.getOppositeSide()).getBodyFrame();
+         nextFrontFootFrame = feet.get(nextTrailingLeg.getOppositeSide()).getFrameAfterParentJoint();
 
       if (!doToeTouchdownIfPossible.getBooleanValue())
       {
@@ -417,7 +417,7 @@ public class WalkOnTheEdgesManager
       if (nextFootstep != null)
          nextFrontFootFrame = nextFootstep.getPoseReferenceFrame();
       else
-         nextFrontFootFrame = feet.get(nextTrailingLeg.getOppositeSide()).getBodyFrame();
+         nextFrontFootFrame = feet.get(nextTrailingLeg.getOppositeSide()).getFrameAfterParentJoint();
 
       boolean frontFootWellPositionedForToeOff = isFrontFootWellPositionedForToeOff(nextTrailingLeg, nextFrontFootFrame);
 
@@ -528,7 +528,7 @@ public class WalkOnTheEdgesManager
       if (desiredFootstep != null)
       {
          desiredAngleReached.get(robotSide).set(false);
-         FrameOrientation footFrameOrientation = new FrameOrientation(feet.get(robotSide).getBodyFrame());
+         FrameOrientation footFrameOrientation = new FrameOrientation(feet.get(robotSide).getFrameAfterParentJoint());
          footFrameOrientation.changeFrame(worldFrame);
          footOrientationInWorld.get(robotSide).set(footFrameOrientation);
          FrameOrientation desiredOrientation = new FrameOrientation(desiredFootstep.getPoseReferenceFrame());

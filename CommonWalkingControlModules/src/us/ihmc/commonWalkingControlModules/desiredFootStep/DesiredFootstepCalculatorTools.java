@@ -25,7 +25,7 @@ public class DesiredFootstepCalculatorTools
       for (FramePoint footPoint : footPoints)
       {
          tempFramePoint.setIncludingFrame(footPoint);
-         tempFramePoint.changeFrame(contactableBody.getBodyFrame());
+         tempFramePoint.changeFrame(contactableBody.getFrameAfterParentJoint());
          tempVector.set(tempFramePoint.getPoint());
          footToWorldRotation.transform(tempVector);
          if (tempVector.getZ() < minZ)
@@ -45,7 +45,7 @@ public class DesiredFootstepCalculatorTools
       for (FramePoint footPoint : footPoints)
       {
          tempFramePoint.setIncludingFrame(footPoint);
-         tempFramePoint.changeFrame(contactableBody.getBodyFrame());
+         tempFramePoint.changeFrame(contactableBody.getFrameAfterParentJoint());
          tempVector.set(tempFramePoint.getPoint());
          footToWorldRotation.transform(tempVector);
 
@@ -69,7 +69,7 @@ public class DesiredFootstepCalculatorTools
       for (FramePoint footPoint : footPoints)
       {
          tempFramePoint.setIncludingFrame(footPoint);
-         tempFramePoint.changeFrame(contactableBody.getBodyFrame());
+         tempFramePoint.changeFrame(contactableBody.getFrameAfterParentJoint());
          tempVector.set(tempFramePoint.getPoint());    // foot point w.r.t. ankle in foot frame
          footToWorldRotation.transform(tempVector);    // foot point w.r.t. ankle in world frame
          worldToDesiredHeadingFrame.transform(tempVector);    // foot point w.r.t. ankle in desired heading frame
@@ -84,7 +84,7 @@ public class DesiredFootstepCalculatorTools
    {
       List<FramePoint> footPoints = contactableBody.getContactPointsCopy();
 
-      ReferenceFrame bodyFrame = contactableBody.getBodyFrame();
+      ReferenceFrame bodyFrame = contactableBody.getFrameAfterParentJoint();
 
       return computeMinZPointInFrame(footToWorldTransform, footPoints, bodyFrame, frame);
    }
@@ -126,7 +126,7 @@ public class DesiredFootstepCalculatorTools
       for (FramePoint footPoint : footPoints)
       {
          tempFramePoint.setIncludingFrame(footPoint);
-         tempFramePoint.changeFrame(contactableBody.getBodyFrame());
+         tempFramePoint.changeFrame(contactableBody.getFrameAfterParentJoint());
          tempFramePoint.changeFrameUsingTransform(ReferenceFrame.getWorldFrame(), footToWorldTransform);
          tempFramePoint.changeFrame(frame);
 
