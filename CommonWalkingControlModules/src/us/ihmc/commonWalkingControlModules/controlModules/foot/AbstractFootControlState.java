@@ -80,7 +80,7 @@ public abstract class AbstractFootControlState extends State<ConstraintType>
       this.jacobianDeterminantInRange = jacobianDeterminantInRange;
       this.doSingularityEscape = doSingularityEscape;
 
-      edgeToRotateAbout = new FrameLineSegment2d(contactableBody.getPlaneFrame());
+      edgeToRotateAbout = new FrameLineSegment2d(contactableBody.getSoleFrame());
       rootBody = momentumBasedController.getTwistCalculator().getRootBody();
       taskspaceConstraintData.set(rootBody, contactableBody.getRigidBody());
       jacobian = momentumBasedController.getJacobian(jacobianId);

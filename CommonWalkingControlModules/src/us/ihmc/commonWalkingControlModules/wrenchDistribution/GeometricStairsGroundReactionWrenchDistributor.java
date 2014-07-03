@@ -174,7 +174,7 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
          FramePoint footCoP = centersOfPressureOnSole3d.get(robotSide);
          if (footCoP != null)
          {
-            footCoP.changeFrame(feet.get(robotSide).getPlaneFrame());
+            footCoP.changeFrame(feet.get(robotSide).getSoleFrame());
             centersOfPressure.put(robotSide, footCoP.toFramePoint2d());
          }
          else
@@ -338,7 +338,7 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
          {
             centerOfPressure.changeFrame(worldFrame);
             FramePoint virtualToePoint = centerOfPressure.toFramePoint();
-            ReferenceFrame soleFrame = feet.get(robotSide).getPlaneFrame();
+            ReferenceFrame soleFrame = feet.get(robotSide).getSoleFrame();
             virtualToePoint = projectPointOntoSole(soleFrame, virtualToePoint);
             virtualToePointsOnSole.put(robotSide, virtualToePoint);
          }
@@ -366,7 +366,7 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
       for (RobotSide robotSide : RobotSide.values)
       {
          ContactablePlaneBody foot = feet.get(robotSide);
-         if (foot.getPlaneFrame() == contactState.getPlaneFrame())
+         if (foot.getSoleFrame() == contactState.getPlaneFrame())
          {
             if (ret == null)
                ret = robotSide;

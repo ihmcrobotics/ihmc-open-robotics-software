@@ -563,7 +563,7 @@ public class ResizableBipedFoot implements BipedFootInterface
       return computeFootPolygonPointsCopy(getFootPolygonInUse());
    }
 
-   public ReferenceFrame getPlaneFrame()
+   public ReferenceFrame getSoleFrame()
    {
       return soleFrame;
    }

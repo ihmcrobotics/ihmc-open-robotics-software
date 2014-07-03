@@ -324,7 +324,7 @@ public class FeetManager
       FootControlModule footControlModule = footControlModules.get(robotSide);
       if (footControlModule.isInFlatSupportState())
       {
-         footNormalContactVector.setIncludingFrame(feet.get(robotSide).getPlaneFrame(), 0.0, 0.0, 1.0);
+         footNormalContactVector.setIncludingFrame(feet.get(robotSide).getSoleFrame(), 0.0, 0.0, 1.0);
          footNormalContactVector.changeFrame(worldFrame);
       }
       else
@@ -352,7 +352,7 @@ public class FeetManager
       if (USE_WORLDFRAME_SURFACE_NORMAL_WHEN_FULLY_CONSTRAINED)
          footNormalContactVector.setIncludingFrame(worldFrame, 0.0, 0.0, 1.0);
       else
-         footNormalContactVector.setIncludingFrame(feet.get(robotSide).getPlaneFrame(), 0.0, 0.0, 1.0);
+         footNormalContactVector.setIncludingFrame(feet.get(robotSide).getSoleFrame(), 0.0, 0.0, 1.0);
       footControlModules.get(robotSide).setContactState(ConstraintType.FULL, footNormalContactVector);
    }
 

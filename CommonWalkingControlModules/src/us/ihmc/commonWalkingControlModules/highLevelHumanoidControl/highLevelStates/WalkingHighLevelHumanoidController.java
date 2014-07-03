@@ -861,7 +861,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private void setDesiredPelvisYawToAverageOfFeetOnStartupOnly(RobotSide transferToSide)
    {
       FrameOrientation averageOrientation = new FrameOrientation(worldFrame);
-      averageOrientationCalculator.computeAverageOrientation(averageOrientation, feet.get(RobotSide.LEFT).getPlaneFrame(), feet.get(RobotSide.RIGHT).getPlaneFrame(), worldFrame);
+      averageOrientationCalculator.computeAverageOrientation(averageOrientation, feet.get(RobotSide.LEFT).getSoleFrame(), feet.get(RobotSide.RIGHT).getSoleFrame(), worldFrame);
 
       double[] yawPitchRoll = averageOrientation.getYawPitchRoll();
 
@@ -1462,7 +1462,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private List<FramePoint> getToePoints(ContactablePlaneBody supportFoot)
    {
-      FrameVector forward = new FrameVector(supportFoot.getPlaneFrame(), 1.0, 0.0, 0.0);
+      FrameVector forward = new FrameVector(supportFoot.getSoleFrame(), 1.0, 0.0, 0.0);
       int nToePoints = 2;
       List<FramePoint> toePoints = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(supportFoot.getContactPointsCopy(), forward, nToePoints);
       for (FramePoint toePoint : toePoints)
