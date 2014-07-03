@@ -914,7 +914,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          
          if (pushRecoveryModule.usePushRecoveryICPPlanner() && pushRecoveryModule.isRecovering())
          {
-            // for the moment we assume that the swingTime has not been changed, if changed the argument of 'compute' should be modified
+            //TODO for the moment we assume that the swingTime has not been changed, if changed the argument of 'compute' should be modified
             pushRecoveryModule.getICPPlanner().compute(stateMachine.timeInCurrentState() - captureTime);
             pushRecoveryModule.getICPPlanner().getICPPosition(desiredICPLocal,capturePoint2d);
             pushRecoveryModule.getICPPlanner().getICPVelocity(desiredICPVelocityLocal);
@@ -959,7 +959,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                 
                   if (pushRecoveryModule.usePushRecoveryICPPlanner())
                   {
-                     //here use temporary variables instead the desired icp
+                     //TODO here use temporary variables instead the desired icp
                      instantaneousCapturePointPlanner.getICPPositionAndVelocity(desiredICPLocal, desiredICPVelocityLocal, ecmpLocal, capturePoint2d,
                            yoTime.getDoubleValue() + icpProjectionTimeOffset.getDoubleValue());
                      
@@ -1162,7 +1162,13 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          isInFlamingoStance.set(false);
 
          if (pushRecoveryModule.isEnabled())
-         {
+         {                                    
+            if (pushRecoveryModule.usePushRecoveryICPPlanner() && pushRecoveryModule.isRecovering())
+            {
+               instantaneousCapturePointPlanner.reset(yoTime.getDoubleValue() - (icpProjectionTimeOffset.getDoubleValue() + captureTime));
+            }
+            
+            captureTime = 0.0;
             pushRecoveryModule.reset();
             icpProjectionTimeOffset.set(0.0);
          }
