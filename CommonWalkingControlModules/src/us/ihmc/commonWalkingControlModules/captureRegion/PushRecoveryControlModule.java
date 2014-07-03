@@ -45,13 +45,14 @@ public class PushRecoveryControlModule
    private static final boolean ENABLE_DOUBLE_SUPPORT_PUSH_RECOVERY = false;
    private static final boolean USE_ICP_PROJECTION_PLANNER = true;
    private static final boolean USE_PUSH_RECOVERY_ICP_PLANNER = false;
+   private static final boolean USE_PUSH_RECOVERY_ICP_PLANNER_WITH_PROJECTION = true;
 
    private static final double MINIMUM_TIME_BEFORE_RECOVER_WITH_REDUCED_POLYGON = 6;
    private static final double DOUBLESUPPORT_SUPPORT_POLYGON_SCALE = 0.85;
    private static final double TRUST_TIME_SCALE = 0.9;
    private static final double MINIMUM_TIME_TO_REPLAN = 0.1;
-   private static final double MINIMUM_SWING_TIME_FOR_DOUBLE_SUPPORT_RECOVERY = 0.35;
-   private static final double MINIMUN_CAPTURE_REGION_PERCENTAGE_OF_FOOT_AREA = 2.5;
+   private static final double MINIMUM_SWING_TIME_FOR_DOUBLE_SUPPORT_RECOVERY = 0.25;
+   private static final double MINIMUN_CAPTURE_REGION_PERCENTAGE_OF_FOOT_AREA = 2.0;
    private static final double REDUCE_SWING_TIME_MULTIPLIER = 0.9;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -60,6 +61,7 @@ public class PushRecoveryControlModule
    private final BooleanYoVariable useICPProjection;
    private final BooleanYoVariable usePushRecoveryICPPlanner;
    private final BooleanYoVariable enablePushRecoveryFromDoubleSupport;
+   private final BooleanYoVariable usePushRecoveryICPPlannerWithProjection;
    private final ICPAndMomentumBasedController icpAndMomentumBasedController;
    private final MomentumBasedController momentumBasedController;
    private final OrientationStateVisualizer orientationStateVisualizer;
@@ -89,6 +91,7 @@ public class PushRecoveryControlModule
    private final PointArtifact projectedCapturePointArtifact;
    private final Point2d projectedCapturePoint;
    private final DoubleYoVariable swingTimeRemaining;
+   private final DoubleYoVariable captureRegionAreaWithMinimumSwingTime;
 
    public PushRecoveryControlModule(MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters,
          BooleanYoVariable readyToGrabNextFootstep, ICPAndMomentumBasedController icpAndMomentumBasedController, StateMachine<?> stateMachine,
@@ -110,7 +113,9 @@ public class PushRecoveryControlModule
       this.useICPProjection = new BooleanYoVariable("useICPProjection", registry);
       this.useICPProjection.set(USE_ICP_PROJECTION_PLANNER);
       this.usePushRecoveryICPPlanner = new BooleanYoVariable("usePushRecoveryICPPlanner", registry);
-      this.usePushRecoveryICPPlanner.set(USE_PUSH_RECOVERY_ICP_PLANNER);     
+      this.usePushRecoveryICPPlanner.set(USE_PUSH_RECOVERY_ICP_PLANNER);  
+      this.usePushRecoveryICPPlannerWithProjection = new BooleanYoVariable("usePushRecoveryICPPlannerWithProjection", registry);
+      this.usePushRecoveryICPPlannerWithProjection.set(USE_PUSH_RECOVERY_ICP_PLANNER_WITH_PROJECTION);  
       
       if (useICPProjection.getBooleanValue() && usePushRecoveryICPPlanner.getBooleanValue())
       {
@@ -135,6 +140,7 @@ public class PushRecoveryControlModule
       tempContactPoints = new ArrayList<FramePoint>();
       tempFootPolygon = new FrameConvexPolygon2d(worldFrame);
       swingTimeRemaining = new DoubleYoVariable("pushRecoverySwingTimeRemaining", registry);
+      captureRegionAreaWithMinimumSwingTime = new DoubleYoVariable("captureRegionAreaWithMinimumSwingTime", registry);
 
       this.capturePointTrajectoryLineArtifact = new YoFrameLine2dArtifact("CapturePointTrajectoryLineArtifact", capturePointTrajectoryLine, Color.red);
       dynamicGraphicObjectsListRegistry.registerArtifact("CapturePointTrajectoryArtifact", capturePointTrajectoryLineArtifact);
@@ -246,14 +252,27 @@ public class PushRecoveryControlModule
                   regularSwingTime = swingTimeCalculationProvider.getValue();
                   
                   doubleSupportInitialSwingTime = computeInitialSwingTimeForDoubleSupportRecovery(swingSide, regularSwingTime, capturePoint2d);
-
-                  if (doubleSupportInitialSwingTime < MINIMUM_SWING_TIME_FOR_DOUBLE_SUPPORT_RECOVERY)
+                  
+                  if(Double.isNaN(captureRegionAreaWithMinimumSwingTime.getDoubleValue()))
                   {
                      // TODO prepare to fall or try to do 2-step recover
                      return false;
                   }
+
+                  if (doubleSupportInitialSwingTime < MINIMUM_SWING_TIME_FOR_DOUBLE_SUPPORT_RECOVERY)
+                  {
+                     // here we try to take a step with the minimum swing time even if may not be enough to recover
+                     swingTimeCalculationProvider.setSwingTime(MINIMUM_SWING_TIME_FOR_DOUBLE_SUPPORT_RECOVERY);
+                     usingReducedSwingTime = true;
+                     readyToGrabNextFootstep.set(false);
+                     momentumBasedController.getUpcomingSupportLeg().set(transferToSide.getOppositeSide());
+                     recoverFromDoubleSupportFallFootStep = currentFootstep;
+                     recoveringFromDoubleSupportFall = true;
+                     reducedSwingTime = doubleSupportInitialSwingTime;
+                     return true;
+                  }
                   
-                  if(doubleSupportInitialSwingTime < regularSwingTime)
+                  if(doubleSupportInitialSwingTime <= regularSwingTime)
                   {
                      swingTimeCalculationProvider.setSwingTime(doubleSupportInitialSwingTime);
                      usingReducedSwingTime = true;
@@ -290,18 +309,32 @@ public class PushRecoveryControlModule
          tempVelocityToPack = new FrameVector(worldFrame);
       }  
       
-      public void getICPPosition(FramePoint2d desiredICPPositionToPack)
+      public void getICPPosition(FramePoint2d desiredICPPositionToPack, FramePoint2d currentICP)
       {
-         get(tempPositionToPack);
-         tempPositionToPack.changeFrame(desiredICPPositionToPack.getReferenceFrame());
-         desiredICPPositionToPack.set(tempPositionToPack.getX(), tempPositionToPack.getY());
+         if(usePushRecoveryICPPlannerWithProjection.getBooleanValue())
+         {
+            desiredICPPositionToPack.set(capturePointTrajectoryLine.orthogonalProjectionCopy(currentICP));
+         }
+         else
+         {
+            get(tempPositionToPack);
+            tempPositionToPack.changeFrame(desiredICPPositionToPack.getReferenceFrame());
+            desiredICPPositionToPack.set(tempPositionToPack.getX(), tempPositionToPack.getY());         
+         }
       }
       
       public void getICPVelocity(FrameVector2d desiredICPVelocityToPack)
       {
-         packVelocity(tempVelocityToPack);
-         tempVelocityToPack.changeFrame(desiredICPVelocityToPack.getReferenceFrame());
-         desiredICPVelocityToPack.set(tempVelocityToPack.getX(), tempVelocityToPack.getY());         
+         if(usePushRecoveryICPPlannerWithProjection.getBooleanValue())
+         {
+            desiredICPVelocityToPack.setToZero(worldFrame);
+         }
+         else
+         {
+            packVelocity(tempVelocityToPack);
+            tempVelocityToPack.changeFrame(desiredICPVelocityToPack.getReferenceFrame());
+            desiredICPVelocityToPack.set(tempVelocityToPack.getX(), tempVelocityToPack.getY());
+         }
       }
    }
 
@@ -358,6 +391,9 @@ public class PushRecoveryControlModule
    {
       momentumBasedController.getContactPoints(feet.get(swingSide.getOppositeSide()), tempContactPoints);
       tempFootPolygon.setIncludingFrameByProjectionOntoXYPlaneAndUpdate(momentumBasedController.getReferenceFrames().getAnkleZUpFrame(swingSide.getOppositeSide()), tempContactPoints);
+      
+      captureRegionCalculator.calculateCaptureRegion(swingSide, MINIMUM_SWING_TIME_FOR_DOUBLE_SUPPORT_RECOVERY, capturePoint2d, icpAndMomentumBasedController.getOmega0(), tempFootPolygon);
+      captureRegionAreaWithMinimumSwingTime.set(captureRegionCalculator.getCaptureRegionArea());
       
       return computeMinimumSwingTime(swingSide, swingTimeRemaining, capturePoint2d, icpAndMomentumBasedController.getOmega0(), tempFootPolygon);
    }
