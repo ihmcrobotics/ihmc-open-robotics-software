@@ -35,10 +35,7 @@ public class DRCConfigParameters
    public static final double GRID_RESOLUTION = 0.025; // in meters
    public static final double OCTREE_RESOLUTION_WHEN_NOT_USING_RESOLUTION_SPHERE = 0.025;
    public static final double FOOTSTEP_FITTING_BUFFER_SIZE = -0.01;
-
-   public static final int CHEATING_POLARIS_PORT = 1543;
-   public static final String CHEATING_POLARIS_HOST = "localhost";
-
+   
    public static final boolean ALLOW_MODEL_CORRUPTION = false;
 
    public static final boolean SEND_ROBOT_DATA_TO_ROS = true;
