@@ -83,7 +83,7 @@ public class EquivalentConstantCoPDesiredCoPControlModule implements DesiredCoPC
 
       FrameConvexPolygon2d supportPolygon = couplingRegistry.getBipedSupportPolygons().getFootPolygonInAnkleZUp(supportLeg);
       FramePoint desiredFinalCapturePoint = new FramePoint();
-      couplingRegistry.getDesiredFootstep().getPosition(desiredFinalCapturePoint);
+      couplingRegistry.getDesiredFootstep().getPositionIncludingFrame(desiredFinalCapturePoint);
       FramePoint2d desiredFinalCapturePoint2d = desiredFinalCapturePoint.toFramePoint2d();
 //      double finalTime = couplingRegistry.getEstimatedSwingTimeRemaining() + 0.2;    // FIXME: hack
       double finalTime = Math.max(couplingRegistry.getEstimatedSwingTimeRemaining(), 50e-3);    // FIXME: hack
