@@ -79,7 +79,7 @@ public abstract class DRCPushRecoveryDoubleSupportTest implements MultiRobotTest
    }
 
    @Test
-   public void TestPushInDoubleSupport() throws SimulationExceededMaximumTimeException, InterruptedException
+   public void TestPushForwardInDoubleSupport() throws SimulationExceededMaximumTimeException, InterruptedException
    {
       BambooTools.reportTestStartedMessage();
 
@@ -98,10 +98,18 @@ public abstract class DRCPushRecoveryDoubleSupportTest implements MultiRobotTest
       BooleanYoVariable enable = (BooleanYoVariable) scs.getVariable("enablePushRecovery");
       @SuppressWarnings("deprecation")
       BooleanYoVariable enableDS = (BooleanYoVariable) scs.getVariable("enablePushRecoveryFromDoubleSupport");
+      @SuppressWarnings("deprecation")
+      BooleanYoVariable useICPProjectionPlanner = (BooleanYoVariable) scs.getVariable("useICPProjection");
+      @SuppressWarnings("deprecation")
+      BooleanYoVariable usePushRecoveryICPPlanner = (BooleanYoVariable) scs.getVariable("usePushRecoveryICPPlanner");
 
       // enable push recovery
       enable.set(true);
       enableDS.set(true);
+      
+      // enable ICP push recovery planner and disable projection planner
+      useICPProjectionPlanner.set(false);;
+      usePushRecoveryICPPlanner.set(true);
 
       // disable walking
       walk.set(false);
@@ -117,7 +125,7 @@ public abstract class DRCPushRecoveryDoubleSupportTest implements MultiRobotTest
    }
    
    @Test
-   public void TestPushInDoubleSupportAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException
+   public void TestPushForwardInDoubleSupportAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException
    {
       BambooTools.reportTestStartedMessage();
 
@@ -136,10 +144,18 @@ public abstract class DRCPushRecoveryDoubleSupportTest implements MultiRobotTest
       BooleanYoVariable enable = (BooleanYoVariable) scs.getVariable("enablePushRecovery");
       @SuppressWarnings("deprecation")
       BooleanYoVariable enableDS = (BooleanYoVariable) scs.getVariable("enablePushRecoveryFromDoubleSupport");
+      @SuppressWarnings("deprecation")
+      BooleanYoVariable useICPProjectionPlanner = (BooleanYoVariable) scs.getVariable("useICPProjection");
+      @SuppressWarnings("deprecation")
+      BooleanYoVariable usePushRecoveryICPPlanner = (BooleanYoVariable) scs.getVariable("usePushRecoveryICPPlanner");
 
       // enable push recovery
       enable.set(true);
       enableDS.set(true);
+      
+      // enable ICP push recovery planner and disable projection planner
+      useICPProjectionPlanner.set(false);;
+      usePushRecoveryICPPlanner.set(true);
 
       // disable walking
       walk.set(false);
@@ -150,6 +166,170 @@ public abstract class DRCPushRecoveryDoubleSupportTest implements MultiRobotTest
 
       // simulate for a little while longer
       blockingSimulationRunner.simulateAndBlock(forceDuration + 2.0);
+      
+      //re-enable walking
+      walk.set(true);
+      blockingSimulationRunner.simulateAndBlock(6.0);
+
+      BambooTools.reportTestFinishedMessage();
+   }
+   
+   @Test
+   public void TestDoublePushForwardInDoubleSupportAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      DRCFlatGroundWalkingTrack track = setupTest(getRobotModel());
+      SimulationConstructionSet scs = track.getSimulationConstructionSet();
+
+      double forceMagnitude = 450.0;
+      double forceDuration = 0.15;
+      Vector3d forceDirection = new Vector3d(1.0, 0.0, 0.0);
+
+      blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
+
+      @SuppressWarnings("deprecation")
+      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("walk");
+      @SuppressWarnings("deprecation")
+      BooleanYoVariable enable = (BooleanYoVariable) scs.getVariable("enablePushRecovery");
+      @SuppressWarnings("deprecation")
+      BooleanYoVariable enableDS = (BooleanYoVariable) scs.getVariable("enablePushRecoveryFromDoubleSupport");
+      @SuppressWarnings("deprecation")
+      BooleanYoVariable useICPProjectionPlanner = (BooleanYoVariable) scs.getVariable("useICPProjection");
+      @SuppressWarnings("deprecation")
+      BooleanYoVariable usePushRecoveryICPPlanner = (BooleanYoVariable) scs.getVariable("usePushRecoveryICPPlanner");
+
+      // enable push recovery
+      enable.set(true);
+      enableDS.set(true);
+      
+      // enable ICP push recovery planner and disable projection planner
+      useICPProjectionPlanner.set(false);;
+      usePushRecoveryICPPlanner.set(true);
+
+      // disable walking
+      walk.set(false);
+      blockingSimulationRunner.simulateAndBlock(6.0);
+
+      // push the robot
+      pushRobotController.applyForce(forceDirection, forceMagnitude, forceDuration);
+
+      // simulate for a little while longer
+      blockingSimulationRunner.simulateAndBlock(forceDuration + 2.0);
+      
+      // push the robot
+      pushRobotController.applyForce(forceDirection, forceMagnitude, forceDuration);
+
+      // simulate for a little while longer
+      blockingSimulationRunner.simulateAndBlock(forceDuration + 2.0);
+      
+      //re-enable walking
+      walk.set(true);
+      blockingSimulationRunner.simulateAndBlock(6.0);
+
+      BambooTools.reportTestFinishedMessage();
+   }
+   
+   @Test
+   public void TestPushBackwardInDoubleSupportAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      DRCFlatGroundWalkingTrack track = setupTest(getRobotModel());
+      SimulationConstructionSet scs = track.getSimulationConstructionSet();
+
+      double forceMagnitude = -450.0;
+      double forceDuration = 0.15;
+      Vector3d forceDirection = new Vector3d(1.0, 0.0, 0.0);
+
+      blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
+
+      @SuppressWarnings("deprecation")
+      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("walk");
+      @SuppressWarnings("deprecation")
+      BooleanYoVariable enable = (BooleanYoVariable) scs.getVariable("enablePushRecovery");
+      @SuppressWarnings("deprecation")
+      BooleanYoVariable enableDS = (BooleanYoVariable) scs.getVariable("enablePushRecoveryFromDoubleSupport");
+      @SuppressWarnings("deprecation")
+      BooleanYoVariable useICPProjectionPlanner = (BooleanYoVariable) scs.getVariable("useICPProjection");
+      @SuppressWarnings("deprecation")
+      BooleanYoVariable usePushRecoveryICPPlanner = (BooleanYoVariable) scs.getVariable("usePushRecoveryICPPlanner");
+
+      // enable push recovery
+      enable.set(true);
+      enableDS.set(true);
+      
+      // enable ICP push recovery planner and disable projection planner
+      useICPProjectionPlanner.set(false);;
+      usePushRecoveryICPPlanner.set(true);
+
+      // disable walking
+      walk.set(false);
+      blockingSimulationRunner.simulateAndBlock(6.0);
+
+      // push the robot
+      pushRobotController.applyForce(forceDirection, forceMagnitude, forceDuration);
+
+      // simulate for a little while longer
+      blockingSimulationRunner.simulateAndBlock(forceDuration + 2.0);
+      
+      //re-enable walking
+      walk.set(true);
+      blockingSimulationRunner.simulateAndBlock(6.0);
+
+      BambooTools.reportTestFinishedMessage();
+   }
+   
+   @Test
+   public void TestPushBackwardForwardInDoubleSupportAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      DRCFlatGroundWalkingTrack track = setupTest(getRobotModel());
+      SimulationConstructionSet scs = track.getSimulationConstructionSet();
+
+      double forceMagnitude = -450.0;
+      double forceDuration = 0.15;
+      Vector3d forceDirection = new Vector3d(1.0, 0.0, 0.0);
+
+      blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
+
+      @SuppressWarnings("deprecation")
+      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("walk");
+      @SuppressWarnings("deprecation")
+      BooleanYoVariable enable = (BooleanYoVariable) scs.getVariable("enablePushRecovery");
+      @SuppressWarnings("deprecation")
+      BooleanYoVariable enableDS = (BooleanYoVariable) scs.getVariable("enablePushRecoveryFromDoubleSupport");
+      @SuppressWarnings("deprecation")
+      BooleanYoVariable useICPProjectionPlanner = (BooleanYoVariable) scs.getVariable("useICPProjection");
+      @SuppressWarnings("deprecation")
+      BooleanYoVariable usePushRecoveryICPPlanner = (BooleanYoVariable) scs.getVariable("usePushRecoveryICPPlanner");
+
+      // enable push recovery
+      enable.set(true);
+      enableDS.set(true);
+      
+      // enable ICP push recovery planner and disable projection planner
+      useICPProjectionPlanner.set(false);;
+      usePushRecoveryICPPlanner.set(true);
+
+      // disable walking
+      walk.set(false);
+      blockingSimulationRunner.simulateAndBlock(6.0);
+
+      // push the robot
+      pushRobotController.applyForce(forceDirection, forceMagnitude, forceDuration);
+
+      // simulate for a little while longer
+      blockingSimulationRunner.simulateAndBlock(forceDuration + 3.0);
+      
+      forceMagnitude = 450.0;
+      
+      // push the robot
+      pushRobotController.applyForce(forceDirection, forceMagnitude, forceDuration);
+
+      // simulate for a little while longer
+      blockingSimulationRunner.simulateAndBlock(forceDuration + 3.0);
       
       //re-enable walking
       walk.set(true);
