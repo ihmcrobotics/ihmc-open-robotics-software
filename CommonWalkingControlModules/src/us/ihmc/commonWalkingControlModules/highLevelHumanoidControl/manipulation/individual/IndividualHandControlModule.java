@@ -367,7 +367,7 @@ public class IndividualHandControlModule
       pose.changeFrame(trajectoryFrame);
 
       Transform3D oldTrackingFrameTransform = new Transform3D();
-      pose.getTransformFromPoseToFrame(oldTrackingFrameTransform);
+      pose.getPose(oldTrackingFrameTransform);
       Transform3D transformFromNewTrackingFrameToOldTrackingFrame =
          frameToControlPoseOf.getTransformToDesiredFrame(taskspaceHandPositionControlState.getFrameToControlPoseOf());
 
@@ -390,7 +390,7 @@ public class IndividualHandControlModule
       pose.setPosition(position);
 
       Transform3D oldTrackingFrameTransform = new Transform3D();
-      pose.getTransformFromPoseToFrame(oldTrackingFrameTransform);
+      pose.getPose(oldTrackingFrameTransform);
       Transform3D transformFromNewTrackingFrameToOldTrackingFrame =
             frameToControlPoseOf.getTransformToDesiredFrame(pointPositionHandControlState.getFrameToControlPoseOf());
 

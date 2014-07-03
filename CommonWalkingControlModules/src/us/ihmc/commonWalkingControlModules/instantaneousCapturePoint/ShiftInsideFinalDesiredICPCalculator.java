@@ -87,6 +87,6 @@ public class ShiftInsideFinalDesiredICPCalculator implements FinalDesiredICPCalc
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       framePose.changeFrame(worldFrame);
-      framePose.getTransformFromPoseToFrame(poseToWorldTransformToPack);
+      framePose.getPose(poseToWorldTransformToPack);
    }
 }
