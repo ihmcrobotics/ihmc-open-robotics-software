@@ -60,8 +60,9 @@ public class ShiftInsideFinalDesiredICPCalculator implements FinalDesiredICPCalc
       Transform3D footstepAnkleToWorldTransform = new Transform3D();
       getTransformFromPoseToWorld(footstepAnkleToWorldTransform, transferToFootstepAnklePose);
 
-      Transform3D ankleToSoleTransform = FootstepUtils.getAnkleToSoleTransform(transferToFootContactablePlaneBody);
-      ankleToSoleTransform.invert();
+      ReferenceFrame footBodyFrame = transferToFootContactablePlaneBody.getFrameAfterParentJoint();
+      ReferenceFrame footPlaneFrame = transferToFootContactablePlaneBody.getSoleFrame();
+      Transform3D ankleToSoleTransform = footPlaneFrame.getTransformToDesiredFrame(footBodyFrame);
 
       FramePoint2d centroid2d = transferToFootPolygonInSoleFrame.getCentroidCopy();
       FramePoint centroid = centroid2d.toFramePoint();

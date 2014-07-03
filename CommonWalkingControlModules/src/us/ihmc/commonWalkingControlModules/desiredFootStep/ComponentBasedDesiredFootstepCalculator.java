@@ -49,13 +49,16 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
 
    private HeightMap heightMap;
 
-   public ComponentBasedDesiredFootstepCalculator(SideDependentList<? extends ReferenceFrame> ankleZUpFrames,
+   private final double ankleHeight;
+
+   public ComponentBasedDesiredFootstepCalculator(double ankleHeight, SideDependentList<? extends ReferenceFrame> ankleZUpFrames,
            SideDependentList<? extends ReferenceFrame> ankleFrames, SideDependentList<? extends ContactablePlaneBody> bipedFeet,
            DesiredHeadingControlModule desiredHeadingControlModule, DesiredVelocityControlModule desiredVelocityControlModule,
            YoVariableRegistry parentRegistry)
    {
       super(bipedFeet, getFramesToStoreFootstepsIn(), parentRegistry);
 
+      this.ankleHeight = ankleHeight;
       this.ankleZUpFrames = ankleZUpFrames;
       this.ankleFrames = ankleFrames;
 
@@ -290,7 +293,6 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
 
          footstepPosition.changeFrame(ReferenceFrame.getWorldFrame());
          double groundZ = heightMap.heightAt(footstepPosition.getX(), footstepPosition.getY(), 0.0);
-         double ankleHeight = FootstepUtils.getSoleToAnkleHeight(upcomingSwingFoot);
          double ankleZ = groundZ + ankleHeight;
 
          footstepPosition.setZ(ankleZ);

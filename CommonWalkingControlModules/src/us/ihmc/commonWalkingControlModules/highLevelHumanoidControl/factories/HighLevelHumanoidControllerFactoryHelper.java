@@ -77,7 +77,8 @@ public class HighLevelHumanoidControllerFactoryHelper
 
       updatables.add(new DesiredHeadingUpdater(desiredHeadingControlModule));
 
-      desiredFootstepCalculator = new ComponentBasedDesiredFootstepCalculator(referenceFrames.getAnkleZUpReferenceFrames(),
+      double ankleHeight = walkingControllerParameters.getAnkleHeight();
+      desiredFootstepCalculator = new ComponentBasedDesiredFootstepCalculator(ankleHeight, referenceFrames.getAnkleZUpReferenceFrames(),
             referenceFrames.getFootReferenceFrames(), bipedFeet, desiredHeadingControlModule, desiredVelocityControlModule, registry);
 
       desiredFootstepCalculator.setInPlaceWidth(walkingControllerParameters.getInPlaceWidth());
