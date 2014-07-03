@@ -47,7 +47,7 @@ public class PushRecoveryControlModule
    private static final boolean USE_PUSH_RECOVERY_ICP_PLANNER = true;
    private static final boolean ENABLE_PROJECTION_INSIDE_PUSH_RECOVERY_ICP_PLANNER = true;
 
-   private static final double MINIMUM_TIME_BEFORE_RECOVER_WITH_REDUCED_POLYGON = 6;
+   private static final double MINIMUM_TIME_BEFORE_RECOVER_WITH_REDUCED_POLYGON = 4;
    private static final double DOUBLESUPPORT_SUPPORT_POLYGON_SCALE = 0.85;
    private static final double TRUST_TIME_SCALE = 0.95;
    private static final double MINIMUM_TIME_TO_REPLAN = 0.1;
@@ -379,7 +379,7 @@ public class PushRecoveryControlModule
          captureRegionCalculator.calculateCaptureRegion(swingSide, reducedSwingTime, capturePoint2d, omega0, footPolygon);
 
          // avoid infinite loops
-         if (reducedSwingTime < 0.1)
+         if (reducedSwingTime < MINIMUM_TIME_TO_REPLAN)
             break;
       }
       
