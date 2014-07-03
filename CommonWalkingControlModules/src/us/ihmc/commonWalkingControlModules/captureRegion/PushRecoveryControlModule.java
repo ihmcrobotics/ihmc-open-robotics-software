@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.ICPAndMomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
+import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePositionTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculationProvider;
 import us.ihmc.plotting.shapes.PointArtifact;
 import us.ihmc.robotSide.RobotSide;
@@ -23,20 +24,27 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.plotting.YoFrameLine2dArtifact;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameLine2d;
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
+import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.PositionProvider;
 
 public class PushRecoveryControlModule
 {
    private static final boolean ENABLE = false;
+   private static final boolean ENABLE_DOUBLE_SUPPORT_PUSH_RECOVERY = false;
+   private static final boolean USE_ICP_PROJECTION_PLANNER = true;
+   private static final boolean USE_PUSH_RECOVERY_ICP_PLANNER = false;
 
    private static final double MINIMUM_TIME_BEFORE_RECOVER_WITH_REDUCED_POLYGON = 6;
    private static final double DOUBLESUPPORT_SUPPORT_POLYGON_SCALE = 0.85;
@@ -47,8 +55,10 @@ public class PushRecoveryControlModule
    private static final double REDUCE_SWING_TIME_MULTIPLIER = 0.9;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final boolean useICPProjection = true;
-
+   
+   private final BooleanYoVariable enablePushRecovery; 
+   private final BooleanYoVariable useICPProjection;
+   private final BooleanYoVariable usePushRecoveryICPPlanner;
    private final BooleanYoVariable enablePushRecoveryFromDoubleSupport;
    private final ICPAndMomentumBasedController icpAndMomentumBasedController;
    private final MomentumBasedController momentumBasedController;
@@ -57,10 +67,10 @@ public class PushRecoveryControlModule
    private final OneStepCaptureRegionCalculator captureRegionCalculator;
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final BooleanYoVariable footstepWasProjectedInCaptureRegion;
-   private final BooleanYoVariable enablePushRecovery = new BooleanYoVariable("enablePushRecovery", registry);
    private final CommonWalkingReferenceFrames referenceFrames;
    private final StateMachine<?> stateMachine;
    private final SwingTimeCalculationProvider swingTimeCalculationProvider;
+   private final PushRecoveryICPPlanner pushRecoveryICPPlanner;
 
    private boolean recoveringFromDoubleSupportFall;
    private boolean usingReducedSwingTime;
@@ -72,11 +82,13 @@ public class PushRecoveryControlModule
    private final SideDependentList<? extends ContactablePlaneBody> feet;
    private final List<FramePoint> tempContactPoints;
    private final FrameConvexPolygon2d tempFootPolygon;
+   private final FramePoint2d initialDesiredICP, finalDesiredICP;
 
    private final YoFrameLine2d capturePointTrajectoryLine;
    private final YoFrameLine2dArtifact capturePointTrajectoryLineArtifact;
    private final PointArtifact projectedCapturePointArtifact;
    private final Point2d projectedCapturePoint;
+   private final DoubleYoVariable swingTimeRemaining;
 
    public PushRecoveryControlModule(MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters,
          BooleanYoVariable readyToGrabNextFootstep, ICPAndMomentumBasedController icpAndMomentumBasedController, StateMachine<?> stateMachine,
@@ -89,11 +101,22 @@ public class PushRecoveryControlModule
       this.stateMachine = stateMachine;
       this.swingTimeCalculationProvider = swingTimeCalculationProvider;
       this.feet = feet;
+      this.pushRecoveryICPPlanner = new PushRecoveryICPPlanner("pushRecoveryICPPlanner", worldFrame, remainingSwingTimeProvider, initialICPPositionProvider, finalICPPositionProvider, registry);
 
-      enablePushRecovery.set(ENABLE);
-
+      this.enablePushRecovery = new BooleanYoVariable("enablePushRecovery", registry);
+      this.enablePushRecovery.set(ENABLE);
       this.enablePushRecoveryFromDoubleSupport = new BooleanYoVariable("enablePushRecoveryFromDoubleSupport", registry);
-      this.enablePushRecoveryFromDoubleSupport.set(false);
+      this.enablePushRecoveryFromDoubleSupport.set(ENABLE_DOUBLE_SUPPORT_PUSH_RECOVERY);
+      this.useICPProjection = new BooleanYoVariable("useICPProjection", registry);
+      this.useICPProjection.set(USE_ICP_PROJECTION_PLANNER);
+      this.usePushRecoveryICPPlanner = new BooleanYoVariable("usePushRecoveryICPPlanner", registry);
+      this.usePushRecoveryICPPlanner.set(USE_PUSH_RECOVERY_ICP_PLANNER);     
+      
+      if (useICPProjection.getBooleanValue() && usePushRecoveryICPPlanner.getBooleanValue())
+      {
+         throw new RuntimeException("Select only one default ICP planner for push recovery.");
+      }
+    
       this.usingReducedSwingTime = false;
 
       this.dynamicGraphicObjectsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
@@ -103,26 +126,25 @@ public class PushRecoveryControlModule
 
       footstepWasProjectedInCaptureRegion = new BooleanYoVariable("footstepWasProjectedInCaptureRegion", registry);
       recovering = new BooleanYoVariable("recovering", registry);
+      initialDesiredICP = new FramePoint2d(worldFrame);
+      finalDesiredICP = new FramePoint2d(worldFrame);
 
       capturePointTrajectoryLine = new YoFrameLine2d(getClass().getSimpleName(), "CapturePointTrajectoryLine", ReferenceFrame.getWorldFrame(), registry);
       projectedCapturePoint = new Point2d();
       projectedCapturePointArtifact = new PointArtifact("ProjectedCapturePointArtifact", projectedCapturePoint);
       tempContactPoints = new ArrayList<FramePoint>();
       tempFootPolygon = new FrameConvexPolygon2d(worldFrame);
+      swingTimeRemaining = new DoubleYoVariable("pushRecoverySwingTimeRemaining", registry);
 
       this.capturePointTrajectoryLineArtifact = new YoFrameLine2dArtifact("CapturePointTrajectoryLineArtifact", capturePointTrajectoryLine, Color.red);
       dynamicGraphicObjectsListRegistry.registerArtifact("CapturePointTrajectoryArtifact", capturePointTrajectoryLineArtifact);
       dynamicGraphicObjectsListRegistry.registerArtifact("ProjectedCapturePointArtifact", projectedCapturePointArtifact);
 
       parentRegistry.addChild(registry);
-
+      
       reset();
    }
 
-   public boolean isEnabled()
-   {
-      return enablePushRecovery.getBooleanValue();
-   }
 
    public void reset()
    {
@@ -171,7 +193,7 @@ public class PushRecoveryControlModule
       {
          if (enablePushRecovery.getBooleanValue())
          {
-            if (getDoubleSupportEnableState())
+            if (isEnabledInDoubleSupport())
             {
                FrameConvexPolygon2d supportPolygonInMidFeetZUp = icpAndMomentumBasedController.getBipedSupportPolygons().getSupportPolygonInMidFeetZUp();
 
@@ -254,10 +276,38 @@ public class PushRecoveryControlModule
          return false;
       }
    }
+   
+   public class PushRecoveryICPPlanner extends StraightLinePositionTrajectoryGenerator
+   {
+      private FramePoint tempPositionToPack;
+      private FrameVector tempVelocityToPack;
+      
+      public PushRecoveryICPPlanner(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider trajectoryTimeProvider,
+            PositionProvider initialPositionProvider, PositionProvider finalPositionProvider, YoVariableRegistry parentRegistry)
+      {
+         super(namePrefix, referenceFrame, trajectoryTimeProvider, initialPositionProvider, finalPositionProvider, parentRegistry);
+      }  
+      
+      public void getICPPosition(FramePoint2d desiredICPPositionToPack)
+      {
+         get(tempPositionToPack);
+         tempPositionToPack.changeFrame(desiredICPPositionToPack.getReferenceFrame());
+         desiredICPPositionToPack.set(tempPositionToPack.getX(), tempPositionToPack.getY());
+      }
+      
+      public void getICPVelocity(FrameVector2d desiredICPVelocityToPack)
+      {
+         packVelocity(tempVelocityToPack);
+         tempVelocityToPack.changeFrame(desiredICPVelocityToPack.getReferenceFrame());
+         desiredICPVelocityToPack.set(tempVelocityToPack.getX(), tempVelocityToPack.getY());         
+      }
+   }
 
    public boolean checkAndUpdateFootstep(RobotSide swingSide, double swingTimeRemaining, FramePoint2d capturePoint2d, Footstep nextFootstep, double omega0,
          FrameConvexPolygon2d footPolygon)
    {
+      this.swingTimeRemaining.set(swingTimeRemaining);
+      
       if (enablePushRecovery.getBooleanValue())
       {
          captureRegionCalculator.calculateCaptureRegion(swingSide, swingTimeRemaining, capturePoint2d, omega0, footPolygon);
@@ -362,16 +412,35 @@ public class PushRecoveryControlModule
    //
    //      return tempFootPolygon;
    //   }
-
-   public boolean isRecoveringFromDoubleSupportFall()
+   
+   private PositionProvider initialICPPositionProvider = new PositionProvider()
    {
-      return recoveringFromDoubleSupportFall;
-   }
-
-   public boolean getDoubleSupportEnableState()
+      @Override
+      public void get(FramePoint positionToPack)
+      {
+         initialDesiredICP.checkReferenceFrameMatch(worldFrame);
+         positionToPack.setIncludingFrame(worldFrame, initialDesiredICP.getX(), initialDesiredICP.getY(), 0.0);
+      }  
+   };
+   
+   private PositionProvider finalICPPositionProvider = new PositionProvider()
    {
-      return enablePushRecoveryFromDoubleSupport.getBooleanValue();
-   }
+      @Override
+      public void get(FramePoint positionToPack)
+      {
+         finalDesiredICP.checkReferenceFrameMatch(worldFrame);
+         positionToPack.setIncludingFrame(worldFrame, finalDesiredICP.getX(), finalDesiredICP.getY(), 0.0);         
+      }
+   };
+   
+   private DoubleProvider remainingSwingTimeProvider = new DoubleProvider()
+   {
+      @Override
+      public double getValue()
+      {
+         return getSwingTimeRemaining();
+      } 
+   };
 
    public Footstep getRecoverFromDoubleSupportFootStep()
    {
@@ -381,6 +450,36 @@ public class PushRecoveryControlModule
    public double getTrustTimeToConsiderSwingFinished()
    {
       return this.reducedSwingTime * TRUST_TIME_SCALE;
+   }
+   
+   public double getSwingTimeRemaining()
+   {
+      return this.swingTimeRemaining.getDoubleValue();
+   }
+   
+   public PushRecoveryICPPlanner getICPPlanner()
+   {
+      return pushRecoveryICPPlanner;
+   }
+   
+   public boolean isEnabled()
+   {
+      return enablePushRecovery.getBooleanValue();
+   }
+
+   public boolean isEnabledInDoubleSupport()
+   {
+      return enablePushRecoveryFromDoubleSupport.getBooleanValue();
+   }
+   
+   public boolean isRecoveringFromDoubleSupportFall()
+   {
+      return recoveringFromDoubleSupportFall;
+   }
+   
+   public void setSwingTimeRemaining(double value)
+   {
+      this.swingTimeRemaining.set(value);
    }
 
    public void setRecoveringFromDoubleSupportState(boolean value)
@@ -392,10 +491,27 @@ public class PushRecoveryControlModule
    {
       recoverFromDoubleSupportFallFootStep = recoverFootStep;
    }
+   
+   public void setFinalDesiredICP(FramePoint2d tempPoint)
+   {
+      tempPoint.changeFrame(worldFrame);
+      finalDesiredICP.setIncludingFrame(worldFrame, tempPoint.getX(), tempPoint.getY());
+   }
+   
+   public void setInitialDesiredICP(FramePoint2d tempPoint)
+   {
+      tempPoint.changeFrame(worldFrame);
+      initialDesiredICP.setIncludingFrame(worldFrame, tempPoint.getX(), tempPoint.getY());
+   }
 
    public boolean useICPProjection()
    {
-      return this.useICPProjection;
+      return this.useICPProjection.getBooleanValue();
+   }
+   
+   public boolean usePushRecoveryICPPlanner()
+   {
+      return this.usePushRecoveryICPPlanner.getBooleanValue();
    }
 
    public boolean isRecovering()
