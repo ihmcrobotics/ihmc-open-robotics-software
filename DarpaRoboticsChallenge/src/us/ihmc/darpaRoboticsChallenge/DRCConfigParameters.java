@@ -28,7 +28,6 @@ public class DRCConfigParameters
    // UI
    public static final int UI_JOINT_CONFIGURATION_UPDATE_MILLIS = 100;
    public static final boolean USE_COLLISIONS_MESHS_FOR_VISUALIZATION = false;
-   public static final boolean USE_SLIDER_FOR_POSE_PLAYBACK = false;
 
    // LIDAR Processor
    public static final boolean LIDAR_PROCESSOR_TIMING_REPORTING_ON = false;
