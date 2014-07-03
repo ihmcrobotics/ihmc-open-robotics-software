@@ -53,7 +53,9 @@ public class CapturabilityBasedDesiredCoPControlModule implements DesiredCoPCont
       BipedSupportPolygons bipedSupportPolygons = couplingRegistry.getBipedSupportPolygons();
       ReferenceFrame ankleZUpFrame = referenceFrames.getAnkleZUpFrame(supportLeg);
       FramePoint2d capturePoint = couplingRegistry.getCapturePointInFrame(ankleZUpFrame).toFramePoint2d();
-      FramePoint finalDesiredSwingTarget = couplingRegistry.getDesiredFootstep().getPositionInFrame(ankleZUpFrame);
+      FramePoint finalDesiredSwingTarget = new FramePoint();
+      couplingRegistry.getDesiredFootstep().getPositionIncludingFrame(finalDesiredSwingTarget);
+      finalDesiredSwingTarget.changeFrame(ankleZUpFrame);
       FramePoint2d ret = new FramePoint2d(ankleZUpFrame);
 
       if (guideLineOrCapturePointSingleSupportDecider.useGuideLine(singleSupportCondition, timeInState, desiredVelocity))

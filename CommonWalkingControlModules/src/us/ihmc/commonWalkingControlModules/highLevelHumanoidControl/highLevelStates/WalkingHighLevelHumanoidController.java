@@ -235,7 +235,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    
    private final BooleanYoVariable isInFlamingoStance = new BooleanYoVariable("isInFlamingoStance", registry);
    private final DoubleYoVariable icpProjectionTimeOffset = new DoubleYoVariable("icpProjectionTimeOffset", registry);
-   
+
    public WalkingHighLevelHumanoidController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
          CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator, TransferTimeCalculationProvider transferTimeCalculationProvider,
          SwingTimeCalculationProvider swingTimeCalculationProvider, WalkingControllerParameters walkingControllerParameters,
@@ -648,7 +648,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
                TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForDoubleSupport(RobotSide.LEFT, true);
                instantaneousCapturePointPlanner.initializeDoubleSupport(transferToAndNextFootstepsData, 0.1);
-               
+
                neutralFootstepsData = createTransferToAndNextFootstepDataForDoubleSupport(RobotSide.LEFT, true);
                neutralFootstepsData.setTransferToSide(null);
 
@@ -1086,7 +1086,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          FrameOrientation tempOrientation = new FrameOrientation();
          tempOrientation.interpolate(orientation, finalPelvisOrientation, 0.5);
          finalPelvisOrientation.setYawPitchRoll(tempOrientation.getYaw(), 0.0, 0.0);
-         FramePoint swingFootFinalPosition = nextFootstep.getPositionInFrame(referenceFrames.getAnkleZUpFrame(swingSide.getOppositeSide()));
+         FramePoint swingFootFinalPosition = new FramePoint();
+         nextFootstep.getPositionIncludingFrame(swingFootFinalPosition);
+         swingFootFinalPosition.changeFrame(referenceFrames.getAnkleZUpFrame(swingSide.getOppositeSide()));
          FrameVector supportFootToSwingFoot = new FrameVector(swingFootFinalPosition);
          Vector3d temp = supportFootToSwingFoot.getVectorCopy();
          double desiredPelvisYawAngle = 0.0;

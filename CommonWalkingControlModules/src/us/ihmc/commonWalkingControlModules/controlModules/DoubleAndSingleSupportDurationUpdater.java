@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
@@ -30,7 +31,10 @@ public class DoubleAndSingleSupportDurationUpdater
    public void update(Footstep desiredFootstep, RobotSide supportLeg, FrameVector2d desiredVelocity)
    {
       ReferenceFrame supportAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(supportLeg);
-      FrameVector2d desiredStepVector = new FrameVector2d(desiredFootstep.getPositionInFrame(supportAnkleZUpFrame).toFramePoint2d());
+      FramePoint desiredFootstepPosition = new FramePoint();
+      desiredFootstep.getPositionIncludingFrame(desiredFootstepPosition);
+      desiredFootstepPosition.changeFrame(supportAnkleZUpFrame);
+      FrameVector2d desiredStepVector = new FrameVector2d(desiredFootstepPosition.toFramePoint2d());
       desiredVelocity.changeFrame(supportAnkleZUpFrame);
       double desiredVelocityMagnitude = desiredVelocity.length();
       double stepDistanceAlongDesiredVelocity = desiredStepVector.dot(desiredVelocity) / desiredVelocityMagnitude;
