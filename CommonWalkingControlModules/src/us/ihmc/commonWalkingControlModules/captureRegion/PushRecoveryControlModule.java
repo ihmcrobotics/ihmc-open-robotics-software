@@ -286,6 +286,8 @@ public class PushRecoveryControlModule
             PositionProvider initialPositionProvider, PositionProvider finalPositionProvider, YoVariableRegistry parentRegistry)
       {
          super(namePrefix, referenceFrame, trajectoryTimeProvider, initialPositionProvider, finalPositionProvider, parentRegistry);
+         tempPositionToPack = new FramePoint(worldFrame);
+         tempVelocityToPack = new FrameVector(worldFrame);
       }  
       
       public void getICPPosition(FramePoint2d desiredICPPositionToPack)
