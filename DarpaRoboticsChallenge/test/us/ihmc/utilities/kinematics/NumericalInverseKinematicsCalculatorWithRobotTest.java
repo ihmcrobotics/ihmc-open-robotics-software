@@ -169,7 +169,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
 
       Transform3D transform = new Transform3D();
 
-      handPose.getTransformFromPoseToFrame(transform);
+      handPose.getPose(transform);
       randomArmPoseWithForwardKinematics();
 
       long start = System.nanoTime();

@@ -216,7 +216,7 @@ public class DesiredFootstepVisualizer
       desiredFootstep.getPose(pose);
       pose.changeFrame(worldFrame);
       Transform3D transform = new Transform3D();
-      pose.getTransformFromPoseToFrame(transform);
+      pose.getPose(transform);
       sixDoFJoints.get(swingLegSide).setPositionAndRotation(transform);
 
       updateFrames();
@@ -431,7 +431,7 @@ public class DesiredFootstepVisualizer
          poseToMoveTo.changeFrame(worldFrame);
 
          Transform3D transform = new Transform3D();
-         poseToMoveTo.getTransformFromPoseToFrame(transform);
+         poseToMoveTo.getPose(transform);
          desiredFootstepVisualizer.setPoseToMoveToTransform(swingLegSide, transform);
 
          for (int j = 0; j < ticksPerDoubleSupport; j++)
