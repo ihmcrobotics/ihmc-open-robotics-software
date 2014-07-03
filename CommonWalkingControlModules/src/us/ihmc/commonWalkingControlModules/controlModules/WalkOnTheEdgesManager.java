@@ -333,21 +333,19 @@ public class WalkOnTheEdgesManager
       doHeelTouchdown.set(frontFootWellPositionedForHeelTouchdown);
    }
 
-   public Footstep createFootstepForEdgeTouchdown(Footstep footstepToModify, double touchdownInitialPitch)
+   public void modifyFootstepForEdgeTouchdown(Footstep footstepToModify, double touchdownInitialPitch)
    {
       desiredFootstep = new Footstep(footstepToModify);
       if (!doToeTouchdown.getBooleanValue() && !doHeelTouchdown.getBooleanValue())
-         return footstepToModify;
-
-      FramePose oldPose = new FramePose();
-      footstepToModify.getPose(oldPose);
+         return;
 
       FrameOrientation oldOrientation = new FrameOrientation();
-      oldPose.getOrientationIncludingFrame(oldOrientation);
       FrameOrientation newOrientation = new FrameOrientation();
-      oldPose.getOrientationIncludingFrame(newOrientation);
       FramePoint newPosition = new FramePoint();
-      oldPose.getPositionIncludingFrame(newPosition);
+
+      footstepToModify.getPose(newPosition, oldOrientation);
+      newOrientation.setIncludingFrame(oldOrientation);
+      
       double[] yawPitchRoll = newOrientation.getYawPitchRoll();
       yawPitchRoll[1] += touchdownInitialPitch;
       newOrientation.setYawPitchRoll(yawPitchRoll);
@@ -373,10 +371,7 @@ public class WalkOnTheEdgesManager
 
       newPosition.setX(newX);
       newPosition.setZ(newHeight);
-      FramePose newPose = new FramePose(newPosition, newOrientation);
-      PoseReferenceFrame newReferenceFrame = new PoseReferenceFrame("newPoseFrame", newPose);
-
-      return Footstep.copyChangePoseFrame(footstepToModify, newReferenceFrame);
+      footstepToModify.setPose(newPosition, newOrientation);
    }
 
    public boolean willLandOnEdge()
