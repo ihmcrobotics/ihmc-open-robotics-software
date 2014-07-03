@@ -7,25 +7,33 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Random;
+import java.util.jar.Pack200;
 
 import org.jfree.chart.plot.RainbowPalette;
 import org.w3c.dom.css.RGBColor;
 
 import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
+import us.ihmc.sensorProcessing.pointClouds.octree.OccupancyCell;
+import us.ihmc.sensorProcessing.pointClouds.octree.OctreeOccupancyExample;
+import us.ihmc.sensorProcessing.pointClouds.octree.OctreeOccupancyMap;
 import bubo.io.serialization.DataDefinition;
 import bubo.io.serialization.SerializationDefinitionManager;
 import bubo.io.text.ReadCsvObjectSmart;
+import bubo.ptcloud.Octree;
 
 import com.jme3.app.SimpleApplication;
+import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
+import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import com.jme3.scene.shape.Box;
 
-/**
- * @author Peter Abeles
- */
+
 public class DisplayPointCloudFileApp extends SimpleApplication
 {
    Random rand = new Random(234);
@@ -34,7 +42,7 @@ public class DisplayPointCloudFileApp extends SimpleApplication
 
    public static void main(String[] args)
    {
-      DisplayPointCloudFileApp test1 = new DisplayPointCloudFileApp("plane.txt");
+      DisplayPointCloudFileApp test1 = new DisplayPointCloudFileApp("data/kinectcloud.txt");
       test1.start();
    }
 
@@ -45,6 +53,7 @@ public class DisplayPointCloudFileApp extends SimpleApplication
 
    private ColorRGBA generateColors(float value, float colorRange)
    {
+      
       Color color = Color.getHSBColor((value%colorRange) / colorRange, 0.85f, 1.0f);
       return new ColorRGBA(color.getRed() / 255.0f, color.getGreen() / 255.0f, color.getBlue() / 255.0f, 1.0f);
    }
@@ -52,17 +61,19 @@ public class DisplayPointCloudFileApp extends SimpleApplication
    @Override
    public void simpleInitApp()
    {
-      List<Point3D_F64> cloud = readPointCloud(1000000);
+      List<Point3D_F64> cloud = PointCloudTools.readPointCloud(fileName,-1);
 
       System.out.println("total points: " + cloud.size());
-
+      OctreeOccupancyMap map = OctreeOccupancyExample.mainMethod(cloud);
+      
       Vector3f[] points = new Vector3f[cloud.size()];
       ColorRGBA[] colors = new ColorRGBA[cloud.size()];
       int index = 0;
       for (Point3D_F64 p : cloud)
       {
-         ColorRGBA color = generateColors(new Float(p.z), 0.25f);
-         points[index] = new Vector3f((float) p.x, (float) p.y, (float) p.z);
+        // ColorRGBA color = generateColors(new Float(p.z), noColors);
+        ColorRGBA color =  map.getLeafColor(p.x, p.y, p.z);
+         points[index] = new Vector3f((float) p.z, (float) -p.x, (float) -p.y);
          colors[index] = color;
          index++;
       }
@@ -76,7 +87,8 @@ public class DisplayPointCloudFileApp extends SimpleApplication
       try
       {
          rootNode.attachChild(zUpNode);
-         zUpNode.attachChild(generator.generatePointCloudGraph(points, colors,0.75f));
+         generateMap(zUpNode, map);
+         //zUpNode.attachChild(generator.generatePointCloudGraph(points, colors,0.75f));
       }
       catch (Exception e)
       {
@@ -89,36 +101,21 @@ public class DisplayPointCloudFileApp extends SimpleApplication
       cam.update();
       flyCam.setMoveSpeed(10);
    }
-
-   private List<Point3D_F64> readPointCloud(int maxLines)
-   {
-      List<Point3D_F64> cloud = new ArrayList<Point3D_F64>();
-      SerializationDefinitionManager manager = new SerializationDefinitionManager();
-      manager.addDefinition(new DataDefinition("point3d", Point3D_F64.class, "x", "y", "z"));
-
-      try
-      {
-         FileInputStream in = new FileInputStream(fileName);
-         ReadCsvObjectSmart<Point3D_F64> reader = new ReadCsvObjectSmart<Point3D_F64>(in, manager, "point3d");
-
-
-         Point3D_F64 pt = new Point3D_F64();
-         int count = 0;
-         while ((reader.nextObject(pt) != null) && (count++ < maxLines))
-         {
-            cloud.add(pt.copy());
-         }
-
+   private void generateMap(Node zUpNode,OctreeOccupancyMap map){
+      int i =0;
+      for(Octree o : map.getLeafs()){
+         Point3D_F64 p0= o.space.p0;
+         Point3D_F64 p1 = o.space.p1;
+         p0=p0.plus(p1);
+         Box box = new Box(new Vector3f( (float)p0.z/2,(float)-p0.x/2,(float)-p0.y/2),(float)0.025 , (float)0.025,(float) 0.025); 
+         Geometry cube = new Geometry("cell"+i, box);
+         Material mat1 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+         OccupancyCell c = o.getUserData();
+         mat1.setColor("Color", c.getColor());
+         cube.setMaterial(mat1);
+         zUpNode.attachChild(cube);
+         i++;
       }
-      catch (FileNotFoundException e)
-      {
-         throw new RuntimeException(e);
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
-
-      return cloud;
    }
+   
 }
