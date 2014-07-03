@@ -6,7 +6,6 @@ import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolver;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepUtils;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -117,10 +116,8 @@ public class PlaneContactWrenchProcessor
       for(int i = 0; i < contactablePlaneBodies.size(); i++)
       {
          ContactablePlaneBody contactablePlaneBody = contactablePlaneBodies.get(i);
-         FramePoint footCenter = FootstepUtils.calculateFootCenter(contactablePlaneBody);
-         footCenter.changeFrame(contactablePlaneBody.getPlaneFrame());
-         cops.put(contactablePlaneBody, footCenter.toFramePoint2d());
+         FramePoint2d footCenter2d = new FramePoint2d(contactablePlaneBody.getPlaneFrame());
+         cops.put(contactablePlaneBody, footCenter2d);
       }
-
    }
 }
