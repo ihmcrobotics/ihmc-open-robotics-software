@@ -43,13 +43,13 @@ public class PushRecoveryControlModule
 {
    private static final boolean ENABLE = false;
    private static final boolean ENABLE_DOUBLE_SUPPORT_PUSH_RECOVERY = false;
-   private static final boolean USE_ICP_PROJECTION_PLANNER = true;
-   private static final boolean USE_PUSH_RECOVERY_ICP_PLANNER = false;
+   private static final boolean USE_ICP_PROJECTION_PLANNER = false;
+   private static final boolean USE_PUSH_RECOVERY_ICP_PLANNER = true;
    private static final boolean ENABLE_PROJECTION_INSIDE_PUSH_RECOVERY_ICP_PLANNER = true;
 
    private static final double MINIMUM_TIME_BEFORE_RECOVER_WITH_REDUCED_POLYGON = 6;
    private static final double DOUBLESUPPORT_SUPPORT_POLYGON_SCALE = 0.85;
-   private static final double TRUST_TIME_SCALE = 0.9;
+   private static final double TRUST_TIME_SCALE = 0.95;
    private static final double MINIMUM_TIME_TO_REPLAN = 0.1;
    private static final double MINIMUM_SWING_TIME_FOR_DOUBLE_SUPPORT_RECOVERY = 0.25;
    private static final double MINIMUN_CAPTURE_REGION_PERCENTAGE_OF_FOOT_AREA = 2.0;
@@ -117,10 +117,10 @@ public class PushRecoveryControlModule
       this.enableProjectionInsidePushRecoveryICPPlanner = new BooleanYoVariable("enableProjectionInsidePushRecoveryICPPlanner", registry);
       this.enableProjectionInsidePushRecoveryICPPlanner.set(ENABLE_PROJECTION_INSIDE_PUSH_RECOVERY_ICP_PLANNER);  
       
-      if (useICPProjection.getBooleanValue() && usePushRecoveryICPPlanner.getBooleanValue())
-      {
-         throw new RuntimeException("Select only one default ICP planner for push recovery.");
-      }
+//      if (useICPProjection.getBooleanValue() && usePushRecoveryICPPlanner.getBooleanValue())
+//      {
+//         throw new RuntimeException("Select only one default ICP planner for push recovery.");
+//      }
     
       this.usingReducedSwingTime = false;
 
@@ -268,7 +268,7 @@ public class PushRecoveryControlModule
                      momentumBasedController.getUpcomingSupportLeg().set(transferToSide.getOppositeSide());
                      recoverFromDoubleSupportFallFootStep = currentFootstep;
                      recoveringFromDoubleSupportFall = true;
-                     reducedSwingTime = doubleSupportInitialSwingTime;
+                     reducedSwingTime = MINIMUM_SWING_TIME_FOR_DOUBLE_SUPPORT_RECOVERY;
                      return true;
                   }
                   
