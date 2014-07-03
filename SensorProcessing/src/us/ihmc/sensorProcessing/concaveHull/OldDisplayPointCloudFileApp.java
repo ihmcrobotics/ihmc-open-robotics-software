@@ -30,7 +30,7 @@ import com.jme3.scene.Node;
 /**
  * @author Peter Abeles
  */
-public class DisplayPointCloudFileApp extends SimpleApplication
+public class OldDisplayPointCloudFileApp extends SimpleApplication
 {
    Random rand = new Random(234);
 
@@ -40,12 +40,12 @@ public class DisplayPointCloudFileApp extends SimpleApplication
    public static void main(String[] args)
    {
       ///home/unknownid/workspace/SensorProcessing/output.txt
-	   DisplayPointCloudFileApp test1 = new DisplayPointCloudFileApp("torus.txt","gen_torus.txt");
+	   OldDisplayPointCloudFileApp test1 = new OldDisplayPointCloudFileApp("torus.txt","gen_torus.txt");
 	  
       test1.start();
    }
 
-   public DisplayPointCloudFileApp(String fileName1,String fileName2)
+   public OldDisplayPointCloudFileApp(String fileName1,String fileName2)
    {
       this.fileName = fileName1;
       this.fileName2 = fileName2;

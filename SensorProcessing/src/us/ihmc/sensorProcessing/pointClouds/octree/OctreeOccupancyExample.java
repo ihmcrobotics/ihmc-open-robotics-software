@@ -1,14 +1,11 @@
 package us.ihmc.sensorProcessing.pointClouds.octree;
 
-import bubo.ptcloud.Octree;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.shapes.Cube3D_F64;
-import us.ihmc.sensorProcessing.pointClouds.shape.PointCloudTools;
 
-import java.awt.Color;
 import java.util.List;
 
-import com.jme3.math.ColorRGBA;
+import bubo.ptcloud.Octree;
 
 /**
  * @author Peter Abeles
@@ -34,13 +31,11 @@ public class OctreeOccupancyExample {
                 OccupancyCell c = n.getUserData();
                 if( n.points.size() > NUMBER_OCCUPIED ) {
                     totalOccupied++;
-                    c.probability = 0.8;
+                    c.setProbability(0.8);
                     
                 } else {
-                    c.probability = 0.4;
+                    c.setProbability(0.4);
                 }
-                Color color= Color.getHSBColor((float)c.probability, 0.85f, 1.0f);
-                c.setColor(new ColorRGBA(color.getRed() / 255.0f, color.getGreen() / 255.0f, color.getBlue() / 255.0f, 1.0f));
             }
         }
         System.out.println("Leafs occupied = " + totalOccupied + "  out of " + map.getLeafs().size());
