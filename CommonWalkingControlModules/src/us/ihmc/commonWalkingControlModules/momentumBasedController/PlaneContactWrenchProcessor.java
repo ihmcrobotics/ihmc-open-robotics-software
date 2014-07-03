@@ -44,7 +44,7 @@ public class PlaneContactWrenchProcessor
       this.contactablePlaneBodies = contactablePlaneBodies;
       for (ContactablePlaneBody contactableBody : contactablePlaneBodies)
       {
-         String name = contactableBody.getPlaneFrame().getName();
+         String name = contactableBody.getSoleFrame().getName();
          DoubleYoVariable forceMagnitude = new DoubleYoVariable(name + "ForceMagnitude", registry);
          groundReactionForceMagnitudes.put(contactableBody, forceMagnitude);
 
@@ -54,7 +54,7 @@ public class PlaneContactWrenchProcessor
          String copName = name + "CoP";
          String listName = "cops";
 
-         YoFramePoint2d cop2d = new YoFramePoint2d(copName + "2d", "", contactableBody.getPlaneFrame(), registry);
+         YoFramePoint2d cop2d = new YoFramePoint2d(copName + "2d", "", contactableBody.getSoleFrame(), registry);
          centersOfPressure2d.put(contactableBody, cop2d);
 
          YoFramePoint cop = new YoFramePoint(copName, ReferenceFrame.getWorldFrame(), registry);
@@ -84,7 +84,7 @@ public class PlaneContactWrenchProcessor
             FrameVector force = wrench.getLinearPartAsFrameVectorCopy();
 
             FramePoint2d cop = new FramePoint2d(ReferenceFrame.getWorldFrame());
-            double normalTorque = centerOfPressureResolver.resolveCenterOfPressureAndNormalTorque(cop, wrench, contactablePlaneBody.getPlaneFrame());
+            double normalTorque = centerOfPressureResolver.resolveCenterOfPressureAndNormalTorque(cop, wrench, contactablePlaneBody.getSoleFrame());
             cops.put(contactablePlaneBody, cop);
 
             centersOfPressure2d.get(contactablePlaneBody).set(cop);
@@ -116,7 +116,7 @@ public class PlaneContactWrenchProcessor
       for(int i = 0; i < contactablePlaneBodies.size(); i++)
       {
          ContactablePlaneBody contactablePlaneBody = contactablePlaneBodies.get(i);
-         FramePoint2d footCenter2d = new FramePoint2d(contactablePlaneBody.getPlaneFrame());
+         FramePoint2d footCenter2d = new FramePoint2d(contactablePlaneBody.getSoleFrame());
          cops.put(contactablePlaneBody, footCenter2d);
       }
    }

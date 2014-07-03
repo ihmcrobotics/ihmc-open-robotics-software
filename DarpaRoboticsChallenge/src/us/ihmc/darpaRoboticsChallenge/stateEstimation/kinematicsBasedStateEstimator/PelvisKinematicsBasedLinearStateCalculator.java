@@ -111,7 +111,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         ReferenceFrame footFrame = bipedFeet.get(robotSide).getPlaneFrame();
+         ReferenceFrame footFrame = bipedFeet.get(robotSide).getSoleFrame();
          footFrames.put(robotSide, footFrame);
 
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();

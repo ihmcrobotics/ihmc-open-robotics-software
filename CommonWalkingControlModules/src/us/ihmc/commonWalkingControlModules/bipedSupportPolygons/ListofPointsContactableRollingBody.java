@@ -74,7 +74,7 @@ public class ListofPointsContactableRollingBody implements ContactableRollingBod
    }
 
    //TODO: This is wrong but it works for now... Should be refactored
-   public ReferenceFrame getPlaneFrame()
+   public ReferenceFrame getSoleFrame()
    {
       return bodyFrame;
    }

@@ -64,7 +64,7 @@ public class ListOfPointsContactablePlaneBody implements ContactablePlaneBody
       return new FrameConvexPolygon2d(soleFrame, contactPoints);
    }
 
-   public ReferenceFrame getPlaneFrame()
+   public ReferenceFrame getSoleFrame()
    {
       return soleFrame;
    }

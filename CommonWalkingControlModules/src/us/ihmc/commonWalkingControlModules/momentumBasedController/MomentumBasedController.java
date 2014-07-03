@@ -225,8 +225,8 @@ public class MomentumBasedController
       for (ContactablePlaneBody contactablePlaneBody : this.contactablePlaneBodyList)
       {
          RigidBody rigidBody = contactablePlaneBody.getRigidBody();
-         YoPlaneContactState contactState = new YoPlaneContactState(contactablePlaneBody.getPlaneFrame().getName(), rigidBody,
-               contactablePlaneBody.getPlaneFrame(), contactablePlaneBody.getContactPoints2d(), coefficientOfFriction, registry);
+         YoPlaneContactState contactState = new YoPlaneContactState(contactablePlaneBody.getSoleFrame().getName(), rigidBody,
+               contactablePlaneBody.getSoleFrame(), contactablePlaneBody.getContactPoints2d(), coefficientOfFriction, registry);
          yoPlaneContactStates.put(contactablePlaneBody, contactState);
          yoPlaneContactStateList.add(contactState);
       }
@@ -277,8 +277,8 @@ public class MomentumBasedController
       
       for (RobotSide robotSide : RobotSide.values)
       {
-         desiredTorquesForCoPControl.put(robotSide, AlphaFilteredYoFrameVector2d.createAlphaFilteredYoFrameVector2d("desired" + robotSide.getCamelCaseNameForMiddleOfExpression() + "AnkleTorqueForCoPControl", "", registry, alphaCoPControl, feet.get(robotSide).getPlaneFrame()));
-         yoCoPError.put(robotSide, new YoFrameVector2d(robotSide.getCamelCaseNameForStartOfExpression() + "FootCoPError", feet.get(robotSide).getPlaneFrame(), registry));
+         desiredTorquesForCoPControl.put(robotSide, AlphaFilteredYoFrameVector2d.createAlphaFilteredYoFrameVector2d("desired" + robotSide.getCamelCaseNameForMiddleOfExpression() + "AnkleTorqueForCoPControl", "", registry, alphaCoPControl, feet.get(robotSide).getSoleFrame()));
+         yoCoPError.put(robotSide, new YoFrameVector2d(robotSide.getCamelCaseNameForStartOfExpression() + "FootCoPError", feet.get(robotSide).getSoleFrame(), registry));
       }
    }
 
@@ -420,7 +420,7 @@ public class MomentumBasedController
       for (RobotSide robotSide : RobotSide.values)
       {
          ContactablePlaneBody contactablePlaneBody = feet.get(robotSide);
-         ReferenceFrame planeFrame = contactablePlaneBody.getPlaneFrame();
+         ReferenceFrame planeFrame = contactablePlaneBody.getSoleFrame();
          AlphaFilteredYoFrameVector2d desiredTorqueForCoPControl = desiredTorquesForCoPControl.get(robotSide);
          
          FramePoint2d cop = planeContactWrenchProcessor.getCops().get(contactablePlaneBody);

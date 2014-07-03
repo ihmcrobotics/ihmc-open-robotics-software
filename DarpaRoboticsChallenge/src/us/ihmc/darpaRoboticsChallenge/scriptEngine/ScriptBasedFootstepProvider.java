@@ -72,12 +72,12 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
    
    private void loadScriptFileIfNecessary()
    {      
-      FramePoint soleInRootJointFrame = new FramePoint(bipedFeet.get(RobotSide.LEFT).getPlaneFrame());
+      FramePoint soleInRootJointFrame = new FramePoint(bipedFeet.get(RobotSide.LEFT).getSoleFrame());
       soleInRootJointFrame.changeFrame(fullRobotModel.getRootJoint().getFrameAfterJoint());
       if (loadedScriptFile) return;
       
 //      //TODO: Get to work for more than just left foot frame.
-      ReferenceFrame leftFootFrame = bipedFeet.get(RobotSide.LEFT).getPlaneFrame();
+      ReferenceFrame leftFootFrame = bipedFeet.get(RobotSide.LEFT).getSoleFrame();
       Transform3D transformFromLeftFootPlaneFrameToWorldFrame = leftFootFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());      
       
       ArrayList<ScriptObject> scriptObjectsList = scriptFileLoader.readIntoList(transformFromLeftFootPlaneFrameToWorldFrame); 

@@ -470,7 +470,7 @@ public class WalkOnTheEdgesManager
 
    private List<FramePoint> getToePointsCopy(ContactablePlaneBody supportFoot)
    {
-      FrameVector forward = new FrameVector(supportFoot.getPlaneFrame(), 1.0, 0.0, 0.0);
+      FrameVector forward = new FrameVector(supportFoot.getSoleFrame(), 1.0, 0.0, 0.0);
       int nToePoints = 2;
       List<FramePoint> toePoints = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(supportFoot.getContactPointsCopy(), forward, nToePoints);
 

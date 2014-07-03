@@ -294,7 +294,7 @@ public class OnToesState extends AbstractFootControlState
       List<FramePoint2d> contactPoints2d = new ArrayList<FramePoint2d>(contactPoints.size());
       for (FramePoint contactPoint : contactPoints)
       {
-         contactPoint.changeFrame(contactableBody.getPlaneFrame());
+         contactPoint.changeFrame(contactableBody.getSoleFrame());
          contactPoints2d.add(contactPoint.toFramePoint2d());
       }
 

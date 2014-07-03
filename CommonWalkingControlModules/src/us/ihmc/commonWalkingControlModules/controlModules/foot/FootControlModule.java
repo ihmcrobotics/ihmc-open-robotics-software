@@ -111,7 +111,7 @@ public class FootControlModule
       footLoadThresholdToHoldPosition = new DoubleYoVariable("footLoadThresholdToHoldPosition", registry);
       footLoadThresholdToHoldPosition.set(0.2);
 
-      fullyConstrainedNormalContactVector = new FrameVector(contactableFoot.getPlaneFrame(), 0.0, 0.0, 1.0);
+      fullyConstrainedNormalContactVector = new FrameVector(contactableFoot.getSoleFrame(), 0.0, 0.0, 1.0);
 
       ReferenceFrame bodyFrame = contactableFoot.getFrameAfterParentJoint();
       TwistCalculator twistCalculator = momentumBasedController.getTwistCalculator();
@@ -305,7 +305,7 @@ public class FootControlModule
          if (normalContactVector != null)
             fullyConstrainedNormalContactVector.setIncludingFrame(normalContactVector);
          else
-            fullyConstrainedNormalContactVector.setIncludingFrame(contactableFoot.getPlaneFrame(), 0.0, 0.0, 1.0);
+            fullyConstrainedNormalContactVector.setIncludingFrame(contactableFoot.getSoleFrame(), 0.0, 0.0, 1.0);
       }
 
       momentumBasedController.setPlaneContactState(contactableFoot, contactStatesMap.get(constraintType), normalContactVector);

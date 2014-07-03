@@ -343,7 +343,7 @@ public class SimpleStanceController implements RobotController
       for (ContactablePlaneBody contactablePlaneBody : feet)
       {
          YoPlaneContactState contactState = new YoPlaneContactState(contactablePlaneBody.getName() + "ContactState", contactablePlaneBody.getRigidBody(),
-                                               contactablePlaneBody.getPlaneFrame(), contactablePlaneBody.getContactPoints2d(), coefficientOfFriction, registry);
+                                               contactablePlaneBody.getSoleFrame(), contactablePlaneBody.getContactPoints2d(), coefficientOfFriction, registry);
          contactStates.put(contactablePlaneBody, contactState);
       }
 
