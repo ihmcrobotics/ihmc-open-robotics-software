@@ -955,17 +955,18 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                   FramePoint2d constantCenterOfPressure = instantaneousCapturePointPlanner.getConstantCenterOfPressure();
                   FramePoint2d finalDesiredICP = instantaneousCapturePointPlanner.getFinalDesiredICP();
                   FramePoint2d startICP = instantaneousCapturePointPlanner.getSingleSupportStartICP();
-                                    
+                  icpProjectionTimeOffset.set(pushRecoveryModule.computeTimeToProjectDesiredICPToClosestPointOnTrajectoryToActualICP(capturePoint2d, constantCenterOfPressure, startICP, finalDesiredICP, omega0) - captureTime);
+                
                   if (pushRecoveryModule.usePushRecoveryICPPlanner())
                   {
+                     //here use temporary variables instead the desired icp
+                     instantaneousCapturePointPlanner.getICPPositionAndVelocity(desiredICPLocal, desiredICPVelocityLocal, ecmpLocal, capturePoint2d,
+                           yoTime.getDoubleValue() + icpProjectionTimeOffset.getDoubleValue());
+                     
                      pushRecoveryModule.setSwingTimeRemaining(swingTimeRemaining);
-                     pushRecoveryModule.setInitialDesiredICP(startICP);
+                     pushRecoveryModule.setInitialDesiredICP(desiredICPLocal);
                      pushRecoveryModule.setFinalDesiredICP(finalDesiredICP);
                      pushRecoveryModule.getICPPlanner().initialize(); 
-                  }
-                  else
-                  {
-                     icpProjectionTimeOffset.set(pushRecoveryModule.computeTimeToProjectDesiredICPToClosestPointOnTrajectoryToActualICP(capturePoint2d, constantCenterOfPressure, startICP, finalDesiredICP, omega0) - captureTime);
                   }
                }
                
