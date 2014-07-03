@@ -225,7 +225,10 @@ public class DesiredFootstepVisualizer
 
       computeMinZ(swingLegSide);
 
-      bagsOfBalls.get(swingLegSide).setBall(desiredFootstep.getPositionInFrame(worldFrame));
+      FramePoint desiredFootstepPosition = new FramePoint();
+      desiredFootstep.getPositionIncludingFrame(desiredFootstepPosition);
+      desiredFootstepPosition.changeFrame(worldFrame);
+      bagsOfBalls.get(swingLegSide).setBall(desiredFootstepPosition);
 
       return desiredFootstep;
    }
