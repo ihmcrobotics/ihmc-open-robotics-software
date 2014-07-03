@@ -463,7 +463,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          break;
          
       case LOW_HEIGHT:
-         waypoints = getWaypointsAtGroundClearance(defaultGroundClearance.getDoubleValue()/3);
+         waypoints = getWaypointsAtGroundClearance(defaultGroundClearance.getDoubleValue()/2);
 
          break;
 
