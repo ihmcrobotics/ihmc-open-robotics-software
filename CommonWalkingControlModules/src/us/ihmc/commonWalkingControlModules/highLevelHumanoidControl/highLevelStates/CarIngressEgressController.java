@@ -338,7 +338,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          if (isContactablePlaneBodyInContact(feet.get(robotSide)))
             feetManager.setFlatFootContactState(robotSide);
          else
-            feetManager.requestMoveStraight(robotSide, new FramePose(feet.get(robotSide).getBodyFrame()));
+            feetManager.requestMoveStraight(robotSide, new FramePose(feet.get(robotSide).getFrameAfterParentJoint()));
          requestedThighLoadBearing.get(robotSide).set(false); // Set to false there is no button in the GUI to change it anymore
          requestedThighLoadBearing.get(robotSide).notifyVariableChangedListeners();
       }

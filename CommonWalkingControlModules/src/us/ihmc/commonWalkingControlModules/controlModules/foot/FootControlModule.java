@@ -113,7 +113,7 @@ public class FootControlModule
 
       fullyConstrainedNormalContactVector = new FrameVector(contactableFoot.getPlaneFrame(), 0.0, 0.0, 1.0);
 
-      ReferenceFrame bodyFrame = contactableFoot.getBodyFrame();
+      ReferenceFrame bodyFrame = contactableFoot.getFrameAfterParentJoint();
       TwistCalculator twistCalculator = momentumBasedController.getTwistCalculator();
       accelerationControlModule = new RigidBodySpatialAccelerationControlModule(namePrefix, twistCalculator, foot, bodyFrame,
             momentumBasedController.getControlDT(), registry);
@@ -349,7 +349,7 @@ public class FootControlModule
 
    private boolean[] getOnEdgeContactPointStates(ContactablePlaneBody contactableBody, ConstraintType constraintType)
    {
-      FrameVector direction = new FrameVector(contactableBody.getBodyFrame(), 1.0, 0.0, 0.0);
+      FrameVector direction = new FrameVector(contactableBody.getFrameAfterParentJoint(), 1.0, 0.0, 0.0);
       if (constraintType == ConstraintType.HEEL_TOUCHDOWN)
          direction.scale(-1.0);
 

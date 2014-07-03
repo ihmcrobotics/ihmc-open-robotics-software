@@ -68,7 +68,7 @@ public class ListofPointsContactableRollingBody implements ContactableRollingBod
       return ret;
    }
 
-   public ReferenceFrame getBodyFrame()
+   public ReferenceFrame getFrameAfterParentJoint()
    {
       return bodyFrame;
    }

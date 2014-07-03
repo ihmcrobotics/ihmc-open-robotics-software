@@ -70,16 +70,16 @@ public class FullyConstrainedState extends AbstractFootControlState
 
       if (!USE_SUPPORT_DAMPING)
       {
-         footAcceleration.setToZero(contactableBody.getBodyFrame(), rootBody.getBodyFixedFrame(), contactableBody.getBodyFrame());
+         footAcceleration.setToZero(contactableBody.getFrameAfterParentJoint(), rootBody.getBodyFixedFrame(), contactableBody.getFrameAfterParentJoint());
       }
       else
       {
          setFullyConstrainedStateGains();
 
-         desiredPosition.setToZero(contactableBody.getBodyFrame());
+         desiredPosition.setToZero(contactableBody.getFrameAfterParentJoint());
          desiredPosition.changeFrame(worldFrame);
 
-         desiredOrientation.setToZero(contactableBody.getBodyFrame());
+         desiredOrientation.setToZero(contactableBody.getFrameAfterParentJoint());
          desiredOrientation.changeFrame(worldFrame);
 
          desiredLinearVelocity.setToZero(worldFrame);

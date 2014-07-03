@@ -42,10 +42,10 @@ public class HoldPositionState extends AbstractFootControlState
       holdPositionNormalContactVector.changeFrame(worldFrame);
       momentumBasedController.setPlaneContactStateNormalContactVector(contactableBody, holdPositionNormalContactVector);
 
-      desiredPosition.setToZero(contactableBody.getBodyFrame());
+      desiredPosition.setToZero(contactableBody.getFrameAfterParentJoint());
       desiredPosition.changeFrame(worldFrame);
 
-      desiredOrientation.setToZero(contactableBody.getBodyFrame());
+      desiredOrientation.setToZero(contactableBody.getFrameAfterParentJoint());
       desiredOrientation.changeFrame(worldFrame);
 
       desiredLinearVelocity.setToZero(worldFrame);

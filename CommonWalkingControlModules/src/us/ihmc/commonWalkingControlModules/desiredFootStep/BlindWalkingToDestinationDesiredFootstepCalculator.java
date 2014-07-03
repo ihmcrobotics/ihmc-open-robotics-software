@@ -388,7 +388,7 @@ public class BlindWalkingToDestinationDesiredFootstepCalculator extends Abstract
       }
       else
       {
-         FrameVector forwardInFootFrame = new FrameVector(contactableBodies.get(swingSide).getBodyFrame());
+         FrameVector forwardInFootFrame = new FrameVector(contactableBodies.get(swingSide).getFrameAfterParentJoint());
          ReferenceFrame frame = allContactPoints.get(0).getReferenceFrame();
          forwardInFootFrame.changeFrame(frame);
          forwardInFootFrame.scale(Math.signum(stepPitch));

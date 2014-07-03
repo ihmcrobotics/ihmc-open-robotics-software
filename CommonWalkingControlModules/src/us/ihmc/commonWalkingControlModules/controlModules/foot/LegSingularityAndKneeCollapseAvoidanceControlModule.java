@@ -152,7 +152,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
 
       pelvis = momentumBasedController.getFullRobotModel().getPelvis();
       frameBeforeHipPitchJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.HIP_PITCH).getFrameBeforeJoint();
-      endEffectorFrame = contactablePlaneBody.getBodyFrame();
+      endEffectorFrame = contactablePlaneBody.getFrameAfterParentJoint();
       
       checkVelocityForSwingSingularityAvoidance = new BooleanYoVariable(namePrefix + "CheckVelocityForSwingSingularityAvoidance", registry);
 

@@ -272,7 +272,7 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
           *                = zUpcomingSwing + upcomingSwingMinZ - footstepMinZ
           */
 
-         FramePoint upcomingSwingAnkle = new FramePoint(upcomingSwingFoot.getBodyFrame());
+         FramePoint upcomingSwingAnkle = new FramePoint(upcomingSwingFoot.getFrameAfterParentJoint());
          upcomingSwingAnkle.changeFrame(worldFrame);
          double zUpcomingSwing = upcomingSwingAnkle.getZ();
 
@@ -350,7 +350,7 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
       }
       else
       {
-         FrameVector forwardInFootFrame = new FrameVector(contactableBodies.get(swingSide).getBodyFrame());
+         FrameVector forwardInFootFrame = new FrameVector(contactableBodies.get(swingSide).getFrameAfterParentJoint());
          ReferenceFrame frame = allContactPoints.get(0).getReferenceFrame();
          forwardInFootFrame.changeFrame(frame);
          forwardInFootFrame.scale(Math.signum(stepPitch));
