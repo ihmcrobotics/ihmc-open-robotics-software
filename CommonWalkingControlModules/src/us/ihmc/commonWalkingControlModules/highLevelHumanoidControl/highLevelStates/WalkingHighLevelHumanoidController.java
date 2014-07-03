@@ -916,7 +916,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          {
             // for the moment we assume that the swingTime has not been changed, if changed the argument of 'compute' should be modified
             pushRecoveryModule.getICPPlanner().compute(stateMachine.timeInCurrentState() - captureTime);
-            pushRecoveryModule.getICPPlanner().getICPPosition(desiredICPLocal);
+            pushRecoveryModule.getICPPlanner().getICPPosition(desiredICPLocal,capturePoint2d);
             pushRecoveryModule.getICPPlanner().getICPVelocity(desiredICPVelocityLocal);
          }
 
