@@ -222,6 +222,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final YoFramePoint2d desiredECMP = new YoFramePoint2d("desiredECMP", "", worldFrame, registry);
    private final BooleanYoVariable desiredECMPinSupportPolygon = new BooleanYoVariable("desiredECMPinSupportPolygon", registry);
    private YoFramePoint ecmpViz = new YoFramePoint("ecmpViz", worldFrame, registry);
+   private TransferToAndNextFootstepsData neutralFootstepsData;
 
    private final VariousWalkingManagers variousWalkingManagers;
 
@@ -234,7 +235,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    
    private final BooleanYoVariable isInFlamingoStance = new BooleanYoVariable("isInFlamingoStance", registry);
    private final DoubleYoVariable icpProjectionTimeOffset = new DoubleYoVariable("icpProjectionTimeOffset", registry);
-
+   
    public WalkingHighLevelHumanoidController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
          CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator, TransferTimeCalculationProvider transferTimeCalculationProvider,
          SwingTimeCalculationProvider swingTimeCalculationProvider, WalkingControllerParameters walkingControllerParameters,
@@ -372,6 +373,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       moveICPAwayDuringSwingDistance.set(0.012); // 0.03);
       moveICPAwayAtEndOfSwingDistance.set(0.04); // 0.08);
       singleSupportTimeLeftBeforeShift.set(0.26);
+      neutralFootstepsData = null;
 
       if (DESIREDICP_FROM_POLYGON_COORDINATE)
       {
@@ -646,6 +648,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
                TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForDoubleSupport(RobotSide.LEFT, true);
                instantaneousCapturePointPlanner.initializeDoubleSupport(transferToAndNextFootstepsData, 0.1);
+               
+               neutralFootstepsData = createTransferToAndNextFootstepDataForDoubleSupport(RobotSide.LEFT, true);
+               neutralFootstepsData.setTransferToSide(null);
 
                initializedAtStart = true;
             }
@@ -923,6 +928,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
             if (footstepHasBeenAdjusted)
             {
+               if(pushRecoveryModule.isRecoveringFromDoubleSupportFall())
+               {
+                  neutralFootstepsData.setTransferToSide(swingSide.getOppositeSide());
+                  instantaneousCapturePointPlanner.initializeDoubleSupport(neutralFootstepsData, yoTime.getDoubleValue());
+               }
+               
                updateFootstepParameters();
                
                captureTime = stateMachine.timeInCurrentState();
