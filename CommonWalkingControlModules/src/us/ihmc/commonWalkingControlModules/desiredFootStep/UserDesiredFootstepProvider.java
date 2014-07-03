@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotSide.RobotSide;
@@ -133,10 +132,7 @@ public class UserDesiredFootstepProvider implements FootstepProvider
       ContactablePlaneBody foot = bipedFeet.get(swingLegSide);
 
       boolean trustHeight = false;
-      ReferenceFrame soleFrame = FootstepUtils.createSoleFrame(footstepPoseFrame, foot);
-      List<FramePoint> expectedContactPoints = FootstepUtils.getContactPointsInFrame(foot, soleFrame);
-
-      Footstep desiredFootstep = new Footstep(foot, footstepPoseFrame, soleFrame, expectedContactPoints, trustHeight);
+      Footstep desiredFootstep = new Footstep(foot, footstepPoseFrame, trustHeight);
 
       return desiredFootstep;
    }

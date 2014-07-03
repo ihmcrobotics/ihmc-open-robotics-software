@@ -58,9 +58,7 @@ public abstract class AbstractAdjustableDesiredFootstepCalculator implements Des
       ContactablePlaneBody foot = contactableBodies.get(swingLegSide);
 
       boolean trustHeight = true;
-      ReferenceFrame soleFrame = FootstepUtils.createSoleFrame(poseReferenceFrame, foot);
-      List<FramePoint> contactPoints = FootstepUtils.getContactPointsInFrame(getContactPoints(swingLegSide), soleFrame);
-      Footstep desiredFootstep = new Footstep(foot, poseReferenceFrame, soleFrame, contactPoints, trustHeight);
+      Footstep desiredFootstep = new Footstep(foot, poseReferenceFrame, trustHeight);
 
       if (desiredFootstepAdjustor != null)
       {
@@ -71,9 +69,7 @@ public abstract class AbstractAdjustableDesiredFootstepCalculator implements Des
 
          PoseReferenceFrame stanceFootPoseFrame = new PoseReferenceFrame("desiredFootstep", stanceFootPose);
 
-         ReferenceFrame stanceFootSoleFrame = FootstepUtils.createSoleFrame(stanceFootPoseFrame, stanceFoot);
-         List<FramePoint> stanceContactPoints = FootstepUtils.getContactPointsInFrame(stanceFoot.getContactPointsCopy(), stanceFootSoleFrame);
-         Footstep stanceFootstep = new Footstep(stanceFoot, stanceFootPoseFrame, stanceFootSoleFrame, stanceContactPoints, trustHeight);
+         Footstep stanceFootstep = new Footstep(stanceFoot, stanceFootPoseFrame, trustHeight);
          desiredFootstep = desiredFootstepAdjustor.adjustDesiredFootstep(stanceFootstep, desiredFootstep);
 
          desiredFootstep.getPose(footstepPose);

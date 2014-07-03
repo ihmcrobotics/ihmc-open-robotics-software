@@ -1,10 +1,20 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
-import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParameters;
-import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryWaypointGenerationMethod;
+import static org.junit.Assert.assertTrue;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Random;
+
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBodyTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData;
@@ -18,22 +28,18 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.net.*;
+import us.ihmc.utilities.net.KryoObjectClient;
+import us.ihmc.utilities.net.KryoObjectServer;
+import us.ihmc.utilities.net.NetClassList;
+import us.ihmc.utilities.net.ObjectCommunicator;
+import us.ihmc.utilities.net.ObjectConsumer;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.test.JUnitTools;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
-import static org.junit.Assert.assertTrue;
+import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParameters;
+import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryWaypointGenerationMethod;
 
 /**
  * User: Matt
@@ -42,19 +48,19 @@ import static org.junit.Assert.assertTrue;
 public class FootstepDataTest
 {
    private static final RobotSide robotSide = RobotSide.LEFT;
-   
+
    @Before
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
-   
+
    @After
    public void showMemoryUsageAfterTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
+
    /**
     * This test verifies that FootstepData can be sent and received using our current message passing utilities
     * @throws IOException 
@@ -75,7 +81,7 @@ public class FootstepDataTest
       ArrayList<Footstep> sentFootsteps = createRandomFootsteps(50);
       for (Footstep footstep : sentFootsteps)
       {
-         
+
          FootstepData footstepData = new FootstepData(robotSide, footstep);
          queueBasedStreamingDataProducer.queueDataToSend(footstepData);
       }
@@ -87,7 +93,7 @@ public class FootstepDataTest
 
       // verify received correctly
       ArrayList<Footstep> receivedFootsteps = footstepDataConsumer.getReconstructedFootsteps();
-      
+
       compareFootstepsSentWithReceived(sentFootsteps, receivedFootsteps);
    }
 
@@ -108,7 +114,7 @@ public class FootstepDataTest
       // create test footsteps
       ArrayList<Footstep> sentFootsteps = createRandomFootsteps(50);
       FootstepDataList footstepsData = convertFootstepsToFootstepData(sentFootsteps, null, random.nextDouble(), random.nextDouble());
- 
+
       queueBasedStreamingDataProducer.queueDataToSend(footstepsData);
       ThreadTools.sleep(100);
 
@@ -175,11 +181,10 @@ public class FootstepDataTest
       // create one client for two types of data
       FootstepPathConsumer footstepPathConsumer = new FootstepPathConsumer();
       PauseConsumer pauseConsumer = new PauseConsumer();
-      
-      
+
       ObjectCommunicator streamingDataTCPClient = createStreamingDataConsumer(FootstepDataList.class, footstepPathConsumer, pathPort);
       streamingDataTCPClient.attachListener(PauseCommand.class, pauseConsumer);
-      
+
       ThreadTools.sleep(100);
       pathQueueBasedStreamingDataProducer.startProducingData();
       pauseQueueBasedStreamingDataProducer.startProducingData();
@@ -269,7 +274,7 @@ public class FootstepDataTest
       ArrayList<FootstepStatus> receivedFootsteps = footstepStatusConsumer.getReconstructedFootsteps();
       compareStatusSentWithReceived(sentFootstepStatus, receivedFootsteps);
    }
-   
+
    private NetClassList getNetClassList()
    {
       NetClassList netClassList = new NetClassList();
@@ -277,20 +282,21 @@ public class FootstepDataTest
       netClassList.addClass(FootstepDataList.class);
       netClassList.addClass(PauseCommand.class);
       netClassList.addClass(FootstepStatus.class);
-      
+
       netClassList.addType(ArrayList.class);
       netClassList.addType(Point3d.class);
       netClassList.addType(Quat4d.class);
       netClassList.addType(FootstepStatus.Status.class);
       netClassList.addType(TrajectoryWaypointGenerationMethod.class);
       netClassList.addType(RobotSide.class);
-      
+
       return netClassList;
    }
 
-   private ObjectCommunicator createAndStartStreamingDataTCPServer(QueueBasedStreamingDataProducer<?> queueBasedStreamingDataProducer, int port) throws IOException
+   private ObjectCommunicator createAndStartStreamingDataTCPServer(QueueBasedStreamingDataProducer<?> queueBasedStreamingDataProducer, int port)
+         throws IOException
    {
-      
+
       KryoObjectServer server = new KryoObjectServer(port, getNetClassList());
       server.connect();
       queueBasedStreamingDataProducer.addConsumer(server);
@@ -310,31 +316,18 @@ public class FootstepDataTest
       Random random = new Random(77);
       ArrayList<Footstep> footsteps = new ArrayList<Footstep>();
 
-
       for (int footstepNumber = 0; footstepNumber < number; footstepNumber++)
       {
          RigidBody endEffector = createRigidBody(robotSide);
          ContactablePlaneBody contactablePlaneBody = ContactablePlaneBodyTools.createRandomContactablePlaneBodyForTests(random, endEffector);
 
-         FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3d(footstepNumber, 0.0, 0.0),
-                                        new Quat4d(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble()));
-         
-         
+         FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3d(footstepNumber, 0.0, 0.0), new Quat4d(random.nextDouble(),
+               random.nextDouble(), random.nextDouble(), random.nextDouble()));
+
          PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", pose);
-         
 
          boolean trustHeight = true;
-         ReferenceFrame soleFrame = FootstepUtils.createSoleFrame(poseReferenceFrame, contactablePlaneBody); 
-//         ArrayList<FramePoint> expectedContactPoints = new ArrayList<FramePoint>();
-//         for (int i = 0; i < 3; i++)
-//         {
-//            FramePoint framePoint = new FramePoint(ReferenceFrame.getWorldFrame(), footstepNumber, i, 0.0);
-//            expectedContactPoints.add(framePoint);
-//         }
-         
-         List<FramePoint> expectedContactPoints = FootstepUtils.getContactPointsInFrame(contactablePlaneBody, soleFrame);
-         
-         Footstep footstep = new Footstep(contactablePlaneBody, poseReferenceFrame, soleFrame, expectedContactPoints, trustHeight);
+         Footstep footstep = new Footstep(contactablePlaneBody, poseReferenceFrame, trustHeight);
          footsteps.add(footstep);
       }
 
@@ -349,26 +342,25 @@ public class FootstepDataTest
          Footstep receivedFootstep = receivedFootsteps.get(i);
 
          assertTrue(sentFootstep.getBody().getName().equals(receivedFootstep.getBody().getName()));
-         
-         
+
          FramePose sentPose = new FramePose();
          sentFootstep.getPose(sentPose);
          FramePose receivedPose = new FramePose();
          receivedFootstep.getPose(receivedPose);
-         
+
          assertTrue(sentPose.epsilonEquals(receivedPose, 0.0001));
 
          for (int j = 0; j < sentFootstep.getExpectedContactPoints().size(); j++)
          {
             FramePoint sentFramePoint = sentFootstep.getExpectedContactPoints().get(j);
             FramePoint receivedFramePoint = receivedFootstep.getExpectedContactPoints().get(j);
-            
+
             Point3d expected = new Point3d();
             Point3d actual = new Point3d();
             sentFramePoint.get(expected);
             receivedFramePoint.get(actual);
             JUnitTools.assertTuple3dEquals(expected, actual, 1e-4);
-//            assertTrue(sentFramePoint.epsilonEquals(receivedFramePoint, 0.0001));
+            //            assertTrue(sentFramePoint.epsilonEquals(receivedFramePoint, 0.0001));
          }
       }
    }
@@ -383,7 +375,8 @@ public class FootstepDataTest
       }
    }
 
-   private static FootstepDataList convertFootstepsToFootstepData(ArrayList<Footstep> footsteps, TrajectoryParameters trajectoryParameters, double swingTime, double transferTime)
+   private static FootstepDataList convertFootstepsToFootstepData(ArrayList<Footstep> footsteps, TrajectoryParameters trajectoryParameters, double swingTime,
+         double transferTime)
    {
       FootstepDataList footstepsData = new FootstepDataList(trajectoryParameters, swingTime, transferTime);
 
@@ -400,23 +393,17 @@ public class FootstepDataTest
    {
       ArrayList<Footstep> reconstructedFootsteps = new ArrayList<Footstep>();
 
-
       public void consumeObject(FootstepData packet)
       {
          RigidBody endEffector = createRigidBody(packet.getRobotSide());
-         ContactablePlaneBody contactablePlaneBody = ContactablePlaneBodyTools.createTypicalContactablePlaneBodyForTests(endEffector, ReferenceFrame
-               .getWorldFrame());
+         ContactablePlaneBody contactablePlaneBody = ContactablePlaneBodyTools.createTypicalContactablePlaneBodyForTests(endEffector,
+               ReferenceFrame.getWorldFrame());
 
-         
          FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), packet.getLocation(), packet.getOrientation());
          PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", pose);
 
          boolean trustHeight = true;
-         ReferenceFrame soleFrame = FootstepUtils.createSoleFrame(poseReferenceFrame, contactablePlaneBody); 
-         
-         List<FramePoint> expectedContactPoints = FootstepUtils.getContactPointsInFrame(contactablePlaneBody, soleFrame);
-         
-         Footstep footstep = new Footstep(contactablePlaneBody, poseReferenceFrame, soleFrame, expectedContactPoints, trustHeight);
+         Footstep footstep = new Footstep(contactablePlaneBody, poseReferenceFrame, trustHeight);
          reconstructedFootsteps.add(footstep);
       }
 
@@ -426,11 +413,9 @@ public class FootstepDataTest
       }
    }
 
-
    private class FootstepPathConsumer implements ObjectConsumer<FootstepDataList>
    {
       ArrayList<Footstep> reconstructedFootstepPath = new ArrayList<Footstep>();
-
 
       public void consumeObject(FootstepDataList packet)
       {
@@ -438,18 +423,14 @@ public class FootstepDataTest
          {
             RigidBody endEffector = createRigidBody(footstepData.getRobotSide());
 
-            ContactablePlaneBody contactablePlaneBody = ContactablePlaneBodyTools.createTypicalContactablePlaneBodyForTests(endEffector, ReferenceFrame.getWorldFrame());
+            ContactablePlaneBody contactablePlaneBody = ContactablePlaneBodyTools.createTypicalContactablePlaneBodyForTests(endEffector,
+                  ReferenceFrame.getWorldFrame());
 
             FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
             PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", pose);
 
             boolean trustHeight = true;
-            ReferenceFrame soleFrame = FootstepUtils.createSoleFrame(poseReferenceFrame, contactablePlaneBody);
-            List<FramePoint> expectedContactPoints = FootstepUtils.getContactPointsInFrame(contactablePlaneBody, soleFrame);
-
-
-            
-            Footstep footstep = new Footstep(contactablePlaneBody, poseReferenceFrame, soleFrame, expectedContactPoints, trustHeight);
+            Footstep footstep = new Footstep(contactablePlaneBody, poseReferenceFrame, trustHeight);
             reconstructedFootstepPath.add(footstep);
          }
       }
@@ -460,11 +441,11 @@ public class FootstepDataTest
       }
    }
 
-   
    private RigidBody createRigidBody(RobotSide robotSide)
    {
       return createRigidBody(robotSide.getCamelCaseNameForStartOfExpression() + "Foot");
    }
+
    private RigidBody createRigidBody(String name)
    {
       RigidBody elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
@@ -472,11 +453,9 @@ public class FootstepDataTest
       return ScrewTools.addRigidBody(name, joint, new Matrix3d(), 0.0, new Vector3d());
    }
 
-
    private class PauseConsumer implements ObjectConsumer<PauseCommand>
    {
       ArrayList<Boolean> reconstructedCommands = new ArrayList<Boolean>();
-
 
       public void consumeObject(PauseCommand packet)
       {
@@ -489,11 +468,9 @@ public class FootstepDataTest
       }
    }
 
-
    private class FootstepStatusConsumer implements ObjectConsumer<FootstepStatus>
    {
       private ArrayList<FootstepStatus> reconstructedFootstepStatuses = new ArrayList<FootstepStatus>();
-
 
       public void consumeObject(FootstepStatus footstepStatus)
       {
