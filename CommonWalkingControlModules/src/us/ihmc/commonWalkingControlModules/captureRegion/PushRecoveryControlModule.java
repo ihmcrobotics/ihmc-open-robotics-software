@@ -45,7 +45,7 @@ public class PushRecoveryControlModule
    private static final boolean ENABLE_DOUBLE_SUPPORT_PUSH_RECOVERY = false;
    private static final boolean USE_ICP_PROJECTION_PLANNER = true;
    private static final boolean USE_PUSH_RECOVERY_ICP_PLANNER = false;
-   private static final boolean USE_PUSH_RECOVERY_ICP_PLANNER_WITH_PROJECTION = true;
+   private static final boolean ENABLE_PROJECTION_INSIDE_PUSH_RECOVERY_ICP_PLANNER = true;
 
    private static final double MINIMUM_TIME_BEFORE_RECOVER_WITH_REDUCED_POLYGON = 6;
    private static final double DOUBLESUPPORT_SUPPORT_POLYGON_SCALE = 0.85;
@@ -61,7 +61,7 @@ public class PushRecoveryControlModule
    private final BooleanYoVariable useICPProjection;
    private final BooleanYoVariable usePushRecoveryICPPlanner;
    private final BooleanYoVariable enablePushRecoveryFromDoubleSupport;
-   private final BooleanYoVariable usePushRecoveryICPPlannerWithProjection;
+   private final BooleanYoVariable enableProjectionInsidePushRecoveryICPPlanner;
    private final ICPAndMomentumBasedController icpAndMomentumBasedController;
    private final MomentumBasedController momentumBasedController;
    private final OrientationStateVisualizer orientationStateVisualizer;
@@ -114,8 +114,8 @@ public class PushRecoveryControlModule
       this.useICPProjection.set(USE_ICP_PROJECTION_PLANNER);
       this.usePushRecoveryICPPlanner = new BooleanYoVariable("usePushRecoveryICPPlanner", registry);
       this.usePushRecoveryICPPlanner.set(USE_PUSH_RECOVERY_ICP_PLANNER);  
-      this.usePushRecoveryICPPlannerWithProjection = new BooleanYoVariable("usePushRecoveryICPPlannerWithProjection", registry);
-      this.usePushRecoveryICPPlannerWithProjection.set(USE_PUSH_RECOVERY_ICP_PLANNER_WITH_PROJECTION);  
+      this.enableProjectionInsidePushRecoveryICPPlanner = new BooleanYoVariable("enableProjectionInsidePushRecoveryICPPlanner", registry);
+      this.enableProjectionInsidePushRecoveryICPPlanner.set(ENABLE_PROJECTION_INSIDE_PUSH_RECOVERY_ICP_PLANNER);  
       
       if (useICPProjection.getBooleanValue() && usePushRecoveryICPPlanner.getBooleanValue())
       {
@@ -311,7 +311,7 @@ public class PushRecoveryControlModule
       
       public void getICPPosition(FramePoint2d desiredICPPositionToPack, FramePoint2d currentICP)
       {
-         if(usePushRecoveryICPPlannerWithProjection.getBooleanValue())
+         if(enableProjectionInsidePushRecoveryICPPlanner.getBooleanValue())
          {
             desiredICPPositionToPack.set(capturePointTrajectoryLine.orthogonalProjectionCopy(currentICP));
          }
@@ -325,7 +325,7 @@ public class PushRecoveryControlModule
       
       public void getICPVelocity(FrameVector2d desiredICPVelocityToPack)
       {
-         if(usePushRecoveryICPPlannerWithProjection.getBooleanValue())
+         if(enableProjectionInsidePushRecoveryICPPlanner.getBooleanValue())
          {
             desiredICPVelocityToPack.setToZero(worldFrame);
          }
