@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData;
@@ -10,7 +9,6 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepD
 import us.ihmc.commonWalkingControlModules.trajectories.SimpleTwoWaypointTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointTrajectoryUtils;
 import us.ihmc.robotSide.SideDependentList;
-import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -66,14 +64,7 @@ public class FootstepPathConsumer implements ObjectConsumer<FootstepDataList>
 
          FramePose footstepPose = new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
          PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footstepPose);
-         ReferenceFrame soleReferenceFrame = FootstepUtils.createSoleFrame(footstepPoseFrame, contactableBody);
-
-         
-         FootstepUtils.getContactPointsInFrame(contactableBody, soleReferenceFrame);
-         List<FramePoint> expectedContactPoints = FootstepUtils.getContactPointsInFrame(contactableBody, soleReferenceFrame);
-         
-
-         Footstep footstep = new Footstep(id, contactableBody, footstepPoseFrame, soleReferenceFrame, expectedContactPoints, true);
+         Footstep footstep = new Footstep(id, contactableBody, footstepPoseFrame, true);
          
          footsteps.add(footstep);
          mapFromFootstepsToTrajectoryParameters.put(footstep, trajectoryParameters);

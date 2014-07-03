@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.vecmath.Point2d;
 
@@ -167,10 +166,7 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
          ContactablePlaneBody foot = contactableBodies.get(supportLegSide.getOppositeSide());
 
          boolean trustHeight = false;
-         ReferenceFrame soleFrame = FootstepUtils.createSoleFrame(poseReferenceFrame, foot);
-         List<FramePoint> expectedContactPoints = FootstepUtils.getContactPointsInFrame(foot, soleFrame);
-
-         desiredFootstep = new Footstep(foot, poseReferenceFrame, soleFrame, expectedContactPoints, trustHeight);
+         desiredFootstep = new Footstep(foot, poseReferenceFrame, trustHeight);
       }
 
       captureRegion.changeFrame(ReferenceFrame.getWorldFrame());
@@ -216,10 +212,7 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
       ContactablePlaneBody foot = contactableBodies.get(supportLegSide.getOppositeSide());
 
       boolean trustHeight = false;
-      ReferenceFrame soleReferenceFrame = FootstepUtils.createSoleFrame(poseReferenceFrame, foot);
-      List<FramePoint> expectedContactPoints = FootstepUtils.getContactPointsInFrame(foot, soleReferenceFrame);
-
-      desiredFootstep = new Footstep(foot, poseReferenceFrame, soleReferenceFrame, expectedContactPoints, trustHeight);
+      desiredFootstep = new Footstep(foot, poseReferenceFrame, trustHeight);
 
       return desiredFootstep;
    }

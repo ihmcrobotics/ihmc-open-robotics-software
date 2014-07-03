@@ -1,7 +1,5 @@
 package us.ihmc.darpaRoboticsChallenge.testTools;
 
-import java.util.List;
-
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -11,7 +9,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlane
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepUtils;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
@@ -81,9 +78,7 @@ public class ScriptedFootstepGenerator
       footstepPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footstepPose);
-      ReferenceFrame soleFrame = FootstepUtils.createSoleFrame(footstepPoseFrame, foot);
-      List<FramePoint> expectedContactPoints = FootstepUtils.getContactPointsInFrame(foot, soleFrame);
-      Footstep footstep = new Footstep(foot, footstepPoseFrame, soleFrame, expectedContactPoints, trustHeight);
+      Footstep footstep = new Footstep(foot, footstepPoseFrame, trustHeight);
 
       return footstep;
    }
@@ -109,9 +104,7 @@ public class ScriptedFootstepGenerator
       footstepPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footstepPose);
-      ReferenceFrame soleFrame = FootstepUtils.createSoleFrame(footstepPoseFrame, foot);
-      List<FramePoint> expectedContactPoints = FootstepUtils.getContactPointsInFrame(foot, soleFrame);
-      Footstep footstep = new Footstep(foot, footstepPoseFrame, soleFrame, expectedContactPoints, trustHeight);
+      Footstep footstep = new Footstep(foot, footstepPoseFrame, trustHeight);
 
       return footstep;
    }

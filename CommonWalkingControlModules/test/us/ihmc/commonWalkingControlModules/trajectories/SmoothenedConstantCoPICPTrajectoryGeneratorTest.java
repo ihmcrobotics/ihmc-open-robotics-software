@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
@@ -13,8 +12,6 @@ import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepUtils;
-import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -74,14 +71,8 @@ public class SmoothenedConstantCoPICPTrajectoryGeneratorTest
          
          
          PoseReferenceFrame poseFrame = new PoseReferenceFrame("poseFrame" + i, pose);
-         Transform3D transformFromFootstepSoleToPose = new Transform3D();
-         ReferenceFrame footstepSoleFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("soleFrame" + i, poseFrame, transformFromFootstepSoleToPose);
-               
-         List<FramePoint> expectedContactPoints = FootstepUtils.getContactPointsInFrame(endEffector, footstepSoleFrame);
-         
-         
          boolean trustHeight = true;
-         Footstep footstep = new Footstep(endEffector, poseFrame, footstepSoleFrame, expectedContactPoints, trustHeight);
+         Footstep footstep = new Footstep(endEffector, poseFrame, trustHeight);
          footsteps.add(footstep);       
          
          flip = -flip; 

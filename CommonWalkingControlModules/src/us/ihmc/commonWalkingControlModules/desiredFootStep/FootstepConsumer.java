@@ -1,15 +1,12 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.io.streamingData.StreamingDataConsumer;
-import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -48,12 +45,7 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
       String id = "footstep_" + currentIndex;
       FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
       PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("poseReferenceFrame", framePose);
-      ReferenceFrame soleReferenceFrame = FootstepUtils.createSoleFrame(poseReferenceFrame, contactableBody);
-
-      List<FramePoint> expectedContactPoints = FootstepUtils.getContactPointsInFrame(contactableBody, soleReferenceFrame);
-
-
-      Footstep footstep = new Footstep(id, contactableBody, poseReferenceFrame, soleReferenceFrame, expectedContactPoints, trustHeight);
+      Footstep footstep = new Footstep(id, contactableBody, poseReferenceFrame, trustHeight);
 
 //    System.out.println("footstep = " + footstep);
       footstepQueue.add(footstep);
