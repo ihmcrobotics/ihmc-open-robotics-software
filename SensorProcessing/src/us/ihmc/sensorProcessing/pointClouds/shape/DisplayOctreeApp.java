@@ -3,7 +3,6 @@ package us.ihmc.sensorProcessing.pointClouds.shape;
 import georegression.struct.point.Point3D_F64;
 
 import java.util.List;
-import java.util.Random;
 
 import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
 import us.ihmc.sensorProcessing.pointClouds.octree.OccupancyCell;
@@ -22,15 +21,13 @@ import com.jme3.scene.Node;
 import com.jme3.scene.shape.Box;
 import com.jme3.system.AppSettings;
 
-public class DisplayPointCloudFileApp extends SimpleApplication
+public class DisplayOctreeApp extends SimpleApplication
 {
-   Random rand = new Random(234);
-
-   public String fileName;
+   private final String fileName;
 
    public static void main(String[] args)
    {
-      DisplayPointCloudFileApp test1 = new DisplayPointCloudFileApp("data/kinectcloud.txt");
+      DisplayOctreeApp test1 = new DisplayOctreeApp("data/kinectcloud.txt");
       AppSettings appSettings = new AppSettings(true);
       appSettings.setResolution(1600, 900);
       test1.setSettings(appSettings);
@@ -38,7 +35,7 @@ public class DisplayPointCloudFileApp extends SimpleApplication
       test1.start();
    }
 
-   public DisplayPointCloudFileApp(String fileName)
+   public DisplayOctreeApp(String fileName)
    {
       this.fileName = fileName;
    }
