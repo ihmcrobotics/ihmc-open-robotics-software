@@ -58,10 +58,11 @@ public class MultiSenseSensorManager
       this.lidarDataFilter = lidarDataFilter;           
       this.lidarCRC = sensorInformation.getLidarCRC();
       this.sensorURI = sensorURI;
-      this.fieldComputerClient.attachListener(MultisenseParameterPacket.class, new MultisenseParameterPacketProvider());                                
       registerCameraReceivers();
       registerLidarReceivers();
+      MultiSenseParamaterSetter.initialize(rosMainNode);
       setMultiseSenseParams(sensorInformation.getLidarSpindleVelocity());
+      //this.fieldComputerClient.attachListener(MultisenseParameterPacket.class, new MultisenseParameterPacketProvider());                                
    }
    
    private void setMultiseSenseParams(double lidarSpindleVelocity)

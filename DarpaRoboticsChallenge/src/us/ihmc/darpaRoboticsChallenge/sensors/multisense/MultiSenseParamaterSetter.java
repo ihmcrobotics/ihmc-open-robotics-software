@@ -115,6 +115,7 @@ public class MultiSenseParamaterSetter
    
    public static void initialize(RosMainNode rosMainNode){
       
+      System.out.println();
       rosMainNode.attachServiceClient("multisense/set_parameters", multiSenseClient);
    }
    
@@ -133,8 +134,8 @@ public class MultiSenseParamaterSetter
                resolutionParam.setName("resolution");
                //resolutionParam.setValue("2048x1088x64");
                //System.out.println("Setting multisense resolution to 2048x1088");
-               System.out.println("Setting multisense resolution to 1024x544x64");
-               resolutionParam.setValue("1024x544x64");
+               System.out.println("Setting multisense resolution to 1024x544x128");
+               resolutionParam.setValue("1024x544x128");
                request.getConfig().getStrs().add(resolutionParam);
 
                DoubleParameter fpsParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(DoubleParameter._TYPE);
