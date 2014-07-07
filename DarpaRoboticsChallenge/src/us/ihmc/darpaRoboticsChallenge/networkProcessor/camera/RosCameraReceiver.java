@@ -71,9 +71,11 @@ public class RosCameraReceiver extends CameraDataReceiver
             }
 
             RobotPoseData robotPoseData = robotPoseBuffer.floorEntry(ppsTimestampOffsetProvider.adjustTimeStampToRobotClock(timeStamp));
-            worldToCameraTransform.mul(robotPoseData.getHeadPose(),rosTransformFromHeadBaseToCamera);
-            
-            updateLeftEyeImage(worldToCameraTransform, image, timeStamp, DRCSensorParameters.DUMMY_FILED_OF_VIEW);
+            if(robotPoseData != null)
+            {
+               worldToCameraTransform.mul(robotPoseData.getHeadPose(),rosTransformFromHeadBaseToCamera);
+               updateLeftEyeImage(worldToCameraTransform, image, timeStamp, DRCSensorParameters.DUMMY_FILED_OF_VIEW);
+            }
          }
       };
       rosMainNode.attachSubscriber(cameraParameters.getRosCompressedTopicName(), imageSubscriberSubscriber);
