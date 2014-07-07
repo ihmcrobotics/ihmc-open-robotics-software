@@ -1,26 +1,8 @@
 package us.ihmc.sensorProcessing.pointClouds.shape;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-
-import org.opensphere.geometry.algorithm.ConcaveHull;
-import org.opensphere.geometry.triangulation.model.Edge;
-import org.opensphere.geometry.triangulation.model.Triangle;
-import org.opensphere.geometry.triangulation.model.Vertex;
-
-import us.ihmc.sensorProcessing.concaveHull.BoundConcavePolygon;
-import georegression.struct.plane.PlaneGeneral3D_F64;
-import georegression.struct.point.Point2D_F64;
-import georegression.struct.point.Point3D_F64;
-import georegression.struct.shapes.Cylinder3D_F64;
-import georegression.struct.shapes.Sphere3D_F64;
-import bubo.ptcloud.CloudShapeTypes;
-import bubo.ptcloud.PointCloudShapeFinder.Shape;
-import bubo.ptcloud.alg.BoundCylinderBasic;
-import bubo.ptcloud.alg.BoundPlaneRectangle;
-
+import bubo.clouds.detect.CloudShapeTypes;
+import bubo.clouds.detect.alg.BoundCylinderBasic;
+import bubo.clouds.detect.alg.BoundPlaneRectangle;
 import com.jme3.app.SimpleApplication;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState;
@@ -41,6 +23,23 @@ import com.jme3.util.BufferUtils;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import georegression.struct.plane.PlaneGeneral3D_F64;
+import georegression.struct.point.Point2D_F64;
+import georegression.struct.point.Point3D_F64;
+import georegression.struct.shapes.Cylinder3D_F64;
+import georegression.struct.shapes.Sphere3D_F64;
+import org.opensphere.geometry.algorithm.ConcaveHull;
+import org.opensphere.geometry.triangulation.model.Edge;
+import org.opensphere.geometry.triangulation.model.Triangle;
+import org.opensphere.geometry.triangulation.model.Vertex;
+import us.ihmc.sensorProcessing.concaveHull.BoundConcavePolygon;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+
+import static bubo.clouds.detect.PointCloudShapeFinder.Shape;
 
 public class ShapeTranslator
 {

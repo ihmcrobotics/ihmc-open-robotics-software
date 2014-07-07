@@ -165,10 +165,10 @@ public class IcpCloud3D {
             return false;
 
          // apply found motion
-         total.concat(motionAlg.getMotion(),work0);
+         total.concat(motionAlg.getTransformSrcToDst(),work0);
          total.set(work0);
 
-         Se3_F64 found = motionAlg.getMotion();
+         Se3_F64 found = motionAlg.getTransformSrcToDst();
          double change = found.getT().normSq();
          RotationMatrixGenerator.matrixToRodrigues(found.getR(),rod);
 

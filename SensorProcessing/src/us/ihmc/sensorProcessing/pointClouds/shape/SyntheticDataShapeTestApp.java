@@ -1,12 +1,11 @@
 package us.ihmc.sensorProcessing.pointClouds.shape;
 
-import bubo.ptcloud.FactoryPointCloudShape;
-import bubo.ptcloud.PointCloudShapeFinder;
-import bubo.ptcloud.alg.ConfigSchnabel2007;
-import bubo.ptcloud.tools.PointCloudShapeTools;
-import bubo.ptcloud.wrapper.ConfigMergeShapes;
-import bubo.ptcloud.wrapper.ConfigRemoveFalseShapes;
-import bubo.ptcloud.wrapper.ConfigSurfaceNormals;
+import bubo.clouds.FactoryPointCloudShape;
+import bubo.clouds.detect.PointCloudShapeFinder;
+import bubo.clouds.detect.alg.ConfigSchnabel2007;
+import bubo.clouds.detect.tools.PointCloudShapeTools;
+import bubo.clouds.detect.wrapper.ConfigRemoveFalseShapes;
+import bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
 import com.jme3.app.SimpleApplication;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;

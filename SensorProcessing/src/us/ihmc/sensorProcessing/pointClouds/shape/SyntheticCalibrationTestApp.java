@@ -1,20 +1,15 @@
 package us.ihmc.sensorProcessing.pointClouds.shape;
 
-import bubo.ptcloud.CloudShapeTypes;
-import bubo.ptcloud.FactoryPointCloudShape;
-import bubo.ptcloud.PointCloudShapeFinder;
-import bubo.ptcloud.PointCloudShapeFinder.Shape;
-import bubo.ptcloud.alg.ConfigSchnabel2007;
-import bubo.ptcloud.wrapper.ConfigRemoveFalseShapes;
-import bubo.ptcloud.wrapper.ConfigSurfaceNormals;
-
+import bubo.clouds.FactoryPointCloudShape;
+import bubo.clouds.detect.CloudShapeTypes;
+import bubo.clouds.detect.PointCloudShapeFinder;
+import bubo.clouds.detect.alg.ConfigSchnabel2007;
+import bubo.clouds.detect.wrapper.ConfigRemoveFalseShapes;
+import bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
 import com.jme3.app.SimpleApplication;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
-
-import georegression.metric.Intersection3D_F64;
-import georegression.struct.line.LineParametric3D_F64;
 import georegression.struct.plane.PlaneGeneral3D_F64;
 import georegression.struct.plane.PlaneNormal3D_F64;
 import georegression.struct.point.Point3D_F64;
@@ -24,14 +19,11 @@ import georegression.struct.shapes.Sphere3D_F64;
 import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
 import us.ihmc.sensorProcessing.pointClouds.shape.ExpectationMaximizationFitter.ScoringFunction;
 
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.LinkedList;
+import java.awt.*;
+import java.util.*;
 import java.util.List;
-import java.util.Random;
-import java.util.concurrent.Callable;
+
+import static bubo.clouds.detect.PointCloudShapeFinder.Shape;
 
 /**
  * @author Alex Lesman

@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.pointClouds.shape;
 
-import bubo.ptcloud.tools.PointCloudShapeTools;
+import bubo.clouds.detect.tools.PointCloudShapeTools;
 import georegression.geometry.UtilPlane3D_F64;
 import georegression.struct.plane.PlaneGeneral3D_F64;
 import georegression.struct.plane.PlaneNormal3D_F64;
@@ -28,7 +28,7 @@ public class IhmcPointCloudOpsTest
 
       List<Point3D_F64> points = new ArrayList<Point3D_F64>();
       for( int i = 0; i < 100; i++ ) {
-         points.add(PointCloudShapeTools.createPt(orig,rand.nextGaussian()*2,rand.nextGaussian()*2));
+         points.add(PointCloudShapeTools.createPt(orig, rand.nextGaussian() * 2, rand.nextGaussian() * 2));
       }
 
       PlaneGeneral3D_F64 general = UtilPlane3D_F64.convert(orig,null);

@@ -1,19 +1,26 @@
 package us.ihmc.sensorProcessing.pointClouds.shape;
 
 
+import bubo.clouds.detect.PointCloudShapeFinder;
+import com.jme3.app.SimpleApplication;
+import com.jme3.math.ColorRGBA;
+import com.jme3.math.Vector3f;
+import com.jme3.scene.Node;
 import georegression.metric.Distance3D_F64;
 import georegression.struct.GeoTuple3D_F64;
-import georegression.struct.GeoTuple_F64;
 import georegression.struct.plane.PlaneGeneral3D_F64;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.point.Vector3D_F64;
+import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
+import us.ihmc.utilities.lidar.polarLidar.LidarScan;
+import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
 
-import java.awt.Color;
+import javax.media.j3d.Transform3D;
+import javax.vecmath.Point3d;
+import java.awt.*;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -21,20 +28,7 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.media.j3d.Transform3D;
-import javax.vecmath.Point3d;
-
-import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
-import us.ihmc.sensorProcessing.concaveHull.BoundConcavePolygon;
-import us.ihmc.utilities.lidar.polarLidar.LidarScan;
-import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
-import bubo.ptcloud.PointCloudShapeFinder;
-import bubo.ptcloud.PointCloudShapeFinder.Shape;
-
-import com.jme3.app.SimpleApplication;
-import com.jme3.math.ColorRGBA;
-import com.jme3.math.Vector3f;
-import com.jme3.scene.Node;
+import static bubo.clouds.detect.PointCloudShapeFinder.Shape;
 
 public class LidarOffsetCalculator extends SimpleApplication
 {
