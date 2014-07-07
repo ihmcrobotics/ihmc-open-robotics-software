@@ -58,13 +58,13 @@ public class AtlasArmControllerParameters implements ArmControllerParameters
    public double getArmJointspaceKi()
    {
       if (!runningOnRealRobot)  return 0.0;
-      return 20.0; //0.0 
+      return 0.0;
    }
 
    public double getArmJointspaceMaxIntegralError()
    {
       if (!runningOnRealRobot)  return 0.0;
-      return 0.2; //0.0;
+      return 0.0;
    }
 
    public double getArmJointspaceMaxAcceleration()
@@ -124,6 +124,6 @@ public class AtlasArmControllerParameters implements ArmControllerParameters
    @Override
    public boolean doLowLevelPositionControl()
    {
-      return runningOnRealRobot && true;
+      return runningOnRealRobot;
    }
 }
