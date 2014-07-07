@@ -62,7 +62,7 @@ public class MultiSenseSensorManager
       registerLidarReceivers();
       MultiSenseParamaterSetter.initialize(rosMainNode);
       setMultiseSenseParams(sensorInformation.getLidarSpindleVelocity());
-      //this.fieldComputerClient.attachListener(MultisenseParameterPacket.class, new MultisenseParameterPacketProvider());                                
+                                    
    }
    
    private void setMultiseSenseParams(double lidarSpindleVelocity)
