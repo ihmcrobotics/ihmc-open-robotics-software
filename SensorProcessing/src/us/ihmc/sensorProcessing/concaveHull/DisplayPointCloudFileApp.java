@@ -1,6 +1,5 @@
 package us.ihmc.sensorProcessing.concaveHull;
 
-import georegression.struct.plane.PlaneGeneral3D_F64;
 import georegression.struct.point.Point3D_F64;
 
 import java.awt.Color;
@@ -11,16 +10,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.jfree.chart.plot.RainbowPalette;
-import org.w3c.dom.css.RGBColor;
-
 import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
 import us.ihmc.sensorProcessing.pointClouds.shape.PointCloud;
 import us.ihmc.sensorProcessing.pointClouds.shape.ShapeTranslator;
 import bubo.io.serialization.DataDefinition;
 import bubo.io.serialization.SerializationDefinitionManager;
 import bubo.io.text.ReadCsvObjectSmart;
-import bubo.ptcloud.PointCloudShapeFinder.Shape;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.math.ColorRGBA;
@@ -30,7 +25,7 @@ import com.jme3.scene.Node;
 /**
  * @author Peter Abeles
  */
-public class OldDisplayPointCloudFileApp extends SimpleApplication
+public class DisplayPointCloudFileApp extends SimpleApplication
 {
    Random rand = new Random(234);
 
@@ -40,12 +35,12 @@ public class OldDisplayPointCloudFileApp extends SimpleApplication
    public static void main(String[] args)
    {
       ///home/unknownid/workspace/SensorProcessing/output.txt
-	   OldDisplayPointCloudFileApp test1 = new OldDisplayPointCloudFileApp("torus.txt","gen_torus.txt");
+	   DisplayPointCloudFileApp test1 = new DisplayPointCloudFileApp("torus.txt","gen_torus.txt");
 	  
       test1.start();
    }
 
-   public OldDisplayPointCloudFileApp(String fileName1,String fileName2)
+   public DisplayPointCloudFileApp(String fileName1,String fileName2)
    {
       this.fileName = fileName1;
       this.fileName2 = fileName2;
