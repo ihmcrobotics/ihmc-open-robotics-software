@@ -15,6 +15,8 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosNativeNetworkProce
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
+import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.MultisenseParameterPacket;
+import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.MultisenseParameterPacketProvider;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.ros.RosMainNode;
 
@@ -56,7 +58,7 @@ public class MultiSenseSensorManager
       this.lidarDataFilter = lidarDataFilter;           
       this.lidarCRC = sensorInformation.getLidarCRC();
       this.sensorURI = sensorURI;
-                                      
+      this.fieldComputerClient.attachListener(MultisenseParameterPacket.class, new MultisenseParameterPacketProvider());                                
       registerCameraReceivers();
       registerLidarReceivers();
       setMultiseSenseParams(sensorInformation.getLidarSpindleVelocity());
