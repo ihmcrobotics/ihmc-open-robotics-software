@@ -1,15 +1,8 @@
 package us.ihmc.sensorProcessing.pointClouds.shape;
 
-import georegression.struct.point.Point3D_F64;
-
-import java.util.List;
-
-import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
-import us.ihmc.sensorProcessing.pointClouds.octree.OccupancyCell;
-import us.ihmc.sensorProcessing.pointClouds.octree.OctreeOccupancyExample;
-import us.ihmc.sensorProcessing.pointClouds.octree.OctreeOccupancyMap;
-import bubo.ptcloud.Octree;
-
+import bubo.maps.d3.grid.CellProbability_F64;
+import bubo.maps.d3.grid.GridMapSpacialInfo3D;
+import bubo.maps.d3.grid.impl.OctreeGridMap_F64;
 import com.jme3.app.SimpleApplication;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState.BlendMode;
@@ -20,6 +13,12 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.shape.Box;
 import com.jme3.system.AppSettings;
+import georegression.struct.point.Point3D_F64;
+import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
+import us.ihmc.sensorProcessing.pointClouds.octree.OctreeOccupancyExample;
+
+import java.util.Iterator;
+import java.util.List;
 
 public class DisplayOctreeApp extends SimpleApplication
 {
@@ -27,7 +26,7 @@ public class DisplayOctreeApp extends SimpleApplication
 
    public static void main(String[] args)
    {
-      DisplayOctreeApp test1 = new DisplayOctreeApp("data/kinectcloud.txt");
+      DisplayOctreeApp test1 = new DisplayOctreeApp("../SensorProcessing/data/kinectcloud.txt");
       AppSettings appSettings = new AppSettings(true);
       appSettings.setResolution(1600, 900);
       test1.setSettings(appSettings);
@@ -46,7 +45,8 @@ public class DisplayOctreeApp extends SimpleApplication
       List<Point3D_F64> cloud = PointCloudTools.readPointCloud(fileName, -1);
 
       System.out.println("total points: " + cloud.size());
-      OctreeOccupancyMap map = OctreeOccupancyExample.mainMethod(cloud);
+      GridMapSpacialInfo3D spacial = OctreeOccupancyExample.createSpacial();
+      OctreeGridMap_F64 map = OctreeOccupancyExample.createMapFromCloud(cloud, spacial);
 
       Node zUpNode = new Node();
       zUpNode.setLocalRotation(JMEGeometryUtils.getRotationFromJMEToZupCoordinates());
@@ -54,7 +54,7 @@ public class DisplayOctreeApp extends SimpleApplication
       try
       {
          rootNode.attachChild(zUpNode);
-         generateMap(zUpNode, map);
+         generateMap(zUpNode, map,spacial);
       }
       catch (Exception e)
       {
@@ -70,22 +70,26 @@ public class DisplayOctreeApp extends SimpleApplication
       flyCam.setZoomSpeed(10);
    }
 
-   private void generateMap(Node zUpNode, OctreeOccupancyMap map)
+   private void generateMap(Node zUpNode, OctreeGridMap_F64 map, GridMapSpacialInfo3D spacial)
    {
+      Iterator<CellProbability_F64> iterator = map.iteratorKnown();
+      float r = (float)(spacial.getCellSize()/2.0);
+
       int i = 0;
-      for (Octree o : map.getLeafs())
-      {
-         Point3D_F64 p0 = o.space.p0;
-         Point3D_F64 p1 = o.space.p1;
-         p0 = p0.plus(p1);
-         Box box = new Box(new Vector3f((float) p0.z / 2, (float) -p0.x / 2, (float) -p0.y / 2), (float) 0.025, (float) 0.025, (float) 0.025);
+      while( iterator.hasNext() ) {
+         CellProbability_F64 o = iterator.next();
+         Point3D_F64 p = new Point3D_F64();
+
+         spacial.gridToMap(o.x,o.y,o.z,p);
+         p.x += r; p.y += r;p.z += r;
+
+         Box box = new Box(new Vector3f((float) p.z, (float) -p.x, (float) -p.y), (float) r, (float) r, (float) r);
          Geometry cube = new Geometry("cell" + i, box);
          Material mat1 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
          mat1.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
          cube.setQueueBucket(Bucket.Transparent);
-         OccupancyCell c = o.getUserData();
-         float p = (float) c.getProbability();
-         ColorRGBA color = new ColorRGBA(1.0f - p, p, 0f, p);
+         float prob = (float) o.probability;
+         ColorRGBA color = new ColorRGBA(1.0f - prob, prob, 0f, prob);
          mat1.setColor("Color", color);
          cube.setMaterial(mat1);
          zUpNode.attachChild(cube);

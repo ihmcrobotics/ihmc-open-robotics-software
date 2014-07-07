@@ -1,9 +1,5 @@
 package us.ihmc.sensorProcessing.pointClouds.shape;
 
-import java.nio.FloatBuffer;
-import java.util.Collection;
-import java.util.Iterator;
-
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState.BlendMode;
@@ -13,11 +9,15 @@ import com.jme3.renderer.queue.RenderQueue.Bucket;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
-import com.jme3.scene.Node;
 import com.jme3.scene.Mesh.Mode;
+import com.jme3.scene.Node;
 import com.jme3.scene.Spatial.CullHint;
 import com.jme3.scene.VertexBuffer;
 import com.jme3.util.BufferUtils;
+
+import java.nio.FloatBuffer;
+import java.util.Collection;
+import java.util.Iterator;
 
 
 
@@ -56,8 +56,6 @@ public class PointCloud
       mat.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
       mat.setBoolean("PointSprite", true);
       mat.setFloat("Quadratic", size);
-
-
 
       Mesh m = new Mesh();
       m.setMode(Mode.Points);

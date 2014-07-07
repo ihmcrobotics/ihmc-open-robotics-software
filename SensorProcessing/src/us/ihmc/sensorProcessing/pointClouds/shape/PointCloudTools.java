@@ -1,12 +1,11 @@
 package us.ihmc.sensorProcessing.pointClouds.shape;
 
+import bubo.clouds.detect.CloudShapeTypes;
+import bubo.clouds.detect.alg.*;
+import bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
 import bubo.io.serialization.DataDefinition;
 import bubo.io.serialization.SerializationDefinitionManager;
 import bubo.io.text.ReadCsvObjectSmart;
-import bubo.ptcloud.CloudShapeTypes;
-import bubo.ptcloud.PointCloudShapeFinder.Shape;
-import bubo.ptcloud.alg.*;
-import bubo.ptcloud.wrapper.ConfigSurfaceNormals;
 import com.jme3.math.Vector3f;
 import georegression.geometry.UtilPlane3D_F64;
 import georegression.geometry.UtilPoint3D_F64;
@@ -32,6 +31,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+
+import static bubo.clouds.detect.PointCloudShapeFinder.Shape;
 
 public class PointCloudTools
 {
