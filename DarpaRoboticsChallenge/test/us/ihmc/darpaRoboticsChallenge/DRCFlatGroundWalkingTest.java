@@ -283,6 +283,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       stringsToIgnore.add("actualControl");
       stringsToIgnore.add("actualEstimator");
       stringsToIgnore.add("totalDelay");
+      stringsToIgnore.add("Time");
 
       double maxPercentDifference = 0.000001;
       assertTrue("Simulation did not run same way twice!", verifier.verifySimRunsSameWayTwice(maxPercentDifference, stringsToIgnore));
