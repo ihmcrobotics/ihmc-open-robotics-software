@@ -49,10 +49,9 @@ public class ValkyrieSliderBoard
    {
       selectedJoint = new EnumYoVariable<>("selectedJoint", registry, ValkyrieSliderBoardSelectableJoints.class);
       selectedJoint.set(ValkyrieSliderBoardSelectableJoints.RightKneeExtensor);
-      remoteSelectedJoint = (EnumYoVariable<ValkyrieSliderBoardSelectableJoints>) registry.getVariable(
-         "remoteroot.ValkyrieSliderBoardController.selectedJoint");
+      remoteSelectedJoint = (EnumYoVariable<ValkyrieSliderBoardSelectableJoints>) registry.getVariable("ValkyrieSliderBoardController", "selectedJoint");
 
-      remoteTurboIndex = (IntegerYoVariable) registry.getVariable("remoteroot.ValkyrieSliderBoardController.turboIndex");
+      remoteTurboIndex = (IntegerYoVariable) registry.getVariable("ValkyrieSliderBoardController", "turboIndex");
 
       final SliderBoardConfigurationManager sliderBoardConfigurationManager = new SliderBoardConfigurationManager(scs);
 
