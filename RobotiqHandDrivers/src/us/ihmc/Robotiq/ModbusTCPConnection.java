@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.Arrays;
 
 public class ModbusTCPConnection
@@ -32,53 +31,52 @@ public class ModbusTCPConnection
 		this(ip_address, 502);
 	}
 	
-	public void transcieve(int unitID, int functionCode, byte[] data) throws IOException
+	public void transcieve(int unitID, byte[] data) throws IOException
 	{
-		transcieve((byte)unitID, (byte)functionCode, data);
+		transcieve((byte)unitID, data);
 	}
 	
-	public byte[] transcieve(byte unitID, byte functionCode, byte[] data) throws IOException
+	public byte[] transcieve(byte unitID, byte[] data) throws IOException
 	{		
 		/*
 		 *Header:
 		 *Transaction ID: 2 bytes
 		 *Protocol Identifier: 2 bytes
 		 *Packet Length: 2 bytes
+		 *Unit ID: 1 byte
 		 *
 		 *Data:
-		 *Unit ID: 1 byte
 		 *Function Code: 1 byte
-		 *Application Data: Up to 1452 Bytes
+		 *Reference Number: 2 bytes
+		 *Byte Count: 1 byte
+		 *Application Data: Up to 1449 Bytes
 		*/
-		
 		packetCounter++;
-		if(packetCounter > 0xFFFF)
+		if(packetCounter > 0xFFFF)	//cycle packet counter to maintain a semblance of knowledge about how many packets were sent
 			packetCounter = 0;
 		
 		byte[] packetLength = new byte[2];
-		packetLength[0] = (byte)((2 + data.length) >> 8);	//bit shifting to align integer to byte stream
-		packetLength[1] = (byte)(2 + data.length);
+		packetLength[0] = (byte)((1 + data.length) >> 8);	//bit shifting to align integer to byte stream
+		packetLength[1] = (byte)(1 + data.length);
 		
 		byte[] transactionID = new byte[2];
 		transactionID[0] = (byte)(packetCounter >> 8);		//bit shifting to align integer to byte stream
 		transactionID[1] = (byte)packetCounter;
 		
 		outBuffer[0] = transactionID[0];
-		outBuffer[1] = transactionID[1];
+		outBuffer[1] = transactionID[1];	//transactionID being used as packet counter
 		outBuffer[2] = 0x00;
 		outBuffer[3] = 0x00;				//Defining protocol as Modbus (0x0000)
 		outBuffer[4] = packetLength[0];
-		outBuffer[5] = packetLength[1];
+		outBuffer[5] = packetLength[1];		//send 
 		outBuffer[6] = unitID;
-		outBuffer[7] = functionCode;
 		
-		System.out.println(data.length);
 		for(int counter = 0; counter < data.length; counter++)
 		{
-			outBuffer[counter+8] = data[counter];
+			outBuffer[counter+7] = data[counter];
 		}
 		
-		int outBytes = 8 + data.length; 
+		int outBytes = 7 + data.length; 
 		outStream.write(outBuffer, 0, outBytes); //request
 		outStream.flush();
 		
@@ -90,19 +88,15 @@ public class ModbusTCPConnection
 			{
 				//unexpected close of connection
 				System.err.println("connection unexpectly closed");
-				System.exit(-1);
 			}
 			else
 			{
 				//response too short
 				System.err.println("response too short");
-				System.exit(-1);
 			}
 		}
 		
-		//TODO:more error testing should be handled here
-		//TODO:return proper length array of response here
-		return Arrays.copyOfRange(inBuffer, 7, inBuffer.length);
+		return Arrays.copyOfRange(inBuffer, 7, inBytes); //return the reply with the proper length (removes header)
 		
 	}
 	

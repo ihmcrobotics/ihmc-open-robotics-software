@@ -6,12 +6,12 @@ public class ConnectionTesting
 {
 	public static void main(String[] args) throws IOException, InterruptedException
 	{
-		
+		//testing of the underlying connection
 //		ModbusTCPConnection connection;
 //		
 //		System.out.println("starting connection");
 //		
-//		connection = new ModbusTCPConnection("192.168.1.13", 0x02);
+//		connection = new ModbusTCPConnection("192.168.1.13", 502);
 //		
 //		System.out.println("connected");
 //		
@@ -40,25 +40,83 @@ public class ConnectionTesting
 //		System.out.println("closing socket");
 //		connection.close();
 //		System.out.println("socket closed");
+
 		
+		
+		//testing the robot hand interface
 		System.out.println("starting connection");
 		RobotiqHandInterface rightHand = new RobotiqHandInterface();
 		System.out.println("connected");
-		Thread.sleep(3000);
+		
 		System.out.println("Sending Activation Request");
 		rightHand.initialize();
 		System.out.println("Activation Request Sent");
-		Thread.sleep(17000);
-		System.out.println("Resetting Hand");
-		rightHand.reset();
-		System.out.println("Hand Reset");
-		Thread.sleep(20000);
-		System.out.println("Closing Hand");
-		rightHand.close();
-		System.out.println("Hand Closed");
-		Thread.sleep(7000);
+		
+//		System.out.println("Sending Activation Request");
+//		rightHand.initialize();
+//		System.out.println("Activation Request Sent");
+		
+//		System.out.println("Resetting Hand");
+//		rightHand.reset();
+//		System.out.println("Hand Reset");
+		
+//		testCycles(rightHand, 200);
+		
+//		System.out.println("Crushing with Hand");
+//		rightHand.crush();
+//		System.out.println("Hand Crushing");
+//		Thread.sleep(500);
+//		
+//		System.out.println("Opening Hand");
+//		rightHand.open();
+//		System.out.println("Hand Open");
+//		Thread.sleep(500);
+		
 		System.out.println("Shutting Down Hand");
 		rightHand.shutdown();
 		System.out.println("Hand Shut Down");
+	}
+
+	/**
+	 * @param hand
+	 * @throws InterruptedException
+	 */
+	private static void testCycles(RobotiqHandInterface hand, int cycles)
+			throws InterruptedException {
+		int counter;
+		for(counter = 0; counter < cycles; counter++)
+		{
+			System.out.println("Cycle: " + (counter + 1));
+			System.out.println("Closing Hand");
+			hand.close();
+			System.out.println("Hand Closed");
+			Thread.sleep(500);
+			
+			System.out.println("Opening Hand");
+			hand.open();
+			System.out.println("Hand Open");
+			Thread.sleep(500);
+			
+			System.out.println();
+		}
+		System.out.println("Close cycles completed: " + counter);
+		System.out.println();
+		for(counter = 0; counter < cycles; counter++)
+		{
+			System.out.println("Cycle: " + (counter + 1));
+			System.out.println("Crushing with Hand");
+			hand.crush();
+			System.out.println("Hand Crushing");
+			Thread.sleep(500);
+			
+			System.out.println("Opening Hand");
+			hand.open();
+			System.out.println("Hand Open");
+			Thread.sleep(500);
+			
+			System.out.println();
+		}
+		System.out.println("Crush cycles completed: " + counter);
+		System.out.println();
 	}
 }
