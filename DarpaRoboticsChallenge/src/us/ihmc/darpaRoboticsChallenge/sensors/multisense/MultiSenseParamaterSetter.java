@@ -9,10 +9,12 @@ import org.ros.node.service.ServiceResponseListener;
 
 import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosNativeNetworkProcessor;
+import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.MultisenseParameterPacket;
 import us.ihmc.utilities.processManagement.ProcessStreamGobbler;
 import us.ihmc.utilities.ros.RosDoublePublisher;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosServiceClient;
+import dynamic_reconfigure.BoolParameter;
 import dynamic_reconfigure.DoubleParameter;
 import dynamic_reconfigure.Reconfigure;
 import dynamic_reconfigure.ReconfigureRequest;
@@ -21,6 +23,13 @@ import dynamic_reconfigure.StrParameter;
 
 public class MultiSenseParamaterSetter
 {
+   private static double gain;
+   private static double motorSpeed;
+   private static boolean ledEnable;
+   private static boolean flashEnable;
+   
+   private static final RosServiceClient<ReconfigureRequest, ReconfigureResponse> multiSenseClient = new RosServiceClient<ReconfigureRequest, ReconfigureResponse>(
+         Reconfigure._TYPE);
    
    public static void setupNativeROSCommunicator(RosNativeNetworkProcessor rosNativeNetworkProcessor, double lidarSpindleVelocity)
    {
@@ -104,14 +113,16 @@ public class MultiSenseParamaterSetter
       rosMainNode.attachPublisher("/multisense/set_spindle_speed", rosDoublePublisher);
    }
    
+   public static void initialize(RosMainNode rosMainNode){
+      
+      rosMainNode.attachServiceClient("multisense/set_parameters", multiSenseClient);
+   }
+   
    public static void setMultisenseResolution(RosMainNode rosMainNode)
    {
       try
       {
-         final RosServiceClient<ReconfigureRequest, ReconfigureResponse> multiSenseClient = new RosServiceClient<ReconfigureRequest, ReconfigureResponse>(
-               Reconfigure._TYPE);
-         rosMainNode.attachServiceClient("multisense/set_parameters", multiSenseClient);
-
+         
          Thread setupThread = new Thread()
          {
             public void run()
@@ -155,5 +166,51 @@ public class MultiSenseParamaterSetter
       {
          System.err.println(e.getMessage());
       }
+   }
+   
+   
+
+   public static void setMultisenseParameters(MultisenseParameterPacket object)
+   {
+      gain = object.getGain();
+      motorSpeed = object.getMotorSpeed();
+      ledEnable = object.isLedEnable();
+      flashEnable = object.isFlashEnable();
+      System.out.println("object received with gain "+ gain+" speed "+ motorSpeed+"led "+ ledEnable +"flash"+flashEnable);
+      multiSenseClient.waitTillConnected();
+      ReconfigureRequest request = multiSenseClient.getMessage();
+      DoubleParameter gainParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(DoubleParameter._TYPE);
+      gainParam.setName("gain");
+      gainParam.setValue(gain);
+      request.getConfig().getDoubles().add(gainParam);
+      
+      DoubleParameter motorSpeedParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(DoubleParameter._TYPE);
+      motorSpeedParam.setName("motor_speed");
+      motorSpeedParam.setValue(motorSpeed);
+      request.getConfig().getDoubles().add(motorSpeedParam);
+      
+      BoolParameter ledEnableParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(BoolParameter._TYPE);
+      ledEnableParam.setName("lighting");
+      ledEnableParam.setValue(ledEnable);
+      request.getConfig().getBools().add(ledEnableParam);
+      
+      BoolParameter flashEnableParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(BoolParameter._TYPE);
+      flashEnableParam.setName("flash");
+      flashEnableParam.setValue(flashEnable);
+      request.getConfig().getBools().add(flashEnableParam);
+      
+      multiSenseClient.call(request, new ServiceResponseListener<ReconfigureResponse>()
+            {
+
+               public void onSuccess(ReconfigureResponse response)
+               {
+                  System.out.println("successful" + response.getConfig().getDoubles().get(0).getValue());
+               }
+
+               public void onFailure(RemoteException e)
+               {
+                  e.printStackTrace();
+               }
+            });
    }
 }
