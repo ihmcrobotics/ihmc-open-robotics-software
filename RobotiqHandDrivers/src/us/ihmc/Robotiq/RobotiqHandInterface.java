@@ -5,11 +5,296 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 
 public class RobotiqHandInterface
-{
-//	private static final byte INITAILIZING = 0b00100000;
-//	private static final byte INITAILIZED = 0b00110000;
-//	private static final byte INIT_MODE_STATUS = 0b00110000;
+{	
+	/*---LOCATION DATA---*/
+	private static final int REGISTER_START = 0x0000;
 	
+	/*---FUNCTION CODES---*/
+	private static final byte SET_REGISTERS = 0x10;
+	private static final byte READ_REGISTERS = 0x04;
+	
+	/*---DATA INDICES---*/
+	//status response index (from hand start register) 
+	private static final int FUNCTION_CODE = 0;
+	private static final int DATA_BYTES = 1;
+	private static final int GRIPPER_STATUS = 2;
+	private static final int OBJECT_STATUS = 3;
+	private static final int FAULT_STATUS = 4;
+	private static final int POSITION_REQUEST_A = 5;
+	private static final int FINGER_A_POSITION = 6;
+	private static final int FINGER_A_CURRENT = 7;
+	private static final int POSITION_REQUEST_B = 8;
+	private static final int FINGER_B_POSITION = 9;
+	private static final int FINGER_B_CURRENT = 10;
+	private static final int POSITION_REQUEST_C = 11;
+	private static final int FINGER_C_POSITION = 12;
+	private static final int FINGER_C_CURRENT = 13;
+	private static final int POSITION_REQUEST_S = 14;
+	private static final int SCISSOR_POSITION = 15;
+	private static final int SCISSOR_CURRENT = 16;
+	
+	//control parameter index
+	private static final int FINGER_A = 0;
+	private static final int FINGER_B = 1;
+	private static final int FINGER_C = 2;
+	private static final int SCISSOR = 3;
+	
+	/*---FUNCTIONALITY REGISTER BITMASKS---*/
+	//byte 0 (action request)
+	private static final byte INITIALIZATON_MASK =		0b00000001;
+	private static final byte OPERATION_MODE_MASK =		0b00000110;
+	private static final byte GO_TO_REQUESTED_MASK =	0b00001000;
+	private static final byte AUTOMATIC_RELEASE = 		0b00010000;
+	//last three bits reserved
+	
+	//byte 1 (gripper options 1)
+	private static final byte GLOVE_MODE_MASK = 				0b00000001;
+	//bit 1 reserved
+	private static final byte INDIVIDUAL_FINGER_CONTROL_MASK = 	0b00000100;
+	private static final byte INDIVIDUAL_SCISSOR_CONTROL_MASK =	0b00001000;
+	//bits 4 to 7 reserved
+	
+	//bytes 2 to 14 do not require masks
+	
+	/*---STATUS REGISTER BITMASKS---*/
+	//byte 0 (gripper status 
+	/*
+	private static final byte INITIALIZATON_MASK =		0b00000001; //same as functionality mask
+	private static final byte OPERATION_MODE_MASK =		0b00000110; //same as functionality mask
+	private static final byte GO_TO_REQUESTED_MASK =	0b00001000; //same as functionality mask
+	 */
+	private static final byte INIT_MODE_STATUS_MASK =	 0b00110000;
+	private static final byte MOTION_STATUS_MASK = (byte)0b11000000;
+	
+	//byte 1 (object status)
+	private static final byte OBJECT_DETECTION_A_MASK = 	  0b00000011;
+	private static final byte OBJECT_DETECTION_B_MASK = 	  0b00001100;
+	private static final byte OBJECT_DETECTION_C_MASK =       0b00110000;
+	private static final byte OBJECT_DETECTION_S_MASK =	(byte)0b11000000;
+	
+	//bytes 2 to 14 do not require masks
+	
+	/*---FUNCTIONALITY REGISTER VALUES---*/
+	//byte 0 (action request)
+	//bit 0
+	private static final byte RESET = 			0b00000000;
+	private static final byte INITIALIZE = 		0b00000001;
+	//bits 1 and 2
+	private static final byte BASIC_MODE = 		0b00000000;
+	private static final byte WIDE_MODE = 		0b00000010;
+	private static final byte PINCH_MODE = 		0b00000100;
+	private static final byte SCISSOR_MODE = 	0b00000110; 
+	//bit 3
+	private static final byte STANDBY = 		0b00000000;
+	private static final byte GO_TO_REQUESTED =	0b00001000;
+	//bit 4
+	private static final byte AUTO_RELEASE_DISABLED =	0b00010000;
+	private static final byte AUTO_RELEASE_ENABLED =	0b00010000;
+	//bits 5 to 7 reserved
+	
+	//byte 1 (gripper options 1)
+	//bit 0
+	private static final byte GLOVE_MODE_DISABLED = 	0b00000000;
+	private static final byte GLOVE_MODE_ENABLED = 		0b00000001;
+	//bit 1 reserved
+	//bit 2
+	private static final byte CONCURRENT_FINGER_CONTROL = 	0b00000000;
+	private static final byte INDIVIDUAL_FINGER_CONTROL = 	0b00000100;
+	//bit 3
+	private static final byte CONCURRENT_SCISSOR_CONTROL = 	0b00000000;
+	private static final byte INDIVIDUAL_SCISSOR_CONTROL = 	0b00001000;
+	//bits 4 to 7 reserved
+	
+	//byte 2 (gripper options 2)
+	//byte reserved
+	
+	//byte 3 (position request finger A)
+	/* Value:
+	 * 0x00 (fully open) to 0xFF (fully closed)
+	 */
+	
+	//byte 4 (grasping speed of finger A)
+	/* Value:
+	 * 0x00 (minimum speed) to 0xFF (maximum speed)
+	 */
+	
+	//byte 5 (gripping force of finger A)
+	/* Value:
+	 * 0x00 (minimum force) to 0xFF (maximum force)
+	 */
+	
+	//byte 6 (position request finger B)
+	/* Value:
+	 * 0x00 (fully open) to 0xFF (fully closed)
+	 */
+	
+	//byte 7 (grasping speed of finger B)
+	/* Value:
+	 * 0x00 (minimum speed) to 0xFF (maximum speed)
+	 */
+	
+	//byte 8 (gripping force of finger B)
+	/* Value:
+	 * 0x00 (minimum force) to 0xFF (maximum force)
+	 */
+	
+	//byte 9 (position request finger C)
+	/* Value:
+	 * 0x00 (fully open) to 0xFF (fully closed)
+	 */
+	
+	//byte 10 (grasping speed of finger C)
+	/* Value:
+	 * 0x00 (minimum speed) to 0xFF (maximum speed)
+	 */
+	
+	//byte 11 (gripping force of finger C)
+	/* Value:
+	 * 0x00 (minimum force) to 0xFF (maximum force)
+	 */
+	
+	//byte 12 (position request scissor
+	/* Value:
+	 * 0x00 (fully open) to 0xFF (fully closed)
+	 */
+	
+	//byte 13 (grasping speed of scissor)
+	/* Value:
+	 * 0x00 (minimum speed) to 0xFF (maximum speed)
+	 */
+	
+	//byte 14 (gripping force of scissor)
+	/* Value:
+	 * 0x00 (minimum force) to 0xFF (maximum force)
+	 */
+	
+	
+	/*---STATUS REGISTER VALUES---*/
+	//byte 0 (gripper status)
+	//bit 0
+	/*
+	private static final byte RESET = 		0b00000000;  //same as function value
+	 */
+	private static final byte INITIALIZED = 	0b00000001;
+	//bits 1 and 2
+	/*
+	private static final byte BASIC_MODE = 		0b00000000;  //same as function value
+	private static final byte WIDE_MODE = 		0b00000010;  //same as function value
+	private static final byte PINCH_MODE = 		0b00000100;  //same as function value
+	private static final byte SCISSOR_MODE = 	0b00000110;   //same as function value
+	 */
+	//bit 3
+	/*
+	private static final byte STANDBY = 			0b00000000;  //same as function value
+	private static final byte GO_TO_REQUESTED =		0b00001000;  //same as function value
+	 */
+	//bits 4 and 5
+	private static final byte RESET_STATE = 	0b00000000;
+	private static final byte ACTIVATING = 		0b00010000;
+	private static final byte CHANGING_MODE = 	0b00100000;
+	private static final byte COMPLETED = 		0B00110000;
+	//bits 6 and 7
+	private static final byte IN_MOTION = 				0b00000000;
+	private static final byte STOPPED_SOME_EARLY = 		0b01000000; //1 or 2 fingers stopped before desired position
+	private static final byte STOPPED_ALL_EARLY = (byte)0b10000000; //all fingers stopped before the desired position
+	private static final byte STOPPED_AT_DESIRED =(byte)0b11000000;
+	
+	//byte 1 (object status)
+	//bits 0 and 1
+	private static final byte A_IN_MOTION = 		0b00000000;
+	private static final byte A_STOPPED_OPEN = 		0b00000001; //stopped from contact while opening
+	private static final byte A_STOPPED_CLOSED = 	0b00000010; //stopped from contact while closing
+	private static final byte A_AT_DESIRED = 		0b00000011;
+	//bits 2 and 3
+	private static final byte B_IN_MOTION = 		0b00000000;
+	private static final byte B_STOPPED_OPEN = 		0b00000001; //stopped from contact while opening
+	private static final byte B_STOPPED_CLOSED = 	0b00000010; //stopped from contact while closing
+	private static final byte B_AT_DESIRED = 		0b00000011;
+	//bits 4 and 5
+	private static final byte C_IN_MOTION = 		0b00000000;
+	private static final byte C_STOPPED_OPEN = 		0b00000001; //stopped from contact while opening
+	private static final byte C_STOPPED_CLOSED = 	0b00000010; //stopped from contact while closing
+	private static final byte C_AT_DESIRED = 		0b00000011;
+	//bits 6 and 7
+	private static final byte S_IN_MOTION = 		0b00000000;
+	private static final byte S_STOPPED_OPEN = 		0b00000001; //stopped from contact while opening
+	private static final byte S_STOPPED_CLOSED = 	0b00000010; //stopped from contact while closing
+	private static final byte S_AT_DESIRED = 		0b00000011;
+	
+	//byte 2 (fault status)
+	private static final byte NO_FAULT = 0x00;
+	/* Fault Codes:
+	 * 0x00: No Fault.
+	 * 0x05: Priority Fault: Action delayed, activation must be completed prior to action.
+	 * 0x06: Priority Fault: Action delayed, mode change must be completed prior to action.
+	 * 0x07: Priority Fault: The activation bit must be set prior to action.
+	 * 0x09: Minor Fault: Communication is not ready (may be booting).
+	 * 0x0A: Minor Fault: Changing mode fault, interferences detected on scissor axis (less then 20s).
+	 * 0x0B: Minor Fault: Automatic release in progress.
+	 * 0x0D: Major Fault: Action fault, verify that no interference or other error occurred.
+	 * 0x0E: Major Fault: Changing mode fault, interferences detected on scissor axis (more then 20s).
+	 * 0x0F: Major Fault: Automatic release completed. Reset and activation required.
+	 */
+	
+	//byte 3 (position request echo finger A)
+	/* Value:
+	 * 0x00 (fully open) to 0xFF (fully closed)
+	 */
+	
+	//byte 4 (current position of finger A)
+	/* Value:
+	 * 0x00 (fully open) to 0xFF (fully closed)
+	 */
+	
+	//byte 5 (current of finger A motor)
+	/* Value:
+	 * 0x00 to 0xFF (0.1*Current[mA])
+	 */
+	
+	//byte 6 (position request echo finger B)
+	/* Value:
+	 * 0x00 (fully open) to 0xFF (fully closed)
+	 */
+	
+	//byte 7 (current position of finger B)
+	/* Value:
+	 * 0x00 (fully open) to 0xFF (fully closed)
+	 */
+	
+	//byte 8 (current of finger B motor)
+	/* Value:
+	 * 0x00 to 0xFF (0.1*Current[mA])
+	 */
+	
+	//byte 9 (position request echo finger C)
+	/* Value:
+	 * 0x00 (fully open) to 0xFF (fully closed)
+	 */
+	
+	//byte 10 (current position of finger C)
+	/* Value:
+	 * 0x00 (fully open) to 0xFF (fully closed)
+	 */
+	
+	//byte 11 (current of finger C motor)
+	/* Value:
+	 * 0x00 to 0xFF (0.1*Current[mA])
+	 */
+	
+	//byte 12 (position request echo scissor
+	/* Value:
+	 * 0x00 (fully open) to 0xFF (fully closed)
+	 */
+	
+	//byte 13 (current position of scissor)
+	/* Value:
+	 * 0x00 (fully open) to 0xFF (fully closed)
+	 */
+	
+	//byte 14 (current of scissor motor)
+	/* Value:
+	 * 0x00 to 0xFF (0.1*Current[mA])
+	 */
 	
 	private ModbusTCPConnection connection;
 	
@@ -28,7 +313,6 @@ public class RobotiqHandInterface
 	
 	RobotiqHandInterface()
 	{
-		
 		try
 		{
 			connection = new ModbusTCPConnection(RobotiqHandParameters.RIGHT_HAND_ADDRESS,
@@ -65,52 +349,51 @@ public class RobotiqHandInterface
 		byte[] status;
 		status = this.getStatus();
 		
-		if(((status[2] & RobotiqHandParameters.ACTIVATE_HAND) == RobotiqHandParameters.ACTIVATE_HAND) || (status[4] != 0x00))
+		if(((status[GRIPPER_STATUS] & INITIALIZATON_MASK) == INITIALIZED) || (status[FAULT_STATUS] != NO_FAULT))
 		{
 			this.reset();
 			return;
 		}
 		
-		for(int counter = 0; counter < 32; counter++)
+		for(int counter = 0; counter < 32; counter++) //initialize to 0
 		{
 			data[counter] = 0;
 			response[counter] = 0;
 		}
-		for(int counter = 0; counter < 4; counter++)
+		for(int counter = 0; counter < 4; counter++) //initialize to 0
 		{
 			speed[counter] = 0;
 			force[counter] = 0;
 			position[counter] = 0;
 		}
 		
-		position[0] = RobotiqHandParameters.FULLY_OPEN;
-		speed[0] = (byte) (RobotiqHandParameters.MAX_SPEED & 0xF0);
-		force[0] = RobotiqHandParameters.MAX_FORCE/2;
+		position[FINGER_A] = RobotiqHandParameters.FULLY_OPEN;
+		speed[FINGER_A] = (byte) (RobotiqHandParameters.MAX_SPEED & 0xF0);
+		force[FINGER_A] = RobotiqHandParameters.MAX_FORCE/2;
 		
-		initializedStatus = RobotiqHandParameters.ACTIVATE_HAND;
-		operationMode = RobotiqHandParameters.NORMAL_MODE;
-		commandedStatus = RobotiqHandParameters.IGNORE_POSITION_COMMANDS;
-		curlStatus = RobotiqHandParameters.CONCURRENT_CURL;
-		scissorStatus = RobotiqHandParameters.CONCURRENT_SCISSOR;
+		initializedStatus = INITIALIZED;
+		operationMode = BASIC_MODE;
+		commandedStatus = STANDBY;
+		curlStatus = CONCURRENT_FINGER_CONTROL;
+		scissorStatus = CONCURRENT_SCISSOR_CONTROL;
 		
 		do
 		{
-			sendRequest(RobotiqHandParameters.SET_REGISTERS,
-					RobotiqHandParameters.REGISTER_START,
+			sendRequest(SET_REGISTERS,
+					REGISTER_START,
 					(byte)(initializedStatus | operationMode | commandedStatus),
 					(byte)(curlStatus | scissorStatus),
 					(byte)0x00,	//reserved byte
-					(byte)position[0], //all finger control
-					(byte)speed[0],
-					(byte)force[0]);
-			
+					(byte)position[FINGER_A], //all finger control
+					(byte)speed[FINGER_A],
+					(byte)force[FINGER_A]);
 			do
 			{
 				Thread.sleep(1000);
 				status = this.getStatus();
-			}while(((status[2] & 0b00110000) == 0b00010000) && (status[4] == 0x00)); //check/wait while activation is in progress
+			}while(((status[GRIPPER_STATUS] & 0b00110000) == 0b00010000) && (status[4] == 0x00)); //check/wait while activation is in progress
 			
-			if(status[4] != 0x00) //checking for errors
+			if(status[FAULT_STATUS] != 0x00) //checking for errors
 			{
 				faultCounter++;
 				if(faultCounter < 3)
@@ -118,19 +401,131 @@ public class RobotiqHandInterface
 				else
 				{
 					System.err.println("Unable to initalize hand");
-					printErrors(status[4]);
+					printErrors(status[FAULT_STATUS]);
 					return;
 				}
 			}
 			
-		}while ((status[2] & 0b00110000) != 0b00110000); //check to see if activation was successful, else resend command	
+		}while ((status[GRIPPER_STATUS] & 0b00110000) != 0b00110000); //check to see if activation was successful, else resend command	
 		
 		faultCounter = 0; //reset fault counter
 	}
 
-	/**
-	 * @param status
-	 */
+	public void reset() throws InterruptedException
+	{
+		initializedStatus = RESET; //reset activation status
+		commandedStatus = STANDBY;
+		byte[] status;
+		do
+		{
+			sendRequest(SET_REGISTERS,
+					REGISTER_START,
+					(byte)(initializedStatus | operationMode | commandedStatus),
+					(byte)(curlStatus | scissorStatus));
+		
+			Thread.sleep(100);
+			status = this.getStatus();
+		}while((status[GRIPPER_STATUS] & 0x01) == 0x01); //check until reset
+		initialize();
+		
+	}
+	
+	public void shutdown()
+	{
+		try
+		{
+			connection.close();
+		} catch
+		(IOException e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	public void open() throws InterruptedException
+	{
+		if(operationMode != SCISSOR_MODE)
+		{
+			position[0] = RobotiqHandParameters.FULLY_OPEN; // finger A/all fingers
+			if(curlStatus == INDIVIDUAL_FINGER_CONTROL)
+			{
+				position[1] = RobotiqHandParameters.FULLY_OPEN; // finger B
+				position[2] = RobotiqHandParameters.FULLY_OPEN; //finger C
+			}
+		}
+		else
+		{
+			position[3] = RobotiqHandParameters.FULLY_OPEN;
+		}
+		sendMotionRequest();
+		byte[] status;
+		do
+		{
+			Thread.sleep(200);
+			status = this.getStatus();
+		}while((status[GRIPPER_STATUS] & 0b11000000) == 0b00000000);
+	}
+	
+	public void close() throws InterruptedException
+	{
+		if(operationMode != SCISSOR_MODE)
+		{
+			position[0] = RobotiqHandParameters.FULLY_CLOSED; // finger A/all fingers
+			force[0] = RobotiqHandParameters.MAX_FORCE/2;
+			if(curlStatus == INDIVIDUAL_FINGER_CONTROL)
+			{
+				position[1] = RobotiqHandParameters.FULLY_CLOSED; // finger B
+				force[1] = RobotiqHandParameters.MAX_FORCE/2;
+				position[2] = RobotiqHandParameters.FULLY_CLOSED; //finger C
+				force[2] = RobotiqHandParameters.MAX_FORCE/2;
+			}
+		}
+		else
+		{
+			position[3] = RobotiqHandParameters.FULLY_CLOSED;
+			force[3] = RobotiqHandParameters.MAX_FORCE/2;
+		}
+		sendMotionRequest();
+		byte[] status;
+		do
+		{
+			Thread.sleep(200);
+			status = this.getStatus();
+		}while(((status[OBJECT_STATUS] & 0b00000011) == 0b00000000) ||
+			   ((status[OBJECT_STATUS] & 0b00001100) == 0b00000000) ||
+			   ((status[OBJECT_STATUS] & 0b00110000) == 0b00000000));
+	}
+	
+	public void crush() throws InterruptedException
+	{
+		if(operationMode != SCISSOR_MODE)
+		{
+			position[FINGER_A] = RobotiqHandParameters.FULLY_CLOSED; // finger A/all fingers
+			force[FINGER_A] = RobotiqHandParameters.MAX_FORCE;
+			if(curlStatus == INDIVIDUAL_FINGER_CONTROL)
+			{
+				position[FINGER_B] = RobotiqHandParameters.FULLY_CLOSED; // finger B
+				force[FINGER_B] = RobotiqHandParameters.MAX_FORCE;
+				position[FINGER_C] = RobotiqHandParameters.FULLY_CLOSED; //finger C
+				force[FINGER_C] = RobotiqHandParameters.MAX_FORCE;
+			}
+		}
+		else
+		{
+			position[SCISSOR] = RobotiqHandParameters.FULLY_CLOSED;
+			force[SCISSOR] = RobotiqHandParameters.MAX_FORCE;
+		}
+		sendMotionRequest();
+		byte[] status;
+		do
+		{
+			Thread.sleep(200);
+			status = this.getStatus();
+		}while(((status[OBJECT_STATUS] & 0b00000011) == 0b00000000) ||
+			   ((status[OBJECT_STATUS] & 0b00001100) == 0b00000000) ||
+			   ((status[OBJECT_STATUS] & 0b00110000) == 0b00000000));
+	}
+	
 	private void printErrors(byte status)
 	{
 		switch(status) //print correct fault
@@ -141,28 +536,10 @@ public class RobotiqHandInterface
 		case 0x09: System.err.println("Minor Fault: Communication is not ready (may be booting)."); break;
 		case 0x0A: System.err.println("Minor Fault: Changing mode fault, interferences detected on scissor axis (less then 20s)."); break;
 		case 0x0B: System.err.println("Minor Fault: Automatic release in progress."); break;
-		case 0x0D: System.err.println("Major Fault: Action fault, verify that no interference or other error occured."); break;
+		case 0x0D: System.err.println("Major Fault: Action fault, verify that no interference or other error occurred."); break;
 		case 0x0E: System.err.println("Major Fault: Changing mode fault, interferences detected on scissor axis (more then 20s)."); break;
 		case 0x0F: System.err.println("Major Fault: Automatic release completed. Reset and activation required."); break;
 		}
-	}
-	
-	public void reset() throws InterruptedException
-	{
-		initializedStatus &= ~RobotiqHandParameters.ACTIVATE_HAND; //reset activation status
-		commandedStatus = RobotiqHandParameters.IGNORE_POSITION_COMMANDS;
-		byte[] status;
-		do
-		{
-			sendRequest(RobotiqHandParameters.SET_REGISTERS,
-					RobotiqHandParameters.REGISTER_START,
-					(byte)(initializedStatus | operationMode | commandedStatus),
-					(byte)(curlStatus | scissorStatus));
-		
-			Thread.sleep(100);
-			status = this.getStatus();
-		}while((status[2] & 0x01) != 0x00); //check until reset
-		initialize();
 	}
 	
 	/* WARNING:
@@ -176,7 +553,7 @@ public class RobotiqHandInterface
 		data[0] = functionCode;
 		data[1] = (byte)(startRegister >> 8);
 		data[2] = (byte)startRegister;
-		if(functionCode == RobotiqHandParameters.READ_REGISTERS)
+		if(functionCode == READ_REGISTERS)
 		{
 			data[3] = (byte)(dataRegisters[0] >> 8);
 			data[4] = (byte)(dataRegisters[0]);
@@ -202,142 +579,47 @@ public class RobotiqHandInterface
 		}
 		return null;
 	}
-
+	
 	private void sendMotionRequest() {
 		byte[] request = new byte[32];
 		int dataLength;
 		Arrays.fill(request, (byte)0x00);
-		request[0] = (byte)(initializedStatus | operationMode | RobotiqHandParameters.COMMAND_HAND_POSITONS);
+		request[0] = (byte)(initializedStatus | operationMode | GO_TO_REQUESTED); //Whenever sending a motion request, the command hand postions bit must be sent
 		request[1] = (byte)(curlStatus | scissorStatus);
 		//update finger a/all fingers
 		request[2] = 0x00; //reserved byte
-		request[3] = position[0];
-		request[4] = speed[0];
-		request[5] = force[0];
+		request[3] = position[FINGER_A];
+		request[4] = speed[FINGER_A];
+		request[5] = force[FINGER_A];
 		dataLength = 6;
-		if(curlStatus == RobotiqHandParameters.INDIVIDUAL_CURL)
+		if(curlStatus == INDIVIDUAL_FINGER_CONTROL)
 		{
 			//update finger b
-			request[6] = position[1];
-			request[7] = speed[1];
-			request[8] = force[1];
+			request[6] = position[FINGER_B];
+			request[7] = speed[FINGER_B];
+			request[8] = force[FINGER_B];
 			//update finger c
-			request[9] = position[2];
-			request[10] = speed[2];
-			request[11] = force[2];
+			request[9] = position[FINGER_C];
+			request[10] = speed[FINGER_C];
+			request[11] = force[FINGER_C];
 			dataLength = 12;
 		}		
-		if(operationMode == RobotiqHandParameters.SCISSOR_MODE)
+		if(operationMode == SCISSOR_MODE)
 		{
-			request[12] = force[2];
-			request[13] = position[3];
-			request[14] = speed[3];
-			request[15] = force[3];
+			request[12] = force[FINGER_C];		//included to send an even number of registers. (see sendRequest() warning)
+			request[13] = position[SCISSOR];
+			request[14] = speed[SCISSOR];
+			request[15] = force[SCISSOR];
 			dataLength = 16;
 		}
-		sendRequest(RobotiqHandParameters.SET_REGISTERS, RobotiqHandParameters.REGISTER_START, Arrays.copyOfRange(request,0,dataLength));
-		
+		sendRequest(SET_REGISTERS, REGISTER_START, Arrays.copyOfRange(request,0,dataLength));
 	}
 	
-	public void open() throws InterruptedException
+	private byte[] getStatus()
 	{
-		if(operationMode != RobotiqHandParameters.SCISSOR_MODE)
-		{
-			position[0] = RobotiqHandParameters.FULLY_OPEN; // finger A/all fingers
-			if(curlStatus == RobotiqHandParameters.INDIVIDUAL_CURL)
-			{
-				position[1] = RobotiqHandParameters.FULLY_OPEN; // finger B
-				position[2] = RobotiqHandParameters.FULLY_OPEN; //finger C
-			}
-		}
-		else
-		{
-			position[3] = RobotiqHandParameters.FULLY_OPEN;
-		}
-		sendMotionRequest();
-		byte[] status;
-		do
-		{
-			Thread.sleep(200);
-			status = this.getStatus();
-		}while((status[2] & 0b11000000) == 0b00000000);
-	}
-	public void close() throws InterruptedException
-	{
-		if(operationMode != RobotiqHandParameters.SCISSOR_MODE)
-		{
-			position[0] = RobotiqHandParameters.FULLY_CLOSED; // finger A/all fingers
-			force[0] = RobotiqHandParameters.MAX_FORCE/2;
-			if(curlStatus == RobotiqHandParameters.INDIVIDUAL_CURL)
-			{
-				position[1] = RobotiqHandParameters.FULLY_CLOSED; // finger B
-				force[1] = RobotiqHandParameters.MAX_FORCE/2;
-				position[2] = RobotiqHandParameters.FULLY_CLOSED; //finger C
-				force[2] = RobotiqHandParameters.MAX_FORCE/2;
-			}
-		}
-		else
-		{
-			position[3] = RobotiqHandParameters.FULLY_CLOSED;
-			force[3] = RobotiqHandParameters.MAX_FORCE/2;
-		}
-		sendMotionRequest();
-		byte[] status;
-		do
-		{
-			Thread.sleep(200);
-			status = this.getStatus();
-		}while(((status[3] & 0b00000011) == 0b00000000) ||
-			   ((status[3] & 0b00001100) == 0b00000000) ||
-			   ((status[3] & 0b00110000) == 0b00000000));
-	}
-	
-	public void crush() throws InterruptedException
-	{
-		if(operationMode != RobotiqHandParameters.SCISSOR_MODE)
-		{
-			position[0] = RobotiqHandParameters.FULLY_CLOSED; // finger A/all fingers
-			force[0] = RobotiqHandParameters.MAX_FORCE;
-			if(curlStatus == RobotiqHandParameters.INDIVIDUAL_CURL)
-			{
-				position[1] = RobotiqHandParameters.FULLY_CLOSED; // finger B
-				force[1] = RobotiqHandParameters.MAX_FORCE;
-				position[2] = RobotiqHandParameters.FULLY_CLOSED; //finger C
-				force[2] = RobotiqHandParameters.MAX_FORCE;
-			}
-		}
-		else
-		{
-			position[3] = RobotiqHandParameters.FULLY_CLOSED;
-			force[3] = RobotiqHandParameters.MAX_FORCE;
-		}
-		sendMotionRequest();
-		byte[] status;
-		do
-		{
-			Thread.sleep(200);
-			status = this.getStatus();
-		}while(((status[3] & 0b00000011) == 0b00000000) ||
-			   ((status[3] & 0b00001100) == 0b00000000) ||
-			   ((status[3] & 0b00110000) == 0b00000000));
-	}
-	
-	public void shutdown()
-	{
-		try
-		{
-			connection.close();
-		} catch
-		(IOException e)
-		{
-			e.printStackTrace();
-		}
-	}
-	public byte[] getStatus()
-	{
-		return sendRequest(RobotiqHandParameters.READ_REGISTERS,
-						   RobotiqHandParameters.REGISTER_START,
-						   (byte)0x08);
+		return sendRequest(READ_REGISTERS,
+				REGISTER_START,
+				(byte)0x08);
 	}
 }
 
