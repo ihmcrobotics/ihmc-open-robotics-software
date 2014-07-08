@@ -51,7 +51,7 @@ public class PushRecoveryControlModule
    private static final double DOUBLESUPPORT_SUPPORT_POLYGON_SCALE = 0.85;
    private static final double TRUST_TIME_SCALE = 0.95;
    private static final double MINIMUM_TIME_TO_REPLAN = 0.1;
-   private static final double MINIMUM_SWING_TIME_FOR_DOUBLE_SUPPORT_RECOVERY = 0.25;
+   private static final double MINIMUM_SWING_TIME_FOR_DOUBLE_SUPPORT_RECOVERY = 0.3;
    private static final double MINIMUN_CAPTURE_REGION_PERCENTAGE_OF_FOOT_AREA = 2.0;
    private static final double REDUCE_SWING_TIME_MULTIPLIER = 0.9;
 
