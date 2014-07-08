@@ -60,17 +60,31 @@ public class ConnectionTesting
 //		rightHand.reset();
 //		System.out.println("Hand Reset");
 		
-//		testCycles(rightHand, 200);
+		testCycles(rightHand, 2);
 		
-//		System.out.println("Crushing with Hand");
-//		rightHand.crush();
-//		System.out.println("Hand Crushing");
-//		Thread.sleep(500);
-//		
-//		System.out.println("Opening Hand");
-//		rightHand.open();
-//		System.out.println("Hand Open");
-//		Thread.sleep(500);
+		System.out.println("Going to pinch");
+		rightHand.pinch();
+		System.out.println("Pinching");
+		
+		testCycles(rightHand, 2);
+		
+		System.out.println("Going to wide mode");
+		rightHand.wideGrip();
+		System.out.println("In wide mode");
+		
+		testCycles(rightHand, 2);
+		
+		System.out.println("Going to scissor mode");
+		rightHand.scissorGrip();
+		System.out.println("In scissor mode");
+		
+		testCycles(rightHand, 2);		
+		
+		System.out.println("Going to basic mode");
+		rightHand.normalGrip();
+		System.out.println("In basic mode");
+		
+		System.out.println();
 		
 		System.out.println("Shutting Down Hand");
 		rightHand.shutdown();
@@ -81,8 +95,10 @@ public class ConnectionTesting
 	 * @param hand
 	 * @throws InterruptedException
 	 */
-	private static void testCycles(RobotiqHandInterface hand, int cycles)
-			throws InterruptedException {
+	private static void testCycles(RobotiqHandInterface hand, int cycles) throws InterruptedException
+	{
+		System.out.println();
+		System.out.println("Starting test cycles: " + cycles + " cycles");
 		int counter;
 		for(counter = 0; counter < cycles; counter++)
 		{
@@ -90,7 +106,7 @@ public class ConnectionTesting
 			System.out.println("Closing Hand");
 			hand.close();
 			System.out.println("Hand Closed");
-			Thread.sleep(500);
+			Thread.sleep(1000);
 			
 			System.out.println("Opening Hand");
 			hand.open();
