@@ -53,7 +53,8 @@ public class PushRecoveryControlModule
    private static final double MINIMUM_TIME_TO_REPLAN = 0.1;
    private static final double MINIMUM_SWING_TIME_FOR_DOUBLE_SUPPORT_RECOVERY = 0.3;
    private static final double MINIMUN_CAPTURE_REGION_PERCENTAGE_OF_FOOT_AREA = 2.0;
-   private static final double REDUCE_SWING_TIME_MULTIPLIER = 0.9;
+   private static final double REDUCE_SWING_TIME_MULTIPLIER = 0.9;  
+   private static final double DISTANCE_BETWEEN_FOOT_CENTER_AND_SUPPORT_WITH_OPPOSITE_LINE = 0.01;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    
@@ -181,15 +182,12 @@ public class PushRecoveryControlModule
       private final FramePoint2d capturePoint2d = new FramePoint2d();
       private RobotSide swingSide = null;
       private RobotSide transferToSide = null;
-      
-      // TODO WRITE A METHOD TO EXTRACT THIS VALUE FROM THE FOOT DATA or leave as a parameter that can be adjusted but move at the top
-      private double halfFootWidth = 0.01;
 
       private final Transform3D fromWorldToPelvis = new Transform3D();
       private final Transform3D scaleTransformation = new Transform3D();
       private final FrameConvexPolygon2d reducedSupportPolygon;
       private final ReferenceFrame midFeetZUp;
-      private double capturePointYAxis, regularSwingTime;
+      private double regularSwingTime;
       private double capturePointDistanceFromLeftFoot, capturePointDistanceFromRightFoot;
       private ReferenceFrame footFrame;
       private FramePoint projectedCapturePoint;
@@ -224,10 +222,6 @@ public class PushRecoveryControlModule
 
                // update the visualization
                momentumBasedController.getFullRobotModel().getPelvis().getBodyFixedFrame().getTransformToDesiredFrame(fromWorldToPelvis, worldFrame);
-               // momentumBasedController.getFullRobotModel().getFoot(RobotSide.LEFT).getBodyFixedFrame().getTransformToDesiredFrame(fromWorldToPelvis, worldFrame);
-               //momentumBasedController.getFullRobotModel().getSoleFrame(RobotSide.RIGHT).getTransformToDesiredFrame(fromWorldToPelvis, worldFrame);
-//               midFeetZUp.getTransformToDesiredFrame(fromWorldToPelvis, worldFrame);
-
                orientationStateVisualizer.updatePelvisReferenceFrame(fromWorldToPelvis);
                orientationStateVisualizer.updateReducedSupportPolygon(reducedSupportPolygon);
 
@@ -245,32 +239,21 @@ public class PushRecoveryControlModule
                   System.out.println("Robot is falling from double support");
                   projectedCapturePoint.changeFrame(capturePoint2d.getReferenceFrame());
                   projectedCapturePoint.set(capturePoint2d.getX(), capturePoint2d.getY(), 0);
-//                  projectedCapturePoint.changeFrame(momentumBasedController.getFullRobotModel().getPelvis().getBodyFixedFrame());
-//                  capturePointYAxis = projectedCapturePoint.getY();
-//                  if (capturePointYAxis >= 0)
-//                  {
-//                     swingSide = RobotSide.LEFT;
-//                  }
-//                  else
-//                  {
-//                     swingSide = RobotSide.RIGHT;
-//                  }
 
                   for (RobotSide side : RobotSide.values())
                   {
-//                     footFrame = momentumBasedController.getFullRobotModel().getFoot(side).getBodyFixedFrame();
                      footFrame = momentumBasedController.getFullRobotModel().getSoleFrame(side);
                      projectedCapturePoint.changeFrame(footFrame);
                      
                      if (side == RobotSide.LEFT)
                      {
-                        leftFootSupportWithOpposite = projectedCapturePoint.getY() + halfFootWidth > 0;
+                        leftFootSupportWithOpposite = projectedCapturePoint.getY() + DISTANCE_BETWEEN_FOOT_CENTER_AND_SUPPORT_WITH_OPPOSITE_LINE > 0;
                         capturePointDistanceFromLeftFoot = Math.sqrt(projectedCapturePoint.getX()*projectedCapturePoint.getX() 
                                                                      + projectedCapturePoint.getY()*projectedCapturePoint.getY());
                      }
                      else
                      {
-                        rightFootSupportWithOpposite = projectedCapturePoint.getY() - halfFootWidth < 0;
+                        rightFootSupportWithOpposite = projectedCapturePoint.getY() - DISTANCE_BETWEEN_FOOT_CENTER_AND_SUPPORT_WITH_OPPOSITE_LINE < 0;
                         capturePointDistanceFromRightFoot = Math.sqrt(projectedCapturePoint.getX()*projectedCapturePoint.getX() 
                                                                       + projectedCapturePoint.getY()*projectedCapturePoint.getY());
                      }
@@ -489,7 +472,8 @@ public class PushRecoveryControlModule
       FrameLine2d capturePointTrajectoryLine = new FrameLine2d(finalDesiredICP, initialICP);
       this.capturePointTrajectoryLine.setFrameLine2d(capturePointTrajectoryLine);
 
-      capturePointTrajectoryLine.orthogonalProjection(capturePoint2d);//project current capture point to desired capture point trajectory line
+      //project current capture point to desired capture point trajectory line
+      capturePointTrajectoryLine.orthogonalProjection(capturePoint2d);
 
       projectedCapturePoint.set(capturePoint2d.getPointCopy());
 
@@ -525,17 +509,6 @@ public class PushRecoveryControlModule
       return (1 / omega0) * Math.log(Math.abs(tmpNumerator.getX()) / Math.abs(tmpDenominator.getX()));
    }
 
-   //   private FrameConvexPolygon2d computeFootPolygon(RobotSide robotSide, ReferenceFrame referenceFrame)
-   //   {
-   //      final List<FramePoint> tempContactPoints = new ArrayList<FramePoint>();
-   //      final FrameConvexPolygon2d tempFootPolygon = new FrameConvexPolygon2d(worldFrame);
-   //
-   //      momentumBasedController.getContactPoints(momentumBasedController.getContactablePlaneFeet().get(robotSide), tempContactPoints);
-   //      tempFootPolygon.setIncludingFrameByProjectionOntoXYPlaneAndUpdate(referenceFrame, tempContactPoints);
-   //
-   //      return tempFootPolygon;
-   //   }
-   
    private PositionProvider initialICPPositionProvider = new PositionProvider()
    {
       @Override
