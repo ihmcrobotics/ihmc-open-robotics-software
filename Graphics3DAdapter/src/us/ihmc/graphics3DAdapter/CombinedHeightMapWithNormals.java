@@ -8,7 +8,7 @@ import us.ihmc.utilities.math.geometry.BoundingBox3d;
 
 public class CombinedHeightMapWithNormals implements HeightMapWithNormals
 {
-   private final ArrayList<HeightMapWithNormals> heightMaps = new ArrayList<>();
+   private final ArrayList<HeightMapWithNormals> heightMaps = new ArrayList<HeightMapWithNormals>();
    private BoundingBox3d boundingBox = null;
 
    public void addHeightMap(HeightMapWithNormals heightMap)

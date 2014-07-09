@@ -6,7 +6,7 @@ import us.ihmc.utilities.math.geometry.BoundingBox3d;
 
 public class CombinedHeightMap implements HeightMap
 {
-   private final ArrayList<HeightMap> heightMaps = new ArrayList<>();
+   private final ArrayList<HeightMap> heightMaps = new ArrayList<HeightMap>();
    private BoundingBox3d boundingBox = null;
 
    public void addHeightMap(HeightMap heightMap)
