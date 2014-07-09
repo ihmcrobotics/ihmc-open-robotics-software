@@ -305,15 +305,14 @@ public class RobotiqHandInterface
 	private byte initializedStatus;
 	private byte operationMode;
 	private byte commandedStatus;
-	private byte curlStatus;
-	private byte scissorStatus;
+	private byte fingerControl;
+	private byte scissorControl;
 	private byte[] data = new byte[32];
 	private byte[] response = new byte[32];
 	private byte[] speed = new byte[4];
 	private byte[] force = new byte[4];
 	private byte[] position = new byte[4];
 	private int faultCounter = 0;
-	
 	
 	RobotiqHandInterface()
 	{
@@ -348,7 +347,7 @@ public class RobotiqHandInterface
 		}
 	}
 	
-	public void initialize() throws InterruptedException
+	public void initialize() throws Exception
 	{
 		byte[] status;
 		status = this.getStatus();
@@ -373,15 +372,15 @@ public class RobotiqHandInterface
 		initializedStatus = INITIALIZED;
 		operationMode = BASIC_MODE;
 		commandedStatus = STANDBY;
-		curlStatus = CONCURRENT_FINGER_CONTROL;
-		scissorStatus = CONCURRENT_SCISSOR_CONTROL;
+		fingerControl = CONCURRENT_FINGER_CONTROL;
+		scissorControl = CONCURRENT_SCISSOR_CONTROL;
 		
 		do
 		{
 			sendRequest(SET_REGISTERS,
 					REGISTER_START,
 					(byte)(initializedStatus | operationMode | commandedStatus),
-					(byte)(curlStatus | scissorStatus),
+					(byte)(fingerControl | scissorControl),
 					(byte)0x00,	//reserved byte
 					(byte)position[FINGER_A], //all finger control
 					(byte)speed[FINGER_A],
@@ -401,7 +400,7 @@ public class RobotiqHandInterface
 				{
 					System.err.println("Unable to initalize hand");
 					printErrors(status[FAULT_STATUS]);
-					return;
+					throw new Exception("Fault in hand during activation");
 				}
 			}
 		}while ((status[GRIPPER_STATUS] & INIT_MODE_STATUS_MASK) != COMPLETED); //check to see if activation was successful, else resend command	
@@ -409,7 +408,7 @@ public class RobotiqHandInterface
 		faultCounter = 0; //reset fault counter
 	}
 
-	public void reset() throws InterruptedException
+	public void reset() throws Exception
 	{
 		initializedStatus = RESET; //reset activation status
 		commandedStatus = STANDBY;
@@ -419,7 +418,7 @@ public class RobotiqHandInterface
 			sendRequest(SET_REGISTERS,
 					REGISTER_START,
 					(byte)(initializedStatus | operationMode | commandedStatus),
-					(byte)(curlStatus | scissorStatus));
+					(byte)(fingerControl | scissorControl));
 		
 			Thread.sleep(100);
 			status = this.getStatus();
@@ -443,12 +442,12 @@ public class RobotiqHandInterface
 	{
 		
 		position[FINGER_A] = RobotiqHandParameters.FULLY_OPEN; //all fingers
-		if(curlStatus == INDIVIDUAL_FINGER_CONTROL)
+		if(fingerControl == INDIVIDUAL_FINGER_CONTROL)
 		{
 			position[FINGER_B] = RobotiqHandParameters.FULLY_OPEN;
 			position[FINGER_C] = RobotiqHandParameters.FULLY_OPEN;
 		}
-		else if(scissorStatus == INDIVIDUAL_SCISSOR_CONTROL)
+		else if(scissorControl == INDIVIDUAL_SCISSOR_CONTROL)
 		{
 			position[SCISSOR] = RobotiqHandParameters.FULLY_OPEN;
 		}
@@ -472,14 +471,14 @@ public class RobotiqHandInterface
 		{
 			position[FINGER_A] = RobotiqHandParameters.FULLY_CLOSED; // also all fingers
 			force[FINGER_A] = RobotiqHandParameters.MAX_FORCE/2;
-			if(curlStatus == INDIVIDUAL_FINGER_CONTROL)
+			if(fingerControl == INDIVIDUAL_FINGER_CONTROL)
 			{
 				position[FINGER_B] = RobotiqHandParameters.FULLY_CLOSED;
 				force[FINGER_B] = RobotiqHandParameters.MAX_FORCE/2;
 				position[FINGER_C] = RobotiqHandParameters.FULLY_CLOSED;
 				force[FINGER_C] = RobotiqHandParameters.MAX_FORCE/2;
 			}
-			else if(scissorStatus == INDIVIDUAL_SCISSOR_CONTROL)
+			else if(scissorControl == INDIVIDUAL_SCISSOR_CONTROL)
 			{
 				position[SCISSOR] = RobotiqHandParameters.FULLY_CLOSED;
 				force[SCISSOR] = RobotiqHandParameters.MAX_FORCE/2;
@@ -506,14 +505,14 @@ public class RobotiqHandInterface
 		{
 			position[FINGER_A] = RobotiqHandParameters.FULLY_CLOSED; // also all fingers
 			force[FINGER_A] = RobotiqHandParameters.MAX_FORCE;
-			if(curlStatus == INDIVIDUAL_FINGER_CONTROL)
+			if(fingerControl == INDIVIDUAL_FINGER_CONTROL)
 			{
 				position[FINGER_B] = RobotiqHandParameters.FULLY_CLOSED;
 				force[FINGER_B] = RobotiqHandParameters.MAX_FORCE;
 				position[FINGER_C] = RobotiqHandParameters.FULLY_CLOSED;
 				force[FINGER_C] = RobotiqHandParameters.MAX_FORCE;
 			}
-			else if(scissorStatus == INDIVIDUAL_SCISSOR_CONTROL)
+			else if(scissorControl == INDIVIDUAL_SCISSOR_CONTROL)
 			{
 				position[SCISSOR] = RobotiqHandParameters.FULLY_CLOSED;
 				force[SCISSOR] = RobotiqHandParameters.MAX_FORCE;
@@ -650,14 +649,14 @@ public class RobotiqHandInterface
 		
 		Arrays.fill(request, (byte)0x00);
 		request[0] = (byte)(initializedStatus | operationMode | commandedStatus); //Whenever sending a motion request, the command hand positions bit (GO_TO_REQUESTED) must be sent
-		request[1] = (byte)(curlStatus | scissorStatus);
+		request[1] = (byte)(fingerControl | scissorControl);
 		request[2] = 0x00; //reserved byte
 		//update finger a/all fingers
 		request[3] = position[FINGER_A];
 		request[4] = speed[FINGER_A];
 		request[5] = force[FINGER_A];
 		dataLength = 6;
-		if(curlStatus == INDIVIDUAL_FINGER_CONTROL)
+		if(fingerControl == INDIVIDUAL_FINGER_CONTROL)
 		{
 			//update finger b
 			request[6] = position[FINGER_B];
@@ -669,7 +668,7 @@ public class RobotiqHandInterface
 			request[11] = force[FINGER_C];
 			dataLength = 12;
 		}		
-		if(scissorStatus == INDIVIDUAL_SCISSOR_CONTROL)
+		if(scissorControl == INDIVIDUAL_SCISSOR_CONTROL)
 		{
 			request[12] = position[SCISSOR];
 			request[13] = speed[SCISSOR];
