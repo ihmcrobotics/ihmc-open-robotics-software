@@ -314,37 +314,15 @@ public class RobotiqHandInterface
 	private byte[] position = new byte[4];
 	private int faultCounter = 0;
 	
-	RobotiqHandInterface()
+	RobotiqHandInterface() throws UnknownHostException, IOException
 	{
-		try
-		{
-			connection = new ModbusTCPConnection(RobotiqHandParameters.RIGHT_HAND_ADDRESS,
+		connection = new ModbusTCPConnection(RobotiqHandParameters.RIGHT_HAND_ADDRESS,
 												 RobotiqHandParameters.PORT);
-		} 
-		catch (UnknownHostException e)
-		{
-			e.printStackTrace();
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
 	}
 	
-	RobotiqHandInterface(String address)
+	RobotiqHandInterface(String address) throws UnknownHostException, IOException
 	{
-		try
-		{
-			connection = new ModbusTCPConnection(address,RobotiqHandParameters.PORT);
-		}
-		catch (UnknownHostException e)
-		{
-			e.printStackTrace();
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
+		connection = new ModbusTCPConnection(address,RobotiqHandParameters.PORT);
 	}
 	
 	public void initialize() throws Exception

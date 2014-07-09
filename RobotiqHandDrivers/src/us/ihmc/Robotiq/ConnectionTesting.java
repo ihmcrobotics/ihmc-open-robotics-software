@@ -52,10 +52,6 @@ public class ConnectionTesting
 		rightHand.initialize();
 		System.out.println("Activation Request Sent");
 		
-//		System.out.println("Sending Activation Request");
-//		rightHand.initialize();
-//		System.out.println("Activation Request Sent");
-		
 //		System.out.println("Resetting Hand");
 //		rightHand.reset();
 //		System.out.println("Hand Reset");
