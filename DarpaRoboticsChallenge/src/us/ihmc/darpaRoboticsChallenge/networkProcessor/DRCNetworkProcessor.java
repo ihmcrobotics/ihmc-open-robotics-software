@@ -53,9 +53,9 @@ public class DRCNetworkProcessor
       this(null, scsCommunicator, drcNetworkObjectCommunicator, robotModel);
    }
    
-   private DRCNetworkProcessor(URI rosUri, LocalObjectCommunicator scsCommunicator, ObjectCommunicator fieldComputerClientL, DRCRobotModel robotModel)
+   private DRCNetworkProcessor(URI rosUri, LocalObjectCommunicator scsCommunicator, ObjectCommunicator fieldComputerClient, DRCRobotModel robotModel)
    {
-      if (fieldComputerClientL == null)
+      if (fieldComputerClient == null)
       {
          this.fieldComputerClient = new KryoObjectClient(robotModel.getNetworkParameters().getRobotControlComputerIP(), DRCConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT,
                new DRCNetClassList());
@@ -63,7 +63,7 @@ public class DRCNetworkProcessor
       }
       else
       {
-         this.fieldComputerClient = fieldComputerClientL;
+         this.fieldComputerClient = fieldComputerClient;
       }
       
       useSimulatedSensors = !robotModel.isRunningOnRealRobot();
