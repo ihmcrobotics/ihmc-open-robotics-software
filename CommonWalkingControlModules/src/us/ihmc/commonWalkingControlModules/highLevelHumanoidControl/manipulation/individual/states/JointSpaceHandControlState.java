@@ -130,7 +130,7 @@ public class JointSpaceHandControlState extends AbstractJointSpaceHandControlSta
 
       kpArmJointspace.addVariableChangedListener(listener);
       zetaArmJointspace.addVariableChangedListener(listener);
-      kdArmJointspace.addVariableChangedListener(listener);
+//      kdArmJointspace.addVariableChangedListener(listener);
       
       listener.variableChanged(null);
    }

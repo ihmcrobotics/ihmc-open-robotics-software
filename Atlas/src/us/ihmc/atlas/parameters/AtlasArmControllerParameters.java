@@ -46,13 +46,13 @@ public class AtlasArmControllerParameters implements ArmControllerParameters
    public double getArmJointspaceKp()
    {
       if (!runningOnRealRobot)  return 80.0;
-      return 80.0; 
+      return 40.0; 
    }
 
    public double getArmJointspaceZeta()
    {
       if (!runningOnRealRobot)  return 0.6;
-      return 0.2;  // Lots of natural damping in the arms. Don't need to damp the controllers.
+      return 0.0;  // Lots of natural damping in the arms. Don't need to damp the controllers.
    }
 
    public double getArmJointspaceKi()
