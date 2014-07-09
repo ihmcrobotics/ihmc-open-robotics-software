@@ -46,7 +46,7 @@ public class DisplayOctreeApp extends SimpleApplication
 
       System.out.println("total points: " + cloud.size());
       GridMapSpacialInfo3D spacial = OctreeOccupancyExample.createSpacial();
-      OctreeGridMap_F64 map = OctreeOccupancyExample.createMapFromCloud(cloud, spacial);
+      OctreeGridMap_F64 map = OctreeOccupancyExample.createMapFromCloud(cloud, spacial, 0);
 
       Node zUpNode = new Node();
       zUpNode.setLocalRotation(JMEGeometryUtils.getRotationFromJMEToZupCoordinates());
@@ -81,6 +81,7 @@ public class DisplayOctreeApp extends SimpleApplication
          Point3D_F64 p = new Point3D_F64();
 
          spacial.gridToMap(o.x,o.y,o.z,p);
+         spacial.mapToCanonical(p,p);
          p.x += r; p.y += r;p.z += r;
 
          Box box = new Box(new Vector3f((float) p.z, (float) -p.x, (float) -p.y), (float) r, (float) r, (float) r);
@@ -89,7 +90,7 @@ public class DisplayOctreeApp extends SimpleApplication
          mat1.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
          cube.setQueueBucket(Bucket.Transparent);
          float prob = (float) o.probability;
-         ColorRGBA color = new ColorRGBA(1.0f - prob, prob, 0f, prob);
+         ColorRGBA color = new ColorRGBA(1.0f - prob, prob, 0f, Math.abs(prob-0.5f)/0.5f);
          mat1.setColor("Color", color);
          cube.setMaterial(mat1);
          zUpNode.attachChild(cube);

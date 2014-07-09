@@ -15,7 +15,7 @@ import georegression.struct.plane.PlaneNormal3D_F64;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.point.Vector3D_F64;
 import georegression.struct.se.Se3_F64;
-import georegression.struct.shapes.Cube3D_F64;
+import georegression.struct.shapes.Box3D_F64;
 import georegression.transform.se.SePointOps_F64;
 import org.ddogleg.optimization.FactoryOptimization;
 import org.ddogleg.optimization.UnconstrainedLeastSquares;
@@ -244,8 +244,8 @@ public class PointCloudTools
       //System.out.println("about to process...");
       PointCloudShapeDetectionSchnabel2007 alg = new PointCloudShapeDetectionSchnabel2007(configRansac);
 
-      Cube3D_F64 boundingBox = new Cube3D_F64();
-      UtilPoint3D_F64.boundingCube(cloud, boundingBox);
+      Box3D_F64 boundingBox = new Box3D_F64();
+      UtilPoint3D_F64.boundingBox(cloud, boundingBox);
 
       alg.process(pointNormList, boundingBox);
       //System.out.println("done...");
