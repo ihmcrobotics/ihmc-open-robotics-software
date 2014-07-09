@@ -425,6 +425,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          transferState.addStateTransition(toDoubleSupport);
          transferState.addStateTransition(toSingleSupport);
+         transferState.addStateTransition(toFalling);
 //         singleSupportState.addStateTransition(toDoubleSupport2);
          singleSupportState.addStateTransition(toTransferOppositeSide);
          singleSupportState.addStateTransition(toTransferSameSide);
