@@ -10,6 +10,7 @@ import org.junit.Test;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingState;
 import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCPushRobotController;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -41,6 +42,7 @@ public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTest
 
    private double swingTime;
    private SideDependentList<SingleSupportStartCondition> swingStartConditions = new SideDependentList<>();
+   private SideDependentList<DoubleSupportStartCondition> swingFinishConditions = new SideDependentList<>();
 
    private DRCPushRobotController pushRobotController;
    private BlockingSimulationRunner blockingSimulationRunner;
@@ -104,7 +106,7 @@ public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTest
       RobotSide side = RobotSide.LEFT;
 
       // apply the push
-      testPush(forceDirection, magnitude, duration, percentInSwing, side);
+      testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions);
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -123,7 +125,7 @@ public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTest
       RobotSide side = RobotSide.LEFT;
 
       // apply the push
-      testPush(forceDirection, magnitude, duration, percentInSwing, side);
+      testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions);
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -142,7 +144,7 @@ public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTest
       RobotSide side = RobotSide.LEFT;
 
       // apply the push
-      testPush(forceDirection, magnitude, duration, percentInSwing, side);
+      testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions);
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -161,7 +163,7 @@ public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTest
       RobotSide side = RobotSide.RIGHT;
 
       // apply the push
-      testPush(forceDirection, magnitude, duration, percentInSwing, side);
+      testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions);
 
       // push the robot again with new parameters
       forceDirection = new Vector3d(0.0, 1.0, 0.0);
@@ -170,7 +172,7 @@ public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTest
       side = RobotSide.LEFT;
 
       // apply the push
-      testPush(forceDirection, magnitude, duration, percentInSwing, side);
+      testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions);
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -189,7 +191,7 @@ public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTest
       RobotSide side = RobotSide.LEFT;
 
       // apply the push
-      testPush(forceDirection, magnitude, duration, percentInSwing, side);
+      testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions);
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -208,7 +210,7 @@ public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTest
       RobotSide side = RobotSide.LEFT;
 
       // apply the push
-      testPush(forceDirection, magnitude, duration, percentInSwing, side);
+      testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions);
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -245,7 +247,11 @@ public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTest
          @SuppressWarnings("unchecked")
          final EnumYoVariable<ConstraintType> footConstraintType = (EnumYoVariable<ConstraintType>) scs.getVariable(prefix + "FootControlModule", prefix
                + "State");
+         @SuppressWarnings("unchecked")
+         final EnumYoVariable<WalkingState> walkingState = (EnumYoVariable<WalkingState>) scs.getVariable("walkingState");
+         
          swingStartConditions.put(robotSide, new SingleSupportStartCondition(footConstraintType));
+         swingFinishConditions.put(robotSide, new DoubleSupportStartCondition(walkingState, robotSide));
       }
       // simulate for a while
       enable.set(true);
@@ -274,12 +280,12 @@ public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTest
       return drcFlatGroundWalkingTrack;
    }
 
-   private void testPush(Vector3d forceDirection, double magnitude, double duration, double percentInSwing, RobotSide side)
+   private void testPush(Vector3d forceDirection, double magnitude, double duration, double percentInSwing, RobotSide side, SideDependentList<SingleSupportStartCondition> condition)
          throws SimulationExceededMaximumTimeException, InterruptedException
    {
       double delay = swingTime * percentInSwing;
 
-      pushRobotController.applyForceDelayed(swingStartConditions.get(side), delay, forceDirection, magnitude, duration);
+      pushRobotController.applyForceDelayed(condition.get(side), delay, forceDirection, magnitude, duration);
 
       blockingSimulationRunner.simulateAndBlock(8.0);
    }
@@ -297,6 +303,31 @@ public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTest
       public boolean checkCondition()
       {
          return footConstraintType.getEnumValue() == ConstraintType.SWING;
+      }
+   }
+   
+   private class DoubleSupportStartCondition implements StateTransitionCondition
+   {
+      private final EnumYoVariable<WalkingState> walkingState;
+      private final RobotSide side;
+
+      public DoubleSupportStartCondition(EnumYoVariable<WalkingState> walkingState, RobotSide side)
+      {
+         this.walkingState = walkingState;
+         this.side = side;
+      }
+
+      @Override
+      public boolean checkCondition()
+      {
+         if (side == RobotSide.LEFT)
+         {
+            return walkingState.getEnumValue() == WalkingState.DOUBLE_SUPPORT || walkingState.getEnumValue() == WalkingState.TRANSFER_TO_LEFT_SUPPORT;
+         }
+         else
+         {
+            return walkingState.getEnumValue() == WalkingState.DOUBLE_SUPPORT || walkingState.getEnumValue() == WalkingState.TRANSFER_TO_RIGHT_SUPPORT;
+         }
       }
    }
 }
