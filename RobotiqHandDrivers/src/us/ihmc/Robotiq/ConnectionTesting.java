@@ -4,7 +4,7 @@ import java.io.IOException;
 
 public class ConnectionTesting
 {
-	public static void main(String[] args) throws IOException, InterruptedException
+	public static void main(String[] args) throws Exception
 	{
 		//testing of the underlying connection
 //		ModbusTCPConnection connection;
