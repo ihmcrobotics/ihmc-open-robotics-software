@@ -35,7 +35,7 @@ public class DisplayPointCloudFileApp extends SimpleApplication
    public static void main(String[] args)
    {
       ///home/unknownid/workspace/SensorProcessing/output.txt
-	   DisplayPointCloudFileApp test1 = new DisplayPointCloudFileApp("torus.txt","gen_torus.txt");
+	   DisplayPointCloudFileApp test1 = new DisplayPointCloudFileApp("../SensorProcessing/data/kinectcloud.txt","../SensorProcessing/data/kinectcloud.txt");
 	  
       test1.start();
    }
