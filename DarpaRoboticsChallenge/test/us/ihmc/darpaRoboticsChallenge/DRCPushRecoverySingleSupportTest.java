@@ -36,13 +36,13 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateTransition
 
 public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTestInterface
 {
-   private final static boolean KEEP_SCS_UP = false;
+   private final static boolean KEEP_SCS_UP = true;
    private final static boolean SHOW_GUI = true;
-   private final static boolean VISUALIZE_FORCE = false;
+   private final static boolean VISUALIZE_FORCE = true;
 
-   private double swingTime;
-   private SideDependentList<SingleSupportStartCondition> swingStartConditions = new SideDependentList<>();
-   private SideDependentList<DoubleSupportStartCondition> swingFinishConditions = new SideDependentList<>();
+   private double swingTime, transferTime;
+   private SideDependentList<StateTransitionCondition> swingStartConditions = new SideDependentList<>();
+   private SideDependentList<StateTransitionCondition> swingFinishConditions = new SideDependentList<>();
 
    private DRCPushRobotController pushRobotController;
    private BlockingSimulationRunner blockingSimulationRunner;
@@ -106,7 +106,7 @@ public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTest
       RobotSide side = RobotSide.LEFT;
 
       // apply the push
-      testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions);
+      testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -125,7 +125,7 @@ public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTest
       RobotSide side = RobotSide.LEFT;
 
       // apply the push
-      testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions);
+      testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -144,7 +144,7 @@ public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTest
       RobotSide side = RobotSide.LEFT;
 
       // apply the push
-      testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions);
+      testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -163,7 +163,7 @@ public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTest
       RobotSide side = RobotSide.RIGHT;
 
       // apply the push
-      testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions);
+      testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
 
       // push the robot again with new parameters
       forceDirection = new Vector3d(0.0, 1.0, 0.0);
@@ -172,7 +172,7 @@ public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTest
       side = RobotSide.LEFT;
 
       // apply the push
-      testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions);
+      testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -191,7 +191,7 @@ public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTest
       RobotSide side = RobotSide.LEFT;
 
       // apply the push
-      testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions);
+      testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -210,7 +210,26 @@ public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTest
       RobotSide side = RobotSide.LEFT;
 
       // apply the push
-      testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions);
+      testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
+
+      BambooTools.reportTestFinishedMessage();
+   }
+   
+   @Test
+   public void TestPushRightInitialTransferState() throws SimulationExceededMaximumTimeException, InterruptedException
+   {
+      BambooTools.reportTestStartedMessage();
+      setupTest(getRobotModel());
+
+      // setup all parameters
+      Vector3d forceDirection = new Vector3d(0.0, -1.0, 0.0);
+      double magnitude = 800.0;
+      double duration = 0.05;
+      double percentInTransferState = 0.5;
+      RobotSide side = RobotSide.LEFT;
+
+      // apply the push
+      testPush(forceDirection, magnitude, duration, percentInTransferState, side, swingFinishConditions, transferTime);
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -220,6 +239,7 @@ public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTest
       DRCFlatGroundWalkingTrack track = setupTrack(robotModel);
       FullRobotModel fullRobotModel = robotModel.createFullRobotModel();
       swingTime = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
+      transferTime = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
       pushRobotController = new DRCPushRobotController(track.getDrcSimulation().getRobot(), fullRobotModel);
 
       SimulationConstructionSet scs = track.getSimulationConstructionSet();
@@ -240,6 +260,7 @@ public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTest
       // get YoVariables
       BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper", "walk");
       BooleanYoVariable enable = (BooleanYoVariable) scs.getVariable("PushRecoveryControlModule", "enablePushRecovery");
+      BooleanYoVariable enableDS = (BooleanYoVariable) scs.getVariable("PushRecoveryControlModule","enablePushRecoveryFromDoubleSupport");
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -255,6 +276,7 @@ public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTest
       }
       // simulate for a while
       enable.set(true);
+      enableDS.set(true);
       walk.set(false);
       blockingSimulationRunner.simulateAndBlock(1.0);
       walk.set(true);
@@ -280,10 +302,10 @@ public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTest
       return drcFlatGroundWalkingTrack;
    }
 
-   private void testPush(Vector3d forceDirection, double magnitude, double duration, double percentInSwing, RobotSide side, SideDependentList<SingleSupportStartCondition> condition)
+   private void testPush(Vector3d forceDirection, double magnitude, double duration, double percentInState, RobotSide side, SideDependentList<StateTransitionCondition> condition, double stateTime)
          throws SimulationExceededMaximumTimeException, InterruptedException
    {
-      double delay = swingTime * percentInSwing;
+      double delay = stateTime * percentInState;
 
       pushRobotController.applyForceDelayed(condition.get(side), delay, forceDirection, magnitude, duration);
 
