@@ -6,4 +6,6 @@ dependencies {
 	compile group: 'us.ihmc.thirdparty', name: 'starfire', version: 'x'
 	
 	compile project(':IHMCUtilities')
+	compile project(':JMEGraphics3DAdapter')
+	compile project(':UserInterface')
 }
