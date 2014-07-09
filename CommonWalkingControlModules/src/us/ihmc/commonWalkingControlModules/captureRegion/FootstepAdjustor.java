@@ -28,6 +28,7 @@ public class FootstepAdjustor
    private static final boolean VISUALIZE = true;
    private static final double SHRINK_TOUCHDOWN_POLYGON_FACTOR = 0.5;
    private static final double DISTANCE_FROM_KINEMATIC_LIMIT = 0.05;
+   private static final double DISTANCE_FROM_KINEMATIC_LIMIT_FOR_EXTREME_BORDER = 0.0; 
 
    private final YoVariableRegistry registry = new YoVariableRegistry("FootstepAdjustor");
 
@@ -51,7 +52,7 @@ public class FootstepAdjustor
     * This function takes a footstep and a captureRegion and if necessary projects the footstep
     * into the capture region. Returns true if the footstep was changed.
     */
-   public boolean adjustFootstep(Footstep footstep, FramePoint2d supportCentroid, FrameConvexPolygon2d captureRegion)
+   public boolean adjustFootstep(Footstep footstep, FramePoint2d supportCentroid, FrameConvexPolygon2d captureRegion, boolean moveToExtremeBorder)
    {
       boolean footstepChanged = false;
 
@@ -87,7 +88,7 @@ public class FootstepAdjustor
       }
 
       // No overlap between touch-down polygon and capture region.
-      projectFootstepInCaptureRegion(footstep, supportCentroid, desiredSteppingRegion);
+      projectFootstepInCaptureRegion(footstep, supportCentroid, desiredSteppingRegion, moveToExtremeBorder);
       updateVisualizer();
       return footstepChanged;
    }
@@ -102,7 +103,7 @@ public class FootstepAdjustor
     * Might be a bit conservative it should be sufficient to slightly overlap the capture region
     * and the touch-down polygon.
     */
-   private void projectFootstepInCaptureRegion(Footstep footstep, FramePoint2d projectionPoint, FrameConvexPolygon2d captureRegion)
+   private void projectFootstepInCaptureRegion(Footstep footstep, FramePoint2d projectionPoint, FrameConvexPolygon2d captureRegion, boolean moveToExtremeBorder)
    {
       projection.setIncludingFrame(projectionPoint);
       projection.changeFrame(footstep.getParentFrame());
@@ -123,7 +124,14 @@ public class FootstepAdjustor
       nextStep2d.changeFrame(footstep.getParentFrame());
       
       direction.normalize();
-      direction.scale(DISTANCE_FROM_KINEMATIC_LIMIT);
+      if(moveToExtremeBorder)
+      {
+         direction.scale(DISTANCE_FROM_KINEMATIC_LIMIT_FOR_EXTREME_BORDER);
+      }
+      else
+      {
+         direction.scale(DISTANCE_FROM_KINEMATIC_LIMIT);
+      }
       nextStep2d.sub(direction);
       footstep.setPositionChangeOnlyXY(nextStep2d);
 

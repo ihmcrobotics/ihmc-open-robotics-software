@@ -311,6 +311,7 @@ public class PushRecoveryControlModule
                         return true;
                      }
                      
+                     // TODO prepare to fall
                      return false;
                   }
 
@@ -416,7 +417,7 @@ public class PushRecoveryControlModule
          }
 
          footstepWasProjectedInCaptureRegion.set(footstepAdjustor.adjustFootstep(nextFootstep, footPolygon.getCentroid(),
-               captureRegionCalculator.getCaptureRegion()));
+               captureRegionCalculator.getCaptureRegion(), isRecoveringFromDoubleSupportFall()));
 
          if (footstepWasProjectedInCaptureRegion.getBooleanValue())
          {
