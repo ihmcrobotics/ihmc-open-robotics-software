@@ -36,9 +36,9 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateTransition
 
 public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTestInterface
 {
-   private final static boolean KEEP_SCS_UP = true;
+   private final static boolean KEEP_SCS_UP = false;
    private final static boolean SHOW_GUI = true;
-   private final static boolean VISUALIZE_FORCE = true;
+   private final static boolean VISUALIZE_FORCE = false;
 
    private double swingTime, transferTime;
    private SideDependentList<StateTransitionCondition> swingStartConditions = new SideDependentList<>();
@@ -226,6 +226,64 @@ public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTest
       double magnitude = 800.0;
       double duration = 0.05;
       double percentInTransferState = 0.5;
+      RobotSide side = RobotSide.LEFT;
+
+      // apply the push
+      testPush(forceDirection, magnitude, duration, percentInTransferState, side, swingFinishConditions, transferTime);
+      
+      // push the robot again with new parameters
+      forceDirection = new Vector3d(0.5, -1.0, 0.0);
+      magnitude = 800.0;
+      duration = 0.05;
+      double percentInSwing = 0.4;
+      side = RobotSide.RIGHT;
+
+      // apply the push
+      testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
+
+      BambooTools.reportTestFinishedMessage();
+   }
+   
+   @Test
+   public void TestPushLeftInitialTransferState() throws SimulationExceededMaximumTimeException, InterruptedException
+   {
+      BambooTools.reportTestStartedMessage();
+      setupTest(getRobotModel());
+
+      // setup all parameters
+      Vector3d forceDirection = new Vector3d(0.0, -1.0, 0.0);
+      double magnitude = 800.0;
+      double duration = 0.05;
+      double percentInTransferState = 0.5;
+      RobotSide side = RobotSide.LEFT;
+
+      // apply the push
+      testPush(forceDirection, magnitude, duration, percentInTransferState, side, swingFinishConditions, transferTime);
+      
+      // push the robot again with new parameters
+      forceDirection = new Vector3d(0.0, 1.0, 0.0);
+      magnitude = 800.0;
+      duration = 0.05;
+      double percentInSwing = 0.4;
+      side = RobotSide.LEFT;
+
+      // apply the push
+      testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
+
+      BambooTools.reportTestFinishedMessage();
+   }
+   
+   @Test
+   public void TestPushRightRandomTransferState() throws SimulationExceededMaximumTimeException, InterruptedException
+   {
+      BambooTools.reportTestStartedMessage();
+      setupTest(getRobotModel());
+
+      // setup all parameters
+      Vector3d forceDirection = new Vector3d(0.0, -1.0, 0.0);
+      double magnitude = 800.0;
+      double duration = 0.05;
+      double percentInTransferState = 0.9 * Math.random();
       RobotSide side = RobotSide.LEFT;
 
       // apply the push
