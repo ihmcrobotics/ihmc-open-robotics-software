@@ -138,16 +138,11 @@ public abstract class DRCPushRecoveryDoubleSupportTest implements MultiRobotTest
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
-      @SuppressWarnings("deprecation")
-      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("walk");
-      @SuppressWarnings("deprecation")
-      BooleanYoVariable enable = (BooleanYoVariable) scs.getVariable("enablePushRecovery");
-      @SuppressWarnings("deprecation")
-      BooleanYoVariable enableDS = (BooleanYoVariable) scs.getVariable("enablePushRecoveryFromDoubleSupport");
-      @SuppressWarnings("deprecation")
-      BooleanYoVariable useICPProjectionPlanner = (BooleanYoVariable) scs.getVariable("useICPProjection");
-      @SuppressWarnings("deprecation")
-      BooleanYoVariable usePushRecoveryICPPlanner = (BooleanYoVariable) scs.getVariable("usePushRecoveryICPPlanner");
+      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper", "walk");
+      BooleanYoVariable enable = (BooleanYoVariable) scs.getVariable("PushRecoveryControlModule", "enablePushRecovery");
+      BooleanYoVariable enableDS = (BooleanYoVariable) scs.getVariable("PushRecoveryControlModule"," enablePushRecoveryFromDoubleSupport");
+      BooleanYoVariable useICPProjectionPlanner = (BooleanYoVariable) scs.getVariable("PushRecoveryControlModule", "useICPProjection");
+      BooleanYoVariable usePushRecoveryICPPlanner = (BooleanYoVariable) scs.getVariable("PushRecoveryControlModule", "usePushRecoveryICPPlanner");
 
       // enable push recovery
       enable.set(true);
