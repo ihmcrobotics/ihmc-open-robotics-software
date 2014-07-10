@@ -20,7 +20,7 @@ public class ImagePanel extends JPanel
    {
       try
       {
-         image = ImageIO.read(ImagePanel.class.getResource(filename));
+         image = ImageIO.read(ImagePanel.class.getClassLoader().getResource(filename));
       }
       catch (IOException e)
       {

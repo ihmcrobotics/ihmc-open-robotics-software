@@ -1,5 +1,6 @@
 package us.ihmc.graphics3DAdapter.graphics.appearances;
 
+import java.net.URL;
 import java.util.ArrayList;
 
 import javax.vecmath.Color3f;
@@ -9,22 +10,22 @@ import org.apache.commons.lang.NotImplementedException;
 
 public class SDFAppearance extends YoAppearanceTransparency
 {
-   private final ArrayList<String> uri;
+   private final ArrayList<String> urls;
    private final String name;
    private final ArrayList<String> resourceDirectories = new ArrayList<String>();
 
 
-   public SDFAppearance(ArrayList<String> uri, String name, ArrayList<String> resourceDirectories)
+   public SDFAppearance(ArrayList<String> urls, String name, ArrayList<String> resourceDirectories)
    {
       super();
-      this.uri = uri;
+      this.urls = urls;
       this.name = name;
       this.resourceDirectories.addAll(resourceDirectories);
    }
 
-   public ArrayList<String> getUri()
+   public ArrayList<String> getUrls()
    {
-      return uri;
+      return urls;
    }
 
    public String getName()

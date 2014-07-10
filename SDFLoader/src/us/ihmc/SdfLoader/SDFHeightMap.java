@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 
 import javax.imageio.ImageIO;
 import javax.vecmath.Vector3d;
@@ -23,13 +24,13 @@ public class SDFHeightMap implements us.ihmc.graphics3DAdapter.HeightMap
 
    private final Vector3d offset;
    
-   public SDFHeightMap(String URI, HeightMap heightMap)
+   public SDFHeightMap(String resourceId, HeightMap heightMap)
    {
       Vector3d size = SDFConversionsHelper.stringToVector3d(heightMap.getSize());
       offset = SDFConversionsHelper.stringToVector3d(heightMap.getPos());
       try
       {
-         BufferedImage img = ImageIO.read(new File(URI));
+         BufferedImage img = ImageIO.read(getClass().getClassLoader().getResourceAsStream(resourceId));
          BufferedImage convertedImg = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
          convertedImg.getGraphics().drawImage(img, 0, 0, img.getWidth(), img.getHeight(), 0, img.getHeight(), img.getWidth(), 0, null);
          

@@ -1,8 +1,8 @@
 package us.ihmc.SdfLoader;
 
-import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -72,20 +72,27 @@ public class SDFGraphics3DObject extends Graphics3DObject
             {
                if(sdfVisual.getMaterial().getScript() != null)
                {
-                  ArrayList<String> paths = new ArrayList<String>();
+                  ArrayList<String> resourceUrls = new ArrayList<>();
                   
                   if(sdfVisual.getMaterial().getScript().getUri() != null)
                   {
                      for(String uri : sdfVisual.getMaterial().getScript().getUri())
                      {
-                        String fullPath = convertToFullPath(resourceDirectories, uri);
-                        paths.add(fullPath);
+                        if(uri.equals("__default__"))
+                        {
+                           resourceUrls.add("/scripts/gazebo.material");
+                        }
+                        else
+                        {
+                           String id = convertToResourceIdentifier(resourceDirectories, uri);
+                           resourceUrls.add(id);
+                        }
                      }
                   }
                   
                   String name = sdfVisual.getMaterial().getScript().getName();
                   
-                  appearance = new SDFAppearance(paths, name, resourceDirectories);
+                  appearance = new SDFAppearance(resourceUrls, name, resourceDirectories);
                }
             }
             
@@ -93,7 +100,7 @@ public class SDFGraphics3DObject extends Graphics3DObject
             Mesh mesh = geometry.getMesh();
             if(mesh != null)
             {
-               String uri = convertToFullPath(resourceDirectories, mesh.getUri());
+               String resourceUrl = convertToResourceIdentifier(resourceDirectories, mesh.getUri());
                if(mesh.getScale() != null)
                {
                   Vector3d scale = SDFConversionsHelper.stringToVector3d(mesh.getScale());
@@ -106,7 +113,7 @@ public class SDFGraphics3DObject extends Graphics3DObject
                   submesh = mesh.getSubmesh().getName().trim();
                   centerSubmesh = mesh.getSubmesh().getCenter().trim().equals("1");
                }
-               addMesh(uri, submesh, centerSubmesh, visualPose, appearance, resourceDirectories);
+               addMesh(resourceUrl, submesh, centerSubmesh, visualPose, appearance, resourceDirectories);
             }
             else if(geometry.getCylinder() != null)
             {
@@ -140,8 +147,8 @@ public class SDFGraphics3DObject extends Graphics3DObject
             }
             else if(geometry.getHeightMap() != null)
             {
-               String URI = convertToFullPath(resourceDirectories, geometry.getHeightMap().getUri());
-               SDFHeightMap heightMap = new SDFHeightMap(URI, geometry.getHeightMap());
+               String id = convertToResourceIdentifier(resourceDirectories, geometry.getHeightMap().getUri());
+               SDFHeightMap heightMap = new SDFHeightMap(id, geometry.getHeightMap());
                
                
                AppearanceDefinition app = DEFAULT_APPEARANCE;
@@ -153,8 +160,8 @@ public class SDFGraphics3DObject extends Graphics3DObject
                   {
                      double size = Double.parseDouble(text.getSize());
                      double scale = width/size;
-                     sdfTerrainBlend.addTexture(scale, convertToFullPath(resourceDirectories, text.getDiffuse()),
-                           convertToFullPath(resourceDirectories, text.getNormal()));
+                     sdfTerrainBlend.addTexture(scale, convertToResourceIdentifier(resourceDirectories, text.getDiffuse()),
+                           convertToResourceIdentifier(resourceDirectories, text.getNormal()));
                   }
                   
                   for(Blend blend : geometry.getHeightMap().getBlends())
@@ -195,25 +202,16 @@ public class SDFGraphics3DObject extends Graphics3DObject
    {
 
       // STL files do not have appearances
-      if (ModelFileType.getFileType(mesh) == ModelFileType._STL)
+      if (ModelFileType.getModelTypeFromId(mesh) == ModelFileType._STL)
       {
          appearance = getDefaultAppearanceIfNull(appearance);
       }
-      
 
       addModelFile(mesh, submesh, centerSubmesh, resourceDirectories, appearance);
-
    }
 
-   private String convertToFullPath(ArrayList<String> resourceDirectories, String meshPath)
+   private String convertToResourceIdentifier(ArrayList<String> resourceDirectories, String meshPath)
    {
-      // Test if the mesh path is actually a full path
-      File testFile = new File(meshPath);
-      if(testFile.exists())
-      {
-         return meshPath;
-      }
-
       if(meshPath.equals("__default__"))
       {
          meshPath = "file://media/materials/scripts/gazebo.material";
@@ -221,28 +219,19 @@ public class SDFGraphics3DObject extends Graphics3DObject
 
       for (String resourceDirectory : resourceDirectories)
       {
-         String fullPath;
          try
          {
-            if (resourceDirectory != "")
-            {
-               URI meshURI = new URI(meshPath);
-               fullPath = resourceDirectory + File.separator + meshURI.getAuthority() + meshURI.getPath();
-            }
-            else
-            {
-               fullPath = meshPath;
-            }
-         }
-         catch (URISyntaxException e)
-         {
-            fullPath = meshPath;
-         }
+            URI meshURI = new URI(meshPath);
 
-         testFile = new File(fullPath);
-         if(testFile.exists())
+            String id = resourceDirectory + meshURI.getAuthority() + meshURI.getPath();
+            URL resource = getClass().getClassLoader().getResource(id);
+            if (resource != null)
+            {
+               return id;
+            }
+         } catch (URISyntaxException e)
          {
-            return fullPath;
+            System.err.println("Malformed resource path in .SDF file for path: " + meshPath);
          }
       }
 

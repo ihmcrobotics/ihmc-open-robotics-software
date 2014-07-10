@@ -317,7 +317,6 @@ public class Graphics3DObject
    */
    public Graphics3DAddModelFileInstruction addModelFile(String fileName, AppearanceDefinition app)
    {
-      
       Graphics3DAddModelFileInstruction graphics3dAddModelFileInstruction = new Graphics3DAddModelFileInstruction(fileName, app);
       graphics3DInstructions.add(graphics3dAddModelFileInstruction);
       return graphics3dAddModelFileInstruction;
@@ -328,7 +327,6 @@ public class Graphics3DObject
       Graphics3DAddModelFileInstruction graphics3dAddModelFileInstruction = new Graphics3DAddModelFileInstruction(fileName, submesh, centerSubmesh, app, resourceDirectories);
       graphics3DInstructions.add(graphics3dAddModelFileInstruction);
       return graphics3dAddModelFileInstruction;
-      
    }
    
    public Graphics3DAddModelFileInstruction addModelFile(String fileName, ArrayList<String> resourceDirectories, AppearanceDefinition app)
