@@ -1,10 +1,9 @@
 package us.ihmc.valkyrie;
 
-import java.io.InputStream;
-import java.net.URI;
-
-import javax.media.j3d.Transform3D;
-
+import com.jme3.math.Quaternion;
+import com.jme3.math.Transform;
+import com.jme3.math.Vector3f;
+import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
@@ -12,12 +11,7 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParameters;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.RobotNetworkParameters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.*;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.AlwaysZeroOffsetPPSTimestampOffsetProvider;
@@ -27,19 +21,12 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
-import us.ihmc.valkyrie.models.ModelRoot;
-import us.ihmc.valkyrie.paramaters.ValkyrieArmControllerParameters;
-import us.ihmc.valkyrie.paramaters.ValkyrieJointMap;
-import us.ihmc.valkyrie.paramaters.ValkyriePhysicalProperties;
-import us.ihmc.valkyrie.paramaters.ValkyrieSensorInformation;
-import us.ihmc.valkyrie.paramaters.ValkyrieStateEstimatorParameters;
-import us.ihmc.valkyrie.paramaters.ValkyrieWalkingControllerParameters;
+import us.ihmc.valkyrie.paramaters.*;
 import us.ihmc.valkyrie.sensors.ValkyrieSensorSuiteManager;
 
-import com.jme3.math.Quaternion;
-import com.jme3.math.Transform;
-import com.jme3.math.Vector3f;
-import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
+import javax.media.j3d.Transform3D;
+import java.io.InputStream;
+import java.net.URI;
 
 public class ValkyrieRobotModel implements DRCRobotModel
 {
@@ -48,7 +35,6 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private static final String VALKYRIE_NETWORK_CONFIG = "Configurations/valkyrie_network_config.ini";
    private static final String DEFAULT_NETWORK_CONFIG =	"Configurations/localhost_network_config.ini";
 
-   private static Class<ModelRoot> valModelRoot = ModelRoot.class;
    private final ArmControllerParameters armControllerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
    private final StateEstimatorParameters stateEstimatorParamaters;
@@ -59,9 +45,15 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private final SideDependentList<Transform> offsetHandFromWrist = new SideDependentList<Transform>();
    private final RobotNetworkParameters networkParameters;
 
-   private final String[] resourceDirectories = { valModelRoot.getResource("").getFile(), valModelRoot.getResource("V1/").getFile(),
-         valModelRoot.getResource("V1/sdf/").getFile(), valModelRoot.getResource("V1/meshes/").getFile(),
-         valModelRoot.getResource("V1/meshes/2013_05_16/").getFile(), };
+   private final String[] resourceDirectories = {
+         "",
+         "models/",
+         "models/GFE/",
+         "models/gazebo/",
+         "models/V1/",
+         "models/V1/sdf/",
+         "models/V1/meshes/",
+         "models/V1/meshes/2013_05_16/"};
 
    private final JaxbSDFLoader loader;
    private final boolean runningOnRealRobot;
@@ -174,7 +166,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
 
    private InputStream getSdfFileAsStream()
    {
-      return valModelRoot.getResourceAsStream(getSdfFile());
+      return getClass().getClassLoader().getResourceAsStream(getSdfFile());
    }
 
    @Override
