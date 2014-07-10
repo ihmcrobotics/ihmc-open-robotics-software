@@ -10,8 +10,8 @@ import org.junit.runners.Suite;
    ValkyrieObstacleCourseFlatTest.class,
    ValkyrieObstacleCourseTrialsTerrainTest.class,
    ValkyrieObstacleCourseEveryBuildTest.class,
-   ValkyriePushInSingleSupportTest.class,
-   ValkyriePushInDoubleSupportTest.class
+   ValkyriePushRecoveryWalkingTest.class,
+   ValkyriePushRecoveryStandingTest.class
 })
 
 public class ValkyrieBambooTestSuiteNightly

@@ -1,10 +1,10 @@
 package us.ihmc.valkyrie;
 
 import us.ihmc.bambooTools.BambooTools;
-import us.ihmc.darpaRoboticsChallenge.DRCPushRecoveryDoubleSupportTest;
+import us.ihmc.darpaRoboticsChallenge.DRCPushRecoveryStandingTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 
-public class ValkyriePushInDoubleSupportTest extends DRCPushRecoveryDoubleSupportTest
+public class ValkyriePushRecoveryStandingTest extends DRCPushRecoveryStandingTest
 {
    @Override
    public DRCRobotModel getRobotModel()
