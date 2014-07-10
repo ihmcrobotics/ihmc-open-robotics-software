@@ -224,6 +224,9 @@ public class SDFGraphics3DObject extends Graphics3DObject
             URI meshURI = new URI(meshPath);
 
             String id = resourceDirectory + meshURI.getAuthority() + meshURI.getPath();
+//            System.out.println("PATH: " + meshURI.getPath());
+//            System.out.println("AUTH: " + meshURI.getAuthority());
+//            System.out.println("ID: " + id);
             URL resource = getClass().getClassLoader().getResource(id);
             if (resource != null)
             {
