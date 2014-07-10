@@ -25,6 +25,7 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
+import us.ihmc.utilities.math.geometry.LineSegment2d;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
@@ -80,7 +81,7 @@ public class PushRecoveryControlModule
    private double reducedSwingTime, doubleSupportInitialSwingTime;
    private Footstep recoverFromDoubleSupportFallFootStep;
    private final BooleanYoVariable recovering;
-   private final BooleanYoVariable tryingMultistepRecover;
+   private final BooleanYoVariable tryingUncertainRecover;
    private final BooleanYoVariable existsAMinimumSwingTimeCaptureRegion;
    private BooleanYoVariable readyToGrabNextFootstep;
    private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
@@ -134,7 +135,7 @@ public class PushRecoveryControlModule
 
       footstepWasProjectedInCaptureRegion = new BooleanYoVariable("footstepWasProjectedInCaptureRegion", registry);
       recovering = new BooleanYoVariable("recovering", registry);
-      tryingMultistepRecover = new BooleanYoVariable("tryingMultistepRecover", registry);
+      tryingUncertainRecover = new BooleanYoVariable("tryingUncertainRecover", registry);
       existsAMinimumSwingTimeCaptureRegion = new BooleanYoVariable("existsAMinimumSwingTimeCaptureRegion", registry);
       initialDesiredICP = new FramePoint2d(worldFrame);
       finalDesiredICP = new FramePoint2d(worldFrame);
@@ -172,7 +173,7 @@ public class PushRecoveryControlModule
             usingReducedSwingTime = false;
          }
          recoveringFromDoubleSupportFall = false;
-         tryingMultistepRecover.set(false);
+         tryingUncertainRecover.set(false);
          existsAMinimumSwingTimeCaptureRegion.set(false);
       }
    }
@@ -188,10 +189,14 @@ public class PushRecoveryControlModule
       private final FrameConvexPolygon2d reducedSupportPolygon;
       private final ReferenceFrame midFeetZUp;
       private double regularSwingTime;
+      private LineSegment2d closestEdge; 
+      private Point2d closestPointOnEdge;
       private double capturePointDistanceFromLeftFoot, capturePointDistanceFromRightFoot;
       private ReferenceFrame footFrame;
       private FramePoint projectedCapturePoint;
+      private FramePoint2d projectedCapturePoint2d;
       private Footstep currentFootstep = null;
+      private FrameConvexPolygon2d footPolygon;
       private boolean isICPOutside, leftFootSupportWithOpposite, rightFootSupportWithOpposite;
 
       public IsFallingFromDoubleSupportCondition(RobotSide robotSide)
@@ -199,7 +204,9 @@ public class PushRecoveryControlModule
          this.transferToSide = robotSide;
          this.scaleTransformation.setScale(DOUBLESUPPORT_SUPPORT_POLYGON_SCALE);
          this.reducedSupportPolygon = new FrameConvexPolygon2d(icpAndMomentumBasedController.getBipedSupportPolygons().getSupportPolygonInMidFeetZUp());
-         this.projectedCapturePoint = new FramePoint(worldFrame, 0, 0, 0);
+         this.projectedCapturePoint = new FramePoint(worldFrame, 0.0, 0.0, 0.0);
+         this.projectedCapturePoint2d = new FramePoint2d(worldFrame, 0.0, 0.0);
+         this.footPolygon = new FrameConvexPolygon2d(worldFrame);
          midFeetZUp = referenceFrames.getMidFeetZUpFrame();
       }
 
@@ -238,24 +245,30 @@ public class PushRecoveryControlModule
                {
                   System.out.println("Robot is falling from double support");
                   projectedCapturePoint.changeFrame(capturePoint2d.getReferenceFrame());
-                  projectedCapturePoint.set(capturePoint2d.getX(), capturePoint2d.getY(), 0);
+                  projectedCapturePoint.set(capturePoint2d.getX(), capturePoint2d.getY(), 0.0);
 
                   for (RobotSide side : RobotSide.values())
                   {
                      footFrame = momentumBasedController.getFullRobotModel().getSoleFrame(side);
                      projectedCapturePoint.changeFrame(footFrame);
-                     
+                     currentFootstep = createFootstepAtCurrentLocation(side);
+                     calculateTouchdownFootPolygon(currentFootstep, projectedCapturePoint.getReferenceFrame(), footPolygon);
+                     projectedCapturePoint2d.setIncludingFrame(projectedCapturePoint.getReferenceFrame(), projectedCapturePoint.getX(), projectedCapturePoint.getY());
+
+                     // In the following the reference frames must be equal
                      if (side == RobotSide.LEFT)
                      {
                         leftFootSupportWithOpposite = projectedCapturePoint.getY() + DISTANCE_BETWEEN_FOOT_CENTER_AND_SUPPORT_WITH_OPPOSITE_LINE > 0;
-                        capturePointDistanceFromLeftFoot = Math.sqrt(projectedCapturePoint.getX()*projectedCapturePoint.getX() 
-                                                                     + projectedCapturePoint.getY()*projectedCapturePoint.getY());
+                        closestEdge = footPolygon.getClosestEdge(projectedCapturePoint2d).getLineSegment2d();
+                        closestPointOnEdge = closestEdge.getClosestPointOnLineSegment(projectedCapturePoint2d.getPoint());
+                        capturePointDistanceFromLeftFoot = closestPointOnEdge.distance(projectedCapturePoint2d.getPoint()); 
                      }
                      else
                      {
                         rightFootSupportWithOpposite = projectedCapturePoint.getY() - DISTANCE_BETWEEN_FOOT_CENTER_AND_SUPPORT_WITH_OPPOSITE_LINE < 0;
-                        capturePointDistanceFromRightFoot = Math.sqrt(projectedCapturePoint.getX()*projectedCapturePoint.getX() 
-                                                                      + projectedCapturePoint.getY()*projectedCapturePoint.getY());
+                        closestEdge = footPolygon.getClosestEdge(projectedCapturePoint2d).getLineSegment2d();
+                        closestPointOnEdge = closestEdge.getClosestPointOnLineSegment(projectedCapturePoint2d.getPoint());
+                        capturePointDistanceFromRightFoot = closestPointOnEdge.distance(projectedCapturePoint2d.getPoint());
                      }
                   }
                   
@@ -304,10 +317,20 @@ public class PushRecoveryControlModule
                         usingReducedSwingTime = true;
                         readyToGrabNextFootstep.set(false);
                         momentumBasedController.getUpcomingSupportLeg().set(transferToSide.getOppositeSide());
+                        
+//                        // we orient the foot towards the external to exploit the length of the foot, needs to be improved for backward pushes
+//                        Transform3D footPose = new Transform3D(); 
+//                        currentFootstep.getPose(footPose);
+//                        footPose.rotZ(swingSide.negateIfRightSide(DEFAULT_FOOT_ROTATION_TO_RECOVER));
+//                        FramePose poseToPack = new FramePose();
+//                        currentFootstep.getPose(poseToPack);
+//                        poseToPack.setPose(footPose);
+//                        currentFootstep.setPose(poseToPack);
+   
                         recoverFromDoubleSupportFallFootStep = currentFootstep;
                         recoveringFromDoubleSupportFall = true;
                         reducedSwingTime = MINIMUM_SWING_TIME_FOR_DOUBLE_SUPPORT_RECOVERY;
-                        tryingMultistepRecover.set(true);           
+                        tryingUncertainRecover.set(true);           
                         return true;
                      }
                      
@@ -401,7 +424,7 @@ public class PushRecoveryControlModule
       
       if (enablePushRecovery.getBooleanValue())
       {
-         if (tryingMultistepRecover.getBooleanValue())
+         if (tryingUncertainRecover.getBooleanValue())
          {
             captureRegionCalculator.calculateCaptureRegion(swingSide, MINIMUM_TIME_TO_REPLAN, capturePoint2d, omega0, footPolygon);
          }
@@ -427,6 +450,17 @@ public class PushRecoveryControlModule
          return footstepWasProjectedInCaptureRegion.getBooleanValue();
       }
       return false;
+   }
+   
+   private void calculateTouchdownFootPolygon(Footstep footstep, ReferenceFrame desiredFrame, FrameConvexPolygon2d polygonToPack)
+   {
+      List<FramePoint> expectedContactPoints = footstep.getExpectedContactPoints();
+      int numberOfVertices = expectedContactPoints.size();
+      for (int i=0; i<numberOfVertices; i++)
+      {
+         expectedContactPoints.get(i).changeFrame(desiredFrame);
+      }
+      polygonToPack.setIncludingFrameByProjectionOntoXYPlaneAndUpdate(desiredFrame, expectedContactPoints);
    }
    
    private double computeMinimumSwingTime(RobotSide swingSide, double swingTimeRemaining, FramePoint2d capturePoint2d, double omega0, FrameConvexPolygon2d footPolygon)
@@ -572,6 +606,11 @@ public class PushRecoveryControlModule
    public boolean isRecoveringFromDoubleSupportFall()
    {
       return recoveringFromDoubleSupportFall;
+   }
+   
+   public boolean isPerformingUncertainRecover()
+   {
+      return tryingUncertainRecover.getBooleanValue();
    }
    
    public void setSwingTimeRemaining(double value)
