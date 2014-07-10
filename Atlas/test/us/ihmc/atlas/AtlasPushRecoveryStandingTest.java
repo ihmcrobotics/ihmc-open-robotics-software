@@ -1,11 +1,11 @@
 package us.ihmc.atlas;
 
 import us.ihmc.bambooTools.BambooTools;
-import us.ihmc.darpaRoboticsChallenge.DRCPushRecoveryDoubleSupportTest;
+import us.ihmc.darpaRoboticsChallenge.DRCPushRecoveryStandingTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 
 
-public class AtlasPushInDoubleSupportTest extends DRCPushRecoveryDoubleSupportTest {
+public class AtlasPushRecoveryStandingTest extends DRCPushRecoveryStandingTest {
 
 	@Override
 	public DRCRobotModel getRobotModel() {

@@ -34,7 +34,7 @@ import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimu
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
 
-public abstract class DRCPushRecoverySingleSupportTest implements MultiRobotTestInterface
+public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterface
 {
    private final static boolean KEEP_SCS_UP = false;
    private final static boolean SHOW_GUI = true;
