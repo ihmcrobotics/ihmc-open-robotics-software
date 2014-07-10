@@ -4,5 +4,5 @@ import javax.media.j3d.Transform3D;
 
 public interface GPULidarCallback
 {
-   public void scan(float[] scan, Transform3D currentTransform, double time);
+   public void scan(float[] scan, Transform3D currentTransform, double time, GPULidar gpuLidar);
 }
