@@ -309,6 +309,7 @@ public class RobotiqHandInterface
 	private byte scissorControl;
 	private byte[] data = new byte[32];
 	private byte[] response = new byte[32];
+	private byte[] request = new byte[32];
 	private byte[] speed = new byte[4];
 	private byte[] force = new byte[4];
 	private byte[] position = new byte[4];
@@ -621,7 +622,6 @@ public class RobotiqHandInterface
 	
 	private void sendMotionRequest()
 	{
-		byte[] request = new byte[32];
 		int dataLength;
 		commandedStatus = GO_TO_REQUESTED;
 		

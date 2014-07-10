@@ -48,6 +48,8 @@ public class ConnectionTesting
 		RobotiqHandInterface rightHand = new RobotiqHandInterface();
 		System.out.println("connected");
 		
+		Thread.sleep(2000);
+		
 		System.out.println("Sending Activation Request");
 		rightHand.initialize();
 		System.out.println("Activation Request Sent");
@@ -56,29 +58,39 @@ public class ConnectionTesting
 //		rightHand.reset();
 //		System.out.println("Hand Reset");
 		
-		testCycles(rightHand, 2);
+		//testCycles(rightHand, 2);
 		
-		System.out.println("Going to pinch");
-		rightHand.pinch();
-		System.out.println("Pinching");
+		System.out.println("Closing Hand");
+		rightHand.close();
+		System.out.println("Hand Closed");
 		
-		testCycles(rightHand, 2);
+		Thread.sleep(10000);
 		
-		System.out.println("Going to wide mode");
-		rightHand.wideGrip();
-		System.out.println("In wide mode");
+		System.out.println("Opening Hand");
+		rightHand.open();
+		System.out.println("Hand Open");
 		
-		testCycles(rightHand, 2);
-		
-		System.out.println("Going to scissor mode");
-		rightHand.scissorGrip();
-		System.out.println("In scissor mode");
-		
-		testCycles(rightHand, 2);		
-		
-		System.out.println("Going to basic mode");
-		rightHand.normalGrip();
-		System.out.println("In basic mode");
+//		System.out.println("Going to pinch");
+//		rightHand.pinch();
+//		System.out.println("Pinching");
+//		
+//		testCycles(rightHand, 2);
+//		
+//		System.out.println("Going to wide mode");
+//		rightHand.wideGrip();
+//		System.out.println("In wide mode");
+//		
+//		testCycles(rightHand, 2);
+//		
+//		System.out.println("Going to scissor mode");
+//		rightHand.scissorGrip();
+//		System.out.println("In scissor mode");
+//		
+//		testCycles(rightHand, 2);		
+//		
+//		System.out.println("Going to basic mode");
+//		rightHand.normalGrip();
+//		System.out.println("In basic mode");
 		
 		System.out.println();
 		
