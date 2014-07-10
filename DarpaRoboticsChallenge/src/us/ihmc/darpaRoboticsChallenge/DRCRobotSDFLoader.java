@@ -18,9 +18,9 @@ public class DRCRobotSDFLoader
 
       if (!headless)
       {
-         resources.add(myClass.getResource("models").getFile());
-         resources.add(myClass.getResource("models/GFE/").getFile());
-         resources.add(myClass.getResource("models/GFE/gazebo").getFile());
+         resources.add("models");
+         resources.add("models/GFE/");
+         resources.add("models/gazebo/");
         for(String resource : resourceDirectories)
         {
            resources.add(resource);

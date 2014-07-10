@@ -6,7 +6,7 @@ dependencies {
     compile group: 'us.ihmc.thirdparty.j3d', name: 'j3dcore', version: 'x'
 
     compile group: 'com.googlecode.efficient-java-matrix-library', name: 'ejml', version: '0.25'
-    compile group: 'us.ihmc.thirdparty', name: 'georegression', version: 'x'
+    compile group: 'us.ihmc.thirdparty', name: 'georegression', version: '0.5.1'
     compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-calibration', version: '0.17'
     compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-geo', version: '0.17'
     compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-io', version: '0.17'

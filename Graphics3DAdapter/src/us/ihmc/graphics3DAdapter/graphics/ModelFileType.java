@@ -1,12 +1,14 @@
 package us.ihmc.graphics3DAdapter.graphics;
 
+import java.net.URL;
+
 public enum ModelFileType
 {
    COLLADA, _3DS, _STL, _VRML, _OBJ;
    
-   public static ModelFileType getFileType(String fileName)
+   public static ModelFileType getModelTypeFromId(String resourceId)
    {
-      String ext = fileName.substring(fileName.length() - 3);
+      String ext = resourceId.substring(resourceId.length() - 3);
       if (ext.equalsIgnoreCase("3ds"))
       {
          return _3DS;
