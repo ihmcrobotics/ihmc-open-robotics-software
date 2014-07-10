@@ -26,7 +26,7 @@ import com.yobotics.simulationconstructionset.util.FlatGroundProfile;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
-public abstract class DRCPushRecoveryDoubleSupportTest implements MultiRobotTestInterface
+public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInterface
 {
    private final static boolean KEEP_SCS_UP = false;
    private final static boolean SHOW_GUI = true;
