@@ -24,7 +24,7 @@ public class MatchTwoPointCloudsApp {
 
    public static List<Point3D_F64> filterPointCloud( String filename ) {
       List<Point3D_F64> input = DisplayPointCloudApp.loadCloud(filename);
-      List<Point3D_F64> output = new ArrayList<>();
+      List<Point3D_F64> output = new ArrayList<Point3D_F64>();
 
       for ( Point3D_F64 p : input ) {
          if( p.norm() < MAX_DISTANCE ) {
