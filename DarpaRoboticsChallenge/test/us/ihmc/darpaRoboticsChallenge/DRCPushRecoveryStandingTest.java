@@ -30,7 +30,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 {
    private final static boolean KEEP_SCS_UP = false;
    private final static boolean SHOW_GUI = true;
-   private final static boolean VISUALIZE_FORCE = false;
+   private final static boolean VISUALIZE_FORCE = true;
 
    private DRCPushRobotController pushRobotController;
    private BlockingSimulationRunner blockingSimulationRunner;
@@ -255,6 +255,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
    private DRCFlatGroundWalkingTrack setupTest(DRCRobotModel robotModel) throws SimulationExceededMaximumTimeException, InterruptedException
    {
+      DRCSimulationFactory.setSingleThreaded();
       DRCFlatGroundWalkingTrack track = setupTrack(robotModel);
       FullRobotModel fullRobotModel = robotModel.createFullRobotModel();
       pushRobotController = new DRCPushRobotController(track.getDrcSimulation().getRobot(), fullRobotModel);
