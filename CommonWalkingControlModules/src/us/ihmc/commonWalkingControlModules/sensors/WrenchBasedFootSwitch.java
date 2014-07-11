@@ -329,4 +329,9 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
 
       return maxFront.get(0).getX();
    }
+   
+   public boolean getForceMagnitudePastThreshhold()
+   {
+      return isForceMagnitudePastThreshold.getBooleanValue();
+   }
 }
