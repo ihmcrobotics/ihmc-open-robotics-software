@@ -38,7 +38,11 @@ public class BonoRobotModel implements DRCRobotModel
    private static final double CONTROLLER_DT = 0.006;
    private static final double ESTIMATOR_DT = 0.001;
 
-   private final String[] resourceDirectories = new String[] { getClass().getResource("../models/axl/axl_description").getFile() };
+   private final String[] resourceDirectories = new String[] {
+         "models/axl/",
+         "models/axl/axl_description/",
+         "models/axl/axl_description/bono/",
+   };
 
    private final boolean runningOnRealRobot;
    private final JaxbSDFLoader loader;
@@ -118,7 +122,7 @@ public class BonoRobotModel implements DRCRobotModel
 
    private String getSdfFile()
    {
-      return "../models/axl/axl_description/bono/robots/bono.sdf";
+      return "models/axl/axl_description/bono/robots/bono.sdf";
    }
 
    private String[] getResourceDirectories()
@@ -128,7 +132,7 @@ public class BonoRobotModel implements DRCRobotModel
 
    private InputStream getSdfFileAsStream()
    {
-      return getClass().getResourceAsStream(getSdfFile());
+      return getClass().getClassLoader().getResourceAsStream(getSdfFile());
    }
 
    @Override
