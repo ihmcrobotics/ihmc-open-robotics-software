@@ -243,7 +243,7 @@ public class PushRecoveryControlModule
 
                if (isICPOutside && recoverFromDoubleSupportFallFootStep == null)
                {
-                  System.out.println("Robot is falling from double support");
+//                  System.out.println("Robot is falling from double support");
                   projectedCapturePoint.changeFrame(capturePoint2d.getReferenceFrame());
                   projectedCapturePoint.set(capturePoint2d.getX(), capturePoint2d.getY(), 0.0);
 
