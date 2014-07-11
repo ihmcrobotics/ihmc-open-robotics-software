@@ -400,6 +400,19 @@ public class PelvisLinearStateUpdater
          for (RobotSide robotSide : RobotSide.values)
             areFeetTrusted.get(robotSide).set(haveFeetHitGroundFiltered.get(robotSide).getBooleanValue());
       }
+      // Else if there is a foot with a force past the threshold trust the force and not the CoP
+      else if (footSwitches.get(RobotSide.LEFT).getForceMagnitudePastThreshhold())
+      {
+         areFeetTrusted.get(RobotSide.LEFT).set(true);
+         areFeetTrusted.get(RobotSide.RIGHT).set(false);
+         numberOfEndEffectorsTrusted = 1;
+      }
+      else if (footSwitches.get(RobotSide.RIGHT).getForceMagnitudePastThreshhold())
+      {
+         areFeetTrusted.get(RobotSide.LEFT).set(false);
+         areFeetTrusted.get(RobotSide.RIGHT).set(true);
+         numberOfEndEffectorsTrusted = 1;
+      }
       // Else keep the old states
       else
       {
