@@ -4,7 +4,18 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 
-public class RobotiqHandInterface
+import javax.crypto.spec.PSource;
+
+
+/* GENERAL INFO
+ * (This information assumes right hand for convention)
+ * Finger A = Thumb
+ * Finger B = Index Finger
+ * Finger C = Middle Finger
+ * Scissor = Motion between Fingers B & C
+ */
+
+public final class RobotiqHandInterface
 {	
 	/*---LOCATION DATA---*/
 	private static final int REGISTER_START = 0x0000;
@@ -307,9 +318,7 @@ public class RobotiqHandInterface
 	private byte commandedStatus;
 	private byte fingerControl;
 	private byte scissorControl;
-	private byte[] data = new byte[32];
-	private byte[] response = new byte[32];
-	private byte[] request = new byte[32];
+	private byte[] status;
 	private byte[] speed = new byte[4];
 	private byte[] force = new byte[4];
 	private byte[] position = new byte[4];
@@ -328,7 +337,6 @@ public class RobotiqHandInterface
 	
 	public void initialize() throws Exception
 	{
-		byte[] status;
 		status = this.getStatus();
 		
 		if(((status[GRIPPER_STATUS] & INITIALIZATON_MASK) == INITIALIZED) || (status[FAULT_STATUS] != NO_FAULT))
@@ -338,14 +346,12 @@ public class RobotiqHandInterface
 		}
 		
 		//initialize arrays
-		Arrays.fill(data,(byte)0x00);
-		Arrays.fill(response,(byte)0x00);
 		Arrays.fill(position,(byte)0x00);
 		Arrays.fill(speed,(byte)0x00);
 		Arrays.fill(force,(byte)0x00);
 		
 		position[FINGER_A] = RobotiqHandParameters.FULLY_OPEN;
-		speed[FINGER_A] = (byte) (RobotiqHandParameters.MAX_SPEED & 0xF0);
+		speed[FINGER_A] = (byte) (RobotiqHandParameters.MAX_SPEED * 3 /4);
 		force[FINGER_A] = RobotiqHandParameters.MAX_FORCE/2;
 		
 		initializedStatus = INITIALIZED;
@@ -391,7 +397,6 @@ public class RobotiqHandInterface
 	{
 		initializedStatus = RESET; //reset activation status
 		commandedStatus = STANDBY;
-		byte[] status;
 		do
 		{
 			sendRequest(SET_REGISTERS,
@@ -426,12 +431,24 @@ public class RobotiqHandInterface
 			position[FINGER_B] = RobotiqHandParameters.FULLY_OPEN;
 			position[FINGER_C] = RobotiqHandParameters.FULLY_OPEN;
 		}
-		else if(scissorControl == INDIVIDUAL_SCISSOR_CONTROL)
+		sendMotionRequest();
+		do
 		{
-			position[SCISSOR] = RobotiqHandParameters.FULLY_OPEN;
+			Thread.sleep(200);
+			status = this.getStatus();
+		}while((status[GRIPPER_STATUS] & MOTION_STATUS_MASK) == IN_MOTION);
+	}
+	
+	public void open(float percent) throws InterruptedException
+	{
+		
+		position[FINGER_A] = (byte)(percent * RobotiqHandParameters.FULLY_OPEN); //all fingers
+		if(fingerControl == INDIVIDUAL_FINGER_CONTROL)
+		{
+			position[FINGER_B] = (byte)(percent * RobotiqHandParameters.FULLY_OPEN);
+			position[FINGER_C] = (byte)(percent * RobotiqHandParameters.FULLY_OPEN);
 		}
 		sendMotionRequest();
-		byte[] status;
 		do
 		{
 			Thread.sleep(200);
@@ -443,7 +460,7 @@ public class RobotiqHandInterface
 	{
 		if(operationMode == PINCH_MODE)
 		{
-			position[FINGER_A] = 120;
+			position[FINGER_A] = 120; //max closed position for pinch
 			force[FINGER_A] = RobotiqHandParameters.MAX_FORCE/2;
 		}
 		else
@@ -457,15 +474,35 @@ public class RobotiqHandInterface
 				position[FINGER_C] = RobotiqHandParameters.FULLY_CLOSED;
 				force[FINGER_C] = RobotiqHandParameters.MAX_FORCE/2;
 			}
-			else if(scissorControl == INDIVIDUAL_SCISSOR_CONTROL)
+		}
+		sendMotionRequest();
+		do
+		{
+			Thread.sleep(200);
+			status = this.getStatus();
+		}while((status[GRIPPER_STATUS] & MOTION_STATUS_MASK) == IN_MOTION);
+	}
+	
+	public void close(float percent) throws InterruptedException
+	{
+		if(operationMode == PINCH_MODE)
+		{
+			position[FINGER_A] = (byte)(percent * 120); //max closed position for pinch
+			force[FINGER_A] = RobotiqHandParameters.MAX_FORCE/2;
+		}
+		else
+		{
+			position[FINGER_A] = (byte)(percent * RobotiqHandParameters.FULLY_CLOSED); // also all fingers
+			force[FINGER_A] = RobotiqHandParameters.MAX_FORCE/2;
+			if(fingerControl == INDIVIDUAL_FINGER_CONTROL)
 			{
-				position[SCISSOR] = RobotiqHandParameters.FULLY_CLOSED;
-				force[SCISSOR] = RobotiqHandParameters.MAX_FORCE/2;
+				position[FINGER_B] = (byte)(percent * RobotiqHandParameters.FULLY_CLOSED);
+				force[FINGER_B] = RobotiqHandParameters.MAX_FORCE/2;
+				position[FINGER_C] = (byte)(percent * RobotiqHandParameters.FULLY_CLOSED);
+				force[FINGER_C] = RobotiqHandParameters.MAX_FORCE/2;
 			}
 		}
-		
 		sendMotionRequest();
-		byte[] status;
 		do
 		{
 			Thread.sleep(200);
@@ -491,14 +528,8 @@ public class RobotiqHandInterface
 				position[FINGER_C] = RobotiqHandParameters.FULLY_CLOSED;
 				force[FINGER_C] = RobotiqHandParameters.MAX_FORCE;
 			}
-			else if(scissorControl == INDIVIDUAL_SCISSOR_CONTROL)
-			{
-				position[SCISSOR] = RobotiqHandParameters.FULLY_CLOSED;
-				force[SCISSOR] = RobotiqHandParameters.MAX_FORCE;
-			}
 		}
 		sendMotionRequest();
-		byte[] status;
 		do
 		{
 			Thread.sleep(200);
@@ -506,57 +537,33 @@ public class RobotiqHandInterface
 		}while((status[GRIPPER_STATUS] & MOTION_STATUS_MASK) == IN_MOTION);
 	}
 	
-	public void pinch() throws InterruptedException
+	public void pinchGrip() throws InterruptedException
 	{
-		if(operationMode != PINCH_MODE)
-		{
-			byte[] status;
-			operationMode = PINCH_MODE;
-			sendMotionRequest();
-			do
-			{
-				Thread.sleep(100);
-				status = this.getStatus();
-			}while((status[GRIPPER_STATUS] & INIT_MODE_STATUS_MASK) == CHANGING_MODE);
-		}
+		setGrip(PINCH_MODE);
 	}
 	
 	public void normalGrip() throws InterruptedException
 	{
-		if(operationMode != BASIC_MODE)
-		{
-			byte[] status;
-			operationMode = BASIC_MODE;
-			sendMotionRequest();
-			do
-			{
-				Thread.sleep(50);
-				status = this.getStatus();
-			}while((status[GRIPPER_STATUS] & INIT_MODE_STATUS_MASK) == CHANGING_MODE);
-		}
+		setGrip(BASIC_MODE);
 	}
 	
 	public void wideGrip() throws InterruptedException
 	{
-		if(operationMode != WIDE_MODE)
-		{
-			byte[] status;
-			operationMode = WIDE_MODE;
-			sendMotionRequest();
-			do
-			{
-				Thread.sleep(50);
-				status = this.getStatus();
-			}while((status[GRIPPER_STATUS] & INIT_MODE_STATUS_MASK) == CHANGING_MODE);
-		}
+		setGrip(WIDE_MODE);
 	}
 	
 	public void scissorGrip() throws InterruptedException
 	{
-		if(operationMode != SCISSOR_MODE)
+		setGrip(SCISSOR_MODE);
+	}
+
+	private void setGrip(byte mode) throws InterruptedException
+	{
+		if(operationMode != mode)
 		{
-			byte[] status;
-			operationMode = SCISSOR_MODE;
+			fingerControl = CONCURRENT_FINGER_CONTROL;
+			scissorControl = CONCURRENT_SCISSOR_CONTROL;
+			operationMode = mode;
 			sendMotionRequest();
 			do
 			{
@@ -566,9 +573,52 @@ public class RobotiqHandInterface
 		}
 	}
 	
-	private void printErrors(byte status)
+	public void setIndividualFinger(int finger, byte desiredForce, byte desiredPosition, byte desiredSpeed)
 	{
-		switch(status) //print correct fault
+		if(fingerControl == CONCURRENT_FINGER_CONTROL || scissorControl == CONCURRENT_SCISSOR_CONTROL)
+			status = getStatus();
+		if(fingerControl == CONCURRENT_FINGER_CONTROL)
+		{
+			position[FINGER_A] = status[POSITION_REQUEST_A];
+			position[FINGER_B] = status[POSITION_REQUEST_B];
+			position[FINGER_C] = status[POSITION_REQUEST_C];
+			force[FINGER_B] = force[FINGER_A];
+			force[FINGER_C] = force[FINGER_A];
+			speed[FINGER_B] = speed[FINGER_A];
+			speed[FINGER_C] = speed[FINGER_A];
+			fingerControl = INDIVIDUAL_FINGER_CONTROL;
+		}
+		if(finger == SCISSOR)
+		{
+			position[SCISSOR] = status[POSITION_REQUEST_S];
+			scissorControl = INDIVIDUAL_SCISSOR_CONTROL;
+		}
+		position[finger] = desiredPosition;
+		speed[finger] = desiredSpeed;
+		force[finger] = desiredForce;
+	}
+	
+	//TODO: Test this on actual hand
+	float[] positions = new float[4]; //only used in this method and is extracted for efficiency
+	public float[] positionStatus()
+	{
+		status = getStatus();
+		positions[FINGER_A] = status[POSITION_REQUEST_A];
+		positions[FINGER_B] = status[POSITION_REQUEST_B];
+		positions[FINGER_C] = status[POSITION_REQUEST_C];
+		positions[SCISSOR] = status[POSITION_REQUEST_S];
+		for(float p : positions)
+		{
+			if(p < 0)
+				p += 256; //rectify two's comp because java doesn't have unsigned bytes
+			p /= 255;
+		}
+		return positions;
+	}
+	
+	private void printErrors(byte code)
+	{
+		switch(code) //print correct fault
 		{
 		case 0x05: System.err.println("Priority Fault: Action delayed, activation must be completed prior to action."); break;
 		case 0x06: System.err.println("Priority Fault: Action delayed, mode change must be completed prior to action."); break;
@@ -587,6 +637,7 @@ public class RobotiqHandInterface
 	 * there must be an even number of registers given in dataRegisters when writing, otherwise the last register
 	 * will be truncated to maintain compatibility and register integrity
 	 */
+	private byte[] data = new byte[32]; //only used in this method and is extracted for efficiency
 	private byte[] sendRequest(byte functionCode, int startRegister, byte ... dataRegisters)
 	{
 		int dataLength = 0;
@@ -617,9 +668,10 @@ public class RobotiqHandInterface
 			System.err.println("Unable to send Modbus request");
 			e.printStackTrace();
 		}
-		return null;
+		return null; //should probably return something a bit more useful that won't break things
 	}
 	
+	private byte[] request = new byte[32]; //only used in this method and is extracted for efficiency
 	private void sendMotionRequest()
 	{
 		int dataLength;
@@ -645,7 +697,7 @@ public class RobotiqHandInterface
 			request[10] = speed[FINGER_C];
 			request[11] = force[FINGER_C];
 			dataLength = 12;
-		}		
+		}
 		if(scissorControl == INDIVIDUAL_SCISSOR_CONTROL)
 		{
 			request[12] = position[SCISSOR];
@@ -657,6 +709,7 @@ public class RobotiqHandInterface
 		sendRequest(SET_REGISTERS, REGISTER_START, Arrays.copyOfRange(request,0,dataLength));
 	}
 	
+	//TODO: Add TCP socket to write data back to machine in blocking loops
 	private byte[] getStatus() //gets the status of every register
 	{
 		return sendRequest(READ_REGISTERS,
