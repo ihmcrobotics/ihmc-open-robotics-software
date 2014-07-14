@@ -36,8 +36,8 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
       {
          throw new RuntimeException("Wrong data identifier: " + dataIdentifier + ". Expected: " + this.dataIdentifier);
       }
-      
-//      System.out.println("FootstepConsumer: consume: " + (++j) + " footsteps received, Ah Ah Ah!");
+
+      //      System.out.println("FootstepConsumer: consume: " + (++j) + " footsteps received, Ah Ah Ah!");
       FootstepData footstepData = (FootstepData) object;
       ContactablePlaneBody contactableBody = rigidBodyList.get(footstepData.getRobotSide());
 
@@ -47,9 +47,9 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
       PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("poseReferenceFrame", framePose);
       Footstep footstep = new Footstep(id, contactableBody, poseReferenceFrame, trustHeight);
 
-//    System.out.println("footstep = " + footstep);
+      //    System.out.println("footstep = " + footstep);
       footstepQueue.add(footstep);
-      
+
       currentIndex++;
    }
 
@@ -62,11 +62,11 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
    {
       return footstepQueue.peek();
    }
-   
+
    public Footstep peekPeek()
    {
       Iterator<Footstep> iterator = footstepQueue.iterator();
-      
+
       if (iterator.hasNext()) 
       {
          iterator.next();
@@ -110,9 +110,9 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
       return false;
    }
 
+   public void consumeObject(FootstepData object) 
+   {
+      // TODO Auto-generated method stub
+   }
 
-public void consumeObject(FootstepData object) {
-	// TODO Auto-generated method stub
-	
-}
 }
