@@ -17,7 +17,7 @@ public class SDFRoadVisual extends Graphics3DObject
    {
       double width = Double.parseDouble(road.getWidth());
       
-      AppearanceDefinition appearance = YoAppearance.Texture(getClass().getResource("models/road1.jpg"));
+      AppearanceDefinition appearance = YoAppearance.Texture("models/road1.jpg");
       
       Point3d startLeft = new Point3d();
       Point3d startRight = new Point3d();
