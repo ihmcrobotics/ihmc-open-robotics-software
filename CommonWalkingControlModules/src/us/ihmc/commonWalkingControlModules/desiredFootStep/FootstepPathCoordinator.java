@@ -427,7 +427,6 @@ public class FootstepPathCoordinator implements FootstepProvider
       setWalkMethod(WalkMethod.BLIND);
       footstepQueue.clear();
       setPaused(false);
-
    }
 
    private enum WalkMethod {STOP, FOOTSTEP_PATH, BLIND;}
