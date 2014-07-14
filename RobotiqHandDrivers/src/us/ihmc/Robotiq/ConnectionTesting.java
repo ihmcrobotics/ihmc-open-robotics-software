@@ -63,12 +63,12 @@ public class ConnectionTesting
 		System.out.println("Closing Hand");
 		rightHand.close();
 		System.out.println("Hand Closed");
-		
-		Thread.sleep(10000);
-		
-		System.out.println("Opening Hand");
-		rightHand.open();
-		System.out.println("Hand Open");
+//		
+//		Thread.sleep(10000);
+//		
+//		System.out.println("Opening Hand");
+//		rightHand.open();
+//		System.out.println("Hand Open");
 		
 //		System.out.println("Going to pinch");
 //		rightHand.pinch();
