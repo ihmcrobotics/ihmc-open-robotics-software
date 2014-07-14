@@ -27,12 +27,14 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.RobotNetworkParameters;
 import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandType;
+import us.ihmc.darpaRoboticsChallenge.handControl.HandCommandManager;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.AlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.AtlasPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
+import us.ihmc.iRobot.control.IRobotCommandManager;
 import us.ihmc.iRobot.model.iRobotHandModel;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -66,6 +68,7 @@ public class AtlasRobotModel implements DRCRobotModel
    private final AtlasRobotMultiContactControllerParameters multiContactControllerParameters;
    private final AtlasDrivingControllerParameters drivingControllerParameters;
    private final RobotNetworkParameters networkParameters;
+   private HandCommandManager handCommandManager;
 
    public AtlasRobotModel(AtlasRobotVersion atlasVersion, boolean runningOnRealRobot, boolean headless)
    {
@@ -94,6 +97,7 @@ public class AtlasRobotModel implements DRCRobotModel
       multiContactControllerParameters = new AtlasRobotMultiContactControllerParameters();
       drivingControllerParameters = new AtlasDrivingControllerParameters();
       networkParameters = new RobotNetworkParameters(runningOnRealRobot ? ATLAS_NETWORK_CONFIG : DEFAULT_NETWORK_CONFIG);
+      handCommandManager = createHandCommandManager();
    }
 
    @Override
@@ -276,5 +280,23 @@ public class AtlasRobotModel implements DRCRobotModel
    public RobotNetworkParameters getNetworkParameters()
    {
 	   return networkParameters;
+   }
+
+   @Override
+   public HandCommandManager getHandCommandManager()
+   {
+      return handCommandManager;
+   }
+   
+   private HandCommandManager createHandCommandManager()
+   {
+      switch(getHandType())
+      {
+      case IROBOT:
+         return new IRobotCommandManager();
+         
+      default:
+         return null;
+      }
    }
 }
