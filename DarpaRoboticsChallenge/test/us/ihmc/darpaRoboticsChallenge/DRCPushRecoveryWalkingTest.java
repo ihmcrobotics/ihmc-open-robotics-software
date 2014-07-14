@@ -294,7 +294,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
    private void setupTest(DRCRobotModel robotModel) throws SimulationExceededMaximumTimeException, InterruptedException
    {
-      DRCSimulationFactory.setSingleThreaded();
+      DRCSimulationFactory.RUN_MULTI_THREADED = false;
       DRCFlatGroundWalkingTrack track = setupTrack(robotModel);
       FullRobotModel fullRobotModel = robotModel.createFullRobotModel();
       swingTime = robotModel.getWalkingControllerParameters().getDefaultSwingTime();

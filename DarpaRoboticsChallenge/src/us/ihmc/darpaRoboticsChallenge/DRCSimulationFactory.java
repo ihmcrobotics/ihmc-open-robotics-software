@@ -33,7 +33,7 @@ import com.yobotics.simulationconstructionset.robotController.SingleThreadedRobo
 
 public class DRCSimulationFactory
 {
-   private static boolean RUN_MULTI_THREADED = true;
+   public static boolean RUN_MULTI_THREADED = true;
 
    private static final double gravity = -9.81;
 
@@ -206,11 +206,5 @@ public class DRCSimulationFactory
    public TimestampProvider getTimeStampProvider()
    {
       return simulatedDRCRobotTimeProvider;
-   }
-   
-   public static void setSingleThreaded()
-   {
-      // call before constructor
-      RUN_MULTI_THREADED = false;
    }
 }
