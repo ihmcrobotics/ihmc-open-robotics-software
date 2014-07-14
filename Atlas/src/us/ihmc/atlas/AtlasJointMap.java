@@ -43,7 +43,7 @@ public class AtlasJointMap implements DRCRobotJointMap
 {
 
    // Enable joint limits
-   public static boolean ENABLE_JOINT_VELOCITY_TORQUE_LIMITS = true;
+   public static boolean ENABLE_JOINT_VELOCITY_TORQUE_LIMITS = false;
 
    static
    {
