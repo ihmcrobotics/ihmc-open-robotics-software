@@ -34,6 +34,8 @@ public class DRCNetworkProcessorEnterpriseCloudDispatcherBackend implements Runn
    private static String[] javaArgs = new String[] {"-Xms2048m", "-Xmx2048m"};
 
    private static String robotModel;
+   
+   private int leftHandIP, rightHandIP;
 
    public DRCNetworkProcessorEnterpriseCloudDispatcherBackend()
    {
@@ -62,6 +64,10 @@ public class DRCNetworkProcessorEnterpriseCloudDispatcherBackend implements Runn
                case 0x00 :
                   commandServer.read(1);
                   robotModel = AtlasRobotModelFactory.getAvailableRobotModels()[UnsignedByteTools.toInt(buffer[1])];
+                  commandServer.read(1);
+                  leftHandIP = UnsignedByteTools.toInt(buffer[2]);
+                  commandServer.read(1);
+                  rightHandIP = UnsignedByteTools.toInt(buffer[3]);
                   spawnNetworkProcessor();
 
                   break;
@@ -146,7 +152,8 @@ public class DRCNetworkProcessorEnterpriseCloudDispatcherBackend implements Runn
    {
       if (!networkProcessorSpawner.hasRunningProcesses())
       {
-         networkProcessorSpawner.spawn(AtlasNetworkProcessor.class, javaArgs, new String[] {"--ros-uri", rosMasterURI, "--scs-ip", scsMachineIPAddress, "-m", robotModel, "--realRobot"});
+         networkProcessorSpawner.spawn(AtlasNetworkProcessor.class, javaArgs, new String[] {"--ros-uri", rosMasterURI, "--scs-ip", scsMachineIPAddress, "-m", robotModel, "--realRobot",
+            "-l", "10.66.171.1" + leftHandIP, "-r", "10.66.171.1" + rightHandIP });
 
          try
          {
