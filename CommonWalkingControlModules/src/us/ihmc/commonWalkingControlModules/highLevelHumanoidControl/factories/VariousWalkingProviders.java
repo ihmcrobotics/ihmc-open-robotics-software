@@ -86,7 +86,7 @@ public class VariousWalkingProviders
    private final DesiredHandLoadBearingProvider desiredHandLoadBearingProvider;
    private final DesiredPelvisLoadBearingProvider desiredPelvisLoadBearingProvider;
    private final DesiredThighLoadBearingProvider desiredThighLoadBearingProvider;
-   
+
    // TODO: Shouldn't really be in providers but this class is the easiest to access
    private final ControlStatusProducer controlStatusProducer;
 
@@ -110,16 +110,15 @@ public class VariousWalkingProviders
       this.desiredHandPoseProvider = desiredHandPoseProvider;
       this.desiredFootPoseProvider = footPoseProvider;
       this.reinitializeWalkingControllerProvider = reinitializeWalkingControllerProvider;
-      
+
       this.desiredHandLoadBearingProvider = desiredHandLoadBearingProvider;
       this.desiredFootLoadBearingProvider = footStateProvider;
       this.desiredThighLoadBearingProvider = thighLoadBearingProvider;
       this.desiredPelvisLoadBearingProvider = pelvisLoadBearingProvider;
-      
-      this.controlStatusProducer = controlStatusProducer;
-      
+
+      this.controlStatusProducer = controlStatusProducer;   
    }
-   
+
    public void clearPoseProviders()
    {
       if(desiredPelvisPoseProvider != null)
@@ -130,14 +129,14 @@ public class VariousWalkingProviders
       {
          desiredChestOrientationProvider.getDesiredChestOrientation();
       }
-      
+
       for(RobotSide robotSide : RobotSide.values)
       {
          if(desiredHandPoseProvider != null)
          {
             desiredHandPoseProvider.getDesiredHandPose(robotSide);
          }
-         
+
          if(desiredFootPoseProvider != null)
          {
             desiredFootPoseProvider.getDesiredFootPose(robotSide);
@@ -164,7 +163,7 @@ public class VariousWalkingProviders
    {
       return desiredPelvisPoseProvider;
    }
-   
+
    public DesiredComHeightProvider getDesiredComHeightProvider()
    {
       return desiredComHeightProvider;
@@ -174,7 +173,7 @@ public class VariousWalkingProviders
    {
       return desiredPelvisLoadBearingProvider;
    }
-   
+
    public HandPoseProvider getDesiredHandPoseProvider()
    {
       return desiredHandPoseProvider;
@@ -204,7 +203,7 @@ public class VariousWalkingProviders
    {
       return desiredFootLoadBearingProvider;
    }
-   
+
    public DesiredThighLoadBearingProvider getDesiredThighLoadBearingProvider()
    {
       return desiredThighLoadBearingProvider;
@@ -215,23 +214,22 @@ public class VariousWalkingProviders
       return reinitializeWalkingControllerProvider;
    }
 
-
    public static VariousWalkingProviders createUsingObjectCommunicator(FootstepTimingParameters footstepTimingParameters, GlobalDataProducer objectCommunicator, FullRobotModel fullRobotModel,
-           WalkingControllerParameters walkingControllerParameters, CommonWalkingReferenceFrames referenceFrames,
-           SideDependentList<ContactablePlaneBody> bipedFeet, ConstantTransferTimeCalculator transferTimeCalculator,
-           ConstantSwingTimeCalculator swingTimeCalculator, YoVariableRegistry registry)
+         WalkingControllerParameters walkingControllerParameters, CommonWalkingReferenceFrames referenceFrames,
+         SideDependentList<ContactablePlaneBody> bipedFeet, ConstantTransferTimeCalculator transferTimeCalculator,
+         ConstantSwingTimeCalculator swingTimeCalculator, YoVariableRegistry registry)
    {
       DesiredHandPoseProvider handPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame());
 
       LinkedHashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = new LinkedHashMap<Footstep, TrajectoryParameters>();
 
       BlindWalkingToDestinationDesiredFootstepCalculator desiredFootstepCalculator =
-         HighLevelHumanoidControllerFactoryHelper.getBlindWalkingToDestinationDesiredFootstepCalculator(walkingControllerParameters, referenceFrames,
-            bipedFeet, registry);
+            HighLevelHumanoidControllerFactoryHelper.getBlindWalkingToDestinationDesiredFootstepCalculator(walkingControllerParameters, referenceFrames,
+                  bipedFeet, registry);
 
       FootstepPathCoordinator footstepPathCoordinator = new FootstepPathCoordinator(footstepTimingParameters, objectCommunicator, desiredFootstepCalculator, swingTimeCalculator,
-                                                           transferTimeCalculator, registry);
-      
+            transferTimeCalculator, registry);
+
       FootstepPathConsumer footstepPathConsumer = new FootstepPathConsumer(bipedFeet, footstepPathCoordinator, mapFromFootstepsToTrajectoryParameters);
       BlindWalkingPacketConsumer blindWalkingPacketConsumer = new BlindWalkingPacketConsumer(footstepPathCoordinator);
       PauseCommandConsumer pauseCommandConsumer = new PauseCommandConsumer(footstepPathCoordinator);
@@ -247,7 +245,7 @@ public class VariousWalkingProviders
       DesiredFootStateProvider footLoadBearingProvider = new DesiredFootStateProvider();
       DesiredThighLoadBearingProvider thighLoadBearingProvider = new DesiredThighLoadBearingProvider();
       DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider = new DesiredPelvisLoadBearingProvider();
-      
+
       objectCommunicator.attachListener(FootstepDataList.class, footstepPathConsumer);
       objectCommunicator.attachListener(BlindWalkingPacket.class, blindWalkingPacketConsumer);
       objectCommunicator.attachListener(PauseCommand.class, pauseCommandConsumer);
@@ -260,15 +258,14 @@ public class VariousWalkingProviders
       objectCommunicator.attachListener(FootPosePacket.class, footPoseProvider);
       objectCommunicator.attachListener(ChestOrientationPacket.class, chestOrientationProvider);
       objectCommunicator.attachListener(ReinitializeWalkingControllerPacket.class, reinitializeWalkingControllerProvider);
-      
+
       objectCommunicator.attachListener(HandLoadBearingPacket.class, handLoadBearingProvider);
       objectCommunicator.attachListener(FootStatePacket.class, footLoadBearingProvider);
       objectCommunicator.attachListener(ThighStatePacket.class, thighLoadBearingProvider);
       objectCommunicator.attachListener(BumStatePacket.class, pelvisLoadBearingProvider);
 
-      
       ControlStatusProducer controlStatusProducer = new NetworkControlStatusProducer(objectCommunicator);
-      
+
       VariousWalkingProviders variousProvidersFactory = new VariousWalkingProviders(footstepPathCoordinator, mapFromFootstepsToTrajectoryParameters,
             headOrientationProvider, desiredComHeightProvider, pelvisPoseProvider, handPoseProvider, handLoadBearingProvider,
             chestOrientationProvider, footPoseProvider, footLoadBearingProvider, highLevelStateProvider, thighLoadBearingProvider,
@@ -278,20 +275,20 @@ public class VariousWalkingProviders
    }
 
    public static VariousWalkingProviders createUsingComponentBasedDesiredFootstepCalculator(FullRobotModel fullRobotModel,
-           CommonWalkingReferenceFrames referenceFrames, SideDependentList<ContactablePlaneBody> bipedFeet, double controlDT, ArrayList<Updatable> updatables,
-           boolean useHeadingAndVelocityScript, HeightMap heightMapForCheatingOnStepHeight, WalkingControllerParameters walkingControllerParameters,
-           YoVariableRegistry registry)
+         CommonWalkingReferenceFrames referenceFrames, SideDependentList<ContactablePlaneBody> bipedFeet, double controlDT, ArrayList<Updatable> updatables,
+         boolean useHeadingAndVelocityScript, HeightMap heightMapForCheatingOnStepHeight, WalkingControllerParameters walkingControllerParameters,
+         YoVariableRegistry registry)
    {
       ComponentBasedDesiredFootstepCalculator desiredFootstepCalculator =
-         HighLevelHumanoidControllerFactoryHelper.getDesiredFootstepCalculator(walkingControllerParameters, referenceFrames, bipedFeet, controlDT, registry,
-            updatables, useHeadingAndVelocityScript);
+            HighLevelHumanoidControllerFactoryHelper.getDesiredFootstepCalculator(walkingControllerParameters, referenceFrames, bipedFeet, controlDT, registry,
+                  updatables, useHeadingAndVelocityScript);
       if (heightMapForCheatingOnStepHeight != null)
       {
          desiredFootstepCalculator.setGroundProfile(heightMapForCheatingOnStepHeight);
       }
 
       DesiredFootstepCalculatorFootstepProviderWrapper footstepProvider = new DesiredFootstepCalculatorFootstepProviderWrapper(desiredFootstepCalculator,
-                                                                             registry);
+            registry);
       LinkedHashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = new LinkedHashMap<Footstep, TrajectoryParameters>();
 
       DesiredHighLevelStateProvider highLevelStateProvider = null;
@@ -318,14 +315,13 @@ public class VariousWalkingProviders
             reinitializeWalkingControllerProvider, controlStatusProducer);
 
       return variousProvidersFactory;
-
    }
 
    public static VariousWalkingProviders createForStairClimbing(VaryingStairGroundProfile groundProfile, SideDependentList<ContactablePlaneBody> bipedFeet,
          CommonWalkingReferenceFrames referenceFrames, DesiredHeadingControlModule desiredHeadingControlModule, YoVariableRegistry registry)
    {
       VaryingStairDesiredFootstepCalculator desiredFootstepCalculator = new VaryingStairDesiredFootstepCalculator(groundProfile, bipedFeet, referenceFrames,
-                                                                           desiredHeadingControlModule, registry);
+            desiredHeadingControlModule, registry);
       desiredFootstepCalculator.setupParametersForR2InverseDynamics();
       FootstepProvider footstepProvider = new DesiredFootstepCalculatorFootstepProviderWrapper(desiredFootstepCalculator, registry);
       LinkedHashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = new LinkedHashMap<Footstep, TrajectoryParameters>();
@@ -343,10 +339,9 @@ public class VariousWalkingProviders
       DesiredFootStateProvider footLoadBearingProvider = null;
       DesiredThighLoadBearingProvider thighLoadBearingProvider = null;
       DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider = null;
-      
+
       ControlStatusProducer controlStatusProducer = new SystemErrControlStatusProducer();
-      
-      
+
       VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(footstepProvider, mapFromFootstepsToTrajectoryParameters,
             headOrientationProvider, comHeightProvider, pelvisPoseProvider, handPoseProvider, handLoadBearingProvider, chestOrientationProvider,
             footPoseProvider, footLoadBearingProvider, highLevelStateProvider, thighLoadBearingProvider, pelvisLoadBearingProvider,
@@ -363,7 +358,7 @@ public class VariousWalkingProviders
       LinkedHashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = new LinkedHashMap<Footstep, TrajectoryParameters>();
 
       FootstepProvider footstepPovider = new UserDesiredFootstepProvider(bipedFeet, referenceFrames.getAnkleZUpReferenceFrames(), registry);
-      
+
       DesiredHighLevelStateProvider highLevelStateProvider = null; 
       DesiredHeadOrientationProvider headOrientationProvider = new UserDesiredHeadOrientationProvider(referenceFrames.getPelvisZUpFrame(), registry); 
       DesiredComHeightProvider desiredComHeightProvider = null;
@@ -376,9 +371,9 @@ public class VariousWalkingProviders
       DesiredFootStateProvider footLoadBearingProvider = null; 
       DesiredThighLoadBearingProvider thighLoadBearingProvider = null; 
       DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider = null; 
-      
+
       ControlStatusProducer controlStatusProducer = new SystemErrControlStatusProducer();
-      
+
       VariousWalkingProviders variousProvidersFactory = new VariousWalkingProviders(footstepPovider, mapFromFootstepsToTrajectoryParameters,
             headOrientationProvider, desiredComHeightProvider, pelvisPoseProvider, handPoseProvider, handLoadBearingProvider, chestOrientationProvider,
             footPoseProvider, footLoadBearingProvider, highLevelStateProvider, thighLoadBearingProvider, pelvisLoadBearingProvider,
