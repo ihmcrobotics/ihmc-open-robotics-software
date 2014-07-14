@@ -51,8 +51,6 @@ public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTe
    private ReferenceFrames referenceFrames;
    private SideDependentList<ContactablePlaneBody> bipedFeet;
    private WalkingControllerParameters walkingParamaters;
-   
-
 
    @Before
    public void showMemoryUsageBeforeTest()
@@ -65,7 +63,6 @@ public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTe
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-
 
    @Test
    public void testStraightLinePath()
@@ -172,6 +169,4 @@ public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTe
       referenceFrames = new ReferenceFrames(fullRobotModel, robotModel.getJointMap(), physicalProperties.getAnkleHeight());
       bipedFeet = DRCOperatorUserInterface.setupBipedFeet(referenceFrames, fullRobotModel, walkingParamaters);
    }
-
-
 }
