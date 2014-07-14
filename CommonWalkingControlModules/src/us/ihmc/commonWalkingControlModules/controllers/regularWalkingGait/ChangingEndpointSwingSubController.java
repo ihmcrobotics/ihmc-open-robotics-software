@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait;
 
-import javax.vecmath.Matrix3d;
-
 import us.ihmc.commonWalkingControlModules.configurations.BalanceOnOneLegConfiguration;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.PreSwingControlModule;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.SwingLegTorqueControlModule;
@@ -530,8 +528,6 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       desiredSwingFootPositionInWorldFrame.set(position);
       desiredSwingFootVelocityInWorldFrame.set(velocity);
       desiredSwingFootAccelerationInWorldFrame.set(acceleration);
-
-      
       
       // Determine foot orientation and angular velocity
       minimumJerkTrajectoryForFootOrientation.computeTrajectory(timeInState);
