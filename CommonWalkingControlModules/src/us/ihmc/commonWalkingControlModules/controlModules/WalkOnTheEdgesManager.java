@@ -18,9 +18,7 @@ import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
-import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
@@ -33,7 +31,7 @@ public class WalkOnTheEdgesManager
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   
+
    // TODO it would be nice to use toe touchdown for side steps, but it requires too often an unreachable orientation of the foot resulting in unstable behaviors
    private static final boolean DO_TOE_TOUCHDOWN_ONLY_WHEN_STEPPING_DOWN = true;
    private static final boolean DO_TOEOFF_FOR_SIDE_STEPS = false;
@@ -79,7 +77,7 @@ public class WalkOnTheEdgesManager
    private final FramePoint tempTrailingFootPosition = new FramePoint();
    private final FramePoint tempLeadingFootPositionInWorld = new FramePoint();
    private final FramePoint tempTrailingFootPositionInWorld = new FramePoint();
-   
+
    private final WalkingControllerParameters walkingControllerParameters;
 
    private final SideDependentList<DoubleYoVariable> angleFootsWithDesired = new SideDependentList<DoubleYoVariable>(
@@ -88,7 +86,7 @@ public class WalkOnTheEdgesManager
 
    private final SideDependentList<YoFrameOrientation> footOrientationInWorld = new SideDependentList<YoFrameOrientation>(new YoFrameOrientation("orientationLeftFoot",
          worldFrame, registry), new YoFrameOrientation("orientationRightFoot", worldFrame, registry));
-   
+
    private final SideDependentList<BooleanYoVariable> desiredAngleReached = new SideDependentList<BooleanYoVariable>(new BooleanYoVariable("l_Desired_Pitch", registry), new BooleanYoVariable("r_Desired_Pitch", registry));
    private Footstep desiredFootstep;
 
@@ -103,13 +101,13 @@ public class WalkOnTheEdgesManager
       this.doToeOffIfPossible.set(walkingControllerParameters.doToeOffIfPossible());
       this.doToeTouchdownIfPossible.set(walkingControllerParameters.doToeTouchdownIfPossible());
       this.doHeelTouchdownIfPossible.set(walkingControllerParameters.doHeelTouchdownIfPossible());
-      
+
       this.walkingControllerParameters = walkingControllerParameters;
-      
+
       this.feet = feet;
       this.footEndEffectorControlModules = footEndEffectorControlModules;
       desiredFootstep = null;
-      
+
       this.inPlaceWidth = walkingControllerParameters.getInPlaceWidth();
       this.footLength = walkingControllerParameters.getFootBackwardOffset() + walkingControllerParameters.getFootForwardOffset();
 
@@ -138,9 +136,9 @@ public class WalkOnTheEdgesManager
       ContactablePlaneBody trailingFoot = feet.get(trailingLeg);
       ContactablePlaneBody leadingFoot = feet.get(trailingLeg.getOppositeSide());
       FrameConvexPolygon2d onToesSupportPolygon = getOnToesSupportPolygonCopy(trailingFoot, leadingFoot);
-//      isDesiredECMPOKForToeOff.set(Math.abs(onToesSupportPolygon.distance(desiredECMP)) < 0.06);
+      //      isDesiredECMPOKForToeOff.set(Math.abs(onToesSupportPolygon.distance(desiredECMP)) < 0.06);
       isDesiredECMPOKForToeOff.set(onToesSupportPolygon.isPointInside(desiredECMP));
-      
+
       if (!isDesiredECMPOKForToeOff.getBooleanValue())
       {
          doToeOff.set(false);
@@ -215,12 +213,12 @@ public class WalkOnTheEdgesManager
       tempLeadingFootPosition.setToZero(frontFootFrame);
       tempTrailingFootPosition.setToZero(trailingFootFrame);
       tempLeadingFootPosition.changeFrame(trailingFootFrame);
-      
+
       if (Math.abs(tempLeadingFootPosition.getY()) > inPlaceWidth)
          tempLeadingFootPosition.setY(tempLeadingFootPosition.getY() + trailingLeg.negateIfRightSide(inPlaceWidth));
       else
          tempLeadingFootPosition.setY(0.0);
-      
+
       tempLeadingFootPositionInWorld.setToZero(frontFootFrame);
       tempTrailingFootPositionInWorld.setToZero(trailingFootFrame);
       tempLeadingFootPositionInWorld.changeFrame(worldFrame);
@@ -239,7 +237,7 @@ public class WalkOnTheEdgesManager
       boolean isForwardOrSideStepping = tempLeadingFootPosition.getX() > -0.05;
       if (!isForwardOrSideStepping)
          return false;
-      
+
       boolean isSideStepping = Math.abs(Math.atan2(tempLeadingFootPosition.getY(), tempLeadingFootPosition.getX())) > Math.toRadians(45.0);
       if (isSideStepping && !DO_TOEOFF_FOR_SIDE_STEPS)
          return false;
@@ -274,7 +272,7 @@ public class WalkOnTheEdgesManager
 
       if (DO_TOE_TOUCHDOWN_ONLY_WHEN_STEPPING_DOWN)
          return false;
-      
+
       boolean isBackardOrSideStepping = tempLeadingFootPosition.getX() < 0.05;
       if (!isBackardOrSideStepping)
          return false;
@@ -322,13 +320,13 @@ public class WalkOnTheEdgesManager
          boolean frontFootWellPositionedForToeTouchdown = isFrontFootWellPositionedForToeTouchdown(nextTrailingLeg, nextFrontFootFrame);
          doToeTouchdown.set(frontFootWellPositionedForToeTouchdown);
       }
-      
+
       if (!doHeelTouchdownIfPossible.getBooleanValue() || doToeTouchdown.getBooleanValue())
       {
          doHeelTouchdown.set(false);
          return;
       }
-      
+
       boolean frontFootWellPositionedForHeelTouchdown = isFrontFootWellPositionedForHeelTouchdown(nextTrailingLeg, nextFrontFootFrame);
       doHeelTouchdown.set(frontFootWellPositionedForHeelTouchdown);
    }
@@ -345,21 +343,21 @@ public class WalkOnTheEdgesManager
 
       footstepToModify.getPose(newPosition, oldOrientation);
       newOrientation.setIncludingFrame(oldOrientation);
-      
+
       double[] yawPitchRoll = newOrientation.getYawPitchRoll();
       yawPitchRoll[1] += touchdownInitialPitch;
       newOrientation.setYawPitchRoll(yawPitchRoll);
-      
+
       Vector3d ankleToEdge, edgeToAnkle;
-      
+
       if (doToeTouchdown.getBooleanValue())
          ankleToEdge = new Vector3d(walkingControllerParameters.getFootForwardOffset(), 0.0, -walkingControllerParameters.getAnkleHeight());
       else
          ankleToEdge = new Vector3d(-walkingControllerParameters.getFootBackwardOffset(), 0.0, -walkingControllerParameters.getAnkleHeight());
-      
+
       edgeToAnkle = new Vector3d(ankleToEdge);
       edgeToAnkle.negate();
-      
+
       Transform3D tempTransform = new Transform3D();
       oldOrientation.getTransform3D(tempTransform);
       tempTransform.transform(ankleToEdge);
@@ -378,7 +376,7 @@ public class WalkOnTheEdgesManager
    {
       if (!doToeTouchdownIfPossible.getBooleanValue() && !doHeelTouchdownIfPossible.getBooleanValue())
          return false;
-      
+
       return doToeTouchdown.getBooleanValue() || doHeelTouchdown.getBooleanValue();
    }
 
@@ -443,7 +441,7 @@ public class WalkOnTheEdgesManager
    {
       isDesiredECMPOKForToeOff.set(false);
       isDesiredICPOKForToeOff.set(false);
-      
+
       doToeOff.set(false);
    }
 
@@ -481,12 +479,12 @@ public class WalkOnTheEdgesManager
 
       List<FramePoint2d> allPoints = new ArrayList<FramePoint2d>();
       allPoints.add(singleToePoint.toFramePoint2d());
-//      for (FramePoint framePoint : toePoints)
-//      {
-//         framePoint.changeFrame(worldFrame);
-//         allPoints.add(framePoint.toFramePoint2d());
-//      }
-      
+      //      for (FramePoint framePoint : toePoints)
+      //      {
+      //         framePoint.changeFrame(worldFrame);
+      //         allPoints.add(framePoint.toFramePoint2d());
+      //      }
+
       for(int i = 0; i < leadingFootPoints.size(); i++)
       {
          FramePoint framePoint = leadingFootPoints.get(i);
