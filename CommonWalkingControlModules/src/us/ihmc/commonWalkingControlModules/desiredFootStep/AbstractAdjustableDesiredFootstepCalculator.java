@@ -26,7 +26,7 @@ public abstract class AbstractAdjustableDesiredFootstepCalculator implements Des
    private DesiredFootstepAdjustor desiredFootstepAdjustor;
 
    public AbstractAdjustableDesiredFootstepCalculator(SideDependentList<? extends ContactablePlaneBody> contactableBodies,
-           SideDependentList<ReferenceFrame> framesToSaveFootstepIn, YoVariableRegistry parentRegistry)
+         SideDependentList<ReferenceFrame> framesToSaveFootstepIn, YoVariableRegistry parentRegistry)
    {
       this.contactableBodies = contactableBodies;
 
@@ -50,7 +50,7 @@ public abstract class AbstractAdjustableDesiredFootstepCalculator implements Des
       RobotSide swingLegSide = supportLegSide.getOppositeSide();
 
       FramePose footstepPose = new FramePose(footstepPositions.get(swingLegSide).getFramePointCopy(),
-                                  footstepOrientations.get(swingLegSide).getFrameOrientationCopy());
+            footstepOrientations.get(swingLegSide).getFrameOrientationCopy());
       footstepPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("poseReferenceFrame", footstepPose);
@@ -87,7 +87,7 @@ public abstract class AbstractAdjustableDesiredFootstepCalculator implements Des
 
       return desiredFootstep;
    }
-   
+
    public Footstep predictFootstepAfterDesiredFootstep(RobotSide supportLegSide, Footstep desiredFootstep)
    {
       return null;
@@ -99,6 +99,5 @@ public abstract class AbstractAdjustableDesiredFootstepCalculator implements Des
    }
 
    protected abstract List<FramePoint> getContactPoints(RobotSide swingSide);
-
 
 }
