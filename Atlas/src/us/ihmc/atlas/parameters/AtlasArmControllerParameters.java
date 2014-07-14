@@ -6,7 +6,7 @@ public class AtlasArmControllerParameters implements ArmControllerParameters
 {
    private final boolean runningOnRealRobot;
    
-   public static final double[] kp = { 40.0, 20.0, 30.0, 30.0, 20.0, 30.0}; //{ 1.8, 1.5, 7.8, 6, 30, 24 };
+   private static final double[] kp = { 40.0, 20.0, 30.0, 30.0, 20.0, 30.0}; //{ 1.8, 1.5, 7.8, 6, 30, 24 };
    private static final double[] ki = { 1.5, 0.8, 5, 10, 5, 10 };
    private static final double[] kd = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }; //{ 11, 17, 39, 47, 26, 25 };
    private static final double[] ff_qd_ds = { 60.0, 80.0, 50.0, 50.0, 30.0, 30.0 }; //{ 35, 35, 35, 35, 35, 35 };
