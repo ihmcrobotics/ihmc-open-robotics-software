@@ -4,9 +4,6 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 
-import javax.crypto.spec.PSource;
-
-
 /* GENERAL INFO
  * (This information assumes right hand for convention)
  * Finger A = Thumb
@@ -26,6 +23,14 @@ public final class RobotiqHandInterface
 	private static final byte READ_REGISTERS = 0x04;
 	
 	
+	/*---CONTROL PARAMETERS---*/
+	static final byte MAX_SPEED = (byte) 0xFF;
+	static final byte MAX_FORCE = (byte) 0xFF;
+	static final byte FULLY_OPEN = 0x00;
+	static final byte MIN_SPEED = 0x00;
+	static final byte MIN_FORCE = 0x00;
+	static final byte FULLY_CLOSED = (byte)0xFF;
+	
 	/*---DATA INDICES---*/
 	//status response index (from hand start register) 
 	private static final int FUNCTION_CODE = 0;
@@ -33,16 +38,16 @@ public final class RobotiqHandInterface
 	private static final int GRIPPER_STATUS = 2;
 	private static final int OBJECT_STATUS = 3;
 	private static final int FAULT_STATUS = 4;
-	private static final int POSITION_REQUEST_A = 5;
+	private static final int FINGER_A_REQUESTED_POSITION = 5;
 	private static final int FINGER_A_POSITION = 6;
 	private static final int FINGER_A_CURRENT = 7;
-	private static final int POSITION_REQUEST_B = 8;
+	private static final int FINGER_B_REQUESTED_POSITION = 8;
 	private static final int FINGER_B_POSITION = 9;
 	private static final int FINGER_B_CURRENT = 10;
-	private static final int POSITION_REQUEST_C = 11;
+	private static final int FINGER_C_REQUESTED_POSITION = 11;
 	private static final int FINGER_C_POSITION = 12;
 	private static final int FINGER_C_CURRENT = 13;
-	private static final int POSITION_REQUEST_S = 14;
+	private static final int SCISSOR_REQUESTED_POSITION = 14;
 	private static final int SCISSOR_POSITION = 15;
 	private static final int SCISSOR_CURRENT = 16;
 	
@@ -350,9 +355,9 @@ public final class RobotiqHandInterface
 		Arrays.fill(speed,(byte)0x00);
 		Arrays.fill(force,(byte)0x00);
 		
-		position[FINGER_A] = RobotiqHandParameters.FULLY_OPEN;
-		speed[FINGER_A] = (byte) (RobotiqHandParameters.MAX_SPEED * 3 /4);
-		force[FINGER_A] = RobotiqHandParameters.MAX_FORCE/2;
+		position[FINGER_A] = FULLY_OPEN;
+		speed[FINGER_A] = (byte) (MAX_SPEED * 3 /4);
+		force[FINGER_A] = MAX_FORCE/2;
 		
 		initializedStatus = INITIALIZED;
 		operationMode = BASIC_MODE;
@@ -425,11 +430,11 @@ public final class RobotiqHandInterface
 	public void open() throws InterruptedException
 	{
 		
-		position[FINGER_A] = RobotiqHandParameters.FULLY_OPEN; //all fingers
+		position[FINGER_A] = FULLY_OPEN; //all fingers
 		if(fingerControl == INDIVIDUAL_FINGER_CONTROL)
 		{
-			position[FINGER_B] = RobotiqHandParameters.FULLY_OPEN;
-			position[FINGER_C] = RobotiqHandParameters.FULLY_OPEN;
+			position[FINGER_B] = FULLY_OPEN;
+			position[FINGER_C] = FULLY_OPEN;
 		}
 		sendMotionRequest();
 		do
@@ -442,11 +447,11 @@ public final class RobotiqHandInterface
 	public void open(float percent) throws InterruptedException
 	{
 		
-		position[FINGER_A] = (byte)(percent * RobotiqHandParameters.FULLY_OPEN); //all fingers
+		position[FINGER_A] = (byte)(percent * FULLY_OPEN); //all fingers
 		if(fingerControl == INDIVIDUAL_FINGER_CONTROL)
 		{
-			position[FINGER_B] = (byte)(percent * RobotiqHandParameters.FULLY_OPEN);
-			position[FINGER_C] = (byte)(percent * RobotiqHandParameters.FULLY_OPEN);
+			position[FINGER_B] = (byte)(percent * FULLY_OPEN);
+			position[FINGER_C] = (byte)(percent * FULLY_OPEN);
 		}
 		sendMotionRequest();
 		do
@@ -461,18 +466,18 @@ public final class RobotiqHandInterface
 		if(operationMode == PINCH_MODE)
 		{
 			position[FINGER_A] = 120; //max closed position for pinch
-			force[FINGER_A] = RobotiqHandParameters.MAX_FORCE/2;
+			force[FINGER_A] = MAX_FORCE/2;
 		}
 		else
 		{
-			position[FINGER_A] = RobotiqHandParameters.FULLY_CLOSED; // also all fingers
-			force[FINGER_A] = RobotiqHandParameters.MAX_FORCE/2;
+			position[FINGER_A] = FULLY_CLOSED; // also all fingers
+			force[FINGER_A] = MAX_FORCE/2;
 			if(fingerControl == INDIVIDUAL_FINGER_CONTROL)
 			{
-				position[FINGER_B] = RobotiqHandParameters.FULLY_CLOSED;
-				force[FINGER_B] = RobotiqHandParameters.MAX_FORCE/2;
-				position[FINGER_C] = RobotiqHandParameters.FULLY_CLOSED;
-				force[FINGER_C] = RobotiqHandParameters.MAX_FORCE/2;
+				position[FINGER_B] = FULLY_CLOSED;
+				force[FINGER_B] = MAX_FORCE/2;
+				position[FINGER_C] = FULLY_CLOSED;
+				force[FINGER_C] = MAX_FORCE/2;
 			}
 		}
 		sendMotionRequest();
@@ -488,18 +493,18 @@ public final class RobotiqHandInterface
 		if(operationMode == PINCH_MODE)
 		{
 			position[FINGER_A] = (byte)(percent * 120); //max closed position for pinch
-			force[FINGER_A] = RobotiqHandParameters.MAX_FORCE/2;
+			force[FINGER_A] = MAX_FORCE/2;
 		}
 		else
 		{
-			position[FINGER_A] = (byte)(percent * RobotiqHandParameters.FULLY_CLOSED); // also all fingers
-			force[FINGER_A] = RobotiqHandParameters.MAX_FORCE/2;
+			position[FINGER_A] = (byte)(percent * FULLY_CLOSED); // also all fingers
+			force[FINGER_A] = MAX_FORCE/2;
 			if(fingerControl == INDIVIDUAL_FINGER_CONTROL)
 			{
-				position[FINGER_B] = (byte)(percent * RobotiqHandParameters.FULLY_CLOSED);
-				force[FINGER_B] = RobotiqHandParameters.MAX_FORCE/2;
-				position[FINGER_C] = (byte)(percent * RobotiqHandParameters.FULLY_CLOSED);
-				force[FINGER_C] = RobotiqHandParameters.MAX_FORCE/2;
+				position[FINGER_B] = (byte)(percent * FULLY_CLOSED);
+				force[FINGER_B] = MAX_FORCE/2;
+				position[FINGER_C] = (byte)(percent * FULLY_CLOSED);
+				force[FINGER_C] = MAX_FORCE/2;
 			}
 		}
 		sendMotionRequest();
@@ -515,18 +520,18 @@ public final class RobotiqHandInterface
 		if(operationMode == PINCH_MODE)
 		{
 			position[FINGER_A] = 120; //max closed position for pinch
-			force[FINGER_A] = RobotiqHandParameters.MAX_FORCE;
+			force[FINGER_A] = MAX_FORCE;
 		}
 		else
 		{
-			position[FINGER_A] = RobotiqHandParameters.FULLY_CLOSED; // also all fingers
-			force[FINGER_A] = RobotiqHandParameters.MAX_FORCE;
+			position[FINGER_A] = FULLY_CLOSED; // also all fingers
+			force[FINGER_A] = MAX_FORCE;
 			if(fingerControl == INDIVIDUAL_FINGER_CONTROL)
 			{
-				position[FINGER_B] = RobotiqHandParameters.FULLY_CLOSED;
-				force[FINGER_B] = RobotiqHandParameters.MAX_FORCE;
-				position[FINGER_C] = RobotiqHandParameters.FULLY_CLOSED;
-				force[FINGER_C] = RobotiqHandParameters.MAX_FORCE;
+				position[FINGER_B] = FULLY_CLOSED;
+				force[FINGER_B] = MAX_FORCE;
+				position[FINGER_C] = FULLY_CLOSED;
+				force[FINGER_C] = MAX_FORCE;
 			}
 		}
 		sendMotionRequest();
@@ -579,9 +584,9 @@ public final class RobotiqHandInterface
 			status = getStatus();
 		if(fingerControl == CONCURRENT_FINGER_CONTROL)
 		{
-			position[FINGER_A] = status[POSITION_REQUEST_A];
-			position[FINGER_B] = status[POSITION_REQUEST_B];
-			position[FINGER_C] = status[POSITION_REQUEST_C];
+			position[FINGER_A] = status[FINGER_A_POSITION]; //TODO: check to see if this should be the request3ed position
+			position[FINGER_B] = status[FINGER_B_POSITION];
+			position[FINGER_C] = status[FINGER_C_POSITION];
 			force[FINGER_B] = force[FINGER_A];
 			force[FINGER_C] = force[FINGER_A];
 			speed[FINGER_B] = speed[FINGER_A];
@@ -590,7 +595,7 @@ public final class RobotiqHandInterface
 		}
 		if(finger == SCISSOR)
 		{
-			position[SCISSOR] = status[POSITION_REQUEST_S];
+			position[SCISSOR] = status[SCISSOR_REQUESTED_POSITION];
 			scissorControl = INDIVIDUAL_SCISSOR_CONTROL;
 		}
 		position[finger] = desiredPosition;
@@ -603,14 +608,14 @@ public final class RobotiqHandInterface
 	public float[] positionStatus()
 	{
 		status = getStatus();
-		positions[FINGER_A] = status[POSITION_REQUEST_A];
-		positions[FINGER_B] = status[POSITION_REQUEST_B];
-		positions[FINGER_C] = status[POSITION_REQUEST_C];
-		positions[SCISSOR] = status[POSITION_REQUEST_S];
+		positions[FINGER_A] = status[FINGER_A_POSITION];
+		positions[FINGER_B] = status[FINGER_B_POSITION];
+		positions[FINGER_C] = status[FINGER_C_POSITION];
+		positions[SCISSOR] = status[SCISSOR_POSITION];
 		for(float p : positions)
 		{
 			if(p < 0)
-				p += 256; //rectify two's comp because java doesn't have unsigned bytes
+				p += 256; //rectify two's comp because Java doesn't have unsigned bytes
 			p /= 255;
 		}
 		return positions;

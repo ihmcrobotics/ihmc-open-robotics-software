@@ -1,48 +1,12 @@
 package us.ihmc.Robotiq;
 
 import java.io.IOException;
+import java.net.UnknownHostException;
 
 public class ConnectionTesting
 {
 	public static void main(String[] args) throws Exception
 	{
-		//testing of the underlying connection
-//		ModbusTCPConnection connection;
-//		
-//		System.out.println("starting connection");
-//		
-//		connection = new ModbusTCPConnection("192.168.1.13", 502);
-//		
-//		System.out.println("connected");
-//		
-//		Thread.sleep(5000);
-//		
-////		byte[] activationRequest = {0x03,(byte)0xE8,0x00,0x03,0x06,0x01,0x00,0x00,0x00,0x00,0x00};
-//		byte[] activationRequest = {0x00,0x00,0x00,0x03,0x06,0x01,0x00,0x00,0x00,0x00,0x00};
-////		byte[] dataLiteral = {0x33, (byte)0x9A, 0x00, 0x00, 0x00, 0x0D, 0x02, 0x10, 0x03, (byte)0xE8, 0x00, 0x03, 0x06, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00};
-////		byte[] dataLiteral = {0x33, (byte)0x9A, 0x00, 0x00, 0x00, 0x0D, 0x02, 0x10, 0x00, 0x00, 0x00, 0x03, 0x06, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00};
-//		
-////		System.out.println("sending data literal");
-////		connection.sendLiteral(dataLiteral, dataLiteral.length);
-//		System.out.println("Sending Activation Request");
-//		connection.transcieve(0x02, 0x10, activationRequest);
-//		System.out.println("activation data");
-//		
-//		Thread.sleep(20000);
-//		
-//		byte[] resetRequest = {0x00,0x00,0x00,0x03,0x06,0x00,0x00,0x00,0x00,0x00,0x00};
-//		System.out.println("Sending reset");
-//		connection.transcieve(0x02, 0x10, resetRequest);
-//		System.out.println("Reset Sent");
-//		
-//		Thread.sleep(5000);
-//		
-//		System.out.println("closing socket");
-//		connection.close();
-//		System.out.println("socket closed");
-
-		
-		
 		//testing the robot hand interface
 		System.out.println("starting connection");
 		RobotiqHandInterface rightHand = new RobotiqHandInterface();
@@ -71,7 +35,7 @@ public class ConnectionTesting
 //		System.out.println("Hand Open");
 		
 //		System.out.println("Going to pinch");
-//		rightHand.pinch();
+//		rightHand.pinchGrip();
 //		System.out.println("Pinching");
 //		
 //		testCycles(rightHand, 2);
@@ -142,5 +106,38 @@ public class ConnectionTesting
 		}
 		System.out.println("Crush cycles completed: " + counter);
 		System.out.println();
+	}
+	
+	private static void testModbusTCP() throws InterruptedException, UnknownHostException, IOException
+	{
+		//testing of the underlying connection
+		ModbusTCPConnection connection;
+		System.out.println("starting connection");
+		connection = new ModbusTCPConnection("192.168.1.13", 502);
+		System.out.println("connected");
+		Thread.sleep(5000);
+//		byte[] activationRequest = {0x03,(byte)0xE8,0x00,0x03,0x06,0x01,0x00,0x00,0x00,0x00,0x00};
+		byte[] activationRequest = {0x10, 0x00,0x00,0x00,0x03,0x06,0x01,0x00,0x00,0x00,0x00,0x00};
+//		byte[] dataLiteral = {0x33, (byte)0x9A, 0x00, 0x00, 0x00, 0x0D, 0x02, 0x10, 0x03, (byte)0xE8, 0x00, 0x03, 0x06, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00};
+//		byte[] dataLiteral = {0x33, (byte)0x9A, 0x00, 0x00, 0x00, 0x0D, 0x02, 0x10, 0x00, 0x00, 0x00, 0x03, 0x06, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00};
+		
+//		System.out.println("sending data literal");
+//		connection.sendLiteral(dataLiteral, dataLiteral.length);
+		System.out.println("Sending Activation Request");
+		connection.transcieve(0x02, activationRequest);
+		System.out.println("activation data");
+		
+		Thread.sleep(20000);
+		
+		byte[] resetRequest = {0x10, 0x00,0x00,0x00,0x03,0x06,0x00,0x00,0x00,0x00,0x00,0x00};
+		System.out.println("Sending reset");
+		connection.transcieve(0x02, resetRequest);
+		System.out.println("Reset Sent");
+		
+		Thread.sleep(5000);
+		
+		System.out.println("closing socket");
+		connection.close();
+		System.out.println("socket closed");
 	}
 }
