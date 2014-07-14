@@ -36,7 +36,6 @@ import javax.swing.text.PlainDocument;
 import us.ihmc.atlas.AtlasOperatorUserInterface;
 import us.ihmc.atlas.AtlasRobotModelFactory;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.utilities.fixedPointRepresentation.UnsignedByteTools;
 import us.ihmc.utilities.gui.IHMCSwingTools;
 import us.ihmc.utilities.net.NetStateListener;
@@ -549,7 +548,10 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
                else
                {
             	  String modelAsString = selectRobotModelRadioButtonGroup.getSelection().getActionCommand();
-                  netProcClient.write(new byte[] {UnsignedByteTools.fromInt(0x00), UnsignedByteTools.fromInt(AtlasRobotModelFactory.getOrdinalOfModel(modelAsString))});
+            	  int leftHandIP = Integer.parseInt(leftHandField.getText());
+                 int rightHandIP = Integer.parseInt(rightHandField.getText());
+                  netProcClient.write(new byte[] {UnsignedByteTools.fromInt(0x00), UnsignedByteTools.fromInt(AtlasRobotModelFactory.getOrdinalOfModel(modelAsString)),
+                        UnsignedByteTools.fromInt(leftHandIP), UnsignedByteTools.fromInt(rightHandIP)});
                }
             }
             catch (DisconnectedException e)
@@ -620,18 +622,12 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
                else if (selectControllerRadioButtonGroup.getSelection().getActionCommand().contains(BLUE_TEAM_ACTION_COMMAND))
                {
             	  String modelAsString = selectRobotModelRadioButtonGroup.getSelection().getActionCommand();
-                  int leftHandIP = Integer.parseInt(leftHandField.getText());
-                  int rightHandIP = Integer.parseInt(rightHandField.getText());
-                  controllerClient.write(new byte[] {UnsignedByteTools.fromInt(0x00), UnsignedByteTools.fromInt(AtlasRobotModelFactory.getOrdinalOfModel(modelAsString)),
-                                                     UnsignedByteTools.fromInt(leftHandIP), UnsignedByteTools.fromInt(rightHandIP)});
+                  controllerClient.write(new byte[] {UnsignedByteTools.fromInt(0x00), UnsignedByteTools.fromInt(AtlasRobotModelFactory.getOrdinalOfModel(modelAsString))});
                }
                else if (selectControllerRadioButtonGroup.getSelection().getActionCommand().contains(RED_TEAM_ACTION_COMMAND))
                {
             	   String modelAsString = selectRobotModelRadioButtonGroup.getSelection().getActionCommand();
-                  int leftHandIP = Integer.parseInt(leftHandField.getText());
-                  int rightHandIP = Integer.parseInt(rightHandField.getText());
-                  controllerClient.write(new byte[] {UnsignedByteTools.fromInt(0x01), UnsignedByteTools.fromInt(AtlasRobotModelFactory.getOrdinalOfModel(modelAsString)),
-                                                     UnsignedByteTools.fromInt(leftHandIP), UnsignedByteTools.fromInt(rightHandIP)});
+                  controllerClient.write(new byte[] {UnsignedByteTools.fromInt(0x01), UnsignedByteTools.fromInt(AtlasRobotModelFactory.getOrdinalOfModel(modelAsString))});
                }
             }
             catch (DisconnectedException e)

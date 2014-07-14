@@ -7,6 +7,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DummyController;
 import us.ihmc.iRobot.control.IRobotCommandManager;
+import us.ihmc.iRobot.control.iRobotNativeLibraryCommunicatorManager;
 import us.ihmc.utilities.net.LocalObjectCommunicator;
 
 import com.martiansoftware.jsap.FlaggedOption;
@@ -28,7 +29,10 @@ public class AtlasNetworkProcessor
 
       FlaggedOption robotModel = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(true).setStringParser(JSAP.STRING_PARSER);
       
-      Switch runningOnRealRobot = new Switch("runningOnRealRobot").setLongFlag("realRobot").setShortFlag('r');
+      Switch runningOnRealRobot = new Switch("runningOnRealRobot").setLongFlag("realRobot");
+      
+      FlaggedOption leftHandHost = new FlaggedOption("leftHandHost").setLongFlag("lefthand").setShortFlag('l').setRequired(false).setStringParser(JSAP.STRING_PARSER);
+      FlaggedOption rightHandHost = new FlaggedOption("rightHandHost").setLongFlag("righthand").setShortFlag('r').setRequired(false).setStringParser(JSAP.STRING_PARSER);
 
       robotModel.setHelp("Robot models: " + AtlasRobotModelFactory.robotModelsToString());
       jsap.registerParameter(robotModel);
@@ -37,6 +41,8 @@ public class AtlasNetworkProcessor
       jsap.registerParameter(rosURIFlag);
       jsap.registerParameter(simulateController);
       jsap.registerParameter(runningOnRealRobot);
+      jsap.registerParameter(leftHandHost);
+      jsap.registerParameter(rightHandHost);
 
       JSAPResult config = jsap.parse(args);
 
@@ -55,29 +61,48 @@ public class AtlasNetworkProcessor
     		  return;
     	  }
     	  
-         String rosMasterURI;
-         if (config.getString(rosURIFlag.getID()) != null)
-         {
-            rosMasterURI = config.getString(rosURIFlag.getID());
-         }
-         else
-         {
-        	 rosMasterURI = model.getNetworkParameters().getROSHostIP();
-         }
+    	  String leftHandInput = iRobotNativeLibraryCommunicatorManager.LEFT_HAND_IP;
+    	  String rightHandInput = iRobotNativeLibraryCommunicatorManager.RIGHT_HAND_IP;
+    	  
+    	  if(config.contains("leftHandHost"))
+    	  {
+    	     leftHandInput = config.getString("leftHandHost");
+    	     iRobotNativeLibraryCommunicatorManager.LEFT_HAND_IP = leftHandInput;
+    	  }
+    	  
+    	  if(config.contains("rightHandHost"))
+    	  {
+    	     rightHandInput = config.getString("rightHandHost");
+    	     iRobotNativeLibraryCommunicatorManager.RIGHT_HAND_IP = rightHandInput;
+    	  }
+    	  
+    	  System.out.println("Left hand: " + iRobotNativeLibraryCommunicatorManager.LEFT_HAND_IP);
+    	  System.out.println("Right hand: " + iRobotNativeLibraryCommunicatorManager.RIGHT_HAND_IP);
+    	  System.out.println("Using the " + model + " model");
+    	  
+    	  String rosMasterURI;
+    	  if (config.getString(rosURIFlag.getID()) != null)
+    	  {
+    	     rosMasterURI = config.getString(rosURIFlag.getID());
+    	  }
+    	  else
+    	  {
+    	     rosMasterURI = model.getNetworkParameters().getROSHostIP();
+    	  }
 
-         if (config.getBoolean(simulateController.getID()) && config.getBoolean(runningOnRealRobot.getID()))
-         {
-            System.err
-                  .println("WARNING WARNING WARNING :: Simulating DRC Controller - WILL NOT WORK ON REAL ROBOT. Do not use -d argument when running on real robot.");
-            LocalObjectCommunicator objectCommunicator = new LocalObjectCommunicator();
-
-            new DummyController(rosMasterURI, objectCommunicator, model, new IRobotCommandManager());
-            new DRCNetworkProcessor(objectCommunicator, model);
-         }
-         else
-         {
-            new DRCNetworkProcessor(new URI(rosMasterURI), model);
-         }
+    	  if (config.getBoolean(simulateController.getID()) && config.getBoolean(runningOnRealRobot.getID()))
+    	  {
+    	     System.err
+    	     .println("WARNING WARNING WARNING :: Simulating DRC Controller - WILL NOT WORK ON REAL ROBOT. Do not use -d argument when running on real robot.");
+    	     LocalObjectCommunicator objectCommunicator = new LocalObjectCommunicator();
+    	     
+    	     new DummyController(rosMasterURI, objectCommunicator, model, new IRobotCommandManager());
+    	     new DRCNetworkProcessor(objectCommunicator, model);
+    	  }
+    	  else
+    	  {
+    	     new DRCNetworkProcessor(new URI(rosMasterURI), model);
+    	  }
       }
       else
       {
