@@ -1,9 +1,10 @@
 package us.ihmc.valkyrie;
 
-import com.jme3.math.Quaternion;
-import com.jme3.math.Transform;
-import com.jme3.math.Vector3f;
-import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
+import java.io.InputStream;
+import java.net.URI;
+
+import javax.media.j3d.Transform3D;
+
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
@@ -11,7 +12,13 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.*;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParameters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.RobotNetworkParameters;
+import us.ihmc.darpaRoboticsChallenge.handControl.HandCommandManager;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.AlwaysZeroOffsetPPSTimestampOffsetProvider;
@@ -21,12 +28,18 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
-import us.ihmc.valkyrie.paramaters.*;
+import us.ihmc.valkyrie.paramaters.ValkyrieArmControllerParameters;
+import us.ihmc.valkyrie.paramaters.ValkyrieJointMap;
+import us.ihmc.valkyrie.paramaters.ValkyriePhysicalProperties;
+import us.ihmc.valkyrie.paramaters.ValkyrieSensorInformation;
+import us.ihmc.valkyrie.paramaters.ValkyrieStateEstimatorParameters;
+import us.ihmc.valkyrie.paramaters.ValkyrieWalkingControllerParameters;
 import us.ihmc.valkyrie.sensors.ValkyrieSensorSuiteManager;
 
-import javax.media.j3d.Transform3D;
-import java.io.InputStream;
-import java.net.URI;
+import com.jme3.math.Quaternion;
+import com.jme3.math.Transform;
+import com.jme3.math.Vector3f;
+import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
 
 public class ValkyrieRobotModel implements DRCRobotModel
 {
@@ -296,6 +309,11 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public RobotNetworkParameters getNetworkParameters()
    {
 	   return networkParameters;
+   }
+
+   public HandCommandManager getHandCommandManager()
+   {
+      return null;
    }
 
 }
