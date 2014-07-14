@@ -9,26 +9,26 @@ import org.apache.commons.lang.NotImplementedException;
 
 public class YoAppearanceTexture extends YoAppearanceTransparency
 {
-   private final URL fileURL;
+   private final String path;
    private final BufferedImage bufferedImage;
 
-   public YoAppearanceTexture(URL fileURL)
+   public YoAppearanceTexture(String path)
    {
       super();
-      this.fileURL = fileURL;
+      this.path = path;
       this.bufferedImage = null;
    }
 
    public YoAppearanceTexture(BufferedImage bufferedImage)
    {
       super();
-      this.fileURL = null;
+      this.path = null;
       this.bufferedImage = bufferedImage;
    }
 
-   public URL getFileURL()
+   public String getPath()
    {
-      return fileURL;
+      return path;
    }
    
    public BufferedImage getBufferedImage()

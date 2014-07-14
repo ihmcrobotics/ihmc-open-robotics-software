@@ -381,8 +381,8 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       // setUpGround();
       // 45,200
       // Ground
-      URL fileURL = DRCDemo01NavigationEnvironment.class.getClassLoader().getResource("Textures/ground2.png");
-      YoAppearanceTexture texture = new YoAppearanceTexture(fileURL);
+//      URL fileURL = DRCDemo01NavigationEnvironment.class.getClassLoader().getResource("Textures/ground2.png");
+      YoAppearanceTexture texture = new YoAppearanceTexture("Textures/ground2.png");
       double width2 = 10;
       double width1 = width2 / 2;
       Transform3D location = new Transform3D();
@@ -1636,8 +1636,8 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
    {
       CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D(name);
       
-      URL fileURL = DRCDemo01NavigationEnvironment.class.getClassLoader().getResource("Textures/ground2.png");
-      YoAppearanceTexture texture = new YoAppearanceTexture(fileURL);
+//      URL fileURL = DRCDemo01NavigationEnvironment.class.getClassLoader().getResource("Textures/ground2.png");
+      YoAppearanceTexture texture = new YoAppearanceTexture("Textures/ground2.png");
 
       Transform3D location = new Transform3D();
       location.setTranslation(new Vector3d(0, 0, -0.5));

@@ -17,14 +17,12 @@ public class YoAppearance
 {
    public static AppearanceDefinition YoboticsTexture()
    {
-      URL fileURL = Graphics3DAdapter.class.getResource("images/yobotics.jpg");
-
-      return Texture(fileURL);
+      return Texture("images/yobotics.jpg");
    }
 
-   public static AppearanceDefinition Texture(URL fileURL)
+   public static AppearanceDefinition Texture(String path)
    {
-      return new YoAppearanceTexture(fileURL);
+      return new YoAppearanceTexture(path);
 
    }
    
@@ -35,17 +33,12 @@ public class YoAppearance
 
    public static AppearanceDefinition EarthTexture()
    {
-      URL fileURL = Graphics3DAdapter.class.getResource("images/earth.jpg");
-
-      return Texture(fileURL);
-
+      return Texture("images/earth.jpg");
    }
 
    public static AppearanceDefinition StoneTexture()
    {
-      URL fileURL = Graphics3DAdapter.class.getResource("images/stone.jpg");
-
-      return Texture(fileURL);
+      return Texture("images/stone.jpg");
    }
 
    public static AppearanceDefinition PlaneMaterial()
