@@ -46,7 +46,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
    @After
    public void destroySimulationAndRecycleMemory()
    {
-      if (SHOW_GUI && KEEP_SCS_UP)
+      if (KEEP_SCS_UP)
       {
          ThreadTools.sleepForever();
       }
