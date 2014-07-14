@@ -9,6 +9,7 @@ import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.configuration.DRCNetClassList;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.handControl.HandCommandManager;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandJointAnglePacket;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.LidarFilter;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.RobotBoundingBoxes;
