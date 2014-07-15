@@ -283,14 +283,19 @@ public class AtlasRobotModel implements DRCRobotModel
    @Override
    public HandCommandManager createHandCommandManager()
    {
-	   switch(getHandType())
+	   if(runningOnRealRobot)
 	   {
-	   case IROBOT:
-		   return new IRobotCommandManager();
-		   
-	   default:
-		   return null;
-	   
+		   switch(getHandType())
+		   {
+		   case IROBOT:
+			   return new IRobotCommandManager();
+			   
+		   default:
+			   break;
+			   
+		   }
 	   }
+	   
+	   return null;
    }
 }
