@@ -34,7 +34,6 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
 {
    private boolean VISUALIZE = true;
 
-   private static final boolean DEBUG = false;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final FourPointSpline1D spline = new FourPointSpline1D(registry);
@@ -428,33 +427,6 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       }
    }
 
-   private void computeHeightsToUseOne()
-   {
-      double z0 = previousZFinal.getDoubleValue();
-
-      if (z0 > s0Max.getY())
-         z0 = s0Max.getY();
-      else if (z0 < s0Min.getY())
-         z0 = s0Min.getY();
-
-      double z_d0 = d0Nom.getY();
-      double z_dF = dFNom.getY();
-      double zF = sFNom.getY();
-      double zNext = sNextNom.getY();
-
-      z_d0 = clipToMaximum(z_d0, z_dF + maximumHeightDeltaBetweenWaypoints.getDoubleValue());
-      z_dF = clipToMaximum(z_dF, z_d0 + maximumHeightDeltaBetweenWaypoints.getDoubleValue());
-
-      z0 = clipToMaximum(z0, z_d0 + maximumHeightDeltaBetweenWaypoints.getDoubleValue());
-      zF = clipToMaximum(zF, z_dF + maximumHeightDeltaBetweenWaypoints.getDoubleValue());
-
-      s0.setY(z0);
-      d0.setY(z_d0);
-      dF.setY(z_dF);
-      sF.setY(zF);
-      sNext.setY(zNext);
-   }
-
    private void computeHeightsToUseByStretchingString()
    {
       // s0 is at previous
@@ -550,14 +522,6 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       sNextMax.setX(xSNext);
    }
 
-   private double clipToMaximum(double value, double maxValue)
-   {
-      if (value < maxValue)
-         return value;
-      else
-         return maxValue;
-   }
-
    public double findMinimumDoubleSupportHeight(double s0, double sF, double s_d0, double foot0Height, double foot1Height)
    {
       return findDoubleSupportHeight(minimumHeightAboveGround.getDoubleValue(), s0, sF, s_d0, foot0Height, foot1Height);
@@ -648,36 +612,6 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       double dsdy = (segment.getSecondEndPointCopy().getY() - segment.getFirstEndPointCopy().getY()) / segment.length();
 
       return new double[] { dsdx, dsdy };
-   }
-
-   private FramePoint[] getContactStateCenters(List<PlaneContactState> contactStates, Footstep nextFootstep)
-   {
-      ReferenceFrame bodyFrame0 = contactStates.get(0).getFrameAfterParentJoint();
-
-      FramePoint contactFramePosition0 = new FramePoint(bodyFrame0);
-      contactFramePosition0.changeFrame(worldFrame);
-      FramePoint contactFramePosition1;
-      if (nextFootstep == null)
-      {
-         if (contactStates.size() != 2)
-            throw new RuntimeException("contactStates.size() != 2");
-         ReferenceFrame bodyFrame1 = contactStates.get(1).getFrameAfterParentJoint();
-
-         contactFramePosition1 = new FramePoint(bodyFrame1);
-         contactFramePosition1.changeFrame(worldFrame);
-      }
-      else
-      {
-         contactFramePosition1 = new FramePoint(nextFootstep.getPoseReferenceFrame());
-         contactFramePosition1.changeFrame(worldFrame);
-      }
-      if (DEBUG)
-      {
-         System.out.println("nextFootstep: " + nextFootstep);
-         System.out.println("contactFramePosition0: " + contactFramePosition0);
-         System.out.println("contactFramePosition1: " + contactFramePosition1 + "\n");
-      }
-      return new FramePoint[] { contactFramePosition0, contactFramePosition1 };
    }
 
    private final FramePoint coM = new FramePoint();
