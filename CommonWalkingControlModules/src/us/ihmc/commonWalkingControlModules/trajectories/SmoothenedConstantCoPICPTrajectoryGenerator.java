@@ -50,8 +50,6 @@ public class SmoothenedConstantCoPICPTrajectoryGenerator
       return desiredICPVelocity.getFrameVector2dCopy();
    }
 
-   //   private FramePoint2d getCoPF
-
    public List<FramePoint2d> getEquivalentConstantCoPs(List<Footstep> footsteps, int lookahead)
    {
       List<FramePoint2d> ret = new ArrayList<FramePoint2d>();
@@ -71,7 +69,6 @@ public class SmoothenedConstantCoPICPTrajectoryGenerator
       int numberOfEquivalentConstantCoPs = equivalentConstantCoPs.size();
       List<FramePoint2d> ret = new ArrayList<FramePoint2d>();
 
-      //      int numberOfICPWaypoints = numberOfEquivalentConstantCoPs-1;
       for (int i = 0; i < numberOfEquivalentConstantCoPs; i++)
       {
          FramePoint2d dummyFramePoint2d = new FramePoint2d(ReferenceFrame.getWorldFrame());
@@ -83,7 +80,6 @@ public class SmoothenedConstantCoPICPTrajectoryGenerator
       for (int i = numberOfEquivalentConstantCoPs - 2; i >= 0; i--)
       {
          FramePoint2d cmp = equivalentConstantCoPs.get(i);
-         //         extrapolateICPposAndVel(equivalentConstantCoPs.get(i - 1), -steppingTime, w0, cmp, ret.get(i - 1));
 
          FramePoint2d icp = ret.get(i + 1);
          ret.get(i).set(EquivalentConstantCoPCalculator.computeICPPositionWithConstantCMP(icp, cmp, -steppingTime, w0));
@@ -94,11 +90,11 @@ public class SmoothenedConstantCoPICPTrajectoryGenerator
 
    public DenseMatrix64F computeDoubleSupportpolynomialParams(List<FramePoint2d> equivalentConstantCoPs, List<FramePoint2d> desiredICPWaypoints, double w0,
          double steppingTime, double doubleSupportTime)
-   {      
+   {
       // Check, if the CoPs and the ICPs are in the same frames
-      for(int i = 0; i < equivalentConstantCoPs.size(); i++)
+      for (int i = 0; i < equivalentConstantCoPs.size(); i++)
       {
-         equivalentConstantCoPs.get(i).checkReferenceFrameMatch(desiredICPWaypoints.get(i)); 
+         equivalentConstantCoPs.get(i).checkReferenceFrameMatch(desiredICPWaypoints.get(i));
       }
 
       double smootheningStartTime = steppingTime - doubleSupportTime / 2.0;
@@ -115,10 +111,10 @@ public class SmoothenedConstantCoPICPTrajectoryGenerator
       FrameVector2d finalDoubleSupportICPVelocity = EquivalentConstantCoPCalculator.computeICPVelocityWithConstantCMP(desiredICPWaypoints.get(1),
             equivalentConstantCoPs.get(1), smootheningStartTime, w0);
 
-      DenseMatrix64F initialDoubleSupportICPposMat = new DenseMatrix64F(1,2,true,0,0);
-      DenseMatrix64F initialDoubleSupportICPVelocityMat = new DenseMatrix64F(1,2,true,0,0);
-      DenseMatrix64F finalDoubleSupportICPMat = new DenseMatrix64F(1,2,true,0,0);
-      DenseMatrix64F finalDoubleSupportICPVelocityMat = new DenseMatrix64F(1,2,true,0,0);
+      DenseMatrix64F initialDoubleSupportICPposMat = new DenseMatrix64F(1, 2, true, 0, 0);
+      DenseMatrix64F initialDoubleSupportICPVelocityMat = new DenseMatrix64F(1, 2, true, 0, 0);
+      DenseMatrix64F finalDoubleSupportICPMat = new DenseMatrix64F(1, 2, true, 0, 0);
+      DenseMatrix64F finalDoubleSupportICPVelocityMat = new DenseMatrix64F(1, 2, true, 0, 0);
 
       MatrixTools.transformFramePoint2dIntoRowVector(initialDoubleSupportICPposMat, initialDoubleSupportICP);
       MatrixTools.transformFrameVector2dIntoRowVector(initialDoubleSupportICPVelocityMat, initialDoubleSupportICPVelocity);
@@ -157,26 +153,25 @@ public class SmoothenedConstantCoPICPTrajectoryGenerator
       CommonOps.transpose(tempParamMatrix);
       paramMatrix.set(tempParamMatrix);
 
-      return paramMatrix; 
+      return paramMatrix;
    }
 
-   public void calcDCMandECMPofTime(List<FramePoint2d> equivalentConstantCoPs, List<FramePoint2d> desiredICPWaypoints, double w0, 
-         double currentTime, double steppingTime, double doubleSupportTime, boolean isSingeSupport, FramePoint2d desiredICP, 
-         FrameVector2d desiredICPVelocity, FramePoint2d desiredEquivalentConstantCOP, DenseMatrix64F paramMatrix)
+   public void calcDCMandECMPofTime(List<FramePoint2d> equivalentConstantCoPs, List<FramePoint2d> desiredICPWaypoints, double w0, double currentTime,
+         double steppingTime, double doubleSupportTime, boolean isSingeSupport, FramePoint2d desiredICP, FrameVector2d desiredICPVelocity,
+         FramePoint2d desiredEquivalentConstantCOP, DenseMatrix64F paramMatrix)
    {
-      //      DenseMatrix64F constCoPcurrentStep, DenseMatrix64F constCoPnextStep, DenseMatrix64F constCoPnextNextStep, 
-      //      DenseMatrix64F constCoPnextNextNextStep
       if (isSingeSupport)
       {
          double singleSupportComputationTime = currentTime + 0.5 * doubleSupportTime;
 
-         desiredICP = EquivalentConstantCoPCalculator.computeICPPositionWithConstantCMP(desiredICPWaypoints.get(0), equivalentConstantCoPs.get(0), singleSupportComputationTime, w0);
-         desiredICPVelocity = EquivalentConstantCoPCalculator.computeICPVelocityWithConstantCMP(desiredICPWaypoints.get(0), equivalentConstantCoPs.get(0), singleSupportComputationTime, w0);        
-         desiredEquivalentConstantCOP.set(equivalentConstantCoPs.get(0)); 
+         desiredICP = EquivalentConstantCoPCalculator.computeICPPositionWithConstantCMP(desiredICPWaypoints.get(0), equivalentConstantCoPs.get(0),
+               singleSupportComputationTime, w0);
+         desiredICPVelocity = EquivalentConstantCoPCalculator.computeICPVelocityWithConstantCMP(desiredICPWaypoints.get(0), equivalentConstantCoPs.get(0),
+               singleSupportComputationTime, w0);
+         desiredEquivalentConstantCOP.set(equivalentConstantCoPs.get(0));
       }
       else
       {
-         //         DenseMatrix64F paramMatrix = computeDoubleSupportpolynomialParams(equivalentConstantCoPs, desiredICPWaypoints, w0, steppingTime, doubleSupportTime); 
          double timePow3 = Math.pow(currentTime, 3.0);
          double timePow2 = Math.pow(currentTime, 2.0);
          DenseMatrix64F tempVector = new DenseMatrix64F(2, 1);
@@ -192,10 +187,9 @@ public class SmoothenedConstantCoPICPTrajectoryGenerator
          CommonOps.scale(-w0, desiredICPVelocityMat, tempVector);
          CommonOps.add(desiredICPMat, tempVector, desiredEquivalentConstantCOPMat);
 
-
          MatrixTools.transformColumnVectorIntoFramePoint2d(desiredICPMat, desiredICP);
 
-         MatrixTools.transformColumnVectorIntoFrameVector2d(desiredICPVelocityMat, desiredICPVelocity); 
+         MatrixTools.transformColumnVectorIntoFrameVector2d(desiredICPVelocityMat, desiredICPVelocity);
 
          MatrixTools.transformColumnVectorIntoFramePoint2d(desiredEquivalentConstantCOPMat, desiredEquivalentConstantCOP);
       }
