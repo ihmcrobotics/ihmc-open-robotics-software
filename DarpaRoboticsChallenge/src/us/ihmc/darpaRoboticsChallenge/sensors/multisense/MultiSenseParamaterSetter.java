@@ -27,6 +27,9 @@ public class MultiSenseParamaterSetter
    private static double motorSpeed;
    private static boolean ledEnable;
    private static boolean flashEnable;
+   private static double dutyCycle;
+   private static boolean autoExposure;
+   private static String resolution;
    
    private static final RosServiceClient<ReconfigureRequest, ReconfigureResponse> multiSenseClient = new RosServiceClient<ReconfigureRequest, ReconfigureResponse>(
          Reconfigure._TYPE);
@@ -175,8 +178,11 @@ public class MultiSenseParamaterSetter
    {
       gain = object.getGain();
       motorSpeed = object.getMotorSpeed();
+      dutyCycle = object.getDutyCycle();
       ledEnable = object.isLedEnable();
       flashEnable = object.isFlashEnable();
+      autoExposure = object.isAutoExposure();
+      resolution = object.getResolution();
       System.out.println("object received with gain "+ gain+" speed "+ motorSpeed+"led "+ ledEnable +"flash"+flashEnable);
       multiSenseClient.waitTillConnected();
       ReconfigureRequest request = multiSenseClient.getMessage();
@@ -190,6 +196,11 @@ public class MultiSenseParamaterSetter
       motorSpeedParam.setValue(motorSpeed);
       request.getConfig().getDoubles().add(motorSpeedParam);
       
+      DoubleParameter dutyCycleParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(DoubleParameter._TYPE);
+      motorSpeedParam.setName("duty_cycle");
+      motorSpeedParam.setValue(dutyCycle);
+      request.getConfig().getDoubles().add(dutyCycleParam);
+      
       BoolParameter ledEnableParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(BoolParameter._TYPE);
       ledEnableParam.setName("lighting");
       ledEnableParam.setValue(ledEnable);
@@ -199,6 +210,16 @@ public class MultiSenseParamaterSetter
       flashEnableParam.setName("flash");
       flashEnableParam.setValue(flashEnable);
       request.getConfig().getBools().add(flashEnableParam);
+      
+      BoolParameter autoExposureParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(BoolParameter._TYPE);
+      flashEnableParam.setName("auto_exposure");
+      flashEnableParam.setValue(autoExposure);
+      request.getConfig().getBools().add(autoExposureParam);
+      
+      StrParameter resolutionParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(StrParameter._TYPE);
+      resolutionParam.setName("resolution");
+      resolutionParam.setValue(resolution);
+      request.getConfig().getStrs().add(resolutionParam);
       
       multiSenseClient.call(request, new ServiceResponseListener<ReconfigureResponse>()
             {
