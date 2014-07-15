@@ -45,7 +45,7 @@ public class DesiredFootstepCalculatorFootstepProviderWrapper implements Footste
    {
       return desiredFootstepCalculator.predictFootstepAfterDesiredFootstep(nextSwingLeg.getEnumValue(), lastPolledFootstep);
    }
-   
+
    public Footstep peekPeek()
    {
       Footstep nextOne = desiredFootstepCalculator.predictFootstepAfterDesiredFootstep(nextSwingLeg.getEnumValue(), lastPolledFootstep);
@@ -59,7 +59,6 @@ public class DesiredFootstepCalculatorFootstepProviderWrapper implements Footste
 
    public void notifyComplete()
    {
-//    System.out.println("DesiredFootstepCalculatorFootstepProviderWrapper: notifyComplete not implemented in DesiredFootstepCalculatorFootstepProviderWrapper");
    }
 
    public void setWalk(boolean walk)
@@ -78,7 +77,7 @@ public class DesiredFootstepCalculatorFootstepProviderWrapper implements Footste
          return 0;
       }
    }
-   
+
    public boolean isBlindWalking()
    {
       return true;
