@@ -285,15 +285,8 @@ public class AtlasRobotModel implements DRCRobotModel
    {
 	   if(runningOnRealRobot)
 	   {
-		   switch(getHandType())
-		   {
-		   case IROBOT:
+		   if(hasIRobotHands())
 			   return new IRobotCommandManager();
-			   
-		   default:
-			   break;
-			   
-		   }
 	   }
 	   
 	   return null;
