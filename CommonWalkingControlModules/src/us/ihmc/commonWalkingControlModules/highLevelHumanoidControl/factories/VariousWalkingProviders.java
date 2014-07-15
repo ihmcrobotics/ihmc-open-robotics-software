@@ -92,12 +92,10 @@ public class VariousWalkingProviders
 
    public VariousWalkingProviders(FootstepProvider footstepProvider, HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters,
          DesiredHeadOrientationProvider desiredHeadOrientationProvider, DesiredComHeightProvider desiredComHeightProvider,
-         DesiredPelvisPoseProvider desiredPelvisPoseProvider,
-         HandPoseProvider desiredHandPoseProvider, DesiredHandLoadBearingProvider desiredHandLoadBearingProvider,
-         DesiredChestOrientationProvider desiredChestOrientationProvider,
-         DesiredFootPoseProvider footPoseProvider, DesiredFootStateProvider footStateProvider,
-         DesiredHighLevelStateProvider desiredHighLevelStateProvider, DesiredThighLoadBearingProvider thighLoadBearingProvider,
-         DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider,
+         DesiredPelvisPoseProvider desiredPelvisPoseProvider, HandPoseProvider desiredHandPoseProvider,
+         DesiredHandLoadBearingProvider desiredHandLoadBearingProvider, DesiredChestOrientationProvider desiredChestOrientationProvider,
+         DesiredFootPoseProvider footPoseProvider, DesiredFootStateProvider footStateProvider, DesiredHighLevelStateProvider desiredHighLevelStateProvider,
+         DesiredThighLoadBearingProvider thighLoadBearingProvider, DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider,
          ReinitializeWalkingControllerProvider reinitializeWalkingControllerProvider, ControlStatusProducer controlStatusProducer)
    {
       this.desiredHighLevelStateProvider = desiredHighLevelStateProvider;
@@ -116,28 +114,28 @@ public class VariousWalkingProviders
       this.desiredThighLoadBearingProvider = thighLoadBearingProvider;
       this.desiredPelvisLoadBearingProvider = pelvisLoadBearingProvider;
 
-      this.controlStatusProducer = controlStatusProducer;   
+      this.controlStatusProducer = controlStatusProducer;
    }
 
    public void clearPoseProviders()
    {
-      if(desiredPelvisPoseProvider != null)
+      if (desiredPelvisPoseProvider != null)
       {
          desiredPelvisPoseProvider.getDesiredPelvisPose();
       }
-      if(desiredChestOrientationProvider != null)
+      if (desiredChestOrientationProvider != null)
       {
          desiredChestOrientationProvider.getDesiredChestOrientation();
       }
 
-      for(RobotSide robotSide : RobotSide.values)
+      for (RobotSide robotSide : RobotSide.values)
       {
-         if(desiredHandPoseProvider != null)
+         if (desiredHandPoseProvider != null)
          {
             desiredHandPoseProvider.getDesiredHandPose(robotSide);
          }
 
-         if(desiredFootPoseProvider != null)
+         if (desiredFootPoseProvider != null)
          {
             desiredFootPoseProvider.getDesiredFootPose(robotSide);
          }
@@ -214,21 +212,21 @@ public class VariousWalkingProviders
       return reinitializeWalkingControllerProvider;
    }
 
-   public static VariousWalkingProviders createUsingObjectCommunicator(FootstepTimingParameters footstepTimingParameters, GlobalDataProducer objectCommunicator, FullRobotModel fullRobotModel,
-         WalkingControllerParameters walkingControllerParameters, CommonWalkingReferenceFrames referenceFrames,
-         SideDependentList<ContactablePlaneBody> bipedFeet, ConstantTransferTimeCalculator transferTimeCalculator,
-         ConstantSwingTimeCalculator swingTimeCalculator, YoVariableRegistry registry)
+   public static VariousWalkingProviders createUsingObjectCommunicator(FootstepTimingParameters footstepTimingParameters,
+         GlobalDataProducer objectCommunicator, FullRobotModel fullRobotModel, WalkingControllerParameters walkingControllerParameters,
+         CommonWalkingReferenceFrames referenceFrames, SideDependentList<ContactablePlaneBody> bipedFeet,
+         ConstantTransferTimeCalculator transferTimeCalculator, ConstantSwingTimeCalculator swingTimeCalculator, YoVariableRegistry registry)
    {
-      DesiredHandPoseProvider handPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame());
+      DesiredHandPoseProvider handPoseProvider = new DesiredHandPoseProvider(fullRobotModel,
+            walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame());
 
       LinkedHashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = new LinkedHashMap<Footstep, TrajectoryParameters>();
 
-      BlindWalkingToDestinationDesiredFootstepCalculator desiredFootstepCalculator =
-            HighLevelHumanoidControllerFactoryHelper.getBlindWalkingToDestinationDesiredFootstepCalculator(walkingControllerParameters, referenceFrames,
-                  bipedFeet, registry);
+      BlindWalkingToDestinationDesiredFootstepCalculator desiredFootstepCalculator = HighLevelHumanoidControllerFactoryHelper
+            .getBlindWalkingToDestinationDesiredFootstepCalculator(walkingControllerParameters, referenceFrames, bipedFeet, registry);
 
-      FootstepPathCoordinator footstepPathCoordinator = new FootstepPathCoordinator(footstepTimingParameters, objectCommunicator, desiredFootstepCalculator, swingTimeCalculator,
-            transferTimeCalculator, registry);
+      FootstepPathCoordinator footstepPathCoordinator = new FootstepPathCoordinator(footstepTimingParameters, objectCommunicator, desiredFootstepCalculator,
+            swingTimeCalculator, transferTimeCalculator, registry);
 
       FootstepPathConsumer footstepPathConsumer = new FootstepPathConsumer(bipedFeet, footstepPathCoordinator, mapFromFootstepsToTrajectoryParameters);
       BlindWalkingPacketConsumer blindWalkingPacketConsumer = new BlindWalkingPacketConsumer(footstepPathCoordinator);
@@ -267,9 +265,9 @@ public class VariousWalkingProviders
       ControlStatusProducer controlStatusProducer = new NetworkControlStatusProducer(objectCommunicator);
 
       VariousWalkingProviders variousProvidersFactory = new VariousWalkingProviders(footstepPathCoordinator, mapFromFootstepsToTrajectoryParameters,
-            headOrientationProvider, desiredComHeightProvider, pelvisPoseProvider, handPoseProvider, handLoadBearingProvider,
-            chestOrientationProvider, footPoseProvider, footLoadBearingProvider, highLevelStateProvider, thighLoadBearingProvider,
-            pelvisLoadBearingProvider, reinitializeWalkingControllerProvider, controlStatusProducer);
+            headOrientationProvider, desiredComHeightProvider, pelvisPoseProvider, handPoseProvider, handLoadBearingProvider, chestOrientationProvider,
+            footPoseProvider, footLoadBearingProvider, highLevelStateProvider, thighLoadBearingProvider, pelvisLoadBearingProvider,
+            reinitializeWalkingControllerProvider, controlStatusProducer);
 
       return variousProvidersFactory;
    }
@@ -279,9 +277,8 @@ public class VariousWalkingProviders
          boolean useHeadingAndVelocityScript, HeightMap heightMapForCheatingOnStepHeight, WalkingControllerParameters walkingControllerParameters,
          YoVariableRegistry registry)
    {
-      ComponentBasedDesiredFootstepCalculator desiredFootstepCalculator =
-            HighLevelHumanoidControllerFactoryHelper.getDesiredFootstepCalculator(walkingControllerParameters, referenceFrames, bipedFeet, controlDT, registry,
-                  updatables, useHeadingAndVelocityScript);
+      ComponentBasedDesiredFootstepCalculator desiredFootstepCalculator = HighLevelHumanoidControllerFactoryHelper.getDesiredFootstepCalculator(
+            walkingControllerParameters, referenceFrames, bipedFeet, controlDT, registry, updatables, useHeadingAndVelocityScript);
       if (heightMapForCheatingOnStepHeight != null)
       {
          desiredFootstepCalculator.setGroundProfile(heightMapForCheatingOnStepHeight);
@@ -297,7 +294,7 @@ public class VariousWalkingProviders
       DesiredPelvisPoseProvider pelvisPoseProvider = null;
       DesiredChestOrientationProvider chestOrientationProvider = null;
       DesiredHandPoseProvider handPoseProvider = null;
-      if(fullRobotModel.getHand(RobotSide.LEFT) != null && fullRobotModel.getHand(RobotSide.RIGHT) != null)
+      if (fullRobotModel.getHand(RobotSide.LEFT) != null && fullRobotModel.getHand(RobotSide.RIGHT) != null)
          handPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame());
       DesiredFootPoseProvider footPoseProvider = new DesiredFootPoseProvider();
       ReinitializeWalkingControllerProvider reinitializeWalkingControllerProvider = new ReinitializeWalkingControllerProvider();
@@ -353,24 +350,25 @@ public class VariousWalkingProviders
    public static VariousWalkingProviders createUsingYoVariables(FullRobotModel fullRobotModel, WalkingControllerParameters walkingControllerParameters,
          CommonWalkingReferenceFrames referenceFrames, SideDependentList<ContactablePlaneBody> bipedFeet, YoVariableRegistry registry)
    {
-      HandPoseProvider handPoseProvider = new UserDesiredHandPoseProvider(fullRobotModel, walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame(), registry);
+      HandPoseProvider handPoseProvider = new UserDesiredHandPoseProvider(fullRobotModel,
+            walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame(), registry);
 
       LinkedHashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = new LinkedHashMap<Footstep, TrajectoryParameters>();
 
       FootstepProvider footstepPovider = new UserDesiredFootstepProvider(bipedFeet, referenceFrames.getAnkleZUpReferenceFrames(), registry);
 
-      DesiredHighLevelStateProvider highLevelStateProvider = null; 
-      DesiredHeadOrientationProvider headOrientationProvider = new UserDesiredHeadOrientationProvider(referenceFrames.getPelvisZUpFrame(), registry); 
+      DesiredHighLevelStateProvider highLevelStateProvider = null;
+      DesiredHeadOrientationProvider headOrientationProvider = new UserDesiredHeadOrientationProvider(referenceFrames.getPelvisZUpFrame(), registry);
       DesiredComHeightProvider desiredComHeightProvider = null;
       DesiredPelvisPoseProvider pelvisPoseProvider = null;
-      DesiredChestOrientationProvider chestOrientationProvider = null; 
-      DesiredFootPoseProvider footPoseProvider = null; 
-      ReinitializeWalkingControllerProvider reinitializeWalkingControllerProvider = null; 
+      DesiredChestOrientationProvider chestOrientationProvider = null;
+      DesiredFootPoseProvider footPoseProvider = null;
+      ReinitializeWalkingControllerProvider reinitializeWalkingControllerProvider = null;
 
-      DesiredHandLoadBearingProvider handLoadBearingProvider = null; 
-      DesiredFootStateProvider footLoadBearingProvider = null; 
-      DesiredThighLoadBearingProvider thighLoadBearingProvider = null; 
-      DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider = null; 
+      DesiredHandLoadBearingProvider handLoadBearingProvider = null;
+      DesiredFootStateProvider footLoadBearingProvider = null;
+      DesiredThighLoadBearingProvider thighLoadBearingProvider = null;
+      DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider = null;
 
       ControlStatusProducer controlStatusProducer = new SystemErrControlStatusProducer();
 
