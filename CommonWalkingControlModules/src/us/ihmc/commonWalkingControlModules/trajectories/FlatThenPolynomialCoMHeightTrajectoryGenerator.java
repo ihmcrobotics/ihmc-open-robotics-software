@@ -37,7 +37,7 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CoMHeight
    private final CommonWalkingReferenceFrames referenceFrames;
 
    private static final int numberOfCoefficients = 6;
-   
+
    private final double gravityZ;
 
    private final YoPolynomial heightSplineInFootFrame = new YoPolynomial("heightSplineInFootFrame", numberOfCoefficients, registry);
@@ -60,9 +60,9 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CoMHeight
    private final YoPolynomial testHeightSplineInFootFrame = new YoPolynomial("testHeightSplineInFootFrame", numberOfCoefficients, registry);
    private final DoubleYoVariable deltaZ = new DoubleYoVariable("deltaZ", registry);
 
-   public FlatThenPolynomialCoMHeightTrajectoryGenerator(double gravityZ, ReferenceFrame centerOfMassFrame, CenterOfMassJacobian centerOfMassJacobian, 
-           ReferenceFrame desiredHeadingFrame, SideDependentList<ContactablePlaneBody> bipedFeet, CommonWalkingReferenceFrames referenceFrames,
-           double nominalHeightAboveGround, double initialHeightAboveGround, YoVariableRegistry parentRegistry)
+   public FlatThenPolynomialCoMHeightTrajectoryGenerator(double gravityZ, ReferenceFrame centerOfMassFrame, CenterOfMassJacobian centerOfMassJacobian,
+         ReferenceFrame desiredHeadingFrame, SideDependentList<ContactablePlaneBody> bipedFeet, CommonWalkingReferenceFrames referenceFrames,
+         double nominalHeightAboveGround, double initialHeightAboveGround, YoVariableRegistry parentRegistry)
    {
       this.gravityZ = gravityZ;
       this.centerOfMassFrame = centerOfMassFrame;
@@ -76,7 +76,8 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CoMHeight
       parentRegistry.addChild(registry);
    }
 
-   public void initialize(TransferToAndNextFootstepsData transferToAndNextFootstepsData, RobotSide supportLeg, Footstep nextFootstep, List<PlaneContactState> contactStates)
+   public void initialize(TransferToAndNextFootstepsData transferToAndNextFootstepsData, RobotSide supportLeg, Footstep nextFootstep,
+         List<PlaneContactState> contactStates)
    {
       if (supportLeg == null)
       {
@@ -86,10 +87,8 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CoMHeight
             heightSplineInFootFrame.setConstant(initialHeightAboveGround.getDoubleValue());
             hasBeenInitialized.set(true);
          }
-
-         // else just keep everything the same
       }
-      else
+      else          
       {
          compute();
          footX.set(findMaxXOfGroundContactPoints(supportLeg));
@@ -107,7 +106,8 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CoMHeight
     * @param spline
     * @return the minimum and maximum abscissa for which the spline is valid
     */
-   private double[] initializeSpline(TransferToAndNextFootstepsData transferToAndNextFootstepsData, RobotSide supportLeg, YoPolynomial spline, double offsetX, double offsetZ)
+   private double[] initializeSpline(TransferToAndNextFootstepsData transferToAndNextFootstepsData, RobotSide supportLeg, YoPolynomial spline, double offsetX,
+         double offsetZ)
    {
       double x = getCurrentCoMX();
 
@@ -128,9 +128,7 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CoMHeight
 
       spline.setQuintic(x0, xf, z0, dzdx0, d2zdx20, zf, dzdxf, d2zdx2f);
 
-//    spline.setCubic(x0, xf, z0, dzdx0, zf, dzdxf);
-
-      return new double[] {x0, xf};
+      return new double[] { x0, xf };
    }
 
    private void compute()
@@ -144,7 +142,7 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CoMHeight
       {
          desiredComHeightSlope.set(heightSplineInFootFrame.getVelocity());
          desiredComHeightSecondDerivative.set(heightSplineInFootFrame.getAcceleration());
-         
+
          centerOfMassJacobian.compute();
          FrameVector comVelocity = new FrameVector(referenceFrame);
          centerOfMassJacobian.packCenterOfMassVelocity(comVelocity);
@@ -158,12 +156,11 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CoMHeight
          orbitalEnergy.set(Double.NaN);
       }
    }
-   
-   
+
    public void solve(CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, ContactStatesAndUpcomingFootstepData centerOfMassHeightInputData)
    {
       compute();
-      
+
       coMHeightPartialDerivativesDataToPack.setCoMHeight(ReferenceFrame.getWorldFrame(), desiredComHeightInWorld.getDoubleValue());
       coMHeightPartialDerivativesDataToPack.setPartialDzDx(desiredComHeightSlope.getDoubleValue());
       coMHeightPartialDerivativesDataToPack.setPartialDzDy(0.0);
@@ -171,7 +168,6 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CoMHeight
       coMHeightPartialDerivativesDataToPack.setPartialD2zDy2(0.0);
       coMHeightPartialDerivativesDataToPack.setPartialD2zDxDy(0.0);
    }
-
 
    private double getDesiredCenterOfMassHeight()
    {
@@ -183,18 +179,13 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CoMHeight
       return new FrameVector2d(referenceFrame, desiredComHeightSlope.getDoubleValue(), 0.0);
    }
 
-   private FrameVector2d getDesiredCenterOfMassHeightSecondDerivative()
-   {
-      return new FrameVector2d(referenceFrame, desiredComHeightSecondDerivative.getDoubleValue(), 0.0);
-   }
-
    public double computeOrbitalEnergyIfInitializedNow(RobotSide upcomingSupportLeg)
    {
       throwExceptionAndBail();
-      
+
       double footX = findMaxXOfGroundContactPoints(upcomingSupportLeg);
       double footZ = findMinZOfGroundContactPoints(upcomingSupportLeg);
-      
+
       TransferToAndNextFootstepsData transferToAndNextFootstepsData = null;
       initializeSpline(transferToAndNextFootstepsData, upcomingSupportLeg, testHeightSplineInFootFrame, footX, footZ);
 
@@ -208,7 +199,7 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CoMHeight
 
       return computeOrbitalEnergy(testHeightSplineInFootFrame, x, xd, gravityZ);
    }
-   
+
    private void throwExceptionAndBail()
    {
       throw new RuntimeException("This class needs lots of love. Talk to Jerry and Twan to get Steep stair climbing working again!");
@@ -272,7 +263,7 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CoMHeight
 
       return maxX;
    }
-   
+
    public boolean hasBeenInitializedWithNextStep()
    {
       return false;
