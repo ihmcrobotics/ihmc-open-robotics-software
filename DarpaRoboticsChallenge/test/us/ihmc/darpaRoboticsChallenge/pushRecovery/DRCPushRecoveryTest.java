@@ -36,7 +36,7 @@ public abstract class DRCPushRecoveryTest
    private static final boolean showGUI = true;
    private static final boolean KEEP_SCS_UP = false;
    
-   private static String script = "walkingPushTestScript.xml";
+   private static String script = "scripts/ExerciseAndJUnitScripts/walkingPushTestScript.xml";
    private static double simulationTime = 6.0;
    
    private DRCSimulationTestHelper drcSimulationTestHelper;
