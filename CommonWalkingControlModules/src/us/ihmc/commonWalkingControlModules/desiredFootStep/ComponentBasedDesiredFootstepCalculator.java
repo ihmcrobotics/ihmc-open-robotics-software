@@ -52,9 +52,8 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
    private final double ankleHeight;
 
    public ComponentBasedDesiredFootstepCalculator(double ankleHeight, SideDependentList<? extends ReferenceFrame> ankleZUpFrames,
-           SideDependentList<? extends ReferenceFrame> ankleFrames, SideDependentList<? extends ContactablePlaneBody> bipedFeet,
-           DesiredHeadingControlModule desiredHeadingControlModule, DesiredVelocityControlModule desiredVelocityControlModule,
-           YoVariableRegistry parentRegistry)
+         SideDependentList<? extends ReferenceFrame> ankleFrames, SideDependentList<? extends ContactablePlaneBody> bipedFeet,
+         DesiredHeadingControlModule desiredHeadingControlModule, DesiredVelocityControlModule desiredVelocityControlModule, YoVariableRegistry parentRegistry)
    {
       super(bipedFeet, getFramesToStoreFootstepsIn(), parentRegistry);
 
@@ -97,7 +96,8 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
       ReferenceFrame desiredHeadingFrame = desiredHeadingControlModule.getDesiredHeadingFrame();
       Matrix3d footToWorldRotation = computeDesiredFootRotation(desiredHeadingFrame, futureSupportAnkleFrame);
 
-      FramePoint footstepPosition = getDesiredFootstepPosition(futureSupportAnkleZUpFrame, futureSupportAnkleFrame, futureSwingLegSide, desiredHeadingFrame, footToWorldRotation);
+      FramePoint footstepPosition = getDesiredFootstepPosition(futureSupportAnkleZUpFrame, futureSupportAnkleFrame, futureSwingLegSide, desiredHeadingFrame,
+            footToWorldRotation);
       FrameOrientation footstepOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame());
       double[] yawPitchRoll = new double[3];
       RotationFunctions.getYawPitchRoll(yawPitchRoll, footToWorldRotation);
@@ -112,11 +112,12 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
       return new Footstep(foot, poseReferenceFrame, trustHeight);
    }
 
-   private FramePoint getDesiredFootstepPosition(ReferenceFrame supportAnkleZUpFrame, ReferenceFrame supportAnkleFrame, RobotSide swingLegSide, ReferenceFrame desiredHeadingFrame,
-           Matrix3d footToWorldRotation)
+   private FramePoint getDesiredFootstepPosition(ReferenceFrame supportAnkleZUpFrame, ReferenceFrame supportAnkleFrame, RobotSide swingLegSide,
+         ReferenceFrame desiredHeadingFrame, Matrix3d footToWorldRotation)
    {
       FrameVector2d desiredOffsetFromAnkle = computeDesiredOffsetFromSupportAnkle(swingLegSide, desiredHeadingFrame);
-      FramePoint footstepPosition = computeDesiredFootPosition(swingLegSide, supportAnkleZUpFrame, supportAnkleFrame, desiredOffsetFromAnkle, footToWorldRotation);
+      FramePoint footstepPosition = computeDesiredFootPosition(swingLegSide, supportAnkleZUpFrame, supportAnkleFrame, desiredOffsetFromAnkle,
+            footToWorldRotation);
       footstepPosition.changeFrame(ReferenceFrame.getWorldFrame());
 
       return footstepPosition;
@@ -133,16 +134,11 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
       velocityMagnitudeInHeading.set(desiredVelocity.dot(desiredHeading));
       velocityMagnitudeToLeftOfHeading.set(desiredVelocity.dot(toLeftOfDesiredHeading));
 
-//    double stepForward = maxStepLength.getDoubleValue() * velocityMagnitudeInHeading.getDoubleValue();
-//    double stepSideways = swingLegSide.negateIfRightSide(inPlaceWidth.getDoubleValue());    // maxStepLength.getDoubleValue() * velocityMagnitudeToLeftOfHeading;
-
-//    FrameVector2d desiredVelocityInSupportAnkleZUpFrame = desiredVelocity.changeFrameCopy(supportAnkleZUpFrame);
       FrameVector2d desiredVelocityInHeadingFrame = new FrameVector2d(desiredVelocity);
       desiredVelocityInHeadingFrame.changeFrame(desiredHeadingFrame);
 
-      FrameVector2d desiredOffsetFromAnkle = new FrameVector2d(desiredHeadingFrame, 0.0, swingLegSide.negateIfRightSide(inPlaceWidth.getDoubleValue()));    // desiredVelocityInHeadingFrame);
+      FrameVector2d desiredOffsetFromAnkle = new FrameVector2d(desiredHeadingFrame, 0.0, swingLegSide.negateIfRightSide(inPlaceWidth.getDoubleValue())); // desiredVelocityInHeadingFrame);
       desiredOffsetFromAnkle.add(desiredVelocityInHeadingFrame);
-
 
       if (swingLegSide == RobotSide.LEFT)
       {
@@ -176,21 +172,9 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
 
    private Matrix3d computeDesiredFootRotationMatchSupportFootPlane(ReferenceFrame desiredHeadingFrame, ReferenceFrame supportFootFrame)
    {
-//      Transform3D desiredHeadingToWorldTransform = desiredHeadingFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
-//      Matrix3d desiredHeadingToWorldRotation = new Matrix3d();
-//      desiredHeadingToWorldTransform.get(desiredHeadingToWorldRotation);
-//      double yaw = RotationFunctions.getYaw(desiredHeadingToWorldRotation);
-      
       Transform3D supportFootToWorldTransform = supportFootFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
       Matrix3d supportFootToWorldRotation = new Matrix3d();
       supportFootToWorldTransform.get(supportFootToWorldRotation);
-//      double yaw = RotationFunctions.getYaw(footToSupportRotation);
-//      
-//      
-//      
-//      double pitch = stepPitch.getDoubleValue();
-//      double roll = 0.0;
-//      RotationFunctions.setYawPitchRoll(footToSupportRotation, yaw, pitch, roll);
 
       return supportFootToWorldRotation;
    }
@@ -208,13 +192,13 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
       return footToSupportRotation;
    }
 
-   private FramePoint computeDesiredFootPosition(RobotSide upcomingSwingLegSide, ReferenceFrame upcomingSupportAnkleZUpFrame, ReferenceFrame upcomingSupportAnkleFrame,
-           FrameVector2d desiredOffsetFromAnkle, Matrix3d swingFootToWorldRotation)
+   private FramePoint computeDesiredFootPosition(RobotSide upcomingSwingLegSide, ReferenceFrame upcomingSupportAnkleZUpFrame,
+         ReferenceFrame upcomingSupportAnkleFrame, FrameVector2d desiredOffsetFromAnkle, Matrix3d swingFootToWorldRotation)
    {
       if (matchSupportFootPlane.getBooleanValue())
       {
          return computeDesiredFootPositionMatchSupportFootPlane(upcomingSwingLegSide, upcomingSupportAnkleFrame, desiredOffsetFromAnkle,
-                 swingFootToWorldRotation);
+               swingFootToWorldRotation);
       }
       else
       {
@@ -223,7 +207,7 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
    }
 
    private FramePoint computeDesiredFootPositionMatchSupportFootPlane(RobotSide upcomingSwingLegSide, ReferenceFrame upcomingSupportAnkleFrame,
-           FrameVector2d desiredOffsetFromAnkle, Matrix3d swingFootToWorldRotation)
+         FrameVector2d desiredOffsetFromAnkle, Matrix3d swingFootToWorldRotation)
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -235,7 +219,7 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
    }
 
    private FramePoint computeDesiredFootPositionMatchMinimumZ(RobotSide upcomingSwingLegSide, ReferenceFrame upcomingSupportAnkleZUpFrame,
-           FrameVector2d desiredOffsetFromAnkle, Matrix3d swingFootToWorldRotation)
+         FrameVector2d desiredOffsetFromAnkle, Matrix3d swingFootToWorldRotation)
    {
       ContactablePlaneBody upcomingSwingFoot = contactableBodies.get(upcomingSwingLegSide);
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -250,26 +234,31 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
       {
          /*
           * Assume that the ground height is constant.
-          *
-          * Specifically, if we assume that:
-          * 1) the lowest contact point on the upcoming swing foot is in contact with the ground
-          * 2) the ground height at the lowest upcoming swing foot contact point is the same as the ground height at the
-          *    lowest swing foot contact point
-          *
+          * 
+          * Specifically, if we assume that: 1) the lowest contact point on the
+          * upcoming swing foot is in contact with the ground 2) the ground
+          * height at the lowest upcoming swing foot contact point is the same
+          * as the ground height at the lowest swing foot contact point
+          * 
           * then the following holds:
-          *
-          * let upcomingSwingMinZ be the z coordinate of the vector (expressed in world frame) from upcoming swing ankle to the lowest contact point on
-          * the stance foot (compared in world frame). Current foot orientation is used to determine this value.
-          *
-          * let footstepMinZ be the z coordinate of the vector (expressed in world frame) from planned swing ankle to the lowest contact point on
-          * the planned swing foot (compared in world frame). Planned foot orientation is used to determine this value
-          *
-          * let zUpcomingSwing be the z coordinate of the upcoming swing ankle, expressed in world frame.
-          * let zFootstep be the z coordinate of the footstep, expressed in world frame (this is what we're after)
-          * let zGround be the z coordinate of the lowest point on the stance foot i.e. of the ground
-          * zUpcomingSwing = zGround - upcomingSwingMinZ
-          * zFootstep      = zGround - footstepMinZ
-          *                = zUpcomingSwing + upcomingSwingMinZ - footstepMinZ
+          * 
+          * let upcomingSwingMinZ be the z coordinate of the vector (expressed
+          * in world frame) from upcoming swing ankle to the lowest contact
+          * point on the stance foot (compared in world frame). Current foot
+          * orientation is used to determine this value.
+          * 
+          * let footstepMinZ be the z coordinate of the vector (expressed in
+          * world frame) from planned swing ankle to the lowest contact point on
+          * the planned swing foot (compared in world frame). Planned foot
+          * orientation is used to determine this value
+          * 
+          * let zUpcomingSwing be the z coordinate of the upcoming swing ankle,
+          * expressed in world frame. let zFootstep be the z coordinate of the
+          * footstep, expressed in world frame (this is what we're after) let
+          * zGround be the z coordinate of the lowest point on the stance foot
+          * i.e. of the ground zUpcomingSwing = zGround - upcomingSwingMinZ
+          * zFootstep = zGround - footstepMinZ = zUpcomingSwing +
+          * upcomingSwingMinZ - footstepMinZ
           */
 
          FramePoint upcomingSwingAnkle = new FramePoint(upcomingSwingFoot.getFrameAfterParentJoint());
@@ -278,7 +267,7 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
 
          FrameVector searchDirection = new FrameVector(upcomingSupportAnkleZUpFrame, 0.0, 0.0, -1.0);
          FramePoint upcomingSwingMinZPoint = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(upcomingSwingFoot.getContactPointsCopy(),
-                                                searchDirection, 1).get(0);
+               searchDirection, 1).get(0);
          upcomingSwingMinZPoint.changeFrame(ankleZUpFrames.get(upcomingSwingLegSide));
          double upcomingSwingMinZ = upcomingSwingMinZPoint.getZ();
 
@@ -290,15 +279,12 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
          /*
           * use ground profile to determine height at the planned foot position
           */
-
          footstepPosition.changeFrame(ReferenceFrame.getWorldFrame());
          double groundZ = heightMap.heightAt(footstepPosition.getX(), footstepPosition.getY(), 0.0);
          double ankleZ = groundZ + ankleHeight;
 
          footstepPosition.setZ(ankleZ);
       }
-
-
 
       return footstepPosition;
    }
@@ -358,7 +344,7 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
          return DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(allContactPoints, forwardInFootFrame, nPoints);
       }
    }
-   
+
    public boolean isDone()
    {
       return false;
