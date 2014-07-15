@@ -311,9 +311,9 @@ public class ValkyrieRobotModel implements DRCRobotModel
 	   return networkParameters;
    }
 
-   public HandCommandManager getHandCommandManager()
+   @Override
+   public HandCommandManager createHandCommandManager()
    {
-      return null;
+	   return null;
    }
-
 }
