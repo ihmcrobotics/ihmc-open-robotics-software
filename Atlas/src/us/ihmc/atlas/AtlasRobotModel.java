@@ -68,7 +68,6 @@ public class AtlasRobotModel implements DRCRobotModel
    private final AtlasRobotMultiContactControllerParameters multiContactControllerParameters;
    private final AtlasDrivingControllerParameters drivingControllerParameters;
    private final RobotNetworkParameters networkParameters;
-   private HandCommandManager handCommandManager;
 
    public AtlasRobotModel(AtlasRobotVersion atlasVersion, boolean runningOnRealRobot, boolean headless)
    {
@@ -97,7 +96,6 @@ public class AtlasRobotModel implements DRCRobotModel
       multiContactControllerParameters = new AtlasRobotMultiContactControllerParameters();
       drivingControllerParameters = new AtlasDrivingControllerParameters();
       networkParameters = new RobotNetworkParameters(runningOnRealRobot ? ATLAS_NETWORK_CONFIG : DEFAULT_NETWORK_CONFIG);
-      handCommandManager = createHandCommandManager();
    }
 
    @Override
@@ -283,20 +281,16 @@ public class AtlasRobotModel implements DRCRobotModel
    }
 
    @Override
-   public HandCommandManager getHandCommandManager()
+   public HandCommandManager createHandCommandManager()
    {
-      return handCommandManager;
-   }
-   
-   private HandCommandManager createHandCommandManager()
-   {
-      switch(getHandType())
-      {
-      case IROBOT:
-         return new IRobotCommandManager();
-         
-      default:
-         return null;
-      }
+	   switch(getHandType())
+	   {
+	   case IROBOT:
+		   return new IRobotCommandManager();
+		   
+	   default:
+		   return null;
+	   
+	   }
    }
 }
