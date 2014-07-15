@@ -14,7 +14,6 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetPr
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
-import us.ihmc.utilities.net.ObjectCommunicator;
 
 import com.jme3.math.Transform;
 import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
@@ -71,5 +70,5 @@ public interface DRCRobotModel
    
    public abstract RobotNetworkParameters getNetworkParameters();
    
-   public abstract HandCommandManager getHandCommandManager();
+   public abstract HandCommandManager createHandCommandManager();
 }
