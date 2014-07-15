@@ -18,6 +18,7 @@ import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.atlas.parameters.AtlasStateEstimatorParameters;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.atlas.physics.AtlasPhysicsEngineConfiguration;
+import us.ihmc.atlas.ros.AtlasPPSTimestampOffsetProvider;
 import us.ihmc.atlas.sensors.AtlasSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -31,7 +32,6 @@ import us.ihmc.darpaRoboticsChallenge.handControl.HandCommandManager;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.AlwaysZeroOffsetPPSTimestampOffsetProvider;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.AtlasPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.iRobot.control.IRobotCommandManager;
@@ -61,7 +61,7 @@ public class AtlasRobotModel implements DRCRobotModel
    private final JaxbSDFLoader loader;
 
    private final AtlasJointMap jointMap;
-   private final DRCRobotSensorInformation sensorInformation;
+   private final AtlasSensorInformation sensorInformation;
    private final AtlasArmControllerParameters armControllerParameters;
    private final AtlasWalkingControllerParameters walkingControllerParameters;
    private final AtlasStateEstimatorParameters stateEstimatorParameters;
@@ -257,7 +257,7 @@ public class AtlasRobotModel implements DRCRobotModel
    {
       if (runningOnRealRobot)
       {
-         return new AtlasPPSTimestampOffsetProvider();
+         return new AtlasPPSTimestampOffsetProvider(sensorInformation);
       }
       return new AlwaysZeroOffsetPPSTimestampOffsetProvider();
    }
@@ -285,8 +285,15 @@ public class AtlasRobotModel implements DRCRobotModel
    {
 	   if(runningOnRealRobot)
 	   {
-		   if(hasIRobotHands())
+		   switch(getHandType())
+		   {
+		   case IROBOT:
 			   return new IRobotCommandManager();
+			   
+		   default:
+			   break;
+			   
+		   }
 	   }
 	   
 	   return null;

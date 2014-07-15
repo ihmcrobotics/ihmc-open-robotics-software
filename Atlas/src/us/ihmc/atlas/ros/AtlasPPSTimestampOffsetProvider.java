@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.networkProcessor.time;
+package us.ihmc.atlas.ros;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -7,14 +7,17 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.zeromq.ZMQ;
 
 import std_msgs.Time;
-import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
+import us.ihmc.atlas.parameters.AtlasSensorInformation;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSRequestType;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
-import us.ihmc.utilities.ros.RosMultisensePPSSubscriber;
+import us.ihmc.utilities.ros.RosTimestampSubscriber;
 
 public class AtlasPPSTimestampOffsetProvider implements PPSTimestampOffsetProvider
 {
-   private static final String MULTISENSE_SL_PPS_TOPIC = "/multisense/pps";
-   private RosMultisensePPSSubscriber ppsSubscriber;
+   private final int ppsPort;
+   private final String ppsTopic;
+   private RosTimestampSubscriber ppsSubscriber;
    private final AtomicLong currentTimeStampOffset = new AtomicLong(0);
    private ZMQ.Socket requester;
 
@@ -23,8 +26,11 @@ public class AtlasPPSTimestampOffsetProvider implements PPSTimestampOffsetProvid
    
    private final AtomicBoolean offsetIsDetermined = new AtomicBoolean(false);
 
-   public AtlasPPSTimestampOffsetProvider()
+   public AtlasPPSTimestampOffsetProvider(AtlasSensorInformation sensorInformation)
    {
+      ppsPort = sensorInformation.getPPSProviderPort();
+     ppsTopic = sensorInformation.getPPSRosTopic();
+      
       setupZMQSocket();
 
       setupPPSSubscriber();
@@ -32,7 +38,7 @@ public class AtlasPPSTimestampOffsetProvider implements PPSTimestampOffsetProvid
 
    private void setupPPSSubscriber()
    {
-      ppsSubscriber = new RosMultisensePPSSubscriber()
+      ppsSubscriber = new RosTimestampSubscriber()
       {
          @Override
          public void onNewMessage(Time message)
@@ -47,13 +53,13 @@ public class AtlasPPSTimestampOffsetProvider implements PPSTimestampOffsetProvid
    {
       ZMQ.Context context = ZMQ.context(1);
       requester = context.socket(ZMQ.REQ);
-      requester.connect("tcp://10.66.171.20:" + DRCConfigParameters.PPS_PROVIDER_PORT);
+      requester.connect("tcp://10.66.171.20:" + ppsPort);
    }
 
    @Override
    public void attachToRosMainNode(RosMainNode rosMainNode)
    {
-      rosMainNode.attachSubscriber(MULTISENSE_SL_PPS_TOPIC, ppsSubscriber);
+      rosMainNode.attachSubscriber(ppsTopic, ppsSubscriber);
    }
 
    @Override

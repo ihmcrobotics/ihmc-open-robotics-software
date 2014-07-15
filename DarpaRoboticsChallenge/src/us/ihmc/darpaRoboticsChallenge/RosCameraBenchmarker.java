@@ -15,18 +15,15 @@ import org.ros.node.topic.Subscriber;
 import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.keyboardAndMouse.RepeatingReleasedEventsFixer;
 
-public class GazeboCameraBenchmarker extends AbstractNodeMain
+public class RosCameraBenchmarker extends AbstractNodeMain
 {
-	public static final String MASTER = "http://localhost:11311";
-	public static final String TOPIC_NAME = "/multisense/camera/left/image_raw/compressed";
-	
 	private Subscriber<sensor_msgs.CompressedImage> cameraSubscriber;
 	private String topicName;
 	
 	private long initialTime;
 	private double framesReceived = 0.0;
 	
-	public GazeboCameraBenchmarker(String topicName)
+	public RosCameraBenchmarker(String topicName)
 	{
 		new RepeatingReleasedEventsFixer().install();
 		
@@ -34,7 +31,7 @@ public class GazeboCameraBenchmarker extends AbstractNodeMain
 	}
 	
 	public GraphName getDefaultNodeName() {
-		return GraphName.of("darpaRoboticsChallenge/GazeboCameraBenchmarker" + topicName);
+		return GraphName.of("darpaRoboticsChallenge/RosCameraBenchmarker" + topicName);
 	}
 	
 	public void onStart(ConnectedNode connectedNode)
@@ -69,11 +66,13 @@ public class GazeboCameraBenchmarker extends AbstractNodeMain
 	
 	public static void main(String[] args) throws URISyntaxException
 	{	
+	   String MASTER = "http://localhost:11311";
+	   String TOPIC_NAME = "/camera/image_raw/compressed";
 		URI master = new URI(MASTER);
 		
 		try
 		{
-			GazeboCameraBenchmarker externalCamera = new GazeboCameraBenchmarker(TOPIC_NAME);
+			RosCameraBenchmarker externalCamera = new RosCameraBenchmarker(TOPIC_NAME);
 			NodeConfiguration nodeConfiguration = RosTools.createNodeConfiguration(master);
 			NodeMainExecutor nodeMainExecutor = DefaultNodeMainExecutor.newDefault();
 			nodeMainExecutor.execute(externalCamera, nodeConfiguration);
