@@ -245,8 +245,9 @@ public class BonoRobotModel implements DRCRobotModel
 	   return null;
    }
 
-   public HandCommandManager getHandCommandManager()
+   @Override
+   public HandCommandManager createHandCommandManager()
    {
-      return null;
+	   return null;
    }
 }
