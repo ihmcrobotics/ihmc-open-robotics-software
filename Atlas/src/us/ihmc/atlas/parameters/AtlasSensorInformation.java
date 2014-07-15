@@ -15,6 +15,9 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    public static final SideDependentList<String> handForceSensorNames = new SideDependentList<String>("l_arm_wrx", "r_arm_wrx");
    private final DRCRobotCameraParamaters[] cameraParamaters = new DRCRobotCameraParamaters[4];
    
+   private static final int PPS_PROVIDER_PORT = 5050;
+   private final String MULTISENSE_SL_PPS_TOPIC = "/multisense/pps";
+   
    private static final int multisense_sl_left_camera_id = 0;
    private static final int multisense_sl_right_camera_id = 1;
    private static final int blackfly_left_camera_id = 2;
@@ -176,5 +179,15 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    public double getLidarSpindleVelocity()
    {
       return lidar_spindle_velocity;
+   }
+
+   public int getPPSProviderPort()
+   {
+      return PPS_PROVIDER_PORT;
+   }
+
+   public String getPPSRosTopic()
+   {
+      return MULTISENSE_SL_PPS_TOPIC;
    }
 }

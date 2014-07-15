@@ -17,7 +17,6 @@ import us.ihmc.utilities.net.ObjectConsumer;
 /**
  * 
  *  Generate simulated camera data and camera info packet from SCS, we use only left eye.
- *  @ref: GazeboCameraDataReceiver, MultiSenseCameraInfoReciever
  */
 public class SCSCameraDataReceiver extends CameraDataReceiver implements ObjectConsumer<LocalVideoPacket>
 {

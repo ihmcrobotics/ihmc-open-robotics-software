@@ -30,41 +30,4 @@ public abstract class RosImageSubscriber extends AbstractRosTopicSubscriber<sens
    }
 
    protected abstract void imageReceived(long timeStamp, BufferedImage image);
-
-   public static void main(String[] args) throws URISyntaxException
-   {
-
-      final JPanelCameraStreamer leftCameraStreamer = new JPanelCameraStreamer();
-      leftCameraStreamer.createAndDisplayInNewWindow("left");
-
-      final JPanelCameraStreamer rightCameraStreamer = new JPanelCameraStreamer();
-      rightCameraStreamer.createAndDisplayInNewWindow("right");
-
-      RosImageSubscriber leftImageReceiver = new RosImageSubscriber()
-      {
-
-         @Override
-         protected void imageReceived(long timeStamp, BufferedImage image)
-         {
-            leftCameraStreamer.updateImage(image);
-         }
-
-      };
-      RosImageSubscriber rightImageReceiver = new RosImageSubscriber()
-      {
-
-         @Override
-         protected void imageReceived(long timeStamp, BufferedImage image)
-         {
-            rightCameraStreamer.updateImage(image);
-         }
-
-      };
-
-      RosMainNode rosMainNode = new RosMainNode(new URI("http://localhost:11311"), "darpaRoboticsChallange/rosImageSubscriber");
-      rosMainNode.attachSubscriber("/multisense/camera/left/image_rect_color/compressed", leftImageReceiver);
-      rosMainNode.attachSubscriber("/multisense/camera/right/image_rect_color/compressed", rightImageReceiver);
-      rosMainNode.execute();
-
-   }
 }

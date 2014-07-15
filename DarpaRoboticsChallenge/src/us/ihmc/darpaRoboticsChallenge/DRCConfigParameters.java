@@ -16,7 +16,6 @@ public class DRCConfigParameters
    public static final int NETWORK_PROCESSOR_TO_UI_RAW_PROTOCOL_TCP_PORT = 4898;
    public static final int NETWORK_PROCESSOR_CLOUD_DISPATCHER_BACKEND_TCP_PORT = 5000;
    public static final int CONTROLLER_CLOUD_DISPATCHER_BACKEND_TCP_PORT = 5002;
-   public static final int PPS_PROVIDER_PORT = 5050;
 
    // Log images from the primary camera
    public static boolean LOG_PRIMARY_CAMERA_IMAGES = false;
