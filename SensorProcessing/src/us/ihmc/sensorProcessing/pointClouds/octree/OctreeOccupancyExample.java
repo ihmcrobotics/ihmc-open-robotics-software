@@ -21,11 +21,13 @@ public class OctreeOccupancyExample {
 
    public static double mapSize = 20.0;
    public static int NUMBER_OCCUPIED = 10;
+   public static GridMapSpacialInfo3D spacial;
 
    public static GridMapSpacialInfo3D createSpacial() {
       Se3_F64 mapToCanonical = new Se3_F64();
-      mapToCanonical.getT().set(-5,-5,-5);
-      return new GridMapSpacialInfo3D(0.05,mapToCanonical);
+      mapToCanonical.getTranslation().set(-5,-5,-5);
+      spacial = new GridMapSpacialInfo3D(0.05,mapToCanonical);
+      return spacial;
    }
 
    public static OctreeGridMap_F64 createMapFromCloud(List<Point3D_F64> cloud, GridMapSpacialInfo3D spacial , int blurRadius ) {
@@ -37,7 +39,7 @@ public class OctreeOccupancyExample {
       pointTree.initialize(new Box3D_I32(0,0,0,w,w,w));
 
       for( Point3D_F64 p : cloud ) {
-         spacial.canonicalToMap(p, p);
+         spacial.canonicalToMap(p, p );
          Point3D_I32 gridPt = new Point3D_I32();
          spacial.mapToGrid(p.x, p.y, p.z, gridPt);
          pointTree.addPoint(gridPt,null);
@@ -49,7 +51,7 @@ public class OctreeOccupancyExample {
       OctreeGridMap_F64 map = new OctreeGridMap_F64(w,w,w);
       int totalOccupied = 0;
       for( Octree_I32 n : cells ) {
-         Point3D_I32 p = n.space.p0;
+         Point3D_I32 p = n.getLocation();
          if( n.isLeaf() ) {
             if( n.points.size() > NUMBER_OCCUPIED ) {
                totalOccupied++;
@@ -79,5 +81,11 @@ public class OctreeOccupancyExample {
    }
 
 
-
+public static double getProb(Point3D_F64 p,OctreeGridMap_F64 map){
+   spacial.canonicalToMap(p, p );
+   Point3D_I32 gridPt = new Point3D_I32();
+   spacial.mapToGrid(p.x, p.y, p.z, gridPt);
+   return map.get(gridPt.x, gridPt.y, gridPt.z);
+   
+}
 }
