@@ -14,10 +14,9 @@ public class ContactStatesAndUpcomingFootstepData
    private ReferenceFrame centerOfMassFrame, pelvisZUpFrame;
    private Footstep upcomingFootstep;
    private final ArrayList<PlaneContactState> contactStates = new ArrayList<PlaneContactState>();
-   
+
    public ContactStatesAndUpcomingFootstepData()
    {
-      
    }
 
    public RobotSide getSupportLeg()
@@ -34,7 +33,7 @@ public class ContactStatesAndUpcomingFootstepData
    {
       return centerOfMassFrame;
    }
-   
+
    public ReferenceFrame getPelvisZUpFrame()
    {
       return pelvisZUpFrame;
@@ -67,7 +66,8 @@ public class ContactStatesAndUpcomingFootstepData
       this.contactStates.addAll(contactStates);
    }
 
-   public void set(ReferenceFrame centerOfMassFrame, ReferenceFrame pelvisFrame, RobotSide supportLeg, Footstep upcomingFootstep, List<PlaneContactState> contactStates)
+   public void set(ReferenceFrame centerOfMassFrame, ReferenceFrame pelvisFrame, RobotSide supportLeg, Footstep upcomingFootstep,
+         List<PlaneContactState> contactStates)
    {
       this.setCenterOfMassAndPelvisZUpFrames(centerOfMassFrame, pelvisFrame);
       this.setSupportLeg(supportLeg);
