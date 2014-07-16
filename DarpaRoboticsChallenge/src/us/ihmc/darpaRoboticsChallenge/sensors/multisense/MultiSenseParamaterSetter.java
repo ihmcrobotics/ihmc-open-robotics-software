@@ -29,7 +29,7 @@ public class MultiSenseParamaterSetter
    private static boolean flashEnable;
    private static double dutyCycle;
    private static boolean autoExposure;
-   private static String resolution;
+   private static String resolution = new String("1024x544x128");
    
    private static final RosServiceClient<ReconfigureRequest, ReconfigureResponse> multiSenseClient = new RosServiceClient<ReconfigureRequest, ReconfigureResponse>(
          Reconfigure._TYPE);
@@ -176,13 +176,14 @@ public class MultiSenseParamaterSetter
 
    public static void setMultisenseParameters(MultisenseParameterPacket object)
    {
+     
+      System.out.println("object received with gain "+ object.getGain()+" speed "+ object.getMotorSpeed()+" dutycycle"+object.getDutyCycle()+" resolution"+ object.getResolution());
       gain = object.getGain();
       motorSpeed = object.getMotorSpeed();
       dutyCycle = object.getDutyCycle();
       ledEnable = object.isLedEnable();
       flashEnable = object.isFlashEnable();
       autoExposure = object.isAutoExposure();
-      
       
       System.out.println("object received with gain "+ gain+" speed "+ motorSpeed+"led "+ ledEnable +"flash"+flashEnable);
       multiSenseClient.waitTillConnected();
