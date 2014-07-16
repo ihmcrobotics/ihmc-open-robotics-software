@@ -23,8 +23,8 @@ public class LookaheadFinalDesiredICPCalculator implements FinalDesiredICPCalcul
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private boolean VISUALIZE = true;
 
-   private final EnumYoVariable<DesiredICPCalculatorMethod> desiredICPCalculatorMethod =
-      new EnumYoVariable<DesiredICPCalculatorMethod>("desiredICPCalculatorMethod", registry, DesiredICPCalculatorMethod.class);
+   private final EnumYoVariable<DesiredICPCalculatorMethod> desiredICPCalculatorMethod = new EnumYoVariable<DesiredICPCalculatorMethod>(
+         "desiredICPCalculatorMethod", registry, DesiredICPCalculatorMethod.class);
    private final DoubleYoVariable icpDistanceAlongCentroidSegment = new DoubleYoVariable("icpDistanceAlongCentroidSegment", registry);
    private final DoubleYoVariable w0ForICPGenerator = new DoubleYoVariable("w0ForICPGenerator", registry);
    private final DoubleYoVariable estimatedStepTimeForICPGenerator = new DoubleYoVariable("estimatedStepTimeForICPGenerator", registry);
@@ -54,13 +54,13 @@ public class LookaheadFinalDesiredICPCalculator implements FinalDesiredICPCalcul
          dynamicGraphicObjectsListRegistry.registerArtifact("FinalDesiredICP", finalDesiredICPGraphicPosition.createArtifact());
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
       }
-      
+
       else
       {
          transferToAndNextFootstepsDataVisualizer = null;
          finalDesiredICPGraphicPosition = null;
       }
-      
+
       desiredICPCalculatorMethod.set(DesiredICPCalculatorMethod.SHIFT_INSIDE);
       icpDistanceAlongCentroidSegment.set(0.04);
 
@@ -73,55 +73,53 @@ public class LookaheadFinalDesiredICPCalculator implements FinalDesiredICPCalcul
    }
 
    private FramePoint2d finalDesiredICP;
-   
+
    public void initialize(TransferToAndNextFootstepsData transferToAndNextFootstepsData)
    {
       finalDesiredICP = getFinalDesiredICPForWalking(transferToAndNextFootstepsData);
    }
-   
+
    public FramePoint2d getFinalDesiredICP()
    {
       return finalDesiredICP;
    }
-   
+
    private FramePoint2d getFinalDesiredICPForWalking(TransferToAndNextFootstepsData transferToAndNextFootstepsData)
    {
       switch (desiredICPCalculatorMethod.getEnumValue())
       {
-         case SHIFT_INSIDE :
-         {
-            shiftInsideFinalDesiredICPCalculator.initialize(transferToAndNextFootstepsData);
-            return shiftInsideFinalDesiredICPCalculator.getFinalDesiredICP();
-         }
+      case SHIFT_INSIDE:
+      {
+         shiftInsideFinalDesiredICPCalculator.initialize(transferToAndNextFootstepsData);
+         return shiftInsideFinalDesiredICPCalculator.getFinalDesiredICP();
+      }
 
-         case CENTROID_TO_CENTROID :
-         {
-            return getFinalDesiredICPCentroidToCentroid(transferToAndNextFootstepsData);
-         }
+      case CENTROID_TO_CENTROID:
+      {
+         return getFinalDesiredICPCentroidToCentroid(transferToAndNextFootstepsData);
+      }
 
-         case CENTROID_TO_CENTROID_WITH_CALCULATED_SCALAR :
-         {
-            return getFinalDesiredICPCentroidToCentroidWithCalculatedScalar(transferToAndNextFootstepsData);
-         }
+      case CENTROID_TO_CENTROID_WITH_CALCULATED_SCALAR:
+      {
+         return getFinalDesiredICPCentroidToCentroidWithCalculatedScalar(transferToAndNextFootstepsData);
+      }
 
-         default :
-         {
-            throw new RuntimeException("Should not get here!");
-         }
+      default:
+      {
+         throw new RuntimeException("Should not get here!");
+      }
       }
    }
 
    private FramePoint2d getFinalDesiredICPCentroidToCentroid(TransferToAndNextFootstepsData transferToAndNextFootstepsData)
    {
-      if(transferToAndNextFootstepsDataVisualizer != null)
+      if (transferToAndNextFootstepsDataVisualizer != null)
       {
          transferToAndNextFootstepsDataVisualizer.visualizeFootsteps(transferToAndNextFootstepsData);
       }
 
       Footstep transferToFootstep = transferToAndNextFootstepsData.getTransferToFootstep();
       Footstep nextFootstep = transferToAndNextFootstepsData.getNextFootstep();
-
-//    Footstep nextNextFootstep = transferToAndNextFootstepsData.getNextNextFootstep();
 
       FrameConvexPolygon2d transferToFootPolygon = FootstepUtils.getProjectedFootPolygonInFrame(transferToFootstep, worldFrame);
 
@@ -150,15 +148,13 @@ public class LookaheadFinalDesiredICPCalculator implements FinalDesiredICPCalcul
 
    private FramePoint2d getFinalDesiredICPCentroidToCentroidWithCalculatedScalar(TransferToAndNextFootstepsData transferToAndNextFootstepsData)
    {
-      if(transferToAndNextFootstepsDataVisualizer != null)
+      if (transferToAndNextFootstepsDataVisualizer != null)
       {
          transferToAndNextFootstepsDataVisualizer.visualizeFootsteps(transferToAndNextFootstepsData);
       }
 
       Footstep transferToFootstep = transferToAndNextFootstepsData.getTransferToFootstep();
       Footstep nextFootstep = transferToAndNextFootstepsData.getNextFootstep();
-
-//    Footstep nextNextFootstep = transferToAndNextFootstepsData.getNextNextFootstep();
 
       FrameConvexPolygon2d transferToFootPolygon = FootstepUtils.getProjectedFootPolygonInFrame(transferToFootstep, worldFrame);
 
@@ -204,8 +200,10 @@ public class LookaheadFinalDesiredICPCalculator implements FinalDesiredICPCalcul
          finalDesiredICP.getReferenceFrame().checkIsWorldFrame();
          finalDesiredICPGraphicPosition.setPosition(finalDesiredICP.getX(), finalDesiredICP.getY(), 0.0);
       }
-
    }
 
-   public static enum DesiredICPCalculatorMethod {SHIFT_INSIDE, CENTROID_TO_CENTROID, CENTROID_TO_CENTROID_WITH_CALCULATED_SCALAR;}
+   public static enum DesiredICPCalculatorMethod
+   {
+      SHIFT_INSIDE, CENTROID_TO_CENTROID, CENTROID_TO_CENTROID_WITH_CALCULATED_SCALAR;
+   }
 }
