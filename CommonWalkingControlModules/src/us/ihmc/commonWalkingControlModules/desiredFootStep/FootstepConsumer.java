@@ -12,7 +12,7 @@ import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.ObjectConsumer;
 
-public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer,ObjectConsumer<FootstepData>
+public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer, ObjectConsumer<FootstepData>
 {
    private final ConcurrentLinkedQueue<Footstep> footstepQueue = new ConcurrentLinkedQueue<Footstep>();
    private final long dataIdentifier;
@@ -37,7 +37,6 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
          throw new RuntimeException("Wrong data identifier: " + dataIdentifier + ". Expected: " + this.dataIdentifier);
       }
 
-      //      System.out.println("FootstepConsumer: consume: " + (++j) + " footsteps received, Ah Ah Ah!");
       FootstepData footstepData = (FootstepData) object;
       ContactablePlaneBody contactableBody = rigidBodyList.get(footstepData.getRobotSide());
 
@@ -47,7 +46,6 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
       PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("poseReferenceFrame", framePose);
       Footstep footstep = new Footstep(id, contactableBody, poseReferenceFrame, trustHeight);
 
-      //    System.out.println("footstep = " + footstep);
       footstepQueue.add(footstep);
 
       currentIndex++;
@@ -67,7 +65,7 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
    {
       Iterator<Footstep> iterator = footstepQueue.iterator();
 
-      if (iterator.hasNext()) 
+      if (iterator.hasNext())
       {
          iterator.next();
       }
@@ -75,7 +73,7 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
       {
          return null;
       }
-      if (iterator.hasNext()) 
+      if (iterator.hasNext())
       {
          return iterator.next();
       }
@@ -110,9 +108,8 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
       return false;
    }
 
-   public void consumeObject(FootstepData object) 
+   public void consumeObject(FootstepData object)
    {
       // TODO Auto-generated method stub
    }
-
 }
