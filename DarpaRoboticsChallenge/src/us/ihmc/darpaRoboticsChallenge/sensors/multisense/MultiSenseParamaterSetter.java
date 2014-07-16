@@ -199,8 +199,8 @@ public class MultiSenseParamaterSetter
       request.getConfig().getDoubles().add(motorSpeedParam);
       
       DoubleParameter dutyCycleParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(DoubleParameter._TYPE);
-      motorSpeedParam.setName("duty_cycle");
-      motorSpeedParam.setValue(dutyCycle);
+      dutyCycleParam.setName("led_duty_cycle");
+      dutyCycleParam.setValue(dutyCycle);
       request.getConfig().getDoubles().add(dutyCycleParam);
       
       BoolParameter ledEnableParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(BoolParameter._TYPE);
@@ -214,11 +214,11 @@ public class MultiSenseParamaterSetter
       request.getConfig().getBools().add(flashEnableParam);
       
       BoolParameter autoExposureParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(BoolParameter._TYPE);
-      flashEnableParam.setName("auto_exposure");
-      flashEnableParam.setValue(autoExposure);
+      autoExposureParam.setName("auto_exposure");
+      autoExposureParam.setValue(autoExposure);
       request.getConfig().getBools().add(autoExposureParam);
       
-      if(resolution != object.getResolution()){
+      if(!resolution.equals(object.getResolution())){
       resolution = object.getResolution();
       StrParameter resolutionParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(StrParameter._TYPE);
       resolutionParam.setName("resolution");
