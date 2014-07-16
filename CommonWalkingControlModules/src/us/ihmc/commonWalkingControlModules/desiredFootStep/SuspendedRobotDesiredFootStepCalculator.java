@@ -35,7 +35,7 @@ public class SuspendedRobotDesiredFootStepCalculator implements DesiredFootstepC
    private final SideDependentList<? extends ContactablePlaneBody> contactableBodies;
 
    public SuspendedRobotDesiredFootStepCalculator(SideDependentList<? extends ContactablePlaneBody> contactableBodies,
-           SideDependentList<ReferenceFrame> ankleZUpFrames, DesiredHeadingControlModule desiredHeadingControlModule, YoVariableRegistry parentRegistry)
+         SideDependentList<ReferenceFrame> ankleZUpFrames, DesiredHeadingControlModule desiredHeadingControlModule, YoVariableRegistry parentRegistry)
    {
       this.contactableBodies = contactableBodies;
       this.ankleZUpFrames = ankleZUpFrames;
@@ -50,22 +50,21 @@ public class SuspendedRobotDesiredFootStepCalculator implements DesiredFootstepC
       stepRoll.set(0.0);
 
       state.set(0);
-
    }
 
    public void initializeDesiredFootstep(RobotSide supportLegSide)
    {
       switch (state.getIntegerValue())
       {
-         case 0 :
-            currentStepLength.set(stepLength.getDoubleValue());
+      case 0:
+         currentStepLength.set(stepLength.getDoubleValue());
 
-            break;
+         break;
 
-         case 1 :
-            currentStepLength.set(-stepLength.getDoubleValue());
+      case 1:
+         currentStepLength.set(-stepLength.getDoubleValue());
 
-            break;
+         break;
       }
 
       state.increment();
@@ -85,19 +84,16 @@ public class SuspendedRobotDesiredFootStepCalculator implements DesiredFootstepC
 
       // Footstep Position
       FramePoint footstepPosition = new FramePoint(supportAnkleZUpFrame);
-      FrameVector footstepOffset = new FrameVector(desiredHeadingFrame, currentStepLength.getDoubleValue(),
-                                      supportLegSide.negateIfLeftSide(stepWidth.getDoubleValue()), stepHeight.getDoubleValue());
+      FrameVector footstepOffset = new FrameVector(desiredHeadingFrame, currentStepLength.getDoubleValue(), supportLegSide.negateIfLeftSide(stepWidth
+            .getDoubleValue()), stepHeight.getDoubleValue());
 
       footstepPosition.changeFrame(desiredHeadingFrame);
 
-//    footstepOffset.changeFrame(supportAnkleZUpFrame);
       footstepPosition.add(footstepOffset);
 
       // Footstep Orientation
       FrameOrientation footstepOrientation = new FrameOrientation(desiredHeadingFrame);
       footstepOrientation.setYawPitchRoll(stepYaw.getDoubleValue(), stepPitch.getDoubleValue(), stepRoll.getDoubleValue());
-
-//    footstepOrientation.changeFrame(supportAnkleZUpFrame);
 
       // Create a foot Step Pose from Position and Orientation
       FramePose footstepPose = new FramePose(footstepPosition, footstepOrientation);
@@ -114,23 +110,20 @@ public class SuspendedRobotDesiredFootStepCalculator implements DesiredFootstepC
    public void setupParametersForM2V2()
    {
       // TODO Auto-generated method stub
-
    }
 
    public void setupParametersForR2()
    {
       // TODO Auto-generated method stub
-
    }
 
    public Footstep predictFootstepAfterDesiredFootstep(RobotSide supportLegSide, Footstep desiredFootstep)
    {
       return null;
    }
-   
+
    public boolean isDone()
    {
       return false;
    }
-
 }
