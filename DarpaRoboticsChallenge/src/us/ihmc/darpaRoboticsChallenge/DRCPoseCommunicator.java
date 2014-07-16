@@ -54,7 +54,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
       this.timeProvider = timestampProvider;
 
       headFrame = estimatorModel.getHeadBaseFrame();
-      lidarFrame = estimatorModel.getLidarBaseFrame(sensorInformation.getLidarSensorName());
+      lidarFrame = estimatorModel.getLidarBaseFrame(sensorInformation.getPrimaryLidarParameters().getLidarSensorNameInSdf());
       cameraFrame = estimatorModel.getCameraFrame(sensorInformation.getPrimaryCameraParamaters().getCameraNameInSdf());
       rootFrame = estimatorModel.getRootJoint().getFrameAfterJoint();
 

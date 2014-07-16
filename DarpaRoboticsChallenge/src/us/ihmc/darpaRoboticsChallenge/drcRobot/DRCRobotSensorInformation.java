@@ -5,20 +5,6 @@ import us.ihmc.robotSide.SideDependentList;
 public interface DRCRobotSensorInformation
 {
    public abstract String[] getIMUSensorsToUse();
-   
-   public abstract DRCRobotCameraParamaters[] getCameraParamaters();
-
-   public abstract DRCRobotCameraParamaters getPrimaryCameraParamaters();
-   
-   public abstract String getLidarSensorName();
-
-   public abstract String getLidarJointName();
-   
-   public abstract double getLidarSpindleVelocity();
-
-   public abstract String getLidarScanTopic();
-
-   public abstract String getLidarJointTopic();
 
    public abstract String[] getForceSensorNames();
 
@@ -27,10 +13,16 @@ public interface DRCRobotSensorInformation
    public abstract SideDependentList<String> getWristForceSensorNames();
 
    public abstract String getPrimaryBodyImu();
-
-   public abstract String getLidarBaseFrame();
-
-   public abstract String getLidarEndFrame();
    
-   public abstract double getLidarCRC();
+   public abstract DRCRobotCameraParamaters[] getCameraParamaters();
+   
+   public abstract DRCRobotCameraParamaters getPrimaryCameraParamaters();
+
+   public abstract DRCRobotLidarParamaters[] getLidarParamaters();
+
+   public abstract DRCRobotLidarParamaters getPrimaryLidarParameters();
+   
+   public abstract DRCRobotPointCloudParamaters[] getPointCloudParamaters();
+   
+   public abstract DRCRobotPointCloudParamaters getPrimaryPointCloudParameters();
 }
