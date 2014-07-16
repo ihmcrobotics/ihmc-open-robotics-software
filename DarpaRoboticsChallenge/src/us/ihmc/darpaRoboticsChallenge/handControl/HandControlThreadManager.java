@@ -1,10 +1,22 @@
 package us.ihmc.darpaRoboticsChallenge.handControl;
 
-public interface HandControlThreadManager
+import us.ihmc.darpaRoboticsChallenge.configuration.DRCNetClassList;
+import us.ihmc.utilities.net.KryoObjectClient;
+
+public abstract class HandControlThreadManager
 {
-   public void start();
+	protected KryoObjectClient objectCommunicator;
 	
-   public void connect();
+	public HandControlThreadManager(int tcpPort)
+	{
+		this.objectCommunicator = new KryoObjectClient("localhost", tcpPort, new DRCNetClassList());
+		
+		attachObjectConsumers();
+	}
+	
+   public abstract void start();
+	
+   public abstract void connect();
    
-   public void attachObjectConsumers();
+   public abstract void attachObjectConsumers();
 }
