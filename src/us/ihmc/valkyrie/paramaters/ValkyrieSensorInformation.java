@@ -6,6 +6,8 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParamaters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotLidarParamaters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPointCloudParamaters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.graphics3DAdapter.camera.VideoSettingsFactory;
 import us.ihmc.graphics3DAdapter.camera.VideoSettingsH264LowLatency;
@@ -62,11 +64,15 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
       transformFromMeasurementToAnkleZUpFrames.put(RobotSide.RIGHT, new Transform3D(leftTransform));
    }
 
+   /**
+    * PointCloud Parameters
+    */
+   private final DRCRobotPointCloudParamaters[] pointCloudParamaters = new DRCRobotPointCloudParamaters[1];
+   private final int ibeoId = 0;
+   private static final String ibeoSensorName = "/v1/Ibeo_sensor";
+   private static final String ibeoTopic = "/ibeo/points";
    
    private static final SideDependentList<String> wristForceSensorNames = new SideDependentList<String>("LeftForearmSupinator", "RightForearmSupinator");
-   private static final String lidarSensorName = "/v1/Ibeo_sensor";
-   private static final String lidarJointName = null;//"Ibeo_sensor_joint";
-   private static final String lidarTopic = "/ibeo/points";//"Ibeo_sensor_joint";
    
    private static int forheadCameraId = 0;
    private static int leftHazardCameraId = 1;
@@ -110,6 +116,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
       cameraParamaters[0] = new DRCRobotCameraParamaters(forheadCameraName,forheadCameraTopic,headLinkName,videoSetting,forheadCameraId);
       cameraParamaters[1] = new DRCRobotCameraParamaters(leftStereoCameraName,leftCameraTopic,headLinkName,videoSetting,leftHazardCameraId);
       cameraParamaters[2] = new DRCRobotCameraParamaters(rightStereoCameraName,rightCameraTopic,headLinkName,videoSetting,rightHazardCameraId);
+      pointCloudParamaters[ibeoId] = new DRCRobotPointCloudParamaters(ibeoSensorName,ibeoTopic,null,null);
    }
    
    public static String getUrdfFeetForceSensorName(RobotSide side)
@@ -123,21 +130,9 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    }
    
    @Override
-   public String getLidarSensorName()
-   {
-      return lidarSensorName;
-   }
-
-   @Override
    public String[] getIMUSensorsToUse()
    {
       return imuSensorsToUse;
-   }
-
-   @Override
-   public String getLidarJointName()
-   {
-      return lidarJointName;
    }
 
    @Override
@@ -187,39 +182,26 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    }
 
    @Override
-   public String getLidarScanTopic()
-   {
-      return lidarTopic;
-   }
-
-   @Override
-   public String getLidarJointTopic()
+   public DRCRobotLidarParamaters[] getLidarParamaters()
    {
       return null;
    }
 
    @Override
-   public String getLidarBaseFrame()
+   public DRCRobotLidarParamaters getPrimaryLidarParameters()
    {
-      return "";
+      return null;
    }
 
    @Override
-   public String getLidarEndFrame()
+   public DRCRobotPointCloudParamaters[] getPointCloudParamaters()
    {
-      return "";
-   }
-   
-
-   @Override
-   public double getLidarCRC()
-   {
-      return 0;
+      return pointCloudParamaters;
    }
 
    @Override
-   public double getLidarSpindleVelocity()
+   public DRCRobotPointCloudParamaters getPrimaryPointCloudParameters()
    {
-      return 5.1;
+      return pointCloudParamaters[ibeoId];
    }
 }

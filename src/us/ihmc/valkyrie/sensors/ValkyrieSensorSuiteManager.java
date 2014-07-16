@@ -45,7 +45,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
          new SCSPointCloudDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, sdfFullRobotModel, sensorInformation, scsCommunicator,
                ppsTimestampOffsetProvider, lidarDataFilter);
       } else {
-         new SCSLidarDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, sdfFullRobotModel, sensorInformation, scsCommunicator,
+         new SCSLidarDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, sdfFullRobotModel, sensorInformation.getPrimaryLidarParameters(), scsCommunicator,
                ppsTimestampOffsetProvider, lidarDataFilter, sensorURI);
       }
    }
@@ -73,7 +73,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
       CameraInfoReceiver cameraInfoServer = new RosCameraInfoReciever(cameraParamaters, rosMainNode, networkingManager.getControllerStateHandler(),null);
       networkingManager.getControllerCommandHandler().setIntrinsicServer(cameraInfoServer);
 
-      new IbeoPointCloudDataReceiver(rosMainNode, robotPoseBuffer, networkingManager, sdfFullRobotModel, sensorInformation, lidarDataFilter);
+      new IbeoPointCloudDataReceiver(rosMainNode, robotPoseBuffer, networkingManager, sdfFullRobotModel, sensorInformation.getPrimaryPointCloudParameters(), lidarDataFilter);
 
       ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
 
