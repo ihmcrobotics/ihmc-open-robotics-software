@@ -50,11 +50,11 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
    private boolean recycleBipedFeetMemory = false;
 
    public CommonDoEveryTickSubController(ProcessedSensorsInterface processedSensors, CommonWalkingReferenceFrames referenceFrames, BipedFootInterface leftFoot,
-           BipedFootInterface rightFoot, BipedFeetUpdater bipedFeetUpdater, Updatable footPolygonVisualizer,
-           DesiredHeadingControlModule desiredHeadingControlModule, DesiredVelocityControlModule desiredVelocityControlModule,
-           DesiredFootstepCalculator desiredFootstepCalculator, DoubleAndSingleSupportDurationUpdater doubleAndSingleSupportDurationUpdater,
-           CapturePointCalculatorInterface capturePointCalculator, OneStepCaptureRegionCalculator captureRegionCalculator, CouplingRegistry couplingRegistry,
-           double initialDesiredHeading)
+         BipedFootInterface rightFoot, BipedFeetUpdater bipedFeetUpdater, Updatable footPolygonVisualizer,
+         DesiredHeadingControlModule desiredHeadingControlModule, DesiredVelocityControlModule desiredVelocityControlModule,
+         DesiredFootstepCalculator desiredFootstepCalculator, DoubleAndSingleSupportDurationUpdater doubleAndSingleSupportDurationUpdater,
+         CapturePointCalculatorInterface capturePointCalculator, OneStepCaptureRegionCalculator captureRegionCalculator, CouplingRegistry couplingRegistry,
+         double initialDesiredHeading)
    {
       this.processedSensors = processedSensors;
       this.referenceFrames = referenceFrames;
@@ -124,20 +124,15 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
          FrameConvexPolygon2d supportFoot = bipedSupportPolygons.getFootPolygonInAnkleZUp(supportLeg);
          double gravity = -processedSensors.getGravityInWorldFrame().getZ();
          double comHeight = processedSensors.getCenterOfMassPositionInFrame(referenceFrames.getMidFeetZUpFrame()).getZ();
-         double omega0 = Math.sqrt(gravity/comHeight);
-         captureRegionCalculator.calculateCaptureRegion
-               (supportLeg.getOppositeSide(), couplingRegistry.getEstimatedSwingTimeRemaining(), capturePoint2d, omega0 ,supportFoot);
+         double omega0 = Math.sqrt(gravity / comHeight);
+         captureRegionCalculator.calculateCaptureRegion(supportLeg.getOppositeSide(), couplingRegistry.getEstimatedSwingTimeRemaining(), capturePoint2d,
+               omega0, supportFoot);
          FrameConvexPolygon2d captureRegion = captureRegionCalculator.getCaptureRegion();
          couplingRegistry.setCaptureRegion(captureRegion);
 
          // Desired Footstep
          Footstep desiredFootstep = desiredFootstepCalculator.updateAndGetDesiredFootstep(supportLeg);
 
-//       RobotSide swingLeg = supportLeg.getOppositeSide();
-//       if (desiredFootstep.getFootstepSide() != swingLeg)
-//       {
-//          throw new RuntimeException("desiredFootstep.getFootstepSide() != swingLeg");
-//       }
          couplingRegistry.setDesiredFootstep(desiredFootstep);
 
          doubleAndSingleSupportDurationUpdater.update(desiredFootstep, supportLeg, desiredVelocity);
