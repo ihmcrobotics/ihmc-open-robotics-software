@@ -47,8 +47,6 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
    private double initialDesiredHeading;
    private final ProcessedSensorsInterface processedSensors;
 
-   private boolean recycleBipedFeetMemory = false;
-
    public CommonDoEveryTickSubController(ProcessedSensorsInterface processedSensors, CommonWalkingReferenceFrames referenceFrames, BipedFootInterface leftFoot,
          BipedFootInterface rightFoot, BipedFeetUpdater bipedFeetUpdater, Updatable footPolygonVisualizer,
          DesiredHeadingControlModule desiredHeadingControlModule, DesiredVelocityControlModule desiredVelocityControlModule,
