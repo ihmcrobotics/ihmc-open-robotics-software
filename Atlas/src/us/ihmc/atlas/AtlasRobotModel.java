@@ -34,7 +34,7 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.AlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
-import us.ihmc.iRobot.control.IRobotControlThreadManager;
+import us.ihmc.iRobot.control.IRobotCommandManager;
 import us.ihmc.iRobot.model.iRobotHandModel;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -288,7 +288,7 @@ public class AtlasRobotModel implements DRCRobotModel
 		   switch(getHandType())
 		   {
 		   case IROBOT:
-			   return new HandCommandManager(IRobotControlThreadManager.class);
+			   return new IRobotCommandManager();
 			   
 		   default:
 			   break;
