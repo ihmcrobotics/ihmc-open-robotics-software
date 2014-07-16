@@ -1,6 +1,8 @@
 package us.ihmc.acsell.parameters;
 
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParamaters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotLidarParamaters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPointCloudParamaters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -45,18 +47,6 @@ public class BonoSensorInformation implements DRCRobotSensorInformation
    }
 
    @Override
-   public String getLidarSensorName()
-   {
-      return lidarSensorName;
-   }
-
-   @Override
-   public String getLidarJointName()
-   {
-      return null;
-   }
-
-   @Override
    public SideDependentList<String> getWristForceSensorNames()
    {
       return new SideDependentList<String>();
@@ -81,39 +71,26 @@ public class BonoSensorInformation implements DRCRobotSensorInformation
    }
 
    @Override
-   public String getLidarScanTopic()
+   public DRCRobotLidarParamaters[] getLidarParamaters()
    {
       return null;
    }
 
    @Override
-   public String getLidarJointTopic()
+   public DRCRobotLidarParamaters getPrimaryLidarParameters()
    {
-      // TODO Auto-generated method stub
       return null;
    }
 
    @Override
-   public String getLidarBaseFrame()
+   public DRCRobotPointCloudParamaters[] getPointCloudParamaters()
    {
-      return "";
+      return null;
    }
 
    @Override
-   public String getLidarEndFrame()
+   public DRCRobotPointCloudParamaters getPrimaryPointCloudParameters()
    {
-      return "";
-   }
-
-   @Override
-   public double getLidarCRC()
-   {
-      return 0;
-   }
-
-   @Override
-   public double getLidarSpindleVelocity()
-   {
-      throw new RuntimeException("No LIDAR in Bono");
+      return null;
    }
 }
