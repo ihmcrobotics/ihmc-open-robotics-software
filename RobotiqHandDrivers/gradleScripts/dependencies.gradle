@@ -1,3 +1,7 @@
 dependencies {
-
+	compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
+	
+	compile project(':IHMCUtilities')
+	compile project(':DarpaRoboticsChallenge')
+	compile project(':CommonWalkingControlModules')
 }
