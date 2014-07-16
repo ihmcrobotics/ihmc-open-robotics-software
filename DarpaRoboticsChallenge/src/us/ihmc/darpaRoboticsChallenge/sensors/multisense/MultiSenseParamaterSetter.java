@@ -182,10 +182,12 @@ public class MultiSenseParamaterSetter
       ledEnable = object.isLedEnable();
       flashEnable = object.isFlashEnable();
       autoExposure = object.isAutoExposure();
-      resolution = object.getResolution();
+      
+      
       System.out.println("object received with gain "+ gain+" speed "+ motorSpeed+"led "+ ledEnable +"flash"+flashEnable);
       multiSenseClient.waitTillConnected();
       ReconfigureRequest request = multiSenseClient.getMessage();
+      
       DoubleParameter gainParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(DoubleParameter._TYPE);
       gainParam.setName("gain");
       gainParam.setValue(gain);
@@ -216,10 +218,13 @@ public class MultiSenseParamaterSetter
       flashEnableParam.setValue(autoExposure);
       request.getConfig().getBools().add(autoExposureParam);
       
+      if(resolution != object.getResolution()){
+      resolution = object.getResolution();
       StrParameter resolutionParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(StrParameter._TYPE);
       resolutionParam.setName("resolution");
       resolutionParam.setValue(resolution);
       request.getConfig().getStrs().add(resolutionParam);
+      }
       
       multiSenseClient.call(request, new ServiceResponseListener<ReconfigureResponse>()
             {
