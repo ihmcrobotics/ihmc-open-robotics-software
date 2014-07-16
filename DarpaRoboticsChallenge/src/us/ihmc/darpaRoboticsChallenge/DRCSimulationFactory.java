@@ -9,7 +9,9 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Mo
 import us.ihmc.darpaRoboticsChallenge.controllers.PIDLidarTorqueController;
 import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadDataSynchronizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotLidarParamaters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
@@ -122,11 +124,12 @@ public class DRCSimulationFactory
       }
 
       simulatedRobot.setController(multiThreadedRobotController);
-      
-      if(drcRobotModel.getSensorInformation().getLidarJointName() != null)
+      DRCRobotSensorInformation sensorInformation = drcRobotModel.getSensorInformation();
+      DRCRobotLidarParamaters lidarParams = sensorInformation.getPrimaryLidarParameters();
+      if(lidarParams.getLidarSpindleJointName() != null)
       {
          PIDLidarTorqueController lidarControllerInterface = new PIDLidarTorqueController(simulatedRobot,
-               drcRobotModel.getSensorInformation().getLidarJointName(), drcRobotModel.getSensorInformation().getLidarSpindleVelocity(), drcRobotModel.getSimulateDT());
+               lidarParams.getLidarSpindleJointName(), lidarParams.getLidarSpindleVelocity(), drcRobotModel.getSimulateDT());
          simulatedRobot.setController(lidarControllerInterface);
       }
       simulatedRobot.setController(simulatedDRCRobotTimeProvider);
