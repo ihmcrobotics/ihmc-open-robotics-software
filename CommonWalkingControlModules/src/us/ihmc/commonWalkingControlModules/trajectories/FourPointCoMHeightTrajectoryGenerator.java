@@ -25,34 +25,35 @@ import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 public class FourPointCoMHeightTrajectoryGenerator implements CoMHeightTrajectoryGenerator
 {
    private boolean VISUALIZE = true;
-   
-   private static final boolean DEBUG = false; 
+
+   private static final boolean DEBUG = false;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final FourPointSpline1D spline = new FourPointSpline1D(registry);
-   
+
    private final DoubleYoVariable nominalHeightAboveGround = new DoubleYoVariable("nominalHeightAboveGround", registry);
    private final DoubleYoVariable maximumHeightDeltaBetweenWaypoints = new DoubleYoVariable("maximumHeightDeltaBetweenWaypoints", registry);
    private final DoubleYoVariable doubleSupportPercentageIn = new DoubleYoVariable("doubleSupportPercentageIn", registry);
-   
+
    private final DoubleYoVariable desiredCoMHeight = new DoubleYoVariable("desiredCoMHeight", registry);
    private LineSegment2d projectionSegment;
 
    private final YoFramePoint contactFrameZeroPosition = new YoFramePoint("contactFrameZeroPosition", worldFrame, registry);
    private final YoFramePoint contactFrameOnePosition = new YoFramePoint("contactFrameOnePosition", worldFrame, registry);
-   
+
    private final DynamicGraphicPosition pointS0Viz, pointSFViz, pointD0Viz, pointDFViz;
    private final BagOfBalls bagOfBalls;
-   
-   public FourPointCoMHeightTrajectoryGenerator(double nominalHeightAboveGround, double doubleSupportPercentageIn, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+
+   public FourPointCoMHeightTrajectoryGenerator(double nominalHeightAboveGround, double doubleSupportPercentageIn,
+         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
    {
       setNominalHeightAboveGround(nominalHeightAboveGround);
       this.doubleSupportPercentageIn.set(doubleSupportPercentageIn);
-      
+
       this.maximumHeightDeltaBetweenWaypoints.set(0.2); //0.04);
 
       parentRegistry.addChild(registry);
-      
+
       if (dynamicGraphicObjectsListRegistry == null)
       {
          VISUALIZE = false;
@@ -60,7 +61,7 @@ public class FourPointCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       if (VISUALIZE)
       {
          double pointSize = 0.03;
-         
+
          DynamicGraphicPosition position0 = new DynamicGraphicPosition("contactFrame0", contactFrameZeroPosition, pointSize, YoAppearance.Purple());
          DynamicGraphicPosition position1 = new DynamicGraphicPosition("contactFrame1", contactFrameOnePosition, pointSize, YoAppearance.Gold());
 
@@ -71,9 +72,9 @@ public class FourPointCoMHeightTrajectoryGenerator implements CoMHeightTrajector
          pointSFViz = new DynamicGraphicPosition("pointSF", "", registry, pointSize, YoAppearance.Chartreuse());
          pointD0Viz = new DynamicGraphicPosition("pointD0", "", registry, pointSize, YoAppearance.BlueViolet());
          pointDFViz = new DynamicGraphicPosition("pointDF", "", registry, pointSize, YoAppearance.Azure());
-         
+
          bagOfBalls = new BagOfBalls(registry, dynamicGraphicObjectsListRegistry);
-         
+
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointS0Viz);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointSFViz);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointD0Viz);
@@ -85,42 +86,43 @@ public class FourPointCoMHeightTrajectoryGenerator implements CoMHeightTrajector
          pointSFViz = null;
          pointD0Viz = null;
          pointDFViz = null;
-         
+
          bagOfBalls = null;
       }
    }
-   
+
    public void setNominalHeightAboveGround(double nominalHeightAboveGround)
    {
       this.nominalHeightAboveGround.set(nominalHeightAboveGround);
    }
 
-   public void initialize(TransferToAndNextFootstepsData transferToAndNextFootstepsData, RobotSide supportLeg, Footstep nextFootstep, List<PlaneContactState> contactStates)
+   public void initialize(TransferToAndNextFootstepsData transferToAndNextFootstepsData, RobotSide supportLeg, Footstep nextFootstep,
+         List<PlaneContactState> contactStates)
    {
       FramePoint[] contactFramePositions = getContactStateCenters(contactStates, nextFootstep);
-      
+
       contactFrameZeroPosition.set(contactFramePositions[0]);
       contactFrameOnePosition.set(contactFramePositions[1]);
-      
+
       projectionSegment = new LineSegment2d(getPoint2d(contactFramePositions[0]), getPoint2d(contactFramePositions[1]));
       double s0 = 0.0;
       double sF = projectionSegment.length();
-      
+
       double s_d0 = doubleSupportPercentageIn.getDoubleValue() * sF;
       double s_df = (1.0 - doubleSupportPercentageIn.getDoubleValue()) * sF;
 
       double footHeight0 = contactFramePositions[0].getZ();
       double footHeight1 = contactFramePositions[1].getZ();
-      
+
       double z0 = footHeight0 + nominalHeightAboveGround.getDoubleValue();
       double zF = footHeight1 + nominalHeightAboveGround.getDoubleValue();
-      
+
       double z_d0 = findMaximumDoubleSupportHeight(s0, sF, s_d0, footHeight0, footHeight1);
       double z_dF = findMaximumDoubleSupportHeight(s0, sF, s_df, footHeight0, footHeight1);
-  
+
       z_d0 = clipToMaximum(z_d0, z_dF + maximumHeightDeltaBetweenWaypoints.getDoubleValue());
       z_dF = clipToMaximum(z_dF, z_d0 + maximumHeightDeltaBetweenWaypoints.getDoubleValue());
-      
+
       z0 = clipToMaximum(z0, z_d0 + maximumHeightDeltaBetweenWaypoints.getDoubleValue());
       zF = clipToMaximum(zF, z_dF + maximumHeightDeltaBetweenWaypoints.getDoubleValue());
 
@@ -128,59 +130,61 @@ public class FourPointCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       Point2d pointSF = new Point2d(sF, zF);
       Point2d pointD0 = new Point2d(s_d0, z_d0);
       Point2d pointDF = new Point2d(s_df, z_dF);
-      
-      Point2d[] points = new Point2d[] {pointS0, pointD0, pointDF, pointSF};
-      double[] endpointSlopes = new double[] {0.0, 0.0};
-      
+
+      Point2d[] points = new Point2d[] { pointS0, pointD0, pointDF, pointSF };
+      double[] endpointSlopes = new double[] { 0.0, 0.0 };
+
       double[] waypointSlopes = new double[2];
       waypointSlopes[0] = (points[2].y - points[0].y) / (points[2].x - points[0].x);
       waypointSlopes[1] = (points[3].y - points[1].y) / (points[3].x - points[1].x);
-      
+
       spline.setPoints(points, endpointSlopes, waypointSlopes);
-      
+
       if (VISUALIZE)
       {
          FramePoint framePointD0 = new FramePoint(contactFramePositions[0].getReferenceFrame());
-         framePointD0.interpolate(contactFramePositions[0], contactFramePositions[1], s_d0/sF);
+         framePointD0.interpolate(contactFramePositions[0], contactFramePositions[1], s_d0 / sF);
          framePointD0.setZ(z_d0);
          pointD0Viz.setPosition(framePointD0);
-         
+
          FramePoint framePointDF = new FramePoint(contactFramePositions[0].getReferenceFrame());
-         framePointDF.interpolate(contactFramePositions[0], contactFramePositions[1], (s_df)/sF);
+         framePointDF.interpolate(contactFramePositions[0], contactFramePositions[1], (s_df) / sF);
          framePointDF.setZ(z_dF);
          pointDFViz.setPosition(framePointDF);
-         
+
          FramePoint framePointS0 = new FramePoint(contactFramePositions[0]);
          framePointS0.setZ(z0);
          pointS0Viz.setPosition(framePointS0);
-         
+
          FramePoint framePointSF = new FramePoint(contactFramePositions[1]);
          framePointSF.setZ(zF);
-         pointSFViz.setPosition(framePointSF);     
-         
+         pointSFViz.setPosition(framePointSF);
+
          bagOfBalls.reset();
          int numberOfPoints = 30;
          CoMHeightPartialDerivativesData coMHeightPartialDerivativesData = new CoMHeightPartialDerivativesData();
-         for (int i=0; i<numberOfPoints; i++)
+         for (int i = 0; i < numberOfPoints; i++)
          {
             FramePoint framePoint = new FramePoint(contactFramePositions[0].getReferenceFrame());
-            framePoint.interpolate(contactFramePositions[0], contactFramePositions[1], ((double) i)/((double) numberOfPoints));
+            framePoint.interpolate(contactFramePositions[0], contactFramePositions[1], ((double) i) / ((double) numberOfPoints));
             Point2d queryPoint = new Point2d(framePoint.getX(), framePoint.getY());
             this.solve(coMHeightPartialDerivativesData, queryPoint);
             FramePoint framePointToPack = new FramePoint();
             coMHeightPartialDerivativesData.getCoMHeight(framePointToPack);
             framePointToPack.setX(framePoint.getX());
             framePointToPack.setY(framePoint.getY());
-            
+
             bagOfBalls.setBallLoop(framePointToPack);
          }
       }
    }
-   
+
    private double clipToMaximum(double value, double maxValue)
    {
-      if (value < maxValue) return value;
-      else return maxValue;
+      if (value < maxValue)
+         return value;
+      else
+         return maxValue;
    }
 
    public double findMaximumDoubleSupportHeight(double s0, double sF, double s_d0, double foot0Height, double foot1Height)
@@ -190,7 +194,6 @@ public class FourPointCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       double z_d0 = Math.min(z_d0_A, z_d0_B);
       return z_d0;
    }
-
 
    private Point2d getPoint2d(FramePoint point)
    {
@@ -219,20 +222,20 @@ public class FourPointCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       double ddsddx = 0;
       double ddsddy = 0;
       double ddsdxdy = 0;
-      
+
       double dzdx = dsdx * dzds;
       double dzdy = dsdy * dzds;
       double ddzddx = dzds * ddsddx + ddzdds * dsdx * dsdx;
       double ddzddy = dzds * ddsddy + ddzdds * dsdy * dsdy;
       double ddzdxdy = ddzdds * dsdx * dsdy + dzds * ddsdxdy;
-      
+
       coMHeightPartialDerivativesDataToPack.setCoMHeight(worldFrame, z);
       coMHeightPartialDerivativesDataToPack.setPartialDzDx(dzdx);
       coMHeightPartialDerivativesDataToPack.setPartialDzDy(dzdy);
       coMHeightPartialDerivativesDataToPack.setPartialD2zDxDy(ddzdxdy);
       coMHeightPartialDerivativesDataToPack.setPartialD2zDx2(ddzddx);
       coMHeightPartialDerivativesDataToPack.setPartialD2zDy2(ddzddy);
-      
+
       desiredCoMHeight.set(z);
    }
 
@@ -241,22 +244,21 @@ public class FourPointCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       double dsdx = (segment.getSecondEndPointCopy().getX() - segment.getFirstEndPointCopy().getX()) / segment.length();
       double dsdy = (segment.getSecondEndPointCopy().getY() - segment.getFirstEndPointCopy().getY()) / segment.length();
 
-      return new double[] {dsdx, dsdy};
+      return new double[] { dsdx, dsdy };
    }
 
    private FramePoint[] getContactStateCenters(List<PlaneContactState> contactStates, Footstep nextFootstep)
    {
       ReferenceFrame bodyFrame0 = contactStates.get(0).getFrameAfterParentJoint();
-//      contactFrameZero.setToReferenceFrame(bodyFrame0);
-      
+
       FramePoint contactFramePosition0 = new FramePoint(bodyFrame0);
       contactFramePosition0.changeFrame(worldFrame);
       FramePoint contactFramePosition1;
       if (nextFootstep == null)
       {
-         if (contactStates.size() != 2) throw new RuntimeException("contactStates.size() != 2");
+         if (contactStates.size() != 2)
+            throw new RuntimeException("contactStates.size() != 2");
          ReferenceFrame bodyFrame1 = contactStates.get(1).getFrameAfterParentJoint();
-//         contactFrameOne.setToReferenceFrame(bodyFrame1);
 
          contactFramePosition1 = new FramePoint(bodyFrame1);
          contactFramePosition1.changeFrame(worldFrame);
@@ -272,7 +274,7 @@ public class FourPointCoMHeightTrajectoryGenerator implements CoMHeightTrajector
          System.out.println("contactFramePosition0: " + contactFramePosition0);
          System.out.println("contactFramePosition1: " + contactFramePosition1 + "\n");
       }
-      return new FramePoint[]{contactFramePosition0, contactFramePosition1};
+      return new FramePoint[] { contactFramePosition0, contactFramePosition1 };
    }
 
    private Point2d getCenterOfMass2d(ReferenceFrame centerOfMassFrame)
@@ -282,7 +284,7 @@ public class FourPointCoMHeightTrajectoryGenerator implements CoMHeightTrajector
 
       return getPoint2d(coM);
    }
-   
+
    public boolean hasBeenInitializedWithNextStep()
    {
       return false;
@@ -292,4 +294,3 @@ public class FourPointCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    {
    }
 }
-
