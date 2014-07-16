@@ -36,7 +36,7 @@ public class UserDesiredFootstepProvider implements FootstepProvider
    private final ArrayList<Footstep> footstepList = new ArrayList<Footstep>();
 
    public UserDesiredFootstepProvider(SideDependentList<ContactablePlaneBody> bipedFeet, SideDependentList<ReferenceFrame> ankleZUpReferenceFrames,
-                                      YoVariableRegistry parentRegistry)
+         YoVariableRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
       this.bipedFeet = bipedFeet;
@@ -54,14 +54,15 @@ public class UserDesiredFootstepProvider implements FootstepProvider
          userStepsTakeEm.set(false);
 
          RobotSide stepSide = userStepFirstSide.getEnumValue();
-         if (stepSide == null) stepSide = RobotSide.LEFT;
+         if (stepSide == null)
+            stepSide = RobotSide.LEFT;
 
          Footstep previousFootstep = null;
 
          for (int i = 0; i < userStepsToTake.getIntegerValue(); i++)
          {
             Footstep footstep;
-            
+
             if (i == 0)
             {
                footstep = createFirstFootstep(stepSide);
@@ -70,7 +71,7 @@ public class UserDesiredFootstepProvider implements FootstepProvider
             {
                footstep = createNextFootstep(previousFootstep, stepSide);
             }
-            
+
             footstepList.add(footstep);
             previousFootstep = footstep;
             stepSide = stepSide.getOppositeSide();
@@ -86,7 +87,6 @@ public class UserDesiredFootstepProvider implements FootstepProvider
       return ret;
    }
 
-   
    private Footstep createFirstFootstep(RobotSide swingLegSide)
    {
       RobotSide supportLegSide = swingLegSide.getOppositeSide();
@@ -104,7 +104,7 @@ public class UserDesiredFootstepProvider implements FootstepProvider
       FramePose pose = new FramePose();
       previousFootstep.getPose(pose);
       PoseReferenceFrame referenceFrame = new PoseReferenceFrame("step" + userStepsNotifyCompleteCount.getIntegerValue(), pose);
-      
+
       return createFootstep(referenceFrame, swingLegSide);
    }
 
@@ -114,15 +114,14 @@ public class UserDesiredFootstepProvider implements FootstepProvider
 
       // Footstep Position
       FramePoint footstepPosition = new FramePoint(previousFootFrame);
-      FrameVector footstepOffset = new FrameVector(previousFootFrame, userStepLength.getDoubleValue(),
-                                      supportLegSide.negateIfLeftSide(userStepWidth.getDoubleValue()), userStepHeight.getDoubleValue());
+      FrameVector footstepOffset = new FrameVector(previousFootFrame, userStepLength.getDoubleValue(), supportLegSide.negateIfLeftSide(userStepWidth
+            .getDoubleValue()), userStepHeight.getDoubleValue());
 
       footstepPosition.add(footstepOffset);
 
       // Footstep Orientation
       FrameOrientation footstepOrientation = new FrameOrientation(previousFootFrame);
       footstepOrientation.setYawPitchRoll(userStepYaw.getDoubleValue(), 0.0, 0.0);
-
 
       // Create a foot Step Pose from Position and Orientation
       FramePose footstepPose = new FramePose(footstepPosition, footstepOrientation);
@@ -182,5 +181,4 @@ public class UserDesiredFootstepProvider implements FootstepProvider
    {
       return true;
    }
-
 }
