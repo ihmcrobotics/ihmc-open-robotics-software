@@ -154,7 +154,7 @@ private void calculateAngularOffset(List<List<Point3D_F64>> points,Node zUpNode,
   		
   		 if(planeAngle< min){
   			 	
-  			 GeoTuple3D_F64<GeoTuple3D_F64> g = calculateMean(s1.points);
+  			 Point3D_F64 g = calculateMean(s1.points);
   	    	 double dist = calculateMean(s2.points).distance(g); 
   	    	 
   	    	 if(dist<=threshold){

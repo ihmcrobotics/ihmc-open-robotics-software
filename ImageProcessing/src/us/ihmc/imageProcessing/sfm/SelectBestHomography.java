@@ -102,14 +102,14 @@ public class SelectBestHomography
    private void computeTransform() {
       // make sure the normal is pointing downwards (+y) to simplify later calculations
       if( normal.y < 0 )
-         normal.ip_times(-1);
+         normal.scale(-1);
 
       double rotX = Math.atan2(normal.z,normal.y);
       double rotZ = Math.atan2(normal.x,normal.y);
 
       RotationMatrixGenerator.eulerXYZ(rotX, 0, rotZ, groundToLeft.R);
       groundToLeft.T.set(normal);
-      groundToLeft.T.ip_times(distanceFromPlane);
+      groundToLeft.T.scale(distanceFromPlane);
    }
 
    public Se3_F64 getGroundToLeft()
