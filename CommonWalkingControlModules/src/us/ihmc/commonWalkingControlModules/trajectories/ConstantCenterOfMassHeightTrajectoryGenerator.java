@@ -16,22 +16,22 @@ public class ConstantCenterOfMassHeightTrajectoryGenerator implements CoMHeightT
 {
    private final YoVariableRegistry registry;
    private final DoubleYoVariable desiredCenterOfMassHeight;
-   
+
    public ConstantCenterOfMassHeightTrajectoryGenerator(double initialDesiredCoMHeight, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(getClass().getSimpleName());
-      desiredCenterOfMassHeight = new DoubleYoVariable("desiredCenterOfMassHeight", registry); 
+      desiredCenterOfMassHeight = new DoubleYoVariable("desiredCenterOfMassHeight", registry);
       parentRegistry.addChild(registry);
 
       desiredCenterOfMassHeight.set(initialDesiredCoMHeight);
    }
 
-   public void initialize(TransferToAndNextFootstepsData transferToAndNextFootstepsData, RobotSide supportLeg, Footstep nextFootstep, List<PlaneContactState> contactStates)
+   public void initialize(TransferToAndNextFootstepsData transferToAndNextFootstepsData, RobotSide supportLeg, Footstep nextFootstep,
+         List<PlaneContactState> contactStates)
    {
       // empty
    }
 
-   
    public void solve(CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, ContactStatesAndUpcomingFootstepData centerOfMassHeightInputData)
    {
       coMHeightPartialDerivativesDataToPack.setCoMHeight(ReferenceFrame.getWorldFrame(), desiredCenterOfMassHeight.getDoubleValue());
