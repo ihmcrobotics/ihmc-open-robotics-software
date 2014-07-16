@@ -28,8 +28,6 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPositi
 import com.yobotics.simulationconstructionset.util.ground.steppingStones.SteppingStones;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
-
-
 /**
  * <p>Title: SteppingStonesDesiredStepLocationCalculator</p>
  *
@@ -75,25 +73,23 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
 
    private final SideDependentList<? extends ContactablePlaneBody> contactableBodies;
 
-
    // Constructors
    public SteppingStonesDesiredFootstepCalculator(SideDependentList<? extends ContactablePlaneBody> contactableBodies, SteppingStones steppingStones,
-           CouplingRegistry couplingRegistry, CommonWalkingReferenceFrames commonWalkingReferenceFrames, OneStepCaptureRegionCalculator captureRegionCalculator,
-           YoVariableRegistry yoVariableRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+         CouplingRegistry couplingRegistry, CommonWalkingReferenceFrames commonWalkingReferenceFrames, OneStepCaptureRegionCalculator captureRegionCalculator,
+         YoVariableRegistry yoVariableRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       percentNominalToAdjusted.set(1.0);
 
       this.couplingRegistry = couplingRegistry;
       this.contactableBodies = contactableBodies;
 
-
       double defaultStepWidth = 0.22;
       stanceWidth.set(defaultStepWidth);
-      double defaultStanceLength = captureRegionCalculator.getKinematicStepRange() * 0.5;    // 0.7;//0.40;
+      double defaultStanceLength = captureRegionCalculator.getKinematicStepRange() * 0.5; // 0.7;//0.40;
       stanceLength.set(defaultStanceLength);
-      stepAngle.set(Math.atan(stanceWidth.getDoubleValue() / stanceLength.getDoubleValue()));    // 0.4
+      stepAngle.set(Math.atan(stanceWidth.getDoubleValue() / stanceLength.getDoubleValue())); // 0.4
       stepDistance.set(Math.sqrt((stanceWidth.getDoubleValue() * stanceWidth.getDoubleValue())
-                                 + (stanceLength.getDoubleValue() * stanceLength.getDoubleValue())));
+            + (stanceLength.getDoubleValue() * stanceLength.getDoubleValue())));
 
       ReferenceFrame leftAnkleZUpFrame = commonWalkingReferenceFrames.getAnkleZUpReferenceFrames().get(RobotSide.LEFT);
       ReferenceFrame rightAnkleZUpFrame = commonWalkingReferenceFrames.getAnkleZUpReferenceFrames().get(RobotSide.RIGHT);
@@ -102,12 +98,10 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
 
       stepLocationScorer = new WeightedDistanceScorer(captureRegionCalculator, footZUpFrames, stanceWidth, stanceLength, stepAngle, stepDistance);
 
-//    stepLocationScorer = new BasicReachableScorer(yoboticsBipedCaptureRegionCalculator);
-
       if (steppingStones != null)
       {
          steppingStonesCaptureRegionIntersectionCalculator = new SteppingStonesCaptureRegionIntersectionCalculator(steppingStones, yoVariableRegistry,
-                 dynamicGraphicObjectsListRegistry);
+               dynamicGraphicObjectsListRegistry);
       }
       else
       {
@@ -123,28 +117,17 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
       {
          double scale = 0.012;
          DynamicGraphicPosition adjustedStepPositionDynamicGraphicPosition = new DynamicGraphicPosition("Adjusted Step Position", adjustedStepPosition, scale,
-                                                                                YoAppearance.Yellow());
+               YoAppearance.Yellow());
 
          dynamicGraphicObjectsListRegistry.registerArtifact("DesiredStepLocation", adjustedStepPositionDynamicGraphicPosition.createArtifact());
-
-//       int level = 4;
-//       YoboticsBipedPlotter.registerDynamicGraphicPosition("Adjusted Step Position", adjustedStepPositionDynamicGraphicPosition, level);
       }
    }
-
-   // Getters
-// public Footstep getDesiredFootstep()
-// {
-//    return desiredFootstep;
-// }
-
 
    public void initializeDesiredFootstep(RobotSide supportLegSide)
    {
       updateAndGetDesiredFootstep(supportLegSide);
 
    }
-
 
    public Footstep updateAndGetDesiredFootstep(RobotSide supportLegSide)
    {
@@ -174,24 +157,24 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
       ArrayList<ConvexPolygon2d> captureRegionSteppingStonesIntersections = null;
       if (steppingStonesCaptureRegionIntersectionCalculator != null)
       {
-         captureRegionSteppingStonesIntersections =
-            steppingStonesCaptureRegionIntersectionCalculator.findIntersectionsBetweenSteppingStonesAndCaptureRegion(captureRegion);
+         captureRegionSteppingStonesIntersections = steppingStonesCaptureRegionIntersectionCalculator
+               .findIntersectionsBetweenSteppingStonesAndCaptureRegion(captureRegion);
       }
 
       switch (captureRegionStepLocationSelectionMethod)
       {
-         case NEAREST_CENTROID :
-            computeAndSetBestCentroidToStepTo(nominalLocation2d, captureRegionSteppingStonesIntersections);
+      case NEAREST_CENTROID:
+         computeAndSetBestCentroidToStepTo(nominalLocation2d, captureRegionSteppingStonesIntersections);
 
-            break;
+         break;
 
-         case NEAREST_POINT :
-            computeAndSetBestNearestPointToStepTo(nominalLocation2d, captureRegionSteppingStonesIntersections);
+      case NEAREST_POINT:
+         computeAndSetBestNearestPointToStepTo(nominalLocation2d, captureRegionSteppingStonesIntersections);
 
-            break;
+         break;
 
-         default :
-            throw new RuntimeException("Enum constant not handled");
+      default:
+         throw new RuntimeException("Enum constant not handled");
       }
 
       FrameVector nominalToAdjusted = new FrameVector(adjustedStepPosition.getFramePointCopy());
@@ -244,7 +227,7 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
       double nearestDistanceSquared = Double.POSITIVE_INFINITY;
       Point2d pointToTest = new Point2d();
 
-      if (captureRegionSteppingStonesIntersections != null)    // If there are no captureRegionSteppingStonesIntersections, just keep stepping where you were before for now...
+      if (captureRegionSteppingStonesIntersections != null) // If there are no captureRegionSteppingStonesIntersections, just keep stepping where you were before for now...
       {
          for (ConvexPolygon2d possiblePlaceToStep : captureRegionSteppingStonesIntersections)
          {
@@ -260,12 +243,11 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
             }
          }
 
-         if (nearestDistanceSquared != Double.POSITIVE_INFINITY)    // If there are no near centroids, just keep stepping where you were before...
+         if (nearestDistanceSquared != Double.POSITIVE_INFINITY) // If there are no near centroids, just keep stepping where you were before...
          {
             adjustedStepPosition.set(nearestPoint.x, nearestPoint.y, 0.0);
          }
       }
-
    }
 
    private void computeAndSetBestCentroidToStepTo(Point2d nominalLocation2d, ArrayList<ConvexPolygon2d> captureRegionSteppingStonesIntersections)
@@ -275,7 +257,7 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
       double nearestDistanceSquared = Double.POSITIVE_INFINITY;
       Point2d centroid = new Point2d();
 
-      if (captureRegionSteppingStonesIntersections != null)    // If there are no captureRegionSteppingStonesIntersections, just keep stepping where you were before for now...
+      if (captureRegionSteppingStonesIntersections != null) // If there are no captureRegionSteppingStonesIntersections, just keep stepping where you were before for now...
       {
          for (ConvexPolygon2d possiblePlaceToStep : captureRegionSteppingStonesIntersections)
          {
@@ -289,14 +271,17 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
             }
          }
 
-         if (nearestCentroid != null)    // If there are no near centroids, just keep stepping where you were before...
+         if (nearestCentroid != null) // If there are no near centroids, just keep stepping where you were before...
          {
             adjustedStepPosition.set(nearestCentroid.x, nearestCentroid.y, 0.0);
          }
       }
    }
 
-   private enum CaptureRegionStepLocationSelectionMethod {NEAREST_CENTROID, NEAREST_POINT}
+   private enum CaptureRegionStepLocationSelectionMethod
+   {
+      NEAREST_CENTROID, NEAREST_POINT
+   }
 
    public void setupParametersForM2V2()
    {
@@ -315,5 +300,4 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
    {
       return false;
    }
-
 }
