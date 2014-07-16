@@ -40,9 +40,10 @@ public class UpcomingFootstepList
    }
 
    public void checkForFootsteps(BooleanYoVariable readyToGrabNextFootstep, EnumYoVariable<RobotSide> upcomingSupportLeg,
-                                 SideDependentList<? extends ContactablePlaneBody> bipedFeet)
+         SideDependentList<? extends ContactablePlaneBody> bipedFeet)
    {
-      if (footstepProvider == null) return;
+      if (footstepProvider == null)
+         return;
 
       if (readyToGrabNextFootstep.getBooleanValue())
       {
@@ -55,7 +56,7 @@ public class UpcomingFootstepList
          {
             nextNextFootstepList.remove(i);
          }
-         
+
          for (int i = nextNextNextFootstepList.size() - 1; i > nextNextNextFootstepIndex.getIntegerValue(); i--)
          {
             nextNextNextFootstepList.remove(i);
@@ -65,10 +66,6 @@ public class UpcomingFootstepList
 
          if (nextFootstep != null)
          {
-//            System.out.println("Grabbed next footstep. upcomingSupportLeg = " + upcomingSupportLeg.getEnumValue());
-//            System.out.println("Grabbed next footstep. nextFootstepList.size() = " + nextFootstepList.size());
-//            System.out.println("Grabbed next footstep. nextFootstepIndex.getIntegerValue() = " + nextFootstepIndex.getIntegerValue());
-
             nextFootstepList.add(nextFootstep);
             nextFootstepIndex.set(nextFootstepList.size() - 1);
 
@@ -89,7 +86,7 @@ public class UpcomingFootstepList
             {
                nextNextFootstepIndex.increment();
             }
-            
+
             Footstep nextNextNextFootstep = footstepProvider.peekPeek();
             if (nextNextNextFootstep != null)
             {
@@ -100,7 +97,6 @@ public class UpcomingFootstepList
             {
                nextNextNextFootstepIndex.increment();
             }
-
          }
 
          else
@@ -132,7 +128,7 @@ public class UpcomingFootstepList
 
       return nextNextFootstep;
    }
-   
+
    public Footstep getNextNextNextFootstep()
    {
       if (nextNextNextFootstepIndex.getIntegerValue() >= nextNextNextFootstepList.size())
@@ -144,22 +140,25 @@ public class UpcomingFootstepList
 
    public void notifyComplete()
    {
-      if (footstepProvider == null) return;
+      if (footstepProvider == null)
+         return;
 
       footstepProvider.notifyComplete();
    }
 
    public boolean isFootstepProviderEmpty()
    {
-      if (footstepProvider == null) return true;
+      if (footstepProvider == null)
+         return true;
 
       return footstepProvider.isEmpty();
    }
-   
+
    public int getNumberOfFootstepsToProvide()
    {
-      if (footstepProvider == null) return 0;
-      
+      if (footstepProvider == null)
+         return 0;
+
       return footstepProvider.getNumberOfFootstepsToProvide();
    }
 
