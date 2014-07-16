@@ -1,6 +1,4 @@
-
 //A Desired Footstep is always defined in the support foot frame
-
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
@@ -34,7 +32,7 @@ public class SimpleDesiredFootstepCalculator implements DesiredFootstepCalculato
    private final SideDependentList<? extends ContactablePlaneBody> contactableBodies;
 
    public SimpleDesiredFootstepCalculator(SideDependentList<? extends ContactablePlaneBody> contactableBodies,
-           SideDependentList<ReferenceFrame> ankleZUpFrames, DesiredHeadingControlModule desiredHeadingControlModule, YoVariableRegistry parentRegistry)
+         SideDependentList<ReferenceFrame> ankleZUpFrames, DesiredHeadingControlModule desiredHeadingControlModule, YoVariableRegistry parentRegistry)
    {
       this.contactableBodies = contactableBodies;
       this.ankleZUpFrames = ankleZUpFrames;
@@ -58,18 +56,15 @@ public class SimpleDesiredFootstepCalculator implements DesiredFootstepCalculato
       // Footstep Position
       FramePoint footstepPosition = new FramePoint(supportAnkleZUpFrame);
       FrameVector footstepOffset = new FrameVector(desiredHeadingFrame, stepLength.getDoubleValue(),
-                                      supportLegSide.negateIfLeftSide(stepWidth.getDoubleValue()), stepHeight.getDoubleValue());
+            supportLegSide.negateIfLeftSide(stepWidth.getDoubleValue()), stepHeight.getDoubleValue());
 
       footstepPosition.changeFrame(desiredHeadingFrame);
 
-//    footstepOffset.changeFrame(supportAnkleZUpFrame);
       footstepPosition.add(footstepOffset);
 
       // Footstep Orientation
       FrameOrientation footstepOrientation = new FrameOrientation(desiredHeadingFrame);
       footstepOrientation.setYawPitchRoll(stepYaw.getDoubleValue(), stepPitch.getDoubleValue(), stepRoll.getDoubleValue());
-
-//    footstepOrientation.changeFrame(supportAnkleZUpFrame);
 
       // Create a foot Step Pose from Position and Orientation
       FramePose footstepPose = new FramePose(footstepPosition, footstepOrientation);
@@ -106,30 +101,26 @@ public class SimpleDesiredFootstepCalculator implements DesiredFootstepCalculato
 
    public void setupParametersForR2InverseDynamics()
    {
-      // stairs:
-      stepLength.set(0.315);
-
-//    stepLength.set(0.21);
+      //    stepLength.set(0.21);
       stepWidth.set(0.2);
       stepHeight.set(0.25);
       stepYaw.set(0.0);
       stepPitch.set(0.0);
       stepRoll.set(0.0);
+      
+      // stairs:
+      stepLength.set(0.315);
 
       // flat ground
-//    stepLength.set(0.3);
-//    stepWidth.set(0.2);
-//    stepHeight.set(0.0);
-//    stepYaw.set(0.0);
-//    stepPitch.set(0.0);
-//    stepRoll.set(0.0);
+      //    stepLength.set(0.3);
+      //    stepHeight.set(0.0);
    }
 
    public Footstep predictFootstepAfterDesiredFootstep(RobotSide supportLegSide, Footstep desiredFootstep)
    {
       return null;
    }
-   
+
    public boolean isDone()
    {
       return false;
