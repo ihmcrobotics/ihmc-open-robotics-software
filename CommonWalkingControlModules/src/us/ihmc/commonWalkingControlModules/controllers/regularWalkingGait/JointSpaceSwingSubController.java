@@ -218,7 +218,6 @@ public class JointSpaceSwingSubController implements SwingSubController
 
    public void doInitialSwing(LegTorques legTorquesToPackForSwingLeg, double timeInState)
    {
-      //      updateFinalDesiredPosition(legTorquesToPackForSwingLeg.getRobotSide());
       updateDesiredPositions(legTorquesToPackForSwingLeg.getRobotSide());
 
       doSwing(legTorquesToPackForSwingLeg, timeInState, true);
@@ -227,7 +226,6 @@ public class JointSpaceSwingSubController implements SwingSubController
 
    public void doMidSwing(LegTorques legTorquesToPackForSwingLeg, double timeInState)
    {
-      //      updateFinalDesiredPosition(legTorquesToPackForSwingLeg.getRobotSide());
       updateDesiredPositions(legTorquesToPackForSwingLeg.getRobotSide());
 
       doSwing(legTorquesToPackForSwingLeg, timeSpentInInitialSwing.getDoubleValue() + timeInState, true);
@@ -283,7 +281,6 @@ public class JointSpaceSwingSubController implements SwingSubController
 
    public void doSwingInAir(LegTorques legTorques, double timeInState)
    {
-
       doSwing(legTorques, timeInState, false);
       canGoToDoubleSupportFromLastTickState.set(true);
    }
@@ -309,7 +306,6 @@ public class JointSpaceSwingSubController implements SwingSubController
 
    public boolean isDoneWithMidSwing(RobotSide swingSide, double timeInState)
    {
-      //      footSwitches.get(swingSide).hasFootHitGround(); // to update the maximum value
       return jointSpaceTrajectoryGenerator.isDoneWithSwing(timeSpentInInitialSwing.getDoubleValue() + timeInState);
    }
 
@@ -369,7 +365,6 @@ public class JointSpaceSwingSubController implements SwingSubController
 
    public void doTransitionIntoInitialSwing(RobotSide swingSide)
    {
-
       initializeToCurrentJointValues(swingSide);
       updateDesiredPositions(swingSide);
       jointSpaceTrajectoryGenerator.initialize(swingSide, jointPositions.get(swingSide), jointVelocities.get(swingSide), jointAccelerations.get(swingSide),
@@ -421,7 +416,6 @@ public class JointSpaceSwingSubController implements SwingSubController
    public void doTransitionOutOfInitialSwing(RobotSide swingSide)
    {
       torqueControlModule.setAnkleGainsDefault(swingSide);
-
    }
 
    public void doTransitionOutOfMidSwing(RobotSide swingSide)
