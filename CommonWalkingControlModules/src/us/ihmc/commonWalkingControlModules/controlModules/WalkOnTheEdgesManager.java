@@ -80,22 +80,22 @@ public class WalkOnTheEdgesManager
 
    private final WalkingControllerParameters walkingControllerParameters;
 
-   private final SideDependentList<DoubleYoVariable> angleFootsWithDesired = new SideDependentList<DoubleYoVariable>(
-         new DoubleYoVariable("angleFootWithDesiredLeft", registry), new DoubleYoVariable("angleFootWithDesiredRight", registry));
+   private final SideDependentList<DoubleYoVariable> angleFootsWithDesired = new SideDependentList<DoubleYoVariable>(new DoubleYoVariable(
+         "angleFootWithDesiredLeft", registry), new DoubleYoVariable("angleFootWithDesiredRight", registry));
    private BooleanYoVariable enabledDoubleState = new BooleanYoVariable("enabledDoubleState", registry);
 
-   private final SideDependentList<YoFrameOrientation> footOrientationInWorld = new SideDependentList<YoFrameOrientation>(new YoFrameOrientation("orientationLeftFoot",
-         worldFrame, registry), new YoFrameOrientation("orientationRightFoot", worldFrame, registry));
+   private final SideDependentList<YoFrameOrientation> footOrientationInWorld = new SideDependentList<YoFrameOrientation>(new YoFrameOrientation(
+         "orientationLeftFoot", worldFrame, registry), new YoFrameOrientation("orientationRightFoot", worldFrame, registry));
 
-   private final SideDependentList<BooleanYoVariable> desiredAngleReached = new SideDependentList<BooleanYoVariable>(new BooleanYoVariable("l_Desired_Pitch", registry), new BooleanYoVariable("r_Desired_Pitch", registry));
+   private final SideDependentList<BooleanYoVariable> desiredAngleReached = new SideDependentList<BooleanYoVariable>(new BooleanYoVariable("l_Desired_Pitch",
+         registry), new BooleanYoVariable("r_Desired_Pitch", registry));
    private Footstep desiredFootstep;
 
    private final double inPlaceWidth;
    private final double footLength;
 
-   public WalkOnTheEdgesManager(WalkingControllerParameters walkingControllerParameters,
-         SideDependentList<? extends ContactablePlaneBody> feet, SideDependentList<FootControlModule> footEndEffectorControlModules,
-         YoVariableRegistry parentRegistry)
+   public WalkOnTheEdgesManager(WalkingControllerParameters walkingControllerParameters, SideDependentList<? extends ContactablePlaneBody> feet,
+         SideDependentList<FootControlModule> footEndEffectorControlModules, YoVariableRegistry parentRegistry)
    {
       this.stayOnToes.set(walkingControllerParameters.stayOnToes());
       this.doToeOffIfPossible.set(walkingControllerParameters.doToeOffIfPossible());
@@ -136,7 +136,6 @@ public class WalkOnTheEdgesManager
       ContactablePlaneBody trailingFoot = feet.get(trailingLeg);
       ContactablePlaneBody leadingFoot = feet.get(trailingLeg.getOppositeSide());
       FrameConvexPolygon2d onToesSupportPolygon = getOnToesSupportPolygonCopy(trailingFoot, leadingFoot);
-      //      isDesiredECMPOKForToeOff.set(Math.abs(onToesSupportPolygon.distance(desiredECMP)) < 0.06);
       isDesiredECMPOKForToeOff.set(onToesSupportPolygon.isPointInside(desiredECMP));
 
       if (!isDesiredECMPOKForToeOff.getBooleanValue())
@@ -247,7 +246,6 @@ public class WalkOnTheEdgesManager
       return isStepLongEnough && isStepLongEnoughAlongX;
    }
 
-   @SuppressWarnings("unused")
    private boolean isFrontFootWellPositionedForToeTouchdown(RobotSide trailingLeg, ReferenceFrame frontFootFrame)
    {
       ReferenceFrame trailingFootFrame = feet.get(trailingLeg).getFrameAfterParentJoint();
@@ -303,7 +301,7 @@ public class WalkOnTheEdgesManager
 
    public void updateEdgeTouchdownStatus(RobotSide supportLeg, Footstep nextFootstep)
    {
-      RobotSide nextTrailingLeg = supportLeg; 
+      RobotSide nextTrailingLeg = supportLeg;
       ReferenceFrame nextFrontFootFrame;
 
       if (nextFootstep != null)
@@ -449,7 +447,7 @@ public class WalkOnTheEdgesManager
    {
       List<FramePoint> toePoints = getToePointsCopy(supportFoot);
       ArrayList<FramePoint2d> points = new ArrayList<FramePoint2d>();
-      for(int i = 0; i < toePoints.size(); i++)
+      for (int i = 0; i < toePoints.size(); i++)
       {
          FramePoint toePoint = toePoints.get(i);
          toePoint.changeFrame(worldFrame);
@@ -479,19 +477,13 @@ public class WalkOnTheEdgesManager
 
       List<FramePoint2d> allPoints = new ArrayList<FramePoint2d>();
       allPoints.add(singleToePoint.toFramePoint2d());
-      //      for (FramePoint framePoint : toePoints)
-      //      {
-      //         framePoint.changeFrame(worldFrame);
-      //         allPoints.add(framePoint.toFramePoint2d());
-      //      }
 
-      for(int i = 0; i < leadingFootPoints.size(); i++)
+      for (int i = 0; i < leadingFootPoints.size(); i++)
       {
          FramePoint framePoint = leadingFootPoints.get(i);
          framePoint.changeFrame(worldFrame);
          allPoints.add(framePoint.toFramePoint2d());
       }
-
       return new FrameConvexPolygon2d(allPoints);
    }
 
@@ -500,13 +492,12 @@ public class WalkOnTheEdgesManager
       List<FramePoint> footPoints = foot.getContactPointsCopy();
 
       List<FramePoint2d> allPoints = new ArrayList<FramePoint2d>();
-      for(int i = 0; i < footPoints.size(); i++)
+      for (int i = 0; i < footPoints.size(); i++)
       {
          FramePoint framePoint = footPoints.get(i);
          framePoint.changeFrame(worldFrame);
          allPoints.add(framePoint.toFramePoint2d());
       }
-
       return new FrameConvexPolygon2d(allPoints);
    }
 
