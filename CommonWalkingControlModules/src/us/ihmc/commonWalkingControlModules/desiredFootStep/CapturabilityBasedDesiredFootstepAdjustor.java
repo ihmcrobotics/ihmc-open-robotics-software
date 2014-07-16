@@ -25,11 +25,11 @@ public class CapturabilityBasedDesiredFootstepAdjustor implements DesiredFootste
 
    private final YoVariableRegistry registry = new YoVariableRegistry("CapturabilityBasedDesiredFootstepCalculator");
 
-// Stepping Stones if the world isn't flat:
+   // Stepping Stones if the world isn't flat:
    private final SteppingStonesCaptureRegionIntersectionCalculator steppingStonesCaptureRegionIntersectionCalculator;
 
    private final BooleanYoVariable projectIntoCaptureRegion = new BooleanYoVariable("projectIntoCaptureRegion",
-                                                                 "Whether or not to project the step into the capture region", registry);
+         "Whether or not to project the step into the capture region", registry);
 
    private final BooleanYoVariable nextStepIsInsideCaptureRegion = new BooleanYoVariable("nextStepIsInsideCaptureRegion", registry);
 
@@ -39,18 +39,16 @@ public class CapturabilityBasedDesiredFootstepAdjustor implements DesiredFootste
    private double footBackwardOffset;
    private double footWidth;
 
-
    public CapturabilityBasedDesiredFootstepAdjustor(CouplingRegistry couplingRegistry, SideDependentList<? extends ContactablePlaneBody> feet,
-           SteppingStones steppingStones, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+         SteppingStones steppingStones, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       this.couplingRegistry = couplingRegistry;
       this.feet = feet;
 
-
       if (steppingStones != null)
       {
          steppingStonesCaptureRegionIntersectionCalculator = new SteppingStonesCaptureRegionIntersectionCalculator(steppingStones, registry,
-                 dynamicGraphicObjectsListRegistry);
+               dynamicGraphicObjectsListRegistry);
       }
       else
       {
@@ -91,7 +89,6 @@ public class CapturabilityBasedDesiredFootstepAdjustor implements DesiredFootste
          throw new RuntimeException("Swing leg side not recognized");
       }
 
-
       if (steppingStonesCaptureRegionIntersectionCalculator != null)
       {
          return projectIntoSteppingStonesAndCaptureRegion(baseSwingFootstep, swingLegSide, captureRegion);
@@ -102,14 +99,12 @@ public class CapturabilityBasedDesiredFootstepAdjustor implements DesiredFootste
       }
    }
 
-
    private Footstep projectIntoCaptureRegion(Footstep baseFootstep, RobotSide swingLegSide, FrameConvexPolygon2d captureRegion)
    {
       FramePoint2d nextStep2d = new FramePoint2d();
       baseFootstep.getPosition2d(nextStep2d);
       nextStep2d.changeFrame(captureRegion.getReferenceFrame());
       FrameConvexPolygon2d nextStepFootPolygon = buildNextStepFootPolygon(nextStep2d);
-
 
       if (nextStepFootPolygon.intersectionWith(captureRegion) == null)
       {
@@ -131,14 +126,12 @@ public class CapturabilityBasedDesiredFootstepAdjustor implements DesiredFootste
    private Footstep projectIntoSteppingStonesAndCaptureRegion(Footstep baseFootstep, RobotSide swingLegSide, FrameConvexPolygon2d captureRegion)
    {
       captureRegion.changeFrame(ReferenceFrame.getWorldFrame());
-      ArrayList<ConvexPolygon2d> steppingStoneCaptureRegionIntersections =
-         steppingStonesCaptureRegionIntersectionCalculator.findIntersectionsBetweenSteppingStonesAndCaptureRegion(captureRegion);
+      ArrayList<ConvexPolygon2d> steppingStoneCaptureRegionIntersections = steppingStonesCaptureRegionIntersectionCalculator
+            .findIntersectionsBetweenSteppingStonesAndCaptureRegion(captureRegion);
 
       FramePoint2d nextStep2d = new FramePoint2d();
       baseFootstep.getPosition2d(nextStep2d);
       nextStep2d.changeFrame(captureRegion.getReferenceFrame());
-
-//    FrameConvexPolygon2d nextStepFootPolygon = buildNextStepFootPolygon(nextStep2d);
 
       Point2d oldLocation = nextStep2d.getPointCopy();
       Point2d newLocation = computeBestNearestPointToStepTo(oldLocation, steppingStoneCaptureRegionIntersections);
@@ -163,8 +156,7 @@ public class CapturabilityBasedDesiredFootstepAdjustor implements DesiredFootste
       return baseFootstep;
    }
 
-
-   private FrameConvexPolygon2d buildNextStepFootPolygon(FramePoint2d nextStep)    // TODO: doesn't account for foot yaw
+   private FrameConvexPolygon2d buildNextStepFootPolygon(FramePoint2d nextStep) // TODO: doesn't account for foot yaw
    {
       ArrayList<FramePoint2d> nextStepFootPolygonPoints = new ArrayList<FramePoint2d>(4);
 
@@ -200,14 +192,13 @@ public class CapturabilityBasedDesiredFootstepAdjustor implements DesiredFootste
       return nextStepFootPolygon;
    }
 
-
    private Point2d computeBestNearestPointToStepTo(Point2d nominalLocation2d, ArrayList<ConvexPolygon2d> captureRegionSteppingStonesIntersections)
    {
       Point2d nearestPoint = new Point2d();
       double nearestDistanceSquared = Double.POSITIVE_INFINITY;
       Point2d pointToTest = new Point2d();
 
-      if (captureRegionSteppingStonesIntersections != null)    // If there are no captureRegionSteppingStonesIntersections, just keep stepping where you were before for now...
+      if (captureRegionSteppingStonesIntersections != null) // If there are no captureRegionSteppingStonesIntersections, just keep stepping where you were before for now...
       {
          for (ConvexPolygon2d possiblePlaceToStep : captureRegionSteppingStonesIntersections)
          {
@@ -223,18 +214,14 @@ public class CapturabilityBasedDesiredFootstepAdjustor implements DesiredFootste
             }
          }
 
-         if (nearestDistanceSquared != Double.POSITIVE_INFINITY)    // If there are no near centroids, just keep stepping where you were before...
+         if (nearestDistanceSquared != Double.POSITIVE_INFINITY) // If there are no near centroids, just keep stepping where you were before...
          {
             return nearestPoint;
-
-//          adjustedStepPosition.set(nearestPoint.x, nearestPoint.y, 0.0);
          }
       }
 
       return nominalLocation2d;
    }
-
-
 
    public void setUpParametersForR2(double footBackwardOffset, double footForwardOffset, double footWidth)
    {
@@ -253,6 +240,4 @@ public class CapturabilityBasedDesiredFootstepAdjustor implements DesiredFootste
 
       projectIntoCaptureRegion.set(true);
    }
-
-
 }
