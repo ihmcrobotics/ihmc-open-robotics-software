@@ -127,7 +127,10 @@ public class DRCPoseCommunicator implements RawOutputWriter
    {
       rootFrame.getTransformToDesiredFrame(rootTransform, ReferenceFrame.getWorldFrame());
       cameraFrame.getTransformToDesiredFrame(cameraTransform, ReferenceFrame.getWorldFrame());
-      lidarFrame.getTransformToDesiredFrame(lidarTransform, ReferenceFrame.getWorldFrame());
+      if(lidarFrame != null)
+      {
+         lidarFrame.getTransformToDesiredFrame(lidarTransform, ReferenceFrame.getWorldFrame());
+      }
       headFrame.getTransformToDesiredFrame(headTransform, ReferenceFrame.getWorldFrame());
 
       State state = stateRingBuffer.next();
