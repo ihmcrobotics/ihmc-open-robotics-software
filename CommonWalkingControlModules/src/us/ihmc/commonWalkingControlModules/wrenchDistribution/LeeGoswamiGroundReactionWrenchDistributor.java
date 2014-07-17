@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.wrenchDistribution;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -30,9 +29,8 @@ public class LeeGoswamiGroundReactionWrenchDistributor implements GroundReaction
 
    private final double rotationalCoefficientOfFrictionMultiplier;
 
-
    public LeeGoswamiGroundReactionWrenchDistributor(ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry,
-           double rotationalCoefficientOfFrictionMultiplier)
+         double rotationalCoefficientOfFrictionMultiplier)
    {
       this.centerOfMassFrame = centerOfMassFrame;
       this.leeGoswamiForceOptimizer = new LeeGoswamiForceOptimizer(centerOfMassFrame, parentRegistry);
@@ -49,7 +47,7 @@ public class LeeGoswamiGroundReactionWrenchDistributor implements GroundReaction
    }
 
    public void solve(GroundReactionWrenchDistributorOutputData distributedWrench,
-                     GroundReactionWrenchDistributorInputData groundReactionWrenchDistributorInputData)
+         GroundReactionWrenchDistributorInputData groundReactionWrenchDistributorInputData)
    {
       reset();
 
@@ -93,7 +91,7 @@ public class LeeGoswamiGroundReactionWrenchDistributor implements GroundReaction
 
       leeGoswamiForceOptimizer.solve(forces, coefficientsOfFriction, desiredGroundReactionWrench);
       leeGoswamiCoPAndNormalTorqueOptimizer.solve(centersOfPressure, normalTorques, rotationalCoefficientsOfFriction,
-              leeGoswamiForceOptimizer.getTorqueError(), forces);
+            leeGoswamiForceOptimizer.getTorqueError(), forces);
    }
 
    private void getOutputData(GroundReactionWrenchDistributorOutputData outputData)
@@ -120,5 +118,4 @@ public class LeeGoswamiGroundReactionWrenchDistributor implements GroundReaction
    {
       return normalTorques.get(contactState);
    }
-
 }
