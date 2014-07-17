@@ -72,8 +72,8 @@ public class ValkyrieWarmupPoseSequencePacket implements PosePlaybackPacket
       Map<String, Map<String, Double>> gainMap = (Map<String, Map<String, Double>>) YamlWithIncludesLoader.load(ValkyrieConfigurationRoot.class, "standPrep", "gains.yaml");
 
       this.initialGainScaling = initialGainScaling;
-      playbackPoseSequence = PlaybackPoseSequenceReader.readFromFile(fullRobotModel, filename);
-      
+//      playbackPoseSequence = PlaybackPoseSequenceReader.readFromFile(fullRobotModel, filename);
+      playbackPoseSequence = PlaybackPoseSequenceReader.readFromInputStream(fullRobotModel, getClass().getClassLoader().getResourceAsStream(filename));
       for (OneDoFJoint joint : fullRobotModel.getOneDoFJoints())
       {
          Map<String, Double> jointGains = gainMap.get(joint.getName());

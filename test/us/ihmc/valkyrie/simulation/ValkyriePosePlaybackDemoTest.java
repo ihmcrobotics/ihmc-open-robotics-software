@@ -106,8 +106,8 @@ public class ValkyriePosePlaybackDemoTest
       double trajectoryTime = 1.0;
       FullRobotModel fullRobotModel = valkyrieRobotModel.createFullRobotModel();
 //      PosePlaybackPacket posePlaybackPacket = new ValkyrieWarmupPoseSequencePacket(fullRobotModel, 1.0);
-//      PosePlaybackPacket posePlaybackPacket = new ValkyrieWarmupPoseSequencePacket("valkercise02.poseSequence", fullRobotModel, 1.0);
-      PosePlaybackPacket posePlaybackPacket = new ValkyrieWarmupPoseSequencePacket("valkerena.poseSequence", fullRobotModel, 1.0);
+//      PosePlaybackPacket posePlaybackPacket = new ValkyrieWarmupPoseSequencePacket("PoseSequences/valkercise02.poseSequence", fullRobotModel, 1.0);
+      PosePlaybackPacket posePlaybackPacket = new ValkyrieWarmupPoseSequencePacket("PoseSequences/valkerena.poseSequence", fullRobotModel, 1.0);
       
       SimulationConstructionSet scs = startPosePlaybackSim(posePlaybackPacket);
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
@@ -168,6 +168,7 @@ public class ValkyriePosePlaybackDemoTest
    {
 
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false, null);
+      guiInitialSetup.setIsGuiShown(SHOW_GUI);
       double floatingHeight = 0.3;
       double groundHeight = 0.0;
       double initialYaw = 0.0;
