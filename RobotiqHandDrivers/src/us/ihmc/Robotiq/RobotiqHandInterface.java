@@ -621,6 +621,12 @@ public final class RobotiqHandInterface
 		return positions;
 	}
 	
+	public boolean isReady()
+	{
+		status = getStatus();
+		return (status[GRIPPER_STATUS] & INITIALIZATON_MASK) == INITIALIZED;
+	}
+	
 	private void printErrors(byte code)
 	{
 		switch(code) //print correct fault
