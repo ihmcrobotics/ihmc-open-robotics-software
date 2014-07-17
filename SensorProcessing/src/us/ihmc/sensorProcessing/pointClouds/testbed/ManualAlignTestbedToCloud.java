@@ -78,11 +78,17 @@ public class ManualAlignTestbedToCloud extends SimpleApplication {
    public static final String SLOW_DOWN = "SLOW_DOWN";
    public static final String SPEED_UP = "SPEED_UP";
 
+   public static final String ROTATE_X = "ROTATE_X";
+   public static final String ROTATE_Y = "ROTATE_Y";
+   public static final String ROTATE_Z = "ROTATE_Z";
+
    public static final String SAVE_TRANFORM = "SAVE_TRANFORM";
    public static final String LOAD_TRANFORM = "LOAD_TRANFORM";
 
 
    public static final String OBJ_ROTATE = "OBJ_ROTATE";
+
+   int axisRotation = 0;
 
    Canvas canvas;
    JMEAssetLocator assetLocator;
@@ -175,6 +181,16 @@ public class ManualAlignTestbedToCloud extends SimpleApplication {
       });
    }
 
+   public void setTestbedToWorld( final Se3_F64 testbedToWorld ) {
+      enqueue(new Callable<Void>() {
+         public Void call() {
+            Transform transform = GeometryOps.convert(testbedToWorld, null);
+            testbedTransform.setLocalTransform(transform);
+            return null;
+         }
+      });
+   }
+
    @Override
    public void simpleInitApp() {
       flyCam.setDragToRotate(true);
@@ -204,10 +220,14 @@ public class ManualAlignTestbedToCloud extends SimpleApplication {
       inputManager.addMapping(SAVE_TRANFORM,  new KeyTrigger(KeyInput.KEY_RETURN));
       inputManager.addMapping(LOAD_TRANFORM,  new KeyTrigger(KeyInput.KEY_PGUP));
 
+      inputManager.addMapping(ROTATE_X,  new KeyTrigger(KeyInput.KEY_NUMPAD1));
+      inputManager.addMapping(ROTATE_Y,  new KeyTrigger(KeyInput.KEY_NUMPAD2));
+      inputManager.addMapping(ROTATE_Z,  new KeyTrigger(KeyInput.KEY_NUMPAD3));
+
       inputManager.addMapping(OBJ_ROTATE, new MouseButtonTrigger(MouseInput.BUTTON_RIGHT));
 
       inputManager.addListener(new ObjectMoveListener(),OBJ_LEFT,OBJ_RIGHT,OBJ_FORWARDS,OBJ_BACKWARDS,OBJ_UP,
-              OBJ_DOWN,OBJ_ROTATE,SAVE_TRANFORM,LOAD_TRANFORM,SPEED_UP,SLOW_DOWN);
+              OBJ_DOWN,OBJ_ROTATE,SAVE_TRANFORM,LOAD_TRANFORM,SPEED_UP,SLOW_DOWN,ROTATE_X,ROTATE_Y,ROTATE_Z);
 
 
 
@@ -254,6 +274,15 @@ public class ManualAlignTestbedToCloud extends SimpleApplication {
                transform.getTranslation().y += 0.05*speed;
             } else if (name.equals(OBJ_DOWN)) {
                transform.getTranslation().y -= 0.05*speed;
+            } else if (name.equals(ROTATE_X)) {
+               System.out.println("Rotate X");
+               axisRotation = 0;
+            } else if (name.equals(ROTATE_Y)) {
+               System.out.println("Rotate Y");
+               axisRotation = 1;
+            } else if (name.equals(ROTATE_Z)) {
+               System.out.println("Rotate Z");
+               axisRotation = 2;
             } else if (name.equals(SPEED_UP)) {
                speed *= 1.1;
                System.out.println("speed = "+speed);
@@ -265,7 +294,7 @@ public class ManualAlignTestbedToCloud extends SimpleApplication {
                Se3_F64 transformGR = GeometryOps.convert(transform,null);
 
                try {
-                  new XStream().toXML(transformGR,new FileOutputStream("testbedToWorld.xml"));
+                  new XStream().toXML(transformGR, new FileOutputStream("testbedToWorld.xml"));
                } catch (FileNotFoundException e) {
                   throw new RuntimeException(e);
                }
@@ -293,22 +322,35 @@ public class ManualAlignTestbedToCloud extends SimpleApplication {
 
          if( name.equals(OBJ_ROTATE)) {
             float mouseX = getInputManager().getCursorPosition().x;
-            float mouseY = getInputManager().getCursorPosition().y;
+//            float mouseY = getInputManager().getCursorPosition().y;
 
             float rotX = mouseX-mouseInitX;
-            float rotY = mouseY-mouseInitY;
+//            float rotY = mouseY-mouseInitY;
 
-            testbedTransform.rotate(rotX*speed*foo, 0, 0);
-            testbedTransform.rotate(0, rotY*speed*foo, 0);
+            switch(axisRotation) {
+               case 0:
+                  testbedTransform.rotate(rotX*speed*foo, 0, 0);
+                  break;
+
+               case 1:
+                  testbedTransform.rotate(0, rotX*speed*foo, 0);
+                  break;
+
+               case 2:
+                  testbedTransform.rotate(0, 0, rotX*speed*foo);
+                  break;
+
+            }
+//            testbedTransform.rotate(0, rotY*speed*foo, 0);
 
             mouseInitX = mouseX;
-            mouseInitY = mouseY;
+//            mouseInitY = mouseY;
          }
       }
    }
 
    public static void main(String[] args) {
-      List<Point3D_F64> cloud = DisplayPointCloudApp.loadCloud("../SensorProcessing/data/testbed/2014-07-10/cloud01.txt");
+      List<Point3D_F64> cloud = DisplayPointCloudApp.loadCloud("../SensorProcessing/data/testbed/2014-07-10/cloud04.txt");
       ManualAlignTestbedToCloud app = new ManualAlignTestbedToCloud();
       app.addPoints(cloud,0xFF0000,1);
       app.addTestBedModel();

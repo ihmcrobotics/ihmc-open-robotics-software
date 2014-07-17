@@ -35,6 +35,12 @@ public class CreateCloudFromFilteredScanApp {
 
    }
 
+   public static List<Point3D_F64> loadFilteredScans( String fileName , double maxRange ) {
+      List<List<Point3D_F64>> scans = DisplayPointCloudApp.loadScanLines(fileName);
+
+      return filter(scans,maxRange);
+   }
+
    public static int countNeighbors( Point3D_F64 target , double radius , List<Point3D_F64> scan ) {
 
       double r = radius*radius;
@@ -64,4 +70,6 @@ public class CreateCloudFromFilteredScanApp {
 
       ShowImages.showWindow(gui, "Point Cloud");
    }
+
+
 }
