@@ -55,15 +55,15 @@ public class ValkyriePosePlaybackDemoTest
    private DRCSimulationFactory drcSimulation;
    private RobotVisualizer robotVisualizer;
    private final Random random = new Random(6519651L);
-   
+
    private final ValkyrieRobotModel valkyrieRobotModel = new ValkyrieRobotModel(false, false);
-   
+
    @Before
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
-   
+
    @After
    public void destroySimulationAndRecycleMemory()
    {
@@ -94,10 +94,9 @@ public class ValkyriePosePlaybackDemoTest
       GlobalTimer.clearTimers();
       TimerTaskScheduler.cancelAndReset();
       AsyncContinuousExecutor.cancelAndReset();
-      
+
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-
 
    @Test
    public void testPosePlaybackControllerWithWarmupPacket() throws SimulationExceededMaximumTimeException
@@ -105,10 +104,8 @@ public class ValkyriePosePlaybackDemoTest
       int numberOfPoses = 5;
       double trajectoryTime = 1.0;
       FullRobotModel fullRobotModel = valkyrieRobotModel.createFullRobotModel();
-//      PosePlaybackPacket posePlaybackPacket = new ValkyrieWarmupPoseSequencePacket(fullRobotModel, 1.0);
-//      PosePlaybackPacket posePlaybackPacket = new ValkyrieWarmupPoseSequencePacket("PoseSequences/valkercise02.poseSequence", fullRobotModel, 1.0);
       PosePlaybackPacket posePlaybackPacket = new ValkyrieWarmupPoseSequencePacket("PoseSequences/valkerena.poseSequence", fullRobotModel, 1.0);
-      
+
       SimulationConstructionSet scs = startPosePlaybackSim(posePlaybackPacket);
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
@@ -180,7 +177,8 @@ public class ValkyriePosePlaybackDemoTest
       scsInitialSetup.setSimulationDataBufferSize(16000);
       scsInitialSetup.setTimePerRecordTick(valkyrieRobotModel.getControllerDT());
 
-      DRCPosePlaybackDemo drcPosePlaybackDemo = new DRCPosePlaybackDemo(robotInitialSetup, guiInitialSetup, scsInitialSetup, posePlaybackPacket, valkyrieRobotModel);
+      DRCPosePlaybackDemo drcPosePlaybackDemo = new DRCPosePlaybackDemo(robotInitialSetup, guiInitialSetup, scsInitialSetup, posePlaybackPacket,
+            valkyrieRobotModel);
       drcSimulation = drcPosePlaybackDemo.getDRCSimulation();
       return drcPosePlaybackDemo.getSimulationConstructionSet();
    }
@@ -189,34 +187,35 @@ public class ValkyriePosePlaybackDemoTest
    {
       if (CREATE_MOVIE)
       {
-         BambooTools.createMovieAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(BambooTools.getSimpleRobotNameFor(BambooTools
-               .SimpleRobotNameKeys.VALKYRIE), scs, 1);
+         BambooTools.createMovieAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(
+               BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.VALKYRIE), scs, 1);
       }
    }
 
-   private PosePlaybackPacket createRandomPosePlaybackPacket(final FullRobotModel fullRobotModel, final List<OneDoFJoint> jointToControl, final int numberOfPoses, final double delayBeforePoses, final double trajectoryTime)
+   private PosePlaybackPacket createRandomPosePlaybackPacket(final FullRobotModel fullRobotModel, final List<OneDoFJoint> jointToControl,
+         final int numberOfPoses, final double delayBeforePoses, final double trajectoryTime)
    {
       PosePlaybackPacket posePlaybackPacket = new PosePlaybackPacket()
       {
          private final PlaybackPoseSequence playbackPoseSequence = new PlaybackPoseSequence(fullRobotModel);
-         
+
          private final LinkedHashMap<OneDoFJoint, Double> jointKps = new LinkedHashMap<>(numberOfPoses);
          private final LinkedHashMap<OneDoFJoint, Double> jointKds = new LinkedHashMap<>(numberOfPoses);
          {
-            for (int i = 0; i < numberOfPoses; i ++)
-            {               
+            for (int i = 0; i < numberOfPoses; i++)
+            {
                LinkedHashMap<OneDoFJoint, Double> pose = new LinkedHashMap<>();
                for (OneDoFJoint joint : jointToControl)
                {
                   pose.put(joint, RandomTools.generateRandomDouble(random, joint.getJointLimitLower(), joint.getJointLimitUpper()));
                }
-               
+
                PlaybackPose playbackPose = new PlaybackPose(pose);
                playbackPose.setPlayBackDuration(trajectoryTime);
                playbackPose.setPlaybackDelayBeforePose(delayBeforePoses);
-               
+
                playbackPoseSequence.addPose(playbackPose);
-               
+
                for (OneDoFJoint joint : jointToControl)
                {
                   double mass = TotalMassCalculator.computeSubTreeMass(joint.getSuccessor());
@@ -225,15 +224,13 @@ public class ValkyriePosePlaybackDemoTest
                }
             }
          }
-         
-        
-         
+
          @Override
          public Map<OneDoFJoint, Double> getJointKps()
          {
             return jointKps;
          }
-         
+
          @Override
          public Map<OneDoFJoint, Double> getJointKds()
          {
@@ -252,8 +249,6 @@ public class ValkyriePosePlaybackDemoTest
             return 1.0;
          }
       };
-      
       return posePlaybackPacket;
    }
-
 }
