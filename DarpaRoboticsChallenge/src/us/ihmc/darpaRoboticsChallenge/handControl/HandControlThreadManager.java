@@ -10,13 +10,9 @@ public abstract class HandControlThreadManager
 	public HandControlThreadManager(int tcpPort)
 	{
 		this.objectCommunicator = new KryoObjectClient("localhost", tcpPort, new DRCNetClassList());
-		
-		attachObjectConsumers();
 	}
 	
    public abstract void start();
 	
    public abstract void connect();
-   
-   public abstract void attachObjectConsumers();
 }
