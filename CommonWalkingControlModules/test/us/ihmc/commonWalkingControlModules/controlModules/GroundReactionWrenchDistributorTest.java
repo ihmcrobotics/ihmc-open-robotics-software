@@ -75,11 +75,10 @@ public class GroundReactionWrenchDistributorTest
    public void testSimpleWrenchDistributionWithGeometricFlatGroundDistributor()
    {
       YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
-      GroundReactionWrenchDistributor distributor = new GeometricFlatGroundReactionWrenchDistributor(parentRegistry, null);
-
       Point3d centerOfMassPoint3d = new Point3d(0.0, 0.0, 1.0);
       PoseReferenceFrame centerOfMassFrame = createCenterOfMassFrame(centerOfMassPoint3d);
-
+      
+      GroundReactionWrenchDistributor distributor = new GeometricFlatGroundReactionWrenchDistributor(parentRegistry, null);     
       testSimpleWrenchDistribution(centerOfMassFrame, distributor, parentRegistry, 1e-7);
    }
 
@@ -87,11 +86,10 @@ public class GroundReactionWrenchDistributorTest
    public void testSimpleWrenchDistributionWithLeeGoswamiDistributor()
    {
       YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
-
       Point3d centerOfMassPoint3d = new Point3d(0.0, 0.0, 1.0);
       PoseReferenceFrame centerOfMassFrame = createCenterOfMassFrame(centerOfMassPoint3d);
 
-      GroundReactionWrenchDistributor distributor = new LeeGoswamiGroundReactionWrenchDistributor(centerOfMassFrame, parentRegistry, 1.0);
+      GroundReactionWrenchDistributor distributor = new LeeGoswamiGroundReactionWrenchDistributor(centerOfMassFrame, parentRegistry, 1.0); 
       testSimpleWrenchDistribution(centerOfMassFrame, distributor, parentRegistry, 1e-7);
    }
 
@@ -99,7 +97,6 @@ public class GroundReactionWrenchDistributorTest
    public void testSimpleWrenchDistributionWithOptimizationBasedDistributor()
    {
       YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
-
       Point3d centerOfMassPoint3d = new Point3d(0.0, 0.0, 1.0);
       PoseReferenceFrame centerOfMassFrame = createCenterOfMassFrame(centerOfMassPoint3d);
 
@@ -111,7 +108,6 @@ public class GroundReactionWrenchDistributorTest
    public void testSimpleWrenchDistributionWithContactPointDistributor()
    {
       YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
-
       Point3d centerOfMassPoint3d = new Point3d(0.0, 0.0, 1.0);
       PoseReferenceFrame centerOfMassFrame = createCenterOfMassFrame(centerOfMassPoint3d);
 
@@ -119,72 +115,44 @@ public class GroundReactionWrenchDistributorTest
       testSimpleWrenchDistribution(centerOfMassFrame, distributor, parentRegistry, 1e-7);
    }
 
-   private ContactPointGroundReactionWrenchDistributor createContactPointDistributor(YoVariableRegistry parentRegistry, PoseReferenceFrame centerOfMassFrame)
-   {
-      ContactPointGroundReactionWrenchDistributor distributor = new ContactPointGroundReactionWrenchDistributor(centerOfMassFrame, parentRegistry);
-
-      double[] diagonalCWeights = new double[] { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
-      double epsilonRho = 0.0;
-      distributor.setWeights(diagonalCWeights, 0.0, epsilonRho);
-
-      return distributor;
-   }
-
-   private CylinderAndContactPointWrenchDistributor createOptimizationBasedWrenchDistributor(YoVariableRegistry parentRegistry,
-         PoseReferenceFrame centerOfMassFrame, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
-   {
-      CylinderAndContactPointWrenchDistributor distributor = new CylinderAndContactPointWrenchDistributor(centerOfMassFrame, parentRegistry,
-            dynamicGraphicObjectsListRegistry);
-
-      double[] diagonalCWeights = new double[] { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
-      double rhoWeight = 1e-6;
-      double phiWeight = 1e-6;
-      distributor.setWeights(diagonalCWeights, phiWeight, rhoWeight);
-
-      return distributor;
-   }
-
    @Test
    public void testRandomFlatGroundExamplesWithGeometricFlatGroundDistributor()
    {
+      YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
       Point3d centerOfMassPoint3d = new Point3d(0.2, 0.1, 1.07);
       PoseReferenceFrame centerOfMassFrame = createCenterOfMassFrame(centerOfMassPoint3d);
-
-      YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
-      GroundReactionWrenchDistributor distributor = new GeometricFlatGroundReactionWrenchDistributor(parentRegistry, null);
-
       boolean verifyForcesAreInsideFrictionCones = false;
       boolean feasibleMomentSolutions = false;
+
+      GroundReactionWrenchDistributor distributor = new GeometricFlatGroundReactionWrenchDistributor(parentRegistry, null);
       testRandomFlatGroundExamples(verifyForcesAreInsideFrictionCones, feasibleMomentSolutions, false, centerOfMassFrame, distributor, 1.0, parentRegistry);
    }
 
    @Test
    public void testRandomFlatGroundExamplesWithViableMomentSolutionsWithGeometricFlatGroundDistributor()
    {
+      YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
       Point3d centerOfMassPoint3d = new Point3d(0.2, 0.1, 1.07);
       PoseReferenceFrame centerOfMassFrame = createCenterOfMassFrame(centerOfMassPoint3d);
-
-      YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
-      GroundReactionWrenchDistributor distributor = new GeometricFlatGroundReactionWrenchDistributor(parentRegistry, null);
-
       boolean verifyForcesAreInsideFrictionCones = false;
       boolean feasibleMomentSolutions = true;
+
+      GroundReactionWrenchDistributor distributor = new GeometricFlatGroundReactionWrenchDistributor(parentRegistry, null);
       testRandomFlatGroundExamples(verifyForcesAreInsideFrictionCones, feasibleMomentSolutions, false, centerOfMassFrame, distributor, 1.0, parentRegistry);
    }
 
    @Test
    public void testRandomFlatGroundExamplesWithLeeGoswamiDistributor()
    {
+      YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
       Point3d centerOfMassPoint3d = new Point3d(0.2, 0.1, 1.07);
       PoseReferenceFrame centerOfMassFrame = createCenterOfMassFrame(centerOfMassPoint3d);
-
-      YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
-      double rotationalCoefficientOfFrictionMultiplier = 1.0;
-      LeeGoswamiGroundReactionWrenchDistributor distributor = new LeeGoswamiGroundReactionWrenchDistributor(centerOfMassFrame, parentRegistry,
-            rotationalCoefficientOfFrictionMultiplier);
-
       boolean verifyForcesAreInsideFrictionCones = false;
       boolean feasibleMomentSolutions = false;
+      double rotationalCoefficientOfFrictionMultiplier = 1.0;
+     
+      LeeGoswamiGroundReactionWrenchDistributor distributor = new LeeGoswamiGroundReactionWrenchDistributor(centerOfMassFrame, parentRegistry,
+            rotationalCoefficientOfFrictionMultiplier);
       testRandomFlatGroundExamples(verifyForcesAreInsideFrictionCones, feasibleMomentSolutions, false, centerOfMassFrame, distributor,
             rotationalCoefficientOfFrictionMultiplier, parentRegistry);
    }
@@ -192,16 +160,15 @@ public class GroundReactionWrenchDistributorTest
    @Test
    public void testRandomFlatGroundExamplesWithViableMomentSolutionsWithLeeGoswamiDistributor()
    {
+      YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
       Point3d centerOfMassPoint3d = new Point3d(0.2, 0.1, 1.07);
       PoseReferenceFrame centerOfMassFrame = createCenterOfMassFrame(centerOfMassPoint3d);
-
-      YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
       double rotationalCoefficientOfFrictionMultiplier = 1.0;
-      LeeGoswamiGroundReactionWrenchDistributor distributor = new LeeGoswamiGroundReactionWrenchDistributor(centerOfMassFrame, parentRegistry,
-            rotationalCoefficientOfFrictionMultiplier);
-
       boolean verifyForcesAreInsideFrictionCones = false;
       boolean feasibleMomentSolutions = true;
+      
+      LeeGoswamiGroundReactionWrenchDistributor distributor = new LeeGoswamiGroundReactionWrenchDistributor(centerOfMassFrame, parentRegistry,
+            rotationalCoefficientOfFrictionMultiplier);
       testRandomFlatGroundExamples(verifyForcesAreInsideFrictionCones, feasibleMomentSolutions, false, centerOfMassFrame, distributor,
             rotationalCoefficientOfFrictionMultiplier, parentRegistry);
    }
@@ -209,29 +176,27 @@ public class GroundReactionWrenchDistributorTest
    @Test
    public void testRandomFlatGroundExamplesWithContactPointDistributor()
    {
+      YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
       Point3d centerOfMassPoint3d = new Point3d(0.2, 0.1, 1.07);
       PoseReferenceFrame centerOfMassFrame = createCenterOfMassFrame(centerOfMassPoint3d);
-
-      YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
-      GroundReactionWrenchDistributor distributor = createContactPointDistributor(parentRegistry, centerOfMassFrame);
-
       boolean verifyForcesAreInsideFrictionCones = false;
       boolean feasibleMomentSolutions = false;
+
+      GroundReactionWrenchDistributor distributor = createContactPointDistributor(parentRegistry, centerOfMassFrame);
       testRandomFlatGroundExamples(verifyForcesAreInsideFrictionCones, feasibleMomentSolutions, true, centerOfMassFrame, distributor, 1.0, parentRegistry);
    }
 
    @Test
    public void testRandomFlatGroundExamplesWithOptimizationBasedtDistributor()
    {
+      YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
       Point3d centerOfMassPoint3d = new Point3d(0.2, 0.1, 1.07);
       PoseReferenceFrame centerOfMassFrame = createCenterOfMassFrame(centerOfMassPoint3d);
-
-      YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
-      GroundReactionWrenchDistributor distributor = createOptimizationBasedWrenchDistributor(parentRegistry, centerOfMassFrame, null);
-
       boolean verifyForcesAreInsideFrictionCones = false;
       boolean feasibleMomentSolutions = false;
       boolean contactPointDistributor = true;
+
+      GroundReactionWrenchDistributor distributor = createOptimizationBasedWrenchDistributor(parentRegistry, centerOfMassFrame, null);
       testRandomFlatGroundExamples(verifyForcesAreInsideFrictionCones, feasibleMomentSolutions, contactPointDistributor, centerOfMassFrame, distributor, 1.0,
             parentRegistry);
    }
@@ -239,29 +204,27 @@ public class GroundReactionWrenchDistributorTest
    @Test
    public void testRandomFlatGroundExamplesWithViableMomentSolutionsWithContactPointDistributor()
    {
+      YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
       Point3d centerOfMassPoint3d = new Point3d(0.2, 0.1, 1.07);
       PoseReferenceFrame centerOfMassFrame = createCenterOfMassFrame(centerOfMassPoint3d);
-
-      YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
-      GroundReactionWrenchDistributor distributor = createContactPointDistributor(parentRegistry, centerOfMassFrame);
-
       boolean verifyForcesAreInsideFrictionCones = false;
       boolean feasibleMomentSolutions = true;
+
+      GroundReactionWrenchDistributor distributor = createContactPointDistributor(parentRegistry, centerOfMassFrame);
       testRandomFlatGroundExamples(verifyForcesAreInsideFrictionCones, feasibleMomentSolutions, true, centerOfMassFrame, distributor, 1.0, parentRegistry);
    }
 
    @Test
    public void testRandomFlatGroundExamplesWithViableMomentSolutionsWithOptimizationBasedDistributor()
    {
+      YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
       Point3d centerOfMassPoint3d = new Point3d(0.2, 0.1, 1.07);
       PoseReferenceFrame centerOfMassFrame = createCenterOfMassFrame(centerOfMassPoint3d);
-
-      YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
-      GroundReactionWrenchDistributor distributor = new CylinderAndContactPointWrenchDistributor(centerOfMassFrame, parentRegistry, null);
-
       boolean verifyForcesAreInsideFrictionCones = false;
       boolean feasibleMomentSolutions = true;
       boolean contactPointDistributor = true;
+
+      GroundReactionWrenchDistributor distributor = new CylinderAndContactPointWrenchDistributor(centerOfMassFrame, parentRegistry, null);
       testRandomFlatGroundExamples(verifyForcesAreInsideFrictionCones, feasibleMomentSolutions, contactPointDistributor, centerOfMassFrame, distributor, 1.0,
             parentRegistry);
    }
@@ -269,10 +232,9 @@ public class GroundReactionWrenchDistributorTest
    @Test
    public void testSimpleNonFlatGroundExampleWithLeeGoswamiDistributor()
    {
+      YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
       Point3d centerOfMassPoint3d = new Point3d(0.0, 0.0, 1.0);
       PoseReferenceFrame centerOfMassFrame = createCenterOfMassFrame(centerOfMassPoint3d);
-
-      YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
 
       GroundReactionWrenchDistributor distributor = new LeeGoswamiGroundReactionWrenchDistributor(centerOfMassFrame, parentRegistry, 1.0);
       testNonFlatGroundExample(centerOfMassFrame, distributor, parentRegistry);
@@ -281,10 +243,9 @@ public class GroundReactionWrenchDistributorTest
    @Test
    public void testSimpleNonFlatGroundExampleWithContactPointDistributor()
    {
+      YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
       Point3d centerOfMassPoint3d = new Point3d(0.0, 0.0, 1.0);
       PoseReferenceFrame centerOfMassFrame = createCenterOfMassFrame(centerOfMassPoint3d);
-
-      YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
 
       GroundReactionWrenchDistributor distributor = createContactPointDistributor(parentRegistry, centerOfMassFrame);
       testNonFlatGroundExample(centerOfMassFrame, distributor, parentRegistry);
@@ -293,10 +254,9 @@ public class GroundReactionWrenchDistributorTest
    @Test
    public void testSimpleNonFlatGroundExampleWithOptimizationBasedWrenchDistributor()
    {
+      YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
       Point3d centerOfMassPoint3d = new Point3d(0.0, 0.0, 1.0);
       PoseReferenceFrame centerOfMassFrame = createCenterOfMassFrame(centerOfMassPoint3d);
-
-      YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
 
       GroundReactionWrenchDistributor distributor = new CylinderAndContactPointWrenchDistributor(centerOfMassFrame, parentRegistry, null);
       testNonFlatGroundExample(centerOfMassFrame, distributor, parentRegistry);
@@ -307,12 +267,11 @@ public class GroundReactionWrenchDistributorTest
    @Test
    public void testSimpleExampleWithCylindersUsingOptimizationBasedWrenchDistributor()
    {
+      YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
       Point3d centerOfMassPoint3d = new Point3d(0.0, 0.0, 1.0);
       PoseReferenceFrame centerOfMassFrame = createCenterOfMassFrame(centerOfMassPoint3d);
-
-      YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
-
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+      
       GroundReactionWrenchDistributor distributor = new CylinderAndContactPointWrenchDistributor(centerOfMassFrame, parentRegistry,
             dynamicGraphicObjectsListRegistry);
       testSimpleWrenchDistributionWithCylinders(centerOfMassFrame, distributor, parentRegistry, 1e-3, dynamicGraphicObjectsListRegistry);
@@ -321,10 +280,9 @@ public class GroundReactionWrenchDistributorTest
    @Test
    public void testTroublesomeExamplesWithLeeGoswamiDistributor()
    {
+      YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
       Point3d centerOfMassPoint3d = new Point3d(0.2, 0.1, 1.07);
       PoseReferenceFrame centerOfMassFrame = createCenterOfMassFrame(centerOfMassPoint3d);
-
-      YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
 
       GroundReactionWrenchDistributor distributor = new LeeGoswamiGroundReactionWrenchDistributor(centerOfMassFrame, parentRegistry, 1.0);
       testTroublesomeExampleOne(centerOfMassFrame, distributor, parentRegistry);
@@ -334,10 +292,9 @@ public class GroundReactionWrenchDistributorTest
    @Test
    public void testTroublesomeExamplesWithGeometricFlatGroundDistributor()
    {
+      YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
       Point3d centerOfMassPoint3d = new Point3d(0.2, 0.1, 1.07);
       PoseReferenceFrame centerOfMassFrame = createCenterOfMassFrame(centerOfMassPoint3d);
-
-      YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
 
       GroundReactionWrenchDistributor distributor = new GeometricFlatGroundReactionWrenchDistributor(parentRegistry, null);
       testTroublesomeExampleOne(centerOfMassFrame, distributor, parentRegistry);
@@ -349,10 +306,9 @@ public class GroundReactionWrenchDistributorTest
    @Test
    public void testTroublesomeExamplesWithOptimizationBasedDistributor()
    {
+      YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
       Point3d centerOfMassPoint3d = new Point3d(0.2, 0.1, 1.07);
       PoseReferenceFrame centerOfMassFrame = createCenterOfMassFrame(centerOfMassPoint3d);
-
-      YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
 
       GroundReactionWrenchDistributor distributor = new CylinderAndContactPointWrenchDistributor(centerOfMassFrame, parentRegistry, null);
       testTroublesomeExampleOne(centerOfMassFrame, distributor, parentRegistry);
@@ -368,12 +324,11 @@ public class GroundReactionWrenchDistributorTest
       int numTests = 100;
       for (int i = 0; i < numTests; i++)
       {
+         YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
          Point3d centerOfMassPoint3d = new Point3d(0.2, 0.1, 1.07);
          PoseReferenceFrame centerOfMassFrame = createCenterOfMassFrame(centerOfMassPoint3d);
-
-         YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
-
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+         
          GroundReactionWrenchDistributor distributor = new CylinderAndContactPointWrenchDistributor(centerOfMassFrame, parentRegistry,
                dynamicGraphicObjectsListRegistry);
          testRandomMultiContact(centerOfMassFrame, distributor, parentRegistry, 1e-1, dynamicGraphicObjectsListRegistry, random);
@@ -409,7 +364,6 @@ public class GroundReactionWrenchDistributorTest
       double cylinderRadius = 0.03;
       double halfHandWidth = 0.025;
       double gripWeaknessFactor = 0.2;
-
       Point3d leftMidfootLocation = new Point3d(0.0, 0.5, 0.0);
       RigidBody leftFoot = new RigidBody("leftFoot", ReferenceFrame.getWorldFrame());
       FlatGroundPlaneContactState leftFootContactState = new FlatGroundPlaneContactState(footLength, footWidth, leftMidfootLocation, coefficientOfFriction,
@@ -1213,5 +1167,30 @@ public class GroundReactionWrenchDistributorTest
       ret.scale(1.0 / totalWeight);
 
       return ret;
+   }
+   
+   private ContactPointGroundReactionWrenchDistributor createContactPointDistributor(YoVariableRegistry parentRegistry, PoseReferenceFrame centerOfMassFrame)
+   {
+      ContactPointGroundReactionWrenchDistributor distributor = new ContactPointGroundReactionWrenchDistributor(centerOfMassFrame, parentRegistry);
+
+      double[] diagonalCWeights = new double[] { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
+      double epsilonRho = 0.0;
+      distributor.setWeights(diagonalCWeights, 0.0, epsilonRho);
+
+      return distributor;
+   }
+
+   private CylinderAndContactPointWrenchDistributor createOptimizationBasedWrenchDistributor(YoVariableRegistry parentRegistry,
+         PoseReferenceFrame centerOfMassFrame, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   {
+      CylinderAndContactPointWrenchDistributor distributor = new CylinderAndContactPointWrenchDistributor(centerOfMassFrame, parentRegistry,
+            dynamicGraphicObjectsListRegistry);
+
+      double[] diagonalCWeights = new double[] { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
+      double rhoWeight = 1e-6;
+      double phiWeight = 1e-6;
+      distributor.setWeights(diagonalCWeights, phiWeight, rhoWeight);
+
+      return distributor;
    }
 }
