@@ -18,56 +18,49 @@
 
 package us.ihmc.sensorProcessing.pointClouds.testbed;
 
+import georegression.struct.point.Point3D_F64;
+import georegression.struct.se.Se3_F64;
+
+import java.awt.Canvas;
+import java.awt.Dimension;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.util.List;
+import java.util.concurrent.Callable;
+
+import javax.swing.JPanel;
+
+import us.ihmc.graphics3DAdapter.jme.JMEAssetLocator;
+import us.ihmc.graphics3DAdapter.jme.util.JME3DLoaderUtils;
+import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
+import us.ihmc.sensorProcessing.pointClouds.DisplayPointCloudApp;
+import us.ihmc.sensorProcessing.pointClouds.GeometryOps;
 import boofcv.gui.image.ShowImages;
+
 import com.jme3.app.SimpleApplication;
-import com.jme3.asset.AssetManager;
-import com.jme3.asset.plugins.FileLocator;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
-import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState;
 import com.jme3.math.ColorRGBA;
-import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.queue.RenderQueue;
-import com.jme3.scene.*;
+import com.jme3.scene.Geometry;
+import com.jme3.scene.Mesh;
+import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
+import com.jme3.scene.VertexBuffer;
 import com.jme3.system.AppSettings;
 import com.jme3.system.JmeCanvasContext;
-import com.jme3.texture.plugins.AWTLoader;
 import com.jme3.util.TangentBinormalGenerator;
 import com.thoughtworks.xstream.XStream;
-import georegression.geometry.RotationMatrixGenerator;
-import georegression.struct.point.Point3D_F64;
-import georegression.struct.se.Se3_F64;
-import georegression.struct.so.Quaternion_F64;
-import jme3dae.ColladaLoader;
-import org.jmonkeyengine.scene.plugins.ogre.MaterialLoader;
-import us.ihmc.graphics3DAdapter.jme.JMEAssetLocator;
-import us.ihmc.graphics3DAdapter.jme.util.JME3DLoaderUtils;
-import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
-import us.ihmc.sensorProcessing.pointClouds.DisplayPointCloudApp;
-import us.ihmc.sensorProcessing.pointClouds.GeometryOps;
-import us.ihmc.utilities.math.MatrixTools;
-
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.net.URL;
-import java.util.*;
-import java.util.List;
-import java.util.concurrent.Callable;
 
 /**
  * @author Peter Abeles
