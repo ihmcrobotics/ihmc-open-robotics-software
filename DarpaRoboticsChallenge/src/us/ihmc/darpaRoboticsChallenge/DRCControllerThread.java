@@ -120,7 +120,12 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       DRCRobotPhysicalProperties physicalProperties = robotModel.getPhysicalProperties();
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       DRCRobotLidarParamaters lidarParameters = sensorInformation.getPrimaryLidarParameters();
-      OneDoFJoint lidarJoint = controllerFullRobotModel.getOneDoFJointByName(lidarParameters.getLidarSpindleJointName());
+      OneDoFJoint lidarJoint = null;
+      if(lidarParameters != null)
+      {
+    	  lidarJoint = controllerFullRobotModel.getOneDoFJointByName(lidarParameters.getLidarSpindleJointName());
+      }
+      
       
       
       controllerReferenceFrames = new ReferenceFrames(controllerFullRobotModel, jointMap, physicalProperties.getAnkleHeight());
