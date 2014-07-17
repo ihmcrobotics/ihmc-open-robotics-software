@@ -53,7 +53,7 @@ public class ADotVTest
 @Ignore
 public void TestTree() throws UnreasonableAccelerationException
 {
-   Random random = new Random();
+   Random random = new Random(16154L);
 
    Robot robot = new Robot("robot");
    ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -127,7 +127,7 @@ public void TestFloatingChain() throws UnreasonableAccelerationException
 {
    Random random = new Random();
    
-   Vector3d[] jointAxes = {Y};//{X,Y,Z,Z,Y,X,X,Y,Z};
+   Vector3d[] jointAxes = {};//{X,Y,Z,Z,Y,X,X,Y,Z};
    ScrewTestTools.RandomFloatingChain randomFloatingChain = new ScrewTestTools.RandomFloatingChain(random, jointAxes);
    
    InverseDynamicsJoint[] jointsInOrder = ScrewTools.computeSupportAndSubtreeJoints(randomFloatingChain.getElevator());
@@ -201,7 +201,7 @@ public void TestFloatingChain() throws UnreasonableAccelerationException
    
    System.out.print(aDotVAnalytical.getMatrix() + "\n");
    
-   JUnitTools.assertMatrixEquals(aMatrix.getMatrix(), previousAMatrix.getMatrix(), 1e-8);
+   JUnitTools.assertMatrixEquals(adotVNumerical, aDotVAnalytical.getMatrix(), 1e-2);
    
 }
 
