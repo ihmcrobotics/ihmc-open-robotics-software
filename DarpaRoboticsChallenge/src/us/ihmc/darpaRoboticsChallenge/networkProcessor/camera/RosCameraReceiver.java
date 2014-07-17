@@ -89,6 +89,10 @@ public class RosCameraReceiver extends CameraDataReceiver
          long robotTimestamp = ppsTimestampOffsetProvider.adjustTimeStampToRobotClock(rosTimestamp);
          TimeStampedTransform3D transformFromRos = rosTransformProvider.getTimeStampedTransform(cameraParameters.getCameraFrameName(),
                cameraParameters.getLowerFrameNameForRosTransform(), rosTimestamp, robotTimestamp);
+         Transform3D zForwardToZUp = new Transform3D();
+         zForwardToZUp.rotY(90);
+         zForwardToZUp.rotZ(90);
+         rosTransformFromHeadBaseToCamera.mul(zForwardToZUp);
          rosTransformFromHeadBaseToCamera = transformFromRos.getTransform3D();
       }
    }
