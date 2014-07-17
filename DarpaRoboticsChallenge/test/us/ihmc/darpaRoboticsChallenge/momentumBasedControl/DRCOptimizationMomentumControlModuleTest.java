@@ -106,7 +106,12 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
       CenterOfMassReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", ReferenceFrame.getWorldFrame(), rootJoint.getSuccessor());
       centerOfMassFrame.update();
       
-      OneDoFJoint lidarJoint = fullRobotModel.getOneDoFJointByName(lidarParameters.getLidarSpindleJointName());
+      OneDoFJoint lidarJoint = null;
+      if(lidarParameters != null)
+      {
+    	  lidarJoint = fullRobotModel.getOneDoFJointByName(lidarParameters.getLidarSpindleJointName());
+      }
+      
       InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerFactoryHelper.computeJointsToOptimizeFor(fullRobotModel, lidarJoint);
 
       double controlDT = 1e-4;
@@ -194,7 +199,12 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
       LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> contactStates = createContactStates(feet, registry, coefficientOfFriction);
 
       CenterOfMassReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", ReferenceFrame.getWorldFrame(), rootJoint.getSuccessor());
-      OneDoFJoint lidarJoint = fullRobotModel.getOneDoFJointByName(lidarParameters.getLidarSpindleJointName());
+      OneDoFJoint lidarJoint = null;
+      if(lidarParameters != null)
+      {
+    	  lidarJoint = fullRobotModel.getOneDoFJointByName(lidarParameters.getLidarSpindleJointName());
+      }
+      
       InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerFactoryHelper.computeJointsToOptimizeFor(fullRobotModel, lidarJoint);
 
       double controlDT = robotModel.getControllerDT();
