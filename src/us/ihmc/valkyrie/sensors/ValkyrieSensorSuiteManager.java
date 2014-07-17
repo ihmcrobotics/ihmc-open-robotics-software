@@ -40,14 +40,10 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
          DRCNetworkProcessorNetworkingManager networkingManager, SDFFullRobotModel sdfFullRobotModel, LidarFilter lidarDataFilter, String sensorURI)
    {
       new SCSCameraDataReceiver(robotPoseBuffer, sensorInformation.getPrimaryCameraParamaters(), scsCommunicator, networkingManager, ppsTimestampOffsetProvider);
-      if(DRCConfigParameters.USE_POINT_CLOUD_INSTEAD_OF_LIDAR)
-      {
-         new SCSPointCloudDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, sdfFullRobotModel, sensorInformation, scsCommunicator,
-               ppsTimestampOffsetProvider, lidarDataFilter);
-      } else {
-         new SCSLidarDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, sdfFullRobotModel, sensorInformation.getPrimaryLidarParameters(), scsCommunicator,
-               ppsTimestampOffsetProvider, lidarDataFilter, sensorURI);
-      }
+
+      new SCSPointCloudDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, sdfFullRobotModel, sensorInformation, scsCommunicator,
+           ppsTimestampOffsetProvider, lidarDataFilter);
+
    }
 
    public void initializePhysicalSensors(RobotPoseBuffer robotPoseBuffer, DRCNetworkProcessorNetworkingManager networkingManager,
