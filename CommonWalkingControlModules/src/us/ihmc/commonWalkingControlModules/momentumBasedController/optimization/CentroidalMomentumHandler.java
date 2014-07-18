@@ -69,7 +69,7 @@ public class CentroidalMomentumHandler
 
       parentRegistry.addChild(registry);
       
-      this.aDotVAnalytical = new InefficientRateOfChangeOfCentroidalMomentumADotVTerm(ScrewTools.getRootBody(rootJoint.getPredecessor()), centerOfMassFrame, centroidalMomentumMatrix, TotalMassCalculator.computeSubTreeMass(rootJoint.getSuccessor()));
+      this.aDotVAnalytical = new InefficientRateOfChangeOfCentroidalMomentumADotVTerm(ScrewTools.getRootBody(rootJoint.getPredecessor()), centerOfMassFrame, centroidalMomentumMatrix, TotalMassCalculator.computeSubTreeMass(rootJoint.getSuccessor()),v);
    }
 
    public void initialize()
@@ -89,6 +89,7 @@ public class CentroidalMomentumHandler
    public void compute()
    {
       centroidalMomentumMatrix.compute();
+      ScrewTools.packJointVelocitiesMatrix(jointsInOrder, v);
       if(USE_NUMERICALLY_DIFFERENTIATED_CENTROIDAL_MOMENTUM_MATRIX)
       {
          MatrixYoVariableConversionTools.getFromYoVariables(previousCentroidalMomentumMatrix, yoPreviousCentroidalMomentumMatrix);
@@ -96,7 +97,6 @@ public class CentroidalMomentumHandler
                  controlDT);
          MatrixYoVariableConversionTools.storeInYoVariables(previousCentroidalMomentumMatrix, yoPreviousCentroidalMomentumMatrix);
    
-         ScrewTools.packJointVelocitiesMatrix(jointsInOrder, v);
          CommonOps.mult(centroidalMomentumMatrixDerivative, v, adotV);
       }
       else
