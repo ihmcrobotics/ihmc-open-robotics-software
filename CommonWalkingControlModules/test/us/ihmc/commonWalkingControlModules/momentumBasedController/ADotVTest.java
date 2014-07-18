@@ -84,8 +84,12 @@ public void TestTree() throws UnreasonableAccelerationException
    CentroidalMomentumMatrix centroidalMomentumMatrix0 = new CentroidalMomentumMatrix(elevator, centerOfMassFrame);
    CentroidalMomentumMatrix centroidalMomentumMatrix1 = new CentroidalMomentumMatrix(elevator, centerOfMassFrame);
    
+   InverseDynamicsJoint[] jointsInOrder = ScrewTools.computeSupportAndSubtreeJoints(elevator);
+   DenseMatrix64F v = new DenseMatrix64F(numberOfJoints,1);
+   ScrewTools.packJointVelocitiesMatrix(jointsInOrder, v);
+   
    InefficientRateOfChangeOfCentroidalMomentumADotVTerm aDotV1Analytical = new InefficientRateOfChangeOfCentroidalMomentumADotVTerm(elevator, 
-         centerOfMassFrame, centroidalMomentumMatrix0, totalMass);
+         centerOfMassFrame, centroidalMomentumMatrix0, totalMass,v);
 
    // Compute initial A matrix at initial condition
    centroidalMomentumMatrix0.compute();
@@ -110,8 +114,6 @@ public void TestTree() throws UnreasonableAccelerationException
    MatrixTools.numericallyDifferentiate(centroidalMomentumMatrixDerivative, centroidalMomentumMatrix0.getMatrix(), centroidalMomentumMatrix1.getMatrix(),
          controlDT);
 
-   InverseDynamicsJoint[] jointsInOrder = ScrewTools.computeSupportAndSubtreeJoints(elevator);
-   DenseMatrix64F v = new DenseMatrix64F(numberOfJoints,1);
    DenseMatrix64F adotV = new DenseMatrix64F(6,1);
    ScrewTools.packJointVelocitiesMatrix(jointsInOrder, v);
    CommonOps.mult(centroidalMomentumMatrixDerivative, v, adotV);
@@ -142,6 +144,8 @@ public void TestFloatingChain() throws UnreasonableAccelerationException
    CentroidalMomentumMatrix previousAMatrix = new CentroidalMomentumMatrix(randomFloatingChain.getElevator(), centerOfMassFrame);
    
    int nDoFs = ScrewTools.computeDegreesOfFreedom(jointsInOrder);
+   DenseMatrix64F v = new DenseMatrix64F(nDoFs, 1);
+   ScrewTools.packJointVelocitiesMatrix(jointsInOrder, v);
    
    previousAMatrix.compute(); // Compute A matrix at initial condition
    
@@ -166,7 +170,7 @@ public void TestFloatingChain() throws UnreasonableAccelerationException
 
    CentroidalMomentumMatrix aMatrix = new CentroidalMomentumMatrix(randomFloatingChain.getElevator(), centerOfMassFrame);
    InefficientRateOfChangeOfCentroidalMomentumADotVTerm aDotVAnalytical = new InefficientRateOfChangeOfCentroidalMomentumADotVTerm(randomFloatingChain.getElevator(), 
-         centerOfMassFrame, aMatrix, totalMass);
+         centerOfMassFrame, aMatrix, totalMass,v);
    for(int i=0;i<randomFloatingChain.getRevoluteJoints().size();i++)
    {
       // After integrating the scsRobot, set the random floating chain positions and velocities to integrated values
@@ -190,8 +194,6 @@ public void TestFloatingChain() throws UnreasonableAccelerationException
    MatrixTools.numericallyDifferentiate(centroidalMomentumMatrixDerivative, previousMatrix, newMatrix, controlDT);
 
    DenseMatrix64F adotVNumerical = new DenseMatrix64F(6,1);
-   DenseMatrix64F v = new DenseMatrix64F(nDoFs, 1);
-   ScrewTools.packJointVelocitiesMatrix(jointsInOrder, v);
    CommonOps.mult(centroidalMomentumMatrixDerivative, v, adotVNumerical);
    
    DenseMatrix64F tmpMatrix = new DenseMatrix64F(previousAMatrix.getMatrix().numRows, previousAMatrix.getMatrix().numCols);
