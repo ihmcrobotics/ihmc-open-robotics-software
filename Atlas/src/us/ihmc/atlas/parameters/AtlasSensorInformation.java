@@ -39,12 +39,12 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    private static final String left_camera_name = "stereo_camera_left";
    private static final String left_camera_topic = multisense_namespace + "/left/image_rect_color/compressed";
    private static final String left_info_camera_topic = multisense_namespace +"/left/camera_info";
-   private static final String left_frame_name = multisense_namespace + "/left_camera_optical_frame";
+   private static final String left_frame_name = multisense_namespace + "/left_camera_frame";
    
    private static final String right_camera_name = "stereo_camera_right";
    private static final String right_camera_topic = multisense_namespace + "/right/image_rect/compressed";
    private static final String right_info_camera_topic = multisense_namespace +"/right/camera_info";
-   private static final String right_frame_name = multisense_namespace + "/right_camera_optical_frame";
+   private static final String right_frame_name = multisense_namespace + "/right_camera_frame";
    
    private static final String fisheye_left_camera_topic = "/blackfly/camera/left/compressed";
    private static final String leftFisheyeCameraName = "l_situational_awareness_camera";
@@ -77,7 +77,7 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    private static final String stereoSensorName = "stereo_camera";
    private static final String stereoColorTopic = multisense_namespace + "image_points2_color";
    private final String stereoBaseFrame = multisense_namespace + "/head";
-   private final String stereoEndFrame = multisense_namespace + "/left_camera_optical_frame";
+   private final String stereoEndFrame = multisense_namespace + "/left_camera_frame";
    
    public AtlasSensorInformation(boolean runningOnRealRobot)
    {
