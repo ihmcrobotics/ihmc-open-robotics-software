@@ -7,7 +7,6 @@ import org.ros.exception.RemoteException;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.service.ServiceResponseListener;
 
-import us.ihmc.darpaRoboticsChallenge.DRCLocalConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosNativeNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.MultisenseParameterPacket;
 import us.ihmc.utilities.processManagement.ProcessStreamGobbler;
@@ -36,33 +35,30 @@ public class MultiSenseParamaterSetter
    
    public static void setupNativeROSCommunicator(RosNativeNetworkProcessor rosNativeNetworkProcessor, double lidarSpindleVelocity)
    {
-      if (DRCLocalConfigParameters.IS_HEAD_ATTACHED)
+      String rosPrefix = "/opt/ros";
+      if (useRosHydro(rosPrefix))
       {
-         String rosPrefix = "/opt/ros";
-         if (useRosHydro(rosPrefix))
-         {
-            System.out.println("using hydro");
-            String[] hydroSpindleSpeedShellString = {"sh", "-c",
-                  ". /opt/ros/hydro/setup.sh; rosrun dynamic_reconfigure dynparam set /multisense motor_speed " + lidarSpindleVelocity
-                        + "; rosrun dynamic_reconfigure dynparam set /multisense network_time_sync true"};
-            shellOutSpindleSpeedCommand(hydroSpindleSpeedShellString);
-         }
-         else if (useRosGroovy(rosPrefix))
-         {
-            System.out.println("using groovy");
-            String[] groovySpindleSpeedShellString = {"sh", "-c",
-                  ". /opt/ros/groovy/setup.sh; rosrun dynamic_reconfigure dynparam set /multisense motor_speed " + lidarSpindleVelocity
-                  + "; rosrun dynamic_reconfigure dynparam set /multisense network_time_sync true"};
-            shellOutSpindleSpeedCommand(groovySpindleSpeedShellString);
-         }
-         else if (useRosFuerte(rosPrefix))
-         {
-            System.out.println("using fuerte");
-            String[] fuerteSpindleSpeedShellString = {"sh", "-c",
-                  ". /opt/ros/fuerte/setup.sh; rosrun dynamic_reconfigure dynparam set /multisense motor_speed " + lidarSpindleVelocity
-                  + "; rosrun dynamic_reconfigure dynparam set /multisense network_time_sync true"};
-            shellOutSpindleSpeedCommand(fuerteSpindleSpeedShellString);
-         }
+         System.out.println("using hydro");
+         String[] hydroSpindleSpeedShellString = {"sh", "-c",
+               ". /opt/ros/hydro/setup.sh; rosrun dynamic_reconfigure dynparam set /multisense motor_speed " + lidarSpindleVelocity
+                     + "; rosrun dynamic_reconfigure dynparam set /multisense network_time_sync true"};
+         shellOutSpindleSpeedCommand(hydroSpindleSpeedShellString);
+      }
+      else if (useRosGroovy(rosPrefix))
+      {
+         System.out.println("using groovy");
+         String[] groovySpindleSpeedShellString = {"sh", "-c",
+               ". /opt/ros/groovy/setup.sh; rosrun dynamic_reconfigure dynparam set /multisense motor_speed " + lidarSpindleVelocity
+               + "; rosrun dynamic_reconfigure dynparam set /multisense network_time_sync true"};
+         shellOutSpindleSpeedCommand(groovySpindleSpeedShellString);
+      }
+      else if (useRosFuerte(rosPrefix))
+      {
+         System.out.println("using fuerte");
+         String[] fuerteSpindleSpeedShellString = {"sh", "-c",
+               ". /opt/ros/fuerte/setup.sh; rosrun dynamic_reconfigure dynparam set /multisense motor_speed " + lidarSpindleVelocity
+               + "; rosrun dynamic_reconfigure dynparam set /multisense network_time_sync true"};
+         shellOutSpindleSpeedCommand(fuerteSpindleSpeedShellString);
       }
    }
    
