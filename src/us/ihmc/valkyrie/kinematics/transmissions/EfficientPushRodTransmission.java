@@ -75,8 +75,8 @@ public class EfficientPushRodTransmission implements PushRodTransmissionInterfac
       
     assertTrue(numActuators() == actuatorData.length && numJoints() == jointData.length);
 
-    double actuatorForce0 = actuatorData[1].getEffort(); //TODO: Verify the ordering here...
-    double actuatorForce1 = actuatorData[0].getEffort();
+    double actuatorForce0 = actuatorData[0].getEffort(); //TODO: Verify the ordering here...
+    double actuatorForce1 = actuatorData[1].getEffort();
 
     double pitchAngle = jointData[0].getPosition();
     double rollAngle = reflect * jointData[1].getPosition();
