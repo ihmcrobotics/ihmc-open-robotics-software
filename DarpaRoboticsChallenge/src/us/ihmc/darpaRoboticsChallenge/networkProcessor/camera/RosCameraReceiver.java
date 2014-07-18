@@ -4,7 +4,6 @@ import java.awt.image.BufferedImage;
 
 import javax.media.j3d.Transform3D;
 
-import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParamaters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCSensorParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.messages.controller.RobotPoseData;

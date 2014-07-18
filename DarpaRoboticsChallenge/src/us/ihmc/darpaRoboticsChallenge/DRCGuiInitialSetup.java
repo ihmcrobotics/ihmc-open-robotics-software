@@ -110,7 +110,7 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
       //TODO: Clean this up!
       GeneralizedSDFRobotModel generalizedSDFRobotModel = robotModel.getGeneralizedRobotModel();
 
-      if (DRCLocalConfigParameters.MAKE_SLIDER_BOARD)
+      if (DRCConfigParameters.MAKE_SLIDER_BOARD)
       {
          if (sliderBoardFactory != null)
          {
