@@ -1014,6 +1014,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       private void removeAllUpcomingFootstepsAndStand()
       {
          int numberOfUpcomingFootsteps = upcomingFootstepList.getNumberOfFootstepsToProvide();
+         
+         // horrible hack that does not remove footsteps if we are sending them every tick like in FlatGroundWalking.
+         // Removing this should neither break Bamboo nor Atlas but it messes up the PushRecoveryWalkingTrack.
          if(numberOfUpcomingFootsteps > 1000)
             return;
          
