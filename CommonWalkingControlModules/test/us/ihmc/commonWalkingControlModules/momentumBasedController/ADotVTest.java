@@ -127,7 +127,7 @@ public void TestFloatingChain() throws UnreasonableAccelerationException
 {
    Random random = new Random();
    
-   Vector3d[] jointAxes = {};//{X,Y,Z,Z,Y,X,X,Y,Z};
+   Vector3d[] jointAxes = {X};//{X,Y,Z,Z,Y,X,X,Y,Z};
    ScrewTestTools.RandomFloatingChain randomFloatingChain = new ScrewTestTools.RandomFloatingChain(random, jointAxes);
    
    InverseDynamicsJoint[] jointsInOrder = ScrewTools.computeSupportAndSubtreeJoints(randomFloatingChain.getElevator());
