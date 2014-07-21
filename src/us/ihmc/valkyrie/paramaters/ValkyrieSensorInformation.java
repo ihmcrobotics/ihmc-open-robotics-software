@@ -116,7 +116,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
       cameraParamaters[0] = new DRCRobotCameraParamaters(forheadCameraName,forheadCameraTopic,headLinkName,videoSetting,forheadCameraId);
       cameraParamaters[1] = new DRCRobotCameraParamaters(leftStereoCameraName,leftCameraTopic,headLinkName,videoSetting,leftHazardCameraId);
       cameraParamaters[2] = new DRCRobotCameraParamaters(rightStereoCameraName,rightCameraTopic,headLinkName,videoSetting,rightHazardCameraId);
-      pointCloudParamaters[ibeoId] = new DRCRobotPointCloudParamaters(ibeoSensorName,ibeoTopic,null,null);
+      pointCloudParamaters[ibeoId] = new DRCRobotPointCloudParamaters(ibeoSensorName,ibeoTopic,null,null, ibeoId);
    }
    
    public static String getUrdfFeetForceSensorName(RobotSide side)
