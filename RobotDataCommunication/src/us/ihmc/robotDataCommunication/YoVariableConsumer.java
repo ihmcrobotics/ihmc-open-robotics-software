@@ -7,10 +7,13 @@ import java.nio.channels.Selector;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jvcompress.util.LZOUtils;
+import org.jvcompress.util.MInt;
 import org.zeromq.ZMQ;
 
 import us.ihmc.robotDataCommunication.YoVariableChangedProducer.YoVariableClientChangedListener;
 import us.ihmc.robotDataCommunication.jointState.JointState;
+import us.ihmc.robotDataCommunication.jointState.OneDoFState;
 import zmq.PollItem;
 import zmq.ZError;
 
@@ -49,16 +52,16 @@ public class YoVariableConsumer extends Thread
    public void run()
    {
       zmq.SocketBase socketBase = ctx.create_socket(ZMQ.SUB);
-      RemoteVisualizationUtils.mayRaise();
+      RemoteVisualizationUtils.mayRaise(socketBase);
 
       if (!socketBase.connect("tcp://" + host + ":" + port))
       {
-         RemoteVisualizationUtils.mayRaise();
+         RemoteVisualizationUtils.mayRaise(socketBase);
       }
 
       socketBase.setsockopt(zmq.ZMQ.ZMQ_SUBSCRIBE, new byte[0]);
       
-      RemoteVisualizationUtils.mayRaiseNot(ZError.ETERM);
+      RemoteVisualizationUtils.mayRaiseNot(socketBase, ZError.ETERM);
       PollItem[] pollItem = { new PollItem(socketBase, zmq.ZMQ.ZMQ_POLLIN) };
       Selector selector;
       try
@@ -69,8 +72,13 @@ public class YoVariableConsumer extends Thread
       {
          throw new RuntimeException(e);
       }
+      int numberOfJointStates = OneDoFState.getNumberOfJointStates(jointStates);
+      int bufferSize = (1 + variables.size() + numberOfJointStates) * 8;
+      ByteBuffer decompressed = ByteBuffer.allocate(bufferSize);
+      
       connected = true;
       
+      MInt outputLength = LZOUtils.createOutputLength();
       while (connected)
       {
          
@@ -90,13 +98,23 @@ public class YoVariableConsumer extends Thread
          
          zmq.Msg msg = socketBase.recv(zmq.ZMQ.ZMQ_NOBLOCK);
          
-         
          if(msg != null && packetNumber++ % listener.getDisplayOneInNPackets() == 0)
          {
             ByteBuffer buf = msg.buf();
+            decompressed.clear();
+            buf.clear();
+            try
+            {
+               LZOUtils.decompress(buf, decompressed, outputLength);
+            }
+            catch (Exception e)
+            {
+               e.printStackTrace();
+               continue;
+            }
             
-            long timestamp = buf.getLong();
-            LongBuffer data = buf.asLongBuffer();
+            long timestamp = decompressed.getLong();
+            LongBuffer data = decompressed.asLongBuffer();
 
             for (int i = 0; i < variables.size(); i++)
             {
