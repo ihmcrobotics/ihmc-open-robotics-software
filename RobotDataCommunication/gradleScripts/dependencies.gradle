@@ -8,7 +8,8 @@ dependencies {
 	compile group: 'xuggle', name: 'xuggle-xuggler', version: '5.4'
 	
 	compile group: 'org.jeromq', name: 'jeromq', version: '0.2.0' //for ZError
-	compile group: 'org.zeromq', name: 'jeromq', version: '0.3.3' //need both
+	//compile group: 'org.zeromq', name: 'jeromq', version: '0.3.3' //need both
+	compile group: 'us.ihmc.thirdparty', name: 'jeromq', version: '0.3.4'
 	compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
 	compile group: 'commons-lang', name: 'commons-lang', version: '2.6'
 	compile group: 'com.google.guava', name: 'guava', version: '17.0'
