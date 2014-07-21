@@ -581,7 +581,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder, Hu
          updateParameters.setUpdateRate(sdfUpdateRate);
          
          
-         LidarMount lidarMount = new LidarMount(linkToSensor, polarDefinition);
+         LidarMount lidarMount = new LidarMount(linkToSensor, polarDefinition,sensor.getName());
          scsJoint.addSensor(lidarMount);
          
       }
