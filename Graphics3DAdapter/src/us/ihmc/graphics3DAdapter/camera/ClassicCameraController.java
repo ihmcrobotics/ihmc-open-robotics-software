@@ -22,18 +22,18 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 {
    public static final double MIN_FIELD_OF_VIEW = 0.001;
    public static final double MAX_FIELD_OF_VIEW = 2.0;
-   
 
-   private static final double MIN_CAMERA_POSITION_TO_FIX_DISTANCE = 0.1; // 0.8;
 
-   private final static double CAMERA_START_X = 0.0;
-   private final static double CAMERA_START_Y = -6.0;
-   private final static double CAMERA_START_Z = 1.0;
+   private static final double MIN_CAMERA_POSITION_TO_FIX_DISTANCE = 0.1;    // 0.8;
+
+   public final static double CAMERA_START_X = 0.0;
+   public final static double CAMERA_START_Y = -6.0;
+   public final static double CAMERA_START_Z = 1.0;
 
    private double fieldOfView = CameraConfiguration.DEFAULT_FIELD_OF_VIEW;
    private double clipDistanceNear = CameraConfiguration.DEFAULT_CLIP_DISTANCE_NEAR;
    private double clipDistanceFar = CameraConfiguration.DEFAULT_CLIP_DISTANCE_FAR;
-   
+
    private double camX, camY, camZ, fixX, fixY, fixZ;
 
    private double zoom_factor = 1.0;
@@ -82,20 +82,23 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
    private ArrayList<Integer> cameraKeyPoints = new ArrayList<Integer>(0);
 
    private final CameraTrackingAndDollyPositionHolder cameraTrackAndDollyVariablesHolder;
-   
+
 
    private Graphics3DAdapter graphics3dAdapter;
 
-   public static ClassicCameraController createClassicCameraControllerAndAddListeners(ViewportAdapter viewportAdapter, CameraTrackingAndDollyPositionHolder cameraTrackAndDollyVariablesHolder, Graphics3DAdapter graphics3dAdapter)
+   public static ClassicCameraController createClassicCameraControllerAndAddListeners(ViewportAdapter viewportAdapter,
+           CameraTrackingAndDollyPositionHolder cameraTrackAndDollyVariablesHolder, Graphics3DAdapter graphics3dAdapter)
    {
       ClassicCameraController classicCameraController = new ClassicCameraController(graphics3dAdapter, viewportAdapter, cameraTrackAndDollyVariablesHolder);
       graphics3dAdapter.addKeyListener(classicCameraController);
       graphics3dAdapter.addMouseListener(classicCameraController);
       graphics3dAdapter.addSelectedListener(classicCameraController);
+
       return classicCameraController;
    }
-   
-   public ClassicCameraController(Graphics3DAdapter graphics3dAdapter, ViewportAdapter viewportAdapter, CameraTrackingAndDollyPositionHolder cameraTrackAndDollyVariablesHolder)
+
+   public ClassicCameraController(Graphics3DAdapter graphics3dAdapter, ViewportAdapter viewportAdapter,
+                                  CameraTrackingAndDollyPositionHolder cameraTrackAndDollyVariablesHolder)
    {
       this.graphics3dAdapter = graphics3dAdapter;
       this.viewportAdapter = viewportAdapter;
@@ -171,7 +174,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       setFieldOfView(config.fieldOfView);
       this.clipDistanceFar = config.clipDistanceFar;
       this.clipDistanceNear = config.clipDistanceNear;
-      
+
 
       // this.update();
    }
@@ -348,7 +351,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
    public void update()
    {
-      if(graphics3dAdapter.getContextManager().getCurrentViewport() != viewportAdapter)
+      if (graphics3dAdapter.getContextManager().getCurrentViewport() != viewportAdapter)
       {
          forward = false;
          backward = false;
@@ -357,7 +360,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
          up = false;
          down = false;
       }
-      
+
       if (isTracking)
       {
          if (isTrackingX)
@@ -411,7 +414,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
          setFieldOfView(fieldOfView);
 
       // Flying
-      if (fly && !isTracking && !isDolly && !transitioning)
+      if (fly &&!isTracking &&!isDolly &&!transitioning)
       {
          if (forward)
          {
@@ -446,7 +449,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
       // End Flying
 
-      if (transitioning && !isTracking && !isDolly)
+      if (transitioning &&!isTracking &&!isDolly)
       {
          int numberOfDimensionsThatHaveTransitioned = 0;
          double elapsedTransitionTime = System.currentTimeMillis() - lastTransitionTime;
@@ -695,7 +698,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       t3d.rotZ(-dx * rotate_factor);
       t3d.transform(v3d);
 
-      if (!isDolly || (!isDollyX && !isDollyY))
+      if (!isDolly || (!isDollyX &&!isDollyY))
       {
          camX = v3d.x + fixX;
          camY = v3d.y + fixY;
@@ -714,13 +717,13 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
       if ((v3d.x * delX0 > 0.0) && (v3d.y * delY0 > 0.0))
       {
-         if (!isDolly || (!isDollyX && !isDollyY))
+         if (!isDolly || (!isDollyX &&!isDollyY))
          {
             camX = v3d.x + fixX;
             camY = v3d.y + fixY;
          }
 
-         if (!isDolly || !isDollyZ)
+         if (!isDolly ||!isDollyZ)
          {
             camZ = v3d.z + fixZ;
 
@@ -733,7 +736,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
          }
       }
 
-      //         transformChanged(currXform);
+      // transformChanged(currXform);
 
    }
 
@@ -748,7 +751,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       t3d.rotZ(-dx * rotate_camera_factor);
       t3d.transform(v3d);
 
-      if (!isTracking || (!isTrackingX && !isTrackingY))
+      if (!isTracking || (!isTrackingX &&!isTrackingY))
       {
          fixX = camX - v3d.x;
          fixY = camY - v3d.y;
@@ -769,13 +772,13 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
       if ((v3d.x * delX0 > 0.0) && (v3d.y * delY0 > 0.0))
       {
-         if (!isTracking || (!isTrackingX && !isTrackingY))
+         if (!isTracking || (!isTrackingX &&!isTrackingY))
          {
             fixX = camX - v3d.x;
             fixY = camY - v3d.y;
          }
 
-         if (!isTracking || !isTrackingZ)
+         if (!isTracking ||!isTrackingZ)
          {
             fixZ = camZ - v3d.z;
 
@@ -788,7 +791,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
          }
       }
 
-      //         transformChanged(currXform);
+      // transformChanged(currXform);
 
    }
 
@@ -824,13 +827,13 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
          // if (offsetVec.length() < v3d.length())
          // {
-         if (!isDolly || (!isDollyX && !isDollyY))
+         if (!isDolly || (!isDollyX &&!isDollyY))
          {
             camX += offsetVec.x;
             camY += offsetVec.y;
          }
 
-         if (!isDolly || !isDollyZ)
+         if (!isDolly ||!isDollyZ)
             camZ += offsetVec.z;
 
          // }
@@ -847,7 +850,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
          }
       }
 
-      //      transformChanged(currXform);
+      // transformChanged(currXform);
 
    }
 
@@ -873,11 +876,11 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       //
       // Vector3d offsetVec = new Vector3d(v3d);
       //
-      // // offsetVec.normalize();
+      //// offsetVec.normalize();
       // offsetVec.scale(distance * zoom_factor);
       //
-      // // if (offsetVec.length() < v3d.length())
-      // // {
+      //// if (offsetVec.length() < v3d.length())
+      //// {
       // if (!isDolly || (!isDollyX &&!isDollyY))
       // {
       // camX += offsetVec.x;
@@ -885,7 +888,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       // }
       //
       // if (!isDolly ||!isDollyZ)
-      // camZ += offsetVec.z; 
+      // camZ += offsetVec.z;
    }
 
    public void pan(double dx, double dy)
@@ -894,7 +897,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       dx *= distanceFromCameraToFix / viewportAdapter.getPhysicalWidth() * .00023;
       dy *= distanceFromCameraToFix / viewportAdapter.getPhysicalHeight() * .00007;
       double theta = Math.PI / 2 + Math.atan2((camZ - fixZ), Math.hypot(camX - fixX, camY - fixY));
-      if (!isTracking || !isTrackingZ)
+      if (!isTracking ||!isTrackingZ)
       {
          camZ += dy * Math.sin(theta);
          fixZ += dy * Math.sin(theta);
@@ -903,13 +906,13 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       double d = dy * Math.cos(theta);
       theta = Math.atan2(camY - fixY, camX - fixX);
 
-      if (!isTracking || !isTrackingY)
+      if (!isTracking ||!isTrackingY)
       {
          camY += d * Math.sin(theta);
          fixY += d * Math.sin(theta);
       }
 
-      if (!isTracking || !isTrackingX)
+      if (!isTracking ||!isTrackingX)
       {
          camX += d * Math.cos(theta);
          fixX += d * Math.cos(theta);
@@ -917,13 +920,13 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
       theta = Math.PI / 2 + Math.atan2(camY - fixY, camX - fixX);
 
-      if (!isTracking || !isTrackingY)
+      if (!isTracking ||!isTrackingY)
       {
          camY -= dx * Math.sin(theta);
          fixY -= dx * Math.sin(theta);
       }
 
-      if (!isTracking || !isTrackingX)
+      if (!isTracking ||!isTrackingX)
       {
          camX -= dx * Math.cos(theta);
          fixX -= dx * Math.cos(theta);
@@ -1120,67 +1123,68 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       if (isMounted() && (cameraMount != null))
       {
          cameraMount.getTransformToCamera(currXform);
+
          return;
       }
 
-//      // Note: The following you should be able to just do with Transform3D.lookAt()...
-//      double delX = getCamX() - getFixX();
-//      if (Double.isNaN(delX))
-//         return;
-//      double delY = getCamY() - getFixY();
-//      if (Double.isNaN(delY))
-//         return;
-//      double delZ = getCamZ() - getFixZ();
-//      if (Double.isNaN(delZ))
-//         return;
+//    // Note: The following you should be able to just do with Transform3D.lookAt()...
+//    double delX = getCamX() - getFixX();
+//    if (Double.isNaN(delX))
+//       return;
+//    double delY = getCamY() - getFixY();
+//    if (Double.isNaN(delY))
+//       return;
+//    double delZ = getCamZ() - getFixZ();
+//    if (Double.isNaN(delZ))
+//       return;
 //
-//      // Z axis points away from camera look ray...
-//      zAxis.set(delX, delY, delZ);
+//    // Z axis points away from camera look ray...
+//    zAxis.set(delX, delY, delZ);
 //
-//      if (zAxis.length() < 1.0e-10)
-//         zAxis.set(0.0, 0.0, -1.0); // Prevent "non-congruent transform above ViewPlatform exceptions...
-//      if (zAxis.length() > 1.0e100)
-//         return;
+//    if (zAxis.length() < 1.0e-10)
+//       zAxis.set(0.0, 0.0, -1.0); // Prevent "non-congruent transform above ViewPlatform exceptions...
+//    if (zAxis.length() > 1.0e100)
+//       return;
 //
-//      zAxis.normalize();
+//    zAxis.normalize();
 //
-//      yAxis.set(0.0, 0.0, 1.0);
+//    yAxis.set(0.0, 0.0, 1.0);
 //
-//      if (yAxis.equals(zAxis))
-//      {
-//         yAxis.set(0.0, 1.0, 0.0);
-//      }
+//    if (yAxis.equals(zAxis))
+//    {
+//       yAxis.set(0.0, 1.0, 0.0);
+//    }
 //
-//      xAxis.cross(yAxis, zAxis);
-//      xAxis.normalize();
+//    xAxis.cross(yAxis, zAxis);
+//    xAxis.normalize();
 //
-//      yAxis.cross(zAxis, xAxis);
+//    yAxis.cross(zAxis, xAxis);
 //
-//      /*
-//       * double[] t3DMatrix = new double[] {xAxis.x, yAxis.x, zAxis.x,
-//       * classicCameraController.getCamX(), xAxis.y, yAxis.y, zAxis.y,
-//       * classicCameraController.getCamY(), xAxis.z, yAxis.z, zAxis.z,
-//       * classicCameraController.getCamZ(), 0.0, 0.0, 0.0, 1.0};
-//       */
+//    /*
+//     * double[] t3DMatrix = new double[] {xAxis.x, yAxis.x, zAxis.x,
+//     * classicCameraController.getCamX(), xAxis.y, yAxis.y, zAxis.y,
+//     * classicCameraController.getCamY(), xAxis.z, yAxis.z, zAxis.z,
+//     * classicCameraController.getCamZ(), 0.0, 0.0, 0.0, 1.0};
+//     */
 //
-//      t3DMatrix[0] = xAxis.x;
-//      t3DMatrix[1] = yAxis.x;
-//      t3DMatrix[2] = zAxis.x;
-//      t3DMatrix[3] = getCamX();
-//      t3DMatrix[4] = xAxis.y;
-//      t3DMatrix[5] = yAxis.y;
-//      t3DMatrix[6] = zAxis.y;
-//      t3DMatrix[7] = getCamY();
-//      t3DMatrix[8] = xAxis.z;
-//      t3DMatrix[9] = yAxis.z;
-//      t3DMatrix[10] = zAxis.z;
-//      t3DMatrix[11] = getCamZ();
-//      t3DMatrix[12] = 0.0;
-//      t3DMatrix[13] = 0.0;
-//      t3DMatrix[14] = 0.0;
-//      t3DMatrix[15] = 1.0;
+//    t3DMatrix[0] = xAxis.x;
+//    t3DMatrix[1] = yAxis.x;
+//    t3DMatrix[2] = zAxis.x;
+//    t3DMatrix[3] = getCamX();
+//    t3DMatrix[4] = xAxis.y;
+//    t3DMatrix[5] = yAxis.y;
+//    t3DMatrix[6] = zAxis.y;
+//    t3DMatrix[7] = getCamY();
+//    t3DMatrix[8] = xAxis.z;
+//    t3DMatrix[9] = yAxis.z;
+//    t3DMatrix[10] = zAxis.z;
+//    t3DMatrix[11] = getCamZ();
+//    t3DMatrix[12] = 0.0;
+//    t3DMatrix[13] = 0.0;
+//    t3DMatrix[14] = 0.0;
+//    t3DMatrix[15] = 1.0;
 
-      
+
       positionOffset.set(getCamX(), getCamY(), getCamZ());
       xAxis.set(getFixX(), getFixY(), getFixZ());
 
@@ -1189,13 +1193,13 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       zAxis.set(0.0, 0.0, 1.0);
       yAxis.cross(zAxis, xAxis);
       zAxis.cross(xAxis, yAxis);
-      
-           
+
+
       rotationMatrix.setColumn(0, xAxis);
       rotationMatrix.setColumn(1, yAxis);
       rotationMatrix.setColumn(2, zAxis);
-      
-      
+
+
       currXform.set(rotationMatrix);
       currXform.setTranslation(positionOffset);
 
@@ -1203,112 +1207,147 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
    public void keyPressed(Key key)
    {
-      if(graphics3dAdapter.getContextManager().getCurrentViewport() != viewportAdapter)
+      if (graphics3dAdapter.getContextManager().getCurrentViewport() != viewportAdapter)
          return;
 
       switch (key)
       {
-      case W:
-         forward = true;
-         break;
-      case S:
-         backward = true;
-         break;
-      case A:
-         left = true;
-         break;
-      case D:
-         right = true;
-         break;
-      case Q:
-         up = true;
-         break;
-      case Z:
-         down = true;
-         break;
+         case W :
+            forward = true;
+
+            break;
+
+         case S :
+            backward = true;
+
+            break;
+
+         case A :
+            left = true;
+
+            break;
+
+         case D :
+            right = true;
+
+            break;
+
+         case Q :
+            up = true;
+
+            break;
+
+         case Z :
+            down = true;
+
+            break;
       }
 
    }
 
    public void keyReleased(Key key)
    {
-      if(graphics3dAdapter.getContextManager().getCurrentViewport() != viewportAdapter)
+      if (graphics3dAdapter.getContextManager().getCurrentViewport() != viewportAdapter)
          return;
-      
-      switch(key)
+
+      switch (key)
       {
-      case W:
-         forward = false;
-         break;
-      case S:
-         backward = false;
-         break;
-      case A:
-         left = false;
-         break;
-      case D:
-         right = false;
-         break;
-      case Q:
-         up = false;
-         break;
-      case Z:
-         down = false;
-         break;
-      case RIGHT:
-         nextStoredPosition();
-         break;
-      case LEFT:
-         previousStoredPosition();
-         break;
-      case K:
-         storePosition();
-         break;
+         case W :
+            forward = false;
+
+            break;
+
+         case S :
+            backward = false;
+
+            break;
+
+         case A :
+            left = false;
+
+            break;
+
+         case D :
+            right = false;
+
+            break;
+
+         case Q :
+            up = false;
+
+            break;
+
+         case Z :
+            down = false;
+
+            break;
+
+         case RIGHT :
+            nextStoredPosition();
+
+            break;
+
+         case LEFT :
+            previousStoredPosition();
+
+            break;
+
+         case K :
+            storePosition();
+
+            break;
       }
-      
+
    }
-   
+
    public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyHolder, Point3d location, Point3d cameraLocation, Quat4d cameraRotation)
    {
-      if(graphics3dAdapter.getContextManager().getCurrentViewport() != viewportAdapter)
+      if (graphics3dAdapter.getContextManager().getCurrentViewport() != viewportAdapter)
          return;
-      
-      if(modifierKeyHolder.isKeyPressed(Key.SHIFT))
+
+      if (modifierKeyHolder.isKeyPressed(Key.SHIFT))
       {
-         if (!isTracking() || !isTrackingX())
+         if (!isTracking() ||!isTrackingX())
             setFixX(location.x);
-         if (!isTracking() || !isTrackingY())
+         if (!isTracking() ||!isTrackingY())
             setFixY(location.y);
-         if (!isTracking() || !isTrackingZ())
+         if (!isTracking() ||!isTrackingZ())
             setFixZ(location.z);
       }
    }
 
    public void mouseDragged(MouseButton mouseButton, double dx, double dy)
    {
-      if(graphics3dAdapter.getContextManager().getCurrentViewport() != viewportAdapter)
+      if (graphics3dAdapter.getContextManager().getCurrentViewport() != viewportAdapter)
          return;
-      
-      switch(mouseButton)
+
+      switch (mouseButton)
       {
-      case LEFT:
-         doMouseDraggedLeft(dx, dy);
-         break;
-      case RIGHT:
-         doMouseDraggedRight(dx, dy);
-         break;
-      case MIDDLE:
-         doMouseDraggedMiddle(dx, dy);
-         break;
-      case LEFTRIGHT:
-         pan(dx, dy);
-         break;
+         case LEFT :
+            doMouseDraggedLeft(dx, dy);
+
+            break;
+
+         case RIGHT :
+            doMouseDraggedRight(dx, dy);
+
+            break;
+
+         case MIDDLE :
+            doMouseDraggedMiddle(dx, dy);
+
+            break;
+
+         case LEFTRIGHT :
+            pan(dx, dy);
+
+            break;
       }
    }
 
    public double getClipNear()
    {
-      if(isMounted)
+      if (isMounted)
       {
          return cameraMount.getClipDistanceNear();
       }
@@ -1320,7 +1359,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
    public double getClipFar()
    {
-      if(isMounted)
+      if (isMounted)
       {
          return cameraMount.getClipDistanceFar();
       }
@@ -1332,7 +1371,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
    public double getHorizontalFieldOfViewInRadians()
    {
-      if(isMounted)
+      if (isMounted)
       {
          return cameraMount.getFieldOfView();
       }
@@ -1356,29 +1395,29 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
    {
       setTracking(otherCamera.isTracking(), otherCamera.isTrackingX(), otherCamera.isTrackingY(), otherCamera.isTrackingZ());
       setDolly(otherCamera.isDolly(), otherCamera.isDollyX(), otherCamera.isDollyY(), otherCamera.isDollyZ());
-      
+
       setCameraPosition(otherCamera.getCamX(), otherCamera.getCamY(), otherCamera.getCamZ());
-      
+
       setFixPosition(otherCamera.getFixX(), otherCamera.getFixY(), otherCamera.getFixZ());
-      
+
       setDollyOffsets(otherCamera.getDollyXOffset(), otherCamera.getDollyYOffset(), otherCamera.getDollyZOffset());
       setTrackingOffsets(otherCamera.getTrackingXOffset(), otherCamera.getTrackingYOffset(), otherCamera.getTrackingZOffset());
-      
-      
+
+
       if (otherCamera instanceof ClassicCameraController)
       {
          ClassicCameraController classicOtherCamera = (ClassicCameraController) otherCamera;
-         
+
          keyFrameCamPos = classicOtherCamera.keyFrameCamPos;
          keyFrameFixPos = classicOtherCamera.keyFrameFixPos;
-         keyFrameTimes  = classicOtherCamera.keyFrameTimes ;
+         keyFrameTimes = classicOtherCamera.keyFrameTimes;
 
          toggleCameraKeyPoints = classicOtherCamera.toggleCameraKeyPoints;
          cameraKeyPointIndex = classicOtherCamera.cameraKeyPointIndex;
          cameraKeyPoints = classicOtherCamera.cameraKeyPoints;
-         
+
          System.out.println("Copying camera keys");
       }
-      
+
    }
 }
