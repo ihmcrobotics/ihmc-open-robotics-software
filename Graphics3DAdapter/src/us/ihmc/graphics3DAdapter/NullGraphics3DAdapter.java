@@ -163,13 +163,6 @@ public class NullGraphics3DAdapter implements Graphics3DAdapter
          public void addContextSwitchedListener(ContextSwitchedListener contextSwitchedListener)
          {
          }
-
-         @Override
-         public void addFrameListener(Graphics3DFrameListener frameListener)
-         {
-            // TODO Auto-generated method stub
-
-         }
       };
    }
 
