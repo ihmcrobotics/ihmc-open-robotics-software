@@ -51,7 +51,7 @@ public class Graphics3DObject
 
    private boolean changeable = false;
 
-   private Graphics3DObject(Shape3d shape, ArrayList<Graphics3DPrimitiveInstruction> graphics3DInstructions)
+   private Graphics3DObject(Shape3d shape, AppearanceDefinition appearance, ArrayList<Graphics3DPrimitiveInstruction> graphics3DInstructions)
    {
       if (graphics3DInstructions != null)
       {
@@ -64,18 +64,30 @@ public class Graphics3DObject
 
       if (shape != null)
       {
-         add(shape);
+         if (appearance == null)
+         {
+            add(shape);
+         }
+         else
+         {
+            add(shape, appearance);
+         }
       }
+   }
+
+   public Graphics3DObject(Shape3d shape, AppearanceDefinition appearance)
+   {
+      this(shape, appearance, null);
    }
 
    public Graphics3DObject(Shape3d shape)
    {
-      this(shape, null);
+      this(shape, null, null);
    }
 
    public Graphics3DObject(ArrayList<Graphics3DPrimitiveInstruction> graphics3DInstructions)
    {
-      this(null, graphics3DInstructions);
+      this(null, null, graphics3DInstructions);
    }
 
    /**
@@ -83,7 +95,7 @@ public class Graphics3DObject
     */
    public Graphics3DObject()
    {
-      this(null, null);
+      this(null, null, null);
    }
 
    public ArrayList<Graphics3DPrimitiveInstruction> getGraphics3DInstructions()
