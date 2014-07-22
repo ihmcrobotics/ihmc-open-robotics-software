@@ -3,6 +3,7 @@ package us.ihmc.graphics3DAdapter;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.camera.ClassicCameraController;
+import us.ihmc.graphics3DAdapter.camera.ViewportAdapter;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 
 public class Graphics3DWorld
@@ -11,6 +12,7 @@ public class Graphics3DWorld
    private Graphics3DNode rootNode;
    private final String worldName;
    private ClassicCameraController cameraController;
+   private ViewportAdapter viewportAdapter;
 
    public Graphics3DWorld(String worldName, Graphics3DAdapter graphics3dAdapter)
    {
@@ -68,7 +70,9 @@ public class Graphics3DWorld
    {
       start();
 
-      cameraController = Graphics3DAdapterTools.createNewWindow(graphics3dAdapter, worldName, windowWidth, windowHeight, new Vector3d(camX, camY, camZ));
+      viewportAdapter = Graphics3DAdapterTools.createViewport(graphics3dAdapter);
+      cameraController = Graphics3DAdapterTools.createNewWindow(graphics3dAdapter, viewportAdapter, worldName, windowWidth, windowHeight,
+              new Vector3d(camX, camY, camZ));
    }
 
    public void startWithGui(int windowWidth, int windowHeight)
