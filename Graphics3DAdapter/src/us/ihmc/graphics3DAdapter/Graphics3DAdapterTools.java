@@ -16,10 +16,14 @@ import us.ihmc.graphics3DAdapter.camera.ViewportAdapter;
 
 public class Graphics3DAdapterTools
 {
-   public static ClassicCameraController createNewWindow(Graphics3DAdapter graphics3DAdapter, String title, int width, int height,
-           Vector3d initialCameraTranslation)
+   public static ViewportAdapter createViewport(Graphics3DAdapter graphics3DAdapter)
    {
-      ViewportAdapter viewportAdapter = graphics3DAdapter.createNewViewport(null, false, false);
+      return graphics3DAdapter.createNewViewport(null, false, false);
+   }
+
+   public static ClassicCameraController createNewWindow(Graphics3DAdapter graphics3DAdapter, ViewportAdapter viewportAdapter, String title, int width,
+           int height, Vector3d initialCameraTranslation)
+   {
       CameraTrackingAndDollyPositionHolder cameraTrackingAndDollyPositionHolder = new SimpleCameraTrackingAndDollyPositionHolder();
       ClassicCameraController classicCameraController = ClassicCameraController.createClassicCameraControllerAndAddListeners(viewportAdapter,
                                                            cameraTrackingAndDollyPositionHolder, graphics3DAdapter);
@@ -30,6 +34,12 @@ public class Graphics3DAdapterTools
       Graphics3DAdapterTools.createNewWindow(canvas, title, width, height);
 
       return classicCameraController;
+   }
+
+   public static ClassicCameraController createNewWindow(Graphics3DAdapter graphics3DAdapter, String title, int width, int height,
+           Vector3d initialCameraTranslation)
+   {
+      return createNewWindow(graphics3DAdapter, createViewport(graphics3DAdapter), title, width, height, initialCameraTranslation);
    }
 
    public static ClassicCameraController createNewWindow(Graphics3DAdapter graphics3DAdapter, String title, int width, int height)
