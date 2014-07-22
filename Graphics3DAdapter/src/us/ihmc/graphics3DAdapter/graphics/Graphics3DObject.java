@@ -15,6 +15,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.HeightMap;
+import us.ihmc.graphics3DAdapter.exceptions.ShapeNotSupportedException;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddExtusionInstruction;
@@ -33,6 +34,8 @@ import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.InertiaTools;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
+import us.ihmc.utilities.math.geometry.Shape3d;
+import us.ihmc.utilities.math.geometry.Sphere3d;
 
 public class Graphics3DObject
 {
@@ -379,6 +382,32 @@ public class Graphics3DObject
       addArrow(length, YoAppearance.White(), arrowAppearance);
       rotate(Math.PI / 2.0, X);
       addArrow(length, YoAppearance.Blue(), arrowAppearance);
+   }
+
+   public Graphics3DAddMeshDataInstruction add(Shape3d shape)
+   {
+      return add(shape, YoAppearance.Black());
+   }
+
+   public Graphics3DAddMeshDataInstruction add(Shape3d shape, AppearanceDefinition app)
+   {
+      if (shape instanceof Sphere3d)
+      {
+         return addSphere(((Sphere3d) shape).getRadius(), app);
+      }
+      else
+      {
+         try
+         {
+            throw new ShapeNotSupportedException(shape);
+         }
+         catch (ShapeNotSupportedException e)
+         {
+            e.printStackTrace();
+         }
+
+         return null;
+      }
    }
 
    public void addArrow(double length, AppearanceDefinition baseAppearance, AppearanceDefinition headAppearance)
