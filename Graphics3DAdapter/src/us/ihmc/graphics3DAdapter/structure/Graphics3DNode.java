@@ -89,6 +89,14 @@ public class Graphics3DNode
       transform.mul(translator);
    }
 
+   public Vector3d getTranslation()
+   {
+      Vector3d translation = new Vector3d();
+      getTransform().get(translation);
+
+      return translation;
+   }
+
    public void addChild(Graphics3DNode child)
    {
       synchronized (childeren)
