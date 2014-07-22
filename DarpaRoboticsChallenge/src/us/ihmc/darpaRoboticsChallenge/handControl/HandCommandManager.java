@@ -15,8 +15,6 @@ public abstract class HandCommandManager
 	
 	public HandCommandManager(Class<? extends Object> clazz)
 	{
-		attachObjectConsumers();
-		
 		spawnHandControllerThreadManager(clazz);
 		
 		try
@@ -36,8 +34,6 @@ public abstract class HandCommandManager
    
 	public void sendHandCommand(Object packet)
 	{
-		server.consumeObject(packet);
+	   server.consumeObject(packet);
 	}
-	
-	protected abstract void attachObjectConsumers();
 }
