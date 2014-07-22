@@ -51,10 +51,29 @@ public class Graphics3DObject
 
    private boolean changeable = false;
 
+   private Graphics3DObject(Shape3d shape, ArrayList<Graphics3DPrimitiveInstruction> graphics3DInstructions)
+   {
+      graphics3DInstructions = new ArrayList<Graphics3DPrimitiveInstruction>();
+
+      if (shape != null)
+      {
+         add(shape);
+      }
+
+      if (graphics3DInstructions != null)
+      {
+         this.graphics3DInstructions = graphics3DInstructions;
+      }
+   }
+
+   public Graphics3DObject(Shape3d shape)
+   {
+      this(shape, null);
+   }
+
    public Graphics3DObject(ArrayList<Graphics3DPrimitiveInstruction> graphics3DInstructions)
    {
-      this();
-      this.graphics3DInstructions = graphics3DInstructions;
+      this(null, graphics3DInstructions);
    }
 
    /**
@@ -62,7 +81,7 @@ public class Graphics3DObject
     */
    public Graphics3DObject()
    {
-      graphics3DInstructions = new ArrayList<Graphics3DPrimitiveInstruction>();
+      this(null, null);
    }
 
    public ArrayList<Graphics3DPrimitiveInstruction> getGraphics3DInstructions()
