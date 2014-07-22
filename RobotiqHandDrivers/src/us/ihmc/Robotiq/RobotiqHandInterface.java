@@ -356,7 +356,7 @@ public final class RobotiqHandInterface
 		Arrays.fill(force,(byte)0x00);
 		
 		position[FINGER_A] = FULLY_OPEN;
-		speed[FINGER_A] = (byte) (MAX_SPEED * 3 /4);
+		speed[FINGER_A] = (byte)(MAX_SPEED & 0b11110000); //speed control
 		force[FINGER_A] = MAX_FORCE/2;
 		
 		initializedStatus = INITIALIZED;
@@ -584,7 +584,7 @@ public final class RobotiqHandInterface
 			status = getStatus();
 		if(fingerControl == CONCURRENT_FINGER_CONTROL)
 		{
-			position[FINGER_A] = status[FINGER_A_POSITION]; //TODO: check to see if this should be the request3ed position
+			position[FINGER_A] = status[FINGER_A_POSITION]; //TODO: check to see if this should be the requested position
 			position[FINGER_B] = status[FINGER_B_POSITION];
 			position[FINGER_C] = status[FINGER_C_POSITION];
 			force[FINGER_B] = force[FINGER_A];
