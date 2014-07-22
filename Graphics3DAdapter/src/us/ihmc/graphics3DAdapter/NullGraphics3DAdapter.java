@@ -1,10 +1,10 @@
 package us.ihmc.graphics3DAdapter;
+
 import java.awt.Canvas;
 import java.awt.GraphicsDevice;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.net.URL;
-import java.util.ArrayList;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Color3f;
@@ -20,8 +20,6 @@ import us.ihmc.graphics3DAdapter.input.KeyListener;
 import us.ihmc.graphics3DAdapter.input.MouseListener;
 import us.ihmc.graphics3DAdapter.input.SelectedListener;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
-import us.ihmc.utilities.math.geometry.Ray3d;
-import us.ihmc.utilities.net.TimestampProvider;
 
 public class NullGraphics3DAdapter implements Graphics3DAdapter
 {
@@ -29,27 +27,22 @@ public class NullGraphics3DAdapter implements Graphics3DAdapter
 
    public void addRootNode(Graphics3DNode rootNode)
    {
-
    }
 
    public void removeRootNode(Graphics3DNode rootNode)
    {
-
    }
 
    public ViewportAdapter createNewViewport(GraphicsDevice graphicsDevice, boolean isMainViewport, boolean isOffScreen)
    {
       return new ViewportAdapter()
       {
-
          public void setupOffscreenView(int width, int height)
          {
-
          }
 
          public void setCameraController(CameraController cameraController)
          {
-
          }
 
          public double[][] getZBuffer()
@@ -81,7 +74,6 @@ public class NullGraphics3DAdapter implements Graphics3DAdapter
          {
             return new CaptureDevice()
             {
-
                public void streamTo(CameraStreamer cameraStreamer, int framesPerSecond)
                {
                }
@@ -107,23 +99,19 @@ public class NullGraphics3DAdapter implements Graphics3DAdapter
 
                public void exportSnapshot(File snapshotFile)
                {
-
                }
             };
          }
 
          public Canvas getCanvas()
          {
-
             return new Canvas();
          }
 
          public CameraController getCameraController()
          {
-
             return new CameraController()
             {
-
                public double getHorizontalFieldOfViewInRadians()
                {
                   // TODO Auto-generated method stub
@@ -152,10 +140,8 @@ public class NullGraphics3DAdapter implements Graphics3DAdapter
 
          public CameraAdapter getCamera()
          {
-
             return new CameraAdapter()
             {
-
                public float getHorizontalFovInRadians()
                {
                   return (float) Math.PI;
@@ -169,7 +155,6 @@ public class NullGraphics3DAdapter implements Graphics3DAdapter
 
                public Point3d getCameraPosition()
                {
-
                   return new Point3d();
                }
             };
@@ -177,6 +162,12 @@ public class NullGraphics3DAdapter implements Graphics3DAdapter
 
          public void addContextSwitchedListener(ContextSwitchedListener contextSwitchedListener)
          {
+         }
+
+         @Override
+         public void addFrameListener(Graphics3DFrameListener frameListener)
+         {
+            // TODO Auto-generated method stub
 
          }
       };
@@ -184,70 +175,57 @@ public class NullGraphics3DAdapter implements Graphics3DAdapter
 
    public void closeViewport(ViewportAdapter viewport)
    {
-
    }
 
    public void setHeightMap(HeightMap heightMap)
    {
-
    }
 
    public Object getGraphicsConch()
    {
-
       return graphicsConch;
    }
 
    public void setGroundVisible(boolean isVisible)
    {
-
    }
 
    public void addSelectedListener(SelectedListener selectedListener)
    {
-
    }
 
    public void addKeyListener(KeyListener keyListener)
    {
-
    }
 
    public void addMouseListener(MouseListener mouseListener)
    {
-
    }
 
    public void closeAndDispose()
    {
-
    }
 
    public void setBackgroundColor(Color3f color)
    {
-
    }
 
    public void setBackgroundImage(URL fileURL, Graphics3DBackgroundScaleMode backgroundScaleMode)
    {
-
    }
 
    public void setGroundAppearance(AppearanceDefinition app)
    {
-
    }
 
    public void freezeFrame(Graphics3DNode rootJoint)
    {
-
    }
 
    public ContextManager getContextManager()
    {
       return new ContextManager()
       {
-
          public ViewportAdapter getCurrentViewport()
          {
             return null;
