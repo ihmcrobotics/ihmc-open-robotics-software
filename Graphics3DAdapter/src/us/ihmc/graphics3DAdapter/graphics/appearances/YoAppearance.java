@@ -2,12 +2,9 @@ package us.ihmc.graphics3DAdapter.graphics.appearances;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
-import java.net.URL;
 import java.util.Random;
 
 import javax.vecmath.Color3f;
-
-import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 
 
 //http://www.wdvl.com/Graphics/Colour/  has some of the color names I'm using...
@@ -25,7 +22,7 @@ public class YoAppearance
       return new YoAppearanceTexture(path);
 
    }
-   
+
    public static AppearanceDefinition Texture(BufferedImage bufferedImage)
    {
       return new YoAppearanceTexture(bufferedImage);
@@ -403,6 +400,19 @@ public class YoAppearance
    public static AppearanceDefinition GreenYellow()
    {
       return RGBColorFromHex(0xADFF2F);
+   }
+
+   public static AppearanceDefinition Glass(double transparency)
+   {
+      AppearanceDefinition glass = SkyBlue();
+      makeTransparent(glass, 0.5);
+
+      return glass;
+   }
+
+   public static AppearanceDefinition Glass()
+   {
+      return Glass(0.5);
    }
 
    public static AppearanceDefinition HoneyDew()
@@ -873,6 +883,7 @@ public class YoAppearance
       double red = random.nextDouble();
       double green = random.nextDouble();
       double blue = random.nextDouble();
+
       return YoAppearance.RGBColor(red, green, blue);
    }
 
