@@ -53,8 +53,6 @@ public class Graphics3DObject
 
    private Graphics3DObject(Shape3d shape, ArrayList<Graphics3DPrimitiveInstruction> graphics3DInstructions)
    {
-      graphics3DInstructions = new ArrayList<Graphics3DPrimitiveInstruction>();
-
       if (shape != null)
       {
          add(shape);
@@ -63,6 +61,10 @@ public class Graphics3DObject
       if (graphics3DInstructions != null)
       {
          this.graphics3DInstructions = graphics3DInstructions;
+      }
+      else
+      {
+         this.graphics3DInstructions = new ArrayList<Graphics3DPrimitiveInstruction>();
       }
    }
 
