@@ -15,6 +15,7 @@ import us.ihmc.utilities.math.geometry.RotationFunctions;
 
 public class Graphics3DNode
 {
+   private static final Graphics3DNodeType DEFAULT_NODE_TYPE = Graphics3DNodeType.JOINT;
    private final String name;
    private final Graphics3DNodeType nodeType;
    private final Transform3D transform = new Transform3D();
@@ -36,9 +37,19 @@ public class Graphics3DNode
       }
    }
 
+   public Graphics3DNode(String name, Graphics3DObject graphicsObject)
+   {
+      this(name, DEFAULT_NODE_TYPE, graphicsObject);
+   }
+
    public Graphics3DNode(String name, Graphics3DNodeType nodeType)
    {
       this(name, nodeType, null);
+   }
+
+   public Graphics3DNode(String name)
+   {
+      this(name, DEFAULT_NODE_TYPE, null);
    }
 
    public synchronized Transform3D getTransform()
@@ -66,6 +77,11 @@ public class Graphics3DNode
       {
          return Collections.unmodifiableList(childeren);
       }
+   }
+
+   public Graphics3DObject getGraphics3DObject()
+   {
+      return graphicsObject;
    }
 
    public synchronized Graphics3DObject getGraphicsObjectAndResetHasGraphicsObjectChanged()
