@@ -89,6 +89,26 @@ public class Graphics3DNode
       transform.mul(translator);
    }
 
+   public void rotate(double angle, Axis axis)
+   {
+      Transform3D rotator = new Transform3D();
+
+      if (axis == Axis.X)
+      {
+         rotator.rotX(angle);
+      }
+      else if (axis == Axis.Y)
+      {
+         rotator.rotY(angle);
+      }
+      else if (axis == Axis.Z)
+      {
+         rotator.rotZ(angle);
+      }
+
+      transform.mul(rotator);
+   }
+
    public Vector3d getTranslation()
    {
       Vector3d translation = new Vector3d();
