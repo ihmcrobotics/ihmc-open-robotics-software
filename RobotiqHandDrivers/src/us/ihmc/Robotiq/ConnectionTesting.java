@@ -18,15 +18,15 @@ public class ConnectionTesting
 		rightHand.initialize();
 		System.out.println("Activation Request Sent");
 		
-//		System.out.println("Resetting Hand");
-//		rightHand.reset();
-//		System.out.println("Hand Reset");
+		System.out.println("Resetting Hand");
+		rightHand.reset();
+		System.out.println("Hand Reset");
 		
-		//testCycles(rightHand, 2);
+		testCycles(rightHand, 2);
 		
-		System.out.println("Closing Hand");
-		rightHand.close();
-		System.out.println("Hand Closed");
+//		System.out.println("Closing Hand");
+//		rightHand.close();
+//		System.out.println("Hand Closed");
 //		
 //		Thread.sleep(10000);
 //		
@@ -34,27 +34,27 @@ public class ConnectionTesting
 //		rightHand.open();
 //		System.out.println("Hand Open");
 		
-//		System.out.println("Going to pinch");
-//		rightHand.pinchGrip();
-//		System.out.println("Pinching");
-//		
-//		testCycles(rightHand, 2);
-//		
-//		System.out.println("Going to wide mode");
-//		rightHand.wideGrip();
-//		System.out.println("In wide mode");
-//		
-//		testCycles(rightHand, 2);
-//		
-//		System.out.println("Going to scissor mode");
-//		rightHand.scissorGrip();
-//		System.out.println("In scissor mode");
-//		
-//		testCycles(rightHand, 2);		
-//		
-//		System.out.println("Going to basic mode");
-//		rightHand.normalGrip();
-//		System.out.println("In basic mode");
+		System.out.println("Going to pinch");
+		rightHand.pinchGrip();
+		System.out.println("Pinching");
+		
+		testCycles(rightHand, 2);
+		
+		System.out.println("Going to wide mode");
+		rightHand.wideGrip();
+		System.out.println("In wide mode");
+		
+		testCycles(rightHand, 2);
+		
+		System.out.println("Going to scissor mode");
+		rightHand.scissorGrip();
+		System.out.println("In scissor mode");
+		
+		testCycles(rightHand, 2);		
+		
+		System.out.println("Going to basic mode");
+		rightHand.normalGrip();
+		System.out.println("In basic mode");
 		
 		System.out.println();
 		
