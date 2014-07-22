@@ -18,17 +18,27 @@ public class Graphics3DNode
    private final String name;
    private final Graphics3DNodeType nodeType;
    private final Transform3D transform = new Transform3D();
-   
+
    private Graphics3DObject graphicsObject;
    private boolean hasGraphicsObjectChanged = false;
 
    private final ArrayList<Graphics3DNode> childeren = new ArrayList<Graphics3DNode>();
    private final ArrayList<SelectedListener> selectedListeners = new ArrayList<SelectedListener>();
 
-   public Graphics3DNode(String name, Graphics3DNodeType nodeType)
+   public Graphics3DNode(String name, Graphics3DNodeType nodeType, Graphics3DObject graphicsObject)
    {
       this.name = name;
       this.nodeType = nodeType;
+
+      if (graphicsObject != null)
+      {
+         setGraphicsObject(graphicsObject);
+      }
+   }
+
+   public Graphics3DNode(String name, Graphics3DNodeType nodeType)
+   {
+      this(name, nodeType, null);
    }
 
    public synchronized Transform3D getTransform()
@@ -57,19 +67,20 @@ public class Graphics3DNode
          return Collections.unmodifiableList(childeren);
       }
    }
-   
+
    public synchronized Graphics3DObject getGraphicsObjectAndResetHasGraphicsObjectChanged()
    {
       Graphics3DObject ret = graphicsObject;
       setHasGraphicsObjectChanged(false);
+
       return ret;
    }
-   
+
    public synchronized void setHasGraphicsObjectChanged(boolean hasGraphicsObjectChanged)
    {
       this.hasGraphicsObjectChanged = hasGraphicsObjectChanged;
    }
-   
+
    public boolean getHasGraphicsObjectChanged()
    {
       return hasGraphicsObjectChanged;
@@ -93,14 +104,14 @@ public class Graphics3DNode
 
    public void notifySelectedListeners(ModifierKeyInterface modifierKeys, Point3d location, Point3d cameraPosition, Quat4d cameraRotation)
    {
-      for(SelectedListener selectedListener : selectedListeners)
+      for (SelectedListener selectedListener : selectedListeners)
       {
          selectedListener.selected(this, modifierKeys, location, cameraPosition, cameraRotation);
       }
-      
+
       graphicsObject.notifySelectedListeners(this, modifierKeys, location, cameraPosition, cameraRotation);
    }
-   
+
    public void addSelectedListener(SelectedListener selectedListener)
    {
       selectedListeners.add(selectedListener);
