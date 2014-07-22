@@ -75,6 +75,11 @@ public class Graphics3DWorld
               new Vector3d(camX, camY, camZ));
    }
 
+   public void addFrameListener(Graphics3DFrameListener frameListener)
+   {
+      viewportAdapter.addFrameListener(frameListener);
+   }
+
    public void startWithGui(int windowWidth, int windowHeight)
    {
       startWithGui(ClassicCameraController.CAMERA_START_X, ClassicCameraController.CAMERA_START_Y, ClassicCameraController.CAMERA_START_Z, windowWidth,

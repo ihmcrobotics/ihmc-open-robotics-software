@@ -12,7 +12,7 @@ import us.ihmc.graphics3DAdapter.Graphics3DFrameListener;
 
 public abstract class ViewportAdapter
 {
-   ArrayList<Graphics3DFrameListener> frameListeners = new ArrayList<>();
+   private ArrayList<Graphics3DFrameListener> frameListeners = new ArrayList<>();
 
    public abstract Canvas getCanvas();
 
@@ -36,5 +36,13 @@ public abstract class ViewportAdapter
 
    public abstract void addContextSwitchedListener(ContextSwitchedListener contextSwitchedListener);
 
-   public abstract void addFrameListener(Graphics3DFrameListener frameListener);
+   public void addFrameListener(Graphics3DFrameListener frameListener)
+   {
+      frameListeners.add(frameListener);
+   }
+
+   public ArrayList<Graphics3DFrameListener> getFrameListeners()
+   {
+      return frameListeners;
+   }
 }
