@@ -106,6 +106,14 @@ public class Graphics3DWorld
       rootNode.addChild(child);
    }
 
+   public void addAllChildren(Graphics3DNode... children)
+   {
+      for (Graphics3DNode child : children)
+      {
+         addChild(child);
+      }
+   }
+
    public Graphics3DNode getRootNode()
    {
       return rootNode;
