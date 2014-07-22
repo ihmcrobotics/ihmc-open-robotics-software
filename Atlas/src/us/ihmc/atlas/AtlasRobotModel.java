@@ -4,6 +4,7 @@ import java.net.URI;
 
 import javax.media.j3d.Transform3D;
 
+import us.ihmc.Robotiq.RobotiqCommandManager;
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
@@ -141,6 +142,11 @@ public class AtlasRobotModel implements DRCRobotModel
    public boolean hasHookHands()
    {
       return selectedVersion.getHandModel() == DRCHandType.HOOK;
+   }
+   
+   public boolean hasRobotiqHands()
+   {
+	   return selectedVersion.getHandModel() == DRCHandType.ROBOTIQ;
    }
 
    public DRCHandType getHandType()
@@ -289,6 +295,9 @@ public class AtlasRobotModel implements DRCRobotModel
 		   {
 		   case IROBOT:
 			   return new IRobotCommandManager();
+			   
+		   case ROBOTIQ:
+			   return new RobotiqCommandManager();
 			   
 		   default:
 			   break;

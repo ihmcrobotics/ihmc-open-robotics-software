@@ -10,7 +10,7 @@ import us.ihmc.robotSide.SideDependentList;
 import java.io.InputStream;
 
 public enum AtlasRobotVersion {
-	ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS, DRC_NO_HANDS, DRC_HANDS, DRC_EXTENDED_HANDS, DRC_HOOKS, DRC_TASK_HOSE, DRC_EXTENDED_HOOKS;
+	ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS, DRC_NO_HANDS, DRC_HANDS, DRC_EXTENDED_HANDS, DRC_HOOKS, DRC_TASK_HOSE, DRC_EXTENDED_HOOKS, ATLAS_ROBOTIQ;
 
 	private static String[] resourceDirectories;
 	private final SideDependentList<Transform> offsetHandFromWrist = new SideDependentList<Transform>(); 
@@ -25,6 +25,9 @@ public enum AtlasRobotVersion {
 
 		case DRC_HOOKS:
 			return DRCHandType.HOOK;
+			
+		case ATLAS_ROBOTIQ:
+			return DRCHandType.ROBOTIQ;
 			
 		case DRC_NO_HANDS:
 		case ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS:
@@ -52,12 +55,17 @@ public enum AtlasRobotVersion {
 	public boolean hasHookHands() {
 		return getHandModel() == DRCHandType.HOOK;
 	}
+	
+	public boolean hasRobotiqHands() {
+		return getHandModel() == DRCHandType.ROBOTIQ;
+	}
 
 	public String getSdfFile() {
 		switch (this)
 	      {
 	         case ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS :
 	         case DRC_NO_HANDS:
+	         case ATLAS_ROBOTIQ:
 	            return "models/GFE/drc_no_hands.sdf";
 	         case DRC_HANDS:
 	            return "models/GFE/drc_hands.sdf";
