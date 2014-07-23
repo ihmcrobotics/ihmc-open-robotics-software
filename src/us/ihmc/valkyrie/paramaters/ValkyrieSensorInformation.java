@@ -1,5 +1,6 @@
 package us.ihmc.valkyrie.paramaters;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.media.j3d.Transform3D;
@@ -9,6 +10,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotLidarParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPointCloudParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorParameters;
 import us.ihmc.graphics3DAdapter.camera.VideoSettingsFactory;
 import us.ihmc.graphics3DAdapter.camera.VideoSettingsH264LowLatency;
 import us.ihmc.robotSide.RobotSide;
@@ -203,5 +205,27 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    public DRCRobotPointCloudParameters getPointCloudParameters(int sensorId)
    {
       return pointCloudParamaters[sensorId];
+   }
+   
+   private void sensorFramesToTrack(DRCRobotSensorParameters[] sensorParams, ArrayList<String> holder)
+   {
+      for(int i = 0; i < sensorParams.length; i++)
+      {
+         if(sensorParams[i].getPoseFrameForSdf() != null)
+         {
+            holder.add(sensorParams[i].getPoseFrameForSdf());
+         }
+      }
+   }
+   
+   @Override
+   public String[] getSensorFramesToTrack()
+   {
+      ArrayList<String> sensorFramesToTrack = new ArrayList<String>();
+      sensorFramesToTrack(cameraParamaters,sensorFramesToTrack);
+      sensorFramesToTrack(pointCloudParamaters,sensorFramesToTrack);
+      String[] sensorFramesToTrackAsPrimitive = new String[sensorFramesToTrack.size()];
+      sensorFramesToTrack.toArray(sensorFramesToTrackAsPrimitive);
+      return sensorFramesToTrackAsPrimitive;
    }
 }
