@@ -119,7 +119,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       DRCRobotJointMap jointMap = robotModel.getJointMap();
       DRCRobotPhysicalProperties physicalProperties = robotModel.getPhysicalProperties();
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
-      DRCRobotLidarParameters lidarParameters = sensorInformation.getPrimaryLidarParameters();
+      DRCRobotLidarParameters lidarParameters = sensorInformation.getLidarParameters(0);
       OneDoFJoint lidarJoint = null;
       if(lidarParameters != null)
       {

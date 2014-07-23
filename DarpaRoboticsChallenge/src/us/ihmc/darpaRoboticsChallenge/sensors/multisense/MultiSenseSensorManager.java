@@ -47,7 +47,7 @@ public class MultiSenseSensorManager
          String sensorURI)
    {
       cameraParamaters = sensorInformation.getPrimaryCameraParameters();
-      lidarParamaters = sensorInformation.getPrimaryLidarParameters();
+      lidarParamaters = sensorInformation.getLidarParameters(0);
       this.sensorInformation = sensorInformation;          
       this.sharedRobotPoseBuffer = sharedRobotPoseBuffer;                
       this.rosMainNode = rosMainNode;                              
@@ -81,7 +81,7 @@ public class MultiSenseSensorManager
    
    private void registerLidarReceivers()
    {
-      new RosLidarDataReceiver(rosMainNode, sharedRobotPoseBuffer, networkingManager, sharedFullRobotModel, sensorInformation.getPrimaryLidarParameters(), fieldComputerClient,
+      new RosLidarDataReceiver(rosMainNode, sharedRobotPoseBuffer, networkingManager, sharedFullRobotModel, sensorInformation.getLidarParameters(0), fieldComputerClient,
             rosNativeNetworkProcessor, ppsTimestampOffsetProvider, lidarDataFilter, USE_ROS_FOR_SENSOR_TRANSFORMS, lidarCRC, sensorURI);
    }
    

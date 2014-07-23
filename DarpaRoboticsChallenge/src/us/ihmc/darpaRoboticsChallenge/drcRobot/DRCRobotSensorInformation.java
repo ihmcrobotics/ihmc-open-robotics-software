@@ -20,7 +20,7 @@ public interface DRCRobotSensorInformation
 
    public abstract DRCRobotLidarParameters[] getLidarParameters();
 
-   public abstract DRCRobotLidarParameters getPrimaryLidarParameters();
+   public abstract DRCRobotLidarParameters getLidarParameters(int sensorId);
    
    public abstract DRCRobotPointCloudParameters[] getPointCloudParameters();
 

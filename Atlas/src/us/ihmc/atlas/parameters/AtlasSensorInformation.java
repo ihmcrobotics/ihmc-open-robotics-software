@@ -101,9 +101,9 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    }
    
    @Override
-   public DRCRobotLidarParameters getPrimaryLidarParameters()
+   public DRCRobotLidarParameters getLidarParameters(int sensorId)
    {
-      return lidarParamaters[MULTISENSE_LIDAR_ID];
+      return lidarParamaters[sensorId];
    }
 
    @Override

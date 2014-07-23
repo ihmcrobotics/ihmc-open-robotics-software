@@ -125,7 +125,7 @@ public class DRCSimulationFactory
 
       simulatedRobot.setController(multiThreadedRobotController);
       DRCRobotSensorInformation sensorInformation = drcRobotModel.getSensorInformation();
-      DRCRobotLidarParameters lidarParams = sensorInformation.getPrimaryLidarParameters();
+      DRCRobotLidarParameters lidarParams = sensorInformation.getLidarParameters(0);
       if(lidarParams != null && lidarParams.getLidarSpindleJointName() != null)
       {
          PIDLidarTorqueController lidarControllerInterface = new PIDLidarTorqueController(simulatedRobot,

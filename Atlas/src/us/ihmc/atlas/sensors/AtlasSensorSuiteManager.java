@@ -53,7 +53,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
          new SCSPointCloudDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, sdfFullRobotModel, sensorInformation, scsCommunicator,
                ppsTimestampOffsetProvider, lidarDataFilter);
       } else {
-         DRCRobotLidarParameters lidarParams = sensorInformation.getPrimaryLidarParameters();
+         DRCRobotLidarParameters lidarParams = sensorInformation.getLidarParameters(0);
          new SCSLidarDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, sdfFullRobotModel, lidarParams, scsCommunicator,
                ppsTimestampOffsetProvider, lidarDataFilter, sensorURI);
       }

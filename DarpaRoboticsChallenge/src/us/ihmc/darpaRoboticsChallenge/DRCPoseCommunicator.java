@@ -55,9 +55,9 @@ public class DRCPoseCommunicator implements RawOutputWriter
 
       headFrame = estimatorModel.getHeadBaseFrame();
       String lidarSpindleJointName = null;
-      if(sensorInformation.getPrimaryLidarParameters() != null)
+      if(sensorInformation.getLidarParameters(0) != null)
       {
-     	 lidarSpindleJointName =sensorInformation.getPrimaryLidarParameters().getSensorNameInSdf();
+     	 lidarSpindleJointName =sensorInformation.getLidarParameters(0).getSensorNameInSdf();
       }
       
       lidarFrame = estimatorModel.getLidarBaseFrame(lidarSpindleJointName);

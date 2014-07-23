@@ -79,7 +79,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
 
       DRCRobotModel robotModel = getRobotModel();
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
-      DRCRobotLidarParameters lidarParameters = sensorInformation.getPrimaryLidarParameters();
+      DRCRobotLidarParameters lidarParameters = sensorInformation.getLidarParameters(0);
       DRCRobotJointMap jointMap = robotModel.getJointMap();
       DRCRobotPhysicalProperties physicalProperties = robotModel.getPhysicalProperties();
       
@@ -174,7 +174,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
       DRCRobotModel robotModel = getRobotModel();
       DRCRobotJointMap jointMap = robotModel.getJointMap();
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
-      DRCRobotLidarParameters lidarParameters = sensorInformation.getPrimaryLidarParameters();
+      DRCRobotLidarParameters lidarParameters = sensorInformation.getLidarParameters(0);
       DRCRobotPhysicalProperties physicalProperties = robotModel.getPhysicalProperties();
       SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
       SDFRobot robot = robotModel.createSdfRobot(false);
