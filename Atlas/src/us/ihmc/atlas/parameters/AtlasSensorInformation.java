@@ -2,7 +2,7 @@ package us.ihmc.atlas.parameters;
 
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotLidarParameters;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPointCloudParamaters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPointCloudParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.graphics3DAdapter.camera.VideoSettingsFactory;
 import us.ihmc.graphics3DAdapter.camera.VideoSettingsH264LowLatency;
@@ -74,8 +74,8 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    /**
     * Stereo Parameters
     */
-   private final DRCRobotPointCloudParamaters[] pointCloudParamaters = new DRCRobotPointCloudParamaters[1];
-   private final int multiSenseStereoId = 0;
+   private final DRCRobotPointCloudParameters[] pointCloudParamaters = new DRCRobotPointCloudParameters[1];
+   public static final int MULTISENSE_STEREO_ID = 0;
    private static final String stereoSensorName = "stereo_camera";
    private static final String stereoColorTopic = multisense_namespace + "image_points2_color";
    private final String stereoBaseFrame = multisense_namespace + "/head";
@@ -91,8 +91,8 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
       lidarJointName = runningOnRealRobot ? "head" : "hokuyo_joint";
       lidarParamaters[MULTISENSE_LIDAR_ID] = new DRCRobotLidarParameters(lidarSensorName, multisense_laser_topic_string, lidarJointName, lidarJointTopic, multisenseHandoffFrame, lidarBaseFrame, lidarEndFrame, lidar_spindle_velocity, MULTISENSE_LIDAR_ID);
       
-      pointCloudParamaters[multiSenseStereoId] = new DRCRobotPointCloudParamaters(stereoSensorName, stereoColorTopic, stereoBaseFrame, stereoEndFrame, multiSenseStereoId);
-   }
+      pointCloudParamaters[MULTISENSE_STEREO_ID] = new DRCRobotPointCloudParameters(stereoSensorName, stereoColorTopic, multisenseHandoffFrame, stereoBaseFrame, stereoEndFrame, MULTISENSE_STEREO_ID);
+      }
    
    @Override
    public DRCRobotLidarParameters[] getLidarParameters()
@@ -164,14 +164,14 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    }
 
    @Override
-   public DRCRobotPointCloudParamaters[] getPointCloudParameters()
+   public DRCRobotPointCloudParameters[] getPointCloudParameters()
    {
       return pointCloudParamaters;
    }
 
    @Override
-   public DRCRobotPointCloudParamaters getPrimaryPointCloudParameters()
+   public DRCRobotPointCloudParameters getPrimaryPointCloudParameters()
    {
-      return pointCloudParamaters[multiSenseStereoId];
+      return pointCloudParamaters[MULTISENSE_STEREO_ID];
    }
 }
