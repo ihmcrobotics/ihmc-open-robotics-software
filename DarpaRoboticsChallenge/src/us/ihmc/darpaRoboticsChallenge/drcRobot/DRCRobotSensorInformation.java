@@ -4,25 +4,27 @@ import us.ihmc.robotSide.SideDependentList;
 
 public interface DRCRobotSensorInformation
 {
-   public abstract String[] getIMUSensorsToUse();
+   public String[] getIMUSensorsToUse();
 
-   public abstract String[] getForceSensorNames();
+   public String[] getForceSensorNames();
 
-   public abstract SideDependentList<String> getFeetForceSensorNames();
+   public SideDependentList<String> getFeetForceSensorNames();
    
-   public abstract SideDependentList<String> getWristForceSensorNames();
+   public SideDependentList<String> getWristForceSensorNames();
 
-   public abstract String getPrimaryBodyImu();
+   public String getPrimaryBodyImu();
    
-   public abstract DRCRobotCameraParameters[] getCameraParameters();
-
-   public abstract DRCRobotCameraParameters getCameraParameters(int sensorId);
+   public DRCRobotCameraParameters[] getCameraParameters();
    
-   public abstract DRCRobotLidarParameters[] getLidarParameters();
+   public DRCRobotLidarParameters[] getLidarParameters();
 
-   public abstract DRCRobotLidarParameters getLidarParameters(int sensorId);
+   public DRCRobotPointCloudParameters[] getPointCloudParameters();
    
-   public abstract DRCRobotPointCloudParameters[] getPointCloudParameters();
+   public DRCRobotCameraParameters getCameraParameters(int cameraId);
 
-   public abstract DRCRobotPointCloudParameters getPointCloudParameters(int sensorId);
+   public DRCRobotLidarParameters getLidarParameters(int lidarId);
+
+   public DRCRobotPointCloudParameters getPointCloudParameters(int pointCloudSensorId);
+
+   public String[] getSensorFramesToTrack();
 }
