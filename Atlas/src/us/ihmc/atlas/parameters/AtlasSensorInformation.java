@@ -1,6 +1,6 @@
 package us.ihmc.atlas.parameters;
 
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParamaters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotLidarParamaters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPointCloudParamaters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
@@ -12,6 +12,7 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
 {
    private static final String multisense_namespace = "/multisense";
    private static final String baseTfName = multisense_namespace + "/head";
+   private static final String multisenseHandoffFrame = "head";
 
    /**
     * Force Sensor Parameters
@@ -29,12 +30,11 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    /**
     * Camera Parameters
     */
-   private final DRCRobotCameraParamaters[] cameraParamaters = new DRCRobotCameraParamaters[4];
-   private static final int multisense_sl_left_camera_id = 0;
-   private static final int multisense_sl_right_camera_id = 1;
-   private static final int blackfly_left_camera_id = 2;
-   private static final int blackfly_right_camera_id = 3;
-   private static final int primaryCameraId = multisense_sl_left_camera_id;
+   private final DRCRobotCameraParameters[] cameraParamaters = new DRCRobotCameraParameters[4];
+   public static final int MULTISENSE_SL_LEFT_CAMERA_ID = 0;
+   public static final int MULTISENSE_SL_RIGHT_CAMERA_ID = 1;
+   public static final int BLACKFLY_LEFT_CAMERA_ID = 2;
+   public static final int BLACKFLY_RIGHT_CAMERA_ID = 3;
    
    private static final String left_camera_name = "stereo_camera_left";
    private static final String left_camera_topic = multisense_namespace + "/left/image_rect_color/compressed";
@@ -46,6 +46,8 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    private static final String right_info_camera_topic = multisense_namespace +"/right/camera_info";
    private static final String right_frame_name = multisense_namespace + "/right_camera_frame";
    
+   
+   private static final String fisheye_pose_source = "utorso";
    private static final String fisheye_left_camera_topic = "/blackfly/camera/left/compressed";
    private static final String leftFisheyeCameraName = "l_situational_awareness_camera";
                         
@@ -82,10 +84,10 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    public AtlasSensorInformation(boolean runningOnRealRobot)
    {
       VideoSettingsH264LowLatency videoSetting = VideoSettingsFactory.get32kBitSettingsWide();
-      cameraParamaters[multisense_sl_left_camera_id] = new DRCRobotCameraParamaters(left_camera_name, left_camera_topic, left_info_camera_topic, left_frame_name, baseTfName, videoSetting, multisense_sl_left_camera_id);
-      cameraParamaters[multisense_sl_right_camera_id] = new DRCRobotCameraParamaters(right_camera_name, right_camera_topic, right_info_camera_topic, right_frame_name, baseTfName, videoSetting, multisense_sl_right_camera_id);
-      cameraParamaters[blackfly_left_camera_id] = new DRCRobotCameraParamaters(leftFisheyeCameraName, fisheye_left_camera_topic, leftFisheyeCameraName, videoSetting, blackfly_left_camera_id);
-      cameraParamaters[blackfly_right_camera_id] = new DRCRobotCameraParamaters(right_fisheye_camera_name, fisheye_right_camera_topic, right_fisheye_camera_name, videoSetting, blackfly_right_camera_id);
+      cameraParamaters[MULTISENSE_SL_LEFT_CAMERA_ID] = new DRCRobotCameraParameters(left_camera_name, left_camera_topic, left_info_camera_topic, multisenseHandoffFrame, left_frame_name, baseTfName, videoSetting, MULTISENSE_SL_LEFT_CAMERA_ID);
+      cameraParamaters[MULTISENSE_SL_RIGHT_CAMERA_ID] = new DRCRobotCameraParameters(right_camera_name, right_camera_topic, right_info_camera_topic, multisenseHandoffFrame, right_frame_name, baseTfName, videoSetting, MULTISENSE_SL_RIGHT_CAMERA_ID);
+      cameraParamaters[BLACKFLY_LEFT_CAMERA_ID] = new DRCRobotCameraParameters(leftFisheyeCameraName, fisheye_left_camera_topic, fisheye_pose_source, videoSetting, BLACKFLY_LEFT_CAMERA_ID);
+      cameraParamaters[BLACKFLY_RIGHT_CAMERA_ID] = new DRCRobotCameraParameters(right_fisheye_camera_name, fisheye_right_camera_topic, fisheye_pose_source, videoSetting, BLACKFLY_RIGHT_CAMERA_ID);
       lidarJointName = runningOnRealRobot ? "head" : "hokuyo_joint";
       lidarParamaters[multiSenseLidarId] = new DRCRobotLidarParamaters(lidarSensorName, multisense_laser_topic_string, lidarJointName, lidarJointTopic, lidarBaseFrame, lidarEndFrame, lidar_spindle_velocity, multiSenseLidarId);
       
@@ -135,15 +137,15 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    }
 
    @Override
-   public DRCRobotCameraParamaters[] getCameraParameters()
+   public DRCRobotCameraParameters[] getCameraParameters()
    {
       return cameraParamaters;
    }
 
    @Override
-   public DRCRobotCameraParamaters getPrimaryCameraParameters()
+   public DRCRobotCameraParameters getPrimaryCameraParameters()
    {
-      return cameraParamaters[primaryCameraId];
+      return cameraParamaters[0];
    }
 
    public String getCameraStringBase()

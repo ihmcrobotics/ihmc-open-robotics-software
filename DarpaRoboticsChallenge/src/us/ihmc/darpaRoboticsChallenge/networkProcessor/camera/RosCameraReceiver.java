@@ -4,7 +4,7 @@ import java.awt.image.BufferedImage;
 
 import javax.media.j3d.Transform3D;
 
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParamaters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCSensorParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.messages.controller.RobotPoseData;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.RobotPoseBuffer;
@@ -23,9 +23,9 @@ public class RosCameraReceiver extends CameraDataReceiver
    private Transform3D worldToCameraTransform = new Transform3D();
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
    private final ROSNativeTransformTools rosTransformProvider;
-   private final DRCRobotCameraParamaters cameraParameters;
+   private final DRCRobotCameraParameters cameraParameters;
 
-   public RosCameraReceiver(final DRCRobotCameraParamaters cameraParameters, final RobotPoseBuffer robotPoseBuffer, final VideoSettings videoSettings,
+   public RosCameraReceiver(final DRCRobotCameraParameters cameraParameters, final RobotPoseBuffer robotPoseBuffer, final VideoSettings videoSettings,
          final RosMainNode rosMainNode, final DRCNetworkProcessorNetworkingManager networkingManager, final PPSTimestampOffsetProvider ppsTimestampOffsetProvider,
          final CameraLogger logger, String sensorURI)
    {
@@ -34,7 +34,7 @@ public class RosCameraReceiver extends CameraDataReceiver
       this.cameraParameters = cameraParameters;
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
 
-      if (cameraParameters.useRosToGenerateTransformFromBaseToCamera())
+      if (cameraParameters.useRosForTransformFromPoseToSensor())
       {
          rosTransformProvider = ROSNativeTransformTools.getInstance(sensorURI);
          rosTransformProvider.connect();
@@ -52,7 +52,7 @@ public class RosCameraReceiver extends CameraDataReceiver
             if (DEBUG)
                System.out.println("Cam image received. \ntimestamp: " + timeStamp);
 
-            if (cameraParameters.useRosToGenerateTransformFromBaseToCamera())
+            if (cameraParameters.useRosForTransformFromPoseToSensor())
             {
                if ((rosTransformFromHeadBaseToCamera.getType() & Transform3D.IDENTITY) != 0)
                {
@@ -77,7 +77,7 @@ public class RosCameraReceiver extends CameraDataReceiver
             }
          }
       };
-      rosMainNode.attachSubscriber(cameraParameters.getRosCompressedTopicName(), imageSubscriberSubscriber);
+      rosMainNode.attachSubscriber(cameraParameters.getRosTopic(), imageSubscriberSubscriber);
    }
 
      
@@ -86,8 +86,8 @@ public class RosCameraReceiver extends CameraDataReceiver
       if (ppsTimestampOffsetProvider.offsetIsDetermined())
       {
          long robotTimestamp = ppsTimestampOffsetProvider.adjustTimeStampToRobotClock(rosTimestamp);
-         TimeStampedTransform3D transformFromRos = rosTransformProvider.getTimeStampedTransform(cameraParameters.getCameraFrameName(),
-               cameraParameters.getLowerFrameNameForRosTransform(), rosTimestamp, robotTimestamp);
+         TimeStampedTransform3D transformFromRos = rosTransformProvider.getTimeStampedTransform(cameraParameters.getEndFrameForRosTransform(),
+               cameraParameters.getBaseFrameForRosTransform(), rosTimestamp, robotTimestamp);
          rosTransformFromHeadBaseToCamera = transformFromRos.getTransform3D();
       }
    }

@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge;
 import javax.swing.JButton;
 
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParamaters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.GuiInitialSetup;
@@ -69,11 +69,11 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
       scs.setupCamera(behindPelvis);
 
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
-      DRCRobotCameraParamaters[] cameraInfo = sensorInformation.getCameraParameters();
+      DRCRobotCameraParameters[] cameraInfo = sensorInformation.getCameraParameters();
       for (int i = 0; i < cameraInfo.length; i++)
       {
-         CameraConfiguration camera = new CameraConfiguration(cameraInfo[i].getCameraNameInSdf());
-         camera.setCameraMount(cameraInfo[i].getCameraNameInSdf());
+         CameraConfiguration camera = new CameraConfiguration(cameraInfo[i].getSensorNameInSdf());
+         camera.setCameraMount(cameraInfo[i].getSensorNameInSdf());
          scs.setupCamera(camera);
       }
 
