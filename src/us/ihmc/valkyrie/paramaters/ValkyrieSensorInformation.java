@@ -186,9 +186,9 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    {
       return null;
    }
-
+   
    @Override
-   public DRCRobotLidarParameters getPrimaryLidarParameters()
+   public DRCRobotLidarParameters getLidarParameters(int sensorId)
    {
       return null;
    }
