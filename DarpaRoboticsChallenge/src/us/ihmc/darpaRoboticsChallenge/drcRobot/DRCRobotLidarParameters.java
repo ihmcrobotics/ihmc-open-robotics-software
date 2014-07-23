@@ -8,7 +8,7 @@ public class DRCRobotLidarParameters implements DRCRobotSensorParameters
    private final String lidarSpindleJointTopic;
    private final String lidarBaseFrameForRos;
    private final String lidarEndFrameForRos;
-   private final String lidarToRosHandoffFrameInSdf;
+   private final String poseFrameName;
    private final double lidarSpinVelocity;
    private final boolean useRosForTransformFromPoseToSensor;
    private final int lidarId;
@@ -20,7 +20,7 @@ public class DRCRobotLidarParameters implements DRCRobotSensorParameters
       this.laserTopic = laserTopic;
       this.lidarSpindleJointName = lidarSpindleJointName;
       this.lidarSpindleJointTopic = lidarSpindleJointTopic;
-      this.lidarToRosHandoffFrameInSdf = lidarToRosHandoffFrameInSdf;
+      this.poseFrameName = lidarToRosHandoffFrameInSdf;
       this.lidarBaseFrameForRos = lidarBaseFrameForRos;
       this.lidarEndFrameForRos = lidarEndFrameForRos;
       this.lidarSpinVelocity = lidar_spindle_velocity;
@@ -29,13 +29,13 @@ public class DRCRobotLidarParameters implements DRCRobotSensorParameters
    }
    
    public DRCRobotLidarParameters(String lidarSensorName, String laserTopic, String lidarSpindleJointName, String lidarSpindleJointTopic,
-         double lidar_spindle_velocity, int lidarId)
+         String sdflinkNameForSensorPose, double lidar_spindle_velocity, int lidarId)
    {
       this.lidarSensorName = lidarSensorName;
       this.laserTopic = laserTopic;
       this.lidarSpindleJointName = lidarSpindleJointName;
       this.lidarSpindleJointTopic = lidarSpindleJointTopic;
-      this.lidarToRosHandoffFrameInSdf = null;
+      this.poseFrameName = sdflinkNameForSensorPose;
       this.lidarBaseFrameForRos = null;
       this.lidarEndFrameForRos = null;
       this.lidarSpinVelocity = lidar_spindle_velocity;
@@ -91,6 +91,12 @@ public class DRCRobotLidarParameters implements DRCRobotSensorParameters
    @Override
    public String getPoseFrameForSdf()
    {
-      return lidarToRosHandoffFrameInSdf;
+      return poseFrameName;
+   }
+
+   @Override
+   public DRCRobotSensorType getSensorType()
+   {
+      return DRCRobotSensorType.LIDAR;
    }
 }

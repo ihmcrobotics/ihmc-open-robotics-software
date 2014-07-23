@@ -50,7 +50,7 @@ public abstract class CameraDataReceiver
       {
          return;
       }
-      updateLeftEyeImage(robotPoseData.getCameraPose(), bufferedImage, timeStamp, fov);
+      updateLeftEyeImage(robotPoseData.getCameraPoses()[0], bufferedImage, timeStamp, fov);
    }
 
    protected void updateLeftEyeImage(Transform3D worldToCamera, BufferedImage bufferedImage, long timeStamp, double fov)

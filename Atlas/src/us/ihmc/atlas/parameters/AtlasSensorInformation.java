@@ -52,10 +52,10 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    
    private static final String fisheye_pose_source = "utorso";
    private static final String fisheye_left_camera_topic = "/blackfly/camera/left/compressed";
-   private static final String leftFisheyeCameraName = "l_situational_awareness_camera";
+   private static final String leftFisheyeCameraName = "l_situational_awareness_camera_sensor_l_situational_awareness_camera";
                         
    private static final String fisheye_right_camera_topic = "/blackfly/camera/right/compressed";
-   private static final String right_fisheye_camera_name = "r_situational_awareness_camera";
+   private static final String right_fisheye_camera_name = "r_situational_awareness_camera_sensor_r_situational_awareness_camera";
    
    /**
     * Lidar Parameters
@@ -64,7 +64,9 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    
    private final DRCRobotLidarParameters[] lidarParamaters = new DRCRobotLidarParameters[1];
    public final int MULTISENSE_LIDAR_ID = 0;
-   private final String lidarJointName; //this has to match LidarDataReceiver::LIDAR_HEAD_FRAME; gazebo should use: "hokuyo_joint"; 
+   
+   private final String lidarPoseLink = "hokuyo_link"; 
+   private final String lidarJointName = "hokuyo_joint";
    private final String lidarBaseFrame = multisense_namespace + "/head";
    private final String lidarEndFrame = multisense_namespace + "/head_hokuyo_frame";
    
@@ -87,15 +89,22 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    public AtlasSensorInformation(boolean runningOnRealRobot)
    {
       VideoSettingsH264LowLatency videoSetting = VideoSettingsFactory.get32kBitSettingsWide();
-      cameraParamaters[MULTISENSE_SL_LEFT_CAMERA_ID] = new DRCRobotCameraParameters(left_camera_name, left_camera_topic, left_info_camera_topic, multisenseHandoffFrame, left_frame_name, baseTfName, videoSetting, MULTISENSE_SL_LEFT_CAMERA_ID);
-      cameraParamaters[MULTISENSE_SL_RIGHT_CAMERA_ID] = new DRCRobotCameraParameters(right_camera_name, right_camera_topic, right_info_camera_topic, multisenseHandoffFrame, right_frame_name, baseTfName, videoSetting, MULTISENSE_SL_RIGHT_CAMERA_ID);
+      
+      if(runningOnRealRobot)
+      {
+         cameraParamaters[MULTISENSE_SL_LEFT_CAMERA_ID] = new DRCRobotCameraParameters(left_camera_name, left_camera_topic, left_info_camera_topic, multisenseHandoffFrame, left_frame_name, baseTfName, videoSetting, MULTISENSE_SL_LEFT_CAMERA_ID);
+         cameraParamaters[MULTISENSE_SL_RIGHT_CAMERA_ID] = new DRCRobotCameraParameters(right_camera_name, right_camera_topic, right_info_camera_topic, multisenseHandoffFrame, right_frame_name, baseTfName, videoSetting, MULTISENSE_SL_RIGHT_CAMERA_ID);
+         lidarParamaters[MULTISENSE_LIDAR_ID] = new DRCRobotLidarParameters(lidarSensorName, multisense_laser_topic_string, lidarJointName, lidarJointTopic, multisenseHandoffFrame, lidarBaseFrame, lidarEndFrame, lidar_spindle_velocity, MULTISENSE_LIDAR_ID);
+         pointCloudParamaters[MULTISENSE_STEREO_ID] = new DRCRobotPointCloudParameters(stereoSensorName, stereoColorTopic, multisenseHandoffFrame, stereoBaseFrame, stereoEndFrame, MULTISENSE_STEREO_ID);
+      } else {
+         cameraParamaters[MULTISENSE_SL_LEFT_CAMERA_ID] = new DRCRobotCameraParameters(left_camera_name, left_camera_topic, multisenseHandoffFrame, videoSetting, MULTISENSE_SL_LEFT_CAMERA_ID);
+         cameraParamaters[MULTISENSE_SL_RIGHT_CAMERA_ID] = new DRCRobotCameraParameters(right_camera_name, right_camera_topic,  multisenseHandoffFrame, videoSetting, MULTISENSE_SL_RIGHT_CAMERA_ID);
+         lidarParamaters[MULTISENSE_LIDAR_ID] = new DRCRobotLidarParameters(lidarSensorName, multisense_laser_topic_string, lidarJointName, lidarJointTopic, lidarPoseLink, lidar_spindle_velocity, MULTISENSE_LIDAR_ID);
+         pointCloudParamaters[MULTISENSE_STEREO_ID] = new DRCRobotPointCloudParameters(stereoSensorName, stereoColorTopic, multisenseHandoffFrame, MULTISENSE_STEREO_ID);
+      }
       cameraParamaters[BLACKFLY_LEFT_CAMERA_ID] = new DRCRobotCameraParameters(leftFisheyeCameraName, fisheye_left_camera_topic, fisheye_pose_source, videoSetting, BLACKFLY_LEFT_CAMERA_ID);
       cameraParamaters[BLACKFLY_RIGHT_CAMERA_ID] = new DRCRobotCameraParameters(right_fisheye_camera_name, fisheye_right_camera_topic, fisheye_pose_source, videoSetting, BLACKFLY_RIGHT_CAMERA_ID);
-      lidarJointName = runningOnRealRobot ? "head" : "hokuyo_joint";
-      lidarParamaters[MULTISENSE_LIDAR_ID] = new DRCRobotLidarParameters(lidarSensorName, multisense_laser_topic_string, lidarJointName, lidarJointTopic, multisenseHandoffFrame, lidarBaseFrame, lidarEndFrame, lidar_spindle_velocity, MULTISENSE_LIDAR_ID);
-      
-      pointCloudParamaters[MULTISENSE_STEREO_ID] = new DRCRobotPointCloudParameters(stereoSensorName, stereoColorTopic, multisenseHandoffFrame, stereoBaseFrame, stereoEndFrame, MULTISENSE_STEREO_ID);
-      }
+   }
    
    @Override
    public DRCRobotLidarParameters[] getLidarParameters()

@@ -72,7 +72,7 @@ public class RosCameraReceiver extends CameraDataReceiver
             RobotPoseData robotPoseData = robotPoseBuffer.floorEntry(ppsTimestampOffsetProvider.adjustTimeStampToRobotClock(timeStamp));
             if(robotPoseData != null)
             {
-               worldToCameraTransform.mul(robotPoseData.getHeadPose(),rosTransformFromHeadBaseToCamera);
+               worldToCameraTransform.mul(robotPoseData.getCameraPoses()[0],rosTransformFromHeadBaseToCamera);
                updateLeftEyeImage(worldToCameraTransform, image, timeStamp, DRCSensorParameters.DUMMY_FILED_OF_VIEW);
             }
          }

@@ -15,6 +15,6 @@ public class SDFFullRobotModelFactory implements FullRobotModelFactory
 
    public SDFFullRobotModel create()
    {
-      return new SDFFullRobotModel(generalizedSDFRobotModel.getRootLinks().get(0), sdfJointNameMap);
+      return new SDFFullRobotModel(generalizedSDFRobotModel.getRootLinks().get(0), sdfJointNameMap, new String[0]);
    }
 }

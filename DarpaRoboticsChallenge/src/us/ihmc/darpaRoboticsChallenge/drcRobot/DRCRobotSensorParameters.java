@@ -9,4 +9,5 @@ public interface DRCRobotSensorParameters
    public String getBaseFrameForRosTransform();
    public String getEndFrameForRosTransform();
    public int getSensorId();
+   public DRCRobotSensorType getSensorType();
 }
