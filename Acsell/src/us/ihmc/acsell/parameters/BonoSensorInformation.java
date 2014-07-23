@@ -89,7 +89,7 @@ public class BonoSensorInformation implements DRCRobotSensorInformation
    }
 
    @Override
-   public DRCRobotPointCloudParameters getPrimaryPointCloudParameters()
+   public DRCRobotPointCloudParameters getPointCloudParameters(int sensorId)
    {
       return null;
    }
