@@ -7,7 +7,7 @@ public class DRCRobotPointCloudParameters implements DRCRobotSensorParameters
    private final String pointCloudTopic;
    private final String pointCloudBaseFrameForRos;
    private final String pointCloudEndFrameForRos;
-   private final String lidarToRosHandoffFrameInSdf;
+   private final String poseFrameName;
    private final boolean useRosForTransformFromPoseToSensor;
    private final int pointCloudId;
    
@@ -17,7 +17,7 @@ public class DRCRobotPointCloudParameters implements DRCRobotSensorParameters
       this.pointCloudTopic = pointCloudTopic;
       this.pointCloudBaseFrameForRos = null;
       this.pointCloudEndFrameForRos = null;
-      this.lidarToRosHandoffFrameInSdf = sdflinkNameForSensorPose;
+      this.poseFrameName = sdflinkNameForSensorPose;
       this.useRosForTransformFromPoseToSensor = false;
       this.pointCloudId = stereoId;
    }
@@ -26,7 +26,7 @@ public class DRCRobotPointCloudParameters implements DRCRobotSensorParameters
    {
       this.pointCloudSensorName = pointCloudSensorName;
       this.pointCloudTopic = pointCloudTopic;
-      this.lidarToRosHandoffFrameInSdf = lidarToRosHandoffFrameInSdf;
+      this.poseFrameName = lidarToRosHandoffFrameInSdf;
       this.pointCloudBaseFrameForRos = pointCloudBaseFrameForRos;
       this.pointCloudEndFrameForRos = pointCloudEndFrameForRos;
       this.useRosForTransformFromPoseToSensor = true;
@@ -66,6 +66,12 @@ public class DRCRobotPointCloudParameters implements DRCRobotSensorParameters
    @Override
    public String getPoseFrameForSdf()
    {
-      return lidarToRosHandoffFrameInSdf;
+      return poseFrameName;
+   }
+
+   @Override
+   public DRCRobotSensorType getSensorType()
+   {
+      return DRCRobotSensorType.POINTCLOUD;
    }
 }

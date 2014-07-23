@@ -75,10 +75,14 @@ public class SDFFullRobotModel implements FullRobotModel
    private final HashMap<String, FrameVector> lidarAxis = new HashMap<String, FrameVector>();
 
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
+   private final HashMap<String, ReferenceFrame> sensorFrames = new HashMap<String, ReferenceFrame>();
+   private final String[] sensorLinksToTrack;
 
-   public SDFFullRobotModel(SDFLinkHolder rootLink, SDFJointNameMap sdfJointNameMap)
+
+   public SDFFullRobotModel(SDFLinkHolder rootLink, SDFJointNameMap sdfJointNameMap, String[] sensorLinksToTrack)
    {
       this.sdfJointNameMap = sdfJointNameMap;
+      this.sensorLinksToTrack = sensorLinksToTrack;
 
       /*
        * Create root object
@@ -95,6 +99,7 @@ public class SDFFullRobotModel implements FullRobotModel
       //            + "; izz: " + rootLink.getInertia().m22 + "; COM Offset: " + rootLink.getCoMOffset());
       pelvis = ScrewTools.addRigidBody(rootLink.getName(), rootJoint, rootLink.getInertia(), rootLink.getMass(), rootLink.getCoMOffset());
 
+      checkLinkIsNeededForSensor(rootJoint, rootLink);
       addSensorDefinitions(rootJoint, rootLink);
       for (SDFJointHolder sdfJoint : rootLink.getChildren())
       {
@@ -247,6 +252,8 @@ public class SDFFullRobotModel implements FullRobotModel
 
       SDFLinkHolder childLink = joint.getChild();
 
+      checkLinkIsNeededForSensor(inverseDynamicsJoint, childLink);
+      
       double mass = childLink.getMass();
       Vector3d comOffset = new Vector3d(childLink.getCoMOffset());
       Matrix3d inertia = InertiaTools.rotate(visualTransform, childLink.getInertia());
@@ -481,6 +488,10 @@ public class SDFFullRobotModel implements FullRobotModel
 
    public ReferenceFrame getLidarBaseFrame(String name)
    {
+      for(String st : lidarBaseFrames.keySet())
+      {
+         System.out.println(st);
+      }
       return lidarBaseFrames.get(name);
    }
 
@@ -504,5 +515,31 @@ public class SDFFullRobotModel implements FullRobotModel
    {
       return head.getParentJoint().getFrameAfterJoint();
    }
-
+   
+   private void checkLinkIsNeededForSensor(InverseDynamicsJoint joint, SDFLinkHolder link)
+   {
+      for(int i = 0; i < sensorLinksToTrack.length; i++)
+      {
+         if(sensorLinksToTrack[i].equalsIgnoreCase(link.getName()));
+         {
+            
+            sensorFrames.put(link.getName(),joint.getFrameAfterJoint());
+         }
+      }
+   }
+   
+   public ReferenceFrame getSensorReferenceFrameByLink(String linkName)
+   {
+      if(linkName == null)
+      {
+         System.err.println("SDFFullRobotModel getSensorReferenceFrameByLink: Passed in NULL link name for Sensor pose" );
+         return null;
+      }
+      linkName = linkName.replace("/", "");
+      if(!sensorFrames.containsKey(linkName))
+      {
+         System.err.println("SDFFullRobotModel getSensorReferenceFrameByLink: got null for linkName: " + linkName);
+      }
+      return sensorFrames.get(linkName);
+   }
 }

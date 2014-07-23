@@ -225,7 +225,7 @@ public class AtlasRobotModel implements DRCRobotModel
    @Override
    public SDFFullRobotModel createFullRobotModel()
    {
-      return loader.createFullRobotModel(getJointMap());
+      return loader.createFullRobotModel(getJointMap(), sensorInformation.getSensorFramesToTrack());
    }
 
    @Override

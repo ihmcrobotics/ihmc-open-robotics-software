@@ -81,4 +81,10 @@ public class DRCRobotCameraParameters implements DRCRobotSensorParameters
    {
       return sdfPoseFrameName;
    }
+
+   @Override
+   public DRCRobotSensorType getSensorType()
+   {
+      return DRCRobotSensorType.CAMERA;
+   }
 }
