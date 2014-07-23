@@ -176,9 +176,9 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    }
 
    @Override
-   public DRCRobotCameraParameters getPrimaryCameraParameters()
+   public DRCRobotCameraParameters getCameraParameters(int sensorId)
    {
-      return cameraParamaters[primaryCameraId];
+      return cameraParamaters[sensorId];
    }
 
    @Override
