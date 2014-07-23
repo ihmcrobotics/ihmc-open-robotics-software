@@ -1,6 +1,8 @@
 package com.yobotics.simulationconstructionset.util.math.filter;
 
-//import org.junit.Ignore;
+import static org.junit.Assert.*;
+
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.utilities.ThreadTools;
@@ -14,10 +16,68 @@ import com.yobotics.simulationconstructionset.util.math.functionGenerator.YoFunc
 
 public class AccelerationLimitedYoVariableTest
 {
-
-//   @Ignore("Really more of an evaluator than a test case. Need to turn it into a few good test cases.")
    @Test
    public void testAccelerationLimitedYoVariable()
+   {
+      SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("test"));
+      double dt = 0.006;
+
+      scs.startOnAThread();
+
+      YoVariableRegistry registry = scs.getRootRegistry();
+      DoubleYoVariable time = new DoubleYoVariable("time", registry);
+      DoubleYoVariable maxRate = new DoubleYoVariable("maxRate", registry);
+      DoubleYoVariable maxAcceleration = new DoubleYoVariable("maxAcceleration", registry);
+      DoubleYoVariable variable = new DoubleYoVariable("variable", registry);
+      String name = "accelerationLimitedYoVariable";
+
+      AccelerationLimitedYoVariable accelerationLimitedYoVariable = new AccelerationLimitedYoVariable(name, registry, maxRate, maxAcceleration, dt);
+      
+      try
+      {
+         DoubleYoVariable doubleYoVariable = new DoubleYoVariable(name, registry);
+         fail();
+      }
+      catch(RuntimeException rte)
+      {
+         System.err.println("The previous namespace error was part of the AccelerationLimitedYoVariableTest.");
+      }
+      
+      assertEquals(name, accelerationLimitedYoVariable.getName());
+   }
+
+   @Test
+   public void testAccelerationLimitedYoVariable_without_Input_Variable()
+   {
+      SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("test"));
+      double dt = 0.006;
+
+      scs.startOnAThread();
+
+      YoVariableRegistry registry = scs.getRootRegistry();
+      DoubleYoVariable time = new DoubleYoVariable("time", registry);
+      DoubleYoVariable maxRate = new DoubleYoVariable("maxRate", registry);
+      DoubleYoVariable maxAcceleration = new DoubleYoVariable("maxAcceleration", registry);
+      DoubleYoVariable variable = new DoubleYoVariable("variable", registry);
+      String name = "accelerationLimitedYoVariable";
+
+      AccelerationLimitedYoVariable accelerationLimitedYoVariable = new AccelerationLimitedYoVariable(name, registry, maxRate, maxAcceleration, dt);
+      
+      try
+      {
+         DoubleYoVariable doubleYoVariable = new DoubleYoVariable(name, registry);
+         fail();
+      }
+      catch(RuntimeException rte)
+      {
+         System.err.println("The previous namespace error was part of the AccelerationLimitedYoVariableTest.");
+      }
+      
+      assertEquals(name, accelerationLimitedYoVariable.getName());
+   }
+   
+   @Test
+   public void testDump()
    {
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("test"));
       double dt = 0.006;
@@ -78,4 +138,5 @@ public class AccelerationLimitedYoVariableTest
       scs.cropBuffer();
       ThreadTools.sleepForever();
    }
+   
 }
