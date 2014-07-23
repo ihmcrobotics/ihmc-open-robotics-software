@@ -6,7 +6,7 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParameters;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotLidarParamaters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotLidarParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPointCloudParamaters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.graphics3DAdapter.camera.VideoSettingsFactory;
@@ -182,13 +182,13 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    }
 
    @Override
-   public DRCRobotLidarParamaters[] getLidarParameters()
+   public DRCRobotLidarParameters[] getLidarParameters()
    {
       return null;
    }
 
    @Override
-   public DRCRobotLidarParamaters getPrimaryLidarParameters()
+   public DRCRobotLidarParameters getPrimaryLidarParameters()
    {
       return null;
    }
