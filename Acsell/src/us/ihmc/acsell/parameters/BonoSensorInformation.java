@@ -93,4 +93,10 @@ public class BonoSensorInformation implements DRCRobotSensorInformation
    {
       return null;
    }
+
+   @Override
+   public String[] getSensorFramesToTrack()
+   {
+      return null;
+   }
 }
