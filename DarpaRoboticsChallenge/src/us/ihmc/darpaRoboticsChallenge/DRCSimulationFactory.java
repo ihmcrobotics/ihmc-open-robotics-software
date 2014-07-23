@@ -9,7 +9,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Mo
 import us.ihmc.darpaRoboticsChallenge.controllers.PIDLidarTorqueController;
 import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadDataSynchronizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotLidarParamaters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotLidarParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.SimulatedDRCRobotTimeProvider;
@@ -125,7 +125,7 @@ public class DRCSimulationFactory
 
       simulatedRobot.setController(multiThreadedRobotController);
       DRCRobotSensorInformation sensorInformation = drcRobotModel.getSensorInformation();
-      DRCRobotLidarParamaters lidarParams = sensorInformation.getPrimaryLidarParameters();
+      DRCRobotLidarParameters lidarParams = sensorInformation.getPrimaryLidarParameters();
       if(lidarParams != null && lidarParams.getLidarSpindleJointName() != null)
       {
          PIDLidarTorqueController lidarControllerInterface = new PIDLidarTorqueController(simulatedRobot,

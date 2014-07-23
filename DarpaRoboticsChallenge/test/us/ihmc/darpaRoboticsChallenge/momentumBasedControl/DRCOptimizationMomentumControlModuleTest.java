@@ -38,7 +38,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotLidarParamaters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotLidarParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
@@ -79,7 +79,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
 
       DRCRobotModel robotModel = getRobotModel();
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
-      DRCRobotLidarParamaters lidarParameters = sensorInformation.getPrimaryLidarParameters();
+      DRCRobotLidarParameters lidarParameters = sensorInformation.getPrimaryLidarParameters();
       DRCRobotJointMap jointMap = robotModel.getJointMap();
       DRCRobotPhysicalProperties physicalProperties = robotModel.getPhysicalProperties();
       
@@ -174,7 +174,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
       DRCRobotModel robotModel = getRobotModel();
       DRCRobotJointMap jointMap = robotModel.getJointMap();
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
-      DRCRobotLidarParamaters lidarParameters = sensorInformation.getPrimaryLidarParameters();
+      DRCRobotLidarParameters lidarParameters = sensorInformation.getPrimaryLidarParameters();
       DRCRobotPhysicalProperties physicalProperties = robotModel.getPhysicalProperties();
       SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
       SDFRobot robot = robotModel.createSdfRobot(false);
