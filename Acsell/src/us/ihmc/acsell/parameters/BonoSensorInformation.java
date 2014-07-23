@@ -2,7 +2,7 @@ package us.ihmc.acsell.parameters;
 
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotLidarParameters;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPointCloudParamaters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPointCloudParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -83,13 +83,13 @@ public class BonoSensorInformation implements DRCRobotSensorInformation
    }
 
    @Override
-   public DRCRobotPointCloudParamaters[] getPointCloudParameters()
+   public DRCRobotPointCloudParameters[] getPointCloudParameters()
    {
       return null;
    }
 
    @Override
-   public DRCRobotPointCloudParamaters getPrimaryPointCloudParameters()
+   public DRCRobotPointCloudParameters getPrimaryPointCloudParameters()
    {
       return null;
    }
