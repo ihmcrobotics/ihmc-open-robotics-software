@@ -77,7 +77,7 @@ public class BonoSensorInformation implements DRCRobotSensorInformation
    }
 
    @Override
-   public DRCRobotLidarParameters getPrimaryLidarParameters()
+   public DRCRobotLidarParameters getLidarParameters(int sensorId)
    {
       return null;
    }
