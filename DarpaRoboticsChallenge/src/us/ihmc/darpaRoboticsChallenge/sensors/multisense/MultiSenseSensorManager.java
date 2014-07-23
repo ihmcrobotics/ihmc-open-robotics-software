@@ -10,7 +10,7 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.CameraInfoReceiver
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.CameraLogger;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.RosCameraInfoReciever;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.RosCameraReceiver;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.LidarFilter;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.DepthDataFilter;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.RosLidarDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosNativeNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.RobotPoseBuffer;
@@ -31,7 +31,7 @@ public class MultiSenseSensorManager
    private final ObjectCommunicator fieldComputerClient;
    private final RosNativeNetworkProcessor rosNativeNetworkProcessor;
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
-   private final LidarFilter lidarDataFilter;
+   private final DepthDataFilter lidarDataFilter;
    
    private static final double lidarCRC = -.0010908f;
    private final boolean USE_ROS_FOR_SENSOR_TRANSFORMS = true;
@@ -43,7 +43,7 @@ public class MultiSenseSensorManager
 
    public MultiSenseSensorManager(DRCRobotSensorInformation sensorInformation, RobotPoseBuffer sharedRobotPoseBuffer, RosMainNode rosMainNode,
          DRCNetworkProcessorNetworkingManager networkingManager, SDFFullRobotModel sharedFullRobotModel, ObjectCommunicator fieldComputerClient,
-         RosNativeNetworkProcessor rosNativeNetworkProcessor, PPSTimestampOffsetProvider ppsTimestampOffsetProvider, LidarFilter lidarDataFilter,
+         RosNativeNetworkProcessor rosNativeNetworkProcessor, PPSTimestampOffsetProvider ppsTimestampOffsetProvider, DepthDataFilter lidarDataFilter,
          String sensorURI)
    {
       cameraParamaters = sensorInformation.getCameraParameters(0);

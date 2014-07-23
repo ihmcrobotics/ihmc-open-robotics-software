@@ -9,7 +9,7 @@ import us.ihmc.darpaRoboticsChallenge.configuration.DRCNetClassList;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandJointAnglePacket;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.LidarFilter;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.DepthDataFilter;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.RobotBoundingBoxes;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
@@ -31,7 +31,7 @@ public class DRCNetworkProcessor
    private final SDFFullRobotModel fullRobotModel;
    private final DRCRobotDataReceiver drcRobotDataReceiver;
    private final RobotPoseBuffer robotPoseBuffer;
-   private final LidarFilter lidarFilter;
+   private final DepthDataFilter lidarFilter;
    
    /*
     * This will become a stand-alone application in the final competition. Do
@@ -71,7 +71,7 @@ public class DRCNetworkProcessor
       fullRobotModel = robotModel.createFullRobotModel();
       drcRobotDataReceiver = new DRCRobotDataReceiver(robotModel, fullRobotModel);
       RobotBoundingBoxes robotBoundingBoxes = new RobotBoundingBoxes(drcRobotDataReceiver, fullRobotModel);
-      lidarFilter = new LidarFilter(robotBoundingBoxes, fullRobotModel);
+      lidarFilter = new DepthDataFilter(robotBoundingBoxes, fullRobotModel);
       
       this.fieldComputerClient.attachListener(DRCJointConfigurationData.class, drcRobotDataReceiver);
       this.fieldComputerClient.attachListener(HandJointAnglePacket.class, new ObjectConsumer<HandJointAnglePacket>()
