@@ -5,7 +5,7 @@ import java.net.URI;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotLidarParamaters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotLidarParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCSensorParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ArmCalibrationHelper;
@@ -53,7 +53,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
          new SCSPointCloudDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, sdfFullRobotModel, sensorInformation, scsCommunicator,
                ppsTimestampOffsetProvider, lidarDataFilter);
       } else {
-         DRCRobotLidarParamaters lidarParams = sensorInformation.getPrimaryLidarParameters();
+         DRCRobotLidarParameters lidarParams = sensorInformation.getPrimaryLidarParameters();
          new SCSLidarDataReceiver(robotPoseBuffer, scsCommunicator, networkingManager, sdfFullRobotModel, lidarParams, scsCommunicator,
                ppsTimestampOffsetProvider, lidarDataFilter, sensorURI);
       }

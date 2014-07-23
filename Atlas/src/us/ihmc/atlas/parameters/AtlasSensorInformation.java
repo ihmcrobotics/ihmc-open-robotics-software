@@ -1,7 +1,7 @@
 package us.ihmc.atlas.parameters;
 
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParameters;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotLidarParamaters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotLidarParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPointCloudParamaters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.graphics3DAdapter.camera.VideoSettingsFactory;
@@ -59,8 +59,8 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
     */
    private static final double lidar_spindle_velocity = 5.1;
    
-   private final DRCRobotLidarParamaters[] lidarParamaters = new DRCRobotLidarParamaters[1];
-   private final int multiSenseLidarId = 0;
+   private final DRCRobotLidarParameters[] lidarParamaters = new DRCRobotLidarParameters[1];
+   public final int MULTISENSE_LIDAR_ID = 0;
    private final String lidarJointName; //this has to match LidarDataReceiver::LIDAR_HEAD_FRAME; gazebo should use: "hokuyo_joint"; 
    private final String lidarBaseFrame = multisense_namespace + "/head";
    private final String lidarEndFrame = multisense_namespace + "/head_hokuyo_frame";
@@ -89,21 +89,21 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
       cameraParamaters[BLACKFLY_LEFT_CAMERA_ID] = new DRCRobotCameraParameters(leftFisheyeCameraName, fisheye_left_camera_topic, fisheye_pose_source, videoSetting, BLACKFLY_LEFT_CAMERA_ID);
       cameraParamaters[BLACKFLY_RIGHT_CAMERA_ID] = new DRCRobotCameraParameters(right_fisheye_camera_name, fisheye_right_camera_topic, fisheye_pose_source, videoSetting, BLACKFLY_RIGHT_CAMERA_ID);
       lidarJointName = runningOnRealRobot ? "head" : "hokuyo_joint";
-      lidarParamaters[multiSenseLidarId] = new DRCRobotLidarParamaters(lidarSensorName, multisense_laser_topic_string, lidarJointName, lidarJointTopic, lidarBaseFrame, lidarEndFrame, lidar_spindle_velocity, multiSenseLidarId);
+      lidarParamaters[MULTISENSE_LIDAR_ID] = new DRCRobotLidarParameters(lidarSensorName, multisense_laser_topic_string, lidarJointName, lidarJointTopic, multisenseHandoffFrame, lidarBaseFrame, lidarEndFrame, lidar_spindle_velocity, MULTISENSE_LIDAR_ID);
       
       pointCloudParamaters[multiSenseStereoId] = new DRCRobotPointCloudParamaters(stereoSensorName, stereoColorTopic, stereoBaseFrame, stereoEndFrame, multiSenseStereoId);
    }
    
    @Override
-   public DRCRobotLidarParamaters[] getLidarParameters()
+   public DRCRobotLidarParameters[] getLidarParameters()
    {
       return lidarParamaters;
    }
    
    @Override
-   public DRCRobotLidarParamaters getPrimaryLidarParameters()
+   public DRCRobotLidarParameters getPrimaryLidarParameters()
    {
-      return lidarParamaters[multiSenseLidarId];
+      return lidarParamaters[MULTISENSE_LIDAR_ID];
    }
 
    @Override

@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.sensors.multisense;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParameters;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotLidarParamaters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotLidarParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ArmCalibrationHelper;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.CameraInfoReceiver;
@@ -39,7 +39,7 @@ public class MultiSenseSensorManager
    private final String sensorURI;
 
    private DRCRobotCameraParameters cameraParamaters;
-   private DRCRobotLidarParamaters lidarParamaters;
+   private DRCRobotLidarParameters lidarParamaters;
 
    public MultiSenseSensorManager(DRCRobotSensorInformation sensorInformation, RobotPoseBuffer sharedRobotPoseBuffer, RosMainNode rosMainNode,
          DRCNetworkProcessorNetworkingManager networkingManager, SDFFullRobotModel sharedFullRobotModel, ObjectCommunicator fieldComputerClient,
