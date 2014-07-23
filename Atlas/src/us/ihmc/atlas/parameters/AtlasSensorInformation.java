@@ -170,8 +170,8 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    }
 
    @Override
-   public DRCRobotPointCloudParameters getPrimaryPointCloudParameters()
+   public DRCRobotPointCloudParameters getPointCloudParameters(int sensorId)
    {
-      return pointCloudParamaters[MULTISENSE_STEREO_ID];
+      return pointCloudParamaters[sensorId];
    }
 }
