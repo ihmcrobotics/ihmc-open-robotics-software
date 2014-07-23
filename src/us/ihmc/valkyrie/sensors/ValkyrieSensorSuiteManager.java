@@ -22,6 +22,7 @@ import us.ihmc.darpaRoboticsChallenge.sensors.ibeo.IbeoPointCloudDataReceiver;
 import us.ihmc.utilities.net.LocalObjectCommunicator;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.ros.RosMainNode;
+import us.ihmc.valkyrie.paramaters.ValkyrieSensorInformation;
 
 public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
 {
@@ -69,7 +70,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
       CameraInfoReceiver cameraInfoServer = new RosCameraInfoReciever(cameraParamaters, rosMainNode, networkingManager.getControllerStateHandler(),null);
       networkingManager.getControllerCommandHandler().setIntrinsicServer(cameraInfoServer);
 
-      new IbeoPointCloudDataReceiver(rosMainNode, robotPoseBuffer, networkingManager, sdfFullRobotModel, sensorInformation.getPrimaryPointCloudParameters(), lidarDataFilter);
+      new IbeoPointCloudDataReceiver(rosMainNode, robotPoseBuffer, networkingManager, sdfFullRobotModel, sensorInformation.getPointCloudParameters(ValkyrieSensorInformation.IBEO_ID), lidarDataFilter);
 
       ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
 
