@@ -7,7 +7,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotLidarParameters;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPointCloudParamaters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPointCloudParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.graphics3DAdapter.camera.VideoSettingsFactory;
 import us.ihmc.graphics3DAdapter.camera.VideoSettingsH264LowLatency;
@@ -67,8 +67,8 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    /**
     * PointCloud Parameters
     */
-   private final DRCRobotPointCloudParamaters[] pointCloudParamaters = new DRCRobotPointCloudParamaters[1];
-   private final int ibeoId = 0;
+   private final DRCRobotPointCloudParameters[] pointCloudParamaters = new DRCRobotPointCloudParameters[1];
+   public final int IBEO_ID = 0;
    private static final String ibeoSensorName = "/v1/Ibeo_sensor";
    private static final String ibeoTopic = "/ibeo/points";
    
@@ -116,8 +116,8 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
       cameraParamaters[0] = new DRCRobotCameraParameters(forheadCameraName,forheadCameraTopic,headLinkName,videoSetting,forheadCameraId);
       cameraParamaters[1] = new DRCRobotCameraParameters(leftStereoCameraName,leftCameraTopic,headLinkName,videoSetting,leftHazardCameraId);
       cameraParamaters[2] = new DRCRobotCameraParameters(rightStereoCameraName,rightCameraTopic,headLinkName,videoSetting,rightHazardCameraId);
-      pointCloudParamaters[ibeoId] = new DRCRobotPointCloudParamaters(ibeoSensorName,ibeoTopic,null,null, ibeoId);
-   }
+      pointCloudParamaters[IBEO_ID] = new DRCRobotPointCloudParameters(ibeoSensorName,ibeoTopic,headLinkName,IBEO_ID);
+      }
    
    public static String getUrdfFeetForceSensorName(RobotSide side)
    {
@@ -194,14 +194,14 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    }
 
    @Override
-   public DRCRobotPointCloudParamaters[] getPointCloudParameters()
+   public DRCRobotPointCloudParameters[] getPointCloudParameters()
    {
       return pointCloudParamaters;
    }
 
    @Override
-   public DRCRobotPointCloudParamaters getPrimaryPointCloudParameters()
+   public DRCRobotPointCloudParameters getPrimaryPointCloudParameters()
    {
-      return pointCloudParamaters[ibeoId];
+      return pointCloudParamaters[IBEO_ID];
    }
 }
