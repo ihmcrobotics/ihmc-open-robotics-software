@@ -59,19 +59,19 @@ public class BonoSensorInformation implements DRCRobotSensorInformation
    }
 
    @Override
-   public DRCRobotCameraParamaters[] getCameraParamaters()
+   public DRCRobotCameraParamaters[] getCameraParameters()
    {
       return new DRCRobotCameraParamaters[0];
    }
 
    @Override
-   public DRCRobotCameraParamaters getPrimaryCameraParamaters()
+   public DRCRobotCameraParamaters getPrimaryCameraParameters()
    {
       return null;
    }
 
    @Override
-   public DRCRobotLidarParamaters[] getLidarParamaters()
+   public DRCRobotLidarParamaters[] getLidarParameters()
    {
       return null;
    }
@@ -83,7 +83,7 @@ public class BonoSensorInformation implements DRCRobotSensorInformation
    }
 
    @Override
-   public DRCRobotPointCloudParamaters[] getPointCloudParamaters()
+   public DRCRobotPointCloudParamaters[] getPointCloudParameters()
    {
       return null;
    }
