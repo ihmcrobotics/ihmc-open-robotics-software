@@ -15,9 +15,9 @@ public interface DRCRobotSensorInformation
    public abstract String getPrimaryBodyImu();
    
    public abstract DRCRobotCameraParameters[] getCameraParameters();
-   
-   public abstract DRCRobotCameraParameters getPrimaryCameraParameters();
 
+   public abstract DRCRobotCameraParameters getCameraParameters(int sensorId);
+   
    public abstract DRCRobotLidarParameters[] getLidarParameters();
 
    public abstract DRCRobotLidarParameters getLidarParameters(int sensorId);

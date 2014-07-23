@@ -143,9 +143,9 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    }
 
    @Override
-   public DRCRobotCameraParameters getPrimaryCameraParameters()
+   public DRCRobotCameraParameters getCameraParameters(int sensorId)
    {
-      return cameraParamaters[0];
+      return cameraParamaters[sensorId];
    }
 
    public String getCameraStringBase()
