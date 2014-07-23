@@ -1,10 +1,14 @@
 package com.yobotics.simulationconstructionset;
 
 import static org.junit.Assert.assertTrue;
+
 import java.awt.Frame;
+
 import org.junit.Test;
-import com.yobotics.exampleSimulations.fallingBrick.FallingBrickRobot;
+
 import us.ihmc.utilities.MemoryTools;
+
+import com.yobotics.simulationconstructionset.examples.FallingBrickRobot;
 
 public class SimulationConstructionSetMemoryReclamationTest
 {
