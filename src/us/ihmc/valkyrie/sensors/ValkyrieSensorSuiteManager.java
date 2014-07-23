@@ -10,7 +10,7 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.CameraInfoReceiver
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.RosCameraInfoReciever;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.RosCameraReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.SCSCameraDataReceiver;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.LidarFilter;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.DepthDataFilter;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.SCSLidarDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.SCSPointCloudDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosNativeNetworkProcessor;
@@ -38,7 +38,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
    }
 
    public void initializeSimulatedSensors(LocalObjectCommunicator scsCommunicator, RobotPoseBuffer robotPoseBuffer,
-         DRCNetworkProcessorNetworkingManager networkingManager, SDFFullRobotModel sdfFullRobotModel, LidarFilter lidarDataFilter, String sensorURI)
+         DRCNetworkProcessorNetworkingManager networkingManager, SDFFullRobotModel sdfFullRobotModel, DepthDataFilter lidarDataFilter, String sensorURI)
    {
       new SCSCameraDataReceiver(robotPoseBuffer, sensorInformation.getCameraParameters(0), scsCommunicator, networkingManager, ppsTimestampOffsetProvider);
 
@@ -48,7 +48,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
    }
 
    public void initializePhysicalSensors(RobotPoseBuffer robotPoseBuffer, DRCNetworkProcessorNetworkingManager networkingManager,
-         SDFFullRobotModel sdfFullRobotModel, ObjectCommunicator objectCommunicator, LidarFilter lidarDataFilter, String sensorURI)
+         SDFFullRobotModel sdfFullRobotModel, ObjectCommunicator objectCommunicator, DepthDataFilter lidarDataFilter, String sensorURI)
    {
       RosMainNode rosMainNode = new RosMainNode(rosCoreURI, "darpaRoboticsChallange/networkProcessor");
 
