@@ -46,7 +46,7 @@ public class MultiSenseSensorManager
          RosNativeNetworkProcessor rosNativeNetworkProcessor, PPSTimestampOffsetProvider ppsTimestampOffsetProvider, LidarFilter lidarDataFilter,
          String sensorURI)
    {
-      cameraParamaters = sensorInformation.getPrimaryCameraParamaters();
+      cameraParamaters = sensorInformation.getPrimaryCameraParameters();
       lidarParamaters = sensorInformation.getPrimaryLidarParameters();
       this.sensorInformation = sensorInformation;          
       this.sharedRobotPoseBuffer = sharedRobotPoseBuffer;                
@@ -91,7 +91,7 @@ public class MultiSenseSensorManager
       cameraReceiver = new RosCameraReceiver(cameraParamaters, sharedRobotPoseBuffer, cameraParamaters.getVideoSettings(), rosMainNode, networkingManager,
             ppsTimestampOffsetProvider,logger, sensorURI);
 
-      CameraInfoReceiver cameraInfoServer = new RosCameraInfoReciever(sensorInformation.getPrimaryCameraParamaters(), rosMainNode,
+      CameraInfoReceiver cameraInfoServer = new RosCameraInfoReciever(sensorInformation.getPrimaryCameraParameters(), rosMainNode,
             networkingManager.getControllerStateHandler(),logger);
       
       networkingManager.getControllerCommandHandler().setIntrinsicServer(cameraInfoServer);

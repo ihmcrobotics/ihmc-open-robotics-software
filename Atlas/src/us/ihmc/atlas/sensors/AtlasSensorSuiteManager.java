@@ -45,7 +45,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    public void initializeSimulatedSensors(LocalObjectCommunicator scsCommunicator, RobotPoseBuffer robotPoseBuffer,
          DRCNetworkProcessorNetworkingManager networkingManager, SDFFullRobotModel sdfFullRobotModel, LidarFilter lidarDataFilter, String sensorURI)
    {
-      SCSCameraDataReceiver cameraReceiver = new SCSCameraDataReceiver(robotPoseBuffer, sensorInformation.getPrimaryCameraParamaters(), scsCommunicator,
+      SCSCameraDataReceiver cameraReceiver = new SCSCameraDataReceiver(robotPoseBuffer, sensorInformation.getPrimaryCameraParameters(), scsCommunicator,
             networkingManager, ppsTimestampOffsetProvider);
       
       if(DRCConfigParameters.USE_POINT_CLOUD_INSTEAD_OF_LIDAR)
@@ -85,7 +85,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       MultiSenseSensorManager multiSenseSensorManager = new MultiSenseSensorManager(sensorInformation, robotPoseBuffer, rosMainNode, networkingManager,
             sdfFullRobotModel, objectCommunicator, rosNativeNetworkProcessor, ppsTimestampOffsetProvider, lidarDataFilter, sensorURI);
 
-      new FishEyeDataReceiver(robotPoseBuffer, sensorInformation.getPrimaryCameraParamaters().getVideoSettings(), rosMainNode, networkingManager,
+      new FishEyeDataReceiver(robotPoseBuffer, sensorInformation.getPrimaryCameraParameters().getVideoSettings(), rosMainNode, networkingManager,
             DRCSensorParameters.DEFAULT_FIELD_OF_VIEW, ppsTimestampOffsetProvider);
     
       if (DRCConfigParameters.SEND_ROBOT_DATA_TO_ROS)

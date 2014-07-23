@@ -69,7 +69,7 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
       scs.setupCamera(behindPelvis);
 
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
-      DRCRobotCameraParamaters[] cameraInfo = sensorInformation.getCameraParamaters();
+      DRCRobotCameraParamaters[] cameraInfo = sensorInformation.getCameraParameters();
       for (int i = 0; i < cameraInfo.length; i++)
       {
          CameraConfiguration camera = new CameraConfiguration(cameraInfo[i].getCameraNameInSdf());

@@ -61,7 +61,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
       }
       
       lidarFrame = estimatorModel.getLidarBaseFrame(lidarSpindleJointName);
-      cameraFrame = estimatorModel.getCameraFrame(sensorInformation.getPrimaryCameraParamaters().getCameraNameInSdf());
+      cameraFrame = estimatorModel.getCameraFrame(sensorInformation.getPrimaryCameraParameters().getCameraNameInSdf());
       rootFrame = estimatorModel.getRootJoint().getFrameAfterJoint();
 
       stateRingBuffer = new ConcurrentRingBuffer<State>(State.builder, 8);

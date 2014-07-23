@@ -93,7 +93,7 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    }
    
    @Override
-   public DRCRobotLidarParamaters[] getLidarParamaters()
+   public DRCRobotLidarParamaters[] getLidarParameters()
    {
       return lidarParamaters;
    }
@@ -135,13 +135,13 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    }
 
    @Override
-   public DRCRobotCameraParamaters[] getCameraParamaters()
+   public DRCRobotCameraParamaters[] getCameraParameters()
    {
       return cameraParamaters;
    }
 
    @Override
-   public DRCRobotCameraParamaters getPrimaryCameraParamaters()
+   public DRCRobotCameraParamaters getPrimaryCameraParameters()
    {
       return cameraParamaters[primaryCameraId];
    }
@@ -162,7 +162,7 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    }
 
    @Override
-   public DRCRobotPointCloudParamaters[] getPointCloudParamaters()
+   public DRCRobotPointCloudParamaters[] getPointCloudParameters()
    {
       return pointCloudParamaters;
    }
