@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.camera;
 import java.awt.image.BufferedImage;
 
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParamaters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorControllerStateHandler;
@@ -22,7 +22,7 @@ public class SCSCameraDataReceiver extends CameraDataReceiver implements ObjectC
 {
    SCSCameraInfoReceiver scsCameraInfoReceiver;
 
-   public SCSCameraDataReceiver(RobotPoseBuffer robotPoseBuffer, DRCRobotCameraParamaters drcRobotCameraParamaters, ObjectCommunicator scsCommunicator,
+   public SCSCameraDataReceiver(RobotPoseBuffer robotPoseBuffer, DRCRobotCameraParameters drcRobotCameraParamaters, ObjectCommunicator scsCommunicator,
                                 DRCNetworkProcessorNetworkingManager networkingManager, PPSTimestampOffsetProvider ppsTimestampOffsetProvider)
    {
       super(robotPoseBuffer, drcRobotCameraParamaters.getVideoSettings(), networkingManager, ppsTimestampOffsetProvider);
