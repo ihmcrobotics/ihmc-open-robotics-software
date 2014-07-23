@@ -68,7 +68,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
     * PointCloud Parameters
     */
    private final DRCRobotPointCloudParameters[] pointCloudParamaters = new DRCRobotPointCloudParameters[1];
-   public final int IBEO_ID = 0;
+   public static final int IBEO_ID = 0;
    private static final String ibeoSensorName = "/v1/Ibeo_sensor";
    private static final String ibeoTopic = "/ibeo/points";
    
@@ -200,8 +200,8 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    }
 
    @Override
-   public DRCRobotPointCloudParameters getPrimaryPointCloudParameters()
+   public DRCRobotPointCloudParameters getPointCloudParameters(int sensorId)
    {
-      return pointCloudParamaters[IBEO_ID];
+      return pointCloudParamaters[sensorId];
    }
 }
