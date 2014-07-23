@@ -65,7 +65,7 @@ public class BonoSensorInformation implements DRCRobotSensorInformation
    }
 
    @Override
-   public DRCRobotCameraParameters getPrimaryCameraParameters()
+   public DRCRobotCameraParameters getCameraParameters(int sensorId)
    {
       return null;
    }
