@@ -4,7 +4,7 @@ import java.net.URI;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParamaters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.CameraInfoReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.RosCameraInfoReciever;
@@ -62,7 +62,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
          rosNativeNetworkProcessor = null;
       }
 
-      DRCRobotCameraParamaters cameraParamaters = sensorInformation.getPrimaryCameraParameters();
+      DRCRobotCameraParameters cameraParamaters = sensorInformation.getPrimaryCameraParameters();
 
       new RosCameraReceiver(cameraParamaters, robotPoseBuffer, cameraParamaters.getVideoSettings(), rosMainNode, networkingManager, ppsTimestampOffsetProvider,null, sensorURI);
 

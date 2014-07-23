@@ -5,7 +5,7 @@ import java.util.HashMap;
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParamaters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotLidarParamaters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPointCloudParamaters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
@@ -80,7 +80,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    private static int primaryCameraId = forheadCameraId;
    
    private static final String headLinkName = "/v1/Head";
-   private final DRCRobotCameraParamaters[] cameraParamaters = new DRCRobotCameraParamaters[3];
+   private final DRCRobotCameraParameters[] cameraParamaters = new DRCRobotCameraParameters[3];
    
    private static final String forheadCameraName = "/v1/HeadWebcam___default__";
    private static final String forheadCameraTopic = "/forhead/image_raw/compressed";
@@ -113,9 +113,9 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    public ValkyrieSensorInformation()
    {
       VideoSettingsH264LowLatency videoSetting = VideoSettingsFactory.get32kBitSettingsWide();
-      cameraParamaters[0] = new DRCRobotCameraParamaters(forheadCameraName,forheadCameraTopic,headLinkName,videoSetting,forheadCameraId);
-      cameraParamaters[1] = new DRCRobotCameraParamaters(leftStereoCameraName,leftCameraTopic,headLinkName,videoSetting,leftHazardCameraId);
-      cameraParamaters[2] = new DRCRobotCameraParamaters(rightStereoCameraName,rightCameraTopic,headLinkName,videoSetting,rightHazardCameraId);
+      cameraParamaters[0] = new DRCRobotCameraParameters(forheadCameraName,forheadCameraTopic,headLinkName,videoSetting,forheadCameraId);
+      cameraParamaters[1] = new DRCRobotCameraParameters(leftStereoCameraName,leftCameraTopic,headLinkName,videoSetting,leftHazardCameraId);
+      cameraParamaters[2] = new DRCRobotCameraParameters(rightStereoCameraName,rightCameraTopic,headLinkName,videoSetting,rightHazardCameraId);
       pointCloudParamaters[ibeoId] = new DRCRobotPointCloudParamaters(ibeoSensorName,ibeoTopic,null,null, ibeoId);
    }
    
@@ -170,13 +170,13 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    }
 
    @Override
-   public DRCRobotCameraParamaters[] getCameraParameters()
+   public DRCRobotCameraParameters[] getCameraParameters()
    {
       return cameraParamaters;
    }
 
    @Override
-   public DRCRobotCameraParamaters getPrimaryCameraParameters()
+   public DRCRobotCameraParameters getPrimaryCameraParameters()
    {
       return cameraParamaters[primaryCameraId];
    }
