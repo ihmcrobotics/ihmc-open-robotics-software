@@ -170,19 +170,19 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    }
 
    @Override
-   public DRCRobotCameraParamaters[] getCameraParamaters()
+   public DRCRobotCameraParamaters[] getCameraParameters()
    {
       return cameraParamaters;
    }
 
    @Override
-   public DRCRobotCameraParamaters getPrimaryCameraParamaters()
+   public DRCRobotCameraParamaters getPrimaryCameraParameters()
    {
       return cameraParamaters[primaryCameraId];
    }
 
    @Override
-   public DRCRobotLidarParamaters[] getLidarParamaters()
+   public DRCRobotLidarParamaters[] getLidarParameters()
    {
       return null;
    }
@@ -194,7 +194,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    }
 
    @Override
-   public DRCRobotPointCloudParamaters[] getPointCloudParamaters()
+   public DRCRobotPointCloudParamaters[] getPointCloudParameters()
    {
       return pointCloudParamaters;
    }
