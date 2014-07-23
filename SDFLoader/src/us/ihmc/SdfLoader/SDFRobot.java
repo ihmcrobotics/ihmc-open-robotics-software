@@ -558,9 +558,9 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder, Hu
             }
          }
          
-         System.err.println("[SDFRobot]: FIXME: Setting LIDAR angle to 0.5 pi due to current GPULidar limitations");
-         sdfMinAngle = -0.25 * Math.PI;
-         sdfMaxAngle = 0.25 * Math.PI;
+//         System.err.println("[SDFRobot]: FIXME: Setting LIDAR angle to 0.5 pi due to current GPULidar limitations");
+//         sdfMinAngle = -Math.PI/4;
+//         sdfMaxAngle = Math.PI/4;
          
          LidarScanParameters polarDefinition = new LidarScanParameters(sdfSamples, (float) sdfMinAngle, (float) sdfMaxAngle, 0.0f, (float) sdfMinRange, (float) sdfMaxRange, 0.0f);
          
