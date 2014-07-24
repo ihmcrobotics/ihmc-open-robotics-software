@@ -3,6 +3,7 @@ package us.ihmc.sensorProcessing.pointClouds.shape;
 import bubo.maps.d3.grid.CellProbability_F64;
 import bubo.maps.d3.grid.GridMapSpacialInfo3D;
 import bubo.maps.d3.grid.impl.OctreeGridMap_F64;
+
 import com.jme3.app.SimpleApplication;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState.BlendMode;
@@ -11,8 +12,10 @@ import com.jme3.math.Vector3f;
 import com.jme3.renderer.queue.RenderQueue.Bucket;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import com.jme3.scene.control.Control;
 import com.jme3.scene.shape.Box;
 import com.jme3.system.AppSettings;
+
 import georegression.struct.point.Point3D_F64;
 import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
 import us.ihmc.sensorProcessing.pointClouds.octree.OctreeOccupancyExample;
@@ -68,6 +71,9 @@ public class DisplayOctreeApp extends SimpleApplication
       flyCam.setMoveSpeed(10);
       flyCam.setDragToRotate(true);
       flyCam.setZoomSpeed(10);
+      
+   
+     
    }
 
    private void generateMap(Node zUpNode, OctreeGridMap_F64 map, GridMapSpacialInfo3D spacial)
