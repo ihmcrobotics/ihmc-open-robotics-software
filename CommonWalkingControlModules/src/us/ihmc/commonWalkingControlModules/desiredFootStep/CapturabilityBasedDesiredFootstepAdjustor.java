@@ -69,7 +69,7 @@ public class CapturabilityBasedDesiredFootstepAdjustor implements DesiredFootste
 
       FrameConvexPolygon2d captureRegion = couplingRegistry.getCaptureRegion();
 
-      boolean noCaptureRegion = captureRegion == null;
+      boolean noCaptureRegion = captureRegion == null || captureRegion.isEmpty();
       if (noCaptureRegion)
       {
          nextStepIsInsideCaptureRegion.set(false);
