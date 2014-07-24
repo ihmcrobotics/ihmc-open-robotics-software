@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 import java.awt.Frame;
 import java.io.File;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.utilities.DateTools;
@@ -52,7 +51,6 @@ public class SimulationConstructionSetMemoryReclamationTest
       assertTrue("usedMemoryMB = " + usedMemoryMB, usedMemoryMB < 50);
    }
 
-   @Ignore
    @Test
    public void testMemoryReclamationForSCSWithARobotAndMovie()
    {
@@ -74,7 +72,7 @@ public class SimulationConstructionSetMemoryReclamationTest
       }
       frames = null;
 
-//      assertTrue("usedMemoryMB = " + usedMemoryMB, usedMemoryMB < 50);
+      assertTrue("usedMemoryMB = " + usedMemoryMB, usedMemoryMB < 50);
    }
 
    private int testOneAndReturnUsedMemoryMB(boolean useARobot, int numberOfTests, boolean createMovie)
@@ -85,9 +83,9 @@ public class SimulationConstructionSetMemoryReclamationTest
       {
          SimulationConstructionSet scs = createAndStartSimulationConstructionSet(useARobot);
          sleep(2000);
-         if(createMovie)
+         if (createMovie)
          {
-            createMovieAndDataWithDateTimeClassMethod("/SimulationConstructionSet/resources/", "BrettRobot2000", scs, 2);
+            createMovieAndDataWithDateTimeClassMethod("resources/", "BrettRobot2000", scs, 2);
             System.err.println("Movie creation successful");
          }
          scs.closeAndDispose();
@@ -98,6 +96,7 @@ public class SimulationConstructionSetMemoryReclamationTest
       System.out.println("Created and disposed of " + numberOfTests + " SCSs. Should be garbage collected now...");
       sleep(2000);
       int usedMemoryMB = MemoryTools.getCurrentMemoryUsageInMB();
+
       return usedMemoryMB;
    }
 
@@ -126,14 +125,16 @@ public class SimulationConstructionSetMemoryReclamationTest
       Thread thread = new Thread(scs);
       thread.start();
 
-      while (useARobot && !scs.isSimulationThreadUpAndRunning())
+      while (useARobot &&!scs.isSimulationThreadUpAndRunning())
       {
          sleep(100);
       }
+
       return scs;
    }
-   
-   private static File[] createMovieAndDataWithDateTimeClassMethod(String rootDirectory, String simplifiedRobotModelName, SimulationConstructionSet scs, int stackDepthForRelevantCallingMethod)
+
+   private static File[] createMovieAndDataWithDateTimeClassMethod(String rootDirectory, String simplifiedRobotModelName, SimulationConstructionSet scs,
+           int stackDepthForRelevantCallingMethod)
    {
       String dateString = DateTools.getDateString();
       String directoryName = rootDirectory + dateString + "/";
@@ -146,34 +147,34 @@ public class SimulationConstructionSetMemoryReclamationTest
          System.err.println("DIRECTORY CREATED: " + result);
       }
 
-//      String timeString = DateTools.getTimeString();
-//      String filenameStart = dateString + "_" + timeString;
-//      if (!simplifiedRobotModelName.equals(""))
-//      {
-//         filenameStart += "_" + simplifiedRobotModelName;
-//      }
+//    String timeString = DateTools.getTimeString();
+//    String filenameStart = dateString + "_" + timeString;
+//    if (!simplifiedRobotModelName.equals(""))
+//    {
+//       filenameStart += "_" + simplifiedRobotModelName;
+//    }
 //
-//      String movieFilename = filenameStart + ".mp4";
+//    String movieFilename = filenameStart + ".mp4";
 //
-//      File movieFile;
-//      movieFile = scs.createMovie(directoryName + movieFilename);
+//    File movieFile;
+//    movieFile = scs.createMovie(directoryName + movieFilename);
 //
-//      String dataFilename = directoryName + filenameStart + ".data.gz";
+//    String dataFilename = directoryName + filenameStart + ".data.gz";
 //
-//      File dataFile = new File(dataFilename);
-//      try
-//      {
-//         scs.writeData(dataFile);
-//      } catch (Exception e)
-//      {
-//         System.err.println("Error in writing data file in BambooTools.createMovieAndDataWithDateTimeClassMethod()");
-//         e.printStackTrace();
-//      }
+//    File dataFile = new File(dataFilename);
+//    try
+//    {
+//       scs.writeData(dataFile);
+//    } catch (Exception e)
+//    {
+//       System.err.println("Error in writing data file in BambooTools.createMovieAndDataWithDateTimeClassMethod()");
+//       e.printStackTrace();
+//    }
 //
-//      scs.gotoOutPointNow();
-      return new File[]{directory};
+//    scs.gotoOutPointNow();
+      return new File[] {directory};
 
-//      return new File[]{directory, movieFile, dataFile};
+//    return new File[]{directory, movieFile, dataFile};
    }
 
    private void sleep(long sleepMillis)
