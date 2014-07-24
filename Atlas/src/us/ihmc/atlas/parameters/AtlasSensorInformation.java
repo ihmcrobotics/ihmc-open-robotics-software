@@ -63,7 +63,7 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    private static final double lidar_spindle_velocity = 5.1;
    
    private final DRCRobotLidarParameters[] lidarParamaters = new DRCRobotLidarParameters[1];
-   public final int MULTISENSE_LIDAR_ID = 0;
+   public static final int MULTISENSE_LIDAR_ID = 0;
    
    private final String lidarPoseLink = "hokuyo_link"; 
    private final String lidarJointName = "hokuyo_joint";

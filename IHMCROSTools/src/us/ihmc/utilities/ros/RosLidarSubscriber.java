@@ -1,8 +1,5 @@
 package us.ihmc.utilities.ros;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-
 import sensor_msgs.LaserScan;
 import us.ihmc.utilities.lidar.polarLidar.LidarScan;
 import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
@@ -11,10 +8,12 @@ public abstract class RosLidarSubscriber extends AbstractRosTopicSubscriber<sens
 {
    private boolean DEBUG = false;
    private LidarScanParameters initialPolarLidarScanParameters = null;
+   private final int sensorId;
 
-   public RosLidarSubscriber()
+   public RosLidarSubscriber(int sensorId)
    {
       super(sensor_msgs.LaserScan._TYPE);
+      this.sensorId = sensorId;
    }
 
    public void onNewMessage(LaserScan message)
@@ -27,7 +26,7 @@ public abstract class RosLidarSubscriber extends AbstractRosTopicSubscriber<sens
          verifyDataFromGazeboRemainsTheSame(polarLidarScanParameters);
       }
 
-      LidarScan polarLidarScan = new LidarScan(polarLidarScanParameters, message.getRanges());
+      LidarScan polarLidarScan = new LidarScan(polarLidarScanParameters, message.getRanges(),sensorId);
       newScan(polarLidarScan);
    }
 
