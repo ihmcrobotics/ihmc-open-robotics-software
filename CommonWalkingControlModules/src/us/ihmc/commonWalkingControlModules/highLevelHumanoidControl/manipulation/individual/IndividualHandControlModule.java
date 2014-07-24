@@ -25,7 +25,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
 import us.ihmc.commonWalkingControlModules.sensors.MassMatrixEstimatingToolRigidBody;
-import us.ihmc.commonWalkingControlModules.trajectories.ChangeableConfigurationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantOrientationTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantPositionTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.OneDoFJointQuinticTrajectoryGenerator;
@@ -38,6 +37,7 @@ import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.trajectories.providers.ChangeableConfigurationProvider;
 import us.ihmc.utilities.math.trajectories.providers.SE3ConfigurationProvider;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
