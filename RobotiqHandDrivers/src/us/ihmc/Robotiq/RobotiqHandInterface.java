@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 
+import us.ihmc.utilities.ThreadTools;
+
 /* GENERAL INFO
  * (This information assumes right hand for convention)
  * Finger A = Thumb
@@ -328,19 +330,35 @@ public final class RobotiqHandInterface
 	private byte[] force = new byte[4];
 	private byte[] position = new byte[4];
 	private int faultCounter = 0;
+	private boolean connected = false;
+	private String address;
 	
-	RobotiqHandInterface() throws UnknownHostException, IOException
+	RobotiqHandInterface()
 	{
-		connection = new ModbusTCPConnection(RobotiqHandParameters.RIGHT_HAND_ADDRESS,
-												 RobotiqHandParameters.PORT);
+		this(RobotiqHandParameters.LEFT_HAND_ADDRESS);
 	}
 	
-	RobotiqHandInterface(String address) throws UnknownHostException, IOException
+	RobotiqHandInterface(String address)
 	{
-		connection = new ModbusTCPConnection(address,RobotiqHandParameters.PORT);
+		this.address = address;
+		this.connect();
 	}
 	
-	public void initialize() throws Exception
+	public void connect()
+	{
+		try
+		{
+			connection = new ModbusTCPConnection(address,RobotiqHandParameters.PORT);
+			connected = true;
+		}
+		catch(UnknownHostException e)
+		{
+		} catch (IOException e)
+		{
+		}
+	}
+	
+	public void initialize()
 	{
 		status = this.getStatus();
 		
@@ -377,7 +395,7 @@ public final class RobotiqHandInterface
 					(byte)force[FINGER_A]);
 			do
 			{
-				Thread.sleep(1000);
+				ThreadTools.sleep(1000);
 				status = this.getStatus();
 			}while(((status[GRIPPER_STATUS] & INIT_MODE_STATUS_MASK) == ACTIVATING) && (status[FAULT_STATUS] == NO_FAULT)); //check/wait while activation is in progress
 			
@@ -388,9 +406,7 @@ public final class RobotiqHandInterface
 					this.reset();
 				else
 				{
-					System.err.println("Unable to initalize hand");
-					printErrors(status[FAULT_STATUS]);
-					throw new Exception("Fault in hand during activation");
+					return;
 				}
 			}
 		}while ((status[GRIPPER_STATUS] & INIT_MODE_STATUS_MASK) != COMPLETED); //check to see if activation was successful, else resend command	
@@ -398,7 +414,7 @@ public final class RobotiqHandInterface
 		faultCounter = 0; //reset fault counter
 	}
 
-	public void reset() throws Exception
+	public void reset()
 	{
 		initializedStatus = RESET; //reset activation status
 		commandedStatus = STANDBY;
@@ -409,7 +425,7 @@ public final class RobotiqHandInterface
 					(byte)(initializedStatus | operationMode | commandedStatus),
 					(byte)(fingerControl | scissorControl));
 		
-			Thread.sleep(100);
+			ThreadTools.sleep(100);
 			status = this.getStatus();
 		}while((status[GRIPPER_STATUS] & INITIALIZATON_MASK) != RESET); //check until reset
 		initialize();
@@ -427,7 +443,7 @@ public final class RobotiqHandInterface
 		}
 	}
 
-	public void open() throws InterruptedException
+	public void open()
 	{
 		
 		position[FINGER_A] = FULLY_OPEN; //all fingers
@@ -439,12 +455,12 @@ public final class RobotiqHandInterface
 		sendMotionRequest();
 		do
 		{
-			Thread.sleep(200);
+			ThreadTools.sleep(200);
 			status = this.getStatus();
 		}while((status[GRIPPER_STATUS] & MOTION_STATUS_MASK) == IN_MOTION);
 	}
 	
-	public void open(float percent) throws InterruptedException
+	public void open(float percent)
 	{
 		
 		position[FINGER_A] = (byte)(percent * FULLY_OPEN); //all fingers
@@ -456,12 +472,12 @@ public final class RobotiqHandInterface
 		sendMotionRequest();
 		do
 		{
-			Thread.sleep(200);
+			ThreadTools.sleep(200);
 			status = this.getStatus();
 		}while((status[GRIPPER_STATUS] & MOTION_STATUS_MASK) == IN_MOTION);
 	}
 	
-	public void close() throws InterruptedException
+	public void close()
 	{
 		if(operationMode == PINCH_MODE)
 		{
@@ -483,7 +499,7 @@ public final class RobotiqHandInterface
 		sendMotionRequest();
 		do
 		{
-			Thread.sleep(200);
+			ThreadTools.sleep(200);
 			status = this.getStatus();
 		}while((status[GRIPPER_STATUS] & MOTION_STATUS_MASK) == IN_MOTION);
 	}
@@ -515,7 +531,7 @@ public final class RobotiqHandInterface
 		}while((status[GRIPPER_STATUS] & MOTION_STATUS_MASK) == IN_MOTION);
 	}
 	
-	public void crush() throws InterruptedException
+	public void crush()
 	{
 		if(operationMode == PINCH_MODE)
 		{
@@ -537,7 +553,7 @@ public final class RobotiqHandInterface
 		sendMotionRequest();
 		do
 		{
-			Thread.sleep(200);
+			ThreadTools.sleep(200);
 			status = this.getStatus();
 		}while((status[GRIPPER_STATUS] & MOTION_STATUS_MASK) == IN_MOTION);
 	}
@@ -625,6 +641,11 @@ public final class RobotiqHandInterface
 	{
 		status = getStatus();
 		return (status[GRIPPER_STATUS] & INITIALIZATON_MASK) == INITIALIZED;
+	}
+	
+	public boolean isConnected()
+	{
+		return connected;
 	}
 	
 	private void printErrors(byte code)
