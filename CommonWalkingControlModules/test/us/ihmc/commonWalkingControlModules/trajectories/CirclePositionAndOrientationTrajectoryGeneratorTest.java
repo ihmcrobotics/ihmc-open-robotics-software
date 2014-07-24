@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.trajectory.CirclePositionAndOrientationTrajectoryGenerator;
+
 import org.junit.Test;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;

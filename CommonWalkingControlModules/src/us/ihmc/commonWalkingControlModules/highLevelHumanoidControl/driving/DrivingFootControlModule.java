@@ -13,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.taskExecutor.TaskExecutor;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
-import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePositionTrajectoryGenerator;
 import us.ihmc.packets.LowLevelDrivingAction;
 import us.ihmc.packets.LowLevelDrivingStatus;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
@@ -45,6 +44,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicRefere
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
+import com.yobotics.simulationconstructionset.util.trajectory.StraightLinePositionTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.provider.YoPositionProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.provider.YoVariableDoubleProvider;
 
