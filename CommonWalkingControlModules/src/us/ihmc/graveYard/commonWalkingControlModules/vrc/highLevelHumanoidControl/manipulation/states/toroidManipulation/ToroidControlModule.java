@@ -1,22 +1,21 @@
 package us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.manipulation.states.toroidManipulation;
 
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.PDController;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.SpatialForceVectorProvider;
-import us.ihmc.commonWalkingControlModules.trajectories.SpatialAccelerationProvider;
+import javax.vecmath.Vector3d;
+
 import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.manipulation.ManipulableToroid;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
 import us.ihmc.utilities.screwTheory.Twist;
 
-import javax.vecmath.Vector3d;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.PDController;
 
 /**
  * @author twan
  *         Date: 5/13/13
  */
-public class ToroidControlModule implements SpatialAccelerationProvider, SpatialForceVectorProvider
+public class ToroidControlModule
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final ManipulableToroid toroidUpdater;
