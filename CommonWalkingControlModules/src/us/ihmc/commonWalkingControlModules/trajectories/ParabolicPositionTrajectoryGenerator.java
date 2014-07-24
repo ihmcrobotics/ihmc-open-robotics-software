@@ -1,4 +1,4 @@
-package com.yobotics.simulationconstructionset.util.trajectory;
+package us.ihmc.commonWalkingControlModules.trajectories;
 
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -9,6 +9,9 @@ import us.ihmc.utilities.math.trajectories.providers.PositionProvider;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
+import com.yobotics.simulationconstructionset.util.trajectory.YoMinimumJerkTrajectory;
+import com.yobotics.simulationconstructionset.util.trajectory.YoParabolicTrajectoryGenerator;
 
 public class ParabolicPositionTrajectoryGenerator implements PositionTrajectoryGenerator
 {
