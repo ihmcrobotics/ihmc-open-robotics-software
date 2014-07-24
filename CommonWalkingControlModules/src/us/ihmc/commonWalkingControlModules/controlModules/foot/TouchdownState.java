@@ -19,6 +19,7 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
+import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
 import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 import us.ihmc.utilities.screwTheory.Twist;
 
@@ -28,7 +29,6 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.GainCalculator;
 import com.yobotics.simulationconstructionset.util.trajectory.ConstantDoubleProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.ConstantVelocityTrajectoryGenerator;
-import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.DoubleTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.VectorProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.YoVariableDoubleProvider;

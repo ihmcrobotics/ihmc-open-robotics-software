@@ -12,12 +12,12 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
 import us.ihmc.utilities.screwTheory.RigidBody;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.trajectory.ConstantDoubleProvider;
-import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
 
 

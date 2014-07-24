@@ -21,6 +21,7 @@ import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
@@ -33,7 +34,6 @@ import com.yobotics.simulationconstructionset.util.GainCalculator;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
-import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParameters;
 import com.yobotics.simulationconstructionset.util.trajectory.YoVelocityProvider;
 

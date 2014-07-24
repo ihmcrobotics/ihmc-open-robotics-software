@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelState;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
@@ -19,7 +20,6 @@ import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.PDController;
 import com.yobotics.simulationconstructionset.util.trajectory.CubicPolynomialTrajectoryGenerator;
-import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.YoVariableDoubleProvider;
 
 public class PosePlaybackController extends HighLevelBehavior

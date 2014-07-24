@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.SettableOrientationProvi
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
@@ -16,7 +17,6 @@ import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.trajectory.ConstantDoubleProvider;
-import com.yobotics.simulationconstructionset.util.trajectory.DoubleProvider;
 
 public class HeadOrientationManager
 {
