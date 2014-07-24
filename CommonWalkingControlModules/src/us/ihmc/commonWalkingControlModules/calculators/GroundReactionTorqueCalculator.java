@@ -92,8 +92,8 @@ public class GroundReactionTorqueCalculator
       {
          GroundContactPoint groundContactPoint = contactPoints.get(i);
          // Compute r X f for each contact point. Use the ankle origin to calculate total moments about it
-         FramePoint contactPointLocation = new FramePoint(worldFrame, groundContactPoint.x.getDoubleValue(), groundContactPoint.y.getDoubleValue(),
-                                              groundContactPoint.z.getDoubleValue());
+         FramePoint contactPointLocation = new FramePoint(worldFrame, groundContactPoint.getX(), groundContactPoint.getY(),
+                                              groundContactPoint.getZ());
          contactPointLocation.changeFrame(ankleZupFrame);
 
          FrameVector vectorToContactPoint = new FrameVector(contactPointLocation);
