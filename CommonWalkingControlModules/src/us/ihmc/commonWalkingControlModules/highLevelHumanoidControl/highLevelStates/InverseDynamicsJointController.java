@@ -24,7 +24,6 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.MathTools;
-import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -58,7 +57,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPositi
 import com.yobotics.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePose;
-import com.yobotics.simulationconstructionset.util.trajectory.PoseTrajectoryGenerator;
+import com.yobotics.simulationconstructionset.util.trajectory.ConstantPoseTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.provider.YoOrientationProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.provider.YoPositionProvider;
 
@@ -688,96 +687,6 @@ public class InverseDynamicsJointController extends HighLevelBehavior
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
-   }
-   
-   private class ConstantPoseTrajectoryGenerator implements PoseTrajectoryGenerator
-   {
-      private final OrientationProvider orientationProvider;
-      private final PositionProvider positionProvider;
-      
-      private final ReferenceFrame referenceFrame;
-
-      public ConstantPoseTrajectoryGenerator(OrientationProvider orientationProvider, PositionProvider positionProvider)
-      {
-         FrameOrientation orientation = new FrameOrientation();
-         orientationProvider.get(orientation);
-         FramePoint position = new FramePoint();
-         positionProvider.get(position);
-         
-         position.checkReferenceFrameMatch(orientation);
-         
-         this.referenceFrame = position.getReferenceFrame();
-         this.orientationProvider = orientationProvider;
-         this.positionProvider = positionProvider;
-      }
-      
-      @Override
-      public void initialize()
-      {
-      }
-
-      @Override
-      public void compute(double time)
-      {
-      }
-
-      @Override
-      public boolean isDone()
-      {
-         return false;
-      }
-
-      @Override
-      public void get(FramePoint positionToPack)
-      {
-         positionProvider.get(positionToPack);
-      }
-
-      @Override
-      public void packVelocity(FrameVector velocityToPack)
-      {
-         velocityToPack.setToZero(referenceFrame);
-      }
-
-      @Override
-      public void packAcceleration(FrameVector accelerationToPack)
-      {
-         accelerationToPack.setToNaN(referenceFrame);
-      }
-
-      @Override
-      public void packLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
-      {
-         get(positionToPack);
-         packVelocity(velocityToPack);
-         packAcceleration(accelerationToPack);
-      }
-
-      @Override
-      public void get(FrameOrientation orientationToPack)
-      {
-         orientationProvider.get(orientationToPack);
-      }
-
-      @Override
-      public void packAngularVelocity(FrameVector angularVelocityToPack)
-      {
-         angularVelocityToPack.setToZero(referenceFrame);
-      }
-
-      @Override
-      public void packAngularAcceleration(FrameVector angularAccelerationToPack)
-      {
-         angularAccelerationToPack.setToZero(referenceFrame);
-      }
-
-      @Override
-      public void packAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
-      {
-         get(orientationToPack);
-         packAngularVelocity(angularVelocityToPack);
-         packAngularAcceleration(angularAccelerationToPack);
-      }
    }
 
    public static class GravityCompensationSliderBoard
