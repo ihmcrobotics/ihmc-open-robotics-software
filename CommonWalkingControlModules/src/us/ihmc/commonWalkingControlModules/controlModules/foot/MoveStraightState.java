@@ -5,13 +5,13 @@ import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccele
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
-import us.ihmc.commonWalkingControlModules.trajectories.CurrentConfigurationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePositionTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.YoSE3ConfigurationProvider;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.trajectories.providers.CurrentConfigurationProvider;
 import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
 import us.ihmc.utilities.screwTheory.RigidBody;
 
