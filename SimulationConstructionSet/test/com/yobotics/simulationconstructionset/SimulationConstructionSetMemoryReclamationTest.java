@@ -3,9 +3,12 @@ package com.yobotics.simulationconstructionset;
 import static org.junit.Assert.assertTrue;
 
 import java.awt.Frame;
+import java.io.File;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
+import us.ihmc.utilities.DateTools;
 import us.ihmc.utilities.MemoryTools;
 
 import com.yobotics.simulationconstructionset.examples.FallingBrickRobot;
@@ -17,20 +20,22 @@ public class SimulationConstructionSetMemoryReclamationTest
    {
       boolean useRobot = false;
       int numberOfTests = 3;
+      boolean createMovie = false;
       int usedMemoryMBAtStart = MemoryTools.getCurrentMemoryUsageInMB();
-      int usedMemoryMBAtEnd = testOneAndReturnUsedMemoryMB(useRobot, numberOfTests);
+      int usedMemoryMBAtEnd = testOneAndReturnUsedMemoryMB(useRobot, numberOfTests, createMovie);
       int usedMemoryMB = usedMemoryMBAtEnd - usedMemoryMBAtStart;
 
       assertTrue("usedMemoryMB = " + usedMemoryMB, usedMemoryMB < 50);
    }
-   
+
    @Test
    public void testMemoryReclamationForSCSWithARobot()
    {
       boolean useRobot = true;
       int numberOfTests = 1;
+      boolean createMovie = false;
       int usedMemoryMBAtStart = MemoryTools.getCurrentMemoryUsageInMB();
-      int usedMemoryMBAtEnd = testOneAndReturnUsedMemoryMB(useRobot, numberOfTests);
+      int usedMemoryMBAtEnd = testOneAndReturnUsedMemoryMB(useRobot, numberOfTests, createMovie);
       int usedMemoryMB = usedMemoryMBAtEnd - usedMemoryMBAtStart;
 
       Frame[] frames = Frame.getFrames();
@@ -39,10 +44,7 @@ public class SimulationConstructionSetMemoryReclamationTest
          System.out.println("Number of Frames is still " + frames.length);
          for (Frame frame : frames)
          {
-            System.out.println(frame.getTitle() + ": " + frame);
-
-            //            frame.setVisible(false);
-            //            frame.dispose();
+            System.out.println("Frame " + frame.getTitle() + ": " + frame);
          }
       }
       frames = null;
@@ -50,14 +52,44 @@ public class SimulationConstructionSetMemoryReclamationTest
       assertTrue("usedMemoryMB = " + usedMemoryMB, usedMemoryMB < 50);
    }
 
-   private int testOneAndReturnUsedMemoryMB(boolean useARobot, int numberOfTests)
+   @Ignore
+   @Test
+   public void testMemoryReclamationForSCSWithARobotAndMovie()
+   {
+      boolean useRobot = true;
+      int numberOfTests = 1;
+      boolean createMovie = true;
+      int usedMemoryMBAtStart = MemoryTools.getCurrentMemoryUsageInMB();
+      int usedMemoryMBAtEnd = testOneAndReturnUsedMemoryMB(useRobot, numberOfTests, createMovie);
+      int usedMemoryMB = usedMemoryMBAtEnd - usedMemoryMBAtStart;
+
+      Frame[] frames = Frame.getFrames();
+      if (frames != null)
+      {
+         System.out.println("Number of Frames is still " + frames.length);
+         for (Frame frame : frames)
+         {
+            System.out.println("Frame " + frame.getTitle() + ": " + frame);
+         }
+      }
+      frames = null;
+
+//      assertTrue("usedMemoryMB = " + usedMemoryMB, usedMemoryMB < 50);
+   }
+
+   private int testOneAndReturnUsedMemoryMB(boolean useARobot, int numberOfTests, boolean createMovie)
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB("testOneAndReturnUsedMemoryMB start:");
 
       for (int i = 0; i < numberOfTests; i++)
       {
          SimulationConstructionSet scs = createAndStartSimulationConstructionSet(useARobot);
-         sleep(200000); //2000
+         sleep(2000);
+         if(createMovie)
+         {
+            createMovieAndDataWithDateTimeClassMethod("/SimulationConstructionSet/resources/", "BrettRobot2000", scs, 2);
+            System.err.println("Movie creation successful");
+         }
          scs.closeAndDispose();
          MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB("testOneAndReturnUsedMemoryMB final: ");
       }
@@ -96,9 +128,52 @@ public class SimulationConstructionSetMemoryReclamationTest
 
       while (useARobot && !scs.isSimulationThreadUpAndRunning())
       {
-         sleep(10000); //100
+         sleep(100);
       }
       return scs;
+   }
+   
+   private static File[] createMovieAndDataWithDateTimeClassMethod(String rootDirectory, String simplifiedRobotModelName, SimulationConstructionSet scs, int stackDepthForRelevantCallingMethod)
+   {
+      String dateString = DateTools.getDateString();
+      String directoryName = rootDirectory + dateString + "/";
+
+      File directory = new File(directoryName);
+      System.err.println(directory.getName());
+      if (!directory.exists())
+      {
+         boolean result = directory.mkdir();
+         System.err.println("DIRECTORY CREATED: " + result);
+      }
+
+//      String timeString = DateTools.getTimeString();
+//      String filenameStart = dateString + "_" + timeString;
+//      if (!simplifiedRobotModelName.equals(""))
+//      {
+//         filenameStart += "_" + simplifiedRobotModelName;
+//      }
+//
+//      String movieFilename = filenameStart + ".mp4";
+//
+//      File movieFile;
+//      movieFile = scs.createMovie(directoryName + movieFilename);
+//
+//      String dataFilename = directoryName + filenameStart + ".data.gz";
+//
+//      File dataFile = new File(dataFilename);
+//      try
+//      {
+//         scs.writeData(dataFile);
+//      } catch (Exception e)
+//      {
+//         System.err.println("Error in writing data file in BambooTools.createMovieAndDataWithDateTimeClassMethod()");
+//         e.printStackTrace();
+//      }
+//
+//      scs.gotoOutPointNow();
+      return new File[]{directory};
+
+//      return new File[]{directory, movieFile, dataFile};
    }
 
    private void sleep(long sleepMillis)
