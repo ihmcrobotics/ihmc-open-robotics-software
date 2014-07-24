@@ -88,11 +88,13 @@ public class ModbusTCPConnection
 			{
 				//unexpected close of connection
 				System.err.println("connection unexpectly closed");
+				return null;
 			}
 			else
 			{
 				//response too short
 				System.err.println("response too short");
+				return null;
 			}
 		}
 		

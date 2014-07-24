@@ -526,7 +526,7 @@ public final class RobotiqHandInterface
 		sendMotionRequest();
 		do
 		{
-			Thread.sleep(200);
+			Thread.sleep(300);
 			status = this.getStatus();
 		}while((status[GRIPPER_STATUS] & MOTION_STATUS_MASK) == IN_MOTION);
 	}
