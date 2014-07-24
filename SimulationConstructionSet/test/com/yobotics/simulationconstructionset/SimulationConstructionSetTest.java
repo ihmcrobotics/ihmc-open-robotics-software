@@ -95,17 +95,19 @@ public class SimulationConstructionSetTest
       // Go to In/out points, step through data. Add KeyPoints, Verify at the expected indices
       testFixture.clickGotoInPointButton();
 
-      ThreadTools.sleep(1000);
+      ThreadTools.sleep(100);
 
       int index = scs.getIndex();
       int inPoint = scs.getInPoint();
       assertEquals(index, inPoint);
       
+      // Do some stepping forwards and putting in key points:
       int stepsForward = 8;
       for (int i=0; i<stepsForward; i++)
       {
          testFixture.clickStepForwardButton();
       }
+      ThreadTools.sleep(100);
       index = scs.getIndex();
       assertEquals(stepsForward, index);
       testFixture.clickAddKeyPointButton();
@@ -114,6 +116,7 @@ public class SimulationConstructionSetTest
       {
          testFixture.clickStepForwardButton();
       }
+      ThreadTools.sleep(100);
       index = scs.getIndex();
       assertEquals(2*stepsForward, index);
       testFixture.clickAddKeyPointButton();
@@ -122,6 +125,7 @@ public class SimulationConstructionSetTest
       {
          testFixture.clickStepForwardButton();
       }
+      ThreadTools.sleep(100);
       index = scs.getIndex();
       assertEquals(3*stepsForward, index);
       testFixture.clickAddKeyPointButton();
@@ -137,10 +141,12 @@ public class SimulationConstructionSetTest
       testFixture.clickToggleKeyModeButton();
       
       testFixture.clickStepForwardButton();
+      ThreadTools.sleep(100);
       index = scs.getIndex();
       assertEquals(stepsForward, index);
       
       testFixture.clickStepForwardButton();
+      ThreadTools.sleep(100);
       index = scs.getIndex();
       assertEquals(2*stepsForward, index);
       
@@ -148,6 +154,7 @@ public class SimulationConstructionSetTest
       testFixture.clickAddKeyPointButton();
       
       testFixture.clickStepBackwardButton();
+      ThreadTools.sleep(100);
       index = scs.getIndex();
       assertEquals(stepsForward, index);
       
@@ -156,16 +163,19 @@ public class SimulationConstructionSetTest
       testFixture.clickSetOutPointButton();
 
       testFixture.clickGotoInPointButton();
+      ThreadTools.sleep(100);
       index = scs.getIndex();
       assertEquals(stepsForward, index);
       
       testFixture.clickGotoOutPointButton();
+      ThreadTools.sleep(100);
       index = scs.getIndex();
       assertEquals(3*stepsForward, index);
       testFixture.clickGotoInPointButton();
 
       testFixture.clickToggleKeyModeButton();
       testFixture.clickStepForwardButton();
+      ThreadTools.sleep(100);
       index = scs.getIndex();
       assertEquals(stepsForward+1, index);
       
