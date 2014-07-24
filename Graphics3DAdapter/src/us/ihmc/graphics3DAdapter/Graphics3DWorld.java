@@ -35,6 +35,8 @@ public class Graphics3DWorld
    private void start()
    {
       graphics3dAdapter.addRootNode(rootNode);
+
+      viewportAdapter = Graphics3DAdapterTools.createViewport(graphics3dAdapter);
    }
 
    public void fixCameraOnNode(Graphics3DNode node)
@@ -66,17 +68,33 @@ public class Graphics3DWorld
       }
    }
 
+   private void checkViewportIsNotNull()
+   {
+      if (viewportAdapter == null)
+      {
+         try
+         {
+            throw new Exception("Viewport adapter is null. Call startWithGui or startWithoutGui first.");
+         }
+         catch (Exception e)
+         {
+            e.printStackTrace();
+         }
+      }
+   }
+
    public void startWithGui(double camX, double camY, double camZ, int windowWidth, int windowHeight)
    {
       start();
 
-      viewportAdapter = Graphics3DAdapterTools.createViewport(graphics3dAdapter);
       cameraController = Graphics3DAdapterTools.createNewWindow(graphics3dAdapter, viewportAdapter, worldName, windowWidth, windowHeight,
               new Vector3d(camX, camY, camZ));
    }
 
    public void addFrameListener(Graphics3DFrameListener frameListener)
    {
+      checkViewportIsNotNull();
+
       viewportAdapter.addFrameListener(frameListener);
    }
 
