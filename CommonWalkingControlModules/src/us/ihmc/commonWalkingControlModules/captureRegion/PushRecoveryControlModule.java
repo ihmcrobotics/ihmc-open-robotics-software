@@ -29,6 +29,7 @@ import us.ihmc.utilities.math.geometry.LineSegment2d;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
+import us.ihmc.utilities.math.trajectories.providers.PositionProvider;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -38,7 +39,6 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameLine2d;
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
-import com.yobotics.simulationconstructionset.util.trajectory.PositionProvider;
 
 public class PushRecoveryControlModule
 {

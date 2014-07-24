@@ -5,6 +5,7 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
+import us.ihmc.utilities.math.trajectories.providers.PositionProvider;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -14,7 +15,6 @@ import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
-import com.yobotics.simulationconstructionset.util.trajectory.PositionProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryParametersProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryWaypointGenerationMethod;
