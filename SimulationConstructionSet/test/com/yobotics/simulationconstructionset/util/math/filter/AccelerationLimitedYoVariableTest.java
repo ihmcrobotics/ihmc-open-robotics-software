@@ -1,6 +1,9 @@
 package com.yobotics.simulationconstructionset.util.math.filter;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
+import java.util.Random;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -16,6 +19,9 @@ import com.yobotics.simulationconstructionset.util.math.functionGenerator.YoFunc
 
 public class AccelerationLimitedYoVariableTest
 {
+   public static double epsilon = 1e-10;
+   private final Random random = new Random(3456456456456L);
+   
    @Test
    public void testAccelerationLimitedYoVariable()
    {
@@ -76,6 +82,64 @@ public class AccelerationLimitedYoVariableTest
       assertEquals(name, accelerationLimitedYoVariable.getName());
    }
    
+   @Test
+   public void testSetMaximumAcceleration()
+   {
+      SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("test"));
+      double dt = 0.006;
+
+      scs.startOnAThread();
+
+      YoVariableRegistry registry = scs.getRootRegistry();
+      DoubleYoVariable time = new DoubleYoVariable("time", registry);
+      DoubleYoVariable maxRate = new DoubleYoVariable("maxRate", registry);
+      DoubleYoVariable maxAcceleration = new DoubleYoVariable("maxAcceleration", registry);
+      DoubleYoVariable variable = new DoubleYoVariable("variable", registry);
+      String name = "accelerationLimitedYoVariable";
+
+      AccelerationLimitedYoVariable accelerationLimitedYoVariable = new AccelerationLimitedYoVariable(name, registry, maxRate, maxAcceleration, dt);
+      double maximumAcceleration = random.nextDouble();
+      accelerationLimitedYoVariable.setMaximumAcceleration(maximumAcceleration);
+//      assertEquals(maximumAcceleration, accelerationLimitedYoVariable, epsilon);
+   }
+   
+   @Test
+   public void testSetMaximumRate()
+   {
+      
+   }
+   
+   @Test
+   public void testSetGainsByPolePlacement()
+   {
+      
+   }
+   
+   @Test
+   public void testUpdate()
+   {
+      
+   }
+   
+   @Test
+   public void testUpdate_double()
+   {
+      
+   }
+   
+   @Test
+   public void testInitialize()
+   {
+      
+   }
+   
+   @Test
+   public void testReset()
+   {
+      
+   }
+   
+   @Ignore
    @Test
    public void testDump()
    {
