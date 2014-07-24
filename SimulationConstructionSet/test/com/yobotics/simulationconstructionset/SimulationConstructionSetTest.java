@@ -66,17 +66,27 @@ public class SimulationConstructionSetTest
       testFixture.deleteSearchText();
       testFixture.enterSearchText("q_");
       
-//   
-
-
+      testFixture.selectVariableInSearchTab("q_x");
+      testFixture.clickRemoveEmptyGraphButton();
       testFixture.clickNewGraphButton();
+      testFixture.middleClickInEmptyGraph();
+      
+      testFixture.clickNewGraphButton();
+      testFixture.clickNewGraphButton();
+      testFixture.selectVariableInSearchTab("q_z");
+      testFixture.middleClickInNthGraph(2);
+      
       testFixture.clickSimulateButton();
-
-      ThreadTools.sleep(2000);
+      ThreadTools.sleep(500);
       testFixture.clickStopButton();
       testFixture.clickPlayButton();
+      
+      
+      testFixture.removeVariableFromNthGraph("q_z", 2);
+      testFixture.clickRemoveEmptyGraphButton();
 
-      ThreadTools.sleep(2000);
+
+      ThreadTools.sleep(500);
       testFixture.clickStopButton();
 
       testFixture.clickGotoInPointButton();
@@ -86,8 +96,41 @@ public class SimulationConstructionSetTest
       int index = scs.getIndex();
       int inPoint = scs.getInPoint();
       assertEquals(index, inPoint);
+      
+      int stepsForward = 8;
+      for (int i=0; i<stepsForward; i++)
+      {
+         testFixture.clickStepForwardButton();
+      }
+      index = scs.getIndex();
+      assertEquals(stepsForward, index);
+      testFixture.clickAddKeyPointButton();
+      
+      for (int i=0; i<stepsForward; i++)
+      {
+         testFixture.clickStepForwardButton();
+      }
+      index = scs.getIndex();
+      assertEquals(2*stepsForward, index);
+      testFixture.clickAddKeyPointButton();
 
-
+      testFixture.clickZoomInButton();
+      testFixture.clickZoomInButton();
+      testFixture.clickZoomInButton();
+      testFixture.clickZoomInButton();
+      testFixture.clickZoomOutButton();
+      
+      
+      testFixture.clickGotoInPointButton();
+      testFixture.clickToggleKeyModeButton();
+      
+      testFixture.clickStepForwardButton();
+      index = scs.getIndex();
+      assertEquals(stepsForward, index);
+      
+      testFixture.clickStepForwardButton();
+      index = scs.getIndex();
+      assertEquals(2*stepsForward, index);
       
       
       testFixture.closeAndDispose();
