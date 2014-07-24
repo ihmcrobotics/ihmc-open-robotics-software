@@ -10,7 +10,6 @@ import us.ihmc.commonWalkingControlModules.trajectories.ConstantPositionTrajecto
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.ProviderBasedConstantOrientationTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.trajectories.SE3ConfigurationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePositionTrajectoryGenerator;
 import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.manipulation.ManipulableToroid;
 import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.manipulation.states.toroidManipulation.states.HandControlState;
@@ -27,6 +26,7 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.trajectories.providers.ConstantDoubleProvider;
+import us.ihmc.utilities.math.trajectories.providers.SE3ConfigurationProvider;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
