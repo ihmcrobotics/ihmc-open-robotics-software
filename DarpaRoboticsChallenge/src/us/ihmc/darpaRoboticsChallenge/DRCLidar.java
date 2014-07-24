@@ -103,7 +103,7 @@ public class DRCLidar
       }
 
       @Override
-      public void scan(float[] scan, Transform3D lidarTransform, double time, GPULidar gpuLidar)
+      public void scan(float[] scan, Transform3D lidarTransform, double time)
       {
          Transform3D transform = new Transform3D(lidarTransform);
          final LidarScan lidarScan = new LidarScan(new LidarScanParameters(lidarScanParameters, TimeTools.secondsToNanoSeconds(time)), transform, transform,
@@ -142,7 +142,7 @@ public class DRCLidar
       }
 
       @Override
-      public void scan(float[] scan, Transform3D lidarTransform, double time, GPULidar gpuLidar)
+      public void scan(float[] scan, Transform3D lidarTransform, double time)
       {
          Transform3D transform = new Transform3D(lidarTransform);
          final LidarScan lidarScan = new LidarScan(new LidarScanParameters(lidarScanParameters, TimeTools.secondsToNanoSeconds(time)), transform, transform,
