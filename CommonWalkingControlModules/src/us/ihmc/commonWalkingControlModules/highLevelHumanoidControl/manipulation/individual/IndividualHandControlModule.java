@@ -31,7 +31,6 @@ import us.ihmc.commonWalkingControlModules.trajectories.OneDoFJointQuinticTrajec
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePositionTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.trajectories.YoSE3ConfigurationProvider;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -56,7 +55,8 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
-import com.yobotics.simulationconstructionset.util.trajectory.YoVariableDoubleProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.provider.YoSE3ConfigurationProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.provider.YoVariableDoubleProvider;
 
 public class IndividualHandControlModule
 {

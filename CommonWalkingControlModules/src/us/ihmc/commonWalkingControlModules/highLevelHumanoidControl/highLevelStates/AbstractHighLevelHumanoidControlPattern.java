@@ -40,7 +40,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameQuaternion;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.trajectory.CubicPolynomialTrajectoryGenerator;
-import com.yobotics.simulationconstructionset.util.trajectory.YoVariableDoubleProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.provider.YoVariableDoubleProvider;
 
 public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelBehavior
 {

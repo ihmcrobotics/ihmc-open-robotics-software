@@ -4,7 +4,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.trajectories.SettableOrientationProvider;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -17,6 +16,7 @@ import us.ihmc.utilities.screwTheory.ScrewTools;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.trajectory.provider.YoQuaternionProvider;
 
 public class HeadOrientationManager
 {
@@ -31,8 +31,8 @@ public class HeadOrientationManager
    private final BooleanYoVariable isTrackingOrientation;
    
    private final ReferenceFrame headOrientationExpressedInFrame;
-   private final SettableOrientationProvider initialOrientationProvider;
-   private final SettableOrientationProvider finalOrientationProvider;
+   private final YoQuaternionProvider initialOrientationProvider;
+   private final YoQuaternionProvider finalOrientationProvider;
    private int jacobianId = -1;
 
    public HeadOrientationManager(MomentumBasedController momentumBasedController, HeadOrientationControlModule headOrientationControlModule,
@@ -52,8 +52,8 @@ public class HeadOrientationManager
          isTrackingOrientation = new BooleanYoVariable("isTrackingOrientation", registry);
          DoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(trajectoryTime);
 //         initialOrientationProvider = new CurrentOrientationProvider(headOrientationExpressedInFrame, headOrientationControlModule.getHead().getBodyFixedFrame());
-         initialOrientationProvider = new SettableOrientationProvider("headInitialOrientation", headOrientationExpressedInFrame, registry);
-         finalOrientationProvider = new SettableOrientationProvider("headFinalOrientation", headOrientationExpressedInFrame, registry);
+         initialOrientationProvider = new YoQuaternionProvider("headInitialOrientation", headOrientationExpressedInFrame, registry);
+         finalOrientationProvider = new YoQuaternionProvider("headFinalOrientation", headOrientationExpressedInFrame, registry);
          orientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator("headOrientation", headOrientationExpressedInFrame,
                trajectoryTimeProvider, initialOrientationProvider, finalOrientationProvider, registry);
          orientationTrajectoryGenerator.setContinuouslyUpdateFinalOrientation(true);

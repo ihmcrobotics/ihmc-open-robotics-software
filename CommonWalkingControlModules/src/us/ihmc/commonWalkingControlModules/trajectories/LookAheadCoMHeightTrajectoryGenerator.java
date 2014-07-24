@@ -28,7 +28,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.trajectory.CubicPolynomialTrajectoryGenerator;
-import com.yobotics.simulationconstructionset.util.trajectory.YoVariableDoubleProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.provider.YoVariableDoubleProvider;
 
 public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajectoryGenerator
 {

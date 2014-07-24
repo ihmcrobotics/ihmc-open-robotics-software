@@ -35,7 +35,7 @@ import com.yobotics.simulationconstructionset.util.GainCalculator;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
-import com.yobotics.simulationconstructionset.util.trajectory.YoVelocityProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.provider.YoVelocityProvider;
 
 public class FootControlModule
 {

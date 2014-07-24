@@ -46,7 +46,6 @@ import us.ihmc.commonWalkingControlModules.trajectories.ContactStatesAndUpcoming
 import us.ihmc.commonWalkingControlModules.trajectories.FlatThenPolynomialCoMHeightTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.trajectories.SettableOrientationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.TransferTimeCalculationProvider;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -86,6 +85,7 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionAction;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
+import com.yobotics.simulationconstructionset.util.trajectory.provider.YoQuaternionProvider;
 
 public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoidControlPattern
 {
@@ -164,8 +164,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final DoubleYoVariable userDesiredPelvisRoll = new DoubleYoVariable("userDesiredPelvisRoll", registry);
    private final BooleanYoVariable userSetDesiredPelvis = new BooleanYoVariable("userSetDesiredPelvis", registry);
 
-   private final SettableOrientationProvider initialPelvisOrientationProvider;
-   private final SettableOrientationProvider finalPelvisOrientationProvider;
+   private final YoQuaternionProvider initialPelvisOrientationProvider;
+   private final YoQuaternionProvider finalPelvisOrientationProvider;
    private final OrientationTrajectoryGenerator pelvisOrientationTrajectoryGenerator;
 
    private final SwingTimeCalculationProvider swingTimeCalculationProvider;
@@ -335,8 +335,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       this.centerOfMassHeightTrajectoryGenerator.attachWalkOnToesManager(feetManager.getWalkOnTheEdgesManager());
 
-      initialPelvisOrientationProvider = new SettableOrientationProvider("initialPelvis", worldFrame, registry);
-      finalPelvisOrientationProvider = new SettableOrientationProvider("finalPelvis", worldFrame, registry);
+      initialPelvisOrientationProvider = new YoQuaternionProvider("initialPelvis", worldFrame, registry);
+      finalPelvisOrientationProvider = new YoQuaternionProvider("finalPelvis", worldFrame, registry);
       this.pelvisOrientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator("pelvis", worldFrame, swingTimeCalculationProvider,
             initialPelvisOrientationProvider, finalPelvisOrientationProvider, registry);
 

@@ -19,7 +19,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.trajectories.PoseTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.trajectories.YoOrientationProvider;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.plotting.Artifact;
 import us.ihmc.robotSide.RobotSide;
@@ -60,7 +59,8 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPositi
 import com.yobotics.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePose;
-import com.yobotics.simulationconstructionset.util.trajectory.YoPositionProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.provider.YoOrientationProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.provider.YoPositionProvider;
 
 /**
  * Simple controller using an inverse dynamics calculator. Mainly used to check gravity compensation, and simple controls while having the robot hanging in the air.
