@@ -25,7 +25,6 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisLoadBear
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.OrientationInterpolationTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.trajectories.SettableOrientationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePositionTrajectoryGenerator;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -45,6 +44,7 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.VariableChangedListener;
 import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.util.GainCalculator;
+import com.yobotics.simulationconstructionset.util.trajectory.provider.YoQuaternionProvider;
 
 public class CarIngressEgressController extends AbstractHighLevelHumanoidControlPattern
 {
@@ -68,7 +68,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
    private final DesiredChestOrientationProvider chestOrientationProvider;
    private final ReferenceFrame chestPositionControlFrame;
-   private final SettableOrientationProvider finalDesiredChestOrientation, initialDesiredChestOrientation;
+   private final YoQuaternionProvider finalDesiredChestOrientation, initialDesiredChestOrientation;
    private final OrientationInterpolationTrajectoryGenerator chestOrientationTrajectoryGenerator;
    private double chestTrajectoryStartTime = 0.0;
 
@@ -160,8 +160,8 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       // Set up the chest trajectory generator
       this.chestOrientationProvider = variousWalkingProviders.getDesiredChestOrientationProvider();
       chestPositionControlFrame = fullRobotModel.getChest().getParentJoint().getFrameAfterJoint();
-      initialDesiredChestOrientation = new SettableOrientationProvider("initialDesiredChest", worldFrame, registry);
-      finalDesiredChestOrientation = new SettableOrientationProvider("finalDesiredChest", worldFrame, registry);
+      initialDesiredChestOrientation = new YoQuaternionProvider("initialDesiredChest", worldFrame, registry);
+      finalDesiredChestOrientation = new YoQuaternionProvider("finalDesiredChest", worldFrame, registry);
       chestOrientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator("chest", worldFrame, trajectoryTimeProvider,
             initialDesiredChestOrientation, finalDesiredChestOrientation, registry);
 

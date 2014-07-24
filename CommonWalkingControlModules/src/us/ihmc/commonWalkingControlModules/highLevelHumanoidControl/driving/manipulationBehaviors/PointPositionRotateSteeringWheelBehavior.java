@@ -23,7 +23,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.EuclideanPositionController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
-import com.yobotics.simulationconstructionset.util.trajectory.YoVariableDoubleProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.provider.YoVariableDoubleProvider;
 
 /**
  * @author twan

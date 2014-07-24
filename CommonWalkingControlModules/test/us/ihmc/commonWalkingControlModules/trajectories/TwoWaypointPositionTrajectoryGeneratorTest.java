@@ -23,8 +23,8 @@ import us.ihmc.utilities.math.trajectories.providers.VectorProvider;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
-import com.yobotics.simulationconstructionset.util.trajectory.YoPositionProvider;
-import com.yobotics.simulationconstructionset.util.trajectory.YoVariableDoubleProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.provider.YoPositionProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.provider.YoVariableDoubleProvider;
 
 public class TwoWaypointPositionTrajectoryGeneratorTest {
 

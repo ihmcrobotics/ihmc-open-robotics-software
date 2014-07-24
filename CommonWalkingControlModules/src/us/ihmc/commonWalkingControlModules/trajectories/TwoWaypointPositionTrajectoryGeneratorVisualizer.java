@@ -27,9 +27,9 @@ import com.yobotics.simulationconstructionset.util.inputdevices.SliderBoardConfi
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import com.yobotics.simulationconstructionset.util.trajectory.YoPositionProvider;
-import com.yobotics.simulationconstructionset.util.trajectory.YoVariableDoubleProvider;
-import com.yobotics.simulationconstructionset.util.trajectory.YoVelocityProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.provider.YoPositionProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.provider.YoVariableDoubleProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.provider.YoVelocityProvider;
 
 public class TwoWaypointPositionTrajectoryGeneratorVisualizer
 {
