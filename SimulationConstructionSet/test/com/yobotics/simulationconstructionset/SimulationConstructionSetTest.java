@@ -54,10 +54,9 @@ public class SimulationConstructionSetTest
       scs.setFrameMaximized();
       scs.startOnAThread();
       
-      
       SimulationGUITestFixture testFixture = new SimulationGUITestFixture(scs);
       
-      
+      // Search for variables, change their values, and plot them:
       testFixture.selectNameSpaceTab();
       ThreadTools.sleep(1000);
       
@@ -76,19 +75,24 @@ public class SimulationConstructionSetTest
       testFixture.selectVariableInSearchTab("q_z");
       testFixture.middleClickInNthGraph(2);
       
+      testFixture.selectVariableAndSetValueInSearchTab("q_z", 1.31);
+      DoubleYoVariable q_z = (DoubleYoVariable) scs.getVariable("q_z");
+      assertEquals(1.31, q_z.getDoubleValue(), 1e-9);
+      
+      // Simulate and replay
       testFixture.clickSimulateButton();
       ThreadTools.sleep(500);
       testFixture.clickStopButton();
       testFixture.clickPlayButton();
       
-      
+      // Remove variables from graphs:
       testFixture.removeVariableFromNthGraph("q_z", 2);
       testFixture.clickRemoveEmptyGraphButton();
-
-
+      
       ThreadTools.sleep(500);
       testFixture.clickStopButton();
 
+      // Go to In/out points, step through data. Add KeyPoints, Verify at the expected indices
       testFixture.clickGotoInPointButton();
 
       ThreadTools.sleep(1000);
@@ -113,13 +117,21 @@ public class SimulationConstructionSetTest
       index = scs.getIndex();
       assertEquals(2*stepsForward, index);
       testFixture.clickAddKeyPointButton();
+      
+      for (int i=0; i<stepsForward; i++)
+      {
+         testFixture.clickStepForwardButton();
+      }
+      index = scs.getIndex();
+      assertEquals(3*stepsForward, index);
+      testFixture.clickAddKeyPointButton();
 
+      // Zoom in and out
       testFixture.clickZoomInButton();
       testFixture.clickZoomInButton();
       testFixture.clickZoomInButton();
       testFixture.clickZoomInButton();
       testFixture.clickZoomOutButton();
-      
       
       testFixture.clickGotoInPointButton();
       testFixture.clickToggleKeyModeButton();
@@ -132,6 +144,30 @@ public class SimulationConstructionSetTest
       index = scs.getIndex();
       assertEquals(2*stepsForward, index);
       
+      // Toggle a keypoint off:
+      testFixture.clickAddKeyPointButton();
+      
+      testFixture.clickStepBackwardButton();
+      index = scs.getIndex();
+      assertEquals(stepsForward, index);
+      
+      testFixture.clickSetInPointButton();
+      testFixture.clickStepForwardButton();
+      testFixture.clickSetOutPointButton();
+
+      testFixture.clickGotoInPointButton();
+      index = scs.getIndex();
+      assertEquals(stepsForward, index);
+      
+      testFixture.clickGotoOutPointButton();
+      index = scs.getIndex();
+      assertEquals(3*stepsForward, index);
+      testFixture.clickGotoInPointButton();
+
+      testFixture.clickToggleKeyModeButton();
+      testFixture.clickStepForwardButton();
+      index = scs.getIndex();
+      assertEquals(stepsForward+1, index);
       
       testFixture.closeAndDispose();
       scs.closeAndDispose();
