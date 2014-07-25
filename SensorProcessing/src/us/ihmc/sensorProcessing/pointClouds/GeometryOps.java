@@ -1,20 +1,135 @@
 package us.ihmc.sensorProcessing.pointClouds;
 
+import bubo.io.text.ReadCsv;
+import bubo.io.text.ReadCsvObject;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 import com.thoughtworks.xstream.XStream;
 import georegression.geometry.RotationMatrixGenerator;
+import georegression.struct.point.Point3D_F64;
 import georegression.struct.se.Se3_F64;
 import georegression.struct.so.Quaternion_F64;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Peter Abeles
  */
 public class GeometryOps {
+
+   public static List<Point3D_F64> loadCloud( String fileName )  {
+      InputStream in = null;
+      try {
+         in = new FileInputStream(fileName);
+      } catch (FileNotFoundException e) {
+         throw new RuntimeException(e);
+      }
+      ReadCsvObject<Point3D_F64> reader = new ReadCsvObject<Point3D_F64>(in, Point3D_F64.class,"x","y","z");
+
+      List<Point3D_F64> cloud = new ArrayList<Point3D_F64>();
+
+      while( true ) {
+         try {
+            Point3D_F64 p = reader.nextObject(null);
+            if (p == null)
+               break;
+            else {
+               cloud.add(p);
+            }
+         } catch (IOException e) {
+            e.printStackTrace();
+         }
+      }
+
+      return cloud;
+   }
+
+   public static List<List<Point3D_F64>> loadScanLines( String fileName )  {
+      InputStream in = null;
+      try {
+         in = new FileInputStream(fileName);
+      } catch (FileNotFoundException e) {
+         throw new RuntimeException(e);
+      }
+
+      ReadCsv reader = new ReadCsv(in);
+      reader.setComment('#');
+
+      List<List<Point3D_F64>> ret = new ArrayList<List<Point3D_F64>>();
+      while( true ) {
+         try {
+            List<String> words = reader.extractWords();
+            if( words == null )
+               break;
+            int total = Integer.parseInt(words.get(0));
+            List<Point3D_F64> list = new ArrayList<Point3D_F64>();
+            if( total*3+1 != words.size() ) {
+               throw new RuntimeException("Unexpected number of words");
+            } else {
+               for (int i = 1; i < words.size(); i += 3 ) {
+                  double x = Double.parseDouble(words.get(i));
+                  double y = Double.parseDouble(words.get(i+1));
+                  double z = Double.parseDouble(words.get(i+2));
+                  list.add( new Point3D_F64(x,y,z));
+               }
+            }
+            ret.add(list);
+         } catch (IOException e) {
+            throw new RuntimeException(e);
+         }
+      }
+
+      return ret;
+   }
+
+   public static void saveCsv( Se3_F64 a , String fileName ) {
+      try {
+         PrintStream out = new PrintStream(fileName);
+
+         out.printf("%.12f %.12f %.12f %.12f\n",a.R.get(0,0),a.R.get(0,1),a.R.get(0,2),a.T.x);
+         out.printf("%.12f %.12f %.12f %.12f\n",a.R.get(1,0),a.R.get(1,1),a.R.get(1,2),a.T.y);
+         out.printf("%.12f %.12f %.12f %.12f\n",a.R.get(2,0),a.R.get(2,1),a.R.get(2,2),a.T.z);
+         out.println("0 0 0 1");
+         out.close();
+
+      } catch (FileNotFoundException e) {
+         throw new RuntimeException(e);
+      }
+   }
+
+   public static Se3_F64 loadCsvSe3( String fileName ) {
+      try {
+         ReadCsv reader = new ReadCsv(new FileInputStream(fileName));
+
+         Se3_F64 ret = new Se3_F64();
+
+         List<String> words = reader.extractWords();
+         ret.R.set(0,0, Double.parseDouble(words.get(0)));
+         ret.R.set(0,1, Double.parseDouble(words.get(1)));
+         ret.R.set(0,2, Double.parseDouble(words.get(2)));
+         ret.T.x =  Double.parseDouble(words.get(3));
+
+         words = reader.extractWords();
+         ret.R.set(1,0, Double.parseDouble(words.get(0)));
+         ret.R.set(1,1, Double.parseDouble(words.get(1)));
+         ret.R.set(1,2, Double.parseDouble(words.get(2)));
+         ret.T.y =  Double.parseDouble(words.get(3));
+
+         words = reader.extractWords();
+         ret.R.set(2,0, Double.parseDouble(words.get(0)));
+         ret.R.set(2,1, Double.parseDouble(words.get(1)));
+         ret.R.set(2,2, Double.parseDouble(words.get(2)));
+         ret.T.z = Double.parseDouble(words.get(3));
+
+         reader.getReader().close();
+         return ret;
+      } catch (IOException e) {
+         throw new RuntimeException(e);
+      }
+   }
 
    public static Transform convert( Se3_F64 input , Transform output ) {
       if( output == null )
