@@ -10,7 +10,7 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.CameraInfoReceiver
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.CameraLogger;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.RosCameraInfoReciever;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.RosCameraReceiver;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.DepthDataProcessor;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.DepthDataProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosNativeNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
