@@ -341,25 +341,27 @@ public final class RobotiqHandInterface
 	RobotiqHandInterface(String address)
 	{
 		this.address = address;
-		this.connect();
 	}
 	
-	public void connect()
+	public boolean connect()
 	{
 		try
 		{
 			connection = new ModbusTCPConnection(address,RobotiqHandParameters.PORT);
 			connected = true;
 		}
-		catch(UnknownHostException e)
+		catch(IOException e)
 		{
-		} catch (IOException e)
-		{
+			//should throw another exception that handles this better.
 		}
+		return connected;
 	}
 	
 	public void initialize()
 	{
+		if(!this.isConnected())
+			this.connect();
+			
 		status = this.getStatus();
 		
 		if(((status[GRIPPER_STATUS] & INITIALIZATON_MASK) == INITIALIZED) || (status[FAULT_STATUS] != NO_FAULT))
@@ -386,13 +388,13 @@ public final class RobotiqHandInterface
 		do
 		{
 			sendRequest(SET_REGISTERS,
-					REGISTER_START,
-					(byte)(initializedStatus | operationMode | commandedStatus),
-					(byte)(fingerControl | scissorControl),
-					(byte)0x00,	//reserved byte
-					(byte)position[FINGER_A], //all finger control
-					(byte)speed[FINGER_A],
-					(byte)force[FINGER_A]);
+						REGISTER_START,
+						(byte)(initializedStatus | operationMode | commandedStatus),
+						(byte)(fingerControl | scissorControl),
+						(byte)0x00,	//reserved byte
+						(byte)position[FINGER_A], //all finger control
+						(byte)speed[FINGER_A],
+						(byte)force[FINGER_A]);
 			do
 			{
 				ThreadTools.sleep(1000);
@@ -421,9 +423,9 @@ public final class RobotiqHandInterface
 		do
 		{
 			sendRequest(SET_REGISTERS,
-					REGISTER_START,
-					(byte)(initializedStatus | operationMode | commandedStatus),
-					(byte)(fingerControl | scissorControl));
+						REGISTER_START,
+						(byte)(initializedStatus | operationMode | commandedStatus),
+						(byte)(fingerControl | scissorControl));
 		
 			ThreadTools.sleep(100);
 			status = this.getStatus();
@@ -745,8 +747,8 @@ public final class RobotiqHandInterface
 	private byte[] getStatus() //gets the status of every register
 	{
 		return sendRequest(READ_REGISTERS,
-				REGISTER_START,
-				(byte)0x08);
+						   REGISTER_START,
+						   (byte)0x08);
 	}
 }
 
