@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar;
+package us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
