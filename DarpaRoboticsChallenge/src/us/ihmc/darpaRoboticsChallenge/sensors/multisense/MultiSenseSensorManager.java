@@ -32,14 +32,14 @@ public class MultiSenseSensorManager
    
    private final String sensorURI;
 
-   private DRCRobotCameraParameters cameraParamaters;
-   private DRCRobotLidarParameters lidarParamaters;
+   private final DRCRobotCameraParameters cameraParamaters;
+   private final DRCRobotLidarParameters lidarParamaters;
 
-   private DepthDataProcessor depthDataProcessor;
+   private final DepthDataProcessor depthDataProcessor;
 
-   private ROSNativeTransformTools rosTransformProvider;
+   private final ROSNativeTransformTools rosTransformProvider;
 
-   private DRCRobotPointCloudParameters stereoParamaters;
+   private final DRCRobotPointCloudParameters stereoParamaters;
 
    public MultiSenseSensorManager(DepthDataProcessor depthDataProcessor, ROSNativeTransformTools rosTransformProvider, RobotPoseBuffer sharedRobotPoseBuffer,
          RosMainNode rosMainNode, DRCNetworkProcessorNetworkingManager networkingManager, RosNativeNetworkProcessor rosNativeNetworkProcessor,
@@ -51,6 +51,7 @@ public class MultiSenseSensorManager
       this.lidarParamaters = lidarParamaters;
       this.stereoParamaters = stereoParamaters;
       this.sharedRobotPoseBuffer = sharedRobotPoseBuffer;
+      this.cameraParamaters = cameraParamaters;
       this.rosMainNode = rosMainNode;
       this.networkingManager = networkingManager;
       this.rosNativeNetworkProcessor = rosNativeNetworkProcessor;
