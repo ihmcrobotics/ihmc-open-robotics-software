@@ -177,9 +177,9 @@ public class DRCPosePlaybackDemo
             derivativeTerm.scale(-holdPelvisKv.getDoubleValue());
 
             pdControlOutput.add(proportionalTerm, derivativeTerm);
-
+            pdControlOutput.setZ(pdControlOutput.getZ() + robotWeight / efp_offsetFromRootJoint.size());
+            
             efp.setForce(pdControlOutput);
-            efp.fz.add(robotWeight / efp_offsetFromRootJoint.size());
 
             efp_positionViz.get(i).update();
          }

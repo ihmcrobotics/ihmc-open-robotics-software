@@ -2,9 +2,11 @@ package us.ihmc.commonWalkingControlModules.calculators;
 
 import java.util.ArrayList;
 
+import javax.vecmath.Vector3d;
+
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -100,8 +102,9 @@ public class GroundReactionTorqueCalculator
          vectorToContactPoint.sub(ankleOrigin);
 
 
-         FrameVector groundReactionForce = new FrameVector(worldFrame, groundContactPoint.fx.getDoubleValue(), groundContactPoint.fy.getDoubleValue(),
-                                              groundContactPoint.fz.getDoubleValue());
+         Vector3d force = new Vector3d();
+         groundContactPoint.getForce(force);
+         FrameVector groundReactionForce = new FrameVector(worldFrame, force);
 
          groundReactionForce.changeFrame(ankleZupFrame);
 
