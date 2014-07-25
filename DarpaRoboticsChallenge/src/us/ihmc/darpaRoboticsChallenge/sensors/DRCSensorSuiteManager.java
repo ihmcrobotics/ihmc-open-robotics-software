@@ -1,7 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.sensors;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.DepthDataFilter;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.DepthDataFilter;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
 import us.ihmc.utilities.net.LocalObjectCommunicator;

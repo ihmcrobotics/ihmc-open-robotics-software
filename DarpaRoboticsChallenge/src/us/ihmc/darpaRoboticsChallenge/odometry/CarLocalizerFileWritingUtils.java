@@ -16,7 +16,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.lidar.LidarDataRecorder;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.LidarDataRecorder;
 
 public class CarLocalizerFileWritingUtils
 {
