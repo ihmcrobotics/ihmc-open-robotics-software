@@ -13,7 +13,7 @@ import com.yobotics.simulationconstructionset.examples.FallingBrickRobot;
 
 public class SimulationConstructionSetMemoryReclamationTest
 {
-   private static final boolean DEBUG = false;
+   private static final boolean DEBUG = true;
 
    @Test
    public void testMemoryReclamationForSCSWithoutARobot()
@@ -48,7 +48,7 @@ public class SimulationConstructionSetMemoryReclamationTest
    public void testMemoryReclamationForSCSWithARobotAndMovie()
    {
       boolean useRobot = true;
-      int numberOfTests = 2;
+      int numberOfTests = 10;
       boolean createMovie = true;
       int usedMemoryMBAtStart = MemoryTools.getCurrentMemoryUsageInMB();
       int usedMemoryMBAtEnd = testOneAndReturnUsedMemoryMB(useRobot, numberOfTests, createMovie);
@@ -66,7 +66,7 @@ public class SimulationConstructionSetMemoryReclamationTest
       for (int i = 0; i < numberOfTests; i++)
       {
          SimulationConstructionSet scs = createAndStartSimulationConstructionSet(useARobot);
-         scs.simulate(1.0);
+         scs.simulate(2.0);
          
          sleep(2000);
          if (createMovie)
