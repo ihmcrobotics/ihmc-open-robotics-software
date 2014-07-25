@@ -80,7 +80,7 @@ public class MultiSenseSensorManager
    
    private void registerLidarReceivers()
    {
-      new MutlisenseLidarDataReceiver(depthDataProcessor, rosTransformProvider, ppsTimestampOffsetProvider, sharedRobotPoseBuffer, rosMainNode,
+      new MultisenseLidarDataReceiver(depthDataProcessor, rosTransformProvider, ppsTimestampOffsetProvider, sharedRobotPoseBuffer, rosMainNode,
             rosNativeNetworkProcessor, lidarParamaters);
    }
    
