@@ -86,7 +86,7 @@ public class SimulationConstructionSetMemoryReclamationTest
          if (createMovie)
          {
             createMovieAndDataWithDateTimeClassMethod("resources/", "BrettRobot2000", scs, 2);
-            System.err.println("Movie creation successful");
+            System.err.println("Got past movie creation...maybe");
          }
          scs.closeAndDispose();
          MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB("testOneAndReturnUsedMemoryMB final: ");
@@ -140,41 +140,39 @@ public class SimulationConstructionSetMemoryReclamationTest
       String directoryName = rootDirectory + dateString + "/";
 
       File directory = new File(directoryName);
-      System.err.println(directory.getName());
       if (!directory.exists())
       {
          boolean result = directory.mkdir();
          System.err.println("DIRECTORY CREATED: " + result);
       }
 
-//    String timeString = DateTools.getTimeString();
-//    String filenameStart = dateString + "_" + timeString;
-//    if (!simplifiedRobotModelName.equals(""))
-//    {
-//       filenameStart += "_" + simplifiedRobotModelName;
-//    }
-//
-//    String movieFilename = filenameStart + ".mp4";
-//
-//    File movieFile;
-//    movieFile = scs.createMovie(directoryName + movieFilename);
-//
-//    String dataFilename = directoryName + filenameStart + ".data.gz";
-//
-//    File dataFile = new File(dataFilename);
-//    try
-//    {
-//       scs.writeData(dataFile);
-//    } catch (Exception e)
-//    {
-//       System.err.println("Error in writing data file in BambooTools.createMovieAndDataWithDateTimeClassMethod()");
-//       e.printStackTrace();
-//    }
-//
-//    scs.gotoOutPointNow();
-      return new File[] {directory};
+    String timeString = DateTools.getTimeString();
+    String filenameStart = dateString + "_" + timeString;
+    if (!simplifiedRobotModelName.equals(""))
+    {
+       filenameStart += "_" + simplifiedRobotModelName;
+    }
 
-//    return new File[]{directory, movieFile, dataFile};
+    String movieFilename = filenameStart + ".mp4";
+
+    File movieFile;
+    movieFile = scs.createMovie(directoryName + movieFilename);
+
+    String dataFilename = directoryName + filenameStart + ".data.gz";
+
+    File dataFile = new File(dataFilename);
+    try
+    {
+       scs.writeData(dataFile);
+    } catch (Exception e)
+    {
+       System.err.println("Error in writing data file in BambooTools.createMovieAndDataWithDateTimeClassMethod()");
+       e.printStackTrace();
+    }
+
+    scs.gotoOutPointNow();
+
+    return new File[]{directory, movieFile, dataFile};
    }
 
    private void sleep(long sleepMillis)
