@@ -79,6 +79,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
          SDFFullRobotModel sdfFullRobotModel, ObjectCommunicator objectCommunicator, DepthDataFilter lidarDataFilter, String sensorURI)
    {
       RosMainNode rosMainNode = new RosMainNode(rosCoreURI, "darpaRoboticsChallange/networkProcessor");
+      depthDataProcessor = new DepthDataProcessor(networkingManager,lidarDataFilter);
 
       RosNativeNetworkProcessor rosNativeNetworkProcessor;
       if (RosNativeNetworkProcessor.hasNativeLibrary())
