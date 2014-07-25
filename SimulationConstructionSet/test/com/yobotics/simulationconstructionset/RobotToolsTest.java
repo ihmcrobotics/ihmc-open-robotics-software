@@ -6,34 +6,41 @@ import java.util.Random;
 
 import javax.vecmath.Vector3d;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.utilities.screwTheory.ScrewTestTools;
+import us.ihmc.utilities.screwTheory.ScrewTestTools.RandomFloatingChain;
 
 import com.yobotics.simulationconstructionset.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
 
 public class RobotToolsTest
 {
-   @Test
-   public void testScsRobotFromInverseDynamicsRobotModel()
+   private RandomFloatingChain getRandomFloatingChain()
    {
       Random random = new Random();
 
-      Vector3d[] jointAxes = {new Vector3d(1.0, 0.0, 0.0)};    // {X,Y,Z,Z,Y,X,X,Y,Z};
+      Vector3d[] jointAxes = {new Vector3d(1.0, 0.0, 0.0)};
       ScrewTestTools.RandomFloatingChain randomFloatingChain = new ScrewTestTools.RandomFloatingChain(random, jointAxes);
 
       randomFloatingChain.setRandomPositionsAndVelocities(random);
 
+      return randomFloatingChain;
+   }
+
+   @Test
+   public void testScsRobotFromInverseDynamicsRobotModel()
+   {
       SCSRobotFromInverseDynamicsRobotModel scsRobotFromInverseDynamicsRobotModel = new RobotTools.SCSRobotFromInverseDynamicsRobotModel("robot",
-                                                                                       randomFloatingChain.getRootJoint());
+                                                                                       getRandomFloatingChain().getRootJoint());
 
       assertNotNull(scsRobotFromInverseDynamicsRobotModel);
    }
 
-   @Ignore
    @Test
    public void testAddScsJointUsingIDJoint()
    {
+      Joint scsRootJoint = RobotTools.addSCSJointUsingIDJoint(getRandomFloatingChain().getRootJoint(), new Robot("robot"), true);
+
+      assertNotNull(scsRootJoint);
    }
 }
