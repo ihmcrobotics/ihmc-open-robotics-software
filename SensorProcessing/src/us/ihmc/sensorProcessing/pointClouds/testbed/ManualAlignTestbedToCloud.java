@@ -34,7 +34,6 @@ import javax.swing.JPanel;
 import us.ihmc.graphics3DAdapter.jme.JMEAssetLocator;
 import us.ihmc.graphics3DAdapter.jme.util.JME3DLoaderUtils;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
-import us.ihmc.sensorProcessing.pointClouds.DisplayPointCloudApp;
 import us.ihmc.sensorProcessing.pointClouds.GeometryOps;
 import boofcv.gui.image.ShowImages;
 
@@ -350,7 +349,7 @@ public class ManualAlignTestbedToCloud extends SimpleApplication {
    }
 
    public static void main(String[] args) {
-      List<Point3D_F64> cloud = DisplayPointCloudApp.loadCloud("../SensorProcessing/data/testbed/2014-07-10/cloud04.txt");
+      List<Point3D_F64> cloud = GeometryOps.loadCloud("../SensorProcessing/data/testbed/2014-07-10/cloud04.txt");
       ManualAlignTestbedToCloud app = new ManualAlignTestbedToCloud();
       app.addPoints(cloud,0xFF0000,1);
       app.addTestBedModel();

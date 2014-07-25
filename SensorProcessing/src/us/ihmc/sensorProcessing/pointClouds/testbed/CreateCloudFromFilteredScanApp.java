@@ -4,12 +4,13 @@ import boofcv.gui.image.ShowImages;
 import bubo.gui.FactoryVisualization3D;
 import bubo.gui.UtilDisplayBubo;
 import bubo.gui.d3.PointCloudPanel;
+import bubo.io.pcl.PointCloudLibraryPcdWriter;
 import georegression.struct.point.Point3D_F64;
-import us.ihmc.sensorProcessing.pointClouds.DisplayPointCloudApp;
+import us.ihmc.sensorProcessing.pointClouds.GeometryOps;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 /**
  * @author Peter Abeles
@@ -36,7 +37,7 @@ public class CreateCloudFromFilteredScanApp {
    }
 
    public static List<Point3D_F64> loadFilteredScans( String fileName , double maxRange ) {
-      List<List<Point3D_F64>> scans = DisplayPointCloudApp.loadScanLines(fileName);
+      List<List<Point3D_F64>> scans = GeometryOps.loadScanLines(fileName);
 
       return filter(scans,maxRange);
    }
@@ -55,8 +56,8 @@ public class CreateCloudFromFilteredScanApp {
    }
 
 
-   public static void main(String[] args) {
-      List<List<Point3D_F64>> scans = DisplayPointCloudApp.loadScanLines("../SensorProcessing/data/testbed/2014-07-10/cloud01_scans.txt");
+   public static void main(String[] args) throws FileNotFoundException {
+      List<List<Point3D_F64>> scans = GeometryOps.loadScanLines("../SensorProcessing/data/testbed/2014-07-10/cloud01_scans.txt");
 
       FactoryVisualization3D factory = UtilDisplayBubo.createVisualize3D();
       PointCloudPanel gui =  factory.displayPointCloud();
@@ -66,7 +67,12 @@ public class CreateCloudFromFilteredScanApp {
 //         int color = rand.nextInt();
 //         gui.addPoints(l, color, 1);
 //      }
-      gui.addPoints(filter(scans,4.0),0xFF0000,1);
+
+      double filterR = 25.0;
+
+      PointCloudLibraryPcdWriter.save(filter(scans,filterR),"cloud.pcd");
+
+      gui.addPoints(filter(scans,filterR),0xFF0000,1);
 
       ShowImages.showWindow(gui, "Point Cloud");
    }

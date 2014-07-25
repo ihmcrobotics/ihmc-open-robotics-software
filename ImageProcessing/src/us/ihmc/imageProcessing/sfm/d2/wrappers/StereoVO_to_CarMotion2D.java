@@ -57,7 +57,7 @@ public class StereoVO_to_CarMotion2D implements EstimateCarMotion2D
       output.T.x = groundToWorld.T.z;
       output.T.y = -groundToWorld.T.x;
 
-      double[] euler = RotationMatrixGenerator.matrixToEulerXYZ(groundToWorld.getR(),null);
+      double[] euler = RotationMatrixGenerator.matrixToEulerXYZ(groundToWorld.getR(),(double[])null);
 
       output.setYaw(-euler[1]);
 

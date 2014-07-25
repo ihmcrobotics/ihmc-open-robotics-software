@@ -10,7 +10,7 @@ import bubo.struct.StoppingCondition;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.se.Se3_F64;
 import georegression.transform.se.SePointOps_F64;
-import us.ihmc.sensorProcessing.pointClouds.DisplayPointCloudApp;
+import us.ihmc.sensorProcessing.pointClouds.GeometryOps;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +23,7 @@ public class MatchTwoPointCloudsApp {
    public static double MAX_DISTANCE = 2;
 
    public static List<Point3D_F64> filterPointCloud( String filename ) {
-      List<Point3D_F64> input = DisplayPointCloudApp.loadCloud(filename);
+      List<Point3D_F64> input = GeometryOps.loadCloud(filename);
       List<Point3D_F64> output = new ArrayList<Point3D_F64>();
 
       for ( Point3D_F64 p : input ) {

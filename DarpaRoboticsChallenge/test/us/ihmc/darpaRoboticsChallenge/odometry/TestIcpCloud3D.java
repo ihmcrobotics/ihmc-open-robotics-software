@@ -46,7 +46,7 @@ public class TestIcpCloud3D {
       assertTrue(alg.setCurrent(curr));
 
       Se3_F64 found = alg.getReferenceToCurrent();
-      double euler[] = RotationMatrixGenerator.matrixToEulerXYZ(found.getR(),null);
+      double euler[] = RotationMatrixGenerator.matrixToEulerXYZ(found.getR(),(double[])null);
       assertEquals(0,euler[0],1e-8);
       assertEquals(0,euler[1],1e-8);
       assertEquals(0,euler[2],1e-8);
@@ -79,7 +79,7 @@ public class TestIcpCloud3D {
       assertTrue(alg.setCurrent(curr));
 
       Se3_F64 found = alg.getReferenceToCurrent();
-      double euler[] = RotationMatrixGenerator.matrixToEulerXYZ(found.getR(),null);
+      double euler[] = RotationMatrixGenerator.matrixToEulerXYZ(found.getR(),(double[])null);
       assertEquals(0,euler[0],1e-8);
       assertEquals(0,euler[1],1e-8);
       assertEquals(0,euler[2],1e-8);
@@ -115,7 +115,7 @@ public class TestIcpCloud3D {
       assertTrue(alg.setCurrent(curr));
 
       Se3_F64 found = alg.getReferenceToCurrent();
-      double euler[] = RotationMatrixGenerator.matrixToEulerXYZ(found.getR(),null);
+      double euler[] = RotationMatrixGenerator.matrixToEulerXYZ(found.getR(),(double[])null);
       assertEquals(-0.1,euler[0],1e-8);
       assertEquals(0.05,euler[1],1e-8);
       assertEquals(0.07,euler[2],1e-8);

@@ -106,7 +106,7 @@ public class CalibUtil
 
    public static Vector3d Matrix3dToAxisAngle3d(DenseMatrix64F md)
    {
-      Rodrigues_F64 r = RotationMatrixGenerator.matrixToRodrigues(md, null);
+      Rodrigues_F64 r = RotationMatrixGenerator.matrixToRodrigues(md, (Rodrigues_F64)null);
       r.unitAxisRotation.scale(r.theta);
       Vector3d angleAxis = new Vector3d(r.unitAxisRotation.x, r.unitAxisRotation.y, r.unitAxisRotation.z);
       return angleAxis;
