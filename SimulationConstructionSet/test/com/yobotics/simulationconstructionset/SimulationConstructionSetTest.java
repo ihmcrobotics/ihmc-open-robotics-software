@@ -9,10 +9,11 @@ import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
-import com.yobotics.simulationconstructionset.gui.SimulationGUITestFixture;
-
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
+import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.ThreadTools;
+
+import com.yobotics.simulationconstructionset.gui.SimulationGUITestFixture;
 
 public class SimulationConstructionSetTest
 {
@@ -44,7 +45,7 @@ public class SimulationConstructionSetTest
       scs.closeAndDispose();
       scs = null;
    }
-   
+ 
    @Test
    public void testSimulationConstructionSetUsingGUITestFixture() throws AWTException
    {
@@ -53,12 +54,44 @@ public class SimulationConstructionSetTest
       SimulationConstructionSet scs = new SimulationConstructionSet(simpleRobot);
       scs.setFrameMaximized();
       scs.startOnAThread();
+      scs.setSimulateDuration(2.0);
       
       SimulationGUITestFixture testFixture = new SimulationGUITestFixture(scs);
       
+      testFixture.removeAllGraphs();
+      
+      testFixture.selectSearchTab();
+      testFixture.enterSearchText("q_");
+
+      testFixture.selectVariableInSearchTab("q_y");
+      testFixture.clickNewGraphButton();
+      testFixture.middleClickInEmptyGraph();
+      
+      testFixture.selectVariableInSearchTab("q_z");
+      testFixture.clickNewGraphButton();
+      testFixture.middleClickInEmptyGraph();
+      
+      testFixture.removeAllGraphs();
+
+      
+      // Setup a few entry boxes:
+      EnumYoVariable<Axis> enumForTests = new EnumYoVariable<Axis>("enumForTests", scs.getRootRegistry(), Axis.class);
+      enumForTests.set(Axis.X);
+      
+      testFixture.selectSearchTab();
+      testFixture.deleteSearchText();
+      testFixture.enterSearchText("enumForTests");
+      testFixture.selectVariableInSearchTab("enumForTests");
+
+      testFixture.clickOnUnusedEntryBox();
+      
+      assertTrue(enumForTests.getEnumValue() == Axis.X);
+      testFixture.findEnumEntryBoxAndSelectValue("enumForTests", "Z");
+      assertTrue(enumForTests.getEnumValue() == Axis.Z);
+      
       // Search for variables, change their values, and plot them:
-      testFixture.selectNameSpaceTab();
-      ThreadTools.sleep(1000);
+//      testFixture.selectNameSpaceTab();
+//      ThreadTools.sleep(1000);
       
       testFixture.selectSearchTab();
       
@@ -72,6 +105,9 @@ public class SimulationConstructionSetTest
       
       testFixture.clickNewGraphButton();
       testFixture.clickNewGraphButton();
+      testFixture.selectVariableInSearchTab("q_y");
+      testFixture.middleClickInNthGraph(2);
+      ThreadTools.sleep(500);
       testFixture.selectVariableInSearchTab("q_z");
       testFixture.middleClickInNthGraph(2);
       
@@ -80,17 +116,20 @@ public class SimulationConstructionSetTest
       assertEquals(1.31, q_z.getDoubleValue(), 1e-9);
       
       // Simulate and replay
+      ThreadTools.sleep(500);
       testFixture.clickSimulateButton();
       ThreadTools.sleep(500);
       testFixture.clickStopButton();
+      ThreadTools.sleep(500);
       testFixture.clickPlayButton();
-      
-      // Remove variables from graphs:
-      testFixture.removeVariableFromNthGraph("q_z", 2);
-      testFixture.clickRemoveEmptyGraphButton();
-      
       ThreadTools.sleep(500);
       testFixture.clickStopButton();
+      ThreadTools.sleep(500);
+
+      // Remove variables from graphs:
+      testFixture.removeVariableFromNthGraph("q_y", 2);
+      testFixture.clickRemoveEmptyGraphButton();
+      
 
       // Go to In/out points, step through data. Add KeyPoints, Verify at the expected indices
       testFixture.clickGotoInPointButton();
