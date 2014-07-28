@@ -7,8 +7,10 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 
+
 import com.joptimizer.functions.ConvexMultivariateRealFunction;
 import com.joptimizer.functions.LinearMultivariateRealFunction;
+import com.joptimizer.functions.PSDQuadraticMultivariateRealFunction;
 import com.joptimizer.functions.QuadraticMultivariateRealFunction;
 import com.joptimizer.optimizers.JOptimizer;
 import com.joptimizer.optimizers.OptimizationRequest;
@@ -102,7 +104,7 @@ public class ExperimentalSOCPSolverUsingJOptimizer implements ExperimentalSOCPSo
   
       double[] qVector = new double[numberOfRows];
       double r = 0.0;
-      ConvexMultivariateRealFunction  quadraticInequalityFunction = new QuadraticMultivariateRealFunction(quadraticInequalityMatrixPAsDoubleArray, qVector, r);    
+      ConvexMultivariateRealFunction  quadraticInequalityFunction = new PSDQuadraticMultivariateRealFunction(quadraticInequalityMatrixPAsDoubleArray, qVector, r);    
       inequalities[0] = quadraticInequalityFunction;
       
       // Add the linear inequality -u^T x <= 0
