@@ -16,14 +16,14 @@ public class DRCRobotLidarParameters implements DRCRobotSensorParameters
    public DRCRobotLidarParameters(String lidarSensorName, String laserTopic, String lidarSpindleJointName, String lidarSpindleJointTopic,
          String lidarToRosHandoffFrameInSdf, String lidarBaseFrameForRos, String lidarEndFrameForRos, double lidar_spindle_velocity, int lidarId)
    {
-      this.lidarSensorName = lidarSensorName;
-      this.laserTopic = laserTopic;
-      this.lidarSpindleJointName = lidarSpindleJointName;
-      this.lidarSpindleJointTopic = lidarSpindleJointTopic;
-      this.poseFrameName = lidarToRosHandoffFrameInSdf;
-      this.lidarBaseFrameForRos = lidarBaseFrameForRos;
-      this.lidarEndFrameForRos = lidarEndFrameForRos;
-      this.lidarSpinVelocity = lidar_spindle_velocity;
+      this.lidarSensorName = lidarSensorName;//"head_hokuyo_sensor"
+      this.laserTopic = laserTopic;//multisense_namespace+"/lidar_scan"
+      this.lidarSpindleJointName = lidarSpindleJointName;//"hokuyo_joint";
+      this.lidarSpindleJointTopic = lidarSpindleJointTopic;//multisense_namespace + "/joint_states";
+      this.poseFrameName = lidarToRosHandoffFrameInSdf;//"head";
+      this.lidarBaseFrameForRos = lidarBaseFrameForRos;//multisense_namespace + "/head";
+      this.lidarEndFrameForRos = lidarEndFrameForRos;//multisense_namespace + "/head_hokuyo_frame";
+      this.lidarSpinVelocity = lidar_spindle_velocity;//lidar_spindle_velocity = 5.1;
       this.useRosForTransformFromPoseToSensor = true;
       this.lidarId = lidarId;
    }
