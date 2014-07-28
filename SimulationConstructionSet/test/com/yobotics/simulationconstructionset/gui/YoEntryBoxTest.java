@@ -12,8 +12,8 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.SimulationConstructionSetTest;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.examples.FallingBrickRobot;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
@@ -185,7 +185,7 @@ public class YoEntryBoxTest
    public <T extends RobotControllerWithAttachRobot> SimulationConstructionSet setupSCS(T controller) throws InterruptedException
    {
       boolean showGUI = true;
-      SimulationConstructionSetTest.SimpleRobot robot = new SimulationConstructionSetTest.SimpleRobot();
+      FallingBrickRobot robot = new FallingBrickRobot();
       controller.attachRobot(robot);
       assertFalse(controller.getYoVariableRegistry() == null);
       robot.setController(controller);
