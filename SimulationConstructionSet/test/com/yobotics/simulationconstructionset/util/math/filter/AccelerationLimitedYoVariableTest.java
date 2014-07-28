@@ -79,15 +79,8 @@ public class AccelerationLimitedYoVariableTest
       assertEquals(name, accelerationLimitedYoVariable.getName());
    }
 
-   /*
-    * To view this test properly in SCS, create three graphs and add: to the
-    * first: raw & processed, 
-    * to the second: rawRate, processedSmoothedRate, and max_Rate, 
-    * to the third: processedSmoothAcceleration & max_Acceleration
-    */
-//   @Ignore
    @Test
-   public void testSetMaximumAcceleration()
+   public void testSetMaximumRateAndAcceleration_ConstantVelocity()
    {
       double maxAcceleration = 10.0;
       double maxRate = 1.0;
@@ -107,7 +100,7 @@ public class AccelerationLimitedYoVariableTest
       DoubleYoVariable raw = new DoubleYoVariable("raw", registry);
       DoubleYoVariable alphaVariable = new DoubleYoVariable("alpha", registry);
       FilteredVelocityYoVariable rawRate = new FilteredVelocityYoVariable("rawRate", "", alphaVariable, raw, dt, registry);
-
+      
       int bufferSize = (int) (maxAcceleration / iteratorIncrement) + 1;
       scs.changeBufferSize(bufferSize);
 
@@ -129,21 +122,99 @@ public class AccelerationLimitedYoVariableTest
          rawRate.update();
          processed.update(i);
          scs.tickAndUpdate();
-         if(i > 1.0)
+         
+         assertTrue(maxRate >= processed.getSmoothedRate().getDoubleValue());
+         assertTrue(maxAcceleration >= processed.getSmoothedAcceleration().getDoubleValue());
+
+         if(i > 3.0)
          {
             assertTrue(isValueWithinMarginOfError(raw.getDoubleValue(), processed.getDoubleValue(), permissibleErrorRatio));
-//            assertTrue(isValueWithinMarginOfError(rawRate.getDoubleValue(), processedSmoothedRate.getDoubleValue(), permissibleErrorRatio));
-            
+            assertTrue(isValueWithinMarginOfError(rawRate.getDoubleValue(), processed.getSmoothedRate().getDoubleValue(), permissibleErrorRatio));
+            assertTrue(isValueWithinMarginOfError(0.0, processed.getSmoothedAcceleration().getDoubleValue(), permissibleErrorRatio));
          }
       }
       scs.startOnAThread();
-      ThreadTools.sleepForever();
+      ThreadTools.sleep(10000);
+      
+      scs.closeAndDispose();
    }
-
+   
    @Test
-   public void testSetMaximumRate()
+   public void testSetMaximumRateAndAcceleration_Sine()
    {
+      double maxAcceleration = 10.0;
+      double maxRate = 1.0;
+      double iteratorIncrement = 0.0005;
+      double dt = 0.001;
+      double permissibleErrorRatio = 0.1;
+      Robot robot = new Robot("generic_robot");
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot);
+      YoVariableRegistry registry = new YoVariableRegistry("generic_registry");
+      scs.getRootRegistry().addChild(registry);
+      DoubleYoVariable maxRateYo = new DoubleYoVariable("max_Rate", registry);
+      boolean notifyListeners = true;
+      maxRateYo.set(maxRate, notifyListeners);
+      DoubleYoVariable maxAccelerationYo = new DoubleYoVariable("max_Acceleration", registry);
+      maxAccelerationYo.set(maxAcceleration, notifyListeners);
+      AccelerationLimitedYoVariable processed = new AccelerationLimitedYoVariable("processed", registry, maxRateYo, maxAccelerationYo, dt);
+      DoubleYoVariable raw = new DoubleYoVariable("raw", registry);
+      DoubleYoVariable alphaVariable = new DoubleYoVariable("alpha", registry);
+      FilteredVelocityYoVariable rawRate = new FilteredVelocityYoVariable("rawRate", "", alphaVariable, raw, dt, registry);
+      
+      int bufferSize = (int) (maxAcceleration / iteratorIncrement) + 1;
+      scs.changeBufferSize(bufferSize);
 
+      String[] vars = {"raw", "processed", "max_Rate", "rawRate", "processedSmoothedRate", "processedSmoothedAcceleration", "max_Acceleration"};
+      scs.setupVarGroup("Acceleration Var Group", vars);
+      
+      String[][] graphGroupVars = { { "raw", "processed"}, { "max_Rate", "rawRate", "processedSmoothedRate" }, { "processedSmoothedAcceleration", "max_Acceleration" } };
+      scs.setupGraphGroup("GraphGroup for Acceleration", graphGroupVars);
+      
+      String[] entryBoxGroupVars = { "raw", "processed", "max_Rate", "rawRate", "processedSmoothedRate", "processedSmoothedAcceleration", "max_Acceleration" };
+      scs.setupEntryBoxGroup("Acceleration Entry Box", entryBoxGroupVars);
+      
+      scs.setupConfiguration("Acceleration Config", "Acceleration Var Group", "GraphGroup for Acceleration", "Acceleration Entry Box");
+      scs.selectConfiguration("Acceleration Config");
+      
+      DoubleYoVariable timeYo = new DoubleYoVariable("time", registry);
+      YoFunctionGenerator sineFunction = new YoFunctionGenerator("sineFunction", timeYo, registry);
+      sineFunction.setMode(YoFunctionGeneratorMode.SINE);
+//      sineFunction.setFrequency(1000);
+      sineFunction.setFrequencyWithContinuousOutput(1000);
+      System.out.println(sineFunction.getMode());
+
+      double time = 0;
+      double value = 0;
+      
+      for (double i = 0.0; i < 10.0; i += iteratorIncrement)
+      {
+         timeYo.set(i);
+         time = timeYo.getValueAsDouble();
+
+//         value = sineFunction.getValue(time);
+         value = sineFunction.getValue();
+
+         System.out.println(value);
+         
+         raw.set(value);
+         rawRate.update();
+         processed.update(value);
+         scs.tickAndUpdate();
+         
+         assertTrue(maxRate >= processed.getSmoothedRate().getDoubleValue());
+         assertTrue(maxAcceleration >= processed.getSmoothedAcceleration().getDoubleValue());
+
+         if(i > 3.0)
+         {
+            assertTrue(isValueWithinMarginOfError(raw.getDoubleValue(), processed.getDoubleValue(), permissibleErrorRatio));
+            assertTrue(isValueWithinMarginOfError(rawRate.getDoubleValue(), processed.getSmoothedRate().getDoubleValue(), permissibleErrorRatio));
+            assertTrue(isValueWithinMarginOfError(0.0, processed.getSmoothedAcceleration().getDoubleValue(), permissibleErrorRatio));
+         }
+      }
+      scs.startOnAThread();
+      ThreadTools.sleep(10000);
+      
+      scs.closeAndDispose();
    }
 
    @Test
@@ -242,7 +313,8 @@ public class AccelerationLimitedYoVariableTest
 
    private boolean isValueWithinMarginOfError(double correctValue, double valueInQuestion, double permissibleErrorRatio)
    {
-      double result = Math.abs(correctValue - valueInQuestion) / correctValue;
+      double denominator = (correctValue == 0.0) ? EPSILON : correctValue;
+      double result = Math.abs(correctValue - valueInQuestion) / denominator;
 
       if (result <= permissibleErrorRatio)
       {
@@ -250,7 +322,7 @@ public class AccelerationLimitedYoVariableTest
       }
       else
       {
-         System.out.println("result" + result);
+         System.out.println("result = " + result);
          return false;
       }
    }
