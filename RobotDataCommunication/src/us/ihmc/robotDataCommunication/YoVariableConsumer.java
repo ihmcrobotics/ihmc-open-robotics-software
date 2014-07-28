@@ -13,7 +13,6 @@ import org.zeromq.ZMQ;
 
 import us.ihmc.robotDataCommunication.YoVariableChangedProducer.YoVariableClientChangedListener;
 import us.ihmc.robotDataCommunication.jointState.JointState;
-import us.ihmc.robotDataCommunication.jointState.OneDoFState;
 import zmq.PollItem;
 import zmq.ZError;
 
@@ -36,6 +35,9 @@ public class YoVariableConsumer extends Thread
    
    private long packetNumber = 0;
 
+   private int numberOfVariables;
+   private int numberOfJointStateVariables;
+   
    public YoVariableConsumer(String host, int port, List<YoVariable> variables, List<JointState<?>> jointStates, YoVariablesUpdatedListener listener)
    {
       super();
@@ -45,7 +47,23 @@ public class YoVariableConsumer extends Thread
       this.variables = variables;
       this.jointStates = jointStates;
       this.listener = listener;
-    
+   
+      
+   }
+   
+   public void start(int numberOfVariables, int numberOfJointStateVariables)
+   {
+      // Passed in instead of calculated from variables and jointStates to allow for logging without creating registries.
+      this.numberOfVariables = numberOfVariables;
+      this.numberOfJointStateVariables = numberOfJointStateVariables;
+      super.start();
+      
+   }
+   
+   @Deprecated
+   public void start()
+   {
+      throw new RuntimeException("Use start(int, int)");
    }
    
    @Override
@@ -72,8 +90,7 @@ public class YoVariableConsumer extends Thread
       {
          throw new RuntimeException(e);
       }
-      int numberOfJointStates = OneDoFState.getNumberOfJointStates(jointStates);
-      int bufferSize = (1 + variables.size() + numberOfJointStates) * 8;
+      int bufferSize = (1 + numberOfVariables + numberOfJointStateVariables) * 8;
       ByteBuffer decompressed = ByteBuffer.allocate(bufferSize);
       
       connected = true;
@@ -145,7 +162,7 @@ public class YoVariableConsumer extends Thread
             }
             
             
-            listener.receivedUpdate(timestamp, buf);
+            listener.receivedUpdate(timestamp, decompressed);
          }
       }
       socketBase.close();

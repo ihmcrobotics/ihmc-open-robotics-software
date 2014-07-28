@@ -1,9 +1,13 @@
 package us.ihmc.robotDataCommunication;
 
-import com.google.protobuf.InvalidProtocolBufferException;
-import com.yobotics.simulationconstructionset.*;
-import com.yobotics.simulationconstructionset.util.graphics.*;
-import com.yobotics.simulationconstructionset.util.graphics.RemoteDynamicGraphic.RemoteGraphicType;
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+
+import javax.vecmath.Color3f;
+
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
 import us.ihmc.plotting.Artifact;
@@ -15,12 +19,22 @@ import us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHan
 import us.ihmc.robotDataCommunication.jointState.JointState;
 import us.ihmc.utilities.dynamicClassLoader.DynamicEnumCreator;
 
-import javax.vecmath.Color3f;
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.EnumYoVariable;
+import com.yobotics.simulationconstructionset.IntegerYoVariable;
+import com.yobotics.simulationconstructionset.Joint;
+import com.yobotics.simulationconstructionset.LongYoVariable;
+import com.yobotics.simulationconstructionset.YoVariable;
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicFactory;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.RemoteDynamicGraphic;
+import com.yobotics.simulationconstructionset.util.graphics.RemoteDynamicGraphic.RemoteGraphicType;
 
 public class YoVariableHandshakeParser
 {
@@ -36,6 +50,9 @@ public class YoVariableHandshakeParser
    private final DynamicEnumCreator dynamicEnumCreator = new DynamicEnumCreator();
 
    private final YoVariablesUpdatedListener listener;
+   
+   private int numberOfVariables;
+   private int numberOfJointStateVariables;
    
    public YoVariableHandshakeParser(YoVariablesUpdatedListener yoVariablesUpdatedListener, String registryPrefix, boolean registerYoVariables)
    {
@@ -95,9 +112,24 @@ public class YoVariableHandshakeParser
          addJointStates(yoProtoHandshake);
          addGraphicObjects(yoProtoHandshake);
    
-         System.out.println("Receiving " + variables.size() + " variables");
-         System.out.println("Receiving " + jointStates.size() + " joint states");
       }
+      
+      this.numberOfVariables = yoProtoHandshake.getVariableCount();
+      this.numberOfJointStateVariables = getNumberOfJointStateVariables(yoProtoHandshake);
+      
+      System.out.println("Receiving " + getNumberOfVariables() + " variables.");
+      System.out.println("Receiving " + getNumberOfJointStateVariables() + " joint state variables.");
+   }
+   
+   private int getNumberOfJointStateVariables(YoProtoHandshake yoProtoHandshake)
+   {
+      int numberOfJointStates = 0;
+      for (int i = 0; i < yoProtoHandshake.getJointCount(); i++)
+      {
+         JointDefinition joint = yoProtoHandshake.getJoint(i);
+         numberOfJointStates += JointState.getNumberOfVariables(joint.getType());
+      }
+      return numberOfJointStates;
    }
    
    private void addJointStates(YoProtoHandshake yoProtoHandshake)
@@ -245,6 +277,16 @@ public class YoVariableHandshakeParser
    public YoVariableRegistry getRootRegistry()
    {
       return registry;
+   }
+
+   public int getNumberOfVariables()
+   {
+      return numberOfVariables;
+   }
+
+   public int getNumberOfJointStateVariables()
+   {
+      return numberOfJointStateVariables;
    }
 
 }
