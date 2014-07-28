@@ -53,12 +53,10 @@ public class OctreeOccupancyExample {
       for( Octree_I32 n : cells ) {
          Point3D_I32 p = n.getLocation();
          if( n.isLeaf() ) {
-            if( n.points.size() > NUMBER_OCCUPIED ) {
+            if( n.points.size() > 0 ) {
                totalOccupied++;
-               map.set(p.x, p.y, p.z, 0.8);
-            } else {
-               map.set(p.x, p.y, p.z, 0.2);
-            }
+               map.set(p.x, p.y, p.z, 1.0);
+            } 
          }
       }
       System.out.println("Leafs occupied = " + totalOccupied + "  out of " + cells.size());
