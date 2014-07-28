@@ -6,7 +6,7 @@ import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.graphics3DAdapter.jme.JMEGraphics3DAdapter;
+import us.ihmc.graphics3DAdapter.jme.JMEGraphics3DimAdapter;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
