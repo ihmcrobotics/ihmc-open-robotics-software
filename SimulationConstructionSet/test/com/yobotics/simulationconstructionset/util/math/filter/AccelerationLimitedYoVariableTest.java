@@ -13,6 +13,7 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.simulatedSensors.ProcessedSensorsReadWrite;
 import com.yobotics.simulationconstructionset.util.math.functionGenerator.YoFunctionGenerator;
 import com.yobotics.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
 
@@ -84,7 +85,7 @@ public class AccelerationLimitedYoVariableTest
     * to the second: rawRate, processedSmoothedRate, and max_Rate, 
     * to the third: processedSmoothAcceleration & max_Acceleration
     */
-   @Ignore
+//   @Ignore
    @Test
    public void testSetMaximumAcceleration()
    {
@@ -93,9 +94,9 @@ public class AccelerationLimitedYoVariableTest
       double iteratorIncrement = 0.0005;
       double dt = 0.001;
       double permissibleErrorRatio = 0.1;
-      Robot robot = new Robot("bip");
+      Robot robot = new Robot("generic_robot");
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);
-      YoVariableRegistry registry = new YoVariableRegistry("blop");
+      YoVariableRegistry registry = new YoVariableRegistry("generic_registry");
       scs.getRootRegistry().addChild(registry);
       DoubleYoVariable maxRateYo = new DoubleYoVariable("max_Rate", registry);
       boolean notifyListeners = true;
@@ -110,13 +111,13 @@ public class AccelerationLimitedYoVariableTest
       int bufferSize = (int) (maxAcceleration / iteratorIncrement) + 1;
       scs.changeBufferSize(bufferSize);
 
-      String[] vars = {"raw", "processed", "rawRate", "processedSmoothRate", "max_Rate", "processedSmoothAcceleration", "max_Acceleration"};
+      String[] vars = {"raw", "processed", "max_Rate", "rawRate", "processedSmoothedRate", "processedSmoothedAcceleration", "max_Acceleration"};
       scs.setupVarGroup("Acceleration Var Group", vars);
       
-      String[][] graphGroupVars = { { "raw", "processed"}, { "max_Rate", "rawRate", "processedSmoothRate" }, { "processedSmoothAcceleration", "max_Acceleration" } };
+      String[][] graphGroupVars = { { "raw", "processed"}, { "max_Rate", "rawRate", "processedSmoothedRate" }, { "processedSmoothedAcceleration", "max_Acceleration" } };
       scs.setupGraphGroup("GraphGroup for Acceleration", graphGroupVars);
       
-      String[] entryBoxGroupVars = { "raw", "processed", "raw" };
+      String[] entryBoxGroupVars = { "raw", "processed", "max_Rate", "rawRate", "processedSmoothedRate", "processedSmoothedAcceleration", "max_Acceleration" };
       scs.setupEntryBoxGroup("Acceleration Entry Box", entryBoxGroupVars);
       
       scs.setupConfiguration("Acceleration Config", "Acceleration Var Group", "GraphGroup for Acceleration", "Acceleration Entry Box");
@@ -128,7 +129,12 @@ public class AccelerationLimitedYoVariableTest
          rawRate.update();
          processed.update(i);
          scs.tickAndUpdate();
-         //         assertTrue(isValueWithinMarginOfError(raw.getDoubleValue(), processed.getDoubleValue(), permissibleErrorRatio));
+         if(i > 1.0)
+         {
+            assertTrue(isValueWithinMarginOfError(raw.getDoubleValue(), processed.getDoubleValue(), permissibleErrorRatio));
+//            assertTrue(isValueWithinMarginOfError(rawRate.getDoubleValue(), processedSmoothedRate.getDoubleValue(), permissibleErrorRatio));
+            
+         }
       }
       scs.startOnAThread();
       ThreadTools.sleepForever();
