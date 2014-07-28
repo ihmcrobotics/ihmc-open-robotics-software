@@ -18,34 +18,7 @@ import com.yobotics.simulationconstructionset.gui.SimulationGUITestFixture;
 public class SimulationConstructionSetTest
 {
    
-   @Test
-   public void testSimulationConstructionSetUsingDirectCalls() throws AWTException
-   {
-      SimpleRobot simpleRobot = new SimpleRobot();
-      
-      SimulationConstructionSet scs = new SimulationConstructionSet(simpleRobot);
-      scs.setFrameMaximized();
-      scs.startOnAThread();
-      
-      double simulateTime = 1.0;
-      
-      double startTime = scs.getTime();
-      scs.simulate(simulateTime);
-      while(scs.isSimulating())
-      {
-         ThreadTools.sleep(100L);
-      }
-      
-      double endTime = scs.getTime();
-
-      assertEquals(simulateTime, endTime-startTime, 1e-7);
-
-//      ThreadTools.sleepForever();
-      
-      scs.closeAndDispose();
-      scs = null;
-   }
- 
+  
    @Test
    public void testSimulationConstructionSetUsingGUITestFixture() throws AWTException
    {
@@ -251,7 +224,7 @@ public class SimulationConstructionSetTest
   
 
 
-   public static class SimpleRobot extends Robot
+   private static class SimpleRobot extends Robot
    {
       private static final long serialVersionUID = 43883985473093746L;
 
