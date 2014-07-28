@@ -9,6 +9,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.graphics3DAdapter.camera.CameraController;
 import us.ihmc.graphics3DAdapter.camera.CameraTrackingAndDollyPositionHolder;
 import us.ihmc.graphics3DAdapter.camera.ClassicCameraController;
 import us.ihmc.graphics3DAdapter.camera.SimpleCameraTrackingAndDollyPositionHolder;
@@ -21,19 +22,34 @@ public class Graphics3DAdapterTools
       return graphics3DAdapter.createNewViewport(null, false, false);
    }
 
-   public static ClassicCameraController createNewWindow(Graphics3DAdapter graphics3DAdapter, ViewportAdapter viewportAdapter, String title, int width,
-           int height, Vector3d initialCameraTranslation)
+   public static ClassicCameraController createCameraController(Graphics3DAdapter graphics3DAdapter, ViewportAdapter viewportAdapter,
+           Vector3d initialCameraTranslation)
    {
       CameraTrackingAndDollyPositionHolder cameraTrackingAndDollyPositionHolder = new SimpleCameraTrackingAndDollyPositionHolder();
       ClassicCameraController classicCameraController = ClassicCameraController.createClassicCameraControllerAndAddListeners(viewportAdapter,
                                                            cameraTrackingAndDollyPositionHolder, graphics3DAdapter);
       classicCameraController.setCameraPosition(initialCameraTranslation.x, initialCameraTranslation.y, initialCameraTranslation.z);
-      viewportAdapter.setCameraController(classicCameraController);
-      Canvas canvas = viewportAdapter.getCanvas();
-
-      Graphics3DAdapterTools.createNewWindow(canvas, title, width, height);
 
       return classicCameraController;
+   }
+
+   public static ClassicCameraController createNewWindow(Graphics3DAdapter graphics3DAdapter, ViewportAdapter viewportAdapter, String title, int width,
+           int height, Vector3d initialCameraTranslation)
+   {
+      ClassicCameraController classicCameraController = createCameraController(graphics3DAdapter, viewportAdapter, initialCameraTranslation);
+
+      viewportAdapter.setCameraController(classicCameraController);
+
+      createNewWindow(viewportAdapter.getCanvas(), title, width, height);
+
+      return classicCameraController;
+   }
+
+   public static JFrame createNewWindow(ViewportAdapter viewportAdapter, String title, int width, int height, CameraController cameraController)
+   {
+      viewportAdapter.setCameraController(cameraController);
+
+      return createNewWindow(viewportAdapter.getCanvas(), title, width, height);
    }
 
    public static ClassicCameraController createNewWindow(Graphics3DAdapter graphics3DAdapter, String title, int width, int height,
@@ -49,7 +65,7 @@ public class Graphics3DAdapterTools
                                 ClassicCameraController.CAMERA_START_Z));
    }
 
-   public static void createNewWindow(Canvas canvas, String title, int width, int height)
+   public static JFrame createNewWindow(Canvas canvas, String title, int width, int height)
    {
       JPanel panel = new JPanel(new BorderLayout());
       panel.add("Center", canvas);
@@ -63,5 +79,7 @@ public class Graphics3DAdapterTools
 
       jFrame.pack();
       jFrame.setVisible(true);
+
+      return jFrame;
    }
 }
