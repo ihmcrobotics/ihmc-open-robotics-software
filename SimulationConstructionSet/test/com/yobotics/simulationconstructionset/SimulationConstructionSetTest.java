@@ -52,13 +52,39 @@ public class SimulationConstructionSetTest
       SimpleRobot simpleRobot = new SimpleRobot();
       
       SimulationConstructionSet scs = new SimulationConstructionSet(simpleRobot);
+      YoVariableRegistry registryOne = new YoVariableRegistry("RegistryOne");
+      EnumYoVariable<Axis> enumForTests = new EnumYoVariable<Axis>("enumForTests", registryOne, Axis.class);
+      YoVariableRegistry registryTwo = new YoVariableRegistry("RegistryTwo");
+      BooleanYoVariable booleanForTests = new BooleanYoVariable("booleanForTests", registryTwo);
+      registryOne.addChild(registryTwo);
+      scs.addYoVariableRegistry(registryOne);
+      
       scs.setFrameMaximized();
       scs.startOnAThread();
       scs.setSimulateDuration(2.0);
+
       
       SimulationGUITestFixture testFixture = new SimulationGUITestFixture(scs);
       
       testFixture.removeAllGraphs();
+      testFixture.removeAllEntryBoxes();
+      
+      testFixture.selectNameSpaceTab();
+      testFixture.selectNameSpace("root/RegistryOne");
+      testFixture.selectVariableInOpenTab("enumForTests");
+      ThreadTools.sleep(500);
+      
+      testFixture.selectNameSpaceTab();
+      testFixture.selectNameSpace("root/RegistryOne/RegistryTwo");
+      testFixture.selectVariableInOpenTab("booleanForTests");
+      ThreadTools.sleep(500);
+
+      testFixture.clickOnUnusedEntryBox();
+
+      assertTrue(booleanForTests.getBooleanValue() == false);
+      testFixture.findEntryBoxAndEnterValue("booleanForTests", 1.0);
+      assertTrue(booleanForTests.getBooleanValue() == true);
+
       
       testFixture.selectSearchTab();
       testFixture.enterSearchText("q_");
@@ -75,7 +101,6 @@ public class SimulationConstructionSetTest
 
       
       // Setup a few entry boxes:
-      EnumYoVariable<Axis> enumForTests = new EnumYoVariable<Axis>("enumForTests", scs.getRootRegistry(), Axis.class);
       enumForTests.set(Axis.X);
       
       testFixture.selectSearchTab();
