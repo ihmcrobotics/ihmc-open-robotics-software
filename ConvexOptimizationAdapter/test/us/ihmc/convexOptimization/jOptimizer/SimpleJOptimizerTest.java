@@ -11,6 +11,7 @@ import us.ihmc.convexOptimization.ConvexOptimizationAdapter;
 
 import com.joptimizer.functions.ConvexMultivariateRealFunction;
 import com.joptimizer.functions.LinearMultivariateRealFunction;
+import com.joptimizer.functions.PSDQuadraticMultivariateRealFunction;
 import com.joptimizer.functions.QuadraticMultivariateRealFunction;
 import com.joptimizer.functions.SOCPLogarithmicBarrier;
 import com.joptimizer.functions.SOCPLogarithmicBarrier.SOCPConstraintParameters;
@@ -114,7 +115,7 @@ public class SimpleJOptimizerTest
       double[] qVector = new double[]{0.0, 0.0};
       double r = -2;
       
-      inequalities[0] = new QuadraticMultivariateRealFunction(PMatrix, qVector, r);    // x^2+y^2 <= 4
+      inequalities[0] = new PSDQuadraticMultivariateRealFunction(PMatrix, qVector, r);    // x^2+y^2 <= 4
 
       double[] solution = solveOptimizationProblem(objectiveFunction, inequalities);
 
@@ -176,7 +177,7 @@ public class SimpleJOptimizerTest
       double[] qVector = new double[]{0.0, -1.0};
       double r = 0.0;
       
-      inequalities[0] = new QuadraticMultivariateRealFunction(PMatrix, qVector, r);    // x^2 - y <= 0
+      inequalities[0] = new PSDQuadraticMultivariateRealFunction(PMatrix, qVector, r);    // x^2 - y <= 0
 
       double[] solution = solveOptimizationProblem(objectiveFunction, equalityAMatrix, equalityBVector, inequalities);
 
@@ -195,7 +196,7 @@ public class SimpleJOptimizerTest
       double[][] costPMatrix = new double[][]{{-2.0, 0.0},{0.0, 0.0}};
       double[] costQVector = new double[]{0.0, 0.0};
       double costR = 0.0;
-      QuadraticMultivariateRealFunction objectiveFunction = new QuadraticMultivariateRealFunction(costPMatrix, costQVector, costR);
+      PSDQuadraticMultivariateRealFunction objectiveFunction = new PSDQuadraticMultivariateRealFunction(costPMatrix, costQVector, costR);
 
       // Equalities:
       double[][] equalityAMatrix = new double[][]{{1.0, 1.0}};
@@ -208,7 +209,7 @@ public class SimpleJOptimizerTest
       double[] qVector = new double[]{0.0, -1.0};
       double r = 0.0;
       
-      inequalities[0] = new QuadraticMultivariateRealFunction(PMatrix, qVector, r);    // x^2 - y <= 0
+      inequalities[0] = new PSDQuadraticMultivariateRealFunction(PMatrix, qVector, r);    // x^2 - y <= 0
 
       double[] solution = solveOptimizationProblem(objectiveFunction, equalityAMatrix, equalityBVector, inequalities);
 
@@ -285,7 +286,7 @@ public class SimpleJOptimizerTest
       double[] qVector = new double[]{0.0, 0.0, 0.0};
       double r = 0.0;
       
-      inequalities[0] = new QuadraticMultivariateRealFunction(PMatrix, qVector, r);    
+      inequalities[0] = new PSDQuadraticMultivariateRealFunction(PMatrix, qVector, r);    
 
       qVector = new double[]{0.0, 0.0, 1.0};
       r = -Math.sqrt(18.0);
