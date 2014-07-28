@@ -23,7 +23,7 @@ public class YoVariableClient
 
       this.yoVariableHandshakeClient = new YoVariableHandshakeClient(host, handshakePort, listener, registryPrefix, listener.populateRegistry());
       this.yoVariableConsumer = new YoVariableConsumer(host, consumerPort, yoVariableHandshakeClient.getYoVariablesList(),
-              yoVariableHandshakeClient.getJointStates(), listener);
+            yoVariableHandshakeClient.getJointStates(), listener);
       if(listener.changesVariables())
       {
          this.yoVariableChangedProducer = new YoVariableChangedProducer(host, producerPort, yoVariableHandshakeClient.getYoVariablesList());
@@ -67,7 +67,7 @@ public class YoVariableClient
       {
          yoVariableChangedProducer.start();
       }
-      yoVariableConsumer.start();
+      yoVariableConsumer.start(yoVariableHandshakeClient.getNumberOfVariables(), yoVariableHandshakeClient.getNumberOfJointStateVariables());
       listener.start();
 
       started = true;
