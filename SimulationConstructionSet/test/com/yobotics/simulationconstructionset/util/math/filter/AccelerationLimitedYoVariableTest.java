@@ -1,7 +1,6 @@
 package com.yobotics.simulationconstructionset.util.math.filter;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.util.Random;
 
@@ -19,9 +18,9 @@ import com.yobotics.simulationconstructionset.util.math.functionGenerator.YoFunc
 
 public class AccelerationLimitedYoVariableTest
 {
-   public static double epsilon = 1e-10;
+   public static final double EPSILON = 1e-8;
    private final Random random = new Random(3456456456456L);
-   
+
    @Test
    public void testAccelerationLimitedYoVariable()
    {
@@ -31,24 +30,23 @@ public class AccelerationLimitedYoVariableTest
       scs.startOnAThread();
 
       YoVariableRegistry registry = scs.getRootRegistry();
-      DoubleYoVariable time = new DoubleYoVariable("time", registry);
       DoubleYoVariable maxRate = new DoubleYoVariable("maxRate", registry);
       DoubleYoVariable maxAcceleration = new DoubleYoVariable("maxAcceleration", registry);
       DoubleYoVariable variable = new DoubleYoVariable("variable", registry);
       String name = "accelerationLimitedYoVariable";
 
       AccelerationLimitedYoVariable accelerationLimitedYoVariable = new AccelerationLimitedYoVariable(name, registry, maxRate, maxAcceleration, dt);
-      
+
       try
       {
          DoubleYoVariable doubleYoVariable = new DoubleYoVariable(name, registry);
          fail();
       }
-      catch(RuntimeException rte)
+      catch (RuntimeException rte)
       {
          System.err.println("The previous namespace error was part of the AccelerationLimitedYoVariableTest.");
       }
-      
+
       assertEquals(name, accelerationLimitedYoVariable.getName());
    }
 
@@ -61,84 +59,117 @@ public class AccelerationLimitedYoVariableTest
       scs.startOnAThread();
 
       YoVariableRegistry registry = scs.getRootRegistry();
-      DoubleYoVariable time = new DoubleYoVariable("time", registry);
       DoubleYoVariable maxRate = new DoubleYoVariable("maxRate", registry);
       DoubleYoVariable maxAcceleration = new DoubleYoVariable("maxAcceleration", registry);
-      DoubleYoVariable variable = new DoubleYoVariable("variable", registry);
       String name = "accelerationLimitedYoVariable";
 
       AccelerationLimitedYoVariable accelerationLimitedYoVariable = new AccelerationLimitedYoVariable(name, registry, maxRate, maxAcceleration, dt);
-      
+
       try
       {
          DoubleYoVariable doubleYoVariable = new DoubleYoVariable(name, registry);
          fail();
       }
-      catch(RuntimeException rte)
+      catch (RuntimeException rte)
       {
          System.err.println("The previous namespace error was part of the AccelerationLimitedYoVariableTest.");
       }
-      
+
       assertEquals(name, accelerationLimitedYoVariable.getName());
    }
-   
+
+   /*
+    * To view this test properly in SCS, create three graphs and add: to the
+    * first: raw & processed, 
+    * to the second: rawRate, processedSmoothedRate, and max_Rate, 
+    * to the third: processedSmoothAcceleration & max_Acceleration
+    */
+   @Ignore
    @Test
    public void testSetMaximumAcceleration()
    {
-      SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("test"));
-      double dt = 0.006;
+      double maxAcceleration = 10.0;
+      double maxRate = 1.0;
+      double iteratorIncrement = 0.0005;
+      double dt = 0.001;
+      double permissibleErrorRatio = 0.1;
+      Robot robot = new Robot("bip");
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot);
+      YoVariableRegistry registry = new YoVariableRegistry("blop");
+      scs.getRootRegistry().addChild(registry);
+      DoubleYoVariable maxRateYo = new DoubleYoVariable("max_Rate", registry);
+      boolean notifyListeners = true;
+      maxRateYo.set(maxRate, notifyListeners);
+      DoubleYoVariable maxAccelerationYo = new DoubleYoVariable("max_Acceleration", registry);
+      maxAccelerationYo.set(maxAcceleration, notifyListeners);
+      AccelerationLimitedYoVariable processed = new AccelerationLimitedYoVariable("processed", registry, maxRateYo, maxAccelerationYo, dt);
+      DoubleYoVariable raw = new DoubleYoVariable("raw", registry);
+      DoubleYoVariable alphaVariable = new DoubleYoVariable("alpha", registry);
+      FilteredVelocityYoVariable rawRate = new FilteredVelocityYoVariable("rawRate", "", alphaVariable, raw, dt, registry);
 
+      int bufferSize = (int) (maxAcceleration / iteratorIncrement) + 1;
+      scs.changeBufferSize(bufferSize);
+
+      String[] vars = {"raw", "processed", "rawRate", "processedSmoothRate", "max_Rate", "processedSmoothAcceleration", "max_Acceleration"};
+      scs.setupVarGroup("Acceleration Var Group", vars);
+      
+      String[][] graphGroupVars = { { "raw", "processed"}, { "max_Rate", "rawRate", "processedSmoothRate" }, { "processedSmoothAcceleration", "max_Acceleration" } };
+      scs.setupGraphGroup("GraphGroup for Acceleration", graphGroupVars);
+      
+      String[] entryBoxGroupVars = { "raw", "processed", "raw" };
+      scs.setupEntryBoxGroup("Acceleration Entry Box", entryBoxGroupVars);
+      
+      scs.setupConfiguration("Acceleration Config", "Acceleration Var Group", "GraphGroup for Acceleration", "Acceleration Entry Box");
+      scs.selectConfiguration("Acceleration Config");
+      
+      for (double i = 0.0; i < 10.0; i += iteratorIncrement)
+      {
+         raw.set(i);
+         rawRate.update();
+         processed.update(i);
+         scs.tickAndUpdate();
+         //         assertTrue(isValueWithinMarginOfError(raw.getDoubleValue(), processed.getDoubleValue(), permissibleErrorRatio));
+      }
       scs.startOnAThread();
-
-      YoVariableRegistry registry = scs.getRootRegistry();
-      DoubleYoVariable time = new DoubleYoVariable("time", registry);
-      DoubleYoVariable maxRate = new DoubleYoVariable("maxRate", registry);
-      DoubleYoVariable maxAcceleration = new DoubleYoVariable("maxAcceleration", registry);
-      DoubleYoVariable variable = new DoubleYoVariable("variable", registry);
-      String name = "accelerationLimitedYoVariable";
-
-      AccelerationLimitedYoVariable accelerationLimitedYoVariable = new AccelerationLimitedYoVariable(name, registry, maxRate, maxAcceleration, dt);
-      double maximumAcceleration = random.nextDouble();
-      accelerationLimitedYoVariable.setMaximumAcceleration(maximumAcceleration);
-//      assertEquals(maximumAcceleration, accelerationLimitedYoVariable, epsilon);
+      ThreadTools.sleepForever();
    }
-   
+
    @Test
    public void testSetMaximumRate()
    {
-      
+
    }
-   
+
    @Test
    public void testSetGainsByPolePlacement()
    {
-      
+
    }
-   
+
    @Test
    public void testUpdate()
    {
-      
+
    }
-   
+
    @Test
    public void testUpdate_double()
    {
-      
+
    }
-   
+
    @Test
    public void testInitialize()
    {
-      
+
    }
-   
+
    @Test
    public void testReset()
    {
-      
+
    }
-   
+
    @Ignore
    @Test
    public void testDump()
@@ -202,5 +233,19 @@ public class AccelerationLimitedYoVariableTest
       scs.cropBuffer();
       ThreadTools.sleepForever();
    }
-   
+
+   private boolean isValueWithinMarginOfError(double correctValue, double valueInQuestion, double permissibleErrorRatio)
+   {
+      double result = Math.abs(correctValue - valueInQuestion) / correctValue;
+
+      if (result <= permissibleErrorRatio)
+      {
+         return true;
+      }
+      else
+      {
+         System.out.println("result" + result);
+         return false;
+      }
+   }
 }
