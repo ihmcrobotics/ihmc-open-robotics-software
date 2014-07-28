@@ -42,7 +42,7 @@ import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.TotalMassCalculator;
 import us.ihmc.utilities.test.JUnitTools;
 
-public class ADotVTest
+public class CentroidalMomentumRateOfChangeADotVTermTest
 {
 
    private final Vector3d X = new Vector3d(1.0, 0.0, 0.0);
@@ -50,10 +50,11 @@ public class ADotVTest
    private final Vector3d Z = new Vector3d(0.0, 0.0, 1.0);
    private final double controlDT = 0.006;
    
-@Ignore
+@Test
 public void TestTree() throws UnreasonableAccelerationException
 {
-   Random random = new Random(16154L);
+   
+   Random random = new Random(167L);
 
    Robot robot = new Robot("robot");
    ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -63,7 +64,7 @@ public void TestTree() throws UnreasonableAccelerationException
    double gravity = 0.0;
 
    //Very simple, single link robot
-   int numberOfJoints = 2;
+   int numberOfJoints = 4;
    createRandomTreeRobotAndSetJointPositionsAndVelocities(robot, jointMap, worldFrame, elevator, numberOfJoints, gravity,
          true, true, random);
    robot.updateVelocities();
@@ -117,19 +118,16 @@ public void TestTree() throws UnreasonableAccelerationException
    DenseMatrix64F adotV = new DenseMatrix64F(6,1);
    ScrewTools.packJointVelocitiesMatrix(jointsInOrder, v);
    CommonOps.mult(centroidalMomentumMatrixDerivative, v, adotV);
-   
-   System.out.print(adotV + "\n");
-   System.out.print(aDotV1Analytical.getMatrix() + "\n");
 
    JUnitTools.assertMatrixEquals(adotV, aDotV1Analytical.getMatrix(), 1e-2);
 }
    
-@Test
+@Ignore
 public void TestFloatingChain() throws UnreasonableAccelerationException
 {
-   Random random = new Random();
+   Random random = new Random(100L);
    
-   Vector3d[] jointAxes = {X};//{X,Y,Z,Z,Y,X,X,Y,Z};
+   Vector3d[] jointAxes = {Y,X};
    ScrewTestTools.RandomFloatingChain randomFloatingChain = new ScrewTestTools.RandomFloatingChain(random, jointAxes);
    
    InverseDynamicsJoint[] jointsInOrder = ScrewTools.computeSupportAndSubtreeJoints(randomFloatingChain.getElevator());
@@ -203,7 +201,7 @@ public void TestFloatingChain() throws UnreasonableAccelerationException
    
    System.out.print(aDotVAnalytical.getMatrix() + "\n");
    
-   JUnitTools.assertMatrixEquals(adotVNumerical, aDotVAnalytical.getMatrix(), 1e-2);
+   JUnitTools.assertMatrixEquals(adotVNumerical, aDotVAnalytical.getMatrix(), 1e-1);
    
 }
 
