@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge;
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.jme.JMEGraphics3DimAdapter;
+import us.ihmc.graphics3DAdapter.jme.JMEGraphics3DAdapter;
 
 import com.yobotics.simulationconstructionset.DynamicIntegrationMethod;
 import com.yobotics.simulationconstructionset.Robot;
@@ -59,7 +59,7 @@ public class DRCDemo01EnvironmentViewer
     robot.setGroundContactModel(groundContactModel);
     robot.setDynamicIntegrationMethod(DynamicIntegrationMethod.EULER_DOUBLE_STEPS);
 //      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false);
-       JMEGraphics3DimAdapter graphicsAdapter=new JMEGraphics3DimAdapter();
+       JMEGraphics3DAdapter graphicsAdapter=new JMEGraphics3DAdapter();
       SimulationConstructionSet scs = new SimulationConstructionSet(robot, graphicsAdapter, initialBufferSize);
 
       scs.setDT(simulateDT, 16342);

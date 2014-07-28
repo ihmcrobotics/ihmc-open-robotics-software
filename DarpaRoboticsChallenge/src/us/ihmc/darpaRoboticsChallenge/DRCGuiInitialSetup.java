@@ -13,7 +13,7 @@ import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.graphics3DAdapter.NullGraphics3DAdapter;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.jme.JMEGraphics3DimAdapter;
+import us.ihmc.graphics3DAdapter.jme.JMEGraphics3DAdapter;
 
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
@@ -133,7 +133,7 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
    {
       if (isGuiShown && is3dGraphicsShown)
       {
-         return new JMEGraphics3DimAdapter();
+         return new JMEGraphics3DAdapter();
       }
       else if (isGuiShown)
       {
