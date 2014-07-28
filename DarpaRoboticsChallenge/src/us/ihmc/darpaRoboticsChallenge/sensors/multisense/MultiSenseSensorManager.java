@@ -4,7 +4,6 @@ import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotLidarParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPointCloudParameters;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ArmCalibrationHelper;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.CameraInfoReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.CameraLogger;
@@ -81,7 +80,7 @@ public class MultiSenseSensorManager
    private void registerLidarReceivers()
    {
       new MultisenseLidarDataReceiver(depthDataProcessor, rosTransformProvider, ppsTimestampOffsetProvider, sharedRobotPoseBuffer, rosMainNode,
-            rosNativeNetworkProcessor, lidarParamaters);
+            lidarParamaters);
    }
    
    private void registerCameraReceivers()

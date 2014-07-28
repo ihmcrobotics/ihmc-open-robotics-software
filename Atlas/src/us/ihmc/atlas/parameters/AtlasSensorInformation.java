@@ -71,7 +71,7 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    private final String lidarEndFrame = multisense_namespace + "/head_hokuyo_frame";
    
    private static final String lidarSensorName = "head_hokuyo_sensor";
-   private static final String lidarJointTopic = multisense_namespace + "joint_states";
+   private static final String lidarJointTopic = multisense_namespace + "/joint_states";
    private static final String multisense_laser_topic_string = multisense_namespace+"/lidar_scan";
    private static final String bodyIMUSensor = "pelvis_imu_sensor";
    private static final String[] imuSensorsToUse = { bodyIMUSensor };
