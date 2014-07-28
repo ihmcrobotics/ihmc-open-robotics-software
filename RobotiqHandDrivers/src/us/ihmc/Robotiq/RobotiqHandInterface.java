@@ -1,6 +1,7 @@
 package us.ihmc.Robotiq;
 
 import java.io.IOException;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 
@@ -696,9 +697,15 @@ public final class RobotiqHandInterface
 			}
 			dataLength = counter+6;
 		}
-		try {
+		try
+		{
 			return connection.transcieve(RobotiqHandParameters.UNIT_ID, Arrays.copyOfRange(data, 0, dataLength));
-		} catch (IOException e) {
+		} catch (SocketException e)
+		{
+			connected = false;
+			e.printStackTrace();
+		} catch (IOException e)
+		{
 			System.err.println("Unable to send Modbus request");
 			e.printStackTrace();
 		}
