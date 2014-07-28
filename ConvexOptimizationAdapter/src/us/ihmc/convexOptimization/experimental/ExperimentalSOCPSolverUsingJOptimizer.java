@@ -6,12 +6,9 @@ import java.util.ArrayList;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-
-
 import com.joptimizer.functions.ConvexMultivariateRealFunction;
 import com.joptimizer.functions.LinearMultivariateRealFunction;
 import com.joptimizer.functions.PSDQuadraticMultivariateRealFunction;
-import com.joptimizer.functions.QuadraticMultivariateRealFunction;
 import com.joptimizer.optimizers.JOptimizer;
 import com.joptimizer.optimizers.OptimizationRequest;
 import com.joptimizer.optimizers.OptimizationResponse;
