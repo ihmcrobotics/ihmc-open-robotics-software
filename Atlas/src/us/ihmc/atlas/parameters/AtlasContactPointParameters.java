@@ -173,7 +173,7 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
          {
             // add ankle joint contact points on each corner of the foot
             Point3d gcOffset = new Point3d(footGC.getX(), footGC.getY(), 0.0);
-            AtlasPhysicalProperties.ankleToSoleFrameTransform.transform(gcOffset);
+            AtlasPhysicalProperties.ankleToSoleFrameTransforms.get(robotSide).transform(gcOffset);
             jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(jointMap.getJointBeforeFootName(robotSide), new Vector3d(gcOffset)));
          }
       }
