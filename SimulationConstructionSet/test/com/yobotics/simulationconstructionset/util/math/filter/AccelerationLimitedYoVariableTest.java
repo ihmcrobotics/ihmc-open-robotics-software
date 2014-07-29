@@ -271,6 +271,7 @@ public class AccelerationLimitedYoVariableTest
    {
    }
 
+   
    @Test
    public void testInitialize()
    {
@@ -430,6 +431,14 @@ public class AccelerationLimitedYoVariableTest
       ThreadTools.sleepForever();
    }
 
+   @Test
+   public void testErrorTooHigh()
+   {
+	 
+	   assertFalse(isValueWithinMarginOfError(1.0, 0.0, 0.1));
+	   assertTrue(isValueWithinMarginOfError(1.0, 0.9, 0.11));
+   }
+   
    private boolean isValueWithinMarginOfError(double correctValue, double valueInQuestion, double permissibleErrorRatio)
    {
       double denominator = (correctValue == 0.0) ? EPSILON : correctValue;
