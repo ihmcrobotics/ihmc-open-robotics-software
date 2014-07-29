@@ -19,6 +19,7 @@ public class ValkyriePhysicalProperties extends DRCRobotPhysicalProperties
    public static final double pelvisToFoot = 0.887 + 0.3;
 
    public static final SideDependentList<Transform3D> soleToAnkleFrameTransforms = new SideDependentList<>();
+   public static final SideDependentList<Transform3D> handControlFrameToWristTransforms = new SideDependentList<Transform3D>(new Transform3D(), new Transform3D());
 
    static
    {
