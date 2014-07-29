@@ -297,7 +297,7 @@ public class AtlasJointMap implements DRCRobotJointMap
    @Override
    public SideDependentList<Transform3D> getAnkleToSoleFrameTransform()
    {
-      return new SideDependentList<Transform3D>(AtlasPhysicalProperties.ankleToSoleFrameTransform, AtlasPhysicalProperties.ankleToSoleFrameTransform);
+      return AtlasPhysicalProperties.ankleToSoleFrameTransforms;
    }
 
    @Override

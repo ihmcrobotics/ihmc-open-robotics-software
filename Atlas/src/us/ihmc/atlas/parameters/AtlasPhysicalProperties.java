@@ -1,9 +1,10 @@
 package us.ihmc.atlas.parameters;
 
 import javax.media.j3d.Transform3D;
-import javax.vecmath.Vector3d;
 
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
+import us.ihmc.robotSide.RobotSide;
+import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.TransformTools;
 
 public class AtlasPhysicalProperties extends DRCRobotPhysicalProperties
@@ -19,9 +20,19 @@ public class AtlasPhysicalProperties extends DRCRobotPhysicalProperties
    public static final double footBack = 0.09;    // 0.06;   //0.082;    // 0.07;
    public static final double footStartToetaperFromBack = 0.195;
    public static final double footForward = footLength - footBack;    // 0.16;   //0.178;    // 0.18;
-   public static final Transform3D ankleToSoleFrameTransform = TransformTools.createTranslationTransform(new Vector3d(footLength / 2.0 - footBack, 0.0, -ankleHeight));
    public static final double shinLength = 0.374;
    public static final double thighLength = 0.422;
+
+   public static final SideDependentList<Transform3D> ankleToSoleFrameTransforms = new SideDependentList<>();
+   
+   static
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         Transform3D ankleToSoleFrame = TransformTools.createTranslationTransform(footLength / 2.0 - footBack, 0.0, -ankleHeight);
+         ankleToSoleFrameTransforms.put(robotSide, ankleToSoleFrame);
+      }
+   }
 
    @Override
    public double getAnkleHeight()
