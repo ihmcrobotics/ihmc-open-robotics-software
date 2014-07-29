@@ -301,6 +301,12 @@ public class AtlasJointMap implements DRCRobotJointMap
    }
 
    @Override
+   public Transform3D getHandControlFrameToWristTransform(RobotSide robotSide)
+   {
+      return AtlasPhysicalProperties.handControlFrameToWristTransforms.get(robotSide);
+   }
+
+   @Override
    public String getLegJointName(RobotSide robotSide, LegJointName legJointName)
    {
       return legJointStrings.get(robotSide).get(legJointName);

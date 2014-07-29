@@ -48,6 +48,8 @@ public interface SDFJointNameMap extends RobotSpecificJointNames
 
    public Transform3D getSoleToAnkleFrameTransform(RobotSide robotSide);
 
+   public Transform3D getHandControlFrameToWristTransform(RobotSide robotSide);
+
    public boolean isTorqueVelocityLimitsEnabled();
 
    public Set<String> getLastSimulatedJoints();
