@@ -22,17 +22,17 @@ public class DataBufferTest
    }
 
    private EnumYoVariable<EnumYoVariableTestEnums> enumYoVariable;
-   DoubleYoVariable doubleYoVariable;
-   BooleanYoVariable booleanYoVariable;
-   IntegerYoVariable integerYoVariable;
-   YoVariableRegistry registry;
-   DataBuffer dataBuffer = new DataBuffer(testBufferSize);
+   private DoubleYoVariable doubleYoVariable;
+   private BooleanYoVariable booleanYoVariable;
+   private IntegerYoVariable integerYoVariable;
+   private YoVariableRegistry registry;
+   private DataBuffer dataBuffer = new DataBuffer(testBufferSize);
 
    public DataBufferTest()
    {
-
+      
    }
-
+   
    @Before
    public void setUp()
    {
