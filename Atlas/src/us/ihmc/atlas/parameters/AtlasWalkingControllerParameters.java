@@ -26,7 +26,6 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    private final boolean runningOnRealRobot;
    private final SideDependentList<Transform3D> handControlFramesWithRespectToFrameAfterWrist = new SideDependentList<Transform3D>();
    private final SideDependentList<Transform3D> handPosesWithRespectToChestFrame = new SideDependentList<Transform3D>();
-   private final double minElbowRollAngle = 0.5;
 
    // Limits
    private final double neck_pitch_upper_limit = 1.14494; //0.83;    // true limit is = 1.134460, but pitching down more just looks at more robot chest
@@ -686,28 +685,6 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    }
 
 
-   @Override
-   public Map<OneDoFJoint, Double> getMinTaskspaceArmJointPositions(FullRobotModel fullRobotModel, RobotSide robotSide)
-   {
-      Map<OneDoFJoint, Double> ret = new LinkedHashMap<OneDoFJoint, Double>();
-      if (robotSide == RobotSide.LEFT)
-      {
-         ret.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_ROLL), minElbowRollAngle);
-      }
-      return ret;
-   }
-
-   @Override
-   public Map<OneDoFJoint, Double> getMaxTaskspaceArmJointPositions(FullRobotModel fullRobotModel, RobotSide robotSide)
-   {
-      Map<OneDoFJoint, Double> ret = new LinkedHashMap<OneDoFJoint, Double>();
-      if (robotSide == RobotSide.RIGHT)
-      {
-         ret.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_ROLL), -minElbowRollAngle);
-      }
-      return ret;
-   }
-   
    @Override
    public SideDependentList<Transform3D> getHandControlFramesWithRespectToFrameAfterWrist()
    {
