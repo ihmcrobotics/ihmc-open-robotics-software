@@ -12,8 +12,6 @@ public class AtlasPhysicalProperties extends DRCRobotPhysicalProperties
    public static final double ankleHeight = 0.084;
    public static final double pelvisToFoot = 0.887;
 
-   // this transform is probably in the wrong direction.  The ankle is above the sole,  so the origin of the ankle should have a positive z value
-   // from the point of view of the sole.  With this transform it will have a negative value -- PA
    public static final double footWidth = 0.12;    // 0.08;   //0.124887;
    public static final double toeWidth = 0.095;    // 0.07;   //0.05;   //
    public static final double footLength = 0.255;
@@ -23,14 +21,14 @@ public class AtlasPhysicalProperties extends DRCRobotPhysicalProperties
    public static final double shinLength = 0.374;
    public static final double thighLength = 0.422;
 
-   public static final SideDependentList<Transform3D> ankleToSoleFrameTransforms = new SideDependentList<>();
+   public static final SideDependentList<Transform3D> soleToAnkleFrameTransforms = new SideDependentList<>();
    
    static
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         Transform3D ankleToSoleFrame = TransformTools.createTranslationTransform(footLength / 2.0 - footBack, 0.0, -ankleHeight);
-         ankleToSoleFrameTransforms.put(robotSide, ankleToSoleFrame);
+         Transform3D soleToAnkleFrame = TransformTools.createTranslationTransform(footLength / 2.0 - footBack, 0.0, -ankleHeight);
+         soleToAnkleFrameTransforms.put(robotSide, soleToAnkleFrame);
       }
    }
 

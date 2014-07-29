@@ -133,8 +133,8 @@ public class SDFFullRobotModel implements FullRobotModel
 
       for(RobotSide robotSide : RobotSide.values)
       {
-         Transform3D soleToFootTransform = sdfJointNameMap.getAnkleToSoleFrameTransforms().get(robotSide);
-         ReferenceFrame soleFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(robotSide.getCamelCaseNameForStartOfExpression() + "Sole", getEndEffectorFrame(robotSide, LimbName.LEG), soleToFootTransform);
+         Transform3D soleToAnkleTransform = sdfJointNameMap.getSoleToAnkleFrameTransform(robotSide);
+         ReferenceFrame soleFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(robotSide.getCamelCaseNameForStartOfExpression() + "Sole", getEndEffectorFrame(robotSide, LimbName.LEG), soleToAnkleTransform);
          soleFrames.put(robotSide, soleFrame); 
       }
 

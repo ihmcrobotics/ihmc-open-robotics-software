@@ -7,7 +7,6 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotSide.RobotSide;
-import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
@@ -47,7 +46,7 @@ public interface SDFJointNameMap extends RobotSpecificJointNames
 
    public List<Pair<String, Vector3d>> getJointNameGroundContactPointMap();
 
-   public SideDependentList<Transform3D> getAnkleToSoleFrameTransforms();
+   public Transform3D getSoleToAnkleFrameTransform(RobotSide robotSide);
 
    public boolean isTorqueVelocityLimitsEnabled();
 
