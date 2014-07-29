@@ -21,7 +21,7 @@ import java.util.Map;
  */
 public class CentroidalMomentumHandler
 {
-   private final boolean USE_NUMERICALLY_DIFFERENTIATED_CENTROIDAL_MOMENTUM_MATRIX = true;
+   private final boolean USE_NUMERICALLY_DIFFERENTIATED_CENTROIDAL_MOMENTUM_MATRIX = false;
    
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final CentroidalMomentumMatrix centroidalMomentumMatrix;
