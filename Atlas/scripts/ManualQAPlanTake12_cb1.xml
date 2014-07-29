@@ -96,14 +96,6 @@
     <pause>true</pause>
   </us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.PauseCommand>
   <long>56362401760</long>
-  <com.yobotics.simulationconstructionset.simulatedSensors.LidarClearCommand>
-    <lidarTree>OCTREE</lidarTree>
-  </com.yobotics.simulationconstructionset.simulatedSensors.LidarClearCommand>
-  <long>75211522155</long>
-  <com.yobotics.simulationconstructionset.simulatedSensors.LidarClearCommand>
-    <lidarTree>OCTREE</lidarTree>
-  </com.yobotics.simulationconstructionset.simulatedSensors.LidarClearCommand>
-  <long>101196131133</long>
   <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList>
     <footstepDataList>
       <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
@@ -459,10 +451,6 @@
       <double>0.2638502275424356</double>
     </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
-  <long>195770340173</long>
-  <com.yobotics.simulationconstructionset.simulatedSensors.LidarClearCommand>
-    <lidarTree>OCTREE</lidarTree>
-  </com.yobotics.simulationconstructionset.simulatedSensors.LidarClearCommand>
   <long>220336356789</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
