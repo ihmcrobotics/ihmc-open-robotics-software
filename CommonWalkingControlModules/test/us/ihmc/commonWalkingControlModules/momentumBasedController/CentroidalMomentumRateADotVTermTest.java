@@ -27,7 +27,7 @@ import us.ihmc.utilities.math.geometry.CenterOfMassReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.CenterOfMassCalculator;
 import us.ihmc.utilities.screwTheory.CentroidalMomentumMatrix;
-import us.ihmc.utilities.screwTheory.InefficientRateOfChangeOfCentroidalMomentumADotVTerm;
+import us.ihmc.utilities.screwTheory.CentroidalMomentumRateADotVTerm;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RevoluteJoint;
@@ -84,7 +84,7 @@ public void TestTree() throws UnreasonableAccelerationException
    DenseMatrix64F v = new DenseMatrix64F(numberOfJoints,1);
    ScrewTools.packJointVelocitiesMatrix(jointsInOrder, v);
    
-   InefficientRateOfChangeOfCentroidalMomentumADotVTerm aDotV1Analytical = new InefficientRateOfChangeOfCentroidalMomentumADotVTerm(elevator, 
+   CentroidalMomentumRateADotVTerm aDotV1Analytical = new CentroidalMomentumRateADotVTerm(elevator, 
          centerOfMassFrame, centroidalMomentumMatrix0, totalMass,v);
 
    // Compute initial A matrix at initial condition
@@ -123,9 +123,9 @@ public void TestTree() throws UnreasonableAccelerationException
 @Ignore
 public void TestFloatingChain() throws UnreasonableAccelerationException
 {
-   Random random = new Random(167L);
+   Random random = new Random();
    
-   Vector3d[] jointAxes = {X};
+   Vector3d[] jointAxes = {Y,Y,Y,Y};
    ScrewTestTools.RandomFloatingChain randomFloatingChain = new ScrewTestTools.RandomFloatingChain(random, jointAxes);
    
    InverseDynamicsJoint[] jointsInOrder = ScrewTools.computeSupportAndSubtreeJoints(randomFloatingChain.getElevator());
@@ -157,7 +157,7 @@ public void TestFloatingChain() throws UnreasonableAccelerationException
       scsRobotJoints.get(i).setQd(randomFloatingChain.getRevoluteJoints().get(i).getQd());
       scsRobotJoints.get(i).setQdd(randomFloatingChain.getRevoluteJoints().get(i).getQdd());
       
-      scsRobotJoints.get(i).setTau(0.0);
+//      scsRobotJoints.get(i).setTau(0.0);
    }
    scsRobot.updateVelocities();
 
@@ -165,7 +165,7 @@ public void TestFloatingChain() throws UnreasonableAccelerationException
    scsRobot.updateVelocities();
 
    CentroidalMomentumMatrix aMatrix = new CentroidalMomentumMatrix(randomFloatingChain.getElevator(), centerOfMassFrame);
-   InefficientRateOfChangeOfCentroidalMomentumADotVTerm aDotVAnalytical = new InefficientRateOfChangeOfCentroidalMomentumADotVTerm(randomFloatingChain.getElevator(), 
+   CentroidalMomentumRateADotVTerm aDotVAnalytical = new CentroidalMomentumRateADotVTerm(randomFloatingChain.getElevator(), 
          centerOfMassFrame, aMatrix, totalMass,v);
    
    for(int i=0;i<randomFloatingChain.getRevoluteJoints().size();i++)
@@ -196,11 +196,11 @@ public void TestFloatingChain() throws UnreasonableAccelerationException
    DenseMatrix64F tmpMatrix = new DenseMatrix64F(previousAMatrix.getMatrix().numRows, previousAMatrix.getMatrix().numCols);
    CommonOps.sub(previousAMatrix.getMatrix(), aMatrix.getMatrix(), tmpMatrix);
    
-//   System.out.print(adotVNumerical + "\n");
-//   
-//   System.out.print(aDotVAnalytical.getMatrix() + "\n");
+   System.out.print(adotVNumerical + "\n");
    
-   JUnitTools.assertMatrixEquals(adotVNumerical, aDotVAnalytical.getMatrix(), 1e-1);
+   System.out.print(aDotVAnalytical.getMatrix() + "\n");
+   
+   JUnitTools.assertMatrixEquals(adotVNumerical, aDotVAnalytical.getMatrix(), 1e-0);
    
 }
 
