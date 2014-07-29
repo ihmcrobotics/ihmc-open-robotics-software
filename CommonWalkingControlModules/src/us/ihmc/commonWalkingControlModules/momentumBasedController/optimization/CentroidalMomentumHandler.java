@@ -74,15 +74,11 @@ public class CentroidalMomentumHandler
 
    public void initialize()
    {
-      centroidalMomentumMatrix.compute();
       if(USE_NUMERICALLY_DIFFERENTIATED_CENTROIDAL_MOMENTUM_MATRIX)
       {
+         centroidalMomentumMatrix.compute();
          previousCentroidalMomentumMatrix.set(centroidalMomentumMatrix.getMatrix());
          MatrixYoVariableConversionTools.storeInYoVariables(previousCentroidalMomentumMatrix, yoPreviousCentroidalMomentumMatrix);
-      }
-      else
-      {
-         aDotVAnalytical.initialize();
       }
    }
 
