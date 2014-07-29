@@ -267,9 +267,9 @@ public class ValkyrieJointMap implements DRCRobotJointMap
    }
 
    @Override
-   public SideDependentList<Transform3D> getAnkleToSoleFrameTransforms()
+   public Transform3D getSoleToAnkleFrameTransform(RobotSide robotSide)
    {
-      return ValkyriePhysicalProperties.ankleToSoleFrameTransforms;
+      return ValkyriePhysicalProperties.soleToAnkleFrameTransforms.get(robotSide);
    }
 
    @Override
