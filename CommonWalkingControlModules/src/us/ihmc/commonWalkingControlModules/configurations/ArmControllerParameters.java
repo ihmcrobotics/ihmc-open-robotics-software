@@ -1,5 +1,11 @@
 package us.ihmc.commonWalkingControlModules.configurations;
 
+import java.util.Map;
+
+import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
+
 public interface ArmControllerParameters
 {
    public abstract double getArmJointspaceKp();
@@ -25,4 +31,6 @@ public interface ArmControllerParameters
    public abstract boolean useInverseKinematicsTaskspaceControl();
    
    public abstract boolean doLowLevelPositionControl();
+
+   public abstract Map<OneDoFJoint, Double> getDefaultArmJointPositions(FullRobotModel fullRobotModel, RobotSide robotSide);
 }
