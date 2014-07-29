@@ -40,7 +40,7 @@ public class CentroidalMomentumHandler
    private final DenseMatrix64F hdot = new DenseMatrix64F(Momentum.SIZE, 1);
    private final DenseMatrix64F centroidalMomentumEquationRightHandSide = new DenseMatrix64F(Momentum.SIZE, 1);
    private final ReferenceFrame centerOfMassFrame;
-   private final InefficientRateOfChangeOfCentroidalMomentumADotVTerm aDotVAnalytical;
+   private final CentroidalMomentumRateADotVTerm aDotVAnalytical;
 
    public CentroidalMomentumHandler(InverseDynamicsJoint rootJoint, ReferenceFrame centerOfMassFrame, double controlDT, YoVariableRegistry parentRegistry)
    {
@@ -69,7 +69,7 @@ public class CentroidalMomentumHandler
 
       parentRegistry.addChild(registry);
       
-      this.aDotVAnalytical = new InefficientRateOfChangeOfCentroidalMomentumADotVTerm(ScrewTools.getRootBody(rootJoint.getPredecessor()), centerOfMassFrame, centroidalMomentumMatrix, TotalMassCalculator.computeSubTreeMass(rootJoint.getSuccessor()),v);
+      this.aDotVAnalytical = new CentroidalMomentumRateADotVTerm(ScrewTools.getRootBody(rootJoint.getPredecessor()), centerOfMassFrame, centroidalMomentumMatrix, TotalMassCalculator.computeSubTreeMass(rootJoint.getSuccessor()),v);
    }
 
    public void initialize()
