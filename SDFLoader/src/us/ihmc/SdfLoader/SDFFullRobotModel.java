@@ -75,6 +75,7 @@ public class SDFFullRobotModel implements FullRobotModel
    private final HashMap<String, FrameVector> lidarAxis = new HashMap<String, FrameVector>();
 
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
+   private final SideDependentList<ReferenceFrame> handControlFrames = new SideDependentList<>();
    private final HashMap<String, ReferenceFrame> sensorFrames = new HashMap<String, ReferenceFrame>();
    private final String[] sensorLinksToTrack;
 
@@ -134,10 +135,21 @@ public class SDFFullRobotModel implements FullRobotModel
       for(RobotSide robotSide : RobotSide.values)
       {
          Transform3D soleToAnkleTransform = sdfJointNameMap.getSoleToAnkleFrameTransform(robotSide);
-         ReferenceFrame soleFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(robotSide.getCamelCaseNameForStartOfExpression() + "Sole", getEndEffectorFrame(robotSide, LimbName.LEG), soleToAnkleTransform);
+         String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
+         ReferenceFrame soleFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(sidePrefix + "Sole", getEndEffectorFrame(robotSide, LimbName.LEG), soleToAnkleTransform);
          soleFrames.put(robotSide, soleFrame); 
-      }
 
+         Transform3D handControlFrameToWristTransform = sdfJointNameMap.getHandControlFrameToWristTransform(robotSide);
+         if (handControlFrameToWristTransform != null)
+         {
+            ReferenceFrame handControlFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(sidePrefix + "HandControlFrame", getEndEffectorFrame(robotSide, LimbName.ARM), handControlFrameToWristTransform);
+            handControlFrames.put(robotSide, handControlFrame);
+         }
+         else
+         {
+            handControlFrames.put(robotSide, null);
+         }
+      }
    }
 
    public String getModelName()
@@ -509,6 +521,12 @@ public class SDFFullRobotModel implements FullRobotModel
    public ReferenceFrame getSoleFrame(RobotSide robotSide)
    {
       return soleFrames.get(robotSide);
+   }
+
+   @Override
+   public ReferenceFrame getHandControlFrame(RobotSide robotSide)
+   {
+      return handControlFrames.get(robotSide);
    }
 
    public ReferenceFrame getHeadBaseFrame()
