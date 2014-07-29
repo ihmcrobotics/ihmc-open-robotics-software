@@ -52,18 +52,6 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    }
 
    @Override
-   public Map<OneDoFJoint, Double> getMinTaskspaceArmJointPositions(FullRobotModel fullRobotModel, RobotSide robotSide)
-   {
-      return new LinkedHashMap<OneDoFJoint, Double>();
-   }
-
-   @Override
-   public Map<OneDoFJoint, Double> getMaxTaskspaceArmJointPositions(FullRobotModel fullRobotModel, RobotSide robotSide)
-   {
-      return new LinkedHashMap<OneDoFJoint, Double>();
-   }
-
-   @Override
    public boolean stayOnToes()
    {
       return false; // Not working for now
