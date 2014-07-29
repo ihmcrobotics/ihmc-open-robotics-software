@@ -47,7 +47,7 @@ public interface SDFJointNameMap extends RobotSpecificJointNames
 
    public List<Pair<String, Vector3d>> getJointNameGroundContactPointMap();
 
-   public SideDependentList<Transform3D> getAnkleToSoleFrameTransform();
+   public SideDependentList<Transform3D> getAnkleToSoleFrameTransforms();
 
    public boolean isTorqueVelocityLimitsEnabled();
 
