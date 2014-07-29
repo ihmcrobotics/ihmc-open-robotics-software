@@ -21,7 +21,6 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
 
    private final SideDependentList<Transform3D> handControlFramesWithRespectToFrameAfterWrist = new SideDependentList<Transform3D>();
    private final SideDependentList<Transform3D> handPosesWithRespectToChestFrame = new SideDependentList<Transform3D>();
-   private final double minElbowRollAngle = 0.5;
 
    private final double upperNeckExtensorUpperLimit = 0.785398;
    private final double upperNeckExtensorLowerLimit = -0.0872665;
@@ -83,28 +82,6 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.WRIST_ROLL), 0.0);
       
       return jointPositions;
-   }
-
-   @Override
-   public Map<OneDoFJoint, Double> getMinTaskspaceArmJointPositions(FullRobotModel fullRobotModel, RobotSide robotSide)
-   {
-      Map<OneDoFJoint, Double> ret = new LinkedHashMap<OneDoFJoint, Double>();
-      if (robotSide == RobotSide.LEFT)
-      {
-         ret.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_YAW), minElbowRollAngle);
-      }
-      return ret;
-   }
-
-   @Override
-   public Map<OneDoFJoint, Double> getMaxTaskspaceArmJointPositions(FullRobotModel fullRobotModel, RobotSide robotSide)
-   {
-      Map<OneDoFJoint, Double> ret = new LinkedHashMap<OneDoFJoint, Double>();
-      if (robotSide == RobotSide.RIGHT)
-      {
-         ret.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_YAW), minElbowRollAngle);
-      }
-      return ret;
    }
 
    @Override
