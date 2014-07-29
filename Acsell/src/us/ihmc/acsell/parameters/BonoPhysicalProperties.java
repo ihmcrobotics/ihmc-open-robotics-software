@@ -8,7 +8,6 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.TransformTools;
 
-
 public class BonoPhysicalProperties extends DRCRobotPhysicalProperties
 {
    public static final double ankleHeight = 0.00;
@@ -22,23 +21,24 @@ public class BonoPhysicalProperties extends DRCRobotPhysicalProperties
    public static final double pelvisToFoot = 0.887;
 
    public static final SideDependentList<Transform3D> soleToAnkleFrameTransforms = new SideDependentList<Transform3D>();
-   static {
-      for(RobotSide robotSide : RobotSide.values())
+   public static final SideDependentList<Transform3D> handControlFrameToWristTransforms = new SideDependentList<Transform3D>(new Transform3D(), new Transform3D());
+   static
+   {
+      for (RobotSide robotSide : RobotSide.values())
       {
-         Transform3D soleToAnkleFrame = TransformTools.yawPitchDegreesTransform(new Vector3d(footLength / 2.0 - footBack, 0.0, -ankleHeight), 0.0, Math.toDegrees(0.0*0.18704));
+         Transform3D soleToAnkleFrame = TransformTools.yawPitchDegreesTransform(new Vector3d(footLength / 2.0 - footBack, 0.0, -ankleHeight), 0.0, Math.toDegrees(0.0 * 0.18704));
          soleToAnkleFrameTransforms.put(robotSide, soleToAnkleFrame);
       }
    }
-   
+
    @Override
    public double getAnkleHeight()
    {
       return ankleHeight;
    }
-   
+
    public static Transform3D getAnkleToSoleFrameTransform(RobotSide side)
    {
       return soleToAnkleFrameTransforms.get(side);
    }
-
 }

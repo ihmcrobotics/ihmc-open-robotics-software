@@ -1,16 +1,11 @@
 package us.ihmc.acsell.controlParameters;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import javax.media.j3d.Transform3D;
 
 import us.ihmc.acsell.parameters.BonoPhysicalProperties;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
-import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 /**
  * Created by dstephen on 2/14/14.
@@ -22,11 +17,6 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    private final SideDependentList<Transform3D> handPosesWithRespectToChestFrame = new SideDependentList<Transform3D>();
 
    private final boolean runningOnRealRobot;
-   
-   public BonoWalkingControllerParameters()
-   {
-      this(false);
-   }
    
    public BonoWalkingControllerParameters(boolean runningOnRealRobot)
    {

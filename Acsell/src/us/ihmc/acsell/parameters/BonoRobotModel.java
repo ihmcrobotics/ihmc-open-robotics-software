@@ -75,7 +75,7 @@ public class BonoRobotModel implements DRCRobotModel
 
       armControlParameters = new BonoArmControlParameters(runningOnRealRobot);
       walkingControllerParameters = new BonoWalkingControllerParameters(runningOnRealRobot);
-      multiContactControllerParameters = new BonoWalkingControllerParameters();
+      multiContactControllerParameters = new BonoWalkingControllerParameters(runningOnRealRobot);
    }
 
    @Override

@@ -119,6 +119,12 @@ public class BonoJointMap implements DRCRobotJointMap
    }
 
    @Override
+   public Transform3D getHandControlFrameToWristTransform(RobotSide robotSide)
+   {
+      return BonoPhysicalProperties.handControlFrameToWristTransforms.get(robotSide);
+   }
+
+   @Override
    public String[] getOrderedJointNames()
    {
       return jointNames;
