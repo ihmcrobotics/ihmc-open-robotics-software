@@ -268,6 +268,36 @@ public class SimulationConstructionSetTest
       scs = null;
       testFixture = null;
    }
+   
+   @Ignore
+   @Test
+   public void testSimulationConstructionSetNewViewportWindowUsingGUITestFixture() throws AWTException
+   {
+      FallingBrickRobot robot = new FallingBrickRobot();
+
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot);
+      scs.setDT(0.0001, 100);
+      scs.setFrameMaximized();
+      scs.startOnAThread();
+      scs.setSimulateDuration(2.0);
+
+      ThreadTools.sleep(2000);
+      SimulationGUITestFixture testFixture = new SimulationGUITestFixture(scs);
+      
+      testFixture.closeAllViewportWindows();
+      testFixture.selectNewViewportWindowMenu();
+      
+      testFixture.focusNthViewportWindow(0);
+
+      ThreadTools.sleepForever();
+      
+      testFixture.closeAndDispose();
+      scs.closeAndDispose();
+      scs = null;
+      testFixture = null;
+
+   }
+   
 
    @Ignore
    @Test
