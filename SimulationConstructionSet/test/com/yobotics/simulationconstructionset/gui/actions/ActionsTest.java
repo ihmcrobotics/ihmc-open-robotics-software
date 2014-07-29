@@ -29,6 +29,7 @@ import com.yobotics.simulationconstructionset.commands.ToggleKeyPointModeCommand
 import com.yobotics.simulationconstructionset.commands.ViewportSelectorCommandExecutor;
 import com.yobotics.simulationconstructionset.commands.ViewportSelectorCommandListener;
 import com.yobotics.simulationconstructionset.commands.ZoomGraphCommandExecutor;
+import com.yobotics.simulationconstructionset.gui.GraphArrayWindow;
 import com.yobotics.simulationconstructionset.gui.ViewportWindow;
 import com.yobotics.simulationconstructionset.gui.actions.dialogActions.AboutAction;
 import com.yobotics.simulationconstructionset.gui.dialogConstructors.AboutDialogConstructor;
@@ -99,19 +100,25 @@ public class ActionsTest
 
       CreateNewGraphWindowCommandExecutor executor = new CreateNewGraphWindowCommandExecutor()
       {
-         public void createNewGraphWindow()
+         public GraphArrayWindow createNewGraphWindow()
          {
-            executorCalled[0] = true;            
+            executorCalled[0] = true;
+            return null;
          }
          
-         public void createNewGraphWindow(String name)
+         public GraphArrayWindow createNewGraphWindow(String name)
          {
             throw new RuntimeException("Shouldn't call this one in the test!");
          }
 
-         public void createNewGraphWindow(String graphGroupName, int screenID, boolean maximizeWindow)
-         {           
+         public GraphArrayWindow createNewGraphWindow(String graphGroupName, int screenID, boolean maximizeWindow)
+         {      
             throw new RuntimeException("Shouldn't call this one in the test!");
+         }
+
+         public GraphArrayWindow getGraphArrayWindow(String windowName)
+         {
+            return null;
          }
 
       };
@@ -143,6 +150,11 @@ public class ActionsTest
          public ViewportWindow createNewViewportWindow(String viewportName, int screenID, boolean maximizeWindow)
          {
             throw new RuntimeException("Shouldn't call this one in the test!");
+         }
+
+         public ViewportWindow getViewportWindow(String windowName)
+         {
+            return null;
          }
       };
 
