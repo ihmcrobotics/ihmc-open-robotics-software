@@ -113,9 +113,9 @@ public class BonoJointMap implements DRCRobotJointMap
    }
 
    @Override
-   public SideDependentList<Transform3D> getAnkleToSoleFrameTransforms()
+   public Transform3D getSoleToAnkleFrameTransform(RobotSide robotSide)
    {
-      return BonoPhysicalProperties.ankleToSoleFrameTransforms;
+      return BonoPhysicalProperties.soleToAnkleFrameTransforms.get(robotSide);
    }
 
    @Override

@@ -21,12 +21,12 @@ public class BonoPhysicalProperties extends DRCRobotPhysicalProperties
    public static final double legLength = thighLength + shinLength;
    public static final double pelvisToFoot = 0.887;
 
-   public static final SideDependentList<Transform3D> ankleToSoleFrameTransforms = new SideDependentList<Transform3D>();
+   public static final SideDependentList<Transform3D> soleToAnkleFrameTransforms = new SideDependentList<Transform3D>();
    static {
       for(RobotSide robotSide : RobotSide.values())
       {
-         Transform3D ankleToSoleFrameTransform = TransformTools.yawPitchDegreesTransform(new Vector3d(footLength / 2.0 - footBack, 0.0, -ankleHeight), 0.0, Math.toDegrees(0.0*0.18704));
-         ankleToSoleFrameTransforms.put(robotSide, ankleToSoleFrameTransform);
+         Transform3D soleToAnkleFrame = TransformTools.yawPitchDegreesTransform(new Vector3d(footLength / 2.0 - footBack, 0.0, -ankleHeight), 0.0, Math.toDegrees(0.0*0.18704));
+         soleToAnkleFrameTransforms.put(robotSide, soleToAnkleFrame);
       }
    }
    
@@ -38,7 +38,7 @@ public class BonoPhysicalProperties extends DRCRobotPhysicalProperties
    
    public static Transform3D getAnkleToSoleFrameTransform(RobotSide side)
    {
-      return ankleToSoleFrameTransforms.get(side);
+      return soleToAnkleFrameTransforms.get(side);
    }
 
 }
