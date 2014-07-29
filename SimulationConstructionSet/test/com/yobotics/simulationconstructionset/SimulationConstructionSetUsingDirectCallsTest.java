@@ -6,6 +6,7 @@ import java.awt.AWTException;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Point;
+import java.util.ArrayList;
 
 import org.junit.Test;
 
@@ -32,10 +33,12 @@ public class SimulationConstructionSetUsingDirectCallsTest
       FallingBrickRobot simpleRobot = new FallingBrickRobot();
       Dimension dimension = new Dimension(250, 350);
       Point location = new Point(25, 50);
+      String rootRegistryName = "root";
+      String simpleRegistryName = "simpleRegistry";
+      YoVariableRegistry simpleRegistry = new YoVariableRegistry(simpleRegistryName);
+      NameSpace simpleRegistryNameSpace = new NameSpace(rootRegistryName + "." + simpleRegistryName);
 
-      SimulationConstructionSet scs = new SimulationConstructionSet(simpleRobot);
-      scs.setFrameMaximized();
-      scs.startOnAThread();
+      SimulationConstructionSet scs = createAndStartSCSWithRobot(simpleRobot);
 
       double startTime = scs.getTime();
       scs.simulate(simulateTime);
@@ -49,6 +52,14 @@ public class SimulationConstructionSetUsingDirectCallsTest
       Robot[] robotFromSCS = scs.getRobots();
       assertEquals(simpleRobot, robotFromSCS[0]);
       
+      ArrayList<YoVariable> allVariablesFromRobot = simpleRobot.getAllVariables();
+      ArrayList<YoVariable> allVariablesFromSCS = scs.getAllVariables();
+      assertEquals(allVariablesFromRobot, allVariablesFromSCS);
+      
+      int allVariablesArrayFromRobot = simpleRobot.getAllVariablesArray().length;
+      int allVariablesArrayFromSCS = scs.getAllVariablesArray().length;
+      assertEquals(allVariablesArrayFromRobot, allVariablesArrayFromSCS);
+      
       scs.setDT(simulateDT, recordFrequency);
       double simulateDTFromSCS = scs.getDT();
       assertEquals(simulateDT, simulateDTFromSCS , epsilon); 
@@ -57,15 +68,11 @@ public class SimulationConstructionSetUsingDirectCallsTest
       int indexFromSCS = scs.getIndex();
       assertEquals(index, indexFromSCS, epsilon);
       
-      scs.setIndex(inputPoint);
-      scs.setInPoint();
-      scs.setIndex(outputPoint);
-      scs.setOutPoint();
+      setInputAndOutputPointsInSCS(scs, inputPoint, outputPoint);
       boolean isMiddleIndexFromSCS = scs.isIndexBetweenInAndOutPoint(middleIndex);
       assertEquals(true, isMiddleIndexFromSCS);
 
-      scs.setIndex(inputPoint);
-      scs.setInPoint();
+      setInputPointInSCS(scs, inputPoint);
       scs.setIndex(outputPoint);
       StandardSimulationGUI GUIFromSCS = scs.getStandardSimulationGUI();
       GUIFromSCS.gotoInPointNow();
@@ -86,9 +93,18 @@ public class SimulationConstructionSetUsingDirectCallsTest
       int frameStateFromSCS = scs.getJFrame().getExtendedState();
       assertEquals(Frame.MAXIMIZED_BOTH, frameStateFromSCS);
 
+      scs.setFrameAlwaysOnTop(true);
+      boolean alwaysOnTopFromSCS = scs.getJFrame().isAlwaysOnTop();
+      assertEquals(true, alwaysOnTopFromSCS);
       
+      YoVariableRegistry rootRegistryFromSCS = scs.getRootRegistry();
+      String  rootRegistryNameFromSCS = rootRegistryFromSCS.getName();
+      assertEquals(rootRegistryName, rootRegistryNameFromSCS);
       
-
+      scs.addYoVariableRegistry(simpleRegistry);
+      YoVariableRegistry simpleRegistryFromSCS = scs.getRootRegistry().getRegistry(simpleRegistryNameSpace);
+      assertEquals(simpleRegistry, simpleRegistryFromSCS);
+       
 //      ThreadTools.sleepForever();
 //    Robot simpleRobot2 = new Robot("simpleRobot2");
 //    Robot[] robots = {simpleRobot, simpleRobot2};
@@ -100,6 +116,30 @@ public class SimulationConstructionSetUsingDirectCallsTest
       scs.closeAndDispose();
       scs = null;
    }
- 
-
+   
+   private SimulationConstructionSet createAndStartSCSWithRobot(Robot robotModel)
+   {
+      SimulationConstructionSet scs = new SimulationConstructionSet(robotModel);
+      scs.setFrameMaximized();
+      scs.startOnAThread();
+      return scs;
+   }
+   
+   private void setInputAndOutputPointsInSCS(SimulationConstructionSet scs, int inputPointIndex, int outputPointIndex)
+   {
+      setInputPointInSCS(scs, inputPointIndex);
+      setOutputPointInSCS(scs, outputPointIndex);
+   }
+   
+   private void setInputPointInSCS(SimulationConstructionSet scs, int inputPointIndex)
+   {
+      scs.setIndex(inputPointIndex);
+      scs.setInPoint();
+   }
+   
+   private void setOutputPointInSCS(SimulationConstructionSet scs, int outputPointIndex)
+   {
+      scs.setIndex(outputPointIndex);
+      scs.setOutPoint();
+   }
 }
