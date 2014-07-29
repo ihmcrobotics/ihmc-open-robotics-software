@@ -1,19 +1,13 @@
 package us.ihmc.valkyrie.paramaters;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import javax.media.j3d.Transform3D;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
-import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
-import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 public class ValkyrieWalkingControllerParameters implements WalkingControllerParameters
 {
@@ -66,22 +60,6 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    public SideDependentList<Transform3D> getDesiredHandPosesWithRespectToChestFrame()
    {
       return handPosesWithRespectToChestFrame;
-   }
-
-   @Override
-   public Map<OneDoFJoint, Double> getDefaultArmJointPositions(FullRobotModel fullRobotModel, RobotSide robotSide)
-   {
-      Map<OneDoFJoint, Double> jointPositions = new LinkedHashMap<OneDoFJoint, Double>();
-
-      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_ROLL), -0.25);
-      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_PITCH), 0.3);
-      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_YAW), 0.0);
-      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH), -1.0);
-      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_YAW), 0.0);
-      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.WRIST_PITCH), 0.0);
-      jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.WRIST_ROLL), 0.0);
-      
-      return jointPositions;
    }
 
    @Override
