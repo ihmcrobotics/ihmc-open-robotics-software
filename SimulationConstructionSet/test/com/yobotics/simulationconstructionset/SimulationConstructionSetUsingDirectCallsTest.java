@@ -1,6 +1,10 @@
 package com.yobotics.simulationconstructionset;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertArrayEquals;
 
 import java.awt.AWTException;
 import java.awt.Dimension;
@@ -11,6 +15,7 @@ import java.util.ArrayList;
 import org.junit.After;
 import org.junit.Test;
 
+import us.ihmc.graphics3DAdapter.camera.ClassicCameraController;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
@@ -19,6 +24,7 @@ import us.ihmc.utilities.ThreadTools;
 import com.yobotics.simulationconstructionset.examples.FallingBrickRobot;
 import com.yobotics.simulationconstructionset.graphics.GraphicsDynamicGraphicsObject;
 import com.yobotics.simulationconstructionset.gui.StandardSimulationGUI;
+import com.yobotics.simulationconstructionset.gui.camera.CameraTrackAndDollyYoVariablesHolder;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
 
@@ -43,6 +49,10 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private double realTimeRate = 0.75;
    private double frameRate = 0.5;
    private double recomputedSecondsPerFrameRate = recomputeTiming(simulateDT, recordFreq, realTimeRate, frameRate);
+   private double[] cameraDollyOffsetXYZValues = {1.2, 2.2, 3.2};
+   private double[] cameraTrackingOffsetXYZValues = {1.5, 2.5, 3.5};
+   private double[] cameraDollyXYZVarValues = {1.5, 1.6, 1.7}; 
+   private double[] cameraTrackingXYZVarValues = {0.5, 0.6, 0.7}; 
    
    private Dimension dimension = new Dimension(250, 350);
    private FallingBrickRobot simpleRobot = new FallingBrickRobot();
@@ -54,12 +64,8 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private String[] regularExpressions = new String[] {"gc.*.fs"};
    private String simpleRobotFirstVariableName = getFirstVariableNameFromRobotRegistry(simpleRobot);
    private String simpleRobotRegistryNameSpace = getRegistryNameSpaceFromRobot(simpleRobot);
-   private String cameraTrackingVarNameX = "simpleCameraTrackingVarNameX";
-   private String cameraTrackingVarNameY = "simpleCameraTrackingVarNameY";
-   private String cameraTrackingVarNameZ = "simpleCameraTrackingVarNameZ";
-   private String cameraDollyVarNameX = "simpleCameraDollyVarNameX";
-   private String cameraDollyVarNameY = "simpleCameraDollyVarNameY";
-   private String cameraDollyVarNameZ = "simpleCameraDollyVarNameZ";
+   private String[] cameraTrackingXYZVarNames = new String[] {"simpleCameraTrackingVarNameX", "simpleCameraTrackingVarNameY", "simpleCameraTrackingVarNameZ"};
+   private String[] cameraDollyXYZVarNames = new String[] {"simpleCameraDollyVarNameX", "simpleCameraDollyVarNameY", "simpleCameraDollyVarNameZ"};
    private NameSpace simpleRegistryNameSpace = new NameSpace(rootRegistryName + "." + simpleRegistryName);
    private YoVariableRegistry simpleRegistry = new YoVariableRegistry(simpleRegistryName);
    private YoVariableRegistry dummyRegistry = new YoVariableRegistry("dummyRegistry");
@@ -226,23 +232,23 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertFalse(isCameraDollyY4);
       assertTrue(isCameraDollyZ4);
       
-      setCameraTrackingDoubleYoVariableInSCSRegistry(cameraTrackingVarNameX, cameraTrackingVarNameY, cameraTrackingVarNameZ, scs);
-      scs.setCameraTrackingVars(cameraTrackingVarNameX, cameraTrackingVarNameY, cameraTrackingVarNameZ);
-      String cameraTrackingVarNameXSCS = scs.getRootRegistry().getVariable(cameraTrackingVarNameX).getName();
-      String cameraTrackingVarNameYSCS = scs.getRootRegistry().getVariable(cameraTrackingVarNameY).getName();
-      String cameraTrackingVarNameZSCS = scs.getRootRegistry().getVariable(cameraTrackingVarNameZ).getName();
-      assertEquals(cameraTrackingVarNameX, cameraTrackingVarNameXSCS);
-      assertEquals(cameraTrackingVarNameY, cameraTrackingVarNameYSCS);
-      assertEquals(cameraTrackingVarNameZ, cameraTrackingVarNameZSCS);
+      addDoubleYoVariablesInSCSRegistry(cameraTrackingXYZVarNames, cameraTrackingXYZVarValues, scs);
+      scs.setCameraTrackingVars(cameraTrackingXYZVarNames[0], cameraTrackingXYZVarNames[1], cameraTrackingXYZVarNames[2]);
+      double[] cameraTrackingXYZVarsFromSCS = getCameraTrackingXYZVars(scs);
+      assertArrayEquals(cameraTrackingXYZVarValues, cameraTrackingXYZVarsFromSCS, epsilon);
       
-      setCameraDollyDoubleYoVariableInSCSRegistry(cameraDollyVarNameX, cameraDollyVarNameY, cameraDollyVarNameZ, scs);
-      scs.setCameraDollyVars(cameraDollyVarNameX, cameraDollyVarNameY, cameraDollyVarNameZ);
-      String cameraDollyVarNameXSCS = scs.getRootRegistry().getVariable(cameraDollyVarNameX).getName();
-      String cameraDollyVarNameYSCS = scs.getRootRegistry().getVariable(cameraDollyVarNameY).getName();
-      String cameraDollyVarNameZSCS = scs.getRootRegistry().getVariable(cameraDollyVarNameZ).getName();
-      assertEquals(cameraDollyVarNameX, cameraDollyVarNameXSCS);
-      assertEquals(cameraDollyVarNameY, cameraDollyVarNameYSCS);
-      assertEquals(cameraDollyVarNameZ, cameraDollyVarNameZSCS);
+      addDoubleYoVariablesInSCSRegistry(cameraDollyXYZVarNames, cameraDollyXYZVarValues, scs);
+      scs.setCameraDollyVars(cameraDollyXYZVarNames[0], cameraDollyXYZVarNames[1], cameraDollyXYZVarNames[2]);
+      double[] cameraDollyXYZVarsFromSCS = getCameraDollyXYZVars(scs);
+      assertArrayEquals(cameraDollyXYZVarValues, cameraDollyXYZVarsFromSCS, epsilon);
+      
+      scs.setCameraTrackingOffsets(cameraTrackingOffsetXYZValues[0], cameraTrackingOffsetXYZValues[1], cameraTrackingOffsetXYZValues[2]);
+      double[] cameraTrackingOffsetXYZValuesFromSCS = getCameraTrackingOffsetXYZValues(scs);
+      assertArrayEquals(cameraTrackingOffsetXYZValues, cameraTrackingOffsetXYZValuesFromSCS, epsilon);
+      
+      scs.setCameraDollyOffsets(cameraDollyOffsetXYZValues[0], cameraDollyOffsetXYZValues[1], cameraDollyOffsetXYZValues[2]);
+      double[] cameraDollyOffsetXYZValuesFromSCS = getCameraDollyOffsetXYZValues(scs);
+      assertArrayEquals(cameraDollyOffsetXYZValues, cameraDollyOffsetXYZValuesFromSCS, epsilon);
    }
    
    @Test
@@ -354,22 +360,68 @@ public class SimulationConstructionSetUsingDirectCallsTest
    
    // local methods
    
-   private void setCameraTrackingDoubleYoVariableInSCSRegistry(String cameraTrackingVarNameX, String cameraTrackingVarNameY, String cameraTrackingVarNameZ, SimulationConstructionSet scs)
+   private double[] getCameraTrackingXYZVars(SimulationConstructionSet scs)
    {
-      YoVariableRegistry scsRegistry = scs.getRootRegistry();
-      
-      DoubleYoVariable cameraTrackingDouBleYoVariableX = new DoubleYoVariable(cameraTrackingVarNameX, scsRegistry);
-      DoubleYoVariable cameraTrackingDouBleYoVariableY = new DoubleYoVariable(cameraTrackingVarNameY, scsRegistry);
-      DoubleYoVariable cameraTrackingDouBleYoVariableZ = new DoubleYoVariable(cameraTrackingVarNameZ, scsRegistry);
+      CameraTrackAndDollyYoVariablesHolder cameraTrackAndDollyYoVariablesHolder = getCameraTrackAndDollyVariablesHolder(scs); 
+      double x = cameraTrackAndDollyYoVariablesHolder.getTrackingX();
+      double y = cameraTrackAndDollyYoVariablesHolder.getTrackingY();
+      double z = cameraTrackAndDollyYoVariablesHolder.getTrackingZ();
+      return new double[] {x, y, z};
    }
    
-   private void setCameraDollyDoubleYoVariableInSCSRegistry(String cameraDollyVarNameX, String cameraDollyVarNameY, String cameraDollyVarNameZ, SimulationConstructionSet scs)
+   private double[] getCameraDollyXYZVars(SimulationConstructionSet scs)
    {
-      YoVariableRegistry scsRegistry = scs.getRootRegistry();
-      
-      DoubleYoVariable cameraDollyDouBleYoVariableX = new DoubleYoVariable(cameraDollyVarNameX, scsRegistry);
-      DoubleYoVariable cameraDollyDouBleYoVariableY = new DoubleYoVariable(cameraDollyVarNameY, scsRegistry);
-      DoubleYoVariable cameraDollyDouBleYoVariableZ = new DoubleYoVariable(cameraDollyVarNameZ, scsRegistry);
+      CameraTrackAndDollyYoVariablesHolder cameraTrackAndDollyYoVariablesHolder = getCameraTrackAndDollyVariablesHolder(scs); 
+      double x = cameraTrackAndDollyYoVariablesHolder.getDollyX();
+      double y = cameraTrackAndDollyYoVariablesHolder.getDollyY();
+      double z = cameraTrackAndDollyYoVariablesHolder.getDollyZ();
+      return new double[] {x, y, z};
+   }
+   
+   private double[] getCameraTrackingOffsetXYZValues(SimulationConstructionSet scs)
+   {
+      ClassicCameraController classicCameraController = getClassicCameraController(scs); 
+      double dx = classicCameraController.getTrackingXOffset();
+      double dy = classicCameraController.getTrackingYOffset();
+      double dz = classicCameraController.getTrackingZOffset();
+      return new double[] {dx, dy, dz};
+   }
+
+   private double[] getCameraDollyOffsetXYZValues(SimulationConstructionSet scs)
+   {
+      ClassicCameraController classicCameraController = getClassicCameraController(scs); 
+      double dx = classicCameraController.getDollyXOffset();
+      double dy = classicCameraController.getDollyYOffset();
+      double dz = classicCameraController.getDollyZOffset();
+      return new double[] {dx, dy, dz};
+   }
+   
+   private ClassicCameraController getClassicCameraController(SimulationConstructionSet scs)
+   {
+      return (ClassicCameraController) scs.getGUI().getViewportPanel().getActiveView().getCameraController();
+   }
+   
+   private CameraTrackAndDollyYoVariablesHolder getCameraTrackAndDollyVariablesHolder(SimulationConstructionSet scs)
+   {
+      ClassicCameraController classicCameraController = getClassicCameraController(scs);
+      return (CameraTrackAndDollyYoVariablesHolder) classicCameraController.getCameraTrackAndDollyVariablesHolder();
+   }
+   
+   private void addDoubleYoVariablesInSCSRegistry(String[] varNames, double[] varValues, SimulationConstructionSet scs)
+   {
+      if(varNames.length == varValues.length)
+      {
+         YoVariableRegistry scsRegistry = scs.getRootRegistry();
+         for(int i =0; i< varNames.length; i++)
+         {
+            DoubleYoVariable doubleYoVariable = new DoubleYoVariable(varNames[i], scsRegistry);
+            doubleYoVariable.set(varValues[i]);
+         } 
+      }
+      else
+      {
+         System.out.print("Input arrays have different length.");
+      }
    }
    
    private String getRegistryNameSpaceFromRobot(Robot robotModel)
