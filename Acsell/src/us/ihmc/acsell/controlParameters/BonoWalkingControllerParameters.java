@@ -13,7 +13,6 @@ import us.ihmc.robotSide.SideDependentList;
 public class BonoWalkingControllerParameters implements WalkingControllerParameters
 {
 
-   private final SideDependentList<Transform3D> handControlFramesWithRespectToFrameAfterWrist = new SideDependentList<Transform3D>();
    private final SideDependentList<Transform3D> handPosesWithRespectToChestFrame = new SideDependentList<Transform3D>();
 
    private final boolean runningOnRealRobot;
@@ -24,7 +23,6 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
       
       for(RobotSide robotSide : RobotSide.values())
       {
-         handControlFramesWithRespectToFrameAfterWrist.put(robotSide, new Transform3D());
          handPosesWithRespectToChestFrame.put(robotSide, new Transform3D());
       }
    }
@@ -163,12 +161,6 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    public String getJointNameForExtendedPitchRange()
    {
       return null;
-   }
-
-   @Override
-   public SideDependentList<Transform3D> getHandControlFramesWithRespectToFrameAfterWrist()
-   {
-      return handControlFramesWithRespectToFrameAfterWrist;
    }
 
    @Override
