@@ -18,7 +18,6 @@ import us.ihmc.utilities.math.geometry.RotationFunctions;
 public class AtlasWalkingControllerParameters implements WalkingControllerParameters
 {   
    private final boolean runningOnRealRobot;
-   private final SideDependentList<Transform3D> handControlFramesWithRespectToFrameAfterWrist = new SideDependentList<Transform3D>();
    private final SideDependentList<Transform3D> handPosesWithRespectToChestFrame = new SideDependentList<Transform3D>();
 
    // Limits
@@ -39,29 +38,6 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    public AtlasWalkingControllerParameters(boolean runningOnRealRobot)
    {
       this.runningOnRealRobot = runningOnRealRobot;
-      for(RobotSide robotSide : RobotSide.values)
-      {
-         Transform3D rotationPart = new Transform3D();
-         double yaw = robotSide.negateIfRightSide(Math.PI / 2.0);
-         double pitch = 0.0;
-         double roll = 0.0;
-         rotationPart.setEuler(new Vector3d(roll, pitch, yaw));
-   
-         Transform3D toHand = new Transform3D();
-//         double x = 0.2;
-//         double y = robotSide.negateIfRightSide(-0.03);
-//         double z = 0.04;
-         double x = 0.1;
-         double y = 0.0;
-         double z = 0.0;
-         toHand.setTranslation(new Vector3d(x, y, z));
-   
-         Transform3D transform = new Transform3D();
-         transform.mul(rotationPart, toHand);
-         
-         handControlFramesWithRespectToFrameAfterWrist.put(robotSide, transform);
-      }
-      
       
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -654,12 +630,6 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    public SideDependentList<Transform3D> getDesiredHandPosesWithRespectToChestFrame()
    {
       return handPosesWithRespectToChestFrame;
-   }
-
-   @Override
-   public SideDependentList<Transform3D> getHandControlFramesWithRespectToFrameAfterWrist()
-   {
-      return handControlFramesWithRespectToFrameAfterWrist;
    }
 
    @Override

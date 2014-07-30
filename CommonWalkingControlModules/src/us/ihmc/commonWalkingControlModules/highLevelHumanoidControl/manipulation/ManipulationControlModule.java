@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ManipulationControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.SE3PDGains;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.IndividualHandControlModule;
@@ -55,8 +54,8 @@ public class ManipulationControlModule
    private final SE3PDGains taskspaceControlGains = new SE3PDGains();
 
    public ManipulationControlModule(FullRobotModel fullRobotModel, TwistCalculator twistCalculator, final VariousWalkingProviders variousWalkingProviders,
-         ArmControllerParameters armControlParameters, ManipulationControllerParameters parameters, DoubleYoVariable yoTime,
-         MomentumBasedController momentumBasedController, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+         ArmControllerParameters armControlParameters, DoubleYoVariable yoTime, MomentumBasedController momentumBasedController,
+         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
    {
       SideDependentList<Integer> jacobianIds = new SideDependentList<Integer>();
       SideDependentList<RigidBody> endEffectors = new SideDependentList<RigidBody>();
@@ -78,7 +77,7 @@ public class ManipulationControlModule
 
       createFrameVisualizers(dynamicGraphicObjectsListRegistry, midHandPositionControlFrames, "midHandPositionControlFrames", false);
 
-      setUpStateMachine(parameters, variousWalkingProviders, momentumBasedController, midHandPositionControlFrames, jacobianIds, armControlParameters);
+      setUpStateMachine(variousWalkingProviders, momentumBasedController, midHandPositionControlFrames, jacobianIds, armControlParameters);
 
       kpArmTaskspace = new DoubleYoVariable("kpArmTaskspace", registry);
       kpArmTaskspace.set(armControlParameters.getArmTaskspaceKp());
@@ -144,7 +143,7 @@ public class ManipulationControlModule
       }
    }
 
-   private void setUpStateMachine(ManipulationControllerParameters parameters, final VariousWalkingProviders variousWalkingProviders,
+   private void setUpStateMachine(final VariousWalkingProviders variousWalkingProviders,
          MomentumBasedController momentumBasedController, SideDependentList<ReferenceFrame> handPositionControlFrames, SideDependentList<Integer> jacobianIds,
          ArmControllerParameters armControlParameters)
    {
@@ -153,7 +152,7 @@ public class ManipulationControlModule
 
       individualHandControlModules = createIndividualHandControlModules(momentumBasedController, jacobianIds, armControlParameters, variousWalkingProviders.getControlStatusProducer());
 
-      directControlManipulationTaskDispatcher = new DirectControlManipulationTaskDispatcher(parameters, armControlParameters, handPoseProvider,
+      directControlManipulationTaskDispatcher = new DirectControlManipulationTaskDispatcher(armControlParameters, handPoseProvider,
             handLoadBearingProvider, handPositionControlFrames, individualHandControlModules, pipeline, taskspaceControlGains, momentumBasedController,
             registry);
    }

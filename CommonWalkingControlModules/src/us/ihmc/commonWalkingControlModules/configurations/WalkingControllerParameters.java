@@ -4,7 +4,7 @@ import javax.media.j3d.Transform3D;
 
 import us.ihmc.robotSide.SideDependentList;
 
-public interface WalkingControllerParameters extends HeadOrientationControllerParameters, ManipulationControllerParameters
+public interface WalkingControllerParameters extends HeadOrientationControllerParameters
 {
    public abstract SideDependentList<Transform3D> getDesiredHandPosesWithRespectToChestFrame();
 

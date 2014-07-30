@@ -82,7 +82,7 @@ public class VariousWalkingManagers
       {
          // Setup arm+hand manipulation state machines
          manipulationControlModule = new ManipulationControlModule(fullRobotModel, twistCalculator, variousWalkingProviders, armControlParameters,
-               walkingControllerParameters, yoTime, momentumBasedController, dynamicGraphicObjectsListRegistry, registry);
+               yoTime, momentumBasedController, dynamicGraphicObjectsListRegistry, registry);
       }
 
       PelvisDesiredsHandler pelvisDesiredsHandler = new PelvisDesiredsHandler(controlDT, yoTime, registry);
