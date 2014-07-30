@@ -11,6 +11,7 @@ import us.ihmc.graphics3DAdapter.input.KeyListener;
 import us.ihmc.graphics3DAdapter.input.MouseListener;
 import us.ihmc.graphics3DAdapter.input.SelectedListener;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
+import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
 
 public interface Graphics3DAdapter
 {
@@ -40,5 +41,8 @@ public interface Graphics3DAdapter
 
    public ContextManager getContextManager();
    
+   @Deprecated
    public GPULidar createGPULidar(GPULidarListener callback, int horizontalRays, double fov, double near, double far);
+
+   public GPULidar createGPULidar(LidarScanParameters lidarScanParameters);
 }
