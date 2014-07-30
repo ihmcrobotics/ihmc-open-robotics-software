@@ -564,16 +564,4 @@ public class SimulationConstructionSetUsingDirectCallsTest
    {
       return Math.max((int) (frameRate * realTimeRate / (dt * recordFreq)), 1);
    }
-   
-   // unused
-   private ArrayList<Graphics3DObject> createRandomGraphics3DArrayList(Graphics3DObject staticLinkGraphics)
-   {
-      ArrayList<Graphics3DObject> graphics3DArrayList = new ArrayList<Graphics3DObject>();
-      for(int i = 0; i < Math.round(Math.random()*10); i++)
-      {
-         graphics3DArrayList.add(staticLinkGraphics);
-      }
-      
-      return graphics3DArrayList;
-   }
 }
