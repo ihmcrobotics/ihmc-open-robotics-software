@@ -13,7 +13,6 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
 {
    private final boolean runningOnRealRobot;
 
-   private final SideDependentList<Transform3D> handControlFramesWithRespectToFrameAfterWrist = new SideDependentList<Transform3D>();
    private final SideDependentList<Transform3D> handPosesWithRespectToChestFrame = new SideDependentList<Transform3D>();
 
    private final double upperNeckExtensorUpperLimit = 0.785398;
@@ -33,12 +32,6 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       this.jointMap = jointMap;
       this.runningOnRealRobot = runningOnRealRobot;
 
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         handControlFramesWithRespectToFrameAfterWrist.put(robotSide, new Transform3D());
-      }
-
-      
       // Genreated using ValkyrieFullRobotModelVisualizer
       Transform3D leftHandLocation = new Transform3D(new double[] {0.8772111323383822, -0.47056204413925823, 0.09524700476706424, 0.11738015536007923,
             1.5892231999088989E-4, 0.1986725292086453, 0.980065916600275, 0.3166524835978034,
@@ -206,12 +199,6 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    public boolean resetDesiredICPToCurrentAtStartOfSwing()
    {
       return false;
-   }
-
-   @Override
-   public SideDependentList<Transform3D> getHandControlFramesWithRespectToFrameAfterWrist()
-   {
-      return handControlFramesWithRespectToFrameAfterWrist;
    }
       
    @Override
