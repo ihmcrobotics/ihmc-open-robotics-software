@@ -72,10 +72,7 @@ public class ManipulationControlModule
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         String frameName = endEffectors.get(robotSide).getName() + "PositionControlFrame";
-         final ReferenceFrame frameAfterJoint = endEffectors.get(robotSide).getParentJoint().getFrameAfterJoint();
-         ReferenceFrame handPositionControlFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(frameName, frameAfterJoint, parameters
-               .getHandControlFramesWithRespectToFrameAfterWrist().get(robotSide));
+         ReferenceFrame handPositionControlFrame = fullRobotModel.getHandControlFrame(robotSide);
          midHandPositionControlFrames.put(robotSide, handPositionControlFrame);
       }
 

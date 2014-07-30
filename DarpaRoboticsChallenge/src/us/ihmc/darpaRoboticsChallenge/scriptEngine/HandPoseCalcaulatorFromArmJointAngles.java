@@ -4,8 +4,6 @@ import java.util.EnumMap;
 
 import javax.media.j3d.Transform3D;
 
-import us.ihmc.SdfLoader.JaxbSDFLoader;
-import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.packets.HandPosePacket;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
@@ -25,14 +23,12 @@ public class HandPoseCalcaulatorFromArmJointAngles
 {
    private FullRobotModel fullRobotModel;
    private SideDependentList<EnumMap<ArmJointName, OneDoFJoint>> oneDoFJoints = SideDependentList.createListOfEnumMaps(ArmJointName.class);
-   private WalkingControllerParameters drcRobotWalkingControllerParameters;
    private DRCRobotJointMap jointMap;
 
 
    public HandPoseCalcaulatorFromArmJointAngles(DRCRobotModel robotModel)
    {
       jointMap = robotModel.getJointMap();
-      drcRobotWalkingControllerParameters = robotModel.getWalkingControllerParameters();
       fullRobotModel = robotModel.createFullRobotModel();
 
       for (RobotSide robotSide : RobotSide.values())
@@ -53,9 +49,7 @@ public class HandPoseCalcaulatorFromArmJointAngles
     	  oneDoFJoints.get(robotSide).get(jointName).setQ(handPosePacket.getJointAngles()[++i]);
       }
 
-      ReferenceFrame targetBody = fullRobotModel.getHand(robotSide).getParentJoint().getFrameAfterJoint();
-      ReferenceFrame handPositionControlFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("targetBody_" + robotSide, targetBody,
-                                                   drcRobotWalkingControllerParameters.getHandControlFramesWithRespectToFrameAfterWrist().get(robotSide));
+      ReferenceFrame handPositionControlFrame = fullRobotModel.getHandControlFrame(robotSide);
 
       FramePose handPose = new FramePose(handPositionControlFrame, wristToHandTansform);
       handPose.changeFrame(fullRobotModel.getChest().getParentJoint().getFrameAfterJoint());
