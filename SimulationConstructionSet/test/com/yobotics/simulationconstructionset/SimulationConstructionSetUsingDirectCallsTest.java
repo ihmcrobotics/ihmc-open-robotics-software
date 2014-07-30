@@ -1,6 +1,6 @@
 package com.yobotics.simulationconstructionset;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.awt.AWTException;
 import java.awt.Dimension;
@@ -8,12 +8,19 @@ import java.awt.Frame;
 import java.awt.Point;
 import java.util.ArrayList;
 
+import org.junit.After;
 import org.junit.Test;
 
+import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
+import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
+import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
 import us.ihmc.utilities.ThreadTools;
 
 import com.yobotics.simulationconstructionset.examples.FallingBrickRobot;
+import com.yobotics.simulationconstructionset.graphics.GraphicsDynamicGraphicsObject;
 import com.yobotics.simulationconstructionset.gui.StandardSimulationGUI;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
 
 public class SimulationConstructionSetUsingDirectCallsTest
 {
@@ -21,34 +28,46 @@ public class SimulationConstructionSetUsingDirectCallsTest
    // - the simpleRobot has been used to create the SimulationConstructionSet instance
    // - the registry "simpleRegistry" is empty
    
-   public static double epsilon = 1e-10;
+   private static double epsilon = 1e-10;
    
-   int recordFrequency = 10;
-   int index = 15;
-   int inputPoint = 10;
-   int outputPoint = 30;
-   int middleIndex = 22;
-   int nonMiddleIndex = 35;
-   double simulateDT = 0.1; 
-   double simulateTime = 1.0;
-   double recordDT = 0.5;
-   double recordFreq = computeRecordFreq(recordDT, simulateDT);
-   double realTimeRate = 0.75;
-   double frameRate = 0.5;
-   double recomputedSecondsPerFrameRate = recomputeTiming(simulateDT, recordFreq, realTimeRate, frameRate);
+   private int recordFrequency = 10;
+   private int index = 15;
+   private int inputPoint = 10;
+   private int outputPoint = 30;
+   private int middleIndex = 22;
+   private int nonMiddleIndex = 35;
+   private double simulateDT = 0.1; 
+   private double simulateTime = 1.0;
+   private double recordDT = 0.5;
+   private double recordFreq = computeRecordFreq(recordDT, simulateDT);
+   private double realTimeRate = 0.75;
+   private double frameRate = 0.5;
+   private double recomputedSecondsPerFrameRate = recomputeTiming(simulateDT, recordFreq, realTimeRate, frameRate);
    
-   Dimension dimension = new Dimension(250, 350);
-   FallingBrickRobot simpleRobot = new FallingBrickRobot();
-   Point location = new Point(25, 50);
-   String rootRegistryName = "root";
-   String simpleRegistryName = "simpleRegistry";
-   String searchString = "d";
-   String searchStringStart = "q";
-   String[] regularExpressions = new String[] {"gc.*.fs"};
-   String simpleRobotFirstVariableName = getFirstVariableNameFromRobotRegistry(simpleRobot);
-   String simpleRobotRegistryNameSpace = getRegistryNameSpaceFromRobot(simpleRobot);
-   NameSpace simpleRegistryNameSpace = new NameSpace(rootRegistryName + "." + simpleRegistryName);
-   YoVariableRegistry simpleRegistry = new YoVariableRegistry(simpleRegistryName);
+   private Dimension dimension = new Dimension(250, 350);
+   private FallingBrickRobot simpleRobot = new FallingBrickRobot();
+   private Point location = new Point(25, 50);
+   private String rootRegistryName = "root";
+   private String simpleRegistryName = "simpleRegistry";
+   private String searchString = "d";
+   private String searchStringStart = "q";
+   private String[] regularExpressions = new String[] {"gc.*.fs"};
+   private String simpleRobotFirstVariableName = getFirstVariableNameFromRobotRegistry(simpleRobot);
+   private String simpleRobotRegistryNameSpace = getRegistryNameSpaceFromRobot(simpleRobot);
+   private String cameraTrackingVarNameX = "simpleCameraTrackingVarNameX";
+   private String cameraTrackingVarNameY = "simpleCameraTrackingVarNameY";
+   private String cameraTrackingVarNameZ = "simpleCameraTrackingVarNameZ";
+   private String cameraDollyVarNameX = "simpleCameraDollyVarNameX";
+   private String cameraDollyVarNameY = "simpleCameraDollyVarNameY";
+   private String cameraDollyVarNameZ = "simpleCameraDollyVarNameZ";
+   private NameSpace simpleRegistryNameSpace = new NameSpace(rootRegistryName + "." + simpleRegistryName);
+   private YoVariableRegistry simpleRegistry = new YoVariableRegistry(simpleRegistryName);
+   private YoVariableRegistry dummyRegistry = new YoVariableRegistry("dummyRegistry");
+   private Link staticLink = new Link("simpleLink");
+   private Graphics3DObject staticLinkGraphics = staticLink.getLinkGraphics();
+   private Graphics3DNodeType graphics3DNodeType = Graphics3DNodeType.GROUND;
+   private ExternalForcePoint simpleExternalForcePoint = new ExternalForcePoint("simpleExternalForcePoint", dummyRegistry);
+   private DynamicGraphicObject dynamicGraphicObject = new DynamicGraphicVector("simpleDynamicGraphicObject", simpleExternalForcePoint);
    
    SimulationConstructionSet scs = createAndStartSCSWithRobot(simpleRobot);
 
@@ -113,7 +132,141 @@ public class SimulationConstructionSetUsingDirectCallsTest
       scs.addYoVariableRegistry(simpleRegistry);
       YoVariableRegistry simpleRegistryFromSCS = scs.getRootRegistry().getRegistry(simpleRegistryNameSpace);
       assertEquals(simpleRegistry, simpleRegistryFromSCS);
+
       
+//      ThreadTools.sleepForever();
+//    Robot simpleRobot2 = new Robot("simpleRobot2");
+//    Robot[] robots = {simpleRobot, simpleRobot2};
+//    
+//    SimulationConstructionSet scs2 = new SimulationConstructionSet(robots);
+//    generateSimulationFromDataFile
+//     JButton button = new JButton("test");
+   }
+   
+   @Test
+   public void testCameraMethods()
+   {
+      scs.setCameraTracking(true, false, false, false);
+      boolean isCameraTracking = scs.getGUI().getCamera().isTracking();
+      boolean isCameraTrackingX = scs.getGUI().getCamera().isTrackingX();
+      boolean isCameraTrackingY = scs.getGUI().getCamera().isTrackingY();
+      boolean isCameraTrackingZ = scs.getGUI().getCamera().isTrackingZ();
+      assertTrue(isCameraTracking);
+      assertFalse(isCameraTrackingX);
+      assertFalse(isCameraTrackingY);
+      assertFalse(isCameraTrackingZ);
+      
+      scs.setCameraTracking(false, true, false, false);
+      boolean isCameraTracking2 = scs.getGUI().getCamera().isTracking();
+      boolean isCameraTrackingX2 = scs.getGUI().getCamera().isTrackingX();
+      boolean isCameraTrackingY2 = scs.getGUI().getCamera().isTrackingY();
+      boolean isCameraTrackingZ2 = scs.getGUI().getCamera().isTrackingZ();
+      assertFalse(isCameraTracking2);
+      assertTrue(isCameraTrackingX2);
+      assertFalse(isCameraTrackingY2);
+      assertFalse(isCameraTrackingZ2);
+      
+      scs.setCameraTracking(false, false, true, false);
+      boolean isCameraTracking3 = scs.getGUI().getCamera().isTracking();
+      boolean isCameraTrackingX3 = scs.getGUI().getCamera().isTrackingX();
+      boolean isCameraTrackingY3 = scs.getGUI().getCamera().isTrackingY();
+      boolean isCameraTrackingZ3 = scs.getGUI().getCamera().isTrackingZ();
+      assertFalse(isCameraTracking3);
+      assertFalse(isCameraTrackingX3);
+      assertTrue(isCameraTrackingY3);
+      assertFalse(isCameraTrackingZ3);
+      
+      scs.setCameraTracking(false, false, false, true);
+      boolean isCameraTracking4 = scs.getGUI().getCamera().isTracking();
+      boolean isCameraTrackingX4 = scs.getGUI().getCamera().isTrackingX();
+      boolean isCameraTrackingY4 = scs.getGUI().getCamera().isTrackingY();
+      boolean isCameraTrackingZ4 = scs.getGUI().getCamera().isTrackingZ();
+      assertFalse(isCameraTracking4);
+      assertFalse(isCameraTrackingX4);
+      assertFalse(isCameraTrackingY4);
+      assertTrue(isCameraTrackingZ4);
+      
+      scs.setCameraDolly(true, false, false, false);
+      boolean isCameraDolly = scs.getGUI().getCamera().isDolly();
+      boolean isCameraDollyX = scs.getGUI().getCamera().isDollyX();
+      boolean isCameraDollyY = scs.getGUI().getCamera().isDollyY();
+      boolean isCameraDollyZ = scs.getGUI().getCamera().isDollyZ();
+      assertTrue(isCameraDolly);
+      assertFalse(isCameraDollyX);
+      assertFalse(isCameraDollyY);
+      assertFalse(isCameraDollyZ);
+      
+      scs.setCameraDolly(false, true, false, false);
+      boolean isCameraDolly2 = scs.getGUI().getCamera().isDolly();
+      boolean isCameraDollyX2 = scs.getGUI().getCamera().isDollyX();
+      boolean isCameraDollyY2 = scs.getGUI().getCamera().isDollyY();
+      boolean isCameraDollyZ2 = scs.getGUI().getCamera().isDollyZ();
+      assertFalse(isCameraDolly2);
+      assertTrue(isCameraDollyX2);
+      assertFalse(isCameraDollyY2);
+      assertFalse(isCameraDollyZ2);
+      
+      scs.setCameraDolly(false, false, true, false);
+      boolean isCameraDolly3 = scs.getGUI().getCamera().isDolly();
+      boolean isCameraDollyX3 = scs.getGUI().getCamera().isDollyX();
+      boolean isCameraDollyY3 = scs.getGUI().getCamera().isDollyY();
+      boolean isCameraDollyZ3 = scs.getGUI().getCamera().isDollyZ();
+      assertFalse(isCameraDolly3);
+      assertFalse(isCameraDollyX3);
+      assertTrue(isCameraDollyY3);
+      assertFalse(isCameraDollyZ3);
+      
+      scs.setCameraDolly(false, false, false, true);
+      boolean isCameraDolly4 = scs.getGUI().getCamera().isDolly();
+      boolean isCameraDollyX4 = scs.getGUI().getCamera().isDollyX();
+      boolean isCameraDollyY4 = scs.getGUI().getCamera().isDollyY();
+      boolean isCameraDollyZ4 = scs.getGUI().getCamera().isDollyZ();
+      assertFalse(isCameraDolly4);
+      assertFalse(isCameraDollyX4);
+      assertFalse(isCameraDollyY4);
+      assertTrue(isCameraDollyZ4);
+      
+      setCameraTrackingDoubleYoVariableInSCSRegistry(cameraTrackingVarNameX, cameraTrackingVarNameY, cameraTrackingVarNameZ, scs);
+      scs.setCameraTrackingVars(cameraTrackingVarNameX, cameraTrackingVarNameY, cameraTrackingVarNameZ);
+      String cameraTrackingVarNameXSCS = scs.getRootRegistry().getVariable(cameraTrackingVarNameX).getName();
+      String cameraTrackingVarNameYSCS = scs.getRootRegistry().getVariable(cameraTrackingVarNameY).getName();
+      String cameraTrackingVarNameZSCS = scs.getRootRegistry().getVariable(cameraTrackingVarNameZ).getName();
+      assertEquals(cameraTrackingVarNameX, cameraTrackingVarNameXSCS);
+      assertEquals(cameraTrackingVarNameY, cameraTrackingVarNameYSCS);
+      assertEquals(cameraTrackingVarNameZ, cameraTrackingVarNameZSCS);
+      
+      setCameraDollyDoubleYoVariableInSCSRegistry(cameraDollyVarNameX, cameraDollyVarNameY, cameraDollyVarNameZ, scs);
+      scs.setCameraDollyVars(cameraDollyVarNameX, cameraDollyVarNameY, cameraDollyVarNameZ);
+      String cameraDollyVarNameXSCS = scs.getRootRegistry().getVariable(cameraDollyVarNameX).getName();
+      String cameraDollyVarNameYSCS = scs.getRootRegistry().getVariable(cameraDollyVarNameY).getName();
+      String cameraDollyVarNameZSCS = scs.getRootRegistry().getVariable(cameraDollyVarNameZ).getName();
+      assertEquals(cameraDollyVarNameX, cameraDollyVarNameXSCS);
+      assertEquals(cameraDollyVarNameY, cameraDollyVarNameYSCS);
+      assertEquals(cameraDollyVarNameZ, cameraDollyVarNameZSCS);
+   }
+   
+   @Test
+   public void test3DGraphicsMethods()
+   {
+      Graphics3DNode graphics3DNodeFromSCS = scs.addStaticLinkGraphics(staticLinkGraphics);
+      assertNotNull(graphics3DNodeFromSCS);
+      
+      Graphics3DNode graphics3DNodeFromSCS2 = scs.addStaticLinkGraphics(staticLinkGraphics, graphics3DNodeType);
+      assertNotNull(graphics3DNodeFromSCS2);
+      
+      GraphicsDynamicGraphicsObject graphicsDynamicGraphicsObjectFromSCS = scs.addDynamicGraphicObject(dynamicGraphicObject);
+      assertNotNull(graphicsDynamicGraphicsObjectFromSCS);
+      
+      GraphicsDynamicGraphicsObject graphicsDynamicGraphicsObjectFromSCS2 = scs.addDynamicGraphicObject(dynamicGraphicObject, true);
+      assertNotNull(graphicsDynamicGraphicsObjectFromSCS2);
+      
+      GraphicsDynamicGraphicsObject graphicsDynamicGraphicsObjectFromSCS3 = scs.addDynamicGraphicObject(dynamicGraphicObject, false);
+      assertNotNull(graphicsDynamicGraphicsObjectFromSCS3);
+   }
+   
+   @Test
+   public void testGetVariableMethods() throws AWTException
+   {
       ArrayList<YoVariable> allVariablesFromRobot = simpleRobot.getAllVariables();
       ArrayList<YoVariable> allVariablesFromSCS = scs.getAllVariables();
       assertEquals(allVariablesFromRobot, allVariablesFromSCS);
@@ -166,21 +319,10 @@ public class SimulationConstructionSetUsingDirectCallsTest
       ArrayList<YoVariable>  arrayOfVariablesRegExprRobot = getSimpleRobotRegExpVariables(varNames, regularExpressions, simpleRobot);
       ArrayList<YoVariable>  arrayOfVariablesRegExprSCS = scs.getVars(varNames, regularExpressions);
       assertEquals(arrayOfVariablesRegExprRobot, arrayOfVariablesRegExprSCS);
-
-//      ThreadTools.sleepForever();
-//    Robot simpleRobot2 = new Robot("simpleRobot2");
-//    Robot[] robots = {simpleRobot, simpleRobot2};
-//    
-//    SimulationConstructionSet scs2 = new SimulationConstructionSet(robots);
-//    generateSimulationFromDataFile
-//     JButton button = new JButton("test");
-      
-      scs.closeAndDispose();
-      scs = null;
    }
    
    @Test
-   public void testTimingMethods()
+   public void testTimingMethods() throws AWTException
    {
       scs.setDT(simulateDT, recordFrequency);
       double simulateDTFromSCS = scs.getDT();
@@ -201,6 +343,33 @@ public class SimulationConstructionSetUsingDirectCallsTest
       double ticksPerCycle = computeTicksPerPlayCycle(simulateDT, recordFreq, realTimeRate, frameRate);
       double ticksPerCycleFromSCS = scs.getTicksPerPlayCycle();
       assertEquals(ticksPerCycle, ticksPerCycleFromSCS, epsilon);
+   }
+   
+   @After
+   public void closeSCS()
+   {
+      scs.closeAndDispose();
+      scs = null;
+   }
+   
+   // local methods
+   
+   private void setCameraTrackingDoubleYoVariableInSCSRegistry(String cameraTrackingVarNameX, String cameraTrackingVarNameY, String cameraTrackingVarNameZ, SimulationConstructionSet scs)
+   {
+      YoVariableRegistry scsRegistry = scs.getRootRegistry();
+      
+      DoubleYoVariable cameraTrackingDouBleYoVariableX = new DoubleYoVariable(cameraTrackingVarNameX, scsRegistry);
+      DoubleYoVariable cameraTrackingDouBleYoVariableY = new DoubleYoVariable(cameraTrackingVarNameY, scsRegistry);
+      DoubleYoVariable cameraTrackingDouBleYoVariableZ = new DoubleYoVariable(cameraTrackingVarNameZ, scsRegistry);
+   }
+   
+   private void setCameraDollyDoubleYoVariableInSCSRegistry(String cameraDollyVarNameX, String cameraDollyVarNameY, String cameraDollyVarNameZ, SimulationConstructionSet scs)
+   {
+      YoVariableRegistry scsRegistry = scs.getRootRegistry();
+      
+      DoubleYoVariable cameraDollyDouBleYoVariableX = new DoubleYoVariable(cameraDollyVarNameX, scsRegistry);
+      DoubleYoVariable cameraDollyDouBleYoVariableY = new DoubleYoVariable(cameraDollyVarNameY, scsRegistry);
+      DoubleYoVariable cameraDollyDouBleYoVariableZ = new DoubleYoVariable(cameraDollyVarNameZ, scsRegistry);
    }
    
    private String getRegistryNameSpaceFromRobot(Robot robotModel)
@@ -343,5 +512,16 @@ public class SimulationConstructionSetUsingDirectCallsTest
    {
       return Math.max((int) (frameRate * realTimeRate / (dt * recordFreq)), 1);
    }
-
+   
+   // unused
+   private ArrayList<Graphics3DObject> createRandomGraphics3DArrayList(Graphics3DObject staticLinkGraphics)
+   {
+      ArrayList<Graphics3DObject> graphics3DArrayList = new ArrayList<>();
+      for(int i = 0; i < Math.round(Math.random()*10); i++)
+      {
+         graphics3DArrayList.add(staticLinkGraphics);
+      }
+      
+      return graphics3DArrayList;
+   }
 }
