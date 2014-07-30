@@ -227,7 +227,7 @@ public class NullGraphics3DAdapter implements Graphics3DAdapter
    }
 
    @Override
-   public GPULidar createGPULidar(GPULidarCallback callback, int horizontalRays, double fov, double near, double far)
+   public GPULidar createGPULidar(GPULidarListener callback, int horizontalRays, double fov, double near, double far)
    {
       return null;
    }

@@ -40,5 +40,5 @@ public interface Graphics3DAdapter
 
    public ContextManager getContextManager();
    
-   public GPULidar createGPULidar(GPULidarCallback callback, int horizontalRays, double fov, double near, double far);
+   public GPULidar createGPULidar(GPULidarListener callback, int horizontalRays, double fov, double near, double far);
 }

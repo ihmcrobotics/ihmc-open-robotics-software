@@ -13,7 +13,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotLidarParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPointCloudParameters;
 import us.ihmc.graphics3DAdapter.GPULidar;
-import us.ihmc.graphics3DAdapter.GPULidarCallback;
+import us.ihmc.graphics3DAdapter.GPULidarListener;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.utilities.lidar.PointCloudPacket;
 import us.ihmc.utilities.lidar.polarLidar.LidarScan;
@@ -88,7 +88,7 @@ public class DRCLidar
  }
 
 
-   public static class DRCLidarToPointCloudCallback implements GPULidarCallback
+   public static class DRCLidarToPointCloudCallback implements GPULidarListener
    {
       private final Executor pool = Executors.newSingleThreadExecutor();
 
@@ -129,7 +129,7 @@ public class DRCLidar
    }
 
 
-   public static class DRCLidarCallback implements GPULidarCallback
+   public static class DRCLidarCallback implements GPULidarListener
    {
       private final Executor pool = Executors.newSingleThreadExecutor();
 
