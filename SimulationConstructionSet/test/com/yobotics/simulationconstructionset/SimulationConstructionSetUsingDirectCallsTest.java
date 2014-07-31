@@ -3,8 +3,8 @@ package com.yobotics.simulationconstructionset;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.awt.AWTException;
 import java.awt.Dimension;
@@ -12,8 +12,10 @@ import java.awt.Frame;
 import java.awt.Point;
 import java.util.ArrayList;
 
+import org.fest.swing.edt.FailOnThreadViolationRepaintManager;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import us.ihmc.graphics3DAdapter.camera.ClassicCameraController;
@@ -78,6 +80,12 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private ExternalForcePoint simpleExternalForcePoint = new ExternalForcePoint("simpleExternalForcePoint", dummyRegistry);
    private DynamicGraphicObject dynamicGraphicObject = new DynamicGraphicVector("simpleDynamicGraphicObject", simpleExternalForcePoint);
    SimulationConstructionSet scs;
+   
+   @BeforeClass 
+   public static void setUpOnce() 
+   {
+      FailOnThreadViolationRepaintManager.install();
+   }
    
    @Before
    public void createAndStartSCSWithRobot()
