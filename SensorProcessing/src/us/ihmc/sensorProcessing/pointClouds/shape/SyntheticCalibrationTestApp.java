@@ -156,7 +156,7 @@ public class SyntheticCalibrationTestApp extends SimpleApplication
       //configRansac.models.get(1).modelCheck = new CheckShapeCylinderRadius(0.2);
       //configRansac.models.get(2).modelCheck = new CheckShapeSphere3DRadius(0.2);
 
-      ConfigSurfaceNormals configSurface = new ConfigSurfaceNormals(10, 30, Double.MAX_VALUE);
+      ConfigSurfaceNormals configSurface = new ConfigSurfaceNormals(30, Double.MAX_VALUE);
       ConfigRemoveFalseShapes configMerge = new ConfigRemoveFalseShapes(0.7);
 
       PointCloudShapeFinder shapeFinder = FactoryPointCloudShape.ransacOctree(configSurface, configRansac, configMerge);

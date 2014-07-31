@@ -90,7 +90,7 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
 
    private boolean SHADOWS = false;
 
-   ConfigSurfaceNormals configNormal = new ConfigSurfaceNormals(100, 100, .1);
+   ConfigSurfaceNormals configNormal = new ConfigSurfaceNormals(100, .1);
 
    public static void main(String[] args)
    {
@@ -355,9 +355,9 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
       {
          public void run()
          {
-            ConfigSurfaceNormals configNormal = new ConfigSurfaceNormals(25, 50, .1);
+            ConfigSurfaceNormals configNormal = new ConfigSurfaceNormals(50, .1);
 
-            ApproximateSurfaceNormals surface = new ApproximateSurfaceNormals(configNormal.numPlane, configNormal.maxDistancePlane, configNormal.numNeighbors,
+            ApproximateSurfaceNormals surface = new ApproximateSurfaceNormals(configNormal.numNeighbors,
                   configNormal.maxDistanceNeighbor);
 
             FastQueue<PointVectorNN> normalVectors = new FastQueue<PointVectorNN>(PointVectorNN.class, false);
@@ -768,7 +768,7 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
       configRansac.maximumAllowedIterations = 250;
       configRansac.ransacExtension = 25;
 
-      ConfigSurfaceNormals stairNormalsConfig = new ConfigSurfaceNormals(25, 50, .1);
+      ConfigSurfaceNormals stairNormalsConfig = new ConfigSurfaceNormals(50, .1);
 
       long time = System.currentTimeMillis();
       List<Point3D_F64> cloud = PointCloudTools.boundSphere(fullCloud, center, .3);
@@ -1227,7 +1227,7 @@ public class ShapesFromPointCloudFileApp extends SimpleApplication implements Ra
                System.out.println("Filter! : " + ransacCloud.size());
                List<Point3D_F64> filterCloud = ransacCloud;
 
-               ConfigSurfaceNormals stairNormalsConfig = new ConfigSurfaceNormals(25, 50, .1);
+               ConfigSurfaceNormals stairNormalsConfig = new ConfigSurfaceNormals(50, .1);
 
                long time = System.currentTimeMillis();
                //filterCloud = PointCloudTools.boundSphere(fullCloud, center, 1.5);
