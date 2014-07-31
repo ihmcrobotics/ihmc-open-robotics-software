@@ -380,6 +380,11 @@ public final class RobotiqHandInterface
 		speed[FINGER_A] = (byte)(MAX_SPEED & 0b11110000); //speed control
 		force[FINGER_A] = MAX_FORCE/2;
 		
+		speed[FINGER_B] = (byte)(MAX_SPEED & 0b11110000); //speed control
+      force[FINGER_B] = MAX_FORCE/2;
+      speed[FINGER_C] = (byte)(MAX_SPEED & 0b11110000); //speed control
+      force[FINGER_C] = MAX_FORCE/2;
+		
 		initializedStatus = INITIALIZED;
 		operationMode = BASIC_MODE;
 		commandedStatus = STANDBY;
@@ -625,9 +630,9 @@ public final class RobotiqHandInterface
 	public void hookMode()
 	{
 		fingerControl = INDIVIDUAL_FINGER_CONTROL;
-		setIndividualFinger(FINGER_A, force[FINGER_A], FULLY_OPEN, speed[FINGER_A]);
-		setIndividualFinger(FINGER_B, force[FINGER_B], FULLY_OPEN, speed[FINGER_B]);
-		setIndividualFinger(FINGER_C, force[FINGER_C], (byte)45, speed[FINGER_C]); //index finger of left Hand
+		setIndividualFinger(FINGER_A, force[FINGER_A], FULLY_CLOSED, speed[FINGER_A]);
+		setIndividualFinger(FINGER_B, force[FINGER_B], FULLY_CLOSED, speed[FINGER_B]);
+		setIndividualFinger(FINGER_C, force[FINGER_C], FULLY_OPEN, speed[FINGER_C]); //index finger of left Hand
 		sendMotionRequest();
 	}
 	
