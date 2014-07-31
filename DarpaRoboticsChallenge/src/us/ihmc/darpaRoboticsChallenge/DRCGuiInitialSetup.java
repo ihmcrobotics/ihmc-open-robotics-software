@@ -18,7 +18,7 @@ import us.ihmc.graphics3DAdapter.jme.JMEGraphics3DAdapter;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.dataExporter.DataExporter;
-import com.yobotics.simulationconstructionset.util.FlatGroundProfile;
+import com.yobotics.simulationconstructionset.util.ground.FlatGroundProfile;
 
 public class DRCGuiInitialSetup implements GuiInitialSetup
 {

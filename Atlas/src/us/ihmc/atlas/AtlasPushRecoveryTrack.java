@@ -18,7 +18,7 @@ import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import com.martiansoftware.jsap.JSAPException;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.util.FlatGroundProfile;
+import com.yobotics.simulationconstructionset.util.ground.FlatGroundProfile;
 
 public class AtlasPushRecoveryTrack
 {

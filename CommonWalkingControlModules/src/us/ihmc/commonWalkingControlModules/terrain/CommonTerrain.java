@@ -15,10 +15,10 @@ import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 
-import com.yobotics.simulationconstructionset.util.FlatGroundProfile;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.ground.AlternatingSlopesGroundProfile;
 import com.yobotics.simulationconstructionset.util.ground.BumpyGroundProfile;
+import com.yobotics.simulationconstructionset.util.ground.FlatGroundProfile;
 import com.yobotics.simulationconstructionset.util.ground.GroundProfileFromFile;
 import com.yobotics.simulationconstructionset.util.ground.RandomRockyGroundProfile;
 import com.yobotics.simulationconstructionset.util.ground.RollingGroundProfile;

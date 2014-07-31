@@ -132,7 +132,11 @@ public abstract class GroundProfileTest
             boolean surfaceNormalsAreClose = surfaceNormalCheck.dot(surfaceNormal) > 1.0 - 0.001;
             boolean belowAPeak = !surfaceNormalsAreClose;
             if (belowAPeak) numberOfPeakPoints++; //assertTrue(surfaceNormalsAreClose);
-            else assertTrue(insideShouldBeTrue);
+            else 
+            {
+               assertTrue(insideShouldBeTrue);
+               assertTrue(groundProfile.isClose(queryPointALittleInside.getX(), queryPointALittleInside.getY(), queryPointALittleInside.getZ()));
+            }
 
             JUnitTools.assertTuple3dEquals(intersectionCheck, queryPoint, 0.002);
             
