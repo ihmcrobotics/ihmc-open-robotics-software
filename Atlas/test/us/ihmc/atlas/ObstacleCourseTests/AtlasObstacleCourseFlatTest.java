@@ -39,4 +39,9 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
                                                 "pelvisOrientationErrorMagnitude");
    }
 
+   @Override
+   protected double getFootSlipTimeDeltaAfterTouchdown()
+   {
+      return 0.05;
+   }
 }
