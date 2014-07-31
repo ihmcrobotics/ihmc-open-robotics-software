@@ -603,9 +603,9 @@ public final class RobotiqHandInterface
 			status = getStatus();
 		if(fingerControl == CONCURRENT_FINGER_CONTROL)
 		{
-			position[FINGER_A] = status[FINGER_A_POSITION]; //TODO: check to see if this should be the requested position
-			position[FINGER_B] = status[FINGER_B_POSITION];
-			position[FINGER_C] = status[FINGER_C_POSITION];
+			position[FINGER_A] = status[FINGER_A_REQUESTED_POSITION]; //TODO: check to see if this should be the requested position
+			position[FINGER_B] = status[FINGER_B_REQUESTED_POSITION];
+			position[FINGER_C] = status[FINGER_C_REQUESTED_POSITION];
 			force[FINGER_B] = force[FINGER_A];
 			force[FINGER_C] = force[FINGER_A];
 			speed[FINGER_B] = speed[FINGER_A];
@@ -620,6 +620,15 @@ public final class RobotiqHandInterface
 		position[finger] = desiredPosition;
 		speed[finger] = desiredSpeed;
 		force[finger] = desiredForce;
+	}
+	
+	public void hookMode()
+	{
+		fingerControl = INDIVIDUAL_FINGER_CONTROL;
+		setIndividualFinger(FINGER_A, force[FINGER_A], FULLY_OPEN, speed[FINGER_A]);
+		setIndividualFinger(FINGER_B, force[FINGER_B], FULLY_OPEN, speed[FINGER_B]);
+		setIndividualFinger(FINGER_C, force[FINGER_C], (byte)45, speed[FINGER_C]); //index finger of left Hand
+		sendMotionRequest();
 	}
 	
 	//TODO: Test this on actual hand
