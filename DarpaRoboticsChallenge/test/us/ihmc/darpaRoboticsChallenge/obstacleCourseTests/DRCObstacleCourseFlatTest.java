@@ -257,7 +257,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       SlipOnNextStepPerturber slipOnEachStepPerturber = new SlipOnNextStepPerturber(robot, RobotSide.LEFT);
       slipOnEachStepPerturber.setAmountToSlipNextStep(getFootSlipVector());
       slipOnEachStepPerturber.setRotationToSlipNextStep(-0.15, 0.0, 0.0);
-      slipOnEachStepPerturber.setSlipAfterStepTimeDelta(0.05);
+      slipOnEachStepPerturber.setSlipAfterStepTimeDelta(getFootSlipTimeDeltaAfterTouchdown());
       slipOnEachStepPerturber.setPercentToSlipPerTick(0.1);
       robot.setController(slipOnEachStepPerturber, 10);
 
@@ -732,6 +732,8 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
    }
    
    protected abstract Vector3d getFootSlipVector();
+
+   protected abstract double getFootSlipTimeDeltaAfterTouchdown();
    
    protected abstract DoubleYoVariable getPelvisOrientationErrorVariableName(SimulationConstructionSet scs);
 }
