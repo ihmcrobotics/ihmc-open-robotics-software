@@ -62,7 +62,7 @@ public class DisplayCloudNormalsApp {
       List<Point3D_F64> cloud0 = filter(scans0,2.5);
 
 
-      ApproximateSurfaceNormals surfaceNormals = new ApproximateSurfaceNormals(40,0.15,40,0.05);
+      ApproximateSurfaceNormals surfaceNormals = new ApproximateSurfaceNormals(40,0.05);
 
       FastQueue<PointVectorNN> pointNormList = new FastQueue<PointVectorNN>(PointVectorNN.class, false);
 

@@ -51,7 +51,7 @@ public class SyntheticDataShapeTestApp extends SimpleApplication
       configRansac.minModelAccept = 100;
       configRansac.octreeSplit = 100;
 
-      ConfigSurfaceNormals configSurface = new ConfigSurfaceNormals(15, 20, 3);
+      ConfigSurfaceNormals configSurface = new ConfigSurfaceNormals(20, 3);
       ConfigRemoveFalseShapes configMerge = new ConfigRemoveFalseShapes(0.6);
 
       PointCloudShapeFinder shapeFinder = FactoryPointCloudShape.ransacOctree(configSurface, configRansac, configMerge);

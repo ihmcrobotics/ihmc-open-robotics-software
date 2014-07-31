@@ -4,11 +4,7 @@ import boofcv.gui.image.ShowImages;
 import bubo.clouds.FactoryPointCloudShape;
 import bubo.clouds.detect.CloudShapeTypes;
 import bubo.clouds.detect.PointCloudShapeFinder;
-import bubo.clouds.detect.alg.ApproximateSurfaceNormals;
-import bubo.clouds.detect.alg.ConfigSchnabel2007;
-import bubo.clouds.detect.alg.PointVectorNN;
 import bubo.clouds.detect.wrapper.ConfigMultiShapeRansac;
-import bubo.clouds.detect.wrapper.ConfigRemoveFalseShapes;
 import bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
 import bubo.gui.FactoryVisualization3D;
 import bubo.gui.UtilDisplayBubo;
@@ -18,11 +14,9 @@ import georegression.geometry.UtilPoint2D_F64;
 import georegression.struct.plane.PlaneGeneral3D_F64;
 import georegression.struct.point.Point2D_F64;
 import georegression.struct.point.Point3D_F64;
-import georegression.struct.point.Vector3D_F64;
 import georegression.struct.se.Se3_F64;
 import georegression.struct.shapes.Rectangle2D_F64;
 import georegression.transform.se.SePointOps_F64;
-import org.ddogleg.struct.FastQueue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +28,9 @@ import static us.ihmc.sensorProcessing.pointClouds.testbed.CreateCloudFromFilter
 /**
  * @author Peter Abeles
  */
-public class FindTestBedWalls {
+public class FindAllPlanesInViewApp {
+
+   public static Random rand = new Random(23423);
 
    private static void visualizePlane( PointCloudShapeFinder.Shape shape , PointCloudPanel gui ) {
       PlaneGeneral3D_F64 plane = (PlaneGeneral3D_F64)shape.parameters;
@@ -58,11 +54,15 @@ public class FindTestBedWalls {
       polygon.add( new Point2D_F64(r.p0.x,r.p1.y));
 
       System.out.println("Plane "+plane);
-      System.out.println("Points on cloud "+shape.points.size());
+      System.out.println("Points in shape "+shape.points.size());
       System.out.println("Bounding rectangle "+r.getWidth()+" "+r.getHeight());
 
+      // select the color so that it won't be nearly black
+      int red =  rand.nextInt(200)+56;
+      int green =  rand.nextInt(200)+56;
+      int blue =  rand.nextInt(200)+56;
 
-      int color = (new Random().nextInt() & 0x00FFFFFF ) | 0xFF000000;
+      int color = (red << 16 | green << 8 | blue) | 0xFF000000;
 
       gui.addMesh2D(planeToWorld,polygon,(color&0x00FFFFFF )|0xA0000000); // 0xA0FF0000
       gui.addPoints(shape.points,color,1);
@@ -73,11 +73,11 @@ public class FindTestBedWalls {
       List<Point3D_F64> cloud0 = filter(scans0,3);
 
       ConfigMultiShapeRansac configRansac = ConfigMultiShapeRansac.createDefault(500,1.2,0.025, CloudShapeTypes.PLANE);
-      configRansac.minimumPoints = 15000;
+      configRansac.minimumPoints = 5000;
 //      ConfigSchnabel2007 configSchnabel = ConfigSchnabel2007.createDefault(20000,0.6,0.15,CloudShapeTypes.PLANE);
 
       PointCloudShapeFinder finder = FactoryPointCloudShape.ransacSingleAll(
-              new ConfigSurfaceNormals(100, 100, 0.15), configRansac);
+              new ConfigSurfaceNormals(100, 0.15), configRansac);
 
       finder.process(cloud0,null);
 

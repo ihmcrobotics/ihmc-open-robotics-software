@@ -142,7 +142,7 @@ public class PointCloudTools
 
    public static List<Point3D_F64> thinCloud(List<Point3D_F64> cloud, double size)
    {
-      ApproximateSurfaceNormals surface = new ApproximateSurfaceNormals(1000, size, 1000, size);
+      ApproximateSurfaceNormals surface = new ApproximateSurfaceNormals(1000, size);
       FastQueue<PointVectorNN> pointNormList = new FastQueue<PointVectorNN>(PointVectorNN.class, false);
       surface.process(cloud, pointNormList);
 
@@ -173,7 +173,7 @@ public class PointCloudTools
 
    public static List<Point3D_F64> filterByResidual(List<Point3D_F64> cloud, ConfigSurfaceNormals configNormal, double thresh)
    {
-      ApproximateSurfaceNormals surface = new ApproximateSurfaceNormals(configNormal.numPlane, configNormal.maxDistancePlane, configNormal.numNeighbors,
+      ApproximateSurfaceNormals surface = new ApproximateSurfaceNormals( configNormal.numNeighbors,
             configNormal.maxDistanceNeighbor);
       FastQueue<PointVectorNN> pointNormList = new FastQueue<PointVectorNN>(PointVectorNN.class, false);
       surface.process(cloud, pointNormList);
@@ -193,7 +193,7 @@ public class PointCloudTools
    public static List<Point3D_F64> filterByNormalOrientation(List<Point3D_F64> cloud, ConfigSurfaceNormals configNormal, Vector3D_F64 desiredNormal,
          double thresh)
    {
-      ApproximateSurfaceNormals surface = new ApproximateSurfaceNormals(configNormal.numPlane, configNormal.maxDistancePlane, configNormal.numNeighbors,
+      ApproximateSurfaceNormals surface = new ApproximateSurfaceNormals(configNormal.numNeighbors,
             configNormal.maxDistanceNeighbor);
       FastQueue<PointVectorNN> pointNormList = new FastQueue<PointVectorNN>(PointVectorNN.class, false);
       surface.process(cloud, pointNormList);
@@ -217,7 +217,7 @@ public class PointCloudTools
       PlaneGeneral3D_F64 plane = (PlaneGeneral3D_F64) s.parameters;
       //PlaneNormal3D_F64 planeNorm = UtilPlane3D_F64.convert();
 
-      ApproximateSurfaceNormals surface = new ApproximateSurfaceNormals(configNormal.numPlane, configNormal.maxDistancePlane, configNormal.numNeighbors,
+      ApproximateSurfaceNormals surface = new ApproximateSurfaceNormals( configNormal.numNeighbors,
             configNormal.maxDistanceNeighbor);
       FastQueue<PointVectorNN> pointNormList = new FastQueue<PointVectorNN>(PointVectorNN.class, false);
       surface.process(cloud, pointNormList);
@@ -232,7 +232,7 @@ public class PointCloudTools
    public static List<Shape> process(List<Point3D_F64> cloud, ConfigSurfaceNormals configNormal, ConfigSchnabel2007 configRansac, Point3D_F64 center,
          double radius)
    {
-      ApproximateSurfaceNormals surface = new ApproximateSurfaceNormals(configNormal.numPlane, configNormal.maxDistancePlane, configNormal.numNeighbors,
+      ApproximateSurfaceNormals surface = new ApproximateSurfaceNormals(configNormal.numNeighbors,
             configNormal.maxDistanceNeighbor);
       FastQueue<PointVectorNN> pointNormList = new FastQueue<PointVectorNN>(PointVectorNN.class, false);
       surface.process(cloud, pointNormList);

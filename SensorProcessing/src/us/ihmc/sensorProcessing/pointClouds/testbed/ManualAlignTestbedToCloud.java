@@ -293,14 +293,14 @@ public class ManualAlignTestbedToCloud extends SimpleApplication {
                Se3_F64 transformGR = GeometryOps.convert(transform,null);
 
                try {
-                  new XStream().toXML(transformGR, new FileOutputStream("testbedToWorld.xml"));
+                  new XStream().toXML(transformGR, new FileOutputStream("modelTestbedToWorld.xml"));
                } catch (FileNotFoundException e) {
                   throw new RuntimeException(e);
                }
             } else if (name.equals(LOAD_TRANFORM)) {
                System.out.println("Loading transform");
                try {
-                  Se3_F64 transformGR = (Se3_F64)new XStream().fromXML(new FileInputStream("testbedToWorld.xml"));
+                  Se3_F64 transformGR = (Se3_F64)new XStream().fromXML(new FileInputStream("modelTestbedToWorld.xml"));
                   transform = GeometryOps.convert(transformGR,null);
                   testbedTransform.setLocalTransform(transform);
                } catch (FileNotFoundException e) {
