@@ -14,7 +14,7 @@ import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.util.DoubleStepGroundProfile;
+import com.yobotics.simulationconstructionset.util.ground.DoubleStepGroundProfile;
 
 public class DRCDoubleElevationChangeSimulation
 {   
