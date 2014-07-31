@@ -227,8 +227,8 @@ public class MomentumBasedControllerFactory
       TransferTimeCalculationProvider transferTimeCalculationProvider = new TransferTimeCalculationProvider("providedTransferTime", registry, transferTimeCalculator, transferTime);
       SwingTimeCalculationProvider swingTimeCalculationProvider = new SwingTimeCalculationProvider("providedSwingTime", registry, swingTimeCalculator, swingTime);
       
-      variousWalkingManagers = VariousWalkingManagers.create(momentumBasedController, yoTime, variousWalkingProviders, walkingControllerParameters,
-            armControllerParameters, registry, swingTimeCalculationProvider);
+      variousWalkingManagers = VariousWalkingManagers.create(momentumBasedController, variousWalkingProviders, walkingControllerParameters, armControllerParameters,
+            registry, swingTimeCalculationProvider);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the ICPAndMomentumBasedController //////////////////////////////////////////////////

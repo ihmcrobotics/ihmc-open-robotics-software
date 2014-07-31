@@ -740,12 +740,6 @@ public class MomentumBasedController
       return centerOfMassJacobian;
    }
 
-   @Deprecated
-   public boolean isUsingOptimizationMomentumControlModule()
-   {
-      return momentumControlModuleBridge.isUsingOptimizationMomentumControlModule();
-   }
-
    public FrameVector getAdmissibleDesiredGroundReactionForceCopy()
    {
       return admissibleDesiredGroundReactionForce.getFrameVectorCopy();
