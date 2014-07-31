@@ -11,7 +11,7 @@ import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
-import com.yobotics.simulationconstructionset.util.FlatGroundProfile;
+import com.yobotics.simulationconstructionset.util.ground.FlatGroundProfile;
 
 public class ValkyrieFlatGroundWalkingTrack
 {
