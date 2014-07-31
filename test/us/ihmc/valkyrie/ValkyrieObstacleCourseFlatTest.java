@@ -37,4 +37,10 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
                                                 "v1PelvisOrientationErrorMagnitude");
    }
 
+   @Override
+   protected double getFootSlipTimeDeltaAfterTouchdown()
+   {
+      return 0.1;
+   }
+
 }
