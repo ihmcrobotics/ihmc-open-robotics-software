@@ -27,7 +27,7 @@ import us.ihmc.utilities.ThreadTools;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.SimulationDoneCriterion;
-import com.yobotics.simulationconstructionset.util.FlatGroundProfile;
+import com.yobotics.simulationconstructionset.util.ground.FlatGroundProfile;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterface

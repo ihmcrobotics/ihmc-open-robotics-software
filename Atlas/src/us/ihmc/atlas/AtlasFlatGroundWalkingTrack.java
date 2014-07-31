@@ -11,8 +11,8 @@ import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 
 import com.martiansoftware.jsap.JSAPException;
-import com.yobotics.simulationconstructionset.util.FlatGroundProfile;
 import com.yobotics.simulationconstructionset.util.ground.BumpyGroundProfile;
+import com.yobotics.simulationconstructionset.util.ground.FlatGroundProfile;
 
 public class AtlasFlatGroundWalkingTrack
 {
