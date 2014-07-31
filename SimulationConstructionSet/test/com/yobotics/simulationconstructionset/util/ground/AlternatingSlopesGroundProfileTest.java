@@ -3,24 +3,38 @@ package com.yobotics.simulationconstructionset.util.ground;
 
 import static org.junit.Assert.assertEquals;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
-public class AlternatingSlopesGroundProfileTest
+import us.ihmc.graphics3DAdapter.GroundProfile3D;
+
+import com.yobotics.simulationconstructionset.ground.GroundProfileTest;
+
+public class AlternatingSlopesGroundProfileTest extends GroundProfileTest
 {
    private static final double epsilon = 1e-7;
 
-   @Before
-   public void setUp() throws Exception
+   public GroundProfile3D getGroundProfile()
    {
+      double[][] xSlopePairs = new double[][]{{-5.0, 1.0}, {0.0, -1.0}, {5.0, 1.0}};
+      AlternatingSlopesGroundProfile groundProfile = new AlternatingSlopesGroundProfile(xSlopePairs);
+      return groundProfile;
+   }
+   
+   public double getMaxPercentageOfAllowableValleyPoints()
+   {
+      return 0.05;
    }
 
-   @After
-   public void tearDown() throws Exception
+   public double getMaxPercentageOfAllowablePeakPoints()
    {
+      return 0.05;
    }
-
+   
+   public double getMaxPercentageOfAllowableDropOffs()
+   {
+      return 0.0;
+   }
+   
    @Test
    public void testAllFlat()
    {
