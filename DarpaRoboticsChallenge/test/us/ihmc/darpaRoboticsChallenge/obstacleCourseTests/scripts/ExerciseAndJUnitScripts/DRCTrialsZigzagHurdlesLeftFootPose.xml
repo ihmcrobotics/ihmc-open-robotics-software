@@ -1,150 +1,118 @@
 <object-stream>
-  <long>34419177496</long>
+  <long>2063170807</long>
   <us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
     <heightOffset>0.04802</heightOffset>
   </us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
-  <long>68379806120</long>
+  <long>30563341675</long>
   <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList>
     <footstepDataList>
       <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
         <robotSide>LEFT</robotSide>
         <location>
-          <x>0.0773720208831806</x>
-          <y>0.022</y>
-          <z>0.10476879825240526</z>
+          <x>0.13449730693868323</x>
+          <y>-0.006404720490549187</y>
+          <z>0.10480062764337932</z>
         </location>
         <orientation>
-          <x>-1.222767936164831E-4</x>
-          <y>0.0015388534600127197</y>
-          <z>-1.7000677686638933E-4</z>
-          <w>0.9999987940373279</w>
+          <x>2.1086047787527472E-4</x>
+          <y>-0.0039269078482335</y>
+          <z>-1.7164186664865428E-4</z>
+          <w>0.9999922527058297</w>
         </orientation>
       </us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
       <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
         <robotSide>RIGHT</robotSide>
         <location>
-          <x>0.3036819676744558</x>
-          <y>-0.41</y>
-          <z>0.22398318378072613</z>
+          <x>0.38166991130354044</x>
+          <y>-0.488750961257052</y>
+          <z>0.2241493052164728</z>
         </location>
         <orientation>
-          <x>-1.222767936164831E-4</x>
-          <y>0.0015388534600127197</y>
-          <z>-1.7000677686638933E-4</z>
-          <w>0.9999987940373279</w>
+          <x>2.1086047787527467E-4</x>
+          <y>-0.003926907848233499</y>
+          <z>-1.7164186664865428E-4</z>
+          <w>0.9999922527058297</w>
         </orientation>
       </us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
-    </footstepDataList>
-    <trajectoryWaypointGenerationMethod>DEFAULT</trajectoryWaypointGenerationMethod>
-    <speed>0.5</speed>
-  </us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList>
-  <long>73545124976</long>
-  <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.PauseCommand>
-    <pause>true</pause>
-  </us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.PauseCommand>
-  <long>103445155567</long>
-  <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList>
-    <footstepDataList>
       <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
         <robotSide>LEFT</robotSide>
         <location>
-          <x>0.6557827186562704</x>
-          <y>-0.035</y>
-          <z>0.2392286766667321</z>
+          <x>0.7786337994775294</x>
+          <y>-0.11090948011874437</y>
+          <z>0.2397562459925455</z>
         </location>
         <orientation>
-          <x>-1.0241933424931904E-4</x>
-          <y>0.0015403025240588852</y>
-          <z>0.012727443995871553</z>
-          <w>0.9999178111963735</w>
-        </orientation>
-      </us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
-    </footstepDataList>
-    <trajectoryWaypointGenerationMethod>DEFAULT</trajectoryWaypointGenerationMethod>
-    <speed>0.5</speed>
-  </us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList>
-  <long>106845042864</long>
-  <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.PauseCommand>
-    <pause>true</pause>
-  </us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.PauseCommand>
-  <long>125545024860</long>
-  <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList>
-    <footstepDataList>
-      <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
-        <robotSide>RIGHT</robotSide>
-        <location>
-          <x>0.8945068289222381</x>
-          <y>-0.3873441017205707</y>
-          <z>0.07970247359326543</z>
-        </location>
-        <orientation>
-          <x>-1.2048175703720635E-4</x>
-          <y>0.001538995039586377</y>
-          <z>9.964144957766532E-4</z>
-          <w>0.999998312066859</w>
-        </orientation>
-      </us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
-    </footstepDataList>
-    <trajectoryWaypointGenerationMethod>DEFAULT</trajectoryWaypointGenerationMethod>
-    <speed>0.5</speed>
-  </us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList>
-  <long>128945246462</long>
-  <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.PauseCommand>
-    <pause>true</pause>
-  </us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.PauseCommand>
-  <long>158894624616</long>
-  <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList>
-    <footstepDataList>
-      <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
-        <robotSide>LEFT</robotSide>
-        <location>
-          <x>1.1890638027101501</x>
-          <y>0.041133703137256576</y>
-          <z>0.06167682727994239</z>
-        </location>
-        <orientation>
-          <x>-1.5483910264747606E-4</x>
-          <y>0.001535918760202366</y>
-          <z>-0.021347874481414387</z>
-          <w>0.9997709163771169</w>
+          <x>1.6019297932705847E-4</x>
+          <y>-0.0039293009046167445</y>
+          <z>0.012726450921097773</z>
+          <w>0.9999112822543624</w>
         </orientation>
       </us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
       <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
         <robotSide>RIGHT</robotSide>
         <location>
-          <x>1.5095246731940701</x>
-          <y>-0.38630646135627095</y>
-          <z>0.06397646992372463</z>
+          <x>0.9318021800344485</x>
+          <y>-0.5173231118026214</y>
+          <z>0.07953579987076559</z>
         </location>
         <orientation>
-          <x>-1.54839102647476E-4</x>
-          <y>0.001535918760202366</y>
-          <z>-0.021347874481414387</z>
-          <w>0.9997709163771169</w>
+          <x>2.0627984297477283E-4</x>
+          <y>-0.00392715113231334</y>
+          <z>9.947864285298556E-4</z>
+          <w>0.9999917726324412</w>
         </orientation>
       </us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
       <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
         <robotSide>LEFT</robotSide>
         <location>
-          <x>1.5275014383023142</x>
-          <y>-0.045508617950543506</y>
-          <z>0.05536096346823505</z>
+          <x>1.3162268406702584</x>
+          <y>-0.20091956082893264</y>
+          <z>0.09017122180171287</z>
         </location>
         <orientation>
-          <x>-1.5483910264747606E-4</x>
-          <y>0.001535918760202366</y>
-          <z>-0.021347874481414387</z>
-          <w>0.9997709163771169</w>
+          <x>2.9398218212688934E-4</x>
+          <y>-0.0039215611516639085</y>
+          <z>-0.021350699065570796</z>
+          <w>0.9997643135169517</w>
+        </orientation>
+      </us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
+      <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
+        <robotSide>RIGHT</robotSide>
+        <location>
+          <x>1.5441048863799314</x>
+          <y>-0.4279145573420012</y>
+          <z>0.06382710906443176</z>
+        </location>
+        <orientation>
+          <x>2.9398218212688934E-4</x>
+          <y>-0.0039215611516639085</y>
+          <z>-0.021350699065570796</z>
+          <w>0.9997643135169517</w>
+        </orientation>
+      </us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
+      <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
+        <robotSide>LEFT</robotSide>
+        <location>
+          <x>1.56544003680388</x>
+          <y>-0.21746384957600445</y>
+          <z>0.08518409688395452</z>
+        </location>
+        <orientation>
+          <x>2.9398218212688934E-4</x>
+          <y>-0.0039215611516639085</y>
+          <z>-0.021350699065570796</z>
+          <w>0.9997643135169517</w>
         </orientation>
       </us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
     </footstepDataList>
     <trajectoryWaypointGenerationMethod>DEFAULT</trajectoryWaypointGenerationMethod>
-    <speed>0.5</speed>
+    <swingTime>0.6</swingTime>
+    <transferTime>0.25</transferTime>
   </us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList>
-  <long>174744432653</long>
+  <long>120889227288</long>
   <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.PauseCommand>
     <pause>true</pause>
   </us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.PauseCommand>
-  <long>180062801171</long>
+  <long>123524497918</long>
   <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.EndOfScriptCommand/>
 </object-stream>

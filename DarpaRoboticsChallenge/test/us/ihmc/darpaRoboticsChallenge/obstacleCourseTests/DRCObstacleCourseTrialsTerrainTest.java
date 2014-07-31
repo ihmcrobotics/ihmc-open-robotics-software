@@ -140,7 +140,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       setupCameraForWalkingOverHurdles(simulationConstructionSet);
 
       ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(15.0);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(13.0);
 
       drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
@@ -178,7 +178,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       slipRandomOnEachStepPerturber.setProbabilityOfSlip(1.0);
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(14.0);
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(12.0);
       
       drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
