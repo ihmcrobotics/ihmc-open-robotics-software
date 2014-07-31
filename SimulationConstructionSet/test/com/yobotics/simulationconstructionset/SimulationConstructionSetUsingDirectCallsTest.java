@@ -33,7 +33,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector
 
 public class SimulationConstructionSetUsingDirectCallsTest
 {
-   // all tests assume that:
+   // Note: some of the tests assume that:
    // - the simpleRobot has been used to create the SimulationConstructionSet instance
    // - the registry "simpleRegistry" is empty
    
@@ -134,7 +134,28 @@ public class SimulationConstructionSetUsingDirectCallsTest
       GUIFromSCS.gotoInPointNow();
       int inputPointFromSCS = scs.getIndex();
       assertEquals(inputPoint, inputPointFromSCS);
+
+      YoVariableRegistry rootRegistryFromSCS = scs.getRootRegistry();
+      String  rootRegistryNameFromSCS = rootRegistryFromSCS.getName();
+      assertEquals(rootRegistryName, rootRegistryNameFromSCS);
       
+      scs.addYoVariableRegistry(simpleRegistry);
+      YoVariableRegistry simpleRegistryFromSCS = scs.getRootRegistry().getRegistry(simpleRegistryNameSpace);
+      assertEquals(simpleRegistry, simpleRegistryFromSCS);
+
+      
+//      ThreadTools.sleepForever();
+//    Robot simpleRobot2 = new Robot("simpleRobot2");
+//    Robot[] robots = {simpleRobot, simpleRobot2};
+//    
+//    SimulationConstructionSet scs2 = new SimulationConstructionSet(robots);
+//    generateSimulationFromDataFile
+//     JButton button = new JButton("test");
+   }
+   
+   @Test
+   public void testFrameMethods()
+   {
       scs.setFrameSize(dimension);
       Dimension dimensionFromSCS = scs.getJFrame().getBounds().getSize();
       assertEquals(dimension.height, dimensionFromSCS.height, epsilon);
@@ -156,23 +177,6 @@ public class SimulationConstructionSetUsingDirectCallsTest
       scs.setFrameAlwaysOnTop(false);
       alwaysOnTopFromSCS = scs.getJFrame().isAlwaysOnTop();
       assertEquals(false, alwaysOnTopFromSCS);
-      
-      YoVariableRegistry rootRegistryFromSCS = scs.getRootRegistry();
-      String  rootRegistryNameFromSCS = rootRegistryFromSCS.getName();
-      assertEquals(rootRegistryName, rootRegistryNameFromSCS);
-      
-      scs.addYoVariableRegistry(simpleRegistry);
-      YoVariableRegistry simpleRegistryFromSCS = scs.getRootRegistry().getRegistry(simpleRegistryNameSpace);
-      assertEquals(simpleRegistry, simpleRegistryFromSCS);
-
-      
-//      ThreadTools.sleepForever();
-//    Robot simpleRobot2 = new Robot("simpleRobot2");
-//    Robot[] robots = {simpleRobot, simpleRobot2};
-//    
-//    SimulationConstructionSet scs2 = new SimulationConstructionSet(robots);
-//    generateSimulationFromDataFile
-//     JButton button = new JButton("test");
    }
    
    @Test
