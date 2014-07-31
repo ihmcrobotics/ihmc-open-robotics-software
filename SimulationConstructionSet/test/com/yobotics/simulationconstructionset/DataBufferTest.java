@@ -49,9 +49,7 @@ public class DataBufferTest
       doubleYoVariable = null;
       registry = null;
    }
-
-
-   
+ 
    @Test
    public void testGetBufferSize()
    {
@@ -113,8 +111,6 @@ public class DataBufferTest
 
    }
    
-   
-   
    @Test
    public void testAddNewEntry() throws RepeatDataBufferEntryException
    {
@@ -133,7 +129,6 @@ public class DataBufferTest
       assertTrue(integerDataBufferEntryTest.getVariable() == dataBuffer.getEntry(integerYoVariable).getVariable());
       assertTrue(enumDataBufferEntryTest.getVariable() == dataBuffer.getEntry(enumYoVariable).getVariable());    
    }
-   
    
    @Test
    public void testAddVariable() throws RepeatDataBufferEntryException
@@ -278,7 +273,7 @@ public class DataBufferTest
  
    }
    
-   
+/*   
    //testGetVars(String [], String[])
    
    //testGetVarsFromGroup(String varGroupName, VarGroupList varGroupList)
@@ -319,8 +314,7 @@ public class DataBufferTest
 //       assertTrue(0 == dataBufferSize);
 //      
 //   }
-  
-   
+  */   
    
    @Test
    public void testEmptyBufferIncreaseBufferSize()
@@ -404,7 +398,6 @@ public class DataBufferTest
 
    }
    
-   
    @Test
    public void testIsIndexBetweenInAndOutPoint()
    {
@@ -483,7 +476,99 @@ public class DataBufferTest
       assertFalse(dataBuffer.isIndexBetweenInAndOutPoint(dataBuffer.getIndex()+1));
 
    }
+
+   @Test
+   public void testSetSafeToChangeIndex() //Luke Morris
+   {
+      boolean isSafe = dataBuffer.isSafeToChangeIndex();
+      assertTrue(isSafe);
+      dataBuffer.setSafeToChangeIndex(false);
+      boolean isNowSafe = dataBuffer.isSafeToChangeIndex();
+      assertFalse(isNowSafe);
+      dataBuffer.setSafeToChangeIndex(true);
+      boolean isFinallySafe = dataBuffer.isSafeToChangeIndex();
+      assertTrue(isFinallySafe);
+   }
+
+   @Test
+   public void testGetVariablesTwo() //Luke Morris
+   {
+      ArrayList<YoVariable> variables = dataBuffer.getVariables();
+      //    return dataBuffer.toString();
+      //    return variables.toString();
+   }
+
+   @Test
+   public void testGetVars() //Luke Morris
+   {
+      DoubleYoVariable a = new DoubleYoVariable("a_arm", registry);
+      DoubleYoVariable b = new DoubleYoVariable("b_arm", registry);
+      DoubleYoVariable c = new DoubleYoVariable("c_arm", registry);      
+      
+      DataBufferEntry aBuffer = new DataBufferEntry(a, testBufferSize);
+      DataBufferEntry bBuffer = new DataBufferEntry(b, testBufferSize);
+      DataBufferEntry cBuffer = new DataBufferEntry(c, testBufferSize);
+      
+      dataBuffer.addEntry(aBuffer);
+      dataBuffer.addEntry(bBuffer);
+      dataBuffer.addEntry(cBuffer);
+      
+      String[] varNames = new String[3];
+      varNames[0] = "a_arm";
+      varNames[1] = "b_arm";
+      varNames[2] = "c_arm";
+      
+      String[] aNames = new String[1];
+      aNames[0] = "a_arm";
+      
+      String[] allRegularExpressions = {".*"};
+      String[] cRegularExpressions = {"c.*"};
+      
+      ArrayList<YoVariable> both = dataBuffer.getVars(varNames, allRegularExpressions);
+      
+      assertTrue(both.contains(a));
+      assertTrue(both.contains(b));
+      assertTrue(both.contains(c));
+      
+      ArrayList<YoVariable> justNames = dataBuffer.getVars(varNames, null);
+      
+      assertTrue(justNames.contains(a));
+      assertTrue(justNames.contains(b));
+      assertTrue(justNames.contains(c));
+      
+      ArrayList<YoVariable> justA = dataBuffer.getVars(aNames, null);
+      
+      assertTrue(justA.contains(a));
+      assertFalse(justA.contains(b));
+      assertFalse(justA.contains(c));
+      
+      ArrayList<YoVariable> justRegExp = dataBuffer.getVars(null, allRegularExpressions);
+      
+      assertTrue(justRegExp.contains(a));
+      assertTrue(justRegExp.contains(b));
+      assertTrue(justRegExp.contains(c));
+      
+      ArrayList<YoVariable> cRegExp = dataBuffer.getVars(null, cRegularExpressions);
+      
+      assertFalse(cRegExp.contains(a));
+      assertFalse(cRegExp.contains(b));
+      assertTrue(cRegExp.contains(c));
+      
+      ArrayList<YoVariable> neither = dataBuffer.getVars(null, null);
+      
+      assertFalse(neither.contains(a));
+      assertFalse(neither.contains(b));
+      assertFalse(neither.contains(c));
+   }
    
+   //   @Test
+//   public String testGetVariablesTest() //Luke Morris
+//   {
+//      ArrayList<YoVariable> variables = dataBuffer.getVariables();
+//      return dataBuffer.toString();
+//      //return variables.toString();
+//   }
+
 //   @Test
 //   public void testCopyValuesThrough()
 //   {
