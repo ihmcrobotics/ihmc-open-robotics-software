@@ -30,7 +30,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
 
    private static final boolean createMovie = BambooTools.doMovieCreation();
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
-   private static final boolean showGUI = false;
+   private static final boolean showGUI = KEEP_SCS_UP || createMovie;
    
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
