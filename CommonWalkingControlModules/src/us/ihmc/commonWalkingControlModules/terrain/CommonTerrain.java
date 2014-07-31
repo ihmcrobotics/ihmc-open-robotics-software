@@ -22,6 +22,7 @@ import com.yobotics.simulationconstructionset.util.ground.FlatGroundProfile;
 import com.yobotics.simulationconstructionset.util.ground.GroundProfileFromFile;
 import com.yobotics.simulationconstructionset.util.ground.RandomRockyGroundProfile;
 import com.yobotics.simulationconstructionset.util.ground.RollingGroundProfile;
+import com.yobotics.simulationconstructionset.util.ground.StairGroundProfile;
 import com.yobotics.simulationconstructionset.util.ground.steppingStones.SteppingStone;
 import com.yobotics.simulationconstructionset.util.ground.steppingStones.SteppingStones;
 import com.yobotics.simulationconstructionset.util.ground.steppingStones.SteppingStonesGroundProfile;
