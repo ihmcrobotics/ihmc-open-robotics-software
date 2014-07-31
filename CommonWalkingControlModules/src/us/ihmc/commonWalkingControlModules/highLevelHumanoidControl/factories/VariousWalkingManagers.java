@@ -21,7 +21,6 @@ import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
@@ -43,9 +42,9 @@ public class VariousWalkingManagers
       this.pelvisDesiredsHandler = pelvisDesiredsHandler;
    }
 
-   public static VariousWalkingManagers create(MomentumBasedController momentumBasedController, DoubleYoVariable yoTime,
-         VariousWalkingProviders variousWalkingProviders, WalkingControllerParameters walkingControllerParameters,
-         ArmControllerParameters armControlParameters, YoVariableRegistry registry, DoubleProvider swingTimeProvider)
+   public static VariousWalkingManagers create(MomentumBasedController momentumBasedController, VariousWalkingProviders variousWalkingProviders,
+         WalkingControllerParameters walkingControllerParameters, ArmControllerParameters armControlParameters,
+         YoVariableRegistry registry, DoubleProvider swingTimeProvider)
    {
       FullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
       TwistCalculator twistCalculator = momentumBasedController.getTwistCalculator();
@@ -81,11 +80,10 @@ public class VariousWalkingManagers
       if (fullRobotModel.getChest() != null && fullRobotModel.getHand(RobotSide.LEFT) != null && fullRobotModel.getHand(RobotSide.RIGHT) != null)
       {
          // Setup arm+hand manipulation state machines
-         manipulationControlModule = new ManipulationControlModule(fullRobotModel, twistCalculator, variousWalkingProviders, armControlParameters,
-               yoTime, momentumBasedController, dynamicGraphicObjectsListRegistry, registry);
+         manipulationControlModule = new ManipulationControlModule(variousWalkingProviders, armControlParameters, momentumBasedController, registry);
       }
 
-      PelvisDesiredsHandler pelvisDesiredsHandler = new PelvisDesiredsHandler(controlDT, yoTime, registry);
+      PelvisDesiredsHandler pelvisDesiredsHandler = new PelvisDesiredsHandler(controlDT, momentumBasedController.getYoTime(), registry);
 
       FeetManager feetManager = new FeetManager(momentumBasedController, walkingControllerParameters, swingTimeProvider, registry);
 

@@ -27,7 +27,6 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.Wrench;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.time.ExecutionTimer;
@@ -157,11 +156,6 @@ public class MomentumControlModuleBridge implements MomentumControlModule
          if (momentumControlModule != null)
             momentumControlModule.initialize();
       }
-   }
-
-   public boolean isUsingOptimizationMomentumControlModule()
-   {
-      return (activeMomentumControlModule instanceof OptimizationMomentumControlModule);
    }
 
    public void initialize()

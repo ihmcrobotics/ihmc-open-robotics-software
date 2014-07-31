@@ -101,7 +101,7 @@ public class IndividualHandControlModule
 
    private final DoubleYoVariable maxAccelerationArmTaskspace, maxJerkArmTaskspace;
 
-   public IndividualHandControlModule(RobotSide robotSide, ReferenceFrame midHandPositionControlFrame, SE3PDGains taskspaceControlGains,
+   public IndividualHandControlModule(RobotSide robotSide, SE3PDGains taskspaceControlGains,
          MomentumBasedController momentumBasedController, int jacobianId, ArmControllerParameters armControlParameters,
          ControlStatusProducer controlStatusProducer, YoVariableRegistry parentRegistry)
    {
@@ -214,7 +214,7 @@ public class IndividualHandControlModule
       //Pre-create the RigidBodySpatialAccelerationControlModules
       getOrCreateRigidBodySpatialAccelerationControlModule(ReferenceFrame.getWorldFrame());
       getOrCreateRigidBodySpatialAccelerationControlModule(fullRobotModel.getChest().getBodyFixedFrame());
-      getOrCreateRigidBodySpatialAccelerationControlModule(midHandPositionControlFrame);
+      getOrCreateRigidBodySpatialAccelerationControlModule(fullRobotModel.getHandControlFrame(robotSide));
 
       InverseDynamicsJoint[] inverseDynamicsJointPath = ScrewTools.createJointPath(fullRobotModel.getChest(), fullRobotModel.getHand(robotSide));
       OneDoFJoint[] oneDoFJoints = ScrewTools.filterJoints(inverseDynamicsJointPath, OneDoFJoint.class);
