@@ -1,5 +1,8 @@
 package us.ihmc.darpaRoboticsChallenge.sensors.multisense;
 
+import org.ros.node.parameter.ParameterListener;
+import org.ros.node.parameter.ParameterTree;
+
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotLidarParameters;
@@ -14,6 +17,7 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosNativeNetworkProce
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
+import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.MultisenseParameterPacket;
 import us.ihmc.darpaRoboticsChallenge.ros.ROSNativeTransformTools;
 import us.ihmc.utilities.ros.RosMainNode;
 
@@ -61,6 +65,21 @@ public class MultiSenseSensorManager
       MultiSenseParamaterSetter.initialize(rosMainNode);
       setMultiseSenseParams(lidarParamaters.getLidarSpindleVelocity());
 
+   }
+   
+   public void initializeParameterListeners(){
+      while(!rosMainNode.isStarted());
+      ParameterTree parameters = rosMainNode.getParameters();
+      parameters.addParameterListener("/multisense/motor_speed", new ParameterListener()
+      {
+         
+         @Override
+         public void onNewValue(Object value)
+         {
+            networkingManager.getControllerStateHandler().sendSerializableObject(new MultisenseParameterPacket(0, (double) value, 0, "", false, false, false));
+            
+         }
+      });
    }
    
    private void setMultiseSenseParams(double lidarSpindleVelocity)

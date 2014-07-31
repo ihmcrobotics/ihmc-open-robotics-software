@@ -116,12 +116,15 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       
       ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
       rosMainNode.execute();     
-     
+         
+            
       if (DRCConfigParameters.CALIBRATE_ARM_MODE)
       {
          ArmCalibrationHelper armCalibrationHelper = new ArmCalibrationHelper(objectCommunicator, networkingManager, jointMap);
          multiSenseSensorManager.registerCameraListener(armCalibrationHelper);
       }
+      
+      multiSenseSensorManager.initializeParameterListeners();
 
    }
 
