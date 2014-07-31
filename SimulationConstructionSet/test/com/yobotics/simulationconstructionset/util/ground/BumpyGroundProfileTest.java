@@ -2,8 +2,6 @@ package com.yobotics.simulationconstructionset.util.ground;
 
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 
-import com.yobotics.simulationconstructionset.ground.GroundProfileTest;
-
 public class BumpyGroundProfileTest extends GroundProfileTest
 {
    public GroundProfile3D getGroundProfile()

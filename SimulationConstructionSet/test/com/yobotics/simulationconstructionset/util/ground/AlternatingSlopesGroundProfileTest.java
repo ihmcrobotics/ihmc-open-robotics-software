@@ -7,8 +7,6 @@ import org.junit.Test;
 
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 
-import com.yobotics.simulationconstructionset.ground.GroundProfileTest;
-
 public class AlternatingSlopesGroundProfileTest extends GroundProfileTest
 {
    private static final double epsilon = 1e-7;
