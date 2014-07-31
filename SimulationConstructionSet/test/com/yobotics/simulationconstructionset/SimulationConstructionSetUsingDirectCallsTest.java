@@ -1,10 +1,10 @@
 package com.yobotics.simulationconstructionset;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.awt.AWTException;
 import java.awt.Dimension;
@@ -13,6 +13,7 @@ import java.awt.Point;
 import java.util.ArrayList;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.graphics3DAdapter.camera.ClassicCameraController;
@@ -33,6 +34,8 @@ public class SimulationConstructionSetUsingDirectCallsTest
    // all tests assume that:
    // - the simpleRobot has been used to create the SimulationConstructionSet instance
    // - the registry "simpleRegistry" is empty
+   
+   private static final long CLOSING_SLEEP_TIME = 1000;
    
    private static double epsilon = 1e-10;
    
@@ -74,8 +77,23 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private Graphics3DNodeType graphics3DNodeType = Graphics3DNodeType.GROUND;
    private ExternalForcePoint simpleExternalForcePoint = new ExternalForcePoint("simpleExternalForcePoint", dummyRegistry);
    private DynamicGraphicObject dynamicGraphicObject = new DynamicGraphicVector("simpleDynamicGraphicObject", simpleExternalForcePoint);
+   SimulationConstructionSet scs;
    
-   SimulationConstructionSet scs = createAndStartSCSWithRobot(simpleRobot);
+   @Before
+   public void createAndStartSCSWithRobot()
+   {
+      scs = new SimulationConstructionSet(simpleRobot);
+      scs.setFrameMaximized();
+      scs.startOnAThread();
+   }
+   
+   @After
+   public void closeSCS()
+   {
+      ThreadTools.sleep(CLOSING_SLEEP_TIME);
+      scs.closeAndDispose();
+      scs = null;
+   }
 
    @Test
    public void testSimulationConstructionSetUsingDirectCalls() throws AWTException
@@ -149,213 +167,206 @@ public class SimulationConstructionSetUsingDirectCallsTest
 //     JButton button = new JButton("test");
    }
    
-//   @Test
-//   public void testCameraMethods()
-//   {
-//      scs.setCameraTracking(true, false, false, false);
-//      boolean isCameraTracking = scs.getGUI().getCamera().isTracking();
-//      boolean isCameraTrackingX = scs.getGUI().getCamera().isTrackingX();
-//      boolean isCameraTrackingY = scs.getGUI().getCamera().isTrackingY();
-//      boolean isCameraTrackingZ = scs.getGUI().getCamera().isTrackingZ();
-//      assertTrue(isCameraTracking);
-//      assertFalse(isCameraTrackingX);
-//      assertFalse(isCameraTrackingY);
-//      assertFalse(isCameraTrackingZ);
-//      
-//      scs.setCameraTracking(false, true, false, false);
-//      boolean isCameraTracking2 = scs.getGUI().getCamera().isTracking();
-//      boolean isCameraTrackingX2 = scs.getGUI().getCamera().isTrackingX();
-//      boolean isCameraTrackingY2 = scs.getGUI().getCamera().isTrackingY();
-//      boolean isCameraTrackingZ2 = scs.getGUI().getCamera().isTrackingZ();
-//      assertFalse(isCameraTracking2);
-//      assertTrue(isCameraTrackingX2);
-//      assertFalse(isCameraTrackingY2);
-//      assertFalse(isCameraTrackingZ2);
-//      
-//      scs.setCameraTracking(false, false, true, false);
-//      boolean isCameraTracking3 = scs.getGUI().getCamera().isTracking();
-//      boolean isCameraTrackingX3 = scs.getGUI().getCamera().isTrackingX();
-//      boolean isCameraTrackingY3 = scs.getGUI().getCamera().isTrackingY();
-//      boolean isCameraTrackingZ3 = scs.getGUI().getCamera().isTrackingZ();
-//      assertFalse(isCameraTracking3);
-//      assertFalse(isCameraTrackingX3);
-//      assertTrue(isCameraTrackingY3);
-//      assertFalse(isCameraTrackingZ3);
-//      
-//      scs.setCameraTracking(false, false, false, true);
-//      boolean isCameraTracking4 = scs.getGUI().getCamera().isTracking();
-//      boolean isCameraTrackingX4 = scs.getGUI().getCamera().isTrackingX();
-//      boolean isCameraTrackingY4 = scs.getGUI().getCamera().isTrackingY();
-//      boolean isCameraTrackingZ4 = scs.getGUI().getCamera().isTrackingZ();
-//      assertFalse(isCameraTracking4);
-//      assertFalse(isCameraTrackingX4);
-//      assertFalse(isCameraTrackingY4);
-//      assertTrue(isCameraTrackingZ4);
-//      
-//      scs.setCameraDolly(true, false, false, false);
-//      boolean isCameraDolly = scs.getGUI().getCamera().isDolly();
-//      boolean isCameraDollyX = scs.getGUI().getCamera().isDollyX();
-//      boolean isCameraDollyY = scs.getGUI().getCamera().isDollyY();
-//      boolean isCameraDollyZ = scs.getGUI().getCamera().isDollyZ();
-//      assertTrue(isCameraDolly);
-//      assertFalse(isCameraDollyX);
-//      assertFalse(isCameraDollyY);
-//      assertFalse(isCameraDollyZ);
-//      
-//      scs.setCameraDolly(false, true, false, false);
-//      boolean isCameraDolly2 = scs.getGUI().getCamera().isDolly();
-//      boolean isCameraDollyX2 = scs.getGUI().getCamera().isDollyX();
-//      boolean isCameraDollyY2 = scs.getGUI().getCamera().isDollyY();
-//      boolean isCameraDollyZ2 = scs.getGUI().getCamera().isDollyZ();
-//      assertFalse(isCameraDolly2);
-//      assertTrue(isCameraDollyX2);
-//      assertFalse(isCameraDollyY2);
-//      assertFalse(isCameraDollyZ2);
-//      
-//      scs.setCameraDolly(false, false, true, false);
-//      boolean isCameraDolly3 = scs.getGUI().getCamera().isDolly();
-//      boolean isCameraDollyX3 = scs.getGUI().getCamera().isDollyX();
-//      boolean isCameraDollyY3 = scs.getGUI().getCamera().isDollyY();
-//      boolean isCameraDollyZ3 = scs.getGUI().getCamera().isDollyZ();
-//      assertFalse(isCameraDolly3);
-//      assertFalse(isCameraDollyX3);
-//      assertTrue(isCameraDollyY3);
-//      assertFalse(isCameraDollyZ3);
-//      
-//      scs.setCameraDolly(false, false, false, true);
-//      boolean isCameraDolly4 = scs.getGUI().getCamera().isDolly();
-//      boolean isCameraDollyX4 = scs.getGUI().getCamera().isDollyX();
-//      boolean isCameraDollyY4 = scs.getGUI().getCamera().isDollyY();
-//      boolean isCameraDollyZ4 = scs.getGUI().getCamera().isDollyZ();
-//      assertFalse(isCameraDolly4);
-//      assertFalse(isCameraDollyX4);
-//      assertFalse(isCameraDollyY4);
-//      assertTrue(isCameraDollyZ4);
-//      
-//      addDoubleYoVariablesInSCSRegistry(cameraTrackingXYZVarNames, cameraTrackingXYZVarValues, scs);
-//      scs.setCameraTrackingVars(cameraTrackingXYZVarNames[0], cameraTrackingXYZVarNames[1], cameraTrackingXYZVarNames[2]);
-//      double[] cameraTrackingXYZVarsFromSCS = getCameraTrackingXYZVars(scs);
-//      assertArrayEquals(cameraTrackingXYZVarValues, cameraTrackingXYZVarsFromSCS, epsilon);
-//      
-//      addDoubleYoVariablesInSCSRegistry(cameraDollyXYZVarNames, cameraDollyXYZVarValues, scs);
-//      scs.setCameraDollyVars(cameraDollyXYZVarNames[0], cameraDollyXYZVarNames[1], cameraDollyXYZVarNames[2]);
-//      double[] cameraDollyXYZVarsFromSCS = getCameraDollyXYZVars(scs);
-//      assertArrayEquals(cameraDollyXYZVarValues, cameraDollyXYZVarsFromSCS, epsilon);
-//      
-//      scs.setCameraTrackingOffsets(cameraTrackingOffsetXYZValues[0], cameraTrackingOffsetXYZValues[1], cameraTrackingOffsetXYZValues[2]);
-//      double[] cameraTrackingOffsetXYZValuesFromSCS = getCameraTrackingOffsetXYZValues(scs);
-//      assertArrayEquals(cameraTrackingOffsetXYZValues, cameraTrackingOffsetXYZValuesFromSCS, epsilon);
-//      
-//      scs.setCameraDollyOffsets(cameraDollyOffsetXYZValues[0], cameraDollyOffsetXYZValues[1], cameraDollyOffsetXYZValues[2]);
-//      double[] cameraDollyOffsetXYZValuesFromSCS = getCameraDollyOffsetXYZValues(scs);
-//      assertArrayEquals(cameraDollyOffsetXYZValues, cameraDollyOffsetXYZValuesFromSCS, epsilon);
-//   }
-//   
-//   @Test
-//   public void test3DGraphicsMethods()
-//   {
-//      Graphics3DNode graphics3DNodeFromSCS = scs.addStaticLinkGraphics(staticLinkGraphics);
-//      assertNotNull(graphics3DNodeFromSCS);
-//      
-//      Graphics3DNode graphics3DNodeFromSCS2 = scs.addStaticLinkGraphics(staticLinkGraphics, graphics3DNodeType);
-//      assertNotNull(graphics3DNodeFromSCS2);
-//      
-//      GraphicsDynamicGraphicsObject graphicsDynamicGraphicsObjectFromSCS = scs.addDynamicGraphicObject(dynamicGraphicObject);
-//      assertNotNull(graphicsDynamicGraphicsObjectFromSCS);
-//      
-//      GraphicsDynamicGraphicsObject graphicsDynamicGraphicsObjectFromSCS2 = scs.addDynamicGraphicObject(dynamicGraphicObject, true);
-//      assertNotNull(graphicsDynamicGraphicsObjectFromSCS2);
-//      
-//      GraphicsDynamicGraphicsObject graphicsDynamicGraphicsObjectFromSCS3 = scs.addDynamicGraphicObject(dynamicGraphicObject, false);
-//      assertNotNull(graphicsDynamicGraphicsObjectFromSCS3);
-//   }
-//   
-//   @Test
-//   public void testGetVariableMethods() throws AWTException
-//   {
-//      ArrayList<YoVariable> allVariablesFromRobot = simpleRobot.getAllVariables();
-//      ArrayList<YoVariable> allVariablesFromSCS = scs.getAllVariables();
-//      assertEquals(allVariablesFromRobot, allVariablesFromSCS);
-//      
-//      int allVariablesArrayFromRobot = simpleRobot.getAllVariablesArray().length;
-//      int allVariablesArrayFromSCS = scs.getAllVariablesArray().length;
-//      assertEquals(allVariablesArrayFromRobot, allVariablesArrayFromSCS);
-//      
-//      YoVariable yoVariableFromSCS = scs.getVariable(simpleRobotFirstVariableName);
-//      String variableNameFromSCS = yoVariableFromSCS.getName();
-//      assertEquals(simpleRobotFirstVariableName, variableNameFromSCS);
-//      
-//      YoVariable yoVariableFromRobot = simpleRobot.getVariable(simpleRobotFirstVariableName);
-//      YoVariable yoVariableFromSCS2 = scs.getVariable(simpleRobotRegistryNameSpace, simpleRobotFirstVariableName);
-//      assertEquals(yoVariableFromRobot, yoVariableFromSCS2);
-//      
-//      ArrayList<YoVariable> yoVariableArrayFromRobot =  simpleRobot.getVariables(simpleRobotRegistryNameSpace, simpleRobotFirstVariableName);
-//      ArrayList<YoVariable> yoVariableArrayFromSCS =  scs.getVariables(simpleRobotRegistryNameSpace, simpleRobotFirstVariableName);
-//      assertEquals(yoVariableArrayFromRobot, yoVariableArrayFromSCS);
-//      
-//      ArrayList<YoVariable> yoVariableFromRobot2 = simpleRobot.getVariables(simpleRobotFirstVariableName);
-//      ArrayList<YoVariable> yoVariableFromSCS3 = scs.getVariables(simpleRobotFirstVariableName);
-//      assertEquals(yoVariableFromRobot2, yoVariableFromSCS3); 
-//      
-//      ArrayList<YoVariable> yoVariableFromRobot3 = simpleRobot.getVariables(simpleRobotRegistryNameSpace);
-//      ArrayList<YoVariable> yoVariableFromSCS4 = scs.getVariables(simpleRobotRegistryNameSpace);
-//      assertEquals(yoVariableFromRobot3, yoVariableFromSCS4); 
-//      
-//      boolean hasUniqueVariableRobot = simpleRobot.hasUniqueVariable(simpleRobotFirstVariableName);
-//      boolean hasUniqueVariableSCS = scs.hasUniqueVariable(simpleRobotFirstVariableName);
-//      assertEquals(hasUniqueVariableRobot, hasUniqueVariableSCS);
-//      
-//      boolean hasUniqueVariableRobot2 = simpleRobot.hasUniqueVariable(simpleRobotRegistryNameSpace, simpleRobotFirstVariableName);
-//      boolean hasUniqueVariableSCS2 = scs.hasUniqueVariable(simpleRobotRegistryNameSpace, simpleRobotFirstVariableName);
-//      assertEquals(hasUniqueVariableRobot2, hasUniqueVariableSCS2);
-//      
-//      ArrayList<YoVariable> arrayOfVariablesContainingRobot = getSimpleRobotVariablesThatContain(searchString, false, simpleRobot);
-//      ArrayList<YoVariable> arrayOfVariablesContainingSCS = scs.getVariablesThatContain(searchString);
-//      assertEquals(arrayOfVariablesContainingRobot, arrayOfVariablesContainingSCS);
-//      
-//      ArrayList<YoVariable> arrayOfVariablesContainingRobot2 = getSimpleRobotVariablesThatContain(searchString, true, simpleRobot);
-//      ArrayList<YoVariable> arrayOfVariablesContainingSCS2 = scs.getVariablesThatContain(searchString, true);
-//      assertEquals(arrayOfVariablesContainingRobot2, arrayOfVariablesContainingSCS2);
-//      
-//      ArrayList<YoVariable> arrayOfVariablesStartingRobot = getSimpleRobotVariablesThatStartWith(searchStringStart, simpleRobot);
-//      ArrayList<YoVariable> arrayOfVariablesStartingSCS = scs.getVariablesThatStartWith(searchStringStart);
-//      assertEquals(arrayOfVariablesStartingRobot, arrayOfVariablesStartingSCS);
-//      
-//      String[] varNames =  getVariableNamesGivenArrayListOfYoVariables(arrayOfVariablesContainingRobot);
-//      ArrayList<YoVariable>  arrayOfVariablesRegExprRobot = getSimpleRobotRegExpVariables(varNames, regularExpressions, simpleRobot);
-//      ArrayList<YoVariable>  arrayOfVariablesRegExprSCS = scs.getVars(varNames, regularExpressions);
-//      assertEquals(arrayOfVariablesRegExprRobot, arrayOfVariablesRegExprSCS);
-//   }
-//   
-//   @Test
-//   public void testTimingMethods() throws AWTException
-//   {
-//      scs.setDT(simulateDT, recordFrequency);
-//      double simulateDTFromSCS = scs.getDT();
-//      assertEquals(simulateDT, simulateDTFromSCS, epsilon); 
-//      
-//      scs.setRecordDT(recordDT);
-//      double recordFreqFromSCS = scs.getRecordFreq();
-//      assertEquals(recordFreq, recordFreqFromSCS, epsilon); 
-//      
-//      scs.setPlaybackRealTimeRate(realTimeRate);
-//      double realTimeRateFromSCS = scs.getPlaybackRealTimeRate();
-//      assertEquals(realTimeRate, realTimeRateFromSCS, epsilon);
-//      
-//      scs.setPlaybackDesiredFrameRate(frameRate);
-//      double frameRateFromSCS = scs.getPlaybackFrameRate();
-//      assertEquals(recomputedSecondsPerFrameRate, frameRateFromSCS, epsilon);
-//      
-//      double ticksPerCycle = computeTicksPerPlayCycle(simulateDT, recordFreq, realTimeRate, frameRate);
-//      double ticksPerCycleFromSCS = scs.getTicksPerPlayCycle();
-//      assertEquals(ticksPerCycle, ticksPerCycleFromSCS, epsilon);
-//   }
-   
-   @After
-   public void closeSCS()
+   @Test
+   public void testCameraMethods()
    {
-      scs.closeAndDispose();
-      scs = null;
+      scs.setCameraTracking(true, false, false, false);
+      boolean isCameraTracking = scs.getGUI().getCamera().isTracking();
+      boolean isCameraTrackingX = scs.getGUI().getCamera().isTrackingX();
+      boolean isCameraTrackingY = scs.getGUI().getCamera().isTrackingY();
+      boolean isCameraTrackingZ = scs.getGUI().getCamera().isTrackingZ();
+      assertTrue(isCameraTracking);
+      assertFalse(isCameraTrackingX);
+      assertFalse(isCameraTrackingY);
+      assertFalse(isCameraTrackingZ);
+      
+      scs.setCameraTracking(false, true, false, false);
+      boolean isCameraTracking2 = scs.getGUI().getCamera().isTracking();
+      boolean isCameraTrackingX2 = scs.getGUI().getCamera().isTrackingX();
+      boolean isCameraTrackingY2 = scs.getGUI().getCamera().isTrackingY();
+      boolean isCameraTrackingZ2 = scs.getGUI().getCamera().isTrackingZ();
+      assertFalse(isCameraTracking2);
+      assertTrue(isCameraTrackingX2);
+      assertFalse(isCameraTrackingY2);
+      assertFalse(isCameraTrackingZ2);
+      
+      scs.setCameraTracking(false, false, true, false);
+      boolean isCameraTracking3 = scs.getGUI().getCamera().isTracking();
+      boolean isCameraTrackingX3 = scs.getGUI().getCamera().isTrackingX();
+      boolean isCameraTrackingY3 = scs.getGUI().getCamera().isTrackingY();
+      boolean isCameraTrackingZ3 = scs.getGUI().getCamera().isTrackingZ();
+      assertFalse(isCameraTracking3);
+      assertFalse(isCameraTrackingX3);
+      assertTrue(isCameraTrackingY3);
+      assertFalse(isCameraTrackingZ3);
+      
+      scs.setCameraTracking(false, false, false, true);
+      boolean isCameraTracking4 = scs.getGUI().getCamera().isTracking();
+      boolean isCameraTrackingX4 = scs.getGUI().getCamera().isTrackingX();
+      boolean isCameraTrackingY4 = scs.getGUI().getCamera().isTrackingY();
+      boolean isCameraTrackingZ4 = scs.getGUI().getCamera().isTrackingZ();
+      assertFalse(isCameraTracking4);
+      assertFalse(isCameraTrackingX4);
+      assertFalse(isCameraTrackingY4);
+      assertTrue(isCameraTrackingZ4);
+      
+      scs.setCameraDolly(true, false, false, false);
+      boolean isCameraDolly = scs.getGUI().getCamera().isDolly();
+      boolean isCameraDollyX = scs.getGUI().getCamera().isDollyX();
+      boolean isCameraDollyY = scs.getGUI().getCamera().isDollyY();
+      boolean isCameraDollyZ = scs.getGUI().getCamera().isDollyZ();
+      assertTrue(isCameraDolly);
+      assertFalse(isCameraDollyX);
+      assertFalse(isCameraDollyY);
+      assertFalse(isCameraDollyZ);
+      
+      scs.setCameraDolly(false, true, false, false);
+      boolean isCameraDolly2 = scs.getGUI().getCamera().isDolly();
+      boolean isCameraDollyX2 = scs.getGUI().getCamera().isDollyX();
+      boolean isCameraDollyY2 = scs.getGUI().getCamera().isDollyY();
+      boolean isCameraDollyZ2 = scs.getGUI().getCamera().isDollyZ();
+      assertFalse(isCameraDolly2);
+      assertTrue(isCameraDollyX2);
+      assertFalse(isCameraDollyY2);
+      assertFalse(isCameraDollyZ2);
+      
+      scs.setCameraDolly(false, false, true, false);
+      boolean isCameraDolly3 = scs.getGUI().getCamera().isDolly();
+      boolean isCameraDollyX3 = scs.getGUI().getCamera().isDollyX();
+      boolean isCameraDollyY3 = scs.getGUI().getCamera().isDollyY();
+      boolean isCameraDollyZ3 = scs.getGUI().getCamera().isDollyZ();
+      assertFalse(isCameraDolly3);
+      assertFalse(isCameraDollyX3);
+      assertTrue(isCameraDollyY3);
+      assertFalse(isCameraDollyZ3);
+      
+      scs.setCameraDolly(false, false, false, true);
+      boolean isCameraDolly4 = scs.getGUI().getCamera().isDolly();
+      boolean isCameraDollyX4 = scs.getGUI().getCamera().isDollyX();
+      boolean isCameraDollyY4 = scs.getGUI().getCamera().isDollyY();
+      boolean isCameraDollyZ4 = scs.getGUI().getCamera().isDollyZ();
+      assertFalse(isCameraDolly4);
+      assertFalse(isCameraDollyX4);
+      assertFalse(isCameraDollyY4);
+      assertTrue(isCameraDollyZ4);
+      
+      addDoubleYoVariablesInSCSRegistry(cameraTrackingXYZVarNames, cameraTrackingXYZVarValues, scs);
+      scs.setCameraTrackingVars(cameraTrackingXYZVarNames[0], cameraTrackingXYZVarNames[1], cameraTrackingXYZVarNames[2]);
+      double[] cameraTrackingXYZVarsFromSCS = getCameraTrackingXYZVars(scs);
+      assertArrayEquals(cameraTrackingXYZVarValues, cameraTrackingXYZVarsFromSCS, epsilon);
+      
+      addDoubleYoVariablesInSCSRegistry(cameraDollyXYZVarNames, cameraDollyXYZVarValues, scs);
+      scs.setCameraDollyVars(cameraDollyXYZVarNames[0], cameraDollyXYZVarNames[1], cameraDollyXYZVarNames[2]);
+      double[] cameraDollyXYZVarsFromSCS = getCameraDollyXYZVars(scs);
+      assertArrayEquals(cameraDollyXYZVarValues, cameraDollyXYZVarsFromSCS, epsilon);
+      
+      scs.setCameraTrackingOffsets(cameraTrackingOffsetXYZValues[0], cameraTrackingOffsetXYZValues[1], cameraTrackingOffsetXYZValues[2]);
+      double[] cameraTrackingOffsetXYZValuesFromSCS = getCameraTrackingOffsetXYZValues(scs);
+      assertArrayEquals(cameraTrackingOffsetXYZValues, cameraTrackingOffsetXYZValuesFromSCS, epsilon);
+      
+      scs.setCameraDollyOffsets(cameraDollyOffsetXYZValues[0], cameraDollyOffsetXYZValues[1], cameraDollyOffsetXYZValues[2]);
+      double[] cameraDollyOffsetXYZValuesFromSCS = getCameraDollyOffsetXYZValues(scs);
+      assertArrayEquals(cameraDollyOffsetXYZValues, cameraDollyOffsetXYZValuesFromSCS, epsilon);
+   }
+   
+   @Test
+   public void test3DGraphicsMethods()
+   {
+      Graphics3DNode graphics3DNodeFromSCS = scs.addStaticLinkGraphics(staticLinkGraphics);
+      assertNotNull(graphics3DNodeFromSCS);
+      
+      Graphics3DNode graphics3DNodeFromSCS2 = scs.addStaticLinkGraphics(staticLinkGraphics, graphics3DNodeType);
+      assertNotNull(graphics3DNodeFromSCS2);
+      
+      GraphicsDynamicGraphicsObject graphicsDynamicGraphicsObjectFromSCS = scs.addDynamicGraphicObject(dynamicGraphicObject);
+      assertNotNull(graphicsDynamicGraphicsObjectFromSCS);
+      
+      GraphicsDynamicGraphicsObject graphicsDynamicGraphicsObjectFromSCS2 = scs.addDynamicGraphicObject(dynamicGraphicObject, true);
+      assertNotNull(graphicsDynamicGraphicsObjectFromSCS2);
+      
+      GraphicsDynamicGraphicsObject graphicsDynamicGraphicsObjectFromSCS3 = scs.addDynamicGraphicObject(dynamicGraphicObject, false);
+      assertNotNull(graphicsDynamicGraphicsObjectFromSCS3);
+   }
+   
+   @Test
+   public void testGetVariableMethods() throws AWTException
+   {
+      ArrayList<YoVariable> allVariablesFromRobot = simpleRobot.getAllVariables();
+      ArrayList<YoVariable> allVariablesFromSCS = scs.getAllVariables();
+      assertEquals(allVariablesFromRobot, allVariablesFromSCS);
+      
+      int allVariablesArrayFromRobot = simpleRobot.getAllVariablesArray().length;
+      int allVariablesArrayFromSCS = scs.getAllVariablesArray().length;
+      assertEquals(allVariablesArrayFromRobot, allVariablesArrayFromSCS);
+      
+      YoVariable yoVariableFromSCS = scs.getVariable(simpleRobotFirstVariableName);
+      String variableNameFromSCS = yoVariableFromSCS.getName();
+      assertEquals(simpleRobotFirstVariableName, variableNameFromSCS);
+      
+      YoVariable yoVariableFromRobot = simpleRobot.getVariable(simpleRobotFirstVariableName);
+      YoVariable yoVariableFromSCS2 = scs.getVariable(simpleRobotRegistryNameSpace, simpleRobotFirstVariableName);
+      assertEquals(yoVariableFromRobot, yoVariableFromSCS2);
+      
+      ArrayList<YoVariable> yoVariableArrayFromRobot =  simpleRobot.getVariables(simpleRobotRegistryNameSpace, simpleRobotFirstVariableName);
+      ArrayList<YoVariable> yoVariableArrayFromSCS =  scs.getVariables(simpleRobotRegistryNameSpace, simpleRobotFirstVariableName);
+      assertEquals(yoVariableArrayFromRobot, yoVariableArrayFromSCS);
+      
+      ArrayList<YoVariable> yoVariableFromRobot2 = simpleRobot.getVariables(simpleRobotFirstVariableName);
+      ArrayList<YoVariable> yoVariableFromSCS3 = scs.getVariables(simpleRobotFirstVariableName);
+      assertEquals(yoVariableFromRobot2, yoVariableFromSCS3); 
+      
+      ArrayList<YoVariable> yoVariableFromRobot3 = simpleRobot.getVariables(simpleRobotRegistryNameSpace);
+      ArrayList<YoVariable> yoVariableFromSCS4 = scs.getVariables(simpleRobotRegistryNameSpace);
+      assertEquals(yoVariableFromRobot3, yoVariableFromSCS4); 
+      
+      boolean hasUniqueVariableRobot = simpleRobot.hasUniqueVariable(simpleRobotFirstVariableName);
+      boolean hasUniqueVariableSCS = scs.hasUniqueVariable(simpleRobotFirstVariableName);
+      assertEquals(hasUniqueVariableRobot, hasUniqueVariableSCS);
+      
+      boolean hasUniqueVariableRobot2 = simpleRobot.hasUniqueVariable(simpleRobotRegistryNameSpace, simpleRobotFirstVariableName);
+      boolean hasUniqueVariableSCS2 = scs.hasUniqueVariable(simpleRobotRegistryNameSpace, simpleRobotFirstVariableName);
+      assertEquals(hasUniqueVariableRobot2, hasUniqueVariableSCS2);
+      
+      ArrayList<YoVariable> arrayOfVariablesContainingRobot = getSimpleRobotVariablesThatContain(searchString, false, simpleRobot);
+      ArrayList<YoVariable> arrayOfVariablesContainingSCS = scs.getVariablesThatContain(searchString);
+      assertEquals(arrayOfVariablesContainingRobot, arrayOfVariablesContainingSCS);
+      
+      ArrayList<YoVariable> arrayOfVariablesContainingRobot2 = getSimpleRobotVariablesThatContain(searchString, true, simpleRobot);
+      ArrayList<YoVariable> arrayOfVariablesContainingSCS2 = scs.getVariablesThatContain(searchString, true);
+      assertEquals(arrayOfVariablesContainingRobot2, arrayOfVariablesContainingSCS2);
+      
+      ArrayList<YoVariable> arrayOfVariablesStartingRobot = getSimpleRobotVariablesThatStartWith(searchStringStart, simpleRobot);
+      ArrayList<YoVariable> arrayOfVariablesStartingSCS = scs.getVariablesThatStartWith(searchStringStart);
+      assertEquals(arrayOfVariablesStartingRobot, arrayOfVariablesStartingSCS);
+      
+      String[] varNames =  getVariableNamesGivenArrayListOfYoVariables(arrayOfVariablesContainingRobot);
+      ArrayList<YoVariable>  arrayOfVariablesRegExprRobot = getSimpleRobotRegExpVariables(varNames, regularExpressions, simpleRobot);
+      ArrayList<YoVariable>  arrayOfVariablesRegExprSCS = scs.getVars(varNames, regularExpressions);
+      assertEquals(arrayOfVariablesRegExprRobot, arrayOfVariablesRegExprSCS);
+   }
+   
+   @Test
+   public void testTimingMethods() throws AWTException
+   {
+      scs.setDT(simulateDT, recordFrequency);
+      double simulateDTFromSCS = scs.getDT();
+      assertEquals(simulateDT, simulateDTFromSCS, epsilon); 
+      
+      scs.setRecordDT(recordDT);
+      double recordFreqFromSCS = scs.getRecordFreq();
+      assertEquals(recordFreq, recordFreqFromSCS, epsilon); 
+      
+      scs.setPlaybackRealTimeRate(realTimeRate);
+      double realTimeRateFromSCS = scs.getPlaybackRealTimeRate();
+      assertEquals(realTimeRate, realTimeRateFromSCS, epsilon);
+      
+      scs.setPlaybackDesiredFrameRate(frameRate);
+      double frameRateFromSCS = scs.getPlaybackFrameRate();
+      assertEquals(recomputedSecondsPerFrameRate, frameRateFromSCS, epsilon);
+      
+      double ticksPerCycle = computeTicksPerPlayCycle(simulateDT, recordFreq, realTimeRate, frameRate);
+      double ticksPerCycleFromSCS = scs.getTicksPerPlayCycle();
+      assertEquals(ticksPerCycle, ticksPerCycleFromSCS, epsilon);
    }
    
    // local methods
@@ -432,14 +443,6 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private String getFirstVariableNameFromRobotRegistry(Robot robotModel)
    {
       return robotModel.getRobotsYoVariableRegistry().getAllVariablesArray()[0].getName();
-   }
-   
-   private SimulationConstructionSet createAndStartSCSWithRobot(Robot robotModel)
-   {
-      SimulationConstructionSet scs = new SimulationConstructionSet(robotModel);
-      scs.setFrameMaximized();
-      scs.startOnAThread();
-      return scs;
    }
    
    private void setInputAndOutputPointsInSCS(SimulationConstructionSet scs, int inputPointIndex, int outputPointIndex)
