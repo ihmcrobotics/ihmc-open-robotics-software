@@ -1,17 +1,22 @@
 package us.ihmc.utilities.ros;
 
-import org.ros.exception.ServiceNotFoundException;
-import org.ros.internal.message.Message;
-import org.ros.namespace.GraphName;
-import org.ros.node.*;
-import org.ros.node.parameter.ParameterTree;
-import org.ros.node.service.ServiceClient;
-import org.ros.node.topic.Publisher;
-import org.ros.node.topic.Subscriber;
-
 import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
+
+import org.ros.exception.ServiceNotFoundException;
+import org.ros.internal.message.Message;
+import org.ros.namespace.GraphName;
+import org.ros.node.ConnectedNode;
+import org.ros.node.DefaultNodeMainExecutor;
+import org.ros.node.Node;
+import org.ros.node.NodeConfiguration;
+import org.ros.node.NodeMain;
+import org.ros.node.NodeMainExecutor;
+import org.ros.node.parameter.ParameterListener;
+import org.ros.node.service.ServiceClient;
+import org.ros.node.topic.Publisher;
+import org.ros.node.topic.Subscriber;
 
 public class RosMainNode implements NodeMain
 {
@@ -22,14 +27,14 @@ public class RosMainNode implements NodeMain
                                                                                                             RosServiceClient<? extends Message,
                                                                                                                ? extends Message>>();
 
-   private final LinkedHashMap<RosTopicSubscriberInterface<? extends Message>, Subscriber<? extends Message>> rosSubscribers =
-      new LinkedHashMap<RosTopicSubscriberInterface<? extends Message>, Subscriber<? extends Message>>();
+   private final LinkedHashMap<String, ParameterListener> parameterListeners = new LinkedHashMap<String, ParameterListener>();
+   private final LinkedHashMap<RosTopicSubscriberInterface<? extends Message>, Subscriber<? extends Message>> rosSubscribers = new LinkedHashMap<RosTopicSubscriberInterface<? extends Message>, Subscriber<? extends Message>>();
+      
 
    private final URI masterURI;
    private boolean isStarted = false;
 
    private final String graphName;
-   private ParameterTree parameters;
 
   
    public RosMainNode(URI masterURI, String graphName)
@@ -41,11 +46,6 @@ public class RosMainNode implements NodeMain
    public boolean isStarted()
    {
       return isStarted;
-   }
-   
-   public ParameterTree getParameters()
-   {
-      return parameters;
    }
    
    public void attachServiceClient(String topicName, RosServiceClient<? extends Message, ? extends Message> client)
@@ -80,6 +80,12 @@ public class RosMainNode implements NodeMain
          subscribers.remove(subscriber.getMessageType());
       }
    }
+   
+   public void attachParameterListener(String topicName, ParameterListener listener)
+   {
+      checkNotStarted();
+      parameterListeners.put(topicName, listener);
+   }
 
    private void checkNotStarted()
    {
@@ -92,7 +98,6 @@ public class RosMainNode implements NodeMain
    @SuppressWarnings({"unchecked", "rawtypes"})
    public void onStart(ConnectedNode connectedNode)
    {
-      parameters = connectedNode.getParameterTree();
       for (Entry<String, RosTopicSubscriberInterface<? extends Message>> entry : subscribers.entrySet())
       {
          final RosTopicSubscriberInterface rosTopicSubscriber = entry.getValue();
@@ -129,8 +134,15 @@ public class RosMainNode implements NodeMain
             throw new RuntimeException(e);
          }
       }
+      
+      for(Entry<String, ParameterListener> entry : parameterListeners.entrySet())
+      {
+         connectedNode.getParameterTree().addParameterListener(entry.getKey(), entry.getValue());
+      }
+      
       isStarted = true;
    }
+   
 
    public void onShutdown(Node node)
    {

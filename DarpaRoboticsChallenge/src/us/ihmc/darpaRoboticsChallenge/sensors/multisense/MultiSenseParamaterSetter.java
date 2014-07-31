@@ -181,7 +181,7 @@ public class MultiSenseParamaterSetter
       flashEnable = object.isFlashEnable();
       autoExposure = object.isAutoExposure();
       
-      System.out.println("object received with gain "+ gain+" speed "+ motorSpeed+"led "+ ledEnable +"flash"+flashEnable);
+      
       multiSenseClient.waitTillConnected();
       ReconfigureRequest request = multiSenseClient.getMessage();
       

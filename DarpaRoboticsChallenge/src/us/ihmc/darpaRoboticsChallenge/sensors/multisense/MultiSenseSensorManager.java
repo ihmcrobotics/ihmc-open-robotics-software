@@ -68,15 +68,17 @@ public class MultiSenseSensorManager
    }
    
    public void initializeParameterListeners(){
-      while(!rosMainNode.isStarted());
-      ParameterTree parameters = rosMainNode.getParameters();
-      parameters.addParameterListener("/multisense/motor_speed", new ParameterListener()
+   
+      System.out.println("initialise parameteres--------------------------------------------------------------------------------");
+
+      rosMainNode.attachParameterListener("/multisense/motor_speed", new ParameterListener()
       {
          
          @Override
          public void onNewValue(Object value)
          {
-            networkingManager.getControllerStateHandler().sendSerializableObject(new MultisenseParameterPacket(0, (double) value, 0, "", false, false, false));
+            System.out.println("new parameter received");
+            networkingManager.getControllerStateHandler().sendSerializableObject(new MultisenseParameterPacket(0, (double) value, 0, "1024x544x128", false, false, false));
             
          }
       });
