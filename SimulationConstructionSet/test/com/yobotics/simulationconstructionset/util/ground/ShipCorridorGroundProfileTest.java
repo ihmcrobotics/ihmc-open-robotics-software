@@ -1,4 +1,4 @@
-package com.yobotics.simulationconstructionset.ground;
+package com.yobotics.simulationconstructionset.util.ground;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -6,11 +6,8 @@ import javax.vecmath.Vector3d;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
 import us.ihmc.utilities.test.JUnitTools;
-
-import com.yobotics.simulationconstructionset.util.ShipCorridorGroundProfile;
 
 public class ShipCorridorGroundProfileTest 
 {
