@@ -7,12 +7,14 @@ import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameter
 import us.ihmc.commonWalkingControlModules.controlModules.SE3PDGains;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.IndividualHandControlModule;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.states.direct.DirectControlManipulationTaskDispatcher;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.taskExecutor.PipeLine;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.tasks.HandLoadBearingTask;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.tasks.HandPoseTask;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
+import us.ihmc.commonWalkingControlModules.packets.HandPosePacket;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
@@ -36,18 +38,24 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicRefere
 public class ManipulationControlModule
 {
    public static final boolean HOLD_POSE_IN_JOINT_SPACE_WHEN_PREPARE_FOR_LOCOMOTION = true;
+   private static final double TO_DEFAULT_CONFIGURATION_TRAJECTORY_TIME = 1.0;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final List<DynamicGraphicReferenceFrame> dynamicGraphicReferenceFrames = new ArrayList<DynamicGraphicReferenceFrame>();
 
    private final DoubleYoVariable kpArmTaskspace, kdArmTaskspace, kiArmTaskspace, zetaArmTaskspace, maxIntegralErrorArmTaskspace;
 
-   private DirectControlManipulationTaskDispatcher directControlManipulationTaskDispatcher;
-
    private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable("hasBeenInitialized", registry);
-   private SideDependentList<IndividualHandControlModule> individualHandControlModules;
+   private final SideDependentList<IndividualHandControlModule> individualHandControlModules;
 
    private final PipeLine<RobotSide> pipeline = new PipeLine<RobotSide>();
+
+   private final ArmControllerParameters armControlParameters;
+   private final FullRobotModel fullRobotModel;
+
+   private final HandPoseProvider handPoseProvider;
+   private final DesiredHandLoadBearingProvider handLoadBearingProvider;
+
    private final SE3PDGains taskspaceControlGains = new SE3PDGains();
 
    public ManipulationControlModule(VariousWalkingProviders variousWalkingProviders, ArmControllerParameters armControlParameters,
@@ -56,7 +64,9 @@ public class ManipulationControlModule
       SideDependentList<Integer> jacobianIds = new SideDependentList<Integer>();
       SideDependentList<RigidBody> endEffectors = new SideDependentList<RigidBody>();
 
-      FullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
+      fullRobotModel = momentumBasedController.getFullRobotModel();
+      this.armControlParameters = armControlParameters;
+
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBody endEffector = fullRobotModel.getHand(robotSide);
@@ -69,7 +79,11 @@ public class ManipulationControlModule
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
       createFrameVisualizers(dynamicGraphicObjectsListRegistry, fullRobotModel, "midHandPositionControlFrames", false);
 
-      setUpStateMachine(variousWalkingProviders, momentumBasedController, jacobianIds, armControlParameters);
+      handPoseProvider = variousWalkingProviders.getDesiredHandPoseProvider();
+      handLoadBearingProvider = variousWalkingProviders.getDesiredHandLoadBearingProvider();
+
+      individualHandControlModules = createIndividualHandControlModules(momentumBasedController, jacobianIds, armControlParameters,
+            variousWalkingProviders.getControlStatusProducer());
 
       kpArmTaskspace = new DoubleYoVariable("kpArmTaskspace", registry);
       kpArmTaskspace.set(armControlParameters.getArmTaskspaceKp());
@@ -136,19 +150,6 @@ public class ManipulationControlModule
       }
    }
 
-   private void setUpStateMachine(VariousWalkingProviders variousWalkingProviders, MomentumBasedController momentumBasedController,
-         SideDependentList<Integer> jacobianIds, ArmControllerParameters armControlParameters)
-   {
-      HandPoseProvider handPoseProvider = variousWalkingProviders.getDesiredHandPoseProvider();
-      DesiredHandLoadBearingProvider handLoadBearingProvider = variousWalkingProviders.getDesiredHandLoadBearingProvider();
-
-      individualHandControlModules = createIndividualHandControlModules(momentumBasedController, jacobianIds, armControlParameters,
-            variousWalkingProviders.getControlStatusProducer());
-
-      directControlManipulationTaskDispatcher = new DirectControlManipulationTaskDispatcher(armControlParameters, handPoseProvider, handLoadBearingProvider,
-            individualHandControlModules, pipeline, taskspaceControlGains, momentumBasedController, registry);
-   }
-
    private SideDependentList<IndividualHandControlModule> createIndividualHandControlModules(MomentumBasedController momentumBasedController,
          SideDependentList<Integer> jacobianIds, ArmControllerParameters armControlParameters, ControlStatusProducer controlStatusProducer)
    {
@@ -167,11 +168,6 @@ public class ManipulationControlModule
       return individualHandControlModules;
    }
 
-   public void goToDefaultState()
-   {
-      directControlManipulationTaskDispatcher.goToDefaultState();
-   }
-
    public void initialize()
    {
       doControl();
@@ -188,12 +184,98 @@ public class ManipulationControlModule
 
       updateGraphics();
 
-      directControlManipulationTaskDispatcher.doAction();
+      RigidBody base = fullRobotModel.getChest(); // TODO: should use fullRobotModel.getElevator(), but OldMomentumControlModule doesn't support this;
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         handleDefaultState(robotSide);
+
+         handleHandPoses(base, robotSide);
+
+         handleLoadBearing(base, robotSide);
+      }
       pipeline.doControl();
 
       for (RobotSide robotSide : RobotSide.values)
       {
          individualHandControlModules.get(robotSide).doControl();
+      }
+   }
+
+   private void handleDefaultState(RobotSide robotSide)
+   {
+      if (handPoseProvider.checkForHomePosition(robotSide))
+      {
+         goToDefaultState(robotSide, handPoseProvider.getTrajectoryTime());
+      }
+   }
+
+   private void handleHandPoses(RigidBody base, RobotSide robotSide)
+   {
+      if (handPoseProvider.checkForNewPose(robotSide))
+      {
+         if (handPoseProvider.checkPacketDataType(robotSide) == HandPosePacket.DataType.HAND_POSE)
+         {
+            ReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
+            HandPoseTask handPoseTask = new HandPoseTask(handPoseProvider.getDesiredHandPose(robotSide), base, handControlFrame,
+                  handPoseProvider.getDesiredReferenceFrame(robotSide), individualHandControlModules.get(robotSide), handPoseProvider.getTrajectoryTime(),
+                  taskspaceControlGains);
+            pipeline.clear(robotSide);
+            pipeline.submit(robotSide, handPoseTask);
+
+         }
+         else
+         {
+            individualHandControlModules.get(robotSide).moveUsingQuinticSplines(handPoseProvider.getFinalDesiredJointAngleMaps(robotSide),
+                  handPoseProvider.getTrajectoryTime());
+         }
+
+      }
+   }
+
+   private void handleLoadBearing(RigidBody base, RobotSide robotSide)
+   {
+      if ((handLoadBearingProvider != null) && handLoadBearingProvider.checkForNewInformation(robotSide))
+      {
+         if (handLoadBearingProvider.hasLoadBearingBeenRequested(robotSide))
+         {
+            pipeline.clear(robotSide);
+
+            HandLoadBearingTask handLoadBearingTask = new HandLoadBearingTask(individualHandControlModules.get(robotSide));
+            pipeline.submit(robotSide, handLoadBearingTask);
+         }
+         else
+         {
+            individualHandControlModules.get(robotSide).holdPositionInBase();
+         }
+      }
+   }
+
+   public void goToDefaultState()
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         goToDefaultState(robotSide, TO_DEFAULT_CONFIGURATION_TRAJECTORY_TIME);
+      }
+   }
+
+   public void goToDefaultState(RobotSide robotSide, double trajectoryTime)
+   {
+      individualHandControlModules.get(robotSide).moveUsingQuinticSplines(armControlParameters.getDefaultArmJointPositions(fullRobotModel, robotSide),
+            trajectoryTime);
+   }
+
+   public void prepareForLocomotion()
+   {
+      for (IndividualHandControlModule individualHandControlModule : individualHandControlModules)
+      {
+         if (individualHandControlModule.isControllingPoseInWorld())
+         {
+            if (ManipulationControlModule.HOLD_POSE_IN_JOINT_SPACE_WHEN_PREPARE_FOR_LOCOMOTION)
+               individualHandControlModule.holdPositionInJointSpace();
+            else
+               individualHandControlModule.holdPositionInBase();
+         }
       }
    }
 
@@ -203,11 +285,6 @@ public class ManipulationControlModule
       {
          dynamicGraphicReferenceFrames.get(i).update();
       }
-   }
-
-   public void prepareForLocomotion()
-   {
-      directControlManipulationTaskDispatcher.prepareForLocomotion();
    }
 
    public boolean isAtLeastOneHandLoadBearing()
