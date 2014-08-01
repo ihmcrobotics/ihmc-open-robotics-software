@@ -139,7 +139,8 @@ public class PointPositionRotateSteeringWheelBehavior
          double trajectoryTime = Math.max(minTrajectoryTime, Math.abs(relativeRotationAngle / averageAngularVelocity));
          trajectoryTimeProvider.set(trajectoryTime);
          desiredRotationAngleProvider.set(relativeRotationAngle);
-         individualHandControlModule.executePointPositionTrajectory(trajectoryGenerator, positionController, tempPoint, jacobianId);
+         // TODO Reimplement the following
+//         individualHandControlModule.executePointPositionTrajectory(trajectoryGenerator, positionController, tempPoint, jacobianId);
       }
 
       public void doAction()

@@ -13,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandPoseProvider;
-import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
 import us.ihmc.commonWalkingControlModules.packets.HandPosePacket;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -61,29 +60,24 @@ public class ManipulationControlModule
    public ManipulationControlModule(VariousWalkingProviders variousWalkingProviders, ArmControllerParameters armControlParameters,
          MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
    {
-      SideDependentList<Integer> jacobianIds = new SideDependentList<Integer>();
-      SideDependentList<RigidBody> endEffectors = new SideDependentList<RigidBody>();
 
       fullRobotModel = momentumBasedController.getFullRobotModel();
       this.armControlParameters = armControlParameters;
 
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         RigidBody endEffector = fullRobotModel.getHand(robotSide);
-         endEffectors.put(robotSide, endEffector);
-
-         int jacobianId = momentumBasedController.getOrCreateGeometricJacobian(fullRobotModel.getChest(), endEffector, endEffector.getBodyFixedFrame());
-         jacobianIds.put(robotSide, jacobianId);
-      }
-
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
-      createFrameVisualizers(dynamicGraphicObjectsListRegistry, fullRobotModel, "midHandPositionControlFrames", false);
+      createFrameVisualizers(dynamicGraphicObjectsListRegistry, fullRobotModel, "HandControlFrames", false);
 
       handPoseProvider = variousWalkingProviders.getDesiredHandPoseProvider();
       handLoadBearingProvider = variousWalkingProviders.getDesiredHandLoadBearingProvider();
 
-      individualHandControlModules = createIndividualHandControlModules(momentumBasedController, jacobianIds, armControlParameters,
-            variousWalkingProviders.getControlStatusProducer());
+      individualHandControlModules = new SideDependentList<IndividualHandControlModule>();
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         IndividualHandControlModule individualHandControlModule = new IndividualHandControlModule(robotSide, taskspaceControlGains, momentumBasedController,
+               armControlParameters, variousWalkingProviders.getControlStatusProducer(), registry);
+         individualHandControlModules.put(robotSide, individualHandControlModule);
+      }
 
       kpArmTaskspace = new DoubleYoVariable("kpArmTaskspace", registry);
       kpArmTaskspace.set(armControlParameters.getArmTaskspaceKp());
@@ -150,24 +144,6 @@ public class ManipulationControlModule
       }
    }
 
-   private SideDependentList<IndividualHandControlModule> createIndividualHandControlModules(MomentumBasedController momentumBasedController,
-         SideDependentList<Integer> jacobianIds, ArmControllerParameters armControlParameters, ControlStatusProducer controlStatusProducer)
-   {
-      SideDependentList<IndividualHandControlModule> individualHandControlModules = new SideDependentList<IndividualHandControlModule>();
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-
-         int jacobianId = jacobianIds.get(robotSide);
-
-         IndividualHandControlModule individualHandControlModule = new IndividualHandControlModule(robotSide, taskspaceControlGains, momentumBasedController,
-               jacobianId, armControlParameters, controlStatusProducer, registry);
-         individualHandControlModules.put(robotSide, individualHandControlModule);
-      }
-
-      return individualHandControlModules;
-   }
-
    public void initialize()
    {
       doControl();
@@ -229,7 +205,6 @@ public class ManipulationControlModule
             individualHandControlModules.get(robotSide).moveUsingQuinticSplines(handPoseProvider.getFinalDesiredJointAngleMaps(robotSide),
                   handPoseProvider.getTrajectoryTime());
          }
-
       }
    }
 
