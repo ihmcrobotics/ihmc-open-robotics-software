@@ -464,11 +464,7 @@ public final class RobotiqHandInterface
 			position[FINGER_C] = FULLY_OPEN;
 		}
 		sendMotionRequest();
-		do
-		{
-			ThreadTools.sleep(200);
-			status = this.getStatus();
-		}while((status[GRIPPER_STATUS] & MOTION_STATUS_MASK) == IN_MOTION);
+//		blockDuringMotion();
 	}
 	
 	public void open(float percent)
@@ -481,11 +477,7 @@ public final class RobotiqHandInterface
 			position[FINGER_C] = (byte)(percent * FULLY_OPEN);
 		}
 		sendMotionRequest();
-		do
-		{
-			ThreadTools.sleep(200);
-			status = this.getStatus();
-		}while((status[GRIPPER_STATUS] & MOTION_STATUS_MASK) == IN_MOTION);
+//		blockDuringMotion();
 	}
 	
 	public void close()
@@ -508,11 +500,7 @@ public final class RobotiqHandInterface
 			}
 		}
 		sendMotionRequest();
-		do
-		{
-			ThreadTools.sleep(200);
-			status = this.getStatus();
-		}while((status[GRIPPER_STATUS] & MOTION_STATUS_MASK) == IN_MOTION);
+//		blockDuringMotion();
 	}
 	
 	public void close(float percent) throws InterruptedException
@@ -535,11 +523,7 @@ public final class RobotiqHandInterface
 			}
 		}
 		sendMotionRequest();
-		do
-		{
-			Thread.sleep(300);
-			status = this.getStatus();
-		}while((status[GRIPPER_STATUS] & MOTION_STATUS_MASK) == IN_MOTION);
+//		blockDuringMotion();
 	}
 	
 	public void crush()
@@ -562,6 +546,11 @@ public final class RobotiqHandInterface
 			}
 		}
 		sendMotionRequest();
+//		blockDuringMotion();
+	}
+
+	private void blockDuringMotion()
+	{
 		do
 		{
 			ThreadTools.sleep(200);
@@ -597,12 +586,17 @@ public final class RobotiqHandInterface
 			scissorControl = CONCURRENT_SCISSOR_CONTROL;
 			operationMode = mode;
 			sendMotionRequest();
-			do
-			{
-				Thread.sleep(50);
-				status = this.getStatus();
-			}while((status[GRIPPER_STATUS] & INIT_MODE_STATUS_MASK) == CHANGING_MODE);
+//			blockDuringGripChange();
 		}
+	}
+
+	private void blockDuringGripChange() throws InterruptedException
+	{
+		do
+		{
+			Thread.sleep(50);
+			status = this.getStatus();
+		}while((status[GRIPPER_STATUS] & INIT_MODE_STATUS_MASK) == CHANGING_MODE);
 	}
 	
 	public void setIndividualFinger(int finger, byte desiredForce, byte desiredPosition, byte desiredSpeed)
@@ -785,7 +779,6 @@ public final class RobotiqHandInterface
 		sendRequest(SET_REGISTERS, REGISTER_START, Arrays.copyOfRange(request,0,dataLength));
 	}
 	
-	//TODO: Add TCP socket to write data back to machine in blocking loops or make the loops non-blocking
 	private byte[] getStatus() //gets the status of every register
 	{
 		return sendRequest(READ_REGISTERS,
