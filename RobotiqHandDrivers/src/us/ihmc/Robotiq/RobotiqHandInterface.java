@@ -5,6 +5,8 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 
+import us.ihmc.Robotiq.ModbusTCPConnection.ModbusException;
+import us.ihmc.Robotiq.ModbusTCPConnection.ModbusResponseTooShortException;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.ThreadTools;
 
@@ -723,11 +725,21 @@ public final class RobotiqHandInterface
 		try
 		{
 			return connection.transcieve(RobotiqHandParameters.UNIT_ID, Arrays.copyOfRange(data, 0, dataLength));
-		} catch (SocketException e)
+		}
+		catch (SocketException e)
 		{
 			connected = false;
 			e.printStackTrace();
-		} catch (IOException e)
+		}
+		catch(ModbusResponseTooShortException e)
+		{
+			e.printStackTrace();
+		}
+		catch(ModbusException e)
+		{
+			e.printStackTrace();
+		}
+		catch (IOException e)
 		{
 			System.err.println("Unable to send Modbus request");
 			e.printStackTrace();
