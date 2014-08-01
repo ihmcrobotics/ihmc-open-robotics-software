@@ -1,28 +1,32 @@
 package com.yobotics.simulationconstructionset;
 
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
-import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
-import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import org.junit.Test;
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.utilities.Axis;
-import us.ihmc.utilities.RandomTools;
-import us.ihmc.utilities.math.RotationalInertiaCalculator;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.test.JUnitTools;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+
+import java.util.ArrayList;
+import java.util.Random;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
-import java.util.ArrayList;
-import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import org.junit.Test;
+
+import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
+import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.utilities.Axis;
+import us.ihmc.utilities.RandomTools;
+import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.math.RotationalInertiaCalculator;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.test.JUnitTools;
+
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
+import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
+import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class RobotTest
 {
@@ -945,15 +949,26 @@ public class RobotTest
       double simulateDT = 0.00001;
       int numberOfTicksToSimulate = 8000;
 
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot, SHOW_GUI);
-      int recordFrequency = 1;
-      scs.setDT(simulateDT, recordFrequency);
-      scs.startOnAThread();
+      SimulationConstructionSet scs = null;
+      if (SHOW_GUI)
+      {
+         scs = new SimulationConstructionSet(robot, SHOW_GUI);
+         int recordFrequency = 1;
+         scs.setDT(simulateDT, recordFrequency);
+         scs.startOnAThread();
 
+         while(!scs.isSimulationThreadUpAndRunning()) 
+         {
+            ThreadTools.sleep(100);
+         }
+      }
+      
       Vector3d angularMomentumStart = new Vector3d();
       Vector3d linearMomentumStart = new Vector3d();
 
       robot.doDynamicsAndIntegrate(simulateDT);
+      robot.update();
+      
       robot.computeAngularMomentum(angularMomentumStart);
       robot.computeLinearMomentum(linearMomentumStart);
       double translationalKineticEnergyStart = robot.computeTranslationalKineticEnergy();
@@ -981,7 +996,12 @@ public class RobotTest
 
          robot.updateVelocities();
          robot.doDynamicsAndIntegrate(simulateDT);
-         scs.tickAndUpdate();
+         robot.update();
+
+         if (SHOW_GUI)
+         {
+            scs.tickAndUpdate();
+         }
       }
 
       Vector3d angularMomentumEnd = new Vector3d();
@@ -999,5 +1019,7 @@ public class RobotTest
       epsilon = 6e-5;
       JUnitTools.assertTuple3dEquals("Angular momentum should be conserved", angularMomentumStart, angularMomentumEnd, epsilon);
       JUnitTools.assertTuple3dEquals("Linear momentum should be conserved", linearMomentumStart, linearMomentumEnd, epsilon);
+   
+      if (SHOW_GUI) ThreadTools.sleepForever();
    }
 }
