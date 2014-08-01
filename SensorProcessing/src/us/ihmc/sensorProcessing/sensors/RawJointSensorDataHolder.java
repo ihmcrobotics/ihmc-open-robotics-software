@@ -12,6 +12,8 @@ public class RawJointSensorDataHolder
    private double qd_out_raw;
    private double qd_raw;
    private double f_raw;
+   private double psi_neg_raw;
+   private double psi_pos_raw;
    
 
    public RawJointSensorDataHolder(String name)
@@ -36,6 +38,8 @@ public class RawJointSensorDataHolder
       setQd_out_raw(source.getQd_out_raw());
       setQd_raw(source.getQd_raw());
       setF_raw(source.getF_raw());
+      setPsi_neg_raw(source.getPsi_neg_raw());
+      setPsi_pos_raw(source.getPsi_pos_raw());
       setUsesOutputEncoderQ(source.isUseOutputEncoderQ());
       setUsesOutputEncoderQd(source.isUseOutputEncoderQd());
    }
@@ -46,6 +50,7 @@ public class RawJointSensorDataHolder
    {
       return useOutputEncoderQ;
    }
+   
    
    public boolean isUseOutputEncoderQd()
    {
@@ -62,13 +67,13 @@ public class RawJointSensorDataHolder
    {
       this.useOutputEncoderQd = useOutputEncoder;
    }
-
+   
    
    public double getQ_raw()
    {
       return q_raw;
    }
-
+   
    
    public double getQd_raw()
    {
@@ -80,43 +85,67 @@ public class RawJointSensorDataHolder
    {
       return f_raw;
    }
-
+   
+   
+   public double getPsi_pos_raw()
+   {
+      return psi_pos_raw;
+   }
+   
+   
+   public double getPsi_neg_raw()
+   {
+      return psi_neg_raw;
+   }
+   
+   
+   public void setPsi_pos_raw(double psi_pos_raw)
+   {
+      this.psi_pos_raw = psi_pos_raw;
+   }
+   
+   
+   public void setPsi_neg_raw(double psi_neg_raw)
+   {
+      this.psi_neg_raw = psi_neg_raw;
+   }
+   
    
    public void setQ_raw(double q_raw)
    {
       this.q_raw = q_raw;
    }
-
+   
    
    public void setQd_raw(double qd_raw)
    {
       this.qd_raw = qd_raw;
    }
-
+   
    
    public void setF_raw(double f_raw)
    {
       this.f_raw = f_raw;
    }
-
+   
    
    public double getQ_out_raw()
    {
       return q_out_raw;
    }
-
+   
    
    public void setQ_out_raw(double q_out_raw)
    {
       this.q_out_raw = q_out_raw;
    }
-
+   
    
    public double getQd_out_raw()
    {
       return qd_out_raw;
    }
-
+   
    
    public void setQd_out_raw(double qd_out_raw)
    {
