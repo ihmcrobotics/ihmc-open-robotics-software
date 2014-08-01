@@ -11,8 +11,8 @@ import javax.xml.bind.JAXBException;
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.SDFModelVisual;
 import us.ihmc.SdfLoader.SDFWorldLoader;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.driving.VehicleModelObjectVisualizer;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCWorld;
+import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.driving.VehicleModelObjectVisualizer;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.Robot;
