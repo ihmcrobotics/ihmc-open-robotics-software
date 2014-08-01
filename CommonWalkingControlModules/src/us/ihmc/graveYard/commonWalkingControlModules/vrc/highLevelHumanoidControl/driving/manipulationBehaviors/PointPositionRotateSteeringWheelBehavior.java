@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.driving.manipulationBehaviors;
+package us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.driving.manipulationBehaviors;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
