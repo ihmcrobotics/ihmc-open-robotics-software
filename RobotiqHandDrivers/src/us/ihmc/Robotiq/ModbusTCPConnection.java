@@ -87,14 +87,12 @@ public class ModbusTCPConnection
 			if(inBytes == 0)
 			{
 				//unexpected close of connection
-				System.err.println("connection unexpectly closed");
-				return null;
+				throw new ModbusException("Connection appears to have closed unexpectedly");
 			}
 			else
 			{
 				//response too short
-				System.err.println("response too short");
-				return null;
+				throw new ModbusResponseTooShortException(unitID);
 			}
 		}
 		
@@ -115,5 +113,34 @@ public class ModbusTCPConnection
 		connection.close();
 	}
 	
+	public class ModbusException extends IOException
+	{
+		ModbusException()
+		{
+			super("Error with Modbus Connection at " + connection.getLocalSocketAddress());
+		}
+		ModbusException(String message)
+		{
+			super(message);
+		}
+	}
 	
+	public class ModbusResponseTooShortException extends ModbusException
+	{
+		public ModbusResponseTooShortException()
+		{
+			super("Response from a device on " + connection.getLocalSocketAddress() + " was too short.");
+		}
+		
+		public ModbusResponseTooShortException(byte unitID)
+		{
+			super("Response from a device on " + connection.getLocalSocketAddress() + "ID: " + unitID + " was too short.");
+		}
+		
+		public ModbusResponseTooShortException(String message)
+		{
+			super(message);
+		}
+		
+	}
 }
