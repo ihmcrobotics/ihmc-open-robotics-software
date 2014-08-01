@@ -69,7 +69,7 @@ public class StraightLinePositionControlState extends State<FingerToroidManipula
 
          ReferenceFrame handPositionControlFrame = handPositionControlFrames.get(robotSide);
          individualHandControlModules.get(robotSide).moveInStraightLine(finalDesiredPose, trajectoryTime, base, handPositionControlFrame,
-               trajectoryFrame, false, gains);
+               trajectoryFrame, gains);
       }
    }
 
