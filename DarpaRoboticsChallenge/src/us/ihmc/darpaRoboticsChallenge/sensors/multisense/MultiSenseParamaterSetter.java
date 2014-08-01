@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import org.ros.exception.RemoteException;
 import org.ros.node.NodeConfiguration;
+import org.ros.node.parameter.ParameterTree;
 import org.ros.node.service.ServiceResponseListener;
 
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosNativeNetworkProcessor;
@@ -29,6 +30,7 @@ public class MultiSenseParamaterSetter
    private static double dutyCycle;
    private static boolean autoExposure;
    private static String resolution = new String("1024x544x128");
+ 
    
    private static final RosServiceClient<ReconfigureRequest, ReconfigureResponse> multiSenseClient = new RosServiceClient<ReconfigureRequest, ReconfigureResponse>(
          Reconfigure._TYPE);
@@ -115,7 +117,9 @@ public class MultiSenseParamaterSetter
    public static void initialize(RosMainNode rosMainNode){
       
       System.out.println();
+  
       rosMainNode.attachServiceClient("multisense/set_parameters", multiSenseClient);
+      
    }
    
    public static void setMultisenseResolution(RosMainNode rosMainNode)
@@ -237,4 +241,6 @@ public class MultiSenseParamaterSetter
                }
             });
    }
+
+   
 }

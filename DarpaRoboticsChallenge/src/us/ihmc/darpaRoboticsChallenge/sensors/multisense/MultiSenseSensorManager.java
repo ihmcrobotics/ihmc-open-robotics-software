@@ -64,6 +64,7 @@ public class MultiSenseSensorManager
       registerLidarReceivers();
       MultiSenseParamaterSetter.initialize(rosMainNode);
       setMultiseSenseParams(lidarParamaters.getLidarSpindleVelocity());
+      networkingManager.getControllerCommandHandler().setMultiSenseSensorManager(this);
 
    }
    
@@ -78,10 +79,34 @@ public class MultiSenseSensorManager
          public void onNewValue(Object value)
          {
             System.out.println("new parameter received");
-            networkingManager.getControllerStateHandler().sendSerializableObject(new MultisenseParameterPacket(0, (double) value, 0, "1024x544x128", false, false, false));
+            networkingManager.getControllerStateHandler().sendSerializableObject(new MultisenseParameterPacket(false, 0, (double) value, 0, "1024x544x128", false, false, false));
             
          }
       });
+   }
+   
+   public void handleMultisenseParameters(MultisenseParameterPacket object)
+   {
+      if(object.isFromUI()){
+         if(rosMainNode.isStarted()){
+            ParameterTree params = rosMainNode.getParameters();
+            networkingManager.getControllerStateHandler().sendSerializableObject( new MultisenseParameterPacket(false,params.getDouble("/multisense/gain"),
+                  params.getDouble("/multisense/motor_speed"),
+                  params.getDouble("/multisense/led_duty_cycle"),
+                  params.getString("/multisense/resolution"),
+                  params.getBoolean("/multisense/lighting"),
+                  params.getBoolean("/multisense/flash"),
+                  params.getBoolean("multisense/auto_exposure")));
+            
+            
+         }
+            
+            
+      }
+      else
+         MultiSenseParamaterSetter.setMultisenseParameters(object);
+         
+      
    }
    
    private void setMultiseSenseParams(double lidarSpindleVelocity)

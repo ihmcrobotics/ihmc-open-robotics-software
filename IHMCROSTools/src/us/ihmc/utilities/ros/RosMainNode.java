@@ -14,6 +14,7 @@ import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMain;
 import org.ros.node.NodeMainExecutor;
 import org.ros.node.parameter.ParameterListener;
+import org.ros.node.parameter.ParameterTree;
 import org.ros.node.service.ServiceClient;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
@@ -35,7 +36,8 @@ public class RosMainNode implements NodeMain
    private boolean isStarted = false;
 
    private final String graphName;
-
+   private ParameterTree parameters;
+  
   
    public RosMainNode(URI masterURI, String graphName)
    {
@@ -46,6 +48,11 @@ public class RosMainNode implements NodeMain
    public boolean isStarted()
    {
       return isStarted;
+   }
+   
+   public ParameterTree getParameters()
+   {
+      return parameters;
    }
    
    public void attachServiceClient(String topicName, RosServiceClient<? extends Message, ? extends Message> client)
@@ -98,6 +105,7 @@ public class RosMainNode implements NodeMain
    @SuppressWarnings({"unchecked", "rawtypes"})
    public void onStart(ConnectedNode connectedNode)
    {
+      parameters = connectedNode.getParameterTree();
       for (Entry<String, RosTopicSubscriberInterface<? extends Message>> entry : subscribers.entrySet())
       {
          final RosTopicSubscriberInterface rosTopicSubscriber = entry.getValue();
@@ -141,6 +149,7 @@ public class RosMainNode implements NodeMain
       }
       
       isStarted = true;
+      
    }
    
 
