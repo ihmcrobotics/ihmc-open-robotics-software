@@ -12,7 +12,7 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 public class AtlasArmControllerParameters implements ArmControllerParameters
 {
    private final boolean runningOnRealRobot;
-   
+   // TODO Must disappear
    private static final double[] kp = { 40.0, 20.0, 30.0, 30.0, 20.0, 30.0}; //{ 1.8, 1.5, 7.8, 6, 30, 24 };
    private static final double[] ki = { 1.5, 0.8, 5, 10, 5, 10 };
    private static final double[] kd = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }; //{ 11, 17, 39, 47, 26, 25 };
