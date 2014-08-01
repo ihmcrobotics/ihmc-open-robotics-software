@@ -9,10 +9,17 @@ public class ManualHandControlProvider implements ObjectConsumer<ManualHandContr
 {
    
    private final ConcurrentLinkedQueue<ManualHandControlPacket> packetQueue = new ConcurrentLinkedQueue<ManualHandControlPacket>();
-
+   private RobotSide robotSide;
+   
+   public ManualHandControlProvider(RobotSide robotSide)
+   {
+	   this.robotSide = robotSide;
+   }
+   
    public void consumeObject(ManualHandControlPacket packet)
    {
-      packetQueue.add(packet);
+      if(packet.getRobotSide() == this.robotSide)
+    	  packetQueue.add(packet);
    }
 
    public ManualHandControlPacket pullPacket()
@@ -27,11 +34,7 @@ public class ManualHandControlProvider implements ObjectConsumer<ManualHandContr
    
    public RobotSide getSide()
    {
-      if(!isNewPacketAvailable())
-      {
-         return null;
-      }
-      return packetQueue.peek().getSide();
+      return this.robotSide;
    }
    
 }

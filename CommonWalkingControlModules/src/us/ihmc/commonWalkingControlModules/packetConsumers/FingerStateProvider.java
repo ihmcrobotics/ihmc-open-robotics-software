@@ -6,17 +6,20 @@ import us.ihmc.commonWalkingControlModules.packets.FingerStatePacket;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.net.ObjectConsumer;
 
-/**
- * @author twan
- *         Date: 6/7/13
- */
 public class FingerStateProvider implements ObjectConsumer<FingerStatePacket>
 {
    private final ConcurrentLinkedQueue<FingerStatePacket> packetQueue = new ConcurrentLinkedQueue<FingerStatePacket>();
-
+   private RobotSide robotSide;
+   
+   public FingerStateProvider(RobotSide robotSide)
+   {
+	   this.robotSide = robotSide;
+   }
+   
    public void consumeObject(FingerStatePacket packet)
    {
-      packetQueue.add(packet);
+	   if(packet.getRobotSide() == this.robotSide)
+		   packetQueue.add(packet);
    }
 
    public FingerStatePacket pullPacket()
@@ -31,10 +34,6 @@ public class FingerStateProvider implements ObjectConsumer<FingerStatePacket>
    
    public RobotSide getSide()
    {
-      if(isNewFingerStateAvailable())
-      {
-         return packetQueue.peek().getRobotSide();
-      }
-      return null;
+	   return robotSide;
    }
 }

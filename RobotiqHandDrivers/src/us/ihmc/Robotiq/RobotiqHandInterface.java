@@ -5,6 +5,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 
+import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.ThreadTools;
 
 /* GENERAL INFO
@@ -627,12 +628,20 @@ public final class RobotiqHandInterface
 		force[finger] = desiredForce;
 	}
 	
-	public void hookMode()
+	public void hook(RobotSide side)
 	{
-		fingerControl = INDIVIDUAL_FINGER_CONTROL;
-		setIndividualFinger(FINGER_A, force[FINGER_A], FULLY_CLOSED, speed[FINGER_A]);
-		setIndividualFinger(FINGER_B, force[FINGER_B], FULLY_CLOSED, speed[FINGER_B]);
-		setIndividualFinger(FINGER_C, force[FINGER_C], FULLY_OPEN, speed[FINGER_C]); //index finger of left Hand
+		if(side == RobotSide.LEFT)
+		{
+			setIndividualFinger(FINGER_A, force[FINGER_A], FULLY_CLOSED, speed[FINGER_A]);
+			setIndividualFinger(FINGER_B, force[FINGER_B], FULLY_CLOSED, speed[FINGER_B]);
+			setIndividualFinger(FINGER_C, force[FINGER_C], FULLY_OPEN, speed[FINGER_C]); //index finger of left Hand
+		}
+		else if(side == RobotSide.RIGHT)
+		{
+			setIndividualFinger(FINGER_A, force[FINGER_A], FULLY_CLOSED, speed[FINGER_A]);
+			setIndividualFinger(FINGER_B, force[FINGER_B], FULLY_OPEN, speed[FINGER_B]); //index finger of right Hand
+			setIndividualFinger(FINGER_C, force[FINGER_C], FULLY_CLOSED, speed[FINGER_C]); 
+		}
 		sendMotionRequest();
 	}
 	
@@ -764,7 +773,7 @@ public final class RobotiqHandInterface
 		sendRequest(SET_REGISTERS, REGISTER_START, Arrays.copyOfRange(request,0,dataLength));
 	}
 	
-	//TODO: Add TCP socket to write data back to machine in blocking loops
+	//TODO: Add TCP socket to write data back to machine in blocking loops or make the loops non-blocking
 	private byte[] getStatus() //gets the status of every register
 	{
 		return sendRequest(READ_REGISTERS,
