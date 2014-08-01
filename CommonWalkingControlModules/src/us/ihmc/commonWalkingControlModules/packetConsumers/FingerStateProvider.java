@@ -18,7 +18,9 @@ public class FingerStateProvider implements ObjectConsumer<FingerStatePacket>
    
    public void consumeObject(FingerStatePacket packet)
    {
-	   if(packet.getRobotSide() == this.robotSide)
+	   if(this.robotSide == null)
+	      packetQueue.add(packet);
+	   else if(packet.getRobotSide() == this.robotSide)
 		   packetQueue.add(packet);
    }
 

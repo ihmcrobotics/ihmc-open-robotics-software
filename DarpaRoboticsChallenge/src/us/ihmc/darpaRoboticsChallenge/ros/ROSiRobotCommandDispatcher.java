@@ -14,7 +14,7 @@ import us.ihmc.utilities.ros.RosTools;
 
 public class ROSiRobotCommandDispatcher implements Runnable
 {
-   private final FingerStateProvider fingerStateProvider = new FingerStateProvider();
+   private final FingerStateProvider fingerStateProvider = new FingerStateProvider(null);
 
    private final ROSiRobotCommunicator rosHandCommunicator;
 
