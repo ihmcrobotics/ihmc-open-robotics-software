@@ -94,5 +94,31 @@ public class YoFunctionGeneratorTest
 
 	   }
    }
+   
+   @Test
+   public void testTriangle()
+   {
+      yoFunctionGenerator.setMode(YoFunctionGeneratorMode.TRIANGLE);
+
+      double amplitude = 1.0;
+      double dt = 0.01;
+      double value, previousValue, velocityAbs, expectedVelocityAbs, singleRampTime;
+      double frequency = 1;
+      
+      yoFunctionGenerator.setAmplitude(amplitude);
+      yoFunctionGenerator.setFrequency(frequency);
+      
+      singleRampTime = frequency/2;
+      
+      expectedVelocityAbs = Math.abs(amplitude / singleRampTime);
+
+      for (double time = dt; time < singleRampTime-dt; time += dt)
+      {
+         value = yoFunctionGenerator.getValue(time);
+         previousValue = yoFunctionGenerator.getValue(time - dt);
+         velocityAbs = Math.abs((value - previousValue) / dt);
+         assertEquals(expectedVelocityAbs, velocityAbs, 1e-10);
+      }
+   }
 
 }
