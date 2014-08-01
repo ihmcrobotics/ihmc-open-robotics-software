@@ -178,46 +178,58 @@ public class MultiSenseParamaterSetter
    {
      
       System.out.println("object received with gain "+ object.getGain()+" speed "+ object.getMotorSpeed()+" dutycycle"+object.getDutyCycle()+" resolution"+ object.getResolution());
-      gain = object.getGain();
-      motorSpeed = object.getMotorSpeed();
-      dutyCycle = object.getDutyCycle();
-      ledEnable = object.isLedEnable();
-      flashEnable = object.isFlashEnable();
-      autoExposure = object.isAutoExposure();
+     
       
       
       multiSenseClient.waitTillConnected();
       ReconfigureRequest request = multiSenseClient.getMessage();
-      
+      if(object.getGain() != gain){
+      gain = object.getGain();
       DoubleParameter gainParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(DoubleParameter._TYPE);
       gainParam.setName("gain");
       gainParam.setValue(gain);
       request.getConfig().getDoubles().add(gainParam);
+      }
       
+      if(object.getMotorSpeed() != motorSpeed){
+      motorSpeed = object.getMotorSpeed();
       DoubleParameter motorSpeedParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(DoubleParameter._TYPE);
       motorSpeedParam.setName("motor_speed");
       motorSpeedParam.setValue(motorSpeed);
       request.getConfig().getDoubles().add(motorSpeedParam);
+      }
       
+      if(object.getDutyCycle() != dutyCycle){
+      dutyCycle = object.getDutyCycle();
       DoubleParameter dutyCycleParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(DoubleParameter._TYPE);
       dutyCycleParam.setName("led_duty_cycle");
       dutyCycleParam.setValue(dutyCycle);
       request.getConfig().getDoubles().add(dutyCycleParam);
+      }
       
+      if(object.isLedEnable() != ledEnable){
+      ledEnable = object.isLedEnable();
       BoolParameter ledEnableParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(BoolParameter._TYPE);
       ledEnableParam.setName("lighting");
       ledEnableParam.setValue(ledEnable);
       request.getConfig().getBools().add(ledEnableParam);
+      }
       
+      if(object.isFlashEnable() != flashEnable){
+      flashEnable = object.isFlashEnable();
       BoolParameter flashEnableParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(BoolParameter._TYPE);
       flashEnableParam.setName("flash");
       flashEnableParam.setValue(flashEnable);
       request.getConfig().getBools().add(flashEnableParam);
+      }
       
+      if(object.isAutoExposure() != autoExposure){
+      autoExposure = object.isAutoExposure();
       BoolParameter autoExposureParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(BoolParameter._TYPE);
       autoExposureParam.setName("auto_exposure");
       autoExposureParam.setValue(autoExposure);
       request.getConfig().getBools().add(autoExposureParam);
+      }
       
       if(!resolution.equals(object.getResolution())){
       resolution = object.getResolution();
