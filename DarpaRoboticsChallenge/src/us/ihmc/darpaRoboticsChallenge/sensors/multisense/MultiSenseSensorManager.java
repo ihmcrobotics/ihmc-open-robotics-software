@@ -87,6 +87,7 @@ public class MultiSenseSensorManager
    
    public void handleMultisenseParameters(MultisenseParameterPacket object)
    {
+      System.out.println("beacuse of this---------------------------------------------------------------");
       if(object.isFromUI()){
          if(rosMainNode.isStarted()){
             ParameterTree params = rosMainNode.getParameters();
