@@ -605,7 +605,7 @@ public final class RobotiqHandInterface
 			status = getStatus();
 		if(fingerControl == CONCURRENT_FINGER_CONTROL)
 		{
-			position[FINGER_A] = status[FINGER_A_REQUESTED_POSITION]; //TODO: check to see if this should be the requested position
+			position[FINGER_A] = status[FINGER_A_REQUESTED_POSITION];
 			position[FINGER_B] = status[FINGER_B_REQUESTED_POSITION];
 			position[FINGER_C] = status[FINGER_C_REQUESTED_POSITION];
 			force[FINGER_B] = force[FINGER_A];
@@ -641,7 +641,6 @@ public final class RobotiqHandInterface
 		sendMotionRequest();
 	}
 	
-	//TODO: Test this on actual hand
 	float[] positions = new float[4]; //only used in this method and is extracted for efficiency
 	public float[] positionStatus()
 	{
