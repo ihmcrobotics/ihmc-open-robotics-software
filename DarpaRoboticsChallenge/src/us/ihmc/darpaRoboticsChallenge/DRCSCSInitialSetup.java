@@ -16,7 +16,7 @@ import com.yobotics.simulationconstructionset.DynamicIntegrationMethod;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.physics.HandleCollision;
+import com.yobotics.simulationconstructionset.physics.CollisionHandler;
 import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
 import com.yobotics.simulationconstructionset.physics.ScsCollisionDetector;
 import com.yobotics.simulationconstructionset.physics.ScsPhysics;
@@ -68,7 +68,7 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
    public ScsPhysics createPhysics(ScsCollisionConfigure collisionConfigure, YoVariableRegistry registry)
    {
       ScsCollisionDetector collision = new JBulletCollisionDetector(registry,10000);
-      HandleCollision handler = new SpringCollisionHandler(1,1000,10.0,registry);
+      CollisionHandler handler = new SpringCollisionHandler(1,1000,10.0,registry);
       collision.initialize(handler);
 
       DefaultCollisionVisualize visualize = new DefaultCollisionVisualize();
