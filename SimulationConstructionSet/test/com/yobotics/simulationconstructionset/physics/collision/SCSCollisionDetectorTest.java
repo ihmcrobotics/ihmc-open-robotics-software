@@ -52,7 +52,7 @@ public abstract class SCSCollisionDetectorTest
       // add a bit of separation to ensure they don't collide
       double tau = 0.001;
 
-      // should just barely not interesect
+      // should just barely not intersect
       for (int i = 0; i < 3; i++)
       {
          double Tx, Ty, Tz;
