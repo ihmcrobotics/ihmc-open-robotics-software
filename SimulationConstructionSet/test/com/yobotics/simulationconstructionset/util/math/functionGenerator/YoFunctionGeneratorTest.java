@@ -110,7 +110,7 @@ public class YoFunctionGeneratorTest
       
       singleRampTime = (1/frequency)/2;
       
-      expectedVelocityAbs = Math.abs(amplitude / singleRampTime);
+      expectedVelocityAbs = Math.abs(2*amplitude / singleRampTime);
 
       for (double time = dt; time < singleRampTime-dt; time += dt)
       {
