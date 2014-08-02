@@ -1,17 +1,21 @@
 package com.yobotics.simulationconstructionset.physics.collision;
 
-import com.yobotics.simulationconstructionset.Joint;
-import com.yobotics.simulationconstructionset.Link;
-import com.yobotics.simulationconstructionset.physics.*;
-
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import org.junit.Before;
+import org.junit.Test;
+
+import com.yobotics.simulationconstructionset.Joint;
+import com.yobotics.simulationconstructionset.Link;
+import com.yobotics.simulationconstructionset.physics.CollisionHandler;
+import com.yobotics.simulationconstructionset.physics.CollisionShape;
+import com.yobotics.simulationconstructionset.physics.CollisionShapeDescription;
+import com.yobotics.simulationconstructionset.physics.FactoryCollisionShape;
+import com.yobotics.simulationconstructionset.physics.ScsCollisionDetector;
 
 
 /**
