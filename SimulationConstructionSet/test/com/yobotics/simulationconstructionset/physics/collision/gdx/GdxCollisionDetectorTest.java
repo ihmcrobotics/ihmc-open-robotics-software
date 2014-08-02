@@ -9,9 +9,9 @@ import com.yobotics.simulationconstructionset.physics.collision.SCSCollisionDete
  */
 public class GdxCollisionDetectorTest extends SCSCollisionDetectorTest
 {
-	@Override
-	public ScsCollisionDetector createCollisionInterface()
-	{
-		return new GdxCollisionDetector(new YoVariableRegistry("Dummy"),1000);
-	}
+   @Override
+   public ScsCollisionDetector createCollisionInterface()
+   {
+      return new GdxCollisionDetector(new YoVariableRegistry("Dummy"), 1000);
+   }
 }
