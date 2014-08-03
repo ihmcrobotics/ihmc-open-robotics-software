@@ -47,17 +47,20 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private int outputPoint = 30;
    private int middleIndex = 22;
    private int nonMiddleIndex = 35;
-   private double simulateDT = 0.1; 
+   private int ticksIncrease = 11;
+   private double simulateDT = 0.001; 
    private double simulateTime = 1.0;
-   private double recordDT = 0.5;
+   private double recordDT = 0.05;
    private double recordFreq = computeRecordFreq(recordDT, simulateDT);
    private double realTimeRate = 0.75;
-   private double frameRate = 0.5;
+   private double frameRate = 0.01;
    private double recomputedSecondsPerFrameRate = recomputeTiming(simulateDT, recordFreq, realTimeRate, frameRate);
    private double[] cameraDollyOffsetXYZValues = {1.2, 2.2, 3.2};
    private double[] cameraTrackingOffsetXYZValues = {1.5, 2.5, 3.5};
    private double[] cameraDollyXYZVarValues = {1.5, 1.6, 1.7}; 
-   private double[] cameraTrackingXYZVarValues = {0.5, 0.6, 0.7}; 
+   private double[] cameraTrackingXYZVarValues = {0.5, 0.6, 0.7};
+   private double[] cameraFixXYZValues = {1.8, 2.8, 3.8};
+   private double[] cameraPositionXYZValues = {1.3, 2.3, 3.3};
    
    private Dimension dimension = new Dimension(250, 350);
    private FallingBrickRobot simpleRobot = new FallingBrickRobot();
@@ -79,6 +82,8 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private Graphics3DNodeType graphics3DNodeType = Graphics3DNodeType.GROUND;
    private ExternalForcePoint simpleExternalForcePoint = new ExternalForcePoint("simpleExternalForcePoint", dummyRegistry);
    private DynamicGraphicObject dynamicGraphicObject = new DynamicGraphicVector("simpleDynamicGraphicObject", simpleExternalForcePoint);
+   private BooleanYoVariable exitActionListenerHasBeenNotified = new BooleanYoVariable("exitActionListenerHasBeenNotified", dummyRegistry); 
+   private BooleanYoVariable simulationRewoundListenerHasBeenNotified = new BooleanYoVariable("simulationRewoundListenerHasBeenNotified", dummyRegistry);
    SimulationConstructionSet scs;
    
    @BeforeClass 
@@ -107,11 +112,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    public void testSimulationConstructionSetUsingDirectCalls() throws AWTException
    {
       double startTime = scs.getTime();
-      scs.simulate(simulateTime);
-      while(scs.isSimulating())
-      {
-         ThreadTools.sleep(100L);
-      }
+      simulateForTime(scs, simulateTime);
       double endTime = scs.getTime();
       assertEquals(simulateTime, endTime-startTime, 1e-7);
       
@@ -142,15 +143,17 @@ public class SimulationConstructionSetUsingDirectCallsTest
       scs.addYoVariableRegistry(simpleRegistry);
       YoVariableRegistry simpleRegistryFromSCS = scs.getRootRegistry().getRegistry(simpleRegistryNameSpace);
       assertEquals(simpleRegistry, simpleRegistryFromSCS);
-
       
-//      ThreadTools.sleepForever();
-//    Robot simpleRobot2 = new Robot("simpleRobot2");
-//    Robot[] robots = {simpleRobot, simpleRobot2};
+      ExitActionListener exitActionListener = createExitActionListener();
+      scs.attachExitActionListener(exitActionListener);
+      exitActionListenerHasBeenNotified.set(false);
+      scs.notifyExitActionListeners();
+      assertTrue(exitActionListenerHasBeenNotified.getBooleanValue());
+      
 //    
 //    SimulationConstructionSet scs2 = new SimulationConstructionSet(robots);
 //    generateSimulationFromDataFile
-//     JButton button = new JButton("test");
+//     
    }
    
    @Test
@@ -279,6 +282,14 @@ public class SimulationConstructionSetUsingDirectCallsTest
       scs.setCameraDollyOffsets(cameraDollyOffsetXYZValues[0], cameraDollyOffsetXYZValues[1], cameraDollyOffsetXYZValues[2]);
       double[] cameraDollyOffsetXYZValuesFromSCS = getCameraDollyOffsetXYZValues(scs);
       assertArrayEquals(cameraDollyOffsetXYZValues, cameraDollyOffsetXYZValuesFromSCS, epsilon);
+      
+      scs.setCameraFix(cameraFixXYZValues[0], cameraFixXYZValues[1], cameraFixXYZValues[2]);
+      double[] cameraFixXYZValuesFromSCS = getCameraFixXYZValues(scs);
+      assertArrayEquals(cameraFixXYZValues, cameraFixXYZValuesFromSCS, epsilon);
+      
+      scs.setCameraPosition(cameraPositionXYZValues[0], cameraPositionXYZValues[1], cameraPositionXYZValues[2]);
+      double[] cameraPositionXYZValuesFromSCS = getCameraPositionXYZValues(scs);
+      assertArrayEquals(cameraPositionXYZValues, cameraPositionXYZValuesFromSCS, epsilon);
    }
    
    @Test
@@ -376,12 +387,129 @@ public class SimulationConstructionSetUsingDirectCallsTest
       double frameRateFromSCS = scs.getPlaybackFrameRate();
       assertEquals(recomputedSecondsPerFrameRate, frameRateFromSCS, epsilon);
       
-      double ticksPerCycle = computeTicksPerPlayCycle(simulateDT, recordFreq, realTimeRate, frameRate);
+      int ticksPerCycle = computeTicksPerPlayCycle(simulateDT, recordFreq, realTimeRate, frameRate);
       double ticksPerCycleFromSCS = scs.getTicksPerPlayCycle();
       assertEquals(ticksPerCycle, ticksPerCycleFromSCS, epsilon);
    }
    
+   @Test
+   public void testSimulationTickControl()
+   {
+      createSimulationRewoundListenerAndAttachToSCS(scs);
+      simulateForTime(scs, simulateTime);
+      int ticksPerCycle = (int) scs.getTicksPerPlayCycle();
+      
+      scs.setIndex(0);
+      simulationRewoundListenerHasBeenNotified.set(false);
+      scs.tickButDoNotNotifySimulationRewoundListeners(ticksIncrease);
+      double currentSCSIndex = scs.getIndex();
+      assertFalse(simulationRewoundListenerHasBeenNotified.getBooleanValue());
+      assertEquals(ticksIncrease, currentSCSIndex, epsilon);
+      
+      scs.setIndex(0);
+      simulationRewoundListenerHasBeenNotified.set(false);
+      scs.tick();
+      double currentSCSIndex2 = scs.getIndex();
+      assertTrue(simulationRewoundListenerHasBeenNotified.getBooleanValue());
+      assertEquals(ticksPerCycle, currentSCSIndex2, epsilon);
+      
+      scs.setIndex(ticksPerCycle);
+      simulationRewoundListenerHasBeenNotified.set(false);
+      scs.unTick();
+      int currentSCSIndex3 = scs.getIndex();
+      assertTrue(simulationRewoundListenerHasBeenNotified.getBooleanValue());
+      assertEquals(0.0, currentSCSIndex3, epsilon);
+
+      scs.setIndex(0);
+      simulationRewoundListenerHasBeenNotified.set(false);
+      scs.tick(ticksIncrease);
+      double currentSCSIndex4 = scs.getIndex();
+      assertTrue(simulationRewoundListenerHasBeenNotified.getBooleanValue());
+      assertEquals(ticksIncrease, currentSCSIndex4, epsilon);
+      
+      scs.setIndex(0);
+      simulationRewoundListenerHasBeenNotified.set(false);
+      scs.setTick(ticksIncrease);
+      double currentSCSIndex5 = scs.getIndex();
+      assertTrue(simulationRewoundListenerHasBeenNotified.getBooleanValue());
+      assertEquals(ticksIncrease*ticksPerCycle, currentSCSIndex5, epsilon);
+      
+      scs.setIndex(0);
+      simulationRewoundListenerHasBeenNotified.set(false);
+      scs.tickAndUpdate();
+      double currentSCSIndex6 = scs.getIndex();
+      assertFalse(simulationRewoundListenerHasBeenNotified.getBooleanValue());
+      assertEquals(1.0, currentSCSIndex6, epsilon);
+      
+      scs.setIndex(0);
+      simulationRewoundListenerHasBeenNotified.set(false);
+      scs.updateAndTick();
+      double currentSCSIndex7 = scs.getIndex();
+      assertTrue(simulationRewoundListenerHasBeenNotified.getBooleanValue());
+      assertEquals(1.0, currentSCSIndex7, epsilon);
+
+      scs.setIndex(0);
+      simulationRewoundListenerHasBeenNotified.set(false);
+      scs.tickAndUpdateLeisurely(ticksIncrease);
+      double currentSCSIndex8 = scs.getIndex();
+      assertFalse(simulationRewoundListenerHasBeenNotified.getBooleanValue());
+      assertEquals(1.0, currentSCSIndex8, epsilon);      
+   }
+   
    // local methods
+
+   
+   private void createSimulationRewoundListenerAndAttachToSCS(SimulationConstructionSet scs)
+   {
+      SimulationRewoundListener simulationRewoundListener = createSimulationRewoundListener();
+      scs.attachSimulationRewoundListener(simulationRewoundListener);
+   }
+   
+//   private void setAllTimingValuesInSCS(SimulationConstructionSet scs, double simulateDT, 
+//                                        int recordFrequency, double recordDT, double realTimeRate, double frameRate)
+//   {
+//      scs.setDT(simulateDT, recordFrequency);
+//      scs.setRecordDT(recordDT);
+//      scs.setPlaybackRealTimeRate(realTimeRate);
+//      scs.setPlaybackDesiredFrameRate(frameRate);
+//   }
+   
+   private void simulateForTime(SimulationConstructionSet scs, double simulateTime)
+   {
+      scs.simulate(simulateTime);
+      while(scs.isSimulating())
+      {
+         ThreadTools.sleep(100L);
+      }
+   }
+
+   private SimulationRewoundListener createSimulationRewoundListener()
+   {
+      SimulationRewoundListener ret = new SimulationRewoundListener()
+      {
+         @Override
+         public void simulationWasRewound()
+         {
+            simulationRewoundListenerHasBeenNotified.set(true);
+         }
+      };
+      
+      return ret;
+   }
+   
+   private ExitActionListener createExitActionListener()
+   {
+      ExitActionListener ret = new ExitActionListener()
+      {
+         @Override
+         public void exitActionPerformed()
+         {
+            exitActionListenerHasBeenNotified.set(true);
+         }
+      };
+      
+      return ret;
+   }
    
    private double[] getCameraTrackingXYZVars(SimulationConstructionSet scs)
    {
@@ -417,6 +545,24 @@ public class SimulationConstructionSetUsingDirectCallsTest
       double dy = classicCameraController.getDollyYOffset();
       double dz = classicCameraController.getDollyZOffset();
       return new double[] {dx, dy, dz};
+   }
+   
+   private double[] getCameraFixXYZValues(SimulationConstructionSet scs)
+   {
+      ClassicCameraController classicCameraController = getClassicCameraController(scs); 
+      double x = classicCameraController.getFixX();
+      double y = classicCameraController.getFixY();
+      double z = classicCameraController.getFixZ();
+      return new double[] {x, y, z};
+   }
+   
+   private double[] getCameraPositionXYZValues(SimulationConstructionSet scs)
+   {
+      ClassicCameraController classicCameraController = getClassicCameraController(scs); 
+      double x = classicCameraController.getCamX();
+      double y = classicCameraController.getCamY();
+      double z = classicCameraController.getCamZ();
+      return new double[] {x, y, z};
    }
    
    private ClassicCameraController getClassicCameraController(SimulationConstructionSet scs)
@@ -570,12 +716,12 @@ public class SimulationConstructionSetUsingDirectCallsTest
    
    private double recomputeTiming(double dt, double recordFreq, double realTimeRate, double frameRate)
    {
-      double ticksPerCycle = computeTicksPerPlayCycle(dt, recordFreq, realTimeRate, frameRate);
+      int ticksPerCycle = computeTicksPerPlayCycle(dt, recordFreq, realTimeRate, frameRate);
       double secondsPerFrameRate = ticksPerCycle * (dt * recordFreq) / realTimeRate;
       return secondsPerFrameRate;
    }
    
-   private double computeTicksPerPlayCycle(double dt, double recordFreq, double realTimeRate, double frameRate)
+   private int computeTicksPerPlayCycle(double dt, double recordFreq, double realTimeRate, double frameRate)
    {
       return Math.max((int) (frameRate * realTimeRate / (dt * recordFreq)), 1);
    }
