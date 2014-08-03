@@ -7,7 +7,7 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.IndividualHandControlState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TrajectoryBasedNumericalInverseKinematicsCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
@@ -44,7 +44,7 @@ public class InverseKinematicsTaskspaceHandPositionControlState extends Taskspac
    
    private final BooleanYoVariable inverseKinematicsSolutionIsValid;
 
-   public InverseKinematicsTaskspaceHandPositionControlState(String namePrefix, IndividualHandControlState stateEnum, RobotSide robotSide,
+   public InverseKinematicsTaskspaceHandPositionControlState(String namePrefix, HandControlState stateEnum, RobotSide robotSide,
          MomentumBasedController momentumBasedController, int jacobianId, RigidBody base, RigidBody endEffector,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, ArmControllerParameters armControllerParameters, ControlStatusProducer controlStatusProducer, double controlDT,
          YoVariableRegistry parentRegistry)

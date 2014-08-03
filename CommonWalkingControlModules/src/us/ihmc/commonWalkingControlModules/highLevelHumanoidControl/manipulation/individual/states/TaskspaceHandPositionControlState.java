@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.IndividualHandControlState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -49,7 +49,7 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
    protected OrientationTrajectoryGenerator orientationTrajectoryGenerator;
    protected RigidBodySpatialAccelerationControlModule handSpatialAccelerationControlModule;
 
-   public TaskspaceHandPositionControlState(String namePrefix, IndividualHandControlState stateEnum, RobotSide robotSide, MomentumBasedController momentumBasedController,
+   public TaskspaceHandPositionControlState(String namePrefix, HandControlState stateEnum, RobotSide robotSide, MomentumBasedController momentumBasedController,
                                             int jacobianId, RigidBody base, RigidBody endEffector,
                                             DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
    {

@@ -52,11 +52,11 @@ import com.yobotics.simulationconstructionset.util.trajectory.StraightLinePositi
 import com.yobotics.simulationconstructionset.util.trajectory.provider.YoSE3ConfigurationProvider;
 import com.yobotics.simulationconstructionset.util.trajectory.provider.YoVariableDoubleProvider;
 
-public class IndividualHandControlModule
+public class HandControlModule
 {
    private final YoVariableRegistry registry;
 
-   private final StateMachine<IndividualHandControlState> stateMachine;
+   private final StateMachine<HandControlState> stateMachine;
    private final Map<ReferenceFrame, RigidBodySpatialAccelerationControlModule> handSpatialAccelerationControlModules;
 
    private final ChangeableConfigurationProvider initialConfigurationProvider;
@@ -80,7 +80,7 @@ public class IndividualHandControlModule
    private final List<TaskspaceHandPositionControlState> taskSpacePositionControlStates = new ArrayList<TaskspaceHandPositionControlState>();
    private final PointPositionHandControlState pointPositionControlState;
 
-   private final EnumYoVariable<IndividualHandControlState> requestedState;
+   private final EnumYoVariable<HandControlState> requestedState;
    private final OneDoFJoint[] oneDoFJoints;
    private final String name;
    private final RobotSide robotSide;
@@ -93,7 +93,7 @@ public class IndividualHandControlModule
 
    private final DoubleYoVariable maxAccelerationArmTaskspace, maxJerkArmTaskspace;
 
-   public IndividualHandControlModule(RobotSide robotSide, SE3PDGains taskspaceControlGains, MomentumBasedController momentumBasedController,
+   public HandControlModule(RobotSide robotSide, SE3PDGains taskspaceControlGains, MomentumBasedController momentumBasedController,
          ArmControllerParameters armControlParameters, ControlStatusProducer controlStatusProducer, YoVariableRegistry parentRegistry)
    {
       this.controlDT = momentumBasedController.getControlDT();
@@ -114,7 +114,7 @@ public class IndividualHandControlModule
 
       oneDoFJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(chest, hand), OneDoFJoint.class);
 
-      requestedState = new EnumYoVariable<IndividualHandControlState>(name + "RequestedState", "", registry, IndividualHandControlState.class, true);
+      requestedState = new EnumYoVariable<HandControlState>(name + "RequestedState", "", registry, HandControlState.class, true);
       requestedState.set(null);
 
       trajectoryTimeProvider = new YoVariableDoubleProvider(name + "TrajectoryTime", registry);
@@ -129,7 +129,7 @@ public class IndividualHandControlModule
       }
 
       DoubleYoVariable simulationTime = momentumBasedController.getYoTime();
-      stateMachine = new StateMachine<IndividualHandControlState>(name, name + "SwitchTime", IndividualHandControlState.class, simulationTime, registry);
+      stateMachine = new StateMachine<HandControlState>(name, name + "SwitchTime", HandControlState.class, simulationTime, registry);
 
       handSpatialAccelerationControlModules = new LinkedHashMap<ReferenceFrame, RigidBodySpatialAccelerationControlModule>();
 
@@ -144,22 +144,22 @@ public class IndividualHandControlModule
 
       InverseDynamicsJoint[] controlledJointsInJointSpaceState = ScrewTools.createJointPath(chest, hand);
 
-      loadBearingControlState = new LoadBearingPlaneHandControlState(namePrefix, IndividualHandControlState.LOAD_BEARING, robotSide, momentumBasedController,
+      loadBearingControlState = new LoadBearingPlaneHandControlState(namePrefix, HandControlState.LOAD_BEARING, robotSide, momentumBasedController,
             fullRobotModel.getElevator(), hand, jacobianId, registry);
 
       if (armControlParameters.doLowLevelPositionControl())
       {
-         jointSpaceHandControlState = new LowLevelJointSpaceHandControlControlState(namePrefix, IndividualHandControlState.JOINT_SPACE, robotSide,
+         jointSpaceHandControlState = new LowLevelJointSpaceHandControlControlState(namePrefix, HandControlState.JOINT_SPACE, robotSide,
                controlledJointsInJointSpaceState, momentumBasedController, armControlParameters, controlDT, registry);
       }
       else
       {
-         jointSpaceHandControlState = new JointSpaceHandControlState(namePrefix, IndividualHandControlState.JOINT_SPACE, robotSide,
+         jointSpaceHandControlState = new JointSpaceHandControlState(namePrefix, HandControlState.JOINT_SPACE, robotSide,
                controlledJointsInJointSpaceState, momentumBasedController, armControlParameters, controlDT, registry);
       }
 
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
-      objectManipulationState = new ObjectManipulationState(namePrefix, IndividualHandControlState.OBJECT_MANIPULATION, robotSide, momentumBasedController,
+      objectManipulationState = new ObjectManipulationState(namePrefix, HandControlState.OBJECT_MANIPULATION, robotSide, momentumBasedController,
             jacobianId, null, chest, hand, dynamicGraphicObjectsListRegistry, parentRegistry);
 
       if (armControlParameters.useInverseKinematicsTaskspaceControl())
@@ -167,19 +167,19 @@ public class IndividualHandControlModule
          if (armControlParameters.doLowLevelPositionControl())
          {
             taskSpacePositionControlState = new LowLevelInverseKinematicsTaskspaceHandPositionControlState(namePrefix,
-                  IndividualHandControlState.TASK_SPACE_POSITION, robotSide, momentumBasedController, jacobianId, chest, hand,
+                  HandControlState.TASK_SPACE_POSITION, robotSide, momentumBasedController, jacobianId, chest, hand,
                   dynamicGraphicObjectsListRegistry, armControlParameters, controlStatusProducer, controlDT, registry);
          }
          else
          {
-            taskSpacePositionControlState = new InverseKinematicsTaskspaceHandPositionControlState(namePrefix, IndividualHandControlState.TASK_SPACE_POSITION,
+            taskSpacePositionControlState = new InverseKinematicsTaskspaceHandPositionControlState(namePrefix, HandControlState.TASK_SPACE_POSITION,
                   robotSide, momentumBasedController, jacobianId, chest, hand, dynamicGraphicObjectsListRegistry, armControlParameters,
                   controlStatusProducer, controlDT, registry);
          }
       }
       else
       {
-         taskSpacePositionControlState = new TaskspaceHandPositionControlState(namePrefix, IndividualHandControlState.TASK_SPACE_POSITION, robotSide,
+         taskSpacePositionControlState = new TaskspaceHandPositionControlState(namePrefix, HandControlState.TASK_SPACE_POSITION, robotSide,
                momentumBasedController, jacobianId, chest, hand, dynamicGraphicObjectsListRegistry, registry);
       }
       pointPositionControlState = new PointPositionHandControlState(momentumBasedController, robotSide, dynamicGraphicObjectsListRegistry, registry);
@@ -373,7 +373,7 @@ public class IndividualHandControlModule
 
    public boolean isLoadBearing()
    {
-      return stateMachine.getCurrentStateEnum() == IndividualHandControlState.LOAD_BEARING;
+      return stateMachine.getCurrentStateEnum() == HandControlState.LOAD_BEARING;
    }
 
    public void holdPositionInBase()
@@ -475,7 +475,7 @@ public class IndividualHandControlModule
 
    public boolean isControllingPoseInWorld()
    {
-      State<IndividualHandControlState> currentState = stateMachine.getCurrentState();
+      State<HandControlState> currentState = stateMachine.getCurrentState();
 
       for (TaskspaceHandPositionControlState taskSpacePositionControlState : taskSpacePositionControlStates)
       {
