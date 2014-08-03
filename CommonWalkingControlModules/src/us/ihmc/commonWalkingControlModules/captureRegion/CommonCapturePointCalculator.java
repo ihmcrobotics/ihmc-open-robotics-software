@@ -22,7 +22,7 @@ import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePointInMultipleFrames;
 
 
@@ -60,7 +60,7 @@ public class CommonCapturePointCalculator implements CapturePointCalculatorInter
 
       ReferenceFrame[] referenceFramesForCapturePoint = {ReferenceFrame.getWorldFrame(), referenceFrames.getPelvisZUpFrame(),
             referenceFrames.getMidFeetZUpFrame(), referenceFrames.getAnkleZUpFrame(RobotSide.LEFT), referenceFrames.getAnkleZUpFrame(RobotSide.RIGHT)};
-      capturePointInMultipleFrames = new YoFramePointInMultipleFrames("capture", referenceFramesForCapturePoint, registry);
+      capturePointInMultipleFrames = new YoFramePointInMultipleFrames("capture", registry, referenceFramesForCapturePoint);
 
       if (yoVariableRegistry != null)
       {
@@ -69,9 +69,7 @@ public class CommonCapturePointCalculator implements CapturePointCalculatorInter
 
       if (dynamicGraphicObjectsListRegistry != null)
       {
-         DynamicGraphicPosition capturePointWorldGraphicPosition = new DynamicGraphicPosition(CAPTURE_POINT_DYNAMIC_GRAPHIC_OBJECT_NAME,
-                 capturePointInMultipleFrames.getPointInFrame(ReferenceFrame.getWorldFrame()), 0.01, YoAppearance.Blue(),
-                 DynamicGraphicPosition.GraphicType.ROTATED_CROSS);
+         DynamicGraphicPosition capturePointWorldGraphicPosition = capturePointInMultipleFrames.createDynamicGraphicPosition(CAPTURE_POINT_DYNAMIC_GRAPHIC_OBJECT_NAME, 0.01, YoAppearance.Blue(), GraphicType.ROTATED_CROSS);
          DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList("CapturePoint");
          dynamicGraphicObjectsList.add(capturePointWorldGraphicPosition);
 
@@ -105,7 +103,7 @@ public class CommonCapturePointCalculator implements CapturePointCalculatorInter
 
       FramePoint capturePoint = new FramePoint(capturePointFrame, captureX, captureY, 0.0);
 
-      capturePointInMultipleFrames.setFramePoint(capturePoint);
+      capturePointInMultipleFrames.setIncludingFrame(capturePoint);
       
       takeArtifactHistorySnapshots();
    }
@@ -137,8 +135,10 @@ public class CommonCapturePointCalculator implements CapturePointCalculatorInter
 
       if (CHECK_COLLINEAR)
       {
-         YoFramePoint capturePointBodyZUp = capturePointInMultipleFrames.getPointInFrame(pelvisZUpFrame);
-         checkCoPCapturePredictedColinear(centerOfPressure, capturePointBodyZUp.getFramePointCopy(), predictedCapturePoint);
+         capturePointInMultipleFrames.changeFrame(pelvisZUpFrame);
+         FramePoint capturePointBodyZUp = new FramePoint();
+         capturePointInMultipleFrames.getFrameTupleIncludingFrame(capturePointBodyZUp);
+         checkCoPCapturePredictedColinear(centerOfPressure, capturePointBodyZUp, predictedCapturePoint);
       }
       
       return predictedCapturePoint;
@@ -146,7 +146,10 @@ public class CommonCapturePointCalculator implements CapturePointCalculatorInter
 
    public FramePoint getCapturePointInFrame(ReferenceFrame referenceFrame)
    {
-      return capturePointInMultipleFrames.getPointInFrame(referenceFrame).getFramePointCopy();
+      FramePoint ret = new FramePoint();
+      capturePointInMultipleFrames.changeFrame(referenceFrame);
+      capturePointInMultipleFrames.getFrameTupleIncludingFrame(ret);
+      return ret;
    }
 
    public FramePoint2d getCapturePoint2dInFrame(ReferenceFrame referenceFrame)
