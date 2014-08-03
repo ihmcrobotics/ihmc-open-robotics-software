@@ -487,7 +487,6 @@ public class SimulationConstructionSetUsingDirectCallsTest
    {
       SimulationRewoundListener ret = new SimulationRewoundListener()
       {
-         @Override
          public void simulationWasRewound()
          {
             simulationRewoundListenerHasBeenNotified.set(true);
@@ -501,7 +500,6 @@ public class SimulationConstructionSetUsingDirectCallsTest
    {
       ExitActionListener ret = new ExitActionListener()
       {
-         @Override
          public void exitActionPerformed()
          {
             exitActionListenerHasBeenNotified.set(true);
