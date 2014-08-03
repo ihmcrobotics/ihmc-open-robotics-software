@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states;
 
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.IndividualHandControlState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.utilities.FormattingTools;
@@ -10,7 +10,7 @@ import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 
-public abstract class TaskspaceHandControlState extends State<IndividualHandControlState>
+public abstract class TaskspaceHandControlState extends State<HandControlState>
 {
    protected final String name;
    protected final YoVariableRegistry registry;
@@ -23,7 +23,7 @@ public abstract class TaskspaceHandControlState extends State<IndividualHandCont
    protected final MomentumBasedController momentumBasedController;
 
 
-   public TaskspaceHandControlState(String namePrefix, IndividualHandControlState stateEnum, MomentumBasedController momentumBasedController, int jacobianId,
+   public TaskspaceHandControlState(String namePrefix, HandControlState stateEnum, MomentumBasedController momentumBasedController, int jacobianId,
                                     RigidBody base, RigidBody endEffector, YoVariableRegistry parentRegistry)
    {
       super(stateEnum);

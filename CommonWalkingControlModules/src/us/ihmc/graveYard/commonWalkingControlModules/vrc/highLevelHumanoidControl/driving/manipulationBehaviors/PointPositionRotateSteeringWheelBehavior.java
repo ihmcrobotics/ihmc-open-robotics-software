@@ -3,7 +3,7 @@ package us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidContr
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
 
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.IndividualHandControlModule;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.taskExecutor.Task;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.robotSide.RobotSide;
@@ -41,7 +41,7 @@ public class PointPositionRotateSteeringWheelBehavior
 
    private final double averageAngularVelocity = 0.7;
 
-   private final IndividualHandControlModule individualHandControlModule;
+   private final HandControlModule individualHandControlModule;
    private final ReferenceFrame creepyGripHandPositionControlFrame;
 
    private final CirclePositionTrajectoryGenerator trajectoryGenerator;
@@ -56,7 +56,7 @@ public class PointPositionRotateSteeringWheelBehavior
    private final RigidBody hand;
    private final RigidBody elevator;
 
-   public PointPositionRotateSteeringWheelBehavior(double dt, RobotSide robotSide, IndividualHandControlModule individualHandControlModule,
+   public PointPositionRotateSteeringWheelBehavior(double dt, RobotSide robotSide, HandControlModule individualHandControlModule,
                                                    ReferenceFrame creepyGripHandPositionControlFrame, FullRobotModel fullRobotModel,
                                                    ReferenceFrame steeringWheelFrame, MomentumBasedController momentumBasedController,
                                                    DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)

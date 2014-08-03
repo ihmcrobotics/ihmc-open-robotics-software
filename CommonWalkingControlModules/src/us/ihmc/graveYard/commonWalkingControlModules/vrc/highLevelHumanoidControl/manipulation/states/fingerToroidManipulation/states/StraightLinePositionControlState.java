@@ -1,7 +1,7 @@
 package us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.manipulation.states.fingerToroidManipulation.states;
 
 import us.ihmc.commonWalkingControlModules.controlModules.SE3PDGains;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.IndividualHandControlModule;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlModule;
 import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.manipulation.states.fingerToroidManipulation.FingerToroidManipulationState;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -20,7 +20,7 @@ import com.yobotics.simulationconstructionset.util.statemachines.State;
  */
 public class StraightLinePositionControlState extends State<FingerToroidManipulationState>
 {
-   private final SideDependentList<IndividualHandControlModule> individualHandControlModules;
+   private final SideDependentList<HandControlModule> individualHandControlModules;
    private final SideDependentList<SE3ConfigurationProvider> finalConfigurationProviders;
    private final SideDependentList<ReferenceFrame> handPositionControlFrames;
 
@@ -33,7 +33,7 @@ public class StraightLinePositionControlState extends State<FingerToroidManipula
    private final SE3PDGains gains;
 
    public StraightLinePositionControlState(FingerToroidManipulationState stateEnum,
-                                           SideDependentList<IndividualHandControlModule> individualHandControlModules, RigidBody rootBody,
+                                           SideDependentList<HandControlModule> individualHandControlModules, RigidBody rootBody,
                                            SideDependentList<SE3ConfigurationProvider> finalConfigurationProviders, SideDependentList<ReferenceFrame> handPositionControlFrames,
                                            double trajectoryTime, SE3PDGains gains)
    {
@@ -82,7 +82,7 @@ public class StraightLinePositionControlState extends State<FingerToroidManipula
    @Override
    public boolean isDone()
    {
-      for (IndividualHandControlModule individualHandControlModule : individualHandControlModules)
+      for (HandControlModule individualHandControlModule : individualHandControlModules)
       {
          if (!individualHandControlModule.isDone())
             return false;

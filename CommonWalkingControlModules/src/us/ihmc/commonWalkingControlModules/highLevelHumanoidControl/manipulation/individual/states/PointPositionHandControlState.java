@@ -7,7 +7,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPositi
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.IndividualHandControlState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
@@ -19,7 +19,7 @@ import us.ihmc.utilities.screwTheory.*;
  * @author twan
  *         Date: 5/9/13
  */
-public class PointPositionHandControlState extends State<IndividualHandControlState>
+public class PointPositionHandControlState extends State<HandControlState>
 {
    private final YoVariableRegistry registry;
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -51,7 +51,7 @@ public class PointPositionHandControlState extends State<IndividualHandControlSt
    public PointPositionHandControlState(MomentumBasedController momentumBasedController, RobotSide robotSide,
                                         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
    {
-      super(IndividualHandControlState.POINT_POSITION);
+      super(HandControlState.POINT_POSITION);
       this.momentumBasedController = momentumBasedController;
       this.twistCalculator = momentumBasedController.getTwistCalculator();
 

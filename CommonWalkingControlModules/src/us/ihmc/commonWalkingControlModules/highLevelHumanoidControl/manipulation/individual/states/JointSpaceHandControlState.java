@@ -4,7 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.IndividualHandControlState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.FormattingTools;
@@ -47,7 +47,7 @@ public class JointSpaceHandControlState extends AbstractJointSpaceHandControlSta
    
    private final double dt;
 
-   public JointSpaceHandControlState(String namePrefix, IndividualHandControlState stateEnum, RobotSide robotSide,
+   public JointSpaceHandControlState(String namePrefix, HandControlState stateEnum, RobotSide robotSide,
                                             InverseDynamicsJoint[] controlledJoints, MomentumBasedController momentumBasedController,
                                             ArmControllerParameters armControllerParameters, double dt, YoVariableRegistry parentRegistry)
    {

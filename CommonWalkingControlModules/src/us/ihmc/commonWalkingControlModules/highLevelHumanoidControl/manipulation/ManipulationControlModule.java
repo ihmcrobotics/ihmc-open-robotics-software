@@ -6,7 +6,7 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.SE3PDGains;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.IndividualHandControlModule;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.taskExecutor.PipeLine;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.tasks.HandLoadBearingTask;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.tasks.HandPoseTask;
@@ -45,7 +45,7 @@ public class ManipulationControlModule
    private final DoubleYoVariable kpArmTaskspace, kdArmTaskspace, kiArmTaskspace, zetaArmTaskspace, maxIntegralErrorArmTaskspace;
 
    private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable("hasBeenInitialized", registry);
-   private final SideDependentList<IndividualHandControlModule> individualHandControlModules;
+   private final SideDependentList<HandControlModule> individualHandControlModules;
 
    private final PipeLine<RobotSide> pipeline = new PipeLine<RobotSide>();
 
@@ -70,11 +70,11 @@ public class ManipulationControlModule
       handPoseProvider = variousWalkingProviders.getDesiredHandPoseProvider();
       handLoadBearingProvider = variousWalkingProviders.getDesiredHandLoadBearingProvider();
 
-      individualHandControlModules = new SideDependentList<IndividualHandControlModule>();
+      individualHandControlModules = new SideDependentList<HandControlModule>();
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         IndividualHandControlModule individualHandControlModule = new IndividualHandControlModule(robotSide, taskspaceControlGains, momentumBasedController,
+         HandControlModule individualHandControlModule = new HandControlModule(robotSide, taskspaceControlGains, momentumBasedController,
                armControlParameters, variousWalkingProviders.getControlStatusProducer(), registry);
          individualHandControlModules.put(robotSide, individualHandControlModule);
       }
@@ -242,7 +242,7 @@ public class ManipulationControlModule
 
    public void prepareForLocomotion()
    {
-      for (IndividualHandControlModule individualHandControlModule : individualHandControlModules)
+      for (HandControlModule individualHandControlModule : individualHandControlModules)
       {
          if (individualHandControlModule.isControllingPoseInWorld())
          {
