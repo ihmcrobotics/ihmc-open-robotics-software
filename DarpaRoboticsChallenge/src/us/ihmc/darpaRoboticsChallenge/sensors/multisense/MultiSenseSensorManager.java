@@ -19,6 +19,7 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetPr
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
 import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.MultisenseParameterPacket;
 import us.ihmc.darpaRoboticsChallenge.ros.ROSNativeTransformTools;
+import us.ihmc.darpaRoboticsChallenge.ros.RosRobotPosePublisher;
 import us.ihmc.utilities.ros.RosMainNode;
 
 public class MultiSenseSensorManager
@@ -45,6 +46,8 @@ public class MultiSenseSensorManager
    private final DRCRobotPointCloudParameters stereoParamaters;
 
    private ParameterTree params;
+
+   private MultisenseLidarDataReceiver multisenseLidarDataReceiver;
 
    public MultiSenseSensorManager(DepthDataProcessor depthDataProcessor, ROSNativeTransformTools rosTransformProvider, RobotPoseBuffer sharedRobotPoseBuffer,
          RosMainNode rosMainNode, DRCNetworkProcessorNetworkingManager networkingManager, RosNativeNetworkProcessor rosNativeNetworkProcessor,
@@ -197,7 +200,7 @@ public class MultiSenseSensorManager
 
    private void registerLidarReceivers()
    {
-      new MultisenseLidarDataReceiver(depthDataProcessor, rosTransformProvider, ppsTimestampOffsetProvider, sharedRobotPoseBuffer, rosMainNode, lidarParamaters);
+      this.multisenseLidarDataReceiver = new MultisenseLidarDataReceiver(depthDataProcessor, rosTransformProvider, ppsTimestampOffsetProvider, sharedRobotPoseBuffer, rosMainNode, lidarParamaters);
    }
 
    private void registerCameraReceivers()
@@ -215,5 +218,10 @@ public class MultiSenseSensorManager
    {
       cameraReceiver.registerCameraListener(armCalibrationHelper);
 
+   }
+
+   public void setRobotPosePublisher(RosRobotPosePublisher robotPosePublisher)
+   {
+      multisenseLidarDataReceiver.setRobotPosePublisher(robotPosePublisher);
    }
 }
