@@ -161,7 +161,7 @@ public class DetectTestbedSaveTrasform {
          // can use median since that's influcence by the scan's density
          int N = pointsWall.size();
          for (int i = 0; i < pointsFloor.size(); i++) {
-            locs[i+N] = ClosestPoint3D_F64.closestPoint(intersection, pointsWall.get(i));
+            locs[i+N] = ClosestPoint3D_F64.closestPoint(intersection, pointsFloor.get(i));
          }
 
          double min = Double.MAX_VALUE;

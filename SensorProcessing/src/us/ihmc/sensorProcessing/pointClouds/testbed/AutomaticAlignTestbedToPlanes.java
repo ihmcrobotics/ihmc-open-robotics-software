@@ -33,7 +33,7 @@ public class AutomaticAlignTestbedToPlanes {
 
    public static void main(String[] args) {
 
-      String directory = "../SensorProcessing/data/testbed/2014-07-10/";
+      String directory = "../SensorProcessing/data/testbed/2014-08-01/";
 
       Se3_F64 estimatedToModel;
       try {
@@ -42,8 +42,10 @@ public class AutomaticAlignTestbedToPlanes {
          throw new RuntimeException(e);
       }
 
+      // point cloud with two bricks 09
+
       System.out.println("Loading and filtering point clouds");
-      List<List<Point3D_F64>> scans0 = loadScanLines(directory+"cloud02_scans.txt");
+      List<List<Point3D_F64>> scans0 = loadScanLines(directory+"cloud09_scans.txt");
       List<Point3D_F64> cloud0 = filter(scans0, 3);
 
       System.out.println("Detecting planes");
