@@ -50,7 +50,7 @@ public class CentroidalMomentumRateADotVTermTest
    private final Vector3d X = new Vector3d(1.0, 0.0, 0.0);
    private final Vector3d Y = new Vector3d(0.0, 1.0, 0.0);
    private final Vector3d Z = new Vector3d(0.0, 0.0, 1.0);
-   private final double controlDT = 0.006; //0.00000005;
+   private final double controlDT = 0.00000005;
 
    private final DenseMatrix64F a = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F aPrevVal = new DenseMatrix64F(0, 0);
@@ -59,7 +59,7 @@ public class CentroidalMomentumRateADotVTermTest
    private final DenseMatrix64F aDotVNumerical = new DenseMatrix64F(6, 1);
    private final DenseMatrix64F aDotVAnalytical = new DenseMatrix64F(6, 1);
 
-   @Ignore
+//   @Ignore
    @Test
    public void chainTest() throws UnreasonableAccelerationException
    {
@@ -68,7 +68,7 @@ public class CentroidalMomentumRateADotVTermTest
       ArrayList<RevoluteJoint> joints = new ArrayList<>();
       ReferenceFrame elevatorFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("elevator", worldFrame, new Transform3D());
       RigidBody elevator = new RigidBody("elevator", elevatorFrame);
-      int numberOfJoints = 10; // NOTE: The final error in aDotV seems to be growing as we increase the number of joints
+      int numberOfJoints = 10;
       Vector3d[] jointAxes = new Vector3d[numberOfJoints];
       for (int i = 0; i < numberOfJoints; i++)
          jointAxes[i] = RandomTools.generateRandomVector(random, 1.0);
@@ -79,7 +79,7 @@ public class CentroidalMomentumRateADotVTermTest
       assertADotV(random, joints, elevator, robot);
    }
 
-   @Ignore
+//   @Ignore
    @Test
    public void treeTest() throws UnreasonableAccelerationException
    {
@@ -91,7 +91,7 @@ public class CentroidalMomentumRateADotVTermTest
       RevoluteJoint rootJoint = ScrewTestTools.addRandomRevoluteJoint("rootJoint", random, elevator); // Just to make sure there is only one root joint for the SCS robot
       RigidBody rootBody = ScrewTestTools.addRandomRigidBody("rootBody", random, rootJoint);
 
-      int numberOfJoints = 8; // FIXME More than 8 joints and the test fails.... check if there is a real bug there.
+      int numberOfJoints = 10; // FIXME More than 8 joints and the test fails.... check if there is a real bug there.
       ScrewTestTools.createRandomTreeRobot(joints, rootBody, numberOfJoints - 1, random);
       joints.add(0, rootJoint);
       SCSRobotFromInverseDynamicsRobotModel robot = new SCSRobotFromInverseDynamicsRobotModel("robot", rootJoint);
@@ -200,6 +200,7 @@ public class CentroidalMomentumRateADotVTermTest
       System.out.println();
    }
 
+   @Ignore
    @Test
    public void TestTree() throws UnreasonableAccelerationException
    {
