@@ -120,6 +120,8 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
    private final YoFrameVector positionInSupportLegAnkleZUp = new YoFrameVector("positionInSupportLegAnkleZUp", ReferenceFrame.getWorldFrame(), registry);
 
+   private final OrientationInterpolationCalculator orientationInterpolationCalculator = new OrientationInterpolationCalculator();
+
    private BagOfBalls bagOfBalls;
    private final double controlDT;
    private RobotSide swingSide;
@@ -539,14 +541,16 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       desiredFootOrientationInWorldFrame.set(desiredFootOrientationToViz);
 
       double alphaDot = minimumJerkTrajectoryForFootOrientation.getVelocity();
-      FrameVector desiredSwingFootAngularVelocity = OrientationInterpolationCalculator.computeAngularVelocity(startSwingOrientation.getFrameOrientationCopy(),
+      FrameVector desiredSwingFootAngularVelocity = new FrameVector();
+      orientationInterpolationCalculator.computeAngularVelocity(desiredSwingFootAngularVelocity, startSwingOrientation.getFrameOrientationCopy(),
             endSwingOrientation.getFrameOrientationCopy(), alphaDot);
       desiredSwingFootAngularVelocity.changeFrame(worldFrame);
       desiredSwingFootAngularVelocityInWorldFrame.set(desiredSwingFootAngularVelocity);
 
       double alphaDDot = minimumJerkTrajectoryForFootOrientation.getAcceleration();
-      FrameVector desiredSwingFootAngularAcceleration = OrientationInterpolationCalculator.computeAngularAcceleration(
-            startSwingOrientation.getFrameOrientationCopy(), endSwingOrientation.getFrameOrientationCopy(), alphaDDot);
+      FrameVector desiredSwingFootAngularAcceleration = new FrameVector();
+      orientationInterpolationCalculator.computeAngularAcceleration(desiredSwingFootAngularAcceleration, startSwingOrientation.getFrameOrientationCopy(),
+            endSwingOrientation.getFrameOrientationCopy(), alphaDDot);
       desiredSwingFootAngularAcceleration.changeFrame(worldFrame);
       desiredSwingFootAngularAccelerationInWorldFrame.set(desiredSwingFootAngularAcceleration);
 
