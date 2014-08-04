@@ -32,7 +32,6 @@ import com.yobotics.simulationconstructionset.graphics.GraphicsDynamicGraphicsOb
 import com.yobotics.simulationconstructionset.gui.StandardSimulationGUI;
 import com.yobotics.simulationconstructionset.gui.camera.CameraTrackAndDollyYoVariablesHolder;
 import com.yobotics.simulationconstructionset.gui.config.GraphGroupList;
-import com.yobotics.simulationconstructionset.gui.config.ViewportConfigurationList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
 
@@ -61,12 +60,14 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private double realTimeRate = 0.75;
    private double frameRate = 0.01;
    private double recomputedSecondsPerFrameRate = recomputeTiming(simulateDT, recordFreq, realTimeRate, frameRate);
+   private double cameraFieldOfView = 1.5;
    private double[] cameraDollyOffsetXYZValues = {1.2, 2.2, 3.2};
    private double[] cameraTrackingOffsetXYZValues = {1.5, 2.5, 3.5};
    private double[] cameraDollyXYZVarValues = {1.5, 1.6, 1.7}; 
    private double[] cameraTrackingXYZVarValues = {0.5, 0.6, 0.7};
    private double[] cameraFixXYZValues = {1.8, 2.8, 3.8};
    private double[] cameraPositionXYZValues = {1.3, 2.3, 3.3};
+   private double[] cameraClipDistancesNearFarValues = {1.75, 2.75};
    
    private Point location = new Point(25, 50);
    private FallingBrickRobot simpleRobot = new FallingBrickRobot();
@@ -90,6 +91,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private String entryBoxGroupName = "simpleEntryBoxGroup";
    private String entryBoxGroupName2 = "simpleEntryBoxGroup2";
    private String entryBoxGroupName3 = "simpleEntryBoxGroup3";
+   private String[] graphConfigurationNames = {"simpleGraphConfiguration", "simpleGraphConfiguration2"};
    private String extraPanelConfigurationName = "simpleExtraPanelConfigurationName";
    private String[][] graphGroupVars = {cameraTrackingXYZVarNames, cameraDollyXYZVarNames};
    private String[][][] graphGroupVarsWithConfig = {{cameraTrackingXYZVarNames, {"config_1"}}, {cameraDollyXYZVarNames, {"config_2"}}};
@@ -111,6 +113,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private ExtraPanelConfiguration extraPanelConfiguration = createExtraPanelConfigurationWithPanel(extraPanelConfigurationName);
    private CameraConfiguration cameraConfiguration = createCameraConfiguration(cameraConfigurationName);
    private ViewportConfiguration viewportConfiguration = createViewportConfiguration(viewportConfigurationName);
+   private GraphConfiguration[] graphConfigurations = createGraphConfigurations(graphConfigurationNames);
    private SimulationConstructionSet scs;
    
    @BeforeClass 
@@ -175,14 +178,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       scs.attachExitActionListener(exitActionListener);
       exitActionListenerHasBeenNotified.set(false);
       scs.notifyExitActionListeners();
-      assertTrue(exitActionListenerHasBeenNotified.getBooleanValue());
-      
-      
-      
-//    
-//    SimulationConstructionSet scs2 = new SimulationConstructionSet(robots);
-//    generateSimulationFromDataFile
-//     
+      assertTrue(exitActionListenerHasBeenNotified.getBooleanValue());     
    }
    
    @Test
@@ -326,7 +322,23 @@ public class SimulationConstructionSetUsingDirectCallsTest
       
       scs.setupViewport(viewportConfiguration);
       String[] viewportConfigurationNamesFromSCS = getViewportConfigurationNames(scs);
-      assertArrayOsStringsContainsTheString(viewportConfigurationNamesFromSCS, viewportConfigurationName);    
+      assertArrayOsStringsContainsTheString(viewportConfigurationNamesFromSCS, viewportConfigurationName);  
+      
+      scs.selectViewport(viewportConfigurationName);
+      boolean isCurrentView = isCurrentView(scs, viewportConfigurationName);
+      assertTrue(isCurrentView);
+      
+      scs.setupGraphConfigurations(graphConfigurations);
+      String[] graphConfigurationNamesFromSCS = getGraphConfigurationListNames(scs);
+      assertArrayOsStringsContainsTheStrings(graphConfigurationNamesFromSCS, graphConfigurationNames);  
+      
+      scs.setClipDistances(cameraClipDistancesNearFarValues[0], cameraClipDistancesNearFarValues[1]);
+      double[] cameraClipDistancesNearFarValuesFromSCS = getCameraNearFarValues(scs);
+      assertArrayEquals(cameraClipDistancesNearFarValues, cameraClipDistancesNearFarValuesFromSCS, epsilon);
+      
+      scs.setFieldOfView(cameraFieldOfView);
+      double cameraFieldOfViewFromSCS = getCameraFieldOfView(scs);
+      assertEquals(cameraFieldOfView, cameraFieldOfViewFromSCS, epsilon);
    }
    
    @Test
@@ -573,6 +585,40 @@ public class SimulationConstructionSetUsingDirectCallsTest
       
    // local methods
    
+   private void assertArrayOsStringsContainsTheStrings(String[] array, String[] strings)
+   {
+      for(int i = 0; i<strings.length; i++)
+      {
+         assertArrayOsStringsContainsTheString(array, strings[i]);
+      }
+   }
+   
+   private GraphConfiguration[] createGraphConfigurations(String[] graphConfigurationNames)
+   {
+      GraphConfiguration[] graphConfigurations = new GraphConfiguration[graphConfigurationNames.length];
+      for(int i = 0; i<graphConfigurationNames.length; i++)
+      {
+         graphConfigurations[i] = new GraphConfiguration(graphConfigurationNames[i]);
+      }
+      
+      return graphConfigurations;
+   }
+   
+   private String[] getGraphConfigurationListNames(SimulationConstructionSet scs)
+   {
+      return scs.getGUI().getGraphConfigurationList().getGraphConfigurationNames();
+   }
+   
+   private boolean isCurrentView(SimulationConstructionSet scs, String currentViewName)
+   {
+      return getRepresentationOfCurrentView(scs).contains(currentViewName);
+   }
+   
+   private String getRepresentationOfCurrentView(SimulationConstructionSet scs)
+   {
+      return scs.getGUI().getXMLStyleRepresentationofMultiViews();
+   }
+   
    private String[] getViewportConfigurationNames(SimulationConstructionSet scs)
    {
       return scs.getGUI().getViewportConfigurationList().getViewportConfigurationNames();
@@ -637,6 +683,19 @@ public class SimulationConstructionSetUsingDirectCallsTest
       for (int i = 0; i < varNames.length; i++)
       {
         ret = ret && representationOfGraphArrayPanel.contains(varNames[i]);
+      }
+      
+      return ret;
+   }
+   
+   private boolean scsContainsTheRobot(SimulationConstructionSet scs, String robotName)
+   {
+      Robot[] robots = scs.getRobots();
+      boolean ret = false;
+      
+      for(int i = 0; i<robots.length; i++)
+      {
+         ret = ret || robots[i].getName().equals(robotName);
       }
       
       return ret;
@@ -719,6 +778,12 @@ public class SimulationConstructionSetUsingDirectCallsTest
       return ret;
    }
    
+   private double getCameraFieldOfView(SimulationConstructionSet scs)
+   {
+      ClassicCameraController classicCameraController = getClassicCameraController(scs);
+      return classicCameraController.getHorizontalFieldOfViewInRadians();
+   }
+   
    private double[] getCameraTrackingXYZVars(SimulationConstructionSet scs)
    {
       CameraTrackAndDollyYoVariablesHolder cameraTrackAndDollyYoVariablesHolder = getCameraTrackAndDollyVariablesHolder(scs); 
@@ -762,6 +827,14 @@ public class SimulationConstructionSetUsingDirectCallsTest
       double y = classicCameraController.getFixY();
       double z = classicCameraController.getFixZ();
       return new double[] {x, y, z};
+   }
+   
+   private double[] getCameraNearFarValues(SimulationConstructionSet scs)
+   {
+      ClassicCameraController classicCameraController = getClassicCameraController(scs); 
+      double near = classicCameraController.getClipNear();
+      double far = classicCameraController.getClipFar();
+      return new double[] {near, far};
    }
    
    private double[] getCameraPositionXYZValues(SimulationConstructionSet scs)
