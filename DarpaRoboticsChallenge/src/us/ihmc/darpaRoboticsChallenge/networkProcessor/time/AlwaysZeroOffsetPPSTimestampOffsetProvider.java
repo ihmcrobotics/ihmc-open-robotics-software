@@ -29,4 +29,10 @@ public class AlwaysZeroOffsetPPSTimestampOffsetProvider implements PPSTimestampO
    {
       return true;
    }
+
+   @Override
+   public long adjustRobotTimeStampToRosClock(long timeStamp)
+   {
+      return timeStamp;
+   }
 }
