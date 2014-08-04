@@ -140,11 +140,11 @@ public class AccelerationLimitedYoVariableTest
 
       assertEquals(nameYo, processed.getName());
 
-      double constant = random.nextDouble(); //necessary variable so velocity remians 0
+      double constant = random.nextDouble();
 
       for (double time = 0.0; time < totalTime; time += dt)
       {
-         raw.set(constant); //set to same constant value
+         raw.set(constant);
          rawRate.update(raw.getDoubleValue());
          rawAcceleration.update(rawRate.getDoubleValue());
          processed.update(raw.getDoubleValue());
@@ -248,7 +248,7 @@ public class AccelerationLimitedYoVariableTest
    }
 
    @Test
-   public void test_Sine_PlusReset() //tests update(double argument)
+   public void test_Sine_Plus_Reset_Plus_Update()
    {
       setupSCSStuff();
 
@@ -353,7 +353,7 @@ public class AccelerationLimitedYoVariableTest
    }
 
    @Test
-   public void test_SquareWaves() //tests update(double argument)
+   public void test_SquareWaves()
    {
       setupSCSStuff();
 
@@ -388,7 +388,6 @@ public class AccelerationLimitedYoVariableTest
          assertTrue(maxRate >= processed.getSmoothedRate().getDoubleValue());
          assertTrue(maxAcceleration >= processed.getSmoothedAcceleration().getDoubleValue());
 
-         //                  assertTrue(Math.abs(processed.getDoubleValue()) <= amplitude); //don't know how or if to incorporate this
          assertTrue(Math.abs(processed.getSmoothedRate().getDoubleValue()) <= maxRate);
          assertTrue(Math.abs(processed.getSmoothedAcceleration().getDoubleValue()) <= maxAcceleration);
       }
@@ -396,7 +395,7 @@ public class AccelerationLimitedYoVariableTest
    }
 
    @Test
-   public void test_Chirp_PlusUpdate_NoArguments() //tests update() with no arguments
+   public void test_Chirp_Plus_UpdateWithoutNoArguments()
    {
       setupSCSStuff();
 
