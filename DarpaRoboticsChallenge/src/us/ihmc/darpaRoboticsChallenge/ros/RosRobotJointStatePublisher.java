@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.ros.message.Time;
 import org.ros.time.WallTimeProvider;
 
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.DRCJointConfigurationData;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.net.ObjectConsumer;
@@ -17,12 +18,14 @@ public class RosRobotJointStatePublisher implements ObjectConsumer<DRCJointConfi
    private final WallTimeProvider wallTime;
    private final ArrayList<String> nameList = new ArrayList<String>();
    private final RosMainNode rosMainNode;
+   private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
    
-   public RosRobotJointStatePublisher(ObjectCommunicator fieldComputer,final RosMainNode rosMainNode, String[] orderedJointNames, String rosNameSpace )
+   public RosRobotJointStatePublisher(ObjectCommunicator fieldComputer,final RosMainNode rosMainNode, PPSTimestampOffsetProvider ppsTimestampOffsetProvider, String[] orderedJointNames, String rosNameSpace )
    {
       this.rosMainNode = rosMainNode;
       this.wallTime = new WallTimeProvider();
       this.jointStatePublisher = new RosJointStatePublisher(false);
+      this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
       
       for (int i = 0; i < orderedJointNames.length; i++)
       {
@@ -36,7 +39,9 @@ public class RosRobotJointStatePublisher implements ObjectConsumer<DRCJointConfi
    public void consumeObject(DRCJointConfigurationData object)
    {
       if(rosMainNode.isStarted()){
-         Time t = new Time(object.getSimTime());//wallTime.getCurrentTime());  
+         
+         long timeStamp = ppsTimestampOffsetProvider.adjustRobotTimeStampToRosClock(object.getSimTime());
+         Time t = new Time(timeStamp);//wallTime.getCurrentTime());  
          jointStatePublisher.publish(nameList, object.getJointAngles(), null, null, t);
       }
    }
