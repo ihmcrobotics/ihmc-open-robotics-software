@@ -23,6 +23,7 @@ import org.junit.Test;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.graphics3DAdapter.camera.ClassicCameraController;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
+import us.ihmc.graphics3DAdapter.jme.JMEGraphics3DAdapter;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
 import us.ihmc.utilities.ThreadTools;
@@ -52,7 +53,10 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private int middleIndex = 22;
    private int nonMiddleIndex = 35;
    private int ticksIncrease = 11;
+   private int numberOfSimulationTicks = 2000;
    private int graphGroupNumberOfColumns = 2;
+   private int numberOfTicksBeforeUpdatingGraphs = 2;
+   private int numberOfTicksBeforeUpdatingGraphs2 = 5;
    private double simulateDT = 0.001; 
    private double simulateTime = 1.0;
    private double recordDT = 0.05;
@@ -61,6 +65,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private double frameRate = 0.01;
    private double recomputedSecondsPerFrameRate = recomputeTiming(simulateDT, recordFreq, realTimeRate, frameRate);
    private double cameraFieldOfView = 1.5;
+   private double secondsOfSimulation = 10;
    private double[] cameraDollyOffsetXYZValues = {1.2, 2.2, 3.2};
    private double[] cameraTrackingOffsetXYZValues = {1.5, 2.5, 3.5};
    private double[] cameraDollyXYZVarValues = {1.5, 1.6, 1.7}; 
@@ -141,30 +146,8 @@ public class SimulationConstructionSetUsingDirectCallsTest
    @Test
    public void testSimulationConstructionSetMiscellaneous() throws AWTException
    {
-      double startTime = scs.getTime();
-      simulateForTime(scs, simulateTime);
-      double endTime = scs.getTime();
-      assertEquals(simulateTime, endTime-startTime, 1e-7);
-      
       Robot[] robotFromSCS = scs.getRobots();
       assertEquals(simpleRobot, robotFromSCS[0]);
-      
-      scs.setIndex(index);
-      int indexFromSCS = scs.getIndex();
-      assertEquals(index, indexFromSCS, epsilon);
-      
-      setInputAndOutputPointsInSCS(scs, inputPoint, outputPoint);
-      boolean isMiddleIndexFromSCS = scs.isIndexBetweenInAndOutPoint(middleIndex);
-      assertEquals(true, isMiddleIndexFromSCS);
-      isMiddleIndexFromSCS = scs.isIndexBetweenInAndOutPoint(nonMiddleIndex);
-      assertEquals(false, isMiddleIndexFromSCS);
-
-      setInputPointInSCS(scs, inputPoint);
-      scs.setIndex(outputPoint);
-      StandardSimulationGUI GUIFromSCS = scs.getStandardSimulationGUI();
-      GUIFromSCS.gotoInPointNow();
-      int inputPointFromSCS = scs.getIndex();
-      assertEquals(inputPoint, inputPointFromSCS);
 
       YoVariableRegistry rootRegistryFromSCS = scs.getRootRegistry();
       String  rootRegistryNameFromSCS = rootRegistryFromSCS.getName();
@@ -178,7 +161,88 @@ public class SimulationConstructionSetUsingDirectCallsTest
       scs.attachExitActionListener(exitActionListener);
       exitActionListenerHasBeenNotified.set(false);
       scs.notifyExitActionListeners();
-      assertTrue(exitActionListenerHasBeenNotified.getBooleanValue());     
+      assertTrue(exitActionListenerHasBeenNotified.getBooleanValue());  
+  
+      scs.setGraphsUpdatedDuringPlayback(false);
+      boolean isGraphsUpdatedDuringPlaybackFromSCS = scs.isGraphsUpdatedDuringPlayback();
+      assertFalse(isGraphsUpdatedDuringPlaybackFromSCS);
+      
+      scs.setGraphsUpdatedDuringPlayback(true);
+      boolean isGraphsUpdatedDuringPlaybackFromSCS2 = scs.isGraphsUpdatedDuringPlayback();
+      assertTrue(isGraphsUpdatedDuringPlaybackFromSCS2);   
+   }
+   
+   @Test
+   public void testSimulationManagement()
+   {
+      double startTime = scs.getTime();
+      simulateForTime(scs, simulateTime);
+      double endTime = scs.getTime();
+      assertEquals(simulateTime, endTime-startTime, 1e-7);
+           
+      scs.stop();
+      scs.simulate(numberOfSimulationTicks);
+      boolean isSimulatingFromSCS = scs.isSimulating();
+      assertTrue(isSimulatingFromSCS);
+      
+      scs.stop();
+      scs.simulate(numberOfSimulationTicks);
+      scs.stop();
+      boolean isSimulatingFromSCS2 = scs.isSimulating();
+      assertFalse(isSimulatingFromSCS2);
+      
+      scs.stop();
+      scs.simulate(secondsOfSimulation);
+      boolean isSimulatingFromSCS3 = scs.isSimulating();
+      assertTrue(isSimulatingFromSCS3);
+      
+      scs.stop();
+      scs.simulate();
+      boolean isSimulatingFromSCS4 = scs.isSimulating();
+      assertTrue(isSimulatingFromSCS4);
+      
+      scs.stop();
+      scs.play();
+      boolean isPlayingFromSCS = scs.isPlaying();
+      scs.stop();
+      assertTrue(isPlayingFromSCS);
+      
+      scs.setFastSimulate(true);
+      boolean isFastSimulateFromSCS = scs.isFastSimulateEnabled();
+      assertTrue(isFastSimulateFromSCS);
+      
+      scs.setFastSimulate(false);
+      boolean isFastSimulateFromSCS2 = scs.isFastSimulateEnabled();
+      assertFalse(isFastSimulateFromSCS2);
+      
+      scs.setFastSimulate(true, numberOfTicksBeforeUpdatingGraphs);
+      boolean isFastSimulateFromSCS3 = scs.isFastSimulateEnabled();
+      int numberOfTicksBeforeUpdatingGraphsFromSCS = scs.getNumberOfTicksBeforeUpdatingGraphs();
+      assertTrue(isFastSimulateFromSCS3);
+      assertEquals(numberOfTicksBeforeUpdatingGraphs, numberOfTicksBeforeUpdatingGraphsFromSCS);
+      
+      scs.setFastSimulate(false, numberOfTicksBeforeUpdatingGraphs2);
+      boolean isFastSimulateFromSCS4 = scs.isFastSimulateEnabled();
+      int numberOfTicksBeforeUpdatingGraphsFromSCS2 = scs.getNumberOfTicksBeforeUpdatingGraphs();
+      assertFalse(isFastSimulateFromSCS4);
+      assertEquals(numberOfTicksBeforeUpdatingGraphs2, numberOfTicksBeforeUpdatingGraphsFromSCS2);
+      
+      double initialTime = scs.getRobots()[0].getTime();
+      double DT = scs.getDT();
+      callSCSMethodSimulateOneTimeStep(scs);
+      double finalTime = scs.getRobots()[0].getTime();
+      assertEquals(initialTime+DT, finalTime, epsilon);
+      
+      double expectedFinalTime2 = getExpectedFinalTime(scs);
+      callSCSMethodSimulateOneRecordStep(scs);
+      double finalTime2 = scs.getRobots()[0].getTime();
+      assertEquals(expectedFinalTime2, finalTime2, epsilon);
+      
+      double expectedFinalTime3 = getExpectedFinalTime(scs);
+      callSCSMethodSimulateOneRecordStepNow(scs);
+      double finalTime3 = scs.getRobots()[0].getTime();
+      assertEquals(expectedFinalTime3, finalTime3, epsilon);
+      
    }
    
    @Test
@@ -358,6 +422,14 @@ public class SimulationConstructionSetUsingDirectCallsTest
       
       GraphicsDynamicGraphicsObject graphicsDynamicGraphicsObjectFromSCS3 = scs.addDynamicGraphicObject(dynamicGraphicObject, false);
       assertNotNull(graphicsDynamicGraphicsObjectFromSCS3);
+      
+      scs.setGroundVisible(false);
+      boolean isGroundVisibleFromSCS = stateIfTerrainIsVisible(scs);
+      assertTrue(isGroundVisibleFromSCS);
+      
+      scs.setGroundVisible(true);
+      boolean isGroundVisibleFromSCS2 = stateIfTerrainIsVisible(scs);
+      assertTrue(isGroundVisibleFromSCS2);
    }
    
    @Test
@@ -444,10 +516,14 @@ public class SimulationConstructionSetUsingDirectCallsTest
    @Test
    public void testSimulationTickControl()
    {
+      scs.setIndex(index);
+      int indexFromSCS = scs.getIndex();
+      assertEquals(index, indexFromSCS, epsilon);
+      
       createSimulationRewoundListenerAndAttachToSCS(scs);
       simulateForTime(scs, simulateTime);
       int ticksPerCycle = (int) scs.getTicksPerPlayCycle();
-      
+
       scs.setIndex(0);
       simulationRewoundListenerHasBeenNotified.set(false);
       scs.tickButDoNotNotifySimulationRewoundListeners(ticksIncrease);
@@ -502,7 +578,24 @@ public class SimulationConstructionSetUsingDirectCallsTest
       scs.tickAndUpdateLeisurely(ticksIncrease);
       double currentSCSIndex8 = scs.getIndex();
       assertFalse(simulationRewoundListenerHasBeenNotified.getBooleanValue());
-      assertEquals(1.0, currentSCSIndex8, epsilon);      
+      assertEquals(1.0, currentSCSIndex8, epsilon);  
+
+      scs.stopSimulationThread();
+      boolean isThreadRunningFromSCS = scs.isSimulationThreadUpAndRunning();
+      assertFalse(isThreadRunningFromSCS);
+      
+      setInputAndOutputPointsInSCS(scs, inputPoint, outputPoint);
+      boolean isMiddleIndexFromSCS = scs.isIndexBetweenInAndOutPoint(middleIndex);
+      assertEquals(true, isMiddleIndexFromSCS);
+      isMiddleIndexFromSCS = scs.isIndexBetweenInAndOutPoint(nonMiddleIndex);
+      assertEquals(false, isMiddleIndexFromSCS);
+
+      setInputPointInSCS(scs, inputPoint);
+      scs.setIndex(outputPoint);
+      StandardSimulationGUI GUIFromSCS = scs.getStandardSimulationGUI();
+      GUIFromSCS.gotoInPointNow();
+      int inputPointFromSCS = scs.getIndex();
+      assertEquals(inputPoint, inputPointFromSCS);
    }
    
    @Test
@@ -584,6 +677,62 @@ public class SimulationConstructionSetUsingDirectCallsTest
    
       
    // local methods
+   
+   private void callSCSMethodSimulateOneRecordStepNow(SimulationConstructionSet scs)
+   {
+      try
+      {
+         scs.simulateOneRecordStepNow();
+      }
+      catch (UnreasonableAccelerationException e)
+      {
+         e.printStackTrace();
+      }
+   }
+   
+   private double getExpectedFinalTime(SimulationConstructionSet scs)
+   {
+      double initialTime = scs.getRobots()[0].getTime();
+      double recordFreq = scs.getRecordFreq();
+      double DT = scs.getDT();
+      return initialTime + recordFreq * DT;
+   }
+   
+   
+   private void callSCSMethodSimulateOneRecordStep(SimulationConstructionSet scs)
+   {
+      try
+      {
+         scs.simulateOneRecordStep();
+      }
+      catch (UnreasonableAccelerationException e)
+      {
+         e.printStackTrace();
+      }
+   }
+   
+   private void callSCSMethodSimulateOneTimeStep(SimulationConstructionSet scs)
+   {
+      try
+      {
+         scs.simulateOneTimeStep();
+      }
+      catch (UnreasonableAccelerationException e)
+      {
+         e.printStackTrace();
+      }
+   }
+   
+   private boolean stateIfTerrainIsVisible(SimulationConstructionSet scs)
+   {
+      JMEGraphics3DAdapter graphics3DAdapter = getGraphics3DAdapter(scs);
+      return graphics3DAdapter.getRenderer().isGroundVisible();
+   }
+   
+   private JMEGraphics3DAdapter getGraphics3DAdapter(SimulationConstructionSet scs)
+   {
+      return (JMEGraphics3DAdapter) scs.getGUI().getGraphics3dAdapter();
+   }
    
    private void assertArrayOfStringsContainsTheStrings(String[] array, String[] strings)
    {
