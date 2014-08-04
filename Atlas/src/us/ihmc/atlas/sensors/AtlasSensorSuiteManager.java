@@ -110,7 +110,8 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
     
       if (DRCConfigParameters.SEND_ROBOT_DATA_TO_ROS)
       {
-         new RosRobotPosePublisher(objectCommunicator, rosMainNode, robotPoseBuffer, sensorInformation, "atlas");
+         RosRobotPosePublisher robotPosePublisher = new RosRobotPosePublisher(objectCommunicator, rosMainNode, robotPoseBuffer, sensorInformation, "atlas");
+         multiSenseSensorManager.setRobotPosePublisher(robotPosePublisher);
          new RosRobotJointStatePublisher(objectCommunicator, rosMainNode, jointMap.getOrderedJointNames(),"atlas");
       }
       
