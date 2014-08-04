@@ -5,6 +5,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.Random;
+
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -20,23 +22,33 @@ import com.yobotics.simulationconstructionset.util.math.functionGenerator.YoFunc
 public class AccelerationLimitedYoVariableTest
 {
    private static final boolean VISUALIZE = false;
-   private static final boolean KEEPWINDOWSOPEN = true;
-   private static final long SLEEPTIME = 5000;
+   private static final boolean KEEPWINDOWSOPEN = false;
+   private static final long SLEEPTIME = 10000;
 
    private static final double EPSILON = 1e-8;
+
+   private static double maxRate = 10.0;
    private static double maxAcceleration = 10.0;
-   private static double maxRate = 1.0;
    private static final double dt = 0.001;
    private static final double totalTime = 10.0;
+
+   DoubleYoVariable raw;
+   DoubleYoVariable alphaVariable;
+   FilteredVelocityYoVariable rawRate;
+   FilteredVelocityYoVariable rawAcceleration;
+
    private static double amplitude = 1.0;
    private static double frequency = 1.0;
+
    private static final double permissibleErrorRatio = 0.1;
+
    private static final boolean notifyListeners = true;
-   private static final int bufferSize = (int) (maxAcceleration / (dt * 0.5)) + 1;
+   private static final int bufferSize = (int) (totalTime / dt) + 5; //make sure it fits in the graph
    private final Robot robot = new Robot("generic_robot");
    private String nameYo = "processed";
    private SimulationConstructionSet scs;
    private YoVariableRegistry registry;
+   private Random random = new Random(4546556L);
 
    /*
     * Can't use @Before because not every test uses the GUI.
@@ -45,19 +57,25 @@ public class AccelerationLimitedYoVariableTest
    {
       registry = new YoVariableRegistry("generic_registry");
 
+      raw = new DoubleYoVariable("raw", registry);
+      alphaVariable = new DoubleYoVariable("alpha", registry);
+      alphaVariable.set(0.0); //set to zero to prevent smoothing of velocity
+      rawRate = new FilteredVelocityYoVariable("rawRate", "", alphaVariable, raw, dt, registry);
+      rawAcceleration = new FilteredVelocityYoVariable("rawAcceleration", "", alphaVariable, rawRate, dt, registry);
+
       if (VISUALIZE)
       {
          scs = new SimulationConstructionSet(robot);
          scs.changeBufferSize(bufferSize);
 
-         String[] vars = { "raw", nameYo, "max_Rate", "rawRate", "processedSmoothedRate", "max_Acceleration", "processedSmoothedAcceleration" };
+         String[] vars = { "raw", nameYo, "max_Rate", "rawRate", "processedSmoothedRate", "rawAcceleration", "max_Acceleration", "processedSmoothedAcceleration" };
          scs.setupVarGroup("Acceleration Var Group", vars);
 
          String[][] graphGroupVars = { { "raw", nameYo }, { "max_Rate", "rawRate", "processedSmoothedRate" },
-               { "max_Acceleration", "processedSmoothedAcceleration" } };
+               { "max_Acceleration", "rawAcceleration", "processedSmoothedAcceleration" } };
          scs.setupGraphGroup("GraphGroup for Acceleration", graphGroupVars);
 
-         String[] entryBoxGroupVars = { "raw", nameYo, "max_Rate", "rawRate", "processedSmoothedRate", "processedSmoothedAcceleration", "max_Acceleration" };
+         String[] entryBoxGroupVars = { "raw", nameYo, "max_Rate", "rawRate", "processedSmoothedRate", "rawAcceleration", "processedSmoothedAcceleration", "max_Acceleration" };
          scs.setupEntryBoxGroup("Acceleration Entry Box", entryBoxGroupVars);
 
          scs.setupConfiguration("Acceleration Config", "Acceleration Var Group", "GraphGroup for Acceleration", "Acceleration Entry Box");
@@ -67,12 +85,12 @@ public class AccelerationLimitedYoVariableTest
       }
    }
 
-//   @Before
-//   public void makeSureGUIIsNotUpWhenRunning()
-//   {
-//      if ( VISUALIZE) throw new RuntimeException(this.getClass() + "was checked in with the GUI enabled."); 
-//   }
-   
+   //   @Before
+   //   public void makeSureGUIIsNotUpWhenRunning()
+   //   {
+   //      if ( VISUALIZE) throw new RuntimeException(this.getClass() + "was checked in with the GUI enabled."); 
+   //   }
+
    /*
     * Can't use @After because not every test uses the GUI.
     */
@@ -95,17 +113,17 @@ public class AccelerationLimitedYoVariableTest
    }
 
    @Test
-   public void testSetMaximumRateAndAcceleration_ConstantVelocity()
+   public void test_ZeroVelocity()
    {
       setupSCSStuff();
 
+      maxRate = Double.POSITIVE_INFINITY;
+      maxAcceleration = Double.POSITIVE_INFINITY;
       DoubleYoVariable maxRateYo = new DoubleYoVariable("max_Rate", registry);
       maxRateYo.set(maxRate, notifyListeners);
       DoubleYoVariable maxAccelerationYo = new DoubleYoVariable("max_Acceleration", registry);
       maxAccelerationYo.set(maxAcceleration, notifyListeners);
       AccelerationLimitedYoVariable processed = new AccelerationLimitedYoVariable("processed", registry, maxRateYo, maxAccelerationYo, dt);
-      processed.setMaximumAcceleration(maxAcceleration);
-      processed.setMaximumRate(maxRate);
 
       try
       {
@@ -119,16 +137,51 @@ public class AccelerationLimitedYoVariableTest
       }
 
       assertEquals(nameYo, processed.getName());
-
-      DoubleYoVariable raw = new DoubleYoVariable("raw", registry);
-      DoubleYoVariable alphaVariable = new DoubleYoVariable("alpha", registry);
-      FilteredVelocityYoVariable rawRate = new FilteredVelocityYoVariable("rawRate", "", alphaVariable, raw, dt, registry);
-
-      for (double time = 0.0; time < totalTime; time += dt * 0.5)
+      
+      double constant = random.nextDouble(); //necessary variable so velocity remians 0
+      
+      for (double time = 0.0; time < totalTime; time += dt)
       {
-         raw.set(time);
-         rawRate.update();
-         processed.update(time);
+         raw.set(constant); //set to same constant value
+         rawRate.update(raw.getDoubleValue());
+         rawAcceleration.update(rawRate.getDoubleValue());
+         processed.update(raw.getDoubleValue());
+
+         if (VISUALIZE)
+            scs.tickAndUpdate();
+
+         assertTrue(maxRate >= processed.getSmoothedRate().getDoubleValue());
+         assertTrue(maxAcceleration >= processed.getSmoothedAcceleration().getDoubleValue());
+
+         assertEquals(0.0, processed.getSmoothedRate().getDoubleValue(), EPSILON);
+         assertEquals(0.0, processed.getSmoothedAcceleration().getDoubleValue(), EPSILON);
+
+      }
+      shutdownSCSStuff(scs);
+   }
+
+   @Test
+   public void test_ConstantVelocity()
+   {
+      setupSCSStuff();
+
+      maxRate = 5.0;
+      maxAcceleration = 5.0;
+      DoubleYoVariable maxRateYo = new DoubleYoVariable("max_Rate", registry);
+      maxRateYo.set(maxRate, notifyListeners);
+      DoubleYoVariable maxAccelerationYo = new DoubleYoVariable("max_Acceleration", registry);
+      maxAccelerationYo.set(maxAcceleration, notifyListeners);
+      AccelerationLimitedYoVariable processed = new AccelerationLimitedYoVariable("processed", registry, maxRateYo, maxAccelerationYo, dt);
+      
+      double value = random.nextDouble();
+      
+      for (double time = 0.0; time < totalTime; time += dt)
+      {
+         raw.set(value * time);
+         rawRate.update(raw.getDoubleValue());
+         rawAcceleration.update(rawRate.getDoubleValue());
+         processed.update(raw.getDoubleValue());
+
          if (VISUALIZE)
             scs.tickAndUpdate();
 
@@ -137,44 +190,93 @@ public class AccelerationLimitedYoVariableTest
 
          if (time > 0.3 * totalTime)
          {
-            //            assertTrue(isValueWithinMarginOfError(raw.getDoubleValue(), processed.getDoubleValue(), permissibleErrorRatio));
-            //            assertTrue(isValueWithinMarginOfError(rawRate.getDoubleValue(), processed.getSmoothedRate().getDoubleValue(), permissibleErrorRatio));
-            //            assertTrue(isValueWithinMarginOfError(0.0, processed.getSmoothedAcceleration().getDoubleValue(), permissibleErrorRatio));
+            assertEquals(value, processed.getSmoothedRate().getDoubleValue(), EPSILON);
+            assertEquals(0.0, processed.getSmoothedAcceleration().getDoubleValue(), EPSILON);
          }
+      }
+      shutdownSCSStuff(scs);
+   }
+   
+   @Test
+   public void test_ConstantAcceleration_PlusInitialize()
+   {
+      setupSCSStuff();
+      
+      double arbitraryMultiplier = 10.0;
+      double constant = arbitraryMultiplier * random.nextDouble();
+      
+      maxRate = 2 * constant * totalTime;
+      maxAcceleration = 2 * constant;
+      DoubleYoVariable maxRateYo = new DoubleYoVariable("max_Rate", registry);
+      maxRateYo.set(maxRate, notifyListeners);
+      DoubleYoVariable maxAccelerationYo = new DoubleYoVariable("max_Acceleration", registry);
+      maxAccelerationYo.set(maxAcceleration, notifyListeners);
+      AccelerationLimitedYoVariable processed = new AccelerationLimitedYoVariable("processed", registry, maxRateYo, maxAccelerationYo, dt);
+
+      assertEquals(nameYo, processed.getName());
+      
+      for (double time = 0.0; time < totalTime; time += dt)
+      {
+         raw.set(constant * time * time);
+         rawRate.update(raw.getDoubleValue());
+         rawAcceleration.update(rawRate.getDoubleValue());
+         processed.update(raw.getDoubleValue());
+
+         if (VISUALIZE)
+            scs.tickAndUpdate();
+
+         assertTrue(maxRate >= processed.getSmoothedRate().getDoubleValue());
+         assertTrue(maxAcceleration >= processed.getSmoothedAcceleration().getDoubleValue());
+
+         if (time > 1.0 * totalTime)
+         {
+            assertEquals(2 * constant * time, processed.getSmoothedRate().getDoubleValue(), EPSILON);
+            assertEquals(2 * constant, processed.getSmoothedAcceleration().getDoubleValue(), EPSILON);
+         }
+         
+         processed.initialize(3.0);
+
+         //After initialize
+         assertEquals(3.0, processed.getDoubleValue(), EPSILON);
+         assertTrue(processed.hasBeenInitialized());
+         assertEquals(0.0, processed.getSmoothedRate().getDoubleValue(), EPSILON);
+         assertEquals(0.0, processed.getSmoothedAcceleration().getDoubleValue(), EPSILON);
       }
       shutdownSCSStuff(scs);
    }
 
    @Test
-   public void testSetMaximumRateAndAcceleration_Sine() //tests update(double argument)
+   public void test_Sine_PlusReset() //tests update(double argument)
    {
       setupSCSStuff();
 
+      maxRate = 1.0;
+      maxAcceleration = 1.0;
       DoubleYoVariable maxRateYo = new DoubleYoVariable("max_Rate", registry);
       maxRateYo.set(maxRate, notifyListeners);
       DoubleYoVariable maxAccelerationYo = new DoubleYoVariable("max_Acceleration", registry);
       maxAccelerationYo.set(maxAcceleration, notifyListeners);
       AccelerationLimitedYoVariable processed = new AccelerationLimitedYoVariable(nameYo, registry, maxRateYo, maxAccelerationYo, dt);
-      DoubleYoVariable raw = new DoubleYoVariable("raw", registry);
-      DoubleYoVariable alphaVariable = new DoubleYoVariable("alpha", registry);
-      FilteredVelocityYoVariable rawRate = new FilteredVelocityYoVariable("rawRate", "", alphaVariable, raw, dt, registry);
 
       DoubleYoVariable timeYo = new DoubleYoVariable("time", registry);
       YoFunctionGenerator sineFunction = new YoFunctionGenerator("sineFunction", timeYo, registry);
       sineFunction.setMode(YoFunctionGeneratorMode.SINE);
+      frequency = 1.0;
+      amplitude = 1.0;
       sineFunction.setFrequency(frequency);
       sineFunction.setAmplitude(amplitude);
 
       double value = 0.0;
 
-      for (double time = 0.0; time < totalTime; time += dt * 0.5)
+      for (double time = 0.0; time < totalTime; time += dt)
       {
          timeYo.set(time);
          value = sineFunction.getValue();
 
          raw.set(value);
-         rawRate.update();
-         processed.update(value);
+         rawRate.update(raw.getDoubleValue());
+         rawAcceleration.update(rawRate.getDoubleValue());
+         processed.update(raw.getDoubleValue());
          if (VISUALIZE)
             scs.tickAndUpdate();
 
@@ -184,66 +286,82 @@ public class AccelerationLimitedYoVariableTest
          assertTrue(Math.abs(processed.getDoubleValue()) <= amplitude);
          assertTrue(Math.abs(processed.getSmoothedRate().getDoubleValue()) <= maxRate);
          assertTrue(Math.abs(processed.getSmoothedAcceleration().getDoubleValue()) <= maxAcceleration);
+         
+         processed.reset();
+
+         //After reset
+         assertFalse(processed.hasBeenInitialized());
+         assertEquals(0.0, processed.getSmoothedRate().getDoubleValue(), EPSILON);
+         assertEquals(0.0, processed.getSmoothedAcceleration().getDoubleValue(), EPSILON);
       }
       shutdownSCSStuff(scs);
    }
 
    @Test
-   public void testSetMaximumRateAndAcceleration_RiseTimeSquareWave()
+   public void test_RiseTimeSquareWave()
    {
       setupSCSStuff();
 
+      maxRate = 10000.0;
+      maxAcceleration = 1000.0;
       DoubleYoVariable maxRateYo = new DoubleYoVariable("max_Rate", registry);
-      maxRate = 10.0; 
       maxRateYo.set(maxRate, notifyListeners);
       DoubleYoVariable maxAccelerationYo = new DoubleYoVariable("max_Acceleration", registry);
-      maxAcceleration = 1.0;
       maxAccelerationYo.set(maxAcceleration, notifyListeners);
       AccelerationLimitedYoVariable processed = new AccelerationLimitedYoVariable(nameYo, registry, maxRateYo, maxAccelerationYo, dt);
-      DoubleYoVariable raw = new DoubleYoVariable("raw", registry);
-      DoubleYoVariable alphaVariable = new DoubleYoVariable("alpha", registry);
-      FilteredVelocityYoVariable rawRate = new FilteredVelocityYoVariable("rawRate", "", alphaVariable, raw, dt, registry);
 
       DoubleYoVariable timeYo = new DoubleYoVariable("time", registry);
       amplitude = 1.0;
 
       double value = 0.0;
 
-      for (double time = 0.0; time < totalTime; time += dt * 0.5)
+      for (double time = 0.0; time < totalTime; time += dt)
       {
          timeYo.set(time);
-         value = (time < 0.5 * totalTime) ? 0.0 : amplitude;
 
-         raw.set(value);
-         rawRate.update();
-         processed.update(value);
+         if(time < 0.25 * totalTime)
+         {
+            value = 0.0;
+         }
+         else if(time < 0.5 * totalTime)
+         {
+            value = 1.0;
+         }
+         else
+         {
+            value = 0.0;
+         }
          
+         raw.set(value);
+         rawRate.update(raw.getDoubleValue());
+         rawAcceleration.update(rawRate.getDoubleValue());
+         processed.update(raw.getDoubleValue());
+
          if (VISUALIZE)
             scs.tickAndUpdate();
 
          assertTrue(maxRate >= processed.getSmoothedRate().getDoubleValue());
          assertTrue(maxAcceleration >= processed.getSmoothedAcceleration().getDoubleValue());
 
-//         assertTrue(Math.abs(processed.getDoubleValue()) <= amplitude);
-//         assertTrue(Math.abs(processed.getSmoothedRate().getDoubleValue()) <= maxRate);
-//         assertTrue(Math.abs(processed.getSmoothedAcceleration().getDoubleValue()) <= maxAcceleration);
+                  assertTrue(Math.abs(processed.getDoubleValue()) <= amplitude);
+                  assertTrue(Math.abs(processed.getSmoothedRate().getDoubleValue()) <= maxRate);
+                  assertTrue(Math.abs(processed.getSmoothedAcceleration().getDoubleValue()) <= maxAcceleration);
       }
       shutdownSCSStuff(scs);
    }
 
    @Test
-   public void testSetMaximumRateAndAcceleration_SquareWaves() //tests update(double argument)
+   public void test_SquareWaves() //tests update(double argument)
    {
       setupSCSStuff();
 
+      maxRate = 10000.0;
+      maxAcceleration = 1000.0;
       DoubleYoVariable maxRateYo = new DoubleYoVariable("max_Rate", registry);
       maxRateYo.set(maxRate, notifyListeners);
       DoubleYoVariable maxAccelerationYo = new DoubleYoVariable("max_Acceleration", registry);
       maxAccelerationYo.set(maxAcceleration, notifyListeners);
       AccelerationLimitedYoVariable processed = new AccelerationLimitedYoVariable(nameYo, registry, maxRateYo, maxAccelerationYo, dt);
-      DoubleYoVariable raw = new DoubleYoVariable("raw", registry);
-      DoubleYoVariable alphaVariable = new DoubleYoVariable("alpha", registry);
-      FilteredVelocityYoVariable rawRate = new FilteredVelocityYoVariable("rawRate", "", alphaVariable, raw, dt, registry);
 
       DoubleYoVariable timeYo = new DoubleYoVariable("time", registry);
       YoFunctionGenerator squareFunction = new YoFunctionGenerator("sineFunction", timeYo, registry);
@@ -253,41 +371,41 @@ public class AccelerationLimitedYoVariableTest
 
       double value = 0.0;
 
-      for (double time = 0.0; time < totalTime; time += dt * 0.5)
+      for (double time = 0.0; time < totalTime; time += dt)
       {
          timeYo.set(time);
          value = squareFunction.getValue();
 
          raw.set(value);
-         rawRate.update();
-         processed.update(value);
+         rawRate.update(raw.getDoubleValue());
+         rawAcceleration.update(rawRate.getDoubleValue());
+         processed.update(raw.getDoubleValue());
          if (VISUALIZE)
             scs.tickAndUpdate();
 
-//         assertTrue(maxRate >= processed.getSmoothedRate().getDoubleValue());
-//         assertTrue(maxAcceleration >= processed.getSmoothedAcceleration().getDoubleValue());
-//
-//         assertTrue(Math.abs(processed.getDoubleValue()) <= amplitude);
-//         assertTrue(Math.abs(processed.getSmoothedRate().getDoubleValue()) <= maxRate);
-//         assertTrue(Math.abs(processed.getSmoothedAcceleration().getDoubleValue()) <= maxAcceleration);
+                  assertTrue(maxRate >= processed.getSmoothedRate().getDoubleValue());
+                  assertTrue(maxAcceleration >= processed.getSmoothedAcceleration().getDoubleValue());
+         
+//                  assertTrue(Math.abs(processed.getDoubleValue()) <= amplitude); //don't know how or if to incorporate this
+                  assertTrue(Math.abs(processed.getSmoothedRate().getDoubleValue()) <= maxRate);
+                  assertTrue(Math.abs(processed.getSmoothedAcceleration().getDoubleValue()) <= maxAcceleration);
       }
       shutdownSCSStuff(scs);
    }
 
    @Test
-   public void testSetMaximumRateAndAcceleration_Chirp() //tests update() with no arguments
+   public void test_Chirp() //tests update() with no arguments
    {
       setupSCSStuff();
 
+      maxRate = 10000.0;
+      maxAcceleration = 1000.0;
       DoubleYoVariable maxRateYo = new DoubleYoVariable("max_Rate", registry);
       maxRateYo.set(maxRate, notifyListeners);
       DoubleYoVariable maxAccelerationYo = new DoubleYoVariable("max_Acceleration", registry);
       maxAccelerationYo.set(maxAcceleration, notifyListeners);
       DoubleYoVariable inputVariable = new DoubleYoVariable("inputVariable", registry);
       AccelerationLimitedYoVariable processed = new AccelerationLimitedYoVariable(nameYo, registry, maxRateYo, maxAccelerationYo, inputVariable, dt);
-      DoubleYoVariable raw = new DoubleYoVariable("raw", registry);
-      DoubleYoVariable alphaVariable = new DoubleYoVariable("alpha", registry);
-      FilteredVelocityYoVariable rawRate = new FilteredVelocityYoVariable("rawRate", "", alphaVariable, raw, dt, registry);
 
       DoubleYoVariable timeYo = new DoubleYoVariable("time", registry);
       YoFunctionGenerator chirpFunction = new YoFunctionGenerator("sineFunction", timeYo, registry);
@@ -296,14 +414,15 @@ public class AccelerationLimitedYoVariableTest
 
       double value = 0.0;
 
-      for (double time = 0.0; time < totalTime; time += dt * 0.5)
+      for (double time = 0.0; time < totalTime; time += dt)
       {
          timeYo.set(time);
          value = chirpFunction.getValue();
 
          raw.set(value);
-         rawRate.update();
-         inputVariable.set(value);
+         rawRate.update(raw.getDoubleValue());
+         rawAcceleration.update(rawRate.getDoubleValue());
+         inputVariable.set(raw.getDoubleValue());
          processed.update();
          if (VISUALIZE)
             scs.tickAndUpdate();
@@ -323,101 +442,6 @@ public class AccelerationLimitedYoVariableTest
    @Test
    public void testSetGainsByPolePlacement()
    {
-   }
-
-   @Test
-   public void testInitialize()
-   {
-      YoVariableRegistry registry = new YoVariableRegistry("generic_registry");
-
-      DoubleYoVariable maxRateYo = new DoubleYoVariable("max_Rate", registry);
-      maxRateYo.set(maxRate, notifyListeners);
-      DoubleYoVariable maxAccelerationYo = new DoubleYoVariable("max_Acceleration", registry);
-      maxAccelerationYo.set(maxAcceleration, notifyListeners);
-      AccelerationLimitedYoVariable processed = new AccelerationLimitedYoVariable(nameYo, registry, maxRateYo, maxAccelerationYo, dt);
-      DoubleYoVariable raw = new DoubleYoVariable("raw", registry);
-      DoubleYoVariable alphaVariable = new DoubleYoVariable("alpha", registry);
-      FilteredVelocityYoVariable rawRate = new FilteredVelocityYoVariable("rawRate", "", alphaVariable, raw, dt, registry);
-
-      DoubleYoVariable timeYo = new DoubleYoVariable("time", registry);
-      YoFunctionGenerator squareFunction = new YoFunctionGenerator("sineFunction", timeYo, registry);
-      squareFunction.setMode(YoFunctionGeneratorMode.SQUARE);
-      squareFunction.setFrequency(frequency);
-      squareFunction.setAmplitude(amplitude);
-
-      double value = 0.0;
-
-      for (double time = 0.0; time < totalTime; time += dt * 0.5)
-      {
-         timeYo.set(time);
-         value = squareFunction.getValue();
-
-         raw.set(value);
-         rawRate.update();
-         processed.update(value);
-
-         assertTrue(maxRate >= processed.getSmoothedRate().getDoubleValue());
-         assertTrue(maxAcceleration >= processed.getSmoothedAcceleration().getDoubleValue());
-
-         assertTrue(Math.abs(processed.getDoubleValue()) <= amplitude);
-         assertTrue(Math.abs(processed.getSmoothedRate().getDoubleValue()) <= maxRate);
-         assertTrue(Math.abs(processed.getSmoothedAcceleration().getDoubleValue()) <= maxAcceleration);
-      }
-
-      processed.initialize(3.0);
-
-      //After initialize
-      assertEquals(3.0, processed.getDoubleValue(), EPSILON);
-      assertTrue(processed.hasBeenInitialized());
-      assertEquals(0.0, processed.getSmoothedRate().getDoubleValue(), EPSILON);
-      assertEquals(0.0, processed.getSmoothedAcceleration().getDoubleValue(), EPSILON);
-   }
-
-   @Test
-   public void testReset()
-   {
-      YoVariableRegistry registry = new YoVariableRegistry("generic_registry");
-
-      DoubleYoVariable maxRateYo = new DoubleYoVariable("max_Rate", registry);
-      maxRateYo.set(maxRate, notifyListeners);
-      DoubleYoVariable maxAccelerationYo = new DoubleYoVariable("max_Acceleration", registry);
-      maxAccelerationYo.set(maxAcceleration, notifyListeners);
-      AccelerationLimitedYoVariable processed = new AccelerationLimitedYoVariable(nameYo, registry, maxRateYo, maxAccelerationYo, dt);
-      DoubleYoVariable raw = new DoubleYoVariable("raw", registry);
-      DoubleYoVariable alphaVariable = new DoubleYoVariable("alpha", registry);
-      FilteredVelocityYoVariable rawRate = new FilteredVelocityYoVariable("rawRate", "", alphaVariable, raw, dt, registry);
-
-      DoubleYoVariable timeYo = new DoubleYoVariable("time", registry);
-      YoFunctionGenerator squareFunction = new YoFunctionGenerator("sineFunction", timeYo, registry);
-      squareFunction.setMode(YoFunctionGeneratorMode.SQUARE);
-      squareFunction.setFrequency(frequency);
-      squareFunction.setAmplitude(amplitude);
-
-      double value = 0.0;
-
-      for (double time = 0.0; time < totalTime; time += dt * 0.5)
-      {
-         timeYo.set(time);
-         value = squareFunction.getValue();
-
-         raw.set(value);
-         rawRate.update();
-         processed.update(value);
-
-         assertTrue(maxRate >= processed.getSmoothedRate().getDoubleValue());
-         assertTrue(maxAcceleration >= processed.getSmoothedAcceleration().getDoubleValue());
-
-         assertTrue(Math.abs(processed.getDoubleValue()) <= amplitude);
-         assertTrue(Math.abs(processed.getSmoothedRate().getDoubleValue()) <= maxRate);
-         assertTrue(Math.abs(processed.getSmoothedAcceleration().getDoubleValue()) <= maxAcceleration);
-      }
-
-      processed.reset();
-
-      //After reset
-      assertFalse(processed.hasBeenInitialized());
-      assertEquals(0.0, processed.getSmoothedRate().getDoubleValue(), EPSILON);
-      assertEquals(0.0, processed.getSmoothedAcceleration().getDoubleValue(), EPSILON);
    }
 
    @Ignore
@@ -491,6 +515,9 @@ public class AccelerationLimitedYoVariableTest
       assertTrue(isValueWithinMarginOfError(1.0, 0.9, 0.11));
    }
 
+// assertTrue(isValueWithinMarginOfError(raw.getDoubleValue(), processed.getDoubleValue(), permissibleErrorRatio));
+// assertTrue(isValueWithinMarginOfError(rawRate.getDoubleValue(), processed.getSmoothedRate().getDoubleValue(), permissibleErrorRatio));
+// assertTrue(isValueWithinMarginOfError(0.0, processed.getSmoothedAcceleration().getDoubleValue(), permissibleErrorRatio));
    private boolean isValueWithinMarginOfError(double correctValue, double valueInQuestion, double permissibleErrorRatio)
    {
       double denominator = (correctValue == 0.0) ? EPSILON : correctValue;
