@@ -69,7 +69,7 @@ public class FindAllPlanesInViewApp {
    }
 
    public static void main(String[] args) {
-      List<List<Point3D_F64>> scans0 = loadScanLines("../SensorProcessing/data/testbed/2014-07-10/cloud01_scans.txt");
+      List<List<Point3D_F64>> scans0 = loadScanLines("../SensorProcessing/data/testbed/2014-08-01/cloud01_scans.txt");
       List<Point3D_F64> cloud0 = filter(scans0,3);
 
       ConfigMultiShapeRansac configRansac = ConfigMultiShapeRansac.createDefault(500,1.2,0.025, CloudShapeTypes.PLANE);
