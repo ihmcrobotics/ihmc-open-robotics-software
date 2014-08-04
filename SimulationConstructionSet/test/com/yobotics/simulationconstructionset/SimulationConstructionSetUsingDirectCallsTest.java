@@ -318,11 +318,11 @@ public class SimulationConstructionSetUsingDirectCallsTest
       
       scs.setupCamera(cameraConfiguration);
       String[] cameraConfigurationNamesFromSCS = getCameraConfigurationNames(scs);
-      assertArrayOsStringsContainsTheString(cameraConfigurationNamesFromSCS, cameraConfigurationName);
+      assertArrayOfStringsContainsTheString(cameraConfigurationNamesFromSCS, cameraConfigurationName);
       
       scs.setupViewport(viewportConfiguration);
       String[] viewportConfigurationNamesFromSCS = getViewportConfigurationNames(scs);
-      assertArrayOsStringsContainsTheString(viewportConfigurationNamesFromSCS, viewportConfigurationName);  
+      assertArrayOfStringsContainsTheString(viewportConfigurationNamesFromSCS, viewportConfigurationName);  
       
       scs.selectViewport(viewportConfigurationName);
       boolean isCurrentView = isCurrentView(scs, viewportConfigurationName);
@@ -330,7 +330,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       
       scs.setupGraphConfigurations(graphConfigurations);
       String[] graphConfigurationNamesFromSCS = getGraphConfigurationListNames(scs);
-      assertArrayOsStringsContainsTheStrings(graphConfigurationNamesFromSCS, graphConfigurationNames);  
+      assertArrayOfStringsContainsTheStrings(graphConfigurationNamesFromSCS, graphConfigurationNames);  
       
       scs.setClipDistances(cameraClipDistancesNearFarValues[0], cameraClipDistancesNearFarValues[1]);
       double[] cameraClipDistancesNearFarValuesFromSCS = getCameraNearFarValues(scs);
@@ -543,39 +543,39 @@ public class SimulationConstructionSetUsingDirectCallsTest
       
       scs.setupVarGroup(varGroupName, cameraDollyXYZVarNames);
       String[] varGroupNamesFromSCS = getVarGroupNames(scs);
-      assertArrayOsStringsContainsTheString(varGroupNamesFromSCS, varGroupName);
+      assertArrayOfStringsContainsTheString(varGroupNamesFromSCS, varGroupName);
       
       scs.setupVarGroup(varGroupName2, cameraDollyXYZVarNames, regularExpressions);
       String[] varGroupNamesFromSCS2 = getVarGroupNames(scs);
-      assertArrayOsStringsContainsTheString(varGroupNamesFromSCS2, varGroupName2);
+      assertArrayOfStringsContainsTheString(varGroupNamesFromSCS2, varGroupName2);
       
       scs.setupGraphGroup(graphGroupName, graphGroupVars);
       String[] graphGroupNamesFromSCS = getGraphGroupNames(scs);
-      assertArrayOsStringsContainsTheString(graphGroupNamesFromSCS, graphGroupName);
+      assertArrayOfStringsContainsTheString(graphGroupNamesFromSCS, graphGroupName);
       
       scs.setupGraphGroup(graphGroupName2, graphGroupVarsWithConfig);
       String[] graphGroupNamesFromSCS2 = getGraphGroupNames(scs);
-      assertArrayOsStringsContainsTheString(graphGroupNamesFromSCS2, graphGroupName2);
+      assertArrayOfStringsContainsTheString(graphGroupNamesFromSCS2, graphGroupName2);
       
       scs.setupGraphGroup(graphGroupName3, graphGroupVars, graphGroupNumberOfColumns);
       String[] graphGroupNamesFromSCS3 = getGraphGroupNames(scs);
-      assertArrayOsStringsContainsTheString(graphGroupNamesFromSCS3, graphGroupName3);
+      assertArrayOfStringsContainsTheString(graphGroupNamesFromSCS3, graphGroupName3);
       
       scs.setupGraphGroup(graphGroupName4, graphGroupVarsWithConfig);
       String[] graphGroupNamesFromSCS4 = getGraphGroupNames(scs);
-      assertArrayOsStringsContainsTheString(graphGroupNamesFromSCS4, graphGroupName4);
+      assertArrayOfStringsContainsTheString(graphGroupNamesFromSCS4, graphGroupName4);
 
       scs.setupEntryBoxGroup(entryBoxGroupName, cameraDollyXYZVarNames);
       String[] entryBoxGroupFromSCS = getEntryBoxGroupListNames(scs);
-      assertArrayOsStringsContainsTheString(entryBoxGroupFromSCS, entryBoxGroupName);
+      assertArrayOfStringsContainsTheString(entryBoxGroupFromSCS, entryBoxGroupName);
  
       scs.setupEntryBoxGroup(entryBoxGroupName2, cameraDollyXYZVarNames, regularExpressions);
       String[] entryBoxGroupFromSCS2 = getEntryBoxGroupListNames(scs);
-      assertArrayOsStringsContainsTheString(entryBoxGroupFromSCS2, entryBoxGroupName2);
+      assertArrayOfStringsContainsTheString(entryBoxGroupFromSCS2, entryBoxGroupName2);
       
       scs.setupConfiguration(configurationName, varGroupName3, graphGroupName5, entryBoxGroupName3);
       String[] configurationNameFromSCS = getConfigurationListNames(scs);
-      assertArrayOsStringsContainsTheString(configurationNameFromSCS, configurationName);
+      assertArrayOfStringsContainsTheString(configurationNameFromSCS, configurationName);
         
       scs.setupExtraPanel(extraPanelConfiguration);
       Component extraPanelConfigurationPanelFromSCS = getExtraPanelConfigurationPanel(scs, extraPanelConfigurationName);
@@ -585,11 +585,11 @@ public class SimulationConstructionSetUsingDirectCallsTest
       
    // local methods
    
-   private void assertArrayOsStringsContainsTheStrings(String[] array, String[] strings)
+   private void assertArrayOfStringsContainsTheStrings(String[] array, String[] strings)
    {
       for(int i = 0; i<strings.length; i++)
       {
-         assertArrayOsStringsContainsTheString(array, strings[i]);
+         assertArrayOfStringsContainsTheString(array, strings[i]);
       }
    }
    
@@ -663,7 +663,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       return scs.getGUI().getEntryBoxGroupList().getEntryBoxGroupNames();
    }
    
-   private void assertArrayOsStringsContainsTheString(String[] array, String string)
+   private void assertArrayOfStringsContainsTheString(String[] array, String string)
    {
       boolean ret = false;
       
