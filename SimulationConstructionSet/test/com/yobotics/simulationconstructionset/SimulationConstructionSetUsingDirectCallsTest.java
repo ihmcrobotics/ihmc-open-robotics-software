@@ -7,6 +7,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.awt.AWTException;
+import java.awt.Button;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Point;
@@ -18,6 +20,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.graphics3DAdapter.camera.ClassicCameraController;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
@@ -28,6 +31,8 @@ import com.yobotics.simulationconstructionset.examples.FallingBrickRobot;
 import com.yobotics.simulationconstructionset.graphics.GraphicsDynamicGraphicsObject;
 import com.yobotics.simulationconstructionset.gui.StandardSimulationGUI;
 import com.yobotics.simulationconstructionset.gui.camera.CameraTrackAndDollyYoVariablesHolder;
+import com.yobotics.simulationconstructionset.gui.config.GraphGroupList;
+import com.yobotics.simulationconstructionset.gui.config.ViewportConfigurationList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
 
@@ -48,6 +53,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private int middleIndex = 22;
    private int nonMiddleIndex = 35;
    private int ticksIncrease = 11;
+   private int graphGroupNumberOfColumns = 2;
    private double simulateDT = 0.001; 
    private double simulateTime = 1.0;
    private double recordDT = 0.05;
@@ -62,18 +68,36 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private double[] cameraFixXYZValues = {1.8, 2.8, 3.8};
    private double[] cameraPositionXYZValues = {1.3, 2.3, 3.3};
    
-   private Dimension dimension = new Dimension(250, 350);
-   private FallingBrickRobot simpleRobot = new FallingBrickRobot();
    private Point location = new Point(25, 50);
+   private FallingBrickRobot simpleRobot = new FallingBrickRobot();
    private String rootRegistryName = "root";
    private String simpleRegistryName = "simpleRegistry";
    private String searchString = "d";
    private String searchStringStart = "q";
-   private String[] regularExpressions = new String[] {"gc.*.fs"};
-   private String simpleRobotFirstVariableName = getFirstVariableNameFromRobotRegistry(simpleRobot);
-   private String simpleRobotRegistryNameSpace = getRegistryNameSpaceFromRobot(simpleRobot);
    private String[] cameraTrackingXYZVarNames = new String[] {"simpleCameraTrackingVarNameX", "simpleCameraTrackingVarNameY", "simpleCameraTrackingVarNameZ"};
    private String[] cameraDollyXYZVarNames = new String[] {"simpleCameraDollyVarNameX", "simpleCameraDollyVarNameY", "simpleCameraDollyVarNameZ"};
+   private String configurationName = "simpleCOnfigurationName";
+   private String cameraConfigurationName  = "simpleCameraConfigurationName";
+   private String viewportConfigurationName = "simpleViewportConfiguration";
+   private String varGroupName = "simpleVarGroup";
+   private String varGroupName2 = "simpleVarGroup2";
+   private String varGroupName3 = "simpleVarGroup3";
+   private String graphGroupName = "simpleGraphGroup";
+   private String graphGroupName2 = "simpleGraphGroup2";
+   private String graphGroupName3 = "simpleGraphGroup3";
+   private String graphGroupName4 = "simpleGraphGroup4";
+   private String graphGroupName5 = "simpleGraphGroup5";
+   private String entryBoxGroupName = "simpleEntryBoxGroup";
+   private String entryBoxGroupName2 = "simpleEntryBoxGroup2";
+   private String entryBoxGroupName3 = "simpleEntryBoxGroup3";
+   private String extraPanelConfigurationName = "simpleExtraPanelConfigurationName";
+   private String[][] graphGroupVars = {cameraTrackingXYZVarNames, cameraDollyXYZVarNames};
+   private String[][][] graphGroupVarsWithConfig = {{cameraTrackingXYZVarNames, {"config_1"}}, {cameraDollyXYZVarNames, {"config_2"}}};
+   private String simpleRobotFirstVariableName = getFirstVariableNameFromRobotRegistry(simpleRobot);
+   private String simpleRobotLastVariableName = getLastVariableNameFromRobotRegistry(simpleRobot);
+   private String simpleRobotRegistryNameSpace = getRegistryNameSpaceFromRobot(simpleRobot);
+   private String[] regularExpressions = new String[] {"gc.*.fs"};
+   private Dimension dimension = new Dimension(250, 350);
    private NameSpace simpleRegistryNameSpace = new NameSpace(rootRegistryName + "." + simpleRegistryName);
    private YoVariableRegistry simpleRegistry = new YoVariableRegistry(simpleRegistryName);
    private YoVariableRegistry dummyRegistry = new YoVariableRegistry("dummyRegistry");
@@ -84,7 +108,10 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private DynamicGraphicObject dynamicGraphicObject = new DynamicGraphicVector("simpleDynamicGraphicObject", simpleExternalForcePoint);
    private BooleanYoVariable exitActionListenerHasBeenNotified = new BooleanYoVariable("exitActionListenerHasBeenNotified", dummyRegistry); 
    private BooleanYoVariable simulationRewoundListenerHasBeenNotified = new BooleanYoVariable("simulationRewoundListenerHasBeenNotified", dummyRegistry);
-   SimulationConstructionSet scs;
+   private ExtraPanelConfiguration extraPanelConfiguration = createExtraPanelConfigurationWithPanel(extraPanelConfigurationName);
+   private CameraConfiguration cameraConfiguration = createCameraConfiguration(cameraConfigurationName);
+   private ViewportConfiguration viewportConfiguration = createViewportConfiguration(viewportConfigurationName);
+   private SimulationConstructionSet scs;
    
    @BeforeClass 
    public static void setUpOnce() 
@@ -109,7 +136,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    }
 
    @Test
-   public void testSimulationConstructionSetUsingDirectCalls() throws AWTException
+   public void testSimulationConstructionSetMiscellaneous() throws AWTException
    {
       double startTime = scs.getTime();
       simulateForTime(scs, simulateTime);
@@ -149,6 +176,8 @@ public class SimulationConstructionSetUsingDirectCallsTest
       exitActionListenerHasBeenNotified.set(false);
       scs.notifyExitActionListeners();
       assertTrue(exitActionListenerHasBeenNotified.getBooleanValue());
+      
+      
       
 //    
 //    SimulationConstructionSet scs2 = new SimulationConstructionSet(robots);
@@ -290,6 +319,14 @@ public class SimulationConstructionSetUsingDirectCallsTest
       scs.setCameraPosition(cameraPositionXYZValues[0], cameraPositionXYZValues[1], cameraPositionXYZValues[2]);
       double[] cameraPositionXYZValuesFromSCS = getCameraPositionXYZValues(scs);
       assertArrayEquals(cameraPositionXYZValues, cameraPositionXYZValuesFromSCS, epsilon);
+      
+      scs.setupCamera(cameraConfiguration);
+      String[] cameraConfigurationNamesFromSCS = getCameraConfigurationNames(scs);
+      assertArrayOsStringsContainsTheString(cameraConfigurationNamesFromSCS, cameraConfigurationName);
+      
+      scs.setupViewport(viewportConfiguration);
+      String[] viewportConfigurationNamesFromSCS = getViewportConfigurationNames(scs);
+      assertArrayOsStringsContainsTheString(viewportConfigurationNamesFromSCS, viewportConfigurationName);    
    }
    
    @Test
@@ -456,23 +493,196 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertEquals(1.0, currentSCSIndex8, epsilon);      
    }
    
-   // local methods
+   @Test
+   public void testVariablesMethods()
+   {
+      addDoubleYoVariablesInSCSRegistry(cameraDollyXYZVarNames, cameraDollyXYZVarValues, scs);
+      
+      scs.setupEntryBox(simpleRobotFirstVariableName);
+      boolean entryBoxIsInSCS = scsContainsTheEntryBox(scs, simpleRobotFirstVariableName);
+      assertTrue(entryBoxIsInSCS);
+      
+      scs.setupEntryBox(simpleRobotLastVariableName);
+      boolean entryBoxIsInSCS2 = scsContainsTheEntryBox(scs, simpleRobotLastVariableName);
+      assertTrue(entryBoxIsInSCS2);
+      
+      scs.setupEntryBox(cameraDollyXYZVarNames);
+      boolean entryBoxesAreInSCS = scsContainsTheEntryBoxes(scs, cameraDollyXYZVarNames);
+      assertTrue(entryBoxesAreInSCS);
+      
+      scs.setupGraph(simpleRobotFirstVariableName);
+      boolean graphIsInSCS = scsContainsTheGraph(scs, simpleRobotFirstVariableName);
+      assertTrue(graphIsInSCS);
+      
+      scs.setupGraph(simpleRobotLastVariableName);
+      boolean graphIsInSCS2 = scsContainsTheGraph(scs, simpleRobotLastVariableName);
+      assertTrue(graphIsInSCS2);
 
+      scs.setupGraph(cameraDollyXYZVarNames);
+      boolean graphsAreInSCS = scsContainsTheGraphs(scs, cameraDollyXYZVarNames);
+      assertTrue(graphsAreInSCS); 
+   }
+   
+   @Test
+   public void testGroupMethods()
+   {
+      addDoubleYoVariablesInSCSRegistry(cameraDollyXYZVarNames, cameraDollyXYZVarValues, scs);
+      addDoubleYoVariablesInSCSRegistry(cameraTrackingXYZVarNames, cameraTrackingXYZVarValues, scs); 
+      
+      scs.setupVarGroup(varGroupName, cameraDollyXYZVarNames);
+      String[] varGroupNamesFromSCS = getVarGroupNames(scs);
+      assertArrayOsStringsContainsTheString(varGroupNamesFromSCS, varGroupName);
+      
+      scs.setupVarGroup(varGroupName2, cameraDollyXYZVarNames, regularExpressions);
+      String[] varGroupNamesFromSCS2 = getVarGroupNames(scs);
+      assertArrayOsStringsContainsTheString(varGroupNamesFromSCS2, varGroupName2);
+      
+      scs.setupGraphGroup(graphGroupName, graphGroupVars);
+      String[] graphGroupNamesFromSCS = getGraphGroupNames(scs);
+      assertArrayOsStringsContainsTheString(graphGroupNamesFromSCS, graphGroupName);
+      
+      scs.setupGraphGroup(graphGroupName2, graphGroupVarsWithConfig);
+      String[] graphGroupNamesFromSCS2 = getGraphGroupNames(scs);
+      assertArrayOsStringsContainsTheString(graphGroupNamesFromSCS2, graphGroupName2);
+      
+      scs.setupGraphGroup(graphGroupName3, graphGroupVars, graphGroupNumberOfColumns);
+      String[] graphGroupNamesFromSCS3 = getGraphGroupNames(scs);
+      assertArrayOsStringsContainsTheString(graphGroupNamesFromSCS3, graphGroupName3);
+      
+      scs.setupGraphGroup(graphGroupName4, graphGroupVarsWithConfig);
+      String[] graphGroupNamesFromSCS4 = getGraphGroupNames(scs);
+      assertArrayOsStringsContainsTheString(graphGroupNamesFromSCS4, graphGroupName4);
+
+      scs.setupEntryBoxGroup(entryBoxGroupName, cameraDollyXYZVarNames);
+      String[] entryBoxGroupFromSCS = getEntryBoxGroupListNames(scs);
+      assertArrayOsStringsContainsTheString(entryBoxGroupFromSCS, entryBoxGroupName);
+ 
+      scs.setupEntryBoxGroup(entryBoxGroupName2, cameraDollyXYZVarNames, regularExpressions);
+      String[] entryBoxGroupFromSCS2 = getEntryBoxGroupListNames(scs);
+      assertArrayOsStringsContainsTheString(entryBoxGroupFromSCS2, entryBoxGroupName2);
+      
+      scs.setupConfiguration(configurationName, varGroupName3, graphGroupName5, entryBoxGroupName3);
+      String[] configurationNameFromSCS = getConfigurationListNames(scs);
+      assertArrayOsStringsContainsTheString(configurationNameFromSCS, configurationName);
+        
+      scs.setupExtraPanel(extraPanelConfiguration);
+      Component extraPanelConfigurationPanelFromSCS = getExtraPanelConfigurationPanel(scs, extraPanelConfigurationName);
+      assertNotNull(extraPanelConfigurationPanelFromSCS);
+   }
+   
+      
+   // local methods
+   
+   private String[] getViewportConfigurationNames(SimulationConstructionSet scs)
+   {
+      return scs.getGUI().getViewportConfigurationList().getViewportConfigurationNames();
+   }
+   
+   private ViewportConfiguration createViewportConfiguration(String name)
+   {
+      return new ViewportConfiguration(name);
+   }
+   
+   private Component getExtraPanelConfigurationPanel(SimulationConstructionSet scs, String panelName)
+   {
+      return scs.getGUI().getExtraPanel(panelName);
+   }
+   
+   private ExtraPanelConfiguration createExtraPanelConfigurationWithPanel(String name)
+   {
+      ExtraPanelConfiguration extraPanelConfiguration = new ExtraPanelConfiguration(name);
+      Button panel = new Button();
+      extraPanelConfiguration.setupPanel(panel);
+      
+      return extraPanelConfiguration;
+   }
+   
+   private CameraConfiguration createCameraConfiguration(String name)
+   {
+      return new CameraConfiguration(name);
+   }
+   
+   private String[] getCameraConfigurationNames(SimulationConstructionSet scs)
+   {
+      return scs.getGUI().getCameraConfigurationList().getCameraConfigurationNames();
+   }
+   
+   private String[] getConfigurationListNames(SimulationConstructionSet scs)
+   {
+      return scs.getGUI().getConfigurationList().getConfigurationNames();
+   }
+   
+   private String[] getEntryBoxGroupListNames(SimulationConstructionSet scs)
+   {
+      return scs.getGUI().getEntryBoxGroupList().getEntryBoxGroupNames();
+   }
+   
+   private void assertArrayOsStringsContainsTheString(String[] array, String string)
+   {
+      boolean ret = false;
+      
+      for(int i = 0; i<array.length; i++)
+      {
+         ret = ret || array[i].contains(string);
+      }
+      
+      assertTrue(ret);
+   }
+   
+   private boolean scsContainsTheGraphs(SimulationConstructionSet scs, String[] varNames)
+   {
+      String representationOfGraphArrayPanel = scs.getGUI().getXMLStyleRepresentationOfGraphArrayPanel();
+      boolean ret = true;
+      
+      for (int i = 0; i < varNames.length; i++)
+      {
+        ret = ret && representationOfGraphArrayPanel.contains(varNames[i]);
+      }
+      
+      return ret;
+   }
+     
+   private String[] getGraphGroupNames(SimulationConstructionSet scs)
+   {
+      GraphGroupList graphGroupList = getGraphGroupList(scs);
+      return graphGroupList.getGraphGroupNames();
+   }
+   
+   private String[] getVarGroupNames(SimulationConstructionSet scs)
+   {
+      return scs.getVarGroupList().getVarGroupNames();
+   }
+   
+   private boolean scsContainsTheGraph(SimulationConstructionSet scs, String varName)
+   {
+      String representationOfGraphArrayPanel = scs.getGUI().getXMLStyleRepresentationOfGraphArrayPanel();
+      return representationOfGraphArrayPanel.contains(varName);
+   }
+
+   private boolean scsContainsTheEntryBoxes(SimulationConstructionSet scs, String[] varNames)
+   {
+      String representationOfEntryBoxes = scs.getGUI().getXMLStyleRepresentationOfEntryBoxes();
+      boolean ret = true;
+      
+      for (int i = 0; i < varNames.length; i++)
+      {
+        ret = ret && representationOfEntryBoxes.contains(varNames[i]);
+      }
+      
+      return ret;
+   }
+   
+   private boolean scsContainsTheEntryBox(SimulationConstructionSet scs, String varName)
+   {
+      String representationOfEntryBoxes = scs.getGUI().getXMLStyleRepresentationOfEntryBoxes();
+      return representationOfEntryBoxes.contains(varName);
+   }
    
    private void createSimulationRewoundListenerAndAttachToSCS(SimulationConstructionSet scs)
    {
       SimulationRewoundListener simulationRewoundListener = createSimulationRewoundListener();
       scs.attachSimulationRewoundListener(simulationRewoundListener);
    }
-   
-//   private void setAllTimingValuesInSCS(SimulationConstructionSet scs, double simulateDT, 
-//                                        int recordFrequency, double recordDT, double realTimeRate, double frameRate)
-//   {
-//      scs.setDT(simulateDT, recordFrequency);
-//      scs.setRecordDT(recordDT);
-//      scs.setPlaybackRealTimeRate(realTimeRate);
-//      scs.setPlaybackDesiredFrameRate(frameRate);
-//   }
    
    private void simulateForTime(SimulationConstructionSet scs, double simulateTime)
    {
@@ -563,6 +773,11 @@ public class SimulationConstructionSetUsingDirectCallsTest
       return new double[] {x, y, z};
    }
    
+   private GraphGroupList getGraphGroupList(SimulationConstructionSet scs)
+   {
+      return scs.getGUI().getGraphGroupList();
+   }
+   
    private ClassicCameraController getClassicCameraController(SimulationConstructionSet scs)
    {
       return (ClassicCameraController) scs.getGUI().getViewportPanel().getActiveView().getCameraController();
@@ -579,7 +794,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       if(varNames.length == varValues.length)
       {
          YoVariableRegistry scsRegistry = scs.getRootRegistry();
-         for(int i =0; i< varNames.length; i++)
+         for(int i = 0; i< varNames.length; i++)
          {
             DoubleYoVariable doubleYoVariable = new DoubleYoVariable(varNames[i], scsRegistry);
             doubleYoVariable.set(varValues[i]);
@@ -599,6 +814,12 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private String getFirstVariableNameFromRobotRegistry(Robot robotModel)
    {
       return robotModel.getRobotsYoVariableRegistry().getAllVariablesArray()[0].getName();
+   }
+   
+   private String getLastVariableNameFromRobotRegistry(Robot robotModel)
+   {
+      int lastIndex = robotModel.getRobotsYoVariableRegistry().getAllVariablesArray().length -1;
+      return robotModel.getRobotsYoVariableRegistry().getAllVariablesArray()[lastIndex].getName();
    }
    
    private void setInputAndOutputPointsInSCS(SimulationConstructionSet scs, int inputPointIndex, int outputPointIndex)
