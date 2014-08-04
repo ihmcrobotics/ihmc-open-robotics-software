@@ -36,7 +36,7 @@ public class RosRobotJointStatePublisher implements ObjectConsumer<DRCJointConfi
    public void consumeObject(DRCJointConfigurationData object)
    {
       if(rosMainNode.isStarted()){
-         Time t = new Time(wallTime.getCurrentTime());  
+         Time t = new Time(object.getSimTime());//wallTime.getCurrentTime());  
          jointStatePublisher.publish(nameList, object.getJointAngles(), null, null, t);
       }
    }
