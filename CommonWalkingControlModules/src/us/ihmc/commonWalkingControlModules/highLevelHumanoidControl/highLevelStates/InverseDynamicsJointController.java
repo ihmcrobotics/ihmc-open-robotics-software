@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
 
 import org.apache.commons.lang.mutable.MutableDouble;
 import org.ejml.data.DenseMatrix64F;
@@ -29,8 +30,6 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.trajectories.providers.OrientationProvider;
-import us.ihmc.utilities.math.trajectories.providers.PositionProvider;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -55,11 +54,11 @@ import com.yobotics.simulationconstructionset.util.PDController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
 import com.yobotics.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePose;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameQuaternion;
 import com.yobotics.simulationconstructionset.util.trajectory.ConstantPoseTrajectoryGenerator;
-import com.yobotics.simulationconstructionset.util.trajectory.provider.YoOrientationProvider;
-import com.yobotics.simulationconstructionset.util.trajectory.provider.YoPositionProvider;
 
 /**
  * Simple controller using an inverse dynamics calculator. Mainly used to check gravity compensation, and simple controls while having the robot hanging in the air.
@@ -322,14 +321,26 @@ public class InverseDynamicsJointController extends HighLevelBehavior
       {
          for (RobotSide robotSide : RobotSide.values)
          {
-            YoFramePose desiredFootPose = new YoFramePose(CONTROLLER_PREFIX + "desried" + robotSide.getCamelCaseNameForMiddleOfExpression() + "Foot", "", pelvis.getBodyFixedFrame(), registry);
+            String namePrefix = CONTROLLER_PREFIX + "desired" + robotSide.getCamelCaseNameForMiddleOfExpression() + "Foot";
+            YoFramePoint desiredFootPosition = new YoFramePoint(namePrefix, pelvis.getBodyFixedFrame(), registry);
+            final YoFrameQuaternion desiredFootQuaternion = new YoFrameQuaternion(namePrefix, pelvis.getBodyFixedFrame(), registry);
+            final YoFrameOrientation desiredFootOrientation = new YoFrameOrientation(namePrefix, pelvis.getBodyFixedFrame(), registry);
+            desiredFootOrientation.attachVariableChangedListener(new VariableChangedListener()
+            {
+               private final Quat4d localQuaternion = new Quat4d();
+               @Override
+               public void variableChanged(YoVariable<?> v)
+               {
+                  desiredFootOrientation.getQuaternion(localQuaternion);
+                  desiredFootQuaternion.set(localQuaternion);
+               }
+            });
+            YoFramePose desiredFootPose = new YoFramePose(desiredFootPosition, desiredFootOrientation);
             desiredFootPoses.put(robotSide, desiredFootPose);
 
             RigidBody foot = feet.get(robotSide);
-            PositionProvider positionProvider = new YoPositionProvider(desiredFootPose.getPosition());
-            OrientationProvider orientationProvider = new YoOrientationProvider(desiredFootPose.getOrientation());
 
-            ConstantPoseTrajectoryGenerator constantPoseTrajectoryGenerator = new ConstantPoseTrajectoryGenerator(orientationProvider, positionProvider);
+            ConstantPoseTrajectoryGenerator constantPoseTrajectoryGenerator = new ConstantPoseTrajectoryGenerator(desiredFootPosition, desiredFootQuaternion);
             
             TrajectoryBasedNumericalInverseKinematicsCalculator footIKCalculator = new TrajectoryBasedNumericalInverseKinematicsCalculator(pelvis, foot, momentumBasedController.getControlDT(),
                   twistCalculator, new YoVariableRegistry("dummy"), null);
@@ -896,7 +907,7 @@ public class InverseDynamicsJointController extends HighLevelBehavior
 
       private void setupTaskpaceDesiredsJointGainScaling(RobotSide robotSide, RevoluteJoint[] revoluteJoints)
       {
-         String varPrefix = CONTROLLER_PREFIX + "desried" + robotSide.getCamelCaseNameForMiddleOfExpression() + "Foot";
+         String varPrefix = CONTROLLER_PREFIX + "desired" + robotSide.getCamelCaseNameForMiddleOfExpression() + "Foot";
          String[] axisSuffix = new String[]{"X", "Y", "Z", "Yaw", "Pitch", "Roll"};
          
          int i = 0;
