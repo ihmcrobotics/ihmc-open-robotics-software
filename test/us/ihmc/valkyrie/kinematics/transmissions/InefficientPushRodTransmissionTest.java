@@ -96,8 +96,8 @@ public class InefficientPushRodTransmissionTest
       double pitch = 0.0;
       double roll = 0.0;
 
-      double actuatorForce0 = 1.0;
-      double actuatorForce1 = 0.0;
+      double actuatorForce1 = 1.0;
+      double actuatorForce0 = 0.0;
 
       double regressionPitchTorque = -0.0366712094326246;
       double regressionRollTorque = 0.034118686505983736;
@@ -105,8 +105,8 @@ public class InefficientPushRodTransmissionTest
                             regressionRollTorque);
 
       
-      actuatorForce0 = 0.0;
-      actuatorForce1 = 1.0;
+      actuatorForce1 = 0.0;
+      actuatorForce0 = 1.0;
       regressionPitchTorque = -0.0366712094326246;
       regressionRollTorque = -0.034118686505983736;
 
@@ -116,16 +116,16 @@ public class InefficientPushRodTransmissionTest
 
       pitch = -0.2;
       roll = 0.1;
-      actuatorForce0 = 1.0;
-      actuatorForce1 = 0.0;
+      actuatorForce1 = 1.0;
+      actuatorForce0 = 0.0;
       regressionPitchTorque = -0.03695254741929382;
       regressionRollTorque = 0.02988230913579041;
 
       verifyARegressionTest(inefficientPushrodTransmission, pitch, roll, actuatorData, jointData, actuatorForce0, actuatorForce1, regressionPitchTorque,
                             regressionRollTorque);
 
-      actuatorForce0 = 0.0;
-      actuatorForce1 = 1.0;
+      actuatorForce1 = 0.0;
+      actuatorForce0 = 1.0;
       regressionPitchTorque = -0.034740329545336665;
       regressionRollTorque = -0.03440182578269918;
 

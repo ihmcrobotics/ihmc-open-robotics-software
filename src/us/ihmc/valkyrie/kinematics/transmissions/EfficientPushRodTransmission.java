@@ -83,8 +83,8 @@ public class EfficientPushRodTransmission implements PushRodTransmissionInterfac
     
     jacobian = efficientPushrodTransmissionJacobian.getUpdatedTransform(rollAngle, pitchAngle);
 
-    double rollTorque = jacobian[0][0] * actuatorForce0 + jacobian[0][1] * actuatorForce1;
-    double pitchTorque  = jacobian[1][0] * actuatorForce0 + jacobian[1][1] * actuatorForce1;
+    double rollTorque = jacobian[0][0] * actuatorForce1 + jacobian[0][1] * actuatorForce0;
+    double pitchTorque  = jacobian[1][0] * actuatorForce1 + jacobian[1][1] * actuatorForce0;
 
     jointData[0].setEffort(pitchTorque);
     jointData[1].setEffort(reflect * rollTorque);
@@ -126,8 +126,8 @@ public class EfficientPushRodTransmission implements PushRodTransmissionInterfac
       jacobian = efficientPushrodTransmissionJacobian.getUpdatedTransform(rollAngle, pitchAngle);
       invertMatrix(jacobian, jacobianInverse);
 
-      double actuatorForce0 = jacobianInverse[0][0] * rollTorque + jacobianInverse[0][1] * pitchTorque;
-      double actuatorForce1 = jacobianInverse[1][0] * rollTorque + jacobianInverse[1][1] * pitchTorque;
+      double actuatorForce1 = jacobianInverse[0][0] * rollTorque + jacobianInverse[0][1] * pitchTorque;
+      double actuatorForce0 = jacobianInverse[1][0] * rollTorque + jacobianInverse[1][1] * pitchTorque;
 
       checkInfinity(actuatorForce0);
       checkInfinity(actuatorForce1);
