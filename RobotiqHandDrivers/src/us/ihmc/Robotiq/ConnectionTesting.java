@@ -8,11 +8,13 @@ public class ConnectionTesting
 	public static void main(String[] args) throws Exception
 	{
 		//testing the robot hand interface
-		System.out.println("starting connection");
 		RobotiqHandInterface rightHand = new RobotiqHandInterface();
-		System.out.println("connected");
 		
 		Thread.sleep(2000);
+		
+		System.out.println("starting connection");
+		rightHand.connect();
+		System.out.println("connected");
 		
 		System.out.println("Sending Activation Request");
 		rightHand.initialize();
