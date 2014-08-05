@@ -79,9 +79,9 @@ public class PointPositionRotateSteeringWheelBehavior
 
       this.momentumBasedController = momentumBasedController;
 
-      SE3ConfigurationProvider currentDesiredConfigurationProvider =
-         individualHandControlModule.getCurrentDesiredConfigurationProvider(creepyGripHandPositionControlFrame);
-      PositionProvider initialPositionProvider = currentDesiredConfigurationProvider;
+//      SE3ConfigurationProvider currentDesiredConfigurationProvider =
+//         individualHandControlModule.getCurrentDesiredConfigurationProvider(creepyGripHandPositionControlFrame);
+      PositionProvider initialPositionProvider = null; // currentDesiredConfigurationProvider;
       trajectoryGenerator = new CirclePositionTrajectoryGenerator("rotateSteeringWheelTrajectory", steeringWheelFrame, trajectoryTimeProvider,
               initialPositionProvider, registry, desiredRotationAngleProvider);
 
