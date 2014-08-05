@@ -19,8 +19,8 @@ LeftAnkleExtensor:
     kd: 6.29
     ki: 0.0    
 LeftAnkle:
-    kp: -56.0
-    kd: -3.14
+    kp: 56.0
+    kd: 3.14
     ki: 0.0    
 RightHipRotator:
     kp: 100.0
@@ -43,8 +43,8 @@ RightAnkleExtensor:
     kd: 6.29
     ki: 0.0  
 RightAnkle:
-    kp: -56.0
-    kd: -3.14
+    kp: 56.0
+    kd: 3.14
     ki: 0.0       
 WaistRotator:
     kp: 100.0
