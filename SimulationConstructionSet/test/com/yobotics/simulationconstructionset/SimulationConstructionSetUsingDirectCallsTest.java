@@ -49,9 +49,10 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private int recordFrequency = 10;
    private int index = 15;
    private int inputPoint = 10;
-   private int outputPoint = 30;
-   private int middleIndex = 22;
-   private int nonMiddleIndex = 35;
+   private int outputPoint = 50;
+   private int middleIndex = outputPoint - 1;
+   private int keyPoint = Math.round((inputPoint + outputPoint)/2);
+   private int nonMiddleIndex = outputPoint + 1;
    private int ticksIncrease = 11;
    private int numberOfSimulationTicks = 2000;
    private int graphGroupNumberOfColumns = 2;
@@ -66,6 +67,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private double recomputedSecondsPerFrameRate = recomputeTiming(simulateDT, recordFreq, realTimeRate, frameRate);
    private double cameraFieldOfView = 1.5;
    private double secondsOfSimulation = 10;
+   private double simulateDurationInSeconds = 2.5;
    private double[] cameraDollyOffsetXYZValues = {1.2, 2.2, 3.2};
    private double[] cameraTrackingOffsetXYZValues = {1.5, 2.5, 3.5};
    private double[] cameraDollyXYZVarValues = {1.5, 1.6, 1.7}; 
@@ -115,6 +117,8 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private DynamicGraphicObject dynamicGraphicObject = new DynamicGraphicVector("simpleDynamicGraphicObject", simpleExternalForcePoint);
    private BooleanYoVariable exitActionListenerHasBeenNotified = new BooleanYoVariable("exitActionListenerHasBeenNotified", dummyRegistry); 
    private BooleanYoVariable simulationRewoundListenerHasBeenNotified = new BooleanYoVariable("simulationRewoundListenerHasBeenNotified", dummyRegistry);
+   private BooleanYoVariable simulationDoneListenerHasBeenNotified = new BooleanYoVariable("simulationDoneListenerHasBeenNotified", dummyRegistry);
+   private BooleanYoVariable setSimulationDoneCriterion = new BooleanYoVariable("setSimulationDoneCriterion", dummyRegistry);
    private ExtraPanelConfiguration extraPanelConfiguration = createExtraPanelConfigurationWithPanel(extraPanelConfigurationName);
    private CameraConfiguration cameraConfiguration = createCameraConfiguration(cameraConfigurationName);
    private ViewportConfiguration viewportConfiguration = createViewportConfiguration(viewportConfigurationName);
@@ -170,6 +174,14 @@ public class SimulationConstructionSetUsingDirectCallsTest
       scs.setGraphsUpdatedDuringPlayback(true);
       boolean isGraphsUpdatedDuringPlaybackFromSCS2 = scs.isGraphsUpdatedDuringPlayback();
       assertTrue(isGraphsUpdatedDuringPlaybackFromSCS2);   
+      
+      scs.setScrollGraphsEnabled(true);
+      boolean isScrollGraphsEnabled = scs.isSafeToScroll();
+      assertTrue(isScrollGraphsEnabled);
+      
+      scs.setScrollGraphsEnabled(false);
+      boolean isScrollGraphsEnabled2 = scs.isSafeToScroll();
+      assertFalse(isScrollGraphsEnabled2);
    }
    
    @Test
@@ -243,7 +255,11 @@ public class SimulationConstructionSetUsingDirectCallsTest
       double finalTime3 = scs.getRobots()[0].getTime();
       assertEquals(expectedFinalTime3, finalTime3, epsilon);
       
+      scs.setSimulateDuration(simulateDurationInSeconds);
+      double simulateDurationInSecondsFromSCS = scs.getSimulateDuration();
+      assertEquals(simulateDurationInSeconds, simulateDurationInSecondsFromSCS, epsilon); 
    }
+   
    
    @Test
    public void testFrameMethods()
@@ -403,6 +419,8 @@ public class SimulationConstructionSetUsingDirectCallsTest
       scs.setFieldOfView(cameraFieldOfView);
       double cameraFieldOfViewFromSCS = getCameraFieldOfView(scs);
       assertEquals(cameraFieldOfView, cameraFieldOfViewFromSCS, epsilon);
+      
+      
    }
    
    @Test
@@ -592,10 +610,21 @@ public class SimulationConstructionSetUsingDirectCallsTest
 
       setInputPointInSCS(scs, inputPoint);
       scs.setIndex(outputPoint);
-      StandardSimulationGUI GUIFromSCS = scs.getStandardSimulationGUI();
-      GUIFromSCS.gotoInPointNow();
+      scs.gotoInPointNow();
       int inputPointFromSCS = scs.getIndex();
       assertEquals(inputPoint, inputPointFromSCS);
+      
+      setOutputPointInSCS(scs, outputPoint);
+      scs.setIndex(inputPoint);
+      scs.gotoOutPointNow();
+      int outputPointFromSCS = scs.getIndex();
+      assertEquals(outputPoint, outputPointFromSCS);
+      
+      setInputAndOutputPointsInSCS(scs, inputPoint, outputPoint);
+      scs.setIndex(keyPoint);
+      scs.addKeyPoint();
+      Integer keyPointFromSCS = scs.getKeyPoints().get(0);
+      assertEquals(keyPoint, keyPointFromSCS.intValue(), epsilon);    
    }
    
    @Test
@@ -675,8 +704,78 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertNotNull(extraPanelConfigurationPanelFromSCS);
    }
    
+   @Test
+   public void testSimulationListeners()
+   { 
+      SimulationDoneListener simulationDoneListener = createSimulationDoneListener();
+      SimulationDoneCriterion simulationDoneCriterion = createSimulationDoneCriterion();
+      scs.addSimulateDoneListener(simulationDoneListener);
+      scs.setSimulateDoneCriterion(simulationDoneCriterion);
+      
+      simulationDoneListenerHasBeenNotified.set(false);
+      callSCSMethodSimulateOneTimeStep(scs);
+      assertTrue(simulationDoneListenerHasBeenNotified.getBooleanValue());
+      
+      simulationDoneListenerHasBeenNotified.set(false);
+      scs.removeSimulateDoneListener(simulationDoneListener);
+      assertFalse(simulationDoneListenerHasBeenNotified.getBooleanValue());
+
+      simulationDoneListenerHasBeenNotified.set(false);
+      scs.simulate(Double.MAX_VALUE);
+      boolean isSCSSimulatingBeforeCriterion = scs.isSimulating();
+      setSimulationDoneCriterion.set(true);
+      askThreadToSleep(100);
+      boolean isSCSSimulatingAfterCriterion = scs.isSimulating();
+      assertTrue(isSCSSimulatingBeforeCriterion);
+      assertFalse(isSCSSimulatingAfterCriterion);
+     
+   }
+   
       
    // local methods
+   
+   private void askThreadToSleep(long milliseconds)
+   {
+      try
+      {
+         Thread.sleep(milliseconds);
+      }
+      catch (InterruptedException e)
+      {
+         e.printStackTrace();
+      }
+   }
+   
+   private SimulationDoneCriterion createSimulationDoneCriterion()
+   {
+      SimulationDoneCriterion criterion = new SimulationDoneCriterion()
+      {
+         public boolean isSimulationDone()
+         { 
+            return setSimulationDoneCriterion.getBooleanValue();  
+         }
+      };
+      
+      return criterion;
+   }
+   
+   
+   private SimulationDoneListener createSimulationDoneListener()
+   {
+      SimulationDoneListener listener = new SimulationDoneListener()
+      {
+         public void simulationDone()
+         {
+            simulationDoneListenerHasBeenNotified.set(true);
+         }
+
+         public void simulationDoneWithException(Throwable throwable)
+         {            
+         }
+      };
+      
+      return listener;
+   }
    
    private void callSCSMethodSimulateOneRecordStepNow(SimulationConstructionSet scs)
    {
