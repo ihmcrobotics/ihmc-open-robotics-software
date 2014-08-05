@@ -41,7 +41,7 @@ public class RosRobotJointStatePublisher implements ObjectConsumer<DRCJointConfi
       if(rosMainNode.isStarted()){
          
          long timeStamp = ppsTimestampOffsetProvider.adjustRobotTimeStampToRosClock(object.getSimTime());
-         Time t = new Time(timeStamp);//wallTime.getCurrentTime());  
+         Time t = Time.fromNano(timeStamp);//wallTime.getCurrentTime());  
          jointStatePublisher.publish(nameList, object.getJointAngles(), null, null, t);
       }
    }

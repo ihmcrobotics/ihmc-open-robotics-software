@@ -69,7 +69,7 @@ public class RosTfPublisher extends RosTopicPublisher<tf.tfMessage>
       transformStamped.setTransform(transform);
       transformStamped.setChildFrameId(childFrame);
       Header header = transformStamped.getHeader();
-      header.setStamp(Time.fromMillis(timeStamp));
+      header.setStamp(Time.fromNano(timeStamp));
       header.setFrameId(parentFrame);
       header.setSeq(seq++);
       transformStamped.setHeader(header);
