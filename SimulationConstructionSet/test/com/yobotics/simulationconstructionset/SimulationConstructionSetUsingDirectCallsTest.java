@@ -1,10 +1,6 @@
 package com.yobotics.simulationconstructionset;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.awt.AWTException;
 import java.awt.Button;
@@ -30,7 +26,6 @@ import us.ihmc.utilities.ThreadTools;
 
 import com.yobotics.simulationconstructionset.examples.FallingBrickRobot;
 import com.yobotics.simulationconstructionset.graphics.GraphicsDynamicGraphicsObject;
-import com.yobotics.simulationconstructionset.gui.StandardSimulationGUI;
 import com.yobotics.simulationconstructionset.gui.camera.CameraTrackAndDollyYoVariablesHolder;
 import com.yobotics.simulationconstructionset.gui.config.GraphGroupList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
@@ -58,6 +53,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private int graphGroupNumberOfColumns = 2;
    private int numberOfTicksBeforeUpdatingGraphs = 2;
    private int numberOfTicksBeforeUpdatingGraphs2 = 5;
+   private int indexStep = 2;
    private double simulateDT = 0.001; 
    private double simulateTime = 1.0;
    private double recordDT = 0.05;
@@ -73,6 +69,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private double[] cameraDollyXYZVarValues = {1.5, 1.6, 1.7}; 
    private double[] cameraTrackingXYZVarValues = {0.5, 0.6, 0.7};
    private double[] cameraFixXYZValues = {1.8, 2.8, 3.8};
+   private double[] cameraFixXYZValues2 = {1.1, 2.1, 3.1};
    private double[] cameraPositionXYZValues = {1.3, 2.3, 3.3};
    private double[] cameraClipDistancesNearFarValues = {1.75, 2.75};
    
@@ -420,7 +417,32 @@ public class SimulationConstructionSetUsingDirectCallsTest
       double cameraFieldOfViewFromSCS = getCameraFieldOfView(scs);
       assertEquals(cameraFieldOfView, cameraFieldOfViewFromSCS, epsilon);
       
+      setInputAndOutputPointsInSCS(scs, inputPoint, outputPoint);
+      scs.setIndex(keyPoint);
+      scs.addCameraKey();
+      Integer keyPointFromSCS = scs.getCameraKeyPoints().get(0);
+      assertEquals(keyPoint, keyPointFromSCS.intValue(), epsilon); 
       
+      setInputAndOutputPointsInSCS(scs, inputPoint, outputPoint);
+      scs.setIndex(keyPoint);
+      scs.addCameraKey();
+      scs.removeCameraKey();
+      ArrayList<Integer> keyPointFromSCS2 = scs.getCameraKeyPoints();
+      assertEquals(0, keyPointFromSCS2.size(), epsilon); 
+      
+      setInputAndOutputPointsInSCS(scs, inputPoint, outputPoint);
+      scs.setCameraFix(cameraFixXYZValues[0], cameraFixXYZValues[1], cameraFixXYZValues[2]);
+      scs.setIndex(inputPoint);
+      scs.addCameraKey();
+      scs.setCameraFix(cameraFixXYZValues2[0], cameraFixXYZValues2[1], cameraFixXYZValues2[2]);
+      scs.setIndex(keyPoint);
+      scs.addCameraKey();
+      scs.nextCameraKey();
+      double[] cameraFixXYZValuesFromSCS2 = getCameraFixXYZValues(scs);
+      assertArrayEquals(cameraFixXYZValues2, cameraFixXYZValuesFromSCS2, epsilon);
+      scs.previousCameraKey();
+      double[] cameraFixXYZValuesFromSCS3 = getCameraFixXYZValues(scs);
+      assertArrayEquals(cameraFixXYZValues, cameraFixXYZValuesFromSCS3, epsilon); 
    }
    
    @Test
@@ -624,7 +646,47 @@ public class SimulationConstructionSetUsingDirectCallsTest
       scs.setIndex(keyPoint);
       scs.addKeyPoint();
       Integer keyPointFromSCS = scs.getKeyPoints().get(0);
-      assertEquals(keyPoint, keyPointFromSCS.intValue(), epsilon);    
+      assertEquals(keyPoint, keyPointFromSCS.intValue(), epsilon); 
+      
+      setInputAndOutputPointsInSCS(scs, inputPoint, outputPoint);
+      scs.setIndex(keyPoint);
+      scs.stepBackwardNow();
+      int currentIndexFromSCS = scs.getIndex();
+      assertEquals(keyPoint-1, currentIndexFromSCS, epsilon);
+      
+      setInputAndOutputPointsInSCS(scs, inputPoint, outputPoint);
+      scs.setIndex(keyPoint);
+      scs.stepForwardNow(indexStep);
+      int currentIndexFromSCS2 = scs.getIndex();
+      assertEquals(keyPoint+indexStep, currentIndexFromSCS2, epsilon);
+      
+      setInputAndOutputPointsInSCS(scs, inputPoint, outputPoint);
+      scs.setIndex(keyPoint);
+      scs.stepForward(indexStep);
+      scs.run();
+      int currentIndexFromSCS3 = scs.getIndex();
+      assertEquals(keyPoint+indexStep, currentIndexFromSCS3, epsilon);
+      
+      setInputAndOutputPointsInSCS(scs, inputPoint, outputPoint);
+      scs.setIndex(keyPoint);
+      scs.stepForward();
+      scs.run();
+      int currentIndexFromSCS4 = scs.getIndex();
+      assertEquals(keyPoint+1, currentIndexFromSCS4, epsilon);
+      
+      setInputAndOutputPointsInSCS(scs, inputPoint, outputPoint);
+      scs.setIndex(keyPoint);
+      scs.stepBackward(indexStep);
+      scs.run();
+      int currentIndexFromSCS5 = scs.getIndex();
+      assertEquals(keyPoint-indexStep, currentIndexFromSCS5, epsilon);
+      
+      setInputAndOutputPointsInSCS(scs, inputPoint, outputPoint);
+      scs.setIndex(keyPoint);
+      scs.stepBackward();
+      scs.run();
+      int currentIndexFromSCS6 = scs.getIndex();
+      assertEquals(keyPoint-1, currentIndexFromSCS6, epsilon);
    }
    
    @Test
@@ -727,8 +789,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       askThreadToSleep(100);
       boolean isSCSSimulatingAfterCriterion = scs.isSimulating();
       assertTrue(isSCSSimulatingBeforeCriterion);
-      assertFalse(isSCSSimulatingAfterCriterion);
-     
+      assertFalse(isSCSSimulatingAfterCriterion);    
    }
    
       
