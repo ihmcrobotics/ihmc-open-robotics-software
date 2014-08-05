@@ -38,7 +38,7 @@ public class ChestOrientationControlModule extends DegenerateOrientationControlM
    protected void packDesiredFrameOrientation(FrameOrientation orientationToPack)
    {
       orientationToPack.setToZero(desiredOrientation.getReferenceFrame());
-      desiredOrientation.get(orientationToPack);
+      desiredOrientation.getFrameOrientationIncludingFrame(orientationToPack);
    }
 
    @Override
