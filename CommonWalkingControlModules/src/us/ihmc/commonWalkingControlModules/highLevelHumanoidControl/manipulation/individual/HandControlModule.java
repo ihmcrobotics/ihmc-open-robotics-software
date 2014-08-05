@@ -28,9 +28,6 @@ import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.trajectories.providers.ChangeableConfigurationProvider;
-import us.ihmc.utilities.math.trajectories.providers.SE3ConfigurationProvider;
-import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
@@ -42,34 +39,27 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
-import com.yobotics.simulationconstructionset.util.trajectory.ConstantOrientationTrajectoryGenerator;
-import com.yobotics.simulationconstructionset.util.trajectory.ConstantPositionTrajectoryGenerator;
+import com.yobotics.simulationconstructionset.util.trajectory.ConstantPoseTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.OneDoFJointQuinticTrajectoryGenerator;
-import com.yobotics.simulationconstructionset.util.trajectory.OrientationInterpolationTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.OrientationTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
-import com.yobotics.simulationconstructionset.util.trajectory.StraightLinePositionTrajectoryGenerator;
-import com.yobotics.simulationconstructionset.util.trajectory.provider.YoSE3ConfigurationProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.StraightLinePoseTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.provider.YoVariableDoubleProvider;
 
 public class HandControlModule
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
    private final YoVariableRegistry registry;
 
    private final StateMachine<HandControlState> stateMachine;
    private final Map<ReferenceFrame, RigidBodySpatialAccelerationControlModule> handSpatialAccelerationControlModules;
 
-   private final ChangeableConfigurationProvider initialConfigurationProvider;
-   private final ChangeableConfigurationProvider finalConfigurationProvider;
-
    private final Map<OneDoFJoint, OneDoFJointQuinticTrajectoryGenerator> quinticPolynomialTrajectoryGenerators;
 
-   private final Map<ReferenceFrame, StraightLinePositionTrajectoryGenerator> straightLinePositionWorldTrajectoryGenerators;
-   private final Map<ReferenceFrame, OrientationInterpolationTrajectoryGenerator> orientationInterpolationWorldTrajectoryGenerators;
+   private final ConstantPoseTrajectoryGenerator holdPoseTrajectoryGenerator;
+   private final StraightLinePoseTrajectoryGenerator straightLinePoseTrajectoryGenerator;
    private final YoVariableDoubleProvider trajectoryTimeProvider;
-
-   private final Map<ReferenceFrame, ConstantPositionTrajectoryGenerator> holdPositionTrajectoryGenerators;
-   private final Map<ReferenceFrame, ConstantOrientationTrajectoryGenerator> holdOrientationTrajectoryGenerators;
 
    private final Map<OneDoFJoint, Double> jointCurrentPositionMap;
 
@@ -86,7 +76,6 @@ public class HandControlModule
    private final RobotSide robotSide;
    private final TwistCalculator twistCalculator;
    private final SE3PDGains taskspaceControlGains;
-   private final Map<ReferenceFrame, YoSE3ConfigurationProvider> currentDesiredConfigurationProviders = new LinkedHashMap<ReferenceFrame, YoSE3ConfigurationProvider>();
    private final RigidBody chest, hand;
 
    private final double controlDT;
@@ -133,16 +122,8 @@ public class HandControlModule
 
       handSpatialAccelerationControlModules = new LinkedHashMap<ReferenceFrame, RigidBodySpatialAccelerationControlModule>();
 
-      initialConfigurationProvider = new ChangeableConfigurationProvider(new FramePose(handFrame));
-      finalConfigurationProvider = new ChangeableConfigurationProvider(new FramePose(handFrame)); // FIXME: make Yo, but is difficult because frame can change
-
-      straightLinePositionWorldTrajectoryGenerators = new LinkedHashMap<ReferenceFrame, StraightLinePositionTrajectoryGenerator>();
-      orientationInterpolationWorldTrajectoryGenerators = new LinkedHashMap<ReferenceFrame, OrientationInterpolationTrajectoryGenerator>();
-
-      holdPositionTrajectoryGenerators = new LinkedHashMap<ReferenceFrame, ConstantPositionTrajectoryGenerator>();
-      holdOrientationTrajectoryGenerators = new LinkedHashMap<ReferenceFrame, ConstantOrientationTrajectoryGenerator>();
-
-      InverseDynamicsJoint[] controlledJointsInJointSpaceState = ScrewTools.createJointPath(chest, hand);
+      straightLinePoseTrajectoryGenerator = new StraightLinePoseTrajectoryGenerator(name, true, worldFrame, registry);
+      holdPoseTrajectoryGenerator = new ConstantPoseTrajectoryGenerator(name + "Hold", true, worldFrame, parentRegistry);
 
       loadBearingControlState = new LoadBearingPlaneHandControlState(namePrefix, HandControlState.LOAD_BEARING, robotSide, momentumBasedController,
             fullRobotModel.getElevator(), hand, jacobianId, registry);
@@ -150,12 +131,12 @@ public class HandControlModule
       if (armControlParameters.doLowLevelPositionControl())
       {
          jointSpaceHandControlState = new LowLevelJointSpaceHandControlControlState(namePrefix, HandControlState.JOINT_SPACE, robotSide,
-               controlledJointsInJointSpaceState, momentumBasedController, armControlParameters, controlDT, registry);
+               oneDoFJoints, momentumBasedController, armControlParameters, controlDT, registry);
       }
       else
       {
          jointSpaceHandControlState = new JointSpaceHandControlState(namePrefix, HandControlState.JOINT_SPACE, robotSide,
-               controlledJointsInJointSpaceState, momentumBasedController, armControlParameters, controlDT, registry);
+               oneDoFJoints, momentumBasedController, armControlParameters, controlDT, registry);
       }
 
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
@@ -195,7 +176,7 @@ public class HandControlModule
       maxJerkArmTaskspace.set(armControlParameters.getArmTaskspaceMaxJerk());
 
       //Pre-create the RigidBodySpatialAccelerationControlModules
-      getOrCreateRigidBodySpatialAccelerationControlModule(ReferenceFrame.getWorldFrame());
+      getOrCreateRigidBodySpatialAccelerationControlModule(worldFrame);
       getOrCreateRigidBodySpatialAccelerationControlModule(fullRobotModel.getChest().getBodyFixedFrame());
       getOrCreateRigidBodySpatialAccelerationControlModule(fullRobotModel.getHandControlFrame(robotSide));
 
@@ -247,16 +228,6 @@ public class HandControlModule
    {
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
-      updateCurrentDesiredConfiguration();
-   }
-
-   private void updateCurrentDesiredConfiguration()
-   {
-      for (ReferenceFrame frameToControlPositionOf : currentDesiredConfigurationProviders.keySet())
-      {
-         FramePose pose = computeDesiredFramePose(frameToControlPositionOf, ReferenceFrame.getWorldFrame());
-         currentDesiredConfigurationProviders.get(frameToControlPositionOf).setPose(pose);
-      }
    }
 
    public boolean isDone()
@@ -279,11 +250,12 @@ public class HandControlModule
    {
       FramePose pose = computeDesiredFramePose(frameToControlPoseOf, trajectoryFrame);
 
-      initialConfigurationProvider.set(pose);
-      finalConfigurationProvider.set(finalDesiredPose);
-      trajectoryTimeProvider.set(time);
-      executeTaskSpaceTrajectory(getOrCreateStraightLinePositionTrajectoryGenerator(trajectoryFrame),
-            getOrCreateOrientationInterpolationTrajectoryGenerator(trajectoryFrame), frameToControlPoseOf, base, gains);
+      straightLinePoseTrajectoryGenerator.registerAndChangeFrame(trajectoryFrame);
+      straightLinePoseTrajectoryGenerator.setInitialPose(pose);
+      straightLinePoseTrajectoryGenerator.setFinalPose(finalDesiredPose);
+      straightLinePoseTrajectoryGenerator.setTrajectoryTime(time);
+      
+      executeTaskSpaceTrajectory(straightLinePoseTrajectoryGenerator, straightLinePoseTrajectoryGenerator, frameToControlPoseOf, base, gains);
    }
 
    private FramePose computeDesiredFramePose(ReferenceFrame frameToControlPoseOf, ReferenceFrame trajectoryFrame)
@@ -386,11 +358,11 @@ public class HandControlModule
       ReferenceFrame handFrame = hand.getBodyFixedFrame();
       FramePose pose = new FramePose(handFrame);
       pose.changeFrame(frame);
-      initialConfigurationProvider.set(pose);
-      PositionTrajectoryGenerator positionTrajectory = getOrCreateConstantPositionTrajectoryGenerator(frame);
-      OrientationTrajectoryGenerator orientationTrajectory = getOrCreateConstantOrientationTrajectoryGenerator(frame);
+      
+      holdPoseTrajectoryGenerator.registerAndChangeFrame(frame);
+      holdPoseTrajectoryGenerator.setConstantPose(pose);
 
-      executeTaskSpaceTrajectory(positionTrajectory, orientationTrajectory, handFrame, base, gains);
+      executeTaskSpaceTrajectory(holdPoseTrajectoryGenerator, holdPoseTrajectoryGenerator, handFrame, base, gains);
    }
 
    public void holdPositionInJointSpace()
@@ -402,58 +374,6 @@ public class HandControlModule
 
       double epsilon = 1e-2;
       moveUsingQuinticSplines(jointCurrentPositionMap, epsilon);
-   }
-
-   private StraightLinePositionTrajectoryGenerator getOrCreateStraightLinePositionTrajectoryGenerator(ReferenceFrame referenceFrame)
-   {
-      StraightLinePositionTrajectoryGenerator ret = straightLinePositionWorldTrajectoryGenerators.get(referenceFrame);
-      if (ret == null)
-      {
-         ret = new StraightLinePositionTrajectoryGenerator(name + referenceFrame.getName(), referenceFrame, trajectoryTimeProvider,
-               initialConfigurationProvider, finalConfigurationProvider, registry);
-         straightLinePositionWorldTrajectoryGenerators.put(referenceFrame, ret);
-      }
-
-      return ret;
-   }
-
-   private OrientationInterpolationTrajectoryGenerator getOrCreateOrientationInterpolationTrajectoryGenerator(ReferenceFrame referenceFrame)
-   {
-      OrientationInterpolationTrajectoryGenerator ret = orientationInterpolationWorldTrajectoryGenerators.get(referenceFrame);
-      if (ret == null)
-      {
-         ret = new OrientationInterpolationTrajectoryGenerator(name + referenceFrame.getName(), referenceFrame, trajectoryTimeProvider,
-               initialConfigurationProvider, finalConfigurationProvider, registry);
-         orientationInterpolationWorldTrajectoryGenerators.put(referenceFrame, ret);
-      }
-
-      return ret;
-   }
-
-   private ConstantPositionTrajectoryGenerator getOrCreateConstantPositionTrajectoryGenerator(ReferenceFrame referenceFrame)
-   {
-      ConstantPositionTrajectoryGenerator ret = holdPositionTrajectoryGenerators.get(referenceFrame);
-      if (ret == null)
-      {
-         ret = new ConstantPositionTrajectoryGenerator(name + "Constant" + referenceFrame.getName(), referenceFrame, initialConfigurationProvider, 0.0,
-               registry);
-         holdPositionTrajectoryGenerators.put(referenceFrame, ret);
-      }
-
-      return ret;
-   }
-
-   private ConstantOrientationTrajectoryGenerator getOrCreateConstantOrientationTrajectoryGenerator(ReferenceFrame referenceFrame)
-   {
-      ConstantOrientationTrajectoryGenerator ret = holdOrientationTrajectoryGenerators.get(referenceFrame);
-      if (ret == null)
-      {
-         ret = new ConstantOrientationTrajectoryGenerator(name + "Constant" + referenceFrame.getName(), chest.getBodyFixedFrame(), initialConfigurationProvider,
-               0.0, registry);
-         holdOrientationTrajectoryGenerators.put(referenceFrame, ret);
-      }
-
-      return ret;
    }
 
    private RigidBodySpatialAccelerationControlModule getOrCreateRigidBodySpatialAccelerationControlModule(ReferenceFrame handPositionControlFrame)
@@ -480,23 +400,10 @@ public class HandControlModule
       for (TaskspaceHandPositionControlState taskSpacePositionControlState : taskSpacePositionControlStates)
       {
          if (currentState == taskSpacePositionControlState)
-            return taskSpacePositionControlState.getReferenceFrame() == ReferenceFrame.getWorldFrame();
+            return taskSpacePositionControlState.getReferenceFrame() == worldFrame;
       }
 
       return false;
-   }
-
-   public SE3ConfigurationProvider getCurrentDesiredConfigurationProvider(ReferenceFrame frameToControlPositionOf)
-   {
-      YoSE3ConfigurationProvider ret = currentDesiredConfigurationProviders.get(frameToControlPositionOf);
-      if (ret == null)
-      {
-         ret = new YoSE3ConfigurationProvider("currentDesired" + frameToControlPositionOf.getName() + "Configuration", ReferenceFrame.getWorldFrame(), registry);
-         currentDesiredConfigurationProviders.put(frameToControlPositionOf, ret);
-         updateCurrentDesiredConfiguration();
-      }
-
-      return ret;
    }
 
    public RobotSide getRobotSide()
