@@ -102,7 +102,7 @@ public class YoFunctionGeneratorTest
 
       double amplitude = 1.0;
       double dt = 0.01;
-      double value, previousValue, velocityAbs, expectedVelocityAbs, singleRampTime;
+      double value, previousValue, velocityAbs, expectedVelocityAbs, singleRampTime, computedVelocityAbs;
       double frequency = 1;
       
       yoFunctionGenerator.setAmplitude(amplitude);
@@ -111,13 +111,17 @@ public class YoFunctionGeneratorTest
       singleRampTime = (1/frequency)/2;
       
       expectedVelocityAbs = Math.abs(2*amplitude / singleRampTime);
+      previousValue = value = yoFunctionGenerator.getValue(dt);
 
-      for (double time = dt; time < singleRampTime-dt; time += dt)
+      for (double time = 2* dt; time < singleRampTime-dt; time += dt)
       {
          value = yoFunctionGenerator.getValue(time);
-         previousValue = yoFunctionGenerator.getValue(time - dt);
          velocityAbs = Math.abs((value - previousValue) / dt);
          assertEquals(expectedVelocityAbs, velocityAbs, 1e-10);
+         
+         computedVelocityAbs = Math.abs(yoFunctionGenerator.getValueDot());
+         assertEquals(expectedVelocityAbs, computedVelocityAbs, 1e-10);
+         previousValue = value;
       }
    }
 
