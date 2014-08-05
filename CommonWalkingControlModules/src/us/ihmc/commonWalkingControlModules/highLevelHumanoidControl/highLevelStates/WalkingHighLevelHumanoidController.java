@@ -1101,7 +1101,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          RobotSide supportSide = swingSide.getOppositeSide();
          
          FrameOrientation orientation = new FrameOrientation(desiredPelvisOrientation.getReferenceFrame());
-         desiredPelvisOrientation.get(orientation);
+         desiredPelvisOrientation.getFrameOrientationIncludingFrame(orientation);
          initialPelvisOrientationProvider.setOrientation(orientation);
 
          FrameOrientation finalPelvisOrientation = new FrameOrientation();

@@ -402,7 +402,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
    {
       OrientationTrajectoryData pelvisOrientationTrajectoryData = new OrientationTrajectoryData();
       FrameOrientation orientation = new FrameOrientation(desiredPelvisOrientation.getReferenceFrame());
-      desiredPelvisOrientation.get(orientation);
+      desiredPelvisOrientation.getFrameOrientationIncludingFrame(orientation);
       pelvisOrientationTrajectoryData.set(orientation, desiredPelvisAngularVelocity.getFrameVectorCopy(),
               desiredPelvisAngularAcceleration.getFrameVectorCopy());
 

@@ -107,7 +107,7 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
       case ORIENTATION:
       {
          orientationToPack.setToZero(orientationToTrack.getReferenceFrame());
-         orientationToTrack.get(orientationToPack);
+         orientationToTrack.getFrameOrientationIncludingFrame(orientationToPack);
 
          break;
       }
