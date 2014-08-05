@@ -598,6 +598,11 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
          fixZ = keyFrameFixPos.get(index).z;
       }
    }
+   
+   public ArrayList<Integer> getCameraKeyPoints()
+   {
+      return cameraKeyPoints;
+   }
 
    public double getFixX()
    {
