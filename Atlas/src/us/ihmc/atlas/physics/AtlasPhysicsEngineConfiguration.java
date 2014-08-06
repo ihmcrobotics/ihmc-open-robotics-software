@@ -5,7 +5,7 @@ import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.Link;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.physics.CollisionShapeDescription;
-import com.yobotics.simulationconstructionset.physics.FactoryCollisionShape;
+import com.yobotics.simulationconstructionset.physics.CollisionShapeFactory;
 import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
 import com.yobotics.simulationconstructionset.physics.ScsCollisionDetector;
 import us.ihmc.SdfLoader.SDFRobot;
@@ -50,7 +50,7 @@ public class AtlasPhysicsEngineConfiguration implements ScsCollisionConfigure
       Link leftLink = leftFootJoint.getLink();
       Link rightLink = rightFootJoint.getLink();
 
-      FactoryCollisionShape factoryShape = collisionDetector.getShapeFactory();
+      CollisionShapeFactory factoryShape = collisionDetector.getShapeFactory();
       CollisionShapeDescription collisionFoot = factoryShape.createBox(AtlasPhysicalProperties.footLength / 2, AtlasPhysicalProperties.footWidth / 2, 0.05);
 
       //      public static final double ankleHeight = 0.084;
