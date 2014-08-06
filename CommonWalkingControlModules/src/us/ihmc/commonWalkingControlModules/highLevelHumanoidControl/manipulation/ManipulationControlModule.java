@@ -74,8 +74,8 @@ public class ManipulationControlModule
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         HandControlModule individualHandControlModule = new HandControlModule(robotSide, taskspaceControlGains, momentumBasedController,
-               armControlParameters, variousWalkingProviders.getControlStatusProducer(), registry);
+         HandControlModule individualHandControlModule = new HandControlModule(robotSide, taskspaceControlGains, momentumBasedController, armControlParameters,
+               variousWalkingProviders.getControlStatusProducer(), registry);
          individualHandControlModules.put(robotSide, individualHandControlModule);
       }
 
@@ -192,8 +192,7 @@ public class ManipulationControlModule
       {
          if (handPoseProvider.checkPacketDataType(robotSide) == HandPosePacket.DataType.HAND_POSE)
          {
-            ReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
-            HandPoseTask handPoseTask = new HandPoseTask(handPoseProvider.getDesiredHandPose(robotSide), base, handControlFrame,
+            HandPoseTask handPoseTask = new HandPoseTask(handPoseProvider.getDesiredHandPose(robotSide), base,
                   handPoseProvider.getDesiredReferenceFrame(robotSide), individualHandControlModules.get(robotSide), handPoseProvider.getTrajectoryTime(),
                   taskspaceControlGains);
             pipeline.clear(robotSide);

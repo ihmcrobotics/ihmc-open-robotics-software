@@ -81,8 +81,8 @@ public class CirclePositionControlState extends State<FingerToroidManipulationSt
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         individualHandControlModules.get(robotSide).executeTaskSpaceTrajectory(positionTrajectoryGenerators.get(robotSide),
-                                          orientationTrajectoryGenerators.get(robotSide), fingerPositionControlFrames.get(robotSide), rootBody, gains);
+//         individualHandControlModules.get(robotSide).executeTaskSpaceTrajectory(positionTrajectoryGenerators.get(robotSide),
+//                                          orientationTrajectoryGenerators.get(robotSide), fingerPositionControlFrames.get(robotSide), rootBody, gains);
       }
    }
 
