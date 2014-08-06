@@ -51,7 +51,7 @@ public class PointPositionHandControlState extends State<HandControlState>
    public PointPositionHandControlState(MomentumBasedController momentumBasedController, RobotSide robotSide,
                                         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
    {
-      super(HandControlState.POINT_POSITION);
+      super(null); //HandControlState.POINT_POSITION);
       this.momentumBasedController = momentumBasedController;
       this.twistCalculator = momentumBasedController.getTwistCalculator();
 
