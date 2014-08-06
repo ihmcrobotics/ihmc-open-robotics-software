@@ -1,6 +1,10 @@
 package com.yobotics.simulationconstructionset;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.awt.AWTException;
 import java.awt.Button;
@@ -8,6 +12,12 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Point;
+import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 import org.fest.swing.edt.FailOnThreadViolationRepaintManager;
@@ -17,6 +27,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
+import us.ihmc.graphics3DAdapter.camera.CaptureDevice;
 import us.ihmc.graphics3DAdapter.camera.ClassicCameraController;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.jme.JMEGraphics3DAdapter;
@@ -26,10 +37,14 @@ import us.ihmc.utilities.ThreadTools;
 
 import com.yobotics.simulationconstructionset.examples.FallingBrickRobot;
 import com.yobotics.simulationconstructionset.graphics.GraphicsDynamicGraphicsObject;
+import com.yobotics.simulationconstructionset.gui.EventDispatchThreadHelper;
+import com.yobotics.simulationconstructionset.gui.ViewportWindow;
 import com.yobotics.simulationconstructionset.gui.camera.CameraTrackAndDollyYoVariablesHolder;
 import com.yobotics.simulationconstructionset.gui.config.GraphGroupList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
+import com.yobotics.simulationconstructionset.util.simulationRunner.StateFileComparer;
+import com.yobotics.simulationconstructionset.util.simulationRunner.VariableDifference;
 
 public class SimulationConstructionSetUsingDirectCallsTest
 {
@@ -75,6 +90,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    
    private Point location = new Point(25, 50);
    private FallingBrickRobot simpleRobot = new FallingBrickRobot();
+   private String viewportName = "viewportName";
    private String rootRegistryName = "root";
    private String simpleRegistryName = "simpleRegistry";
    private String searchString = "d";
@@ -417,20 +433,20 @@ public class SimulationConstructionSetUsingDirectCallsTest
       double cameraFieldOfViewFromSCS = getCameraFieldOfView(scs);
       assertEquals(cameraFieldOfView, cameraFieldOfViewFromSCS, epsilon);
       
-      setInputAndOutputPointsInSCS(scs, inputPoint, outputPoint);
+      setInputAndOutputPointsWithoutCroppingInSCS(scs, inputPoint, outputPoint);
       scs.setIndex(keyPoint);
       scs.addCameraKey();
       Integer keyPointFromSCS = scs.getCameraKeyPoints().get(0);
       assertEquals(keyPoint, keyPointFromSCS.intValue(), epsilon); 
       
-      setInputAndOutputPointsInSCS(scs, inputPoint, outputPoint);
+      setInputAndOutputPointsWithoutCroppingInSCS(scs, inputPoint, outputPoint);
       scs.setIndex(keyPoint);
       scs.addCameraKey();
       scs.removeCameraKey();
       ArrayList<Integer> keyPointFromSCS2 = scs.getCameraKeyPoints();
       assertEquals(0, keyPointFromSCS2.size(), epsilon); 
       
-      setInputAndOutputPointsInSCS(scs, inputPoint, outputPoint);
+      setInputAndOutputPointsWithoutCroppingInSCS(scs, inputPoint, outputPoint);
       scs.setCameraFix(cameraFixXYZValues[0], cameraFixXYZValues[1], cameraFixXYZValues[2]);
       scs.setIndex(inputPoint);
       scs.addCameraKey();
@@ -624,7 +640,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       boolean isThreadRunningFromSCS = scs.isSimulationThreadUpAndRunning();
       assertFalse(isThreadRunningFromSCS);
       
-      setInputAndOutputPointsInSCS(scs, inputPoint, outputPoint);
+      setInputAndOutputPointsWithoutCroppingInSCS(scs, inputPoint, outputPoint);
       boolean isMiddleIndexFromSCS = scs.isIndexBetweenInAndOutPoint(middleIndex);
       assertEquals(true, isMiddleIndexFromSCS);
       isMiddleIndexFromSCS = scs.isIndexBetweenInAndOutPoint(nonMiddleIndex);
@@ -642,46 +658,46 @@ public class SimulationConstructionSetUsingDirectCallsTest
       int outputPointFromSCS = scs.getIndex();
       assertEquals(outputPoint, outputPointFromSCS);
       
-      setInputAndOutputPointsInSCS(scs, inputPoint, outputPoint);
+      setInputAndOutputPointsWithoutCroppingInSCS(scs, inputPoint, outputPoint);
       scs.setIndex(keyPoint);
       scs.addKeyPoint();
       Integer keyPointFromSCS = scs.getKeyPoints().get(0);
       assertEquals(keyPoint, keyPointFromSCS.intValue(), epsilon); 
       
-      setInputAndOutputPointsInSCS(scs, inputPoint, outputPoint);
+      setInputAndOutputPointsWithoutCroppingInSCS(scs, inputPoint, outputPoint);
       scs.setIndex(keyPoint);
       scs.stepBackwardNow();
       int currentIndexFromSCS = scs.getIndex();
       assertEquals(keyPoint-1, currentIndexFromSCS, epsilon);
       
-      setInputAndOutputPointsInSCS(scs, inputPoint, outputPoint);
+      setInputAndOutputPointsWithoutCroppingInSCS(scs, inputPoint, outputPoint);
       scs.setIndex(keyPoint);
       scs.stepForwardNow(indexStep);
       int currentIndexFromSCS2 = scs.getIndex();
       assertEquals(keyPoint+indexStep, currentIndexFromSCS2, epsilon);
       
-      setInputAndOutputPointsInSCS(scs, inputPoint, outputPoint);
+      setInputAndOutputPointsWithoutCroppingInSCS(scs, inputPoint, outputPoint);
       scs.setIndex(keyPoint);
       scs.stepForward(indexStep);
       scs.run();
       int currentIndexFromSCS3 = scs.getIndex();
       assertEquals(keyPoint+indexStep, currentIndexFromSCS3, epsilon);
       
-      setInputAndOutputPointsInSCS(scs, inputPoint, outputPoint);
+      setInputAndOutputPointsWithoutCroppingInSCS(scs, inputPoint, outputPoint);
       scs.setIndex(keyPoint);
       scs.stepForward();
       scs.run();
       int currentIndexFromSCS4 = scs.getIndex();
       assertEquals(keyPoint+1, currentIndexFromSCS4, epsilon);
       
-      setInputAndOutputPointsInSCS(scs, inputPoint, outputPoint);
+      setInputAndOutputPointsWithoutCroppingInSCS(scs, inputPoint, outputPoint);
       scs.setIndex(keyPoint);
       scs.stepBackward(indexStep);
       scs.run();
       int currentIndexFromSCS5 = scs.getIndex();
       assertEquals(keyPoint-indexStep, currentIndexFromSCS5, epsilon);
       
-      setInputAndOutputPointsInSCS(scs, inputPoint, outputPoint);
+      setInputAndOutputPointsWithoutCroppingInSCS(scs, inputPoint, outputPoint);
       scs.setIndex(keyPoint);
       scs.stepBackward();
       scs.run();
@@ -702,7 +718,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       boolean entryBoxIsInSCS2 = scsContainsTheEntryBox(scs, simpleRobotLastVariableName);
       assertTrue(entryBoxIsInSCS2);
       
-      scs.setupEntryBox(cameraDollyXYZVarNames);
+      scs.setupEntryBox(cameraDollyXYZVarNames);   
       boolean entryBoxesAreInSCS = scsContainsTheEntryBoxes(scs, cameraDollyXYZVarNames);
       assertTrue(entryBoxesAreInSCS);
       
@@ -792,8 +808,126 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertFalse(isSCSSimulatingAfterCriterion);    
    }
    
+   @Test
+   public void testDatatExporting()
+   {
+      simulateForTime(scs, simulateTime);
+      int initialInPoint = scs.getInPoint();
+      int initialOutPoint = scs.getOutPoint();
+      int initialInOutBufferLength = getInOutBufferLengthFromSCS(scs);
+      int initialBufferSize = getBufferSizeFromSCS(scs);
+      CaptureDevice captureDevice = getCaptureDeviceFromSCS(scs);
+
+      addAndSubtractOneFromInAndOutPointIndexWithoutCrop(scs);
+      scs.cropBuffer();
+      int currentInPoint = scs.getInPoint();
+      int currentBufferSize = scs.getDataBuffer().getBufferSize();
+      assertEquals(0, currentInPoint, epsilon);
+      assertEquals(initialInOutBufferLength-2, currentBufferSize, epsilon);
+      
+      addAndSubtractOneFromInAndOutPointIndexWithoutCrop(scs);
+      scs.packBuffer();
+      int currentInPoint2 = scs.getInPoint();
+      assertEquals(0, currentInPoint2, epsilon);
+      
+      scs.setWrapBuffer(false);
+      boolean wrapBufferFromSCS = getWrapBufferFromSCS(scs);
+      assertFalse(wrapBufferFromSCS);
+      
+      scs.setWrapBuffer(true);
+      boolean wrapBufferFromSCS2 = getWrapBufferFromSCS(scs);
+      assertTrue(wrapBufferFromSCS2);
+      
+      scs.changeBufferSize(initialBufferSize*2);
+      int bufferSizeFromSCS = getBufferSizeFromSCS(scs);
+      assertEquals(initialBufferSize*2, bufferSizeFromSCS, epsilon);
+      
+      scs.setMaxBufferSize(initialBufferSize*3);
+      int maxBufferSizeFromSCS = getMaxBufferSizeFromSCS(scs);
+      assertEquals(initialBufferSize*3, maxBufferSizeFromSCS, epsilon);
+      
+      BufferedImage  bufferedImage = scs.exportSnapshotAsBufferedImage(captureDevice);
+      assertNotNull(bufferedImage);
+      
+      BufferedImage  bufferedImage2 = scs.exportSnapshotAsBufferedImage();
+      assertNotNull(bufferedImage2);
+      
+      addDoubleYoVariablesInSCSRegistry(cameraTrackingXYZVarNames, cameraTrackingXYZVarValues, scs);
+      File fileOne2 = new File("fileOne");
+      File fileTwo2 = new File("fileTwo");
+      scs.writeSpreadsheetFormattedData("all", fileOne2);
+      scs.writeSpreadsheetFormattedData("all", fileTwo2);
+      assertTheFileContainsTheVariables(fileOne2, cameraTrackingXYZVarNames);
+      fileOne2.delete();
+      fileTwo2.delete();  
+   }
+   
       
    // local methods
+   
+   private void assertTheFileContainsTheVariables(File file, String[] variablesNames)
+   { 
+      String header = null;
+      try
+      {
+         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+         header = bufferedReader.readLine();
+         bufferedReader.close();
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+      }
+      
+      String[] numberOfEntries = header.split(",");
+      
+      assertArrayOfStringsContainsTheStrings(numberOfEntries, variablesNames);
+   }
+   
+   private CaptureDevice getCaptureDeviceFromSCS(SimulationConstructionSet scs)
+   {
+      return scs.getGUI().getActiveCaptureDevice();
+   }
+   
+   private int getMaxBufferSizeFromSCS(SimulationConstructionSet scs)
+   {
+      return scs.getDataBuffer().getMaxBufferSize();
+   }
+   
+   private int getInOutBufferLengthFromSCS(SimulationConstructionSet scs)
+   {
+      return scs.getDataBuffer().getBufferInOutLength();
+   }
+   
+   private int getBufferSizeFromSCS(SimulationConstructionSet scs)
+   {
+      return scs.getDataBuffer().getBufferSize();
+   }
+   
+   private boolean getWrapBufferFromSCS(SimulationConstructionSet scs)
+   {
+      return scs.getDataBuffer().getWrapBuffer();
+   }
+   
+   private void addAndSubtractOneFromInAndOutPointIndexWithoutCrop(SimulationConstructionSet scs)
+   {
+      addOneToInPointIndexWithoutCrop(scs);
+      subtractOneToOutPointIndexWithoutCrop(scs);
+   }
+   
+   private void addOneToInPointIndexWithoutCrop(SimulationConstructionSet scs)
+   {
+      int currentInPoint = scs.getInPoint();
+      scs.setIndex(currentInPoint+1);
+      scs.setInPoint();
+   }
+   
+   private void subtractOneToOutPointIndexWithoutCrop(SimulationConstructionSet scs)
+   {
+      int currentOutPoint = scs.getOutPoint();
+      scs.setIndex(currentOutPoint-1);
+      scs.setOutPoint();
+   }
    
    private void askThreadToSleep(long milliseconds)
    {
@@ -1204,7 +1338,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       return robotModel.getRobotsYoVariableRegistry().getAllVariablesArray()[lastIndex].getName();
    }
    
-   private void setInputAndOutputPointsInSCS(SimulationConstructionSet scs, int inputPointIndex, int outputPointIndex)
+   private void setInputAndOutputPointsWithoutCroppingInSCS(SimulationConstructionSet scs, int inputPointIndex, int outputPointIndex)
    {
       setInputPointInSCS(scs, inputPointIndex);
       setOutputPointInSCS(scs, outputPointIndex);
