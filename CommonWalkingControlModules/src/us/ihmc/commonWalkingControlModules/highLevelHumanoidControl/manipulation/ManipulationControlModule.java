@@ -7,9 +7,6 @@ import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameter
 import us.ihmc.commonWalkingControlModules.controlModules.SE3PDGains;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlModule;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.taskExecutor.PipeLine;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.tasks.HandLoadBearingTask;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.tasks.HandPoseTask;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandPoseProvider;
@@ -46,8 +43,6 @@ public class ManipulationControlModule
 
    private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable("hasBeenInitialized", registry);
    private final SideDependentList<HandControlModule> individualHandControlModules;
-
-   private final PipeLine<RobotSide> pipeline = new PipeLine<RobotSide>();
 
    private final ArmControllerParameters armControlParameters;
    private final FullRobotModel fullRobotModel;
@@ -170,7 +165,6 @@ public class ManipulationControlModule
 
          handleLoadBearing(base, robotSide);
       }
-      pipeline.doControl();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -192,17 +186,11 @@ public class ManipulationControlModule
       {
          if (handPoseProvider.checkPacketDataType(robotSide) == HandPosePacket.DataType.HAND_POSE)
          {
-            HandPoseTask handPoseTask = new HandPoseTask(handPoseProvider.getDesiredHandPose(robotSide), base,
-                  handPoseProvider.getDesiredReferenceFrame(robotSide), individualHandControlModules.get(robotSide), handPoseProvider.getTrajectoryTime(),
-                  taskspaceControlGains);
-            pipeline.clear(robotSide);
-            pipeline.submit(robotSide, handPoseTask);
-
+            individualHandControlModules.get(robotSide).moveInStraightLine(handPoseProvider.getDesiredHandPose(robotSide), handPoseProvider.getTrajectoryTime(), base, handPoseProvider.getDesiredReferenceFrame(robotSide), taskspaceControlGains);
          }
          else
          {
-            individualHandControlModules.get(robotSide).moveUsingQuinticSplines(handPoseProvider.getFinalDesiredJointAngleMaps(robotSide),
-                  handPoseProvider.getTrajectoryTime());
+            individualHandControlModules.get(robotSide).moveUsingQuinticSplines(handPoseProvider.getFinalDesiredJointAngleMaps(robotSide), handPoseProvider.getTrajectoryTime());
          }
       }
    }
@@ -213,10 +201,7 @@ public class ManipulationControlModule
       {
          if (handLoadBearingProvider.hasLoadBearingBeenRequested(robotSide))
          {
-            pipeline.clear(robotSide);
-
-            HandLoadBearingTask handLoadBearingTask = new HandLoadBearingTask(individualHandControlModules.get(robotSide));
-            pipeline.submit(robotSide, handLoadBearingTask);
+            individualHandControlModules.get(robotSide).requestLoadBearing();
          }
          else
          {
