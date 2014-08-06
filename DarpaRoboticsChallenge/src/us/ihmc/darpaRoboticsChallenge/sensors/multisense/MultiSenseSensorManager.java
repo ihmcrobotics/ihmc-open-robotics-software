@@ -223,5 +223,6 @@ public class MultiSenseSensorManager
    public void setRobotPosePublisher(RosRobotPosePublisher robotPosePublisher)
    {
       multisenseLidarDataReceiver.setRobotPosePublisher(robotPosePublisher);
+      cameraReceiver.setRobotPosePublisher(robotPosePublisher);
    }
 }

@@ -39,7 +39,7 @@ public class DRCLidar
       
       for(LidarMount lidarMount : lidarSensors)
       {
-         if(lidarMount.getName() == sensorName)
+         if(lidarMount.getName().equals(sensorName))
          {
             return lidarMount;
          }
