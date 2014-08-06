@@ -15,7 +15,6 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.RigidBody;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -42,7 +41,7 @@ public class ManipulationControlModule
    private final DoubleYoVariable kpArmTaskspace, kdArmTaskspace, kiArmTaskspace, zetaArmTaskspace, maxIntegralErrorArmTaskspace;
 
    private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable("hasBeenInitialized", registry);
-   private final SideDependentList<HandControlModule> individualHandControlModules;
+   private final SideDependentList<HandControlModule> handControlModules;
 
    private final ArmControllerParameters armControlParameters;
    private final FullRobotModel fullRobotModel;
@@ -55,7 +54,6 @@ public class ManipulationControlModule
    public ManipulationControlModule(VariousWalkingProviders variousWalkingProviders, ArmControllerParameters armControlParameters,
          MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
    {
-
       fullRobotModel = momentumBasedController.getFullRobotModel();
       this.armControlParameters = armControlParameters;
 
@@ -65,13 +63,13 @@ public class ManipulationControlModule
       handPoseProvider = variousWalkingProviders.getDesiredHandPoseProvider();
       handLoadBearingProvider = variousWalkingProviders.getDesiredHandLoadBearingProvider();
 
-      individualHandControlModules = new SideDependentList<HandControlModule>();
+      handControlModules = new SideDependentList<HandControlModule>();
 
       for (RobotSide robotSide : RobotSide.values)
       {
          HandControlModule individualHandControlModule = new HandControlModule(robotSide, taskspaceControlGains, momentumBasedController, armControlParameters,
                variousWalkingProviders.getControlStatusProducer(), registry);
-         individualHandControlModules.put(robotSide, individualHandControlModule);
+         handControlModules.put(robotSide, individualHandControlModule);
       }
 
       kpArmTaskspace = new DoubleYoVariable("kpArmTaskspace", registry);
@@ -155,20 +153,18 @@ public class ManipulationControlModule
 
       updateGraphics();
 
-      RigidBody base = fullRobotModel.getChest(); // TODO: should use fullRobotModel.getElevator(), but OldMomentumControlModule doesn't support this;
-
       for (RobotSide robotSide : RobotSide.values)
       {
          handleDefaultState(robotSide);
 
-         handleHandPoses(base, robotSide);
+         handleHandPoses(robotSide);
 
-         handleLoadBearing(base, robotSide);
+         handleLoadBearing(robotSide);
       }
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         individualHandControlModules.get(robotSide).doControl();
+         handControlModules.get(robotSide).doControl();
       }
    }
 
@@ -180,32 +176,32 @@ public class ManipulationControlModule
       }
    }
 
-   private void handleHandPoses(RigidBody base, RobotSide robotSide)
+   private void handleHandPoses(RobotSide robotSide)
    {
       if (handPoseProvider.checkForNewPose(robotSide))
       {
          if (handPoseProvider.checkPacketDataType(robotSide) == HandPosePacket.DataType.HAND_POSE)
          {
-            individualHandControlModules.get(robotSide).moveInStraightLine(handPoseProvider.getDesiredHandPose(robotSide), handPoseProvider.getTrajectoryTime(), base, handPoseProvider.getDesiredReferenceFrame(robotSide), taskspaceControlGains);
+            handControlModules.get(robotSide).moveInStraightLine(handPoseProvider.getDesiredHandPose(robotSide), handPoseProvider.getTrajectoryTime(), handPoseProvider.getDesiredReferenceFrame(robotSide), taskspaceControlGains);
          }
          else
          {
-            individualHandControlModules.get(robotSide).moveUsingQuinticSplines(handPoseProvider.getFinalDesiredJointAngleMaps(robotSide), handPoseProvider.getTrajectoryTime());
+            handControlModules.get(robotSide).moveUsingQuinticSplines(handPoseProvider.getFinalDesiredJointAngleMaps(robotSide), handPoseProvider.getTrajectoryTime());
          }
       }
    }
 
-   private void handleLoadBearing(RigidBody base, RobotSide robotSide)
+   private void handleLoadBearing(RobotSide robotSide)
    {
       if ((handLoadBearingProvider != null) && handLoadBearingProvider.checkForNewInformation(robotSide))
       {
          if (handLoadBearingProvider.hasLoadBearingBeenRequested(robotSide))
          {
-            individualHandControlModules.get(robotSide).requestLoadBearing();
+            handControlModules.get(robotSide).requestLoadBearing();
          }
          else
          {
-            individualHandControlModules.get(robotSide).holdPositionInBase();
+            handControlModules.get(robotSide).holdPositionInBase();
          }
       }
    }
@@ -220,17 +216,16 @@ public class ManipulationControlModule
 
    public void goToDefaultState(RobotSide robotSide, double trajectoryTime)
    {
-      individualHandControlModules.get(robotSide).moveUsingQuinticSplines(armControlParameters.getDefaultArmJointPositions(fullRobotModel, robotSide),
-            trajectoryTime);
+      handControlModules.get(robotSide).moveUsingQuinticSplines(armControlParameters.getDefaultArmJointPositions(fullRobotModel, robotSide), trajectoryTime);
    }
 
    public void prepareForLocomotion()
    {
-      for (HandControlModule individualHandControlModule : individualHandControlModules)
+      for (HandControlModule individualHandControlModule : handControlModules)
       {
          if (individualHandControlModule.isControllingPoseInWorld())
          {
-            if (ManipulationControlModule.HOLD_POSE_IN_JOINT_SPACE_WHEN_PREPARE_FOR_LOCOMOTION)
+            if (HOLD_POSE_IN_JOINT_SPACE_WHEN_PREPARE_FOR_LOCOMOTION)
                individualHandControlModule.holdPositionInJointSpace();
             else
                individualHandControlModule.holdPositionInBase();
@@ -250,7 +245,7 @@ public class ManipulationControlModule
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         if (individualHandControlModules.get(robotSide).isLoadBearing())
+         if (handControlModules.get(robotSide).isLoadBearing())
             return true;
       }
       return false;
