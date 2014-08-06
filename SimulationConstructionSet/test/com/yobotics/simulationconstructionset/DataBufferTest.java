@@ -11,6 +11,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.yobotics.simulationconstructionset.DataBuffer.RepeatDataBufferEntryException;
+import com.yobotics.simulationconstructionset.gui.config.VarGroup;
+import com.yobotics.simulationconstructionset.gui.config.VarGroupList;
 
 public class DataBufferTest
 {
@@ -27,6 +29,9 @@ public class DataBufferTest
    private IntegerYoVariable integerYoVariable;
    private YoVariableRegistry registry;
    private DataBuffer dataBuffer = new DataBuffer(testBufferSize);
+   
+   private DoubleYoVariable a, b, c; 
+   private DataBufferEntry aBuffer, bBuffer, cBuffer;
 
    public DataBufferTest()
    {
@@ -41,6 +46,14 @@ public class DataBufferTest
       booleanYoVariable = new BooleanYoVariable("booleanYoVariable", registry);
       integerYoVariable = new IntegerYoVariable("integerYoVariable", registry);
       enumYoVariable = new EnumYoVariable<DataBufferTest.EnumYoVariableTestEnums>("enumYoVariable", registry, EnumYoVariableTestEnums.class);
+      
+      a = new DoubleYoVariable("a_arm", registry);
+      b = new DoubleYoVariable("b_arm", registry);
+      c = new DoubleYoVariable("c_arm", registry);      
+      
+      aBuffer = new DataBufferEntry(a, testBufferSize);
+      bBuffer = new DataBufferEntry(b, testBufferSize);
+      cBuffer = new DataBufferEntry(c, testBufferSize);
    }
 
    @After
@@ -292,7 +305,7 @@ public class DataBufferTest
 //      dataBuffer.resetDataBuffer();
 //      
 //      int dataBufferSize = dataBuffer.getBufferSize();
-//      System.out.println(dataBufferSize);
+//      .println(dataBufferSize);
 //      assertTrue(0 == dataBufferSize);
 //
 //   }
@@ -310,7 +323,7 @@ public class DataBufferTest
 //       dataBuffer.clearAll(testBufferSize);
 //       
 //       int dataBufferSize = dataBuffer.getBufferSize();
-//       System.out.println(dataBufferSize);
+//       .println(dataBufferSize);
 //       assertTrue(0 == dataBufferSize);
 //      
 //   }
@@ -323,7 +336,7 @@ public class DataBufferTest
       int newBufferSize = originalBufferSize * 2;
             
       dataBuffer.changeBufferSize(newBufferSize);
-      System.out.println(newBufferSize + " " + dataBuffer.getBufferSize()); 
+//      .println(newBufferSize + " " + dataBuffer.getBufferSize()); 
       assertEquals(newBufferSize, dataBuffer.getBufferSize());
    }
    
@@ -334,7 +347,7 @@ public class DataBufferTest
       int newBufferSize = originalBufferSize/2;
             
       dataBuffer.changeBufferSize(newBufferSize);
-      System.out.println(newBufferSize + " " + dataBuffer.getBufferSize()); 
+//      .println(newBufferSize + " " + dataBuffer.getBufferSize()); 
       assertEquals(newBufferSize, dataBuffer.getBufferSize());
    }
    
@@ -348,7 +361,7 @@ public class DataBufferTest
       int newBufferSize = originalBufferSize * 2;
             
       dataBuffer.changeBufferSize(newBufferSize);
-      System.out.println(newBufferSize + " " + dataBuffer.getBufferSize()); 
+//      System.out.println(newBufferSize + " " + dataBuffer.getBufferSize()); 
       assertEquals(newBufferSize, dataBuffer.getBufferSize());
    }
    
@@ -362,7 +375,7 @@ public class DataBufferTest
       int newBufferSize = originalBufferSize/2;
             
       dataBuffer.changeBufferSize(newBufferSize);
-      System.out.println(newBufferSize + " " + dataBuffer.getBufferSize()); 
+//      System.out.println(newBufferSize + " " + dataBuffer.getBufferSize()); 
       assertEquals(newBufferSize, dataBuffer.getBufferSize());
    }
    
@@ -500,89 +513,163 @@ public class DataBufferTest
 
    @Test
    public void testGetVars() //Luke Morris
+
    {
-      DoubleYoVariable a = new DoubleYoVariable("a_arm", registry);
-      DoubleYoVariable b = new DoubleYoVariable("b_arm", registry);
-      DoubleYoVariable c = new DoubleYoVariable("c_arm", registry);      
-      
-      DataBufferEntry aBuffer = new DataBufferEntry(a, testBufferSize);
-      DataBufferEntry bBuffer = new DataBufferEntry(b, testBufferSize);
-      DataBufferEntry cBuffer = new DataBufferEntry(c, testBufferSize);
-      
       dataBuffer.addEntry(aBuffer);
       dataBuffer.addEntry(bBuffer);
       dataBuffer.addEntry(cBuffer);
-      
+
       String[] varNames = new String[3];
       varNames[0] = "a_arm";
       varNames[1] = "b_arm";
       varNames[2] = "c_arm";
-      
+
       String[] aNames = new String[1];
       aNames[0] = "a_arm";
-      
-      String[] allRegularExpressions = {".*"};
-      String[] cRegularExpressions = {"c.*"};
-      
+
+      String[] allRegularExpressions = { ".*" };
+      String[] cRegularExpressions = { "c.*" };
+
       ArrayList<YoVariable> both = dataBuffer.getVars(varNames, allRegularExpressions);
-      
+
       assertTrue(both.contains(a));
       assertTrue(both.contains(b));
       assertTrue(both.contains(c));
-      
+
       ArrayList<YoVariable> justNames = dataBuffer.getVars(varNames, null);
-      
+
       assertTrue(justNames.contains(a));
       assertTrue(justNames.contains(b));
       assertTrue(justNames.contains(c));
-      
+
       ArrayList<YoVariable> justA = dataBuffer.getVars(aNames, null);
-      
+
       assertTrue(justA.contains(a));
       assertFalse(justA.contains(b));
       assertFalse(justA.contains(c));
-      
+
       ArrayList<YoVariable> justRegExp = dataBuffer.getVars(null, allRegularExpressions);
-      
+
       assertTrue(justRegExp.contains(a));
       assertTrue(justRegExp.contains(b));
       assertTrue(justRegExp.contains(c));
-      
+
       ArrayList<YoVariable> cRegExp = dataBuffer.getVars(null, cRegularExpressions);
-      
+
       assertFalse(cRegExp.contains(a));
       assertFalse(cRegExp.contains(b));
       assertTrue(cRegExp.contains(c));
-      
+
       ArrayList<YoVariable> neither = dataBuffer.getVars(null, null);
-      
+
       assertFalse(neither.contains(a));
       assertFalse(neither.contains(b));
       assertFalse(neither.contains(c));
    }
-   
-   //   @Test
-//   public String testGetVariablesTest() //Luke Morris
-//   {
-//      ArrayList<YoVariable> variables = dataBuffer.getVariables();
-//      return dataBuffer.toString();
-//      //return variables.toString();
-//   }
 
-//   @Test
-//   public void testCopyValuesThrough()
-//   {
-//      
-//   }
+   @Test
+   public void testGetVarsFromGroup()
+   {
+      dataBuffer.addEntry(aBuffer);
+      dataBuffer.addEntry(bBuffer);
+      dataBuffer.addEntry(cBuffer);
+
+      VarGroup varGroupOne = new VarGroup("varGroupOne");
+      VarGroup varGroupTwo = new VarGroup("varGroupTwo");
+      VarGroup varGroupThree = new VarGroup("varGroupThree");
+
+      varGroupOne.addVar("a_arm");
+      varGroupOne.addVar("c_arm");
+
+      String[] allRegularExpressions = { ".*" };
+      String[] cRegularExpressions = { "c.*" };
+
+      varGroupTwo.addRegularExpressions(allRegularExpressions);
+      varGroupThree.addRegularExpressions(cRegularExpressions);
+
+      VarGroupList varGroupList = new VarGroupList();
+      varGroupList.addVarGroup(varGroupOne);
+      varGroupList.addVarGroup(varGroupTwo);
+      varGroupList.addVarGroup(varGroupThree);
+
+      ArrayList<YoVariable> allVarsFromGroup = dataBuffer.getVarsFromGroup("all", varGroupList);
+
+      assertTrue(allVarsFromGroup.contains(a));
+      assertTrue(allVarsFromGroup.contains(b));
+      assertTrue(allVarsFromGroup.contains(c));
+
+      ArrayList<YoVariable> aVarsFromGroup = dataBuffer.getVarsFromGroup("varGroupOne", varGroupList);
+
+      assertTrue(aVarsFromGroup.contains(a));
+      assertFalse(aVarsFromGroup.contains(b));
+      assertTrue(aVarsFromGroup.contains(c));
+
+      ArrayList<YoVariable> regExpVarsFromGroup = dataBuffer.getVarsFromGroup("varGroupTwo", varGroupList);
+
+      assertTrue(regExpVarsFromGroup.contains(a));
+      assertTrue(regExpVarsFromGroup.contains(b));
+      assertTrue(regExpVarsFromGroup.contains(c));
+
+      ArrayList<YoVariable> cRegExpVarsFromGroup = dataBuffer.getVarsFromGroup("varGroupThree", varGroupList);
+
+      assertFalse(cRegExpVarsFromGroup.contains(a));
+      assertFalse(cRegExpVarsFromGroup.contains(b));
+      assertTrue(cRegExpVarsFromGroup.contains(c));
+   }
+
+   @Test
+   public void testSetMaxBufferSize()
+
+   {
+      int minBuffer = 1;
+      int maxBuffer = 10000000;
+      int zeroBuffer = 0;
+      int normalBuffer = 200;
+      
+      dataBuffer.setMaxBufferSize(minBuffer);
+      assertTrue(dataBuffer.getMaxBufferSize() == minBuffer);
+      
+      dataBuffer.setMaxBufferSize(maxBuffer);
+      assertTrue(dataBuffer.getMaxBufferSize() == maxBuffer);
+      
+      dataBuffer.setMaxBufferSize(zeroBuffer);
+      assertTrue(dataBuffer.getMaxBufferSize() == zeroBuffer);
+      
+      dataBuffer.setMaxBufferSize(normalBuffer);
+      assertTrue(dataBuffer.getMaxBufferSize() == normalBuffer);
+      
+   }
+
+   @Test
+   public void testClearAll()
+   {
+      
+   }
    
-//   @Test
-//   public void testGetInAndOutLength()
-//   {
-//      System.out.println(dataBuffer.getBufferInOutLength());
-//   }
+    @Test
+    public void testResetDataBuffer()
+    {       
+       dataBuffer.addEntry(aBuffer);
+       dataBuffer.addEntry(bBuffer);
+       dataBuffer.addEntry(cBuffer);
+       
+       ArrayList<YoVariable> withVariables = dataBuffer.getVariables();
+       
+       System.out.println(withVariables.size());
+       assertTrue(withVariables.size() > 0);
+       
+       dataBuffer.resetDataBuffer();
+       
+       ArrayList<YoVariable> resetVariables = dataBuffer.getVariables();
+       
+       System.out.println(resetVariables.size());
+//       assertTrue(resetVariables.size() == 0);
+    }
    
-   //@Test
-  // public void 
-   
-   
+   // @Test
+   // public void testCopyValuesThrough()
+   // {
+   //    
+   // }
+
 }
