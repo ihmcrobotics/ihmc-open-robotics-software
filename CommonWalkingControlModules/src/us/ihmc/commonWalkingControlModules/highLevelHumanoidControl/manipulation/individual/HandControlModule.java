@@ -250,7 +250,7 @@ public class HandControlModule
    {
       FramePose pose = computeDesiredFramePose(frameToControlPoseOf, trajectoryFrame);
 
-      straightLinePoseTrajectoryGenerator.registerAndChangeFrame(trajectoryFrame);
+      straightLinePoseTrajectoryGenerator.registerAndSwitchFrame(trajectoryFrame);
       straightLinePoseTrajectoryGenerator.setInitialPose(pose);
       straightLinePoseTrajectoryGenerator.setFinalPose(finalDesiredPose);
       straightLinePoseTrajectoryGenerator.setTrajectoryTime(time);
@@ -359,7 +359,7 @@ public class HandControlModule
       FramePose pose = new FramePose(handFrame);
       pose.changeFrame(frame);
       
-      holdPoseTrajectoryGenerator.registerAndChangeFrame(frame);
+      holdPoseTrajectoryGenerator.registerAndSwitchFrame(frame);
       holdPoseTrajectoryGenerator.setConstantPose(pose);
 
       executeTaskSpaceTrajectory(holdPoseTrajectoryGenerator, holdPoseTrajectoryGenerator, handFrame, base, gains);
