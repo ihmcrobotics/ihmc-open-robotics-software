@@ -9,8 +9,6 @@ import com.yobotics.simulationconstructionset.gui.SplashPanel;
 public class SimulationConstructionSetSetupTest
 {
    private static final int pauseTimeForGUIs = 5000;
-   
-
 
    @Test
    public void testSplashScreen()
@@ -32,7 +30,7 @@ public class SimulationConstructionSetSetupTest
       sleep(pauseTimeForGUIs);
       scs.closeAndDispose();
    }
-   
+
    @Test
    public void testSimulationConstructionSetWithARobot()
    {
@@ -50,11 +48,9 @@ public class SimulationConstructionSetSetupTest
       try
       {
          Thread.sleep(sleepMillis);
-      } catch (InterruptedException e)
+      }
+      catch (InterruptedException e)
       {
       }
    }
-
-
-
 }
