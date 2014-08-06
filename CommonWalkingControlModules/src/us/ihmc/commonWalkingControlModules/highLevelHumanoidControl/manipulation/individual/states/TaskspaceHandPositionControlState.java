@@ -6,7 +6,6 @@ import java.util.Collection;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -49,13 +48,12 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
    protected OrientationTrajectoryGenerator orientationTrajectoryGenerator;
    protected RigidBodySpatialAccelerationControlModule handSpatialAccelerationControlModule;
 
-   public TaskspaceHandPositionControlState(String namePrefix, HandControlState stateEnum, RobotSide robotSide, MomentumBasedController momentumBasedController,
-                                            int jacobianId, RigidBody base, RigidBody endEffector,
-                                            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+   public TaskspaceHandPositionControlState(String namePrefix, HandControlState stateEnum, MomentumBasedController momentumBasedController, int jacobianId,
+         RigidBody base, RigidBody endEffector, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
    {
       super(namePrefix, stateEnum, momentumBasedController, jacobianId, base, endEffector, parentRegistry);
-      
-      desiredPositionFrame = new PoseReferenceFrame(robotSide.getCamelCaseNameForStartOfExpression() + name + "DesiredFrame", worldFrame);
+
+      desiredPositionFrame = new PoseReferenceFrame(name + "DesiredFrame", worldFrame);
 
       if (dynamicGraphicObjectsListRegistry != null)
       {
@@ -79,7 +77,7 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
       orientationTrajectoryGenerator.packAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
 
       handSpatialAccelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredVelocity, desiredAngularVelocity, desiredAcceleration,
-              desiredAngularAcceleration, getBase());
+            desiredAngularAcceleration, getBase());
 
       handSpatialAccelerationControlModule.packAcceleration(handAcceleration);
 
@@ -124,11 +122,10 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
    }
 
    public void setTrajectory(PositionTrajectoryGenerator positionTrajectoryGenerator, OrientationTrajectoryGenerator orientationTrajectoryGenerator,
-         RigidBody base, RigidBodySpatialAccelerationControlModule rigidBodySpatialAccelerationControlModule)
+         RigidBodySpatialAccelerationControlModule rigidBodySpatialAccelerationControlModule)
    {
       this.positionTrajectoryGenerator = positionTrajectoryGenerator;
       this.orientationTrajectoryGenerator = orientationTrajectoryGenerator;
-      setBase(base);
       this.taskspaceConstraintData.set(getBase(), getEndEffector());
       this.handSpatialAccelerationControlModule = rigidBodySpatialAccelerationControlModule;
    }

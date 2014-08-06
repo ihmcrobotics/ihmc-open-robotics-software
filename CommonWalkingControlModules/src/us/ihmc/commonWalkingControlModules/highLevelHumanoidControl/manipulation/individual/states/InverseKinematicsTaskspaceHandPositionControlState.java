@@ -13,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.MathTools;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RevoluteJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
@@ -49,7 +48,7 @@ public class InverseKinematicsTaskspaceHandPositionControlState extends Taskspac
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, ArmControllerParameters armControllerParameters, ControlStatusProducer controlStatusProducer, double controlDT,
          YoVariableRegistry parentRegistry)
    {
-      super(namePrefix, stateEnum, robotSide, momentumBasedController, jacobianId, base, endEffector, dynamicGraphicObjectsListRegistry, parentRegistry);
+      super(namePrefix, stateEnum, momentumBasedController, jacobianId, base, endEffector, dynamicGraphicObjectsListRegistry, parentRegistry);
       this.controlDT = controlDT;
       this.controlStatusProducer = controlStatusProducer;
       this.robotSide = robotSide;
@@ -96,7 +95,7 @@ public class InverseKinematicsTaskspaceHandPositionControlState extends Taskspac
    {
       VariableChangedListener listener = new VariableChangedListener()
       {
-         public void variableChanged(YoVariable v)
+         public void variableChanged(YoVariable<?> v)
          {
             kdArmJointspace.set(GainCalculator.computeDerivativeGain(kpArmJointspace.getDoubleValue(), zetaArmJointspace.getDoubleValue()));            
          }
@@ -174,9 +173,9 @@ public class InverseKinematicsTaskspaceHandPositionControlState extends Taskspac
    
    @Override
    public void setTrajectory(PositionTrajectoryGenerator positionTrajectoryGenerator, OrientationTrajectoryGenerator orientationTrajectoryGenerator,
-         RigidBody base, RigidBodySpatialAccelerationControlModule rigidBodySpatialAccelerationControlModule)
+         RigidBodySpatialAccelerationControlModule rigidBodySpatialAccelerationControlModule)
    {
-      super.setTrajectory(positionTrajectoryGenerator, orientationTrajectoryGenerator, base, rigidBodySpatialAccelerationControlModule);
+      super.setTrajectory(positionTrajectoryGenerator, orientationTrajectoryGenerator, rigidBodySpatialAccelerationControlModule);
       inverseKinematicsCalculator.setTrajectory(positionTrajectoryGenerator, orientationTrajectoryGenerator, rigidBodySpatialAccelerationControlModule.getTrackingFrame());
    }
 }
