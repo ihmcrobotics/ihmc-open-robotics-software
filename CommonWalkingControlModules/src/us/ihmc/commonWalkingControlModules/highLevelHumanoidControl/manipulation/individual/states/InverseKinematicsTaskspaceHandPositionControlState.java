@@ -174,9 +174,9 @@ public class InverseKinematicsTaskspaceHandPositionControlState extends Taskspac
    
    @Override
    public void setTrajectory(PositionTrajectoryGenerator positionTrajectoryGenerator, OrientationTrajectoryGenerator orientationTrajectoryGenerator,
-         RigidBody base, RigidBodySpatialAccelerationControlModule rigidBodySpatialAccelerationControlModule, ReferenceFrame frameToControlPoseOf)
+         RigidBody base, RigidBodySpatialAccelerationControlModule rigidBodySpatialAccelerationControlModule)
    {
-      super.setTrajectory(positionTrajectoryGenerator, orientationTrajectoryGenerator, base, rigidBodySpatialAccelerationControlModule, frameToControlPoseOf);
-      inverseKinematicsCalculator.setTrajectory(positionTrajectoryGenerator, orientationTrajectoryGenerator, frameToControlPoseOf);
+      super.setTrajectory(positionTrajectoryGenerator, orientationTrajectoryGenerator, base, rigidBodySpatialAccelerationControlModule);
+      inverseKinematicsCalculator.setTrajectory(positionTrajectoryGenerator, orientationTrajectoryGenerator, rigidBodySpatialAccelerationControlModule.getTrackingFrame());
    }
 }
