@@ -15,7 +15,7 @@ import com.yobotics.simulationconstructionset.physics.CollisionHandler;
 import com.yobotics.simulationconstructionset.physics.CollisionShape;
 import com.yobotics.simulationconstructionset.physics.CollisionShapeDescription;
 import com.yobotics.simulationconstructionset.physics.Contacts;
-import com.yobotics.simulationconstructionset.physics.FactoryCollisionShape;
+import com.yobotics.simulationconstructionset.physics.CollisionShapeFactory;
 import com.yobotics.simulationconstructionset.physics.ScsCollisionDetector;
 
 
@@ -202,7 +202,7 @@ public abstract class SCSCollisionDetectorTest
 //    ret.setMomentOfInertia(0.1 * mass, 0.1 * mass, 0.1 * mass);
 //    ret.enableCollisions(10,null);
 
-      FactoryCollisionShape factory = collisionDetector.getShapeFactory();
+      CollisionShapeFactory factory = collisionDetector.getShapeFactory();
       factory.setMargin(0.02);
       CollisionShapeDescription shapeDesc = factory.createBox(radiusX, radiusY, radiusZ);
       factory.addShape(ret, shapeToLink, shapeDesc, collisionGroup, collisionMask);
