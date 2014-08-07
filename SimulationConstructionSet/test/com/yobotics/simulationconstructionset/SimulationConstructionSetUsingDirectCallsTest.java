@@ -52,7 +52,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    // - the simpleRobot has been used to create the SimulationConstructionSet instance
    // - the registry "simpleRegistry" is empty
    
-   private static final long CLOSING_SLEEP_TIME = 1000;
+   private static final long CLOSING_SLEEP_TIME = 2000;
    
    private static double epsilon = 1e-10;
    
@@ -90,7 +90,6 @@ public class SimulationConstructionSetUsingDirectCallsTest
    
    private Point location = new Point(25, 50);
    private FallingBrickRobot simpleRobot = new FallingBrickRobot();
-   private String viewportName = "viewportName";
    private String rootRegistryName = "root";
    private String simpleRegistryName = "simpleRegistry";
    private String searchString = "d";
@@ -817,6 +816,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       int initialInOutBufferLength = getInOutBufferLengthFromSCS(scs);
       int initialBufferSize = getBufferSizeFromSCS(scs);
       CaptureDevice captureDevice = getCaptureDeviceFromSCS(scs);
+      addDoubleYoVariablesInSCSRegistry(cameraTrackingXYZVarNames, cameraTrackingXYZVarValues, scs);
 
       addAndSubtractOneFromInAndOutPointIndexWithoutCrop(scs);
       scs.cropBuffer();
@@ -851,19 +851,67 @@ public class SimulationConstructionSetUsingDirectCallsTest
       
       BufferedImage  bufferedImage2 = scs.exportSnapshotAsBufferedImage();
       assertNotNull(bufferedImage2);
+
+      File file = new File("file.csv");
+      scs.writeSpreadsheetFormattedData("all", file);
+      assertTheFileContainsTheVariables(file, cameraTrackingXYZVarNames);
+      file.delete();  
       
-      addDoubleYoVariablesInSCSRegistry(cameraTrackingXYZVarNames, cameraTrackingXYZVarValues, scs);
-      File fileOne2 = new File("fileOne");
-      File fileTwo2 = new File("fileTwo");
-      scs.writeSpreadsheetFormattedData("all", fileOne2);
-      scs.writeSpreadsheetFormattedData("all", fileTwo2);
-      assertTheFileContainsTheVariables(fileOne2, cameraTrackingXYZVarNames);
-      fileOne2.delete();
-      fileTwo2.delete();  
+      File file2 = new File("file.gz");
+      scs.writeData(file2);
+      SimulationConstructionSet scs2 = createNewSCSWithEmptyRobot("simpleRobot2");
+      scs2.readData(file2);
+      assertSCSContainsTheVariables(scs2, cameraTrackingXYZVarNames);
+      closeGivenSCS(scs2);
+      
+      File file3 = new File("file.csv");
+      scs.writeSpreadsheetFormattedData("all", file3);
+      SimulationConstructionSet scs3 = createNewSCSWithEmptyRobot("simpleRobot3");
+      scs3.readData(file3);
+      assertSCSContainsTheVariables(scs3, cameraTrackingXYZVarNames);
+      closeGivenSCS(scs3);
+      
+      String defaultTimeVariable = scs.getTimeVariableName();
+      scs.setTimeVariableName(cameraTrackingXYZVarNames[0]);
+      String timeVariableNameFromSCS = scs.getTimeVariableName();
+      assertEquals(cameraTrackingXYZVarNames[0], timeVariableNameFromSCS);
+      scs.setTimeVariableName(defaultTimeVariable);
+      
    }
    
       
    // local methods
+   
+   private SimulationConstructionSet createNewSCSWithEmptyRobot(String robotName)
+   {
+      return new SimulationConstructionSet(new Robot(robotName));
+   }
+   
+   private void closeGivenSCS(SimulationConstructionSet scs)
+   {
+      ThreadTools.sleep(CLOSING_SLEEP_TIME);
+      scs.closeAndDispose();
+      scs = null;
+   }
+   
+   private void assertSCSContainsTheVariables(SimulationConstructionSet scs, String[] variablesNames)
+   {
+      YoVariableRegistry registry = scs.getRootRegistry();
+      String[] variableNamesFromSCS = getAllVariableNamesFromRegistry(registry);
+      assertArrayOfStringsContainsTheStrings(variableNamesFromSCS, variablesNames);
+   }
+   
+   private String[] getAllVariableNamesFromRegistry(YoVariableRegistry registry)
+   {
+      int numberOfVariables = registry.getNumberOfYoVariables();
+      String [] names = new String[numberOfVariables];   
+      for(int i = 0; i < numberOfVariables; i++)
+      {
+         names[i] = registry.getYoVariable(i).getName();
+      }
+      
+      return names;
+   }
    
    private void assertTheFileContainsTheVariables(File file, String[] variablesNames)
    { 
