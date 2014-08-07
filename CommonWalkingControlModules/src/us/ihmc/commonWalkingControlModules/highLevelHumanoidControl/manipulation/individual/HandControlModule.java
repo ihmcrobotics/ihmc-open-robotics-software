@@ -7,7 +7,7 @@ import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.SE3PDGains;
+import us.ihmc.commonWalkingControlModules.controlModules.SE3PIDGains;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.AbstractJointSpaceHandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.InverseKinematicsTaskspaceHandPositionControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.JointSpaceHandControlState;
@@ -65,16 +65,14 @@ public class HandControlModule
    private final String name;
    private final RobotSide robotSide;
    private final TwistCalculator twistCalculator;
-   private final SE3PDGains taskspaceControlGains;
+   private final SE3PIDGains taskspaceControlGains;
    private final RigidBody chest, hand;
 
    private final FullRobotModel fullRobotModel;
 
    private final double controlDT;
 
-   private final DoubleYoVariable maxAccelerationArmTaskspace, maxJerkArmTaskspace;
-
-   public HandControlModule(RobotSide robotSide, SE3PDGains taskspaceControlGains, MomentumBasedController momentumBasedController,
+   public HandControlModule(RobotSide robotSide, SE3PIDGains taskspaceControlGains, MomentumBasedController momentumBasedController,
          ArmControllerParameters armControlParameters, ControlStatusProducer controlStatusProducer, YoVariableRegistry parentRegistry)
    {
       this.controlDT = momentumBasedController.getControlDT();
@@ -157,11 +155,6 @@ public class HandControlModule
 
       setupStateMachine(simulationTime);
 
-      maxAccelerationArmTaskspace = new DoubleYoVariable("maxAccelerationArmTaskspace", registry);
-      maxAccelerationArmTaskspace.set(armControlParameters.getArmTaskspaceMaxAcceleration());
-      maxJerkArmTaskspace = new DoubleYoVariable("maxJerkArmTaskspace", registry);
-      maxJerkArmTaskspace.set(armControlParameters.getArmTaskspaceMaxJerk());
-
       jointCurrentPositionMap = new LinkedHashMap<OneDoFJoint, Double>();
       for (OneDoFJoint oneDoFJoint : oneDoFJoints)
       {
@@ -201,18 +194,16 @@ public class HandControlModule
       return stateMachine.getCurrentState().isDone();
    }
 
-   public void executeTaskSpaceTrajectory(PositionTrajectoryGenerator positionTrajectory, OrientationTrajectoryGenerator orientationTrajectory, SE3PDGains gains)
+   public void executeTaskSpaceTrajectory(PositionTrajectoryGenerator positionTrajectory, OrientationTrajectoryGenerator orientationTrajectory, SE3PIDGains gains)
    {
       handSpatialAccelerationControlModule.setGains(gains);
-      handSpatialAccelerationControlModule.setOrientationMaxAccelerationAndJerk(maxAccelerationArmTaskspace.getDoubleValue(), maxJerkArmTaskspace.getDoubleValue());
-      handSpatialAccelerationControlModule.setPositionMaxAccelerationAndJerk(maxAccelerationArmTaskspace.getDoubleValue(), maxJerkArmTaskspace.getDoubleValue());
 
       taskSpacePositionControlState.setTrajectory(positionTrajectory, orientationTrajectory, handSpatialAccelerationControlModule);
       requestedState.set(taskSpacePositionControlState.getStateEnum());
       stateMachine.checkTransitionConditions();
    }
 
-   public void moveInStraightLine(FramePose finalDesiredPose, double time, ReferenceFrame trajectoryFrame, SE3PDGains gains)
+   public void moveInStraightLine(FramePose finalDesiredPose, double time, ReferenceFrame trajectoryFrame, SE3PIDGains gains)
    {
       FramePose pose = computeDesiredFramePose(trajectoryFrame);
 

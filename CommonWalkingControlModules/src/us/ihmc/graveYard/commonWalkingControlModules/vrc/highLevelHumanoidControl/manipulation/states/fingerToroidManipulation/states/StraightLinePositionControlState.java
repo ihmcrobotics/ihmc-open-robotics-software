@@ -1,6 +1,6 @@
 package us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.manipulation.states.fingerToroidManipulation.states;
 
-import us.ihmc.commonWalkingControlModules.controlModules.SE3PDGains;
+import us.ihmc.commonWalkingControlModules.controlModules.SE3PIDGains;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlModule;
 import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.manipulation.states.fingerToroidManipulation.FingerToroidManipulationState;
 import us.ihmc.robotSide.RobotSide;
@@ -30,12 +30,12 @@ public class StraightLinePositionControlState extends State<FingerToroidManipula
    private final RigidBody base;
    private final ReferenceFrame trajectoryFrame = ReferenceFrame.getWorldFrame();
    private final FramePose finalDesiredPose = new FramePose(trajectoryFrame);
-   private final SE3PDGains gains;
+   private final SE3PIDGains gains;
 
    public StraightLinePositionControlState(FingerToroidManipulationState stateEnum,
                                            SideDependentList<HandControlModule> individualHandControlModules, RigidBody rootBody,
                                            SideDependentList<SE3ConfigurationProvider> finalConfigurationProviders, SideDependentList<ReferenceFrame> handPositionControlFrames,
-                                           double trajectoryTime, SE3PDGains gains)
+                                           double trajectoryTime, SE3PIDGains gains)
    {
       super(stateEnum);
       this.individualHandControlModules = individualHandControlModules;

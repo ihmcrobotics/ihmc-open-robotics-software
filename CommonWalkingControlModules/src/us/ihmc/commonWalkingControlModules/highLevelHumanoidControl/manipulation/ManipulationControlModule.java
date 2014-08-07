@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.SE3PDGains;
+import us.ihmc.commonWalkingControlModules.controlModules.SE3PIDGains;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
@@ -39,6 +39,7 @@ public class ManipulationControlModule
    private final List<DynamicGraphicReferenceFrame> dynamicGraphicReferenceFrames = new ArrayList<DynamicGraphicReferenceFrame>();
 
    private final DoubleYoVariable kpArmTaskspace, kdArmTaskspace, kiArmTaskspace, zetaArmTaskspace, maxIntegralErrorArmTaskspace;
+   private final DoubleYoVariable maxAccelerationArmTaskspace, maxJerkArmTaskspace;
 
    private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable("hasBeenInitialized", registry);
    private final SideDependentList<HandControlModule> handControlModules;
@@ -49,7 +50,7 @@ public class ManipulationControlModule
    private final HandPoseProvider handPoseProvider;
    private final DesiredHandLoadBearingProvider handLoadBearingProvider;
 
-   private final SE3PDGains taskspaceControlGains = new SE3PDGains();
+   private final SE3PIDGains taskspaceControlGains = new SE3PIDGains();
 
    public ManipulationControlModule(VariousWalkingProviders variousWalkingProviders, ArmControllerParameters armControlParameters,
          MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
@@ -72,19 +73,27 @@ public class ManipulationControlModule
          handControlModules.put(robotSide, individualHandControlModule);
       }
 
-      kpArmTaskspace = new DoubleYoVariable("kpArmTaskspace", registry);
+      String suffix = "ArmTaskspace";
+      
+      kpArmTaskspace = new DoubleYoVariable("kp" + suffix, registry);
       kpArmTaskspace.set(armControlParameters.getArmTaskspaceKp());
 
-      zetaArmTaskspace = new DoubleYoVariable("zetaArmTaskspace", registry);
+      zetaArmTaskspace = new DoubleYoVariable("zeta" + suffix, registry);
       zetaArmTaskspace.set(armControlParameters.getArmTaskspaceZeta());
 
-      kdArmTaskspace = new DoubleYoVariable("kdArmTaskspace", registry);
+      kdArmTaskspace = new DoubleYoVariable("kd" + suffix, registry);
 
-      kiArmTaskspace = new DoubleYoVariable("kiArmTaskspace", registry);
+      kiArmTaskspace = new DoubleYoVariable("ki" + suffix, registry);
       kiArmTaskspace.set(armControlParameters.getArmTaskspaceKi());
 
-      maxIntegralErrorArmTaskspace = new DoubleYoVariable("maxIntegralErrorArmTaskspace", registry);
+      maxIntegralErrorArmTaskspace = new DoubleYoVariable("maxIntegralError" + suffix, registry);
       maxIntegralErrorArmTaskspace.set(armControlParameters.getArmTaskspaceMaxIntegralError());
+
+      maxAccelerationArmTaskspace = new DoubleYoVariable("maxAcceleration" + suffix, registry);
+      maxAccelerationArmTaskspace.set(armControlParameters.getArmTaskspaceMaxAcceleration());
+
+      maxJerkArmTaskspace = new DoubleYoVariable("maxJerk" + suffix, registry);
+      maxJerkArmTaskspace.set(armControlParameters.getArmTaskspaceMaxJerk());
 
       setupVariableListener();
 
@@ -99,9 +108,9 @@ public class ManipulationControlModule
          {
             kdArmTaskspace.set(GainCalculator.computeDerivativeGain(kpArmTaskspace.getDoubleValue(), zetaArmTaskspace.getDoubleValue()));
 
-            taskspaceControlGains.set(kpArmTaskspace.getDoubleValue(), zetaArmTaskspace.getDoubleValue(), kiArmTaskspace.getDoubleValue(),
-                  maxIntegralErrorArmTaskspace.getDoubleValue(), kpArmTaskspace.getDoubleValue(), zetaArmTaskspace.getDoubleValue(),
-                  kiArmTaskspace.getDoubleValue(), maxIntegralErrorArmTaskspace.getDoubleValue());
+            taskspaceControlGains.setPositionGains(kpArmTaskspace.getDoubleValue(), zetaArmTaskspace.getDoubleValue(), kiArmTaskspace.getDoubleValue(), maxIntegralErrorArmTaskspace.getDoubleValue());
+            taskspaceControlGains.setOrientationGains(kpArmTaskspace.getDoubleValue(), zetaArmTaskspace.getDoubleValue(), kiArmTaskspace.getDoubleValue(), maxIntegralErrorArmTaskspace.getDoubleValue());
+            taskspaceControlGains.setMaximumAccelerationAndJerk(maxAccelerationArmTaskspace.getDoubleValue(), maxJerkArmTaskspace.getDoubleValue());
          }
       };
 
@@ -110,6 +119,8 @@ public class ManipulationControlModule
       kdArmTaskspace.addVariableChangedListener(listener);
       kiArmTaskspace.addVariableChangedListener(listener);
       maxIntegralErrorArmTaskspace.addVariableChangedListener(listener);
+      maxAccelerationArmTaskspace.addVariableChangedListener(listener);
+      maxJerkArmTaskspace.addVariableChangedListener(listener);
 
       listener.variableChanged(null);
    }

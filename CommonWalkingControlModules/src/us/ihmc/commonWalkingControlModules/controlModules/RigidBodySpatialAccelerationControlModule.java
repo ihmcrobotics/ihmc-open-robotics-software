@@ -21,7 +21,7 @@ public class RigidBodySpatialAccelerationControlModule
 
    private final YoVariableRegistry registry;
    private final TwistCalculator twistCalculator;
-   private final SE3PDController se3pdController;
+   private final SE3PIDController se3pdController;
    private final SpatialAccelerationVector acceleration;
    private final RigidBody endEffector;
    private final ReferenceFrame endEffectorFrame;
@@ -38,7 +38,7 @@ public class RigidBodySpatialAccelerationControlModule
       this.twistCalculator = twistCalculator;
       this.endEffector = endEffector;
       this.endEffectorFrame = endEffectorFrame;
-      this.se3pdController = new SE3PDController(namePrefix, endEffectorFrame, VISUALIZE, dt, registry);
+      this.se3pdController = new SE3PIDController(namePrefix, endEffectorFrame, VISUALIZE, dt, registry);
       this.acceleration = new SpatialAccelerationVector();
 
       desiredAccelerationLinearViz = new YoFrameVector(namePrefix + "LinearAccelViz", endEffectorFrame, registry);
@@ -198,7 +198,7 @@ public class RigidBodySpatialAccelerationControlModule
       return endEffectorFrame;
    }
 
-   public void setGains(SE3PDGains gains)
+   public void setGains(SE3PIDGains gains)
    {
       se3pdController.setGains(gains);
    }
