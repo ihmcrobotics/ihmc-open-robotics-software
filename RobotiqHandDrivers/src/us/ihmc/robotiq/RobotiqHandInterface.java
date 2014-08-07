@@ -6,8 +6,9 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 
 import us.ihmc.robotSide.RobotSide;
-import us.ihmc.robotiq.ModbusTCPConnection.ModbusException;
-import us.ihmc.robotiq.ModbusTCPConnection.ModbusResponseTooShortException;
+import us.ihmc.robotiq.communication.ModbusTCPConnection;
+import us.ihmc.robotiq.communication.ModbusTCPConnection.ModbusException;
+import us.ihmc.robotiq.communication.ModbusTCPConnection.ModbusResponseTooShortException;
 import us.ihmc.utilities.ThreadTools;
 
 /* GENERAL INFO
@@ -343,7 +344,7 @@ public final class RobotiqHandInterface
 		this(RobotiqHandParameters.LEFT_HAND_ADDRESS);
 	}
 	
-	RobotiqHandInterface(String address)
+	public RobotiqHandInterface(String address)
 	{
 		this.address = address;
 	}
