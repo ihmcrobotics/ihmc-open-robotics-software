@@ -1,4 +1,4 @@
-package us.ihmc.Robotiq;
+package us.ihmc.robotiq;
 
 public final class RobotiqHandParameters
 {

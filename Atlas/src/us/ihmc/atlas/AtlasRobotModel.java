@@ -4,7 +4,6 @@ import java.net.URI;
 
 import javax.media.j3d.Transform3D;
 
-import us.ihmc.Robotiq.RobotiqCommandManager;
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
@@ -38,6 +37,7 @@ import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.iRobot.control.IRobotCommandManager;
 import us.ihmc.iRobot.model.iRobotHandModel;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.robotiq.RobotiqCommandManager;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.utilities.math.TimeTools;
 

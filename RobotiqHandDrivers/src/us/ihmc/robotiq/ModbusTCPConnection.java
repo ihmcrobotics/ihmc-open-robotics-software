@@ -1,4 +1,4 @@
-package us.ihmc.Robotiq;
+package us.ihmc.robotiq;
 
 import java.io.BufferedInputStream;
 import java.io.FilterInputStream;
