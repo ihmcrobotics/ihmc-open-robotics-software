@@ -3,6 +3,8 @@ package us.ihmc.robotiq;
 import java.io.IOException;
 import java.net.UnknownHostException;
 
+import us.ihmc.robotiq.communication.ModbusTCPConnection;
+
 public class ConnectionTesting
 {
 	public static void main(String[] args) throws Exception
