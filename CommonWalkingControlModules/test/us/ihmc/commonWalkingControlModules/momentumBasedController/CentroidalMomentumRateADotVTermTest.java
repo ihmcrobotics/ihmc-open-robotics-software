@@ -45,7 +45,7 @@ public class CentroidalMomentumRateADotVTermTest
    private final DenseMatrix64F aDotVNumerical = new DenseMatrix64F(6, 1);
    private final DenseMatrix64F aDotVAnalytical = new DenseMatrix64F(6, 1);
 
-   @Ignore
+//   @Ignore
    @Test
    public void chainTest() throws UnreasonableAccelerationException
    {
@@ -65,7 +65,7 @@ public class CentroidalMomentumRateADotVTermTest
       assertADotV(random, joints, elevator, robot,numberOfJoints);
    }
 
-   @Ignore
+//   @Ignore
    @Test
    public void treeTest() throws UnreasonableAccelerationException
    {
