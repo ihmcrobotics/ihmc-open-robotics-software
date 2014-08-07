@@ -1,4 +1,4 @@
-package us.ihmc.Robotiq;
+package us.ihmc.robotiq;
 
 import java.io.IOException;
 import java.net.UnknownHostException;

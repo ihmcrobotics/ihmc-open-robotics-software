@@ -1,13 +1,13 @@
-package us.ihmc.Robotiq;
+package us.ihmc.robotiq;
 
 import java.io.IOException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 
-import us.ihmc.Robotiq.ModbusTCPConnection.ModbusException;
-import us.ihmc.Robotiq.ModbusTCPConnection.ModbusResponseTooShortException;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.robotiq.ModbusTCPConnection.ModbusException;
+import us.ihmc.robotiq.ModbusTCPConnection.ModbusResponseTooShortException;
 import us.ihmc.utilities.ThreadTools;
 
 /* GENERAL INFO
