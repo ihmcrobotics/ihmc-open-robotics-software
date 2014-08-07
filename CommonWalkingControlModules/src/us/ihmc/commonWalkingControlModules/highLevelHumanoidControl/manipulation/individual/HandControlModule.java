@@ -8,6 +8,7 @@ import java.util.Map;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.SE3PIDGains;
+import us.ihmc.commonWalkingControlModules.controlModules.YoPIDGains;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.AbstractJointSpaceHandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.InverseKinematicsTaskspaceHandPositionControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.JointSpaceHandControlState;
@@ -65,15 +66,14 @@ public class HandControlModule
    private final String name;
    private final RobotSide robotSide;
    private final TwistCalculator twistCalculator;
-   private final SE3PIDGains taskspaceControlGains;
    private final RigidBody chest, hand;
 
    private final FullRobotModel fullRobotModel;
 
    private final double controlDT;
 
-   public HandControlModule(RobotSide robotSide, SE3PIDGains taskspaceControlGains, MomentumBasedController momentumBasedController,
-         ArmControllerParameters armControlParameters, ControlStatusProducer controlStatusProducer, YoVariableRegistry parentRegistry)
+   public HandControlModule(RobotSide robotSide, MomentumBasedController momentumBasedController,
+         ArmControllerParameters armControlParameters, YoPIDGains jointspaceGains, ControlStatusProducer controlStatusProducer, YoVariableRegistry parentRegistry)
    {
       this.controlDT = momentumBasedController.getControlDT();
 
@@ -88,8 +88,6 @@ public class HandControlModule
       name = namePrefix + getClass().getSimpleName();
       registry = new YoVariableRegistry(name);
       twistCalculator = momentumBasedController.getTwistCalculator();
-
-      this.taskspaceControlGains = taskspaceControlGains;
 
       oneDoFJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(chest, hand), OneDoFJoint.class);
 
@@ -127,7 +125,7 @@ public class HandControlModule
       else
       {
          jointSpaceHandControlState = new JointSpaceHandControlState(namePrefix, HandControlState.JOINT_SPACE, robotSide, oneDoFJoints,
-               momentumBasedController, armControlParameters, controlDT, registry);
+               momentumBasedController, armControlParameters, jointspaceGains, controlDT, registry);
       }
 
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
@@ -262,14 +260,14 @@ public class HandControlModule
       return stateMachine.getCurrentStateEnum() == HandControlState.LOAD_BEARING;
    }
 
-   public void holdPositionInBase()
+   public void holdPositionInBase(SE3PIDGains gains)
    {
       FramePose currentDesiredHandPose = computeDesiredFramePose(chest.getBodyFixedFrame());
 
       holdPoseTrajectoryGenerator.registerAndSwitchFrame(chest.getBodyFixedFrame());
       holdPoseTrajectoryGenerator.setConstantPose(currentDesiredHandPose);
 
-      executeTaskSpaceTrajectory(holdPoseTrajectoryGenerator, holdPoseTrajectoryGenerator, taskspaceControlGains);
+      executeTaskSpaceTrajectory(holdPoseTrajectoryGenerator, holdPoseTrajectoryGenerator, gains);
    }
 
    public void holdPositionInJointSpace()
