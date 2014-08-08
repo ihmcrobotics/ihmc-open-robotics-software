@@ -15,6 +15,7 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.controller.SE3PIDController;
 import com.yobotics.simulationconstructionset.util.controller.SE3PIDGains;
+import com.yobotics.simulationconstructionset.util.controller.YoSE3PIDGains;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public class RigidBodySpatialAccelerationControlModule
@@ -36,11 +37,17 @@ public class RigidBodySpatialAccelerationControlModule
    public RigidBodySpatialAccelerationControlModule(String namePrefix, TwistCalculator twistCalculator, RigidBody endEffector, ReferenceFrame endEffectorFrame,
          double dt, YoVariableRegistry parentRegistry)
    {
+      this(namePrefix, twistCalculator, endEffector, endEffectorFrame, dt, null, parentRegistry);
+   }
+
+   public RigidBodySpatialAccelerationControlModule(String namePrefix, TwistCalculator twistCalculator, RigidBody endEffector, ReferenceFrame endEffectorFrame,
+         double dt, YoSE3PIDGains taskspaceGains, YoVariableRegistry parentRegistry)
+   {
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       this.twistCalculator = twistCalculator;
       this.endEffector = endEffector;
       this.endEffectorFrame = endEffectorFrame;
-      this.se3pdController = new SE3PIDController(namePrefix, endEffectorFrame, VISUALIZE, dt, registry);
+      this.se3pdController = new SE3PIDController(namePrefix, endEffectorFrame, VISUALIZE, dt, taskspaceGains, registry);
       this.acceleration = new SpatialAccelerationVector();
 
       desiredAccelerationLinearViz = new YoFrameVector(namePrefix + "LinearAccelViz", endEffectorFrame, registry);
@@ -82,15 +89,6 @@ public class RigidBodySpatialAccelerationControlModule
    public void packAcceleration(SpatialAccelerationVector accelerationToPack)
    {
       accelerationToPack.set(acceleration);
-   }
-
-   public FrameVector getPositionErrorInWorld()
-   {
-      FrameVector ret = new FrameVector(endEffectorFrame);
-      se3pdController.getPositionError(ret);
-      ret.changeFrame(ReferenceFrame.getWorldFrame());
-
-      return ret;
    }
 
    Twist currentTwist = new Twist();
