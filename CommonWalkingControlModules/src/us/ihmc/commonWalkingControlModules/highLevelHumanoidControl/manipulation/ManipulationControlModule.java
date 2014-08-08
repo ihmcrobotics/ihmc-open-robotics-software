@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.SE3PIDGains;
-import us.ihmc.commonWalkingControlModules.controlModules.YoPIDGains;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
@@ -23,6 +21,8 @@ import com.yobotics.simulationconstructionset.VariableChangedListener;
 import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.controller.GainCalculator;
+import com.yobotics.simulationconstructionset.util.controller.SE3PIDGains;
+import com.yobotics.simulationconstructionset.util.controller.YoPIDGains;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
