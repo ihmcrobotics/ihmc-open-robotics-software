@@ -857,25 +857,46 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertTheFileContainsTheVariables(file, cameraTrackingXYZVarNames);
       file.delete();  
       
-      File file2 = new File("file.gz");
+      File file2 = new File("file2.gz");
       scs.writeData(file2);
       SimulationConstructionSet scs2 = createNewSCSWithEmptyRobot("simpleRobot2");
       scs2.readData(file2);
       assertSCSContainsTheVariables(scs2, cameraTrackingXYZVarNames);
-      closeGivenSCS(scs2);
+      closeGivenSCSAndDeleteFile(scs2, file2);
       
-      File file3 = new File("file.csv");
+      File file3 = new File("file3.csv");
       scs.writeSpreadsheetFormattedData("all", file3);
       SimulationConstructionSet scs3 = createNewSCSWithEmptyRobot("simpleRobot3");
       scs3.readData(file3);
       assertSCSContainsTheVariables(scs3, cameraTrackingXYZVarNames);
-      closeGivenSCS(scs3);
+      closeGivenSCSAndDeleteFile(scs3, file3);
       
       String defaultTimeVariable = scs.getTimeVariableName();
       scs.setTimeVariableName(cameraTrackingXYZVarNames[0]);
       String timeVariableNameFromSCS = scs.getTimeVariableName();
       assertEquals(cameraTrackingXYZVarNames[0], timeVariableNameFromSCS);
       scs.setTimeVariableName(defaultTimeVariable);
+      
+      File file4 = new File("file4.state");
+      scs.writeState(file4);
+      double initialTime = scs.getTime();
+      simulateForTime(scs, simulateTime);
+      scs.readState(file4);
+      double timeAfterReadState =scs.getTime();
+      assertEquals(initialTime, timeAfterReadState, epsilon);
+      file4.delete();
+      
+      File file5 = new File("file5.csv");
+      scs.writeSpreadsheetFormattedState("all", file5);
+      assertTheFileContainsTheVariables(file5, cameraTrackingXYZVarNames);
+
+      scs.writeState("test.state");
+      double initialTime2 = scs.getTime();
+      simulateForTime(scs, simulateTime);
+      scs.readState("test.state");
+      double timeAfterReadState2 =scs.getTime();
+      assertEquals(initialTime2, timeAfterReadState2, epsilon);
+      
       
    }
    
@@ -885,6 +906,12 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private SimulationConstructionSet createNewSCSWithEmptyRobot(String robotName)
    {
       return new SimulationConstructionSet(new Robot(robotName));
+   }
+   
+   private void closeGivenSCSAndDeleteFile(SimulationConstructionSet scs, File file)
+   {
+      file.delete();
+      closeGivenSCS(scs);
    }
    
    private void closeGivenSCS(SimulationConstructionSet scs)
