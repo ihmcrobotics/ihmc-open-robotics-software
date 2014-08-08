@@ -10,7 +10,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.EuclideanPositionController;
+import com.yobotics.simulationconstructionset.util.controller.EuclideanPositionController;
 
 public class CoMBasedMomentumRateOfChangeControlModule extends AbstractControlFlowElement implements MomentumRateOfChangeControlModule
 {

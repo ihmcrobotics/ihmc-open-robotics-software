@@ -9,7 +9,7 @@ import us.ihmc.utilities.screwTheory.SpatialForceVector;
 import us.ihmc.utilities.screwTheory.Twist;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.PDController;
+import com.yobotics.simulationconstructionset.util.controller.PDController;
 
 /**
  * @author twan

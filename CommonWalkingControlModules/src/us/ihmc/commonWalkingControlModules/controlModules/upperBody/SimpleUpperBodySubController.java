@@ -13,7 +13,7 @@ import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.PIDController;
+import com.yobotics.simulationconstructionset.util.controller.PIDController;
 
 public class SimpleUpperBodySubController implements UpperBodySubController
 {
