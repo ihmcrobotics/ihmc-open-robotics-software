@@ -13,6 +13,8 @@ import us.ihmc.utilities.screwTheory.TwistCalculator;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.controller.SE3PIDController;
+import com.yobotics.simulationconstructionset.util.controller.SE3PIDGains;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public class RigidBodySpatialAccelerationControlModule
