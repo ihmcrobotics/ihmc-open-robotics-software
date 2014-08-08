@@ -11,7 +11,7 @@ import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.PIDController;
+import com.yobotics.simulationconstructionset.util.controller.PIDController;
 
 public abstract class PDArmControlModule implements ArmControlModule
 {

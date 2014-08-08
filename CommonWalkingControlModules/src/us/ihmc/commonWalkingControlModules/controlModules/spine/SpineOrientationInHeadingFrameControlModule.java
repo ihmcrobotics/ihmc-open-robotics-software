@@ -15,7 +15,7 @@ import us.ihmc.utilities.screwTheory.Wrench;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.AxisAngleOrientationController;
+import com.yobotics.simulationconstructionset.util.controller.AxisAngleOrientationController;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public class SpineOrientationInHeadingFrameControlModule implements SpineControlModule

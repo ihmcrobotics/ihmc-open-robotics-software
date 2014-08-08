@@ -8,7 +8,7 @@ import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.AxisAngleOrientationController;
+import com.yobotics.simulationconstructionset.util.controller.AxisAngleOrientationController;
 
 public class RigidBodyOrientationControlModule
 {
