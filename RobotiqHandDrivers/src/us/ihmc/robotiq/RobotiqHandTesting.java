@@ -5,7 +5,7 @@ import java.net.UnknownHostException;
 
 import us.ihmc.robotiq.communication.ModbusTCPConnection;
 
-public class ConnectionTesting
+public class RobotiqHandTesting
 {
 	public static void main(String[] args) throws Exception
 	{
