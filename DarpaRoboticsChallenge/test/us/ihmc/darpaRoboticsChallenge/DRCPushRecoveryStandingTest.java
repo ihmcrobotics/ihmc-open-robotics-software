@@ -29,8 +29,9 @@ import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimu
 public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInterface
 {
    private final static boolean KEEP_SCS_UP = false;
-   private final static boolean SHOW_GUI = true;
-   private final static boolean VISUALIZE_FORCE = true;
+   private static final boolean createMovie = BambooTools.doMovieCreation();
+   private static final boolean SHOW_GUI = KEEP_SCS_UP || createMovie;
+   private final static boolean VISUALIZE_FORCE = false;
 
    private DRCPushRobotController pushRobotController;
    private BlockingSimulationRunner blockingSimulationRunner;
@@ -277,7 +278,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
       enableDS.set(true);
       
       // enable ICP push recovery planner and disable projection planner
-      useICPProjectionPlanner.set(false);;
+      useICPProjectionPlanner.set(false);
       usePushRecoveryICPPlanner.set(true);
 
       return track;
