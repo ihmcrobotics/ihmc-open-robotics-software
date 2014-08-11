@@ -1,6 +1,9 @@
 package us.ihmc.robotiq.data;
 
+import java.util.Arrays;
+
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandSensorData;
+import us.ihmc.robotiq.RobotiqHandInterface;
 
 public class RobotiqHandSensorData implements HandSensorData
 {
@@ -8,7 +11,8 @@ public class RobotiqHandSensorData implements HandSensorData
 	static final int FINGER_B = 1;
 	static final int FINGER_C = 2;
 	static final int SCISSOR = 3;
-	private static final int[] fingers = {FINGER_A, FINGER_B, FINGER_C, SCISSOR};
+	private static final int[] FINGERS = {FINGER_A, FINGER_B, FINGER_C};
+	private static final int MAX_POSITION_VALUE = 0xFF;
 	
 	static final int IN_MOTION = 0;
 	static final int STOPPED_SOME_SHORT = 1;
@@ -174,16 +178,19 @@ public class RobotiqHandSensorData implements HandSensorData
 		return null;
 	}
 	
+	double[] temp = new double[2];
 	public double[][] getFingerJointAngles()
 	{
 		double[][] fingerJointAngles = new double[4][];
-		double[] temp = new double[1];
 		
-		for(int finger : fingers)
+		for(int finger : FINGERS)
 		{
-			temp[0] = (double)position[finger];
-			fingerJointAngles[finger] = temp;
+			temp[0] = (double)position[finger] * 62.5  / MAX_POSITION_VALUE;
+			temp[1] = (double)position[finger] * 90.0 / MAX_POSITION_VALUE;
+			fingerJointAngles[finger] = Arrays.copyOf(temp, 2);
 		}
+		temp[0] = (double)position[SCISSOR] * 32 / MAX_POSITION_VALUE;
+		fingerJointAngles[SCISSOR] = Arrays.copyOf(temp, 1);
 		return fingerJointAngles;
 	}
 
