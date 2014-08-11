@@ -231,7 +231,11 @@ public abstract class SCSCollisionDetectorTest
       {
       }
 
-      public void maintenance()
+      public void maintenanceBeforeCollisionDetection()
+      {
+      }
+      
+      public void maintenanceAfterCollisionDetection()
       {
       }
 
@@ -258,10 +262,14 @@ public abstract class SCSCollisionDetectorTest
       {
       }
 
-      public void maintenance()
+      public void maintenanceBeforeCollisionDetection()
       {
       }
-
+      
+      public void maintenanceAfterCollisionDetection()
+      {
+      }
+      
       public void addListener(Listener listener)
       {
       }
@@ -286,7 +294,11 @@ public abstract class SCSCollisionDetectorTest
       {
       }
 
-      public void maintenance()
+      public void maintenanceBeforeCollisionDetection()
+      {
+      }
+      
+      public void maintenanceAfterCollisionDetection()
       {
       }
 
@@ -309,7 +321,11 @@ public abstract class SCSCollisionDetectorTest
       {
       }
 
-      public void maintenance()
+      public void maintenanceBeforeCollisionDetection()
+      {
+      }
+      
+      public void maintenanceAfterCollisionDetection()
       {
       }
 
