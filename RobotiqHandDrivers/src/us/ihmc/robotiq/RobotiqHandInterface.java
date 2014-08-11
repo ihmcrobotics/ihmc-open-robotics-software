@@ -471,6 +471,7 @@ public final class RobotiqHandInterface
 //		blockDuringMotion();
 	}
 	
+	//TODO: Check if this function operates as expected on the real hand
 	public void open(float percent)
 	{
 		
@@ -507,6 +508,7 @@ public final class RobotiqHandInterface
 //		blockDuringMotion();
 	}
 	
+	//TODO: Check if this function operates as expected on the real hand
 	public void close(float percent) throws InterruptedException
 	{
 		if(operationMode == PINCH_MODE)
@@ -516,13 +518,13 @@ public final class RobotiqHandInterface
 		}
 		else
 		{
-			position[FINGER_A] = (byte)(percent * FULLY_CLOSED); // also all fingers
+			position[FINGER_A] = (byte)(percent * (0xFF & FULLY_CLOSED)); // also all fingers
 			force[FINGER_A] = MAX_FORCE/2;
 			if(fingerControl == INDIVIDUAL_FINGER_CONTROL)
 			{
-				position[FINGER_B] = (byte)(percent * FULLY_CLOSED);
+				position[FINGER_B] = (byte)(percent * (0xFF & FULLY_CLOSED));
 				force[FINGER_B] = MAX_FORCE/2;
-				position[FINGER_C] = (byte)(percent * FULLY_CLOSED);
+				position[FINGER_C] = (byte)(percent * (0xFF & FULLY_CLOSED));
 				force[FINGER_C] = MAX_FORCE/2;
 			}
 		}
@@ -560,6 +562,16 @@ public final class RobotiqHandInterface
 			ThreadTools.sleep(200);
 			status = this.getStatus();
 		}while((status[GRIPPER_STATUS] & MOTION_STATUS_MASK) == IN_MOTION);
+	}
+	
+	public void stop()
+	{
+		status = getStatus();
+		position[FINGER_A] = status[FINGER_A_POSITION];
+		position[FINGER_B] = status[FINGER_B_POSITION];
+		position[FINGER_C] = status[FINGER_C_POSITION];
+		position[SCISSOR] = status[SCISSOR_POSITION];
+		sendMotionRequest();
 	}
 	
 	public void pinchGrip() throws InterruptedException
@@ -714,7 +726,6 @@ public final class RobotiqHandInterface
 		return positions;
 	}
 	
-	//TODO: This thing
 	private RobotiqHandSensorData handData = new RobotiqHandSensorData(null);
 	public RobotiqHandSensorData getHandStatus()
 	{
@@ -853,11 +864,17 @@ public final class RobotiqHandInterface
 		sendRequest(SET_REGISTERS, REGISTER_START, Arrays.copyOfRange(data,0,dataLength));
 	}
 	
-	private byte[] getStatus() //gets the status of every register
+	private byte[] getStatus() //gets the status of every register and updates internal record of status
 	{
-		return sendRequest(READ_REGISTERS,
-						   REGISTER_START,
-						   (byte)0x08);
+		status = sendRequest(READ_REGISTERS,
+							 REGISTER_START,
+							 (byte)0x08);
+		initializedStatus = (byte)(status[GRIPPER_STATUS] & INITIALIZATON_MASK);
+		operationMode = (byte)(status[GRIPPER_STATUS] & OPERATION_MODE_MASK);
+		commandedStatus = (byte)(status[GRIPPER_STATUS] & GO_TO_REQUESTED_MASK);
+		fingerControl = (byte)(status[OBJECT_STATUS] & INDIVIDUAL_FINGER_CONTROL_MASK);
+		scissorControl = (byte)(status[OBJECT_STATUS] & INDIVIDUAL_SCISSOR_CONTROL_MASK);
+		return status;
 	}
 }
 
