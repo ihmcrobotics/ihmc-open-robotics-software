@@ -2,19 +2,13 @@ package us.ihmc.convexOptimization;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.ArrayList;
-
 import org.junit.Ignore;
 import org.junit.Test;
 
 import com.joptimizer.functions.ConvexMultivariateRealFunction;
 import com.joptimizer.functions.LinearMultivariateRealFunction;
-import com.joptimizer.functions.QuadraticMultivariateRealFunction;
-import com.joptimizer.functions.SOCPLogarithmicBarrier;
-import com.joptimizer.functions.SOCPLogarithmicBarrier.SOCPConstraintParameters;
-import com.joptimizer.optimizers.BarrierMethod;
+import com.joptimizer.optimizers.JOptimizer;
 import com.joptimizer.optimizers.OptimizationRequest;
-import com.joptimizer.optimizers.OptimizationResponse;
 
 public abstract class ConvexOptimizationAdapterTest
 {
@@ -37,15 +31,15 @@ public abstract class ConvexOptimizationAdapterTest
       assertEquals(2.0, solution[0], 1e-7);
    }
    
+   
    @Test
    public void testASimpleRedundantEqualityCase()
    {
       // Minimize x subject to x = 2 and x = 2;
       ConvexOptimizationAdapter convexOptimizationAdapter = createConvexOptimizationAdapter();
-      
       convexOptimizationAdapter.setLinearCostFunctionVector(new double[]{1.0});
-      convexOptimizationAdapter.setLinearEqualityConstraintsAMatrix(new double[][]{{1.0}, {1.0}});
-      convexOptimizationAdapter.setLinearEqualityConstraintsBVector(new double[]{2.0, 2.0});
+      convexOptimizationAdapter.setLinearEqualityConstraintsAMatrix(new double[][]{{1.0},{1.0}});
+      convexOptimizationAdapter.setLinearEqualityConstraintsBVector(new double[]{2.0,2.0});
       
       double[] solution = convexOptimizationAdapter.solve();
       
@@ -54,11 +48,73 @@ public abstract class ConvexOptimizationAdapterTest
    }
    
    @Test
-   public void testASimpleInequalityCase()
+   public void testASimpleRedundantEqualityCase2d()
+   {
+      ConvexOptimizationAdapter convexOptimizationAdapter = createConvexOptimizationAdapter();
+      convexOptimizationAdapter.setLinearCostFunctionVector(new double[]{1.0,1.0});
+      convexOptimizationAdapter.setLinearEqualityConstraintsAMatrix(new double[][]{{1,2},{2,4},{3,7}});
+      convexOptimizationAdapter.setLinearEqualityConstraintsBVector(new double[]{2,4,7});
+      
+      double[] solution = convexOptimizationAdapter.solve();
+      
+      assertEquals(2, solution.length);
+      assertEquals(0.0, solution[0], 1e-7);
+      assertEquals(1.0, solution[1], 1e-7);
+   }
+   
+  @Test
+  public void JOptimizerWebpageLPExample() throws Exception
+  {
+      //from http://www.joptimizer.com/linearProgramming.html
+      
+      // Objective function (plane)
+      double[] qVector = new double[] { -1., -1. };
+      double r= 4;
+      LinearMultivariateRealFunction objectiveFunction = new LinearMultivariateRealFunction(qVector, r);
+
+      //inequalities (polyhedral feasible set G.X<H )
+      ConvexMultivariateRealFunction[] inequalities = new ConvexMultivariateRealFunction[4];
+      double[][] G = new double[][] {{4./3., -1}, {-1./2., 1.}, {-2., -1.}, {1./3., 1.}};
+      double[] h = new double[] {2., 1./2., 2., 1./2.};
+      inequalities[0] = new LinearMultivariateRealFunction(G[0], -h[0]);
+      inequalities[1] = new LinearMultivariateRealFunction(G[1], -h[1]);
+      inequalities[2] = new LinearMultivariateRealFunction(G[2], -h[2]);
+      inequalities[3] = new LinearMultivariateRealFunction(G[3], -h[3]);
+      
+      //optimization problem
+      OptimizationRequest or = new OptimizationRequest();
+      or.setF0(objectiveFunction);
+      or.setFi(inequalities);
+      or.setToleranceFeas(1.E-9);
+      or.setTolerance(1.E-9);
+      
+      //optimization
+      JOptimizer opt = new JOptimizer();
+      opt.setOptimizationRequest(or);
+
+      int returnCode = opt.optimize();
+      double[] sol=opt.getOptimizationResponse().getSolution();
+      assertEquals(1.5, sol[0], 1e-7);
+      assertEquals(0, sol[1], 1e-7);
+      
+      
+      //repeat with out adapter
+      ConvexOptimizationAdapter convexOptimizationAdapter = createConvexOptimizationAdapter();
+      convexOptimizationAdapter.setLinearCostFunctionVector(qVector);
+      convexOptimizationAdapter.setLinearInequalityConstraints(G, h); //-x <= -2.0
+      
+      double[] sol2 = convexOptimizationAdapter.solve();
+      
+      assertEquals(2, sol2.length);
+      assertEquals(1.5, sol2[0], 1e-5);
+      assertEquals(0, sol2[1], 1e-5);
+   }
+   
+   @Test
+   public void testASimpleInequalityCase() throws Exception
    {
       // Minimize x subject to -x <= -2; (x >= 2)
       ConvexOptimizationAdapter convexOptimizationAdapter = createConvexOptimizationAdapter();
-      
       convexOptimizationAdapter.setLinearCostFunctionVector(new double[]{1.0});
       convexOptimizationAdapter.setLinearInequalityConstraints(new double[][]{{-1.0}}, new double[]{-2.0}); //-x <= -2.0
       
@@ -177,6 +233,7 @@ public abstract class ConvexOptimizationAdapterTest
    }
    
    
+   @Ignore //not implement yet
    @Test
    public void testASecondOrderLorenzConeProblemUsingSOCP() throws Exception
    {
