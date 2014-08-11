@@ -21,7 +21,7 @@ import java.util.Map;
  */
 public class CentroidalMomentumHandler
 {
-   private final boolean USE_NUMERICALLY_DIFFERENTIATED_CENTROIDAL_MOMENTUM_MATRIX = true;
+   private final boolean USE_NUMERICALLY_DIFFERENTIATED_CENTROIDAL_MOMENTUM_MATRIX = false;
    
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final CentroidalMomentumMatrix centroidalMomentumMatrix;
@@ -40,7 +40,7 @@ public class CentroidalMomentumHandler
    private final DenseMatrix64F hdot = new DenseMatrix64F(Momentum.SIZE, 1);
    private final DenseMatrix64F centroidalMomentumEquationRightHandSide = new DenseMatrix64F(Momentum.SIZE, 1);
    private final ReferenceFrame centerOfMassFrame;
-   private final CentroidalMomentumRateADotVTerm aDotVAnalytical;
+   private final CentroidalMomentumRateTermCalculator centroidalMomentumRateTermCalculator;
 
    public CentroidalMomentumHandler(InverseDynamicsJoint rootJoint, ReferenceFrame centerOfMassFrame, double controlDT, YoVariableRegistry parentRegistry)
    {
@@ -69,7 +69,8 @@ public class CentroidalMomentumHandler
 
       parentRegistry.addChild(registry);
       
-      this.aDotVAnalytical = new CentroidalMomentumRateADotVTerm(ScrewTools.getRootBody(rootJoint.getPredecessor()), centerOfMassFrame, centroidalMomentumMatrix, TotalMassCalculator.computeSubTreeMass(rootJoint.getSuccessor()),v);
+      this.centroidalMomentumRateTermCalculator = new CentroidalMomentumRateTermCalculator(rootJoint.getPredecessor(),
+            centerOfMassFrame, v, TotalMassCalculator.computeSubTreeMass(rootJoint.getSuccessor()));
    }
 
    public void initialize()
@@ -84,10 +85,12 @@ public class CentroidalMomentumHandler
 
    public void compute()
    {
-      centroidalMomentumMatrix.compute();
       ScrewTools.packJointVelocitiesMatrix(jointsInOrder, v);
+      
       if(USE_NUMERICALLY_DIFFERENTIATED_CENTROIDAL_MOMENTUM_MATRIX)
       {
+         centroidalMomentumMatrix.compute();
+         
          MatrixYoVariableConversionTools.getFromYoVariables(previousCentroidalMomentumMatrix, yoPreviousCentroidalMomentumMatrix);
          MatrixTools.numericallyDifferentiate(centroidalMomentumMatrixDerivative, previousCentroidalMomentumMatrix, centroidalMomentumMatrix.getMatrix(),
                  controlDT);
@@ -97,8 +100,8 @@ public class CentroidalMomentumHandler
       }
       else
       {
-         aDotVAnalytical.compute();
-         adotV.set(aDotVAnalytical.getMatrix());
+         centroidalMomentumRateTermCalculator.compute();
+         adotV.set(centroidalMomentumRateTermCalculator.getADotVTerm());
       }
    }
 
@@ -111,7 +114,15 @@ public class CentroidalMomentumHandler
       for (InverseDynamicsJoint joint : joints)
       {
          int[] columnsForJoint = columnsForJoints.get(joint);
-         MatrixTools.extractColumns(centroidalMomentumMatrix.getMatrix(), columnsForJoint, centroidalMomentumMatrixPart, startColumn);
+         if(USE_NUMERICALLY_DIFFERENTIATED_CENTROIDAL_MOMENTUM_MATRIX)
+         {
+            MatrixTools.extractColumns(centroidalMomentumMatrix.getMatrix(), columnsForJoint, centroidalMomentumMatrixPart, startColumn);
+         }
+         else
+         {
+            MatrixTools.extractColumns(centroidalMomentumRateTermCalculator.getCentroidalMomentumMatrix(),
+                  columnsForJoint, centroidalMomentumMatrixPart, startColumn);
+         }
          startColumn += columnsForJoint.length;
       }
       return centroidalMomentumMatrixPart;

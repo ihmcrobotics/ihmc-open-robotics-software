@@ -3,14 +3,11 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
 
-import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.utilities.RandomTools;
@@ -26,19 +23,15 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTestTools;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.TotalMassCalculator;
-import us.ihmc.utilities.test.JUnitTools;
 
 import com.yobotics.simulationconstructionset.UnreasonableAccelerationException;
 import com.yobotics.simulationconstructionset.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
 
 public class CentroidalMomentumBenchmark
 {
-   private static final double EPSILON = 1.0e-5;
    private static final int iters = 50000;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
-   private static final int NUMBER_OF_ITERATIONS = 1;
 
    private final double controlDT = 0.00000005;
 
