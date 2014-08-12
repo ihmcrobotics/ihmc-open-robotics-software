@@ -205,7 +205,7 @@ public abstract class SCSCollisionDetectorTest
       CollisionShapeFactory factory = collisionDetector.getShapeFactory();
       factory.setMargin(0.02);
       CollisionShapeDescription shapeDesc = factory.createBox(radiusX, radiusY, radiusZ);
-      factory.addShape(ret, shapeToLink, shapeDesc, collisionGroup, collisionMask);
+      factory.addShape(ret, shapeToLink, shapeDesc, false,  collisionGroup, collisionMask);
 
       return ret;
    }
