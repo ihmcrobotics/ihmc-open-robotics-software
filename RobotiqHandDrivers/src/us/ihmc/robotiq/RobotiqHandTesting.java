@@ -18,29 +18,71 @@ public class RobotiqHandTesting
 		rightHand.connect();
 		System.out.println("connected");
 		
-		System.out.println("Sending Activation Request");
-		rightHand.initialize();
-		System.out.println("Activation Request Sent");
+//		System.out.println("Sending Activation Request");
+//		rightHand.initialize();
+//		System.out.println("Activation Request Sent");
 		
-//		System.out.println("Resetting Hand");
-//		rightHand.reset();
-//		System.out.println("Hand Reset");
+		System.out.println("Resetting Hand");
+		rightHand.reset();
+		System.out.println("Hand Reset");
+		
+		
+//		System.out.println("Going to pinch");
+//		rightHand.pinchGrip();
+//		System.out.println("Pinching");
 //		
-//		testCycles(rightHand, 2);
-		
 		System.out.println("Closing Hand");
-		rightHand.close();
+		rightHand.close(0.1);
+		rightHand.blockDuringMotion();
+		rightHand.close(0.2);
+		rightHand.blockDuringMotion();
+		rightHand.close(0.3);
+		rightHand.blockDuringMotion();
+		rightHand.close(0.4);
+		rightHand.blockDuringMotion();
+		rightHand.close(0.5);
+		rightHand.blockDuringMotion();
+		rightHand.close(0.6);
+		rightHand.blockDuringMotion();
+		rightHand.close(0.7);
+		rightHand.blockDuringMotion();
+		rightHand.close(0.8);
+		rightHand.blockDuringMotion();
+		rightHand.close(0.9);
+		rightHand.blockDuringMotion();
+		rightHand.close(1.0);
+		rightHand.blockDuringMotion();
 		System.out.println("Hand Closed");
 		
+//		rightHand.stop();System.out.println("Hand Stopped");
+//		
 		Thread.sleep(1000);
-		rightHand.stop();System.out.println("Hand Stopped");
 //		
-//		Thread.sleep(10000);
-//		
-//		System.out.println("Opening Hand");
-//		rightHand.open();
-//		System.out.println("Hand Open");
+		System.out.println("Opening Hand");
+		rightHand.open(0.1);
+		rightHand.blockDuringMotion();
+		rightHand.open(0.2);
+		rightHand.blockDuringMotion();
+		rightHand.open(0.3);
+		rightHand.blockDuringMotion();
+		rightHand.open(0.4);
+		rightHand.blockDuringMotion();
+		rightHand.open(0.5);
+		rightHand.blockDuringMotion();
+		rightHand.open(0.6);
+		rightHand.blockDuringMotion();
+		rightHand.open(0.7);
+		rightHand.blockDuringMotion();
+		rightHand.open(0.8);
+		rightHand.blockDuringMotion();
+		rightHand.open(0.9);
+		rightHand.blockDuringMotion();
+		rightHand.open(1.0);
+		rightHand.blockDuringMotion();
+		System.out.println("Hand Open");
 		
+//		testCycles(rightHand, 2);
+//		
 //		System.out.println("Going to pinch");
 //		rightHand.pinchGrip();
 //		System.out.println("Pinching");
