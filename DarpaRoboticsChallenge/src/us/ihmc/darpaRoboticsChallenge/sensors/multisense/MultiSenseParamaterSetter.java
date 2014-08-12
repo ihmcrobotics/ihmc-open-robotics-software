@@ -29,6 +29,7 @@ public class MultiSenseParamaterSetter
    private static boolean flashEnable;
    private static double dutyCycle;
    private static boolean autoExposure;
+   private static boolean autoWhitebalance;
    private static String resolution = new String("1024x544x128");
  
    
@@ -230,6 +231,14 @@ public class MultiSenseParamaterSetter
       autoExposureParam.setValue(autoExposure);
       request.getConfig().getBools().add(autoExposureParam);
       }
+      
+      if(object.isAutoWhiteBalance() != autoWhitebalance){
+         autoWhitebalance = object.isAutoWhiteBalance();
+         BoolParameter autoWhiteBalanceParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(BoolParameter._TYPE);
+         autoWhiteBalanceParam.setName("auto_white_balance");
+         autoWhiteBalanceParam.setValue(autoWhitebalance);
+         request.getConfig().getBools().add(autoWhiteBalanceParam);
+         }
       
       if(!resolution.equals(object.getResolution())){
       resolution = object.getResolution();

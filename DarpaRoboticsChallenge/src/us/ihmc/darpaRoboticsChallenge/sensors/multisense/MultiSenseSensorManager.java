@@ -141,13 +141,24 @@ public class MultiSenseSensorManager
          }
       });
 
-      rosMainNode.attachParameterListener("/multisense/resolution", new ParameterListener()
+      rosMainNode.attachParameterListener("/multisense/motor_speed", new ParameterListener()
       {
 
          @Override
          public void onNewValue(Object value)
          {
-            System.out.println("new resolution received");
+            System.out.println("new motor speed received");
+            send();
+         }
+      });
+      
+      rosMainNode.attachParameterListener("/multisense/auto_white_balance", new ParameterListener()
+      {
+
+         @Override
+         public void onNewValue(Object value)
+         {
+            System.out.println("new auto white balance received");
             send();
          }
       });
@@ -181,7 +192,7 @@ public class MultiSenseSensorManager
       networkingManager.getControllerStateHandler().sendSerializableObject(
             new MultisenseParameterPacket(false, params.getDouble("/multisense/gain"), params.getDouble("/multisense/motor_speed"), params
                   .getDouble("/multisense/led_duty_cycle"), params.getString("/multisense/resolution"), params.getBoolean("/multisense/lighting"), params
-                  .getBoolean("/multisense/flash"), params.getBoolean("multisense/auto_exposure")));
+                  .getBoolean("/multisense/flash"), params.getBoolean("multisense/auto_exposure"), params.getBoolean("multisense/auto_white_balance")));
    }
 
    private void setMultiseSenseParams(double lidarSpindleVelocity)
