@@ -58,8 +58,8 @@ public class AtlasPhysicsEngineConfiguration implements ScsCollisionConfigure
       Transform3D soleToAnkle = new Transform3D();
       ankleToSole.invert(soleToAnkle);
 
-      factoryShape.addShape(leftLink, soleToAnkle, collisionFoot, GROUP_FEET, GROUP_GROUND);
-      factoryShape.addShape(rightLink, soleToAnkle, collisionFoot, GROUP_FEET, GROUP_GROUND);
+      factoryShape.addShape(leftLink, soleToAnkle, collisionFoot, false, GROUP_FEET, GROUP_GROUND);
+      factoryShape.addShape(rightLink, soleToAnkle, collisionFoot, false, GROUP_FEET, GROUP_GROUND);
 
       // HACK.  Add the ground plane
       CollisionShapeDescription collisionGround = factoryShape.createBox(20, 20, 0.1);
@@ -69,7 +69,7 @@ public class AtlasPhysicsEngineConfiguration implements ScsCollisionConfigure
       linkGround.setMass(1000);
       linkGround.setMomentOfInertia(0.1 * 100, 0.1 * 100, 0.1 * 100);
 
-      factoryShape.addShape(linkGround, null, collisionGround, GROUP_GROUND, 0xFFFFFFFF);
+      factoryShape.addShape(linkGround, null, collisionGround, true, GROUP_GROUND, 0xFFFFFFFF);
 
       groundJoint.setLink(linkGround);
       groundJoint.setPositionAndVelocity(0.0, 0.0, -0.1, 0.0, 0.0, 0.0);
