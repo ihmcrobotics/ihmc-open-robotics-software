@@ -17,6 +17,8 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.PauseComm
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandPoseProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandstepProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.HandstepProvider;
 import us.ihmc.commonWalkingControlModules.packets.ComHeightPacket;
 import us.ihmc.commonWalkingControlModules.packets.FootPosePacket;
 import us.ihmc.commonWalkingControlModules.packets.HandPosePacket;
@@ -42,6 +44,7 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
    private final ConcurrentLinkedQueue<ScriptObject> scriptObjects = new ConcurrentLinkedQueue<ScriptObject>();
 
    private final DesiredHandPoseProvider desiredHandPoseProvider; 
+   private final DesiredHandstepProvider handstepProvider;
    private final DesiredComHeightProvider desiredComHeightProvider;
    private final DesiredFootPoseProvider desiredFootPoseProvider;
    private final ConcurrentLinkedQueue<Footstep> footstepQueue = new ConcurrentLinkedQueue<Footstep>();
@@ -63,6 +66,7 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
       
       this.scriptFileLoader = scriptFileLoader;
       desiredHandPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame());
+      handstepProvider = new DesiredHandstepProvider(fullRobotModel);
       desiredComHeightProvider = new DesiredComHeightProvider();
 
       desiredFootPoseProvider = new DesiredFootPoseProvider();
@@ -230,6 +234,11 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
    public DesiredFootPoseProvider getDesiredFootPoseProvider()
    {
       return desiredFootPoseProvider;
+   }
+   
+   public DesiredHandstepProvider getDesiredHandstepProvider()
+   {
+      return handstepProvider;
    }
 
    @Override

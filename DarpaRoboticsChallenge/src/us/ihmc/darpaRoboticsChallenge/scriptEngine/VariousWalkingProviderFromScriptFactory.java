@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootPoseProvid
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootStateProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandPoseProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisPoseProvider;
@@ -56,13 +57,13 @@ public class VariousWalkingProviderFromScriptFactory implements VariousWalkingPr
          WalkingControllerParameters walkingControllerParameters, CommonWalkingReferenceFrames referenceFrames, SideDependentList<ContactablePlaneBody> feet,
          ConstantTransferTimeCalculator transferTimeCalculator, ConstantSwingTimeCalculator swingTimeCalculator, ArrayList<Updatable> updatables, YoVariableRegistry registry)
    {
-      ScriptBasedFootstepProvider footstepProvider;
-      footstepProvider = new ScriptBasedFootstepProvider(scriptFileLoader, time, feet, fullRobotModel, walkingControllerParameters, registry);
+      ScriptBasedFootstepProvider footstepProvider = new ScriptBasedFootstepProvider(scriptFileLoader, time, feet, fullRobotModel, walkingControllerParameters, registry);
 
       updatables.add(footstepProvider);
       
       DesiredHandPoseProvider handPoseProvider = footstepProvider.getDesiredHandPoseProvider();
-
+      DesiredHandstepProvider handstepProvider = footstepProvider.getDesiredHandstepProvider();
+      
       LinkedHashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = new LinkedHashMap<Footstep, TrajectoryParameters>();
 
       DesiredHighLevelStateProvider highLevelStateProvider = null;
@@ -80,7 +81,7 @@ public class VariousWalkingProviderFromScriptFactory implements VariousWalkingPr
 
       ControlStatusProducer controlStatusProducer = new SystemErrControlStatusProducer();
 
-      VariousWalkingProviders variousProviders = new VariousWalkingProviders(footstepProvider, mapFromFootstepsToTrajectoryParameters,
+      VariousWalkingProviders variousProviders = new VariousWalkingProviders(footstepProvider, handstepProvider, mapFromFootstepsToTrajectoryParameters,
             headOrientationProvider, desiredComHeightProvider, pelvisPoseProvider, handPoseProvider, handLoadBearingProvider, chestOrientationProvider,
             footPoseProvider, footLoadBearingProvider, highLevelStateProvider, thighLoadBearingProvider, pelvisLoadBearingProvider,
             reinitializeWalkingControllerProvider, controlStatusProducer);

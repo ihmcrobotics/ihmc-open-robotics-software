@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandPoseProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.HandstepProvider;
 import us.ihmc.commonWalkingControlModules.packets.HandPosePacket;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -42,6 +43,7 @@ public class ManipulationControlModule
    private final FullRobotModel fullRobotModel;
 
    private final HandPoseProvider handPoseProvider;
+   private final HandstepProvider handstepProvider;
    private final DesiredHandLoadBearingProvider handLoadBearingProvider;
 
    public ManipulationControlModule(VariousWalkingProviders variousWalkingProviders, ArmControllerParameters armControllerParameters,
@@ -54,6 +56,7 @@ public class ManipulationControlModule
       createFrameVisualizers(dynamicGraphicObjectsListRegistry, fullRobotModel, "HandControlFrames", false);
 
       handPoseProvider = variousWalkingProviders.getDesiredHandPoseProvider();
+      handstepProvider = variousWalkingProviders.getHandstepProvider();
       handLoadBearingProvider = variousWalkingProviders.getDesiredHandLoadBearingProvider();
 
       handControlModules = new SideDependentList<HandControlModule>();
