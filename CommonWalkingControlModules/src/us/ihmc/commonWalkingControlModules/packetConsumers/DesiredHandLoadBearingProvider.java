@@ -7,7 +7,7 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.net.ObjectConsumer;
 
-public class DesiredHandLoadBearingProvider implements ObjectConsumer<HandLoadBearingPacket>
+public class DesiredHandLoadBearingProvider implements ObjectConsumer<HandLoadBearingPacket>, HandLoadBearingProvider
 {
    private SideDependentList<AtomicInteger> hasLoadBearingBeenRequested = new SideDependentList<AtomicInteger>();
 

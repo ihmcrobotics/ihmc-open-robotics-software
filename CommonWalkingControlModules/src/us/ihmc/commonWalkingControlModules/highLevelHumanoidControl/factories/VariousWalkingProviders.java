@@ -34,10 +34,13 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHeadOrientatio
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBearingProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.HandLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ReinitializeWalkingControllerProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.UserDesiredHandLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.UserDesiredHandPoseProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.UserDesiredHandstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.UserDesiredHeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.NetworkControlStatusProducer;
@@ -67,6 +70,7 @@ import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.math.trajectories.providers.TrajectoryParameters;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class VariousWalkingProviders
 {
@@ -86,7 +90,7 @@ public class VariousWalkingProviders
 
    // TODO: Rename DesiredFootStateProvider to DesiredFootLoadBearingProvider, do the same for the packet, etc.
    private final DesiredFootStateProvider desiredFootLoadBearingProvider;
-   private final DesiredHandLoadBearingProvider desiredHandLoadBearingProvider;
+   private final HandLoadBearingProvider desiredHandLoadBearingProvider;
    private final DesiredPelvisLoadBearingProvider desiredPelvisLoadBearingProvider;
    private final DesiredThighLoadBearingProvider desiredThighLoadBearingProvider;
 
@@ -97,7 +101,7 @@ public class VariousWalkingProviders
          HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters,
          DesiredHeadOrientationProvider desiredHeadOrientationProvider, DesiredComHeightProvider desiredComHeightProvider,
          DesiredPelvisPoseProvider desiredPelvisPoseProvider, HandPoseProvider desiredHandPoseProvider,
-         DesiredHandLoadBearingProvider desiredHandLoadBearingProvider, DesiredChestOrientationProvider desiredChestOrientationProvider,
+         HandLoadBearingProvider desiredHandLoadBearingProvider, DesiredChestOrientationProvider desiredChestOrientationProvider,
          DesiredFootPoseProvider footPoseProvider, DesiredFootStateProvider footStateProvider, DesiredHighLevelStateProvider desiredHighLevelStateProvider,
          DesiredThighLoadBearingProvider thighLoadBearingProvider, DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider,
          ReinitializeWalkingControllerProvider reinitializeWalkingControllerProvider, ControlStatusProducer controlStatusProducer)
@@ -187,7 +191,7 @@ public class VariousWalkingProviders
       return desiredHandPoseProvider;
    }
 
-   public DesiredHandLoadBearingProvider getDesiredHandLoadBearingProvider()
+   public HandLoadBearingProvider getDesiredHandLoadBearingProvider()
    {
       return desiredHandLoadBearingProvider;
    }
@@ -313,7 +317,7 @@ public class VariousWalkingProviders
       DesiredFootPoseProvider footPoseProvider = new DesiredFootPoseProvider();
       ReinitializeWalkingControllerProvider reinitializeWalkingControllerProvider = new ReinitializeWalkingControllerProvider();
 
-      DesiredHandLoadBearingProvider handLoadBearingProvider = new DesiredHandLoadBearingProvider();
+      HandLoadBearingProvider handLoadBearingProvider = new DesiredHandLoadBearingProvider();
       DesiredFootStateProvider footLoadBearingProvider = new DesiredFootStateProvider();
       DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider = new DesiredPelvisLoadBearingProvider();
       DesiredThighLoadBearingProvider thighLoadBearingProvider = new DesiredThighLoadBearingProvider();
@@ -348,7 +352,7 @@ public class VariousWalkingProviders
       DesiredFootPoseProvider footPoseProvider = null;
       ReinitializeWalkingControllerProvider reinitializeWalkingControllerProvider = null;
 
-      DesiredHandLoadBearingProvider handLoadBearingProvider = null;
+      HandLoadBearingProvider handLoadBearingProvider = null;
       DesiredFootStateProvider footLoadBearingProvider = null;
       DesiredThighLoadBearingProvider thighLoadBearingProvider = null;
       DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider = null;
@@ -364,9 +368,10 @@ public class VariousWalkingProviders
    }
 
    public static VariousWalkingProviders createUsingYoVariables(FullRobotModel fullRobotModel, WalkingControllerParameters walkingControllerParameters,
-         CommonWalkingReferenceFrames referenceFrames, SideDependentList<ContactablePlaneBody> bipedFeet, YoVariableRegistry registry)
+         CommonWalkingReferenceFrames referenceFrames, SideDependentList<ContactablePlaneBody> bipedFeet, 
+         YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      HandstepProvider handstepProvider = null;
+      HandstepProvider handstepProvider = new UserDesiredHandstepProvider(fullRobotModel, registry, dynamicGraphicObjectsListRegistry);
 
       HandPoseProvider handPoseProvider = new UserDesiredHandPoseProvider(fullRobotModel,
             walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame(), registry);
@@ -383,7 +388,7 @@ public class VariousWalkingProviders
       DesiredFootPoseProvider footPoseProvider = null;
       ReinitializeWalkingControllerProvider reinitializeWalkingControllerProvider = null;
 
-      DesiredHandLoadBearingProvider handLoadBearingProvider = null;
+      HandLoadBearingProvider handLoadBearingProvider = new UserDesiredHandLoadBearingProvider(registry);
       DesiredFootStateProvider footLoadBearingProvider = null;
       DesiredThighLoadBearingProvider thighLoadBearingProvider = null;
       DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider = null;

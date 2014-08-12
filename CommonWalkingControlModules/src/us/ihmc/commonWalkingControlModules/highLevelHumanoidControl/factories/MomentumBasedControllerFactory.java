@@ -172,7 +172,7 @@ public class MomentumBasedControllerFactory
 
       if (CREATE_YOVARIABLE_WALKING_PROVIDERS)
       {
-         variousWalkingProviders = VariousWalkingProviders.createUsingYoVariables(fullRobotModel, walkingControllerParameters, referenceFrames, feet, registry);
+         variousWalkingProviders = VariousWalkingProviders.createUsingYoVariables(fullRobotModel, walkingControllerParameters, referenceFrames, feet, registry, dynamicGraphicObjectsListRegistry);
       }
       else if (variousWalkingProviderFactory != null)
       {
