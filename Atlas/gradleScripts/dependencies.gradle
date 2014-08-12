@@ -33,6 +33,7 @@ dependencies {
     compile project(':iRobotHardwareDrivers')
     compile project(':JMEGraphics3DAdapter')
     compile project(':RobotDataCommunication')
+    compile project(':RobotiqHandDrivers')
     compile project(':IHMCControlFlow')
     compile project(':ROSJava')
     compile project(':SDFLoader')
