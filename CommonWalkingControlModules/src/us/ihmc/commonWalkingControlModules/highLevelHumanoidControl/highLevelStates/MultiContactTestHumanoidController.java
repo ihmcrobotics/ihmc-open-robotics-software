@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlModuleBridge.MomentumControlModuleType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootPoseProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packets.HandLoadBearingPacket;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -123,7 +124,8 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
          if (initializeHandsInContact.get(robotSide).booleanValue())
          {
             HandLoadBearingPacket handLoadBearingPacket = new HandLoadBearingPacket(robotSide, true);
-            variousWalkingProviders.getDesiredHandLoadBearingProvider().consumeObject(handLoadBearingPacket);
+            DesiredHandLoadBearingProvider desiredHandLoadBearingProvider = (DesiredHandLoadBearingProvider) variousWalkingProviders.getDesiredHandLoadBearingProvider();
+            desiredHandLoadBearingProvider.consumeObject(handLoadBearingPacket);
          }
 
          if (initializeFeetInContact.get(robotSide).booleanValue())

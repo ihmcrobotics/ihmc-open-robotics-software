@@ -4,16 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandLoadBearingProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.HandLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandstepProvider;
 import us.ihmc.commonWalkingControlModules.packets.HandPosePacket;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
@@ -44,7 +46,7 @@ public class ManipulationControlModule
 
    private final HandPoseProvider handPoseProvider;
    private final HandstepProvider handstepProvider;
-   private final DesiredHandLoadBearingProvider handLoadBearingProvider;
+   private final HandLoadBearingProvider handLoadBearingProvider;
 
    public ManipulationControlModule(VariousWalkingProviders variousWalkingProviders, ArmControllerParameters armControllerParameters,
          MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
@@ -144,7 +146,7 @@ public class ManipulationControlModule
          handleDefaultState(robotSide);
 
          handleHandPoses(robotSide);
-
+         handleHandsteps(robotSide);
          handleLoadBearing(robotSide);
       }
 
@@ -176,6 +178,19 @@ public class ManipulationControlModule
             handControlModules.get(robotSide).moveUsingQuinticSplines(handPoseProvider.getFinalDesiredJointAngleMaps(robotSide),
                   handPoseProvider.getTrajectoryTime());
          }
+      }
+   }
+   
+   private void handleHandsteps(RobotSide robotSide)
+   {
+      if ((handstepProvider != null) && (handstepProvider.checkForNewHandstep(robotSide)))
+      {
+         Handstep desiredHandstep = handstepProvider.getDesiredHandstep(robotSide);
+         FramePose handstepPose = new FramePose(ReferenceFrame.getWorldFrame());
+         desiredHandstep.getPose(handstepPose);
+
+         handControlModules.get(robotSide).moveInStraightLine(handstepPose, TO_DEFAULT_CONFIGURATION_TRAJECTORY_TIME,
+               handstepPose.getReferenceFrame());
       }
    }
 

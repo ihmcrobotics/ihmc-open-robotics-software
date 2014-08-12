@@ -13,7 +13,7 @@
 		</GraphConfig>
 	</Graph>
 </GraphGroup>
-<Entry Boxes></Entry Boxes>
+<Entry Boxes>userHandstepTakeIt,userHandstepPositionX,userHandstepPositionY,userHandstepPositionZ,userHandstepRobotSide,userHandstepNormalX,userHandstepNormalY,userHandstepNormalZ,userHandstepRotationAboutNormal</Entry Boxes>
 
 <Number of ViewPorts>1</Number of ViewPorts>
  <Main Viewport> 
@@ -29,9 +29,9 @@ Plotter,
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>5.417069371703404</Camera X>
- <Camera Y>-4.603719894966602</Camera Y>
- <Camera Z>2.968527950698656</Camera Z>
+ <Camera X>1.9182982046113193</Camera X>
+ <Camera Y>-1.532156958972854</Camera Y>
+ <Camera Z>1.7389204121755344</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -55,8 +55,8 @@ Plotter,
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>-0.44</Fix X>
-<Fix Y>-0.17</Fix Y>
-<Fix Z>0.75</Fix Z>
+<Fix X>-0.2106076240517416</Fix X>
+<Fix Y>0.67837929929063</Fix Y>
+<Fix Z>0.713047910718107</Fix Z>
 </Fix Position>
 </Canvas 1>
