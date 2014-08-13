@@ -16,6 +16,7 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
@@ -34,6 +35,7 @@ public class ManipulationControlModule
 {
    public static final boolean HOLD_POSE_IN_JOINT_SPACE_WHEN_PREPARE_FOR_LOCOMOTION = true;
    private static final double TO_DEFAULT_CONFIGURATION_TRAJECTORY_TIME = 1.0;
+   private static final double approachDistanceForHandsteps = 0.1;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final List<DynamicGraphicReferenceFrame> dynamicGraphicReferenceFrames = new ArrayList<DynamicGraphicReferenceFrame>();
@@ -188,9 +190,11 @@ public class ManipulationControlModule
          Handstep desiredHandstep = handstepProvider.getDesiredHandstep(robotSide);
          FramePose handstepPose = new FramePose(ReferenceFrame.getWorldFrame());
          desiredHandstep.getPose(handstepPose);
+         FrameVector surfaceNormal = new FrameVector();
+         desiredHandstep.getSurfaceNormal(surfaceNormal);
 
-         handControlModules.get(robotSide).moveInStraightLine(handstepPose, TO_DEFAULT_CONFIGURATION_TRAJECTORY_TIME,
-               handstepPose.getReferenceFrame());
+         ReferenceFrame trajectoryFrame = handstepPose.getReferenceFrame();
+         handControlModules.get(robotSide).moveToSurface(handstepPose, surfaceNormal, approachDistanceForHandsteps, TO_DEFAULT_CONFIGURATION_TRAJECTORY_TIME, trajectoryFrame);
       }
    }
 
