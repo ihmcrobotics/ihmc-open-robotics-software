@@ -77,7 +77,7 @@ public class UserDesiredHandstepProvider implements HandstepProvider
       FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame(), transformOne);
 
       RigidBody hand = fullRobotModel.getHand(robotSide);
-      Handstep handstep = new Handstep(hand, framePose);
+      Handstep handstep = new Handstep(hand, framePose, userHandstepNormal.getFrameVectorCopy());
       userHandstepTakeIt.set(false);
 
       return handstep;
