@@ -5,6 +5,7 @@ import bubo.clouds.detect.CloudShapeTypes;
 import bubo.clouds.detect.PointCloudShapeFinder;
 import bubo.clouds.detect.wrapper.ConfigMultiShapeRansac;
 import bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
+import bubo.io.text.WriteCsvObject;
 import com.thoughtworks.xstream.XStream;
 import georegression.geometry.RotationMatrixGenerator;
 import georegression.struct.point.Point3D_F64;
@@ -21,6 +22,8 @@ import us.ihmc.utilities.lidar.polarLidar.LidarScan;
 import javax.vecmath.Point3d;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -28,8 +31,6 @@ import java.util.List;
  *
  * @author Peter Abeles
  */
-// TODO start/stop request from GUI
-// TODO send status update to client.  finish+failed or finished+transform
 public class NetworkProcessorTestbedAlignment implements Runnable {
 
    final FastQueue<Point3D_F64> cloud = new FastQueue<>(Point3D_F64.class,true);
@@ -42,6 +43,7 @@ public class NetworkProcessorTestbedAlignment implements Runnable {
 
    DRCNetworkProcessorNetworkingManager networkManager;
 
+   long integrationPeriod = 6000;
    long stopTime;
 
    public NetworkProcessorTestbedAlignment( DRCNetworkProcessorNetworkingManager networkManager ) {
@@ -70,7 +72,7 @@ public class NetworkProcessorTestbedAlignment implements Runnable {
          }
          cloud.reset();
          active = true;
-         stopTime = System.currentTimeMillis()+10000;
+         stopTime = System.currentTimeMillis()+integrationPeriod;
          networkManager.getControllerStateHandler().
                  sendSerializableObject(new TestbedServerPacket(TestbedServerPacket.START_COLLECTING));
       }
@@ -124,6 +126,18 @@ public class NetworkProcessorTestbedAlignment implements Runnable {
          if( processing ) {
             networkManager.getControllerStateHandler().
                     sendSerializableObject(new TestbedServerPacket(TestbedServerPacket.START_PROCESSING));
+
+            try {
+               WriteCsvObject write = new WriteCsvObject(new FileOutputStream("mycloud.csv"),Point3D_F64.class,"x","y","z");
+               for (int i = 0; i < cloud.size(); i++) {
+                  write.writeObject(cloud.get(i));
+               }
+               write.close();
+            } catch (FileNotFoundException e) {
+
+            } catch (IOException e) {
+
+            }
 
             // find the planes
             finder.process(cloud.toList(),null);
