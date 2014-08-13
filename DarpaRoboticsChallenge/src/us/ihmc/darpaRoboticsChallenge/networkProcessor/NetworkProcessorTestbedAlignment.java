@@ -6,8 +6,11 @@ import bubo.clouds.detect.PointCloudShapeFinder;
 import bubo.clouds.detect.wrapper.ConfigMultiShapeRansac;
 import bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
 import com.thoughtworks.xstream.XStream;
+import georegression.geometry.RotationMatrixGenerator;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.se.Se3_F64;
+import georegression.struct.so.Quaternion_F64;
+import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.ddogleg.struct.FastQueue;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
 import us.ihmc.darpaRoboticsChallenge.sensorProcessing.sensorData.TestbedServerPacket;
@@ -133,19 +136,18 @@ public class NetworkProcessorTestbedAlignment implements Runnable {
                packet.setResult(TestbedServerPacket.SUCCESS);
                Se3_F64 modelToWorld = estimatedToModel.invert(null).concat(estimatedToWorld, null);
 
-               float[] transform = packet.getTransform();
-               transform[0] = (float)modelToWorld.R.get(0,0);
-               transform[1] = (float)modelToWorld.R.get(0,1);
-               transform[2] = (float)modelToWorld.R.get(0,2);
-               transform[3] = (float)modelToWorld.R.get(1,0);
-               transform[4] = (float)modelToWorld.R.get(1,1);
-               transform[5] = (float)modelToWorld.R.get(1,2);
-               transform[4] = (float)modelToWorld.R.get(2,0);
-               transform[5] = (float)modelToWorld.R.get(2,1);
-               transform[6] = (float)modelToWorld.R.get(2,2);
-               transform[7] = (float)modelToWorld.T.x;
-               transform[8] = (float)modelToWorld.T.y;
-               transform[9] = (float)modelToWorld.T.z;
+               Quaternion_F64 quat64 = RotationMatrixGenerator.matrixToQuaternion(modelToWorld.R,null);
+
+               float[] quat = packet.getQuat();
+               quat[0] = (float)quat64.x;
+               quat[1] = (float)quat64.y;
+               quat[2] = (float)quat64.z;
+               quat[3] = (float)quat64.w;
+
+               float[] translation = packet.getTranslation();
+               translation[0] = (float)modelToWorld.T.x;
+               translation[1] = (float)modelToWorld.T.y;
+               translation[2] = (float)modelToWorld.T.z;
             } else {
                packet.setResult(TestbedServerPacket.FAILED);
             }
