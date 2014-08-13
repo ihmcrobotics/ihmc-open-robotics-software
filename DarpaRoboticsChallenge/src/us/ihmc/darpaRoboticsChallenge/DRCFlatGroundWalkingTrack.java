@@ -3,13 +3,15 @@ package us.ihmc.darpaRoboticsChallenge;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepTimingParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ComponentBasedVariousWalkingProviderFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviderFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelState;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.robotSide.SideDependentList;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
@@ -32,10 +34,6 @@ public class DRCFlatGroundWalkingTrack
          recordFrequency = 1;
       scsInitialSetup.setRecordFrequency(recordFrequency);
 
-      boolean useFastTouchdowns = false;
-
-      FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulation(walkingControlParameters);
-
       WalkingControllerParameters walkingControllerParameters = model.getWalkingControllerParameters();
       DRCRobotContactPointParameters contactPointParameters = model.getContactPointParameters();
       ContactableBodiesFactory contactableBodiesFactory = contactPointParameters.getContactableBodiesFactory();
@@ -43,13 +41,18 @@ public class DRCFlatGroundWalkingTrack
       SideDependentList<String> footForceSensorNames = model.getSensorInformation().getFeetForceSensorNames();
 
       MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory,
-            footForceSensorNames, footstepTimingParameters, walkingControllerParameters, armControllerParameters,
-            useVelocityAndHeadingScript, useFastTouchdowns, HighLevelState.WALKING);
+            footForceSensorNames, walkingControllerParameters, armControllerParameters,
+            HighLevelState.WALKING);
+      
+      HeightMap heightMapForCheating = null;
       if (cheatWithGroundHeightAtForFootstep)
       {
-         controllerFactory.setupForCheatingUsingGroundHeightAtForFootstepProvider(scsInitialSetup.getHeightMap());
+         heightMapForCheating = scsInitialSetup.getHeightMap();
       }
 
+      VariousWalkingProviderFactory variousWalkingProviderFactory = new ComponentBasedVariousWalkingProviderFactory(useVelocityAndHeadingScript, heightMapForCheating, model.getControllerDT());
+      controllerFactory.setVariousWalkingProviderFactory(variousWalkingProviderFactory);
+      
       drcSimulation = new DRCSimulationFactory(model, controllerFactory, null, robotInitialSetup, scsInitialSetup, guiInitialSetup, null);
 
       drcSimulation.start();

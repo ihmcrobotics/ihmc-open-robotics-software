@@ -18,6 +18,8 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepD
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.CarIngressEgressControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.DataProducerVariousWalkingProviderFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviderFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelState;
 import us.ihmc.commonWalkingControlModules.packets.ComHeightPacket;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
@@ -97,16 +99,21 @@ public class DRCSimulationTestHelper
 
       SideDependentList<String> footForceSensorNames = robotModel.getSensorInformation().getFeetForceSensorNames();
       MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory,
-            footForceSensorNames, footstepTimingParameters, walkingControllerParameters, armControllerParameters,
-            false, false, HighLevelState.WALKING);
+            footForceSensorNames,  walkingControllerParameters, armControllerParameters,
+            HighLevelState.WALKING);
       controllerFactory.addHighLevelBehaviorFactory(new CarIngressEgressControllerFactory(multiContactControllerParameters, false));
-      controllerFactory.setupForCheatingUsingGroundHeightAtForFootstepProvider(scsInitialSetup.getHeightMap());
+//      controllerFactory.setupForCheatingUsingGroundHeightAtForFootstepProvider(scsInitialSetup.getHeightMap());
       GlobalDataProducer globalDataProducer = new GlobalDataProducer(networkObjectCommunicator);
-      controllerFactory.setupForNetworkedFootstepProvider(globalDataProducer);
+//      controllerFactory.setupForNetworkedFootstepProvider(globalDataProducer);
 
       if ((scriptFileName != null) && (!scriptFileName.equals("")))
       {
          VariousWalkingProviderFromScriptFactory variousWalkingProviderFactory = new VariousWalkingProviderFromScriptFactory(scriptFileName);
+         controllerFactory.setVariousWalkingProviderFactory(variousWalkingProviderFactory);
+      }
+      else
+      {
+         VariousWalkingProviderFactory variousWalkingProviderFactory = new DataProducerVariousWalkingProviderFactory(globalDataProducer, footstepTimingParameters);
          controllerFactory.setVariousWalkingProviderFactory(variousWalkingProviderFactory);
       }
       
