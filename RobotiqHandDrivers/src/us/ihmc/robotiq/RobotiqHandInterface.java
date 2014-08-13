@@ -571,27 +571,27 @@ public final class RobotiqHandInterface
 		sendMotionRequest();
 	}
 	
-	public void pinchGrip() throws InterruptedException
+	public void pinchGrip()
 	{
 		setGrip(PINCH_MODE);
 	}
 	
-	public void normalGrip() throws InterruptedException
+	public void normalGrip()
 	{
 		setGrip(BASIC_MODE);
 	}
 	
-	public void wideGrip() throws InterruptedException
+	public void wideGrip()
 	{
 		setGrip(WIDE_MODE);
 	}
 	
-	public void scissorGrip() throws InterruptedException
+	public void scissorGrip()
 	{
 		setGrip(SCISSOR_MODE);
 	}
 
-	private void setGrip(byte mode) throws InterruptedException
+	private void setGrip(byte mode)
 	{
 		if(operationMode != mode)
 		{
@@ -603,11 +603,11 @@ public final class RobotiqHandInterface
 		}
 	}
 
-	private void blockDuringGripChange() throws InterruptedException
+	private void blockDuringGripChange()
 	{
 		do
 		{
-			Thread.sleep(50);
+			ThreadTools.sleep(50);
 			status = this.getStatus();
 		}while((status[GRIPPER_STATUS] & INIT_MODE_STATUS_MASK) == CHANGING_MODE);
 	}
