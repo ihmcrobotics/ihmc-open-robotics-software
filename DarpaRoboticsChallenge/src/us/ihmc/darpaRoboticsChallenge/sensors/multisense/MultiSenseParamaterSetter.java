@@ -5,10 +5,12 @@ import java.io.IOException;
 
 import org.ros.exception.RemoteException;
 import org.ros.node.NodeConfiguration;
+import org.ros.node.parameter.ParameterListener;
 import org.ros.node.parameter.ParameterTree;
 import org.ros.node.service.ServiceResponseListener;
 
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosNativeNetworkProcessor;
+import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
 import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.MultisenseParameterPacket;
 import us.ihmc.utilities.processManagement.ProcessStreamGobbler;
 import us.ihmc.utilities.ros.RosDoublePublisher;
@@ -31,12 +33,26 @@ public class MultiSenseParamaterSetter
    private static boolean autoExposure;
    private static boolean autoWhitebalance;
    private static String resolution = new String("1024x544x128");
- 
+   private final RosServiceClient<ReconfigureRequest, ReconfigureResponse> multiSenseClient;
+   private RosMainNode rosMainNode;
+   private DRCNetworkProcessorNetworkingManager networkingManager;
+   private ParameterTree params;
    
-   private static final RosServiceClient<ReconfigureRequest, ReconfigureResponse> multiSenseClient = new RosServiceClient<ReconfigureRequest, ReconfigureResponse>(
-         Reconfigure._TYPE);
-   
-   public static void setupNativeROSCommunicator(RosNativeNetworkProcessor rosNativeNetworkProcessor, double lidarSpindleVelocity)
+   public MultiSenseParamaterSetter(RosMainNode rosMainNode, DRCNetworkProcessorNetworkingManager networkingManager)
+   {
+      this.rosMainNode = rosMainNode;
+      this.networkingManager = networkingManager;
+      multiSenseClient = new RosServiceClient<ReconfigureRequest, ReconfigureResponse>(Reconfigure._TYPE);      
+      rosMainNode.attachServiceClient("multisense/set_parameters", multiSenseClient);
+   }
+
+   public MultiSenseParamaterSetter(RosMainNode rosMainNode2)
+   {
+     this.rosMainNode = rosMainNode2;
+     multiSenseClient = new RosServiceClient<ReconfigureRequest, ReconfigureResponse>(Reconfigure._TYPE);    
+   }
+
+   public void setupNativeROSCommunicator(RosNativeNetworkProcessor rosNativeNetworkProcessor, double lidarSpindleVelocity)
    {
       String rosPrefix = "/opt/ros";
       if (useRosHydro(rosPrefix))
@@ -65,7 +81,7 @@ public class MultiSenseParamaterSetter
       }
    }
    
-   private static void shellOutSpindleSpeedCommand(String[] shellCommandString)
+   private void shellOutSpindleSpeedCommand(String[] shellCommandString)
    {
       ProcessBuilder builder = new ProcessBuilder(shellCommandString);
       try
@@ -87,22 +103,22 @@ public class MultiSenseParamaterSetter
       }
    }
 
-   private static boolean useRosFuerte(String rosPrefix)
+   private  boolean useRosFuerte(String rosPrefix)
    {
       return new File(rosPrefix + "/fuerte").exists();
    }
 
-   private static boolean useRosGroovy(String rosPrefix)
+   private  boolean useRosGroovy(String rosPrefix)
    {
       return new File(rosPrefix + "/groovy").exists();
    }
 
-   private static boolean useRosHydro(String rosPrefix)
+   private  boolean useRosHydro(String rosPrefix)
    {
       return new File(rosPrefix + "/hydro").exists();
    }
 
-   public static void setupMultisenseSpindleSpeedPublisher(RosMainNode rosMainNode, final double lidarSpindleVelocity)
+   public  void setupMultisenseSpindleSpeedPublisher(RosMainNode rosMainNode, final double lidarSpindleVelocity)
    {
       final RosDoublePublisher rosDoublePublisher = new RosDoublePublisher(true)
       {
@@ -114,16 +130,132 @@ public class MultiSenseParamaterSetter
       };
       rosMainNode.attachPublisher("/multisense/set_spindle_speed", rosDoublePublisher);
    }
-   
-   public static void initialize(RosMainNode rosMainNode){
-      
-      System.out.println();
   
-      rosMainNode.attachServiceClient("multisense/set_parameters", multiSenseClient);
-      
+   public void handleMultisenseParameters(MultisenseParameterPacket object)
+   {
+      if (object.isFromUI())
+      {
+         if (rosMainNode.isStarted())
+         {
+            params = rosMainNode.getParameters();
+            send();
+
+         }
+      }
+      else
+         setMultisenseParameters(object);
+
    }
    
-   public static void setMultisenseResolution(RosMainNode rosMainNode)
+   
+   private void send()
+   {
+      if (params == null)
+      {
+         System.out.println("params are null");
+         return;
+      }
+
+      networkingManager.getControllerStateHandler().sendSerializableObject(
+            new MultisenseParameterPacket(false, params.getDouble("/multisense/gain"), params.getDouble("/multisense/motor_speed"), params
+                  .getDouble("/multisense/led_duty_cycle"), params.getString("/multisense/resolution"), params.getBoolean("/multisense/lighting"), params
+                  .getBoolean("/multisense/flash"), params.getBoolean("multisense/auto_exposure"), params.getBoolean("multisense/auto_white_balance")));
+   }
+   
+   
+   public void initializeParameterListeners()
+   {
+
+      System.out.println("initialise parameteres--------------------------------------------------------------------------------");
+
+      rosMainNode.attachParameterListener("/multisense/motor_speed", new ParameterListener()
+      {
+
+         @Override
+         public void onNewValue(Object value)
+         {
+            System.out.println("new motor speed received");
+            send();
+         }
+      });
+      rosMainNode.attachParameterListener("/multisense/gain", new ParameterListener()
+      {
+
+         @Override
+         public void onNewValue(Object value)
+         {
+            System.out.println("new gain received");
+            send();
+         }
+      });
+
+      rosMainNode.attachParameterListener("/multisense/led_duty_cycle", new ParameterListener()
+      {
+
+         @Override
+         public void onNewValue(Object value)
+         {
+            System.out.println("new dutyCycle received");
+            send();
+         }
+      });
+      rosMainNode.attachParameterListener("/multisense/lighting", new ParameterListener()
+      {
+
+         @Override
+         public void onNewValue(Object value)
+         {
+            System.out.println("new led received");
+            send();
+         }
+      });
+      rosMainNode.attachParameterListener("/multisense/flash", new ParameterListener()
+      {
+
+         @Override
+         public void onNewValue(Object value)
+         {
+            System.out.println("new flash received");
+            send();
+         }
+      });
+
+      rosMainNode.attachParameterListener("/multisense/auto_exposure", new ParameterListener()
+      {
+
+         @Override
+         public void onNewValue(Object value)
+         {
+            System.out.println("new auto expo received");
+            send();
+         }
+      });
+
+      rosMainNode.attachParameterListener("/multisense/motor_speed", new ParameterListener()
+      {
+
+         @Override
+         public void onNewValue(Object value)
+         {
+            System.out.println("new motor speed received");
+            send();
+         }
+      });
+      
+      rosMainNode.attachParameterListener("/multisense/auto_white_balance", new ParameterListener()
+      {
+
+         @Override
+         public void onNewValue(Object value)
+         {
+            System.out.println("new auto white balance received");
+            send();
+         }
+      });
+
+   }
+
+  public  void setMultisenseResolution(RosMainNode rosMainNode)
    {
       try
       {
@@ -175,7 +307,7 @@ public class MultiSenseParamaterSetter
    
    
 
-   public static void setMultisenseParameters(MultisenseParameterPacket object)
+   public void setMultisenseParameters(MultisenseParameterPacket object)
    {
      
       System.out.println("object received with gain "+ object.getGain()+" speed "+ object.getMotorSpeed()+" dutycycle"+object.getDutyCycle()+" resolution"+ object.getResolution());

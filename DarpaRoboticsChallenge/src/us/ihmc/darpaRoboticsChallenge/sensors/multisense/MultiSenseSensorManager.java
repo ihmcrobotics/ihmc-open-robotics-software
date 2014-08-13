@@ -49,6 +49,8 @@ public class MultiSenseSensorManager
 
    private MultisenseLidarDataReceiver multisenseLidarDataReceiver;
 
+   private MultiSenseParamaterSetter multiSenseParamaterSetter;
+
    public MultiSenseSensorManager(DepthDataProcessor depthDataProcessor, ROSNativeTransformTools rosTransformProvider, RobotPoseBuffer sharedRobotPoseBuffer,
          RosMainNode rosMainNode, DRCNetworkProcessorNetworkingManager networkingManager, RosNativeNetworkProcessor rosNativeNetworkProcessor,
          PPSTimestampOffsetProvider ppsTimestampOffsetProvider, String sensorURI, DRCRobotCameraParameters cameraParamaters,
@@ -67,9 +69,9 @@ public class MultiSenseSensorManager
       this.sensorURI = sensorURI;
       registerCameraReceivers();
       registerLidarReceivers();
-      MultiSenseParamaterSetter.initialize(rosMainNode);
+      multiSenseParamaterSetter = new MultiSenseParamaterSetter(rosMainNode, networkingManager);
       setMultiseSenseParams(lidarParamaters.getLidarSpindleVelocity());
-      networkingManager.getControllerCommandHandler().setMultiSenseSensorManager(this);
+      networkingManager.getControllerCommandHandler().setMultiSenseSensorManager(multiSenseParamaterSetter);
 
    }
 
@@ -77,141 +79,27 @@ public class MultiSenseSensorManager
    {
 
       System.out.println("initialise parameteres--------------------------------------------------------------------------------");
-
-      rosMainNode.attachParameterListener("/multisense/motor_speed", new ParameterListener()
-      {
-
-         @Override
-         public void onNewValue(Object value)
-         {
-            System.out.println("new motor speed received");
-            send();
-         }
-      });
-      rosMainNode.attachParameterListener("/multisense/gain", new ParameterListener()
-      {
-
-         @Override
-         public void onNewValue(Object value)
-         {
-            System.out.println("new gain received");
-            send();
-         }
-      });
-
-      rosMainNode.attachParameterListener("/multisense/led_duty_cycle", new ParameterListener()
-      {
-
-         @Override
-         public void onNewValue(Object value)
-         {
-            System.out.println("new dutyCycle received");
-            send();
-         }
-      });
-      rosMainNode.attachParameterListener("/multisense/lighting", new ParameterListener()
-      {
-
-         @Override
-         public void onNewValue(Object value)
-         {
-            System.out.println("new led received");
-            send();
-         }
-      });
-      rosMainNode.attachParameterListener("/multisense/flash", new ParameterListener()
-      {
-
-         @Override
-         public void onNewValue(Object value)
-         {
-            System.out.println("new flash received");
-            send();
-         }
-      });
-
-      rosMainNode.attachParameterListener("/multisense/auto_exposure", new ParameterListener()
-      {
-
-         @Override
-         public void onNewValue(Object value)
-         {
-            System.out.println("new auto expo received");
-            send();
-         }
-      });
-
-      rosMainNode.attachParameterListener("/multisense/motor_speed", new ParameterListener()
-      {
-
-         @Override
-         public void onNewValue(Object value)
-         {
-            System.out.println("new motor speed received");
-            send();
-         }
-      });
-      
-      rosMainNode.attachParameterListener("/multisense/auto_white_balance", new ParameterListener()
-      {
-
-         @Override
-         public void onNewValue(Object value)
-         {
-            System.out.println("new auto white balance received");
-            send();
-         }
-      });
-
-   }
-
-   public void handleMultisenseParameters(MultisenseParameterPacket object)
-   {
-      if (object.isFromUI())
-      {
-         if (rosMainNode.isStarted())
-         {
-            params = rosMainNode.getParameters();
-            send();
-
-         }
-      }
-      else
-         MultiSenseParamaterSetter.setMultisenseParameters(object);
-
-   }
-
-   private void send()
-   {
-      if (params == null)
-      {
-         System.out.println("params are null");
-         return;
-      }
-
-      networkingManager.getControllerStateHandler().sendSerializableObject(
-            new MultisenseParameterPacket(false, params.getDouble("/multisense/gain"), params.getDouble("/multisense/motor_speed"), params
-                  .getDouble("/multisense/led_duty_cycle"), params.getString("/multisense/resolution"), params.getBoolean("/multisense/lighting"), params
-                  .getBoolean("/multisense/flash"), params.getBoolean("multisense/auto_exposure"), params.getBoolean("multisense/auto_white_balance")));
+      multiSenseParamaterSetter.initializeParameterListeners(); 
    }
 
    private void setMultiseSenseParams(double lidarSpindleVelocity)
    {
-      MultiSenseParamaterSetter.setMultisenseResolution(rosMainNode);
+      multiSenseParamaterSetter.setMultisenseResolution(rosMainNode);
 
       if (RosNativeNetworkProcessor.hasNativeLibrary())
       {
-         MultiSenseParamaterSetter.setupNativeROSCommunicator(rosNativeNetworkProcessor, lidarSpindleVelocity);
+         multiSenseParamaterSetter.setupNativeROSCommunicator(rosNativeNetworkProcessor, lidarSpindleVelocity);
       }
       else
       {
-         MultiSenseParamaterSetter.setupMultisenseSpindleSpeedPublisher(rosMainNode, lidarSpindleVelocity);
+         multiSenseParamaterSetter.setupMultisenseSpindleSpeedPublisher(rosMainNode, lidarSpindleVelocity);
       }
    }
 
    private void registerLidarReceivers()
    {
-      this.multisenseLidarDataReceiver = new MultisenseLidarDataReceiver(depthDataProcessor, rosTransformProvider, ppsTimestampOffsetProvider, sharedRobotPoseBuffer, rosMainNode, lidarParamaters);
+      this.multisenseLidarDataReceiver = new MultisenseLidarDataReceiver(depthDataProcessor, rosTransformProvider, ppsTimestampOffsetProvider,
+            sharedRobotPoseBuffer, rosMainNode, lidarParamaters);
    }
 
    private void registerCameraReceivers()
