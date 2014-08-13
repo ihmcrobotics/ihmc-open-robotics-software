@@ -100,8 +100,9 @@ public class AtlasMultiContact
       };
 
       MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(
-            contactableBodiesFactory, sensorInformation.getFeetForceSensorNames(), null, controllerParameters, armControllerParameters,
-            false, false, HighLevelState.DO_NOTHING_BEHAVIOR);
+            contactableBodiesFactory, sensorInformation.getFeetForceSensorNames(), controllerParameters, armControllerParameters,
+            HighLevelState.DO_NOTHING_BEHAVIOR);
+      
       controllerFactory.addHighLevelBehaviorFactory(new MultiContactTestHumanoidControllerFactory(controllerParameters, footContactSides, handContactSides, true));
 
       drcSimulation = new DRCSimulationFactory(robotModel, controllerFactory, environment.getTerrainObject3D().getLinkGraphics(), robotInitialSetup, scsInitialSetup,

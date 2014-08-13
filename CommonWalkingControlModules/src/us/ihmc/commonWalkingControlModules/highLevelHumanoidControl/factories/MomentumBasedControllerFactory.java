@@ -8,7 +8,6 @@ import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameter
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.RobotControllerUpdatablesAdapter;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepTimingParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHumanoidControllerManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.DoNothingBehavior;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
@@ -31,7 +30,6 @@ import us.ihmc.commonWalkingControlModules.trajectories.ConstantTransferTimeCalc
 import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.TransferTimeCalculationProvider;
-import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.sensors.ForceSensorData;
@@ -50,14 +48,9 @@ import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class MomentumBasedControllerFactory
-{
-   private static final boolean CREATE_YOVARIABLE_WALKING_PROVIDERS = false;
-   
-   private final boolean USE_HEADING_AND_VELOCITY_SCRIPT;
-
+{   
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final FootstepTimingParameters footstepTimingParameters;
    private final WalkingControllerParameters walkingControllerParameters;
    private final ArmControllerParameters armControllerParameters;
 
@@ -67,9 +60,6 @@ public class MomentumBasedControllerFactory
    private final ConstantSwingTimeCalculator swingTimeCalculator;
    private final ConstantTransferTimeCalculator transferTimeCalculator;
    private final HighLevelState initialBehavior;
-
-   private GlobalDataProducer objectCommunicator;
-   private HeightMap heightMapForCheatingOnStepHeight;
 
    private MomentumBasedController momentumBasedController = null;
    private ICPAndMomentumBasedController icpAndMomentumBasedController = null;
@@ -87,35 +77,20 @@ public class MomentumBasedControllerFactory
    private final ContactableBodiesFactory contactableBodiesFactory;
 
    public MomentumBasedControllerFactory(ContactableBodiesFactory contactableBodiesFactory, SideDependentList<String> footSensorNames,
-         FootstepTimingParameters footstepTimingParameters, WalkingControllerParameters walkingControllerParameters, ArmControllerParameters armControllerParameters,
-         boolean USE_HEADING_AND_VELOCITY_SCRIPT, boolean useFastTouchdowns, HighLevelState initialBehavior)
+         WalkingControllerParameters walkingControllerParameters, ArmControllerParameters armControllerParameters, HighLevelState initialBehavior)
    {
       this.footSensorNames = footSensorNames;
       this.contactableBodiesFactory = contactableBodiesFactory;
       this.initialBehavior = initialBehavior;
 
-      this.footstepTimingParameters = footstepTimingParameters;
       this.walkingControllerParameters = walkingControllerParameters;
       this.armControllerParameters = armControllerParameters;
       
       this.transferTime = walkingControllerParameters.getDefaultTransferTime();
       this.swingTime = walkingControllerParameters.getDefaultSwingTime();
 
-      this.USE_HEADING_AND_VELOCITY_SCRIPT = USE_HEADING_AND_VELOCITY_SCRIPT;
-
       this.swingTimeCalculator = new ConstantSwingTimeCalculator(swingTime, registry);    // new PiecewiseLinearStepTimeCalculator(stepTime, 0.7, 0.6);
       this.transferTimeCalculator = new ConstantTransferTimeCalculator(transferTime, registry);
-   }
-
-   public void setupForNetworkedFootstepProvider(GlobalDataProducer objectCommunicator)
-   {
-      this.objectCommunicator = objectCommunicator;
-   }
-
-
-   public void setupForCheatingUsingGroundHeightAtForFootstepProvider(HeightMap heightMapForCheatingOnStepHeight)
-   {
-      this.heightMapForCheatingOnStepHeight = heightMapForCheatingOnStepHeight;
    }
 
    public void setVariousWalkingProviderFactory(VariousWalkingProviderFactory variousWalkingProviderFactory)
@@ -127,7 +102,7 @@ public class MomentumBasedControllerFactory
          DoubleYoVariable yoTime, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, TwistCalculator twistCalculator,
          CenterOfMassJacobian centerOfMassJacobian, ForceSensorDataHolder forceSensorDataHolder, GlobalDataProducer dataProducer,
          InverseDynamicsJoint... jointsToIgnore)
-   {
+   {      
       SideDependentList<ContactablePlaneBody> feet = contactableBodiesFactory.createFootContactableBodies(fullRobotModel, referenceFrames);
 
       double gravityZ = Math.abs(gravity);
@@ -167,30 +142,19 @@ public class MomentumBasedControllerFactory
       OldMomentumControlModule oldMomentumControlModule = null;
 
       /////////////////////////////////////////////////////////////////////////////////////////////
-      // Setup different things relative to GUI communication /////////////////////////////////////
+      // Setup different things relative to GUI communication and WalkingProviders ////////////////
+      
       ArrayList<Updatable> updatables = new ArrayList<Updatable>();
 
-      if (CREATE_YOVARIABLE_WALKING_PROVIDERS)
+      if (variousWalkingProviderFactory == null)
       {
-         variousWalkingProviders = VariousWalkingProviders.createUsingYoVariables(fullRobotModel, walkingControllerParameters, referenceFrames, feet, registry, dynamicGraphicObjectsListRegistry);
+         variousWalkingProviderFactory = new DoNothingVariousWalkingProviderFactory(controlDT);
       }
-      else if (variousWalkingProviderFactory != null)
-      {
-         variousWalkingProviders = variousWalkingProviderFactory.createVariousWalkingProviders(yoTime, fullRobotModel, walkingControllerParameters,
-               referenceFrames, feet, transferTimeCalculator, swingTimeCalculator, updatables, registry);
-         if (variousWalkingProviders == null)
-            throw new RuntimeException("Couldn't create various walking providers!");
-      }
-      else if (objectCommunicator != null)
-      {
-         variousWalkingProviders = VariousWalkingProviders.createUsingObjectCommunicator(footstepTimingParameters, objectCommunicator, fullRobotModel,
-               walkingControllerParameters, referenceFrames, feet, transferTimeCalculator, swingTimeCalculator, registry);
-      }
-      else
-      {
-         variousWalkingProviders = VariousWalkingProviders.createUsingComponentBasedDesiredFootstepCalculator(fullRobotModel, referenceFrames, feet, controlDT,
-               updatables, USE_HEADING_AND_VELOCITY_SCRIPT, heightMapForCheatingOnStepHeight, walkingControllerParameters, registry);
-      }
+      
+      variousWalkingProviders = variousWalkingProviderFactory.createVariousWalkingProviders(yoTime, fullRobotModel, walkingControllerParameters,
+            referenceFrames, feet, transferTimeCalculator, swingTimeCalculator, updatables, registry, dynamicGraphicObjectsListRegistry);
+      if (variousWalkingProviders == null)
+         throw new RuntimeException("Couldn't create various walking providers!");
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup different things for walking ///////////////////////////////////////////////////////
