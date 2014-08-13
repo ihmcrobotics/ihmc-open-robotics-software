@@ -65,8 +65,9 @@ public enum AtlasRobotVersion {
 	      {
 	         case ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS :
 	         case DRC_NO_HANDS:
-	         case ATLAS_ROBOTIQ:
 	            return "models/GFE/drc_no_hands.sdf";
+	         case ATLAS_ROBOTIQ:
+	            return "models/GFE/drc_task_hose_robotiq.sdf";
 	         case DRC_HANDS:
 	            return "models/GFE/drc_hands.sdf";
 	         case DRC_EXTENDED_HANDS:
@@ -90,7 +91,8 @@ public enum AtlasRobotVersion {
                "models/GFE/gazebo_models/",
                "models/GFE/gazebo_models/atlas_description/",
                "models/GFE/gazebo_models/multisense_sl_description/",
-               "models/GFE/gazebo_models/irobot_hand_description/"
+               "models/GFE/gazebo_models/irobot_hand_description/",
+               "models/GFE/gazebo_models/robotiq/"
 				};
 		}
 		return resourceDirectories;
@@ -123,7 +125,7 @@ public enum AtlasRobotVersion {
 				angles[2] = (float) robotSide.negateIfLeftSide(Math.toRadians(0));
 			}
 			
-			else if (hasIrobotHands())
+			else if (hasIrobotHands() || hasRobotiqHands())
 			{
 				centerOfHandToWristTranslation = new Vector3f(0.1f, (float) robotSide.negateIfLeftSide(0f), 0f);
 				angles[0] = (float) robotSide.negateIfLeftSide(Math.toRadians(-90));
