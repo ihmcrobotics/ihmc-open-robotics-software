@@ -4,6 +4,7 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
 
 import us.ihmc.utilities.ArrayTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -11,6 +12,7 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FramePose2d;
+import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
@@ -21,29 +23,31 @@ public class Handstep
    private final String id;
    private final RigidBody endEffector;
    private final PoseReferenceFrame poseReferenceFrame;
+   private final FrameVector surfaceNormal;
 
-   public Handstep(RigidBody endEffector, FramePose framePose)
+   public Handstep(RigidBody endEffector, FramePose framePose, FrameVector surfaceNormal)
    {
-      this(endEffector, new PoseReferenceFrame("Handstep" + counter, framePose));
+      this(endEffector, new PoseReferenceFrame("Handstep" + counter, framePose), surfaceNormal);
    }
 
-   public Handstep(RigidBody endEffector, PoseReferenceFrame poseReferenceFrame)
+   public Handstep(RigidBody endEffector, PoseReferenceFrame poseReferenceFrame, FrameVector surfaceNormal)
    {
-      this(createAutomaticID(endEffector), endEffector, poseReferenceFrame);
+      this(createAutomaticID(endEffector), endEffector, poseReferenceFrame, surfaceNormal);
    }
 
-   public Handstep(String id, RigidBody endEffector, PoseReferenceFrame poseReferenceFrame)
+   public Handstep(String id, RigidBody endEffector, PoseReferenceFrame poseReferenceFrame, FrameVector surfaceNormal)
    {
       poseReferenceFrame.getParent().checkIsWorldFrame();
 
       this.id = id;
       this.endEffector = endEffector;
       this.poseReferenceFrame = poseReferenceFrame;
+      this.surfaceNormal = surfaceNormal;
    }
 
    public Handstep(Handstep handstep)
    {
-      this(handstep.endEffector, handstep.poseReferenceFrame);
+      this(handstep.endEffector, handstep.poseReferenceFrame, handstep.surfaceNormal);
    }
 
    private static String createAutomaticID(RigidBody endEffector)
@@ -60,7 +64,7 @@ public class Handstep
    {
       return poseReferenceFrame.getParent();
    }
-
+   
    public void setX(double x)
    {
       poseReferenceFrame.setX(x);
@@ -94,6 +98,11 @@ public class Handstep
    public void setPositionChangeOnlyXY(FramePoint2d position2d)
    {
       poseReferenceFrame.setXYFromPosition2dAndUpdate(position2d);
+   }
+   
+   public void setSurfaceNormal(FrameVector surfaceNormal)
+   {
+      this.surfaceNormal.set(surfaceNormal);
    }
 
    public String getId()
@@ -155,6 +164,17 @@ public class Handstep
    {
       poseReferenceFrameToPackAndUpdate.setPoseAndUpdate(poseReferenceFrame);
    }
+   
+   public void getSurfaceNormal(FrameVector surfaceNormalToPack)
+   {
+      surfaceNormalToPack.setIncludingFrame(surfaceNormal);
+   }
+   
+   public void getSurfaceNormal(Vector3d surfaceNormalToPack)
+   {
+      this.surfaceNormal.get(surfaceNormalToPack);
+   }
+
 
    public RigidBody getBody()
    {
