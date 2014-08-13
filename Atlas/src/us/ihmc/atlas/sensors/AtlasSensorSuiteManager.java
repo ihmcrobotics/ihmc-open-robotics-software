@@ -51,6 +51,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
          DRCNetworkProcessorNetworkingManager networkingManager, SDFFullRobotModel sdfFullRobotModel, DepthDataFilter lidarDataFilter, String sensorURI)
    {
       depthDataProcessor = new DepthDataProcessor(networkingManager,lidarDataFilter);
+      depthDataProcessor.setTestbed(networkingManager.getControllerCommandHandler().getTestbed());
 
       DRCRobotCameraParameters leftEyeCameraParams = sensorInformation.getCameraParameters(AtlasSensorInformation.MULTISENSE_SL_LEFT_CAMERA_ID);
       SCSCameraDataReceiver cameraReceiver = new SCSCameraDataReceiver(robotPoseBuffer, leftEyeCameraParams, scsCommunicator, networkingManager,
@@ -80,6 +81,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    {
       RosMainNode rosMainNode = new RosMainNode(rosCoreURI, "darpaRoboticsChallange/networkProcessor");
       depthDataProcessor = new DepthDataProcessor(networkingManager,lidarDataFilter);
+      depthDataProcessor.setTestbed(networkingManager.getControllerCommandHandler().getTestbed());
 
       RosNativeNetworkProcessor rosNativeNetworkProcessor;
       if (RosNativeNetworkProcessor.hasNativeLibrary())

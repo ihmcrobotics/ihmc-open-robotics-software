@@ -45,7 +45,7 @@ public class AutomaticAlignTestbedToPlanes {
       // point cloud with two bricks 09
 
       System.out.println("Loading and filtering point clouds");
-      List<List<Point3D_F64>> scans0 = loadScanLines(directory+"cloud09_scans.txt");
+      List<List<Point3D_F64>> scans0 = loadScanLines(directory+"cloud11_scans.txt");
       List<Point3D_F64> cloud0 = filter(scans0, 3);
 
       System.out.println("Detecting planes");
@@ -59,8 +59,6 @@ public class AutomaticAlignTestbedToPlanes {
 
       finder.process(cloud0,null);
 
-      FactoryVisualization3D factory = UtilDisplayBubo.createVisualize3D();
-
 
       System.out.println("Detecting the testbed");
 
@@ -72,7 +70,7 @@ public class AutomaticAlignTestbedToPlanes {
 
 
       ManualAlignTestbedToCloud display = new ManualAlignTestbedToCloud();
-      display.addPoints(cloud0,0xFF0000,1);
+      display.addPoints(cloud0,0xFF0000,3);
       display.addTestBedModel();
       display.setTestbedToWorld(modelToWorld);
 
