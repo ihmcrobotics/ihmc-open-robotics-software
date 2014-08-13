@@ -50,6 +50,8 @@ public class ManipulationControlModule
    private final HandstepProvider handstepProvider;
    private final HandLoadBearingProvider handLoadBearingProvider;
 
+   private final BooleanYoVariable goToLoadBearingWhenHandlingHandstep;
+
    public ManipulationControlModule(VariousWalkingProviders variousWalkingProviders, ArmControllerParameters armControllerParameters,
          MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
    {
@@ -74,6 +76,9 @@ public class ManipulationControlModule
                jointspaceControlGains, taskspaceControlGains, variousWalkingProviders.getControlStatusProducer(), registry);
          handControlModules.put(robotSide, individualHandControlModule);
       }
+
+      goToLoadBearingWhenHandlingHandstep = new BooleanYoVariable("goToLoadBearingWhenHandlingHandstep", registry);
+      goToLoadBearingWhenHandlingHandstep.set(true);
 
       parentRegistry.addChild(registry);
    }
@@ -182,7 +187,7 @@ public class ManipulationControlModule
          }
       }
    }
-   
+
    private void handleHandsteps(RobotSide robotSide)
    {
       if ((handstepProvider != null) && (handstepProvider.checkForNewHandstep(robotSide)))
@@ -194,7 +199,8 @@ public class ManipulationControlModule
          desiredHandstep.getSurfaceNormal(surfaceNormal);
 
          ReferenceFrame trajectoryFrame = handstepPose.getReferenceFrame();
-         handControlModules.get(robotSide).moveToSurface(handstepPose, surfaceNormal, approachDistanceForHandsteps, TO_DEFAULT_CONFIGURATION_TRAJECTORY_TIME, trajectoryFrame);
+         handControlModules.get(robotSide).moveToSurface(handstepPose, surfaceNormal, approachDistanceForHandsteps, TO_DEFAULT_CONFIGURATION_TRAJECTORY_TIME,
+               trajectoryFrame, goToLoadBearingWhenHandlingHandstep.getBooleanValue());
       }
    }
 

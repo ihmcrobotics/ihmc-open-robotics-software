@@ -26,6 +26,7 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
@@ -34,6 +35,9 @@ import com.yobotics.simulationconstructionset.util.controller.YoSE3PIDGains;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
+import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
+import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionAction;
+import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
 import com.yobotics.simulationconstructionset.util.trajectory.ConstantPoseTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.FinalApproachPoseTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.OneDoFJointQuinticTrajectoryGenerator;
@@ -55,6 +59,8 @@ public class HandControlModule
    private final ConstantPoseTrajectoryGenerator holdPoseTrajectoryGenerator;
    private final StraightLinePoseTrajectoryGenerator straightLinePoseTrajectoryGenerator;
    private final FinalApproachPoseTrajectoryGenerator finalApproachPoseTrajectoryGenerator;
+
+   private final BooleanYoVariable isExecutingHandStep;
 
    private final YoVariableDoubleProvider trajectoryTimeProvider;
 
@@ -155,7 +161,7 @@ public class HandControlModule
                jacobianId, chest, hand, dynamicGraphicObjectsListRegistry, registry);
       }
 
-      setupStateMachine(simulationTime);
+      setupStateMachine();
 
       jointCurrentPositionMap = new LinkedHashMap<OneDoFJoint, Double>();
       for (OneDoFJoint oneDoFJoint : oneDoFJoints)
@@ -163,11 +169,13 @@ public class HandControlModule
          jointCurrentPositionMap.put(oneDoFJoint, oneDoFJoint.getQ());
       }
 
+      isExecutingHandStep = new BooleanYoVariable(namePrefix + "DoingHandstep", registry);
+
       parentRegistry.addChild(registry);
    }
 
    @SuppressWarnings("unchecked")
-   private void setupStateMachine(DoubleYoVariable simulationTime)
+   private void setupStateMachine()
    {
       addRequestedStateTransition(requestedState, false, jointSpaceHandControlState, jointSpaceHandControlState);
       addRequestedStateTransition(requestedState, false, jointSpaceHandControlState, taskSpacePositionControlState);
@@ -180,9 +188,34 @@ public class HandControlModule
       addRequestedStateTransition(requestedState, false, loadBearingControlState, taskSpacePositionControlState);
       addRequestedStateTransition(requestedState, false, loadBearingControlState, jointSpaceHandControlState);
 
+      setupTransitionToSupport(taskSpacePositionControlState);
+
       stateMachine.addState(jointSpaceHandControlState);
       stateMachine.addState(taskSpacePositionControlState);
       stateMachine.addState(loadBearingControlState);
+   }
+
+   private void setupTransitionToSupport(final State<HandControlState> fromState)
+   {
+      StateTransitionCondition swingToSupportCondition = new StateTransitionCondition()
+      {
+         @Override
+         public boolean checkCondition()
+         {
+            return isExecutingHandStep.getBooleanValue() && fromState.isDone();
+         }
+      };
+      StateTransitionAction swingToSupportAction = new StateTransitionAction()
+      {
+         @Override
+         public void doTransitionAction()
+         {
+            isExecutingHandStep.set(false);
+            finalApproachPoseTrajectoryGenerator.showVisualization(false);
+         }
+      };
+      StateTransition<HandControlState> swingToSupportTransition = new StateTransition<HandControlState>(HandControlState.LOAD_BEARING, swingToSupportCondition, swingToSupportAction);
+      fromState.addStateTransition(swingToSupportTransition);
    }
 
    public void doControl()
@@ -216,10 +249,11 @@ public class HandControlModule
    }
 
    private final FrameVector finalDirection = new FrameVector();
-   public void moveToSurface(FramePose finalDesiredPose, FrameVector surfaceNormal, double safetyDistance, double time, ReferenceFrame trajectoryFrame)
+   public void moveToSurface(FramePose finalDesiredPose, FrameVector surfaceNormal, double safetyDistance, double time, ReferenceFrame trajectoryFrame, boolean goToSupportWhenDone)
    {
       FramePose pose = computeDesiredFramePose(trajectoryFrame);
 
+      finalApproachPoseTrajectoryGenerator.showVisualization(true);
       finalApproachPoseTrajectoryGenerator.registerAndSwitchFrame(trajectoryFrame);
       finalApproachPoseTrajectoryGenerator.setInitialPose(pose);
       finalApproachPoseTrajectoryGenerator.setFinalPose(finalDesiredPose);
@@ -228,6 +262,7 @@ public class HandControlModule
       finalDirection.negate();
       finalApproachPoseTrajectoryGenerator.setFinalDirection(finalDirection, safetyDistance);
 
+      isExecutingHandStep.set(goToSupportWhenDone);
       executeTaskSpaceTrajectory(finalApproachPoseTrajectoryGenerator);
    }
 
