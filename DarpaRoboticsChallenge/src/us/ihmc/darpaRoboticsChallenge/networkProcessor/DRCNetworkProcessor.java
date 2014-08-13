@@ -82,7 +82,11 @@ public class DRCNetworkProcessor
             networkingManager.getControllerStateHandler().sendHandJointAnglePacket(object);
          }
       });
-      
+
+      NetworkProcessorTestbedAlignment testbed = new NetworkProcessorTestbedAlignment(networkingManager);
+      networkingManager.getControllerCommandHandler().setTestbed(testbed);
+      new Thread(testbed).start();
+
       setSensorManager(robotModel.getSensorSuiteManager(rosUri),scsCommunicator, "http://" + robotModel.getNetworkParameters().getROSHostIP() + ":11311");
       connect();
    }
