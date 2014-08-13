@@ -226,182 +226,182 @@ public class VariousWalkingProviders
       return reinitializeWalkingControllerProvider;
    }
 
-   public static VariousWalkingProviders createUsingObjectCommunicator(FootstepTimingParameters footstepTimingParameters,
-         GlobalDataProducer objectCommunicator, FullRobotModel fullRobotModel, WalkingControllerParameters walkingControllerParameters,
-         CommonWalkingReferenceFrames referenceFrames, SideDependentList<ContactablePlaneBody> bipedFeet,
-         ConstantTransferTimeCalculator transferTimeCalculator, ConstantSwingTimeCalculator swingTimeCalculator, YoVariableRegistry registry)
-   {
-      HandstepProvider handstepProvider = null;
-      
-      DesiredHandPoseProvider handPoseProvider = new DesiredHandPoseProvider(fullRobotModel,
-            walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame());
-
-      LinkedHashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = new LinkedHashMap<Footstep, TrajectoryParameters>();
-
-      BlindWalkingToDestinationDesiredFootstepCalculator desiredFootstepCalculator = HighLevelHumanoidControllerFactoryHelper
-            .getBlindWalkingToDestinationDesiredFootstepCalculator(walkingControllerParameters, referenceFrames, bipedFeet, registry);
-
-      FootstepPathCoordinator footstepPathCoordinator = new FootstepPathCoordinator(footstepTimingParameters, objectCommunicator, desiredFootstepCalculator,
-            swingTimeCalculator, transferTimeCalculator, registry);
-
-      FootstepPathConsumer footstepPathConsumer = new FootstepPathConsumer(bipedFeet, footstepPathCoordinator, mapFromFootstepsToTrajectoryParameters);
-      BlindWalkingPacketConsumer blindWalkingPacketConsumer = new BlindWalkingPacketConsumer(footstepPathCoordinator);
-      PauseCommandConsumer pauseCommandConsumer = new PauseCommandConsumer(footstepPathCoordinator);
-      DesiredHighLevelStateProvider highLevelStateProvider = new DesiredHighLevelStateProvider();
-      DesiredHeadOrientationProvider headOrientationProvider = new DesiredHeadOrientationProvider(referenceFrames.getPelvisZUpFrame());
-      DesiredComHeightProvider desiredComHeightProvider = new DesiredComHeightProvider();
-      DesiredPelvisPoseProvider pelvisPoseProvider = new DesiredPelvisPoseProvider();
-      DesiredChestOrientationProvider chestOrientationProvider = new DesiredChestOrientationProvider();
-      DesiredFootPoseProvider footPoseProvider = new DesiredFootPoseProvider();
-      ReinitializeWalkingControllerProvider reinitializeWalkingControllerProvider = new ReinitializeWalkingControllerProvider();
-
-      DesiredHandLoadBearingProvider handLoadBearingProvider = new DesiredHandLoadBearingProvider();
-      DesiredFootStateProvider footLoadBearingProvider = new DesiredFootStateProvider();
-      DesiredThighLoadBearingProvider thighLoadBearingProvider = new DesiredThighLoadBearingProvider();
-      DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider = new DesiredPelvisLoadBearingProvider();
-
-      objectCommunicator.attachListener(FootstepDataList.class, footstepPathConsumer);
-      objectCommunicator.attachListener(BlindWalkingPacket.class, blindWalkingPacketConsumer);
-      objectCommunicator.attachListener(PauseCommand.class, pauseCommandConsumer);
-      objectCommunicator.attachListener(HighLevelStatePacket.class, highLevelStateProvider);
-      objectCommunicator.attachListener(HeadOrientationPacket.class, headOrientationProvider.getHeadOrientationPacketConsumer());
-      objectCommunicator.attachListener(ComHeightPacket.class, desiredComHeightProvider.getComHeightPacketConsumer());
-      objectCommunicator.attachListener(LookAtPacket.class, headOrientationProvider.getLookAtPacketConsumer());
-      objectCommunicator.attachListener(PelvisOrientationPacket.class, pelvisPoseProvider);
-      objectCommunicator.attachListener(HandPosePacket.class, handPoseProvider);
-      objectCommunicator.attachListener(FootPosePacket.class, footPoseProvider);
-      objectCommunicator.attachListener(ChestOrientationPacket.class, chestOrientationProvider);
-      objectCommunicator.attachListener(ReinitializeWalkingControllerPacket.class, reinitializeWalkingControllerProvider);
-
-      objectCommunicator.attachListener(HandLoadBearingPacket.class, handLoadBearingProvider);
-      objectCommunicator.attachListener(FootStatePacket.class, footLoadBearingProvider);
-      objectCommunicator.attachListener(ThighStatePacket.class, thighLoadBearingProvider);
-      objectCommunicator.attachListener(BumStatePacket.class, pelvisLoadBearingProvider);
-
-      ControlStatusProducer controlStatusProducer = new NetworkControlStatusProducer(objectCommunicator);
-
-      VariousWalkingProviders variousProvidersFactory = new VariousWalkingProviders(footstepPathCoordinator, handstepProvider, mapFromFootstepsToTrajectoryParameters,
-            headOrientationProvider, desiredComHeightProvider, pelvisPoseProvider, handPoseProvider, handLoadBearingProvider, chestOrientationProvider,
-            footPoseProvider, footLoadBearingProvider, highLevelStateProvider, thighLoadBearingProvider, pelvisLoadBearingProvider,
-            reinitializeWalkingControllerProvider, controlStatusProducer);
-
-      return variousProvidersFactory;
-   }
-
-   public static VariousWalkingProviders createUsingComponentBasedDesiredFootstepCalculator(FullRobotModel fullRobotModel,
-         CommonWalkingReferenceFrames referenceFrames, SideDependentList<ContactablePlaneBody> bipedFeet, double controlDT, ArrayList<Updatable> updatables,
-         boolean useHeadingAndVelocityScript, HeightMap heightMapForCheatingOnStepHeight, WalkingControllerParameters walkingControllerParameters,
-         YoVariableRegistry registry)
-   { 
-      HandstepProvider handstepProvider = null;
-
-      ComponentBasedDesiredFootstepCalculator desiredFootstepCalculator = HighLevelHumanoidControllerFactoryHelper.getDesiredFootstepCalculator(
-            walkingControllerParameters, referenceFrames, bipedFeet, controlDT, registry, updatables, useHeadingAndVelocityScript);
-      if (heightMapForCheatingOnStepHeight != null)
-      {
-         desiredFootstepCalculator.setGroundProfile(heightMapForCheatingOnStepHeight);
-      }
-
-      DesiredFootstepCalculatorFootstepProviderWrapper footstepProvider = new DesiredFootstepCalculatorFootstepProviderWrapper(desiredFootstepCalculator,
-            registry);
-      LinkedHashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = new LinkedHashMap<Footstep, TrajectoryParameters>();
-
-      DesiredHighLevelStateProvider highLevelStateProvider = null;
-      DesiredHeadOrientationProvider headOrientationProvider = null;
-      DesiredComHeightProvider comHeightProvider = null;
-      DesiredPelvisPoseProvider pelvisPoseProvider = null;
-      DesiredChestOrientationProvider chestOrientationProvider = null;
-      DesiredHandPoseProvider handPoseProvider = null;
-      if (fullRobotModel.getHand(RobotSide.LEFT) != null && fullRobotModel.getHand(RobotSide.RIGHT) != null)
-         handPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame());
-      DesiredFootPoseProvider footPoseProvider = new DesiredFootPoseProvider();
-      ReinitializeWalkingControllerProvider reinitializeWalkingControllerProvider = new ReinitializeWalkingControllerProvider();
-
-      HandLoadBearingProvider handLoadBearingProvider = new DesiredHandLoadBearingProvider();
-      DesiredFootStateProvider footLoadBearingProvider = new DesiredFootStateProvider();
-      DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider = new DesiredPelvisLoadBearingProvider();
-      DesiredThighLoadBearingProvider thighLoadBearingProvider = new DesiredThighLoadBearingProvider();
-
-      ControlStatusProducer controlStatusProducer = new SystemErrControlStatusProducer();
-
-      VariousWalkingProviders variousProvidersFactory = new VariousWalkingProviders(footstepProvider, handstepProvider, mapFromFootstepsToTrajectoryParameters,
-            headOrientationProvider, comHeightProvider, pelvisPoseProvider, handPoseProvider, handLoadBearingProvider, chestOrientationProvider,
-            footPoseProvider, footLoadBearingProvider, highLevelStateProvider, thighLoadBearingProvider, pelvisLoadBearingProvider,
-            reinitializeWalkingControllerProvider, controlStatusProducer);
-
-      return variousProvidersFactory;
-   }
-
-   public static VariousWalkingProviders createForStairClimbing(VaryingStairGroundProfile groundProfile, SideDependentList<ContactablePlaneBody> bipedFeet,
-         CommonWalkingReferenceFrames referenceFrames, DesiredHeadingControlModule desiredHeadingControlModule, YoVariableRegistry registry)
-   {
-      HandstepProvider handstepProvider = null;
-
-      VaryingStairDesiredFootstepCalculator desiredFootstepCalculator = new VaryingStairDesiredFootstepCalculator(groundProfile, bipedFeet, referenceFrames,
-            desiredHeadingControlModule, registry);
-      desiredFootstepCalculator.setupParametersForR2InverseDynamics();
-      FootstepProvider footstepProvider = new DesiredFootstepCalculatorFootstepProviderWrapper(desiredFootstepCalculator, registry);
-      LinkedHashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = new LinkedHashMap<Footstep, TrajectoryParameters>();
-
-      DesiredHighLevelStateProvider highLevelStateProvider = null;
-      DesiredHeadOrientationProvider headOrientationProvider = null;
-      DesiredComHeightProvider comHeightProvider = null;
-      DesiredPelvisPoseProvider pelvisPoseProvider = null;
-      DesiredHandPoseProvider handPoseProvider = null;
-      DesiredChestOrientationProvider chestOrientationProvider = null;
-      DesiredFootPoseProvider footPoseProvider = null;
-      ReinitializeWalkingControllerProvider reinitializeWalkingControllerProvider = null;
-
-      HandLoadBearingProvider handLoadBearingProvider = null;
-      DesiredFootStateProvider footLoadBearingProvider = null;
-      DesiredThighLoadBearingProvider thighLoadBearingProvider = null;
-      DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider = null;
-
-      ControlStatusProducer controlStatusProducer = new SystemErrControlStatusProducer();
-
-      VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(footstepProvider, handstepProvider, mapFromFootstepsToTrajectoryParameters,
-            headOrientationProvider, comHeightProvider, pelvisPoseProvider, handPoseProvider, handLoadBearingProvider, chestOrientationProvider,
-            footPoseProvider, footLoadBearingProvider, highLevelStateProvider, thighLoadBearingProvider, pelvisLoadBearingProvider,
-            reinitializeWalkingControllerProvider, controlStatusProducer);
-
-      return variousWalkingProviders;
-   }
-
-   public static VariousWalkingProviders createUsingYoVariables(FullRobotModel fullRobotModel, WalkingControllerParameters walkingControllerParameters,
-         CommonWalkingReferenceFrames referenceFrames, SideDependentList<ContactablePlaneBody> bipedFeet, 
-         YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
-   {
-      HandstepProvider handstepProvider = new UserDesiredHandstepProvider(fullRobotModel, registry, dynamicGraphicObjectsListRegistry);
-
-      HandPoseProvider handPoseProvider = new UserDesiredHandPoseProvider(fullRobotModel,
-            walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame(), registry);
-
-      LinkedHashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = new LinkedHashMap<Footstep, TrajectoryParameters>();
-
-      FootstepProvider footstepPovider = new UserDesiredFootstepProvider(bipedFeet, referenceFrames.getAnkleZUpReferenceFrames(), registry);
-
-      DesiredHighLevelStateProvider highLevelStateProvider = null;
-      DesiredHeadOrientationProvider headOrientationProvider = new UserDesiredHeadOrientationProvider(referenceFrames.getPelvisZUpFrame(), registry);
-      DesiredComHeightProvider desiredComHeightProvider = null;
-      DesiredPelvisPoseProvider pelvisPoseProvider = null;
-      DesiredChestOrientationProvider chestOrientationProvider = null;
-      DesiredFootPoseProvider footPoseProvider = null;
-      ReinitializeWalkingControllerProvider reinitializeWalkingControllerProvider = null;
-
-      HandLoadBearingProvider handLoadBearingProvider = new UserDesiredHandLoadBearingProvider(registry);
-      DesiredFootStateProvider footLoadBearingProvider = null;
-      DesiredThighLoadBearingProvider thighLoadBearingProvider = null;
-      DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider = null;
-
-      ControlStatusProducer controlStatusProducer = new SystemErrControlStatusProducer();
-
-      VariousWalkingProviders variousProvidersFactory = new VariousWalkingProviders(footstepPovider, handstepProvider, mapFromFootstepsToTrajectoryParameters,
-            headOrientationProvider, desiredComHeightProvider, pelvisPoseProvider, handPoseProvider, handLoadBearingProvider, chestOrientationProvider,
-            footPoseProvider, footLoadBearingProvider, highLevelStateProvider, thighLoadBearingProvider, pelvisLoadBearingProvider,
-            reinitializeWalkingControllerProvider, controlStatusProducer);
-
-      return variousProvidersFactory;
-   }
+//   public static VariousWalkingProviders createUsingObjectCommunicator(FootstepTimingParameters footstepTimingParameters,
+//         GlobalDataProducer objectCommunicator, FullRobotModel fullRobotModel, WalkingControllerParameters walkingControllerParameters,
+//         CommonWalkingReferenceFrames referenceFrames, SideDependentList<ContactablePlaneBody> bipedFeet,
+//         ConstantTransferTimeCalculator transferTimeCalculator, ConstantSwingTimeCalculator swingTimeCalculator, YoVariableRegistry registry)
+//   {
+//      HandstepProvider handstepProvider = null;
+//      
+//      DesiredHandPoseProvider handPoseProvider = new DesiredHandPoseProvider(fullRobotModel,
+//            walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame());
+//
+//      LinkedHashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = new LinkedHashMap<Footstep, TrajectoryParameters>();
+//
+//      BlindWalkingToDestinationDesiredFootstepCalculator desiredFootstepCalculator = HighLevelHumanoidControllerFactoryHelper
+//            .getBlindWalkingToDestinationDesiredFootstepCalculator(walkingControllerParameters, referenceFrames, bipedFeet, registry);
+//
+//      FootstepPathCoordinator footstepPathCoordinator = new FootstepPathCoordinator(footstepTimingParameters, objectCommunicator, desiredFootstepCalculator,
+//            swingTimeCalculator, transferTimeCalculator, registry);
+//
+//      FootstepPathConsumer footstepPathConsumer = new FootstepPathConsumer(bipedFeet, footstepPathCoordinator, mapFromFootstepsToTrajectoryParameters);
+//      BlindWalkingPacketConsumer blindWalkingPacketConsumer = new BlindWalkingPacketConsumer(footstepPathCoordinator);
+//      PauseCommandConsumer pauseCommandConsumer = new PauseCommandConsumer(footstepPathCoordinator);
+//      DesiredHighLevelStateProvider highLevelStateProvider = new DesiredHighLevelStateProvider();
+//      DesiredHeadOrientationProvider headOrientationProvider = new DesiredHeadOrientationProvider(referenceFrames.getPelvisZUpFrame());
+//      DesiredComHeightProvider desiredComHeightProvider = new DesiredComHeightProvider();
+//      DesiredPelvisPoseProvider pelvisPoseProvider = new DesiredPelvisPoseProvider();
+//      DesiredChestOrientationProvider chestOrientationProvider = new DesiredChestOrientationProvider();
+//      DesiredFootPoseProvider footPoseProvider = new DesiredFootPoseProvider();
+//      ReinitializeWalkingControllerProvider reinitializeWalkingControllerProvider = new ReinitializeWalkingControllerProvider();
+//
+//      DesiredHandLoadBearingProvider handLoadBearingProvider = new DesiredHandLoadBearingProvider();
+//      DesiredFootStateProvider footLoadBearingProvider = new DesiredFootStateProvider();
+//      DesiredThighLoadBearingProvider thighLoadBearingProvider = new DesiredThighLoadBearingProvider();
+//      DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider = new DesiredPelvisLoadBearingProvider();
+//
+//      objectCommunicator.attachListener(FootstepDataList.class, footstepPathConsumer);
+//      objectCommunicator.attachListener(BlindWalkingPacket.class, blindWalkingPacketConsumer);
+//      objectCommunicator.attachListener(PauseCommand.class, pauseCommandConsumer);
+//      objectCommunicator.attachListener(HighLevelStatePacket.class, highLevelStateProvider);
+//      objectCommunicator.attachListener(HeadOrientationPacket.class, headOrientationProvider.getHeadOrientationPacketConsumer());
+//      objectCommunicator.attachListener(ComHeightPacket.class, desiredComHeightProvider.getComHeightPacketConsumer());
+//      objectCommunicator.attachListener(LookAtPacket.class, headOrientationProvider.getLookAtPacketConsumer());
+//      objectCommunicator.attachListener(PelvisOrientationPacket.class, pelvisPoseProvider);
+//      objectCommunicator.attachListener(HandPosePacket.class, handPoseProvider);
+//      objectCommunicator.attachListener(FootPosePacket.class, footPoseProvider);
+//      objectCommunicator.attachListener(ChestOrientationPacket.class, chestOrientationProvider);
+//      objectCommunicator.attachListener(ReinitializeWalkingControllerPacket.class, reinitializeWalkingControllerProvider);
+//
+//      objectCommunicator.attachListener(HandLoadBearingPacket.class, handLoadBearingProvider);
+//      objectCommunicator.attachListener(FootStatePacket.class, footLoadBearingProvider);
+//      objectCommunicator.attachListener(ThighStatePacket.class, thighLoadBearingProvider);
+//      objectCommunicator.attachListener(BumStatePacket.class, pelvisLoadBearingProvider);
+//
+//      ControlStatusProducer controlStatusProducer = new NetworkControlStatusProducer(objectCommunicator);
+//
+//      VariousWalkingProviders variousProvidersFactory = new VariousWalkingProviders(footstepPathCoordinator, handstepProvider, mapFromFootstepsToTrajectoryParameters,
+//            headOrientationProvider, desiredComHeightProvider, pelvisPoseProvider, handPoseProvider, handLoadBearingProvider, chestOrientationProvider,
+//            footPoseProvider, footLoadBearingProvider, highLevelStateProvider, thighLoadBearingProvider, pelvisLoadBearingProvider,
+//            reinitializeWalkingControllerProvider, controlStatusProducer);
+//
+//      return variousProvidersFactory;
+//   }
+//
+//   public static VariousWalkingProviders createUsingComponentBasedDesiredFootstepCalculator(FullRobotModel fullRobotModel,
+//         CommonWalkingReferenceFrames referenceFrames, SideDependentList<ContactablePlaneBody> bipedFeet, double controlDT, ArrayList<Updatable> updatables,
+//         boolean useHeadingAndVelocityScript, HeightMap heightMapForCheatingOnStepHeight, WalkingControllerParameters walkingControllerParameters,
+//         YoVariableRegistry registry)
+//   { 
+//      HandstepProvider handstepProvider = null;
+//
+//      ComponentBasedDesiredFootstepCalculator desiredFootstepCalculator = HighLevelHumanoidControllerFactoryHelper.getDesiredFootstepCalculator(
+//            walkingControllerParameters, referenceFrames, bipedFeet, controlDT, registry, updatables, useHeadingAndVelocityScript);
+//      if (heightMapForCheatingOnStepHeight != null)
+//      {
+//         desiredFootstepCalculator.setGroundProfile(heightMapForCheatingOnStepHeight);
+//      }
+//
+//      DesiredFootstepCalculatorFootstepProviderWrapper footstepProvider = new DesiredFootstepCalculatorFootstepProviderWrapper(desiredFootstepCalculator,
+//            registry);
+//      LinkedHashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = new LinkedHashMap<Footstep, TrajectoryParameters>();
+//
+//      DesiredHighLevelStateProvider highLevelStateProvider = null;
+//      DesiredHeadOrientationProvider headOrientationProvider = null;
+//      DesiredComHeightProvider comHeightProvider = null;
+//      DesiredPelvisPoseProvider pelvisPoseProvider = null;
+//      DesiredChestOrientationProvider chestOrientationProvider = null;
+//      DesiredHandPoseProvider handPoseProvider = null;
+//      if (fullRobotModel.getHand(RobotSide.LEFT) != null && fullRobotModel.getHand(RobotSide.RIGHT) != null)
+//         handPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame());
+//      DesiredFootPoseProvider footPoseProvider = new DesiredFootPoseProvider();
+//      ReinitializeWalkingControllerProvider reinitializeWalkingControllerProvider = new ReinitializeWalkingControllerProvider();
+//
+//      HandLoadBearingProvider handLoadBearingProvider = new DesiredHandLoadBearingProvider();
+//      DesiredFootStateProvider footLoadBearingProvider = new DesiredFootStateProvider();
+//      DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider = new DesiredPelvisLoadBearingProvider();
+//      DesiredThighLoadBearingProvider thighLoadBearingProvider = new DesiredThighLoadBearingProvider();
+//
+//      ControlStatusProducer controlStatusProducer = new SystemErrControlStatusProducer();
+//
+//      VariousWalkingProviders variousProvidersFactory = new VariousWalkingProviders(footstepProvider, handstepProvider, mapFromFootstepsToTrajectoryParameters,
+//            headOrientationProvider, comHeightProvider, pelvisPoseProvider, handPoseProvider, handLoadBearingProvider, chestOrientationProvider,
+//            footPoseProvider, footLoadBearingProvider, highLevelStateProvider, thighLoadBearingProvider, pelvisLoadBearingProvider,
+//            reinitializeWalkingControllerProvider, controlStatusProducer);
+//
+//      return variousProvidersFactory;
+//   }
+//
+//   public static VariousWalkingProviders createForStairClimbing(VaryingStairGroundProfile groundProfile, SideDependentList<ContactablePlaneBody> bipedFeet,
+//         CommonWalkingReferenceFrames referenceFrames, DesiredHeadingControlModule desiredHeadingControlModule, YoVariableRegistry registry)
+//   {
+//      HandstepProvider handstepProvider = null;
+//
+//      VaryingStairDesiredFootstepCalculator desiredFootstepCalculator = new VaryingStairDesiredFootstepCalculator(groundProfile, bipedFeet, referenceFrames,
+//            desiredHeadingControlModule, registry);
+//      desiredFootstepCalculator.setupParametersForR2InverseDynamics();
+//      FootstepProvider footstepProvider = new DesiredFootstepCalculatorFootstepProviderWrapper(desiredFootstepCalculator, registry);
+//      LinkedHashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = new LinkedHashMap<Footstep, TrajectoryParameters>();
+//
+//      DesiredHighLevelStateProvider highLevelStateProvider = null;
+//      DesiredHeadOrientationProvider headOrientationProvider = null;
+//      DesiredComHeightProvider comHeightProvider = null;
+//      DesiredPelvisPoseProvider pelvisPoseProvider = null;
+//      DesiredHandPoseProvider handPoseProvider = null;
+//      DesiredChestOrientationProvider chestOrientationProvider = null;
+//      DesiredFootPoseProvider footPoseProvider = null;
+//      ReinitializeWalkingControllerProvider reinitializeWalkingControllerProvider = null;
+//
+//      HandLoadBearingProvider handLoadBearingProvider = null;
+//      DesiredFootStateProvider footLoadBearingProvider = null;
+//      DesiredThighLoadBearingProvider thighLoadBearingProvider = null;
+//      DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider = null;
+//
+//      ControlStatusProducer controlStatusProducer = new SystemErrControlStatusProducer();
+//
+//      VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(footstepProvider, handstepProvider, mapFromFootstepsToTrajectoryParameters,
+//            headOrientationProvider, comHeightProvider, pelvisPoseProvider, handPoseProvider, handLoadBearingProvider, chestOrientationProvider,
+//            footPoseProvider, footLoadBearingProvider, highLevelStateProvider, thighLoadBearingProvider, pelvisLoadBearingProvider,
+//            reinitializeWalkingControllerProvider, controlStatusProducer);
+//
+//      return variousWalkingProviders;
+//   }
+//
+//   public static VariousWalkingProviders createUsingYoVariables(FullRobotModel fullRobotModel, WalkingControllerParameters walkingControllerParameters,
+//         CommonWalkingReferenceFrames referenceFrames, SideDependentList<ContactablePlaneBody> bipedFeet, 
+//         YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+//   {
+//      HandstepProvider handstepProvider = new UserDesiredHandstepProvider(fullRobotModel, registry, dynamicGraphicObjectsListRegistry);
+//
+//      HandPoseProvider handPoseProvider = new UserDesiredHandPoseProvider(fullRobotModel,
+//            walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame(), registry);
+//
+//      LinkedHashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = new LinkedHashMap<Footstep, TrajectoryParameters>();
+//
+//      FootstepProvider footstepPovider = new UserDesiredFootstepProvider(bipedFeet, referenceFrames.getAnkleZUpReferenceFrames(), registry);
+//
+//      DesiredHighLevelStateProvider highLevelStateProvider = null;
+//      DesiredHeadOrientationProvider headOrientationProvider = new UserDesiredHeadOrientationProvider(referenceFrames.getPelvisZUpFrame(), registry);
+//      DesiredComHeightProvider desiredComHeightProvider = null;
+//      DesiredPelvisPoseProvider pelvisPoseProvider = null;
+//      DesiredChestOrientationProvider chestOrientationProvider = null;
+//      DesiredFootPoseProvider footPoseProvider = null;
+//      ReinitializeWalkingControllerProvider reinitializeWalkingControllerProvider = null;
+//
+//      HandLoadBearingProvider handLoadBearingProvider = new UserDesiredHandLoadBearingProvider(registry);
+//      DesiredFootStateProvider footLoadBearingProvider = null;
+//      DesiredThighLoadBearingProvider thighLoadBearingProvider = null;
+//      DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider = null;
+//
+//      ControlStatusProducer controlStatusProducer = new SystemErrControlStatusProducer();
+//
+//      VariousWalkingProviders variousProvidersFactory = new VariousWalkingProviders(footstepPovider, handstepProvider, mapFromFootstepsToTrajectoryParameters,
+//            headOrientationProvider, desiredComHeightProvider, pelvisPoseProvider, handPoseProvider, handLoadBearingProvider, chestOrientationProvider,
+//            footPoseProvider, footLoadBearingProvider, highLevelStateProvider, thighLoadBearingProvider, pelvisLoadBearingProvider,
+//            reinitializeWalkingControllerProvider, controlStatusProducer);
+//
+//      return variousProvidersFactory;
+//   }
 
    public ControlStatusProducer getControlStatusProducer()
    {
