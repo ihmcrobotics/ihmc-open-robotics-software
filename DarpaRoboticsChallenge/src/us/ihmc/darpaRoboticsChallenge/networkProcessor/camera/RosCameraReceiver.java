@@ -105,7 +105,7 @@ public class RosCameraReceiver extends CameraDataReceiver
    
    public void setRobotPosePublisher(RosRobotPosePublisher robotPosePublisher)
    {
-      this.robotPosePublisher = robotPosePublisher.createPosePublisher("lidarSensorPoses/multiSenseLidar");
+      this.robotPosePublisher = robotPosePublisher.createPosePublisher("cameraSensorPoses/multiSenseCamera" + cameraParameters.getSensorId());
    }
    
    protected void publishCameraWorldPoseForDebugging(Transform3D transform, long timeStamp)
