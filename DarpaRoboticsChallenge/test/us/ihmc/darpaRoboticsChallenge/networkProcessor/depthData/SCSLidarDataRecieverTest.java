@@ -24,6 +24,8 @@ import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimu
 
 public abstract class SCSLidarDataRecieverTest implements MultiRobotTestInterface, NetStateListener
 {
+   private int numberOfLidarScansConsumed = 0;
+   
    @Before
    public void showMemoryUsageBeforeTest()
    {
@@ -52,6 +54,9 @@ public abstract class SCSLidarDataRecieverTest implements MultiRobotTestInterfac
          throw new RuntimeException(e);
       }
 
+      System.out.println(getClass().getSimpleName() + ": Waiting to connect...");
+      while (!networkingManager.isConnected());
+
       networkingManager.getControllerHandler().send(new DepthDataStateCommand(LidarState.ENABLE));
       networkingManager.getVisualizationHandler().attachListener(SparseLidarScan.class, new LidarConsumer());
 
@@ -66,6 +71,7 @@ public abstract class SCSLidarDataRecieverTest implements MultiRobotTestInterfac
       // Check points
 
       assertTrue(success);
+      assertTrue(numberOfLidarScansConsumed > 10);
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -75,15 +81,15 @@ public abstract class SCSLidarDataRecieverTest implements MultiRobotTestInterfac
       @Override
       public void consumeObject(SparseLidarScan object)
       {
-//       System.out.println("Sparse lidar scan received.");
-         System.out.println(object.getClass().getSimpleName() + " received!");
+         numberOfLidarScansConsumed++;
+         System.out.println(SCSLidarDataRecieverTest.this.getClass().getSimpleName() + ": " + object.getClass().getSimpleName() + " received!" + "count = " + numberOfLidarScansConsumed);
       }
    }
 
 
    public void connected()
    {
-      System.out.println("DRCUserInterfaceNetworkingManager: Connected!");
+      System.out.println(DRCUserInterfaceNetworkingManager.class.getSimpleName() + ": Connected!");
    }
 
    public void disconnected()
