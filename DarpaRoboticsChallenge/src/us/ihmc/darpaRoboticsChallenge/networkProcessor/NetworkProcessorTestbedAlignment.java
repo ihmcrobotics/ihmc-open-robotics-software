@@ -70,6 +70,7 @@ public class NetworkProcessorTestbedAlignment implements Runnable
    {
       if (loadedModel)
       {
+         System.out.println("NetworkProcessorTestbedAlignment - startCollection()");
          synchronized (cloud)
          {
             // ignore commands to start collecting data if it's processing the previous cloud still
@@ -83,6 +84,9 @@ public class NetworkProcessorTestbedAlignment implements Runnable
             stopTime = System.currentTimeMillis() + integrationPeriod;
             networkManager.getControllerStateHandler().sendSerializableObject(new TestbedServerPacket(TestbedServerPacket.START_COLLECTING));
          }
+      } else {
+         System.out.println("NetworkProcessorTestbedAlignment - model not loaded");
+         networkManager.getControllerStateHandler().sendSerializableObject(new TestbedServerPacket(TestbedServerPacket.FAILED_NORESOURCE));
       }
    }
 
@@ -97,6 +101,7 @@ public class NetworkProcessorTestbedAlignment implements Runnable
 
             if (System.currentTimeMillis() < stopTime)
             {
+               System.out.println("NetworkProcessorTestbedAlignment - collected packet");
                List<Point3d> points = polarLidarScan.getAllPoints();
 
                for (int i = 0; i < points.size(); i++)
@@ -107,6 +112,7 @@ public class NetworkProcessorTestbedAlignment implements Runnable
             }
             else
             {
+               System.out.println("NetworkProcessorTestbedAlignment - handlePacket done collection");
                processing = true;
                active = false;
             }
