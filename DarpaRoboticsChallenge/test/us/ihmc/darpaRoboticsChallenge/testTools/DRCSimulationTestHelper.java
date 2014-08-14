@@ -18,11 +18,12 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.BlindWalk
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.CarIngressEgressControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.DataProducerVariousWalkingProviderFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviderFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelState;
 import us.ihmc.commonWalkingControlModules.packets.ComHeightPacket;
+import us.ihmc.commonWalkingControlModules.packets.HandstepPacket;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.darpaRoboticsChallenge.DRCDemo01NavigationEnvironment;
 import us.ihmc.darpaRoboticsChallenge.DRCDemo01StartingLocation;
@@ -71,6 +72,10 @@ public class DRCSimulationTestHelper
    private final boolean createMovie;
 
    private final DRCRobotModel robotModel;
+   private final FullRobotModel fullRobotModel;
+   private final ReferenceFrames referenceFrames;
+   private final ScriptedFootstepGenerator scriptedFootstepGenerator;
+   private final ScriptedHandstepGenerator scriptedHandstepGenerator;
 
    public DRCSimulationTestHelper(String name, String scriptFileName, DRCRobotInitialSetup<SDFRobot> robotInitialSetup, boolean checkNothingChanged,
          boolean showGUI, boolean createMovie, DRCRobotModel robotModel, GroundProfile3D groundProfile)
@@ -83,6 +88,11 @@ public class DRCSimulationTestHelper
       if (createMovie)
          showGUI = true;
 
+      fullRobotModel = robotModel.createFullRobotModel();
+      referenceFrames = new ReferenceFrames(fullRobotModel, robotModel.getJointMap(), robotModel.getPhysicalProperties().getAnkleHeight());
+      scriptedFootstepGenerator = new ScriptedFootstepGenerator(referenceFrames, fullRobotModel, walkingControlParameters);
+      scriptedHandstepGenerator = new ScriptedHandstepGenerator(fullRobotModel);
+ 
       boolean groundProfileVisible = !(groundProfile instanceof TerrainObject3D);
 
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(groundProfileVisible, false, WalkControllerSliderBoard.getFactory(), showGUI);
@@ -168,6 +178,11 @@ public class DRCSimulationTestHelper
       if (createMovie)
          showGUI = true;
 
+      fullRobotModel = robotModel.createFullRobotModel();
+      referenceFrames = new ReferenceFrames(fullRobotModel, robotModel.getJointMap(), robotModel.getPhysicalProperties().getAnkleHeight());
+      scriptedFootstepGenerator = new ScriptedFootstepGenerator(referenceFrames, fullRobotModel, walkingControlParameters);
+      scriptedHandstepGenerator = new ScriptedHandstepGenerator(fullRobotModel);
+
       boolean automaticallyStartSimulation = false;
       boolean initializeEstimatorToActual = true;
 
@@ -204,12 +219,12 @@ public class DRCSimulationTestHelper
 
    public ScriptedFootstepGenerator createScriptedFootstepGenerator()
    {
-      FullRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      ReferenceFrames referenceFrames = new ReferenceFrames(fullRobotModel, robotModel.getJointMap(), robotModel.getPhysicalProperties().getAnkleHeight());
-
-      ScriptedFootstepGenerator scriptedFootstepGenerator = new ScriptedFootstepGenerator(referenceFrames, fullRobotModel, walkingControlParameters);
-
       return scriptedFootstepGenerator;
+   }
+   
+   public ScriptedHandstepGenerator createScriptedHandstepGenerator()
+   {
+      return scriptedHandstepGenerator;
    }
 
    public void checkNothingChanged()
@@ -244,8 +259,14 @@ public class DRCSimulationTestHelper
       if (networkObjectCommunicator instanceof ScriptedFootstepDataListObjectCommunicator)
          ((ScriptedFootstepDataListObjectCommunicator) networkObjectCommunicator).sendFootstepListToListeners(footstepDataList);
    }
+   
+   public void sendHandstepPacketToListeners(HandstepPacket handstepPacket)
+   {
+      if (networkObjectCommunicator instanceof ScriptedFootstepDataListObjectCommunicator)
+         ((ScriptedFootstepDataListObjectCommunicator) networkObjectCommunicator).sendHandstepPacketToListeners(handstepPacket);
+   }
 
-   public void sendFootstepListToListeners(BlindWalkingPacket blindWalkingPacket)
+   public void sendBlindWalkingPacketToListeners(BlindWalkingPacket blindWalkingPacket)
    {
       if (networkObjectCommunicator instanceof ScriptedFootstepDataListObjectCommunicator)
          ((ScriptedFootstepDataListObjectCommunicator) networkObjectCommunicator).sendBlindWalkingPacketToListeners(blindWalkingPacket);
@@ -330,5 +351,7 @@ public class DRCSimulationTestHelper
       scs.setupCamera(cameraConfiguration);
       scs.selectCamera("testCamera");
    }
+
+
 
 }
