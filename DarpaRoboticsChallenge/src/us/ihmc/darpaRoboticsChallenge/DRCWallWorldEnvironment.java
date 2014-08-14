@@ -36,7 +36,7 @@ public class DRCWallWorldEnvironment implements CommonAvatarEnvironmentInterface
       CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D(name);
 
       double xStart = 0.6;
-      double wallWidth = 1.2;
+      double wallWidth = 10.0;
       
       AppearanceDefinition appearance = YoAppearance.Green();
       appearance.setTransparency(0.25);
@@ -49,16 +49,18 @@ public class DRCWallWorldEnvironment implements CommonAvatarEnvironmentInterface
    {
       CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D(name);
 
+      combinedTerrainObject.addBox(-0.18, -10.0, 0.18, 10.0, -0.05, 0.0, YoAppearance.Green());
+      
 //    URL fileURL = DRCDemo01NavigationEnvironment.class.getClassLoader().getResource("Textures/ground2.png");
-      YoAppearanceTexture texture = new YoAppearanceTexture("Textures/ground2.png");
-
-      Transform3D location = new Transform3D();
-      location.setTranslation(new Vector3d(0, 0, -0.5));
-
-      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, 45, 45, 1), texture);
-      combinedTerrainObject.addTerrainObject(newBox);
-      RotatableBoxTerrainObject newBox2 = new RotatableBoxTerrainObject(new Box3d(location, 200, 200, 0.75), YoAppearance.DarkGray());
-      combinedTerrainObject.addTerrainObject(newBox2);
+//      YoAppearanceTexture texture = new YoAppearanceTexture("Textures/ground2.png");
+//
+//      Transform3D location = new Transform3D();
+//      location.setTranslation(new Vector3d(0, 0, -0.5));
+//
+//      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, 45, 45, 1), texture);
+//      combinedTerrainObject.addTerrainObject(newBox);
+//      RotatableBoxTerrainObject newBox2 = new RotatableBoxTerrainObject(new Box3d(location, 200, 200, 0.75), YoAppearance.DarkGray());
+//      combinedTerrainObject.addTerrainObject(newBox2);
 
       return combinedTerrainObject;
    }
