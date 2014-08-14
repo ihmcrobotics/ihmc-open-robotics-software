@@ -199,7 +199,7 @@ public class ManipulationControlModule
          desiredHandstep.getSurfaceNormal(surfaceNormal);
 
          ReferenceFrame trajectoryFrame = handstepPose.getReferenceFrame();
-         handControlModules.get(robotSide).moveToSurface(handstepPose, surfaceNormal, approachDistanceForHandsteps, TO_DEFAULT_CONFIGURATION_TRAJECTORY_TIME,
+         handControlModules.get(robotSide).moveTowardsObjectAndGoToSupport(handstepPose, surfaceNormal, approachDistanceForHandsteps, TO_DEFAULT_CONFIGURATION_TRAJECTORY_TIME,
                trajectoryFrame, goToLoadBearingWhenHandlingHandstep.getBooleanValue());
       }
    }
@@ -262,5 +262,10 @@ public class ManipulationControlModule
             return true;
       }
       return false;
+   }
+
+   public static double getDefaultApproachDistanceForHandsteps()
+   {
+      return approachDistanceForHandsteps;
    }
 }
