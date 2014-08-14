@@ -280,6 +280,12 @@ public class MultiSenseParamaterSetter
                request.getConfig().getDoubles().add(fpsParam);
                
                
+               DoubleParameter gainParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(DoubleParameter._TYPE);
+               gainParam.setName("gain");
+               gainParam.setValue(3.2);
+               request.getConfig().getDoubles().add(gainParam);
+               
+               
                multiSenseClient.call(request, new ServiceResponseListener<ReconfigureResponse>()
                {
 
