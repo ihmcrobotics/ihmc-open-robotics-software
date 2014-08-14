@@ -38,6 +38,7 @@ import us.ihmc.iRobot.control.IRobotControlThreadManager;
 import us.ihmc.iRobot.model.iRobotHandModel;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotiq.control.RobotiqControlThreadManager;
+import us.ihmc.robotiq.model.RobotiqHandModel;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.net.ObjectConsumer;
@@ -205,8 +206,10 @@ public class AtlasRobotModel implements DRCRobotModel
    @Override
    public HandModel getHandModel()
    {
-      if (selectedVersion.getHandModel() == DRCHandType.IROBOT)
+      if (selectedVersion.hasIrobotHands())
          return new iRobotHandModel();
+      else if (selectedVersion.hasRobotiqHands())
+    	 return new RobotiqHandModel();
       else
          return null;
    }

@@ -11,7 +11,6 @@ public class RobotiqHandSensorData implements HandSensorData
 	static final int FINGER_B = 1;
 	static final int FINGER_C = 2;
 	static final int SCISSOR = 3;
-	private static final int[] FINGERS = {FINGER_A, FINGER_B, FINGER_C};
 	private static final int MAX_POSITION_VALUE = 0xFF;
 	
 	static final int IN_MOTION = 0;
@@ -178,19 +177,28 @@ public class RobotiqHandSensorData implements HandSensorData
 		return null;
 	}
 	
-	double[] temp = new double[2];
+	double[] temp = new double[4];
 	public double[][] getFingerJointAngles()
 	{
-		double[][] fingerJointAngles = new double[4][];
+		double[][] fingerJointAngles = new double[3][];
 		
-		for(int finger : FINGERS)
-		{
-			temp[0] = (double)position[finger] * 62.5  / MAX_POSITION_VALUE;
-			temp[1] = (double)position[finger] * 90.0 / MAX_POSITION_VALUE;
-			fingerJointAngles[finger] = Arrays.copyOf(temp, 2);
-		}
+		temp[0] = -(double)position[SCISSOR] * 32 / MAX_POSITION_VALUE;
+		temp[1] = (double)position[FINGER_B] * 62.5  / MAX_POSITION_VALUE;
+		temp[2] = (double)position[FINGER_B] * 90.0 / MAX_POSITION_VALUE;
+		temp[3] = 0.0;
+		fingerJointAngles[0] = Arrays.copyOf(temp, 4);
+		
 		temp[0] = (double)position[SCISSOR] * 32 / MAX_POSITION_VALUE;
-		fingerJointAngles[SCISSOR] = Arrays.copyOf(temp, 1);
+		temp[1] = (double)position[FINGER_B] * 62.5  / MAX_POSITION_VALUE;
+		temp[2] = (double)position[FINGER_B] * 90.0 / MAX_POSITION_VALUE;
+		temp[3] = 0.0;
+		fingerJointAngles[1] = Arrays.copyOf(temp, 4);
+		
+		temp[0] = (double)position[FINGER_A] * 62.5  / MAX_POSITION_VALUE;
+		temp[1] = (double)position[FINGER_A] * 90.0 / MAX_POSITION_VALUE;
+		temp[2] = 0.0;
+		fingerJointAngles[2] = Arrays.copyOf(temp, 3);
+		
 		return fingerJointAngles;
 	}
 
