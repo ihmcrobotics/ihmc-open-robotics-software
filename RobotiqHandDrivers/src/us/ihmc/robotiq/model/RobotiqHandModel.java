@@ -75,8 +75,7 @@ public class RobotiqHandModel implements HandModel
 	@Override
 	public HandJointName[] getHandJointNames()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return RobotiqHandJointNameMinimal.values();
 	}
 
 }
