@@ -263,6 +263,7 @@ public class HandControlModule
       finalApproachPoseTrajectoryGenerator.setFinalDirection(finalDirection, safetyDistance);
 
       isExecutingHandStep.set(goToSupportWhenDone);
+      loadBearingControlState.setContactNormalVector(surfaceNormal);
       executeTaskSpaceTrajectory(finalApproachPoseTrajectoryGenerator);
    }
 
