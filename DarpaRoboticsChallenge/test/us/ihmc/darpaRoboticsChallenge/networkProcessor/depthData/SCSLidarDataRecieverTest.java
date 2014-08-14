@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.bambooTools.BambooTools;
+import us.ihmc.darpaRoboticsChallenge.DRCWallWorldEnvironment;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCUserInterfaceNetworkingManager;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationNetworkTestHelper;
@@ -37,7 +38,7 @@ public abstract class SCSLidarDataRecieverTest implements MultiRobotTestInterfac
    {
       BambooTools.reportTestStartedMessage();
 
-      DRCSimulationNetworkTestHelper drcSimulationTestHelper = new DRCSimulationNetworkTestHelper(getRobotModel());
+      DRCSimulationNetworkTestHelper drcSimulationTestHelper = new DRCSimulationNetworkTestHelper(getRobotModel(), new DRCWallWorldEnvironment());
       drcSimulationTestHelper.getDRCSimulationTestHelper().setupCameraForUnitTest(new Point3d(1.8375, -0.16, 0.89), new Point3d(1.10, 8.30, 1.37));
 
       // TODO Listen to tcp stream rather than local object communicator
@@ -71,7 +72,8 @@ public abstract class SCSLidarDataRecieverTest implements MultiRobotTestInterfac
       // Check points
 
       assertTrue(success);
-      assertTrue(numberOfLidarScansConsumed > 10);
+      assertTrue("Lidar scans are not being recieved.", numberOfLidarScansConsumed > 10);
+      
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -82,10 +84,24 @@ public abstract class SCSLidarDataRecieverTest implements MultiRobotTestInterfac
       public void consumeObject(SparseLidarScan object)
       {
          numberOfLidarScansConsumed++;
+         
          System.out.println(SCSLidarDataRecieverTest.this.getClass().getSimpleName() + ": " + object.getClass().getSimpleName() + " received!" + "count = " + numberOfLidarScansConsumed);
+         
+         verifyScan(object);
       }
    }
 
+   public void verifyScan(SparseLidarScan sparseLidarScan)
+   {
+      System.out.println("Scan: ");
+      
+      for (int i = 0; i < sparseLidarScan.size(); i++)
+      {
+         System.out.print(sparseLidarScan.getRange(i) + ", ");
+      }
+      
+      System.out.println();
+   }
 
    public void connected()
    {
