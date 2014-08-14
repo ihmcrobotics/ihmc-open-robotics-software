@@ -6,6 +6,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.ArrayTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -22,24 +23,26 @@ public class Handstep
    private static int counter = 0;
    private final String id;
    private final RigidBody endEffector;
+   private final RobotSide robotSide;
    private final PoseReferenceFrame poseReferenceFrame;
    private final FrameVector surfaceNormal;
 
-   public Handstep(RigidBody endEffector, FramePose framePose, FrameVector surfaceNormal)
+   public Handstep(RobotSide robotSide, RigidBody endEffector, FramePose framePose, FrameVector surfaceNormal)
    {
-      this(endEffector, new PoseReferenceFrame("Handstep" + counter, framePose), surfaceNormal);
+      this(robotSide, endEffector, new PoseReferenceFrame("Handstep" + counter, framePose), surfaceNormal);
    }
 
-   public Handstep(RigidBody endEffector, PoseReferenceFrame poseReferenceFrame, FrameVector surfaceNormal)
+   public Handstep(RobotSide robotSide, RigidBody endEffector, PoseReferenceFrame poseReferenceFrame, FrameVector surfaceNormal)
    {
-      this(createAutomaticID(endEffector), endEffector, poseReferenceFrame, surfaceNormal);
+      this(createAutomaticID(endEffector), robotSide, endEffector, poseReferenceFrame, surfaceNormal);
    }
 
-   public Handstep(String id, RigidBody endEffector, PoseReferenceFrame poseReferenceFrame, FrameVector surfaceNormal)
+   public Handstep(String id, RobotSide robotSide, RigidBody endEffector, PoseReferenceFrame poseReferenceFrame, FrameVector surfaceNormal)
    {
       poseReferenceFrame.getParent().checkIsWorldFrame();
 
       this.id = id;
+      this.robotSide = robotSide;
       this.endEffector = endEffector;
       this.poseReferenceFrame = poseReferenceFrame;
       this.surfaceNormal = surfaceNormal;
@@ -47,7 +50,7 @@ public class Handstep
 
    public Handstep(Handstep handstep)
    {
-      this(handstep.endEffector, handstep.poseReferenceFrame, handstep.surfaceNormal);
+      this(handstep.robotSide, handstep.endEffector, handstep.poseReferenceFrame, handstep.surfaceNormal);
    }
 
    private static String createAutomaticID(RigidBody endEffector)
@@ -110,6 +113,11 @@ public class Handstep
       return id;
    }
 
+   public RobotSide getRobotSide()
+   {
+      return robotSide;
+   } 
+   
    public double getX()
    {
       return poseReferenceFrame.getX();
@@ -234,4 +242,5 @@ public class Handstep
 
       return "id: " + id + " - pose: " + poseReferenceFrame + "\n\tYawPitchRoll= {" + yawPitchRoll + "}";
    }
+
 }
