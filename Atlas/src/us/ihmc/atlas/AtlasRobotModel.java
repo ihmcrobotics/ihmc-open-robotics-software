@@ -34,12 +34,13 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.AlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
-import us.ihmc.iRobot.control.IRobotCommandManager;
+import us.ihmc.iRobot.control.IRobotControlThreadManager;
 import us.ihmc.iRobot.model.iRobotHandModel;
 import us.ihmc.robotSide.RobotSide;
-import us.ihmc.robotiq.control.RobotiqCommandManager;
+import us.ihmc.robotiq.control.RobotiqControlThreadManager;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.utilities.math.TimeTools;
+import us.ihmc.utilities.net.ObjectConsumer;
 
 import com.jme3.math.Transform;
 import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
@@ -287,17 +288,17 @@ public class AtlasRobotModel implements DRCRobotModel
    }
 
    @Override
-   public HandCommandManager createHandCommandManager()
+   public HandCommandManager createHandCommandManager(ObjectConsumer<Object> objectConsumer)
    {
 	   if(runningOnRealRobot)
 	   {
 		   switch(getHandType())
 		   {
 		   case IROBOT:
-			   return new IRobotCommandManager();
+			   return new HandCommandManager(objectConsumer, IRobotControlThreadManager.class);
 			   
 		   case ROBOTIQ:
-			   return new RobotiqCommandManager();
+			   return new HandCommandManager(objectConsumer, RobotiqControlThreadManager.class);
 			   
 		   default:
 			   break;

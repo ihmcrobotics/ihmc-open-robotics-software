@@ -4,17 +4,20 @@ import java.io.IOException;
 
 import us.ihmc.darpaRoboticsChallenge.configuration.DRCNetClassList;
 import us.ihmc.utilities.net.KryoObjectServer;
+import us.ihmc.utilities.net.ObjectConsumer;
 import us.ihmc.utilities.processManagement.JavaProcessSpawner;
 
-public abstract class HandCommandManager
+public class HandCommandManager
 {
 	private static final String TCP_PORT = "4270";
 	   
 	protected JavaProcessSpawner spawner = new JavaProcessSpawner(true);
 	protected KryoObjectServer server = new KryoObjectServer(Integer.parseInt(TCP_PORT), new DRCNetClassList());
 	
-	public HandCommandManager(Class<? extends Object> clazz)
+	public HandCommandManager(ObjectConsumer<Object> objectConsumer, Class<? extends Object> clazz)
 	{
+		server.attachListener(Object.class, objectConsumer);
+		
 		spawnHandControllerThreadManager(clazz);
 		
 		try
