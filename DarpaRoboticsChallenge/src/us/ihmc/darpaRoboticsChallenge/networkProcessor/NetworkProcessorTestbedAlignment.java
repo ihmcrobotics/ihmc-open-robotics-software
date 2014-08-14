@@ -11,7 +11,6 @@ import georegression.geometry.RotationMatrixGenerator;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.se.Se3_F64;
 import georegression.struct.so.Quaternion_F64;
-import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.ddogleg.struct.FastQueue;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
 import us.ihmc.darpaRoboticsChallenge.sensorProcessing.sensorData.TestbedServerPacket;
@@ -20,7 +19,6 @@ import us.ihmc.utilities.lidar.PointCloudPacket;
 import us.ihmc.utilities.lidar.polarLidar.LidarScan;
 
 import javax.vecmath.Point3d;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -57,15 +55,14 @@ public class NetworkProcessorTestbedAlignment implements Runnable
       configRansac.minimumPoints = 5000;
       finder = FactoryPointCloudShape.ransacSingleAll(new ConfigSurfaceNormals(100, 0.15), configRansac);
 
-      String directory = "../SensorProcessing/data/testbed/2014-08-01/";
       try
       {
-         estimatedToModel = (Se3_F64) new XStream().fromXML(new FileInputStream(directory + "estimatedToModel.xml"));
+         estimatedToModel = (Se3_F64) new XStream().fromXML(getClass().getResourceAsStream("/testbed/estimatedToModel.xml"));
          loadedModel = true;
       }
-      catch (FileNotFoundException e)
+      catch (RuntimeException e)
       {
-         System.out.println("Could not find " + directory + "estimatedToModel.xml");
+         System.out.println("Could not find estimatedToModel.xml");
       }
    }
 
