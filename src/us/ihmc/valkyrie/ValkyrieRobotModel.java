@@ -27,6 +27,7 @@ import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
+import us.ihmc.utilities.net.ObjectConsumer;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
 import us.ihmc.valkyrie.paramaters.ValkyrieArmControllerParameters;
 import us.ihmc.valkyrie.paramaters.ValkyrieJointMap;
@@ -312,7 +313,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
-   public HandCommandManager createHandCommandManager()
+   public HandCommandManager createHandCommandManager(ObjectConsumer<Object> objectConsumer)
    {
 	   return null;
    }
