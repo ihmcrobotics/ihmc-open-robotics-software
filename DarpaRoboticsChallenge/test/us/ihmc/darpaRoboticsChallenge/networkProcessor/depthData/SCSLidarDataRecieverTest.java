@@ -38,7 +38,7 @@ public abstract class SCSLidarDataRecieverTest implements MultiRobotTestInterfac
    {
       BambooTools.reportTestStartedMessage();
 
-      DRCSimulationNetworkTestHelper drcSimulationTestHelper = new DRCSimulationNetworkTestHelper(getRobotModel(), new DRCWallWorldEnvironment());
+      DRCSimulationNetworkTestHelper drcSimulationTestHelper = new DRCSimulationNetworkTestHelper(getRobotModel(), new DRCWallWorldEnvironment(-10.0, 10.0));
       drcSimulationTestHelper.getDRCSimulationTestHelper().setupCameraForUnitTest(new Point3d(1.8375, -0.16, 0.89), new Point3d(1.10, 8.30, 1.37));
 
       // TODO Listen to tcp stream rather than local object communicator

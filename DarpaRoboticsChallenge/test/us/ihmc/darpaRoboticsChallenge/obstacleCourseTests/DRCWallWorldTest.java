@@ -15,6 +15,7 @@ import org.junit.Test;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
+import us.ihmc.commonWalkingControlModules.packets.HandPosePacket;
 import us.ihmc.commonWalkingControlModules.packets.HandstepPacket;
 import us.ihmc.darpaRoboticsChallenge.DRCDemo01StartingLocation;
 import us.ihmc.darpaRoboticsChallenge.DRCWallWorldEnvironment;
@@ -70,7 +71,8 @@ public abstract class DRCWallWorldTest implements MultiRobotTestInterface
 
       DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DEFAULT;
 
-      DRCWallWorldEnvironment environment = new DRCWallWorldEnvironment();
+      double wallMaxY = 2.5;
+      DRCWallWorldEnvironment environment = new DRCWallWorldEnvironment(-0.5, wallMaxY);
       drcSimulationTestHelper = new DRCSimulationTestHelper(environment, "DRCWalkingUpToRampShortStepsTest", "", selectedLocation, checkNothingChanged,
             showGUI, createMovie, getRobotModel());
 
@@ -85,7 +87,7 @@ public abstract class DRCWallWorldTest implements MultiRobotTestInterface
       
       double bodyY = 0.0;
 
-      while (bodyY < 0.5)
+      while (bodyY < wallMaxY - 0.65)
       {
          bodyY = bodyY + 0.15;
 
@@ -101,6 +103,24 @@ public abstract class DRCWallWorldTest implements MultiRobotTestInterface
          }
 
          bodyY = bodyY + 0.15;
+
+         FootstepDataList footstepDataList = createFootstepsForTwoSideSteps(bodyY, scriptedFootstepGenerator);
+         drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
+
+         success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
+      }
+      
+      HandPosePacket releaseLeftHandToHome = HandPosePacket.createGoToHomePacket(RobotSide.LEFT, 1.0);
+      drcSimulationTestHelper.sendHandPosePacketToListeners(releaseLeftHandToHome);
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      HandPosePacket releaseRightHandToHome = HandPosePacket.createGoToHomePacket(RobotSide.RIGHT, 1.0);
+      drcSimulationTestHelper.sendHandPosePacketToListeners(releaseRightHandToHome);
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      for (int i=0; i<2; i++)
+      {
+         bodyY = bodyY + 0.3;
 
          FootstepDataList footstepDataList = createFootstepsForTwoSideSteps(bodyY, scriptedFootstepGenerator);
          drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
