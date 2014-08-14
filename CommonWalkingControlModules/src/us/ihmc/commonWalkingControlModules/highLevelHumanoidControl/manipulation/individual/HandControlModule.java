@@ -7,6 +7,7 @@ import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.AbstractJointSpaceHandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.InverseKinematicsTaskspaceHandPositionControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.JointSpaceHandControlState;
@@ -40,6 +41,7 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateTransition
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
 import com.yobotics.simulationconstructionset.util.trajectory.ConstantPoseTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.FinalApproachPoseTrajectoryGenerator;
+import com.yobotics.simulationconstructionset.util.trajectory.InitialClearancePoseTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.LeadInOutPoseTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.OneDoFJointQuinticTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.PoseTrajectoryGenerator;
@@ -60,6 +62,7 @@ public class HandControlModule
    private final ConstantPoseTrajectoryGenerator holdPoseTrajectoryGenerator;
    private final StraightLinePoseTrajectoryGenerator straightLinePoseTrajectoryGenerator;
    private final FinalApproachPoseTrajectoryGenerator finalApproachPoseTrajectoryGenerator;
+   private final InitialClearancePoseTrajectoryGenerator initialClearancePoseTrajectoryGenerator;
    private final LeadInOutPoseTrajectoryGenerator leadInOutPoseTrajectoryGenerator;
 
    private final BooleanYoVariable isExecutingHandStep;
@@ -126,6 +129,7 @@ public class HandControlModule
       holdPoseTrajectoryGenerator = new ConstantPoseTrajectoryGenerator(name + "Hold", true, worldFrame, parentRegistry);
       straightLinePoseTrajectoryGenerator = new StraightLinePoseTrajectoryGenerator(name, true, worldFrame, registry);
       finalApproachPoseTrajectoryGenerator = new FinalApproachPoseTrajectoryGenerator(name, true, worldFrame, registry, dynamicGraphicObjectsListRegistry);
+      initialClearancePoseTrajectoryGenerator = new InitialClearancePoseTrajectoryGenerator(name + "MoveAway", true, worldFrame, registry, dynamicGraphicObjectsListRegistry);
       leadInOutPoseTrajectoryGenerator = new LeadInOutPoseTrajectoryGenerator(name + "Swing", true, worldFrame, registry, dynamicGraphicObjectsListRegistry);
 
       loadBearingControlState = new LoadBearingPlaneHandControlState(namePrefix, HandControlState.LOAD_BEARING, robotSide, momentumBasedController,
@@ -216,6 +220,7 @@ public class HandControlModule
             isExecutingHandStep.set(false);
             finalApproachPoseTrajectoryGenerator.showVisualization(false);
             leadInOutPoseTrajectoryGenerator.showVisualization(false);
+            initialClearancePoseTrajectoryGenerator.showVisualization(false);
          }
       };
       StateTransition<HandControlState> swingToSupportTransition = new StateTransition<HandControlState>(HandControlState.LOAD_BEARING, swingToSupportCondition, swingToSupportAction);
@@ -242,49 +247,75 @@ public class HandControlModule
 
    public void moveInStraightLine(FramePose finalDesiredPose, double time, ReferenceFrame trajectoryFrame)
    {
-      FramePose pose = computeDesiredFramePose(trajectoryFrame);
-
-      straightLinePoseTrajectoryGenerator.registerAndSwitchFrame(trajectoryFrame);
-      straightLinePoseTrajectoryGenerator.setInitialPose(pose);
-      straightLinePoseTrajectoryGenerator.setFinalPose(finalDesiredPose);
-      straightLinePoseTrajectoryGenerator.setTrajectoryTime(time);
-
-      executeTaskSpaceTrajectory(straightLinePoseTrajectoryGenerator);
+      if (stateMachine.getCurrentStateEnum() != HandControlState.LOAD_BEARING)
+      {
+         FramePose pose = computeDesiredFramePose(trajectoryFrame);
+         straightLinePoseTrajectoryGenerator.registerAndSwitchFrame(trajectoryFrame);
+         straightLinePoseTrajectoryGenerator.setInitialPose(pose);
+         straightLinePoseTrajectoryGenerator.setFinalPose(finalDesiredPose);
+         straightLinePoseTrajectoryGenerator.setTrajectoryTime(time);
+         executeTaskSpaceTrajectory(straightLinePoseTrajectoryGenerator);
+      }
+      else
+      {
+         loadBearingControlState.getContactNormalVector(initialDirection);
+         moveAwayObject(finalDesiredPose, initialDirection, ManipulationControlModule.getDefaultApproachDistanceForHandsteps(), time, trajectoryFrame);
+      }
    }
 
    private final FrameVector initialDirection = new FrameVector();
    private final FrameVector finalDirection = new FrameVector();
-   public void moveToSurface(FramePose finalDesiredPose, FrameVector surfaceNormal, double safetyDistance, double time, ReferenceFrame trajectoryFrame, boolean goToSupportWhenDone)
+   public void moveTowardsObjectAndGoToSupport(FramePose finalDesiredPose, FrameVector surfaceNormal, double clearance, double time, ReferenceFrame trajectoryFrame, boolean goToSupportWhenDone)
    {
-      FramePose pose = computeDesiredFramePose(trajectoryFrame);
-      PoseTrajectoryGenerator poseTrajectoryGenerator;
-         finalDirection.setIncludingFrame(surfaceNormal);
-         finalDirection.negate();
+      finalDirection.setIncludingFrame(surfaceNormal);
+      finalDirection.negate();
 
+      moveTowardsObject(finalDesiredPose, finalDirection, clearance, time, trajectoryFrame);
+      loadBearingControlState.setContactNormalVector(surfaceNormal);
+      isExecutingHandStep.set(goToSupportWhenDone);
+   }
+
+   private void moveTowardsObject(FramePose finalDesiredPose, FrameVector finalDirection, double clearance, double time, ReferenceFrame trajectoryFrame)
+   {
       if (stateMachine.getCurrentStateEnum() != HandControlState.LOAD_BEARING)
       {
+         FramePose pose = computeDesiredFramePose(trajectoryFrame);
          finalApproachPoseTrajectoryGenerator.showVisualization(true);
          finalApproachPoseTrajectoryGenerator.registerAndSwitchFrame(trajectoryFrame);
          finalApproachPoseTrajectoryGenerator.setInitialPose(pose);
          finalApproachPoseTrajectoryGenerator.setFinalPose(finalDesiredPose);
          finalApproachPoseTrajectoryGenerator.setTrajectoryTime(time);
-         finalApproachPoseTrajectoryGenerator.setFinalDirection(finalDirection, safetyDistance);
-         poseTrajectoryGenerator = finalApproachPoseTrajectoryGenerator;
+         finalApproachPoseTrajectoryGenerator.setFinalApproach(finalDirection, clearance);
+         executeTaskSpaceTrajectory(finalApproachPoseTrajectoryGenerator);
       }
       else
       {
-         leadInOutPoseTrajectoryGenerator.showVisualization(true);
-         leadInOutPoseTrajectoryGenerator.registerAndSwitchFrame(trajectoryFrame);
          loadBearingControlState.getContactNormalVector(initialDirection);
-         leadInOutPoseTrajectoryGenerator.setInitialLeadOut(pose, initialDirection, safetyDistance);
-         leadInOutPoseTrajectoryGenerator.setFinalLeadIn(finalDesiredPose, finalDirection, safetyDistance);
-         leadInOutPoseTrajectoryGenerator.setTrajectoryTime(time);
-         poseTrajectoryGenerator = leadInOutPoseTrajectoryGenerator;
+         moveAwayObjectTowardsOtherObject(finalDesiredPose, initialDirection, finalDirection, clearance, time, trajectoryFrame);
       }
+   }
 
-      isExecutingHandStep.set(goToSupportWhenDone);
-      loadBearingControlState.setContactNormalVector(surfaceNormal);
-      executeTaskSpaceTrajectory(poseTrajectoryGenerator);
+   public void moveAwayObject(FramePose finalDesiredPose, FrameVector initialDirection, double clearance, double time, ReferenceFrame trajectoryFrame)
+   {
+      FramePose pose = computeDesiredFramePose(trajectoryFrame);
+      initialClearancePoseTrajectoryGenerator.showVisualization(true);
+      initialClearancePoseTrajectoryGenerator.registerAndSwitchFrame(trajectoryFrame);
+      initialClearancePoseTrajectoryGenerator.setInitialPose(pose);
+      initialClearancePoseTrajectoryGenerator.setFinalPose(finalDesiredPose);
+      initialClearancePoseTrajectoryGenerator.setInitialClearance(initialDirection, clearance);
+      initialClearancePoseTrajectoryGenerator.setTrajectoryTime(time);
+      executeTaskSpaceTrajectory(initialClearancePoseTrajectoryGenerator);
+   }
+
+   private void moveAwayObjectTowardsOtherObject(FramePose finalDesiredPose, FrameVector initialDirection, FrameVector finalDirection, double clearance, double time, ReferenceFrame trajectoryFrame)
+   {
+      FramePose pose = computeDesiredFramePose(trajectoryFrame);
+      leadInOutPoseTrajectoryGenerator.showVisualization(true);
+      leadInOutPoseTrajectoryGenerator.registerAndSwitchFrame(trajectoryFrame);
+      leadInOutPoseTrajectoryGenerator.setInitialLeadOut(pose, initialDirection, clearance);
+      leadInOutPoseTrajectoryGenerator.setFinalLeadIn(finalDesiredPose, finalDirection, clearance);
+      leadInOutPoseTrajectoryGenerator.setTrajectoryTime(time);
+      executeTaskSpaceTrajectory(leadInOutPoseTrajectoryGenerator);
    }
 
    private FramePose computeDesiredFramePose(ReferenceFrame trajectoryFrame)
