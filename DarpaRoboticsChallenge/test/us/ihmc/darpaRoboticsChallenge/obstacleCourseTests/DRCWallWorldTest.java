@@ -30,7 +30,7 @@ import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimu
 
 public abstract class DRCWallWorldTest implements MultiRobotTestInterface
 {
-   private static final boolean KEEP_SCS_UP = true;
+   private static final boolean KEEP_SCS_UP = false;
 
    private static final boolean createMovie = BambooTools.doMovieCreation();
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
@@ -81,33 +81,32 @@ public abstract class DRCWallWorldTest implements MultiRobotTestInterface
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
 
-//      +++JEP 140814: Exploratory. Testing handsteps. Will be moved out of here once it's all working...
       ScriptedHandstepGenerator scriptedHandstepGenerator = drcSimulationTestHelper.createScriptedHandstepGenerator();
       
-      ArrayList<Handstep> handsteps = createHandstepForTesting(scriptedHandstepGenerator);
-      
-      for (Handstep handstep : handsteps)
+      double bodyY = 0.0;
+
+      while (bodyY < 0.5)
       {
-         HandstepPacket handstepPacket = new HandstepPacket(handstep);
-         drcSimulationTestHelper.sendHandstepPacketToListeners(handstepPacket);
+         bodyY = bodyY + 0.15;
+
+         double leftHandstepY = bodyY + 0.25;
+         double rightHandstepY = bodyY - 0.25;
+         ArrayList<Handstep> handsteps = createHandstepForTesting(leftHandstepY, rightHandstepY, scriptedHandstepGenerator);
+
+         for (Handstep handstep : handsteps)
+         {
+            HandstepPacket handstepPacket = new HandstepPacket(handstep);
+            drcSimulationTestHelper.sendHandstepPacketToListeners(handstepPacket);
+            success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
+         }
+
+         bodyY = bodyY + 0.15;
+
+         FootstepDataList footstepDataList = createFootstepsForTwoSideSteps(bodyY, scriptedFootstepGenerator);
+         drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
+
          success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
       }
-
-      
-      FootstepDataList footstepDataList = createFootstepsForSteppingInPlace(scriptedFootstepGenerator);
-      drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
-
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(8.0);
-
-      handsteps = createHandstepForTesting(scriptedHandstepGenerator);
-      
-      for (Handstep handstep : handsteps)
-      {
-         HandstepPacket handstepPacket = new HandstepPacket(handstep);
-         drcSimulationTestHelper.sendHandstepPacketToListeners(handstepPacket);
-         success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
-      }
-
       
       drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
@@ -125,12 +124,12 @@ public abstract class DRCWallWorldTest implements MultiRobotTestInterface
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
 
-   private ArrayList<Handstep> createHandstepForTesting(ScriptedHandstepGenerator scriptedHandstepGenerator)
+   private ArrayList<Handstep> createHandstepForTesting(double leftHandstepY, double rightHandstepY, ScriptedHandstepGenerator scriptedHandstepGenerator)
    {
       ArrayList<Handstep> ret = new ArrayList<Handstep>();
 
       RobotSide robotSide = RobotSide.LEFT;
-      Tuple3d position = new Point3d(0.6, 0.3, 1.0);
+      Tuple3d position = new Point3d(0.6, leftHandstepY, 1.0);
       Vector3d surfaceNormal = new Vector3d(-1.0, 0.0, 0.0);
       double rotationAngleAboutNormal = 0.0;
 
@@ -138,7 +137,7 @@ public abstract class DRCWallWorldTest implements MultiRobotTestInterface
       ret.add(handstep);
       
       robotSide = RobotSide.RIGHT;
-      position = new Point3d(0.6, -0.3, 1.0);
+      position = new Point3d(0.6, rightHandstepY, 1.0);
       surfaceNormal = new Vector3d(-1.0, 0.0, 0.0);
       rotationAngleAboutNormal = 0.0;
 
@@ -148,38 +147,23 @@ public abstract class DRCWallWorldTest implements MultiRobotTestInterface
       return ret;
    }
    
-   private FootstepDataList createFootstepsForSteppingInPlace(ScriptedFootstepGenerator scriptedFootstepGenerator)
+   private FootstepDataList createFootstepsForTwoSideSteps(double bodyY, ScriptedFootstepGenerator scriptedFootstepGenerator)
    {
+      double stepWidth = 0.20;
+
       double[][][] footstepLocationsAndOrientations = new double[][][]
       {
          {
-            {0.1, -0.1, 0.084},
+            {0.0, bodyY + stepWidth/2.0, 0.084},
             {0.0, 0.0, 0.0, 1.0}
          },
          {
-            {0.1, 0.1, 0.084},
-            {0.0, 0.0, 0.0, 1.0}
-         },
-         {
-            {0.0, -0.1, 0.084},
-            {0.0, 0.0, 0.0, 1.0}
-         },
-         {
-            {0.0, 0.1, 0.084},
-            {0.0, 0.0, 0.0, 1.0}
-         },
-         {
-            {0.05, -0.1, 0.084},
-            {0.0, 0.0, 0.0, 1.0}
-         },
-         {
-            {0.05, 0.1, 0.084},
+            {0.0, bodyY - stepWidth/2.0, 0.084},
             {0.0, 0.0, 0.0, 1.0}
          }
       };
 
-      RobotSide[] robotSides = drcSimulationTestHelper.createRobotSidesStartingFrom(RobotSide.RIGHT, footstepLocationsAndOrientations.length);
-
+      RobotSide[] robotSides = drcSimulationTestHelper.createRobotSidesStartingFrom(RobotSide.LEFT, footstepLocationsAndOrientations.length);
       return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
    }
 
