@@ -40,6 +40,7 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateTransition
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
 import com.yobotics.simulationconstructionset.util.trajectory.ConstantPoseTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.FinalApproachPoseTrajectoryGenerator;
+import com.yobotics.simulationconstructionset.util.trajectory.LeadInOutPoseTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.OneDoFJointQuinticTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.PoseTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.StraightLinePoseTrajectoryGenerator;
@@ -59,6 +60,7 @@ public class HandControlModule
    private final ConstantPoseTrajectoryGenerator holdPoseTrajectoryGenerator;
    private final StraightLinePoseTrajectoryGenerator straightLinePoseTrajectoryGenerator;
    private final FinalApproachPoseTrajectoryGenerator finalApproachPoseTrajectoryGenerator;
+   private final LeadInOutPoseTrajectoryGenerator leadInOutPoseTrajectoryGenerator;
 
    private final BooleanYoVariable isExecutingHandStep;
 
@@ -124,6 +126,7 @@ public class HandControlModule
       holdPoseTrajectoryGenerator = new ConstantPoseTrajectoryGenerator(name + "Hold", true, worldFrame, parentRegistry);
       straightLinePoseTrajectoryGenerator = new StraightLinePoseTrajectoryGenerator(name, true, worldFrame, registry);
       finalApproachPoseTrajectoryGenerator = new FinalApproachPoseTrajectoryGenerator(name, true, worldFrame, registry, dynamicGraphicObjectsListRegistry);
+      leadInOutPoseTrajectoryGenerator = new LeadInOutPoseTrajectoryGenerator(name + "Swing", true, worldFrame, registry, dynamicGraphicObjectsListRegistry);
 
       loadBearingControlState = new LoadBearingPlaneHandControlState(namePrefix, HandControlState.LOAD_BEARING, robotSide, momentumBasedController,
             fullRobotModel.getElevator(), hand, jacobianId, registry);
@@ -212,6 +215,7 @@ public class HandControlModule
          {
             isExecutingHandStep.set(false);
             finalApproachPoseTrajectoryGenerator.showVisualization(false);
+            leadInOutPoseTrajectoryGenerator.showVisualization(false);
          }
       };
       StateTransition<HandControlState> swingToSupportTransition = new StateTransition<HandControlState>(HandControlState.LOAD_BEARING, swingToSupportCondition, swingToSupportAction);
@@ -248,23 +252,39 @@ public class HandControlModule
       executeTaskSpaceTrajectory(straightLinePoseTrajectoryGenerator);
    }
 
+   private final FrameVector initialDirection = new FrameVector();
    private final FrameVector finalDirection = new FrameVector();
    public void moveToSurface(FramePose finalDesiredPose, FrameVector surfaceNormal, double safetyDistance, double time, ReferenceFrame trajectoryFrame, boolean goToSupportWhenDone)
    {
       FramePose pose = computeDesiredFramePose(trajectoryFrame);
+      PoseTrajectoryGenerator poseTrajectoryGenerator;
+         finalDirection.setIncludingFrame(surfaceNormal);
+         finalDirection.negate();
 
-      finalApproachPoseTrajectoryGenerator.showVisualization(true);
-      finalApproachPoseTrajectoryGenerator.registerAndSwitchFrame(trajectoryFrame);
-      finalApproachPoseTrajectoryGenerator.setInitialPose(pose);
-      finalApproachPoseTrajectoryGenerator.setFinalPose(finalDesiredPose);
-      finalApproachPoseTrajectoryGenerator.setTrajectoryTime(time);
-      finalDirection.setIncludingFrame(surfaceNormal);
-      finalDirection.negate();
-      finalApproachPoseTrajectoryGenerator.setFinalDirection(finalDirection, safetyDistance);
+      if (stateMachine.getCurrentStateEnum() != HandControlState.LOAD_BEARING)
+      {
+         finalApproachPoseTrajectoryGenerator.showVisualization(true);
+         finalApproachPoseTrajectoryGenerator.registerAndSwitchFrame(trajectoryFrame);
+         finalApproachPoseTrajectoryGenerator.setInitialPose(pose);
+         finalApproachPoseTrajectoryGenerator.setFinalPose(finalDesiredPose);
+         finalApproachPoseTrajectoryGenerator.setTrajectoryTime(time);
+         finalApproachPoseTrajectoryGenerator.setFinalDirection(finalDirection, safetyDistance);
+         poseTrajectoryGenerator = finalApproachPoseTrajectoryGenerator;
+      }
+      else
+      {
+         leadInOutPoseTrajectoryGenerator.showVisualization(true);
+         leadInOutPoseTrajectoryGenerator.registerAndSwitchFrame(trajectoryFrame);
+         loadBearingControlState.getContactNormalVector(initialDirection);
+         leadInOutPoseTrajectoryGenerator.setInitialLeadOut(pose, initialDirection, safetyDistance);
+         leadInOutPoseTrajectoryGenerator.setFinalLeadIn(finalDesiredPose, finalDirection, safetyDistance);
+         leadInOutPoseTrajectoryGenerator.setTrajectoryTime(time);
+         poseTrajectoryGenerator = leadInOutPoseTrajectoryGenerator;
+      }
 
       isExecutingHandStep.set(goToSupportWhenDone);
       loadBearingControlState.setContactNormalVector(surfaceNormal);
-      executeTaskSpaceTrajectory(finalApproachPoseTrajectoryGenerator);
+      executeTaskSpaceTrajectory(poseTrajectoryGenerator);
    }
 
    private FramePose computeDesiredFramePose(ReferenceFrame trajectoryFrame)
