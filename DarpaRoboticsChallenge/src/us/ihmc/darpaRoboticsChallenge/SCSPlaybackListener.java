@@ -21,7 +21,8 @@ public class SCSPlaybackListener implements PlaybackListener
    public void stop()
    {
 //      System.out.println("SCSPlaybackListener: stopped");
-      networkServer.queueDataToSend(new SCSListenerPacket());
+      if (networkServer != null)
+         networkServer.queueDataToSend(new SCSListenerPacket());
    }
 
    public void indexChanged(int newIndex, double newTime)
