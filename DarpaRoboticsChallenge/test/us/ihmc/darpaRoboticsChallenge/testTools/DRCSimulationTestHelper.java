@@ -47,6 +47,7 @@ import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
+import us.ihmc.utilities.net.ObjectCommunicator;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.time.GlobalTimer;
@@ -60,7 +61,7 @@ public class DRCSimulationTestHelper
    private final SimulationConstructionSet scs;
    private final SDFRobot sdfRobot;
    private final DRCSimulationFactory drcSimulationFactory;
-   private final ScriptedFootstepDataListObjectCommunicator networkObjectCommunicator;
+   private final ObjectCommunicator networkObjectCommunicator;
 
    private final boolean checkNothingChanged;
    private final NothingChangedVerifier nothingChangedVerifier;
@@ -144,15 +145,22 @@ public class DRCSimulationTestHelper
    public DRCSimulationTestHelper(String name, String scriptFileName, DRCDemo01StartingLocation selectedLocation, boolean checkNothingChanged, boolean showGUI,
          boolean createMovie, DRCRobotModel robotModel)
    {
-      this(new DRCDemo01NavigationEnvironment(), name, scriptFileName, selectedLocation, checkNothingChanged, showGUI,
+      this(new DRCDemo01NavigationEnvironment(), new ScriptedFootstepDataListObjectCommunicator("Team"), name, scriptFileName, selectedLocation, checkNothingChanged, showGUI,
             createMovie, robotModel);
    }
-
-   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface environment, String name, 
+   
+   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface environment, String name, String scriptFileName, DRCDemo01StartingLocation selectedLocation,
+         boolean checkNothingChanged, boolean showGUI, boolean createMovie, DRCRobotModel robotModel)
+   {
+      this(environment, new ScriptedFootstepDataListObjectCommunicator("Team"), name, scriptFileName, selectedLocation, checkNothingChanged, showGUI,
+            createMovie, robotModel);
+   }
+   
+   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface environment, ObjectCommunicator networkObjectCommunicator, String name, 
          String scriptFileName, DRCDemo01StartingLocation selectedLocation, boolean checkNothingChanged, boolean showGUI,
          boolean createMovie, DRCRobotModel robotModel)
    {
-      networkObjectCommunicator = new ScriptedFootstepDataListObjectCommunicator("Team");
+      this.networkObjectCommunicator = networkObjectCommunicator;
       this.walkingControlParameters = robotModel.getWalkingControllerParameters();
       this.checkNothingChanged = checkNothingChanged;
       this.createMovie = createMovie;
@@ -233,17 +241,20 @@ public class DRCSimulationTestHelper
 
    public void sendFootstepListToListeners(FootstepDataList footstepDataList)
    {
-      networkObjectCommunicator.sendFootstepListToListeners(footstepDataList);
+      if (networkObjectCommunicator instanceof ScriptedFootstepDataListObjectCommunicator)
+         ((ScriptedFootstepDataListObjectCommunicator) networkObjectCommunicator).sendFootstepListToListeners(footstepDataList);
    }
 
    public void sendFootstepListToListeners(BlindWalkingPacket blindWalkingPacket)
    {
-      networkObjectCommunicator.sendBlindWalkingPacketToListeners(blindWalkingPacket);
+      if (networkObjectCommunicator instanceof ScriptedFootstepDataListObjectCommunicator)
+         ((ScriptedFootstepDataListObjectCommunicator) networkObjectCommunicator).sendBlindWalkingPacketToListeners(blindWalkingPacket);
    }
 
    public void sendComHeightPacketToListeners(ComHeightPacket comHeightPacket)
    {
-      networkObjectCommunicator.sendComHeightPacketToListeners(comHeightPacket);
+      if (networkObjectCommunicator instanceof ScriptedFootstepDataListObjectCommunicator)
+         ((ScriptedFootstepDataListObjectCommunicator) networkObjectCommunicator).sendComHeightPacketToListeners(comHeightPacket);
    }
 
    public SDFRobot getRobot()
