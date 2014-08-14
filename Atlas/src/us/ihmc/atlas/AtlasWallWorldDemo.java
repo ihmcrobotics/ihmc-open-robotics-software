@@ -21,7 +21,7 @@ public class AtlasWallWorldDemo extends DRCObstacleCourseDemo
       SliderBoardFactory sliderBoardFactory = WalkControllerSliderBoard.getFactory();
       AtlasWallWorldDemo atlasDemo = new AtlasWallWorldDemo();
       boolean automaticallyStartSimulation = true;
-      boolean startDRCNetworkProcessor = true;
+      boolean startDRCNetworkProcessor = false;
       boolean initializeEstimatorToActual = false;
 
       CommonAvatarEnvironmentInterface environment = new DRCWallWorldEnvironment();

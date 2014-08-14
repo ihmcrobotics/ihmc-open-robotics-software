@@ -1,16 +1,12 @@
 package us.ihmc.commonWalkingControlModules.packetConsumers;
 
-import javax.media.j3d.Transform3D;
-import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.HandstepHelper;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
-import us.ihmc.utilities.math.geometry.FramePose;
-import us.ihmc.utilities.math.geometry.GeometryTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.RigidBody;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
@@ -36,21 +32,27 @@ public class UserDesiredHandstepProvider implements HandstepProvider
    private final DynamicGraphicCoordinateSystem userDesiredHandstepCoordinateSystem;
 
    private final FullRobotModel fullRobotModel;
-
+   private final HandstepHelper handstepHelper;
+   
    public UserDesiredHandstepProvider(FullRobotModel fullRobotModel, YoVariableRegistry parentRegistry,
                                       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
+      this.handstepHelper = new HandstepHelper(fullRobotModel); 
+      
       userHandstepTakeIt.set(false);
       userHandstepNormal.set(-1.0, 0.0, 0.0);
       userHandstepRobotSide.set(RobotSide.LEFT);
 
       userDesiredHandstepCoordinateSystem = new DynamicGraphicCoordinateSystem("userHandstepViz", "", parentRegistry, 0.3);
-
+      
       VariableChangedListener listener = new VariableChangedListener()
       {
          public void variableChanged(YoVariable<?> v)
          {
-            userDesiredHandstepCoordinateSystem.setTransformToWorld(computeHandstepTransform(false));
+            Vector3d position = userHandstepPosition.getVector3dCopy();
+            Vector3d surfaceNormal = userHandstepNormal.getVector3dCopy();
+            double rotationAngleAboutNormal = userHandstepRotationAboutNormal.getDoubleValue();
+            userDesiredHandstepCoordinateSystem.setTransformToWorld(HandstepHelper.computeHandstepTransform(false, position, surfaceNormal, rotationAngleAboutNormal));
          }
       };
 
@@ -71,44 +73,14 @@ public class UserDesiredHandstepProvider implements HandstepProvider
          return null;
       if (userHandstepRobotSide.getEnumValue() != robotSide)
          return null;
-
-      Transform3D transformOne = computeHandstepTransform(true);
-
-      FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame(), transformOne);
-
-      RigidBody hand = fullRobotModel.getHand(robotSide);
-      Handstep handstep = new Handstep(hand, framePose, userHandstepNormal.getFrameVectorCopy());
-      userHandstepTakeIt.set(false);
-
-      return handstep;
-   }
-
-   private Transform3D computeHandstepTransform(boolean rotateZIntoX)
-   {
-      Vector3d normal = userHandstepNormal.getVector3dCopy();
-      normal.normalize();
-      AxisAngle4d rotationAxisAngle = new AxisAngle4d();
-      GeometryTools.getRotationBasedOnNormal(rotationAxisAngle, normal);
-
-      AxisAngle4d rotationAboutNormal = new AxisAngle4d(normal, userHandstepRotationAboutNormal.getDoubleValue());
-
-      Transform3D transformOne = new Transform3D();
-      transformOne.set(rotationAboutNormal);
-
-      Transform3D transformTwo = new Transform3D();
-      transformTwo.set(rotationAxisAngle);
-      transformOne.mul(transformTwo);
-
-      if (rotateZIntoX)
-      {
-         Transform3D transformThree = new Transform3D();
-         transformThree.rotY(Math.PI/2.0);
-         transformOne.mul(transformThree);
-      }
       
-      transformOne.setTranslation(userHandstepPosition.getVector3dCopy());
-
-      return transformOne;
+      Vector3d surfaceNormal = userHandstepNormal.getVector3dCopy();
+      double rotationAngleAboutNormal = userHandstepRotationAboutNormal.getDoubleValue();
+      Vector3d position = userHandstepPosition.getVector3dCopy();
+      
+      Handstep handstep = handstepHelper.getDesiredHandstep(robotSide, position, surfaceNormal, rotationAngleAboutNormal);
+      userHandstepTakeIt.set(false);
+      return handstep;
    }
 
    public boolean checkForNewHandstep(RobotSide robotSide)

@@ -3,6 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.obstacleCourseTests;
 import static org.junit.Assert.assertTrue;
 
 import javax.vecmath.Point3d;
+import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
 import org.junit.After;
@@ -12,6 +13,7 @@ import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.bambooTools.BambooTools;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
 import us.ihmc.commonWalkingControlModules.packets.ComHeightPacket;
 import us.ihmc.darpaRoboticsChallenge.DRCDemo01StartingLocation;
@@ -19,6 +21,7 @@ import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
+import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedHandstepGenerator;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.MemoryTools;
@@ -32,7 +35,7 @@ import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimu
 
 public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterface
 {
-   private static final boolean KEEP_SCS_UP = false;
+   private static final boolean KEEP_SCS_UP = true;
 
    private static final boolean createMovie = BambooTools.doMovieCreation();
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
@@ -407,9 +410,17 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
 
+//      +++JEP 140814: Exploratory. Testing handsteps. Will be moved out of here once it's all working...
+//      ScriptedHandstepGenerator scriptedHandstepGenerator = drcSimulationTestHelper.createScriptedHandstepGenerator();
+      //      Handstep handstep = createHandstepForTesting(scriptedHandstepGenerator);
+//      HandstepPacket handstepPacket = new HandstepPacket(RobotSide.LEFT, handstep);
+//      drcSimulationTestHelper.sendHandstepPacketToListeners(handstepPacket);
+      
       FootstepDataList footstepDataList = createFootstepsForWalkingUpToRampShortSteps(scriptedFootstepGenerator);
       drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
 
+     
+      
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(15.0);
 
       drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
@@ -546,7 +557,15 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
    }
 
-
+   private Handstep createHandstepForTesting(ScriptedHandstepGenerator scriptedHandstepGenerator)
+   {
+      RobotSide robotSide = RobotSide.LEFT;
+      Tuple3d position = new Point3d(0.6, 0.3, 1.0);
+      Vector3d surfaceNormal = new Vector3d(-1.0, 0.0, 0.0);
+      double rotationAngleAboutNormal = 0.0;
+      return scriptedHandstepGenerator.createHandstep(robotSide, position, surfaceNormal, rotationAngleAboutNormal);
+   }
+   
    private FootstepDataList createFootstepsForWalkingUpToRampShortSteps(ScriptedFootstepGenerator scriptedFootstepGenerator)
    {
       double[][][] footstepLocationsAndOrientations = new double[][][]
