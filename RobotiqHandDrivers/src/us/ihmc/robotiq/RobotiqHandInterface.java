@@ -39,7 +39,8 @@ public final class RobotiqHandInterface
 	public static final byte MIN_FORCE = 0x00;
 	public static final byte FULLY_CLOSED = (byte)0xFF;
 	public static final byte DEFAULT_SPEED = (byte)(MAX_SPEED & 11000000);  //about 3/4 speed
-	public static final byte SCISSOR_POSITION_BASIC = 120; //scissor position during basic grip
+	public static final byte SCISSOR_POSITION_BASIC = 120; //approximate scissor position during basic grip
+	
 	
 	/*---DATA INDICES---*/
 	//status response index (from hand start register) 
