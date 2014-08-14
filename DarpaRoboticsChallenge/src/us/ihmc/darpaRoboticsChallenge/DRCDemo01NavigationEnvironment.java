@@ -1,9 +1,12 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import com.yobotics.simulationconstructionset.ExternalForcePoint;
-import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.util.environments.SelectableObjectListener;
-import com.yobotics.simulationconstructionset.util.ground.*;
+import java.util.ArrayList;
+import java.util.Random;
+
+import javax.media.j3d.Transform3D;
+import javax.vecmath.Point2d;
+import javax.vecmath.Vector3d;
+
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
@@ -13,12 +16,16 @@ import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.math.geometry.Box3d;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 
-import javax.media.j3d.Transform3D;
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector3d;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Random;
+import com.yobotics.simulationconstructionset.ExternalForcePoint;
+import com.yobotics.simulationconstructionset.Robot;
+import com.yobotics.simulationconstructionset.util.environments.SelectableObjectListener;
+import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject3D;
+import com.yobotics.simulationconstructionset.util.ground.CylinderTerrainObject;
+import com.yobotics.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
+import com.yobotics.simulationconstructionset.util.ground.RotatableCinderBlockTerrainObject;
+import com.yobotics.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject;
+import com.yobotics.simulationconstructionset.util.ground.TerrainObject3D;
+import com.yobotics.simulationconstructionset.util.ground.TrussWithSimpleCollisions;
 
 public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentInterface
 {

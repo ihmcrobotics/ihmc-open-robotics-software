@@ -10,6 +10,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.bambooTools.BambooTools;
+import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepTimingParameters;
@@ -23,6 +24,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Va
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelState;
 import us.ihmc.commonWalkingControlModules.packets.ComHeightPacket;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
+import us.ihmc.darpaRoboticsChallenge.DRCDemo01NavigationEnvironment;
 import us.ihmc.darpaRoboticsChallenge.DRCDemo01StartingLocation;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseDemo;
@@ -142,6 +144,14 @@ public class DRCSimulationTestHelper
    public DRCSimulationTestHelper(String name, String scriptFileName, DRCDemo01StartingLocation selectedLocation, boolean checkNothingChanged, boolean showGUI,
          boolean createMovie, DRCRobotModel robotModel)
    {
+      this(new DRCDemo01NavigationEnvironment(), name, scriptFileName, selectedLocation, checkNothingChanged, showGUI,
+            createMovie, robotModel);
+   }
+
+   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface environment, String name, 
+         String scriptFileName, DRCDemo01StartingLocation selectedLocation, boolean checkNothingChanged, boolean showGUI,
+         boolean createMovie, DRCRobotModel robotModel)
+   {
       networkObjectCommunicator = new ScriptedFootstepDataListObjectCommunicator("Team");
       this.walkingControlParameters = robotModel.getWalkingControllerParameters();
       this.checkNothingChanged = checkNothingChanged;
@@ -158,7 +168,7 @@ public class DRCSimulationTestHelper
       SliderBoardFactory sliderBoardFactory = WalkControllerSliderBoard.getFactory();
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false, sliderBoardFactory, showGUI);
 
-      DRCObstacleCourseSimulation drcSimulation = DRCObstacleCourseDemo.startDRCSim(scriptFileName, networkObjectCommunicator, selectedLocation,
+      DRCObstacleCourseSimulation drcSimulation = DRCObstacleCourseDemo.startDRCSim(environment, scriptFileName, networkObjectCommunicator, selectedLocation,
             guiInitialSetup, initializeEstimatorToActual, automaticallyStartSimulation, startDRCNetworkProcessor, false, robotModel);
 
       scs = drcSimulation.getSimulationConstructionSet();
