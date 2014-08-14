@@ -23,6 +23,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Mo
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviderFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelState;
 import us.ihmc.commonWalkingControlModules.packets.ComHeightPacket;
+import us.ihmc.commonWalkingControlModules.packets.HandPosePacket;
 import us.ihmc.commonWalkingControlModules.packets.HandstepPacket;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.darpaRoboticsChallenge.DRCDemo01NavigationEnvironment;
@@ -264,6 +265,13 @@ public class DRCSimulationTestHelper
    {
       if (networkObjectCommunicator instanceof ScriptedFootstepDataListObjectCommunicator)
          ((ScriptedFootstepDataListObjectCommunicator) networkObjectCommunicator).sendHandstepPacketToListeners(handstepPacket);
+   }
+   
+   public void sendHandPosePacketToListeners(HandPosePacket handPosePacket)
+   {
+      if (networkObjectCommunicator instanceof ScriptedFootstepDataListObjectCommunicator)
+         ((ScriptedFootstepDataListObjectCommunicator) networkObjectCommunicator).sendHandPosePacketToListeners(handPosePacket);
+
    }
 
    public void sendBlindWalkingPacketToListeners(BlindWalkingPacket blindWalkingPacket)
