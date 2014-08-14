@@ -23,11 +23,11 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootPoseProvid
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootStateProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandPoseProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBearingProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.HandstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ReinitializeWalkingControllerProvider;
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.NetworkControlStatusProducer;
@@ -38,6 +38,7 @@ import us.ihmc.commonWalkingControlModules.packets.FootPosePacket;
 import us.ihmc.commonWalkingControlModules.packets.FootStatePacket;
 import us.ihmc.commonWalkingControlModules.packets.HandLoadBearingPacket;
 import us.ihmc.commonWalkingControlModules.packets.HandPosePacket;
+import us.ihmc.commonWalkingControlModules.packets.HandstepPacket;
 import us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket;
 import us.ihmc.commonWalkingControlModules.packets.HighLevelStatePacket;
 import us.ihmc.commonWalkingControlModules.packets.LookAtPacket;
@@ -72,7 +73,7 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
            ConstantTransferTimeCalculator transferTimeCalculator, ConstantSwingTimeCalculator swingTimeCalculator, ArrayList<Updatable> updatables,
            YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      HandstepProvider handstepProvider = null;
+      DesiredHandstepProvider handstepProvider = new DesiredHandstepProvider(fullRobotModel);
 
       DesiredHandPoseProvider handPoseProvider = new DesiredHandPoseProvider(fullRobotModel,
                                                     walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame());
@@ -103,6 +104,7 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
       DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider = new DesiredPelvisLoadBearingProvider();
 
       objectCommunicator.attachListener(FootstepDataList.class, footstepPathConsumer);
+      objectCommunicator.attachListener(HandstepPacket.class, handstepProvider);
       objectCommunicator.attachListener(BlindWalkingPacket.class, blindWalkingPacketConsumer);
       objectCommunicator.attachListener(PauseCommand.class, pauseCommandConsumer);
       objectCommunicator.attachListener(HighLevelStatePacket.class, highLevelStateProvider);

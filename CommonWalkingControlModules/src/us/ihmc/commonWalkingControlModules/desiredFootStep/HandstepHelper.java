@@ -29,7 +29,7 @@ public class HandstepHelper
       FrameVector surfaceNormalFrameVector = new FrameVector(ReferenceFrame.getWorldFrame(), surfaceNormal);
       
       RigidBody hand = fullRobotModel.getHand(robotSide);
-      Handstep handstep = new Handstep(hand, framePose, surfaceNormalFrameVector);
+      Handstep handstep = new Handstep(robotSide, hand, framePose, surfaceNormalFrameVector);
 
       return handstep;
    }

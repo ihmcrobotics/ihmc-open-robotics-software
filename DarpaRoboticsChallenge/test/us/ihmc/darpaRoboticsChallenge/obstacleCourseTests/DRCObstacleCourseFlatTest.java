@@ -409,18 +409,9 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
-
-//      +++JEP 140814: Exploratory. Testing handsteps. Will be moved out of here once it's all working...
-//      ScriptedHandstepGenerator scriptedHandstepGenerator = drcSimulationTestHelper.createScriptedHandstepGenerator();
-      //      Handstep handstep = createHandstepForTesting(scriptedHandstepGenerator);
-//      HandstepPacket handstepPacket = new HandstepPacket(RobotSide.LEFT, handstep);
-//      drcSimulationTestHelper.sendHandstepPacketToListeners(handstepPacket);
       
       FootstepDataList footstepDataList = createFootstepsForWalkingUpToRampShortSteps(scriptedFootstepGenerator);
       drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
-
-     
-      
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(15.0);
 
       drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
