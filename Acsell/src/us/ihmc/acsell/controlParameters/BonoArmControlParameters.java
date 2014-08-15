@@ -68,6 +68,12 @@ public class BonoArmControlParameters implements ArmControllerParameters
    }
 
    @Override
+   public YoSE3PIDGains createTaskspaceControlGainsForLoadBearing(YoVariableRegistry registry)
+   {
+      return null;
+   }
+
+   @Override
    public boolean useInverseKinematicsTaskspaceControl()
    {
       return false;
