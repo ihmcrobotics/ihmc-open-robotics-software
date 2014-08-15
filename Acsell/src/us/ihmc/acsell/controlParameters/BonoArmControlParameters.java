@@ -8,6 +8,10 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.controller.YoPIDGains;
+import com.yobotics.simulationconstructionset.util.controller.YoSE3PIDGains;
+
 /**
  * Created by dstephen on 2/14/14.
  */
@@ -50,77 +54,17 @@ public class BonoArmControlParameters implements ArmControllerParameters
    {
       return new double[0];  
    }
-   
+
    @Override
-   public double getArmJointspaceKp()
+   public YoPIDGains createJointspaceControlGains(YoVariableRegistry registry)
    {
-      return 0;
+      return null;
    }
 
    @Override
-   public double getArmJointspaceZeta()
+   public YoSE3PIDGains createTaskspaceControlGains(YoVariableRegistry registry)
    {
-      return 0;
-   }
-
-   @Override
-   public double getArmJointspaceKi()
-   {
-      return 0;
-   }
-
-   @Override
-   public double getArmJointspaceMaxIntegralError()
-   {
-      return 0;
-   }
-
-   @Override
-   public double getArmJointspaceMaxAcceleration()
-   {
-      return 0;
-   }
-
-   @Override
-   public double getArmJointspaceMaxJerk()
-   {
-      return 0;
-   }
-
-   @Override
-   public double getArmTaskspaceKp()
-   {
-      return 0;
-   }
-
-   @Override
-   public double getArmTaskspaceZeta()
-   {
-      return 0;
-   }
-
-   @Override
-   public double getArmTaskspaceKi()
-   {
-      return 0;
-   }
-
-   @Override
-   public double getArmTaskspaceMaxIntegralError()
-   {
-      return 0;
-   }
-
-   @Override
-   public double getArmTaskspaceMaxAcceleration()
-   {
-      return 0;
-   }
-
-   @Override
-   public double getArmTaskspaceMaxJerk()
-   {
-      return 0;
+      return null;
    }
 
    @Override
