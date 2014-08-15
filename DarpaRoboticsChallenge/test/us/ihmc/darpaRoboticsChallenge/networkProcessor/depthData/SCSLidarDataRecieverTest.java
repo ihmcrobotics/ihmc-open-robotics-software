@@ -73,7 +73,6 @@ public abstract class SCSLidarDataRecieverTest implements MultiRobotTestInterfac
 
       assertTrue(success);
       assertTrue("Lidar scans are not being recieved.", numberOfLidarScansConsumed > 10);
-      
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -86,21 +85,7 @@ public abstract class SCSLidarDataRecieverTest implements MultiRobotTestInterfac
          numberOfLidarScansConsumed++;
          
          System.out.println(SCSLidarDataRecieverTest.this.getClass().getSimpleName() + ": " + object.getClass().getSimpleName() + " received!" + "count = " + numberOfLidarScansConsumed);
-         
-         verifyScan(object);
       }
-   }
-
-   public void verifyScan(SparseLidarScan sparseLidarScan)
-   {
-      System.out.println("Scan: ");
-      
-      for (int i = 0; i < sparseLidarScan.size(); i++)
-      {
-         System.out.print(sparseLidarScan.getRange(i) + ", ");
-      }
-      
-      System.out.println();
    }
 
    public void connected()
