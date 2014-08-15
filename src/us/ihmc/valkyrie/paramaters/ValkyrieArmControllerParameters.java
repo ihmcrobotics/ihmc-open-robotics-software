@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.controller.YoIndependentSE3PIDGains;
 import com.yobotics.simulationconstructionset.util.controller.YoPIDGains;
 import com.yobotics.simulationconstructionset.util.controller.YoSE3PIDGains;
 import com.yobotics.simulationconstructionset.util.controller.YoSymmetricSE3PIDGains;
@@ -98,6 +99,14 @@ public class ValkyrieArmControllerParameters implements ArmControllerParameters
       taskspaceControlGains.setMaximumJerk(maxJerk);
       taskspaceControlGains.createDerivativeGainUpdater(true);
 
+      return taskspaceControlGains;
+   }
+
+   @Override
+   public YoSE3PIDGains createTaskspaceControlGainsForLoadBearing(YoVariableRegistry registry)
+   {
+      YoIndependentSE3PIDGains taskspaceControlGains = new YoIndependentSE3PIDGains("ArmLoadBearing", registry);
+      taskspaceControlGains.reset();
       return taskspaceControlGains;
    }
 
