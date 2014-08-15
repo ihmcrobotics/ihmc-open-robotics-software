@@ -203,6 +203,11 @@ public class RigidBodySpatialAccelerationControlModule
       se3pdController.setGains(gains);
    }
 
+   public void setGains(YoSE3PIDGains gains)
+   {
+      se3pdController.setGains(gains);
+   }
+
    public void setPositionMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
    {
       se3pdController.setPositionMaxAccelerationAndJerk(maxAcceleration, maxJerk);

@@ -3,16 +3,18 @@ package us.ihmc.atlas.parameters;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.controller.YoPIDGains;
-import com.yobotics.simulationconstructionset.util.controller.YoSE3PIDGains;
-import com.yobotics.simulationconstructionset.util.controller.YoSymmetricSE3PIDGains;
-
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
+
+import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import com.yobotics.simulationconstructionset.util.controller.GainCalculator;
+import com.yobotics.simulationconstructionset.util.controller.YoIndependentSE3PIDGains;
+import com.yobotics.simulationconstructionset.util.controller.YoPIDGains;
+import com.yobotics.simulationconstructionset.util.controller.YoSE3PIDGains;
+import com.yobotics.simulationconstructionset.util.controller.YoSymmetricSE3PIDGains;
 
 public class AtlasArmControllerParameters implements ArmControllerParameters
 {
@@ -103,6 +105,26 @@ public class AtlasArmControllerParameters implements ArmControllerParameters
       taskspaceControlGains.setMaximumJerk(maxJerk);
       taskspaceControlGains.createDerivativeGainUpdater(true);
 
+      return taskspaceControlGains;
+   }
+
+   @Override
+   public YoSE3PIDGains createTaskspaceControlGainsForLoadBearing(YoVariableRegistry registry)
+   {
+      YoIndependentSE3PIDGains taskspaceControlGains = new YoIndependentSE3PIDGains("ArmLoadBearing", registry);
+      taskspaceControlGains.reset();
+
+      double kp = 100.0;
+      double zeta = runningOnRealRobot ? 0.6 : 1.0;
+      double kd = GainCalculator.computeDerivativeGain(kp, zeta);
+      double maxAccel = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
+      double maxJerk = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
+
+      taskspaceControlGains.setOrientationProportionalGains(0.0, 0.0, 0.0);
+      taskspaceControlGains.setOrientationDerivativeGains(kd, kd, kd);
+      taskspaceControlGains.setOrientationMaxAccelerationAndJerk(maxAccel, maxJerk);
+      taskspaceControlGains.setPositionMaxAccelerationAndJerk(maxAccel, maxJerk);
+      
       return taskspaceControlGains;
    }
 

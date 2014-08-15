@@ -86,10 +86,16 @@ public class HandControlModule
 
    private final double controlDT;
 
+   private final YoSE3PIDGains taskspaceGains, taskspaceLoadBearingGains;
+
    public HandControlModule(RobotSide robotSide, MomentumBasedController momentumBasedController, ArmControllerParameters armControlParameters,
-         YoPIDGains jointspaceGains, YoSE3PIDGains taskspaceGains, ControlStatusProducer controlStatusProducer, YoVariableRegistry parentRegistry)
+         YoPIDGains jointspaceGains, YoSE3PIDGains taskspaceGains, YoSE3PIDGains taskspaceLoadBearingGains, ControlStatusProducer controlStatusProducer,
+         YoVariableRegistry parentRegistry)
    {
       this.controlDT = momentumBasedController.getControlDT();
+      
+      this.taskspaceGains = taskspaceGains;
+      this.taskspaceLoadBearingGains = taskspaceLoadBearingGains;
 
       fullRobotModel = momentumBasedController.getFullRobotModel();
       hand = fullRobotModel.getHand(robotSide);
@@ -123,7 +129,8 @@ public class HandControlModule
       stateMachine = new StateMachine<HandControlState>(name, name + "SwitchTime", HandControlState.class, simulationTime, registry);
 
       handSpatialAccelerationControlModule = new RigidBodySpatialAccelerationControlModule(name, twistCalculator, hand,
-            fullRobotModel.getHandControlFrame(robotSide), controlDT, taskspaceGains, registry);
+            fullRobotModel.getHandControlFrame(robotSide), controlDT, registry);
+      handSpatialAccelerationControlModule.setGains(taskspaceGains);
 
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
       holdPoseTrajectoryGenerator = new ConstantPoseTrajectoryGenerator(name + "Hold", true, worldFrame, parentRegistry);
@@ -218,6 +225,7 @@ public class HandControlModule
          public void doTransitionAction()
          {
             isExecutingHandStep.set(false);
+            handSpatialAccelerationControlModule.setGains(taskspaceLoadBearingGains);
             finalApproachPoseTrajectoryGenerator.showVisualization(false);
             leadInOutPoseTrajectoryGenerator.showVisualization(false);
             initialClearancePoseTrajectoryGenerator.showVisualization(false);
@@ -240,6 +248,7 @@ public class HandControlModule
 
    public void executeTaskSpaceTrajectory(PoseTrajectoryGenerator poseTrajectory)
    {
+      handSpatialAccelerationControlModule.setGains(taskspaceGains);
       taskSpacePositionControlState.setTrajectory(poseTrajectory, poseTrajectory, handSpatialAccelerationControlModule);
       requestedState.set(taskSpacePositionControlState.getStateEnum());
       stateMachine.checkTransitionConditions();
@@ -272,6 +281,7 @@ public class HandControlModule
 
       moveTowardsObject(finalDesiredPose, finalDirection, clearance, time, trajectoryFrame);
       loadBearingControlState.setContactNormalVector(surfaceNormal);
+      loadBearingControlState.setControlModule(handSpatialAccelerationControlModule);
       isExecutingHandStep.set(goToSupportWhenDone);
    }
 
@@ -338,6 +348,7 @@ public class HandControlModule
    public void requestLoadBearing()
    {
       requestedState.set(loadBearingControlState.getStateEnum());
+      loadBearingControlState.setControlModule(handSpatialAccelerationControlModule);
    }
 
    public void moveUsingQuinticSplines(Map<OneDoFJoint, Double> desiredJointPositions, double time)

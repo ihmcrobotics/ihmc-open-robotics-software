@@ -59,7 +59,7 @@ public class ManipulationControlModule
       this.armControlParameters = armControllerParameters;
 
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
-      createFrameVisualizers(dynamicGraphicObjectsListRegistry, fullRobotModel, "HandControlFrames", false);
+      createFrameVisualizers(dynamicGraphicObjectsListRegistry, fullRobotModel, "HandControlFrames", true);
 
       handPoseProvider = variousWalkingProviders.getDesiredHandPoseProvider();
       handstepProvider = variousWalkingProviders.getHandstepProvider();
@@ -68,12 +68,13 @@ public class ManipulationControlModule
       handControlModules = new SideDependentList<HandControlModule>();
 
       YoPIDGains jointspaceControlGains = armControllerParameters.createJointspaceControlGains(registry);
-      YoSE3PIDGains taskspaceControlGains = armControllerParameters.createTaskspaceControlGains(registry);
+      YoSE3PIDGains taskspaceGains = armControllerParameters.createTaskspaceControlGains(registry);
+      YoSE3PIDGains taskspaceLoadBearingGains = armControllerParameters.createTaskspaceControlGainsForLoadBearing(registry);
 
       for (RobotSide robotSide : RobotSide.values)
       {
          HandControlModule individualHandControlModule = new HandControlModule(robotSide, momentumBasedController, armControllerParameters,
-               jointspaceControlGains, taskspaceControlGains, variousWalkingProviders.getControlStatusProducer(), registry);
+               jointspaceControlGains, taskspaceGains, taskspaceLoadBearingGains, variousWalkingProviders.getControlStatusProducer(), registry);
          handControlModules.put(robotSide, individualHandControlModule);
       }
 
