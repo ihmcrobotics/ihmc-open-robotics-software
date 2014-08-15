@@ -26,10 +26,10 @@ import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.AlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
+import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorControllerStateHandler;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
-import us.ihmc.utilities.net.ObjectConsumer;
 
 import com.jme3.math.Transform;
 import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
@@ -247,7 +247,7 @@ public class BonoRobotModel implements DRCRobotModel
    }
 
    @Override
-   public HandCommandManager createHandCommandManager(ObjectConsumer<Object> objectConsumer)
+   public HandCommandManager createHandCommandManager(DRCNetworkProcessorControllerStateHandler controllerStateHandler)
    {
 	   return null;
    }
