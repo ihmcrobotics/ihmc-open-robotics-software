@@ -20,11 +20,9 @@ import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.VariableChangedListener;
-import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.controller.GainCalculator;
 import com.yobotics.simulationconstructionset.util.controller.PIDController;
+import com.yobotics.simulationconstructionset.util.controller.YoPIDGains;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.math.filter.RateLimitedYoVariable;
 import com.yobotics.simulationconstructionset.util.trajectory.OrientationTrajectoryGenerator;
@@ -38,15 +36,14 @@ public class InverseKinematicsTaskspaceHandPositionControlState extends Taskspac
    private final TrajectoryBasedNumericalInverseKinematicsCalculator inverseKinematicsCalculator;
    private final LinkedHashMap<OneDoFJoint, PIDController> pidControllers = new LinkedHashMap<OneDoFJoint, PIDController>();
    private final HashMap<OneDoFJoint, RateLimitedYoVariable> rateLimitedAccelerations = new HashMap<OneDoFJoint, RateLimitedYoVariable>();
-   private final DoubleYoVariable kpArmJointspace, kdArmJointspace, kiArmJointspace, zetaArmJointspace, maxAccelerationArmJointspace, maxJerkArmJointspace,
-         maxIntegralErrorArmJointspace;
+   private final DoubleYoVariable maxAccelerationArmJointspace;
    
    private final BooleanYoVariable inverseKinematicsSolutionIsValid;
 
    public InverseKinematicsTaskspaceHandPositionControlState(String namePrefix, HandControlState stateEnum, RobotSide robotSide,
          MomentumBasedController momentumBasedController, int jacobianId, RigidBody base, RigidBody endEffector,
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, ArmControllerParameters armControllerParameters, ControlStatusProducer controlStatusProducer, double controlDT,
-         YoVariableRegistry parentRegistry)
+         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, ArmControllerParameters armControllerParameters,
+         ControlStatusProducer controlStatusProducer, YoPIDGains gains, double controlDT, YoVariableRegistry parentRegistry)
    {
       super(namePrefix, stateEnum, momentumBasedController, jacobianId, base, endEffector, dynamicGraphicObjectsListRegistry, parentRegistry);
       this.controlDT = controlDT;
@@ -56,58 +53,19 @@ public class InverseKinematicsTaskspaceHandPositionControlState extends Taskspac
       
       inverseKinematicsSolutionIsValid = new BooleanYoVariable("inverseKinematicsSolutionIsValid", registry);
 
-      kpArmJointspace = new DoubleYoVariable("kpArmJointspace" + robotSide, registry);
-      kpArmJointspace.set(armControllerParameters.getArmJointspaceKp());
+      maxAccelerationArmJointspace = gains.getYoMaximumAcceleration();
 
-      zetaArmJointspace = new DoubleYoVariable("zetaArmJointspace" + robotSide, registry);
-      zetaArmJointspace.set(armControllerParameters.getArmJointspaceZeta());
-
-      kdArmJointspace = new DoubleYoVariable("kdArmJointspace" + robotSide, registry);
-
-      kiArmJointspace = new DoubleYoVariable("kiArmJointspace" + robotSide, registry);
-      kiArmJointspace.set(armControllerParameters.getArmJointspaceKi());
-
-      maxAccelerationArmJointspace = new DoubleYoVariable("maxAccelerationArmJointspace" + robotSide, registry);
-      maxJerkArmJointspace = new DoubleYoVariable("maxJerkArmJointspace" + robotSide, registry);
-
-      maxIntegralErrorArmJointspace = new DoubleYoVariable("maxIntegralErrorArmJointspace" + robotSide, registry);
-      maxIntegralErrorArmJointspace.set(armControllerParameters.getArmJointspaceMaxIntegralError());
-
-      maxAccelerationArmJointspace.set(armControllerParameters.getArmJointspaceMaxAcceleration());
-      maxJerkArmJointspace.set(armControllerParameters.getArmJointspaceMaxJerk());
-
-      setupVariableListener();
-      
       for (OneDoFJoint joint : inverseKinematicsCalculator.getRevoluteJointsInOrder())
       {
-         PIDController pidController = new PIDController(kpArmJointspace, kiArmJointspace, kdArmJointspace, maxIntegralErrorArmJointspace, joint.getName()
-               + robotSide.getCamelCaseNameForMiddleOfExpression(), registry);
+         String suffix = joint.getName() + robotSide.getCamelCaseNameForMiddleOfExpression();
+         PIDController pidController = new PIDController(gains.getYoKp(), gains.getYoKi(), gains.getYoKd(), gains.getYoMaxIntegralError(), suffix, registry);
          pidControllers.put(joint, pidController);
 
-         RateLimitedYoVariable rateLimitedAcceleration = new RateLimitedYoVariable(joint.getName() + "Acceleration" + robotSide, registry,
-               maxJerkArmJointspace, controlDT);
+         RateLimitedYoVariable rateLimitedAcceleration = new RateLimitedYoVariable(joint.getName() + "Acceleration" + robotSide, registry, gains.getYoMaximumJerk(), controlDT);
          rateLimitedAccelerations.put(joint, rateLimitedAcceleration);
       }
-
    }
 
-   private void setupVariableListener()
-   {
-      VariableChangedListener listener = new VariableChangedListener()
-      {
-         public void variableChanged(YoVariable<?> v)
-         {
-            kdArmJointspace.set(GainCalculator.computeDerivativeGain(kpArmJointspace.getDoubleValue(), zetaArmJointspace.getDoubleValue()));            
-         }
-      };
-
-      kpArmJointspace.addVariableChangedListener(listener);
-      zetaArmJointspace.addVariableChangedListener(listener);
-      kdArmJointspace.addVariableChangedListener(listener);
-      
-      listener.variableChanged(null);
-   }
-   
    @Override
    protected SpatialAccelerationVector computeDesiredSpatialAcceleration()
    {

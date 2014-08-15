@@ -22,7 +22,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.controller.YoPIDGains;
-import com.yobotics.simulationconstructionset.util.controller.YoSymmetricSE3PIDGains;
+import com.yobotics.simulationconstructionset.util.controller.YoSE3PIDGains;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
@@ -67,8 +67,8 @@ public class ManipulationControlModule
 
       handControlModules = new SideDependentList<HandControlModule>();
 
-      YoPIDGains jointspaceControlGains = createJointspaceControlGains(armControllerParameters);
-      YoSymmetricSE3PIDGains taskspaceControlGains = createTaskspaceControlGains(armControllerParameters);
+      YoPIDGains jointspaceControlGains = armControllerParameters.createJointspaceControlGains(registry);
+      YoSE3PIDGains taskspaceControlGains = armControllerParameters.createTaskspaceControlGains(registry);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -81,32 +81,6 @@ public class ManipulationControlModule
       goToLoadBearingWhenHandlingHandstep.set(true);
 
       parentRegistry.addChild(registry);
-   }
-
-   private YoSymmetricSE3PIDGains createTaskspaceControlGains(ArmControllerParameters armControllerParameters)
-   {
-      YoSymmetricSE3PIDGains taskspaceControlGains = new YoSymmetricSE3PIDGains("ArmTaskspace", registry);
-      taskspaceControlGains.setProportionalGain(armControllerParameters.getArmTaskspaceKp());
-      taskspaceControlGains.setDampingRatio(armControllerParameters.getArmTaskspaceZeta());
-      taskspaceControlGains.setIntegralGain(armControllerParameters.getArmTaskspaceKi());
-      taskspaceControlGains.setMaximumIntegralError(armControllerParameters.getArmTaskspaceMaxIntegralError());
-      taskspaceControlGains.setMaximumAcceleration(armControllerParameters.getArmTaskspaceMaxAcceleration());
-      taskspaceControlGains.setMaximumJerk(armControllerParameters.getArmTaskspaceMaxJerk());
-      taskspaceControlGains.createDerivativeGainUpdater(true);
-      return taskspaceControlGains;
-   }
-
-   private YoPIDGains createJointspaceControlGains(ArmControllerParameters armControllerParameters)
-   {
-      YoPIDGains jointspaceControlGains = new YoPIDGains("ArmJointspace", registry);
-      jointspaceControlGains.setKp(armControllerParameters.getArmJointspaceKp());
-      jointspaceControlGains.setZeta(armControllerParameters.getArmJointspaceZeta());
-      jointspaceControlGains.setKi(armControllerParameters.getArmJointspaceKi());
-      jointspaceControlGains.setMaximumIntegralError(armControllerParameters.getArmJointspaceMaxIntegralError());
-      jointspaceControlGains.setMaximumAcceleration(armControllerParameters.getArmJointspaceMaxAcceleration());
-      jointspaceControlGains.setMaximumJerk(armControllerParameters.getArmJointspaceMaxJerk());
-      jointspaceControlGains.createDerivativeGainUpdater(true);
-      return jointspaceControlGains;
    }
 
    private void createFrameVisualizers(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, FullRobotModel fullRobotModel, String listName,

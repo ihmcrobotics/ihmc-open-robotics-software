@@ -158,7 +158,7 @@ public class HandControlModule
          else
          {
             taskSpacePositionControlState = new InverseKinematicsTaskspaceHandPositionControlState(namePrefix, HandControlState.TASK_SPACE_POSITION, robotSide,
-                  momentumBasedController, jacobianId, chest, hand, dynamicGraphicObjectsListRegistry, armControlParameters, controlStatusProducer, controlDT,
+                  momentumBasedController, jacobianId, chest, hand, dynamicGraphicObjectsListRegistry, armControlParameters, controlStatusProducer, jointspaceGains, controlDT,
                   registry);
          }
       }
