@@ -376,7 +376,6 @@ public final class RobotiqHandInterface
 		if(((status[GRIPPER_STATUS] & INITIALIZATON_MASK) == INITIALIZED) || (status[FAULT_STATUS] != NO_FAULT))
 		{
 			this.reset();
-			return;
 		}
 		
 		//initialize arrays
@@ -457,7 +456,6 @@ public final class RobotiqHandInterface
 			status = this.getStatus();
 			errorCount++;
 		}while((status[GRIPPER_STATUS] & INITIALIZATON_MASK) != RESET); //check until reset
-		initialize();
 	}
 	
 	public void shutdown()
