@@ -31,6 +31,7 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.SimulationDoneCriterion;
 import com.yobotics.simulationconstructionset.util.ground.FlatGroundProfile;
+import com.yobotics.simulationconstructionset.util.ground.FlatGroundTerrainObject;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterface
@@ -112,10 +113,11 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       String scriptName = "scripts/ExerciseAndJUnitScripts/SimpleFlatGroundScript.xml";
       String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(DRCObstacleCourseFlatTest.class, scriptName);
       String name = "DRCSimpleFlatGroundScriptTest";
-      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = getRobotModel().getDefaultRobotInitialSetup(0.0, 0.0);
       
-      GroundProfile3D flatGround = new FlatGroundProfile();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(name, fileName, robotInitialSetup, checkNothingChanged, showGUI, createMovie, getRobotModel(), flatGround);
+      FlatGroundTerrainObject flatGround = new FlatGroundTerrainObject();
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+      
+      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, name, fileName, selectedLocation, checkNothingChanged, showGUI, createMovie, getRobotModel());
       SDFRobot robot = drcSimulationTestHelper.getRobot();
       setupCameraForWalkingUpToRamp();
       SlipRandomOnNextStepPerturber slipRandomOnEachStepPerturber = new SlipRandomOnNextStepPerturber(robot, 1002L);
@@ -148,9 +150,10 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       String scriptName = "scripts/ExerciseAndJUnitScripts/SimpleFlatGroundScript.xml";
       String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(DRCObstacleCourseFlatTest.class, scriptName);
-      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = getRobotModel().getDefaultRobotInitialSetup(0.0, 0.0);
-      GroundProfile3D flatGround = new FlatGroundProfile();
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCSimpleFlatGroundScriptTest", fileName, robotInitialSetup, checkNothingChanged, showGUI, createMovie, getRobotModel(), flatGround);
+      FlatGroundTerrainObject flatGround = new FlatGroundTerrainObject();
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+      
+      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCSimpleFlatGroundScriptTest", fileName, selectedLocation, checkNothingChanged, showGUI, createMovie, getRobotModel());
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       SDFRobot robot = drcSimulationTestHelper.getRobot();
       setupCameraForWalkingUpToRamp();
@@ -187,9 +190,10 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
    {
       BambooTools.reportTestStartedMessage();
 
-      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = getRobotModel().getDefaultRobotInitialSetup(0.0, 0.0);
-      GroundProfile3D flatGround = new FlatGroundProfile();
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCSimpleFlatGroundScriptTest", null, robotInitialSetup, checkNothingChanged, showGUI, createMovie, getRobotModel(), flatGround);
+      FlatGroundTerrainObject flatGround = new FlatGroundTerrainObject();
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+
+      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCSimpleFlatGroundScriptTest", null, selectedLocation, checkNothingChanged, showGUI, createMovie, getRobotModel());
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       SDFRobot robot = drcSimulationTestHelper.getRobot();
       setupCameraForWalkingUpToRamp();
@@ -225,9 +229,10 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       String scriptName = "scripts/ExerciseAndJUnitScripts/LongStepsMaxHeightPauseAndRestart_LeftFootTest.xml";
       String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(DRCObstacleCourseFlatTest.class, scriptName);
-      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = getRobotModel().getDefaultRobotInitialSetup(0.0, 0.0);
-      GroundProfile3D flatGround = new FlatGroundProfile();
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCLongStepsMaxHeightPauseAndRestartTest", fileName, robotInitialSetup, checkNothingChanged, showGUI, createMovie, getRobotModel(), flatGround);
+      FlatGroundTerrainObject flatGround = new FlatGroundTerrainObject();
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+      
+      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCLongStepsMaxHeightPauseAndRestartTest", fileName, selectedLocation, checkNothingChanged, showGUI, createMovie, getRobotModel());
       setupCameraForWalkingUpToRamp();
 
       ThreadTools.sleep(1000);
@@ -247,13 +252,12 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
    {
       BambooTools.reportTestStartedMessage();
 
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-
       String scriptName = "scripts/ExerciseAndJUnitScripts/LongSideStepsLeft.xml";
       String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(DRCObstacleCourseFlatTest.class, scriptName);
-      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = getRobotModel().getDefaultRobotInitialSetup(0.0, 0.0);
-      GroundProfile3D flatGround = new FlatGroundProfile();
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCLongStepsMaxHeightPauseAndRestartTest", fileName, robotInitialSetup, checkNothingChanged, showGUI, createMovie, getRobotModel(), flatGround);
+      FlatGroundTerrainObject flatGround = new FlatGroundTerrainObject();
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+      
+      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCLongStepsMaxHeightPauseAndRestartTest", fileName, selectedLocation, checkNothingChanged, showGUI, createMovie, getRobotModel());
 
       SDFRobot robot = drcSimulationTestHelper.getRobot();
 
@@ -287,9 +291,10 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       String scriptName = "scripts/ExerciseAndJUnitScripts/LongSideStepsLeft.xml";
       String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(DRCObstacleCourseFlatTest.class, scriptName);
-      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = getRobotModel().getDefaultRobotInitialSetup(0.0, 0.0);
-      GroundProfile3D flatGround = new FlatGroundProfile();
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCSideStepsWithSlippingTest", fileName, robotInitialSetup, checkNothingChanged, showGUI, createMovie, getRobotModel(), flatGround);
+      FlatGroundTerrainObject flatGround = new FlatGroundTerrainObject();
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+      
+      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCSideStepsWithSlippingTest", fileName, selectedLocation, checkNothingChanged, showGUI, createMovie, getRobotModel());
 
       SDFRobot robot = drcSimulationTestHelper.getRobot();
 
@@ -461,13 +466,10 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
    {
       BambooTools.reportTestStartedMessage();
 
+      FlatGroundTerrainObject flatGround = new FlatGroundTerrainObject();
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT_BUT_ALMOST_PI;
 
-//      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCTurningInPlaceAndPassingPITest", "", selectedLocation,
-//            checkNothingChanged, showGUI, createMovie, getRobotModel());
-      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = getRobotModel().getDefaultRobotInitialSetup(0.0, Math.toRadians(170.0));
-      GroundProfile3D flatGround = new FlatGroundProfile();
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCTurningInPlaceAndPassingPITest", "", robotInitialSetup, checkNothingChanged, showGUI, createMovie, getRobotModel(), flatGround);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCTurningInPlaceAndPassingPITest", "", selectedLocation, checkNothingChanged, showGUI, createMovie, getRobotModel());
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
