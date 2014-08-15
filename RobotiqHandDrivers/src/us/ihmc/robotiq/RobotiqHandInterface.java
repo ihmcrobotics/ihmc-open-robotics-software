@@ -389,9 +389,9 @@ public final class RobotiqHandInterface
 		force[FINGER_A] = MAX_FORCE/2;
 		
 		speed[FINGER_B] = DEFAULT_SPEED;
-      force[FINGER_B] = MAX_FORCE/2;
-      speed[FINGER_C] = DEFAULT_SPEED;
-      force[FINGER_C] = MAX_FORCE/2;
+		force[FINGER_B] = MAX_FORCE/2;
+		speed[FINGER_C] = DEFAULT_SPEED;
+		force[FINGER_C] = MAX_FORCE/2;
 		
 		initializedStatus = INITIALIZED;
 		operationMode = BASIC_MODE;
@@ -399,50 +399,63 @@ public final class RobotiqHandInterface
 		fingerControl = CONCURRENT_FINGER_CONTROL;
 		scissorControl = CONCURRENT_SCISSOR_CONTROL;
 		
-		do
-		{
-			sendRequest(SET_REGISTERS,
-						REGISTER_START,
-						(byte)(initializedStatus | operationMode | commandedStatus),
-						(byte)(fingerControl | scissorControl),
-						(byte)0x00,	//reserved byte
-						(byte)position[FINGER_A], //all finger control
-						(byte)speed[FINGER_A],
-						(byte)force[FINGER_A]);
-			do
-			{
-				ThreadTools.sleep(1000);
-				status = this.getStatus();
-			}while(((status[GRIPPER_STATUS] & INIT_MODE_STATUS_MASK) == ACTIVATING) && (status[FAULT_STATUS] == NO_FAULT)); //check/wait while activation is in progress
-			
-			if(status[FAULT_STATUS] != 0x00) //checking for errors
-			{
-				faultCounter++;
-				if(faultCounter < 3)
-					this.reset();
-				else
-				{
-					return;
-				}
-			}
-		}while ((status[GRIPPER_STATUS] & INIT_MODE_STATUS_MASK) != COMPLETED); //check to see if activation was successful, else resend command	
+		sendRequest(SET_REGISTERS,
+				REGISTER_START,
+				(byte)(initializedStatus | operationMode | commandedStatus),
+				(byte)(fingerControl | scissorControl),
+				(byte)0x00,	//reserved byte
+				(byte)position[FINGER_A], //all finger control
+				(byte)speed[FINGER_A],
+				(byte)force[FINGER_A]);
 		
-		faultCounter = 0; //reset fault counter
+//		do
+//		{
+//			sendRequest(SET_REGISTERS,
+//						REGISTER_START,
+//						(byte)(initializedStatus | operationMode | commandedStatus),
+//						(byte)(fingerControl | scissorControl),
+//						(byte)0x00,	//reserved byte
+//						(byte)position[FINGER_A], //all finger control
+//						(byte)speed[FINGER_A],
+//						(byte)force[FINGER_A]);
+//			do
+//			{
+//				ThreadTools.sleep(1000);
+//				status = this.getStatus();
+//			}while(((status[GRIPPER_STATUS] & INIT_MODE_STATUS_MASK) == ACTIVATING) && (status[FAULT_STATUS] == NO_FAULT)); //check/wait while activation is in progress
+//			
+//			if(status[FAULT_STATUS] != 0x00) //checking for errors
+//			{
+//				faultCounter++;
+//				if(faultCounter < 3)
+//					this.reset();
+//				else
+//				{
+//					return;
+//				}
+//			}
+//		}while ((status[GRIPPER_STATUS] & INIT_MODE_STATUS_MASK) != COMPLETED); //check to see if activation was successful, else resend command	
+//		
+//		faultCounter = 0; //reset fault counter
 	}
 
 	public void reset()
 	{
 		initializedStatus = RESET; //reset activation status
 		commandedStatus = STANDBY;
+		int errorCount = 0;
 		do
 		{
+			if(errorCount > 5)
+				throw new RuntimeException("Unable to reset hand. Unrecoverable error");
 			sendRequest(SET_REGISTERS,
 						REGISTER_START,
 						(byte)(initializedStatus | operationMode | commandedStatus),
 						(byte)(fingerControl | scissorControl));
 		
-			ThreadTools.sleep(100);
+			ThreadTools.sleep(200);
 			status = this.getStatus();
+			errorCount++;
 		}while((status[GRIPPER_STATUS] & INITIALIZATON_MASK) != RESET); //check until reset
 		initialize();
 	}
@@ -762,8 +775,15 @@ public final class RobotiqHandInterface
 		return (status[GRIPPER_STATUS] & INITIALIZATON_MASK) == INITIALIZED;
 	}
 	
+	public boolean doneInitializing()
+	{
+		status = getStatus();
+		return (status[GRIPPER_STATUS] & INIT_MODE_STATUS_MASK) != COMPLETED;
+	}
+	
 	public boolean isConnected()
 	{
+		connected = connection.testConnection();
 		return connected;
 	}
 	

@@ -135,6 +135,16 @@ public class RobotiqHandSensorData implements HandSensorData
 		return !(gripperStatus == IN_MOTION) && !(gripperStatus == STOPPED_AT_REQUESTED);
 	}
 	
+	public boolean isInitializing()
+	{
+		return (modeStatus == ACTIVATING);
+	}
+	
+	public boolean hasCompletedAction()
+	{
+		return (modeStatus == CHANGE_COMPLETE);
+	}
+	
 	public boolean hasError()
 	{
 		return error != 0x00;
@@ -182,20 +192,20 @@ public class RobotiqHandSensorData implements HandSensorData
 	{
 		double[][] fingerJointAngles = new double[3][];
 		
-		temp[0] = -(double)position[SCISSOR] * 32 / MAX_POSITION_VALUE;
-		temp[1] = (double)position[FINGER_B] * 62.5  / MAX_POSITION_VALUE;
-		temp[2] = (double)position[FINGER_B] * 90.0 / MAX_POSITION_VALUE;
+		temp[0] = -((4.0/45) - (double)position[SCISSOR] * (8.0/45) / MAX_POSITION_VALUE) * Math.PI; //32 degrees
+		temp[1] = (double)position[FINGER_B] * (25.0/72) * Math.PI  / MAX_POSITION_VALUE; //62.5 degrees
+		temp[2] = (double)position[FINGER_B] * (0.5) * Math.PI / MAX_POSITION_VALUE; //90 degrees
 		temp[3] = 0.0;
 		fingerJointAngles[0] = Arrays.copyOf(temp, 4);
 		
-		temp[0] = (double)position[SCISSOR] * 32 / MAX_POSITION_VALUE;
-		temp[1] = (double)position[FINGER_B] * 62.5  / MAX_POSITION_VALUE;
-		temp[2] = (double)position[FINGER_B] * 90.0 / MAX_POSITION_VALUE;
+		temp[0] = ((4.0/45) - (double)position[SCISSOR] * (8.0/45) / MAX_POSITION_VALUE) * Math.PI; //32 degrees
+		temp[1] = (double)position[FINGER_B] * (25.0/72) * Math.PI  / MAX_POSITION_VALUE; //62.5 degrees
+		temp[2] = (double)position[FINGER_B] * (0.5) * Math.PI / MAX_POSITION_VALUE; //90 degrees
 		temp[3] = 0.0;
 		fingerJointAngles[1] = Arrays.copyOf(temp, 4);
 		
-		temp[0] = (double)position[FINGER_A] * 62.5  / MAX_POSITION_VALUE;
-		temp[1] = (double)position[FINGER_A] * 90.0 / MAX_POSITION_VALUE;
+		temp[0] = (double)position[FINGER_A] * (25.0/72) * Math.PI  / MAX_POSITION_VALUE; //62.5 degrees
+		temp[1] = (double)position[FINGER_A] * (0.5) * Math.PI / MAX_POSITION_VALUE; //90 degrees
 		temp[2] = 0.0;
 		fingerJointAngles[2] = Arrays.copyOf(temp, 3);
 		
