@@ -1,7 +1,6 @@
 package us.ihmc.atlas.sensors;
 
 import java.net.URI;
-
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
@@ -47,7 +46,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    }
 
    @Override
-   public void initializeSimulatedSensors(LocalObjectCommunicator scsCommunicator, RobotPoseBuffer robotPoseBuffer,
+   public void initializeSimulatedSensors(LocalObjectCommunicator scsCommunicator, ObjectCommunicator fieldObjectCommunicator, RobotPoseBuffer robotPoseBuffer,
          DRCNetworkProcessorNetworkingManager networkingManager, SDFFullRobotModel sdfFullRobotModel, DepthDataFilter lidarDataFilter, String sensorURI)
    {
       depthDataProcessor = new DepthDataProcessor(networkingManager,lidarDataFilter);
@@ -67,7 +66,32 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
          new SCSLidarDataReceiver(depthDataProcessor, robotPoseBuffer, scsCommunicator, ppsTimestampOffsetProvider, sdfFullRobotModel,
                sensorInformation.getLidarParameters());
       }
-
+      
+      if (DRCConfigParameters.SEND_SIMULATION_DATA_TO_ROS)
+      {
+		 RosMainNode rosMainNode = new RosMainNode(rosCoreURI, "darpaRoboticsChallange/networkProcessor");
+	
+		 RosNativeNetworkProcessor rosNativeNetworkProcessor;
+	     if (RosNativeNetworkProcessor.hasNativeLibrary())
+	     {
+	        rosNativeNetworkProcessor = RosNativeNetworkProcessor.getInstance(rosCoreURI.toString());
+	        rosNativeNetworkProcessor.connect();
+	     }
+	     else
+	     {
+	        rosNativeNetworkProcessor = null;
+	     }
+	      
+	     ROSNativeTransformTools rosTransformProvider = ROSNativeTransformTools.getInstance(sensorURI);
+	     rosTransformProvider.connect();
+	      
+	     new RosRobotPosePublisher(fieldObjectCommunicator, rosMainNode, ppsTimestampOffsetProvider, robotPoseBuffer, sensorInformation, "atlas");
+	     new RosRobotJointStatePublisher(fieldObjectCommunicator, rosMainNode, ppsTimestampOffsetProvider, jointMap.getOrderedJointNames(),"atlas");
+	 
+	     ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
+	     rosMainNode.execute(); 
+      }
+      
       if (DRCConfigParameters.CALIBRATE_ARM_MODE)
       {
          ArmCalibrationHelper armCalibrationHelper = new ArmCalibrationHelper(scsCommunicator, networkingManager, jointMap);
