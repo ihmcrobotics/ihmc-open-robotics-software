@@ -52,7 +52,7 @@ public class DRCNetworkProcessor
       this(null, scsCommunicator, drcNetworkObjectCommunicator, robotModel);
    }
    
-   private DRCNetworkProcessor(URI rosUri, LocalObjectCommunicator scsCommunicator, ObjectCommunicator fieldComputerClient, DRCRobotModel robotModel)
+   public DRCNetworkProcessor(URI rosUri, LocalObjectCommunicator scsCommunicator, ObjectCommunicator fieldComputerClient, DRCRobotModel robotModel)
    {
       if (fieldComputerClient == null)
       {
@@ -87,7 +87,7 @@ public class DRCNetworkProcessor
       networkingManager.getControllerCommandHandler().setTestbed(testbed);
       new Thread(testbed).start();
       
-      setSensorManager(robotModel.getSensorSuiteManager(rosUri),scsCommunicator, "http://" + robotModel.getNetworkParameters().getROSHostIP() + ":11311");
+      setSensorManager(robotModel.getSensorSuiteManager(rosUri), scsCommunicator, robotModel.getNetworkParameters().getROSHostIP());
       connect();
    }
 
@@ -95,7 +95,7 @@ public class DRCNetworkProcessor
    {
       if (useSimulatedSensors)
       {
-         sensorSuiteManager.initializeSimulatedSensors(localObjectCommunicator, robotPoseBuffer, networkingManager, fullRobotModel, lidarFilter, sensorURI);
+         sensorSuiteManager.initializeSimulatedSensors(localObjectCommunicator, fieldComputerClient, robotPoseBuffer, networkingManager, fullRobotModel, lidarFilter, sensorURI);
       }
       else
       {
