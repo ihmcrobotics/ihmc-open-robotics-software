@@ -11,10 +11,10 @@ import us.ihmc.darpaRoboticsChallenge.handControl.HandCommandManager;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
+import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorControllerStateHandler;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
-import us.ihmc.utilities.net.ObjectConsumer;
 
 import com.jme3.math.Transform;
 import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
@@ -71,5 +71,5 @@ public interface DRCRobotModel
    
    public abstract RobotNetworkParameters getNetworkParameters();
    
-   public abstract HandCommandManager createHandCommandManager(ObjectConsumer<Object> objectConsumer);
+   public abstract HandCommandManager createHandCommandManager(DRCNetworkProcessorControllerStateHandler controllerStateHandler);
 }
