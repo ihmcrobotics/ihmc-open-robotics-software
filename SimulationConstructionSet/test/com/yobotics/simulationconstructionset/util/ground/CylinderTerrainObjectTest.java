@@ -1,20 +1,61 @@
 package com.yobotics.simulationconstructionset.util.ground;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
+import javax.media.j3d.Transform3D;
+import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.utilities.test.JUnitTools;
 
 public class CylinderTerrainObjectTest
 {
    private static final double errEpsilon = 1e-14;
    private static final double testDelta = .0001;
 
+   @Ignore
+   @Test
+   public void testSimpleCylinder()
+   {
+      double height = 1.3;
+      double radius = 0.2;
+      Transform3D location = new Transform3D();
+      location.setTranslation(new Vector3d(0.0, 0.0, height/2.0));
 
+      CylinderTerrainObject cylinderTerrainObject = new CylinderTerrainObject(location, height, radius, YoAppearance.Red());
+      
+      Vector3d surfaceNormal = new Vector3d();
+      double heightAt = cylinderTerrainObject.heightAndNormalAt(0.0, 0.0, 0.0, surfaceNormal);
+      assertEquals(height, heightAt, 1e-7);
+      JUnitTools.assertTuple3dEquals(new Vector3d(0.0, 0.0, 1.0), surfaceNormal, 1e-7);
+      
+      heightAt = cylinderTerrainObject.heightAndNormalAt(0.0, radius - 1e-7, 0.0, surfaceNormal);
+      assertEquals(height, heightAt, 1e-7);
+      
+      heightAt = cylinderTerrainObject.heightAndNormalAt(0.0, radius + 1e-7, 0.0, surfaceNormal);
+      assertEquals(0.0, heightAt, 1e-7);
+      
+      heightAt = cylinderTerrainObject.heightAndNormalAt(radius + 1e-7, 0.0, 0.0, surfaceNormal);
+      assertEquals(0.0, heightAt, 1e-7);
+      
+      Point3d intersection = new Point3d();
+      boolean isInside = cylinderTerrainObject.checkIfInside(0.0, 0.0, height-0.02, intersection, surfaceNormal);
+      
+      assertTrue(isInside);
+      
+      //TODO: FIXME!!!
+      JUnitTools.assertTuple3dEquals(new Vector3d(0.0, 0.0, 1.0), surfaceNormal, 1e-7);
+      JUnitTools.assertTuple3dEquals(new Vector3d(0.0, 0.0, height), intersection, 1e-7);
+
+   }
+   
+   
    @Test
    public void testHeightAtTranslatedRot90TallHorizontalCylinderJustInsideAndOutside()
    {
@@ -122,7 +163,6 @@ public class CylinderTerrainObjectTest
    @Test
    public void testHeightAtTranslatedHorizontalCylinderJustInside()
    {
-      Vector3d center = new Vector3d(0, 0, 0);
       double slopeDegrees = 0.0;
       double yawDegrees = 0.0;
       double height = 2.0;
