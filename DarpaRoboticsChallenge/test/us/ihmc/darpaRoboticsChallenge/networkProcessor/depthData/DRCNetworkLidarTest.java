@@ -23,7 +23,7 @@ import com.yobotics.simulationconstructionset.simulatedSensors.DepthDataStateCom
 import com.yobotics.simulationconstructionset.simulatedSensors.DepthDataStateCommand.LidarState;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
-public abstract class SCSLidarDataRecieverTest implements MultiRobotTestInterface, NetStateListener
+public abstract class DRCNetworkLidarTest implements MultiRobotTestInterface, NetStateListener
 {
    private int numberOfLidarScansConsumed = 0;
    
@@ -34,7 +34,7 @@ public abstract class SCSLidarDataRecieverTest implements MultiRobotTestInterfac
    }
 
    @Test
-   public void testSCSLidarDataReceiver() throws SimulationExceededMaximumTimeException
+   public void testLidarGenerationAndTransmission() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 
@@ -84,7 +84,7 @@ public abstract class SCSLidarDataRecieverTest implements MultiRobotTestInterfac
       {
          numberOfLidarScansConsumed++;
          
-         System.out.println(SCSLidarDataRecieverTest.this.getClass().getSimpleName() + ": " + object.getClass().getSimpleName() + " received!" + "count = " + numberOfLidarScansConsumed);
+         System.out.println(DRCNetworkLidarTest.this.getClass().getSimpleName() + ": " + object.getClass().getSimpleName() + " received!" + "count = " + numberOfLidarScansConsumed);
       }
    }
 

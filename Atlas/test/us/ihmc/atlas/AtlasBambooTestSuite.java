@@ -22,7 +22,7 @@ import us.ihmc.utilities.test.JUnitTestSuiteConstructor;
    AtlasFlatGroundWalkingTest.class,
    AtlasJointConfigurationDataSerializerTest.class,
    AtlasPlaybackPoseSequenceTest.class,
-   us.ihmc.atlas.networkProcessor.depthData.AtlasSCSLidarDataReceiverTest.class,
+   us.ihmc.atlas.networkProcessor.depthData.AtlasDRCNetworkLidarTest.class,
    
 })
 public class AtlasBambooTestSuite
