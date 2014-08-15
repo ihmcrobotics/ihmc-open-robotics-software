@@ -113,6 +113,21 @@ public class ModbusTCPConnection
 		connection.close();
 	}
 	
+	public boolean testConnection()
+	{
+		try
+		{
+			outStream.write('\n');
+			outStream.flush();
+			inStream.read();
+			return true;
+		}
+		catch(IOException e)
+		{
+			return false;
+		}
+	}
+	
 	public class ModbusException extends IOException
 	{
 		ModbusException()
@@ -141,6 +156,5 @@ public class ModbusTCPConnection
 		{
 			super(message);
 		}
-		
 	}
 }
