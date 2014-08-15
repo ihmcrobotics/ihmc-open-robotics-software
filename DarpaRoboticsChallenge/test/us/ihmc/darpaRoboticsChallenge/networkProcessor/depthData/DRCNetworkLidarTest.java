@@ -2,10 +2,9 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData;
 
 import static org.junit.Assert.assertTrue;
 
-import java.io.IOException;
-
 import javax.vecmath.Point3d;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -21,60 +20,40 @@ import us.ihmc.utilities.net.ObjectConsumer;
 
 import com.yobotics.simulationconstructionset.simulatedSensors.DepthDataStateCommand;
 import com.yobotics.simulationconstructionset.simulatedSensors.DepthDataStateCommand.LidarState;
-import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public abstract class DRCNetworkLidarTest implements MultiRobotTestInterface, NetStateListener
 {
    private int numberOfLidarScansConsumed = 0;
    
    @Before
-   public void showMemoryUsageBeforeTest()
+   public void setUp()
    {
-      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test. ");
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before: ");
+      BambooTools.reportTestStartedMessage();
+   }
+   
+   @After
+   public void tearDown()
+   {
+      BambooTools.reportTestFinishedMessage();
    }
 
    @Test
-   public void testLidarGenerationAndTransmission() throws SimulationExceededMaximumTimeException
+   public void testLidarGenerationAndTransmission()
    {
-      BambooTools.reportTestStartedMessage();
-
       DRCSimulationNetworkTestHelper drcSimulationTestHelper = new DRCSimulationNetworkTestHelper(getRobotModel(), new DRCWallWorldEnvironment(-10.0, 10.0));
-      drcSimulationTestHelper.getDRCSimulationTestHelper().setupCameraForUnitTest(new Point3d(1.8375, -0.16, 0.89), new Point3d(1.10, 8.30, 1.37));
+      drcSimulationTestHelper.setupCamera(new Point3d(1.8375, -0.16, 0.89), new Point3d(1.10, 8.30, 1.37));      
+      drcSimulationTestHelper.addNetStateListener(this);
+      drcSimulationTestHelper.addConsumer(SparseLidarScan.class, new LidarConsumer());
+      
+      drcSimulationTestHelper.connect();
+      
+      drcSimulationTestHelper.sendCommand(new DepthDataStateCommand(LidarState.ENABLE));
 
-      // TODO Listen to tcp stream rather than local object communicator
-
-      DRCUserInterfaceNetworkingManager networkingManager = new DRCUserInterfaceNetworkingManager("localhost", getRobotModel());
-      networkingManager.attachStateListener(this);
-
-      try
-      {
-         networkingManager.connect();
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
-
-      System.out.println(getClass().getSimpleName() + ": Waiting to connect...");
-      while (!networkingManager.isConnected());
-
-      networkingManager.getControllerHandler().send(new DepthDataStateCommand(LidarState.ENABLE));
-      networkingManager.getVisualizationHandler().attachListener(SparseLidarScan.class, new LidarConsumer());
-
-      boolean success = drcSimulationTestHelper.getDRCSimulationTestHelper().simulateAndBlockAndCatchExceptions(0.5);
-
-      // Put drc robot in world, bring up window
-
-      // TODO
-      // Put known object in world
-      // Get Object Communicator
-      // Receive Sparse Lidar Packet
-      // Check points
+      boolean success = drcSimulationTestHelper.simulate(0.5);
 
       assertTrue(success);
       assertTrue("Lidar scans are not being recieved.", numberOfLidarScansConsumed > 10);
-
-      BambooTools.reportTestFinishedMessage();
    }
 
    private class LidarConsumer implements ObjectConsumer<SparseLidarScan>
@@ -95,6 +74,6 @@ public abstract class DRCNetworkLidarTest implements MultiRobotTestInterface, Ne
 
    public void disconnected()
    {
-      System.out.println("DRCUserInterfaceNetworkingManager: Disconnected.");
+      System.out.println(DRCUserInterfaceNetworkingManager.class.getSimpleName() + ": Disconnected.");
    }
 }
