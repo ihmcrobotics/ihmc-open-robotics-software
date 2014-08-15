@@ -14,7 +14,7 @@ import us.ihmc.utilities.test.JUnitTestSuiteConstructor;
    us.ihmc.valkyrie.kinematics.transmissions.InefficientPushRodTransmissionTest.class,
    us.ihmc.valkyrie.kinematics.ClosedFormJacobianTest.class,
    us.ihmc.valkyrie.kinematics.transmissions.ComparePushRodTransmissionsTest.class,
-   us.ihmc.valkyrie.networkProcessor.depthData.ValkyrieSCSLidarDataReceiverTest.class,
+   us.ihmc.valkyrie.networkProcessor.depthData.ValkyrieDRCNetworkLidarTest.class,
 })
 
 public class ValkyrieBambooTestSuite
