@@ -4,9 +4,9 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.DRCNetworkLidarTest;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.DepthDataProcessorTest;
 
-public class AtlasDRCNetworkLidarTest extends DRCNetworkLidarTest
+public class AtlasDepthDataProcessorTest extends DepthDataProcessorTest
 {
    private DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, false, false);
 
