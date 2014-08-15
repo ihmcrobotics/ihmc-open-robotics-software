@@ -24,7 +24,7 @@ public class AtlasWallWorldDemo extends DRCObstacleCourseDemo
       boolean startDRCNetworkProcessor = false;
       boolean initializeEstimatorToActual = false;
 
-      CommonAvatarEnvironmentInterface environment = new DRCWallWorldEnvironment(10.0, 10.0);
+      CommonAvatarEnvironmentInterface environment = new DRCWallWorldEnvironment(-10.0, 10.0);
       
       AtlasContactPointParameters contactPointParameters = robotModel.getContactPointParameters();
       contactPointParameters.createHandKnobContactPoints();

@@ -50,12 +50,11 @@ import javax.swing.tree.DefaultTreeModel;
 import org.apache.commons.lang.WordUtils;
 
 import us.ihmc.atlas.AtlasObstacleCourseDemo;
-import us.ihmc.darpaRoboticsChallenge.DRCDemo01StartingLocation;
+import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.configuration.LocalCloudMachines;
-import us.ihmc.darpaRoboticsChallenge.processManagement.DRCDashboardTypes;
-import us.ihmc.darpaRoboticsChallenge.processManagement.GazeboRemoteSimulationAdapter;
 import us.ihmc.darpaRoboticsChallenge.processManagement.DRCDashboardTypes.DRCPluginTasks;
 import us.ihmc.darpaRoboticsChallenge.processManagement.DRCDashboardTypes.DRCROSTasks;
+import us.ihmc.darpaRoboticsChallenge.processManagement.GazeboRemoteSimulationAdapter;
 import us.ihmc.darpaRoboticsChallenge.userInterface.DRCOperatorUserInterface;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.ThreadTools;
@@ -971,7 +970,7 @@ public class DRCDashboard
                     && (taskCombo.getSelectedItem() != DRCPluginTasks.HAND) && (taskCombo.getSelectedItem() != DRCPluginTasks.PARKING_LOT))
             {
                Object[] startingLocations =
-                  DRCDemo01StartingLocation.initialSetupMap.keySet().toArray();
+                  DRCObstacleCourseStartingLocation.initialSetupMap.keySet().toArray();
                for (int i = startingLocations.length - 1; i >= 0; --i)
                {
                   startingLocationsListModel.addElement(startingLocations[i].toString());

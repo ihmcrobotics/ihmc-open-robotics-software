@@ -2,7 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.initialSetup;
 
 import javax.vecmath.Vector3d;
 
-public class SquaredUpDRCDemo01RobotAtPlatformsInitialSetup extends AdditionalOffsetSquaredUpDRCDemo01InitialSetup
+public class SquaredUpDRCDemo01RobotAtPlatformsInitialSetup extends OffsetAndYawRobotInitialSetup
 {
    private static final Vector3d firstPlatform = new Vector3d(-1.6, -3.2, 0.0);
    private static final Vector3d lastPlatform = new Vector3d(-6.5, -8.2, 0.0);

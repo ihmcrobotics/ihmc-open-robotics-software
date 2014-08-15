@@ -10,7 +10,7 @@ import org.junit.Test;
 
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
-import us.ihmc.darpaRoboticsChallenge.DRCDemo01StartingLocation;
+import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
@@ -63,7 +63,7 @@ public abstract class DRCObstacleCourseSteppingStonesTest implements MultiRobotT
       {
       BambooTools.reportTestStartedMessage();
 
-      DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.EASY_STEPPING_STONES;
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.EASY_STEPPING_STONES;
 
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingEasySteppingStonesTest", "", selectedLocation, checkNothingChanged, showGUI, createMovie, getRobotModel());
 

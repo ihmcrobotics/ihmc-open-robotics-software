@@ -27,63 +27,23 @@
 </GraphGroup>
 <Entry Boxes></Entry Boxes>
 
-<Number of ViewPorts>2</Number of ViewPorts>
+<Number of ViewPorts>1</Number of ViewPorts>
  <Main Viewport> 
 <Visible> true</Visible>
 </Main Viewport>
-<Viewport1>
-<Visible>true</Visible>
-<Canvas Number>1</Canvas Number>
-<Canvas1>
-<Viewport Camera X>4.334213597001909</Viewport Camera X>
-<Viewport Camera Y>3.071812141514675</Viewport Camera Y>
-<Viewport Camera Z>1.970134360769605</Viewport Camera Z>
- <Dolly data> 
- <Position X>2.0</Position X>
- <Position Y>12.0</Position Y>
- <Position Z>0.0</Position Z>
-<Dolly Booleans>
-<Dolly>false</Dolly>
-<Dolly X>true</Dolly X>
-<Dolly Y>true</Dolly Y>
-<Dolly Z>true</Dolly Z>
-</Dolly Booleans>
-</Dolly data>
- <Track data> 
- <Position X>0.0</Position X>
- <Position Y>0.0</Position Y>
- <Position Z>0.0</Position Z>
- <Track Booleans>
-<Track>false</Track>
-<Track X>true</Track X>
-<Track Y>true</Track Y>
-<Track Z>false</Track Z>
-</Track Booleans>
-</Track data>
-<Fix Position>
-<Fix X>-0.4191729133409776</Fix X>
-<Fix Y>2.971973741524131</Fix Y>
-<Fix Z>0.7206237350498832</Fix Z>
-</Fix Position>
-</Canvas1>
-</Viewport1>
 
 <Graph Array Window Size>0</Graph Array Window Size>
 
 <Extra Panels>
 <Main Viewport>
 Plotter,
-</Main Viewport>
-<Viewport1>
-
-</Viewport1>
-</Extra Panels>
+</Main Viewport></Extra Panels>
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>0.33497371556903355</Camera X>
- <Camera Y>1.4433420215783894</Camera Y>
- <Camera Z>5.170494840086939</Camera Z>
+ <Camera X>-6.514062945725019</Camera X>
+ <Camera Y>0.24213062204729882</Camera Y>
+ <Camera Z>2.193675454485542</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -107,8 +67,8 @@ Plotter,
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>0.1467458060607538</Fix X>
-<Fix Y>1.4585849972394613</Fix Y>
-<Fix Z>0.9966625903846289</Fix Z>
+<Fix X>1.8633015413300884</Fix X>
+<Fix Y>-0.13514412083501684</Fix Y>
+<Fix Z>0.9248778688558732</Fix Z>
 </Fix Position>
 </Canvas 1>
