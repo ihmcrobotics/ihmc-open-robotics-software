@@ -23,11 +23,11 @@ import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.AlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
+import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorControllerStateHandler;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
-import us.ihmc.utilities.net.ObjectConsumer;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
 import us.ihmc.valkyrie.paramaters.ValkyrieArmControllerParameters;
 import us.ihmc.valkyrie.paramaters.ValkyrieJointMap;
@@ -313,7 +313,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
-   public HandCommandManager createHandCommandManager(ObjectConsumer<Object> objectConsumer)
+   public HandCommandManager createHandCommandManager(DRCNetworkProcessorControllerStateHandler controllerStateHandler)
    {
 	   return null;
    }
