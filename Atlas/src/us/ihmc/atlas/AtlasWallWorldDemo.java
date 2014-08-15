@@ -14,7 +14,6 @@ import com.martiansoftware.jsap.JSAPException;
 public class AtlasWallWorldDemo extends DRCObstacleCourseDemoStarter
 {
    private static final AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS, false, false);
-   public static final boolean USE_NEW_PHYSICS = false;
 
    public static void main(final String[] args) throws JSAPException
    {
@@ -30,7 +29,7 @@ public class AtlasWallWorldDemo extends DRCObstacleCourseDemoStarter
       contactPointParameters.createHandKnobContactPoints();
       
       atlasDemo.obstacleCourseStarter(environment.getTerrainObject3D(), robotModel, sliderBoardFactory, initializeEstimatorToActual, automaticallyStartSimulation,
-            startDRCNetworkProcessor, USE_NEW_PHYSICS);
+            startDRCNetworkProcessor);
    }
 
    @Override

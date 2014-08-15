@@ -100,8 +100,8 @@ public class DRCSimulationTestHelper
       SliderBoardFactory sliderBoardFactory = WalkControllerSliderBoard.getFactory();
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false, sliderBoardFactory, showGUI);
 
-      DRCObstacleCourseSimulation drcSimulation = DRCObstacleCourseDemo.startDRCSim(terrainObject, scriptFileName, networkObjectCommunicator, selectedLocation,
-            guiInitialSetup, initializeEstimatorToActual, automaticallyStartSimulation, false, startNetworkProcessor, robotModel);
+      DRCObstacleCourseSimulation drcSimulation = DRCObstacleCourseDemo.startDRCSim(terrainObject, scriptFileName, selectedLocation, guiInitialSetup,
+            initializeEstimatorToActual, automaticallyStartSimulation, startNetworkProcessor, robotModel, networkObjectCommunicator);
 
       scs = drcSimulation.getSimulationConstructionSet();
       sdfRobot = drcSimulation.getRobot();
