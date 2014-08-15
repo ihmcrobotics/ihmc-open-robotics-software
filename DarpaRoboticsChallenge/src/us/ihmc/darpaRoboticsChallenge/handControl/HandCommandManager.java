@@ -3,6 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.handControl;
 import java.io.IOException;
 
 import us.ihmc.darpaRoboticsChallenge.configuration.DRCNetClassList;
+import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandJointAnglePacket;
 import us.ihmc.utilities.net.KryoObjectServer;
 import us.ihmc.utilities.net.ObjectConsumer;
 import us.ihmc.utilities.processManagement.JavaProcessSpawner;
@@ -14,9 +15,16 @@ public class HandCommandManager
 	protected JavaProcessSpawner spawner = new JavaProcessSpawner(true);
 	protected KryoObjectServer server = new KryoObjectServer(Integer.parseInt(TCP_PORT), new DRCNetClassList());
 	
-	public HandCommandManager(ObjectConsumer<Object> objectConsumer, Class<? extends Object> clazz)
+	public HandCommandManager(final ObjectConsumer<Object> objectConsumer, Class<? extends Object> clazz)
 	{
-		server.attachListener(Object.class, objectConsumer);
+		server.attachListener(HandJointAnglePacket.class, new ObjectConsumer<HandJointAnglePacket>()
+      {
+         @Override
+         public void consumeObject(HandJointAnglePacket object)
+         {
+            objectConsumer.consumeObject(object);
+         }
+      });
 		
 		spawnHandControllerThreadManager(clazz);
 		
