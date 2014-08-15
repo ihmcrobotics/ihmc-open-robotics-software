@@ -8,7 +8,6 @@ import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.configuration.DRCNetClassList;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.handControl.HandCommandManager;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandJointAnglePacket;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.DepthDataFilter;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.RobotBoundingBoxes;
@@ -88,8 +87,6 @@ public class DRCNetworkProcessor
       networkingManager.getControllerCommandHandler().setTestbed(testbed);
       new Thread(testbed).start();
       
-//      networkingManager.getControllerCommandHandler().setHandCommandManager(robotModel.createHandCommandManager(scsCommunicator));
-
       setSensorManager(robotModel.getSensorSuiteManager(rosUri),scsCommunicator, "http://" + robotModel.getNetworkParameters().getROSHostIP() + ":11311");
       connect();
    }

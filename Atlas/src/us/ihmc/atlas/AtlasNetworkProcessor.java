@@ -4,10 +4,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.handControl.HandCommandManager;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DummyController;
-import us.ihmc.iRobot.control.IRobotControlThreadManager;
 import us.ihmc.iRobot.control.iRobotNativeLibraryCommunicatorManager;
 import us.ihmc.utilities.net.LocalObjectCommunicator;
 
@@ -97,7 +95,7 @@ public class AtlasNetworkProcessor
     	     .println("WARNING WARNING WARNING :: Simulating DRC Controller - WILL NOT WORK ON REAL ROBOT. Do not use -d argument when running on real robot.");
     	     LocalObjectCommunicator objectCommunicator = new LocalObjectCommunicator();
     	     
-    	     new DummyController(rosMasterURI, objectCommunicator, model, new HandCommandManager(objectCommunicator, IRobotControlThreadManager.class));
+    	     new DummyController(rosMasterURI, objectCommunicator, model);
     	     new DRCNetworkProcessor(objectCommunicator, model);
     	  }
     	  else
