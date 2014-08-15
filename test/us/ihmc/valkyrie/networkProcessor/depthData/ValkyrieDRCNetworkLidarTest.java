@@ -2,10 +2,10 @@ package us.ihmc.valkyrie.networkProcessor.depthData;
 
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.SCSLidarDataRecieverTest;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.DRCNetworkLidarTest;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
-public class ValkyrieSCSLidarDataReceiverTest extends SCSLidarDataRecieverTest
+public class ValkyrieDRCNetworkLidarTest extends DRCNetworkLidarTest
 {
    private DRCRobotModel robotModel = new ValkyrieRobotModel(false, false);
 
