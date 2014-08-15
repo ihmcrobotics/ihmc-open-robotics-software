@@ -43,8 +43,12 @@ public class NetworkProcessorTestbedAlignment implements Runnable
 
    DRCNetworkProcessorNetworkingManager networkManager;
 
+   boolean justCollectData;
+
    long integrationPeriod = 6000;
    long stopTime;
+
+   int totalSaved = 0;
 
    public NetworkProcessorTestbedAlignment(DRCNetworkProcessorNetworkingManager networkManager)
    {
@@ -66,10 +70,11 @@ public class NetworkProcessorTestbedAlignment implements Runnable
       }
    }
 
-   public void startCollection()
+   public void startCollection( boolean justCollectData )
    {
       if (loadedModel)
       {
+         this.justCollectData = justCollectData;
          System.out.println("NetworkProcessorTestbedAlignment - startCollection()");
          synchronized (cloud)
          {
@@ -113,8 +118,24 @@ public class NetworkProcessorTestbedAlignment implements Runnable
             else
             {
                System.out.println("NetworkProcessorTestbedAlignment - handlePacket done collection");
-               processing = true;
-               active = false;
+               if( justCollectData ) {
+                  try
+                  {
+                     WriteCsvObject write = new WriteCsvObject(new FileOutputStream(String.format("savedTestbedCloud%02d.csv",totalSaved++)), Point3D_F64.class, "x", "y", "z");
+                     for (int i = 0; i < cloud.size(); i++)
+                     {
+                        write.writeObject(cloud.get(i));
+                     }
+                     write.close();
+                  } catch (IOException ignore) { }
+
+                  processing = false;
+                  active = false;
+                  networkManager.getControllerStateHandler().sendSerializableObject(new TestbedServerPacket(TestbedServerPacket.DONE_COLLECTING_DATA));
+               } else {
+                  processing = true;
+                  active = false;
+               }
             }
          }
       }
@@ -160,24 +181,6 @@ public class NetworkProcessorTestbedAlignment implements Runnable
             if (processing)
             {
                networkManager.getControllerStateHandler().sendSerializableObject(new TestbedServerPacket(TestbedServerPacket.START_PROCESSING));
-
-               try
-               {
-                  WriteCsvObject write = new WriteCsvObject(new FileOutputStream("mycloud.csv"), Point3D_F64.class, "x", "y", "z");
-                  for (int i = 0; i < cloud.size(); i++)
-                  {
-                     write.writeObject(cloud.get(i));
-                  }
-                  write.close();
-               }
-               catch (FileNotFoundException e)
-               {
-
-               }
-               catch (IOException e)
-               {
-
-               }
 
                // find the planes
                finder.process(cloud.toList(), null);
