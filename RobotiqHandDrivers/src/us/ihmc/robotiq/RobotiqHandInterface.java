@@ -368,10 +368,13 @@ public final class RobotiqHandInterface
 	
 	public void initialize()
 	{
-		if(!this.isConnected())
+	   if(!this.isConnected())
 			this.connect();
 			
 		status = this.getStatus();
+		
+		if(status == null)
+		   return;
 		
 		if(((status[GRIPPER_STATUS] & INITIALIZATON_MASK) == INITIALIZED) || (status[FAULT_STATUS] != NO_FAULT))
 		{
@@ -738,7 +741,11 @@ public final class RobotiqHandInterface
 	private RobotiqHandSensorData handData = new RobotiqHandSensorData(null);
 	public RobotiqHandSensorData getHandStatus()
 	{
-		status = getStatus();
+		do
+		{
+		   status = getStatus();
+		}while(status.length < 22);
+		
 		data[0] = (byte) (status[GRIPPER_STATUS] & INITIALIZATON_MASK);
 		data[1] = (byte) ((status[GRIPPER_STATUS] & OPERATION_MODE_MASK) >> 1);
 		data[2] = (byte) ((status[GRIPPER_STATUS] & GO_TO_REQUESTED_MASK) >> 3);
@@ -781,8 +788,11 @@ public final class RobotiqHandInterface
 	
 	public boolean isConnected()
 	{
-		connected = connection.testConnection();
-		return connected;
+		if(connected)
+		{
+		   connected = connection.testConnection();
+		}
+	   return connected;
 	}
 	
 	public void doControl()
