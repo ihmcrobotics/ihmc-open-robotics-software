@@ -2,7 +2,7 @@ package us.ihmc.atlas;
 
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
-import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseDemo;
+import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseDemoStarter;
 import us.ihmc.darpaRoboticsChallenge.DRCWallWorldEnvironment;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
@@ -11,7 +11,7 @@ import us.ihmc.utilities.processManagement.JavaProcessSpawner;
 
 import com.martiansoftware.jsap.JSAPException;
 
-public class AtlasWallWorldDemo extends DRCObstacleCourseDemo
+public class AtlasWallWorldDemo extends DRCObstacleCourseDemoStarter
 {
    private static final AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS, false, false);
    public static final boolean USE_NEW_PHYSICS = false;
@@ -29,7 +29,7 @@ public class AtlasWallWorldDemo extends DRCObstacleCourseDemo
       AtlasContactPointParameters contactPointParameters = robotModel.getContactPointParameters();
       contactPointParameters.createHandKnobContactPoints();
       
-      atlasDemo.obstacleCourseStarter(environment, robotModel, sliderBoardFactory, initializeEstimatorToActual, automaticallyStartSimulation,
+      atlasDemo.obstacleCourseStarter(environment.getTerrainObject3D(), robotModel, sliderBoardFactory, initializeEstimatorToActual, automaticallyStartSimulation,
             startDRCNetworkProcessor, USE_NEW_PHYSICS);
    }
 

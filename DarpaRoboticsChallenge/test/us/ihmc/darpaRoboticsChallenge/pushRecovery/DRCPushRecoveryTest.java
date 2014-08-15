@@ -14,6 +14,7 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingState;
+import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCPushRobotController;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
@@ -28,6 +29,7 @@ import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.util.ground.FlatGroundProfile;
+import com.yobotics.simulationconstructionset.util.ground.FlatGroundTerrainObject;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
 
@@ -128,9 +130,10 @@ public abstract class DRCPushRecoveryTest
       {
          fileName = BambooTools.getFullFilenameUsingClassRelativeURL(DRCPushRecoveryTest.class, scriptName);
       }
-      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = getRobotModel().getDefaultRobotInitialSetup(0.0, 0.0);
-      GroundProfile3D flatGround = new FlatGroundProfile();
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCSimpleFlatGroundScriptTest", fileName, robotInitialSetup, false, showGUI, false, getRobotModel(), flatGround);
+      FlatGroundTerrainObject flatGround = new FlatGroundTerrainObject();
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+      
+      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCSimpleFlatGroundScriptTest", fileName, selectedLocation, false, showGUI, false, getRobotModel());
       SDFFullRobotModel fullRobotModel = getRobotModel().createFullRobotModel();
       pushRobotController = new DRCPushRobotController(drcSimulationTestHelper.getRobot(), fullRobotModel);
       
