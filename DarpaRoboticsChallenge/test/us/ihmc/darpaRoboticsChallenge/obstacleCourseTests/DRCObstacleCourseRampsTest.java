@@ -13,7 +13,7 @@ import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataListCorruptor;
 import us.ihmc.commonWalkingControlModules.packets.ComHeightPacket;
-import us.ihmc.darpaRoboticsChallenge.DRCDemo01StartingLocation;
+import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
@@ -75,7 +75,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
    {
       BambooTools.reportTestStartedMessage();
       
-      DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.RAMP_TOP;
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.RAMP_TOP;
       
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingDownRampWithMediumSteps", "", selectedLocation,  checkNothingChanged, showGUI, createMovie, getRobotModel());
       
@@ -144,7 +144,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
    
    private void doUpRampTest(FootstepDataListCorruptor footstepDataListCorruptor, StepLength stepLength) throws SimulationExceededMaximumTimeException
    {
-      DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.RAMP_BOTTOM;
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.RAMP_BOTTOM;
       
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingUpRampTest", "", selectedLocation,  checkNothingChanged, showGUI, createMovie, getRobotModel());
 

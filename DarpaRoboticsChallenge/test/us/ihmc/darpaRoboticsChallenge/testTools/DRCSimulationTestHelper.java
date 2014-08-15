@@ -27,12 +27,12 @@ import us.ihmc.commonWalkingControlModules.packets.HandPosePacket;
 import us.ihmc.commonWalkingControlModules.packets.HandstepPacket;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.darpaRoboticsChallenge.DRCDemo01NavigationEnvironment;
-import us.ihmc.darpaRoboticsChallenge.DRCDemo01StartingLocation;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseDemo;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseSimulation;
 import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCSimulationFactory;
+import us.ihmc.darpaRoboticsChallenge.DRCStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.scriptEngine.VariousWalkingProviderFromScriptFactory;
@@ -153,14 +153,14 @@ public class DRCSimulationTestHelper
       }
    }
 
-   public DRCSimulationTestHelper(String name, String scriptFileName, DRCDemo01StartingLocation selectedLocation, boolean checkNothingChanged, boolean showGUI,
+   public DRCSimulationTestHelper(String name, String scriptFileName, DRCStartingLocation selectedLocation, boolean checkNothingChanged, boolean showGUI,
          boolean createMovie, DRCRobotModel robotModel)
    {
       this(new DRCDemo01NavigationEnvironment(), new ScriptedFootstepDataListObjectCommunicator("Team"), name, scriptFileName, selectedLocation, checkNothingChanged, showGUI,
             createMovie, robotModel);
    }
    
-   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface environment, String name, String scriptFileName, DRCDemo01StartingLocation selectedLocation,
+   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface environment, String name, String scriptFileName, DRCStartingLocation selectedLocation,
          boolean checkNothingChanged, boolean showGUI, boolean createMovie, DRCRobotModel robotModel)
    {
       this(environment, new ScriptedFootstepDataListObjectCommunicator("Team"), name, scriptFileName, selectedLocation, checkNothingChanged, showGUI,
@@ -168,7 +168,7 @@ public class DRCSimulationTestHelper
    }
    
    public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface environment, ObjectCommunicator networkObjectCommunicator, String name, 
-         String scriptFileName, DRCDemo01StartingLocation selectedLocation, boolean checkNothingChanged, boolean showGUI,
+         String scriptFileName, DRCStartingLocation selectedLocation, boolean checkNothingChanged, boolean showGUI,
          boolean createMovie, DRCRobotModel robotModel)
    {
       this.networkObjectCommunicator = networkObjectCommunicator;

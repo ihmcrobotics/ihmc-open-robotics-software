@@ -10,7 +10,7 @@ import org.junit.Test;
 
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
-import us.ihmc.darpaRoboticsChallenge.DRCDemo01StartingLocation;
+import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
@@ -60,7 +60,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
    {
       BambooTools.reportTestStartedMessage();
 
-      DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.SMALL_PLATFORM;
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.SMALL_PLATFORM;
       
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOverSmallPlatformTest", "", selectedLocation,  checkNothingChanged, showGUI, createMovie, getRobotModel());
 
@@ -98,7 +98,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
    {
       BambooTools.reportTestStartedMessage();
 
-      DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.MEDIUM_PLATFORM;
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.MEDIUM_PLATFORM;
       
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOntoMediumPlatformToesTouchingTest", "", selectedLocation,  checkNothingChanged, showGUI, createMovie, getRobotModel());
 
@@ -129,7 +129,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
    {
       BambooTools.reportTestStartedMessage();
       
-      DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.ON_MEDIUM_PLATFORM;
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.ON_MEDIUM_PLATFORM;
       
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOntoMediumPlatformToesTouchingTest", "", selectedLocation,  checkNothingChanged, showGUI, createMovie, getRobotModel());
    

@@ -17,7 +17,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
 import us.ihmc.commonWalkingControlModules.packets.HandPosePacket;
 import us.ihmc.commonWalkingControlModules.packets.HandstepPacket;
-import us.ihmc.darpaRoboticsChallenge.DRCDemo01StartingLocation;
+import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.DRCWallWorldEnvironment;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
@@ -69,7 +69,7 @@ public abstract class DRCWallWorldTest implements MultiRobotTestInterface
    {
       BambooTools.reportTestStartedMessage();
 
-      DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DEFAULT;
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 
       double wallMaxY = 2.5;
       DRCWallWorldEnvironment environment = new DRCWallWorldEnvironment(-0.5, wallMaxY);

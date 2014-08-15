@@ -16,7 +16,7 @@ import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
 import us.ihmc.commonWalkingControlModules.packets.ComHeightPacket;
-import us.ihmc.darpaRoboticsChallenge.DRCDemo01StartingLocation;
+import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
@@ -84,7 +84,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
    {
       BambooTools.reportTestStartedMessage();
 
-      DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DEFAULT;
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCStandingTest", "", selectedLocation, checkNothingChanged, showGUI, createMovie, getRobotModel());
 
@@ -247,7 +247,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
    {
       BambooTools.reportTestStartedMessage();
 
-      DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DEFAULT;
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 
       String scriptName = "scripts/ExerciseAndJUnitScripts/LongSideStepsLeft.xml";
       String fileName = BambooTools.getFullFilenameUsingClassRelativeURL(DRCObstacleCourseFlatTest.class, scriptName);
@@ -325,7 +325,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
    {
       BambooTools.reportTestStartedMessage();
 
-      DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.TOP_OF_SLOPES;
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.TOP_OF_SLOPES;
 
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCStandingTest", "", selectedLocation, checkNothingChanged, showGUI,
               createMovie, getRobotModel());
@@ -369,7 +369,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
    {
       BambooTools.reportTestStartedMessage();
 
-      DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DEFAULT;
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCRotatedStepsInTheAirTest", "", selectedLocation, checkNothingChanged,
               showGUI, createMovie, getRobotModel());
 
@@ -398,7 +398,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
    {
       BambooTools.reportTestStartedMessage();
 
-      DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DEFAULT;
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingUpToRampShortStepsTest", "", selectedLocation, checkNothingChanged,
             showGUI, createMovie, getRobotModel());
@@ -427,7 +427,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
    {
       BambooTools.reportTestStartedMessage();
 
-      DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DEFAULT;
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOccasionallyStraightKneesTest", "", selectedLocation, checkNothingChanged,
             showGUI, createMovie, getRobotModel());
@@ -461,7 +461,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
    {
       BambooTools.reportTestStartedMessage();
 
-      DRCDemo01StartingLocation selectedLocation = DRCDemo01StartingLocation.DEFAULT_BUT_ALMOST_PI;
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT_BUT_ALMOST_PI;
 
 //      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCTurningInPlaceAndPassingPITest", "", selectedLocation,
 //            checkNothingChanged, showGUI, createMovie, getRobotModel());
