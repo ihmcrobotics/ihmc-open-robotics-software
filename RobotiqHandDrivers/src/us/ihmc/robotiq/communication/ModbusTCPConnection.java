@@ -149,7 +149,7 @@ public class ModbusTCPConnection
 		
 		public ModbusResponseTooShortException(byte unitID)
 		{
-			super("Response from a device on " + connection.getLocalSocketAddress() + "ID: " + unitID + " was too short.");
+			super("Response from a device on " + connection.getLocalSocketAddress() + " ID: " + unitID + " was too short.");
 		}
 		
 		public ModbusResponseTooShortException(String message)
