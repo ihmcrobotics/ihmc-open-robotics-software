@@ -45,7 +45,7 @@ public class CylinderTerrainObjectTest
       assertEquals(0.0, heightAt, 1e-7);
       
       Point3d intersection = new Point3d();
-      boolean isInside = cylinderTerrainObject.checkIfInside(0.0, 0.0, height-0.02, intersection, surfaceNormal);
+      boolean isInside = cylinderTerrainObject.checkIfInside(0.0, 0.0, height-0.01, intersection, surfaceNormal);
       
       assertTrue(isInside);
       
