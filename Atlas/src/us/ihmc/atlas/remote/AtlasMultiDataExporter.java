@@ -36,6 +36,7 @@ import us.ihmc.robotDataCommunication.logger.YoVariableLogPlaybackRobot;
 import us.ihmc.robotDataCommunication.logger.YoVariableLogVisualizerGUI;
 import us.ihmc.robotDataCommunication.logger.YoVariableLoggerListener;
 import us.ihmc.utilities.SwingUtils;
+import us.ihmc.utilities.ThreadTools;
 
 import com.yobotics.simulationconstructionset.DataBuffer;
 import com.yobotics.simulationconstructionset.DataBufferEntry;
@@ -49,6 +50,8 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 
 public class AtlasMultiDataExporter implements SimulationDoneListener
 {
+   private static final long CLOSING_SLEEP_TIME = 2000;
+
    YoVariableLogPlaybackRobot robot;
    SimulationConstructionSet scs;
    YoVariableLogCropper yoVariableLogCropper;
@@ -93,7 +96,7 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
       String[] timeVariable;
 
       // variables to export (starts from 1: vars[0] is reserved for timeVariable)
-      vars = new String[6];
+      vars = new String[7];
       String jointName = "r_arm_wry";
 
       vars[1] = "ll_in_" + jointName + "_qd_bef";
@@ -101,6 +104,7 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
       vars[3] = "ll_in_" + jointName + "_psi_pos";
       vars[4] = "ll_in_" + jointName + "_psi_neg";
       vars[5] = "ll_in_" + jointName + "_f";
+      vars[6] = "jointVelocity";
 
       // select the file with export parameters
       File inputParameters = selectInputFile();
@@ -153,6 +157,7 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
             }
          }
          System.out.println("Simulation finished");
+         simulateExport.closeSCS();
          exportData = null;
          simulateExport = null;
       }
@@ -434,6 +439,13 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
          setCamera(exportData, cameraParameters);
          exportData.scs.simulate(secondsOfSimulation);
          exportData.scs.addSimulateDoneListener(exportData);
+      }
+
+      private void closeSCS()
+      {
+         ThreadTools.sleep(CLOSING_SLEEP_TIME);
+         scs.closeAndDispose();
+         scs = null;
       }
 
       private void exportDataAndVideo()
