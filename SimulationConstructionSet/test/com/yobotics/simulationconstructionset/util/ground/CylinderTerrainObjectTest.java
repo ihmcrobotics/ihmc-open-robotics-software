@@ -19,7 +19,6 @@ public class CylinderTerrainObjectTest
    private static final double errEpsilon = 1e-14;
    private static final double testDelta = .0001;
 
-   @Ignore
    @Test
    public void testSimpleCylinder()
    {
