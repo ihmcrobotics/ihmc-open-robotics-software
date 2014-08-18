@@ -800,7 +800,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       scs.simulate(Double.MAX_VALUE);
       boolean isSCSSimulatingBeforeCriterion = scs.isSimulating();
       setSimulationDoneCriterion.set(true);
-      askThreadToSleep(100);
+      ThreadTools.sleep(1000);
       boolean isSCSSimulatingAfterCriterion = scs.isSimulating();
       assertTrue(isSCSSimulatingBeforeCriterion);
       assertFalse(isSCSSimulatingAfterCriterion);
@@ -1023,17 +1023,6 @@ public class SimulationConstructionSetUsingDirectCallsTest
       scs.setOutPoint();
    }
 
-   private void askThreadToSleep(long milliseconds)
-   {
-      try
-      {
-         Thread.sleep(milliseconds);
-      }
-      catch (InterruptedException e)
-      {
-         e.printStackTrace();
-      }
-   }
 
    private SimulationDoneCriterion createSimulationDoneCriterion()
    {
