@@ -8,7 +8,13 @@
 
 %%
 
-function processedObj = ReadMpsAdapter(filePath,varargin)
+function processedObj = ReadMpsAdapter(fileName,varargin)
+
+addpath(genpath(pwd));
+filePath = strcat('MpsParser/QpsFiles/',fileName);
+
+fileNameNoExtensionVector = strsplit(fileName,'.');
+fileNameToWrite = strcat(pwd,'/YamlQpProblems/',fileNameNoExtensionVector(1),'.yaml');
 
 rawObj = readmps(filePath);
 processedObj = convert(rawObj);
@@ -20,6 +26,9 @@ if(~isempty(varargin))
     [X,FVAL] = quadprog(2*processedObj.H,processedObj.f,processedObj.A,processedObj.b,processedObj.Aeq, ...
         processedObj.beq,processedObj.lb,processedObj.ub,x0,options)
 end
+
+fileToWrite = fopen(fileNameToWrite{1},'w+');
+WriteYaml(fileNameToWrite{1},processedObj);
 
 end
 
