@@ -1,0 +1,13 @@
+NAME          Simple1DQpTest
+ROWS
+ N  obj
+ L  r1
+COLUMNS
+    x1        r1                 1.0
+RHS
+    rhs1      r1                 20.0
+BOUNDS
+ LO bnd1      x1                 1   
+QUADOBJ
+    x1        x1                 1.0
+ENDATA
