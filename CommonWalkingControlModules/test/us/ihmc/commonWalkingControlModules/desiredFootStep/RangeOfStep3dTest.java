@@ -126,10 +126,10 @@ public class RangeOfStep3dTest
                   assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), 0.0, 0.0, robotSide.negateIfRightSide(offset))));
                   assertFalse(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), 0.0, 0.0, robotSide.negateIfRightSide(offset - epsilon))));
                   
-                  assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), 0.0, 0.0, robotSide.negateIfRightSide(0.5 * sideLength + offset))));
+                  assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), 0.0, 0.0, robotSide.negateIfRightSide(0.5 * sideLength + offset - epsilon))));
                   assertFalse(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), 0.0, 0.0, robotSide.negateIfRightSide(0.5 * sideLength + offset + epsilon))));
                   
-                  assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), 0.5 * forwardLength, 0.0, robotSide.negateIfRightSide(offset))));
+                  assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), 0.5 * forwardLength - epsilon, 0.0, robotSide.negateIfRightSide(offset))));
                   assertFalse(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), 0.5 * forwardLength + epsilon, 0.0, robotSide.negateIfRightSide(offset))));
 
                   assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), -0.5 * forwardLength, 0.0, robotSide.negateIfRightSide(offset))));
@@ -141,10 +141,10 @@ public class RangeOfStep3dTest
                   assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), 0.0, robotSide.negateIfRightSide(offset), 0.0)));
                   assertFalse(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), 0.0, robotSide.negateIfRightSide(offset - epsilon), 0.0)));
                   
-                  assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), 0.0, robotSide.negateIfRightSide(0.5 * sideLength + offset), 0.0)));
+                  assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), 0.0, robotSide.negateIfRightSide(0.5 * sideLength + offset - epsilon), 0.0)));
                   assertFalse(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), 0.0, robotSide.negateIfRightSide(0.5 * sideLength + offset + epsilon), 0.0)));
                   
-                  assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), 0.5 * verticalLength, robotSide.negateIfRightSide(offset), 0.0)));
+                  assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), 0.5 * verticalLength - epsilon, robotSide.negateIfRightSide(offset), 0.0)));
                   assertFalse(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), 0.5 * verticalLength + epsilon, robotSide.negateIfRightSide(offset), 0.0)));
                   
                   assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), -0.5 * verticalLength, robotSide.negateIfRightSide(offset), 0.0)));
@@ -162,19 +162,19 @@ public class RangeOfStep3dTest
                   assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), robotSide.negateIfLeftSide(offset), 0.0, 0.0)));
                   assertFalse(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), robotSide.negateIfLeftSide(offset - epsilon), 0.0, 0.0)));
                   
-                  assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), robotSide.negateIfLeftSide(0.5 * sideLength + offset), 0.0, 0.0)));
+                  assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), robotSide.negateIfLeftSide(0.5 * sideLength + offset - epsilon), 0.0, 0.0)));
                   assertFalse(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), robotSide.negateIfLeftSide(0.5 * sideLength + offset + epsilon), 0.0, 0.0)));
                   
-                  assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), robotSide.negateIfLeftSide(offset), 0.5 * forwardLength, 0.0)));
+                  assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), robotSide.negateIfLeftSide(offset), 0.5 * forwardLength - epsilon, 0.0)));
                   assertFalse(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), robotSide.negateIfLeftSide(offset), 0.5 * forwardLength + epsilon, 0.0)));
                   
-                  assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), robotSide.negateIfLeftSide(offset), -(0.5 * forwardLength), 0.0)));
+                  assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), robotSide.negateIfLeftSide(offset), -(0.5 * forwardLength - epsilon), 0.0)));
                   assertFalse(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), robotSide.negateIfLeftSide(offset), -(0.5 * forwardLength + epsilon), 0.0)));
                   
-                  assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), robotSide.negateIfLeftSide(offset), 0.0, 0.5 * verticalLength)));
+                  assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), robotSide.negateIfLeftSide(offset), 0.0, 0.5 * verticalLength - epsilon)));
                   assertFalse(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), robotSide.negateIfLeftSide(offset), 0.0, 0.5 * verticalLength + epsilon)));
 
-                  assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), robotSide.negateIfLeftSide(offset), 0.0, -0.5 * verticalLength)));
+                  assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), robotSide.negateIfLeftSide(offset), 0.0, -(0.5 * verticalLength - epsilon))));
                   assertFalse(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), robotSide.negateIfLeftSide(offset), 0.0, -(0.5 * verticalLength + epsilon))));
                }
             }
@@ -241,21 +241,22 @@ public class RangeOfStep3dTest
                      yCoord = robotSide.negateIfRightSide(offset + 0.5 * sideLength) * Math.cos(angle);
                      zCoord = robotSide.negateIfRightSide(offset + 0.5 * sideLength) * Math.sin(angle);
 
-                     assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), 0.0, yCoord, zCoord)));
+                     assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), 0.0, yCoord - robotSide.negateIfRightSide(epsilon), zCoord)));
+                     assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), 0.0, yCoord, zCoord - robotSide.negateIfRightSide(epsilon))));
                      assertFalse(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), 0.0, yCoord + robotSide.negateIfRightSide(epsilon), zCoord)));
                      assertFalse(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), 0.0, yCoord, zCoord + robotSide.negateIfRightSide(epsilon))));
                   }
 
                   if (i == 1)
                   {
-                     assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), 0.0, robotSide.negateIfRightSide(offset), 0.0)));
+                     assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), 0.0, robotSide.negateIfRightSide(offset + epsilon), 0.0)));
                      assertFalse(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), 0.0, robotSide.negateIfRightSide(offset - epsilon), 0.0)));
                      
-                     assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), 0.0, robotSide.negateIfRightSide(0.5 * sideLength + offset), 0.0)));
+                     assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), 0.0, robotSide.negateIfRightSide(0.5 * sideLength + offset - epsilon), 0.0)));
                      assertFalse(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), 0.0, robotSide.negateIfRightSide(0.5 * sideLength + offset + epsilon), 0.0)));
 
-                     double xCoord = 0.5 * forwardLength * Math.cos(angle);
-                     double zCoord = -0.5 * forwardLength * Math.sin(angle);
+                     double xCoord = 0.5 * (forwardLength - epsilon) * Math.cos(angle);
+                     double zCoord = -0.5 * (forwardLength - epsilon) * Math.sin(angle);
 
                      assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), xCoord, robotSide.negateIfRightSide(offset), zCoord)));
                      assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), -xCoord, robotSide.negateIfRightSide(offset), -zCoord)));
@@ -263,8 +264,8 @@ public class RangeOfStep3dTest
                      xCoord = 0.5 * verticalLength * Math.sin(angle);
                      zCoord = 0.5 * verticalLength * Math.cos(angle);
                      
-                     assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), xCoord, robotSide.negateIfRightSide(offset), zCoord)));
-                     assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), -xCoord, robotSide.negateIfRightSide(offset), -zCoord)));
+                     assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), xCoord, robotSide.negateIfRightSide(offset), zCoord - epsilon)));
+                     assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), -xCoord, robotSide.negateIfRightSide(offset), -zCoord + epsilon)));
                   }
 
                   if (i == 2)
@@ -275,8 +276,8 @@ public class RangeOfStep3dTest
                      assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), -xCoord, yCoord, 0.0)));
                      assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), -xCoord, yCoord, 0.5 * verticalLength)));
 
-                     xCoord = robotSide.negateIfRightSide(offset + 0.5 * sideLength) * Math.sin(angle);
-                     yCoord = robotSide.negateIfRightSide(offset + 0.5 * sideLength) * Math.cos(angle);
+                     xCoord = robotSide.negateIfRightSide(offset + 0.5 * sideLength - epsilon) * Math.sin(angle);
+                     yCoord = robotSide.negateIfRightSide(offset + 0.5 * sideLength - epsilon) * Math.cos(angle);
 
                      assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), -xCoord, yCoord, 0.0)));
                   }
@@ -317,15 +318,15 @@ public class RangeOfStep3dTest
             assertEquals(range.getEllipsoid3d().getYRadius(), 0.5 * sideLength, 1e-7);
             assertEquals(range.getEllipsoid3d().getZRadius(), 0.5 * verticalLength, 1e-7);
             
-            assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), translation.getX() + 0.5 * forwardLength, translation.getY() + robotSide.negateIfRightSide(offset), translation.getZ())));
+            assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), translation.getX() + 0.5 * forwardLength - epsilon, translation.getY() + robotSide.negateIfRightSide(offset), translation.getZ())));
             assertFalse(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), translation.getX() + 0.5 * forwardLength + epsilon, translation.getY() + robotSide.negateIfRightSide(offset), translation.getZ())));
-            assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), translation.getX() - 0.5 * forwardLength, translation.getY() + robotSide.negateIfRightSide(offset), translation.getZ())));
+            assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), translation.getX() - (0.5 * forwardLength - epsilon), translation.getY() + robotSide.negateIfRightSide(offset), translation.getZ())));
             assertFalse(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), translation.getX() - (0.5 * forwardLength + epsilon), translation.getY() + robotSide.negateIfRightSide(offset), translation.getZ())));
             
-            assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), translation.getX(), translation.getY() + robotSide.negateIfRightSide(offset + 0.5 * sideLength), translation.getZ())));
+            assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), translation.getX(), translation.getY() + robotSide.negateIfRightSide(offset + 0.5 * sideLength - epsilon), translation.getZ())));
             assertFalse(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), translation.getX(), translation.getY() + robotSide.negateIfRightSide(offset + 0.5 * sideLength + epsilon), translation.getZ())));
             
-            assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), translation.getX(), translation.getY() + robotSide.negateIfRightSide(offset), translation.getZ() + 0.5 * verticalLength)));
+            assertTrue(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), translation.getX(), translation.getY() + robotSide.negateIfRightSide(offset), translation.getZ() + 0.5 * verticalLength - epsilon)));
             assertFalse(range.containsPoint(new FramePoint(ReferenceFrame.getWorldFrame(), translation.getX(), translation.getY() + robotSide.negateIfRightSide(offset), translation.getZ() + 0.5 * verticalLength + epsilon)));
          }
       }
