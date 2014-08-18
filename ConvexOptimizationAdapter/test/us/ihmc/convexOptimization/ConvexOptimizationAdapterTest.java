@@ -2,8 +2,16 @@ package us.ihmc.convexOptimization;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Map;
+
+import org.ejml.data.DenseMatrix64F;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.yaml.snakeyaml.Yaml;
 
 import com.joptimizer.functions.ConvexMultivariateRealFunction;
 import com.joptimizer.functions.LinearMultivariateRealFunction;
@@ -14,23 +22,28 @@ public abstract class ConvexOptimizationAdapterTest
 {
    public abstract ConvexOptimizationAdapter createConvexOptimizationAdapter();
    
-
-   @Test
-   public void testASimpleEqualityCase()
+   @SuppressWarnings("unchecked")
+   @Ignore
+   public void testTest() throws IOException
    {
-      // Minimize x subject to x = 2;
-      ConvexOptimizationAdapter convexOptimizationAdapter = createConvexOptimizationAdapter();
       
-      convexOptimizationAdapter.setLinearCostFunctionVector(new double[]{1.0});
-      convexOptimizationAdapter.setLinearEqualityConstraintsAMatrix(new double[][]{{1.0}});
-      convexOptimizationAdapter.setLinearEqualityConstraintsBVector(new double[]{2.0});
+      DenseMatrix64F beq = new DenseMatrix64F(0,0);
       
-      double[] solution = convexOptimizationAdapter.solve();
+      File projectDirectory = new File(new File("").getAbsolutePath());
+      File yamlQpProblemDirectory = new File(projectDirectory, "/Matlab/YamlQpProblems");
+      File[] yamlQpProblemFileList = yamlQpProblemDirectory.listFiles();
       
-      assertEquals(1, solution.length);
-      assertEquals(2.0, solution[0], 1e-7);
+      Yaml yaml = new Yaml();
+      
+      for(int i = 0; i < yamlQpProblemFileList.length; i++)
+      {
+         InputStream input = new FileInputStream(yamlQpProblemFileList[i]);
+         
+         Map<String, Object> object = (Map<String, Object>) yaml.load(input);
+         System.out.print(object + "\n");
+      }
+     
    }
-   
    
    @Test
    public void testASimpleRedundantEqualityCase()
