@@ -2,10 +2,10 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData;
 
 import static org.junit.Assert.assertTrue;
 
+import javax.media.j3d.Transform3D;
 import javax.vecmath.Point3d;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.bambooTools.BambooTools;
@@ -14,6 +14,7 @@ import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCUserInterfaceNetworkingManager;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationNetworkTestHelper;
 import us.ihmc.utilities.MemoryTools;
+import us.ihmc.utilities.lidar.polarLidar.AbstractLidarScan;
 import us.ihmc.utilities.lidar.polarLidar.SparseLidarScan;
 import us.ihmc.utilities.net.NetStateListener;
 import us.ihmc.utilities.net.ObjectConsumer;
@@ -24,6 +25,7 @@ import com.yobotics.simulationconstructionset.simulatedSensors.DepthDataStateCom
 public abstract class DepthDataProcessorTest implements MultiRobotTestInterface, NetStateListener
 {
    private int numberOfLidarScansConsumed = 0;
+   private AbstractLidarScan zeroDegreeScan;
 
    @Before
    public void setUp()
@@ -53,40 +55,31 @@ public abstract class DepthDataProcessorTest implements MultiRobotTestInterface,
       BambooTools.reportTestFinishedMessage();
    }
 
-   @Ignore    // TODO Ignore until completion.
-   @Test
-   public void testLidarGivesTheSameData180DegreesLater()
-   {
-      BambooTools.reportTestStartedMessage();
-
-      // Make sure the scans at 0 and 180 and at 90 and 270 are the same.
-
-      BambooTools.reportTestFinishedMessage();
-   }
-
-   @Ignore    // TODO Ignore until completion.
-   @Test
-   public void testLidarAt45DegreesSeesTheBoxProperly()
-   {
-      BambooTools.reportTestStartedMessage();
-
-      // Make sure the scan is correct for the geometry presented to it.
-
-      BambooTools.reportTestFinishedMessage();
-   }
-
    private class LidarConsumer implements ObjectConsumer<SparseLidarScan>
    {
       @Override
-      public void consumeObject(SparseLidarScan object)
+      public void consumeObject(SparseLidarScan sparseLidarScan)
       {
          numberOfLidarScansConsumed++;
-         object.getAllPoints();
 
-
-         System.out.println(DepthDataProcessorTest.this.getClass().getSimpleName() + ": " + object.getClass().getSimpleName() + " received!" + "count = "
+         System.out.println(DepthDataProcessorTest.this.getClass().getSimpleName() + ": " + sparseLidarScan.getClass().getSimpleName() + " received!" + "count = "
                             + numberOfLidarScansConsumed);
+         
+         verifyScan(sparseLidarScan);
       }
+   }
+   
+   private void verifyScan(SparseLidarScan sparseLidarScan)
+   {
+      // Make sure the scans at 0 and 180 and at 90 and 270 are the same.
+      
+      // Make sure the scan is correct for the geometry presented to it.
+      
+      Transform3D startTransform = sparseLidarScan.getStartTransform();
+      
+      sparseLidarScan.getAllPoints();
+      
+      
    }
 
    public void connected()
