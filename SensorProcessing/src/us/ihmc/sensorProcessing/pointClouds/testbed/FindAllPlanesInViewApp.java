@@ -6,6 +6,7 @@ import bubo.clouds.detect.CloudShapeTypes;
 import bubo.clouds.detect.PointCloudShapeFinder;
 import bubo.clouds.detect.wrapper.ConfigMultiShapeRansac;
 import bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
+import bubo.clouds.filter.UniformDensityCloudOctree;
 import bubo.gui.FactoryVisualization3D;
 import bubo.gui.UtilDisplayBubo;
 import bubo.gui.d3.PointCloudPanel;
@@ -22,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import static us.ihmc.sensorProcessing.pointClouds.GeometryOps.loadCloud;
 import static us.ihmc.sensorProcessing.pointClouds.GeometryOps.loadScanLines;
 import static us.ihmc.sensorProcessing.pointClouds.testbed.CreateCloudFromFilteredScanApp.filter;
 
@@ -71,15 +73,20 @@ public class FindAllPlanesInViewApp {
    public static void main(String[] args) {
       List<List<Point3D_F64>> scans0 = loadScanLines("../SensorProcessing/data/testbed/2014-08-01/cloud01_scans.txt");
       List<Point3D_F64> cloud0 = filter(scans0,3);
+//      List<Point3D_F64> cloud0 = loadCloud("../SensorProcessing/data/testbed/2014-08-01/cloud02.txt");
+      List<Point3D_F64> cloud1 = new ArrayList<>();
 
-      ConfigMultiShapeRansac configRansac = ConfigMultiShapeRansac.createDefault(500,1.2,0.025, CloudShapeTypes.PLANE);
+      UniformDensityCloudOctree uniform = new UniformDensityCloudOctree(20,0.05,234234);
+      uniform.process(cloud0,cloud1);
+
+      ConfigMultiShapeRansac configRansac = ConfigMultiShapeRansac.createDefault(250,1.2,0.025, CloudShapeTypes.PLANE);
       configRansac.minimumPoints = 5000;
 //      ConfigSchnabel2007 configSchnabel = ConfigSchnabel2007.createDefault(20000,0.6,0.15,CloudShapeTypes.PLANE);
 
       PointCloudShapeFinder finder = FactoryPointCloudShape.ransacSingleAll(
               new ConfigSurfaceNormals(100, 0.15), configRansac);
 
-      finder.process(cloud0,null);
+      finder.process(cloud1,null);
 
       FactoryVisualization3D factory = UtilDisplayBubo.createVisualize3D();
       PointCloudPanel gui = factory.displayPointCloud();
