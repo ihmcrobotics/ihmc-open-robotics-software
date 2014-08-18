@@ -1,10 +1,5 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor;
 
-import bubo.clouds.FactoryPointCloudShape;
-import bubo.clouds.detect.CloudShapeTypes;
-import bubo.clouds.detect.PointCloudShapeFinder;
-import bubo.clouds.detect.wrapper.ConfigMultiShapeRansac;
-import bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
 import bubo.io.text.WriteCsvObject;
 import com.thoughtworks.xstream.XStream;
 import georegression.geometry.RotationMatrixGenerator;
@@ -14,14 +9,14 @@ import georegression.struct.so.Quaternion_F64;
 import org.ddogleg.struct.FastQueue;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
 import us.ihmc.darpaRoboticsChallenge.sensorProcessing.sensorData.TestbedServerPacket;
-import us.ihmc.sensorProcessing.pointClouds.testbed.DetectTestbedSaveTrasform;
-import us.ihmc.utilities.lidar.PointCloudPacket;
+import us.ihmc.sensorProcessing.pointClouds.testbed.TestbedAutomaticAlignment;
 import us.ihmc.utilities.lidar.polarLidar.LidarScan;
 
 import javax.vecmath.Point3d;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.List;
 
 /**
@@ -32,16 +27,17 @@ import java.util.List;
 public class NetworkProcessorTestbedAlignment implements Runnable
 {
 
-   final FastQueue<Point3D_F64> cloud = new FastQueue<>(Point3D_F64.class, true);
+   final FastQueue<Point3D_F64> scanStorage = new FastQueue<>(Point3D_F64.class, true);
 
    volatile boolean active = false;
    volatile boolean processing = false;
    boolean loadedModel = false;
 
-   PointCloudShapeFinder finder;
-   Se3_F64 estimatedToModel;
+   TestbedAutomaticAlignment testbedFinder;
 
    DRCNetworkProcessorNetworkingManager networkManager;
+
+   PrintStream out;
 
    boolean justCollectData;
 
@@ -55,13 +51,10 @@ public class NetworkProcessorTestbedAlignment implements Runnable
 
       this.networkManager = networkManager;
 
-      ConfigMultiShapeRansac configRansac = ConfigMultiShapeRansac.createDefault(500, 1.2, 0.025, CloudShapeTypes.PLANE);
-      configRansac.minimumPoints = 5000;
-      finder = FactoryPointCloudShape.ransacSingleAll(new ConfigSurfaceNormals(100, 0.15), configRansac);
-
       try
       {
-         estimatedToModel = (Se3_F64) new XStream().fromXML(getClass().getResourceAsStream("/testbed/estimatedToModel.xml"));
+         Se3_F64 estimatedToModel = (Se3_F64) new XStream().fromXML(getClass().getResourceAsStream("/testbed/estimatedToModel.xml"));
+         testbedFinder = new TestbedAutomaticAlignment(3,estimatedToModel);
          loadedModel = true;
       }
       catch (RuntimeException e)
@@ -76,7 +69,7 @@ public class NetworkProcessorTestbedAlignment implements Runnable
       {
          this.justCollectData = justCollectData;
          System.out.println("NetworkProcessorTestbedAlignment - startCollection()");
-         synchronized (cloud)
+         synchronized (scanStorage)
          {
             // ignore commands to start collecting data if it's processing the previous cloud still
             if (processing || active)
@@ -84,7 +77,8 @@ public class NetworkProcessorTestbedAlignment implements Runnable
                System.out.println("  ignoring start request.  Busy");
                return;
             }
-            cloud.reset();
+            out = null;
+            scanStorage.reset();
             active = true;
             stopTime = System.currentTimeMillis() + integrationPeriod;
             networkManager.getControllerStateHandler().sendSerializableObject(new TestbedServerPacket(TestbedServerPacket.START_COLLECTING));
@@ -99,7 +93,7 @@ public class NetworkProcessorTestbedAlignment implements Runnable
    {
       if (loadedModel)
       {
-         synchronized (cloud)
+         synchronized (scanStorage)
          {
             if (!active)
                return;
@@ -109,26 +103,38 @@ public class NetworkProcessorTestbedAlignment implements Runnable
                System.out.println("NetworkProcessorTestbedAlignment - collected packet");
                List<Point3d> points = polarLidarScan.getAllPoints();
 
+               scanStorage.reset();
                for (int i = 0; i < points.size(); i++)
                {
                   Point3d p = points.get(i);
-                  cloud.grow().set(p.x, p.y, p.z);
+                  scanStorage.grow().set(p.x, p.y, p.z);
+               }
+
+               if( justCollectData ) {
+                  if( out == null )
+                     try {
+                        out = new PrintStream(new FileOutputStream(String.format("savedTestbedCloud%02d_scans.csv",totalSaved++)));
+                        out.println("# LIDAR scans.  (num) (x y z) .... ");
+                     } catch (FileNotFoundException e) {
+                        throw new RuntimeException(e);
+                     }
+                  out.print(scanStorage.size());
+                  for (int i = 0; i < scanStorage.size(); i++) {
+                     Point3D_F64 p = scanStorage.get(i);
+                     out.printf(" %15f %15f %15f",p.x,p.y,p.z);
+                  }
+                  out.println();
+                  out.flush();
+               } else {
+                  testbedFinder.addScan(scanStorage.toList());
                }
             }
             else
             {
                System.out.println("NetworkProcessorTestbedAlignment - handlePacket done collection");
                if( justCollectData ) {
-                  try
-                  {
-                     WriteCsvObject write = new WriteCsvObject(new FileOutputStream(String.format("savedTestbedCloud%02d.csv",totalSaved++)), Point3D_F64.class, "x", "y", "z");
-                     for (int i = 0; i < cloud.size(); i++)
-                     {
-                        write.writeObject(cloud.get(i));
-                     }
-                     write.close();
-                  } catch (IOException ignore) { }
-
+                  out.close();
+                  out = null;
                   processing = false;
                   active = false;
                   networkManager.getControllerStateHandler().sendSerializableObject(new TestbedServerPacket(TestbedServerPacket.DONE_COLLECTING_DATA));
@@ -136,36 +142,6 @@ public class NetworkProcessorTestbedAlignment implements Runnable
                   processing = true;
                   active = false;
                }
-            }
-         }
-      }
-   }
-
-   public void handlePacket(PointCloudPacket packet)
-   {
-      if (loadedModel)
-      {
-         synchronized (cloud)
-         {
-            if (!active)
-               return;
-
-            if (System.currentTimeMillis() < stopTime)
-            {
-               int N = packet.getNumberOfPoints();
-
-               float flatPoints[] = packet.getFlattenedPoints();
-
-               for (int i = 0; i < N; i++)
-               {
-                  int index = i * 3;
-                  cloud.grow().set(flatPoints[index], flatPoints[index + 1], flatPoints[index + 2]);
-               }
-            }
-            else
-            {
-               processing = true;
-               active = false;
             }
          }
       }
@@ -182,18 +158,13 @@ public class NetworkProcessorTestbedAlignment implements Runnable
             {
                networkManager.getControllerStateHandler().sendSerializableObject(new TestbedServerPacket(TestbedServerPacket.START_PROCESSING));
 
-               // find the planes
-               finder.process(cloud.toList(), null);
-
-               // find the testbed
-               Se3_F64 estimatedToWorld = DetectTestbedSaveTrasform.findTestbed(finder.getFound());
 
                TestbedServerPacket packet = new TestbedServerPacket();
-               if (estimatedToWorld != null)
+               if ( testbedFinder.process() )
                {
                   packet.setResult(TestbedServerPacket.SUCCESS);
-                  Se3_F64 modelToWorld = estimatedToModel.invert(null).concat(estimatedToWorld, null);
 
+                  Se3_F64 modelToWorld = testbedFinder.getModelToWorld();
                   Quaternion_F64 quat64 = RotationMatrixGenerator.matrixToQuaternion(modelToWorld.R, null);
 
                   float[] quat = packet.getQuat();

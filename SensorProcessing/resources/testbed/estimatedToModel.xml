@@ -1,0 +1,22 @@
+<georegression.struct.se.Se3__F64>
+    <R>
+        <numRows>3</numRows>
+        <numCols>3</numCols>
+        <data>
+            <double>-0.9999143279415859</double>
+            <double>0.012662423372879771</double>
+            <double>0.0030397600459711738</double>
+            <double>-0.012727646215076223</double>
+            <double>-0.9996651020283728</double>
+            <double>-0.02249291306415054</double>
+            <double>0.0027539296713950945</double>
+            <double>-0.02252969486285879</double>
+            <double>0.9997415011143813</double>
+        </data>
+    </R>
+    <T>
+        <x>1.1171465611536793</x>
+        <y>3.84556558105667E-4</y>
+        <z>-0.009192361713818764</z>
+    </T>
+</georegression.struct.se.Se3__F64>

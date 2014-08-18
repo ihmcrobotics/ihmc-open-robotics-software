@@ -30,6 +30,7 @@ import org.ddogleg.sorting.QuickSelectArray;
 import org.ddogleg.struct.FastQueue;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+import us.ihmc.sensorProcessing.pointClouds.GeometryOps;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -44,7 +45,7 @@ import static us.ihmc.sensorProcessing.pointClouds.testbed.CreateCloudFromFilter
 /**
  * @author Peter Abeles
  */
-public class DetectTestbedSaveTrasform {
+public class DetectTestbedSaveTransform {
 
    public static Random rand = new Random(23423);
 
@@ -74,9 +75,9 @@ public class DetectTestbedSaveTrasform {
       System.out.println("Bounding rectangle "+r.getWidth()+" "+r.getHeight());
 
       // select the color so that it won't be nearly black
-      int red =  rand.nextInt(200)+56;
+      int red   =  rand.nextInt(200)+56;
       int green =  rand.nextInt(200)+56;
-      int blue =  rand.nextInt(200)+56;
+      int blue  =  rand.nextInt(200)+56;
 
       int color = (red << 16 | green << 8 | blue) | 0xFF000000;
 
@@ -134,7 +135,7 @@ public class DetectTestbedSaveTrasform {
          }
       }
 
-      if( bestDistance < 0.05 ) {
+      if( bestDistance < 0.25 ) {
          System.out.println("Found Testbed!");
 
          // assume the floor has more parallel points than the wall will have
@@ -232,43 +233,46 @@ public class DetectTestbedSaveTrasform {
    }
 
    public static void main(String[] args) {
-      List<List<Point3D_F64>> scans0 = loadScanLines("../SensorProcessing/data/testbed/2014-07-10/cloud04_scans.txt");
-      List<Point3D_F64> cloud0 = filter(scans0,3);
 
-      ConfigMultiShapeRansac configRansac = ConfigMultiShapeRansac.createDefault(500,1.2,0.025, CloudShapeTypes.PLANE);
-      configRansac.minimumPoints = 5000;
-//      ConfigSchnabel2007 configSchnabel = ConfigSchnabel2007.createDefault(20000,0.6,0.15,CloudShapeTypes.PLANE);
+      String directory = "../SensorProcessing/data/testbed/2014-08-01/";
 
-      PointCloudShapeFinder finder = FactoryPointCloudShape.ransacSingleAll(
-              new ConfigSurfaceNormals(100, 0.15), configRansac);
+      Se3_F64 estimatedToModel = (Se3_F64) new XStream().fromXML(directory.getClass().
+              getResourceAsStream("/testbed/estimatedToModel.xml"));
+      TestbedAutomaticAlignment alg = new TestbedAutomaticAlignment(3,estimatedToModel);
 
-      finder.process(cloud0,null);
-
-      FactoryVisualization3D factory = UtilDisplayBubo.createVisualize3D();
-      PointCloudPanel gui = factory.displayPointCloud();
-
-      System.out.println("Total found "+finder.getFound().size());
-
-//      gui.addPoints(cloud0,0xFF00FF00,1);
-      for (int i = 0; i < finder.getFound().size(); i++) {
-         PointCloudShapeFinder.Shape shape = finder.getFound().get(i);
-         visualizePlane(shape,gui);
+      System.out.println("Loading and filtering point clouds");
+      List<List<Point3D_F64>> scans0 = loadScanLines(directory+"cloud02_scans.txt");
+      for (int i = 0; i < scans0.size(); i++) {
+         alg.addScan(scans0.get(i));
       }
 
-      System.out.println();
-      System.out.println("--------- Detecting Testbed");
-      System.out.println();
+      List<Point3D_F64> cloud = GeometryOps.loadCloud(directory + String.format("cloud%02d.txt", 2));
 
-      Se3_F64 testbedToWorld = findTestbed(finder.getFound());
 
-      gui.addAxis(testbedToWorld,0.5,0.02);
+      if( alg.process() ) {
 
-      try {
-         new XStream().toXML(testbedToWorld, new FileOutputStream("estimatedTestbedToWorld.xml"));
-      } catch (FileNotFoundException e) {
-         throw new RuntimeException(e);
+         FactoryVisualization3D factory = UtilDisplayBubo.createVisualize3D();
+         PointCloudPanel gui = factory.displayPointCloud();
+
+         gui.addPoints(alg.getCloud1(),0xFFFF0000,1);
+         gui.addPoints(cloud,0xFF00FF00,1);
+
+         System.out.println();
+         System.out.println("--------- Detecting Testbed");
+         System.out.println();
+
+         Se3_F64 testbedToWorld = alg.getEstimatedToWorld();
+         System.out.println(testbedToWorld);
+
+         gui.addAxis(testbedToWorld, 0.5, 0.02);
+
+         try {
+            new XStream().toXML(testbedToWorld, new FileOutputStream("estimatedTestbedToWorld.xml"));
+         } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+         }
+
+         ShowImages.showWindow(gui, "FooBar");
       }
-
-      ShowImages.showWindow(gui,"FooBar");
    }
 }

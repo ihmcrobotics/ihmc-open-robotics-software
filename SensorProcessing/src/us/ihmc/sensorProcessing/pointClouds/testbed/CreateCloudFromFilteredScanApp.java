@@ -33,7 +33,21 @@ public class CreateCloudFromFilteredScanApp {
       }
 
       return cloud;
+   }
 
+   public static List<Point3D_F64> filterScan( List<Point3D_F64> scan , double maxRange ) {
+
+      List<Point3D_F64> cloud = new ArrayList<>();
+
+      for (int j = 0; j < scan.size(); j++) {
+         Point3D_F64 p = scan.get(j);
+
+         if( p.normSq() <= maxRange*maxRange && countNeighbors(p,0.08,scan) > 6 ) {
+            cloud.add(p);
+         }
+      }
+
+      return cloud;
    }
 
    public static List<Point3D_F64> loadFilteredScans( String fileName , double maxRange ) {

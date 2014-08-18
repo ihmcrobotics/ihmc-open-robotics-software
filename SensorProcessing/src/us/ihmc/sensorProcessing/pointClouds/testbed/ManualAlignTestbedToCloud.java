@@ -349,7 +349,7 @@ public class ManualAlignTestbedToCloud extends SimpleApplication {
    }
 
    public static void main(String[] args) {
-      List<Point3D_F64> cloud = GeometryOps.loadCloud("../SensorProcessing/data/testbed/2014-08-01/cloud00.txt");
+      List<Point3D_F64> cloud = GeometryOps.loadCloud("../SensorProcessing/data/testbed/2014-08-01/cloud02.txt");
       ManualAlignTestbedToCloud app = new ManualAlignTestbedToCloud();
       app.addPoints(cloud,0xFF0000,3);
       app.addTestBedModel();
