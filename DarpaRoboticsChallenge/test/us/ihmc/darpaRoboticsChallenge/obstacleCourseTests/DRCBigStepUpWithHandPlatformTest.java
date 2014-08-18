@@ -101,7 +101,7 @@ public abstract class DRCBigStepUpWithHandPlatformTest implements MultiRobotTest
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
 
-      footstepDataList = createFootstepsForFirstStepOntoPlatform(RobotSide.RIGHT, 0.5, -0.1, stepHeight + 0.05, scriptedFootstepGenerator);
+      footstepDataList = createFootstepsForFirstStepOntoPlatform(RobotSide.RIGHT, 0.5, -0.1, stepHeight, scriptedFootstepGenerator);
       drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
