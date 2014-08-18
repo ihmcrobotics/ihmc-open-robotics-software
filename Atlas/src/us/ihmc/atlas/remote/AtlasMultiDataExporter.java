@@ -158,8 +158,11 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
          }
          System.out.println("Simulation finished");
          simulateExport.closeSCS();
+         ThreadTools.sleep(CLOSING_SLEEP_TIME);
          exportData = null;
          simulateExport = null;
+         ThreadTools.sleep(CLOSING_SLEEP_TIME);
+         System.gc();
       }
 
       System.exit(0);
