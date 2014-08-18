@@ -1,0 +1,49 @@
+cars:
+    - color: blue
+      label: JJ-XX-1500
+      parent: 
+             - manufacturer.skoda
+             - insurance.mandatory.Allianz
+             - insurance.optional.Kooperativa             
+
+      ins_note: IMPORTANT_1 
+      info: {aaa: 2}
+
+    - color: red
+      label: DD-XX-1500
+      ins_note: IMPORTANT_2
+      parent : [ manufacturer.audi, insurance.mandatory.Allianz ]
+
+manufacturer:
+    skoda:
+        established: cca 1900
+        place: MB
+        info:
+            aaa: 1
+            bbb: 11
+    audi:
+        established: cca 1900
+        place: Germany
+
+insurance:
+    mandatory:
+        Allianz: 
+            ins_price: 4000 
+            ins_unit : CZK
+        Kooperativa: 
+            ins_price: 4100 
+            ins_unit : CZK
+            ins_note : umfty dumf
+                
+    optional:
+        CP: 
+            ins_price: 1000 CZK
+        Kooperativa: 
+            ins_price: 1100 CZK
+
+
+
+
+
+    
+

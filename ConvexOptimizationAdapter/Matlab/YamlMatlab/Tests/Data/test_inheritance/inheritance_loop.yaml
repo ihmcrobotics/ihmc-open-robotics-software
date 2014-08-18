@@ -1,0 +1,4 @@
+# loop in inheritance
+students:
+    s1: { name: jan, parent: students.s2}
+    s2: { name: pepa, parent: students.s1}
