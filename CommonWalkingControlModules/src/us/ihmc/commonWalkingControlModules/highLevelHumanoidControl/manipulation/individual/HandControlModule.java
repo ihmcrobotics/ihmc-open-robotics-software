@@ -7,7 +7,6 @@ import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.AbstractJointSpaceHandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.InverseKinematicsTaskspaceHandPositionControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.JointSpaceHandControlState;
@@ -254,7 +253,7 @@ public class HandControlModule
       stateMachine.checkTransitionConditions();
    }
 
-   public void moveInStraightLine(FramePose finalDesiredPose, double time, ReferenceFrame trajectoryFrame)
+   public void moveInStraightLine(FramePose finalDesiredPose, double time, ReferenceFrame trajectoryFrame, double swingClearance)
    {
       if (stateMachine.getCurrentStateEnum() != HandControlState.LOAD_BEARING)
       {
@@ -268,7 +267,7 @@ public class HandControlModule
       else
       {
          loadBearingControlState.getContactNormalVector(initialDirection);
-         moveAwayObject(finalDesiredPose, initialDirection, ManipulationControlModule.getDefaultApproachDistanceForHandsteps(), time, trajectoryFrame);
+         moveAwayObject(finalDesiredPose, initialDirection, swingClearance, time, trajectoryFrame);
       }
    }
 
