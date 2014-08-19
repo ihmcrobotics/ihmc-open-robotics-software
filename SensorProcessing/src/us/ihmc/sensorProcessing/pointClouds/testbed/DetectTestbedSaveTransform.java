@@ -131,7 +131,7 @@ public class DetectTestbedSaveTransform {
          }
       }
 
-      return best.testbedToWorld;
+      return best == null ? null : best.testbedToWorld;
    }
 
    private static int findValve( Candidate c , List<Point3D_F64> cloud ) {
