@@ -36,14 +36,14 @@ public class AutomaticAlignTestbedToPlanes {
 
    public static void main(String[] args) {
 
-      String directory = "../SensorProcessing/data/testbed/2014-08-01/";
+      String directory = "../SensorProcessing/data/testbed/2014-08-18/";
 
       Se3_F64 estimatedToModel = (Se3_F64) new XStream().fromXML(directory.getClass().
               getResourceAsStream("/testbed/estimatedToModel.xml"));
       TestbedAutomaticAlignment alg = new TestbedAutomaticAlignment(3,estimatedToModel);
 
       System.out.println("Loading and filtering point clouds");
-      List<List<Point3D_F64>> scans0 = loadScanLines(directory+"cloud12_scans.txt");
+      List<List<Point3D_F64>> scans0 = loadScanLines(directory+"cloud01_scans.txt");
       for (int i = 0; i < scans0.size(); i++) {
          alg.addScan(scans0.get(i));
       }
