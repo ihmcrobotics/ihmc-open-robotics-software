@@ -3,8 +3,8 @@ package us.ihmc.atlas;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseDemoStarter;
+import us.ihmc.darpaRoboticsChallenge.DRCWallWorldEnvironment;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.environment.BigStepUpWithHandPlatformEnvironment;
 import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
 import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
 import us.ihmc.utilities.processManagement.JavaProcessSpawner;
@@ -23,9 +23,9 @@ public class AtlasWallWorldDemo extends DRCObstacleCourseDemoStarter
       boolean startDRCNetworkProcessor = true;
       boolean initializeEstimatorToActual = false;
 
-      //      CommonAvatarEnvironmentInterface environment = new DRCWallWorldEnvironment(-10.0, 10.0);
-      double stepHeight = 0.2;
-      CommonAvatarEnvironmentInterface environment = new BigStepUpWithHandPlatformEnvironment(stepHeight);
+      CommonAvatarEnvironmentInterface environment = new DRCWallWorldEnvironment(-10.0, 10.0);
+//      double stepHeight = 0.2;
+//      CommonAvatarEnvironmentInterface environment = new BigStepUpWithHandPlatformEnvironment(stepHeight);
       
       AtlasContactPointParameters contactPointParameters = robotModel.getContactPointParameters();
       contactPointParameters.createHandKnobContactPoints();

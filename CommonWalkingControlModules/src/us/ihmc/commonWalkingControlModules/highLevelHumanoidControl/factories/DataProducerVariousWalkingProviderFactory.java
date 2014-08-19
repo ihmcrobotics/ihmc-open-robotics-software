@@ -104,7 +104,7 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
       DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider = new DesiredPelvisLoadBearingProvider();
 
       objectCommunicator.attachListener(FootstepDataList.class, footstepPathConsumer);
-//      objectCommunicator.attachListener(HandstepPacket.class, handstepProvider);
+      objectCommunicator.attachListener(HandstepPacket.class, handstepProvider);
       objectCommunicator.attachListener(BlindWalkingPacket.class, blindWalkingPacketConsumer);
       objectCommunicator.attachListener(PauseCommand.class, pauseCommandConsumer);
       objectCommunicator.attachListener(HighLevelStatePacket.class, highLevelStateProvider);

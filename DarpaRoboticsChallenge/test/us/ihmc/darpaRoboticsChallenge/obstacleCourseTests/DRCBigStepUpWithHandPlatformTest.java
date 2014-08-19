@@ -96,12 +96,14 @@ public abstract class DRCBigStepUpWithHandPlatformTest implements MultiRobotTest
          success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
       }
 
-      FootstepDataList footstepDataList = createFootstepsForFirstStepOntoPlatform(RobotSide.LEFT, 0.5, 0.1, stepHeight, scriptedFootstepGenerator);
+      FootstepDataList footstepDataList = createFootstepsForStepOntoPlatform(RobotSide.LEFT, 0.5, 0.1, stepHeight, scriptedFootstepGenerator);
       drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
 
-      footstepDataList = createFootstepsForFirstStepOntoPlatform(RobotSide.RIGHT, 0.5, -0.1, stepHeight + 0.05, scriptedFootstepGenerator);
+      //TODO: This only works if you step a little too high. Otherwise it catches its foot on the step
+      double extraHeightToAvoidStubbing = 0.05;
+      footstepDataList = createFootstepsForStepOntoPlatform(RobotSide.RIGHT, 0.5, -0.1, stepHeight + 0.extraHeightToAvoidStubbing, scriptedFootstepGenerator);
       drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
@@ -165,7 +167,7 @@ public abstract class DRCBigStepUpWithHandPlatformTest implements MultiRobotTest
       return ret;
    }
    
-   private FootstepDataList createFootstepsForFirstStepOntoPlatform(RobotSide robotSide, double stepX, double stepY, double stepZ, ScriptedFootstepGenerator scriptedFootstepGenerator)
+   private FootstepDataList createFootstepsForStepOntoPlatform(RobotSide robotSide, double stepX, double stepY, double stepZ, ScriptedFootstepGenerator scriptedFootstepGenerator)
    {
       double[][][] footstepLocationsAndOrientations = new double[][][]
       {
