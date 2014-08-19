@@ -131,7 +131,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
             ppsTimestampOffsetProvider, sensorURI, multisenseLeftEyeCameraParameters,
             multisenseLidarParameters, multisenseStereoParameters);
 
-      new FishEyeDataReceiver(robotPoseBuffer, sensorInformation.getCameraParameters(0).getVideoSettings(), rosMainNode, networkingManager,
+      FishEyeDataReceiver fishEyeDataReceiver = new FishEyeDataReceiver(robotPoseBuffer, sensorInformation.getCameraParameters(0).getVideoSettings(), rosMainNode, networkingManager,
             DRCSensorParameters.DEFAULT_FIELD_OF_VIEW, ppsTimestampOffsetProvider);
     
       if (DRCConfigParameters.SEND_ROBOT_DATA_TO_ROS)
@@ -152,7 +152,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       }
       
       multiSenseSensorManager.initializeParameterListeners();
-
+      fishEyeDataReceiver.getBlackFlyParameterSetter().initializeParameterListeners();
    }
 
 }
