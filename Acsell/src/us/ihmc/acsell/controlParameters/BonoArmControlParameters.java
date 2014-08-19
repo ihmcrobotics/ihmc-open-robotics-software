@@ -30,32 +30,6 @@ public class BonoArmControlParameters implements ArmControllerParameters
    }
 
    @Override
-   public double[] getLowLevelArmJointspaceKp()
-   {
-      return new double[0]; 
-   }
-   @Override
-   public double[] getLowLevelArmJointspaceKi()
-   {
-      return new double[0]; 
-   }
-   @Override
-   public double[] getLowLevelArmJointspaceKd()
-   {
-      return new double[0]; 
-   }
-   @Override
-   public double[] getLowLevelArmJointspaceFfqd_d()
-   {
-      return new double[0]; 
-   }
-   @Override
-   public double[] getLowLevelArmJointspaceQerrMax()
-   {
-      return new double[0];  
-   }
-
-   @Override
    public YoPIDGains createJointspaceControlGains(YoVariableRegistry registry)
    {
       return null;
