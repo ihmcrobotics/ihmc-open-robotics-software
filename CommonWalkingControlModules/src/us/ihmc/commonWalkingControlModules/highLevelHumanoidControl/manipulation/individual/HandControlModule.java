@@ -274,7 +274,7 @@ public class HandControlModule
 
    private final FrameVector initialDirection = new FrameVector();
    private final FrameVector finalDirection = new FrameVector();
-   public void moveTowardsObjectAndGoToSupport(FramePose finalDesiredPose, FrameVector surfaceNormal, double clearance, double time, ReferenceFrame trajectoryFrame, boolean goToSupportWhenDone)
+   public void moveTowardsObjectAndGoToSupport(FramePose finalDesiredPose, FrameVector surfaceNormal, double clearance, double time, ReferenceFrame trajectoryFrame, boolean goToSupportWhenDone, double holdPositionDuration)
    {
       finalDirection.setIncludingFrame(surfaceNormal);
       finalDirection.negate();
@@ -282,6 +282,7 @@ public class HandControlModule
       moveTowardsObject(finalDesiredPose, finalDirection, clearance, time, trajectoryFrame);
       loadBearingControlState.setContactNormalVector(surfaceNormal);
       loadBearingControlState.setControlModule(handSpatialAccelerationControlModule);
+      taskSpacePositionControlState.setHoldPositionDuration(holdPositionDuration);
       isExecutingHandStep.set(goToSupportWhenDone);
    }
 

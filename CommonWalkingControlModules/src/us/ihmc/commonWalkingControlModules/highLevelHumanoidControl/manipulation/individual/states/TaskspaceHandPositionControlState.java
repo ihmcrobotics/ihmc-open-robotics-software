@@ -15,6 +15,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
@@ -48,6 +49,9 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
    protected OrientationTrajectoryGenerator orientationTrajectoryGenerator;
    protected RigidBodySpatialAccelerationControlModule handSpatialAccelerationControlModule;
 
+   private final DoubleYoVariable doneTrajectoryTime;
+   private final DoubleYoVariable holdPositionDuration;
+
    public TaskspaceHandPositionControlState(String namePrefix, HandControlState stateEnum, MomentumBasedController momentumBasedController, int jacobianId,
          RigidBody base, RigidBody endEffector, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
    {
@@ -66,6 +70,9 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(list);
          list.hideDynamicGraphicObjects();
       }
+
+      doneTrajectoryTime = new DoubleYoVariable(namePrefix + "DoneTrajectoryTime", registry);
+      holdPositionDuration = new DoubleYoVariable(namePrefix + "HoldPositionDuration", registry);
    }
 
    protected SpatialAccelerationVector computeDesiredSpatialAcceleration()
@@ -95,17 +102,30 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
    {
       positionTrajectoryGenerator.initialize();
       orientationTrajectoryGenerator.initialize();
+      doneTrajectoryTime.set(Double.NaN);
    }
 
    @Override
    public void doTransitionOutOfAction()
    {
+      holdPositionDuration.set(0.0);
    }
 
    @Override
    public boolean isDone()
    {
-      return positionTrajectoryGenerator.isDone() && orientationTrajectoryGenerator.isDone();
+      if (Double.isNaN(doneTrajectoryTime.getDoubleValue()))
+         return false;
+      return getTimeInCurrentState() > doneTrajectoryTime.getDoubleValue() + holdPositionDuration.getDoubleValue();
+   }
+
+   @Override
+   public void doAction()
+   {
+      if (Double.isNaN(doneTrajectoryTime.getDoubleValue()) && positionTrajectoryGenerator.isDone() && orientationTrajectoryGenerator.isDone())
+         doneTrajectoryTime.set(getTimeInCurrentState());
+
+      super.doAction();
    }
 
    private void updateVisualizers()
@@ -119,6 +139,11 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
       {
          dynamicGraphicReferenceFrame.update();
       }
+   }
+
+   public void setHoldPositionDuration(double time)
+   {
+      holdPositionDuration.set(time);
    }
 
    public void setTrajectory(PositionTrajectoryGenerator positionTrajectoryGenerator, OrientationTrajectoryGenerator orientationTrajectoryGenerator,
