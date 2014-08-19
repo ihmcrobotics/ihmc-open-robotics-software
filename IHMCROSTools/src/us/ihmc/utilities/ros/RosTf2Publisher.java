@@ -18,15 +18,15 @@ import org.ros.message.MessageDefinitionProvider;
 import org.ros.message.Time;
 
 import std_msgs.Header;
-import tf.tfMessage;
+import tf2_msgs.TFMessage;
 
-public class RosTfPublisher extends RosTopicPublisher<tf.tfMessage>
+public class RosTf2Publisher extends RosTopicPublisher<tf2_msgs.TFMessage>
 {
    private TopicMessageFactory topicMessageFactory;
    private int seq;
-   public RosTfPublisher(boolean latched)
+   public RosTf2Publisher(boolean latched)
    {
-      super(tf.tfMessage._TYPE, latched);
+      super(tf2_msgs.TFMessage._TYPE, latched);
       MessageDefinitionProvider messageDefinitionProvider = new MessageDefinitionReflectionProvider();
       topicMessageFactory = new TopicMessageFactory(messageDefinitionProvider);
    }
@@ -75,7 +75,7 @@ public class RosTfPublisher extends RosTopicPublisher<tf.tfMessage>
       transformStamped.setHeader(header);
       
       
-      tfMessage message = getMessage();
+      TFMessage message = getMessage();
       
       List<TransformStamped> tfs = new ArrayList<TransformStamped>();
       tfs.add(transformStamped);
