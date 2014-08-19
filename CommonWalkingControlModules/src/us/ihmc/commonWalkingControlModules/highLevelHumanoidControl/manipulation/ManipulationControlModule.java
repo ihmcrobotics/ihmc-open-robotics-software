@@ -52,6 +52,8 @@ public class ManipulationControlModule
 
    private final DoubleYoVariable handSwingClearance = new DoubleYoVariable("handSwingClearance", registry);
 
+   private final DoubleYoVariable timeTransitionBeforeLoadBearing = new DoubleYoVariable("timeTransitionBeforeLoadBearing", registry);
+
    private final BooleanYoVariable goToLoadBearingWhenHandlingHandstep;
 
    public ManipulationControlModule(VariousWalkingProviders variousWalkingProviders, ArmControllerParameters armControllerParameters,
@@ -84,6 +86,7 @@ public class ManipulationControlModule
       goToLoadBearingWhenHandlingHandstep.set(true);
 
       handSwingClearance.set(0.05);
+      timeTransitionBeforeLoadBearing.set(10.0);
 
       parentRegistry.addChild(registry);
    }
@@ -180,7 +183,7 @@ public class ManipulationControlModule
          ReferenceFrame trajectoryFrame = handstepPose.getReferenceFrame();
          double swingTrajectoryTime = desiredHandstep.getSwingTrajectoryTime();
          handControlModules.get(robotSide).moveTowardsObjectAndGoToSupport(handstepPose, surfaceNormal, handSwingClearance.getDoubleValue(), swingTrajectoryTime,
-               trajectoryFrame, goToLoadBearingWhenHandlingHandstep.getBooleanValue());
+               trajectoryFrame, goToLoadBearingWhenHandlingHandstep.getBooleanValue(), timeTransitionBeforeLoadBearing.getDoubleValue());
       }
    }
 
