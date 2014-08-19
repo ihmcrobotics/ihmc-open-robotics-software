@@ -79,14 +79,14 @@ public class AtlasNetworkProcessor
     	  System.out.println("Right hand: " + iRobotNativeLibraryCommunicatorManager.RIGHT_HAND_IP);
     	  System.out.println("Using the " + model + " model");
     	  
-    	  String rosMasterURI;
+    	  URI rosMasterURI;
     	  if (config.getString(rosURIFlag.getID()) != null)
     	  {
-    	     rosMasterURI = config.getString(rosURIFlag.getID());
+    	     rosMasterURI = new URI(config.getString(rosURIFlag.getID()));
     	  }
     	  else
     	  {
-    	     rosMasterURI = model.getNetworkParameters().getROSHostIP();
+    	     rosMasterURI = model.getNetworkParameters().getRosURI();
     	  }
 
     	  if (config.getBoolean(simulateController.getID()) && config.getBoolean(runningOnRealRobot.getID()))
@@ -100,7 +100,7 @@ public class AtlasNetworkProcessor
     	  }
     	  else
     	  {
-    	     new DRCNetworkProcessor(new URI(rosMasterURI), model);
+    	     new DRCNetworkProcessor(rosMasterURI, model);
     	  }
       }
       else

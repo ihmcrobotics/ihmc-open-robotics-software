@@ -1,6 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor.camera;
 
 import java.awt.image.BufferedImage;
+import java.net.URI;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Quat4d;
@@ -33,7 +34,7 @@ public class RosCameraReceiver extends CameraDataReceiver
 
    public RosCameraReceiver(final DRCRobotCameraParameters cameraParameters, final RobotPoseBuffer robotPoseBuffer, final VideoSettings videoSettings,
          final RosMainNode rosMainNode, final DRCNetworkProcessorNetworkingManager networkingManager,
-         final PPSTimestampOffsetProvider ppsTimestampOffsetProvider, final CameraLogger logger, String sensorURI)
+         final PPSTimestampOffsetProvider ppsTimestampOffsetProvider, final CameraLogger logger, URI sensorURI)
    {
       super(robotPoseBuffer, videoSettings, networkingManager, ppsTimestampOffsetProvider);
 
