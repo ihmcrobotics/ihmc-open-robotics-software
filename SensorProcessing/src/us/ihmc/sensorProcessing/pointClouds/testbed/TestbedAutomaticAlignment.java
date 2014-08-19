@@ -79,7 +79,7 @@ public class TestbedAutomaticAlignment {
       uniform.process(cloud0,cloud1);
       findPlanes.process(cloud1, null);
 
-      estimatedToWorld =  DetectTestbedSaveTransform.findTestbed(findPlanes.getFound());
+      estimatedToWorld =  DetectTestbedSaveTransform.findTestbed(findPlanes.getFound(),cloud1);
 
       if( estimatedToWorld != null ) {
          modelToEstimated.concat(estimatedToWorld, modelToWorld);
