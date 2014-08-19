@@ -10,7 +10,7 @@ dependencies {
     compile group: 'com.googlecode.efficient-java-matrix-library', name: 'ejml', version: '0.25' 
     compile group: 'commons-lang', name: 'commons-lang', version: '2.6' 
     compile group: 'commons-collections', name: 'commons-collections', version: '3.2.1' 
-    compile group: 'us.ihmc.thirdparty', name: 'georegression', version: '0.5.2'
+    compile group: 'us.ihmc.thirdparty', name: 'georegression', version: '0.5.3'
     compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-io', version: '0.17' 
     compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-ip', version: '0.17' 
     compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-visualize', version: '0.17' 
