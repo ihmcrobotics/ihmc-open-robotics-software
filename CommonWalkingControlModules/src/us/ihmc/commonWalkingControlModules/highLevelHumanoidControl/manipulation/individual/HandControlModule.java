@@ -251,6 +251,7 @@ public class HandControlModule
       taskSpacePositionControlState.setTrajectory(poseTrajectory, poseTrajectory, handSpatialAccelerationControlModule);
       requestedState.set(taskSpacePositionControlState.getStateEnum());
       stateMachine.checkTransitionConditions();
+      isExecutingHandStep.set(false);
    }
 
    public void moveInStraightLine(FramePose finalDesiredPose, double time, ReferenceFrame trajectoryFrame, double swingClearance)
