@@ -55,7 +55,7 @@ public class DesiredHandstepProvider implements ObjectConsumer<HandstepPacket>, 
 
       FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame(), location, orientation);
       FrameVector surfaceNormalFrameVector = new FrameVector(ReferenceFrame.getWorldFrame(), surfaceNormal);
-      Handstep desiredHandstep = new Handstep(robotSide, fullRobotModel.getHand(robotSide), framePose, surfaceNormalFrameVector);
+      Handstep desiredHandstep = new Handstep(robotSide, fullRobotModel.getHand(robotSide), framePose, surfaceNormalFrameVector, object.swingTrajectoryTime);
 
       return desiredHandstep;
    }
