@@ -24,38 +24,6 @@ public class ValkyrieArmControllerParameters implements ArmControllerParameters
       this.runningOnRealRobot = runningOnRealRobot;
    }
 
-   public static final double[] lowLevelArmJointSpace_kp = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-   public static final double[] lowLevelArmJointSpace_ki = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-   public static final double[] lowLevelArmJointSpace_kd = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-   public static final double[] lowLevelArmJointSpace_ff_qd_ds = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-   public static final double[] lowLevelArmJointSpace_qerr_maxs = { 10.0, 10.0, 10.0, 10.0, 10.0, 10.0 };
-
-   @Override
-   public double[] getLowLevelArmJointspaceKp()
-   {
-      return lowLevelArmJointSpace_kp;
-   }
-   @Override
-   public double[] getLowLevelArmJointspaceKi()
-   {
-      return lowLevelArmJointSpace_ki;
-   }
-   @Override
-   public double[] getLowLevelArmJointspaceKd()
-   {
-      return lowLevelArmJointSpace_kd;
-   }
-   @Override
-   public double[] getLowLevelArmJointspaceFfqd_d()
-   {
-      return lowLevelArmJointSpace_ff_qd_ds;
-   }
-   @Override
-   public double[] getLowLevelArmJointspaceQerrMax()
-   {
-      return lowLevelArmJointSpace_qerr_maxs;
-   }
-
    @Override
    public YoPIDGains createJointspaceControlGains(YoVariableRegistry registry)
    {
