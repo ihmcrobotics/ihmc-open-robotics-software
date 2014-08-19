@@ -15,7 +15,7 @@ import com.martiansoftware.jsap.JSAPResult;
 public class ValkyrieNetworkProcessor
 {
    private static final DRCRobotModel model = new ValkyrieRobotModel(true, true);
-   private static String rosMasterURI = "http://" + model.getNetworkParameters().getROSHostIP() + ":11311";
+   private static URI rosMasterURI = model.getNetworkParameters().getRosURI();
    
    public static void main(String[] args) throws URISyntaxException, JSAPException
    {
@@ -30,9 +30,9 @@ public class ValkyrieNetworkProcessor
       {
          if (config.getString(rosURIFlag.getID()) != null)
          {
-            rosMasterURI = config.getString(rosURIFlag.getID());
+            rosMasterURI = new URI(config.getString(rosURIFlag.getID()));
          }
-         new DRCNetworkProcessor(new URI(rosMasterURI), model);
+         new DRCNetworkProcessor(rosMasterURI, model);
       }
       else
       {
