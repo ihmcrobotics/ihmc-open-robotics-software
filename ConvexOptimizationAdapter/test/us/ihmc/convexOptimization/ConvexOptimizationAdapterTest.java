@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
@@ -28,6 +29,11 @@ public abstract class ConvexOptimizationAdapterTest
    {
       
       DenseMatrix64F beq = new DenseMatrix64F(0,0);
+      DenseMatrix64F Aeq = new DenseMatrix64F(0,0);
+      DenseMatrix64F b = new DenseMatrix64F(0,0);
+      DenseMatrix64F A = new DenseMatrix64F(0,0);
+      DenseMatrix64F H = new DenseMatrix64F(0,0);
+      DenseMatrix64F f = new DenseMatrix64F(0,0);
       
       File projectDirectory = new File(new File("").getAbsolutePath());
       File yamlQpProblemDirectory = new File(projectDirectory, "/Matlab/YamlQpProblems");
@@ -35,14 +41,79 @@ public abstract class ConvexOptimizationAdapterTest
       
       Yaml yaml = new Yaml();
       
-      for(int i = 0; i < yamlQpProblemFileList.length; i++)
-      {
-         InputStream input = new FileInputStream(yamlQpProblemFileList[i]);
+//      for(int i = 0; i < yamlQpProblemFileList.length; i++)
+//      {
+      InputStream input = new FileInputStream(yamlQpProblemFileList[0]);
          
-         Map<String, Object> object = (Map<String, Object>) yaml.load(input);
-         System.out.print(object + "\n");
+      Map<String, Object> object = (Map<String, Object>) yaml.load(input);
+      System.out.print(object + "\n");
+      
+      doIt(beq,"beq",object);
+      doIt(Aeq,"Aeq",object);
+      doIt(A,"A",object);
+      doIt(b,"b",object);
+      doIt(H,"H",object);
+      doIt(f,"f",object);
+      System.out.print(f);
+//      }
+   }
+   
+   /**
+    * This method tries to be smart about converting the various yaml fields to DenseMatrix64F
+    * @param val
+    * @param fieldName
+    * @param object
+    */
+   private void doIt(DenseMatrix64F val, String fieldName, Map<String,Object> object)
+   {
+      if(object.get(fieldName) instanceof ArrayList<?>)
+      {
+         ArrayList<?> arrayList = (ArrayList<?>) object.get(fieldName);
+         try
+         {
+            if(arrayList.get(0) instanceof ArrayList)
+            {
+               @SuppressWarnings("unchecked")
+               ArrayList<ArrayList<Double>> tmp2DArrayList = (ArrayList<ArrayList<Double>>) arrayList;
+               // 2D
+               val.reshape(tmp2DArrayList.size(), tmp2DArrayList.get(0).size());
+               for(int i = 0; i<tmp2DArrayList.size(); i++)
+               {
+                  for(int j = 0; j<tmp2DArrayList.get(0).size(); j++)
+                  {
+                     val.set(i, j, tmp2DArrayList.get(i).get(j));
+                  }
+               }
+            }
+            else
+            {
+               @SuppressWarnings("unchecked")
+               ArrayList<Double> tmp1DArrayList = (ArrayList<Double>) arrayList;
+               // 1D
+               val.reshape(arrayList.size(), 1);
+               for(int i = 0; i<tmp1DArrayList.size(); i++)
+               {
+                  val.set(i,0,tmp1DArrayList.get(i));
+               }
+            }
+         }
+         catch(Exception e)
+         {
+            //Field is empty
+            val.reshape(0,0);
+         }
       }
-     
+      else if(object.get(fieldName) instanceof Double)
+      {
+         val.reshape(1, 1);
+         Double tmpDouble = (Double) object.get(fieldName);
+         
+         val.set(0,0,tmpDouble);
+      }
+      else
+      {
+         throw new RuntimeException("Unsupported data type:" + object.get(fieldName).getClass());
+      }
    }
    
    @Test
