@@ -152,8 +152,9 @@ public abstract class DRCWallWorldTest implements MultiRobotTestInterface
       Tuple3d position = new Point3d(0.6, leftHandstepY, 1.0);
       Vector3d surfaceNormal = new Vector3d(-1.0, 0.0, 0.0);
       double rotationAngleAboutNormal = 0.0;
+      double swingTrajectoryTime = 1.0;
 
-      Handstep handstep = scriptedHandstepGenerator.createHandstep(robotSide, position, surfaceNormal, rotationAngleAboutNormal);
+      Handstep handstep = scriptedHandstepGenerator.createHandstep(robotSide, position, surfaceNormal, rotationAngleAboutNormal, swingTrajectoryTime);
       ret.add(handstep);
       
       robotSide = RobotSide.RIGHT;
@@ -161,7 +162,7 @@ public abstract class DRCWallWorldTest implements MultiRobotTestInterface
       surfaceNormal = new Vector3d(-1.0, 0.0, 0.0);
       rotationAngleAboutNormal = 0.0;
 
-      handstep = scriptedHandstepGenerator.createHandstep(robotSide, position, surfaceNormal, rotationAngleAboutNormal);
+      handstep = scriptedHandstepGenerator.createHandstep(robotSide, position, surfaceNormal, rotationAngleAboutNormal, swingTrajectoryTime);
       ret.add(handstep);
 
       return ret;

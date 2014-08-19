@@ -28,10 +28,10 @@ public class UserDesiredHandstepProvider implements HandstepProvider
    private final EnumYoVariable<RobotSide> userHandstepRobotSide = new EnumYoVariable<RobotSide>("userHandstepRobotSide", registry, RobotSide.class);
    private final YoFrameVector userHandstepNormal = new YoFrameVector("userHandstepNormal", ReferenceFrame.getWorldFrame(), registry);
    private final DoubleYoVariable userHandstepRotationAboutNormal = new DoubleYoVariable("userHandstepRotationAboutNormal", registry);
+   private final DoubleYoVariable swingTrajectoryTime = new DoubleYoVariable("userHandstepSwingTime", registry);
 
    private final DynamicGraphicCoordinateSystem userDesiredHandstepCoordinateSystem;
 
-   private final FullRobotModel fullRobotModel;
    private final HandstepHelper handstepHelper;
    
    public UserDesiredHandstepProvider(FullRobotModel fullRobotModel, YoVariableRegistry parentRegistry,
@@ -63,8 +63,6 @@ public class UserDesiredHandstepProvider implements HandstepProvider
       userHandstepPosition.attachVariableChangedListener(listener);
 
       parentRegistry.addChild(registry);
-
-      this.fullRobotModel = fullRobotModel;
    }
 
    public Handstep getDesiredHandstep(RobotSide robotSide)
@@ -78,7 +76,7 @@ public class UserDesiredHandstepProvider implements HandstepProvider
       double rotationAngleAboutNormal = userHandstepRotationAboutNormal.getDoubleValue();
       Vector3d position = userHandstepPosition.getVector3dCopy();
       
-      Handstep handstep = handstepHelper.getDesiredHandstep(robotSide, position, surfaceNormal, rotationAngleAboutNormal);
+      Handstep handstep = handstepHelper.getDesiredHandstep(robotSide, position, surfaceNormal, rotationAngleAboutNormal, swingTrajectoryTime.getDoubleValue());
       userHandstepTakeIt.set(false);
       return handstep;
    }

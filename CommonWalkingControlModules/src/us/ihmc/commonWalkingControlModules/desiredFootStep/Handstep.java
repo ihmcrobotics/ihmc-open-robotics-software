@@ -26,18 +26,19 @@ public class Handstep
    private final RobotSide robotSide;
    private final PoseReferenceFrame poseReferenceFrame;
    private final FrameVector surfaceNormal;
+   private double swingTrajectoryTime;
 
-   public Handstep(RobotSide robotSide, RigidBody endEffector, FramePose framePose, FrameVector surfaceNormal)
+   public Handstep(RobotSide robotSide, RigidBody endEffector, FramePose framePose, FrameVector surfaceNormal, double swingTrajectoryTime)
    {
-      this(robotSide, endEffector, new PoseReferenceFrame("Handstep" + counter, framePose), surfaceNormal);
+      this(robotSide, endEffector, new PoseReferenceFrame("Handstep" + counter, framePose), surfaceNormal, swingTrajectoryTime);
    }
 
-   public Handstep(RobotSide robotSide, RigidBody endEffector, PoseReferenceFrame poseReferenceFrame, FrameVector surfaceNormal)
+   public Handstep(RobotSide robotSide, RigidBody endEffector, PoseReferenceFrame poseReferenceFrame, FrameVector surfaceNormal, double swingTrajectoryTime)
    {
-      this(createAutomaticID(endEffector), robotSide, endEffector, poseReferenceFrame, surfaceNormal);
+      this(createAutomaticID(endEffector), robotSide, endEffector, poseReferenceFrame, surfaceNormal, swingTrajectoryTime);
    }
 
-   public Handstep(String id, RobotSide robotSide, RigidBody endEffector, PoseReferenceFrame poseReferenceFrame, FrameVector surfaceNormal)
+   public Handstep(String id, RobotSide robotSide, RigidBody endEffector, PoseReferenceFrame poseReferenceFrame, FrameVector surfaceNormal, double swingTrajectoryTime)
    {
       poseReferenceFrame.getParent().checkIsWorldFrame();
 
@@ -46,11 +47,12 @@ public class Handstep
       this.endEffector = endEffector;
       this.poseReferenceFrame = poseReferenceFrame;
       this.surfaceNormal = surfaceNormal;
+      this.swingTrajectoryTime = swingTrajectoryTime;
    }
 
    public Handstep(Handstep handstep)
    {
-      this(handstep.robotSide, handstep.endEffector, handstep.poseReferenceFrame, handstep.surfaceNormal);
+      this(handstep.robotSide, handstep.endEffector, handstep.poseReferenceFrame, handstep.surfaceNormal, handstep.swingTrajectoryTime);
    }
 
    private static String createAutomaticID(RigidBody endEffector)
@@ -222,6 +224,16 @@ public class Handstep
    public void getPosition2d(FramePoint2d framePoint2dToPack)
    {
       poseReferenceFrame.getPosition2dIncludingFrame(framePoint2dToPack);
+   }
+
+   public void setSwingTrajectoryTime(double swingTime)
+   {
+      this.swingTrajectoryTime = swingTime;
+   }
+
+   public double getSwingTrajectoryTime()
+   {
+      return swingTrajectoryTime;
    }
 
    public boolean epsilonEquals(Handstep otherHandstep, double epsilon)

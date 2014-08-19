@@ -152,8 +152,9 @@ public abstract class DRCBigStepUpWithHandPlatformTest implements MultiRobotTest
       Tuple3d position = new Point3d(0.5, leftHandstepY, height);
       Vector3d surfaceNormal = new Vector3d(0.0, 0.0, 1.0);
       double rotationAngleAboutNormal = -0.3;
+      double swingTrajectoryTime = 1.0;
 
-      Handstep handstep = scriptedHandstepGenerator.createHandstep(robotSide, position, surfaceNormal, rotationAngleAboutNormal);
+      Handstep handstep = scriptedHandstepGenerator.createHandstep(robotSide, position, surfaceNormal, rotationAngleAboutNormal, swingTrajectoryTime);
       ret.add(handstep);
       
       robotSide = RobotSide.RIGHT;
@@ -161,7 +162,7 @@ public abstract class DRCBigStepUpWithHandPlatformTest implements MultiRobotTest
       surfaceNormal = new Vector3d(0.0, 0.0, 1.0);
       rotationAngleAboutNormal = -rotationAngleAboutNormal;
 
-      handstep = scriptedHandstepGenerator.createHandstep(robotSide, position, surfaceNormal, rotationAngleAboutNormal);
+      handstep = scriptedHandstepGenerator.createHandstep(robotSide, position, surfaceNormal, rotationAngleAboutNormal, swingTrajectoryTime);
       ret.add(handstep);
 
       return ret;

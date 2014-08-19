@@ -22,14 +22,14 @@ public class HandstepHelper
       this.fullRobotModel = fullRobotModel;
    }
    
-   public Handstep getDesiredHandstep(RobotSide robotSide, Tuple3d position, Vector3d surfaceNormal, double rotationAngleAboutNormal)
+   public Handstep getDesiredHandstep(RobotSide robotSide, Tuple3d position, Vector3d surfaceNormal, double rotationAngleAboutNormal, double swingTrajectoryTime)
    {
       Transform3D transformOne = computeHandstepTransform(true, position, surfaceNormal, rotationAngleAboutNormal);
       FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame(), transformOne);
       FrameVector surfaceNormalFrameVector = new FrameVector(ReferenceFrame.getWorldFrame(), surfaceNormal);
       
       RigidBody hand = fullRobotModel.getHand(robotSide);
-      Handstep handstep = new Handstep(robotSide, hand, framePose, surfaceNormalFrameVector);
+      Handstep handstep = new Handstep(robotSide, hand, framePose, surfaceNormalFrameVector, swingTrajectoryTime);
 
       return handstep;
    }
