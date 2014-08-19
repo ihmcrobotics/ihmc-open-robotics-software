@@ -22,7 +22,7 @@ dependencies {
     compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-ip', version: '0.18'
     compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-visualize', version: '0.18'
     compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-sfm', version: '0.18'
-	compile group: 'us.ihmc.thirdparty', name: 'georegression', version: '0.5.2'
+	compile group: 'us.ihmc.thirdparty', name: 'georegression', version: '0.5.3'
 	compile group: 'us.ihmc.thirdparty', name: 'bubo', version: '0.4'
 	compile group: 'com.googlecode.efficient-java-matrix-library', name: 'ejml', version: '0.25'
 	compile group: 'commons-lang', name: 'commons-lang', version: '2.6'
