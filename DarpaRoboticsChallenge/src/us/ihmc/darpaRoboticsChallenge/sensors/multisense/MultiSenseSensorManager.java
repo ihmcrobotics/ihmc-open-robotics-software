@@ -1,6 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.sensors.multisense;
 
-import org.ros.node.parameter.ParameterListener;
+import java.net.URI;
+
 import org.ros.node.parameter.ParameterTree;
 
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
@@ -17,7 +18,6 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosNativeNetworkProce
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
-import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.MultisenseParameterPacket;
 import us.ihmc.darpaRoboticsChallenge.ros.ROSNativeTransformTools;
 import us.ihmc.darpaRoboticsChallenge.ros.RosRobotPosePublisher;
 import us.ihmc.utilities.ros.RosMainNode;
@@ -34,7 +34,7 @@ public class MultiSenseSensorManager
 
    private static final double lidarCRC = -.0010908f;
 
-   private final String sensorURI;
+   private final URI sensorURI;
 
    private final DRCRobotCameraParameters cameraParamaters;
    private final DRCRobotLidarParameters lidarParamaters;
@@ -53,7 +53,7 @@ public class MultiSenseSensorManager
 
    public MultiSenseSensorManager(DepthDataProcessor depthDataProcessor, ROSNativeTransformTools rosTransformProvider, RobotPoseBuffer sharedRobotPoseBuffer,
          RosMainNode rosMainNode, DRCNetworkProcessorNetworkingManager networkingManager, RosNativeNetworkProcessor rosNativeNetworkProcessor,
-         PPSTimestampOffsetProvider ppsTimestampOffsetProvider, String sensorURI, DRCRobotCameraParameters cameraParamaters,
+         PPSTimestampOffsetProvider ppsTimestampOffsetProvider, URI sensorURI, DRCRobotCameraParameters cameraParamaters,
          DRCRobotLidarParameters lidarParamaters, DRCRobotPointCloudParameters stereoParamaters)
    {
       this.depthDataProcessor = depthDataProcessor;

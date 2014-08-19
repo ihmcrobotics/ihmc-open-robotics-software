@@ -87,11 +87,11 @@ public class DRCNetworkProcessor
       networkingManager.getControllerCommandHandler().setTestbed(testbed);
       new Thread(testbed).start();
       
-      setSensorManager(robotModel.getSensorSuiteManager(rosUri), scsCommunicator, robotModel.getNetworkParameters().getROSHostIP());
+      setSensorManager(robotModel.getSensorSuiteManager(rosUri), scsCommunicator, rosUri);
       connect();
    }
 
-   private void setSensorManager(DRCSensorSuiteManager sensorSuiteManager, LocalObjectCommunicator localObjectCommunicator, String sensorURI)
+   private void setSensorManager(DRCSensorSuiteManager sensorSuiteManager, LocalObjectCommunicator localObjectCommunicator, URI sensorURI)
    {
       if (useSimulatedSensors)
       {
