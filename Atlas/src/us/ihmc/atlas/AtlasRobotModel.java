@@ -58,9 +58,9 @@ public class AtlasRobotModel implements DRCRobotModel
 
    public static final double ATLAS_ONBOARD_SAMPLINGFREQ = 1000.0;
    public static final double ATLAS_ONBOARD_DT = 1.0 / ATLAS_ONBOARD_SAMPLINGFREQ;
-   
+
    private static final String ATLAS_NETWORK_CONFIG = "Configurations/atlas_network_config.ini";
-   private static final String DEFAULT_NETWORK_CONFIG =	"Configurations/localhost_network_config.ini";
+   private static final String DEFAULT_NETWORK_CONFIG = "Configurations/localhost_network_config.ini";
 
    private final boolean runningOnRealRobot;
    private final JaxbSDFLoader loader;
@@ -147,10 +147,10 @@ public class AtlasRobotModel implements DRCRobotModel
    {
       return selectedVersion.getHandModel() == DRCHandType.HOOK;
    }
-   
+
    public boolean hasRobotiqHands()
    {
-	   return selectedVersion.getHandModel() == DRCHandType.ROBOTIQ;
+      return selectedVersion.getHandModel() == DRCHandType.ROBOTIQ;
    }
 
    public DRCHandType getHandType()
@@ -211,7 +211,7 @@ public class AtlasRobotModel implements DRCRobotModel
       if (selectedVersion.hasIrobotHands())
          return new iRobotHandModel();
       else if (selectedVersion.hasRobotiqHands())
-    	 return new RobotiqHandModel();
+         return new RobotiqHandModel();
       else
          return null;
    }
@@ -271,12 +271,12 @@ public class AtlasRobotModel implements DRCRobotModel
       {
          return new AtlasPPSTimestampOffsetProvider(sensorInformation);
       }
-      
+
       if (DRCConfigParameters.SEND_SIMULATION_DATA_TO_ROS)
       {
          return new SimulationRosClockPPSTimestampOffsetProvider();
       }
-      
+
       return new AlwaysZeroOffsetPPSTimestampOffsetProvider();
    }
 
@@ -295,28 +295,28 @@ public class AtlasRobotModel implements DRCRobotModel
    @Override
    public RobotNetworkParameters getNetworkParameters()
    {
-	   return networkParameters;
+      return networkParameters;
    }
 
    @Override
    public HandCommandManager createHandCommandManager(DRCNetworkProcessorControllerStateHandler controllerStateHandler)
    {
-	   if(runningOnRealRobot)
-	   {
-		   switch(getHandType())
-		   {
-		   case IROBOT:
-			   return new HandCommandManager(controllerStateHandler, IRobotControlThreadManager.class);
-			   
-		   case ROBOTIQ:
-			   return new HandCommandManager(controllerStateHandler, RobotiqControlThreadManager.class);
-			   
-		   default:
-			   break;
-			   
-		   }
-	   }
-	   
-	   return null;
+      if (runningOnRealRobot)
+      {
+         switch (getHandType())
+         {
+         case IROBOT:
+            return new HandCommandManager(controllerStateHandler, IRobotControlThreadManager.class);
+
+         case ROBOTIQ:
+            return new HandCommandManager(controllerStateHandler, RobotiqControlThreadManager.class);
+
+         default:
+            break;
+
+         }
+      }
+
+      return null;
    }
 }
