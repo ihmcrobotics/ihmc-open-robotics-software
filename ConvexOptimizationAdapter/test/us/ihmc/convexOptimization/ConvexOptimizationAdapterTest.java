@@ -48,12 +48,12 @@ public abstract class ConvexOptimizationAdapterTest
       Map<String, Object> object = (Map<String, Object>) yaml.load(input);
       System.out.print(object + "\n");
       
-      doIt(beq,"beq",object);
-      doIt(Aeq,"Aeq",object);
-      doIt(A,"A",object);
-      doIt(b,"b",object);
-      doIt(H,"H",object);
-      doIt(f,"f",object);
+      yamlFieldToMatrix(beq,"beq",object);
+      yamlFieldToMatrix(Aeq,"Aeq",object);
+      yamlFieldToMatrix(A,"A",object);
+      yamlFieldToMatrix(b,"b",object);
+      yamlFieldToMatrix(H,"H",object);
+      yamlFieldToMatrix(f,"f",object);
       System.out.print(f);
 //      }
    }
@@ -64,7 +64,7 @@ public abstract class ConvexOptimizationAdapterTest
     * @param fieldName
     * @param object
     */
-   private void doIt(DenseMatrix64F val, String fieldName, Map<String,Object> object)
+   private void yamlFieldToMatrix(DenseMatrix64F val, String fieldName, Map<String,Object> object)
    {
       if(object.get(fieldName) instanceof ArrayList<?>)
       {
