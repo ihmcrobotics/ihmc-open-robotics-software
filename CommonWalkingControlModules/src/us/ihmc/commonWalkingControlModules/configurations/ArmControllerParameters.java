@@ -18,12 +18,6 @@ public interface ArmControllerParameters
 
    public abstract YoSE3PIDGains createTaskspaceControlGainsForLoadBearing(YoVariableRegistry registry);
 
-   public abstract double[] getLowLevelArmJointspaceKp();
-   public abstract double[] getLowLevelArmJointspaceKi();
-   public abstract double[] getLowLevelArmJointspaceKd();
-   public abstract double[] getLowLevelArmJointspaceFfqd_d();
-   public abstract double[] getLowLevelArmJointspaceQerrMax();
-
    public abstract boolean useInverseKinematicsTaskspaceControl();
 
    public abstract boolean doLowLevelPositionControl();
