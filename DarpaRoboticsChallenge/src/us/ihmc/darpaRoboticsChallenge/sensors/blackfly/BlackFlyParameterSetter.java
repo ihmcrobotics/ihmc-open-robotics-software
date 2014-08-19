@@ -173,4 +173,30 @@ public class BlackFlyParameterSetter
             });
    }
 
+   
+   public void setFishEyeFrameRate(double frameRate)
+   {
+      
+      blackFlyClient.waitTillConnected();
+      System.out.println("setting the framer rate for fish eye");
+      ReconfigureRequest request = blackFlyClient.getMessage();
+      DoubleParameter frameRateDoubleParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(DoubleParameter._TYPE);
+      frameRateDoubleParam.setName("prop_frame_rate");
+      frameRateDoubleParam.setValue(frameRate);
+      request.getConfig().getDoubles().add(frameRateDoubleParam);
+           
+      blackFlyClient.call(request, new ServiceResponseListener<ReconfigureResponse>()
+      {
+
+         public void onSuccess(ReconfigureResponse response)
+         {
+            System.out.println("success" + response.getConfig().getDoubles().get(1).getValue());
+         }
+
+         public void onFailure(RemoteException e)
+         {
+            throw new RuntimeException(e);
+         }
+      });
+   }
 }
