@@ -29,9 +29,9 @@ Plotter,
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>-0.9574400510516854</Camera X>
- <Camera Y>-3.7197445031199967</Camera Y>
- <Camera Z>1.334671286716438</Camera Z>
+ <Camera X>0.41760428849947206</Camera X>
+ <Camera Y>3.592368955271042</Camera Y>
+ <Camera Z>0.9110213086242597</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -55,8 +55,8 @@ Plotter,
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>0.35944813690624144</Fix X>
-<Fix Y>0.22944357658233883</Fix Y>
-<Fix Z>0.0809568579534592</Fix Z>
+<Fix X>0.42549419260480237</Fix X>
+<Fix Y>-0.49192948760450017</Fix Y>
+<Fix Z>0.9495691193810356</Fix Z>
 </Fix Position>
 </Canvas 1>

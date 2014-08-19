@@ -3,6 +3,9 @@ package us.ihmc.darpaRoboticsChallenge.environment;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.media.j3d.Transform3D;
+import javax.vecmath.Vector3d;
+
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -52,19 +55,15 @@ public class BigStepUpWithHandPlatformEnvironment implements CommonAvatarEnviron
       appearance.setTransparency(0.25);
             
       double xCenter = 0.5;
-      double width = 0.14;
       double yCenter = 0.4;
       
-//      Transform3D location = new Transform3D();
-//      location.setTranslation(new Vector3d(xCenter, -0.4, height/2.0));
-//      combinedTerrainObject.addCylinder(location, height, radius, appearance);
-//      
-//      location = new Transform3D();
-//      location.setTranslation(new Vector3d(xCenter, 0.4, height/2.0));
-//      combinedTerrainObject.addCylinder(location, height, radius, appearance);
+      Transform3D location = new Transform3D();
+      location.setTranslation(new Vector3d(xCenter, -yCenter, height/2.0));
+      combinedTerrainObject.addCylinder(location, height, radius, appearance);
       
-      combinedTerrainObject.addBox(xCenter-width/2.0, -yCenter-width/2.0, xCenter + width/2.0, -yCenter+width/2.0, 0.0, height, appearance);
-      combinedTerrainObject.addBox(xCenter-width/2.0, yCenter-width/2.0, xCenter + width/2.0, yCenter+width/2.0, 0.0, height, appearance);
+      location = new Transform3D();
+      location.setTranslation(new Vector3d(xCenter, yCenter, height/2.0));
+      combinedTerrainObject.addCylinder(location, height, radius, appearance);
       
       return combinedTerrainObject;
    }
