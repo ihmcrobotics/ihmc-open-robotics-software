@@ -37,8 +37,11 @@ import us.ihmc.utilities.ThreadTools;
 
 import com.yobotics.simulationconstructionset.examples.FallingBrickRobot;
 import com.yobotics.simulationconstructionset.graphics.GraphicsDynamicGraphicsObject;
+import com.yobotics.simulationconstructionset.gui.GraphArrayWindow;
+import com.yobotics.simulationconstructionset.gui.ViewportWindow;
 import com.yobotics.simulationconstructionset.gui.camera.CameraTrackAndDollyYoVariablesHolder;
 import com.yobotics.simulationconstructionset.gui.config.GraphGroupList;
+import com.yobotics.simulationconstructionset.robotcommprotocol.RobotSocketConnection;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
 
@@ -83,6 +86,8 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private double[] cameraFixXYZValues2 = { 1.1, 2.1, 3.1 };
    private double[] cameraPositionXYZValues = { 1.3, 2.3, 3.3 };
    private double[] cameraClipDistancesNearFarValues = { 1.75, 2.75 };
+   private double[] variableGroup1Values = { 1.3, 2.3, 3.3 };
+   private double[] variableGroup2Values = { 1.5, 1.6, 1.7 };
 
    private Point location = new Point(25, 50);
    private FallingBrickRobot simpleRobot = new FallingBrickRobot();
@@ -90,9 +95,11 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private String simpleRegistryName = "simpleRegistry";
    private String searchString = "d";
    private String searchStringStart = "q";
+   private String[] variableGroup1 = new String[] { "simpleVar11", "simpleVar12", "simpleVar13" };
+   private String[] variableGroup2 = new String[] { "simpleVar21", "simpleVar22", "simpleVar23" };
    private String[] cameraTrackingXYZVarNames = new String[] { "simpleCameraTrackingVarNameX", "simpleCameraTrackingVarNameY", "simpleCameraTrackingVarNameZ" };
    private String[] cameraDollyXYZVarNames = new String[] { "simpleCameraDollyVarNameX", "simpleCameraDollyVarNameY", "simpleCameraDollyVarNameZ" };
-   private String configurationName = "simpleCOnfigurationName";
+   private String configurationName = "simpleConfigurationName";
    private String cameraConfigurationName = "simpleCameraConfigurationName";
    private String viewportConfigurationName = "simpleViewportConfiguration";
    private String varGroupName = "simpleVarGroup";
@@ -190,6 +197,14 @@ public class SimulationConstructionSetUsingDirectCallsTest
       scs.setScrollGraphsEnabled(false);
       boolean isScrollGraphsEnabled2 = scs.isSafeToScroll();
       assertFalse(isScrollGraphsEnabled2);
+
+      RobotSocketConnection robotSocketConnectionFromSCS = scs.allowTCPConnectionToHost("host");
+      assertNotNull(robotSocketConnectionFromSCS);
+
+      NewDataListener newDataListener = createNewDataListener();
+      RobotSocketConnection robotSocketConnectionFromSCS2 = scs.allowTCPConnectionToHost("host2", newDataListener);
+      assertNotNull(robotSocketConnectionFromSCS2);
+
    }
 
    @Test
@@ -296,6 +311,36 @@ public class SimulationConstructionSetUsingDirectCallsTest
       scs.maximizeMainWindow();
       int frameStateFromSCS2 = getExtendedStateFromSCS(scs);
       assertEquals(Frame.MAXIMIZED_BOTH, frameStateFromSCS2, epsilon);
+
+      scs.createNewGraphWindow();
+      GraphArrayWindow graphArrayWindowFromSCS = scs.getGraphArrayWindow("Unnamed");
+      ThreadTools.sleep(1000);
+      assertNotNull(graphArrayWindowFromSCS);
+
+      scs.createNewGraphWindow("simpleGraphArrayWindow");
+      GraphArrayWindow graphArrayWindowFromSCS2 = scs.getGraphArrayWindow("simpleGraphArrayWindow");
+      ThreadTools.sleep(1000);
+      assertNotNull(graphArrayWindowFromSCS2);
+
+      scs.createNewGraphWindow("simpleGraphArrayWindow2", 0, false);
+      GraphArrayWindow graphArrayWindowFromSCS3 = scs.getGraphArrayWindow("simpleGraphArrayWindow2");
+      ThreadTools.sleep(1000);
+      assertNotNull(graphArrayWindowFromSCS3);
+
+      scs.createNewViewportWindow();
+      ViewportWindow viewportWindowFromSCS = scs.getViewportWindow("Unnamed");
+      ThreadTools.sleep(1000);
+      assertNotNull(viewportWindowFromSCS);
+
+      scs.createNewViewportWindow("simpleViewportWindow");
+      ViewportWindow viewportWindowFromSCS2 = scs.getViewportWindow("simpleViewportWindow");
+      ThreadTools.sleep(1000);
+      assertNotNull(viewportWindowFromSCS2);
+
+      scs.createNewViewportWindow("simpleViewportWindow", 0, false);
+      ViewportWindow viewportWindowFromSCS3 = scs.getViewportWindow("simpleViewportWindow");
+      ThreadTools.sleep(1000);
+      assertNotNull(viewportWindowFromSCS3);
    }
 
    @Test
@@ -706,7 +751,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    @Test
    public void testVariablesMethods()
    {
-      addDoubleYoVariablesInSCSRegistry(cameraDollyXYZVarNames, cameraDollyXYZVarValues, scs);
+      DoubleYoVariable[] doubleYoVariables = addDoubleYoVariablesInSCSRegistry(cameraDollyXYZVarNames, cameraDollyXYZVarValues, scs);
 
       scs.setupEntryBox(simpleRobotFirstVariableName);
       boolean entryBoxIsInSCS = scsContainsTheEntryBox(scs, simpleRobotFirstVariableName);
@@ -731,6 +776,12 @@ public class SimulationConstructionSetUsingDirectCallsTest
       scs.setupGraph(cameraDollyXYZVarNames);
       boolean graphsAreInSCS = scsContainsTheGraphs(scs, cameraDollyXYZVarNames);
       assertTrue(graphsAreInSCS);
+
+      YoVariableList[] yoVariableLists = createTwoVarListOfDoubleYoVariablesWithDummyRegistry(variableGroup1, variableGroup1Values, variableGroup2,
+            variableGroup2Values);
+      scs.addVarList(yoVariableLists[0]);
+      YoVariableList yoVariableListFromSCS = scs.getCombinedVarList();
+      assertYoVariableListContainsVariables(yoVariableListFromSCS, yoVariableLists[0].getAllVariables());
    }
 
    @Test
@@ -917,6 +968,69 @@ public class SimulationConstructionSetUsingDirectCallsTest
 
    // local methods
 
+   private void assertYoVariableListContainsVariables(YoVariableList yoVariableList, YoVariable[] variables)
+   {
+      int numberOfVariables = variables.length;
+
+      for (int i = 0; i < numberOfVariables; i++)
+      {
+         boolean containsTheVar = yoVariableList.containsVariable(variables[i]);
+         assertTrue(containsTheVar);
+      }
+   }
+
+   private YoVariableList[] createTwoVarListOfDoubleYoVariablesWithDummyRegistry(String[] variableNames1, double[] varValues1, String[] variableNames2,
+         double[] varValues2)
+   {
+      YoVariableRegistry registry = new YoVariableRegistry("dummy");
+      DoubleYoVariable[] doubleYoVariables1 = createAndSetDoubleYoVariableToRegistry(variableNames1, varValues1, registry);
+      DoubleYoVariable[] doubleYoVariables2 = createAndSetDoubleYoVariableToRegistry(variableNames2, varValues2, registry);
+
+      YoVariableList[] yoVariableLists = new YoVariableList[2];
+      yoVariableLists[0] = createYoVariableList("yoVariableList1", doubleYoVariables1);
+      yoVariableLists[1] = createYoVariableList("yoVariableList2", doubleYoVariables2);
+
+      return yoVariableLists;
+   }
+
+   private DoubleYoVariable[] createAndSetDoubleYoVariableToRegistry(String[] varNames, double[] varValues, YoVariableRegistry registry)
+   {
+      DoubleYoVariable[] doubleYoVariables = new DoubleYoVariable[varNames.length];
+
+      for (int i = 0; i < varNames.length; i++)
+      {
+         DoubleYoVariable doubleYoVariable = new DoubleYoVariable(varNames[i], registry);
+         doubleYoVariable.set(varValues[i]);
+         doubleYoVariables[i] = doubleYoVariable;
+      }
+
+      return doubleYoVariables;
+   }
+
+   private YoVariableList createYoVariableList(String name, YoVariable[] yoVariables)
+   {
+      YoVariableList yoVariableList = new YoVariableList(name);
+      yoVariableList.addVariables(yoVariables);
+
+      return yoVariableList;
+   }
+
+   private NewDataListener createNewDataListener()
+   {
+      NewDataListener newDataListener = new NewDataListener()
+      {
+         public void newDataHasBeenSent()
+         {
+         }
+
+         public void newDataHasBeenReceived()
+         {
+         }
+      };
+
+      return newDataListener;
+   }
+
    private int getExtendedStateFromSCS(SimulationConstructionSet scs)
    {
       return scs.getGUI().getFrame().getExtendedState();
@@ -1022,7 +1136,6 @@ public class SimulationConstructionSetUsingDirectCallsTest
       scs.setIndex(currentOutPoint - 1);
       scs.setOutPoint();
    }
-
 
    private SimulationDoneCriterion createSimulationDoneCriterion()
    {
@@ -1386,21 +1499,21 @@ public class SimulationConstructionSetUsingDirectCallsTest
       return (CameraTrackAndDollyYoVariablesHolder) classicCameraController.getCameraTrackAndDollyVariablesHolder();
    }
 
-   private void addDoubleYoVariablesInSCSRegistry(String[] varNames, double[] varValues, SimulationConstructionSet scs)
+   private DoubleYoVariable[] addDoubleYoVariablesInSCSRegistry(String[] varNames, double[] varValues, SimulationConstructionSet scs)
    {
+      DoubleYoVariable[] doubleYoVariables = null;
+
       if (varNames.length == varValues.length)
       {
          YoVariableRegistry scsRegistry = scs.getRootRegistry();
-         for (int i = 0; i < varNames.length; i++)
-         {
-            DoubleYoVariable doubleYoVariable = new DoubleYoVariable(varNames[i], scsRegistry);
-            doubleYoVariable.set(varValues[i]);
-         }
+         doubleYoVariables = createAndSetDoubleYoVariableToRegistry(varNames, varValues, scsRegistry);
       }
       else
       {
          System.out.print("Input arrays have different length.");
       }
+
+      return doubleYoVariables;
    }
 
    private String getRegistryNameSpaceFromRobot(Robot robotModel)
