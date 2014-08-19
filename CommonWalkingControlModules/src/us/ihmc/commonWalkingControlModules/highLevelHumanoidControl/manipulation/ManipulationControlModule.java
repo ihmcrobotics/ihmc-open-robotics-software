@@ -20,6 +20,7 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.controller.YoPIDGains;
 import com.yobotics.simulationconstructionset.util.controller.YoSE3PIDGains;
@@ -35,7 +36,6 @@ public class ManipulationControlModule
 {
    public static final boolean HOLD_POSE_IN_JOINT_SPACE_WHEN_PREPARE_FOR_LOCOMOTION = true;
    private static final double TO_DEFAULT_CONFIGURATION_TRAJECTORY_TIME = 1.0;
-   private static final double approachDistanceForHandsteps = 0.1;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final List<DynamicGraphicReferenceFrame> dynamicGraphicReferenceFrames = new ArrayList<DynamicGraphicReferenceFrame>();
@@ -49,6 +49,8 @@ public class ManipulationControlModule
    private final HandPoseProvider handPoseProvider;
    private final HandstepProvider handstepProvider;
    private final HandLoadBearingProvider handLoadBearingProvider;
+
+   private final DoubleYoVariable handSwingClearance = new DoubleYoVariable("handSwingClearance", registry);
 
    private final BooleanYoVariable goToLoadBearingWhenHandlingHandstep;
 
@@ -80,6 +82,8 @@ public class ManipulationControlModule
 
       goToLoadBearingWhenHandlingHandstep = new BooleanYoVariable("goToLoadBearingWhenHandlingHandstep", registry);
       goToLoadBearingWhenHandlingHandstep.set(true);
+
+      handSwingClearance.set(0.05);
 
       parentRegistry.addChild(registry);
    }
@@ -153,7 +157,7 @@ public class ManipulationControlModule
          if (handPoseProvider.checkPacketDataType(robotSide) == HandPosePacket.DataType.HAND_POSE)
          {
             handControlModules.get(robotSide).moveInStraightLine(handPoseProvider.getDesiredHandPose(robotSide), handPoseProvider.getTrajectoryTime(),
-                  handPoseProvider.getDesiredReferenceFrame(robotSide));
+                  handPoseProvider.getDesiredReferenceFrame(robotSide), handSwingClearance.getDoubleValue());
          }
          else
          {
@@ -175,7 +179,7 @@ public class ManipulationControlModule
 
          ReferenceFrame trajectoryFrame = handstepPose.getReferenceFrame();
          double swingTrajectoryTime = desiredHandstep.getSwingTrajectoryTime();
-         handControlModules.get(robotSide).moveTowardsObjectAndGoToSupport(handstepPose, surfaceNormal, approachDistanceForHandsteps, swingTrajectoryTime,
+         handControlModules.get(robotSide).moveTowardsObjectAndGoToSupport(handstepPose, surfaceNormal, handSwingClearance.getDoubleValue(), swingTrajectoryTime,
                trajectoryFrame, goToLoadBearingWhenHandlingHandstep.getBooleanValue());
       }
    }
@@ -240,8 +244,8 @@ public class ManipulationControlModule
       return false;
    }
 
-   public static double getDefaultApproachDistanceForHandsteps()
+   public double getDefaultApproachDistanceForHandsteps()
    {
-      return approachDistanceForHandsteps;
+      return handSwingClearance.getDoubleValue();
    }
 }
