@@ -43,10 +43,18 @@ import us.ihmc.utilities.ThreadTools;
 import com.yobotics.simulationconstructionset.commands.ToggleKeyPointModeCommandListener;
 import com.yobotics.simulationconstructionset.examples.FallingBrickRobot;
 import com.yobotics.simulationconstructionset.graphics.GraphicsDynamicGraphicsObject;
+import com.yobotics.simulationconstructionset.gui.DynamicGraphicMenuManager;
 import com.yobotics.simulationconstructionset.gui.GraphArrayWindow;
 import com.yobotics.simulationconstructionset.gui.ViewportWindow;
 import com.yobotics.simulationconstructionset.gui.camera.CameraTrackAndDollyYoVariablesHolder;
 import com.yobotics.simulationconstructionset.gui.config.GraphGroupList;
+import com.yobotics.simulationconstructionset.physics.CollisionHandler;
+import com.yobotics.simulationconstructionset.physics.CollisionShape;
+import com.yobotics.simulationconstructionset.physics.CollisionShapeFactory;
+import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
+import com.yobotics.simulationconstructionset.physics.ScsCollisionDetector;
+import com.yobotics.simulationconstructionset.physics.ScsPhysics;
+import com.yobotics.simulationconstructionset.physics.visualize.DefaultCollisionVisualize;
 import com.yobotics.simulationconstructionset.robotcommprotocol.RobotSocketConnection;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
@@ -161,6 +169,9 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private BooleanYoVariable processDataHasBeenCalled = new BooleanYoVariable("processDataHasBeenCalled", dummyRegistry);
    private BooleanYoVariable toggleKeyPointModeCommandListenerHasBeenCalled = new BooleanYoVariable("toggleKeyPointModeCommandListenerHasBeenCalled", dummyRegistry);
    private DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = createDynamicGraphicObjectsListRegistryWithObject();
+   private DynamicGraphicMenuManager dynamicGraphicMenuManager = new DynamicGraphicMenuManager();
+   private ScsPhysics simpleScsPhysics = createScsPhysics();
+   private WrenchContactPoint simpleWrenchContactPoint = new WrenchContactPoint("simpleWrenchContactPoint", dummyRegistry, staticLink);
    private SimulationConstructionSet scs;
 
    @BeforeClass
@@ -239,6 +250,24 @@ public class SimulationConstructionSetUsingDirectCallsTest
       
       String scsVersion = scs.getVersion();
       assertEquals(SCS_VERSION, scsVersion);
+      
+      scs.disableSystemExit();
+      scs.enableSystemExit();
+      boolean systemExitDisabledFromSCS = scs.systemExitDisabled();
+      assertFalse(systemExitDisabledFromSCS);
+      
+      scs.enableSystemExit();
+      scs.disableSystemExit();
+      boolean systemExitDisabledFromSCS2 = scs.systemExitDisabled();
+      assertTrue(systemExitDisabledFromSCS2);
+      
+      scs.initPhysics(simpleScsPhysics);
+      ScsPhysics scsPhysicsFromSCS = scs.getPhysics();
+      assertEquals(simpleScsPhysics, scsPhysicsFromSCS);
+      
+      scs.addForceSensor(simpleWrenchContactPoint);
+      ArrayList<WrenchContactPoint> forceSensorsFromSCS = scs.getForceSensors();
+      assertArrayOfObjectsContainsTheObject(forceSensorsFromSCS, simpleWrenchContactPoint);
    }
 
    @Test
@@ -619,6 +648,10 @@ public class SimulationConstructionSetUsingDirectCallsTest
       scs.setDynamicGraphicObjectsListVisible(dynamicGraphicObjectsListName, true);
       boolean dynamicGraphicObjectsAreShowing2 = scs.checkAllDynamicGraphicObjectsListRegistriesAreShowing();
       assertTrue(dynamicGraphicObjectsAreShowing2);
+      
+      scs.setDynamicGraphicMenuManager(dynamicGraphicMenuManager);
+      DynamicGraphicMenuManager dynamicGraphicMenuManagerFromSCS =  scs.getDynamicGraphicMenuManager();
+      assertEquals(dynamicGraphicMenuManager, dynamicGraphicMenuManagerFromSCS);
    }
 
    @Test
@@ -1115,6 +1148,63 @@ public class SimulationConstructionSetUsingDirectCallsTest
 
    // local methods
    
+   private ScsPhysics createScsPhysics()
+   {
+      ScsCollisionConfigure collisionConfigure = createScsCollisionConfigure();
+      ScsCollisionDetector collisionDetector = createScsCollisionDetector();
+      DefaultCollisionVisualize visualize = new DefaultCollisionVisualize();
+      ScsPhysics physics = new ScsPhysics(collisionConfigure, collisionDetector, visualize);
+      
+      return physics;
+   }
+   
+   private ScsCollisionDetector createScsCollisionDetector()
+   {
+      ScsCollisionDetector scsCollisionDetector = new ScsCollisionDetector()
+      {
+         
+         public void removeShape(Link link)
+         {
+            
+         }
+         
+         public void performCollisionDetection()
+         {
+            
+         }
+         
+         public CollisionShape lookupCollisionShape(Link link)
+         {
+            return null;
+         }
+         
+         public void initialize(CollisionHandler handler)
+         {
+            
+         }
+         
+         public CollisionShapeFactory getShapeFactory()
+         {
+            return null;
+         }
+      };
+      
+      return scsCollisionDetector;
+   }
+   
+   private ScsCollisionConfigure createScsCollisionConfigure()
+   {
+      ScsCollisionConfigure scsCollisionConfigure = new ScsCollisionConfigure()
+      {
+         public void setup(Robot robot, ScsCollisionDetector collisionDetector)
+         {
+            
+         }
+      };
+      
+      return scsCollisionConfigure;
+   }
+   
    private DynamicGraphicObjectsListRegistry createDynamicGraphicObjectsListRegistryWithObject()
    {
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
@@ -1179,6 +1269,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       {
          public void update(int tick)
          {
+            
          }
       };
 
@@ -1321,10 +1412,12 @@ public class SimulationConstructionSetUsingDirectCallsTest
       {
          public void newDataHasBeenSent()
          {
+            
          }
 
          public void newDataHasBeenReceived()
          {
+            
          }
       };
 
@@ -1443,6 +1536,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       {
          public void indexChanged(int newIndex, double newTime)
          {
+            
          }
 
          public void play(double realTimeRate)
@@ -1452,6 +1546,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
 
          public void stop()
          {
+            
          }
       };
 
@@ -1482,6 +1577,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
 
          public void simulationDoneWithException(Throwable throwable)
          {
+            
          }
       };
 
