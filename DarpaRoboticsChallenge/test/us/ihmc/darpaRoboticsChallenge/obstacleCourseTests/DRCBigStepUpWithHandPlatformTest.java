@@ -12,6 +12,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
@@ -26,6 +27,7 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public abstract class DRCBigStepUpWithHandPlatformTest implements MultiRobotTestInterface
@@ -108,23 +110,12 @@ public abstract class DRCBigStepUpWithHandPlatformTest implements MultiRobotTest
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
       
-//      HandPosePacket releaseLeftHandToHome = HandPosePacket.createGoToHomePacket(RobotSide.LEFT, 1.0);
-//      drcSimulationTestHelper.sendHandPosePacketToListeners(releaseLeftHandToHome);
-//      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-//
-//      HandPosePacket releaseRightHandToHome = HandPosePacket.createGoToHomePacket(RobotSide.RIGHT, 1.0);
-//      drcSimulationTestHelper.sendHandPosePacketToListeners(releaseRightHandToHome);
-//      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-//
-//      for (int i=0; i<2; i++)
-//      {
-//         bodyY = bodyY + 0.3;
-//
-//         FootstepDataList footstepDataList = createFootstepsForTwoSideSteps(bodyY, scriptedFootstepGenerator);
-//         drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
-//
-//         success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
-//      }
+      // Make sure that the hands are on the target...
+      SDFRobot robot = drcSimulationTestHelper.getRobot();
+      DoubleYoVariable leftArmZForce = (DoubleYoVariable) robot.getVariable("gc_l_arm_wrx_0_fZ");
+      DoubleYoVariable rightArmZForce = (DoubleYoVariable) robot.getVariable("gc_r_arm_wrx_0_fZ");
+      assertTrue(leftArmZForce.getDoubleValue() > 50.0);
+      assertTrue(rightArmZForce.getDoubleValue() > 50.0);
       
       drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();

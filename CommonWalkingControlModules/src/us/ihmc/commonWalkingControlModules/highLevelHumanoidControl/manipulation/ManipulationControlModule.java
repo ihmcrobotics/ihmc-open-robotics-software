@@ -85,8 +85,8 @@ public class ManipulationControlModule
       goToLoadBearingWhenHandlingHandstep = new BooleanYoVariable("goToLoadBearingWhenHandlingHandstep", registry);
       goToLoadBearingWhenHandlingHandstep.set(true);
 
-      handSwingClearance.set(0.05);
-      timeTransitionBeforeLoadBearing.set(10.0);
+      handSwingClearance.set(0.08);
+      timeTransitionBeforeLoadBearing.set(0.2);
 
       parentRegistry.addChild(registry);
    }
@@ -247,7 +247,12 @@ public class ManipulationControlModule
       return false;
    }
 
-   public double getDefaultApproachDistanceForHandsteps()
+   public void setHandSwingClearanceForHandsteps(double handSwingClearance)
+   {
+      this.handSwingClearance.set(handSwingClearance);
+   }
+   
+   public double getHandSwingClearanceForHandsteps()
    {
       return handSwingClearance.getDoubleValue();
    }
