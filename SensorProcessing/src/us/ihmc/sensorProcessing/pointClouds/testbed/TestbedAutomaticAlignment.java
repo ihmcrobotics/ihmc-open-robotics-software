@@ -38,7 +38,7 @@ public class TestbedAutomaticAlignment {
       configRansac.minimumPoints = 2500;
 //      ConfigSchnabel2007 configSchnabel = ConfigSchnabel2007.createDefault(20000,0.6,0.15,CloudShapeTypes.PLANE);
 
-      findPlanes = FactoryPointCloudShape.ransacSingleAll(new ConfigSurfaceNormals(50, 0.15), configRansac);
+      findPlanes = FactoryPointCloudShape.ransacSingleAll(new ConfigSurfaceNormals(100, 0.15), configRansac);
 
       estimatedToModel.invert(modelToEstimated);
    }

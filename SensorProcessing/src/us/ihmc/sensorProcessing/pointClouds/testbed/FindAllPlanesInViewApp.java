@@ -71,7 +71,7 @@ public class FindAllPlanesInViewApp {
    }
 
    public static void main(String[] args) {
-      List<List<Point3D_F64>> scans0 = loadScanLines("../SensorProcessing/data/testbed/2014-08-18/cloud00_scans.txt");
+      List<List<Point3D_F64>> scans0 = loadScanLines("../SensorProcessing/data/testbed/2014-08-18/cloud05_scans.txt");
       List<Point3D_F64> cloud0 = filter(scans0,3);
 //      List<Point3D_F64> cloud0 = loadCloud("../SensorProcessing/data/testbed/2014-08-01/cloud02.txt");
       List<Point3D_F64> cloud1 = new ArrayList<>();
@@ -80,7 +80,7 @@ public class FindAllPlanesInViewApp {
       uniform.process(cloud0,cloud1);
 
       ConfigMultiShapeRansac configRansac = ConfigMultiShapeRansac.createDefault(250,1.2,0.025, CloudShapeTypes.PLANE);
-      configRansac.minimumPoints = 5000;
+      configRansac.minimumPoints = 2500;
 //      ConfigSchnabel2007 configSchnabel = ConfigSchnabel2007.createDefault(20000,0.6,0.15,CloudShapeTypes.PLANE);
 
       PointCloudShapeFinder finder = FactoryPointCloudShape.ransacSingleAll(

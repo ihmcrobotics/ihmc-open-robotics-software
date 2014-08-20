@@ -79,6 +79,7 @@ public class NetworkProcessorTestbedAlignment implements Runnable
             }
             out = null;
             scanStorage.reset();
+            testbedFinder.reset();
             active = true;
             stopTime = System.currentTimeMillis() + integrationPeriod;
             networkManager.getControllerStateHandler().sendSerializableObject(new TestbedServerPacket(TestbedServerPacket.START_COLLECTING));
@@ -162,6 +163,7 @@ public class NetworkProcessorTestbedAlignment implements Runnable
                TestbedServerPacket packet = new TestbedServerPacket();
                if ( testbedFinder.process() )
                {
+                  System.out.println("Sending testbed location");
                   packet.setResult(TestbedServerPacket.SUCCESS);
 
                   Se3_F64 modelToWorld = testbedFinder.getModelToWorld();
@@ -180,6 +182,7 @@ public class NetworkProcessorTestbedAlignment implements Runnable
                }
                else
                {
+                  System.out.println("Failed to find testbed");
                   packet.setResult(TestbedServerPacket.FAILED);
                }
                networkManager.getControllerStateHandler().sendSerializableObject(packet);
