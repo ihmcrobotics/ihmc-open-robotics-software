@@ -18,8 +18,8 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepD
 import us.ihmc.commonWalkingControlModules.packets.HandPosePacket;
 import us.ihmc.commonWalkingControlModules.packets.HandstepPacket;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
-import us.ihmc.darpaRoboticsChallenge.DRCWallWorldEnvironment;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
+import us.ihmc.darpaRoboticsChallenge.environment.DRCWallWorldEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedHandstepGenerator;
