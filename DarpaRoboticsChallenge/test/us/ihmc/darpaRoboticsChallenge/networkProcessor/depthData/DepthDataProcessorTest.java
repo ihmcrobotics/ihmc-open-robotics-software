@@ -14,7 +14,7 @@ import org.junit.Test;
 
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
-import us.ihmc.darpaRoboticsChallenge.environment.DRCWallWorldEnvironment;
+import us.ihmc.darpaRoboticsChallenge.environment.DRCWallAtDistanceEnvironment;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCUserInterfaceNetworkingManager;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationNetworkTestHelper;
 import us.ihmc.utilities.MemoryTools;
@@ -36,6 +36,7 @@ public abstract class DepthDataProcessorTest implements MultiRobotTestInterface,
    private static final double ONE_EIGHTY_DEGREES = 1.0 * Math.PI;
    private static final double NINETY_DEGREES = 0.5 * Math.PI;
    private static final double TWO_SEVENTY_DEGREES = 1.5 * Math.PI;
+   private static final double WALL_DISTANCE = 1.0;
 
    private int numberOfLidarScansConsumed = 0;
    private SparseLidarScan zeroDegreeScan;
@@ -55,7 +56,7 @@ public abstract class DepthDataProcessorTest implements MultiRobotTestInterface,
    {
       BambooTools.reportTestStartedMessage();
 
-      DRCSimulationNetworkTestHelper drcSimulationTestHelper = new DRCSimulationNetworkTestHelper(getRobotModel(), new DRCWallWorldEnvironment(-10.0, 10.0));
+      DRCSimulationNetworkTestHelper drcSimulationTestHelper = new DRCSimulationNetworkTestHelper(getRobotModel(), new DRCWallAtDistanceEnvironment(WALL_DISTANCE));
       drcSimulationTestHelper.setupCamera(new Point3d(1.8375, -0.16, 0.89), new Point3d(1.10, 8.30, 1.37));
       drcSimulationTestHelper.addNetStateListener(this);
       drcSimulationTestHelper.addConsumer(SparseLidarScan.class, new LidarConsumer());
