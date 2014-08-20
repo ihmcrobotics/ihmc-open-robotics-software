@@ -152,7 +152,7 @@ public class BlackFlyParameterSetter
       if(object.getShutter() != Shutter){
          Shutter = object.getShutter();
          DoubleParameter shutterParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(DoubleParameter._TYPE);
-         shutterParam.setName("prop_frame_rate");
+         shutterParam.setName("prop_shutter");
          shutterParam.setValue(Shutter);
          request.getConfig().getDoubles().add(shutterParam);
          }
