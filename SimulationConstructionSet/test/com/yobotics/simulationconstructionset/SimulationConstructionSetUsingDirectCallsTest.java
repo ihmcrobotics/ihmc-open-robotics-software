@@ -61,6 +61,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
 
    private static final long CLOSING_SLEEP_TIME = 2000;
    private static final String SCS_VERSION = "12.06.22";
+   private static final long THREAD_SLEEP_TIME = 1000;
    
    private static double epsilon = 1e-10;
 
@@ -319,77 +320,85 @@ public class SimulationConstructionSetUsingDirectCallsTest
    @Test
    public void testFrameMethods()
    {
+      ThreadTools.sleep(THREAD_SLEEP_TIME);
+      
       scs.setFrameSize(dimension);
+      ThreadTools.sleep(THREAD_SLEEP_TIME);
       Dimension dimensionFromSCS = scs.getJFrame().getBounds().getSize();
       assertEquals(dimension.height, dimensionFromSCS.height, epsilon);
       assertEquals(dimension.width, dimensionFromSCS.width, epsilon);
 
       scs.setFrameLocation(location.x, location.y);
+      ThreadTools.sleep(THREAD_SLEEP_TIME);
       Point locationFromSCS = scs.getJFrame().getLocation();
       assertEquals(location.x, locationFromSCS.x, epsilon);
       assertEquals(location.y, locationFromSCS.y, epsilon);
 
       scs.setFrameMaximized();
+      ThreadTools.sleep(THREAD_SLEEP_TIME);
       int frameStateFromSCS = getExtendedStateFromSCS(scs);
       assertEquals(Frame.MAXIMIZED_BOTH, frameStateFromSCS, epsilon);
 
       scs.setFrameAlwaysOnTop(true);
+      ThreadTools.sleep(THREAD_SLEEP_TIME);
       boolean alwaysOnTopFromSCS = scs.getJFrame().isAlwaysOnTop();
       assertEquals(true, alwaysOnTopFromSCS);
 
       scs.setFrameAlwaysOnTop(false);
+      ThreadTools.sleep(THREAD_SLEEP_TIME);
       alwaysOnTopFromSCS = scs.getJFrame().isAlwaysOnTop();
       assertEquals(false, alwaysOnTopFromSCS);
 
       scs.maximizeMainWindow();
+      ThreadTools.sleep(THREAD_SLEEP_TIME);
       int frameStateFromSCS2 = getExtendedStateFromSCS(scs);
       assertEquals(Frame.MAXIMIZED_BOTH, frameStateFromSCS2, epsilon);
 
       scs.createNewGraphWindow();
+      ThreadTools.sleep(THREAD_SLEEP_TIME);
       GraphArrayWindow graphArrayWindowFromSCS = scs.getGraphArrayWindow("Unnamed");
-      ThreadTools.sleep(1000);
       assertNotNull(graphArrayWindowFromSCS);
 
       scs.createNewGraphWindow("simpleGraphArrayWindow");
+      ThreadTools.sleep(THREAD_SLEEP_TIME);
       GraphArrayWindow graphArrayWindowFromSCS2 = scs.getGraphArrayWindow("simpleGraphArrayWindow");
-      ThreadTools.sleep(1000);
       assertNotNull(graphArrayWindowFromSCS2);
 
       scs.createNewGraphWindow("simpleGraphArrayWindow2", 0, false);
+      ThreadTools.sleep(THREAD_SLEEP_TIME);
       GraphArrayWindow graphArrayWindowFromSCS3 = scs.getGraphArrayWindow("simpleGraphArrayWindow2");
-      ThreadTools.sleep(1000);
       assertNotNull(graphArrayWindowFromSCS3);
 
       scs.createNewViewportWindow();
+      ThreadTools.sleep(THREAD_SLEEP_TIME);
       ViewportWindow viewportWindowFromSCS = scs.getViewportWindow("Unnamed");
-      ThreadTools.sleep(1000);
       assertNotNull(viewportWindowFromSCS);
 
       scs.createNewViewportWindow("simpleViewportWindow");
+      ThreadTools.sleep(THREAD_SLEEP_TIME);
       ViewportWindow viewportWindowFromSCS2 = scs.getViewportWindow("simpleViewportWindow");
-      ThreadTools.sleep(1000);
       assertNotNull(viewportWindowFromSCS2);
 
       scs.createNewViewportWindow("simpleViewportWindow", 0, false);
+      ThreadTools.sleep(THREAD_SLEEP_TIME);
       ViewportWindow viewportWindowFromSCS3 = scs.getViewportWindow("simpleViewportWindow");
-      ThreadTools.sleep(1000);
       assertNotNull(viewportWindowFromSCS3);
 
       scs.showViewport();
       scs.hideViewport();
-      ThreadTools.sleep(1000);
+      ThreadTools.sleep(THREAD_SLEEP_TIME);
       boolean isViewportHidden = scs.isViewportHidden();
       assertTrue(isViewportHidden);
 
       scs.hideViewport();
       scs.showViewport();
-      ThreadTools.sleep(1000);
+      ThreadTools.sleep(THREAD_SLEEP_TIME);
       boolean isViewportHidden2 = scs.isViewportHidden();
       assertFalse(isViewportHidden2);
       
       Component component = new Button();
       scs.addExtraJpanel(component, simpleComponentName);
-      ThreadTools.sleep(1000);
+      ThreadTools.sleep(THREAD_SLEEP_TIME);
       Component componentFromSCS =  scs.getExtraPanel(simpleComponentName);
       assertEquals(component, componentFromSCS);
    }
@@ -605,6 +614,11 @@ public class SimulationConstructionSetUsingDirectCallsTest
       scs.hideAllDynamicGraphicObjects();
       boolean dynamicGraphicObjectsAreShowing = scs.checkAllDynamicGraphicObjectsListRegistriesAreShowing();
       assertFalse(dynamicGraphicObjectsAreShowing);
+      
+      scs.hideAllDynamicGraphicObjects();
+      scs.setDynamicGraphicObjectsListVisible(dynamicGraphicObjectsListName, true);
+      boolean dynamicGraphicObjectsAreShowing2 = scs.checkAllDynamicGraphicObjectsListRegistriesAreShowing();
+      assertTrue(dynamicGraphicObjectsAreShowing2);
    }
 
    @Test
@@ -846,32 +860,32 @@ public class SimulationConstructionSetUsingDirectCallsTest
             variableGroup5Values);
 
       scs.setupEntryBox(simpleRobotFirstVariableName);
-      ThreadTools.sleep(1000);
+      ThreadTools.sleep(THREAD_SLEEP_TIME);
       boolean entryBoxIsInSCS = scsContainsTheEntryBox(scs, simpleRobotFirstVariableName);
       assertTrue(entryBoxIsInSCS);
 
       scs.setupEntryBox(simpleRobotLastVariableName);
-      ThreadTools.sleep(1000);
+      ThreadTools.sleep(THREAD_SLEEP_TIME);
       boolean entryBoxIsInSCS2 = scsContainsTheEntryBox(scs, simpleRobotLastVariableName);
       assertTrue(entryBoxIsInSCS2);
 
       scs.setupEntryBox(cameraDollyXYZVarNames);
-      ThreadTools.sleep(1000);
+      ThreadTools.sleep(THREAD_SLEEP_TIME);
       boolean entryBoxesAreInSCS = scsContainsTheEntryBoxes(scs, cameraDollyXYZVarNames);
       assertTrue(entryBoxesAreInSCS);
 
       scs.setupGraph(simpleRobotFirstVariableName);
-      ThreadTools.sleep(1000);
+      ThreadTools.sleep(THREAD_SLEEP_TIME);
       boolean graphIsInSCS = scsContainsTheGraph(scs, simpleRobotFirstVariableName);
       assertTrue(graphIsInSCS);
 
       scs.setupGraph(simpleRobotLastVariableName);
-      ThreadTools.sleep(1000);
+      ThreadTools.sleep(THREAD_SLEEP_TIME);
       boolean graphIsInSCS2 = scsContainsTheGraph(scs, simpleRobotLastVariableName);
       assertTrue(graphIsInSCS2);
 
       scs.setupGraph(cameraDollyXYZVarNames);
-      ThreadTools.sleep(1000);
+      ThreadTools.sleep(THREAD_SLEEP_TIME);
       boolean graphsAreInSCS = scsContainsTheGraphs(scs, cameraDollyXYZVarNames);
       assertTrue(graphsAreInSCS);
 
@@ -956,37 +970,37 @@ public class SimulationConstructionSetUsingDirectCallsTest
 
       simulationDoneListenerHasBeenNotified.set(false);
       callSCSMethodSimulateOneTimeStep(scs);
-      ThreadTools.sleep(500);
+      ThreadTools.sleep(THREAD_SLEEP_TIME);
       assertTrue(simulationDoneListenerHasBeenNotified.getBooleanValue());
 
       simulationDoneListenerHasBeenNotified.set(false);
       scs.removeSimulateDoneListener(simulationDoneListener);
-      ThreadTools.sleep(500);
+      ThreadTools.sleep(THREAD_SLEEP_TIME);
       assertFalse(simulationDoneListenerHasBeenNotified.getBooleanValue());
 
       simulationDoneListenerHasBeenNotified.set(false);
       scs.simulate(Double.MAX_VALUE);
       boolean isSCSSimulatingBeforeCriterion = scs.isSimulating();
       setSimulationDoneCriterion.set(true);
-      ThreadTools.sleep(500);
+      ThreadTools.sleep(THREAD_SLEEP_TIME);
       boolean isSCSSimulatingAfterCriterion = scs.isSimulating();
       assertTrue(isSCSSimulatingBeforeCriterion);
       assertFalse(isSCSSimulatingAfterCriterion);
 
       realTimeRateInSCS.set(Double.POSITIVE_INFINITY);
       scs.play();
-      ThreadTools.sleep(500);
+      ThreadTools.sleep(THREAD_SLEEP_TIME);
       double realTimeRateFromSCS = scs.getPlaybackRealTimeRate();
       assertEquals(realTimeRateFromSCS, realTimeRateInSCS.getDoubleValue(), epsilon);
 
       processDataHasBeenCalled.set(false);
       scs.applyDataProcessingFunction(dataProcessingFunction);
-      ThreadTools.sleep(500);
+      ThreadTools.sleep(THREAD_SLEEP_TIME);
       assertTrue(processDataHasBeenCalled.getBooleanValue());
       
       toggleKeyPointModeCommandListenerHasBeenCalled.set(false);
       scs.toggleKeyPointMode();
-      ThreadTools.sleep(500);
+      ThreadTools.sleep(THREAD_SLEEP_TIME);
       assertTrue(toggleKeyPointModeCommandListenerHasBeenCalled.getBooleanValue());
    }
 
