@@ -20,6 +20,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
+
 import org.fest.swing.edt.FailOnThreadViolationRepaintManager;
 import org.junit.After;
 import org.junit.Before;
@@ -30,11 +33,14 @@ import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.graphics3DAdapter.camera.CaptureDevice;
 import us.ihmc.graphics3DAdapter.camera.ClassicCameraController;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
+import us.ihmc.graphics3DAdapter.input.ModifierKeyInterface;
+import us.ihmc.graphics3DAdapter.input.SelectedListener;
 import us.ihmc.graphics3DAdapter.jme.JMEGraphics3DAdapter;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
 import us.ihmc.utilities.ThreadTools;
 
+import com.yobotics.simulationconstructionset.commands.ToggleKeyPointModeCommandListener;
 import com.yobotics.simulationconstructionset.examples.FallingBrickRobot;
 import com.yobotics.simulationconstructionset.graphics.GraphicsDynamicGraphicsObject;
 import com.yobotics.simulationconstructionset.gui.GraphArrayWindow;
@@ -121,6 +127,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private String entryBoxGroupName3 = "simpleEntryBoxGroup3";
    private String[] graphConfigurationNames = { "simpleGraphConfiguration", "simpleGraphConfiguration2" };
    private String extraPanelConfigurationName = "simpleExtraPanelConfigurationName";
+   private String simpleComponentName =  "simpleComponent";
    private String[][] graphGroupVars = { cameraTrackingXYZVarNames, cameraDollyXYZVarNames };
    private String[][][] graphGroupVarsWithConfig = { { cameraTrackingXYZVarNames, { "config_1" } }, { cameraDollyXYZVarNames, { "config_2" } } };
    private String simpleRobotFirstVariableName = getFirstVariableNameFromRobotRegistry(simpleRobot);
@@ -145,6 +152,8 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private ViewportConfiguration viewportConfiguration = createViewportConfiguration(viewportConfigurationName);
    private GraphConfiguration[] graphConfigurations = createGraphConfigurations(graphConfigurationNames);
    private DoubleYoVariable realTimeRateInSCS = new DoubleYoVariable("realTimeRate", dummyRegistry);
+   private BooleanYoVariable processDataHasBeenCalled = new BooleanYoVariable("processDataHasBeenCalled", dummyRegistry);
+   private BooleanYoVariable toggleKeyPointModeCommandListenerHasBeenCalled = new BooleanYoVariable("toggleKeyPointModeCommandListenerHasBeenCalled", dummyRegistry);
    private SimulationConstructionSet scs;
 
    @BeforeClass
@@ -211,6 +220,11 @@ public class SimulationConstructionSetUsingDirectCallsTest
       NewDataListener newDataListener = createNewDataListener();
       RobotSocketConnection robotSocketConnectionFromSCS2 = scs.allowTCPConnectionToHost("host2", newDataListener);
       assertNotNull(robotSocketConnectionFromSCS2);
+      
+      boolean initialKeyPointStatus = scs.isKeyPointModeToggled();
+      scs.toggleKeyPointMode();
+      boolean finalKeyPointStatus = scs.isKeyPointModeToggled();
+      assertBooleansAreOpposite(initialKeyPointStatus, finalKeyPointStatus);
    }
 
    @Test
@@ -359,6 +373,12 @@ public class SimulationConstructionSetUsingDirectCallsTest
       ThreadTools.sleep(1000);
       boolean isViewportHidden2 = scs.isViewportHidden();
       assertFalse(isViewportHidden2);
+      
+      Component component = new Button();
+      scs.addExtraJpanel(component, simpleComponentName);
+      ThreadTools.sleep(1000);
+      Component componentFromSCS =  scs.getExtraPanel(simpleComponentName);
+      assertEquals(component, componentFromSCS);
    }
 
    @Test
@@ -520,6 +540,11 @@ public class SimulationConstructionSetUsingDirectCallsTest
       scs.previousCameraKey();
       double[] cameraFixXYZValuesFromSCS3 = getCameraFixXYZValues(scs);
       assertArrayEquals(cameraFixXYZValues, cameraFixXYZValuesFromSCS3, epsilon);
+      
+      boolean initialCameraKeyModeStatus = getCameraKeyMode(scs);
+      scs.toggleCameraKeyMode();
+      boolean finalCameraKeyModeStatus = getCameraKeyMode(scs);
+      assertBooleansAreOpposite(initialCameraKeyModeStatus, finalCameraKeyModeStatus);
    }
 
    @Test
@@ -884,37 +909,51 @@ public class SimulationConstructionSetUsingDirectCallsTest
       SimulationDoneCriterion simulationDoneCriterion = createSimulationDoneCriterion();
       PlaybackListener playbackListener = createPlaybackListener();
       PlayCycleListener playCycleListener = createPlayCycleListener();
+      DataProcessingFunction dataProcessingFunction = createDataProcessingFunction();
+      ToggleKeyPointModeCommandListener toggleKeyPointModeCommandListener = createToggleKeyPointModeCommandListener();
       scs.attachPlayCycleListener(playCycleListener);
       scs.attachPlaybackListener(playbackListener);
       scs.addSimulateDoneListener(simulationDoneListener);
       scs.setSimulateDoneCriterion(simulationDoneCriterion);
+      scs.registerToggleKeyPointModeCommandListener(toggleKeyPointModeCommandListener);
 
       ArrayList<PlayCycleListener> playCycleListenersFromSCS = scs.getPlayCycleListeners();
       assertArrayOfObjectsContainsTheObject(playCycleListenersFromSCS, playCycleListener);
 
       simulationDoneListenerHasBeenNotified.set(false);
       callSCSMethodSimulateOneTimeStep(scs);
+      ThreadTools.sleep(500);
       assertTrue(simulationDoneListenerHasBeenNotified.getBooleanValue());
 
       simulationDoneListenerHasBeenNotified.set(false);
       scs.removeSimulateDoneListener(simulationDoneListener);
+      ThreadTools.sleep(500);
       assertFalse(simulationDoneListenerHasBeenNotified.getBooleanValue());
 
       simulationDoneListenerHasBeenNotified.set(false);
       scs.simulate(Double.MAX_VALUE);
       boolean isSCSSimulatingBeforeCriterion = scs.isSimulating();
       setSimulationDoneCriterion.set(true);
-      ThreadTools.sleep(1000);
+      ThreadTools.sleep(500);
       boolean isSCSSimulatingAfterCriterion = scs.isSimulating();
       assertTrue(isSCSSimulatingBeforeCriterion);
       assertFalse(isSCSSimulatingAfterCriterion);
 
       realTimeRateInSCS.set(Double.POSITIVE_INFINITY);
       scs.play();
-      ThreadTools.sleep(1000);
+      ThreadTools.sleep(500);
       double realTimeRateFromSCS = scs.getPlaybackRealTimeRate();
       assertEquals(realTimeRateFromSCS, realTimeRateInSCS.getDoubleValue(), epsilon);
 
+      processDataHasBeenCalled.set(false);
+      scs.applyDataProcessingFunction(dataProcessingFunction);
+      ThreadTools.sleep(500);
+      assertTrue(processDataHasBeenCalled.getBooleanValue());
+      
+      toggleKeyPointModeCommandListenerHasBeenCalled.set(false);
+      scs.toggleKeyPointMode();
+      ThreadTools.sleep(500);
+      assertTrue(toggleKeyPointModeCommandListenerHasBeenCalled.getBooleanValue());
    }
 
    @Test
@@ -1027,6 +1066,54 @@ public class SimulationConstructionSetUsingDirectCallsTest
    }
 
    // local methods
+   
+   private ToggleKeyPointModeCommandListener createToggleKeyPointModeCommandListener()
+   {
+      ToggleKeyPointModeCommandListener toggleKeyPointModeCommandListener = new ToggleKeyPointModeCommandListener()
+      {
+         public void updateKeyPointModeStatus()
+         {
+            toggleKeyPointModeCommandListenerHasBeenCalled.set(true);
+         }
+      };
+      
+      return toggleKeyPointModeCommandListener;
+   }
+   
+   private void assertBooleansAreOpposite(boolean one, boolean two)
+   {
+      if (one)
+         assertFalse(two);
+      else
+         assertTrue(two);
+   }
+   
+   private SelectedListener createSelectedListener()
+   {
+      SelectedListener selectedListener = new SelectedListener()
+      {
+         public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyInterface, Point3d location, Point3d cameraLocation,
+               Quat4d cameraRotation)
+         {
+            
+         }
+      };
+      
+      return selectedListener;
+   }
+   
+   private DataProcessingFunction createDataProcessingFunction()
+   {
+      DataProcessingFunction dataProcessingFunction = new DataProcessingFunction()
+      {
+         public void processData()
+         {
+            processDataHasBeenCalled.set(true);
+         }
+      };
+      
+      return dataProcessingFunction;
+   }
 
    private PlayCycleListener createPlayCycleListener()
    {
@@ -1593,6 +1680,12 @@ public class SimulationConstructionSetUsingDirectCallsTest
       };
 
       return ret;
+   }
+   
+   private boolean getCameraKeyMode(SimulationConstructionSet scs)
+   {
+      ClassicCameraController classicCameraController = getClassicCameraController(scs);
+      return classicCameraController.getCameraKeyMode();
    }
 
    private double getCameraFieldOfView(SimulationConstructionSet scs)
