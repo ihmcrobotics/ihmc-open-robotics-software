@@ -16,31 +16,37 @@ import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
 public interface Graphics3DAdapter
 {
    public void addRootNode(Graphics3DNode rootNode);
+
    public void removeRootNode(Graphics3DNode rootNode);
-   
+
    public ViewportAdapter createNewViewport(GraphicsDevice graphicsDevice, boolean isMainViewport, boolean isOffScreen);
+
    public void closeViewport(ViewportAdapter viewport);
-   
+
    public void setHeightMap(HeightMap heightMap);
-   
+
    public Object getGraphicsConch();
+
    public void setGroundVisible(boolean isVisible);
-   
+
    public void addSelectedListener(SelectedListener selectedListener);
+
    public void addKeyListener(KeyListener keyListener);
+
    public void addMouseListener(MouseListener mouseListener);
-   
+
    public void closeAndDispose();
-   
+
    public void setBackgroundColor(Color3f color);
 
    public void setBackgroundImage(URL fileURL, Graphics3DBackgroundScaleMode backgroundScaleMode);
 
    public void setGroundAppearance(AppearanceDefinition app);
+
    public void freezeFrame(Graphics3DNode rootJoint);
 
    public ContextManager getContextManager();
-   
+
    @Deprecated
    public GPULidar createGPULidar(GPULidarListener callback, int horizontalRays, double fov, double near, double far);
 

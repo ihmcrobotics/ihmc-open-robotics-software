@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 
+import javax.swing.AbstractAction;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
@@ -45,6 +46,7 @@ import com.yobotics.simulationconstructionset.examples.FallingBrickRobot;
 import com.yobotics.simulationconstructionset.graphics.GraphicsDynamicGraphicsObject;
 import com.yobotics.simulationconstructionset.gui.DynamicGraphicMenuManager;
 import com.yobotics.simulationconstructionset.gui.GraphArrayWindow;
+import com.yobotics.simulationconstructionset.gui.StandardGUIActions;
 import com.yobotics.simulationconstructionset.gui.ViewportWindow;
 import com.yobotics.simulationconstructionset.gui.camera.CameraTrackAndDollyYoVariablesHolder;
 import com.yobotics.simulationconstructionset.gui.config.GraphGroupList;
@@ -68,8 +70,9 @@ public class SimulationConstructionSetUsingDirectCallsTest
    // - the registry "simpleRegistry" is empty
 
    private static final long CLOSING_SLEEP_TIME = 2000;
-   private static final String SCS_VERSION = "12.06.22";
    private static final long THREAD_SLEEP_TIME = 1000;
+   private static final String SCS_VERSION = "12.06.22";
+  
    
    private static double epsilon = 1e-10;
 
@@ -608,6 +611,9 @@ public class SimulationConstructionSetUsingDirectCallsTest
 
       Graphics3DNode graphics3DNodeFromSCS2 = scs.addStaticLinkGraphics(staticLinkGraphics, graphics3DNodeType);
       assertNotNull(graphics3DNodeFromSCS2);
+      
+      Graphics3DNode graphics3DNodeFromSCS3 = scs.addStaticLink(staticLink);
+      assertNotNull(graphics3DNodeFromSCS3);
 
       GraphicsDynamicGraphicsObject graphicsDynamicGraphicsObjectFromSCS = scs.addDynamicGraphicObject(dynamicGraphicObject);
       assertNotNull(graphicsDynamicGraphicsObjectFromSCS);
@@ -652,6 +658,12 @@ public class SimulationConstructionSetUsingDirectCallsTest
       scs.setDynamicGraphicMenuManager(dynamicGraphicMenuManager);
       DynamicGraphicMenuManager dynamicGraphicMenuManagerFromSCS =  scs.getDynamicGraphicMenuManager();
       assertEquals(dynamicGraphicMenuManager, dynamicGraphicMenuManagerFromSCS);
+      
+      scs.disableGUIComponents();
+      assertIfGUIComponentsAreDisableOrEnabled(scs, false);
+      
+      scs.enableGUIComponents();
+      assertIfGUIComponentsAreDisableOrEnabled(scs, true);
    }
 
    @Test
@@ -1147,6 +1159,22 @@ public class SimulationConstructionSetUsingDirectCallsTest
    }
 
    // local methods
+   
+   private void assertIfGUIComponentsAreDisableOrEnabled(SimulationConstructionSet scs, boolean assertAreEnabled)
+   {
+      StandardGUIActions standardGUIActions = scs.getStandardGUIActions();
+      ArrayList<AbstractAction> guiActions = standardGUIActions.getGuiActions();
+      for (int i = 0; i<guiActions.size(); i++)
+      {
+         AbstractAction guiAction = guiActions.get(i);
+         boolean guiActionStatus = guiAction.isEnabled();
+         
+         if(assertAreEnabled)
+            assertTrue(guiActionStatus);
+         else
+            assertFalse(guiActionStatus);
+      }
+   }
    
    private ScsPhysics createScsPhysics()
    {
