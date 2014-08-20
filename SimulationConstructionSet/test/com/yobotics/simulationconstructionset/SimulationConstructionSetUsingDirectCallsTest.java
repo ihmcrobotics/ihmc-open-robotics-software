@@ -88,6 +88,9 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private double[] cameraClipDistancesNearFarValues = { 1.75, 2.75 };
    private double[] variableGroup1Values = { 1.3, 2.3, 3.3 };
    private double[] variableGroup2Values = { 1.5, 1.6, 1.7 };
+   private double[] variableGroup3Values = { 5.5, 5.6, 5.7 };
+   private double[] variableGroup4Values = { 8.5, 8.6, 8.7 };
+   private double[] variableGroup5Values = { 9.5, 9.6, 9.7 };
 
    private Point location = new Point(25, 50);
    private FallingBrickRobot simpleRobot = new FallingBrickRobot();
@@ -97,6 +100,9 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private String searchStringStart = "q";
    private String[] variableGroup1 = new String[] { "simpleVar11", "simpleVar12", "simpleVar13" };
    private String[] variableGroup2 = new String[] { "simpleVar21", "simpleVar22", "simpleVar23" };
+   private String[] variableGroup3 = new String[] { "simpleVar31", "simpleVar32", "simpleVar33" };
+   private String[] variableGroup4 = new String[] { "simpleVar41", "simpleVar42", "simpleVar43" };
+   private String[] variableGroup5 = new String[] { "simpleVar51", "simpleVar52", "simpleVar53" };
    private String[] cameraTrackingXYZVarNames = new String[] { "simpleCameraTrackingVarNameX", "simpleCameraTrackingVarNameY", "simpleCameraTrackingVarNameZ" };
    private String[] cameraDollyXYZVarNames = new String[] { "simpleCameraDollyVarNameX", "simpleCameraDollyVarNameY", "simpleCameraDollyVarNameZ" };
    private String configurationName = "simpleConfigurationName";
@@ -138,6 +144,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private CameraConfiguration cameraConfiguration = createCameraConfiguration(cameraConfigurationName);
    private ViewportConfiguration viewportConfiguration = createViewportConfiguration(viewportConfigurationName);
    private GraphConfiguration[] graphConfigurations = createGraphConfigurations(graphConfigurationNames);
+   private DoubleYoVariable realTimeRateInSCS = new DoubleYoVariable("realTimeRate", dummyRegistry);
    private SimulationConstructionSet scs;
 
    @BeforeClass
@@ -204,7 +211,6 @@ public class SimulationConstructionSetUsingDirectCallsTest
       NewDataListener newDataListener = createNewDataListener();
       RobotSocketConnection robotSocketConnectionFromSCS2 = scs.allowTCPConnectionToHost("host2", newDataListener);
       assertNotNull(robotSocketConnectionFromSCS2);
-
    }
 
    @Test
@@ -341,6 +347,18 @@ public class SimulationConstructionSetUsingDirectCallsTest
       ViewportWindow viewportWindowFromSCS3 = scs.getViewportWindow("simpleViewportWindow");
       ThreadTools.sleep(1000);
       assertNotNull(viewportWindowFromSCS3);
+
+      scs.showViewport();
+      scs.hideViewport();
+      ThreadTools.sleep(1000);
+      boolean isViewportHidden = scs.isViewportHidden();
+      assertTrue(isViewportHidden);
+
+      scs.hideViewport();
+      scs.showViewport();
+      ThreadTools.sleep(1000);
+      boolean isViewportHidden2 = scs.isViewportHidden();
+      assertFalse(isViewportHidden2);
    }
 
    @Test
@@ -529,6 +547,16 @@ public class SimulationConstructionSetUsingDirectCallsTest
       scs.setGroundVisible(true);
       boolean isGroundVisibleFromSCS2 = stateIfTerrainIsVisible(scs);
       assertTrue(isGroundVisibleFromSCS2);
+
+      CollisionGroup collisionGroup = new CollisionGroup();
+      scs.registerCollisionGroup(collisionGroup);
+      ArrayList<CollisionGroup> collisionGroupFromSCS = scs.getCollisionGroups();
+      assertArrayOfObjectsContainsTheObject(collisionGroupFromSCS, collisionGroup);
+
+      ArrayList<CollisionGroup> arrayListOfCollisionGroup = createArrayListOfCollisionGroup(3);
+      scs.registerCollisionGroups(arrayListOfCollisionGroup);
+      ArrayList<CollisionGroup> collisionGroupFromSCS2 = scs.getCollisionGroups();
+      assertArrayOfObjectsContainsTheArrayOfObject(collisionGroupFromSCS2, arrayListOfCollisionGroup);
    }
 
    @Test
@@ -751,37 +779,55 @@ public class SimulationConstructionSetUsingDirectCallsTest
    @Test
    public void testVariablesMethods()
    {
-      DoubleYoVariable[] doubleYoVariables = addDoubleYoVariablesInSCSRegistry(cameraDollyXYZVarNames, cameraDollyXYZVarValues, scs);
+      addDoubleYoVariablesInSCSRegistry(cameraDollyXYZVarNames, cameraDollyXYZVarValues, scs);
+      YoVariableList yoVariableList = createVarListOfDoubleYoVariableWithDummyRegistry(variableGroup1, variableGroup1Values);
+      YoVariableList[] yoVariableLists = createTwoVarListOfDoubleYoVariablesWithDummyRegistry(variableGroup2, variableGroup2Values, variableGroup3,
+            variableGroup3Values);
+      ArrayList<YoVariableList> yoVariableArrayLists = createArrayListOfDoubleYoVariableWithDummyRegistry(variableGroup4, variableGroup4Values, variableGroup5,
+            variableGroup5Values);
 
       scs.setupEntryBox(simpleRobotFirstVariableName);
+      ThreadTools.sleep(1000);
       boolean entryBoxIsInSCS = scsContainsTheEntryBox(scs, simpleRobotFirstVariableName);
       assertTrue(entryBoxIsInSCS);
 
       scs.setupEntryBox(simpleRobotLastVariableName);
+      ThreadTools.sleep(1000);
       boolean entryBoxIsInSCS2 = scsContainsTheEntryBox(scs, simpleRobotLastVariableName);
       assertTrue(entryBoxIsInSCS2);
 
       scs.setupEntryBox(cameraDollyXYZVarNames);
+      ThreadTools.sleep(1000);
       boolean entryBoxesAreInSCS = scsContainsTheEntryBoxes(scs, cameraDollyXYZVarNames);
       assertTrue(entryBoxesAreInSCS);
 
       scs.setupGraph(simpleRobotFirstVariableName);
+      ThreadTools.sleep(1000);
       boolean graphIsInSCS = scsContainsTheGraph(scs, simpleRobotFirstVariableName);
       assertTrue(graphIsInSCS);
 
       scs.setupGraph(simpleRobotLastVariableName);
+      ThreadTools.sleep(1000);
       boolean graphIsInSCS2 = scsContainsTheGraph(scs, simpleRobotLastVariableName);
       assertTrue(graphIsInSCS2);
 
       scs.setupGraph(cameraDollyXYZVarNames);
+      ThreadTools.sleep(1000);
       boolean graphsAreInSCS = scsContainsTheGraphs(scs, cameraDollyXYZVarNames);
       assertTrue(graphsAreInSCS);
 
-      YoVariableList[] yoVariableLists = createTwoVarListOfDoubleYoVariablesWithDummyRegistry(variableGroup1, variableGroup1Values, variableGroup2,
-            variableGroup2Values);
-      scs.addVarList(yoVariableLists[0]);
+      scs.addVarList(yoVariableList);
       YoVariableList yoVariableListFromSCS = scs.getCombinedVarList();
-      assertYoVariableListContainsVariables(yoVariableListFromSCS, yoVariableLists[0].getAllVariables());
+      assertYoVariableListContainsVariables(yoVariableListFromSCS, yoVariableList.getAllVariables());
+
+      scs.addVarLists(yoVariableLists);
+      YoVariableList yoVariableListFromSCS2 = scs.getCombinedVarList();
+      assertYoVariableListContainsVariables(yoVariableListFromSCS2, yoVariableLists[0].getAllVariables());
+      assertYoVariableListContainsVariables(yoVariableListFromSCS2, yoVariableLists[1].getAllVariables());
+
+      scs.addVarLists(yoVariableArrayLists);
+      YoVariableList yoVariableListFromSCS3 = scs.getCombinedVarList();
+      assertYoVariableListContainsArrayListOfVariables(yoVariableListFromSCS3, yoVariableArrayLists);
    }
 
    @Test
@@ -836,8 +882,15 @@ public class SimulationConstructionSetUsingDirectCallsTest
    {
       SimulationDoneListener simulationDoneListener = createSimulationDoneListener();
       SimulationDoneCriterion simulationDoneCriterion = createSimulationDoneCriterion();
+      PlaybackListener playbackListener = createPlaybackListener();
+      PlayCycleListener playCycleListener = createPlayCycleListener();
+      scs.attachPlayCycleListener(playCycleListener);
+      scs.attachPlaybackListener(playbackListener);
       scs.addSimulateDoneListener(simulationDoneListener);
       scs.setSimulateDoneCriterion(simulationDoneCriterion);
+
+      ArrayList<PlayCycleListener> playCycleListenersFromSCS = scs.getPlayCycleListeners();
+      assertArrayOfObjectsContainsTheObject(playCycleListenersFromSCS, playCycleListener);
 
       simulationDoneListenerHasBeenNotified.set(false);
       callSCSMethodSimulateOneTimeStep(scs);
@@ -855,6 +908,13 @@ public class SimulationConstructionSetUsingDirectCallsTest
       boolean isSCSSimulatingAfterCriterion = scs.isSimulating();
       assertTrue(isSCSSimulatingBeforeCriterion);
       assertFalse(isSCSSimulatingAfterCriterion);
+
+      realTimeRateInSCS.set(Double.POSITIVE_INFINITY);
+      scs.play();
+      ThreadTools.sleep(1000);
+      double realTimeRateFromSCS = scs.getPlaybackRealTimeRate();
+      assertEquals(realTimeRateFromSCS, realTimeRateInSCS.getDoubleValue(), epsilon);
+
    }
 
    @Test
@@ -968,6 +1028,70 @@ public class SimulationConstructionSetUsingDirectCallsTest
 
    // local methods
 
+   private PlayCycleListener createPlayCycleListener()
+   {
+      PlayCycleListener playCycleListener = new PlayCycleListener()
+      {
+         public void update(int tick)
+         {
+         }
+      };
+
+      return playCycleListener;
+   }
+
+   private ArrayList<CollisionGroup> createArrayListOfCollisionGroup(int numberOfElements)
+   {
+      ArrayList<CollisionGroup> arrayListOfCollisionGroup = new ArrayList<CollisionGroup>();
+      for (int i = 0; i < numberOfElements; i++)
+      {
+         arrayListOfCollisionGroup.add(new CollisionGroup());
+      }
+
+      return arrayListOfCollisionGroup;
+   }
+
+   private <T> void assertArrayOfObjectsContainsTheArrayOfObject(ArrayList<T> mainArrayList, ArrayList<T> arrayList)
+   {
+      int numberOfElements = arrayList.size();
+
+      for (int i = 0; i < numberOfElements; i++)
+      {
+         assertArrayOfObjectsContainsTheObject(mainArrayList, arrayList.get(i));
+      }
+   }
+
+   private <T> void assertArrayOfObjectsContainsTheObject(ArrayList<T> arrayList, T object)
+   {
+      int numberOfElements = arrayList.size();
+      boolean ret = false;
+
+      for (int i = 0; i < numberOfElements; i++)
+      {
+         ret = ret || arrayList.get(i).equals(object);
+      }
+
+      assertTrue(ret);
+   }
+
+   private void assertYoVariableListContainsArrayListOfVariables(YoVariableList yoVariableList, ArrayList<YoVariableList> arrayLists)
+   {
+      int numberOfList = arrayLists.size();
+
+      for (int j = 0; j < numberOfList; j++)
+      {
+         YoVariable[] variables = arrayLists.get(j).getAllVariables();
+
+         int numberOfVariables = variables.length;
+
+         for (int i = 0; i < numberOfVariables; i++)
+         {
+            boolean containsTheVar = yoVariableList.containsVariable(variables[i]);
+            assertTrue(containsTheVar);
+         }
+      }
+   }
+
    private void assertYoVariableListContainsVariables(YoVariableList yoVariableList, YoVariable[] variables)
    {
       int numberOfVariables = variables.length;
@@ -977,6 +1101,37 @@ public class SimulationConstructionSetUsingDirectCallsTest
          boolean containsTheVar = yoVariableList.containsVariable(variables[i]);
          assertTrue(containsTheVar);
       }
+   }
+
+   private ArrayList<YoVariableList> createArrayListOfDoubleYoVariableWithDummyRegistry(String[] variableNames1, double[] varValues1, String[] variableNames2,
+         double[] varValues2)
+   {
+      ArrayList<YoVariableList> arrayLists = new ArrayList<YoVariableList>();
+      YoVariableList[] yoVariableList = createTwoVarListOfDoubleYoVariablesWithDummyRegistry(variableNames1, varValues1, variableNames2, varValues2);
+
+      for (int i = 0; i < yoVariableList.length; i++)
+      {
+         arrayLists.add(yoVariableList[i]);
+      }
+
+      return arrayLists;
+   }
+
+   private YoVariableList createVarListOfDoubleYoVariableWithDummyRegistry(String[] variableNames, double[] varValues)
+   {
+      DoubleYoVariable[] doubleYoVariables = null;
+
+      if (variableNames.length == varValues.length)
+      {
+         YoVariableRegistry registry = new YoVariableRegistry("dummy");
+         doubleYoVariables = createAndSetDoubleYoVariableToRegistry(variableNames, varValues, registry);
+      }
+      else
+      {
+         System.out.print("Input arrays have different length.");
+      }
+
+      return createYoVariableList("yoVariableList", doubleYoVariables);
    }
 
    private YoVariableList[] createTwoVarListOfDoubleYoVariablesWithDummyRegistry(String[] variableNames1, double[] varValues1, String[] variableNames2,
@@ -1135,6 +1290,31 @@ public class SimulationConstructionSetUsingDirectCallsTest
       int currentOutPoint = scs.getOutPoint();
       scs.setIndex(currentOutPoint - 1);
       scs.setOutPoint();
+   }
+
+   private PlaybackListener createPlaybackListener()
+   {
+      PlaybackListener listener = new PlaybackListener()
+      {
+
+         @Override
+         public void indexChanged(int newIndex, double newTime)
+         {
+         }
+
+         @Override
+         public void play(double realTimeRate)
+         {
+            realTimeRateInSCS.set(realTimeRate);
+         }
+
+         @Override
+         public void stop()
+         {
+         }
+      };
+
+      return listener;
    }
 
    private SimulationDoneCriterion createSimulationDoneCriterion()
