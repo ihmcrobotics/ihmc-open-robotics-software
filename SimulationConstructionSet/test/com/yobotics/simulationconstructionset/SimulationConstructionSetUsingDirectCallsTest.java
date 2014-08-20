@@ -128,6 +128,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private String[] graphConfigurationNames = { "simpleGraphConfiguration", "simpleGraphConfiguration2" };
    private String extraPanelConfigurationName = "simpleExtraPanelConfigurationName";
    private String simpleComponentName =  "simpleComponent";
+   private String runningName = "simpleRunningName";
    private String[][] graphGroupVars = { cameraTrackingXYZVarNames, cameraDollyXYZVarNames };
    private String[][][] graphGroupVarsWithConfig = { { cameraTrackingXYZVarNames, { "config_1" } }, { cameraDollyXYZVarNames, { "config_2" } } };
    private String simpleRobotFirstVariableName = getFirstVariableNameFromRobotRegistry(simpleRobot);
@@ -225,6 +226,10 @@ public class SimulationConstructionSetUsingDirectCallsTest
       scs.toggleKeyPointMode();
       boolean finalKeyPointStatus = scs.isKeyPointModeToggled();
       assertBooleansAreOpposite(initialKeyPointStatus, finalKeyPointStatus);
+      
+      scs.setRunName(runningName);
+      String runningNameFromSCS = scs.getRunningName();
+      assertEquals(runningName, runningNameFromSCS);
    }
 
    @Test
@@ -663,6 +668,10 @@ public class SimulationConstructionSetUsingDirectCallsTest
       int ticksPerCycle = computeTicksPerPlayCycle(simulateDT, recordFreq, realTimeRate, frameRate);
       double ticksPerCycleFromSCS = scs.getTicksPerPlayCycle();
       assertEquals(ticksPerCycle, ticksPerCycleFromSCS, epsilon);
+      
+      scs.setTime(Math.PI);
+      double timeFromSCS = scs.getTime();
+      assertEquals(Math.PI, timeFromSCS);
    }
 
    @Test
@@ -1383,19 +1392,15 @@ public class SimulationConstructionSetUsingDirectCallsTest
    {
       PlaybackListener listener = new PlaybackListener()
       {
-
-         @Override
          public void indexChanged(int newIndex, double newTime)
          {
          }
 
-         @Override
          public void play(double realTimeRate)
          {
             realTimeRateInSCS.set(realTimeRate);
          }
 
-         @Override
          public void stop()
          {
          }
