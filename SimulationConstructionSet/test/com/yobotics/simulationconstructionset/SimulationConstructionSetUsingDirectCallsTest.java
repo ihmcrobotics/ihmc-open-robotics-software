@@ -49,6 +49,8 @@ import com.yobotics.simulationconstructionset.gui.camera.CameraTrackAndDollyYoVa
 import com.yobotics.simulationconstructionset.gui.config.GraphGroupList;
 import com.yobotics.simulationconstructionset.robotcommprotocol.RobotSocketConnection;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
 
 public class SimulationConstructionSetUsingDirectCallsTest
@@ -58,7 +60,8 @@ public class SimulationConstructionSetUsingDirectCallsTest
    // - the registry "simpleRegistry" is empty
 
    private static final long CLOSING_SLEEP_TIME = 2000;
-
+   private static final String SCS_VERSION = "12.06.22";
+   
    private static double epsilon = 1e-10;
 
    private int recordFrequency = 10;
@@ -129,6 +132,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private String extraPanelConfigurationName = "simpleExtraPanelConfigurationName";
    private String simpleComponentName =  "simpleComponent";
    private String runningName = "simpleRunningName";
+   private String dynamicGraphicObjectsListName = "simpleDynamicGraphicObjectsList";
    private String[][] graphGroupVars = { cameraTrackingXYZVarNames, cameraDollyXYZVarNames };
    private String[][][] graphGroupVarsWithConfig = { { cameraTrackingXYZVarNames, { "config_1" } }, { cameraDollyXYZVarNames, { "config_2" } } };
    private String simpleRobotFirstVariableName = getFirstVariableNameFromRobotRegistry(simpleRobot);
@@ -155,6 +159,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private DoubleYoVariable realTimeRateInSCS = new DoubleYoVariable("realTimeRate", dummyRegistry);
    private BooleanYoVariable processDataHasBeenCalled = new BooleanYoVariable("processDataHasBeenCalled", dummyRegistry);
    private BooleanYoVariable toggleKeyPointModeCommandListenerHasBeenCalled = new BooleanYoVariable("toggleKeyPointModeCommandListenerHasBeenCalled", dummyRegistry);
+   private DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = createDynamicGraphicObjectsListRegistryWithObject();
    private SimulationConstructionSet scs;
 
    @BeforeClass
@@ -230,6 +235,9 @@ public class SimulationConstructionSetUsingDirectCallsTest
       scs.setRunName(runningName);
       String runningNameFromSCS = scs.getRunningName();
       assertEquals(runningName, runningNameFromSCS);
+      
+      String scsVersion = scs.getVersion();
+      assertEquals(SCS_VERSION, scsVersion);
    }
 
    @Test
@@ -555,6 +563,8 @@ public class SimulationConstructionSetUsingDirectCallsTest
    @Test
    public void test3DGraphicsMethods()
    {
+      scs.addDynamicGraphicObjectListRegistries(dynamicGraphicObjectsListRegistry);
+      
       Graphics3DNode graphics3DNodeFromSCS = scs.addStaticLinkGraphics(staticLinkGraphics);
       assertNotNull(graphics3DNodeFromSCS);
 
@@ -587,6 +597,14 @@ public class SimulationConstructionSetUsingDirectCallsTest
       scs.registerCollisionGroups(arrayListOfCollisionGroup);
       ArrayList<CollisionGroup> collisionGroupFromSCS2 = scs.getCollisionGroups();
       assertArrayOfObjectsContainsTheArrayOfObject(collisionGroupFromSCS2, arrayListOfCollisionGroup);
+
+      ArrayList<DynamicGraphicObjectsListRegistry> dynamicGraphicObjectListRegistriesFromSCS = scs.getDynamicGraphicObjectsListRegistries();
+      assertArrayOfObjectsContainsTheObject(dynamicGraphicObjectListRegistriesFromSCS, dynamicGraphicObjectsListRegistry);
+      
+      scs.setDynamicGraphicObjectsListVisible(dynamicGraphicObjectsListName, true);
+      scs.hideAllDynamicGraphicObjects();
+      boolean dynamicGraphicObjectsAreShowing = scs.checkAllDynamicGraphicObjectsListRegistriesAreShowing();
+      assertFalse(dynamicGraphicObjectsAreShowing);
    }
 
    @Test
@@ -740,6 +758,13 @@ public class SimulationConstructionSetUsingDirectCallsTest
       double currentSCSIndex8 = scs.getIndex();
       assertFalse(simulationRewoundListenerHasBeenNotified.getBooleanValue());
       assertEquals(1.0, currentSCSIndex8, epsilon);
+      
+      scs.setIndex(0);
+      simulationRewoundListenerHasBeenNotified.set(false);
+      scs.setIndexButDoNotNotifySimulationRewoundListeners(ticksIncrease);
+      double currentSCSIndex9 = scs.getIndex();
+      assertFalse(simulationRewoundListenerHasBeenNotified.getBooleanValue());
+      assertEquals(ticksIncrease, currentSCSIndex9, epsilon);
 
       scs.stopSimulationThread();
       boolean isThreadRunningFromSCS = scs.isSimulationThreadUpAndRunning();
@@ -1075,6 +1100,16 @@ public class SimulationConstructionSetUsingDirectCallsTest
    }
 
    // local methods
+   
+   private DynamicGraphicObjectsListRegistry createDynamicGraphicObjectsListRegistryWithObject()
+   {
+      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+      DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList(dynamicGraphicObjectsListName);
+      dynamicGraphicObjectsList.add(dynamicGraphicObject);
+      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
+      
+      return dynamicGraphicObjectsListRegistry;
+   }
    
    private ToggleKeyPointModeCommandListener createToggleKeyPointModeCommandListener()
    {
