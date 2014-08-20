@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge;
+package us.ihmc.darpaRoboticsChallenge.environment;
 
 import java.util.ArrayList;
 import java.util.Random;

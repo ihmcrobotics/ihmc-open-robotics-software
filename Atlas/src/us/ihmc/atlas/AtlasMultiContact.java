@@ -18,8 +18,8 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCSimulationFactory;
-import us.ihmc.darpaRoboticsChallenge.MultiContactTestEnvironment;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
+import us.ihmc.darpaRoboticsChallenge.environment.MultiContactTestEnvironment;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;

@@ -13,8 +13,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.bambooTools.BambooTools;
-import us.ihmc.darpaRoboticsChallenge.DRCWallWorldEnvironment;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
+import us.ihmc.darpaRoboticsChallenge.environment.DRCWallWorldEnvironment;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCUserInterfaceNetworkingManager;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationNetworkTestHelper;
 import us.ihmc.utilities.MemoryTools;

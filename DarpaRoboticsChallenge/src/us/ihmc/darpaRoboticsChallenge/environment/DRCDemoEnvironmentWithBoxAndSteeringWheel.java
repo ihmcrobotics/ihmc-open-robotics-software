@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge;
+package us.ihmc.darpaRoboticsChallenge.environment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,6 +7,8 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
+import us.ihmc.darpaRoboticsChallenge.ContactController;
+import us.ihmc.darpaRoboticsChallenge.DRCVehicleModelObjects;
 import us.ihmc.darpaRoboticsChallenge.controllers.SteeringWheelDisturbanceController;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.driving.VehicleObject;

@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge;
+package us.ihmc.darpaRoboticsChallenge.environment;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -12,6 +12,7 @@ import javax.vecmath.Vector3d;
 import org.apache.commons.math3.util.FastMath;
 
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
+import us.ihmc.darpaRoboticsChallenge.ContactController;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 

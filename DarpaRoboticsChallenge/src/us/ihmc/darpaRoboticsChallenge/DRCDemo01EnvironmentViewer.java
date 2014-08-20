@@ -1,6 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge;
 
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
+import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.jme.JMEGraphics3DAdapter;
