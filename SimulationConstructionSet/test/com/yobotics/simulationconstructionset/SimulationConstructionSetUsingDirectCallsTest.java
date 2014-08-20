@@ -671,7 +671,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       
       scs.setTime(Math.PI);
       double timeFromSCS = scs.getTime();
-      assertEquals(Math.PI, timeFromSCS);
+      assertEquals(Math.PI, timeFromSCS, 1e-7);
    }
 
    @Test
