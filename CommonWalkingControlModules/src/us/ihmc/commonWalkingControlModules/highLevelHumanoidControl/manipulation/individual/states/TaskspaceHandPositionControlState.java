@@ -20,8 +20,7 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
-import com.yobotics.simulationconstructionset.util.trajectory.OrientationTrajectoryGenerator;
-import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
+import com.yobotics.simulationconstructionset.util.trajectory.PoseTrajectoryGenerator;
 
 /**
  * @author twan
@@ -45,8 +44,7 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
    protected final FrameVector desiredAngularVelocity = new FrameVector(worldFrame);
    protected final FrameVector desiredAngularAcceleration = new FrameVector(worldFrame);
 
-   protected PositionTrajectoryGenerator positionTrajectoryGenerator;
-   protected OrientationTrajectoryGenerator orientationTrajectoryGenerator;
+   protected PoseTrajectoryGenerator poseTrajectoryGenerator;
    protected RigidBodySpatialAccelerationControlModule handSpatialAccelerationControlModule;
 
    private final DoubleYoVariable doneTrajectoryTime;
@@ -77,11 +75,10 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
 
    protected SpatialAccelerationVector computeDesiredSpatialAcceleration()
    {
-      positionTrajectoryGenerator.compute(getTimeInCurrentState());
-      orientationTrajectoryGenerator.compute(getTimeInCurrentState());
+      poseTrajectoryGenerator.compute(getTimeInCurrentState());
 
-      positionTrajectoryGenerator.packLinearData(desiredPosition, desiredVelocity, desiredAcceleration);
-      orientationTrajectoryGenerator.packAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+      poseTrajectoryGenerator.packLinearData(desiredPosition, desiredVelocity, desiredAcceleration);
+      poseTrajectoryGenerator.packAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
 
       handSpatialAccelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredVelocity, desiredAngularVelocity, desiredAcceleration,
             desiredAngularAcceleration, getBase());
@@ -100,8 +97,8 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
    @Override
    public void doTransitionIntoAction()
    {
-      positionTrajectoryGenerator.initialize();
-      orientationTrajectoryGenerator.initialize();
+      poseTrajectoryGenerator.showVisualization();
+      poseTrajectoryGenerator.initialize();
       doneTrajectoryTime.set(Double.NaN);
    }
 
@@ -122,7 +119,7 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
    @Override
    public void doAction()
    {
-      if (Double.isNaN(doneTrajectoryTime.getDoubleValue()) && positionTrajectoryGenerator.isDone() && orientationTrajectoryGenerator.isDone())
+      if (Double.isNaN(doneTrajectoryTime.getDoubleValue()) && poseTrajectoryGenerator.isDone())
          doneTrajectoryTime.set(getTimeInCurrentState());
 
       super.doAction();
@@ -139,6 +136,9 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
       {
          dynamicGraphicReferenceFrame.update();
       }
+
+      if (poseTrajectoryGenerator.isDone())
+         poseTrajectoryGenerator.hideVisualization();
    }
 
    public void setHoldPositionDuration(double time)
@@ -146,11 +146,10 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
       holdPositionDuration.set(time);
    }
 
-   public void setTrajectory(PositionTrajectoryGenerator positionTrajectoryGenerator, OrientationTrajectoryGenerator orientationTrajectoryGenerator,
+   public void setTrajectory(PoseTrajectoryGenerator poseTrajectoryGenerator,
          RigidBodySpatialAccelerationControlModule rigidBodySpatialAccelerationControlModule)
    {
-      this.positionTrajectoryGenerator = positionTrajectoryGenerator;
-      this.orientationTrajectoryGenerator = orientationTrajectoryGenerator;
+      this.poseTrajectoryGenerator = poseTrajectoryGenerator;
       this.taskspaceConstraintData.set(getBase(), getEndEffector());
       this.handSpatialAccelerationControlModule = rigidBodySpatialAccelerationControlModule;
    }
@@ -160,16 +159,16 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
       // FIXME: hack
 
       FramePoint point = new FramePoint();
-      positionTrajectoryGenerator.get(point);
+      poseTrajectoryGenerator.get(point);
       return point.getReferenceFrame();
    }
 
    public FramePose getDesiredPose()
    {
-      positionTrajectoryGenerator.get(desiredPosition);
+      poseTrajectoryGenerator.get(desiredPosition);
       desiredPosition.changeFrame(getFrameToControlPoseOf());
 
-      orientationTrajectoryGenerator.get(desiredOrientation);
+      poseTrajectoryGenerator.get(desiredOrientation);
       desiredOrientation.changeFrame(getFrameToControlPoseOf());
 
       return new FramePose(desiredPosition, desiredOrientation);

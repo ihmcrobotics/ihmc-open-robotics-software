@@ -25,8 +25,7 @@ import com.yobotics.simulationconstructionset.util.controller.PIDController;
 import com.yobotics.simulationconstructionset.util.controller.YoPIDGains;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.math.filter.RateLimitedYoVariable;
-import com.yobotics.simulationconstructionset.util.trajectory.OrientationTrajectoryGenerator;
-import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
+import com.yobotics.simulationconstructionset.util.trajectory.PoseTrajectoryGenerator;
 
 public class InverseKinematicsTaskspaceHandPositionControlState extends TaskspaceHandPositionControlState
 {
@@ -130,10 +129,10 @@ public class InverseKinematicsTaskspaceHandPositionControlState extends Taskspac
    }
    
    @Override
-   public void setTrajectory(PositionTrajectoryGenerator positionTrajectoryGenerator, OrientationTrajectoryGenerator orientationTrajectoryGenerator,
+   public void setTrajectory(PoseTrajectoryGenerator poseTrajectoryGenerator,
          RigidBodySpatialAccelerationControlModule rigidBodySpatialAccelerationControlModule)
    {
-      super.setTrajectory(positionTrajectoryGenerator, orientationTrajectoryGenerator, rigidBodySpatialAccelerationControlModule);
-      inverseKinematicsCalculator.setTrajectory(positionTrajectoryGenerator, orientationTrajectoryGenerator, rigidBodySpatialAccelerationControlModule.getTrackingFrame());
+      super.setTrajectory(poseTrajectoryGenerator, rigidBodySpatialAccelerationControlModule);
+      inverseKinematicsCalculator.setTrajectory(poseTrajectoryGenerator, poseTrajectoryGenerator, rigidBodySpatialAccelerationControlModule.getTrackingFrame());
    }
 }
