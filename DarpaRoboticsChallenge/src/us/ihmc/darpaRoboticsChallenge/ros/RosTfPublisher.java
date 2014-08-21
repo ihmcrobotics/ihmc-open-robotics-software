@@ -29,9 +29,6 @@ public class RosTfPublisher implements RosTfPublisherInterface
    public void publish(Transform3D transform3d, long timeStamp,
          String parentFrame, String childFrame)
    {
-      
-      System.out.println("timeStamp: " + timeStamp + ", " + parentFrame + " -> " + childFrame + "\n" + transform3d);
-      
       tfPublisher.publish(transform3d, timeStamp, parentFrame, childFrame);
    }
 }
