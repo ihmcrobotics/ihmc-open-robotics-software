@@ -7,8 +7,8 @@ import java.util.Map;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.initialSetup.MultiContactDRCRobotInitialSetup;
 import us.ihmc.atlas.initialSetup.PushUpDRCRobotInitialSetup;
+import us.ihmc.atlas.parameters.AtlasArmControllerParameters;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
-import us.ihmc.atlas.parameters.AtlasRobotMultiContactControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
@@ -79,9 +79,7 @@ public class AtlasMultiContact
       scsInitialSetup.setRecordFrequency(recordFrequency);
       scsInitialSetup.setInitializeEstimatorToActual(true);
 
-      ArmControllerParameters armControllerParameters = robotModel.getArmControllerParameters();
-
-      WalkingControllerParameters controllerParameters = new AtlasRobotMultiContactControllerParameters()
+      ArmControllerParameters armControllerParameters = new AtlasArmControllerParameters(false)
       {
          public Map<OneDoFJoint, Double> getDefaultArmJointPositions(FullRobotModel fullRobotModel, RobotSide robotSide)
          {
@@ -98,6 +96,8 @@ public class AtlasMultiContact
             return jointPositions;
          }
       };
+
+      WalkingControllerParameters controllerParameters = robotModel.getWalkingControllerParameters();
 
       MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(
             contactableBodiesFactory, sensorInformation.getFeetForceSensorNames(), controllerParameters, armControllerParameters,
