@@ -6,7 +6,7 @@
  *  When the robot is static, the projection of CoM on the flatground should be equal to CoP
  *  
  */
-package us.ihmc.systemidentification;
+package us.ihmc.CoM;
 
 import com.yobotics.simulationconstructionset.DataBuffer;
 import com.yobotics.simulationconstructionset.Link;
