@@ -34,6 +34,8 @@ public class RosMainNode implements NodeMain
 
    private final URI masterURI;
    private boolean isStarted = false;
+   
+   private boolean useTf2 = false;
 
    private final String graphName;
    private ParameterTree parameters;
@@ -41,8 +43,14 @@ public class RosMainNode implements NodeMain
   
    public RosMainNode(URI masterURI, String graphName)
    {
+      this(masterURI, graphName, false);
+   }
+   
+   public RosMainNode(URI masterURI, String graphName, boolean useTf2)
+   {
       this.masterURI = masterURI;
       this.graphName = graphName;
+      this.useTf2 = useTf2;
    }
 
    public boolean isStarted()
@@ -53,6 +61,11 @@ public class RosMainNode implements NodeMain
    public ParameterTree getParameters()
    {
       return parameters;
+   }
+   
+   public boolean isUseTf2()
+   {
+      return useTf2;
    }
    
    public void attachServiceClient(String topicName, RosServiceClient<? extends Message, ? extends Message> client)

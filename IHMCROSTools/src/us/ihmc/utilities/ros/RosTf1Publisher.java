@@ -20,11 +20,11 @@ import org.ros.message.Time;
 import std_msgs.Header;
 import tf.tfMessage;
 
-public class RosTfPublisher extends RosTopicPublisher<tf.tfMessage>
+public class RosTf1Publisher extends RosTopicPublisher<tf.tfMessage> implements RosTfPublisherInterface
 {
    private TopicMessageFactory topicMessageFactory;
    private int seq;
-   public RosTfPublisher(boolean latched)
+   public RosTf1Publisher(boolean latched)
    {
       super(tf.tfMessage._TYPE, latched);
       MessageDefinitionProvider messageDefinitionProvider = new MessageDefinitionReflectionProvider();

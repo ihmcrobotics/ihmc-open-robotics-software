@@ -500,10 +500,10 @@ public class SDFFullRobotModel implements FullRobotModel
 
    public ReferenceFrame getLidarBaseFrame(String name)
    {
-      for(String st : lidarBaseFrames.keySet())
-      {
-         System.out.println(st);
-      }
+//      for(String st : lidarBaseFrames.keySet())
+//      {
+//         System.out.println(st);
+//      }
       return lidarBaseFrames.get(name);
    }
 
