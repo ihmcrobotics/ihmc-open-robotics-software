@@ -132,11 +132,12 @@ public class HandControlModule
       handSpatialAccelerationControlModule.setGains(taskspaceGains);
 
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
+      boolean visualize = true;
       holdPoseTrajectoryGenerator = new ConstantPoseTrajectoryGenerator(name + "Hold", true, worldFrame, parentRegistry);
-      straightLinePoseTrajectoryGenerator = new StraightLinePoseTrajectoryGenerator(name, true, worldFrame, registry);
-      finalApproachPoseTrajectoryGenerator = new FinalApproachPoseTrajectoryGenerator(name, true, worldFrame, registry, dynamicGraphicObjectsListRegistry);
-      initialClearancePoseTrajectoryGenerator = new InitialClearancePoseTrajectoryGenerator(name + "MoveAway", true, worldFrame, registry, dynamicGraphicObjectsListRegistry);
-      leadInOutPoseTrajectoryGenerator = new LeadInOutPoseTrajectoryGenerator(name + "Swing", true, worldFrame, registry, dynamicGraphicObjectsListRegistry);
+      straightLinePoseTrajectoryGenerator = new StraightLinePoseTrajectoryGenerator(name + "StraightLine", true, worldFrame, registry, visualize, dynamicGraphicObjectsListRegistry);
+      finalApproachPoseTrajectoryGenerator = new FinalApproachPoseTrajectoryGenerator(name, true, worldFrame, registry, visualize, dynamicGraphicObjectsListRegistry);
+      initialClearancePoseTrajectoryGenerator = new InitialClearancePoseTrajectoryGenerator(name + "MoveAway", true, worldFrame, registry, visualize, dynamicGraphicObjectsListRegistry);
+      leadInOutPoseTrajectoryGenerator = new LeadInOutPoseTrajectoryGenerator(name + "Swing", true, worldFrame, registry, visualize, dynamicGraphicObjectsListRegistry);
 
       loadBearingControlState = new LoadBearingPlaneHandControlState(namePrefix, HandControlState.LOAD_BEARING, robotSide, momentumBasedController,
             fullRobotModel.getElevator(), hand, jacobianId, registry);
@@ -225,9 +226,6 @@ public class HandControlModule
          {
             isExecutingHandStep.set(false);
             handSpatialAccelerationControlModule.setGains(taskspaceLoadBearingGains);
-            finalApproachPoseTrajectoryGenerator.showVisualization(false);
-            leadInOutPoseTrajectoryGenerator.showVisualization(false);
-            initialClearancePoseTrajectoryGenerator.showVisualization(false);
          }
       };
       StateTransition<HandControlState> swingToSupportTransition = new StateTransition<HandControlState>(HandControlState.LOAD_BEARING, swingToSupportCondition, swingToSupportAction);
@@ -248,7 +246,7 @@ public class HandControlModule
    public void executeTaskSpaceTrajectory(PoseTrajectoryGenerator poseTrajectory)
    {
       handSpatialAccelerationControlModule.setGains(taskspaceGains);
-      taskSpacePositionControlState.setTrajectory(poseTrajectory, poseTrajectory, handSpatialAccelerationControlModule);
+      taskSpacePositionControlState.setTrajectory(poseTrajectory, handSpatialAccelerationControlModule);
       requestedState.set(taskSpacePositionControlState.getStateEnum());
       stateMachine.checkTransitionConditions();
       isExecutingHandStep.set(false);
@@ -291,7 +289,6 @@ public class HandControlModule
       if (stateMachine.getCurrentStateEnum() != HandControlState.LOAD_BEARING)
       {
          FramePose pose = computeDesiredFramePose(trajectoryFrame);
-         finalApproachPoseTrajectoryGenerator.showVisualization(true);
          finalApproachPoseTrajectoryGenerator.registerAndSwitchFrame(trajectoryFrame);
          finalApproachPoseTrajectoryGenerator.setInitialPose(pose);
          finalApproachPoseTrajectoryGenerator.setFinalPose(finalDesiredPose);
@@ -309,7 +306,6 @@ public class HandControlModule
    public void moveAwayObject(FramePose finalDesiredPose, FrameVector initialDirection, double clearance, double time, ReferenceFrame trajectoryFrame)
    {
       FramePose pose = computeDesiredFramePose(trajectoryFrame);
-      initialClearancePoseTrajectoryGenerator.showVisualization(true);
       initialClearancePoseTrajectoryGenerator.registerAndSwitchFrame(trajectoryFrame);
       initialClearancePoseTrajectoryGenerator.setInitialPose(pose);
       initialClearancePoseTrajectoryGenerator.setFinalPose(finalDesiredPose);
@@ -321,7 +317,6 @@ public class HandControlModule
    private void moveAwayObjectTowardsOtherObject(FramePose finalDesiredPose, FrameVector initialDirection, FrameVector finalDirection, double clearance, double time, ReferenceFrame trajectoryFrame)
    {
       FramePose pose = computeDesiredFramePose(trajectoryFrame);
-      leadInOutPoseTrajectoryGenerator.showVisualization(true);
       leadInOutPoseTrajectoryGenerator.registerAndSwitchFrame(trajectoryFrame);
       leadInOutPoseTrajectoryGenerator.setInitialLeadOut(pose, initialDirection, clearance);
       leadInOutPoseTrajectoryGenerator.setFinalLeadIn(finalDesiredPose, finalDirection, clearance);

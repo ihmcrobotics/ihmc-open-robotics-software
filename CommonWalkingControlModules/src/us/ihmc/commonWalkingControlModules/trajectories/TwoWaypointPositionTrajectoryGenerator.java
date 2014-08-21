@@ -714,4 +714,16 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       packVelocity(velocityToPack);
       packAcceleration(accelerationToPack);
    }
+
+   @Override
+   public void showVisualization()
+   {
+      // TODO Auto-generated method stub
+   }
+
+   @Override
+   public void hideVisualization()
+   {
+      // TODO Auto-generated method stub
+   }
 }
