@@ -37,10 +37,10 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetPr
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorControllerStateHandler;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
-import us.ihmc.iRobot.control.IRobotControlThreadManager;
+import us.ihmc.iRobot.control.IRobotHandCommandManager;
 import us.ihmc.iRobot.model.iRobotHandModel;
 import us.ihmc.robotSide.RobotSide;
-import us.ihmc.robotiq.control.RobotiqControlThreadManager;
+import us.ihmc.robotiq.control.RobotiqHandCommandManager;
 import us.ihmc.robotiq.model.RobotiqHandModel;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.utilities.math.TimeTools;
@@ -306,10 +306,10 @@ public class AtlasRobotModel implements DRCRobotModel
          switch (getHandType())
          {
          case IROBOT:
-            return new HandCommandManager(controllerStateHandler, IRobotControlThreadManager.class);
+            return new IRobotHandCommandManager(controllerStateHandler);
 
          case ROBOTIQ:
-            return new HandCommandManager(controllerStateHandler, RobotiqControlThreadManager.class);
+            return new RobotiqHandCommandManager(controllerStateHandler);
 
          default:
             break;
