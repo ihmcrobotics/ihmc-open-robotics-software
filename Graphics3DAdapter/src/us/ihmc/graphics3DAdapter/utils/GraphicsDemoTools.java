@@ -6,6 +6,7 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import javax.media.j3d.Transform3D;
@@ -21,6 +22,7 @@ import us.ihmc.graphics3DAdapter.camera.ClassicCameraController;
 import us.ihmc.graphics3DAdapter.camera.SimpleCameraTrackingAndDollyPositionHolder;
 import us.ihmc.graphics3DAdapter.camera.ViewportAdapter;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
+import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DInstruction;
@@ -31,6 +33,7 @@ import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
 import us.ihmc.utilities.BlinkingDaemon;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.VectorTuple;
+import us.ihmc.utilities.math.geometry.Sphere3d;
 
 public class GraphicsDemoTools
 {
@@ -210,6 +213,23 @@ public class GraphicsDemoTools
       jFrame.pack();
       jFrame.setVisible(true);
       jFrame.setSize(800, 600);
+   }
+   
+   public static Graphics3DNode createPointCloud(String name, List<Point3d> worldPoints, double pointRadius, AppearanceDefinition appearance)
+   {
+      // TODO Change to point sprite mesh
+      Graphics3DNode pointCloud = new Graphics3DNode("PointCloud" + name);
+
+      for (int i = 0; i < worldPoints.size(); i++)
+      {
+         Graphics3DNode worldPointNode = new Graphics3DNode(name + "point" + i, Graphics3DNodeType.VISUALIZATION,
+               new Graphics3DObject(new Sphere3d(pointRadius), appearance));
+         worldPointNode.translate(worldPoints.get(i).getX(), worldPoints.get(i).getY(), worldPoints.get(i).getZ());
+         
+         pointCloud.addChild(worldPointNode);
+      }
+      
+      return pointCloud;
    }
 
    public static void daemonizeAllRunnables(ArrayList<Runnable> runnables)
