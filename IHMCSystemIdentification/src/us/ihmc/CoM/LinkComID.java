@@ -12,7 +12,6 @@ public class LinkComID
       this.residual = residual;
    }
 
-
    public void optimize()
    {
       new FactoryOptimization();
@@ -26,13 +25,13 @@ public class LinkComID
       boolean converged;
 
       int maxIter = 10;
-      for(int i=0;i < maxIter;i++)
+      for (int i = 0; i < maxIter; i++)
       {
          converged = optimizer.iterate();
          prm = optimizer.getParameters();
          System.out.println("iter " + i + " obj: " + optimizer.getFunctionValue() + "converged " + converged);
-         
-         if(optimizer.isConverged())
+
+         if (optimizer.isConverged())
             break;
 
       }

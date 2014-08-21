@@ -22,7 +22,6 @@ import javax.vecmath.Vector3d;
 import java.awt.*;
 import java.util.ArrayList;
 
-
 /** Todo
  * 
  * @author tingfan
@@ -32,15 +31,13 @@ import java.util.ArrayList;
  * But the fact Robot model is tie with dataBuffer make it really confusing to do so. 
  */
 
-
 public class ComCopResidual implements FunctionNtoM
 {
-   static boolean lockComY=false;
+   static boolean lockComY = false;
    private Robot robot;
    private Link targetLink;
    private DataBuffer dataBuffer;
    private int[] selectedFrames;
-   
 
    /**
     * 
@@ -55,22 +52,22 @@ public class ComCopResidual implements FunctionNtoM
 
       this.robot = robot;
       targetLink = robot.getLink(linkName);
-      if(targetLink==null)
+      if (targetLink == null)
       {
          System.err.println("target link not found " + linkName);
          throw new RuntimeException("target link not found");
       }
-      
-      System.out.println("target link "+ targetLink.getName()+"mass " + targetLink.getMass() + "kg, com " + getCurrentLinkCom());
+
+      System.out.println("target link " + targetLink.getName() + "mass " + targetLink.getMass() + "kg, com " + getCurrentLinkCom());
 
       //select subframes
-      ArrayList<Integer> keyPoints= dataBuffer.getKeyPoints();
-      if(numSubsampleBetweenInOut<0)
+      ArrayList<Integer> keyPoints = dataBuffer.getKeyPoints();
+      if (numSubsampleBetweenInOut < 0)
       {
          System.out.println("Using key frames");
          selectedFrames = new int[keyPoints.size()];
-         for(int i=0;i<keyPoints.size();i++)
-            selectedFrames[i]=keyPoints.get(i);
+         for (int i = 0; i < keyPoints.size(); i++)
+            selectedFrames[i] = keyPoints.get(i);
       }
       else
       {
@@ -80,23 +77,23 @@ public class ComCopResidual implements FunctionNtoM
             numSubsampleBetweenInOut = dataBuffer.getBufferInOutLength();
             System.err.println("truncate numberSubSampleBetweenInOut to dataBufferSize " + dataBuffer.getBufferInOutLength());
          }
-         
+
          selectedFrames = new int[numSubsampleBetweenInOut];
-         for(int i=0;i<numSubsampleBetweenInOut; i++ )
+         for (int i = 0; i < numSubsampleBetweenInOut; i++)
          {
-            selectedFrames[i] = (int)Math.floor(i*dataBuffer.getBufferInOutLength()/numSubsampleBetweenInOut);
+            selectedFrames[i] = (int) Math.floor(i * dataBuffer.getBufferInOutLength() / numSubsampleBetweenInOut);
             keyPoints.add(selectedFrames[i]);
          }
       }
    }
-   
+
    public Vector3d getCurrentLinkCom()
    {
       Vector3d comOffset = new Vector3d();
       targetLink.getComOffset(comOffset);
       return comOffset;
    }
-   
+
    public void packRobotComCopSeries(ArrayList<Point3d> outCom, ArrayList<Point3d> outCop)
    {
       outCom.clear();
@@ -109,16 +106,13 @@ public class ComCopResidual implements FunctionNtoM
          Point3d modelCoM = new Point3d();
          robot.computeCenterOfMass(modelCoM);
          outCom.add(modelCoM);
-         
+
          // sensedCoP
-         Point3d sensedCoP = new Point3d(
-               dataBuffer.getVariable("sensedCoPX").getValueAsDouble(),
-               dataBuffer.getVariable("sensedCoPY").getValueAsDouble(),
+         Point3d sensedCoP = new Point3d(dataBuffer.getVariable("sensedCoPX").getValueAsDouble(), dataBuffer.getVariable("sensedCoPY").getValueAsDouble(),
                dataBuffer.getVariable("sensedCoPZ").getValueAsDouble());
          outCop.add(sensedCoP);
       }
    }
-   
 
    @Override
    public void process(double[] inParameter, double[] outError)
@@ -127,7 +121,7 @@ public class ComCopResidual implements FunctionNtoM
       {
          Vector3d lastCom = new Vector3d();
          targetLink.getComOffset(lastCom);
-         targetLink.setComOffset(inParameter[0],lastCom.y,inParameter[2]);
+         targetLink.setComOffset(inParameter[0], lastCom.y, inParameter[2]);
       }
       else
       {
@@ -135,61 +129,60 @@ public class ComCopResidual implements FunctionNtoM
       }
       ArrayList<Point3d> com = new ArrayList<>(selectedFrames.length);
       ArrayList<Point3d> cop = new ArrayList<>(selectedFrames.length);
-      
+
       packRobotComCopSeries(com, cop);
 
-      for(int i=0;i<com.size();i++)
+      for (int i = 0; i < com.size(); i++)
       {
-         outError[2*i  ] = cop.get(i).x - com.get(i).x;
-         outError[2*i+1] = cop.get(i).y - com.get(i).y;
+         outError[2 * i] = cop.get(i).x - com.get(i).x;
+         outError[2 * i + 1] = cop.get(i).y - com.get(i).y;
       }
    }
 
    @Override
    public int getNumOfInputsN()
    {
-       return 3; //x,y,z
+      return 3; //x,y,z
    }
 
-   
    @Override
    public int getNumOfOutputsM()
    {
       // dim error
-      return getNumSamples() *2; //x and y, 2d
+      return getNumSamples() * 2; //x and y, 2d
    }
-   
+
    public int getNumSamples()
    {
       return selectedFrames.length;
    }
-   
+
    //Plot model-pred - measurement on a 2d graph
-   public void showSample(int numPlotSample,String frameTitle)
+   public void showSample(int numPlotSample, String frameTitle)
    {
 
       Plotter plotter = createPlotter(frameTitle);
       // filter out zero velocity region
-      int nSamples =getNumSamples();
+      int nSamples = getNumSamples();
       ArrayList<Point3d> com = new ArrayList<>(nSamples);
       ArrayList<Point3d> cop = new ArrayList<>(nSamples);
       packRobotComCopSeries(com, cop);
 
-      for (int i = 0; i < nSamples; i += nSamples/numPlotSample )
+      for (int i = 0; i < nSamples; i += nSamples / numPlotSample)
       {
          plotter.addArtifact(new CircleArtifact("sensedCoP" + i, cop.get(i).x, cop.get(i).y, 0.005, true, Color.RED));
-         plotter.addArtifact(new CircleArtifact("modelCoM"  + i, com.get(i).x, com.get(i).y,  0.01, false, Color.RED));
+         plotter.addArtifact(new CircleArtifact("modelCoM" + i, com.get(i).x, com.get(i).y, 0.01, false, Color.RED));
       }
    }
 
-   
-   static int plotterPanelId=0;
+   static int plotterPanelId = 0;
+
    public static Plotter createPlotter(String frameTitle)
    {
       PlotterPanel plotterPanel = new PlotterPanel();
       Plotter plotter = plotterPanel.getPlotter();
       plotter.setRangeLimit(1, 2, -.2, .2, .2, -.2);
-      if(frameTitle==null)
+      if (frameTitle == null)
       {
          frameTitle = "Plotter Panel " + plotterPanelId;
       }
@@ -200,4 +193,3 @@ public class ComCopResidual implements FunctionNtoM
       return plotter;
    }
 }
-
