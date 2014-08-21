@@ -23,6 +23,8 @@ import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingMa
 import us.ihmc.darpaRoboticsChallenge.ros.ROSNativeTransformTools;
 import us.ihmc.darpaRoboticsChallenge.ros.RosRobotJointStatePublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosRobotPosePublisher;
+import us.ihmc.darpaRoboticsChallenge.ros.RosSCSLidarPublisher;
+import us.ihmc.darpaRoboticsChallenge.ros.RosTfPublisher;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.darpaRoboticsChallenge.sensors.multisense.MultiSenseSensorManager;
 import us.ihmc.utilities.net.LocalObjectCommunicator;
@@ -60,36 +62,44 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 //      {
 //         new SCSPointCloudDataReceiver(depthDataProcessor, robotPoseBuffer, scsCommunicator);
 //      }
+      
+      RosMainNode rosMainNode;
+      RosTfPublisher tfPublisher;
+      
+      if (DRCConfigParameters.SEND_SIMULATION_DATA_TO_ROS)
+      {
+         rosMainNode = new RosMainNode(rosCoreURI,
+               "darpaRoboticsChallange/networkProcessor", true);
 
+         RosNativeNetworkProcessor rosNativeNetworkProcessor;
+         if (RosNativeNetworkProcessor.hasNativeLibrary())
+         {
+            rosNativeNetworkProcessor = RosNativeNetworkProcessor.getInstance(rosCoreURI.toString());
+            rosNativeNetworkProcessor.connect();
+         } else
+         {
+            rosNativeNetworkProcessor = null;
+         }
+
+         ROSNativeTransformTools rosTransformProvider = ROSNativeTransformTools.getInstance(sensorURI);
+         rosTransformProvider.connect();
+         tfPublisher = new RosTfPublisher(rosMainNode);
+         new RosRobotPosePublisher(fieldObjectCommunicator, rosMainNode, ppsTimestampOffsetProvider, robotPoseBuffer, sensorInformation, "atlas", tfPublisher);
+         new RosRobotJointStatePublisher(fieldObjectCommunicator, rosMainNode, ppsTimestampOffsetProvider, jointMap.getOrderedJointNames(), "atlas");
+
+         ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
+         rosMainNode.execute();
+      }
+      
       if (sensorInformation.getLidarParameters().length > 0)
       {
          new SCSLidarDataReceiver(depthDataProcessor, robotPoseBuffer, scsCommunicator, ppsTimestampOffsetProvider, sdfFullRobotModel,
                sensorInformation.getLidarParameters());
-      }
-      
-      if (DRCConfigParameters.SEND_SIMULATION_DATA_TO_ROS)
-      {
-		 RosMainNode rosMainNode = new RosMainNode(rosCoreURI, "darpaRoboticsChallange/networkProcessor");
-	
-		 RosNativeNetworkProcessor rosNativeNetworkProcessor;
-	     if (RosNativeNetworkProcessor.hasNativeLibrary())
-	     {
-	        rosNativeNetworkProcessor = RosNativeNetworkProcessor.getInstance(rosCoreURI.toString());
-	        rosNativeNetworkProcessor.connect();
-	     }
-	     else
-	     {
-	        rosNativeNetworkProcessor = null;
-	     }
-	      
-	     ROSNativeTransformTools rosTransformProvider = ROSNativeTransformTools.getInstance(sensorURI);
-	     rosTransformProvider.connect();
-	      
-	     new RosRobotPosePublisher(fieldObjectCommunicator, rosMainNode, ppsTimestampOffsetProvider, robotPoseBuffer, sensorInformation, "atlas");
-	     new RosRobotJointStatePublisher(fieldObjectCommunicator, rosMainNode, ppsTimestampOffsetProvider, jointMap.getOrderedJointNames(),"atlas");
-	 
-	     ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
-	     rosMainNode.execute(); 
+         
+         if (DRCConfigParameters.SEND_SIMULATION_DATA_TO_ROS)
+         {
+            new RosSCSLidarPublisher(scsCommunicator, rosMainNode, ppsTimestampOffsetProvider, sdfFullRobotModel, sensorInformation.getLidarParameters(), tfPublisher);
+         }
       }
       
       if (DRCConfigParameters.CALIBRATE_ARM_MODE)
@@ -103,7 +113,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    public void initializePhysicalSensors(RobotPoseBuffer robotPoseBuffer, DRCNetworkProcessorNetworkingManager networkingManager,
          SDFFullRobotModel sdfFullRobotModel, ObjectCommunicator objectCommunicator, DepthDataFilter lidarDataFilter, URI sensorURI)
    {
-      RosMainNode rosMainNode = new RosMainNode(rosCoreURI, "darpaRoboticsChallange/networkProcessor");
+      RosMainNode rosMainNode = new RosMainNode(rosCoreURI, "darpaRoboticsChallange/networkProcessor", false);
       depthDataProcessor = new DepthDataProcessor(networkingManager,lidarDataFilter);
       depthDataProcessor.setTestbed(networkingManager.getControllerCommandHandler().getTestbed());
 
@@ -136,7 +146,8 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
     
       if (DRCConfigParameters.SEND_ROBOT_DATA_TO_ROS)
       {
-         RosRobotPosePublisher robotPosePublisher = new RosRobotPosePublisher(objectCommunicator, rosMainNode, ppsTimestampOffsetProvider, robotPoseBuffer, sensorInformation, "atlas");
+         RosTfPublisher tfPublisher = new RosTfPublisher(rosMainNode);
+         RosRobotPosePublisher robotPosePublisher = new RosRobotPosePublisher(objectCommunicator, rosMainNode, ppsTimestampOffsetProvider, robotPoseBuffer, sensorInformation, "atlas", tfPublisher);
          multiSenseSensorManager.setRobotPosePublisher(robotPosePublisher);
          new RosRobotJointStatePublisher(objectCommunicator, rosMainNode, ppsTimestampOffsetProvider, jointMap.getOrderedJointNames(),"atlas");
       }

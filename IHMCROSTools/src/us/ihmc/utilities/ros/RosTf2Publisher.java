@@ -20,7 +20,7 @@ import org.ros.message.Time;
 import std_msgs.Header;
 import tf2_msgs.TFMessage;
 
-public class RosTf2Publisher extends RosTopicPublisher<tf2_msgs.TFMessage>
+public class RosTf2Publisher extends RosTopicPublisher<tf2_msgs.TFMessage> implements RosTfPublisherInterface
 {
    private TopicMessageFactory topicMessageFactory;
    private int seq;

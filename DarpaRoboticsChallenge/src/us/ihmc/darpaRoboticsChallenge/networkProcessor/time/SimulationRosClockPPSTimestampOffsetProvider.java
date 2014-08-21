@@ -9,6 +9,7 @@ public class SimulationRosClockPPSTimestampOffsetProvider implements
       PPSTimestampOffsetProvider {
    
    private RosClockPublisher clockPubisher;
+   private long previousTimestamp = 0;
    
    public SimulationRosClockPPSTimestampOffsetProvider()
    {
@@ -43,9 +44,12 @@ public class SimulationRosClockPPSTimestampOffsetProvider implements
       return timeStamp;
    }
 
-   public void publishRosClock(long timeStamp)
+   public void publishRosClock(long timestamp)
    {
-      Time time = Time.fromNano(timeStamp);
+      if (timestamp <= previousTimestamp) return; // Do not set timestamps from the past, screws up ROS.
+      
+      Time time = Time.fromNano(timestamp);
       clockPubisher.publish(time);
+      previousTimestamp = timestamp;
    }
 }

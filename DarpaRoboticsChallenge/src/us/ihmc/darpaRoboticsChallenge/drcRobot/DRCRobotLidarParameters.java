@@ -13,33 +13,18 @@ public class DRCRobotLidarParameters implements DRCRobotSensorParameters
    private final boolean useRosForTransformFromPoseToSensor;
    private final int lidarId;
 
-   public DRCRobotLidarParameters(String lidarSensorName, String laserTopic, String lidarSpindleJointName, String lidarSpindleJointTopic,
-         String lidarToRosHandoffFrameInSdf, String lidarBaseFrameForRos, String lidarEndFrameForRos, double lidar_spindle_velocity, int lidarId)
+   public DRCRobotLidarParameters(boolean useRosForTransformFromPoseToSensor, String lidarSensorName, String laserTopic, String lidarSpindleJointName, String lidarSpindleJointTopic,
+         String poseFrameName, String lidarBaseFrameForRos, String lidarEndFrameForRos, double lidar_spindle_velocity, int lidarId)
    {
+      this.useRosForTransformFromPoseToSensor = useRosForTransformFromPoseToSensor;
       this.lidarSensorName = lidarSensorName;//"head_hokuyo_sensor"
       this.laserTopic = laserTopic;//multisense_namespace+"/lidar_scan"
       this.lidarSpindleJointName = lidarSpindleJointName;//"hokuyo_joint";
       this.lidarSpindleJointTopic = lidarSpindleJointTopic;//multisense_namespace + "/joint_states";
-      this.poseFrameName = lidarToRosHandoffFrameInSdf;//"head";
+      this.poseFrameName = poseFrameName;//"head";
       this.lidarBaseFrameForRos = lidarBaseFrameForRos;//multisense_namespace + "/head";
       this.lidarEndFrameForRos = lidarEndFrameForRos;//multisense_namespace + "/head_hokuyo_frame";
       this.lidarSpinVelocity = lidar_spindle_velocity;//lidar_spindle_velocity = 5.1;
-      this.useRosForTransformFromPoseToSensor = true;
-      this.lidarId = lidarId;
-   }
-   
-   public DRCRobotLidarParameters(String lidarSensorName, String laserTopic, String lidarSpindleJointName, String lidarSpindleJointTopic,
-         String sdflinkNameForSensorPose, double lidar_spindle_velocity, int lidarId)
-   {
-      this.lidarSensorName = lidarSensorName;
-      this.laserTopic = laserTopic;
-      this.lidarSpindleJointName = lidarSpindleJointName;
-      this.lidarSpindleJointTopic = lidarSpindleJointTopic;
-      this.poseFrameName = sdflinkNameForSensorPose;
-      this.lidarBaseFrameForRos = null;
-      this.lidarEndFrameForRos = null;
-      this.lidarSpinVelocity = lidar_spindle_velocity;
-      this.useRosForTransformFromPoseToSensor = false;
       this.lidarId = lidarId;
    }
 
