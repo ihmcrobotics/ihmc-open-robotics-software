@@ -26,6 +26,11 @@ public class NullGraphics3DAdapter implements Graphics3DAdapter
 {
    private final Object graphicsConch = new Object();
 
+   public void setupSky()
+   {
+      
+   }
+   
    public void addRootNode(Graphics3DNode rootNode)
    {
    }

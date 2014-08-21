@@ -15,6 +15,8 @@ import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
 
 public interface Graphics3DAdapter
 {
+   public void setupSky();
+   
    public void addRootNode(Graphics3DNode rootNode);
 
    public void removeRootNode(Graphics3DNode rootNode);
