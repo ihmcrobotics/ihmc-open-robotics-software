@@ -31,6 +31,7 @@ public abstract class DepthDataProcessorTest implements MultiRobotTestInterface,
    private int numberOfLidarScansConsumed = 0;
    private long numberOfLidarPointsConsumed = 0;
    private ConcurrentLinkedQueue<AssertionError> errorQueue = new ConcurrentLinkedQueue<>();
+//   private LidarWorldViewer lidarWorldViewer;
 
    @Before
    public void setUp()
@@ -42,7 +43,9 @@ public abstract class DepthDataProcessorTest implements MultiRobotTestInterface,
    public void testLidarGenerationAndTransmission()
    {
       BambooTools.reportTestStartedMessage();
-
+      
+//      lidarWorldViewer = new LidarWorldViewer();
+      
       DRCSimulationNetworkTestHelper drcSimulationTestHelper = new DRCSimulationNetworkTestHelper(getRobotModel(), new DRCWallAtDistanceEnvironment(WALL_DISTANCE));
       drcSimulationTestHelper.setupCamera(new Point3d(1.8375, -0.16, 0.89), new Point3d(1.10, 8.30, 1.37));
       drcSimulationTestHelper.addNetStateListener(this);
@@ -52,14 +55,13 @@ public abstract class DepthDataProcessorTest implements MultiRobotTestInterface,
 
       drcSimulationTestHelper.sendCommand(new DepthDataStateCommand(LidarState.ENABLE));
 
-      boolean success = drcSimulationTestHelper.simulate(5);
+      boolean success = drcSimulationTestHelper.simulate(5000);
 
       assertTrue(success);
       assertTrue("Lidar scans are not being recieved.", numberOfLidarScansConsumed > 10);
 
       System.out.println("Number of points consumed: " + numberOfLidarPointsConsumed + " Points out of range: " + errorQueue.size() + " Percentage: " + ((double) errorQueue.size() / numberOfLidarPointsConsumed));
       
-      // Assert that 95% of points are within range
       assertTrue("Too many points are out of range: ", (double) errorQueue.size() / numberOfLidarPointsConsumed < .05);
 //      throwAllAssertionErrors();
 
@@ -80,6 +82,8 @@ public abstract class DepthDataProcessorTest implements MultiRobotTestInterface,
       public void consumeObject(SparseLidarScan sparseLidarScan)
       {
          numberOfLidarScansConsumed++;
+         
+//         lidarWorldViewer.updateLidarScan(sparseLidarScan);
 
          try
          {
