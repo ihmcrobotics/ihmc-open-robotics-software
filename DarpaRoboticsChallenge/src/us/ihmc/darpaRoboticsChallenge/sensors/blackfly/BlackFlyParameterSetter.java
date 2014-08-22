@@ -57,7 +57,7 @@ public class BlackFlyParameterSetter
    {
       if (params == null)
       {
-         System.out.println("params are null");
+         //System.out.println("params are null");
          return;
       }
 
@@ -69,7 +69,7 @@ public class BlackFlyParameterSetter
    public void initializeParameterListeners()
    {
 
-      System.out.println("initialise parameteres--------------------------------------------------------------------------------");
+    //  System.out.println("-----------initialising blackfly parameter listeners-------------------");
 
       rosMainNode.attachParameterListener("/blackfly/prop_gain", new ParameterListener()
       {
@@ -77,7 +77,7 @@ public class BlackFlyParameterSetter
          @Override
          public void onNewValue(Object value)
          {
-            System.out.println("new blackfly gain received");
+           // System.out.println("new blackfly gain received");
             send();
          }
       });
@@ -87,7 +87,7 @@ public class BlackFlyParameterSetter
          @Override
          public void onNewValue(Object value)
          {
-            System.out.println("new blackfly brightness received");
+           // System.out.println("new blackfly brightness received");
             send();
          }
       });
@@ -98,7 +98,7 @@ public class BlackFlyParameterSetter
          @Override
          public void onNewValue(Object value)
          {
-            System.out.println("new blackfly fram rate received");
+           // System.out.println("new blackfly fram rate received");
             send();
          }
       });
@@ -108,7 +108,7 @@ public class BlackFlyParameterSetter
          @Override
          public void onNewValue(Object value)
          {
-            System.out.println("new blackfly shutter received");
+           // System.out.println("new blackfly shutter received");
             send();
          }
       });
@@ -119,7 +119,7 @@ public class BlackFlyParameterSetter
    public void setBlackFlyParameters(BlackFlyParameterPacket object)
    {
      
-      System.out.println("object received with gain "+ object.getGain()+" brightness "+ object.getBrightness()+" framerate"+object.getFrameRate()+" shutter"+ object.getShutter());
+      //System.out.println("object received with gain "+ object.getGain()+" brightness "+ object.getBrightness()+" framerate"+object.getFrameRate()+" shutter"+ object.getShutter());
      
       
       
