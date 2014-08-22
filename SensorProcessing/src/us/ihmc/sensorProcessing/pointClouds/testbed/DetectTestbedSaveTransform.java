@@ -7,7 +7,9 @@ import bubo.gui.UtilDisplayBubo;
 import bubo.gui.d3.PointCloudPanel;
 import com.thoughtworks.xstream.XStream;
 import georegression.geometry.*;
-import georegression.metric.*;
+import georegression.metric.ClosestPoint3D_F64;
+import georegression.metric.Intersection3D_F64;
+import georegression.metric.UtilAngle;
 import georegression.struct.line.LineParametric3D_F64;
 import georegression.struct.plane.PlaneGeneral3D_F64;
 import georegression.struct.point.Point2D_F64;
@@ -17,7 +19,6 @@ import georegression.struct.se.Se3_F64;
 import georegression.struct.shapes.Box3D_F64;
 import georegression.struct.shapes.Rectangle2D_F64;
 import georegression.transform.se.SePointOps_F64;
-import org.ddogleg.sorting.QuickSelectArray;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -84,11 +85,10 @@ public class DetectTestbedSaveTransform {
 //         System.out.println(i+"  plane "+plane);
       }
 
-      List<Candidate> candidates = new ArrayList<>();
+      Se3_F64 best = new Se3_F64();
+      int bestCount = 0;
 
-      double sumParallel[] = new double[ shapes.size() ];
-      double inlierDistance = 0.25;
-
+      Se3_F64 found = new Se3_F64();
       for (int i = 0; i < normals.size(); i++) {
          PlaneGeneral3D_F64 planeA = (PlaneGeneral3D_F64)shapes.get(i).parameters;
          List<Point3D_F64> pointsA = shapes.get(i).points;
@@ -101,46 +101,30 @@ public class DetectTestbedSaveTransform {
             double angle = a.acute(b);
             angle = Math.min(Math.PI-angle,angle);
 
-            sumParallel[i] += Math.cos(angle)*pointsB.size();
-            sumParallel[j] += Math.cos(angle)*pointsA.size();
-
-//            System.out.println("Angle "+i+" "+j+"  =  "+angle);
-
+            // see if they are perpendicular
             if( UtilAngle.dist(angle,Math.PI/2) < 0.1 ) {
-               double distanceA = distanceFromPlane(planeA,pointsB);
-               double distanceB = distanceFromPlane(planeB,pointsA);
-
-               if( distanceA+distanceB < inlierDistance ) {
-                  candidates.add( new Candidate(planeA,planeB,pointsA,pointsB,i,j));
+               // see how much they overlap
+//               int count = computeTestbed(planeA,planeB,pointsA,pointsB,a,b,cloud,found);
+               int count = computeTestbed(planeA,planeB,pointsA,pointsB,a,b,cloud,found);
+//               System.out.println("  candidate "+count);
+               if( count > bestCount ) {
+                  bestCount = count;
+                  best.set(found);
                }
             }
          }
       }
 
-      Candidate best = null;
-      int bestCount = 0;
-      for( Candidate c : candidates ) {
-         if( computeCoorindateSystem(c,sumParallel,normals) ) {
-            int count = findValve(c, cloud);
-
-            System.out.println("count = " + count);
-            if (count > bestCount) {
-               best = c;
-               bestCount = count;
-            }
-         }
-      }
-
-      return best == null ? null : best.testbedToWorld;
+      return bestCount == 0 ? null : best;
    }
 
-   private static int findValve( Candidate c , List<Point3D_F64> cloud ) {
+   private static int findValve( Se3_F64 testbedToWorld , List<Point3D_F64> cloud ) {
 
       Point3D_F64 p = new Point3D_F64(0.25,0.55,1.0);
       double r = 0.15;
 
       // translate center of box into world
-      SePointOps_F64.transform(c.testbedToWorld,p,p);
+      SePointOps_F64.transform(testbedToWorld,p,p);
 
       Box3D_F64 box = new Box3D_F64(p.x-r,p.y-r,p.z-r,p.x+r,p.y+r,p.z+r);
 
@@ -154,42 +138,35 @@ public class DetectTestbedSaveTransform {
       return count;
    }
 
-   private static boolean computeCoorindateSystem( Candidate c , double sumParallel[] , List<Vector3D_F64> normals ) {
-//      System.out.println("Total Parallel:  "+sumParallel[c.indexFloor]+"  "+sumParallel[c.indexWall]);
-
-      if( sumParallel[c.indexFloor] < sumParallel[c.indexWall]) {
-         c.swap();
-      }
-
-      // find line of intersection
+   private static int computeTestbed( PlaneGeneral3D_F64 planeA , PlaneGeneral3D_F64 planeB ,
+                                      List<Point3D_F64> pointsA , List<Point3D_F64> pointsB ,
+                                      Vector3D_F64 normalA , Vector3D_F64 normalB ,
+                                      List<Point3D_F64> cloud , Se3_F64 testbedToWorld ) {
       LineParametric3D_F64 intersection = new LineParametric3D_F64();
-      Intersection3D_F64.intersect(c.planeWall, c.planeFloor, intersection);
+      Intersection3D_F64.intersect(planeA, planeB, intersection);
 
-      double wallR[] = findLineLocation(intersection,c.pointsWall);
-      double floorR[] = findLineLocation(intersection,c.pointsFloor);
+      double whereA[] = findLineLocation(intersection,pointsA);
+      double whereB[] = findLineLocation(intersection,pointsB);
 
-      double min = Math.min(wallR[0],floorR[0]);
-      double max = Math.max(wallR[1], floorR[1]);
+      double min = Math.min(whereA[0],whereB[0]);
+      double max = Math.max(whereA[1], whereB[1]);
 
-      double overlap = (Math.min(wallR[1], floorR[1]) - Math.max(wallR[0], floorR[0]))/(max-min);
+      double overlap = (Math.min(whereA[1], whereB[1]) - Math.max(whereA[0], whereB[0]))/(max-min);
 
-      System.out.println("overlap "+overlap);
-      // reject if the two planes are too far away
-      if( overlap < 0.7)
-         return false;
+//      System.out.println("Overlap = "+overlap);
+      if( overlap < 0.7 )
+         return 0;
 
-      double middle = (max+min)/2.0;
-
-      Point3D_F64 centerPt = intersection.getPointOnLine(middle);
+      Point3D_F64 centerPt = intersection.getPointOnLine((max+min)/2.0);
       Point3D_F64 minPt = intersection.getPointOnLine(min);
       Point3D_F64 maxPt = intersection.getPointOnLine(max);
 
-      Vector3D_F64 axisX = normals.get(c.indexWall);
-      Vector3D_F64 axisZ = normals.get(c.indexFloor);
+      Vector3D_F64 axisX = normalB;
+      Vector3D_F64 axisZ = normalA;
 
       // resolve sign ambiguity
-      adjustSign(axisX,centerPt,c.pointsFloor);
-      adjustSign(axisZ,centerPt,c.pointsWall);
+      adjustSign(axisX,centerPt,pointsA);
+      adjustSign(axisZ,centerPt,pointsB);
 
       Vector3D_F64 axisY = axisZ.cross(axisX);
       axisY.normalize();
@@ -202,12 +179,28 @@ public class DetectTestbedSaveTransform {
 
 //      System.out.println("min = "+angleMin+"  max = "+angleMax);
 
-      Point3D_F64 selected = angleMin > angleMax ? minPt : maxPt;
+      Point3D_F64 selected0 = angleMin > angleMax ? minPt : maxPt;
+      Point3D_F64 selected1 = angleMin <= angleMax ? minPt : maxPt;
 
-      UtilVector3D_F64.createMatrix(c.testbedToWorld.R,axisX,axisY,axisZ);
-      c.testbedToWorld.getT().set(selected.x,selected.y,selected.z);
+      Se3_F64 testbedToWorld0 = new Se3_F64();
+      Se3_F64 testbedToWorld1 = new Se3_F64();
 
-      return true;
+      UtilVector3D_F64.createMatrix(testbedToWorld0.R,axisX,axisY,axisZ);
+      testbedToWorld0.getT().set(selected0.x, selected0.y, selected0.z);
+
+      UtilVector3D_F64.createMatrix(testbedToWorld1.R,axisZ,axisY.times(-1),axisX);
+      testbedToWorld1.getT().set(selected1.x,selected1.y,selected1.z);
+
+      int count0 = findValve(testbedToWorld0, cloud);
+      int count1 = findValve(testbedToWorld1, cloud);
+
+      if( count0 > count1 ) {
+         testbedToWorld.set(testbedToWorld0);
+         return count0;
+      } else {
+         testbedToWorld.set(testbedToWorld1);
+         return count1;
+      }
    }
 
    private static double[] findLineLocation( LineParametric3D_F64 line , List<Point3D_F64> points ) {
@@ -240,29 +233,6 @@ public class DetectTestbedSaveTransform {
 //      System.out.println("  "+angle0+"  "+angle1);
    }
 
-   private static double distanceFromPlane( PlaneGeneral3D_F64 plane , List<Point3D_F64> points ) {
-      double distances[] = new double[points.size()];
-
-      for (int i = 0; i < points.size(); i++) {
-         distances[i] = Math.abs(Distance3D_F64.distance(plane,points.get(i)));
-      }
-
-      int k = Math.min(50,distances.length-1);
-
-      return QuickSelectArray.select(distances,k,distances.length);
-   }
-
-   private static double distanceFromSensor(  List<Point3D_F64> points ) {
-      double min = Double.MAX_VALUE;
-
-      for (int i = 0; i < points.size(); i++) {
-         double d = points.get(i).normSq();
-         if( d < min )
-            min = d;
-      }
-
-      return Math.sqrt(min);
-   }
 
    private static class Candidate
    {

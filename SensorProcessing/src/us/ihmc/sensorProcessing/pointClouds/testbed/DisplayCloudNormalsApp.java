@@ -1,13 +1,9 @@
 package us.ihmc.sensorProcessing.pointClouds.testbed;
 
 import boofcv.gui.image.ShowImages;
-import bubo.clouds.FactoryPointCloudShape;
-import bubo.clouds.detect.CloudShapeTypes;
 import bubo.clouds.detect.PointCloudShapeFinder;
 import bubo.clouds.detect.alg.ApproximateSurfaceNormals;
 import bubo.clouds.detect.alg.PointVectorNN;
-import bubo.clouds.detect.wrapper.ConfigMultiShapeRansac;
-import bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
 import bubo.gui.FactoryVisualization3D;
 import bubo.gui.UtilDisplayBubo;
 import bubo.gui.d3.PointCloudPanel;
@@ -24,6 +20,7 @@ import org.ddogleg.struct.FastQueue;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import static us.ihmc.sensorProcessing.pointClouds.GeometryOps.loadScanLines;
 import static us.ihmc.sensorProcessing.pointClouds.testbed.CreateCloudFromFilteredScanApp.filter;
@@ -73,6 +70,7 @@ public class DisplayCloudNormalsApp {
       List<Vector3D_F64> normals = new ArrayList<>();
 
 
+      Random rand = new Random(234);
       int totalZero = 0;
       int totalOne = 0;
       for (int i = 0; i < pointNormList.size(); i++) {
@@ -85,10 +83,11 @@ public class DisplayCloudNormalsApp {
 
          pnn.normal.scale(scales);
 
-         points.add( pnn.p );
-         normals.add( pnn.normal );
 
-
+         if( rand.nextDouble() < 0.05 ) {
+            points.add(pnn.p);
+            normals.add(pnn.normal);
+         }
       }
       System.out.println("zero = "+totalZero);
       System.out.println("one = "+totalOne);
@@ -96,7 +95,9 @@ public class DisplayCloudNormalsApp {
       FactoryVisualization3D factory = UtilDisplayBubo.createVisualize3D();
       PointCloudPanel gui = factory.displayPointCloud();
 
-      gui.addPoints(points,0xFFFF0000,1);
+
+      gui.addPoints(cloud0,0xFFFF0000,1);
+//      gui.addPoints(points,0xFF0000FF,1);
       gui.addVectors(points,normals,0xFF00FF00);
 
 

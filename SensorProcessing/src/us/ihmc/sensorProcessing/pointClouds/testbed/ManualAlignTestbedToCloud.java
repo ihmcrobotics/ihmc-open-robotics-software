@@ -18,25 +18,7 @@
 
 package us.ihmc.sensorProcessing.pointClouds.testbed;
 
-import georegression.struct.point.Point3D_F64;
-import georegression.struct.se.Se3_F64;
-
-import java.awt.Canvas;
-import java.awt.Dimension;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.util.List;
-import java.util.concurrent.Callable;
-
-import javax.swing.JPanel;
-
-import us.ihmc.graphics3DAdapter.jme.JMEAssetLocator;
-import us.ihmc.graphics3DAdapter.jme.util.JME3DLoaderUtils;
-import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
-import us.ihmc.sensorProcessing.pointClouds.GeometryOps;
 import boofcv.gui.image.ShowImages;
-
 import com.jme3.app.SimpleApplication;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
@@ -51,15 +33,25 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.queue.RenderQueue;
-import com.jme3.scene.Geometry;
-import com.jme3.scene.Mesh;
-import com.jme3.scene.Node;
-import com.jme3.scene.Spatial;
-import com.jme3.scene.VertexBuffer;
+import com.jme3.scene.*;
 import com.jme3.system.AppSettings;
 import com.jme3.system.JmeCanvasContext;
 import com.jme3.util.TangentBinormalGenerator;
 import com.thoughtworks.xstream.XStream;
+import georegression.struct.point.Point3D_F64;
+import georegression.struct.se.Se3_F64;
+import us.ihmc.graphics3DAdapter.jme.JMEAssetLocator;
+import us.ihmc.graphics3DAdapter.jme.util.JME3DLoaderUtils;
+import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
+import us.ihmc.sensorProcessing.pointClouds.GeometryOps;
+
+import javax.swing.*;
+import java.awt.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.util.List;
+import java.util.concurrent.Callable;
 
 /**
  * @author Peter Abeles
@@ -351,7 +343,7 @@ public class ManualAlignTestbedToCloud extends SimpleApplication {
    public static void main(String[] args) {
       List<Point3D_F64> cloud = GeometryOps.loadCloud("../SensorProcessing/data/testbed/2014-08-01/cloud02.txt");
       ManualAlignTestbedToCloud app = new ManualAlignTestbedToCloud();
-      app.addPoints(cloud,0xFF0000,3);
+      app.addPoints(cloud,0xFF0000,2);
       app.addTestBedModel();
 
 
