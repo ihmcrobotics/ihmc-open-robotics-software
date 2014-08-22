@@ -41,7 +41,7 @@ public class NetworkProcessorTestbedAlignment implements Runnable
 
    boolean justCollectData;
 
-   long integrationPeriod = 6000;
+   long integrationPeriod = 10000;
    long stopTime;
 
    int totalSaved = 0;
@@ -111,6 +111,7 @@ public class NetworkProcessorTestbedAlignment implements Runnable
                } else {
                   scan = new FastQueue<>(Point3D_F64.class,true);
                }
+               scans.add(scan);
                scan.reset();
 
                for (int i = 0; i < points.size(); i++)
