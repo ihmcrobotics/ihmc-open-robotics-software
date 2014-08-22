@@ -152,7 +152,7 @@ public class MultiSenseParamaterSetter
    {
       if (params == null)
       {
-         System.out.println("params are null");
+         //System.out.println("params are null");
          return;
       }
 
@@ -166,7 +166,7 @@ public class MultiSenseParamaterSetter
    public void initializeParameterListeners()
    {
 
-      System.out.println("initialise parameteres--------------------------------------------------------------------------------");
+      //System.out.println("------------initialise blackfly parameteres--------------");
 
       rosMainNode.attachParameterListener("/multisense/motor_speed", new ParameterListener()
       {
@@ -174,7 +174,7 @@ public class MultiSenseParamaterSetter
          @Override
          public void onNewValue(Object value)
          {
-            System.out.println("new motor speed received");
+            //System.out.println("new motor speed received");
             send();
          }
       });
@@ -184,7 +184,7 @@ public class MultiSenseParamaterSetter
          @Override
          public void onNewValue(Object value)
          {
-            System.out.println("new gain received");
+            //System.out.println("new gain received");
             send();
          }
       });
@@ -195,7 +195,7 @@ public class MultiSenseParamaterSetter
          @Override
          public void onNewValue(Object value)
          {
-            System.out.println("new dutyCycle received");
+            //System.out.println("new dutyCycle received");
             send();
          }
       });
@@ -205,7 +205,7 @@ public class MultiSenseParamaterSetter
          @Override
          public void onNewValue(Object value)
          {
-            System.out.println("new led received");
+            //System.out.println("new led received");
             send();
          }
       });
@@ -215,7 +215,7 @@ public class MultiSenseParamaterSetter
          @Override
          public void onNewValue(Object value)
          {
-            System.out.println("new flash received");
+           // System.out.println("new flash received");
             send();
          }
       });
@@ -226,7 +226,7 @@ public class MultiSenseParamaterSetter
          @Override
          public void onNewValue(Object value)
          {
-            System.out.println("new auto expo received");
+            //System.out.println("new auto expo received");
             send();
          }
       });
@@ -237,7 +237,7 @@ public class MultiSenseParamaterSetter
          @Override
          public void onNewValue(Object value)
          {
-            System.out.println("new motor speed received");
+            //System.out.println("new motor speed received");
             send();
          }
       });
@@ -248,7 +248,7 @@ public class MultiSenseParamaterSetter
          @Override
          public void onNewValue(Object value)
          {
-            System.out.println("new auto white balance received");
+            //System.out.println("new auto white balance received");
             send();
          }
       });
@@ -316,7 +316,7 @@ public class MultiSenseParamaterSetter
    public void setMultisenseParameters(MultisenseParameterPacket object)
    {
      
-      System.out.println("object received with gain "+ object.getGain()+" speed "+ object.getMotorSpeed()+" dutycycle"+object.getDutyCycle()+" resolution"+ object.getResolution());
+     // System.out.println("object received with gain "+ object.getGain()+" speed "+ object.getMotorSpeed()+" dutycycle"+object.getDutyCycle()+" resolution"+ object.getResolution());
      
       
       
