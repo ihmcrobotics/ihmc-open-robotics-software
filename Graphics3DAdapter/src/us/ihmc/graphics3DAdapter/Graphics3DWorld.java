@@ -26,7 +26,7 @@ public class Graphics3DWorld
 
    public Graphics3DWorld(Graphics3DAdapter graphics3dAdapter)
    {
-      this("DefaultWorld", graphics3dAdapter);
+      this(Graphics3DWorld.class.getSimpleName(), graphics3dAdapter);
    }
 
    private void init()
@@ -155,7 +155,7 @@ public class Graphics3DWorld
       this.rootNode = rootNode;
    }
 
-   public Graphics3DAdapter getGraphics3dAdapter()
+   public Graphics3DAdapter getGraphics3DAdapter()
    {
       return graphics3dAdapter;
    }
