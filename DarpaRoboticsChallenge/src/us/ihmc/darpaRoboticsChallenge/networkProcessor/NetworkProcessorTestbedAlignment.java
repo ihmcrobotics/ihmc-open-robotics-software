@@ -43,7 +43,7 @@ public class NetworkProcessorTestbedAlignment implements Runnable
 
    boolean justCollectData;
 
-   long integrationPeriod = 10000;
+   long integrationPeriod = 6000;
    long stopTime;
    boolean first = false;
 
