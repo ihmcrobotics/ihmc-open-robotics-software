@@ -1,6 +1,5 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor;
 
-import bubo.io.text.WriteCsvObject;
 import com.thoughtworks.xstream.XStream;
 import georegression.geometry.RotationMatrixGenerator;
 import georegression.struct.point.Point3D_F64;
@@ -15,8 +14,8 @@ import us.ihmc.utilities.lidar.polarLidar.LidarScan;
 import javax.vecmath.Point3d;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -27,7 +26,8 @@ import java.util.List;
 public class NetworkProcessorTestbedAlignment implements Runnable
 {
 
-   final FastQueue<Point3D_F64> scanStorage = new FastQueue<>(Point3D_F64.class, true);
+   final List<FastQueue<Point3D_F64>> scans = new ArrayList<>();
+   final List<FastQueue<Point3D_F64>> available = new ArrayList<>();
 
    volatile boolean active = false;
    volatile boolean processing = false;
@@ -69,7 +69,7 @@ public class NetworkProcessorTestbedAlignment implements Runnable
       {
          this.justCollectData = justCollectData;
          System.out.println("NetworkProcessorTestbedAlignment - startCollection()");
-         synchronized (scanStorage)
+         synchronized (scans)
          {
             // ignore commands to start collecting data if it's processing the previous cloud still
             if (processing || active)
@@ -78,7 +78,8 @@ public class NetworkProcessorTestbedAlignment implements Runnable
                return;
             }
             out = null;
-            scanStorage.reset();
+            available.addAll(scans);
+            scans.clear();
             testbedFinder.reset();
             active = true;
             stopTime = System.currentTimeMillis() + integrationPeriod;
@@ -94,7 +95,7 @@ public class NetworkProcessorTestbedAlignment implements Runnable
    {
       if (loadedModel)
       {
-         synchronized (scanStorage)
+         synchronized (scans)
          {
             if (!active)
                return;
@@ -104,11 +105,18 @@ public class NetworkProcessorTestbedAlignment implements Runnable
                System.out.println("NetworkProcessorTestbedAlignment - collected packet");
                List<Point3d> points = polarLidarScan.getAllPoints();
 
-               scanStorage.reset();
+               FastQueue<Point3D_F64> scan;
+               if( available.size() > 0 ) {
+                  scan = available.remove( available.size()-1 );
+               } else {
+                  scan = new FastQueue<>(Point3D_F64.class,true);
+               }
+               scan.reset();
+
                for (int i = 0; i < points.size(); i++)
                {
                   Point3d p = points.get(i);
-                  scanStorage.grow().set(p.x, p.y, p.z);
+                  scan.grow().set(p.x, p.y, p.z);
                }
 
                if( justCollectData ) {
@@ -119,15 +127,13 @@ public class NetworkProcessorTestbedAlignment implements Runnable
                      } catch (FileNotFoundException e) {
                         throw new RuntimeException(e);
                      }
-                  out.print(scanStorage.size());
-                  for (int i = 0; i < scanStorage.size(); i++) {
-                     Point3D_F64 p = scanStorage.get(i);
-                     out.printf(" %15f %15f %15f",p.x,p.y,p.z);
+                  out.print(scan.size());
+                  for (int i = 0; i < scan.size(); i++) {
+                     Point3D_F64 p = scan.get(i);
+                     out.printf(" %15f %15f %15f", p.x, p.y, p.z);
                   }
                   out.println();
                   out.flush();
-               } else {
-                  testbedFinder.addScan(scanStorage.toList());
                }
             }
             else
@@ -161,6 +167,11 @@ public class NetworkProcessorTestbedAlignment implements Runnable
 
 
                TestbedServerPacket packet = new TestbedServerPacket();
+
+               for (int i = 0; i < scans.size(); i++) {
+                  testbedFinder.addScan(scans.get(i).toList());
+               }
+
                if ( testbedFinder.process() )
                {
                   System.out.println("Sending testbed location");
