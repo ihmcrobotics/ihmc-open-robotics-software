@@ -1,5 +1,7 @@
 package us.ihmc.graphics3DAdapter;
 
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 import javax.swing.JFrame;
 import javax.vecmath.Vector3d;
 
@@ -7,14 +9,15 @@ import us.ihmc.graphics3DAdapter.camera.ClassicCameraController;
 import us.ihmc.graphics3DAdapter.camera.ViewportAdapter;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 
-public class Graphics3DWorld
+public class Graphics3DWorld implements Graphics3DFrameListener
 {
    private final Graphics3DAdapter graphics3dAdapter;
    private Graphics3DNode rootNode;
    private final String worldName;
    private ClassicCameraController cameraController;
-   private ViewportAdapter viewportAdapter;
+   protected ViewportAdapter viewportAdapter;
    private JFrame jFrame;
+   private ConcurrentLinkedQueue<Graphics3DNode> graphics3DNodesToAddPostFrame = new ConcurrentLinkedQueue<>();
 
    public Graphics3DWorld(String worldName, Graphics3DAdapter graphics3dAdapter)
    {
@@ -34,11 +37,14 @@ public class Graphics3DWorld
       rootNode = new Graphics3DNode(worldName + "RootNode");
    }
 
-   private void start()
+   protected void start()
    {
       graphics3dAdapter.addRootNode(rootNode);
 
       viewportAdapter = Graphics3DAdapterTools.createViewport(graphics3dAdapter);
+      
+      System.out.println("Adding frame listener");
+      addFrameListener(this);
    }
 
    public void fixCameraOnNode(Graphics3DNode node)
@@ -134,7 +140,14 @@ public class Graphics3DWorld
 
    public void addChild(Graphics3DNode child)
    {
-      rootNode.addChild(child);
+      if (viewportAdapter == null)
+      {
+         rootNode.addChild(child);
+      }
+      else
+      {
+         graphics3DNodesToAddPostFrame.add(child);
+      }
    }
 
    public void addAllChildren(Graphics3DNode... children)
@@ -158,5 +171,14 @@ public class Graphics3DWorld
    public Graphics3DAdapter getGraphics3DAdapter()
    {
       return graphics3dAdapter;
+   }
+
+   @Override
+   public void postFrame(double timePerFrame)
+   {
+      while (!graphics3DNodesToAddPostFrame.isEmpty())
+      {
+         graphics3dAdapter.addRootNode(graphics3DNodesToAddPostFrame.poll());
+      }
    }
 }

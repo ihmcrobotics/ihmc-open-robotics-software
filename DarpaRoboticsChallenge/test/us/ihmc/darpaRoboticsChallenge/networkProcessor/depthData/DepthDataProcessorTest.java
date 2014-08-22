@@ -1,6 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -15,6 +16,7 @@ import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCWallAtDistanceEnvironment;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCUserInterfaceNetworkingManager;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationNetworkTestHelper;
+import us.ihmc.graphics3DAdapter.jme.util.JMEPointCloudVisualizer;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.lidar.polarLidar.SparseLidarScan;
 import us.ihmc.utilities.net.NetStateListener;
@@ -31,7 +33,7 @@ public abstract class DepthDataProcessorTest implements MultiRobotTestInterface,
    private int numberOfLidarScansConsumed = 0;
    private long numberOfLidarPointsConsumed = 0;
    private ConcurrentLinkedQueue<AssertionError> errorQueue = new ConcurrentLinkedQueue<>();
-//   private LidarWorldViewer lidarWorldViewer;
+   private JMEPointCloudVisualizer jmePointCloudVisualizer;
 
    @Before
    public void setUp()
@@ -44,7 +46,7 @@ public abstract class DepthDataProcessorTest implements MultiRobotTestInterface,
    {
       BambooTools.reportTestStartedMessage();
       
-//      lidarWorldViewer = new LidarWorldViewer();
+      jmePointCloudVisualizer = new JMEPointCloudVisualizer();
       
       DRCSimulationNetworkTestHelper drcSimulationTestHelper = new DRCSimulationNetworkTestHelper(getRobotModel(), new DRCWallAtDistanceEnvironment(WALL_DISTANCE));
       drcSimulationTestHelper.setupCamera(new Point3d(1.8375, -0.16, 0.89), new Point3d(1.10, 8.30, 1.37));
@@ -55,7 +57,7 @@ public abstract class DepthDataProcessorTest implements MultiRobotTestInterface,
 
       drcSimulationTestHelper.sendCommand(new DepthDataStateCommand(LidarState.ENABLE));
 
-      boolean success = drcSimulationTestHelper.simulate(5000);
+      boolean success = drcSimulationTestHelper.simulate(0.5);
 
       assertTrue(success);
       assertTrue("Lidar scans are not being recieved.", numberOfLidarScansConsumed > 10);
@@ -83,7 +85,7 @@ public abstract class DepthDataProcessorTest implements MultiRobotTestInterface,
       {
          numberOfLidarScansConsumed++;
          
-//         lidarWorldViewer.updateLidarScan(sparseLidarScan);
+         jmePointCloudVisualizer.addPointCloud(sparseLidarScan.getAllPoints3f());
 
          try
          {
