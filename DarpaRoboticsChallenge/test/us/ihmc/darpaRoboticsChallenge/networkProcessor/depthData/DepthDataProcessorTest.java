@@ -57,7 +57,7 @@ public abstract class DepthDataProcessorTest implements MultiRobotTestInterface,
 
       drcSimulationTestHelper.sendCommand(new DepthDataStateCommand(LidarState.ENABLE));
 
-      boolean success = drcSimulationTestHelper.simulate(0.5);
+      boolean success = drcSimulationTestHelper.simulate(5);
 
       assertTrue(success);
       assertTrue("Lidar scans are not being recieved.", numberOfLidarScansConsumed > 10);
