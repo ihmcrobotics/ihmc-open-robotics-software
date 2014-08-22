@@ -6,7 +6,6 @@ import bubo.clouds.detect.PointCloudShapeFinder;
 import bubo.clouds.detect.wrapper.ConfigMultiShapeRansac;
 import bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
 import bubo.clouds.filter.UniformDensityCloudOctree;
-import com.thoughtworks.xstream.XStream;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.se.Se3_F64;
 
@@ -31,6 +30,7 @@ public class TestbedAutomaticAlignment {
    Se3_F64 modelToEstimated = new Se3_F64();
    Se3_F64 estimatedToWorld;
 
+   Point3D_F64 headLocation = new Point3D_F64();
 
    public TestbedAutomaticAlignment(double maxDistancePoint , Se3_F64 estimatedToModel ) {
       this.maxDistancePoint = maxDistancePoint;
@@ -48,11 +48,20 @@ public class TestbedAutomaticAlignment {
       cloud1.clear();
    }
 
+   public void setheadLocation( double x ,double y , double z ) {
+      headLocation.set(x,y,z);
+   }
+
    public void addScan( List<Point3D_F64> scan ) {
+
+      double r = maxDistancePoint*maxDistancePoint;
+
       for (int j = 0; j < scan.size(); j++) {
          Point3D_F64 p = scan.get(j);
 
-         if( p.normSq() <= maxDistancePoint*maxDistancePoint && countNeighbors(p,0.08,scan) > 6 ) {
+         double d = headLocation.distance(p);
+
+         if( d <= r && countNeighbors(p,0.08,scan) > 6 ) {
             cloud0.add(p);
          }
       }

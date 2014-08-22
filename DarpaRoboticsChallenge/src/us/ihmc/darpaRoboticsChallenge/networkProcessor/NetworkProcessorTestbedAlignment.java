@@ -11,7 +11,9 @@ import us.ihmc.darpaRoboticsChallenge.sensorProcessing.sensorData.TestbedServerP
 import us.ihmc.sensorProcessing.pointClouds.testbed.TestbedAutomaticAlignment;
 import us.ihmc.utilities.lidar.polarLidar.LidarScan;
 
+import javax.media.j3d.Transform3D;
 import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
@@ -43,8 +45,10 @@ public class NetworkProcessorTestbedAlignment implements Runnable
 
    long integrationPeriod = 10000;
    long stopTime;
+   boolean first = false;
 
    int totalSaved = 0;
+   Point3D_F64 testbedLocation = new Point3D_F64();
 
    public NetworkProcessorTestbedAlignment(DRCNetworkProcessorNetworkingManager networkManager)
    {
@@ -78,6 +82,7 @@ public class NetworkProcessorTestbedAlignment implements Runnable
                return;
             }
             out = null;
+            first = false;
             available.addAll(scans);
             scans.clear();
             testbedFinder.reset();
@@ -120,9 +125,22 @@ public class NetworkProcessorTestbedAlignment implements Runnable
                   scan.grow().set(p.x, p.y, p.z);
                }
 
+               if( first ) {
+                  first = false;
+                  Vector3d T = new Vector3d();
+                  Transform3D tran = polarLidarScan.getAverageTransform();
+                  tran.get(T);
+                  testbedLocation.set(T.x,T.y,T.z);
+               }
+
                if( justCollectData ) {
                   if( out == null )
                      try {
+                        out = new PrintStream(new FileOutputStream(String.format("headLocation%02d.csv",totalSaved)));
+                        out.println("# Location of the robot's head in global");
+                        out.printf("%15f %15f %15f",testbedLocation.x,testbedLocation.y,testbedLocation.z);
+                        out.close();
+
                         out = new PrintStream(new FileOutputStream(String.format("savedTestbedCloud%02d_scans.csv",totalSaved++)));
                         out.println("# LIDAR scans.  (num) (x y z) .... ");
                      } catch (FileNotFoundException e) {
@@ -169,6 +187,7 @@ public class NetworkProcessorTestbedAlignment implements Runnable
 
                TestbedServerPacket packet = new TestbedServerPacket();
 
+               testbedFinder.setheadLocation(testbedLocation.x,testbedLocation.y,testbedLocation.z);
                for (int i = 0; i < scans.size(); i++) {
                   testbedFinder.addScan(scans.get(i).toList());
                }
