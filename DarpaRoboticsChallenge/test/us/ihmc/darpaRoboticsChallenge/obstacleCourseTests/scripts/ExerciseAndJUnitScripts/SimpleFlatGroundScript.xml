@@ -39,7 +39,7 @@
     <speed>0.5</speed>
   </us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList>
   <long>2</long>
-  <us.ihmc.commonWalkingControlModules.packets.FootPosePacket>
+  <us.ihmc.communication.packets.walking.FootPosePacket>
     <robotSide>RIGHT</robotSide>
     <position>
       <x>5.476810966098342E-4</x>
@@ -52,9 +52,9 @@
       <z>-1.7150588213870263E-4</z>
       <w>0.9999996541892514</w>
     </orientation>
-  </us.ihmc.commonWalkingControlModules.packets.FootPosePacket>
+  </us.ihmc.communication.packets.walking.FootPosePacket>
   <long>2</long>
-  <us.ihmc.commonWalkingControlModules.packets.FootPosePacket>
+  <us.ihmc.communication.packets.walking.FootPosePacket>
     <robotSide>RIGHT</robotSide>
     <position>
       <x>5.476810966098342E-4</x>
@@ -67,9 +67,9 @@
       <z>-1.7150588213870263E-4</z>
       <w>0.9999996541892514</w>
     </orientation>
-  </us.ihmc.commonWalkingControlModules.packets.FootPosePacket>
+  </us.ihmc.communication.packets.walking.FootPosePacket>
   <long>2</long>
-  <us.ihmc.commonWalkingControlModules.packets.FootPosePacket>
+  <us.ihmc.communication.packets.walking.FootPosePacket>
     <robotSide>RIGHT</robotSide>
     <position>
       <x>0.2</x>
@@ -82,7 +82,7 @@
       <z>-1.7150588213870263E-4</z>
       <w>0.9999996541892514</w>
     </orientation>
-  </us.ihmc.commonWalkingControlModules.packets.FootPosePacket>
+  </us.ihmc.communication.packets.walking.FootPosePacket>
   <long>3</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>LEFT</robotSide>
@@ -103,7 +103,7 @@
     <trajectoryTime>1.0</trajectoryTime>
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>4</long>
-  <us.ihmc.commonWalkingControlModules.packets.FootPosePacket>
+  <us.ihmc.communication.packets.walking.FootPosePacket>
     <robotSide>RIGHT</robotSide>
     <position>
       <x>0.0</x>
@@ -116,9 +116,9 @@
       <z>-1.7150588213870263E-4</z>
       <w>0.9999996541892514</w>
     </orientation>
-  </us.ihmc.commonWalkingControlModules.packets.FootPosePacket>
+  </us.ihmc.communication.packets.walking.FootPosePacket>
   <long>4</long>
-  <us.ihmc.commonWalkingControlModules.packets.FootPosePacket>
+  <us.ihmc.communication.packets.walking.FootPosePacket>
     <robotSide>RIGHT</robotSide>
     <position>
       <x>-0.2</x>
@@ -131,9 +131,9 @@
       <z>-1.7150588213870263E-4</z>
       <w>0.9999996541892514</w>
     </orientation>
-  </us.ihmc.commonWalkingControlModules.packets.FootPosePacket>
+  </us.ihmc.communication.packets.walking.FootPosePacket>
   <long>4</long>
-  <us.ihmc.commonWalkingControlModules.packets.FootPosePacket>
+  <us.ihmc.communication.packets.walking.FootPosePacket>
     <robotSide>RIGHT</robotSide>
     <position>
       <x>5.476810966098342E-4</x>
@@ -146,7 +146,7 @@
       <z>-1.7150588213870263E-4</z>
       <w>0.9999996541892514</w>
     </orientation>
-  </us.ihmc.commonWalkingControlModules.packets.FootPosePacket>
+  </us.ihmc.communication.packets.walking.FootPosePacket>
   <long>5</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>

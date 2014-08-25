@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.packetConsumers;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import us.ihmc.commonWalkingControlModules.packets.FootStatePacket;
+import us.ihmc.communication.packets.walking.FootStatePacket;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.net.ObjectConsumer;
