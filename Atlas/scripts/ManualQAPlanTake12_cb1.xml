@@ -214,9 +214,9 @@
     </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>123740555580</long>
-  <us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.ComHeightPacket>
     <heightOffset>-0.07840000000000001</heightOffset>
-  </us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.ComHeightPacket>
   <long>126570048496</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
@@ -790,9 +790,9 @@
     </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>265754589281</long>
-  <us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.ComHeightPacket>
     <heightOffset>0.004802</heightOffset>
-  </us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.ComHeightPacket>
   <long>270730405519</long>
   <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.EndOfScriptCommand/>
 </object-stream>

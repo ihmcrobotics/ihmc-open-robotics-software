@@ -21,5 +21,4 @@ public class AtlasObstacleCourseEveryBuildTest extends DRCObstacleCourseEveryBui
    {
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
-
 }
