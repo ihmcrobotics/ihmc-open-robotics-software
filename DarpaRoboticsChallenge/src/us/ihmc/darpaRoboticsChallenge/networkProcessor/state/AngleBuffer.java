@@ -56,7 +56,7 @@ public class AngleBuffer implements PendableBuffer
    {
       if (!isInRange(timestamp))
       {
-         return 0.0;
+         return Double.NaN;
       }
 
       for (int i = currentIndex - 1; i >= -size + currentIndex; i--)

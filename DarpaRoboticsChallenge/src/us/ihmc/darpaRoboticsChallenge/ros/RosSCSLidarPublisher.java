@@ -71,6 +71,11 @@ public class RosSCSLidarPublisher implements ObjectConsumer<LidarScan>
    private void publishLidarScanFrame(int sensorId, long timestamp)
    {
       Transform3D spindleRotationTransform = getTransformFromJointAngle(sensorId, timestamp);
+      if (spindleRotationTransform == null)
+      {
+         return;
+      }
+      
       String targetFrame = lidarParameters[sensorId].getPoseFrameForSdf();
       String sourceFrame = lidarParameters[sensorId].getBaseFrameForRosTransform();
       tfPublisher.publish(spindleRotationTransform, timestamp, sourceFrame, targetFrame);
@@ -82,6 +87,10 @@ public class RosSCSLidarPublisher implements ObjectConsumer<LidarScan>
       FrameVector spindleAxis = fullRobotModel.getLidarJointAxis(sensorNameInSdf);
       Transform3D lidarBaseFrameTransform = fullRobotModel.getLidarBaseFrame(sensorNameInSdf).getTransformToParent();
       double angle = spindleAngleReceiver.interpolate(timestamp);
+      if (angle == Double.NaN)
+      {
+         return null;
+      }
       AxisAngle4d spindleRotation = new AxisAngle4d(spindleAxis.getVector(), angle);
       Transform3D spindleRotationTransform = new Transform3D();
       spindleRotationTransform.set(spindleRotation);
