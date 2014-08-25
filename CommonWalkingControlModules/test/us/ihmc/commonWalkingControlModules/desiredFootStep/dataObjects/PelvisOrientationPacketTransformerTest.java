@@ -12,7 +12,7 @@ import javax.vecmath.Quat4d;
 
 import org.junit.Test;
 
-import us.ihmc.commonWalkingControlModules.packets.PelvisOrientationPacket;
+import us.ihmc.communication.packets.PelvisOrientationPacket;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;

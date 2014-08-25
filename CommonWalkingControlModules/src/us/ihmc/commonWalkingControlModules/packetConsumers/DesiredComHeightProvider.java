@@ -4,7 +4,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
-import us.ihmc.commonWalkingControlModules.packets.ComHeightPacket;
+import us.ihmc.communication.packets.ComHeightPacket;
 import us.ihmc.utilities.net.ObjectConsumer;
 
 public class DesiredComHeightProvider
