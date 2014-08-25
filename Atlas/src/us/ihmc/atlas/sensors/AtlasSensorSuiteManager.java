@@ -1,6 +1,7 @@
 package us.ihmc.atlas.sensors;
 
 import java.net.URI;
+
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
@@ -17,7 +18,6 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.DepthDataFilter
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.DepthDataProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.SCSLidarDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosNativeNetworkProcessor;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
 import us.ihmc.darpaRoboticsChallenge.ros.ROSNativeTransformTools;
@@ -27,6 +27,7 @@ import us.ihmc.darpaRoboticsChallenge.ros.RosSCSLidarPublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosTfPublisher;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.darpaRoboticsChallenge.sensors.multisense.MultiSenseSensorManager;
+import us.ihmc.producers.RobotPoseBuffer;
 import us.ihmc.utilities.net.LocalObjectCommunicator;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.ros.RosMainNode;
