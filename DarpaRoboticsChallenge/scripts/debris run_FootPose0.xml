@@ -90,7 +90,7 @@
     </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>9829488307</long>
-  <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
       <x>-0.03672525496972693</x>
       <y>0.4795912589160902</y>
@@ -99,9 +99,9 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
-  </us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>9831019741</long>
-  <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
       <x>-0.03672525496972693</x>
       <y>0.4795912589160902</y>
@@ -110,11 +110,11 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
-  </us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>13086447011</long>
-  <us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.ComHeightPacket>
     <heightOffset>-0.02352</heightOffset>
-  </us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.ComHeightPacket>
   <long>53688925401</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
@@ -197,9 +197,9 @@
     </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>90364675183</long>
-  <us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.ComHeightPacket>
     <heightOffset>-0.07840000000000001</heightOffset>
-  </us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.ComHeightPacket>
   <long>93731823784</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
@@ -255,17 +255,17 @@
     </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>116980547049</long>
-  <us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.ComHeightPacket>
     <heightOffset>-0.06272</heightOffset>
-  </us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.ComHeightPacket>
   <long>121460624315</long>
-  <us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.ComHeightPacket>
     <heightOffset>-0.09016</heightOffset>
-  </us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.ComHeightPacket>
   <long>123836562433</long>
-  <us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.ComHeightPacket>
     <heightOffset>-0.098</heightOffset>
-  </us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.ComHeightPacket>
   <long>130274247179</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
@@ -336,13 +336,13 @@
     <fingerState>CRUSH</fingerState>
   </us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
   <long>170476448690</long>
-  <us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.ComHeightPacket>
     <heightOffset>0.01372</heightOffset>
-  </us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.ComHeightPacket>
   <long>173676566663</long>
-  <us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.ComHeightPacket>
     <heightOffset>0.01568</heightOffset>
-  </us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.ComHeightPacket>
   <long>182604452470</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
@@ -401,7 +401,7 @@
     <frameRate>12</frameRate>
   </us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.FishEyeControlPacket>
   <long>205476574220</long>
-  <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
       <x>-0.027661549234117146</x>
       <y>0.3563909569358801</y>
@@ -410,9 +410,9 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
-  </us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>205477276733</long>
-  <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
       <x>-0.027661549234117146</x>
       <y>0.3563909569358801</y>
@@ -421,9 +421,9 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
-  </us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>207620569875</long>
-  <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
       <x>-0.023723698544234548</x>
       <y>0.30297236940359074</y>
@@ -432,9 +432,9 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
-  </us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>207621257478</long>
-  <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
       <x>-0.023723698544234548</x>
       <y>0.30297236940359074</y>
@@ -443,9 +443,9 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
-  </us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>208788821186</long>
-  <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
       <x>-0.017269536537237527</x>
       <y>0.2155452057038281</y>
@@ -454,9 +454,9 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
-  </us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>208789501936</long>
-  <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
       <x>-0.017269536537237527</x>
       <y>0.2155452057038281</y>
@@ -465,9 +465,9 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
-  </us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>210028549412</long>
-  <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
       <x>-0.016451650249113853</x>
       <y>0.20447690473822117</y>
@@ -476,9 +476,9 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
-  </us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>210029275467</long>
-  <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
       <x>-0.016451650249113853</x>
       <y>0.20447690473822117</y>
@@ -487,9 +487,9 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
-  </us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>211852873521</long>
-  <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
       <x>-0.015631643375280863</x>
       <y>0.1933822470974171</y>
@@ -498,9 +498,9 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
-  </us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>211853691825</long>
-  <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
       <x>-0.015631643375280863</x>
       <y>0.1933822470974171</y>
@@ -509,9 +509,9 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
-  </us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>218636628050</long>
-  <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
       <x>-0.026880706215117622</x>
       <y>0.3457936347110235</y>
@@ -520,9 +520,9 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
-  </us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>218637361388</long>
-  <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
       <x>-0.026880706215117622</x>
       <y>0.3457936347110235</y>
@@ -531,11 +531,11 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
-  </us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>220348570372</long>
-  <us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.ComHeightPacket>
     <heightOffset>0.00882</heightOffset>
-  </us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.ComHeightPacket>
   <long>232263662242</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
@@ -618,7 +618,7 @@
     </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>268380413415</long>
-  <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
       <x>-0.011654409805243533</x>
       <y>0.3465456540215682</y>
@@ -627,7 +627,7 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
-  </us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>272508625025</long>
   <us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
     <robotSide>RIGHT</robotSide>
@@ -688,11 +688,11 @@
     </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>356772701251</long>
-  <us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.ComHeightPacket>
     <heightOffset>0.00588</heightOffset>
-  </us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.ComHeightPacket>
   <long>359068650864</long>
-  <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
       <x>-0.0019518324036392996</x>
       <y>0.3466876198186946</y>
@@ -701,9 +701,9 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
-  </us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>360692720296</long>
-  <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
       <x>0.00775221979082848</x>
       <y>0.34656763052857237</y>
@@ -712,9 +712,9 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
-  </us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>362028565088</long>
-  <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
       <x>0.016065594514241346</x>
       <y>0.34625635106695</y>
@@ -723,9 +723,9 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
-  </us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>363476863012</long>
-  <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
       <x>0.027135423689608577</x>
       <y>0.3455423472025233</y>
@@ -734,9 +734,9 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
-  </us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>365156580411</long>
-  <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
       <x>0.032660977887539584</x>
       <y>0.3450574098572207</y>
@@ -745,7 +745,7 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
-  </us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>380939477546</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>LEFT</robotSide>
@@ -828,7 +828,7 @@
     </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>470604634129</long>
-  <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
       <x>0.022986789653585447</x>
       <y>0.3458501057930738</y>
@@ -837,9 +837,9 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
-  </us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>473437963734</long>
-  <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
       <x>0.016065594514241346</x>
       <y>0.34625635106695</y>
@@ -848,7 +848,7 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
-  </us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>489027979460</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>LEFT</robotSide>
@@ -962,7 +962,7 @@
     </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>544404569902</long>
-  <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
       <x>0.013295232739167788</x>
       <y>0.34638147946225517</y>
@@ -971,7 +971,7 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
-  </us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>552393029212</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
@@ -1010,15 +1010,15 @@
     <fingerState>OPEN</fingerState>
   </us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
   <long>566988645969</long>
-  <us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.ComHeightPacket>
     <heightOffset>0.00392</heightOffset>
-  </us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.ComHeightPacket>
   <long>567900731333</long>
-  <us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.ComHeightPacket>
     <heightOffset>-0.019600000000000003</heightOffset>
-  </us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.ComHeightPacket>
   <long>572220851928</long>
-  <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
       <x>0.010524050851512754</x>
       <y>0.34648524141630466</y>
@@ -1027,9 +1027,9 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
-  </us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>573044856805</long>
-  <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
       <x>0.00775221979082848</x>
       <y>0.34656763052857237</y>
@@ -1038,7 +1038,7 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
-  </us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>578725763670</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
@@ -1067,13 +1067,13 @@
     </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>585132787199</long>
-  <us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.ComHeightPacket>
     <heightOffset>-0.05488</heightOffset>
-  </us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.ComHeightPacket>
   <long>587132706871</long>
-  <us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.ComHeightPacket>
     <heightOffset>-0.09016</heightOffset>
-  </us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.ComHeightPacket>
   <long>596694392070</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
@@ -1107,9 +1107,9 @@
     <fingerState>CRUSH</fingerState>
   </us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
   <long>605212665859</long>
-  <us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.ComHeightPacket>
     <heightOffset>0.004900000000000001</heightOffset>
-  </us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.ComHeightPacket>
   <long>623571443681</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
@@ -1392,7 +1392,7 @@
     </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>787340782406</long>
-  <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
       <x>0.011272451275052756</x>
       <y>0.4906194505903199</y>
@@ -1401,9 +1401,9 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
-  </us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>787341389257</long>
-  <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
       <x>0.011272451275052756</x>
       <y>0.4906194505903199</y>
@@ -1412,9 +1412,9 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
-  </us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>789676904079</long>
-  <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
       <x>0.011754132614505532</x>
       <y>0.5102697776740173</y>
@@ -1423,9 +1423,9 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
-  </us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>789677712363</long>
-  <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
       <x>0.011754132614505532</x>
       <y>0.5102697776740173</y>
@@ -1434,7 +1434,7 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
-  </us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>809372342467</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
@@ -1490,7 +1490,7 @@
     </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>831548721080</long>
-  <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
       <x>0.001618511850367684</x>
       <y>0.5104269623913634</y>
@@ -1499,9 +1499,9 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
-  </us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>833220848751</long>
-  <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
       <x>-0.008517732880898292</x>
       <y>0.5103873677982864</y>
@@ -1510,7 +1510,7 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
-  </us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>841889219419</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
@@ -1566,21 +1566,21 @@
     </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>850108791728</long>
-  <us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.ComHeightPacket>
     <heightOffset>-0.01176</heightOffset>
-  </us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.ComHeightPacket>
   <long>852484750073</long>
-  <us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.ComHeightPacket>
     <heightOffset>-0.050960000000000005</heightOffset>
-  </us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.ComHeightPacket>
   <long>854408775543</long>
-  <us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.ComHeightPacket>
     <heightOffset>-0.06664</heightOffset>
-  </us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.ComHeightPacket>
   <long>856198004794</long>
-  <us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.ComHeightPacket>
     <heightOffset>-0.08624</heightOffset>
-  </us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.ComHeightPacket>
   <long>866572711049</long>
   <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
     <robotSide>RIGHT</robotSide>
@@ -1890,7 +1890,7 @@
     </jointAngles>
   </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
   <long>1008244892366</long>
-  <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
       <x>0.00364581097276691</x>
       <y>0.5104112669459555</y>
@@ -1899,9 +1899,9 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
-  </us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>1011013413701</long>
-  <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
       <x>0.009727245953448779</x>
       <y>0.5103169551459439</y>
@@ -1910,13 +1910,13 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
-  </us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>1016517282721</long>
-  <us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.ComHeightPacket>
     <heightOffset>-0.10976</heightOffset>
-  </us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.ComHeightPacket>
   <long>1024044997712</long>
-  <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
       <x>0.01985955409990238</x>
       <y>0.5100023869697686</y>
@@ -1925,9 +1925,9 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
-  </us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>1030416197957</long>
-  <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
       <x>0.02391055227644276</x>
       <y>0.5098214979845512</y>
@@ -1936,9 +1936,9 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
-  </us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>1033812844701</long>
-  <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
       <x>0.03200787408937431</x>
       <y>0.5093653885376659</y>
@@ -1947,7 +1947,7 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
-  </us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>1042550204643</long>
   <us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
     <robotSide>RIGHT</robotSide>
@@ -1969,19 +1969,19 @@
     <fingerState>CRUSH</fingerState>
   </us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
   <long>1057150205611</long>
-  <us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.ComHeightPacket>
     <heightOffset>-0.08232</heightOffset>
-  </us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.ComHeightPacket>
   <long>1059948977921</long>
-  <us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.ComHeightPacket>
     <heightOffset>-0.06664</heightOffset>
-  </us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.ComHeightPacket>
   <long>1075892835872</long>
-  <us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.ComHeightPacket>
     <heightOffset>-0.03136</heightOffset>
-  </us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.ComHeightPacket>
   <long>1080156940936</long>
-  <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
       <x>0.029492580654259217</x>
       <y>0.4698790331207547</y>
@@ -1990,9 +1990,9 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
-  </us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>1080157580479</long>
-  <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
       <x>0.029492580654259217</x>
       <y>0.4698790331207547</y>
@@ -2001,9 +2001,9 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
-  </us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>1082372904396</long>
-  <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
       <x>0.027565912417591574</x>
       <y>0.4396238913371328</y>
@@ -2012,9 +2012,9 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
-  </us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>1082373549916</long>
-  <us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
       <x>0.027565912417591574</x>
       <y>0.4396238913371328</y>
@@ -2023,7 +2023,7 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
-  </us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>1105652395386</long>
   <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList>
     <footstepDataList>

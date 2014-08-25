@@ -53,9 +53,9 @@
     <pause>true</pause>
   </us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.PauseCommand>
   <long>20099697163</long>
-  <us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.ComHeightPacket>
     <heightOffset>0.05684</heightOffset>
-  </us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.ComHeightPacket>
   <long>23899612269</long>
   <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList>
     <footstepDataList>
@@ -642,9 +642,9 @@
     <pause>true</pause>
   </us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.PauseCommand>
   <long>316703670776</long>
-  <us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.ComHeightPacket>
     <heightOffset>0.02352</heightOffset>
-  </us.ihmc.commonWalkingControlModules.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.ComHeightPacket>
   <long>326440669958</long>
   <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList>
     <footstepDataList>
