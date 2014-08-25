@@ -16,7 +16,7 @@ import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCWallAtDistanceEnvironment;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCUserInterfaceNetworkingManager;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationNetworkTestHelper;
-import us.ihmc.graphics3DAdapter.jme.util.JMEPointCloudVisualizer;
+import us.ihmc.graphics3DAdapter.jme.util.JMELidarScanVisualizer;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.lidar.polarLidar.SparseLidarScan;
 import us.ihmc.utilities.net.NetStateListener;
@@ -33,7 +33,7 @@ public abstract class DepthDataProcessorTest implements MultiRobotTestInterface,
    private int numberOfLidarScansConsumed = 0;
    private long numberOfLidarPointsConsumed = 0;
    private ConcurrentLinkedQueue<AssertionError> errorQueue = new ConcurrentLinkedQueue<>();
-   private JMEPointCloudVisualizer jmePointCloudVisualizer;
+   private JMELidarScanVisualizer jmeLidarScanVisualizer;
 
    @Before
    public void setUp()
@@ -45,10 +45,11 @@ public abstract class DepthDataProcessorTest implements MultiRobotTestInterface,
    public void testLidarGenerationAndTransmission()
    {
       BambooTools.reportTestStartedMessage();
-      
-      jmePointCloudVisualizer = new JMEPointCloudVisualizer();
-      
-      DRCSimulationNetworkTestHelper drcSimulationTestHelper = new DRCSimulationNetworkTestHelper(getRobotModel(), new DRCWallAtDistanceEnvironment(WALL_DISTANCE));
+
+      jmeLidarScanVisualizer = new JMELidarScanVisualizer();
+
+      DRCSimulationNetworkTestHelper drcSimulationTestHelper = new DRCSimulationNetworkTestHelper(getRobotModel(),
+                                                                  new DRCWallAtDistanceEnvironment(WALL_DISTANCE));
       drcSimulationTestHelper.setupCamera(new Point3d(1.8375, -0.16, 0.89), new Point3d(1.10, 8.30, 1.37));
       drcSimulationTestHelper.addNetStateListener(this);
       drcSimulationTestHelper.addConsumer(SparseLidarScan.class, new LidarConsumer());
@@ -62,10 +63,11 @@ public abstract class DepthDataProcessorTest implements MultiRobotTestInterface,
       assertTrue(success);
       assertTrue("Lidar scans are not being recieved.", numberOfLidarScansConsumed > 10);
 
-      System.out.println("Number of points consumed: " + numberOfLidarPointsConsumed + " Points out of range: " + errorQueue.size() + " Percentage: " + ((double) errorQueue.size() / numberOfLidarPointsConsumed));
-      
+      System.out.println("Number of points consumed: " + numberOfLidarPointsConsumed + " Points out of range: " + errorQueue.size() + " Percentage: "
+                         + ((double) errorQueue.size() / numberOfLidarPointsConsumed));
+
       assertTrue("Too many points are out of range: ", (double) errorQueue.size() / numberOfLidarPointsConsumed < .05);
-//      throwAllAssertionErrors();
+//    throwAllAssertionErrors();
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -84,8 +86,9 @@ public abstract class DepthDataProcessorTest implements MultiRobotTestInterface,
       public void consumeObject(SparseLidarScan sparseLidarScan)
       {
          numberOfLidarScansConsumed++;
-         
-         jmePointCloudVisualizer.addPointCloud(sparseLidarScan.getAllPoints3f());
+
+         jmeLidarScanVisualizer.updateLidarNodeTransform(sparseLidarScan.getStartTransform());
+         jmeLidarScanVisualizer.addPointCloud(sparseLidarScan.getAllPoints3f());
 
          try
          {
