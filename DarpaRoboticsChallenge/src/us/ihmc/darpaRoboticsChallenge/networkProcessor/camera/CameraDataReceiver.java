@@ -9,7 +9,6 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.darpaRoboticsChallenge.driving.DRCStereoListener;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.messages.controller.RobotPoseData;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
@@ -18,6 +17,7 @@ import us.ihmc.graphics3DAdapter.camera.CompressedVideoHandler;
 import us.ihmc.graphics3DAdapter.camera.VideoPacket;
 import us.ihmc.graphics3DAdapter.camera.VideoSettings;
 import us.ihmc.graphics3DAdapter.camera.VideoSettings.VideoCompressionKey;
+import us.ihmc.packets.sensing.RobotPoseData;
 
 public abstract class CameraDataReceiver
 {
