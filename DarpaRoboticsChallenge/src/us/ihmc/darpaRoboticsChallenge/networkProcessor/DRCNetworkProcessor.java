@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URI;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.communication.producers.DRCJointConfigurationData;
 import us.ihmc.communication.producers.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.configuration.DRCNetClassList;
@@ -13,7 +14,6 @@ import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandJointA
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.DepthDataFilter;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.RobotBoundingBoxes;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
-import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.DRCJointConfigurationData;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.utilities.net.AtomicSettableTimestampProvider;
 import us.ihmc.utilities.net.KryoObjectClient;
