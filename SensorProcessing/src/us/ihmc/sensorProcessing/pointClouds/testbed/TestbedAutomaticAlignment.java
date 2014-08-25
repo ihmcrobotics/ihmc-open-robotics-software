@@ -71,7 +71,7 @@ public class TestbedAutomaticAlignment {
       for (int j = 0; j < scan.size(); j++) {
          Point3D_F64 p = scan.get(j);
 
-         double d = headLocation.distance(p);
+         double d = headLocation.distance2(p);
 
          if( d <= r && countNeighbors(p,0.08,scan) > 6 ) {
             cloud0.add(p);
