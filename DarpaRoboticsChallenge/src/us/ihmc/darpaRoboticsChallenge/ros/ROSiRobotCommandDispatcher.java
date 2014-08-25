@@ -8,7 +8,7 @@ import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
 
 import us.ihmc.commonWalkingControlModules.packetConsumers.FingerStateProvider;
-import us.ihmc.commonWalkingControlModules.packets.FingerStatePacket;
+import us.ihmc.communication.packets.manipulation.FingerStatePacket;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.ros.RosTools;
 

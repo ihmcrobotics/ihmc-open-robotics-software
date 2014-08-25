@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.packetConsumers;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import us.ihmc.commonWalkingControlModules.packets.FingerStatePacket;
+import us.ihmc.communication.packets.manipulation.FingerStatePacket;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.net.ObjectConsumer;
 

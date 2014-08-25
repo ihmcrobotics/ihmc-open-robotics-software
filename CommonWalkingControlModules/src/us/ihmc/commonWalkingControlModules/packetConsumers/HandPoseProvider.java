@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.packetConsumers;
 
 import java.util.Map;
 
-import us.ihmc.commonWalkingControlModules.packets.HandPosePacket;
+import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;

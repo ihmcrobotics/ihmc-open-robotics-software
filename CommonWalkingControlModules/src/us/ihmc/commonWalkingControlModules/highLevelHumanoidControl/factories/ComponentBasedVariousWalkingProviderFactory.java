@@ -23,8 +23,8 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.HandLoadBearingProvid
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ReinitializeWalkingControllerProvider;
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
+import us.ihmc.commonWalkingControlModules.packetProviders.DesiredHighLevelStateProvider;
 import us.ihmc.commonWalkingControlModules.packetProviders.SystemErrControlStatusProducer;
-import us.ihmc.commonWalkingControlModules.packets.DesiredHighLevelStateProvider;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalculator;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantTransferTimeCalculator;

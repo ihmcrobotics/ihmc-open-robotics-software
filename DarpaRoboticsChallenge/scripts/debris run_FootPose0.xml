@@ -36,7 +36,7 @@
     <transferTime>0.0</transferTime>
   </us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList>
   <long>23966633</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>LEFT</robotSide>
     <referenceFrame>WORLD</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -61,9 +61,9 @@
       <double>0.009212873900293255</double>
       <double>-0.06333870967741939</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>27938223</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>WORLD</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -88,7 +88,7 @@
       <double>0.0</double>
       <double>0.06794516129032258</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>9829488307</long>
   <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
@@ -116,7 +116,7 @@
     <heightOffset>-0.02352</heightOffset>
   </us.ihmc.communication.packets.ComHeightPacket>
   <long>53688925401</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -141,9 +141,9 @@
       <double>0.0</double>
       <double>0.8996754452369053</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>64488477113</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -168,9 +168,9 @@
       <double>0.5246144001462101</double>
       <double>0.8860046875305961</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>77356587852</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -195,13 +195,13 @@
       <double>0.3016276647248404</double>
       <double>0.9548961582055819</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>90364675183</long>
   <us.ihmc.communication.packets.ComHeightPacket>
     <heightOffset>-0.07840000000000001</heightOffset>
   </us.ihmc.communication.packets.ComHeightPacket>
   <long>93731823784</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -226,9 +226,9 @@
       <double>0.2919133227917378</double>
       <double>0.972306462410443</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>112206959443</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>LEFT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -253,7 +253,7 @@
       <double>0.0</double>
       <double>-0.38020420014686623</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>116980547049</long>
   <us.ihmc.communication.packets.ComHeightPacket>
     <heightOffset>-0.06272</heightOffset>
@@ -267,7 +267,7 @@
     <heightOffset>-0.098</heightOffset>
   </us.ihmc.communication.packets.ComHeightPacket>
   <long>130274247179</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -292,9 +292,9 @@
       <double>0.22923837891011692</double>
       <double>0.751848142418198</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>147092059077</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -319,7 +319,7 @@
       <double>0.17430474796457784</double>
       <double>0.43835584295500774</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>156076715185</long>
   <us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
     <robotSide>RIGHT</robotSide>
@@ -344,7 +344,7 @@
     <heightOffset>0.01568</heightOffset>
   </us.ihmc.communication.packets.ComHeightPacket>
   <long>182604452470</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -369,7 +369,7 @@
       <double>0.0</double>
       <double>1.1781</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>191012855863</long>
   <us.ihmc.graphics3DAdapter.camera.VideoControlPacket>
     <sendVideo>true</sendVideo>
@@ -537,7 +537,7 @@
     <heightOffset>0.00882</heightOffset>
   </us.ihmc.communication.packets.ComHeightPacket>
   <long>232263662242</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -562,9 +562,9 @@
       <double>2.787819396880158E-4</double>
       <double>0.3172294697077265</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>243330496268</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -589,9 +589,9 @@
       <double>0.0</double>
       <double>0.29801193495953976</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>259038910569</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -616,7 +616,7 @@
       <double>0.0</double>
       <double>0.05110434405500591</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>268380413415</long>
   <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
@@ -634,7 +634,7 @@
     <fingerState>OPEN</fingerState>
   </us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
   <long>297931789193</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -659,9 +659,9 @@
       <double>0.0</double>
       <double>-0.09167958891218943</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>346011364939</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>LEFT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -686,7 +686,7 @@
       <double>0.7856666438592246</double>
       <double>-0.44466652495745673</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>356772701251</long>
   <us.ihmc.communication.packets.ComHeightPacket>
     <heightOffset>0.00588</heightOffset>
@@ -747,7 +747,7 @@
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
   </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>380939477546</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>LEFT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -772,9 +772,9 @@
       <double>0.0</double>
       <double>-1.1781</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>433660059619</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>LEFT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -799,9 +799,9 @@
       <double>0.0</double>
       <double>-0.24002031725918244</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>444271310388</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>LEFT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -826,7 +826,7 @@
       <double>0.8610921512653111</double>
       <double>0.35228561204626774</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>470604634129</long>
   <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
@@ -850,7 +850,7 @@
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
   </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>489027979460</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>LEFT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -875,9 +875,9 @@
       <double>3.14159</double>
       <double>1.1781</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>496280021258</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>LEFT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -902,9 +902,9 @@
       <double>0.3833649622754798</double>
       <double>1.055499200311078</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>501762637807</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -929,13 +929,13 @@
       <double>0.0</double>
       <double>0.30036594889156115</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>504748863161</long>
   <com.yobotics.simulationconstructionset.simulatedSensors.LidarClearCommand>
     <lidarTree>OCTREE</lidarTree>
   </com.yobotics.simulationconstructionset.simulatedSensors.LidarClearCommand>
   <long>536152608145</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -960,7 +960,7 @@
       <double>0.5305634302829773</double>
       <double>-0.5023583995902073</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>544404569902</long>
   <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
@@ -973,7 +973,7 @@
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
   </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>552393029212</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -998,7 +998,7 @@
       <double>0.49601914572973815</double>
       <double>-0.37012579160674636</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>557972779298</long>
   <us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
     <robotSide>RIGHT</robotSide>
@@ -1040,7 +1040,7 @@
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
   </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>578725763670</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -1065,7 +1065,7 @@
       <double>0.5220130114232902</double>
       <double>-0.350017282104958</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>585132787199</long>
   <us.ihmc.communication.packets.ComHeightPacket>
     <heightOffset>-0.05488</heightOffset>
@@ -1075,7 +1075,7 @@
     <heightOffset>-0.09016</heightOffset>
   </us.ihmc.communication.packets.ComHeightPacket>
   <long>596694392070</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -1100,7 +1100,7 @@
       <double>0.5424078188231429</double>
       <double>-0.32123813935864864</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>600108754812</long>
   <us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
     <robotSide>RIGHT</robotSide>
@@ -1111,7 +1111,7 @@
     <heightOffset>0.004900000000000001</heightOffset>
   </us.ihmc.communication.packets.ComHeightPacket>
   <long>623571443681</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -1136,9 +1136,9 @@
       <double>0.0</double>
       <double>0.4772266698240851</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>636504483316</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -1163,9 +1163,9 @@
       <double>3.14159</double>
       <double>0.11566654859337863</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>640542344712</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -1190,9 +1190,9 @@
       <double>0.0</double>
       <double>0.1843664364583917</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>643483999643</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -1217,9 +1217,9 @@
       <double>0.0</double>
       <double>0.18666708944075128</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>649869077705</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
@@ -1232,14 +1232,14 @@
       <double>0.0</double>
       <double>0.19553219613734724</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>659213183751</long>
   <us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
     <robotSide>RIGHT</robotSide>
     <fingerState>OPEN</fingerState>
   </us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
   <long>664204706280</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>LEFT</robotSide>
     <dataType>HAND_POSE</dataType>
     <toHomePosition>true</toHomePosition>
@@ -1252,9 +1252,9 @@
       <double>0.0</double>
       <double>0.0</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>664205352353</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <dataType>HAND_POSE</dataType>
     <toHomePosition>true</toHomePosition>
@@ -1267,9 +1267,9 @@
       <double>0.0</double>
       <double>0.0</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>691276561501</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>LEFT</robotSide>
     <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
@@ -1282,9 +1282,9 @@
       <double>0.6460833101425192</double>
       <double>0.04392087368553382</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>706240954854</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>LEFT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -1309,9 +1309,9 @@
       <double>1.7958969866206125</double>
       <double>0.28098772347361334</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>742317949002</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>LEFT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -1336,9 +1336,9 @@
       <double>0.0</double>
       <double>-0.7333575112000057</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>775543003913</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -1363,9 +1363,9 @@
       <double>0.8992909061192992</double>
       <double>-0.021111819758447597</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>784935782582</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -1390,7 +1390,7 @@
       <double>0.9325487023606464</double>
       <double>-0.026339286757978617</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>787340782406</long>
   <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
@@ -1436,7 +1436,7 @@
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
   </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>809372342467</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -1461,9 +1461,9 @@
       <double>0.0</double>
       <double>-0.022746179559480637</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>820152705355</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -1488,7 +1488,7 @@
       <double>0.0</double>
       <double>0.06885954376203009</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>831548721080</long>
   <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
@@ -1512,7 +1512,7 @@
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
   </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>841889219419</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -1537,9 +1537,9 @@
       <double>0.0</double>
       <double>0.0549571032349219</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>847512751067</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -1564,7 +1564,7 @@
       <double>0.0</double>
       <double>0.12383630111584203</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>850108791728</long>
   <us.ihmc.communication.packets.ComHeightPacket>
     <heightOffset>-0.01176</heightOffset>
@@ -1582,7 +1582,7 @@
     <heightOffset>-0.08624</heightOffset>
   </us.ihmc.communication.packets.ComHeightPacket>
   <long>866572711049</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
@@ -1595,7 +1595,7 @@
       <double>0.0</double>
       <double>0.24023739504024588</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>876412819139</long>
   <us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
     <robotSide>RIGHT</robotSide>
@@ -1607,7 +1607,7 @@
     <fingerState>OPEN</fingerState>
   </us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
   <long>883827076361</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -1632,9 +1632,9 @@
       <double>0.0</double>
       <double>0.2735030258121688</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>887080765704</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -1659,9 +1659,9 @@
       <double>0.0</double>
       <double>0.6057359097939622</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>894459842883</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -1686,9 +1686,9 @@
       <double>0.0</double>
       <double>0.3679258513856967</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>904018185897</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -1713,7 +1713,7 @@
       <double>0.0</double>
       <double>0.43973955721575464</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>907876824132</long>
   <us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
     <robotSide>RIGHT</robotSide>
@@ -1725,7 +1725,7 @@
     <fingerState>OPEN</fingerState>
   </us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
   <long>924031597391</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -1750,9 +1750,9 @@
       <double>0.042457538461318424</double>
       <double>0.8861300927702866</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>931914165703</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -1777,9 +1777,9 @@
       <double>3.14159</double>
       <double>-0.5938790592875554</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>942612617285</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -1804,9 +1804,9 @@
       <double>0.0</double>
       <double>0.33851809919120335</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>950620677595</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
@@ -1819,9 +1819,9 @@
       <double>0.0</double>
       <double>0.5253820670956826</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>964275281994</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -1846,9 +1846,9 @@
       <double>0.0</double>
       <double>0.2367230760231906</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>980996196104</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -1873,9 +1873,9 @@
       <double>0.025410176599633336</double>
       <double>0.06071151905590762</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>995708742164</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <dataType>HAND_POSE</dataType>
     <toHomePosition>false</toHomePosition>
@@ -1888,7 +1888,7 @@
       <double>0.0</double>
       <double>0.27426394515310754</double>
     </jointAngles>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>1008244892366</long>
   <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>

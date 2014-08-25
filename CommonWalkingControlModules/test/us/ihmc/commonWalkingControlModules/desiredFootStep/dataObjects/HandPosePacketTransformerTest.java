@@ -12,7 +12,7 @@ import javax.vecmath.Quat4d;
 
 import org.junit.Test;
 
-import us.ihmc.commonWalkingControlModules.packets.HandPosePacket;
+import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
