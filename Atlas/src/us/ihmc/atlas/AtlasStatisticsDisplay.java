@@ -42,6 +42,6 @@ public class AtlasStatisticsDisplay
          return;
       }
 
-      new StatisticsDisplay(model);
+      new StatisticsDisplay(model.createFullRobotModel());
    }
 }
