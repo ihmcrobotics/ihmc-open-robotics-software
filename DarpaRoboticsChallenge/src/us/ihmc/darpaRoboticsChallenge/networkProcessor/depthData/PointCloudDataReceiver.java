@@ -5,12 +5,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.media.j3d.Transform3D;
 
-import us.ihmc.RobotPoseBufferListener;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.communication.RobotPoseBufferListener;
+import us.ihmc.communication.packets.sensing.RobotPoseData;
+import us.ihmc.communication.producers.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorControllerStateHandler;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
-import us.ihmc.packets.sensing.RobotPoseData;
-import us.ihmc.producers.RobotPoseBuffer;
 import us.ihmc.utilities.lidar.FilteredPointCloudPacket;
 import us.ihmc.utilities.lidar.PointCloudPacket;
 import us.ihmc.utilities.net.NetStateListener;
