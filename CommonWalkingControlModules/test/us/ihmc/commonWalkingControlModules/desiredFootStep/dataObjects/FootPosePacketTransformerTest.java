@@ -1,7 +1,8 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects;
 
 import org.junit.Test;
-import us.ihmc.commonWalkingControlModules.packets.FootPosePacket;
+
+import us.ihmc.communication.packets.walking.FootPosePacket;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -12,6 +13,7 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
+
 import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
