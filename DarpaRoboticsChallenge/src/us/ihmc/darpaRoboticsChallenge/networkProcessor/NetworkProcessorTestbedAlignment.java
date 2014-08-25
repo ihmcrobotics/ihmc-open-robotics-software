@@ -82,7 +82,7 @@ public class NetworkProcessorTestbedAlignment implements Runnable
                return;
             }
             out = null;
-            first = false;
+            first = true;
             available.addAll(scans);
             scans.clear();
             testbedFinder.reset();
