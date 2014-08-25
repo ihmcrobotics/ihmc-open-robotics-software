@@ -20,8 +20,8 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandPoseProvid
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandstepProvider;
 import us.ihmc.commonWalkingControlModules.packets.FootPosePacket;
-import us.ihmc.commonWalkingControlModules.packets.HandPosePacket;
 import us.ihmc.communication.packets.ComHeightPacket;
+import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;

@@ -7,7 +7,7 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
-import us.ihmc.commonWalkingControlModules.packets.HandstepPacket;
+import us.ihmc.communication.packets.manipulation.HandstepPacket;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FramePose;

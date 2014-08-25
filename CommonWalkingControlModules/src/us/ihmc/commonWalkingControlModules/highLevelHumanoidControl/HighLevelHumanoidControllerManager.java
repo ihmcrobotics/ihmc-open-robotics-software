@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.commonWalkingControlModules.packets.DesiredHighLevelStateProvider;
+import us.ihmc.commonWalkingControlModules.packetProviders.DesiredHighLevelStateProvider;
 import us.ihmc.communication.HighLevelState;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;

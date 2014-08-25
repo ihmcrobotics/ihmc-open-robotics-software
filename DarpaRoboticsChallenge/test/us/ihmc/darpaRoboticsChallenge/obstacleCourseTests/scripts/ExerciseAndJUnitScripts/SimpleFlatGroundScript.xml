@@ -84,7 +84,7 @@
     </orientation>
   </us.ihmc.commonWalkingControlModules.packets.FootPosePacket>
   <long>3</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>LEFT</robotSide>
     <referenceFrame>WORLD</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -101,7 +101,7 @@
       <w>0.9391289965792451</w>
     </orientation>
     <trajectoryTime>1.0</trajectoryTime>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>4</long>
   <us.ihmc.commonWalkingControlModules.packets.FootPosePacket>
     <robotSide>RIGHT</robotSide>
@@ -148,7 +148,7 @@
     </orientation>
   </us.ihmc.commonWalkingControlModules.packets.FootPosePacket>
   <long>5</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>WORLD</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -165,7 +165,7 @@
       <w>0.9365487579887161</w>
     </orientation>
     <trajectoryTime>1.0</trajectoryTime>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>6</long>
   <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList>
     <footstepDataList>
@@ -220,7 +220,7 @@
     <pause>true</pause>
   </us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.PauseCommand>
   <long>8</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>LEFT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -237,7 +237,7 @@
       <w>0.9017839496036073</w>
     </orientation>
     <trajectoryTime>1.0</trajectoryTime>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>9</long>
   <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList>
     <footstepDataList>
@@ -292,7 +292,7 @@
     <pause>true</pause>
   </us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.PauseCommand>
   <long>11</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -309,9 +309,9 @@
       <w>0.9574274542540707</w>
     </orientation>
     <trajectoryTime>1.0</trajectoryTime>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>10</long>
-  <us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>LEFT</robotSide>
     <referenceFrame>CHEST</referenceFrame>
     <dataType>HAND_POSE</dataType>
@@ -328,7 +328,7 @@
       <w>0.9200110160549076</w>
     </orientation>
     <trajectoryTime>1.0</trajectoryTime>
-  </us.ihmc.commonWalkingControlModules.packets.HandPosePacket>
+  </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>12</long>
   <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList>
     <footstepDataList>

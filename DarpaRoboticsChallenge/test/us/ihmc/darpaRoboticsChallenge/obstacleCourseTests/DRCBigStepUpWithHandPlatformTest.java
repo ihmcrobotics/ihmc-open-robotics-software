@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 
 import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
@@ -16,7 +17,7 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
-import us.ihmc.commonWalkingControlModules.packets.HandstepPacket;
+import us.ihmc.communication.packets.manipulation.HandstepPacket;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.BigStepUpWithHandPlatformEnvironment;
@@ -93,7 +94,15 @@ public abstract class DRCBigStepUpWithHandPlatformTest implements MultiRobotTest
 
       for (Handstep handstep : handsteps)
       {
-         HandstepPacket handstepPacket = new HandstepPacket(handstep);
+    	  Point3d location = new Point3d();
+    	  Quat4d orientation = new Quat4d();
+    	  Vector3d surfaceNormal = new Vector3d();
+    	  handstep.getPose(location, orientation);
+          handstep.getSurfaceNormal(surfaceNormal);
+    	  
+         HandstepPacket handstepPacket = new HandstepPacket(handstep.getRobotSide(),
+        		 											location, orientation, surfaceNormal,
+        		 											handstep.getSwingTrajectoryTime());
          drcSimulationTestHelper.sendHandstepPacketToListeners(handstepPacket);
          success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
       }

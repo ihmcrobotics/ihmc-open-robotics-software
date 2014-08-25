@@ -5,7 +5,7 @@ import java.util.Map;
 
 import javax.media.j3d.Transform3D;
 
-import us.ihmc.commonWalkingControlModules.packets.HandPosePacket;
+import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;

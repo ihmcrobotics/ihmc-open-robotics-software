@@ -1,6 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.ros;
 
-import us.ihmc.commonWalkingControlModules.packets.FingerStatePacket;
+import us.ihmc.communication.packets.manipulation.FingerStatePacket;
 import handle_msgs.HandleControl;
 
 public class FingerStatePacketToHandleControlMessageConverter

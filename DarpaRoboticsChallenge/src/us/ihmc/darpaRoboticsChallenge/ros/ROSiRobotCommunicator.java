@@ -13,7 +13,7 @@ import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
 import org.ros.node.topic.Publisher;
 
-import us.ihmc.commonWalkingControlModules.packets.FingerStatePacket;
+import us.ihmc.communication.packets.manipulation.FingerStatePacket;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.ros.RosTools;

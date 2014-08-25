@@ -17,7 +17,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.HandPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ReinitializeWalkingControllerProvider;
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
-import us.ihmc.commonWalkingControlModules.packets.DesiredHighLevelStateProvider;
+import us.ihmc.commonWalkingControlModules.packetProviders.DesiredHighLevelStateProvider;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.trajectories.providers.TrajectoryParameters;
 

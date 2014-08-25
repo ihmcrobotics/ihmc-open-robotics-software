@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.packets;
+package us.ihmc.commonWalkingControlModules.packetProviders;
 
 import java.util.concurrent.atomic.AtomicReference;
 
