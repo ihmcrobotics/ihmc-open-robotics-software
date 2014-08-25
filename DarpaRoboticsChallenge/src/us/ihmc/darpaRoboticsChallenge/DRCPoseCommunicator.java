@@ -4,6 +4,7 @@ import javax.media.j3d.Transform3D;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packets.sensing.RobotPoseData;
+import us.ihmc.communication.producers.DRCJointConfigurationData;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParameters;
@@ -13,7 +14,6 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPointCloudParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorParameters;
-import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.DRCJointConfigurationData;
 import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.JointConfigurationGatherer;
 import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
