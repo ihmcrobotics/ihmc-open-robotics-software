@@ -17,7 +17,6 @@ import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.DRCJointConfigura
 import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.JointConfigurationGatherer;
 import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.geometry.TranslationFrame;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.net.TimestampProvider;
 
