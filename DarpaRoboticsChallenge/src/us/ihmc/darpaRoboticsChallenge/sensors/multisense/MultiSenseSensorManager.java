@@ -4,6 +4,7 @@ import java.net.URI;
 
 import org.ros.node.parameter.ParameterTree;
 
+import us.ihmc.communication.producers.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotLidarParameters;
@@ -19,7 +20,6 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetPr
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
 import us.ihmc.darpaRoboticsChallenge.ros.ROSNativeTransformTools;
 import us.ihmc.darpaRoboticsChallenge.ros.RosRobotPosePublisher;
-import us.ihmc.producers.RobotPoseBuffer;
 import us.ihmc.utilities.ros.RosMainNode;
 
 public class MultiSenseSensorManager
