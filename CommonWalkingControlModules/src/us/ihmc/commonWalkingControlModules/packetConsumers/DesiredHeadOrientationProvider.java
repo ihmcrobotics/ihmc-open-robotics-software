@@ -4,8 +4,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
-import us.ihmc.commonWalkingControlModules.packets.HeadOrientationPacket;
-import us.ihmc.commonWalkingControlModules.packets.LookAtPacket;
+import us.ihmc.communication.packets.HeadOrientationPacket;
+import us.ihmc.communication.packets.LookAtPacket;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;

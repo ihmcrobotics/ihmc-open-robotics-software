@@ -46,6 +46,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.ContactStatesAndUpcoming
 import us.ihmc.commonWalkingControlModules.trajectories.FlatThenPolynomialCoMHeightTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.TransferTimeCalculationProvider;
+import us.ihmc.communication.HighLevelState;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;

@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.M
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packets.HandLoadBearingPacket;
+import us.ihmc.communication.HighLevelState;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FrameOrientation;

@@ -2,7 +2,8 @@ package us.ihmc.commonWalkingControlModules.packets;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelState;
+import us.ihmc.communication.HighLevelState;
+import us.ihmc.communication.packets.HighLevelStatePacket;
 import us.ihmc.utilities.net.ObjectConsumer;
 
 public class DesiredHighLevelStateProvider implements ObjectConsumer<HighLevelStatePacket>

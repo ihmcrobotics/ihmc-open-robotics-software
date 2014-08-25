@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.packetProviders;
 
-import us.ihmc.commonWalkingControlModules.packets.ControlStatusPacket;
-import us.ihmc.commonWalkingControlModules.packets.ControlStatusPacket.ControlStatus;
+import us.ihmc.communication.packets.ControlStatusPacket;
+import us.ihmc.communication.packets.ControlStatusPacket.ControlStatus;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 
