@@ -15,11 +15,11 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.RosCameraInfoRecie
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.RosCameraReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.DepthDataProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosNativeNetworkProcessor;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
 import us.ihmc.darpaRoboticsChallenge.ros.ROSNativeTransformTools;
 import us.ihmc.darpaRoboticsChallenge.ros.RosRobotPosePublisher;
+import us.ihmc.producers.RobotPoseBuffer;
 import us.ihmc.utilities.ros.RosMainNode;
 
 public class MultiSenseSensorManager
