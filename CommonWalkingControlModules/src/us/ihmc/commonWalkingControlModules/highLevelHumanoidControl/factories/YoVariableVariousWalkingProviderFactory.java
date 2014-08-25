@@ -20,7 +20,6 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBeari
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandstepProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.ReinitializeWalkingControllerProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.UserDesiredHandLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.UserDesiredHandPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.UserDesiredHandstepProvider;
@@ -61,7 +60,7 @@ public class YoVariableVariousWalkingProviderFactory implements VariousWalkingPr
       DesiredPelvisPoseProvider pelvisPoseProvider = null;
       DesiredChestOrientationProvider chestOrientationProvider = null;
       DesiredFootPoseProvider footPoseProvider = null;
-      ReinitializeWalkingControllerProvider reinitializeWalkingControllerProvider = null;
+     
 
       HandLoadBearingProvider handLoadBearingProvider = new UserDesiredHandLoadBearingProvider(registry);
       DesiredFootStateProvider footLoadBearingProvider = null;
@@ -74,7 +73,7 @@ public class YoVariableVariousWalkingProviderFactory implements VariousWalkingPr
                                                     headOrientationProvider, desiredComHeightProvider, pelvisPoseProvider, handPoseProvider,
                                                     handLoadBearingProvider, chestOrientationProvider, footPoseProvider, footLoadBearingProvider,
                                                     highLevelStateProvider, thighLoadBearingProvider, pelvisLoadBearingProvider,
-                                                    reinitializeWalkingControllerProvider, controlStatusProducer);
+                                                    controlStatusProducer);
 
       return variousProviders;
    }
