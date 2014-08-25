@@ -21,7 +21,6 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisPoseProv
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandstepProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.ReinitializeWalkingControllerProvider;
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.DesiredHighLevelStateProvider;
 import us.ihmc.commonWalkingControlModules.packetProviders.SystemErrControlStatusProducer;
@@ -79,7 +78,7 @@ public class ComponentBasedVariousWalkingProviderFactory implements VariousWalki
       if ((fullRobotModel.getHand(RobotSide.LEFT) != null) && (fullRobotModel.getHand(RobotSide.RIGHT) != null))
          handPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame());
       DesiredFootPoseProvider footPoseProvider = new DesiredFootPoseProvider();
-      ReinitializeWalkingControllerProvider reinitializeWalkingControllerProvider = new ReinitializeWalkingControllerProvider();
+     
 
       HandLoadBearingProvider handLoadBearingProvider = new DesiredHandLoadBearingProvider();
       DesiredFootStateProvider footLoadBearingProvider = new DesiredFootStateProvider();
@@ -92,7 +91,7 @@ public class ComponentBasedVariousWalkingProviderFactory implements VariousWalki
                                                            headOrientationProvider, comHeightProvider, pelvisPoseProvider, handPoseProvider,
                                                            handLoadBearingProvider, chestOrientationProvider, footPoseProvider, footLoadBearingProvider,
                                                            highLevelStateProvider, thighLoadBearingProvider, pelvisLoadBearingProvider,
-                                                           reinitializeWalkingControllerProvider, controlStatusProducer);
+                                                           controlStatusProducer);
 
       return variousWalkingProviders;
    }

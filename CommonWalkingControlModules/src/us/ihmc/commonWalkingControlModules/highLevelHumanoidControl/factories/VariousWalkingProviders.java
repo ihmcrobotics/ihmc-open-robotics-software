@@ -15,7 +15,6 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBeari
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandstepProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.ReinitializeWalkingControllerProvider;
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.DesiredHighLevelStateProvider;
 import us.ihmc.robotSide.RobotSide;
@@ -35,8 +34,7 @@ public class VariousWalkingProviders
    private final HandPoseProvider desiredHandPoseProvider;
    private final DesiredChestOrientationProvider desiredChestOrientationProvider;
    private final DesiredFootPoseProvider desiredFootPoseProvider;
-   private final ReinitializeWalkingControllerProvider reinitializeWalkingControllerProvider;
-
+  
    // TODO: Rename DesiredFootStateProvider to DesiredFootLoadBearingProvider, do the same for the packet, etc.
    private final DesiredFootStateProvider desiredFootLoadBearingProvider;
    private final HandLoadBearingProvider desiredHandLoadBearingProvider;
@@ -53,7 +51,7 @@ public class VariousWalkingProviders
          HandLoadBearingProvider desiredHandLoadBearingProvider, DesiredChestOrientationProvider desiredChestOrientationProvider,
          DesiredFootPoseProvider footPoseProvider, DesiredFootStateProvider footStateProvider, DesiredHighLevelStateProvider desiredHighLevelStateProvider,
          DesiredThighLoadBearingProvider thighLoadBearingProvider, DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider,
-         ReinitializeWalkingControllerProvider reinitializeWalkingControllerProvider, ControlStatusProducer controlStatusProducer)
+         ControlStatusProducer controlStatusProducer)
    {
       this.desiredHighLevelStateProvider = desiredHighLevelStateProvider;
       this.footstepProvider = footstepProvider;
@@ -65,8 +63,7 @@ public class VariousWalkingProviders
       this.desiredChestOrientationProvider = desiredChestOrientationProvider;
       this.desiredHandPoseProvider = desiredHandPoseProvider;
       this.desiredFootPoseProvider = footPoseProvider;
-      this.reinitializeWalkingControllerProvider = reinitializeWalkingControllerProvider;
-
+   
       this.desiredHandLoadBearingProvider = desiredHandLoadBearingProvider;
       this.desiredFootLoadBearingProvider = footStateProvider;
       this.desiredThighLoadBearingProvider = thighLoadBearingProvider;
@@ -170,11 +167,7 @@ public class VariousWalkingProviders
       return desiredThighLoadBearingProvider;
    }
 
-   public ReinitializeWalkingControllerProvider getReinitializeWalkingControllerProvider()
-   {
-      return reinitializeWalkingControllerProvider;
-   }
-
+  
    public ControlStatusProducer getControlStatusProducer()
    {
       return controlStatusProducer;

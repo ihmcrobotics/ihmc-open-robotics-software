@@ -32,7 +32,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlModuleBridge.MomentumControlModuleType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootPoseProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.ReinitializeWalkingControllerProvider;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.HeelSwitch;
 import us.ihmc.commonWalkingControlModules.sensors.ToeSwitch;
@@ -184,7 +183,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters;
    private final InstantaneousCapturePointPlanner instantaneousCapturePointPlanner;
-   private final ReinitializeWalkingControllerProvider reinitializeControllerProvider;
+ 
 
    private final ICPBasedMomentumRateOfChangeControlModule icpBasedMomentumRateOfChangeControlModule;
 
@@ -263,7 +262,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       doPrepareManipulationForLocomotion.set(walkingControllerParameters.doPrepareManipulationForLocomotion());
 
-      this.reinitializeControllerProvider = variousWalkingProviders.getReinitializeWalkingControllerProvider();
+   
 
       if (dynamicGraphicObjectsListRegistry == null)
       {
@@ -544,8 +543,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       {
          doNotIntegrateAnkleAccelerations();
 
-         checkForReinitialization();
-
+       
          feetManager.updateContactStatesInDoubleSupport(transferToSide);
 
          // note: this has to be done before the ICP trajectory generator is initialized, since it is using nextFootstep
@@ -903,7 +901,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       {
          integrateAnkleAccelerationsOnSwingLeg(swingSide);
 
-         checkForReinitialization();
+       
 
          desiredICPLocal.setToZero(desiredICP.getReferenceFrame());
          desiredICPVelocityLocal.setToZero(desiredICPVelocity.getReferenceFrame());
@@ -1747,18 +1745,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       return footstep;
    }
 
-   private void checkForReinitialization()
-   {
-      if (reinitializeControllerProvider == null)
-         return;
-
-      if (reinitializeControllerProvider.isReinitializeRequested() && (stateMachine.getCurrentStateEnum() == WalkingState.DOUBLE_SUPPORT))
-      {
-         reinitializeControllerProvider.set(false);
-         initialize();
-      }
-   }
-
+  
    public void integrateAnkleAccelerationsOnSwingLeg(RobotSide swingSide)
    {
       fullRobotModel.getLegJoint(swingSide, LegJointName.ANKLE_PITCH).setIntegrateDesiredAccelerations(true);
