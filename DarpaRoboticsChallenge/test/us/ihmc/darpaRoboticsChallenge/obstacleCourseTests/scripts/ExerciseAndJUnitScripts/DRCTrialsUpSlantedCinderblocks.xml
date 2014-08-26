@@ -194,9 +194,9 @@
     <pause>true</pause>
   </us.ihmc.communication.packets.walking.PauseCommand>
   <long>157072384797</long>
-  <com.yobotics.simulationconstructionset.simulatedSensors.LidarClearCommand>
+  <us.ihmc.communication.packets.sensing.DepthDataClearCommand>
     <lidarTree>QUADTREE</lidarTree>
-  </com.yobotics.simulationconstructionset.simulatedSensors.LidarClearCommand>
+  </us.ihmc.communication.packets.sensing.DepthDataClearCommand>
   <long>181827957559</long>
   <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList>
     <footstepDataList>

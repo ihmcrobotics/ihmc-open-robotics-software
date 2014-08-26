@@ -1,5 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+import us.ihmc.communication.packets.SCSListenerPacket;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 
 import com.yobotics.simulationconstructionset.PlaybackListener;

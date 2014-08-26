@@ -142,23 +142,23 @@
     <desiredNeckPitchAngle>0.7955242000000002</desiredNeckPitchAngle>
   </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>62045370763</long>
-  <us.ihmc.graphics3DAdapter.camera.VideoControlPacket>
+  <us.ihmc.communication.packets.sensing.VideoControlPacket>
     <sendVideo>true</sendVideo>
     <videoQualitySetting>bandwidth512kbitWide</videoQualitySetting>
     <fps>25</fps>
     <crop>false</crop>
     <cropX>50</cropX>
     <cropY>50</cropY>
-  </us.ihmc.graphics3DAdapter.camera.VideoControlPacket>
+  </us.ihmc.communication.packets.sensing.VideoControlPacket>
   <long>63077147357</long>
-  <us.ihmc.graphics3DAdapter.camera.VideoControlPacket>
+  <us.ihmc.communication.packets.sensing.VideoControlPacket>
     <sendVideo>true</sendVideo>
     <videoQualitySetting>bandwidth512kbitWide</videoQualitySetting>
     <fps>25</fps>
     <crop>false</crop>
     <cropX>50</cropX>
     <cropY>50</cropY>
-  </us.ihmc.graphics3DAdapter.camera.VideoControlPacket>
+  </us.ihmc.communication.packets.sensing.VideoControlPacket>
   <long>81916945805</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>LEFT</robotSide>
