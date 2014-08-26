@@ -9,7 +9,7 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Random;
 
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.compression.Serializer;
+import us.ihmc.communication.serializers.Serializer;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.compression.SerializerFactory;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.compression.UplinkSerializerFactory;
 
