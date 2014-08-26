@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddHeightMapInstruction;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddMeshDataInstruction;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddModelFileInstruction;
-import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddExtusionInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddExtrusionInstruction;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DPrimitiveInstruction;
 import us.ihmc.graphics3DAdapter.graphics.instructions.primitives.Graphics3DIdentityInstruction;
 import us.ihmc.graphics3DAdapter.graphics.instructions.primitives.Graphics3DRotateInstruction;
@@ -56,9 +56,9 @@ public abstract class Graphics3DInstructionExecutor
             Graphics3DTranslateInstruction graphics3DTranslate = (Graphics3DTranslateInstruction) instruction;
             doTranslateInstruction(graphics3DTranslate);
          }
-         else if (instruction instanceof Graphics3DAddExtusionInstruction)
+         else if (instruction instanceof Graphics3DAddExtrusionInstruction)
          {
-            Graphics3DAddExtusionInstruction graphics3DAddExtrusion = (Graphics3DAddExtusionInstruction) instruction;
+            Graphics3DAddExtrusionInstruction graphics3DAddExtrusion = (Graphics3DAddExtrusionInstruction) instruction;
             doAddExtrusionInstruction(graphics3DAddExtrusion);
          }
          else if (instruction instanceof Graphics3DAddHeightMapInstruction)
@@ -79,7 +79,7 @@ public abstract class Graphics3DInstructionExecutor
 
    protected abstract void doAddHeightMapInstruction(Graphics3DAddHeightMapInstruction graphics3DAddHeightMap);
 
-   protected abstract void doAddExtrusionInstruction(Graphics3DAddExtusionInstruction graphics3DAddText);
+   protected abstract void doAddExtrusionInstruction(Graphics3DAddExtrusionInstruction graphics3DAddText);
 
    protected abstract void doAddModelFileInstruction(Graphics3DAddModelFileInstruction graphics3DAddModelFile);
 
