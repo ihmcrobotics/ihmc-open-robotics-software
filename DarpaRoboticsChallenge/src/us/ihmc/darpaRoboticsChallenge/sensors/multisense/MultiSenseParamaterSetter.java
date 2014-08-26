@@ -9,9 +9,9 @@ import org.ros.node.parameter.ParameterListener;
 import org.ros.node.parameter.ParameterTree;
 import org.ros.node.service.ServiceResponseListener;
 
+import us.ihmc.communication.packets.sensing.MultisenseParameterPacket;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosNativeNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
-import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.MultisenseParameterPacket;
 import us.ihmc.utilities.processManagement.ProcessStreamGobbler;
 import us.ihmc.utilities.ros.RosDoublePublisher;
 import us.ihmc.utilities.ros.RosMainNode;
