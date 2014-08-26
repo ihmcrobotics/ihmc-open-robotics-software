@@ -122,7 +122,7 @@ public class ArmCalibrationHelper implements DRCStereoListener
          PrintWriter qWriter = new PrintWriter(q);
 //         PrintWriter qoutWriter = new PrintWriter(qout);
 
-         String[] jointNames = jointMap.getOrderedJointNames();
+         String[] jointNames = lastJointConfigurationData.getJointNames();
          for (int i = 0; i < jointNames.length; i++)
          {
             qWriter.print(jointNames[i]);
