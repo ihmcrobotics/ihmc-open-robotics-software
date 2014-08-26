@@ -30,7 +30,6 @@ public class JointFrictionModelsHolder
       frictionForce = new DoubleYoVariable(name + "_frictionForce", registry);
    }
 
-   
    /**
     * This method computes an equivalent joint velocity in case the joint is in stiction, but the operator is commanding a movement or a force.
     * In case of force, the equivalent velocity is computed as the stiction velocity with the sign of the desired force.
@@ -79,8 +78,7 @@ public class JointFrictionModelsHolder
 
     public void setActiveFrictionModel(FrictionModel requestedFrictionModel)
     {
-//       jointFrictionParameter = AtlasJointFrictionParameters.getJoitFrictionParameter(requestedFrictionModel, jointId);
-//       checkIfJointHasRequestedFrictionModelParameters(requestedFrictionModel, jointId);
+       activeFrictionModel.set(requestedFrictionModel);
     }
     
    public FrictionModel getActiveFrictionModel()
