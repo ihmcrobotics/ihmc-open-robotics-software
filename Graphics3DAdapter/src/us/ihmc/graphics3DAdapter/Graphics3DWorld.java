@@ -126,6 +126,18 @@ public class Graphics3DWorld implements Graphics3DFrameListener
    {
       start();
    }
+   
+   public void keepAlive(double time)
+   {
+      try
+      {
+         Thread.sleep((long) (time * 1000));
+      }
+      catch (InterruptedException e)
+      {
+         e.printStackTrace();
+      }
+   }
 
    public void stop()
    {
