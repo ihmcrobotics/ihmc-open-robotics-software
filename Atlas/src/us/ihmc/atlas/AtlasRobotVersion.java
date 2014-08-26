@@ -125,13 +125,20 @@ public enum AtlasRobotVersion {
 				angles[2] = (float) robotSide.negateIfLeftSide(Math.toRadians(0));
 			}
 			
-			else if (hasIrobotHands() || hasRobotiqHands())
+			else if (hasIrobotHands() )
 			{
 				centerOfHandToWristTranslation = new Vector3f(0.1f, (float) robotSide.negateIfLeftSide(0f), 0f);
 				angles[0] = (float) robotSide.negateIfLeftSide(Math.toRadians(-90));
 				angles[1] = 0.0f;    
 				angles[2] = (float) robotSide.negateIfLeftSide(Math.toRadians(0));
 			}
+			else if (hasRobotiqHands())
+         {
+            centerOfHandToWristTranslation = new Vector3f(0.16f, (float) robotSide.negateIfLeftSide(0f), 0f);
+            angles[0] = (float) robotSide.negateIfLeftSide(Math.toRadians(90));
+            angles[1] = 0.0f;    
+            angles[2] = (float) robotSide.negateIfLeftSide(Math.toRadians(0));
+         }
 			else if (hasHookHands())
 			{
 				centerOfHandToWristTranslation = new Vector3f(0.1f, (float) robotSide.negateIfLeftSide(0f), 0f);
