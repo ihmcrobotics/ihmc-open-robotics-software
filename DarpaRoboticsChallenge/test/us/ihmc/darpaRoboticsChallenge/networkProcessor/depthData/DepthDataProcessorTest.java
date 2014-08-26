@@ -34,7 +34,7 @@ public abstract class DepthDataProcessorTest implements MultiRobotTestInterface,
    private long numberOfLidarPointsConsumed = 0;
    private ConcurrentLinkedQueue<AssertionError> errorQueue = new ConcurrentLinkedQueue<>();
    private JMELidarScanVisualizer jmeLidarScanVisualizer;
-
+   
    @Before
    public void setUp()
    {
@@ -42,33 +42,35 @@ public abstract class DepthDataProcessorTest implements MultiRobotTestInterface,
    }
 
    @Test
-   public void testLidarGenerationAndTransmission()
+   public void testIsReceivingScansAnd95PercentOfPointsAreCorrect()
    {
       BambooTools.reportTestStartedMessage();
-
+      
       jmeLidarScanVisualizer = new JMELidarScanVisualizer();
-
+      
       DRCSimulationNetworkTestHelper drcSimulationTestHelper = new DRCSimulationNetworkTestHelper(getRobotModel(),
-                                                                  new DRCWallAtDistanceEnvironment(WALL_DISTANCE));
+            new DRCWallAtDistanceEnvironment(WALL_DISTANCE));
       drcSimulationTestHelper.setupCamera(new Point3d(1.8375, -0.16, 0.89), new Point3d(1.10, 8.30, 1.37));
       drcSimulationTestHelper.addNetStateListener(this);
       drcSimulationTestHelper.addConsumer(SparseLidarScan.class, new LidarConsumer());
-
+      
       drcSimulationTestHelper.connect();
-
+      
       drcSimulationTestHelper.sendCommand(new DepthDataStateCommand(LidarState.ENABLE));
-
+      
       boolean success = drcSimulationTestHelper.simulate(5);
-
+      
       assertTrue(success);
-      assertTrue("Lidar scans are not being recieved.", numberOfLidarScansConsumed > 10);
-
+      
+      System.out.println("Scans consumed: " + numberOfLidarScansConsumed);
+      assertTrue("Lidar scans are not being recieved.", numberOfLidarScansConsumed > 100);
+      
       System.out.println("Number of points consumed: " + numberOfLidarPointsConsumed + " Points out of range: " + errorQueue.size() + " Percentage: "
-                         + ((double) errorQueue.size() / numberOfLidarPointsConsumed));
-
+            + ((double) errorQueue.size() / numberOfLidarPointsConsumed) + " less than .05");
+      
       assertTrue("Too many points are out of range: ", (double) errorQueue.size() / numberOfLidarPointsConsumed < .05);
 //    throwAllAssertionErrors();
-
+      
       BambooTools.reportTestFinishedMessage();
    }
 
