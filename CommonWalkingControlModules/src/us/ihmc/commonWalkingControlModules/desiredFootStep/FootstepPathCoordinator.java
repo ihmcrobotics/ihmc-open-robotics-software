@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.BlindWalkingDirection;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.BlindWalkingPacket;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.BlindWalkingSpeed;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalculator;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantTransferTimeCalculator;
+import us.ihmc.communication.packets.dataobjects.BlindWalkingDirection;
+import us.ihmc.communication.packets.dataobjects.BlindWalkingSpeed;
+import us.ihmc.communication.packets.walking.BlindWalkingPacket;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;

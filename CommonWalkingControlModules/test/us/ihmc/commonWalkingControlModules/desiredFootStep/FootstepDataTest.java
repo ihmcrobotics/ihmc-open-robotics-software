@@ -19,7 +19,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlane
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBodyTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.PauseCommand;
+import us.ihmc.communication.packets.walking.PauseCommand;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
