@@ -641,9 +641,9 @@
     <transferTime>0.0</transferTime>
   </us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList>
   <long>298475469096</long>
-  <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.PauseCommand>
+  <us.ihmc.communication.packets.walking.PauseCommand>
     <pause>true</pause>
-  </us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.PauseCommand>
+  </us.ihmc.communication.packets.walking.PauseCommand>
   <long>308941995418</long>
   <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.EndOfScriptCommand/>
 </object-stream>

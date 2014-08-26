@@ -116,9 +116,9 @@
     <transferTime>0.25</transferTime>
   </us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList>
   <long>23806988342</long>
-  <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.PauseCommand>
+  <us.ihmc.communication.packets.walking.PauseCommand>
     <pause>true</pause>
-  </us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.PauseCommand>
+  </us.ihmc.communication.packets.walking.PauseCommand>
   <long>52415181825</long>
   <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
