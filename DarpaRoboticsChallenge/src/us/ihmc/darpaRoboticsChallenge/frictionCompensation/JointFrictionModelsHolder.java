@@ -3,8 +3,8 @@ package us.ihmc.darpaRoboticsChallenge.frictionCompensation;
 import java.util.EnumMap;
 
 import us.ihmc.utilities.frictionModels.FrictionModel;
+import us.ihmc.utilities.frictionModels.FrictionState;
 import us.ihmc.utilities.frictionModels.JointFrictionModel;
-import us.ihmc.utilities.frictionModels.JointFrictionModel.FrictionState;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
