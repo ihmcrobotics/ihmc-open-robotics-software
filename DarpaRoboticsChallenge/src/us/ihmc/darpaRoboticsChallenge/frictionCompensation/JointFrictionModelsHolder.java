@@ -13,9 +13,10 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 public class JointFrictionModelsHolder
 {
    private final String name;
-   private final EnumYoVariable<FrictionState> frictionCompensationState;
-   private final DoubleYoVariable frictionForce;
-   private EnumYoVariable<FrictionModel> activeFrictionModel;
+   
+   protected final DoubleYoVariable frictionForce;
+   protected final EnumYoVariable<FrictionState> frictionCompensationState;
+   protected final EnumYoVariable<FrictionModel> activeFrictionModel;
    protected final EnumMap<FrictionModel, JointFrictionModel> frictionModels;
    
    private double stictionTransitionVelocity;
@@ -31,49 +32,51 @@ public class JointFrictionModelsHolder
 
    
    /**
-    * This method adds the friction force to improve the force control 
-    * As current Joint velocity use the preTransmission because is less noisy
+    * This method computes an equivalent joint velocity in case the joint is in stiction, but the operator is commanding a movement or a force.
+    * In case of force, the equivalent velocity is computed as the stiction velocity with the sign of the desired force.
+    * In case of velocity the equivalent velocity is the desired velocity. 
+    * As current Joint velocity use the less noisy.
     */
-    public double compensateFrictionForForceControl(double requestedForce, double currentJointVelocity, double requestedJointVelocity, double negPressure,
-          double posPressure)
+    protected Double selectFrictionStateAndFrictionVelocity(double requestedForce, double currentJointVelocity, double requestedJointVelocity)
     {
+       double velocityForFrictionCalculation;
+       
        if(activeFrictionModel.getEnumValue() == FrictionModel.OFF)
        {
           frictionCompensationState.set(FrictionState.NOT_COMPENSATING);
-          frictionForce.set(0.0);
-          return requestedForce;        
+          frictionForce.set(0.0);  
+          return null;
        }
        
        if (requestedJointVelocity == 0.0 && requestedForce == 0.0)
        {
           frictionCompensationState.set(FrictionState.NOT_COMPENSATING);
           frictionForce.set(0.0);
-          return 0.0;
+          return null;
        }
 
        if (Math.abs(currentJointVelocity) > stictionTransitionVelocity)
        {
           frictionCompensationState.set(FrictionState.OUT_STICTION);
-          frictionForce.set(getActiveJointFrictionModel().getFrictionForce());
+          velocityForFrictionCalculation = currentJointVelocity;
        }
        else
        {
           if (requestedJointVelocity == 0.0)
           {
              frictionCompensationState.set(FrictionState.IN_STICTION_FORCE_MODE);
-             frictionForce.set(getActiveJointFrictionModel().getFrictionForce());
+             velocityForFrictionCalculation = stictionTransitionVelocity * Math.signum(requestedForce);
           }
           else
           {
              frictionCompensationState.set(FrictionState.IN_STICTION_VELOCITY_MODE);
-             frictionForce.set(getActiveJointFrictionModel().getFrictionForce());
+             velocityForFrictionCalculation = requestedJointVelocity;
           }
        }
 
-       return requestedForce + frictionForce.getDoubleValue();
+       return velocityForFrictionCalculation;
     }
 
-    
     public void setActiveFrictionModel(FrictionModel requestedFrictionModel)
     {
 //       jointFrictionParameter = AtlasJointFrictionParameters.getJoitFrictionParameter(requestedFrictionModel, jointId);
