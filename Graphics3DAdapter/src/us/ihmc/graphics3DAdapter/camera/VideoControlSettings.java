@@ -1,6 +1,6 @@
 package us.ihmc.graphics3DAdapter.camera;
 
-import us.ihmc.graphics3DAdapter.camera.VideoSettings.VideoCompressionKey;
+
 
 public interface VideoControlSettings
 {
