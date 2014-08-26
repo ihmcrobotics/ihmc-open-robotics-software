@@ -11,7 +11,7 @@ import java.awt.image.BufferedImage;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.instructions.listeners.ExtrusionChangedListener;
 
-public class Graphics3DAddExtusionInstruction extends Graphics3DInstruction
+public class Graphics3DAddExtrusionInstruction extends Graphics3DInstruction
 {
    private BufferedImage bufferedImageToExtrude;
    private double thickness;
@@ -23,7 +23,7 @@ public class Graphics3DAddExtusionInstruction extends Graphics3DInstruction
    
    private final FontRenderContext fontRenderContext;
 
-   private Graphics3DAddExtusionInstruction()
+   private Graphics3DAddExtrusionInstruction()
    {
       super();
       BufferedImage measurementImage = new BufferedImage(1, 1, BufferedImage.TYPE_3BYTE_BGR);
@@ -32,7 +32,7 @@ public class Graphics3DAddExtusionInstruction extends Graphics3DInstruction
       
    }
    
-   public Graphics3DAddExtusionInstruction(String text, double thickness, AppearanceDefinition appearance)
+   public Graphics3DAddExtrusionInstruction(String text, double thickness, AppearanceDefinition appearance)
    {
       this();
       this.thickness = thickness;
@@ -49,7 +49,7 @@ public class Graphics3DAddExtusionInstruction extends Graphics3DInstruction
     * @param thickness Thinkness of extrusion
     * @param appearance Appearance
     */
-   public Graphics3DAddExtusionInstruction(BufferedImage bufferedImageToExtrude, double thickness, AppearanceDefinition appearance)
+   public Graphics3DAddExtrusionInstruction(BufferedImage bufferedImageToExtrude, double thickness, AppearanceDefinition appearance)
    {
       this();
       this.thickness = thickness;

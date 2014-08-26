@@ -18,7 +18,7 @@ import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.graphics3DAdapter.exceptions.ShapeNotSupportedException;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddExtusionInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddExtrusionInstruction;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddHeightMapInstruction;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddMeshDataInstruction;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddModelFileInstruction;
@@ -1046,17 +1046,17 @@ public class Graphics3DObject
     * @param thickness Thinkness of extrusion
     * @param appearance Appearance
     */
-   public Graphics3DAddExtusionInstruction addExtrusion(BufferedImage bufferedImageToExtrude, double thickness, AppearanceDefinition appearance)
+   public Graphics3DAddExtrusionInstruction addExtrusion(BufferedImage bufferedImageToExtrude, double thickness, AppearanceDefinition appearance)
    {
-      Graphics3DAddExtusionInstruction instruction = new Graphics3DAddExtusionInstruction(bufferedImageToExtrude, thickness, appearance);
+      Graphics3DAddExtrusionInstruction instruction = new Graphics3DAddExtrusionInstruction(bufferedImageToExtrude, thickness, appearance);
       graphics3DInstructions.add(instruction);
 
       return instruction;
    }
 
-   public Graphics3DAddExtusionInstruction addText(String text, double thickness, AppearanceDefinition yoAppearance)
+   public Graphics3DAddExtrusionInstruction addText(String text, double thickness, AppearanceDefinition yoAppearance)
    {
-      Graphics3DAddExtusionInstruction instruction = new Graphics3DAddExtusionInstruction(text, thickness, yoAppearance);
+      Graphics3DAddExtrusionInstruction instruction = new Graphics3DAddExtrusionInstruction(text, thickness, yoAppearance);
       graphics3DInstructions.add(instruction);
 
       return instruction;
