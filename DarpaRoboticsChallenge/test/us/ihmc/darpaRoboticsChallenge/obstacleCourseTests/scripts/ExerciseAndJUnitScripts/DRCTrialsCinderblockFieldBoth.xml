@@ -307,9 +307,9 @@
     <heightOffset>0.0588</heightOffset>
   </us.ihmc.communication.packets.ComHeightPacket>
   <long>140545430009</long>
-  <com.yobotics.simulationconstructionset.simulatedSensors.LidarClearCommand>
+  <us.ihmc.communication.packets.sensing.DepthDataClearCommand>
     <lidarTree>QUADTREE</lidarTree>
-  </com.yobotics.simulationconstructionset.simulatedSensors.LidarClearCommand>
+  </us.ihmc.communication.packets.sensing.DepthDataClearCommand>
   <long>179373853313</long>
   <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList>
     <footstepDataList>

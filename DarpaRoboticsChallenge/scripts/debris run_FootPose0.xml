@@ -371,35 +371,35 @@
     </jointAngles>
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>191012855863</long>
-  <us.ihmc.graphics3DAdapter.camera.VideoControlPacket>
+  <us.ihmc.communication.packets.sensing.VideoControlPacket>
     <sendVideo>true</sendVideo>
     <videoQualitySetting>bandwidth512kbitWide</videoQualitySetting>
     <fps>11</fps>
     <crop>false</crop>
     <cropX>0</cropX>
     <cropY>0</cropY>
-  </us.ihmc.graphics3DAdapter.camera.VideoControlPacket>
+  </us.ihmc.communication.packets.sensing.VideoControlPacket>
   <long>192308683359</long>
-  <us.ihmc.graphics3DAdapter.camera.VideoControlPacket>
+  <us.ihmc.communication.packets.sensing.VideoControlPacket>
     <sendVideo>true</sendVideo>
     <videoQualitySetting>bandwidth512kbitWide</videoQualitySetting>
     <fps>15</fps>
     <crop>false</crop>
     <cropX>0</cropX>
     <cropY>0</cropY>
-  </us.ihmc.graphics3DAdapter.camera.VideoControlPacket>
+  </us.ihmc.communication.packets.sensing.VideoControlPacket>
   <long>193607614934</long>
-  <us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.FishEyeControlPacket>
+  <us.ihmc.communication.packets.sensing.FishEyeControlPacket>
     <sendVideo>true</sendVideo>
     <compression>fisheyeHigh</compression>
     <frameRate>5</frameRate>
-  </us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.FishEyeControlPacket>
+  </us.ihmc.communication.packets.sensing.FishEyeControlPacket>
   <long>195124594887</long>
-  <us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.FishEyeControlPacket>
+  <us.ihmc.communication.packets.sensing.FishEyeControlPacket>
     <sendVideo>true</sendVideo>
     <compression>fisheyeHigh</compression>
     <frameRate>12</frameRate>
-  </us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.FishEyeControlPacket>
+  </us.ihmc.communication.packets.sensing.FishEyeControlPacket>
   <long>205476574220</long>
   <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
@@ -931,9 +931,9 @@
     </jointAngles>
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>504748863161</long>
-  <com.yobotics.simulationconstructionset.simulatedSensors.LidarClearCommand>
+  <us.ihmc.communication.packets.sensing.DepthDataClearCommand>
     <lidarTree>OCTREE</lidarTree>
-  </com.yobotics.simulationconstructionset.simulatedSensors.LidarClearCommand>
+  </us.ihmc.communication.packets.sensing.DepthDataClearCommand>
   <long>536152608145</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
