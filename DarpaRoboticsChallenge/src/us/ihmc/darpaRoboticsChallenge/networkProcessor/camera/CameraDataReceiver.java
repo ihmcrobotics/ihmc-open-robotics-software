@@ -9,15 +9,15 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.packets.sensing.RobotPoseData;
+import us.ihmc.communication.packets.sensing.VideoPacket;
 import us.ihmc.communication.producers.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.driving.DRCStereoListener;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
 import us.ihmc.graphics3DAdapter.camera.CompressedVideoDataServer;
 import us.ihmc.graphics3DAdapter.camera.CompressedVideoHandler;
-import us.ihmc.graphics3DAdapter.camera.VideoPacket;
+import us.ihmc.graphics3DAdapter.camera.VideoCompressionKey;
 import us.ihmc.graphics3DAdapter.camera.VideoSettings;
-import us.ihmc.graphics3DAdapter.camera.VideoSettings.VideoCompressionKey;
 
 public abstract class CameraDataReceiver
 {

@@ -2,6 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import us.ihmc.communication.packets.manipulation.HandJointAnglePacket;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.robotSide.RobotSide;

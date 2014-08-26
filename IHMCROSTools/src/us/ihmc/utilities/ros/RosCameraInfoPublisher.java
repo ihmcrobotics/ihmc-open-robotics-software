@@ -1,7 +1,9 @@
 package us.ihmc.utilities.ros;
 
-import us.ihmc.graphics3DAdapter.camera.IntrinsicCameraParametersPacket;
+import us.ihmc.communication.packets.sensing.IntrinsicCameraParametersPacket;
+
 import org.ros.message.Time;
+
 import sensor_msgs.CameraInfo;
 import std_msgs.Header;
 

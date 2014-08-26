@@ -1,7 +1,7 @@
 package us.ihmc.robotiq.control;
 
+import us.ihmc.communication.packets.manipulation.HandJointAnglePacket;
 import us.ihmc.darpaRoboticsChallenge.handControl.HandCommandManager;
-import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandJointAnglePacket;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorControllerStateHandler;
 import us.ihmc.utilities.net.ObjectConsumer;
 
