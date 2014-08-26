@@ -88,6 +88,16 @@ public class Graphics3DNode
 
       transform.mul(translator);
    }
+   
+   public void translateTo(double x, double y, double z)
+   {
+      translateTo(new Vector3d(x, y, z));
+   }
+   
+   public void translateTo(Vector3d translation)
+   {
+      transform.set(translation);
+   }
 
    public void rotate(double angle, Axis axis)
    {
