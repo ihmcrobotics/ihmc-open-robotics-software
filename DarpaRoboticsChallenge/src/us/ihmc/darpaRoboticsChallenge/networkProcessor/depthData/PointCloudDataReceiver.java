@@ -162,7 +162,7 @@ public class PointCloudDataReceiver implements RobotPoseBufferListener, NetState
       {
          synchronized (commandLock)
          {
-            PointCloudDataReceiver.this.setLidarState(lidarStateCommand.getSendLidar());
+            PointCloudDataReceiver.this.setLidarState(lidarStateCommand.getLidarState());
          }
       }
 
