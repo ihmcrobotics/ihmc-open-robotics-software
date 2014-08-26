@@ -43,7 +43,6 @@ public class Graphics3DWorld implements Graphics3DFrameListener
 
       viewportAdapter = Graphics3DAdapterTools.createViewport(graphics3dAdapter);
       
-      System.out.println("Adding frame listener");
       addFrameListener(this);
    }
 
