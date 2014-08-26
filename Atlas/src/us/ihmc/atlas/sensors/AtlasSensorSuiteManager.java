@@ -4,6 +4,7 @@ import java.net.URI;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
+import us.ihmc.communication.networking.DRCSensorParameters;
 import us.ihmc.communication.producers.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParameters;
@@ -11,7 +12,6 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotLidarParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPointCloudParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCSensorParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ArmCalibrationHelper;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.FishEyeDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.SCSCameraDataReceiver;
