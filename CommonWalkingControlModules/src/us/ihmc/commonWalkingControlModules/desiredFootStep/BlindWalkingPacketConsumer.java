@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
-import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.BlindWalkingPacket;
+import us.ihmc.communication.packets.walking.BlindWalkingPacket;
 import us.ihmc.utilities.net.ObjectConsumer;
 
 

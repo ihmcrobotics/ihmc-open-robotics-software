@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
-import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.PauseCommand;
+import us.ihmc.communication.packets.walking.PauseCommand;
 import us.ihmc.utilities.net.ObjectConsumer;
 
 /**

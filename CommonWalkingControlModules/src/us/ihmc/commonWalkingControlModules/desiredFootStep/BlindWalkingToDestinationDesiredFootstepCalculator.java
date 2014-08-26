@@ -7,7 +7,7 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector2d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.BlindWalkingDirection;
+import us.ihmc.communication.packets.dataobjects.BlindWalkingDirection;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.MathTools;
