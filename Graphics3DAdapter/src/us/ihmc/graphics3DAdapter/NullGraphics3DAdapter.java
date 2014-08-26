@@ -232,14 +232,27 @@ public class NullGraphics3DAdapter implements Graphics3DAdapter
       };
    }
 
-   public GPULidar createGPULidar(GPULidarListener callback, int horizontalRays, double fov, double near, double far)
+   @Override
+   public GPULidar createGPULidar(int pointsPerSweep, double fieldOfView, double minRange, double maxRange)
    {
       return null;
    }
 
+   @Override
+   public GPULidar createGPULidar(GPULidarListener listener, int pointsPerSweep, double fieldOfView, double minRange, double maxRange)
+   {
+      return null;
+   }
+   
+   @Override
+   public GPULidar createGPULidar(GPULidarListener listener, LidarScanParameters lidarScanParameters)
+   {
+      return null;
+   }
+
+   @Override
    public GPULidar createGPULidar(LidarScanParameters lidarScanParameters)
    {
       return null;
    }
-
 }
