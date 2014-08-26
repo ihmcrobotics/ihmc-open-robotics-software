@@ -1,39 +1,46 @@
 package us.ihmc.darpaRoboticsChallenge.networking.dataProducers;
 
+import java.util.ArrayList;
+
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.producers.DRCJointConfigurationData;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
+import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-
-// packs joint positions
 public class JointConfigurationGatherer
-{  
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-
-   private final OneDoFJoint[] joints;
+{
+   private final ArrayList<OneDoFJoint> joints = new ArrayList<>();
 
    private final SixDoFJoint rootJoint;
    private final Vector3d rootTranslation = new Vector3d();
    private final Quat4d rootOrientation = new Quat4d();
 
-   public JointConfigurationGatherer(SDFFullRobotModel estimatorModel, YoVariableRegistry parentRegistry, DRCRobotJointMap jointMap)
+   /**
+    * The estimated state of the whole robot is packed and sent to the GUI using the DRCJointConfigurationData packet.
+    * Hackish shit going on around here: the lidar and finger joints are not packed in the packet.
+    * @param estimatorModel
+    */
+   public JointConfigurationGatherer(FullRobotModel estimatorModel)
    {
-      parentRegistry.addChild(registry);
       this.rootJoint = estimatorModel.getRootJoint();
-      String[] jointNames = jointMap.getOrderedJointNames();
-      int numberOfJoints = jointNames.length;
-      this.joints = new OneDoFJoint[numberOfJoints];
 
-      for (int i = 0; i < numberOfJoints; ++i)
+      estimatorModel.getOneDoFJoints(joints);
+
+      for (RobotSide robotSide : RobotSide.values)
       {
-         joints[i] = estimatorModel.getOneDoFJointByName(jointNames[i]);
+         OneDoFJoint[] fingerJoints = ScrewTools.filterJoints(ScrewTools.computeSubtreeJoints(estimatorModel.getHand(robotSide)), OneDoFJoint.class);
+         for (OneDoFJoint fingerJoint : fingerJoints)
+            joints.remove(fingerJoint);
       }
+
+      ArrayList<OneDoFJoint> lidarJoints = new ArrayList<>();
+      estimatorModel.getLidarJoints(lidarJoints);
+      joints.removeAll(lidarJoints);
    }
 
    // fills a DRCJointConfigurationData object on the ConcurrentRingBuffer
@@ -43,24 +50,18 @@ public class JointConfigurationGatherer
       {
          return;
       }
-      
-      if(jointConfigurationData.jointAngles == null)
+
+      if (jointConfigurationData.jointAngles == null)
       {
          jointConfigurationData.initJointNumber(numberOfJoints);
       }
 
-      double[] jointAngles = jointConfigurationData.getJointAngles();
-
       rootJoint.packTranslation(rootTranslation);
       rootJoint.packRotation(rootOrientation);
 
-      for (int i = 0; i < joints.length; i++)
-      {
-         jointAngles[i] = joints[i].getQ();
-      }
-
       jointConfigurationData.setRootTranslation(rootTranslation);
       jointConfigurationData.setRootOrientation(rootOrientation);
+      jointConfigurationData.setJointAngles(joints);
       jointConfigurationData.setSimTime(timestamp);
    }
 }
