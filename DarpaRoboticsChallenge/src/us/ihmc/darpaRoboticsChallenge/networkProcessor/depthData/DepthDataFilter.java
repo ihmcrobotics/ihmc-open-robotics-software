@@ -7,6 +7,7 @@ import javax.vecmath.Point3d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packets.sensing.DepthDataFilterParameters;
+import us.ihmc.communication.packets.sensing.FilteredPointCloudPacket;
 import us.ihmc.communication.packets.sensing.DepthDataClearCommand.DepthDataTree;
 import us.ihmc.communication.packets.sensing.DepthDataStateCommand.LidarState;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
@@ -16,7 +17,6 @@ import us.ihmc.userInterface.util.DecayingResolutionFilter;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.Octree;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.OneDimensionalBounds;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.SphericalLinearResolutionProvider;
-import us.ihmc.utilities.lidar.FilteredPointCloudPacket;
 import us.ihmc.utilities.lidar.PointCloudPacket;
 import us.ihmc.utilities.lidar.polarLidar.AbstractLidarScan;
 import us.ihmc.utilities.lidar.polarLidar.LidarScan;
