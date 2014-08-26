@@ -7,19 +7,18 @@ import javax.media.j3d.Transform3D;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.RobotPoseBufferListener;
+import us.ihmc.communication.packets.sensing.DepthDataClearCommand;
 import us.ihmc.communication.packets.sensing.DepthDataFilterParameters;
+import us.ihmc.communication.packets.sensing.DepthDataStateCommand;
 import us.ihmc.communication.packets.sensing.RobotPoseData;
+import us.ihmc.communication.packets.sensing.DepthDataClearCommand.DepthDataTree;
+import us.ihmc.communication.packets.sensing.DepthDataStateCommand.LidarState;
 import us.ihmc.communication.producers.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorControllerStateHandler;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
 import us.ihmc.utilities.lidar.FilteredPointCloudPacket;
 import us.ihmc.utilities.lidar.PointCloudPacket;
 import us.ihmc.utilities.net.NetStateListener;
-
-import com.yobotics.simulationconstructionset.simulatedSensors.DepthDataClearCommand;
-import com.yobotics.simulationconstructionset.simulatedSensors.DepthDataClearCommand.DepthDataTree;
-import com.yobotics.simulationconstructionset.simulatedSensors.DepthDataStateCommand;
-import com.yobotics.simulationconstructionset.simulatedSensors.DepthDataStateCommand.LidarState;
 
 public class PointCloudDataReceiver implements RobotPoseBufferListener, NetStateListener
 {

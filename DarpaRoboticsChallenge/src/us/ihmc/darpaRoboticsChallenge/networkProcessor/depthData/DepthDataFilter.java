@@ -7,6 +7,8 @@ import javax.vecmath.Point3d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packets.sensing.DepthDataFilterParameters;
+import us.ihmc.communication.packets.sensing.DepthDataClearCommand.DepthDataTree;
+import us.ihmc.communication.packets.sensing.DepthDataStateCommand.LidarState;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.GroundOnlyQuadTree;
@@ -21,9 +23,6 @@ import us.ihmc.utilities.lidar.polarLidar.LidarScan;
 import us.ihmc.utilities.lidar.polarLidar.SparseLidarScan;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-
-import com.yobotics.simulationconstructionset.simulatedSensors.DepthDataClearCommand.DepthDataTree;
-import com.yobotics.simulationconstructionset.simulatedSensors.DepthDataStateCommand.LidarState;
 
 public class DepthDataFilter
 {

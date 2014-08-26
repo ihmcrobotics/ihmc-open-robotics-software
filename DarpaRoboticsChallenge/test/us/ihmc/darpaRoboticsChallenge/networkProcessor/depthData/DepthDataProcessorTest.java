@@ -12,6 +12,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.bambooTools.BambooTools;
+import us.ihmc.communication.packets.sensing.DepthDataStateCommand;
+import us.ihmc.communication.packets.sensing.DepthDataStateCommand.LidarState;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCWallAtDistanceEnvironment;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCUserInterfaceNetworkingManager;
@@ -21,9 +23,6 @@ import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.lidar.polarLidar.SparseLidarScan;
 import us.ihmc.utilities.net.NetStateListener;
 import us.ihmc.utilities.net.ObjectConsumer;
-
-import com.yobotics.simulationconstructionset.simulatedSensors.DepthDataStateCommand;
-import com.yobotics.simulationconstructionset.simulatedSensors.DepthDataStateCommand.LidarState;
 
 public abstract class DepthDataProcessorTest implements MultiRobotTestInterface, NetStateListener
 {
