@@ -7,6 +7,7 @@ import javax.media.j3d.Transform3D;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.RobotPoseBufferListener;
+import us.ihmc.communication.packets.sensing.DepthDataFilterParameters;
 import us.ihmc.communication.packets.sensing.RobotPoseData;
 import us.ihmc.communication.producers.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorControllerStateHandler;

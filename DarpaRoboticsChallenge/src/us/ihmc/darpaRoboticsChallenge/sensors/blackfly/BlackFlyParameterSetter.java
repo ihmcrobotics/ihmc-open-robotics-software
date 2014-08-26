@@ -6,9 +6,9 @@ import org.ros.node.parameter.ParameterListener;
 import org.ros.node.parameter.ParameterTree;
 import org.ros.node.service.ServiceResponseListener;
 
+import us.ihmc.communication.packets.sensing.BlackFlyParameterPacket;
+import us.ihmc.communication.packets.sensing.MultisenseParameterPacket;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
-import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.BlackFlyParameterPacket;
-import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.MultisenseParameterPacket;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosServiceClient;
 import dynamic_reconfigure.BoolParameter;
