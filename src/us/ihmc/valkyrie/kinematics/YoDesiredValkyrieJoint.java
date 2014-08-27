@@ -10,7 +10,9 @@ public class YoDesiredValkyrieJoint implements ValkyrieJointInterface
    private double q;
    private double qd;
    private double f;
-   
+   private double motorCurrent;
+   private double commandedMotorCurrent;
+
    private final DoubleYoVariable q_d;
    private final DoubleYoVariable qd_d;
    private final DoubleYoVariable f_d;
@@ -102,12 +104,37 @@ public class YoDesiredValkyrieJoint implements ValkyrieJointInterface
       this.qd_d.set(velocity);
    }
 
+   @Override
+   public double getMotorCurrent()
+   {
+      return motorCurrent;
+   }
+
+   @Override
+   public void setMotorCurrent(double motorCurrent)
+   {
+      this.motorCurrent = motorCurrent;
+   }
+
+   @Override
+   public double getCommandedMotorCurrent()
+   {
+      return commandedMotorCurrent;
+   }
+
+   @Override
+   public void setCommandedMotorCurrent(double commandedMotorCurrent)
+   {
+      this.commandedMotorCurrent = commandedMotorCurrent;
+   }
+
    public void set(ValkyrieJointInterface valkyrieJoint)
    {
       setPosition(valkyrieJoint.getPosition());
       setVelocity(valkyrieJoint.getVelocity());
       setEffort(valkyrieJoint.getEffort());
-      
+      setMotorCurrent(valkyrieJoint.getMotorCurrent());
+      setCommandedMotorCurrent(valkyrieJoint.getCommandedMotorCurrent());
    }
 
 }
