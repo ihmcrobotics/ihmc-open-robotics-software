@@ -186,9 +186,7 @@ public class TestbedAutomaticAlignment {
       LineParametric3D_F64 intersection = new LineParametric3D_F64();
       Intersection3D_F64.intersect(planeA, planeB, intersection);
 
-      System.out.println("planeA = "+planeA);
-      System.out.println("planeB = "+planeB);
-      System.out.println("intersection = "+intersection);
+
       double whereA[] = findLineLocation(intersection,pointsA);
       double whereB[] = findLineLocation(intersection,pointsB);
 
@@ -199,12 +197,6 @@ public class TestbedAutomaticAlignment {
       double max = Math.max(whereA[1],whereB[1]);
 
       double overlap = (Math.min(whereA[1], whereB[1]) - Math.max(whereA[0], whereB[0]))/(max-min);
-
-      System.out.println(whereA[0]+"  "+whereA[1]);
-      System.out.println(whereB[0]+"  "+whereB[1]);
-      if( overlap < 0 ) {
-      overlap = 1 + overlap;
-      }
 
       System.out.println("Overlap = "+overlap+"  "+pointsA.size()+" "+pointsB.size());
       if( overlap < 0.7 )
@@ -275,13 +267,16 @@ public class TestbedAutomaticAlignment {
          if( d < closest )
             closest = d;
 
-         if( t < min )
-            min = t;
-         if( t > max )
-            max = t;
+         // only consider points within a meter so that when it is close it's not as skewed
+         if( d <= 1.0 ) {
+            if (t < min)
+               min = t;
+            if (t > max)
+               max = t;
+         }
       }
 
-      if( closest > 0.3*0.3 )
+      if( closest > 0.3*0.3 || min == Double.MAX_VALUE )
          return null;
 
       return new double[]{min,max};
