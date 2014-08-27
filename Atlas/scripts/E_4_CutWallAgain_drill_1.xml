@@ -330,13 +330,13 @@
     </jointAngles>
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>176622864740</long>
-  <us.ihmc.communication.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.walking.ComHeightPacket>
     <heightOffset>-0.03136</heightOffset>
-  </us.ihmc.communication.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.walking.ComHeightPacket>
   <long>179302297715</long>
-  <us.ihmc.communication.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.walking.ComHeightPacket>
     <heightOffset>-0.07840000000000001</heightOffset>
-  </us.ihmc.communication.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.walking.ComHeightPacket>
   <long>202942558951</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>LEFT</robotSide>
