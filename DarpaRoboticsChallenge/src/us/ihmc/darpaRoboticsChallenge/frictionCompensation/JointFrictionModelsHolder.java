@@ -13,13 +13,12 @@ import com.yobotics.simulationconstructionset.YoVariableRegistry;
 public abstract class JointFrictionModelsHolder
 {
    private final String name;
+   private final DoubleYoVariable stictionTransitionVelocity;
 
    protected final DoubleYoVariable frictionForce;
    protected final EnumYoVariable<FrictionState> frictionCompensationState;
    protected final EnumYoVariable<FrictionModel> activeFrictionModel;
    protected final EnumMap<FrictionModel, JointFrictionModel> frictionModels;
-
-   private double stictionTransitionVelocity;
 
    public JointFrictionModelsHolder(String name, YoVariableRegistry registry)
    {
@@ -28,6 +27,7 @@ public abstract class JointFrictionModelsHolder
       frictionCompensationState = new EnumYoVariable<FrictionState>(name + "_frictionCompensationState", registry, FrictionState.class);
       activeFrictionModel = new EnumYoVariable<FrictionModel>(name + "_activeFrictionModel", registry, FrictionModel.class);
       frictionForce = new DoubleYoVariable(name + "_frictionForce", registry);
+      stictionTransitionVelocity = new DoubleYoVariable(name + "_stictionTransitionVelocity", registry);
    }
 
    /**
@@ -54,7 +54,7 @@ public abstract class JointFrictionModelsHolder
          return null;
       }
 
-      if (Math.abs(currentJointVelocity) > stictionTransitionVelocity)
+      if (Math.abs(currentJointVelocity) > stictionTransitionVelocity.getDoubleValue())
       {
          frictionCompensationState.set(FrictionState.OUT_STICTION);
          velocityForFrictionCalculation = currentJointVelocity;
@@ -64,7 +64,7 @@ public abstract class JointFrictionModelsHolder
          if (requestedJointVelocity == 0.0)
          {
             frictionCompensationState.set(FrictionState.IN_STICTION_FORCE_MODE);
-            velocityForFrictionCalculation = stictionTransitionVelocity * Math.signum(requestedForce);
+            velocityForFrictionCalculation = stictionTransitionVelocity.getDoubleValue() * Math.signum(requestedForce);
          }
          else
          {
@@ -79,7 +79,8 @@ public abstract class JointFrictionModelsHolder
    public void setActiveFrictionModel(FrictionModel requestedFrictionModel)
    {
       activeFrictionModel.set(requestedFrictionModel);
-      checkIfExistFrictionModelForThisJoint(requestedFrictionModel); 
+      checkIfExistFrictionModelForThisJoint(requestedFrictionModel);
+      stictionTransitionVelocity.set(getActiveJointFrictionModel().getStictionTransitionVelocity());
    }
 
    public FrictionModel getActiveFrictionModel()
