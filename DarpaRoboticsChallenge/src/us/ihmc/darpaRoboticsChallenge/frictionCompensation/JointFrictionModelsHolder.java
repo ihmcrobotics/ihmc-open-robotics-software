@@ -10,7 +10,7 @@ import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
-public class JointFrictionModelsHolder
+public abstract class JointFrictionModelsHolder
 {
    private final String name;
 
@@ -79,6 +79,7 @@ public class JointFrictionModelsHolder
    public void setActiveFrictionModel(FrictionModel requestedFrictionModel)
    {
       activeFrictionModel.set(requestedFrictionModel);
+      checkIfExistFrictionModelForThisJoint(requestedFrictionModel); 
    }
 
    public FrictionModel getActiveFrictionModel()
@@ -90,4 +91,6 @@ public class JointFrictionModelsHolder
    {
       return frictionModels.get(activeFrictionModel.getEnumValue());
    }
+
+   protected abstract void checkIfExistFrictionModelForThisJoint(FrictionModel requestedFrictionModel);
 }
