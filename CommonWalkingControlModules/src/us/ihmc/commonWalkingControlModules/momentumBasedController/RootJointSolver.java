@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
+import java.util.LinkedHashMap;
+
 import org.ejml.alg.dense.mult.MatrixDimensionException;
 import org.ejml.data.D1Matrix64F;
 import org.ejml.data.DenseMatrix64F;
@@ -8,12 +10,11 @@ import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixFeatures;
+
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.Momentum;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
-
-import java.util.LinkedHashMap;
 
 public class RootJointSolver
 {

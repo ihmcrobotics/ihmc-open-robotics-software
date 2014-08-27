@@ -1,17 +1,19 @@
 package com.yobotics.simulationconstructionset;
 
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
-import org.junit.Before;
-import org.junit.Test;
-import us.ihmc.utilities.Axis;
-import us.ihmc.utilities.test.JUnitTools;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import org.junit.Before;
+import org.junit.Test;
+
+import us.ihmc.utilities.Axis;
+import us.ihmc.utilities.test.JUnitTools;
+
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 
 public class KinematicPointTest 

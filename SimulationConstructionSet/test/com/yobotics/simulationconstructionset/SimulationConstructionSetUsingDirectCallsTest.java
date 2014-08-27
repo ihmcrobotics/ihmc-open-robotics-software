@@ -40,6 +40,11 @@ import us.ihmc.graphics3DAdapter.jme.JMEGraphics3DAdapter;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.yoUtilities.NameSpace;
+import us.ihmc.yoUtilities.RewoundListener;
+import us.ihmc.yoUtilities.YoVariable;
+import us.ihmc.yoUtilities.YoVariableList;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.commands.ToggleKeyPointModeCommandListener;
 import com.yobotics.simulationconstructionset.examples.FallingBrickRobot;
@@ -1821,7 +1826,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
 
    private void createSimulationRewoundListenerAndAttachToSCS(SimulationConstructionSet scs)
    {
-      SimulationRewoundListener simulationRewoundListener = createSimulationRewoundListener();
+      RewoundListener simulationRewoundListener = createSimulationRewoundListener();
       scs.attachSimulationRewoundListener(simulationRewoundListener);
    }
 
@@ -1834,11 +1839,11 @@ public class SimulationConstructionSetUsingDirectCallsTest
       }
    }
 
-   private SimulationRewoundListener createSimulationRewoundListener()
+   private RewoundListener createSimulationRewoundListener()
    {
-      SimulationRewoundListener ret = new SimulationRewoundListener()
+      RewoundListener ret = new RewoundListener()
       {
-         public void simulationWasRewound()
+         public void wasRewound()
          {
             simulationRewoundListenerHasBeenNotified.set(true);
          }

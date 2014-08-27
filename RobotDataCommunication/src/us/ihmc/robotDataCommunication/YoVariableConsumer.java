@@ -13,11 +13,10 @@ import org.zeromq.ZMQ;
 
 import us.ihmc.robotDataCommunication.YoVariableChangedProducer.YoVariableClientChangedListener;
 import us.ihmc.robotDataCommunication.jointState.JointState;
+import us.ihmc.yoUtilities.VariableChangedListener;
+import us.ihmc.yoUtilities.YoVariable;
 import zmq.PollItem;
 import zmq.ZError;
-
-import com.yobotics.simulationconstructionset.VariableChangedListener;
-import com.yobotics.simulationconstructionset.YoVariable;
 
 public class YoVariableConsumer extends Thread
 {

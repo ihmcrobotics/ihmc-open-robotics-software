@@ -1,10 +1,10 @@
 package us.ihmc.darpaRoboticsChallenge.sensors;
 
-import com.yobotics.simulationconstructionset.YoVariableLimitChecker;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import java.util.ArrayList;
+
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
-import java.util.ArrayList;
+import com.yobotics.simulationconstructionset.YoVariableLimitChecker;
 
 public class RobotJointLimitWatcherForUI extends RobotJointLimitWatcher
 {

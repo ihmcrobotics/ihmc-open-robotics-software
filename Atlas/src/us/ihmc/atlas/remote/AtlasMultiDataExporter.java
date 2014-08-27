@@ -37,6 +37,7 @@ import us.ihmc.robotDataCommunication.logger.YoVariableLogVisualizerGUI;
 import us.ihmc.robotDataCommunication.logger.YoVariableLoggerListener;
 import us.ihmc.utilities.SwingUtils;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.yoUtilities.YoVariable;
 
 import com.yobotics.simulationconstructionset.DataBuffer;
 import com.yobotics.simulationconstructionset.DataBufferEntry;
@@ -45,7 +46,6 @@ import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.SimulationDoneListener;
 import com.yobotics.simulationconstructionset.UnreasonableAccelerationException;
-import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class AtlasMultiDataExporter implements SimulationDoneListener

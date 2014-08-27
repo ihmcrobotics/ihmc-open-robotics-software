@@ -5,9 +5,9 @@ import java.util.List;
 
 import us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake;
 import us.ihmc.robotDataCommunication.jointState.JointState;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.Joint;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public interface YoVariablesUpdatedListener

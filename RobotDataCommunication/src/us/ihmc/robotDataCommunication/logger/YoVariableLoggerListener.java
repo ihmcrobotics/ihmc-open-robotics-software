@@ -15,9 +15,9 @@ import us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHan
 import us.ihmc.robotDataCommunication.jointState.JointState;
 import us.ihmc.robotDataCommunication.logger.util.CookieJar;
 import us.ihmc.robotDataCommunication.logger.util.PipedCommandExecutor;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.Joint;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class YoVariableLoggerListener implements YoVariablesUpdatedListener

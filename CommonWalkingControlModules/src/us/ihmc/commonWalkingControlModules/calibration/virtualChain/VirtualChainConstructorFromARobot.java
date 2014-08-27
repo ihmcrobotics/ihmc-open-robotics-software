@@ -1,13 +1,19 @@
 package us.ihmc.commonWalkingControlModules.calibration.virtualChain;
 
-import com.yobotics.simulationconstructionset.*;
+import java.util.ArrayList;
+
+import javax.vecmath.Vector3d;
+
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RevoluteJointReferenceFrame;
 import us.ihmc.utilities.screwTheory.SixDoFJointReferenceFrame;
 
-import javax.vecmath.Vector3d;
-import java.util.ArrayList;
+import com.yobotics.simulationconstructionset.FloatingJoint;
+import com.yobotics.simulationconstructionset.Joint;
+import com.yobotics.simulationconstructionset.Link;
+import com.yobotics.simulationconstructionset.PinJoint;
+import com.yobotics.simulationconstructionset.Robot;
 
 public class VirtualChainConstructorFromARobot
 {

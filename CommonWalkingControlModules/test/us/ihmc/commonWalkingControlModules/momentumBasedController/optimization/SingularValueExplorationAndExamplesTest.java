@@ -1,14 +1,15 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
+import static org.junit.Assert.fail;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.DecompositionFactory;
 import org.ejml.interfaces.decomposition.SingularValueDecomposition;
 import org.ejml.ops.CommonOps;
 import org.junit.AfterClass;
 import org.junit.Test;
-import us.ihmc.utilities.test.JUnitTools;
 
-import static org.junit.Assert.fail;
+import us.ihmc.utilities.test.JUnitTools;
 
 public class SingularValueExplorationAndExamplesTest
 {

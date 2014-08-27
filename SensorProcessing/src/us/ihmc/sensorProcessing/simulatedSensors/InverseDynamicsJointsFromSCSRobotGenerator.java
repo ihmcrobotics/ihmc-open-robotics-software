@@ -1,17 +1,30 @@
 package us.ihmc.sensorProcessing.simulatedSensors;
 
-import com.yobotics.simulationconstructionset.*;
-import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
-import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.concurrent.ConcurrentLinkedQueue;
+
+import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.utilities.screwTheory.RevoluteJoint;
+import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.ScrewTools;
+import us.ihmc.utilities.screwTheory.SixDoFJoint;
+import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
+import us.ihmc.utilities.screwTheory.Twist;
+
+import com.yobotics.simulationconstructionset.FloatingJoint;
+import com.yobotics.simulationconstructionset.Joint;
+import com.yobotics.simulationconstructionset.Link;
+import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
+import com.yobotics.simulationconstructionset.PinJoint;
+import com.yobotics.simulationconstructionset.Robot;
 
 public class InverseDynamicsJointsFromSCSRobotGenerator
 {   

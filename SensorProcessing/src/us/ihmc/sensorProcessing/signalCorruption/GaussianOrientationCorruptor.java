@@ -8,9 +8,9 @@ import javax.vecmath.Matrix3d;
 import org.apache.commons.math3.util.FastMath;
 
 import us.ihmc.utilities.math.MathTools;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class GaussianOrientationCorruptor implements SignalCorruptor<Matrix3d>
 {

@@ -6,10 +6,10 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Point3d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.communication.packets.sensing.DepthDataFilterParameters;
-import us.ihmc.communication.packets.sensing.FilteredPointCloudPacket;
 import us.ihmc.communication.packets.sensing.DepthDataClearCommand.DepthDataTree;
+import us.ihmc.communication.packets.sensing.DepthDataFilterParameters;
 import us.ihmc.communication.packets.sensing.DepthDataStateCommand.LidarState;
+import us.ihmc.communication.packets.sensing.FilteredPointCloudPacket;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.GroundOnlyQuadTree;

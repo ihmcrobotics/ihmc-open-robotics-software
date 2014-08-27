@@ -1,9 +1,5 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import com.jcraft.jsch.*;
-import us.ihmc.utilities.gui.IHMCSwingTools;
-
-import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
@@ -11,6 +7,21 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.util.Properties;
+
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+
+import us.ihmc.utilities.gui.IHMCSwingTools;
+
+import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.ChannelShell;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
 
 public class DRCFilteredLogPlaybackSelector
 {

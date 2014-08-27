@@ -6,9 +6,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-
-import us.ihmc.sensorProcessing.encoder.SimulatedEncoder;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 public class SimulatedEncoderTest
 {

@@ -1,16 +1,24 @@
 package us.ihmc.sensorProcessing.stateEstimation.evaluation;
 
-import com.yobotics.simulationconstructionset.*;
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.utilities.Axis;
+import java.util.ArrayList;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
-import java.util.ArrayList;
+
+import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.utilities.Axis;
+
+import com.yobotics.simulationconstructionset.ExternalForcePoint;
+import com.yobotics.simulationconstructionset.FloatingJoint;
+import com.yobotics.simulationconstructionset.IMUMount;
+import com.yobotics.simulationconstructionset.KinematicPoint;
+import com.yobotics.simulationconstructionset.Link;
+import com.yobotics.simulationconstructionset.PinJoint;
+import com.yobotics.simulationconstructionset.Robot;
 
 public class StateEstimatorEvaluatorRobot extends Robot
 {

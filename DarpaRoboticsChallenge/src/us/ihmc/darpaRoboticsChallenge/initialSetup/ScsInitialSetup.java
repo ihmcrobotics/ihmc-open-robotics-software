@@ -1,11 +1,11 @@
 package us.ihmc.darpaRoboticsChallenge.initialSetup;
 
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.DynamicIntegrationMethod;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
 import com.yobotics.simulationconstructionset.physics.ScsPhysics;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;

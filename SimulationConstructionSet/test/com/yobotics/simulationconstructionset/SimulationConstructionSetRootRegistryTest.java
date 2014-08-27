@@ -4,6 +4,8 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import us.ihmc.yoUtilities.YoVariableRegistry;
+
 import com.yobotics.simulationconstructionset.gui.CombinedVarPanel;
 import com.yobotics.simulationconstructionset.gui.StandardSimulationGUI;
 import com.yobotics.simulationconstructionset.gui.VarPanel;

@@ -36,11 +36,11 @@ import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.net.AtomicSettableTimestampProvider;
 import us.ihmc.utilities.screwTheory.TotalMassCalculator;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.LongYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.ModularRobotController;
 import com.yobotics.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 import com.yobotics.simulationconstructionset.time.ExecutionTimer;

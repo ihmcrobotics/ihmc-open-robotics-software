@@ -6,9 +6,9 @@ import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
 
 import us.ihmc.utilities.exeptions.NoConvergenceException;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class CylinderAndPlaneContactForceOptimizerNative
 {

@@ -1,7 +1,8 @@
 package us.ihmc.IMUKalmanFilter;
 
+import us.ihmc.yoUtilities.YoVariableRegistry;
+
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 
 public class SingleAngleIMUKalmanFilter

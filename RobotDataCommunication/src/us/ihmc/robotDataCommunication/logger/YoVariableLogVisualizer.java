@@ -1,12 +1,9 @@
 package us.ihmc.robotDataCommunication.logger;
 
 import java.awt.BorderLayout;
-import java.awt.FileDialog;
-import java.awt.Frame;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 

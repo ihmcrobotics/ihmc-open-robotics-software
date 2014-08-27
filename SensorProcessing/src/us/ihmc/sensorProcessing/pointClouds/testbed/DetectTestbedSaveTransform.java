@@ -1,11 +1,6 @@
 package us.ihmc.sensorProcessing.pointClouds.testbed;
 
-import boofcv.gui.image.ShowImages;
-import bubo.clouds.detect.PointCloudShapeFinder;
-import bubo.gui.FactoryVisualization3D;
-import bubo.gui.UtilDisplayBubo;
-import bubo.gui.d3.PointCloudPanel;
-import com.thoughtworks.xstream.XStream;
+import static us.ihmc.sensorProcessing.pointClouds.GeometryOps.loadScanLines;
 import georegression.geometry.UtilPlane3D_F64;
 import georegression.geometry.UtilPoint2D_F64;
 import georegression.struct.plane.PlaneGeneral3D_F64;
@@ -21,7 +16,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static us.ihmc.sensorProcessing.pointClouds.GeometryOps.loadScanLines;
+import boofcv.gui.image.ShowImages;
+import bubo.clouds.detect.PointCloudShapeFinder;
+import bubo.gui.FactoryVisualization3D;
+import bubo.gui.UtilDisplayBubo;
+import bubo.gui.d3.PointCloudPanel;
+
+import com.thoughtworks.xstream.XStream;
 
 /**
  * @author Peter Abeles

@@ -1,10 +1,11 @@
 package us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization;
 
+import java.util.Arrays;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import us.ihmc.utilities.math.MatrixTools;
 
-import java.util.Arrays;
+import us.ihmc.utilities.math.MatrixTools;
 
 public class CVXWithCylinderNativeInput
 {

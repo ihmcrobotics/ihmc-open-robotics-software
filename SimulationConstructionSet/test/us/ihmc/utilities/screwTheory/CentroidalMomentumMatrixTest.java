@@ -1,11 +1,16 @@
 package us.ihmc.utilities.screwTheory;
 
-import com.yobotics.simulationconstructionset.FloatingJoint;
-import com.yobotics.simulationconstructionset.Link;
-import com.yobotics.simulationconstructionset.PinJoint;
-import com.yobotics.simulationconstructionset.Robot;
+import java.util.LinkedHashMap;
+import java.util.Random;
+
+import javax.media.j3d.Transform3D;
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
+
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.CenterOfMassReferenceFrame;
@@ -13,12 +18,10 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.test.JUnitTools;
 
-import javax.media.j3d.Transform3D;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-import java.util.LinkedHashMap;
-import java.util.Random;
+import com.yobotics.simulationconstructionset.FloatingJoint;
+import com.yobotics.simulationconstructionset.Link;
+import com.yobotics.simulationconstructionset.PinJoint;
+import com.yobotics.simulationconstructionset.Robot;
 
 public class CentroidalMomentumMatrixTest
 {

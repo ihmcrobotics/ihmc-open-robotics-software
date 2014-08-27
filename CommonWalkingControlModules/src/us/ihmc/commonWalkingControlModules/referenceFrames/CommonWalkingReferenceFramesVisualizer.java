@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;

@@ -1,12 +1,13 @@
 package com.yobotics.simulationconstructionset;
 
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Vector3d;
+
 import org.junit.Test;
+
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.InertiaTools;
 import us.ihmc.utilities.ThreadTools;
-
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
 
 public class LinkTest
 {

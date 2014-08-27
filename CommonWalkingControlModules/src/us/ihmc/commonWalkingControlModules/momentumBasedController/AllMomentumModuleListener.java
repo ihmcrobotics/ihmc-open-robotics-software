@@ -1,16 +1,26 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.IntegerYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import org.apache.commons.lang.mutable.MutableDouble;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.DecompositionFactory;
 import org.ejml.interfaces.decomposition.SingularValueDecomposition;
 import org.ejml.ops.CommonOps;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.*;
+
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredJointAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredJointAccelerationCommandAndMotionConstraint;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredPointAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredPointAccelerationCommandAndMotionConstraint;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredRateOfChangeOfMomentumCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredSpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredSpatialAccelerationCommandAndMotionConstraint;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleDataObject;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MotionConstraintBlocks;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.DesiredMomentumModuleCommandListener;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumControlModuleSolverListener;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionConstraintListener;
@@ -18,10 +28,12 @@ import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
-import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.IntegerYoVariable;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public class AllMomentumModuleListener implements MotionConstraintListener, DesiredMomentumModuleCommandListener, MomentumControlModuleSolverListener
 {   

@@ -8,19 +8,24 @@
  */
 package us.ihmc.CoM;
 
-import com.yobotics.simulationconstructionset.DataBuffer;
-import com.yobotics.simulationconstructionset.Link;
-import com.yobotics.simulationconstructionset.Robot;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.util.ArrayList;
+
+import javax.swing.JFrame;
+import javax.swing.JScrollPane;
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+
 import org.ddogleg.optimization.functions.FunctionNtoM;
+
 import us.ihmc.plotting.Plotter;
 import us.ihmc.plotting.PlotterPanel;
 import us.ihmc.plotting.shapes.CircleArtifact;
 
-import javax.swing.*;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-import java.awt.*;
-import java.util.ArrayList;
+import com.yobotics.simulationconstructionset.DataBuffer;
+import com.yobotics.simulationconstructionset.Link;
+import com.yobotics.simulationconstructionset.Robot;
 
 /** Todo
  * 

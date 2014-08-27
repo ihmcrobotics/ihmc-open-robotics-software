@@ -1,6 +1,7 @@
 package us.ihmc.SdfLoader;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertTrue;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;

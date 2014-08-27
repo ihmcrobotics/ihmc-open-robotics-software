@@ -1,8 +1,9 @@
 package us.ihmc.darpaRoboticsChallenge.ros.messages;
 
+import java.nio.DoubleBuffer;
+
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
-import java.nio.DoubleBuffer;
 
 public class PoseMessage
 {

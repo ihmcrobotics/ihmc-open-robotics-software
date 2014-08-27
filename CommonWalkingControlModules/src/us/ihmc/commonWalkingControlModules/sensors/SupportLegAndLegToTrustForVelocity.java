@@ -2,10 +2,10 @@ package us.ihmc.commonWalkingControlModules.sensors;
 
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 
 public class SupportLegAndLegToTrustForVelocity implements LegToTrustForVelocityReadOnly, LegToTrustForVelocityWriteOnly

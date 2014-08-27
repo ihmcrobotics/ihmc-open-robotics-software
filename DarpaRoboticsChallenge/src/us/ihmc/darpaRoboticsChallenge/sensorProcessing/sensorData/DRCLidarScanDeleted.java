@@ -3,8 +3,6 @@ package us.ihmc.darpaRoboticsChallenge.sensorProcessing.sensorData;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
-import us.ihmc.utilities.math.geometry.RotationFunctions;
-
 public class DRCLidarScanDeleted
 {
    public float[] distances;

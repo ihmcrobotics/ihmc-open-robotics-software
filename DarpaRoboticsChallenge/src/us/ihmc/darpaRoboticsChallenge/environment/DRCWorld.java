@@ -2,7 +2,9 @@ package us.ihmc.darpaRoboticsChallenge.environment;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
+
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.util.environments.SelectableObjectListener;

@@ -1,12 +1,5 @@
 package us.ihmc.sensorProcessing.pointClouds.shape;
 
-import bubo.clouds.detect.CloudShapeTypes;
-import bubo.clouds.detect.alg.*;
-import bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
-import bubo.io.serialization.DataDefinition;
-import bubo.io.serialization.SerializationDefinitionManager;
-import bubo.io.text.ReadCsvObjectSmart;
-import com.jme3.math.Vector3f;
 import georegression.geometry.UtilPlane3D_F64;
 import georegression.geometry.UtilPoint3D_F64;
 import georegression.metric.Distance3D_F64;
@@ -17,14 +10,7 @@ import georegression.struct.point.Vector3D_F64;
 import georegression.struct.se.Se3_F64;
 import georegression.struct.shapes.Box3D_F64;
 import georegression.transform.se.SePointOps_F64;
-import org.ddogleg.optimization.FactoryOptimization;
-import org.ddogleg.optimization.UnconstrainedLeastSquares;
-import org.ddogleg.optimization.UtilOptimize;
-import org.ddogleg.optimization.functions.FunctionNtoM;
-import org.ddogleg.struct.FastQueue;
-import us.ihmc.sensorProcessing.pointClouds.shape.ExpectationMaximizationFitter.ScoringFunction;
 
-import javax.vecmath.Vector3d;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -32,7 +18,28 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-import static bubo.clouds.detect.PointCloudShapeFinder.Shape;
+import javax.vecmath.Vector3d;
+
+import org.ddogleg.optimization.FactoryOptimization;
+import org.ddogleg.optimization.UnconstrainedLeastSquares;
+import org.ddogleg.optimization.UtilOptimize;
+import org.ddogleg.optimization.functions.FunctionNtoM;
+import org.ddogleg.struct.FastQueue;
+
+import us.ihmc.sensorProcessing.pointClouds.shape.ExpectationMaximizationFitter.ScoringFunction;
+import bubo.clouds.detect.CloudShapeTypes;
+import bubo.clouds.detect.PointCloudShapeFinder.Shape;
+import bubo.clouds.detect.alg.ApproximateSurfaceNormals;
+import bubo.clouds.detect.alg.ConfigSchnabel2007;
+import bubo.clouds.detect.alg.FoundShape;
+import bubo.clouds.detect.alg.PointCloudShapeDetectionSchnabel2007;
+import bubo.clouds.detect.alg.PointVectorNN;
+import bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
+import bubo.io.serialization.DataDefinition;
+import bubo.io.serialization.SerializationDefinitionManager;
+import bubo.io.text.ReadCsvObjectSmart;
+
+import com.jme3.math.Vector3f;
 
 public class PointCloudTools
 {

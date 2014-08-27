@@ -2,8 +2,6 @@ package com.yobotics.simulationconstructionset.util.ground;
 
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 
-import com.yobotics.simulationconstructionset.util.ground.WavyGroundProfile;
-
 public class WavyGroundProfileTest extends GroundProfileTest
 {
 

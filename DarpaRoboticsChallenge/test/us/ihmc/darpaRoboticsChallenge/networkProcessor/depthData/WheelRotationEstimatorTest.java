@@ -7,7 +7,6 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.WheelRotationEstimator;
 import us.ihmc.utilities.math.geometry.AngleTools;
 
 public class WheelRotationEstimatorTest

@@ -20,11 +20,12 @@ package us.ihmc.darpaRoboticsChallenge.sensorProcessing.footPlacement;
 
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.point.Vector3D_F64;
+
+import java.util.List;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.DecompositionFactory;
 import org.ejml.interfaces.decomposition.SingularValueDecomposition;
-
-import java.util.List;
 
 /**
  * Various functions for fitting planes in 3D to point clouds.

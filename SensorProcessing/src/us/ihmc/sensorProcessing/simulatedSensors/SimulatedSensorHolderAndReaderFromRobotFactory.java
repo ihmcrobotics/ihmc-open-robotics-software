@@ -20,13 +20,13 @@ import us.ihmc.utilities.ForceSensorDefinition;
 import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.FloatingJoint;
 import com.yobotics.simulationconstructionset.IMUMount;
 import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 
 public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorReaderFactory

@@ -6,12 +6,12 @@ import java.io.PrintStream;
 import java.util.HashMap;
 
 import us.ihmc.utilities.gui.CustomProgressMonitor;
+import us.ihmc.yoUtilities.RewoundListener;
 
 import com.yobotics.simulationconstructionset.LongYoVariable;
 import com.yobotics.simulationconstructionset.PlaybackListener;
-import com.yobotics.simulationconstructionset.SimulationRewoundListener;
 
-public class MultiVideoDataPlayer implements PlaybackListener, SimulationRewoundListener
+public class MultiVideoDataPlayer implements PlaybackListener, RewoundListener
 {
    private final LongYoVariable timestamp;
    private final LogProperties logProperties;
@@ -56,7 +56,7 @@ public class MultiVideoDataPlayer implements PlaybackListener, SimulationRewound
    }
 
    @Override
-   public void simulationWasRewound()
+   public void wasRewound()
    {
       if(activePlayer != null)
       {

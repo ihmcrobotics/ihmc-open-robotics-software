@@ -1,15 +1,16 @@
 package us.ihmc.robotDataCommunication;
 
 import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 
 import us.ihmc.robotDataCommunication.visualizer.SCSYoVariablesUpdatedListener;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.DataBuffer;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.LongYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class YoVariableConnectionBurstTest
 {

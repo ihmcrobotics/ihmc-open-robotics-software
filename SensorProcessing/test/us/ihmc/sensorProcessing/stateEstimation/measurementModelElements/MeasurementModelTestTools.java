@@ -10,10 +10,13 @@ import org.ejml.ops.EjmlUnitTests;
 
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.MeasurementModelElement;
-import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.PointPositionMeasurementModelElement;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.MatrixTools;
-import us.ihmc.utilities.math.geometry.*;
+import us.ihmc.utilities.math.geometry.Direction;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
+import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.RotationFunctions;
 
 public class MeasurementModelTestTools
 {

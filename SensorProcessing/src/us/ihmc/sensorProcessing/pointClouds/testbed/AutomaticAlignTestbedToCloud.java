@@ -1,18 +1,21 @@
 package us.ihmc.sensorProcessing.pointClouds.testbed;
 
+import georegression.struct.point.Point3D_F64;
+import georegression.struct.se.Se3_F64;
+
+import java.awt.Dimension;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.util.List;
+
+import javax.swing.JPanel;
+
 import boofcv.gui.image.ShowImages;
 import bubo.clouds.FactoryFitting;
 import bubo.clouds.fit.MatchCloudToCloud;
 import bubo.struct.StoppingCondition;
-import com.thoughtworks.xstream.XStream;
-import georegression.struct.point.Point3D_F64;
-import georegression.struct.se.Se3_F64;
 
-import javax.swing.*;
-import java.awt.*;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.util.List;
+import com.thoughtworks.xstream.XStream;
 
 /**
  * @author Peter Abeles

@@ -1,5 +1,9 @@
 package us.ihmc.sensorProcessing.pointClouds.shape;
 
+import java.nio.FloatBuffer;
+import java.util.Collection;
+import java.util.Iterator;
+
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState.BlendMode;
@@ -14,10 +18,6 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial.CullHint;
 import com.jme3.scene.VertexBuffer;
 import com.jme3.util.BufferUtils;
-
-import java.nio.FloatBuffer;
-import java.util.Collection;
-import java.util.Iterator;
 
 
 

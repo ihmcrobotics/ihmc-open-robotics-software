@@ -2,10 +2,10 @@ package us.ihmc.commonWalkingControlModules.packetConsumers;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.google.common.util.concurrent.AtomicDouble;
-
 import us.ihmc.communication.packets.walking.ComHeightPacket;
 import us.ihmc.utilities.net.ObjectConsumer;
+
+import com.google.common.util.concurrent.AtomicDouble;
 
 public class DesiredComHeightProvider
 {

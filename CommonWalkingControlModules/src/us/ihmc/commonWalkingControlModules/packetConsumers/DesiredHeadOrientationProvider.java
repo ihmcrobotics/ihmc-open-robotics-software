@@ -2,14 +2,14 @@ package us.ihmc.commonWalkingControlModules.packetConsumers;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.google.common.util.concurrent.AtomicDouble;
-
 import us.ihmc.communication.packets.LookAtPacket;
 import us.ihmc.communication.packets.walking.HeadOrientationPacket;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.ObjectConsumer;
+
+import com.google.common.util.concurrent.AtomicDouble;
 
 public class DesiredHeadOrientationProvider
 {

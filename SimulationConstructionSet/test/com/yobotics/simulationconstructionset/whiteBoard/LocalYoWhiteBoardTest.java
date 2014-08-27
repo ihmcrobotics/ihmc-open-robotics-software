@@ -5,7 +5,7 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 public class LocalYoWhiteBoardTest extends YoWhiteBoardTest
 {

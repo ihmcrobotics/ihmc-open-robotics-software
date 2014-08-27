@@ -2,11 +2,6 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects;
 
 import java.util.ArrayList;
 
-import org.ejml.data.DenseMatrix64F;
-
-import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.Wrench;
 

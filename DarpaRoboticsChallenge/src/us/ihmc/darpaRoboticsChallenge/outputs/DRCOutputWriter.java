@@ -1,10 +1,9 @@
 package us.ihmc.darpaRoboticsChallenge.outputs;
 
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 public interface DRCOutputWriter
 {

@@ -1,5 +1,12 @@
 package us.ihmc.sensorProcessing.pointClouds.shape;
 
+import georegression.struct.point.Point3D_F64;
+
+import java.util.Iterator;
+import java.util.List;
+
+import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
+import us.ihmc.sensorProcessing.pointClouds.octree.OctreeOccupancyExample;
 import bubo.maps.d3.grid.CellProbability_F64;
 import bubo.maps.d3.grid.GridMapSpacialInfo3D;
 import bubo.maps.d3.grid.impl.OctreeGridMap_F64;
@@ -12,16 +19,8 @@ import com.jme3.math.Vector3f;
 import com.jme3.renderer.queue.RenderQueue.Bucket;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
-import com.jme3.scene.control.Control;
 import com.jme3.scene.shape.Box;
 import com.jme3.system.AppSettings;
-
-import georegression.struct.point.Point3D_F64;
-import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
-import us.ihmc.sensorProcessing.pointClouds.octree.OctreeOccupancyExample;
-
-import java.util.Iterator;
-import java.util.List;
 
 public class DisplayOctreeApp extends SimpleApplication
 {

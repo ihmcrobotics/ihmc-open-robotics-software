@@ -1,12 +1,16 @@
 package us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree;
 
-import org.junit.Test;
-import us.ihmc.utilities.dataStructures.AbstractHeightMapTest;
-import us.ihmc.utilities.math.dataStructures.HeightMap;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.Random;
 
-import static org.junit.Assert.*;
+import org.junit.Test;
+
+import us.ihmc.utilities.dataStructures.AbstractHeightMapTest;
+import us.ihmc.utilities.math.dataStructures.HeightMap;
 
 public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
 {

@@ -8,8 +8,8 @@ import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.net.ObjectCommunicator;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RawOutputWriter;
 
 // fills a ring buffer with pose and joint data and in a worker thread passes it to the appropriate consumer 

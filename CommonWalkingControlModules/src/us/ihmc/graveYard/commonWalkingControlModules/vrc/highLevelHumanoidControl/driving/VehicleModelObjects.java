@@ -1,10 +1,10 @@
 package us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.driving;
 
-import us.ihmc.utilities.math.geometry.FramePose;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
-
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
+
+import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 /**
  * @author twan

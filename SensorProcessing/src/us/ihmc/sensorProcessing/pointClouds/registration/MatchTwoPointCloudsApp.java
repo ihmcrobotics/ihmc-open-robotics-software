@@ -1,5 +1,13 @@
 package us.ihmc.sensorProcessing.pointClouds.registration;
 
+import georegression.struct.point.Point3D_F64;
+import georegression.struct.se.Se3_F64;
+import georegression.transform.se.SePointOps_F64;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import us.ihmc.sensorProcessing.pointClouds.GeometryOps;
 import boofcv.gui.image.ShowImages;
 import bubo.clouds.FactoryFitting;
 import bubo.clouds.fit.MatchCloudToCloud;
@@ -7,13 +15,6 @@ import bubo.gui.FactoryVisualization3D;
 import bubo.gui.UtilDisplayBubo;
 import bubo.gui.d3.PointCloudPanel;
 import bubo.struct.StoppingCondition;
-import georegression.struct.point.Point3D_F64;
-import georegression.struct.se.Se3_F64;
-import georegression.transform.se.SePointOps_F64;
-import us.ihmc.sensorProcessing.pointClouds.GeometryOps;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Peter Abeles

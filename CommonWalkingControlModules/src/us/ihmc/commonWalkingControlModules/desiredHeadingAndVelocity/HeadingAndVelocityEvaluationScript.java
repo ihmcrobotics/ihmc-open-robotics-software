@@ -6,11 +6,11 @@ import javax.vecmath.Vector3d;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.IntegerYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 /*
 * TODO: wave cruise, change heading walking straight, turn while facing same direction not working properly

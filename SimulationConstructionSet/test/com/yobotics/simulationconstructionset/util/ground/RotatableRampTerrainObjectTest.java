@@ -1,6 +1,7 @@
 package com.yobotics.simulationconstructionset.util.ground;
 
 import static org.junit.Assert.assertEquals;
+
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 

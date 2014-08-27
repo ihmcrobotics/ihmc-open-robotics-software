@@ -1,16 +1,16 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import us.ihmc.utilities.math.geometry.FramePose;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.geometry.RotationFunctions;
-import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.driving.VehicleModelObjects;
-import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.driving.VehicleObject;
-
+import java.util.EnumMap;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
-import java.util.EnumMap;
+
+import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.driving.VehicleModelObjects;
+import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.driving.VehicleObject;
+import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RotationFunctions;
 
 public class DRCVehicleModelObjects implements VehicleModelObjects
 {

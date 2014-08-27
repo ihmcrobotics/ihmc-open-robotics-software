@@ -1,5 +1,12 @@
 package us.ihmc.sensorProcessing.pointClouds.octree;
 
+import georegression.struct.point.Point3D_F64;
+import georegression.struct.point.Point3D_I32;
+import georegression.struct.se.Se3_F64;
+import georegression.struct.shapes.Box3D_I32;
+
+import java.util.List;
+
 import bubo.construct.ConstructOctreeLeaf_I32;
 import bubo.construct.OctreeOps;
 import bubo.construct.Octree_I32;
@@ -7,12 +14,6 @@ import bubo.maps.d3.grid.GridMapSpacialInfo3D;
 import bubo.maps.d3.grid.impl.BlurOctreeGridMap_F64;
 import bubo.maps.d3.grid.impl.Kernel3D_F64;
 import bubo.maps.d3.grid.impl.OctreeGridMap_F64;
-import georegression.struct.point.Point3D_F64;
-import georegression.struct.point.Point3D_I32;
-import georegression.struct.se.Se3_F64;
-import georegression.struct.shapes.Box3D_I32;
-
-import java.util.List;
 
 /**
  * @author Peter Abeles

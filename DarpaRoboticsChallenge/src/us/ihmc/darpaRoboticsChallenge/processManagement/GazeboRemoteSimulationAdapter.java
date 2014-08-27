@@ -1,6 +1,9 @@
 package us.ihmc.darpaRoboticsChallenge.processManagement;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.net.InetAddress;
 import java.util.Properties;
 import java.util.Timer;
@@ -12,14 +15,13 @@ import javax.swing.JOptionPane;
 import org.apache.commons.lang.mutable.MutableBoolean;
 
 import us.ihmc.darpaRoboticsChallenge.configuration.LocalCloudMachines;
+import us.ihmc.utilities.Pair;
 
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.ChannelShell;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
-
-import us.ihmc.utilities.Pair;
 
 public class GazeboRemoteSimulationAdapter extends Thread
 {

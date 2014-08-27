@@ -1,7 +1,16 @@
 package us.ihmc.sensorProcessing.stateEstimation;
 
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import javax.media.j3d.Transform3D;
+
 import org.junit.Test;
+
 import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.controlFlow.NullControlFlowElement;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointPositionDataObject;
@@ -9,12 +18,7 @@ import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.AfterJointReferenceFrameNameMap;
-
-import javax.media.j3d.Transform3D;
-import java.util.*;
-
-import static junit.framework.Assert.assertTrue;
-import static junit.framework.Assert.fail;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 /**
  * @author twan

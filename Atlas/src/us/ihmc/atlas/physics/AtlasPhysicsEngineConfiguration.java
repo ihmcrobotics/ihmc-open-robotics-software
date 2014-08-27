@@ -1,5 +1,14 @@
 package us.ihmc.atlas.physics;
 
+import javax.media.j3d.Transform3D;
+import javax.vecmath.Vector3d;
+
+import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
+import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.math.geometry.TransformTools;
+
 import com.yobotics.simulationconstructionset.FloatingJoint;
 import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.Link;
@@ -8,14 +17,6 @@ import com.yobotics.simulationconstructionset.physics.CollisionShapeDescription;
 import com.yobotics.simulationconstructionset.physics.CollisionShapeFactory;
 import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
 import com.yobotics.simulationconstructionset.physics.ScsCollisionDetector;
-import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
-import us.ihmc.robotSide.RobotSide;
-import us.ihmc.utilities.math.geometry.TransformTools;
-
-import javax.media.j3d.Transform3D;
-import javax.vecmath.Vector3d;
 
 /**
  * @author Peter Abeles

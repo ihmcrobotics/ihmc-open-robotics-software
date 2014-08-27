@@ -1,18 +1,19 @@
 package us.ihmc.darpaRoboticsChallenge.driving;
 
-import boofcv.io.image.UtilImageIO;
-import org.ros.message.MessageListener;
-import org.ros.node.topic.Subscriber;
-import rosgraph_msgs.Clock;
-import sensor_msgs.CompressedImage;
-import us.ihmc.utilities.ros.RosTools;
-
-import java.awt.*;
+import java.awt.Transparency;
 import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.ComponentColorModel;
 import java.awt.image.DataBuffer;
+
+import org.ros.message.MessageListener;
+import org.ros.node.topic.Subscriber;
+
+import rosgraph_msgs.Clock;
+import sensor_msgs.CompressedImage;
+import us.ihmc.utilities.ros.RosTools;
+import boofcv.io.image.UtilImageIO;
 
 /**
  * Saves images at the specified rate in simulation time

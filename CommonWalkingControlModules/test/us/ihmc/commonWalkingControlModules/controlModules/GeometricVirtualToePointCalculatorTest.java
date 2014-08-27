@@ -23,8 +23,8 @@ import us.ihmc.utilities.math.geometry.FrameConvexPolygon2dAndConnectingEdges;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.GeometryTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class GeometricVirtualToePointCalculatorTest

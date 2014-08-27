@@ -4,8 +4,6 @@ import static org.junit.Assert.fail;
 
 import java.util.Random;
 
-import com.yobotics.simulationconstructionset.YoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistryChangedListener;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.EjmlUnitTests;
@@ -13,9 +11,12 @@ import org.ejml.ops.RandomMatrices;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.yoUtilities.YoVariable;
+import us.ihmc.yoUtilities.YoVariableRegistry;
+import us.ihmc.yoUtilities.YoVariableRegistryChangedListener;
+
 import com.yobotics.simulationconstructionset.DataBuffer;
 import com.yobotics.simulationconstructionset.DataBuffer.RepeatDataBufferEntryException;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class YoKalmanFilterTest
 {

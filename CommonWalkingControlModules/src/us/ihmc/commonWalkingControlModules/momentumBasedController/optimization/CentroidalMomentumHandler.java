@@ -1,19 +1,26 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.data.RowD1Matrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.*;
+import us.ihmc.utilities.screwTheory.CentroidalMomentumMatrix;
+import us.ihmc.utilities.screwTheory.CentroidalMomentumRateTermCalculator;
+import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
+import us.ihmc.utilities.screwTheory.Momentum;
+import us.ihmc.utilities.screwTheory.ScrewTools;
+import us.ihmc.utilities.screwTheory.SpatialForceVector;
+import us.ihmc.utilities.screwTheory.SpatialMotionVector;
+import us.ihmc.utilities.screwTheory.TotalMassCalculator;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools;
 
 /**
  * @author twan

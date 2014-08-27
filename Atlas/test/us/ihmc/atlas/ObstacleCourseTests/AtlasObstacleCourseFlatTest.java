@@ -2,14 +2,14 @@ package us.ihmc.atlas.ObstacleCourseTests;
 
 import javax.vecmath.Vector3d;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseFlatTest;
+
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 
 public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
 {

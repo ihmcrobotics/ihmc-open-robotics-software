@@ -1,19 +1,26 @@
 package us.ihmc.sensorProcessing.pointClouds;
 
-import bubo.io.text.ReadCsv;
-import bubo.io.text.ReadCsvObject;
-import com.jme3.math.Quaternion;
-import com.jme3.math.Transform;
-import com.jme3.math.Vector3f;
-import com.thoughtworks.xstream.XStream;
 import georegression.geometry.RotationMatrixGenerator;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.se.Se3_F64;
 import georegression.struct.so.Quaternion_F64;
 
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
+
+import bubo.io.text.ReadCsv;
+import bubo.io.text.ReadCsvObject;
+
+import com.jme3.math.Quaternion;
+import com.jme3.math.Transform;
+import com.jme3.math.Vector3f;
+import com.thoughtworks.xstream.XStream;
 
 /**
  * @author Peter Abeles

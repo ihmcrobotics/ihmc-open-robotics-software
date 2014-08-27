@@ -20,8 +20,7 @@ import us.ihmc.utilities.screwTheory.AfterJointReferenceFrameNameMap;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
-
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 public class PointVelocityMeasurementModelElement extends AbstractMeasurementModelElement
 {

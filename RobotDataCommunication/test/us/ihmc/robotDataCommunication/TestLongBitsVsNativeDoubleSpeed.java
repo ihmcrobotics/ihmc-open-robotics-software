@@ -6,8 +6,9 @@ import java.nio.LongBuffer;
 import java.util.ArrayList;
 import java.util.Random;
 
+import us.ihmc.yoUtilities.YoVariableRegistry;
+
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 
 public class TestLongBitsVsNativeDoubleSpeed

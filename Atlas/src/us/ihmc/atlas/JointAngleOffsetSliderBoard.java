@@ -2,9 +2,9 @@ package us.ihmc.atlas;
 
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
 
 public class JointAngleOffsetSliderBoard

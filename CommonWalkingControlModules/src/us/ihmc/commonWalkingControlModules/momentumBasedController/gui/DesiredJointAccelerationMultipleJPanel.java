@@ -1,17 +1,12 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.gui;
 
 import java.awt.Graphics;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
-import org.ejml.data.DenseMatrix64F;
-import org.omg.CORBA.INITIALIZE;
-
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredJointAccelerationCommandAndMotionConstraint;
-import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 
 public class DesiredJointAccelerationMultipleJPanel extends AbstractMultipleReusableJPanel<DesiredJointAccelerationJPanel>
 {

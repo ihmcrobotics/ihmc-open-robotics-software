@@ -1,10 +1,16 @@
 package us.ihmc.IMUKalmanFilter.TestCases;
 
-import com.yobotics.simulationconstructionset.*;
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
+
+import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
+import us.ihmc.yoUtilities.YoVariableRegistry;
+
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.ExternalForcePoint;
+import com.yobotics.simulationconstructionset.FloatingJoint;
+import com.yobotics.simulationconstructionset.Link;
+import com.yobotics.simulationconstructionset.Robot;
 
 public class TestIMUKalmanFilterRobot extends Robot
 {

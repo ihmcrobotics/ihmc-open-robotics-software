@@ -10,8 +10,6 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.EjmlUnitTests;
 import org.junit.Test;
 
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-
 import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
@@ -21,8 +19,9 @@ import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.ScrewTestTools.RandomFloatingChain;
+import us.ihmc.utilities.screwTheory.SixDoFJoint;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 public class OrientationMeasurementModelElementTest
 {

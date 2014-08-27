@@ -11,8 +11,7 @@ import us.ihmc.utilities.screwTheory.DesiredJointAccelerationCalculator;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Twist;
-
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 public class DesiredJointAccelerationCalculatorInWorldFrame
 {

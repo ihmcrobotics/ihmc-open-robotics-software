@@ -11,10 +11,10 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.trajectories.providers.CurrentConfigurationProvider;
 import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
 import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.trajectory.OrientationInterpolationTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.StraightLinePositionTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.provider.YoSE3ConfigurationProvider;

@@ -2,9 +2,6 @@ package us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization;
 
 import org.ejml.data.DenseMatrix64F;
 
-import com.google.gdata.util.NotImplementedException;
-
-import us.ihmc.commonWalkingControlModules.wrenchDistribution.PlaneContactWrenchMatrixCalculator;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
 
 public class CVXMomentumOptimizerAdapter implements MomentumOptimizerInterface

@@ -1,12 +1,10 @@
 package us.ihmc.commonWalkingControlModules.posePlayback;
 
-import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPose;
-import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
 import us.ihmc.utilities.math.TimeTools;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.IntegerYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.trajectory.YoPolynomial;
 
 public class PlaybackPoseInterpolator

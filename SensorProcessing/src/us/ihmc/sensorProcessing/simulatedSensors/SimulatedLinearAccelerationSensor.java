@@ -2,15 +2,15 @@ package us.ihmc.sensorProcessing.simulatedSensors;
 
 import javax.vecmath.Vector3d;
 
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
-
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationCalculator;
+import us.ihmc.yoUtilities.YoVariableRegistry;
+
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public class SimulatedLinearAccelerationSensor extends SimulatedSensor<Vector3d>
 {

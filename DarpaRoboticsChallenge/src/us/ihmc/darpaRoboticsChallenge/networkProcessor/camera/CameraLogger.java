@@ -1,18 +1,21 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor.camera;
 
-import boofcv.io.UtilIO;
-import boofcv.io.image.UtilImageIO;
-import boofcv.struct.calib.IntrinsicParameters;
 import georegression.geometry.RotationMatrixGenerator;
 import georegression.struct.so.Quaternion_F64;
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
 
-import javax.vecmath.Vector3d;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
+
+import javax.vecmath.Vector3d;
+
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
+
+import boofcv.io.UtilIO;
+import boofcv.io.image.UtilImageIO;
+import boofcv.struct.calib.IntrinsicParameters;
 
 /**
  * Grabs camera images, camera location, and intrinsic parameters and saves them to a log file

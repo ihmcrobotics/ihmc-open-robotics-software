@@ -1,10 +1,12 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
+import us.ihmc.yoUtilities.YoVariableRegistry;
+
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
 
 public class MomentumControlModuleSolverVisualizer implements MomentumControlModuleSolverListener
 {

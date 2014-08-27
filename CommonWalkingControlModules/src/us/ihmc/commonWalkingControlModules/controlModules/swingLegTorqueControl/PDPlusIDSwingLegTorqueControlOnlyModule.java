@@ -19,8 +19,7 @@ import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Wrench;
-
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 public class PDPlusIDSwingLegTorqueControlOnlyModule implements SwingLegTorqueControlOnlyModule
 {

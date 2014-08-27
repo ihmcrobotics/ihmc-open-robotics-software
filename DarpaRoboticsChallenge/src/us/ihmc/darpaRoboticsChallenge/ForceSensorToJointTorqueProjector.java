@@ -2,17 +2,15 @@ package us.ihmc.darpaRoboticsChallenge;
 
 import java.util.ArrayList;
 
-
-
 import us.ihmc.sensorProcessing.sensors.ForceSensorData;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.Wrench;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 
 /*

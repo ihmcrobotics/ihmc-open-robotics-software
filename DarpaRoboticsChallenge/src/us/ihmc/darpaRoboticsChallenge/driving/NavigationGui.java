@@ -1,6 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.driving;
 
-import javax.swing.*;
+import javax.swing.JPanel;
 
 /**
  * @author Peter Abeles

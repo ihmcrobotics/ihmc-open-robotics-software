@@ -25,10 +25,10 @@ import us.ihmc.utilities.math.trajectories.providers.TrajectoryParameters;
 import us.ihmc.utilities.math.trajectories.providers.TrajectoryParametersProvider;
 import us.ihmc.utilities.math.trajectories.providers.VectorProvider;
 import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.trajectory.OrientationInterpolationTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;

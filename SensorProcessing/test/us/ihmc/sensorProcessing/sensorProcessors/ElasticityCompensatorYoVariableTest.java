@@ -1,6 +1,7 @@
 package us.ihmc.sensorProcessing.sensorProcessors;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.util.Random;
 
@@ -8,9 +9,9 @@ import org.junit.Test;
 
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.MathTools;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class ElasticityCompensatorYoVariableTest
 {

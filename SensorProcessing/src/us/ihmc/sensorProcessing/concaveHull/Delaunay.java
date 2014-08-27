@@ -5,24 +5,18 @@ import georegression.struct.point.Point3D_F64;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.PrintStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Scanner;
 
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
 import org.opensphere.geometry.algorithm.ConcaveHull;
 import org.opensphere.geometry.triangulation.model.Edge;
 import org.opensphere.geometry.triangulation.model.Triangle;
 import org.opensphere.geometry.triangulation.model.Vertex;
 
-
-//import bubo.ptcloud.alg.BoundPlaneRectangle;
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.CoordinateSequence;
-import com.vividsolutions.jts.geom.CoordinateSequenceFactory;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryFactory;

@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.encoder.processors;
 
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 public class ZeroEncoderProcessor implements EncoderProcessor
 {

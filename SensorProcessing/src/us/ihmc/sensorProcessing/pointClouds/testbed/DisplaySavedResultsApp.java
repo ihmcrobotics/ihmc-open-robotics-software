@@ -1,23 +1,19 @@
 package us.ihmc.sensorProcessing.pointClouds.testbed;
 
+import static us.ihmc.sensorProcessing.pointClouds.GeometryOps.loadScanLines;
+import static us.ihmc.sensorProcessing.pointClouds.testbed.CreateCloudFromFilteredScanApp.filter;
+import georegression.struct.point.Point3D_F64;
+import georegression.struct.se.Se3_F64;
+import georegression.transform.se.SePointOps_F64;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import us.ihmc.sensorProcessing.pointClouds.GeometryOps;
 import boofcv.gui.image.ShowImages;
 import bubo.gui.FactoryVisualization3D;
 import bubo.gui.UtilDisplayBubo;
 import bubo.gui.d3.PointCloudPanel;
-import bubo.io.text.ReadCsv;
-import georegression.struct.point.Point3D_F64;
-import georegression.struct.se.Se3_F64;
-import georegression.transform.se.SePointOps_F64;
-import us.ihmc.sensorProcessing.pointClouds.GeometryOps;
-
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import static us.ihmc.sensorProcessing.pointClouds.GeometryOps.loadScanLines;
-import static us.ihmc.sensorProcessing.pointClouds.testbed.CreateCloudFromFilteredScanApp.filter;
 
 /**
  * @author Peter Abeles

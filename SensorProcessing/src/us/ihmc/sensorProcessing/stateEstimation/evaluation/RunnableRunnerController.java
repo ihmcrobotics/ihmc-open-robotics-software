@@ -2,7 +2,8 @@ package us.ihmc.sensorProcessing.stateEstimation.evaluation;
 
 import java.util.ArrayList;
 
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import us.ihmc.yoUtilities.YoVariableRegistry;
+
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 
 public class RunnableRunnerController implements RobotController

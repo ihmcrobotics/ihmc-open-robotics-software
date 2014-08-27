@@ -7,16 +7,13 @@ import org.ros.node.parameter.ParameterTree;
 import org.ros.node.service.ServiceResponseListener;
 
 import us.ihmc.communication.packets.sensing.BlackFlyParameterPacket;
-import us.ihmc.communication.packets.sensing.MultisenseParameterPacket;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosServiceClient;
-import dynamic_reconfigure.BoolParameter;
 import dynamic_reconfigure.DoubleParameter;
 import dynamic_reconfigure.Reconfigure;
 import dynamic_reconfigure.ReconfigureRequest;
 import dynamic_reconfigure.ReconfigureResponse;
-import dynamic_reconfigure.StrParameter;
 
 public class BlackFlyParameterSetter
 {

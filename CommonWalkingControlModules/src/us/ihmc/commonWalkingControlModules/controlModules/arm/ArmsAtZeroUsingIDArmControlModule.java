@@ -8,8 +8,7 @@ import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.utilities.screwTheory.RevoluteJoint;
-
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 public class ArmsAtZeroUsingIDArmControlModule extends IDArmControlModule
 {

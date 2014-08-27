@@ -2,8 +2,6 @@ package us.ihmc.utilities.parameterOptimization.geneticAlgorithm;
 
 import java.util.Comparator;
 
-import us.ihmc.utilities.parameterOptimization.IndividualToEvaluate;
-
 public class MaximizationIndividualComparator implements Comparator<GeneticAlgorithmIndividualToEvaluate>
 {
 

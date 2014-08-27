@@ -10,9 +10,9 @@ import us.ihmc.robotDataCommunication.jointState.JointHolder;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.yoUtilities.YoVariable;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
-import com.yobotics.simulationconstructionset.YoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class YoVariableServer implements RobotVisualizer

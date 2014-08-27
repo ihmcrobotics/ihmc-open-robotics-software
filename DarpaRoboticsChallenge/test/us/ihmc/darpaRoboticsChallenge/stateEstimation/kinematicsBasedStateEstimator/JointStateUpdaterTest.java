@@ -23,8 +23,7 @@ import us.ihmc.utilities.screwTheory.RevoluteJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTestTools;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
-
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 public class JointStateUpdaterTest
 {

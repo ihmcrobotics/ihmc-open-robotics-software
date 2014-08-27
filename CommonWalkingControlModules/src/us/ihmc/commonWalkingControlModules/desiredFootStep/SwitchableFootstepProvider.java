@@ -2,8 +2,9 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import java.util.ArrayList;
 
+import us.ihmc.yoUtilities.YoVariableRegistry;
+
 import com.yobotics.simulationconstructionset.IntegerYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class SwitchableFootstepProvider implements FootstepProvider
 {

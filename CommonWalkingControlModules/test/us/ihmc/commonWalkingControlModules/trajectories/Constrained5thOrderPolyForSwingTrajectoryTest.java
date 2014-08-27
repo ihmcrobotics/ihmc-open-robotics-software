@@ -1,8 +1,10 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import org.junit.Test;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import static org.junit.Assert.assertTrue;
+
+import org.junit.Test;
+
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 public class Constrained5thOrderPolyForSwingTrajectoryTest
 {

@@ -1,13 +1,19 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-import us.ihmc.utilities.math.MathTools;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.*;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
+
+import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
+import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.ScrewTools;
+import us.ihmc.utilities.screwTheory.SpatialForceVector;
+import us.ihmc.utilities.screwTheory.TotalMassCalculator;
+import us.ihmc.utilities.screwTheory.Wrench;
 
 /**
  * @author twan

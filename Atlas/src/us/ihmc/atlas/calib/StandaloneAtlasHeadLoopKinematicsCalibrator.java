@@ -1,23 +1,29 @@
 package us.ihmc.atlas.calib;
 
-import boofcv.alg.geo.calibration.PlanarCalibrationTarget;
-import boofcv.factory.calib.FactoryPlanarCalibrationTarget;
-import boofcv.io.UtilIO;
-import boofcv.struct.calib.IntrinsicParameters;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.media.j3d.Transform3D;
+
 import org.ddogleg.optimization.FactoryOptimization;
 import org.ddogleg.optimization.UnconstrainedLeastSquares;
 import org.ddogleg.optimization.UtilOptimize;
+
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
-
-import javax.media.j3d.Transform3D;
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
+import boofcv.alg.geo.calibration.PlanarCalibrationTarget;
+import boofcv.factory.calib.FactoryPlanarCalibrationTarget;
+import boofcv.io.UtilIO;
+import boofcv.struct.calib.IntrinsicParameters;
 
 /**
  * @author Peter Abeles

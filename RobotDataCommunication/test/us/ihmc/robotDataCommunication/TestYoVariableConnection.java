@@ -1,14 +1,12 @@
 package us.ihmc.robotDataCommunication;
 
-import us.ihmc.robotDataCommunication.YoVariableClient;
-import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.robotDataCommunication.visualizer.SCSYoVariablesUpdatedListener;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.IntegerYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class TestYoVariableConnection
 {

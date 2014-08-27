@@ -6,7 +6,6 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
 
 import com.sun.jna.Native;
-import com.sun.jna.Platform;
 
 public class OASESConstrainedQPSolver extends ConstrainedQPSolver
 {

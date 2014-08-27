@@ -6,8 +6,8 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceCons
 import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 
 public abstract class TaskspaceHandControlState extends State<HandControlState>

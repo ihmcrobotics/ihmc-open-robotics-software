@@ -25,8 +25,8 @@ import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
 import org.ros.node.topic.Subscriber;
 
-import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.keyboardAndMouse.RepeatingReleasedEventsFixer;
+import us.ihmc.utilities.ros.RosTools;
 
 public class ExternalCameraFeed extends AbstractNodeMain
 {

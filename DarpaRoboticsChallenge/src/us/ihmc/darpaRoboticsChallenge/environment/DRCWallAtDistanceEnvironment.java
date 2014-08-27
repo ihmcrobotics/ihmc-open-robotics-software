@@ -3,15 +3,15 @@ package us.ihmc.darpaRoboticsChallenge.environment;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
+import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.util.environments.SelectableObjectListener;
 import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import com.yobotics.simulationconstructionset.util.ground.TerrainObject3D;
-
-import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 
 public class DRCWallAtDistanceEnvironment implements CommonAvatarEnvironmentInterface
 {

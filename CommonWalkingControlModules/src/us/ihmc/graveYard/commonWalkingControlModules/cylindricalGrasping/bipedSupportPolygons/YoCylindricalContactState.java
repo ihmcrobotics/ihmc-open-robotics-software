@@ -2,10 +2,10 @@ package us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.bipedS
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ModifiableContactState;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
 

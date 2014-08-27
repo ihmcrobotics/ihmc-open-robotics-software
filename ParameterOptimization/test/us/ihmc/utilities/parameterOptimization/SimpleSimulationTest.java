@@ -6,10 +6,6 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.utilities.parameterOptimization.IndividualToEvaluate;
-import us.ihmc.utilities.parameterOptimization.ListOfParametersToOptimize;
-import us.ihmc.utilities.parameterOptimization.OptimizationProblem;
-
 public class SimpleSimulationTest
 {
    @Test

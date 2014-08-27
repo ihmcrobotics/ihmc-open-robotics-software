@@ -25,9 +25,9 @@ import us.ihmc.utilities.math.geometry.GeometryTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.TranslationReferenceFrame;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class GeometricStairsGroundReactionWrenchDistributor implements GroundReactionWrenchDistributor

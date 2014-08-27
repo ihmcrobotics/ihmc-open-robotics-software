@@ -12,10 +12,10 @@ import us.ihmc.utilities.containers.ContainerTools;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.RobotSpecificJointNames;
 import us.ihmc.utilities.math.MathTools;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.gui.GUISetterUpper;
 import com.yobotics.simulationconstructionset.gui.GUISetterUpperRegistry;
 import com.yobotics.simulationconstructionset.util.controller.PIDController;
