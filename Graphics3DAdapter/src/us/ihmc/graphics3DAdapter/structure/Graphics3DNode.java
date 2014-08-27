@@ -14,6 +14,7 @@ import us.ihmc.graphics3DAdapter.input.ModifierKeyInterface;
 import us.ihmc.graphics3DAdapter.input.SelectedListener;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
+import us.ihmc.utilities.math.geometry.TransformTools;
 
 public class Graphics3DNode
 {
@@ -101,22 +102,7 @@ public class Graphics3DNode
 
    public void rotate(double angle, Axis axis)
    {
-      Transform3D rotator = new Transform3D();
-
-      if (axis == Axis.X)
-      {
-         rotator.rotX(angle);
-      }
-      else if (axis == Axis.Y)
-      {
-         rotator.rotY(angle);
-      }
-      else if (axis == Axis.Z)
-      {
-         rotator.rotZ(angle);
-      }
-
-      transform.mul(rotator);
+      TransformTools.rotate(transform, angle, axis);
    }
 
    public Vector3d getTranslation()
