@@ -6,7 +6,7 @@ import java.io.PrintStream;
 import java.util.HashMap;
 
 import us.ihmc.utilities.gui.CustomProgressMonitor;
-import us.ihmc.yoUtilities.RewoundListener;
+import us.ihmc.yoUtilities.dataStructure.listener.RewoundListener;
 
 import com.yobotics.simulationconstructionset.LongYoVariable;
 import com.yobotics.simulationconstructionset.PlaybackListener;

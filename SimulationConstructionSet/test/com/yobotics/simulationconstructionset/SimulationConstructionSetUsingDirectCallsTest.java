@@ -40,10 +40,10 @@ import us.ihmc.graphics3DAdapter.jme.JMEGraphics3DAdapter;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.yoUtilities.RewoundListener;
 import us.ihmc.yoUtilities.YoVariable;
 import us.ihmc.yoUtilities.YoVariableList;
 import us.ihmc.yoUtilities.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.listener.RewoundListener;
 import us.ihmc.yoUtilities.dataStructure.registry.NameSpace;
 
 import com.yobotics.simulationconstructionset.commands.ToggleKeyPointModeCommandListener;
