@@ -3,7 +3,7 @@ package us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.wrench
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.bipedSupportPolygons.CylindricalContactState;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.yoUtilities.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class EndEffector
 {

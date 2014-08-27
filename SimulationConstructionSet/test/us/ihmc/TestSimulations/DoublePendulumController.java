@@ -1,7 +1,7 @@
 package us.ihmc.TestSimulations;
 
 import us.ihmc.utilities.math.TimeTools;
-import us.ihmc.yoUtilities.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.LongYoVariable;

@@ -26,7 +26,7 @@ import org.ejml.factory.SingularMatrixException;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.MatrixFeatures;
 
-import us.ihmc.yoUtilities.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;

@@ -4,7 +4,7 @@ import java.util.List;
 
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
-import us.ihmc.yoUtilities.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 

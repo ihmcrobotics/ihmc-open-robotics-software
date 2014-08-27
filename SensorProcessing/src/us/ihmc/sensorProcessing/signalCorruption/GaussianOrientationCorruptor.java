@@ -8,7 +8,7 @@ import javax.vecmath.Matrix3d;
 import org.apache.commons.math3.util.FastMath;
 
 import us.ihmc.utilities.math.MathTools;
-import us.ihmc.yoUtilities.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 

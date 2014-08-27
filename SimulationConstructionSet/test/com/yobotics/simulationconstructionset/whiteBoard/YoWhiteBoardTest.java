@@ -11,9 +11,9 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.yoUtilities.YoVariableRegistry;
 import us.ihmc.yoUtilities.YoVariableType;
 import us.ihmc.yoUtilities.dataStructure.registry.NameSpace;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;

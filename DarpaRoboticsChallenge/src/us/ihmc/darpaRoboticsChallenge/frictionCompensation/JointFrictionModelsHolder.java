@@ -5,7 +5,7 @@ import java.util.EnumMap;
 import us.ihmc.utilities.frictionModels.FrictionModel;
 import us.ihmc.utilities.frictionModels.FrictionState;
 import us.ihmc.utilities.frictionModels.JointFrictionModel;
-import us.ihmc.yoUtilities.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;

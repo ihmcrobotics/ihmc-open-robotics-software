@@ -3,7 +3,7 @@ package us.ihmc.sensorProcessing.stateEstimation.evaluation;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimator;
-import us.ihmc.yoUtilities.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.Robot;

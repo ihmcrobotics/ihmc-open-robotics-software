@@ -12,7 +12,7 @@ import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.yoUtilities.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 
 public class TeeterTotterLegStrengthCalculatorTest

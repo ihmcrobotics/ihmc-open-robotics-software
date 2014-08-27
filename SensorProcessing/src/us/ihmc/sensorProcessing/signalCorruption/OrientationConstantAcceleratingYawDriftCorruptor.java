@@ -3,7 +3,7 @@ package us.ihmc.sensorProcessing.signalCorruption;
 import javax.vecmath.Matrix3d;
 
 import us.ihmc.utilities.math.geometry.RotationFunctions;
-import us.ihmc.yoUtilities.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 

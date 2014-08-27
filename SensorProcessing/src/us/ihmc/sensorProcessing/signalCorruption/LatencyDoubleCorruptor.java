@@ -2,7 +2,7 @@ package us.ihmc.sensorProcessing.signalCorruption;
 
 import org.apache.commons.lang.mutable.MutableDouble;
 
-import us.ihmc.yoUtilities.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.IntegerYoVariable;
 

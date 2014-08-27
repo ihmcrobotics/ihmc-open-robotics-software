@@ -1,7 +1,7 @@
 package us.ihmc.sensorProcessing.sensorProcessors;
 
 import us.ihmc.utilities.math.MathTools;
-import us.ihmc.yoUtilities.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 
