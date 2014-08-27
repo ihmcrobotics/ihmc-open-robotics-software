@@ -43,8 +43,6 @@ public class NetworkProcessorTestbedAlignment implements Runnable
 
    DRCNetworkProcessorNetworkingManager networkManager;
 
-   PrintStream out;
-
    boolean justCollectData;
 
    long integrationPeriod = 6000;
@@ -85,7 +83,6 @@ public class NetworkProcessorTestbedAlignment implements Runnable
                System.out.println("  ignoring start request.  Busy");
                return;
             }
-            out = null;
             first = true;
             available.addAll(scans);
             scans.clear();
@@ -137,34 +134,12 @@ public class NetworkProcessorTestbedAlignment implements Runnable
                   testbedLocation.set(T.x,T.y,T.z);
                }
 
-               if( justCollectData ) {
-                  if( out == null )
-                     try {
-                        out = new PrintStream(new FileOutputStream(String.format("headLocation%02d.csv",totalSaved)));
-                        out.println("# Location of the robot's head in global");
-                        out.printf("%15f %15f %15f",testbedLocation.x,testbedLocation.y,testbedLocation.z);
-                        out.close();
-
-                        out = new PrintStream(new FileOutputStream(String.format("savedTestbedCloud%02d_scans.csv",totalSaved++)));
-                        out.println("# LIDAR scans.  (num) (x y z) .... ");
-                     } catch (FileNotFoundException e) {
-                        throw new RuntimeException(e);
-                     }
-                  out.print(scan.size());
-                  for (int i = 0; i < scan.size(); i++) {
-                     Point3D_F64 p = scan.get(i);
-                     out.printf(" %15f %15f %15f", p.x, p.y, p.z);
-                  }
-                  out.println();
-                  out.flush();
-               }
             }
             else
             {
                System.out.println("NetworkProcessorTestbedAlignment - handlePacket done collection");
                if( justCollectData ) {
-                  out.close();
-                  out = null;
+                  savePointCloudScans(false);
                   processing = false;
                   active = false;
                   networkManager.getControllerStateHandler().sendSerializableObject(new TestbedServerPacket(TestbedServerPacket.DONE_COLLECTING_DATA));
@@ -174,6 +149,34 @@ public class NetworkProcessorTestbedAlignment implements Runnable
                }
             }
          }
+      }
+   }
+
+   private void savePointCloudScans( boolean didFail ) {
+
+      String name = didFail ? "failedTestbedCloud" : "savedTestbedCloud";
+
+      try {
+         PrintStream out = new PrintStream(new FileOutputStream(String.format("headLocation%02d.csv",totalSaved)));
+         out.println("# Location of the robot's head in global");
+         out.printf("%15f %15f %15f",testbedLocation.x,testbedLocation.y,testbedLocation.z);
+         out.close();
+
+         out = new PrintStream(new FileOutputStream(String.format(name+"%02d_scans.csv",totalSaved++)));
+         out.println("# LIDAR scans.  (num) (x y z) .... ");
+         for (int i = 0; i < scans.size(); i++) {
+            FastQueue<Point3D_F64> scan = scans.get(i);
+            out.print(scan.size());
+            for (int j = 0; j < scan.size(); j++) {
+               Point3D_F64 p = scan.get(j);
+               out.printf(" %15f %15f %15f", p.x, p.y, p.z);
+            }
+            out.println();
+            out.flush();
+         }
+         out.close();
+      } catch (FileNotFoundException e) {
+         throw new RuntimeException(e);
       }
    }
 
@@ -217,6 +220,7 @@ public class NetworkProcessorTestbedAlignment implements Runnable
                }
                else
                {
+                  savePointCloudScans(true);
                   System.out.println("Failed to find testbed");
                   packet.setResult(TestbedServerPacket.FAILED);
                }

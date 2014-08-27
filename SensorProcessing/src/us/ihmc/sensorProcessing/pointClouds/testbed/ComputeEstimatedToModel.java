@@ -64,14 +64,14 @@ public class ComputeEstimatedToModel {
          Arrays.sort(errors);
 
          double error50 = errors[ N/2 ];
-         System.out.println("Error  = "+error50);
+         System.out.println(i+" Error  = "+error50);
          if( error50 < bestError ) {
             bestError = error50;
             best = estimatedToModel;
          }
       }
 
-      System.out.println("Best.  translation error 50% = "+ bestError);
+      System.out.println("Best.  Translation error 50% = "+ bestError);
 
       try {
          new XStream().toXML(best, new FileOutputStream("estimatedToModel.xml"));
