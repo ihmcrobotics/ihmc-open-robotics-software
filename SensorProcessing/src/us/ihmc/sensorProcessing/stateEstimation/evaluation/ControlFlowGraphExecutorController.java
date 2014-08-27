@@ -3,7 +3,7 @@ package us.ihmc.sensorProcessing.stateEstimation.evaluation;
 import java.util.ArrayList;
 
 import us.ihmc.controlFlow.ControlFlowGraph;
-import us.ihmc.yoUtilities.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 

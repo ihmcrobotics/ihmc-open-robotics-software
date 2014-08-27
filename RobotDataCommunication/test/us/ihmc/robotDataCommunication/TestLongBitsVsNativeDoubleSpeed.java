@@ -6,7 +6,7 @@ import java.nio.LongBuffer;
 import java.util.ArrayList;
 import java.util.Random;
 
-import us.ihmc.yoUtilities.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 

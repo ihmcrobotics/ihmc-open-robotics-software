@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.sensors;
 
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
-import us.ihmc.yoUtilities.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.robotController.SensorProcessor;
 

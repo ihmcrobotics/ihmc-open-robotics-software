@@ -7,7 +7,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.IMUKalmanFilter.QuaternionBasedFullIMUKalmanFilter;
 import us.ihmc.IMUKalmanFilter.QuaternionTools;
-import us.ihmc.yoUtilities.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 import com.mathworks.jama.Matrix;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;

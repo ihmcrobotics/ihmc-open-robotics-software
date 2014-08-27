@@ -11,7 +11,7 @@ import us.ihmc.utilities.frictionModels.FrictionModel;
 import us.ihmc.utilities.frictionModels.FrictionState;
 import us.ihmc.utilities.frictionModels.JointFrictionModel;
 import us.ihmc.utilities.frictionModels.NoCompensationFrictionModel;
-import us.ihmc.yoUtilities.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class JointFrictionModelsHolderTest
 {

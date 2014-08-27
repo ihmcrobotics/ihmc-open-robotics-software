@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.arm;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
-import us.ihmc.yoUtilities.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class ArmsSidewaysArmControlModule extends PDArmControlModule
 {

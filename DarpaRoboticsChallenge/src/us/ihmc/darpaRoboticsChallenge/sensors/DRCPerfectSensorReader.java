@@ -9,7 +9,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.ControllerDispatcher;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.utilities.ForceSensorDefinition;
 import us.ihmc.utilities.math.TimeTools;
-import us.ihmc.yoUtilities.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.robotController.RawSensorReader;
