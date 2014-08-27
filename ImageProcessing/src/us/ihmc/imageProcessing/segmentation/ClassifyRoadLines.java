@@ -12,7 +12,7 @@ import georegression.struct.line.LinePolar2D_F64;
 import georegression.struct.line.LineSegment2D_F64;
 import georegression.struct.line.LineSegment2D_I32;
 import georegression.struct.point.Point2D_I32;
-import org.ddogleg.sorting.QuickSelectArray;
+import org.ddogleg.sorting.QuickSelect;
 import org.ddogleg.struct.FastQueue;
 
 import java.util.ArrayList;
@@ -211,7 +211,7 @@ public class ClassifyRoadLines {
             score[i] = -(Math.abs(l.a.y - l.b.y));// - (labeled.height - maxY));
          }
 
-         QuickSelectArray.selectIndex(score,2,score.length,indexes);
+         QuickSelect.selectIndex(score,2,score.length,indexes);
 
          a = candidates.get( indexes[0] );
          b = candidates.get( indexes[1] );
