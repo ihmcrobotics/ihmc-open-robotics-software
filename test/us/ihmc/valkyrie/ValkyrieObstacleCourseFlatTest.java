@@ -5,8 +5,8 @@ import javax.vecmath.Vector3d;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseFlatTest;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 
 public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest

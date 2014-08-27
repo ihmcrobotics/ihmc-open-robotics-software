@@ -20,10 +20,10 @@ import us.ihmc.valkyrie.kinematics.urdf.Transmission;
 import us.ihmc.valkyrie.kinematics.urdf.URDFRobotRoot;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
-import com.yobotics.simulationconstructionset.EnumYoVariable;
-import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
 import com.yobotics.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
