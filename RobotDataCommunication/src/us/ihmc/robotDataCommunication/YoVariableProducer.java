@@ -13,7 +13,7 @@ import us.ihmc.concurrent.ConcurrentRingBuffer;
 
 public class YoVariableProducer extends Thread
 {
-   private static final int NUMBER_OF_WRITE_BUFFERS = 12;
+   private static final int NUMBER_OF_WRITE_BUFFERS = 24;
 
    private final zmq.Ctx ctx = zmq.ZMQ.zmq_init(1);
 
