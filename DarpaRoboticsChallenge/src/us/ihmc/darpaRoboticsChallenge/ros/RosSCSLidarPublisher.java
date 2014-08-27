@@ -6,8 +6,8 @@ import javax.vecmath.AxisAngle4d;
 import org.ros.message.Time;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.communication.packets.sensing.SpindleAnglePacket;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotLidarParameters;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.SpindleAnglePacket;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.SpindleAngleReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.lidar.polarLidar.LidarScan;

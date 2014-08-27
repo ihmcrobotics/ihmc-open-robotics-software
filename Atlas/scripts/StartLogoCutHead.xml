@@ -120,7 +120,7 @@
     <pause>true</pause>
   </us.ihmc.communication.packets.walking.PauseCommand>
   <long>52415181825</long>
-  <us.ihmc.communication.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.walking.HeadOrientationPacket>
     <quaternion>
       <x>0.0</x>
       <y>0.0</y>
@@ -129,9 +129,9 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
-  </us.ihmc.communication.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.walking.HeadOrientationPacket>
   <long>55039515654</long>
-  <us.ihmc.communication.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.walking.HeadOrientationPacket>
     <quaternion>
       <x>0.07556943145172232</x>
       <y>0.37991318713474076</y>
@@ -140,7 +140,7 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.7955242000000002</desiredNeckPitchAngle>
-  </us.ihmc.communication.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.walking.HeadOrientationPacket>
   <long>62045370763</long>
   <us.ihmc.communication.packets.sensing.VideoControlPacket>
     <sendVideo>true</sendVideo>
@@ -186,7 +186,7 @@
     </jointAngles>
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>92912534754</long>
-  <us.ihmc.communication.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.walking.HeadOrientationPacket>
     <quaternion>
       <x>0.10660733970482027</x>
       <y>0.37239715875644674</y>
@@ -195,7 +195,7 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.7955242000000002</desiredNeckPitchAngle>
-  </us.ihmc.communication.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.walking.HeadOrientationPacket>
   <long>178536281201</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>LEFT</robotSide>

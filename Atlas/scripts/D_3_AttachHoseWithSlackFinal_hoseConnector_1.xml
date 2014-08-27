@@ -144,7 +144,7 @@
     </jointAngles>
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>134322030155</long>
-  <us.ihmc.communication.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.walking.HeadOrientationPacket>
     <quaternion>
       <x>0.0</x>
       <y>0.34673239055808364</y>
@@ -153,9 +153,9 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.70817025</desiredNeckPitchAngle>
-  </us.ihmc.communication.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.walking.HeadOrientationPacket>
   <long>134323323051</long>
-  <us.ihmc.communication.packets.HeadOrientationPacket>
+  <us.ihmc.communication.packets.walking.HeadOrientationPacket>
     <quaternion>
       <x>0.0</x>
       <y>0.34673239055808364</y>
@@ -164,7 +164,7 @@
     </quaternion>
     <desiredJointForExtendedNeckPitchRangeAngle>0.0</desiredJointForExtendedNeckPitchRangeAngle>
     <desiredNeckPitchAngle>0.70817025</desiredNeckPitchAngle>
-  </us.ihmc.communication.packets.HeadOrientationPacket>
+  </us.ihmc.communication.packets.walking.HeadOrientationPacket>
   <long>150173122586</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>LEFT</robotSide>
