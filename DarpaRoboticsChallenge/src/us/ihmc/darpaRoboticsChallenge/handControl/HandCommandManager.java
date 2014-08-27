@@ -2,7 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.handControl;
 
 import java.io.IOException;
 
-import us.ihmc.darpaRoboticsChallenge.configuration.DRCNetClassList;
+import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.utilities.net.KryoObjectServer;
 import us.ihmc.utilities.processManagement.JavaProcessSpawner;
 
@@ -11,7 +11,7 @@ public abstract class HandCommandManager
 	private static final String TCP_PORT = "4270";
 	   
 	protected JavaProcessSpawner spawner = new JavaProcessSpawner(true);
-	protected KryoObjectServer server = new KryoObjectServer(Integer.parseInt(TCP_PORT), new DRCNetClassList());
+	protected KryoObjectServer server = new KryoObjectServer(Integer.parseInt(TCP_PORT), new IHMCCommunicationKryoNetClassList());
 	
 	public HandCommandManager(Class<? extends Object> clazz)
 	{
