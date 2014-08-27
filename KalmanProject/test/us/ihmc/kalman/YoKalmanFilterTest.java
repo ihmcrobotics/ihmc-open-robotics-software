@@ -11,7 +11,7 @@ import org.ejml.ops.RandomMatrices;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.yoUtilities.YoVariableRegistryChangedListener;
+import us.ihmc.yoUtilities.dataStructure.listener.YoVariableRegistryChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
