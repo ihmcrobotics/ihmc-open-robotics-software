@@ -8,17 +8,19 @@ import javax.media.j3d.Transform3D;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.vecmath.Matrix3d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.SimplePathParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.TurningThenStraightFootstepGenerator;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScript;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.ManualDesiredVelocityControlModule;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.SimpleDesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.referenceFrames.VisualizeFramesController;
+import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -298,7 +300,10 @@ public class DesiredFootstepVisualizer
 
       for (Footstep footstep : footsteps)
       {
-         FootstepData footStepData = new FootstepData(FootstepUtils.getSideFromFootstep(footstep, bipedFeet), footstep);
+    	  Point3d location = new Point3d();
+    	  Quat4d orientation = new Quat4d();
+    	  footstep.getPose(location, orientation);
+         FootstepData footStepData = new FootstepData(FootstepUtils.getSideFromFootstep(footstep, bipedFeet), location, orientation);
          footstepConsumer.consume(dataIdentifier, footStepData);
       }
 

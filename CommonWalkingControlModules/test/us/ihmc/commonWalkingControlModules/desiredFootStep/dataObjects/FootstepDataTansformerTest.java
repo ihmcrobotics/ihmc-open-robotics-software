@@ -15,6 +15,7 @@ import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
+import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;

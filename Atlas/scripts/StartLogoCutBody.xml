@@ -1160,5 +1160,5 @@
     </jointAngles>
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>1430297888140</long>
-  <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.EndOfScriptCommand/>
+  <us.ihmc.communication.packets.walking.EndOfScriptCommand/>
 </object-stream>

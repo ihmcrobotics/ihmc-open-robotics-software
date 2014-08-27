@@ -11,8 +11,6 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandPoseProvider;
@@ -21,6 +19,8 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.HandstepProvider;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.walking.ComHeightPacket;
 import us.ihmc.communication.packets.walking.FootPosePacket;
+import us.ihmc.communication.packets.walking.FootstepData;
+import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.communication.packets.walking.PauseCommand;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;

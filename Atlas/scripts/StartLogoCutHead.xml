@@ -80,9 +80,9 @@
     </jointAngles>
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>18003279213</long>
-  <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList>
+  <us.ihmc.communication.packets.walking.FootstepDataList>
     <footstepDataList>
-      <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
+      <us.ihmc.communication.packets.walking.FootstepData>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.47265632062643403</x>
@@ -95,8 +95,8 @@
           <z>-0.029873832711975738</z>
           <w>0.9995536746224305</w>
         </orientation>
-      </us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
-      <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
+      </us.ihmc.communication.packets.walking.FootstepData>
+      <us.ihmc.communication.packets.walking.FootstepData>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.45651279267440925</x>
@@ -109,12 +109,12 @@
           <z>-0.029873763879099687</z>
           <w>0.9995535873370864</w>
         </orientation>
-      </us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData>
+      </us.ihmc.communication.packets.walking.FootstepData>
     </footstepDataList>
     <trajectoryWaypointGenerationMethod>DEFAULT</trajectoryWaypointGenerationMethod>
     <swingTime>0.6</swingTime>
     <transferTime>0.25</transferTime>
-  </us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList>
+  </us.ihmc.communication.packets.walking.FootstepDataList>
   <long>23806988342</long>
   <us.ihmc.communication.packets.walking.PauseCommand>
     <pause>true</pause>
@@ -873,5 +873,5 @@
     </jointAngles>
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>421459480184</long>
-  <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.EndOfScriptCommand/>
+  <us.ihmc.communication.packets.walking.EndOfScriptCommand/>
 </object-stream>

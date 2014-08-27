@@ -10,9 +10,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.bambooTools.BambooTools;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataListCorruptor;
 import us.ihmc.communication.packets.walking.ComHeightPacket;
+import us.ihmc.communication.packets.walking.FootstepDataList;
+import us.ihmc.communication.packets.walking.FootstepDataListCorruptor;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;

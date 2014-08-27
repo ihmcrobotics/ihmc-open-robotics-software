@@ -17,8 +17,8 @@ import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBodyTools;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
+import us.ihmc.communication.packets.walking.FootstepData;
+import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.communication.packets.walking.FootstepStatus;
 import us.ihmc.communication.packets.walking.PauseCommand;
 import us.ihmc.robotSide.RobotSide;
@@ -29,6 +29,7 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.trajectories.TrajectoryWaypointGenerationMethod;
 import us.ihmc.utilities.math.trajectories.providers.TrajectoryParameters;
 import us.ihmc.utilities.net.KryoObjectClient;
 import us.ihmc.utilities.net.KryoObjectServer;
@@ -39,8 +40,6 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.test.JUnitTools;
-
-import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryWaypointGenerationMethod;
 
 /**
  * User: Matt
@@ -82,8 +81,11 @@ public class FootstepDataTest
       ArrayList<Footstep> sentFootsteps = createRandomFootsteps(50);
       for (Footstep footstep : sentFootsteps)
       {
-
-         FootstepData footstepData = new FootstepData(robotSide, footstep);
+    	  Point3d location = new Point3d();
+    	  Quat4d orientation = new Quat4d();
+    	  footstep.getPose(location, orientation);
+    	  
+         FootstepData footstepData = new FootstepData(robotSide, location, orientation);
          queueBasedStreamingDataProducer.queueDataToSend(footstepData);
       }
 
@@ -383,7 +385,10 @@ public class FootstepDataTest
 
       for (Footstep footstep : footsteps)
       {
-         FootstepData footstepData = new FootstepData(robotSide, footstep);
+    	  Point3d location = new Point3d();
+    	  Quat4d orientation = new Quat4d();
+    	  footstep.getPose(location, orientation);
+         FootstepData footstepData = new FootstepData(robotSide, location, orientation);
          footstepsData.add(footstepData);
       }
 

@@ -4,18 +4,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.SquareData;
-import us.ihmc.commonWalkingControlModules.trajectories.SimpleTwoWaypointTrajectoryParameters;
+import us.ihmc.communication.packets.walking.FootstepData;
+import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.trajectories.SimpleTwoWaypointTrajectoryParameters;
+import us.ihmc.utilities.math.trajectories.TrajectoryWaypointGenerationMethod;
+import us.ihmc.utilities.math.trajectories.TwoWaypointTrajectoryUtils;
 import us.ihmc.utilities.math.trajectories.providers.TrajectoryParameters;
 import us.ihmc.utilities.net.ObjectConsumer;
-
-import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryWaypointGenerationMethod;
 
 /**
  * User: Matt
@@ -45,8 +44,7 @@ public class FootstepPathConsumer implements ObjectConsumer<FootstepDataList>
       {
          if(footstepList.getTrajectoryWaypointGenerationMethod() == TrajectoryWaypointGenerationMethod.BY_BOX)
          {
-            SquareData trajectoryBoxData = footstepList.getTrajectoryBoxData();
-            trajectoryParameters = new SimpleTwoWaypointTrajectoryParameters(trajectoryBoxData.location, trajectoryBoxData.rotation, trajectoryBoxData.lengthX, trajectoryBoxData.widthY);
+            trajectoryParameters = new SimpleTwoWaypointTrajectoryParameters(TwoWaypointTrajectoryUtils.getFlatBoxFromSquare(footstepList.getTrajectoryBoxData()));
          }
          else
          {
