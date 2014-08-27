@@ -3,7 +3,6 @@ package us.ihmc.valkyrie;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
 

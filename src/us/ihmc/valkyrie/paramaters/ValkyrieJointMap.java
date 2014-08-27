@@ -1,6 +1,26 @@
 package us.ihmc.valkyrie.paramaters;
 
-import static us.ihmc.valkyrie.paramaters.ValkyrieOrderedJointMap.*;
+import static us.ihmc.valkyrie.paramaters.ValkyrieOrderedJointMap.LeftAnkle;
+import static us.ihmc.valkyrie.paramaters.ValkyrieOrderedJointMap.LeftAnkleExtensor;
+import static us.ihmc.valkyrie.paramaters.ValkyrieOrderedJointMap.LeftElbowExtensor;
+import static us.ihmc.valkyrie.paramaters.ValkyrieOrderedJointMap.LeftForearmSupinator;
+import static us.ihmc.valkyrie.paramaters.ValkyrieOrderedJointMap.LeftHipAdductor;
+import static us.ihmc.valkyrie.paramaters.ValkyrieOrderedJointMap.LeftHipExtensor;
+import static us.ihmc.valkyrie.paramaters.ValkyrieOrderedJointMap.LeftHipRotator;
+import static us.ihmc.valkyrie.paramaters.ValkyrieOrderedJointMap.LeftKneeExtensor;
+import static us.ihmc.valkyrie.paramaters.ValkyrieOrderedJointMap.LeftShoulderAdductor;
+import static us.ihmc.valkyrie.paramaters.ValkyrieOrderedJointMap.LeftShoulderExtensor;
+import static us.ihmc.valkyrie.paramaters.ValkyrieOrderedJointMap.LeftShoulderSupinator;
+import static us.ihmc.valkyrie.paramaters.ValkyrieOrderedJointMap.LeftWrist;
+import static us.ihmc.valkyrie.paramaters.ValkyrieOrderedJointMap.LeftWristExtensor;
+import static us.ihmc.valkyrie.paramaters.ValkyrieOrderedJointMap.LowerNeckExtensor;
+import static us.ihmc.valkyrie.paramaters.ValkyrieOrderedJointMap.NeckRotator;
+import static us.ihmc.valkyrie.paramaters.ValkyrieOrderedJointMap.UpperNeckExtensor;
+import static us.ihmc.valkyrie.paramaters.ValkyrieOrderedJointMap.WaistExtensor;
+import static us.ihmc.valkyrie.paramaters.ValkyrieOrderedJointMap.WaistLateralExtensor;
+import static us.ihmc.valkyrie.paramaters.ValkyrieOrderedJointMap.WaistRotator;
+import static us.ihmc.valkyrie.paramaters.ValkyrieOrderedJointMap.forcedSideDependentJointNames;
+import static us.ihmc.valkyrie.paramaters.ValkyrieOrderedJointMap.jointNames;
 
 import java.util.EnumMap;
 import java.util.HashSet;
