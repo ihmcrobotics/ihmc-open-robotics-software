@@ -5,12 +5,7 @@ import georegression.struct.point.Point3D_F64;
 import georegression.struct.se.Se3_F64;
 import georegression.struct.so.Quaternion_F64;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -179,5 +174,34 @@ public class GeometryOps {
       }
 
       return output;
+   }
+
+   public static Point3D_F64 loadLocation( String fileName ) {
+      try {
+         BufferedReader input = new BufferedReader(new FileReader(fileName));
+
+         input.readLine();
+         String a[] = input.readLine().split("\\s");
+
+         String words[] = new String[3];
+         int where = 0;
+         for( String b : a ) {
+            if( b.length() != 0 ) {
+               words[where++] = b;
+            }
+         }
+
+         Point3D_F64 p = new Point3D_F64();
+         p.x = Double.parseDouble(words[0]);
+         p.y = Double.parseDouble(words[1]);
+         p.z = Double.parseDouble(words[2]);
+
+         return p;
+
+      } catch (FileNotFoundException e) {
+         return new Point3D_F64();
+      } catch (IOException e) {
+         return new Point3D_F64();
+      }
    }
 }

@@ -1,4 +1,4 @@
-package us.ihmc.sensorProcessing.testbed;
+package us.ihmc.sensorProcessing.pointClouds.testbed;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -24,6 +24,28 @@ public class TestbedAutomaticAlignmentTest {
    String directory = "/home/pja/voo/b/";
    Se3_F64 estimatedToModel = (Se3_F64) new XStream().fromXML(this.getClass().
            getResourceAsStream("/testbed/estimatedToModel.xml"));
+
+   @Test
+   public void expectedSolution() {
+
+      TestbedAutomaticAlignment alg = new TestbedAutomaticAlignment(3, estimatedToModel);
+
+      List<List<Point3D_F64>> scans = loadScanLines(directory + "savedTestbedCloud00_scans.csv");
+      for (int j = 0; j < scans.size(); j++) {
+         alg.addScan(scans.get(j));
+      }
+      assertTrue(alg.process());
+      Se3_F64 found = alg.getEstimatedToWorld();
+
+      Se3_F64 expected = new Se3_F64();
+      expected.getT().set(0.9125441345977366,-1.4171253460622035,-0.22046243685370556);
+      expected.getR().set(3,3,true,-0.090, -0.996,  0.020,
+      0.996 , -0.091 , -0.025  ,
+      0.027 ,  0.018 ,  0.999);
+
+      assertTrue(found.getT().distance(expected.getT()) < 0.01 );
+      assertTrue(MatrixFeatures.isIdentical(expected.getR(),found.getR(),0.01));
+   }
 
    /**
     * Should produce the approximately the solution when run multiple times

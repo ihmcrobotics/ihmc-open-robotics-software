@@ -122,12 +122,12 @@ public class TestbedAutomaticAlignment {
          Vector3D_F64 normal = new Vector3D_F64(0,0,1);
          GeometryMath_F64.mult(planeToWorld.getR(), normal, normal);
          normals.add(normal);
-//         System.out.println(i+"  plane "+plane);
       }
 
       Se3_F64 best = new Se3_F64();
       int bestCount = 0;
 
+      int total = 0;
       Se3_F64 found = new Se3_F64();
       for (int i = 0; i < normals.size(); i++) {
          PlaneGeneral3D_F64 planeA = (PlaneGeneral3D_F64)shapes.get(i).parameters;
@@ -140,14 +140,15 @@ public class TestbedAutomaticAlignment {
 
             double angle = a.acute(b);
             angle = Math.min(Math.PI-angle,angle);
+            total++;
+
+            System.out.println("Angle "+angle);
 
             // see if they are perpendicular
             if( UtilAngle.dist(angle, Math.PI / 2) < 0.1 ) {
                // see how much they overlap
-//               int count = computeTestbed(planeA,planeB,pointsA,pointsB,a,b,cloud,found);
                int count = computeTestbed(planeA,planeB,pointsA,pointsB,a,b,cloud,found);
                if( count > bestCount ) {
-                  System.out.println("  candidate valve count = "+count);
                   bestCount = count;
                   best.set(found);
                }
@@ -185,6 +186,9 @@ public class TestbedAutomaticAlignment {
       LineParametric3D_F64 intersection = new LineParametric3D_F64();
       Intersection3D_F64.intersect(planeA, planeB, intersection);
 
+      System.out.println("planeA = "+planeA);
+      System.out.println("planeB = "+planeB);
+      System.out.println("intersection = "+intersection);
       double whereA[] = findLineLocation(intersection,pointsA);
       double whereB[] = findLineLocation(intersection,pointsB);
 
@@ -192,9 +196,15 @@ public class TestbedAutomaticAlignment {
          return 0;
 
       double min = Math.min(whereA[0],whereB[0]);
-      double max = Math.max(whereA[1], whereB[1]);
+      double max = Math.max(whereA[1],whereB[1]);
 
       double overlap = (Math.min(whereA[1], whereB[1]) - Math.max(whereA[0], whereB[0]))/(max-min);
+
+      System.out.println(whereA[0]+"  "+whereA[1]);
+      System.out.println(whereB[0]+"  "+whereB[1]);
+      if( overlap < 0 ) {
+      overlap = 1 + overlap;
+      }
 
       System.out.println("Overlap = "+overlap+"  "+pointsA.size()+" "+pointsB.size());
       if( overlap < 0.7 )
@@ -237,6 +247,8 @@ public class TestbedAutomaticAlignment {
       int count0 = findValve(testbedToWorld0, cloud);
       int count1 = findValve(testbedToWorld1, cloud);
 
+      System.out.println(count0+"   "+count1);
+
       if( count0 > count1 ) {
          testbedToWorld.set(testbedToWorld0);
          return count0;
@@ -246,7 +258,7 @@ public class TestbedAutomaticAlignment {
       }
    }
 
-   private static double[] findLineLocation( LineParametric3D_F64 line , List<Point3D_F64> points ) {
+   public static double[] findLineLocation( LineParametric3D_F64 line , List<Point3D_F64> points ) {
       double min = Double.MAX_VALUE;
       double max = -Double.MAX_VALUE;
 
