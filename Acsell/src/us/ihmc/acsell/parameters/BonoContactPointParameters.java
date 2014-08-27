@@ -1,7 +1,7 @@
 package us.ihmc.acsell.parameters;
 
-import static us.ihmc.acsell.parameters.BonoPhysicalProperties.*;
 import static us.ihmc.acsell.parameters.BonoPhysicalProperties.footLength;
+import static us.ihmc.acsell.parameters.BonoPhysicalProperties.footWidth;
 
 import java.util.ArrayList;
 import java.util.List;
