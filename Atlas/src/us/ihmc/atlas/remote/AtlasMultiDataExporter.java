@@ -37,7 +37,7 @@ import us.ihmc.robotDataCommunication.logger.YoVariableLogVisualizerGUI;
 import us.ihmc.robotDataCommunication.logger.YoVariableLoggerListener;
 import us.ihmc.utilities.SwingUtils;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.yoUtilities.YoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 import com.yobotics.simulationconstructionset.DataBuffer;
 import com.yobotics.simulationconstructionset.DataBufferEntry;
