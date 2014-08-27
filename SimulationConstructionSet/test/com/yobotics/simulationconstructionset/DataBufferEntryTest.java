@@ -10,6 +10,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+
 public class DataBufferEntryTest
 {
 

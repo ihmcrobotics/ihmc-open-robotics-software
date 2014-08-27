@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 
 import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
 
 public class SwingTimeCalculationProvider implements DoubleProvider
 {

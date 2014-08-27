@@ -3,8 +3,8 @@ package us.ihmc.sensorProcessing.signalCorruption;
 import org.apache.commons.lang.mutable.MutableDouble;
 
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 
-import com.yobotics.simulationconstructionset.IntegerYoVariable;
 
 public class LatencyDoubleCorruptor implements SignalCorruptor<MutableDouble>
 {

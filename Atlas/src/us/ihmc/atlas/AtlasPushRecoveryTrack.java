@@ -14,9 +14,9 @@ import us.ihmc.darpaRoboticsChallenge.validation.YoVariableThreadAccessValidator
 import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
 import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
+import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 
 import com.martiansoftware.jsap.JSAPException;
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.util.ground.FlatGroundProfile;
 

@@ -7,8 +7,8 @@ import java.util.HashMap;
 
 import us.ihmc.utilities.gui.CustomProgressMonitor;
 import us.ihmc.yoUtilities.dataStructure.listener.RewoundListener;
+import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 
-import com.yobotics.simulationconstructionset.LongYoVariable;
 import com.yobotics.simulationconstructionset.PlaybackListener;
 
 public class MultiVideoDataPlayer implements PlaybackListener, RewoundListener

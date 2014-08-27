@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 import com.yobotics.simulationconstructionset.gui.CombinedVarPanel;
 import com.yobotics.simulationconstructionset.gui.StandardSimulationGUI;

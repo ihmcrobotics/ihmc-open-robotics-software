@@ -1,6 +1,6 @@
 package us.ihmc.utilities.parameterOptimization;
 
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 
 public class BooleanYoVariableParameterToOptimize extends BooleanParameterToOptimize
 {

@@ -9,8 +9,8 @@ import org.apache.commons.math3.util.FastMath;
 
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
 
 public class GaussianOrientationCorruptor implements SignalCorruptor<Matrix3d>
 {
