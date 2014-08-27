@@ -10,6 +10,7 @@ import us.ihmc.communication.packets.sensing.DepthDataClearCommand.DepthDataTree
 import us.ihmc.communication.packets.sensing.DepthDataFilterParameters;
 import us.ihmc.communication.packets.sensing.DepthDataStateCommand.LidarState;
 import us.ihmc.communication.packets.sensing.FilteredPointCloudPacket;
+import us.ihmc.communication.packets.sensing.SparseLidarScanPacket;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.GroundOnlyQuadTree;
@@ -91,7 +92,7 @@ public class DepthDataFilter
             DRCConfigParameters.OCTREE_RESOLUTION_WHEN_NOT_USING_RESOLUTION_SPHERE);
    }
 
-   public SparseLidarScan filterPolarLidarScan(LidarScan lidarScan)
+   public SparseLidarScanPacket filterPolarLidarScan(LidarScan lidarScan)
    {
       ArrayList<Integer> indexes = new ArrayList<Integer>();
       for (int i = 0; i < lidarScan.size(); i++)
@@ -102,7 +103,7 @@ public class DepthDataFilter
          }
       }
 
-      return new SparseLidarScan(lidarScan, indexes);
+      return new SparseLidarScanPacket(lidarScan, indexes);
    }
 
    public boolean addPoint(AbstractLidarScan lidarScan, int i)
