@@ -10,7 +10,7 @@ import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingWithIMUDriftTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.sensorProcessing.signalCorruption.OrientationConstantAcceleratingYawDriftCorruptor;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
-import us.ihmc.yoUtilities.YoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
