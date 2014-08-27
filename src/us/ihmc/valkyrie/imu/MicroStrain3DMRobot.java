@@ -12,8 +12,8 @@ import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.valkyrie.paramaters.ValkyrieSensorInformation;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.FloatingJoint;
 import com.yobotics.simulationconstructionset.Link;
 import com.yobotics.simulationconstructionset.Robot;
