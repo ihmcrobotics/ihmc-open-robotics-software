@@ -14,11 +14,11 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphic;
 
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
@@ -59,7 +59,7 @@ public class DRCPushRobotController implements RobotController
       forceVisualizer = new DynamicGraphicVector("pushForce", forcePoint, 0.005, YoAppearance.DarkBlue());
    }
    
-   public DynamicGraphicObject getForceVisualizer()
+   public YoGraphic getForceVisualizer()
    {
       return forceVisualizer;
    }

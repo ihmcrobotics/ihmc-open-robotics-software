@@ -17,8 +17,8 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphic;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
@@ -64,7 +64,7 @@ public class EquivalentConstantCoPDesiredCoPControlModule implements DesiredCoPC
 
       if (dynamicGraphicObjectsListRegistry != null)
       {
-         DynamicGraphicObject desiredCapturePointGraphic = desiredFinalCapturePoint.createDynamicGraphicPosition("Desired Final Capture Point", 0.01,
+         YoGraphic desiredCapturePointGraphic = desiredFinalCapturePoint.createDynamicGraphicPosition("Desired Final Capture Point", 0.01,
                                                               YoAppearance.Yellow(), GraphicType.ROTATED_CROSS);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("EquivalentConstantCoPVelocityViaCoPControlModule", desiredCapturePointGraphic);
          dynamicGraphicObjectsListRegistry.registerArtifact("EquivalentConstantCoPVelocityViaCoPControlModule", desiredCapturePointGraphic.createArtifact());

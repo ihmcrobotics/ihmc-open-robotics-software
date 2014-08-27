@@ -37,12 +37,12 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphic;
 
 import com.yobotics.simulationconstructionset.FloatingJoint;
 import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicLineSegment;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
@@ -119,12 +119,12 @@ public class DRCRobotMidiSliderBoardPositionManipulation
 
    //   private final DoubleYoVariable BaseControlPoint = new DoubleYoVariable("BaseControlPoint", registry);
    private final YoFramePoint[] baseControlPoints = new YoFramePoint[4];
-   private final ArrayList<DynamicGraphicObject> baseControlPointsList = new ArrayList<DynamicGraphicObject>();
-   private final ArrayList<DynamicGraphicObject> baseControlLinesList = new ArrayList<DynamicGraphicObject>();
+   private final ArrayList<YoGraphic> baseControlPointsList = new ArrayList<YoGraphic>();
+   private final ArrayList<YoGraphic> baseControlLinesList = new ArrayList<YoGraphic>();
 
    private final YoFramePoint[] baseControlTargetPoints = new YoFramePoint[4];
-   private final ArrayList<DynamicGraphicObject> baseControlTargetPointsList = new ArrayList<DynamicGraphicObject>();
-   private final ArrayList<DynamicGraphicObject> baseControlTargetLinesList = new ArrayList<DynamicGraphicObject>();
+   private final ArrayList<YoGraphic> baseControlTargetPointsList = new ArrayList<YoGraphic>();
+   private final ArrayList<YoGraphic> baseControlTargetLinesList = new ArrayList<YoGraphic>();
 
    private final SideDependentList<SliderBodyPart> legBodyParts = new SideDependentList<DRCRobotMidiSliderBoardPositionManipulation.SliderBodyPart>(SliderBodyPart.LEFT_LEG, SliderBodyPart.RIGHT_LEG);
    private final SideDependentList<SliderBodyPart> armBodyParts = new SideDependentList<DRCRobotMidiSliderBoardPositionManipulation.SliderBodyPart>(SliderBodyPart.LEFT_ARM, SliderBodyPart.RIGHT_ARM);
@@ -746,22 +746,22 @@ public class DRCRobotMidiSliderBoardPositionManipulation
          switch (displayState)
          {
          case 0:
-            for (DynamicGraphicObject baseControlPoint : baseControlPointsList)
+            for (YoGraphic baseControlPoint : baseControlPointsList)
             {
                baseControlPoint.hideGraphicObject();
             }
-            for (DynamicGraphicObject baseControlLine : baseControlLinesList)
+            for (YoGraphic baseControlLine : baseControlLinesList)
             {
                baseControlLine.hideGraphicObject();
             }
             break;
 
          case 1:
-            for (DynamicGraphicObject baseControlPoint : baseControlPointsList)
+            for (YoGraphic baseControlPoint : baseControlPointsList)
             {
                baseControlPoint.showGraphicObject();
             }
-            for (DynamicGraphicObject baseControlLine : baseControlLinesList)
+            for (YoGraphic baseControlLine : baseControlLinesList)
             {
                baseControlLine.showGraphicObject();
             }
@@ -826,22 +826,22 @@ public class DRCRobotMidiSliderBoardPositionManipulation
          switch (displayState)
          {
          case 0:
-            for (DynamicGraphicObject baseControlTargetPoint : baseControlTargetPointsList)
+            for (YoGraphic baseControlTargetPoint : baseControlTargetPointsList)
             {
                baseControlTargetPoint.hideGraphicObject();
             }
-            for (DynamicGraphicObject baseControlTargetLine : baseControlTargetLinesList)
+            for (YoGraphic baseControlTargetLine : baseControlTargetLinesList)
             {
                baseControlTargetLine.hideGraphicObject();
             }
             break;
 
          case 1:
-            for (DynamicGraphicObject baseControlTargetPoint : baseControlTargetPointsList)
+            for (YoGraphic baseControlTargetPoint : baseControlTargetPointsList)
             {
                baseControlTargetPoint.showGraphicObject();
             }
-            for (DynamicGraphicObject baseControlTargetLine : baseControlTargetLinesList)
+            for (YoGraphic baseControlTargetLine : baseControlTargetLinesList)
             {
                baseControlTargetLine.showGraphicObject();
             }
@@ -1018,7 +1018,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       addSupportBaseGraphics(dynamicGraphicObjectsListRegistry,baseControlTargetPoints,baseControlTargetPointsList,baseControlTargetLinesList,"baseControlTarget",YoAppearance.Red());
    }
 
-   private void addSupportBaseGraphics(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,YoFramePoint[] basePoints, ArrayList<DynamicGraphicObject> basePointsList, ArrayList<DynamicGraphicObject> linesList, String namePrefix,AppearanceDefinition appearance)
+   private void addSupportBaseGraphics(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,YoFramePoint[] basePoints, ArrayList<YoGraphic> basePointsList, ArrayList<YoGraphic> linesList, String namePrefix,AppearanceDefinition appearance)
    {
       AppearanceDefinition[] colors = { YoAppearance.Red(), YoAppearance.Green(), YoAppearance.Blue(), YoAppearance.Yellow() };
       DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList(namePrefix + "Points");

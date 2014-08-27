@@ -18,8 +18,8 @@ import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphic;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
 
@@ -50,7 +50,7 @@ public class CylinderAndPlaneContactMatrixCalculatorAdapter
    private final List<EndEffector> cylindricalEndEffector;
    private final List<EndEffector> allEndEffectors;
 
-   private final List<DynamicGraphicObject> endEffectorResultGraphics = new ArrayList<DynamicGraphicObject>();
+   private final List<YoGraphic> endEffectorResultGraphics = new ArrayList<YoGraphic>();
 
    public CylinderAndPlaneContactMatrixCalculatorAdapter(ReferenceFrame centerOfMassFrame, int rhoSize, int phiSize, double wRhoCylinderContacts,
            double wPhiCylinderContacts, double wRhoPlaneContacts, double wRhoSmoother, double wRhoPenalizer,

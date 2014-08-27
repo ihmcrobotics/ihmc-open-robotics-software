@@ -47,6 +47,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariableList;
+import us.ihmc.yoUtilities.graphics.YoGraphic;
 
 import com.yobotics.simulationconstructionset.commands.ToggleKeyPointModeCommandListener;
 import com.yobotics.simulationconstructionset.examples.FallingBrickRobot;
@@ -65,7 +66,6 @@ import com.yobotics.simulationconstructionset.physics.ScsCollisionDetector;
 import com.yobotics.simulationconstructionset.physics.ScsPhysics;
 import com.yobotics.simulationconstructionset.physics.visualize.DefaultCollisionVisualize;
 import com.yobotics.simulationconstructionset.robotcommprotocol.RobotSocketConnection;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
@@ -166,7 +166,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private Graphics3DObject staticLinkGraphics = staticLink.getLinkGraphics();
    private Graphics3DNodeType graphics3DNodeType = Graphics3DNodeType.GROUND;
    private ExternalForcePoint simpleExternalForcePoint = new ExternalForcePoint("simpleExternalForcePoint", dummyRegistry);
-   private DynamicGraphicObject dynamicGraphicObject = new DynamicGraphicVector("simpleDynamicGraphicObject", simpleExternalForcePoint);
+   private YoGraphic dynamicGraphicObject = new DynamicGraphicVector("simpleDynamicGraphicObject", simpleExternalForcePoint);
    private BooleanYoVariable exitActionListenerHasBeenNotified = new BooleanYoVariable("exitActionListenerHasBeenNotified", dummyRegistry);
    private BooleanYoVariable simulationRewoundListenerHasBeenNotified = new BooleanYoVariable("simulationRewoundListenerHasBeenNotified", dummyRegistry);
    private BooleanYoVariable simulationDoneListenerHasBeenNotified = new BooleanYoVariable("simulationDoneListenerHasBeenNotified", dummyRegistry);

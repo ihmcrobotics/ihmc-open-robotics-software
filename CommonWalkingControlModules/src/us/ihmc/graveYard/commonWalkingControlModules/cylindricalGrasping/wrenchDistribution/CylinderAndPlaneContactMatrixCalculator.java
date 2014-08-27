@@ -15,8 +15,8 @@ import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphic;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
 
@@ -43,10 +43,10 @@ public class CylinderAndPlaneContactMatrixCalculator
    private static final int z = 8;
    private static final int LINEAR = 0;
    private static final int ANGULAR = 1;
-   private ArrayList<DynamicGraphicObject> dynamicGraphicVectorsRhoLinear;
-   private ArrayList<DynamicGraphicObject> dynamicGraphicVectorsRhoAngular;
-   private ArrayList<DynamicGraphicObject> dynamicGraphicVectorsPhiLinear;
-   private ArrayList<DynamicGraphicObject> dynamicGraphicVectorsPhiAngular;
+   private ArrayList<YoGraphic> dynamicGraphicVectorsRhoLinear;
+   private ArrayList<YoGraphic> dynamicGraphicVectorsRhoAngular;
+   private ArrayList<YoGraphic> dynamicGraphicVectorsPhiLinear;
+   private ArrayList<YoGraphic> dynamicGraphicVectorsPhiAngular;
    private final boolean visualize;
 
    private final DenseMatrix64F rhoMin;
@@ -97,10 +97,10 @@ public class CylinderAndPlaneContactMatrixCalculator
          graphicYoDoubles[0] = new DoubleYoVariable[rhoSize][9];
          graphicWrenches[1] = new DynamicGraphicVector[phiSize][2];
          graphicYoDoubles[1] = new DoubleYoVariable[phiSize][9];
-         dynamicGraphicVectorsRhoLinear = new ArrayList<DynamicGraphicObject>();
-         dynamicGraphicVectorsRhoAngular = new ArrayList<DynamicGraphicObject>();
-         dynamicGraphicVectorsPhiLinear = new ArrayList<DynamicGraphicObject>();
-         dynamicGraphicVectorsPhiAngular = new ArrayList<DynamicGraphicObject>();
+         dynamicGraphicVectorsRhoLinear = new ArrayList<YoGraphic>();
+         dynamicGraphicVectorsRhoAngular = new ArrayList<YoGraphic>();
+         dynamicGraphicVectorsPhiLinear = new ArrayList<YoGraphic>();
+         dynamicGraphicVectorsPhiAngular = new ArrayList<YoGraphic>();
 
          double scaleFactor = 0.25;
 

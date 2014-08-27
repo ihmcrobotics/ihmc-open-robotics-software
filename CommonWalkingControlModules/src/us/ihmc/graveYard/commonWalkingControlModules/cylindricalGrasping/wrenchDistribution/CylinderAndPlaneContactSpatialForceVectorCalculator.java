@@ -16,8 +16,8 @@ import us.ihmc.utilities.screwTheory.SpatialForceVector;
 import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphic;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
 
@@ -86,10 +86,10 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
          graphicYoDoubles[1] = new DoubleYoVariable[phiSize][9];
          double scaleFactor = 0.01;
 
-         ArrayList<DynamicGraphicObject> dynamicGraphicVectorsRhoLinear = new ArrayList<DynamicGraphicObject>();
-         ArrayList<DynamicGraphicObject> dynamicGraphicVectorsRhoAngular = new ArrayList<DynamicGraphicObject>();
-         ArrayList<DynamicGraphicObject> dynamicGraphicVectorsPhiLinear = new ArrayList<DynamicGraphicObject>();
-         ArrayList<DynamicGraphicObject> dynamicGraphicVectorsPhiAngular = new ArrayList<DynamicGraphicObject>();
+         ArrayList<YoGraphic> dynamicGraphicVectorsRhoLinear = new ArrayList<YoGraphic>();
+         ArrayList<YoGraphic> dynamicGraphicVectorsRhoAngular = new ArrayList<YoGraphic>();
+         ArrayList<YoGraphic> dynamicGraphicVectorsPhiLinear = new ArrayList<YoGraphic>();
+         ArrayList<YoGraphic> dynamicGraphicVectorsPhiAngular = new ArrayList<YoGraphic>();
 
          int q = 0;
          for (int i = 0; i < rhoSize; i++)
