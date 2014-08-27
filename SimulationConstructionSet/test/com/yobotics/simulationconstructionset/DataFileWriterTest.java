@@ -21,9 +21,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import us.ihmc.yoUtilities.YoVariableList;
 import us.ihmc.yoUtilities.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.YoVariableList;
 
 import com.yobotics.simulationconstructionset.DataBuffer.RepeatDataBufferEntryException;
 
