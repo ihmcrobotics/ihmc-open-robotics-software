@@ -24,9 +24,9 @@ import us.ihmc.utilities.math.geometry.FrameGeometry2dPlotter;
 import us.ihmc.utilities.math.geometry.FrameGeometryTestFrame;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.yoUtilities.VariableChangedListener;
 import us.ihmc.yoUtilities.YoVariable;
 import us.ihmc.yoUtilities.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;

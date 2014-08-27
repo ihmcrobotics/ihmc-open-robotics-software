@@ -15,9 +15,9 @@ import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceWrit
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
-import us.ihmc.yoUtilities.VariableChangedListener;
 import us.ihmc.yoUtilities.YoVariable;
 import us.ihmc.yoUtilities.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;

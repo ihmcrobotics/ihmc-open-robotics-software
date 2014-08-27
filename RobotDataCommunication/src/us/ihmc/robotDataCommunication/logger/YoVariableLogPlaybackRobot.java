@@ -12,9 +12,9 @@ import us.ihmc.SdfLoader.SDFJointNameMap;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.robotDataCommunication.jointState.JointState;
 import us.ihmc.robotDataCommunication.visualizer.JointUpdater;
-import us.ihmc.yoUtilities.VariableChangedListener;
 import us.ihmc.yoUtilities.YoVariable;
 import us.ihmc.yoUtilities.dataStructure.listener.RewoundListener;
+import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 
 import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.LongYoVariable;

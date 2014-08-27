@@ -4,9 +4,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.yoUtilities.VariableChangedListener;
 import us.ihmc.yoUtilities.YoVariable;
 import us.ihmc.yoUtilities.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 
 import com.google.common.util.concurrent.AtomicDouble;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
