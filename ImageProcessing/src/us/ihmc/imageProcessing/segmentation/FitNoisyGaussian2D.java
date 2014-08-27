@@ -1,7 +1,7 @@
 package us.ihmc.imageProcessing.segmentation;
 
 import georegression.struct.point.Point2D_F64;
-import org.ddogleg.sorting.QuickSelectArray;
+import org.ddogleg.sorting.QuickSelect;
 import org.ddogleg.struct.FastQueue;
 import org.ddogleg.struct.GrowQueue_F64;
 import org.ejml.data.DenseMatrix64F;
@@ -115,7 +115,7 @@ public class FitNoisyGaussian2D {
       System.arraycopy(chisqs.data,0,workArray.data,0,chisqs.size);
 
       // select a threshold which will contain the specified fraction of points
-      double threshold = QuickSelectArray.select(workArray.data,(int)(chisqs.size*fraction),chisqs.size);
+      double threshold = QuickSelect.select(workArray.data, (int) (chisqs.size * fraction), chisqs.size);
       // TODO is a more intelligent way to identify outliers to a Gaussian?
 
       System.out.println("Containment threshold = "+threshold);
