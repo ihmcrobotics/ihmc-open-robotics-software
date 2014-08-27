@@ -14,7 +14,8 @@ public class RawJointSensorDataHolder
    private double f_raw;
    private double psi_neg_raw;
    private double psi_pos_raw;
-   
+   private double motorCurrent;
+   private double commandedMotorCurrent;
 
    public RawJointSensorDataHolder(String name)
    {
@@ -42,10 +43,10 @@ public class RawJointSensorDataHolder
       setPsi_pos_raw(source.getPsi_pos_raw());
       setUsesOutputEncoderQ(source.isUseOutputEncoderQ());
       setUsesOutputEncoderQd(source.isUseOutputEncoderQd());
+      setMotorCurrent(source.getMotorCurrent());
+      setCommandedMotorCurrent(source.getCommandedMotorCurrent());
    }
 
-   
-   
    public boolean isUseOutputEncoderQ()
    {
       return useOutputEncoderQ;
@@ -62,13 +63,14 @@ public class RawJointSensorDataHolder
    {
       this.useOutputEncoderQ = useOutputEncoder;
    }
+
    
    public void setUsesOutputEncoderQd(boolean useOutputEncoder)
    {
       this.useOutputEncoderQd = useOutputEncoder;
    }
-   
-   
+
+
    public double getQ_raw()
    {
       return q_raw;
@@ -150,5 +152,29 @@ public class RawJointSensorDataHolder
    public void setQd_out_raw(double qd_out_raw)
    {
       this.qd_out_raw = qd_out_raw;
+   }
+
+
+   public double getMotorCurrent()
+   {
+      return motorCurrent;
+   }
+
+
+   public void setMotorCurrent(double motorCurrent)
+   {
+      this.motorCurrent = motorCurrent;
+   }
+
+
+   public double getCommandedMotorCurrent()
+   {
+      return commandedMotorCurrent;
+   }
+
+
+   public void setCommandedMotorCurrent(double commandedMotorCurrent)
+   {
+      this.commandedMotorCurrent = commandedMotorCurrent;
    }
 }
