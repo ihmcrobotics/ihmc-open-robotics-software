@@ -10,8 +10,8 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import us.ihmc.communication.networking.SerializerFactory;
+import us.ihmc.communication.networking.UplinkSerializerFactory;
 import us.ihmc.communication.serializers.Serializer;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.compression.UplinkSerializerFactory;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.mapper.MapperWrapper;

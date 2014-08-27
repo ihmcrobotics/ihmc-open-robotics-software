@@ -13,6 +13,7 @@ import org.junit.Test;
 
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.communication.packets.sensing.DepthDataStateCommand;
+import us.ihmc.communication.packets.sensing.SparseLidarScanPacket;
 import us.ihmc.communication.packets.sensing.DepthDataStateCommand.LidarState;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCWallAtDistanceEnvironment;
@@ -51,7 +52,7 @@ public abstract class DepthDataProcessorTest implements MultiRobotTestInterface,
             new DRCWallAtDistanceEnvironment(WALL_DISTANCE));
       drcSimulationTestHelper.setupCamera(new Point3d(1.8375, -0.16, 0.89), new Point3d(1.10, 8.30, 1.37));
       drcSimulationTestHelper.addNetStateListener(this);
-      drcSimulationTestHelper.addConsumer(SparseLidarScan.class, new LidarConsumer());
+      drcSimulationTestHelper.addConsumer(SparseLidarScanPacket.class, new LidarConsumer());
       
       drcSimulationTestHelper.connect();
       
@@ -81,10 +82,10 @@ public abstract class DepthDataProcessorTest implements MultiRobotTestInterface,
       }
    }
 
-   private class LidarConsumer implements ObjectConsumer<SparseLidarScan>
+   private class LidarConsumer implements ObjectConsumer<SparseLidarScanPacket>
    {
       @Override
-      public void consumeObject(SparseLidarScan sparseLidarScan)
+      public void consumeObject(SparseLidarScanPacket sparseLidarScan)
       {
          numberOfLidarScansConsumed++;
 
