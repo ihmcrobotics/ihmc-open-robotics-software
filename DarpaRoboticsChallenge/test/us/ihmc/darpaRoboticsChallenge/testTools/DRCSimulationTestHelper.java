@@ -90,7 +90,7 @@ public class DRCSimulationTestHelper
          showGUI = true;
 
       fullRobotModel = robotModel.createFullRobotModel();
-      referenceFrames = new ReferenceFrames(fullRobotModel, robotModel.getJointMap(), robotModel.getPhysicalProperties().getAnkleHeight());
+      referenceFrames = new ReferenceFrames(fullRobotModel);
       scriptedFootstepGenerator = new ScriptedFootstepGenerator(referenceFrames, fullRobotModel, walkingControlParameters);
       scriptedHandstepGenerator = new ScriptedHandstepGenerator(fullRobotModel);
 

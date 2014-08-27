@@ -3,6 +3,7 @@ package us.ihmc.darpaRoboticsChallenge;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
+import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFramesVisualizer;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.CenterOfMassJacobianUpdater;
 import us.ihmc.commonWalkingControlModules.sensors.CommonWalkingReferenceFramesUpdater;
@@ -12,10 +13,8 @@ import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaElipsoidsVisu
 import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
 import us.ihmc.darpaRoboticsChallenge.controllers.ConstrainedCenterOfMassJacobianEvaluator;
 import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadDataSynchronizer;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotLidarParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
 import us.ihmc.sensorProcessing.sensors.ForceSensorDataHolder;
@@ -116,8 +115,6 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       outputWriter.setFullRobotModel(controllerFullRobotModel, threadDataSynchronizer.getControllerRawJointSensorDataHolderMap());
       outputWriter.setForceSensorDataHolderForController(forceSensorDataHolderForController);
       
-      DRCRobotJointMap jointMap = robotModel.getJointMap();
-      DRCRobotPhysicalProperties physicalProperties = robotModel.getPhysicalProperties();
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       DRCRobotLidarParameters lidarParameters = sensorInformation.getLidarParameters(0);
       OneDoFJoint lidarJoint = null;
@@ -125,11 +122,8 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       {
     	  lidarJoint = controllerFullRobotModel.getOneDoFJointByName(lidarParameters.getLidarSpindleJointName());
       }
-      
-      
-      
-      controllerReferenceFrames = new ReferenceFrames(controllerFullRobotModel, jointMap, physicalProperties.getAnkleHeight());
-      controllerReferenceFrames.visualize(dynamicGraphicObjectsListRegistry, registry);
+
+      controllerReferenceFrames = new ReferenceFrames(controllerFullRobotModel);
 
       robotController = createMomentumBasedController(controllerFullRobotModel, controllerReferenceFrames, sensorInformation,
             controllerFactory, controllerTime, robotModel.getControllerDT(), gravity, forceSensorDataHolderForController, dynamicGraphicObjectsListRegistry,
@@ -146,18 +140,16 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       {
          robotVisualizer.addRegistry(registry, dynamicGraphicObjectsListRegistry);
       }
-
    }
 
    public static RobotController createMomentumBasedController(SDFFullRobotModel controllerModel, ReferenceFrames referenceFramesForController,
-         DRCRobotSensorInformation sensorInformation, MomentumBasedControllerFactory controllerFactory, DoubleYoVariable yoTime, double controlDT, double gravity, ForceSensorDataHolder forceSensorDataHolderForController,
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry registry,
-         GlobalDataProducer dataProducer, InverseDynamicsJoint... jointsToIgnore)
+         DRCRobotSensorInformation sensorInformation, MomentumBasedControllerFactory controllerFactory, DoubleYoVariable yoTime, double controlDT,
+         double gravity, ForceSensorDataHolder forceSensorDataHolderForController, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+         YoVariableRegistry registry, GlobalDataProducer dataProducer, InverseDynamicsJoint... jointsToIgnore)
    {
       CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(controllerModel.getElevator());
 
       FullInverseDynamicsStructure inverseDynamicsStructureForController = createInverseDynamicsStructure(controllerModel);
-
 
       TwistCalculator twistCalculator = inverseDynamicsStructureForController.getTwistCalculator();
 
@@ -192,6 +184,9 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
               modularRobotController.addRobotController(jointAxisVisualizer);
           
         }
+
+        CommonWalkingReferenceFramesVisualizer referenceFramesVisualizer = new CommonWalkingReferenceFramesVisualizer(referenceFramesForController, dynamicGraphicObjectsListRegistry);
+        modularRobotController.addRobotController(referenceFramesVisualizer);
       }
       
       if (CREATE_DYNAMICALLY_CONSISTENT_NULLSPACE_EVALUATOR)

@@ -10,7 +10,6 @@ import us.ihmc.darpaRoboticsChallenge.DRCSimulationVisualizer;
 import us.ihmc.darpaRoboticsChallenge.controllers.SimpleStanceController;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 
@@ -54,10 +53,9 @@ public class AtlasSimpleStanceController {
 	      }
 	      
 	      DRCRobotJointMap jointMap = model.getJointMap();
-	      DRCRobotPhysicalProperties physicalProperties = model.getPhysicalProperties();
 	      SDFFullRobotModel fullRobotModel = model.createFullRobotModel();
 	      SDFRobot robot = model.createSdfRobot(false);
-	      ReferenceFrames referenceFrames = new ReferenceFrames(fullRobotModel, jointMap, physicalProperties.getAnkleHeight());
+	      ReferenceFrames referenceFrames = new ReferenceFrames(fullRobotModel);
 
 	      DRCRobotInitialSetup<SDFRobot> intialSetup = model.getDefaultRobotInitialSetup(0, 0);
 	      intialSetup.initializeRobot(robot, jointMap);
