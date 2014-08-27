@@ -7,10 +7,10 @@ import org.junit.Test;
 import us.ihmc.robotDataCommunication.visualizer.SCSYoVariablesUpdatedListener;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 
 import com.yobotics.simulationconstructionset.DataBuffer;
-import com.yobotics.simulationconstructionset.EnumYoVariable;
-import com.yobotics.simulationconstructionset.LongYoVariable;
 
 public class YoVariableConnectionBurstTest
 {

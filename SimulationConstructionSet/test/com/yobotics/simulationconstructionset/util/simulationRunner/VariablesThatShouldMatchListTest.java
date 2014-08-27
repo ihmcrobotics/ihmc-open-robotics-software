@@ -14,8 +14,8 @@ import org.junit.Test;
 
 import us.ihmc.yoUtilities.dataStructure.registry.NameSpace;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
 
 public class VariablesThatShouldMatchListTest
 {

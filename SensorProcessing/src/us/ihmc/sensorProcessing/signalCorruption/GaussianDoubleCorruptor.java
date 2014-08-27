@@ -5,8 +5,8 @@ import java.util.Random;
 import org.apache.commons.lang.mutable.MutableDouble;
 
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
 
 public class GaussianDoubleCorruptor implements SignalCorruptor<MutableDouble>
 {

@@ -10,8 +10,8 @@ import org.junit.Test;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
 
 public class ElasticityCompensatorYoVariableTest
 {

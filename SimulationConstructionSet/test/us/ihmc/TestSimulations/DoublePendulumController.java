@@ -2,9 +2,9 @@ package us.ihmc.TestSimulations;
 
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.LongYoVariable;
 import com.yobotics.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 

@@ -4,8 +4,8 @@ import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 
-import com.yobotics.simulationconstructionset.IntegerYoVariable;
 
 public class LatencyVectorCorruptor implements SignalCorruptor<Tuple3d>
 {

@@ -14,10 +14,10 @@ import us.ihmc.robotDataCommunication.jointState.JointState;
 import us.ihmc.robotDataCommunication.visualizer.JointUpdater;
 import us.ihmc.yoUtilities.dataStructure.listener.RewoundListener;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
+import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 import com.yobotics.simulationconstructionset.Joint;
-import com.yobotics.simulationconstructionset.LongYoVariable;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 
 public class YoVariableLogPlaybackRobot extends SDFRobot implements RewoundListener

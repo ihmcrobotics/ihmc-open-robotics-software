@@ -9,8 +9,8 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
 
 public abstract class AbstractMeasurementModelElement implements MeasurementModelElement
 {

@@ -5,8 +5,8 @@ import java.util.List;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
 
 public class ConstantOmega0Calculator implements Omega0CalculatorInterface
 {

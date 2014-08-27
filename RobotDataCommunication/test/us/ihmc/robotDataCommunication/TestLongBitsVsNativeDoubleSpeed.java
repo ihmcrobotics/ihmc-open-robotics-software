@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
 
 
 public class TestLongBitsVsNativeDoubleSpeed
