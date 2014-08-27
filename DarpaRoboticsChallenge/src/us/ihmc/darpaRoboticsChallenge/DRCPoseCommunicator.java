@@ -8,9 +8,7 @@ import us.ihmc.communication.producers.DRCJointConfigurationData;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParameters;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotLidarParameters;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPointCloudParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorParameters;
@@ -43,14 +41,10 @@ public class DRCPoseCommunicator implements RawOutputWriter
    private State currentState;
 
    private final ConcurrentRingBuffer<State> stateRingBuffer;
-   private final int numberOfJoints;
 
    public DRCPoseCommunicator(SDFFullRobotModel estimatorModel, JointConfigurationGatherer jointConfigurationGathererAndProducer,
-         ObjectCommunicator networkProcessorCommunicator, TimestampProvider timestampProvider, DRCRobotModel robotModel)
+         ObjectCommunicator networkProcessorCommunicator, TimestampProvider timestampProvider, DRCRobotSensorInformation sensorInformation)
    {
-      DRCRobotJointMap jointMap = robotModel.getJointMap();
-      DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
-      numberOfJoints = jointMap.getOrderedJointNames().length;
       this.networkProcessorCommunicator = networkProcessorCommunicator;
       this.jointConfigurationGathererAndProducer = jointConfigurationGathererAndProducer;
       this.timeProvider = timestampProvider;
@@ -216,7 +210,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
       }
 
       long timestamp = timeProvider.getTimestamp();
-      jointConfigurationGathererAndProducer.packEstimatorJoints(timestamp, state.jointData, numberOfJoints);
+      jointConfigurationGathererAndProducer.packEstimatorJoints(timestamp, state.jointData);
       state.poseData.setAll(timestamp, rootTransform, cameraPoses, lidarPoses, pointCloudPoses);
 
       stateRingBuffer.commit();

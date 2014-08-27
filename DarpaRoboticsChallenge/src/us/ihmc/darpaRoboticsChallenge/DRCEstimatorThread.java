@@ -128,7 +128,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          JointConfigurationGatherer jointConfigurationGathererAndProducer = new JointConfigurationGatherer(estimatorFullRobotModel);
 
          estimatorController.setRawOutputWriter(new DRCPoseCommunicator(estimatorFullRobotModel, jointConfigurationGathererAndProducer,
-                 dataProducer.getObjectCommunicator(), timestampProvider, robotModel));
+                 dataProducer.getObjectCommunicator(), timestampProvider, sensorInformation));
       }
       
       firstTick.set(true);
