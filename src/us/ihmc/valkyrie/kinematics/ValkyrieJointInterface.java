@@ -29,4 +29,12 @@ public interface ValkyrieJointInterface
 
    public abstract void setDesiredVelocity(double velocity);
 
+   public abstract double getMotorCurrent();
+
+   public abstract void setMotorCurrent(double motorCurrent);
+
+   public abstract double getCommandedMotorCurrent();
+
+   public abstract void setCommandedMotorCurrent(double commandedMotorCurrent);
+
 }
