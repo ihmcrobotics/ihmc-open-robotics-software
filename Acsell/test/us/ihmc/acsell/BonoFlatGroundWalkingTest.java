@@ -5,9 +5,9 @@ import org.junit.Test;
 import us.ihmc.acsell.parameters.BonoRobotModel;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTest;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 
 public class BonoFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
 {
