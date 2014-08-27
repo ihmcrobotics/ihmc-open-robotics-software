@@ -88,10 +88,20 @@ public abstract class JointFrictionModelsHolder
       return activeFrictionModel.getEnumValue();
    }
 
+   public double getCurrentFrictionForce()
+   {
+      return frictionForce.getDoubleValue();
+   }
+   
+   public FrictionState getCurrentFrictionState()
+   {
+      return frictionCompensationState.getEnumValue();
+   }
+
    protected JointFrictionModel getActiveJointFrictionModel()
    {
       return frictionModels.get(activeFrictionModel.getEnumValue());
    }
-
+   
    protected abstract void checkIfExistFrictionModelForThisJoint(FrictionModel requestedFrictionModel);
 }
