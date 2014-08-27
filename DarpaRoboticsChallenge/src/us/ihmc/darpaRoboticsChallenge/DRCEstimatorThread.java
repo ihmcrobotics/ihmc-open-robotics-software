@@ -17,7 +17,6 @@ import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadDataSynchroni
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.JointConfigurationGatherer;
 import us.ihmc.darpaRoboticsChallenge.sensors.RobotJointLimitWatcher;
@@ -199,11 +198,10 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          DRCRobotContactPointParameters contactPointParamaters, ForceSensorDataHolder forceSensorDataHolderForEstimator,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry registry)
    {
-      DRCRobotPhysicalProperties physicalProperties = drcRobotModel.getPhysicalProperties();
       DRCRobotJointMap jointMap = drcRobotModel.getJointMap();
       FullInverseDynamicsStructure inverseDynamicsStructure = DRCControllerThread.createInverseDynamicsStructure(estimatorFullRobotModel);
 
-      ReferenceFrames estimatorReferenceFrames = new ReferenceFrames(estimatorFullRobotModel, jointMap, physicalProperties.getAnkleHeight());
+      ReferenceFrames estimatorReferenceFrames = new ReferenceFrames(estimatorFullRobotModel);
       ContactableBodiesFactory contactableBodiesFactory = jointMap.getContactPointParameters().getContactableBodiesFactory();
       SideDependentList<ContactablePlaneBody> bipedFeet = contactableBodiesFactory.createFootContactableBodies(estimatorFullRobotModel, estimatorReferenceFrames);
 

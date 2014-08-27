@@ -20,9 +20,7 @@ import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceReader;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceWriter;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
@@ -48,15 +46,12 @@ public class PoseSequenceSelectorPanel extends JPanel
       registry = new YoVariableRegistry("PoseSequenceGUI");
 
 
-      DRCRobotJointMap jointMap = robotModel.getJointMap();
-      DRCRobotPhysicalProperties physicalProperties = robotModel.getPhysicalProperties();
-
       fullRobotModel = robotModel.createFullRobotModel();
       sdfRobot = robotModel.createSdfRobot(false);
 
       sequence = new PlaybackPoseSequence(fullRobotModel);
       
-      ReferenceFrames referenceFrames = new ReferenceFrames(fullRobotModel, jointMap, physicalProperties.getAnkleHeight());
+      ReferenceFrames referenceFrames = new ReferenceFrames(fullRobotModel);
       SDFPerfectSimulatedSensorReader reader = new SDFPerfectSimulatedSensorReader(sdfRobot, fullRobotModel, referenceFrames);
       ModularRobotController controller = new ModularRobotController("Reader");
       controller.setRawSensorReader(reader);

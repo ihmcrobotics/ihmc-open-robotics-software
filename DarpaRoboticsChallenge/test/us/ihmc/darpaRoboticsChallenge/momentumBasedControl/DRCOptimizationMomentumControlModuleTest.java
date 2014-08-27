@@ -40,7 +40,6 @@ import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotLidarParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.robotSide.RobotSide;
@@ -81,12 +80,11 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       DRCRobotLidarParameters lidarParameters = sensorInformation.getLidarParameters(0);
       DRCRobotJointMap jointMap = robotModel.getJointMap();
-      DRCRobotPhysicalProperties physicalProperties = robotModel.getPhysicalProperties();
       
       SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
       SDFRobot sdfRobot = robotModel.createSdfRobot(false);
       
-      ReferenceFrames referenceFrames = new ReferenceFrames(fullRobotModel, jointMap, physicalProperties.getAnkleHeight());
+      ReferenceFrames referenceFrames = new ReferenceFrames(fullRobotModel);
 
       DRCRobotInitialSetup<SDFRobot> intialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
       initializeRobot(fullRobotModel, sdfRobot, referenceFrames, intialSetup, jointMap);
@@ -175,11 +173,10 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
       DRCRobotJointMap jointMap = robotModel.getJointMap();
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       DRCRobotLidarParameters lidarParameters = sensorInformation.getLidarParameters(0);
-      DRCRobotPhysicalProperties physicalProperties = robotModel.getPhysicalProperties();
       SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
       SDFRobot robot = robotModel.createSdfRobot(false);
       
-      ReferenceFrames referenceFrames = new ReferenceFrames(fullRobotModel, jointMap, physicalProperties.getAnkleHeight());
+      ReferenceFrames referenceFrames = new ReferenceFrames(fullRobotModel);
 
       DRCRobotInitialSetup<SDFRobot> intialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
       initializeRobot(fullRobotModel, robot, referenceFrames, intialSetup, jointMap);

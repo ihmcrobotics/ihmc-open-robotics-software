@@ -16,7 +16,6 @@ import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
@@ -42,13 +41,12 @@ public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInter
                                       RobotSide[] footContactSides, RobotSide[] handContactSides, SideDependentList<Transform3D> invisibleContactablePlaneHandContactPointTransforms)
    {
       DRCRobotJointMap jointMap = robotModel.getJointMap();
-      DRCRobotPhysicalProperties physicalProperties = robotModel.getPhysicalProperties();
       SDFRobot robotForEnvironmentSetup = robotModel.createSdfRobot(DRCConfigParameters.USE_COLLISIONS_MESHS_FOR_VISUALIZATION);
       robotInitialSetup.initializeRobot(robotForEnvironmentSetup, jointMap);
       robotForEnvironmentSetup.update();
       FullRobotModel fullRobotModelForEnvironmentSetup = robotModel.createFullRobotModel();
 
-      CommonWalkingReferenceFrames referenceFramesForEnvironmentSetup = new ReferenceFrames(fullRobotModelForEnvironmentSetup, jointMap, physicalProperties.getAnkleHeight());
+      CommonWalkingReferenceFrames referenceFramesForEnvironmentSetup = new ReferenceFrames(fullRobotModelForEnvironmentSetup);
       SDFPerfectSimulatedSensorReader sensorReaderAndOutputWriter = new SDFPerfectSimulatedSensorReader(robotForEnvironmentSetup,
                                                                                 fullRobotModelForEnvironmentSetup, referenceFramesForEnvironmentSetup);
       sensorReaderAndOutputWriter.read();
