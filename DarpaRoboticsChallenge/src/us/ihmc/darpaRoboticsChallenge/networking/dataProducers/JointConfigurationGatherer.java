@@ -37,14 +37,10 @@ public class JointConfigurationGatherer
          for (OneDoFJoint fingerJoint : fingerJoints)
             joints.remove(fingerJoint);
       }
-
-      ArrayList<OneDoFJoint> lidarJoints = new ArrayList<>();
-      estimatorModel.getLidarJoints(lidarJoints);
-      joints.removeAll(lidarJoints);
    }
 
    // fills a DRCJointConfigurationData object on the ConcurrentRingBuffer
-   public void packEstimatorJoints(long timestamp, DRCJointConfigurationData jointConfigurationData, int numberOfJoints)
+   public void packEstimatorJoints(long timestamp, DRCJointConfigurationData jointConfigurationData)
    {
       if (jointConfigurationData == null)
       {
@@ -53,7 +49,7 @@ public class JointConfigurationGatherer
 
       if (jointConfigurationData.jointAngles == null)
       {
-         jointConfigurationData.initJointNumber(numberOfJoints);
+         jointConfigurationData.initJointNumber(joints.size());
       }
 
       rootJoint.packTranslation(rootTranslation);
