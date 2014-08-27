@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.EndOfScriptCommand;
+import us.ihmc.communication.packets.walking.EndOfScriptCommand;
 import us.ihmc.darpaRoboticsChallenge.scriptEngine.ScriptEngineSettings;
 import us.ihmc.darpaRoboticsChallenge.scriptEngine.ScriptFileSaver;
 import us.ihmc.utilities.FileTools;

@@ -9,10 +9,9 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlane
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
-import us.ihmc.commonWalkingControlModules.trajectories.SimpleTwoWaypointTrajectoryParameters;
+import us.ihmc.communication.packets.walking.FootstepData;
+import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
@@ -21,6 +20,7 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.trajectories.SimpleTwoWaypointTrajectoryParameters;
 import us.ihmc.utilities.screwTheory.RigidBody;
 
 public class ScriptedFootstepGenerator
@@ -51,7 +51,10 @@ public class ScriptedFootstepGenerator
          RobotSide robotSide = robotSides[i];
          double[][] footstepLocationAndOrientation = footstepLocationsAndOrientations[i];
          Footstep footstep = generateFootstepFromLocationAndOrientation(robotSide, footstepLocationAndOrientation);
-         FootstepData footstepData = new FootstepData(robotSide, footstep);
+         Point3d location = new Point3d();
+         Quat4d orientation = new Quat4d();
+         footstep.getPose(location, orientation);
+         FootstepData footstepData = new FootstepData(robotSide, location, orientation);
          footstepDataList.add(footstepData);
       }
 

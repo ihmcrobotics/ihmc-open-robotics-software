@@ -4,7 +4,7 @@ import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData;
+import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.io.streamingData.StreamingDataConsumer;
 import us.ihmc.utilities.math.geometry.FramePose;

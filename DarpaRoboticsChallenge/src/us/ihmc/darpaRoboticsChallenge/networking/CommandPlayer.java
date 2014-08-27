@@ -6,13 +6,13 @@ import java.util.concurrent.Executors;
 
 import javax.media.j3d.Transform3D;
 
-import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryWaypointGenerationMethod;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.EndOfScriptCommand;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
+import us.ihmc.communication.packets.walking.EndOfScriptCommand;
+import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.darpaRoboticsChallenge.configuration.DRCNetClassList;
 import us.ihmc.darpaRoboticsChallenge.scriptEngine.ScriptEngineSettings;
 import us.ihmc.darpaRoboticsChallenge.scriptEngine.ScriptFileLoader;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.math.trajectories.TrajectoryWaypointGenerationMethod;
 import us.ihmc.utilities.net.AtomicSettableTimestampProvider;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.net.TimestampListener;

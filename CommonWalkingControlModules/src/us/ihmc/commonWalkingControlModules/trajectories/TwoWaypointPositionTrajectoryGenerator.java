@@ -13,6 +13,9 @@ import us.ihmc.utilities.math.geometry.FrameBox3d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.trajectories.SimpleTwoWaypointTrajectoryParameters;
+import us.ihmc.utilities.math.trajectories.TrajectoryWaypointGenerationMethod;
+import us.ihmc.utilities.math.trajectories.TwoWaypointTrajectoryParameters;
 import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
 import us.ihmc.utilities.math.trajectories.providers.PositionProvider;
 import us.ihmc.utilities.math.trajectories.providers.TrajectoryParameters;
@@ -28,7 +31,6 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
-import com.yobotics.simulationconstructionset.util.trajectory.TrajectoryWaypointGenerationMethod;
 import com.yobotics.simulationconstructionset.util.trajectory.YoConcatenatedSplines;
 
 public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajectoryGenerator
