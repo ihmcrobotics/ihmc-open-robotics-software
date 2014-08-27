@@ -13,8 +13,8 @@ import org.zeromq.ZMQ;
 
 import us.ihmc.robotDataCommunication.YoVariableChangedProducer.YoVariableClientChangedListener;
 import us.ihmc.robotDataCommunication.jointState.JointState;
-import us.ihmc.yoUtilities.YoVariable;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
+import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import zmq.PollItem;
 import zmq.ZError;
 

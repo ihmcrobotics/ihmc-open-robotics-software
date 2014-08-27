@@ -1,6 +1,6 @@
 package us.ihmc.robotDataCommunication;
 
-import us.ihmc.yoUtilities.YoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 public class VariableChangedMessage
 {

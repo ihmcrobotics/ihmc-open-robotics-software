@@ -10,9 +10,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.yoUtilities.YoVariable;
 import us.ihmc.yoUtilities.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.registry.NameSpace;
+import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 /**
  * <p>Title: SimulationConstructionSet</p>

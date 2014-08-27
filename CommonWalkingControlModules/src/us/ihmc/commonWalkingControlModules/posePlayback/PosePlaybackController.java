@@ -11,9 +11,9 @@ import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
-import us.ihmc.yoUtilities.YoVariable;
 import us.ihmc.yoUtilities.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
+import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;

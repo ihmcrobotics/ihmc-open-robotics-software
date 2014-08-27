@@ -8,8 +8,8 @@ import java.util.List;
 
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
-import us.ihmc.yoUtilities.YoVariable;
 import us.ihmc.yoUtilities.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;

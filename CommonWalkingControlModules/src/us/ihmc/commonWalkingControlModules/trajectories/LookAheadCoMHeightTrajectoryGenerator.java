@@ -17,9 +17,9 @@ import us.ihmc.utilities.math.geometry.Line2d;
 import us.ihmc.utilities.math.geometry.LineSegment2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.stringStretcher2d.StringStretcher2d;
-import us.ihmc.yoUtilities.YoVariable;
 import us.ihmc.yoUtilities.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
+import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;

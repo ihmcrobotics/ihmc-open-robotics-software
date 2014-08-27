@@ -11,9 +11,9 @@ import org.ejml.ops.RandomMatrices;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.yoUtilities.YoVariable;
 import us.ihmc.yoUtilities.YoVariableRegistry;
 import us.ihmc.yoUtilities.YoVariableRegistryChangedListener;
+import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 import com.yobotics.simulationconstructionset.DataBuffer;
 import com.yobotics.simulationconstructionset.DataBuffer.RepeatDataBufferEntryException;
