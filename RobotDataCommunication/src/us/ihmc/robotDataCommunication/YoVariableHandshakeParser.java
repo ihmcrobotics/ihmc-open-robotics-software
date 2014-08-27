@@ -25,7 +25,9 @@ import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
+import us.ihmc.yoUtilities.graphics.RemoteYoGraphic;
 import us.ihmc.yoUtilities.graphics.YoGraphic;
+import us.ihmc.yoUtilities.graphics.RemoteYoGraphic.RemoteGraphicType;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.yobotics.simulationconstructionset.Joint;
@@ -33,8 +35,6 @@ import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicFactory;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.RemoteDynamicGraphic;
-import com.yobotics.simulationconstructionset.util.graphics.RemoteDynamicGraphic.RemoteGraphicType;
 
 public class YoVariableHandshakeParser
 {
@@ -182,7 +182,7 @@ public class YoVariableHandshakeParser
       dynamicGraphicObjectsListRegistry.registerArtifactList(artifactList);
    }
 
-   private RemoteDynamicGraphic getRemoteGraphic(DynamicGraphicMessage msg)
+   private RemoteYoGraphic getRemoteGraphic(DynamicGraphicMessage msg)
    {
       RemoteGraphicType type = RemoteGraphicType.values()[msg.getType()];
    
