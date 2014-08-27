@@ -1,24 +1,25 @@
 package us.ihmc.darpaRoboticsChallenge.driving;
 
+import java.awt.Transparency;
+import java.awt.color.ColorSpace;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.ComponentColorModel;
+import java.awt.image.DataBuffer;
+
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.node.AbstractNodeMain;
 import org.ros.node.ConnectedNode;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
+
 import rosgraph_msgs.Clock;
 import sensor_msgs.CompressedImage;
 import std_msgs.Int8;
-import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.keyboardAndMouse.RepeatingReleasedEventsFixer;
-
-import java.awt.*;
-import java.awt.color.ColorSpace;
-import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
-import java.awt.image.ComponentColorModel;
-import java.awt.image.DataBuffer;
+import us.ihmc.utilities.ros.RosTools;
 
 /**
  * Modified from {@link us.ihmc.atlas.AtlasGazeboDrivingInterface}.

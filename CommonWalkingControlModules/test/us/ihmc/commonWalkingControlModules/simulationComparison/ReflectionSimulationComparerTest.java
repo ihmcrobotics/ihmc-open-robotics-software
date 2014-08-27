@@ -1,10 +1,13 @@
 package us.ihmc.commonWalkingControlModules.simulationComparison;
 
-import com.yobotics.simulationconstructionset.*;
-import com.yobotics.simulationconstructionset.robotController.RobotController;
-import com.yobotics.simulationconstructionset.util.simulationTesting.ReflectionSimulationComparer;
-import com.yobotics.simulationconstructionset.util.simulationTesting.SimpleRewindabilityComparisonScript;
-import com.yobotics.simulationconstructionset.util.simulationTesting.SimulationComparisonScript;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.lang.reflect.Field;
+import java.util.Collection;
+
+import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -12,13 +15,19 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.utilities.MemoryTools;
+import us.ihmc.yoUtilities.YoVariable;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
-import javax.vecmath.Vector3d;
-
-import java.lang.reflect.Field;
-import java.util.Collection;
-
-import static org.junit.Assert.*;
+import com.yobotics.simulationconstructionset.FloatingJoint;
+import com.yobotics.simulationconstructionset.IntegerYoVariable;
+import com.yobotics.simulationconstructionset.Link;
+import com.yobotics.simulationconstructionset.Robot;
+import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import com.yobotics.simulationconstructionset.UnreasonableAccelerationException;
+import com.yobotics.simulationconstructionset.robotController.RobotController;
+import com.yobotics.simulationconstructionset.util.simulationTesting.ReflectionSimulationComparer;
+import com.yobotics.simulationconstructionset.util.simulationTesting.SimpleRewindabilityComparisonScript;
+import com.yobotics.simulationconstructionset.util.simulationTesting.SimulationComparisonScript;
 
 public class ReflectionSimulationComparerTest
 {

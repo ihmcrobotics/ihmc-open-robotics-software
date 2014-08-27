@@ -1,15 +1,20 @@
 package us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization;
 
-import com.sun.jna.Library;
-import com.sun.jna.Native;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.Arrays;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.utilities.exeptions.NoConvergenceException;
 
-import java.io.*;
-import java.util.Arrays;
+import com.sun.jna.Library;
+import com.sun.jna.Native;
 
 // javah -cp ../classes/:../../ThirdParty/ThirdPartyJars/EJML/EJML.jar -o ActiveSetQPMomentumOptimizer.h us.ihmc.commonWalkingControlModules.controlModules
 // .nativeOptimization.ActiveSetQPMomentumOptimizer

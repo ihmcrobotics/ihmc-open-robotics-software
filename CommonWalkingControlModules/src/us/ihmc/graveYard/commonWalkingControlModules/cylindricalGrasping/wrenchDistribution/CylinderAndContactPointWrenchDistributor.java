@@ -13,16 +13,18 @@ import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolv
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CylinderAndPlaneContactForceOptimizerNative;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CylinderAndPlaneContactForceOptimizerNativeInput;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.CylinderAndPlaneContactForceOptimizerNativeOutput;
-import us.ihmc.commonWalkingControlModules.wrenchDistribution.*;
+import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWrenchDistributor;
+import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWrenchDistributorInputData;
+import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWrenchDistributorOutputData;
 import us.ihmc.graveYard.commonWalkingControlModules.cylindricalGrasping.bipedSupportPolygons.CylindricalContactState;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.Wrench;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;

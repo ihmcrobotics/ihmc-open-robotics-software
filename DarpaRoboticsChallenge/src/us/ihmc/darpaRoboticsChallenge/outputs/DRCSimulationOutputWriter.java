@@ -10,10 +10,10 @@ import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.maps.ObjectObjectMap;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RawOutputWriter;
 import com.yobotics.simulationconstructionset.util.math.filter.DelayedDoubleYoVariable;
 

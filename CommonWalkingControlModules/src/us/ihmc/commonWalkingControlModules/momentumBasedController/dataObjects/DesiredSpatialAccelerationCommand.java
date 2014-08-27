@@ -1,11 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
-import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 
 public class DesiredSpatialAccelerationCommand
 {

@@ -5,9 +5,9 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.Momentum;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 /**
  * @author twan

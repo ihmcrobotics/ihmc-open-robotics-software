@@ -8,8 +8,8 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.controller.GainCalculator;
 import com.yobotics.simulationconstructionset.util.controller.YoIndependentSE3PIDGains;
 import com.yobotics.simulationconstructionset.util.controller.YoPIDGains;

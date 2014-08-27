@@ -1,6 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.frictionCompensation;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 
@@ -10,8 +11,7 @@ import us.ihmc.utilities.frictionModels.FrictionModel;
 import us.ihmc.utilities.frictionModels.FrictionState;
 import us.ihmc.utilities.frictionModels.JointFrictionModel;
 import us.ihmc.utilities.frictionModels.NoCompensationFrictionModel;
-
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 public class JointFrictionModelsHolderTest
 {

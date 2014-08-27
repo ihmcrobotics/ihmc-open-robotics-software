@@ -3,8 +3,8 @@ package us.ihmc.robotDataCommunication.logger;
 import java.io.File;
 import java.io.IOException;
 
-import us.ihmc.robotDataCommunication.logger.util.FFMpeg;
 import us.ihmc.robotDataCommunication.logger.util.BMDCapture;
+import us.ihmc.robotDataCommunication.logger.util.FFMpeg;
 import us.ihmc.robotDataCommunication.logger.util.PipedCommandExecutor;
 import us.ihmc.utilities.net.TimestampListener;
 

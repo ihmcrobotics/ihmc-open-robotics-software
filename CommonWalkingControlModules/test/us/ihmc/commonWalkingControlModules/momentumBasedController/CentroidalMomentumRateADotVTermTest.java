@@ -8,7 +8,6 @@ import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.utilities.RandomTools;
@@ -24,6 +23,7 @@ import us.ihmc.utilities.screwTheory.ScrewTestTools;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.TotalMassCalculator;
 import us.ihmc.utilities.test.JUnitTools;
+
 import com.yobotics.simulationconstructionset.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
 import com.yobotics.simulationconstructionset.UnreasonableAccelerationException;
 

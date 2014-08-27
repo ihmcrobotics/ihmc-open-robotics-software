@@ -5,8 +5,7 @@ import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.utilities.ForceSensorDefinition;
 import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
-
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 public interface SensorReaderFactory
 {

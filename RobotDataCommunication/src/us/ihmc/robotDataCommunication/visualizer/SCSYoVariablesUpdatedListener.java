@@ -16,14 +16,14 @@ import us.ihmc.robotDataCommunication.YoVariablesUpdatedListener;
 import us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake;
 import us.ihmc.robotDataCommunication.jointState.JointState;
 import us.ihmc.utilities.math.TimeTools;
+import us.ihmc.yoUtilities.YoVariable;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.DataBuffer;
 import com.yobotics.simulationconstructionset.ExitActionListener;
 import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.YoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class SCSYoVariablesUpdatedListener implements YoVariablesUpdatedListener, ExitActionListener

@@ -6,9 +6,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.utilities.test.JUnitTools;
-
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 public class YoFunctionGeneratorTest
 {

@@ -4,9 +4,9 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 /**
  * @author twan

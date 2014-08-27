@@ -1,9 +1,10 @@
 package us.ihmc.sensorProcessing.encoder.processors;
 
+import us.ihmc.yoUtilities.YoVariableRegistry;
+
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.IntegerYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 /**
  * <p>Title: </p>

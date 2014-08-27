@@ -1,12 +1,13 @@
 package us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.driving;
 
+import java.util.EnumMap;
+
+import javax.media.j3d.Transform3D;
+
 import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-
-import javax.media.j3d.Transform3D;
-import java.util.EnumMap;
 
 /**
  * @author twan

@@ -4,9 +4,9 @@ import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class SwingArmWithOppositeLegControlModule extends PDArmControlModule
 {

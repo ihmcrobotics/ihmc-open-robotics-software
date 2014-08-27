@@ -48,10 +48,10 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
 import us.ihmc.utilities.screwTheory.Wrench;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class GroundReactionWrenchDistributorTest

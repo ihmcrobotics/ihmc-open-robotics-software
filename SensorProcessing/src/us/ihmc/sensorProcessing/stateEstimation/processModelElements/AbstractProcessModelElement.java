@@ -10,9 +10,9 @@ import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.sensorProcessing.stateEstimation.TimeDomain;
 import us.ihmc.utilities.math.MathTools;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public abstract class AbstractProcessModelElement implements ProcessModelElement
 {

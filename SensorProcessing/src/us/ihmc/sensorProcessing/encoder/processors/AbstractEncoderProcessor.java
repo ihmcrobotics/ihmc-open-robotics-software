@@ -1,10 +1,11 @@
 package us.ihmc.sensorProcessing.encoder.processors;
 
-import com.yobotics.simulationconstructionset.YoVariable;
+import us.ihmc.yoUtilities.VariableChangedListener;
+import us.ihmc.yoUtilities.YoVariable;
+import us.ihmc.yoUtilities.YoVariableRegistry;
+
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.IntegerYoVariable;
-import com.yobotics.simulationconstructionset.VariableChangedListener;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public abstract class AbstractEncoderProcessor implements EncoderProcessor
 {

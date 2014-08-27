@@ -9,11 +9,11 @@ import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.dataStructures.ComplexNumber;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.mathworks.jama.Matrix;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class CoMHeightTimeDerivativesSmoother
 {

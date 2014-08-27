@@ -1,6 +1,7 @@
 package us.ihmc.sensorProcessing.controlFlowPorts;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
@@ -13,8 +14,7 @@ import us.ihmc.controlFlow.NullControlFlowElement;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 public class YoFramePointControlFlowOutputPortTest
 {

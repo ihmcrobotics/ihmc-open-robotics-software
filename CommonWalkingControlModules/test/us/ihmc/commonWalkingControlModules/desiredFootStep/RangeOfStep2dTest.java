@@ -11,7 +11,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.commonWalkingControlModules.desiredFootStep.RangeOfStep2d;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.math.geometry.FramePoint;

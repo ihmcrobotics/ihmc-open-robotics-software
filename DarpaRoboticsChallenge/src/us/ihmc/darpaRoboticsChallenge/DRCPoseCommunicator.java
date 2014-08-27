@@ -19,8 +19,8 @@ import us.ihmc.utilities.AsyncContinuousExecutor;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.net.TimestampProvider;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RawOutputWriter;
 
 // fills a ring buffer with pose and joint data and in a worker thread passes it to the appropriate consumer 

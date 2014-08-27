@@ -7,13 +7,13 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;

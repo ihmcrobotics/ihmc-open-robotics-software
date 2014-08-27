@@ -32,12 +32,12 @@ import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.math.MathTools;
+import us.ihmc.yoUtilities.YoVariable;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.time.GlobalTimer;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import com.yobotics.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;

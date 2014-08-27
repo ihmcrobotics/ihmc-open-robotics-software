@@ -12,15 +12,15 @@ import us.ihmc.SdfLoader.SDFJointNameMap;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.robotDataCommunication.jointState.JointState;
 import us.ihmc.robotDataCommunication.visualizer.JointUpdater;
+import us.ihmc.yoUtilities.RewoundListener;
+import us.ihmc.yoUtilities.VariableChangedListener;
+import us.ihmc.yoUtilities.YoVariable;
 
 import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.LongYoVariable;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.SimulationRewoundListener;
-import com.yobotics.simulationconstructionset.VariableChangedListener;
-import com.yobotics.simulationconstructionset.YoVariable;
 
-public class YoVariableLogPlaybackRobot extends SDFRobot implements SimulationRewoundListener
+public class YoVariableLogPlaybackRobot extends SDFRobot implements RewoundListener
 {
    private static final long serialVersionUID = -1461790917855807447L;
 
@@ -173,7 +173,7 @@ public class YoVariableLogPlaybackRobot extends SDFRobot implements SimulationRe
       currentRecordTick.addVariableChangedListener(listener);
    }
 
-   public void simulationWasRewound()
+   public void wasRewound()
    {
       long position = currentRecordTick.getLongValue();
       try

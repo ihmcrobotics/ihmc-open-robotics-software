@@ -7,8 +7,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.communication.HighLevelState;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
-
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 public class DoNothingBehavior extends HighLevelBehavior
 {

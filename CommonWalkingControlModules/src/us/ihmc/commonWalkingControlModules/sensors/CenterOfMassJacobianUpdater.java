@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.sensors;
 
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.SensorProcessor;
 
 public class CenterOfMassJacobianUpdater implements SensorProcessor

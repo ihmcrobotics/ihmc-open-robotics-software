@@ -1,10 +1,10 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class DesiredFootstepCalculatorFootstepProviderWrapper implements FootstepProvider
 {

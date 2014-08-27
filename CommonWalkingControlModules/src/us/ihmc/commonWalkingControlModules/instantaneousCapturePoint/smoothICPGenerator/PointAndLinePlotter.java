@@ -17,9 +17,9 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.plotting.DynamicGraphicPositionArtifact;
 import com.yobotics.simulationconstructionset.plotting.SimulationOverheadPlotter;
 import com.yobotics.simulationconstructionset.plotting.YoFrameLineSegment2dArtifact;

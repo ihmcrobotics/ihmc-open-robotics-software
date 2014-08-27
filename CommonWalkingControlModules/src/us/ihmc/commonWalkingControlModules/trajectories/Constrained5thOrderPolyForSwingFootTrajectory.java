@@ -1,7 +1,8 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
+import us.ihmc.yoUtilities.YoVariableRegistry;
+
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 /**
  * This class creates a cubic function that connects a point at height z0 at time = t0 to a point at height zf at time = tf.

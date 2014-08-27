@@ -10,9 +10,9 @@ import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalcula
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantTransferTimeCalculator;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public interface VariousWalkingProviderFactory

@@ -1,16 +1,20 @@
 package us.ihmc.sensorProcessing.testbed;
 
-import com.thoughtworks.xstream.XStream;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static us.ihmc.sensorProcessing.pointClouds.GeometryOps.loadScanLines;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.se.Se3_F64;
-import org.ejml.ops.MatrixFeatures;
-import org.junit.Test;
-import us.ihmc.sensorProcessing.pointClouds.testbed.TestbedAutomaticAlignment;
 
 import java.util.List;
 
-import static org.junit.Assert.*;
-import static us.ihmc.sensorProcessing.pointClouds.GeometryOps.loadScanLines;
+import org.ejml.ops.MatrixFeatures;
+import org.junit.Test;
+
+import us.ihmc.sensorProcessing.pointClouds.testbed.TestbedAutomaticAlignment;
+
+import com.thoughtworks.xstream.XStream;
 
 /**
  * @author Peter Abeles

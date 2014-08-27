@@ -11,8 +11,6 @@ import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.vecmath.Point2d;
 
-import junit.framework.TestCase;
-
 import org.junit.Test;
 
 import us.ihmc.plotting.PlotterPanel;

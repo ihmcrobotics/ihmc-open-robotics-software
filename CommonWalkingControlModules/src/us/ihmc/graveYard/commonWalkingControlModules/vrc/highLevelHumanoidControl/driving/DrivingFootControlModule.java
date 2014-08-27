@@ -31,10 +31,10 @@ import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.utilities.screwTheory.Wrench;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.IntegerYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.controller.AxisAngleOrientationController;
 import com.yobotics.simulationconstructionset.util.controller.EuclideanPositionController;
 import com.yobotics.simulationconstructionset.util.controller.GainCalculator;

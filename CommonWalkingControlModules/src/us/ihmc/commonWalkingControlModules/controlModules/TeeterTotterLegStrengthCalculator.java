@@ -6,9 +6,9 @@ import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class TeeterTotterLegStrengthCalculator implements LegStrengthCalculator
 {

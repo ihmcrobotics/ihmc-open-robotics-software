@@ -4,9 +4,9 @@ import net.java.games.input.Component;
 import net.java.games.input.Component.Identifier;
 import net.java.games.input.Controller;
 import net.java.games.input.ControllerEnvironment;
+import us.ihmc.yoUtilities.YoVariableHolder;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableHolder;
 import com.yobotics.simulationconstructionset.joystick.DoubleYoVariableJoystickEventListener;
 import com.yobotics.simulationconstructionset.joystick.JoystickUpdater;
 

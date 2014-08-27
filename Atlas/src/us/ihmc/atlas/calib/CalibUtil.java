@@ -2,19 +2,22 @@ package us.ihmc.atlas.calib;
 
 import georegression.geometry.RotationMatrixGenerator;
 import georegression.struct.so.Rodrigues_F64;
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.utilities.math.MatrixTools;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
+
+import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.utilities.math.MatrixTools;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 public class CalibUtil
 {

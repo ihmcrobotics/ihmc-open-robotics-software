@@ -37,11 +37,11 @@ import us.ihmc.utilities.math.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.SpatialMotionVector;
+import us.ihmc.yoUtilities.VariableChangedListener;
+import us.ihmc.yoUtilities.YoVariable;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.VariableChangedListener;
-import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.util.controller.GainCalculator;
 import com.yobotics.simulationconstructionset.util.trajectory.OrientationInterpolationTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.StraightLinePositionTrajectoryGenerator;

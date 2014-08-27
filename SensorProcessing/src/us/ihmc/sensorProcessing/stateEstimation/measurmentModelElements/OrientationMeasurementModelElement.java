@@ -15,8 +15,7 @@ import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.AngleTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 public class OrientationMeasurementModelElement extends AbstractMeasurementModelElement
 {

@@ -18,6 +18,8 @@ import us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHan
 import us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition;
 import us.ihmc.robotDataCommunication.jointState.JointState;
 import us.ihmc.utilities.dynamicClassLoader.DynamicEnumCreator;
+import us.ihmc.yoUtilities.YoVariable;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
@@ -26,8 +28,6 @@ import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.IntegerYoVariable;
 import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.LongYoVariable;
-import com.yobotics.simulationconstructionset.YoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicFactory;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;

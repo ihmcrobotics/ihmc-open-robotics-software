@@ -12,8 +12,7 @@ import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.kalman.YoKalmanFilter;
 import us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements.MeasurementModelElement;
 import us.ihmc.sensorProcessing.stateEstimation.processModelElements.ProcessModelElement;
-
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 public class ComposableStateEstimator extends AbstractControlFlowElement
 {

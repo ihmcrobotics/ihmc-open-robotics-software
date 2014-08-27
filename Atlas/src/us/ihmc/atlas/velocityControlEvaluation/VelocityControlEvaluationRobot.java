@@ -1,13 +1,14 @@
 package us.ihmc.atlas.velocityControlEvaluation;
 
+import javax.vecmath.Vector3d;
+
+import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
+import us.ihmc.utilities.Axis;
+
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.Link;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SliderJoint;
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.utilities.Axis;
-
-import javax.vecmath.Vector3d;
 
 public class VelocityControlEvaluationRobot extends Robot
 {

@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.examples.FallingBrickRobot;
 import com.yobotics.simulationconstructionset.gui.SimulationGUITestFixture;

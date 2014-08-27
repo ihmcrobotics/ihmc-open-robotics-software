@@ -1,18 +1,19 @@
 package us.ihmc.sensorProcessing.pointClouds.shape;
 
-import bubo.clouds.detect.tools.PointCloudShapeTools;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import georegression.geometry.UtilPlane3D_F64;
 import georegression.struct.plane.PlaneGeneral3D_F64;
 import georegression.struct.plane.PlaneNormal3D_F64;
 import georegression.struct.point.Point3D_F64;
-import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import org.junit.Test;
+
+import bubo.clouds.detect.tools.PointCloudShapeTools;
 
 /**
  * @author Peter Abeles

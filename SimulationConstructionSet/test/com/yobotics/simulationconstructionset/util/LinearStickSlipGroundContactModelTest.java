@@ -15,10 +15,10 @@ import org.junit.Test;
 
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.test.JUnitTools;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.GroundContactPoint;
 import com.yobotics.simulationconstructionset.GroundContactPointsHolder;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.ground.FlatGroundProfile;
 import com.yobotics.simulationconstructionset.util.ground.SlopedPlaneGroundProfile;
 

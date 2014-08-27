@@ -30,10 +30,8 @@ import javax.swing.text.BadLocationException;
 import us.ihmc.robotDataCommunication.YoVariableHandshakeParser;
 import us.ihmc.robotDataCommunication.jointState.JointState;
 import us.ihmc.robotDataCommunication.logger.util.FileSelectionDialog;
-import us.ihmc.utilities.math.TimeTools;
-
-import com.yobotics.simulationconstructionset.YoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import us.ihmc.yoUtilities.YoVariable;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 public class YoVariableExtracter
 {

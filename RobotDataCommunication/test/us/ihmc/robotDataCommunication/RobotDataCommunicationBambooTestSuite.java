@@ -1,7 +1,7 @@
 package us.ihmc.robotDataCommunication;
 
-import org.junit.runner.*;
-import org.junit.runners.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 import us.ihmc.utilities.test.JUnitTestSuiteConstructor;
 

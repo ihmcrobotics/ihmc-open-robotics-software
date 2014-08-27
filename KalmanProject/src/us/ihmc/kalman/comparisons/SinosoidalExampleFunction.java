@@ -1,8 +1,9 @@
 package us.ihmc.kalman.comparisons;
 
+import us.ihmc.yoUtilities.YoVariableRegistry;
+
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 
 public class SinosoidalExampleFunction  implements RobotController, ExampleFunctionController

@@ -10,9 +10,6 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolver;
 import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.ContactPointWrenchOptimizerNative;
-import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWrenchDistributor;
-import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWrenchDistributorInputData;
-import us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWrenchDistributorOutputData;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -21,10 +18,10 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
 import us.ihmc.utilities.screwTheory.Wrench;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class ContactPointGroundReactionWrenchDistributor implements GroundReactionWrenchDistributor
 {

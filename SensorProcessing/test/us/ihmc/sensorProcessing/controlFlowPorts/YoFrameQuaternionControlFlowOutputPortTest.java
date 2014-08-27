@@ -12,8 +12,7 @@ import us.ihmc.controlFlow.NullControlFlowElement;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 public class YoFrameQuaternionControlFlowOutputPortTest
 {

@@ -2,29 +2,20 @@ package us.ihmc.atlas.ros;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.ros.exception.RemoteException;
-import org.ros.internal.message.RawMessage;
-import org.ros.message.MessageFactory;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.service.ServiceResponseListener;
 
 import us.ihmc.atlas.AtlasDampingParameters;
-import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
+import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosServiceClient;
 import us.ihmc.utilities.ros.RosStringPublisher;
-import us.ihmc.robotSide.RobotSide;
 import atlas_msgs.SetJointDamping;
 import atlas_msgs.SetJointDampingRequest;
 import atlas_msgs.SetJointDampingResponse;
 import cern.colt.Arrays;
-import dynamic_reconfigure.DoubleParameter;
-import dynamic_reconfigure.Reconfigure;
-import dynamic_reconfigure.ReconfigureRequest;
-import dynamic_reconfigure.ReconfigureResponse;
 
 public class RosAtlasDampingSetter
 {

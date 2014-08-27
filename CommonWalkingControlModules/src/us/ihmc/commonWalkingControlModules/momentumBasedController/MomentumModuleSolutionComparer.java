@@ -1,11 +1,9 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
 import java.util.ArrayList;
-import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredJointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredRateOfChangeOfMomentumCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleDataObject;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
@@ -13,12 +11,10 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.M
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
-import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
 import us.ihmc.utilities.screwTheory.Wrench;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public class MomentumModuleSolutionComparer

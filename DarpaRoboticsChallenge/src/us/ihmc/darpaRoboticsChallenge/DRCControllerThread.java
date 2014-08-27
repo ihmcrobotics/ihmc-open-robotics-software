@@ -28,13 +28,13 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.InverseDynamicsMechanismReferenceFrameVisualizer;
 import com.yobotics.simulationconstructionset.JointAxisVisualizer;
 import com.yobotics.simulationconstructionset.LongYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.ModularRobotController;
 import com.yobotics.simulationconstructionset.robotController.ModularSensorProcessor;
 import com.yobotics.simulationconstructionset.robotController.MultiThreadedRobotControlElement;

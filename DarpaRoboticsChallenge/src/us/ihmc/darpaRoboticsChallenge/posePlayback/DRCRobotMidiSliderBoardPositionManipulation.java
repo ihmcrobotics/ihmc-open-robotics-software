@@ -1,10 +1,14 @@
 package us.ihmc.darpaRoboticsChallenge.posePlayback;
 
-import com.yobotics.simulationconstructionset.*;
-import com.yobotics.simulationconstructionset.util.graphics.*;
-import com.yobotics.simulationconstructionset.util.inputdevices.MidiSliderBoard;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePose;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.LinkedHashMap;
+
+import javax.media.j3d.Transform3D;
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
+
 import us.ihmc.SdfLoader.SDFPerfectSimulatedOutputWriter;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedSensorReader;
 import us.ihmc.SdfLoader.SDFRobot;
@@ -19,18 +23,32 @@ import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
 import us.ihmc.utilities.kinematics.NumericalInverseKinematicsCalculator;
-import us.ihmc.utilities.math.geometry.*;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
+import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.yoUtilities.VariableChangedListener;
+import us.ihmc.yoUtilities.YoVariable;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
-import javax.media.j3d.Transform3D;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.LinkedHashMap;
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.EnumYoVariable;
+import com.yobotics.simulationconstructionset.FloatingJoint;
+import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
+import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicLineSegment;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
+import com.yobotics.simulationconstructionset.util.inputdevices.MidiSliderBoard;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePose;
 
 public class DRCRobotMidiSliderBoardPositionManipulation
 {

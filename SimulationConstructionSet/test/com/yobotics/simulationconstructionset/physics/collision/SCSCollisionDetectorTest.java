@@ -14,8 +14,8 @@ import com.yobotics.simulationconstructionset.Link;
 import com.yobotics.simulationconstructionset.physics.CollisionHandler;
 import com.yobotics.simulationconstructionset.physics.CollisionShape;
 import com.yobotics.simulationconstructionset.physics.CollisionShapeDescription;
-import com.yobotics.simulationconstructionset.physics.Contacts;
 import com.yobotics.simulationconstructionset.physics.CollisionShapeFactory;
+import com.yobotics.simulationconstructionset.physics.Contacts;
 import com.yobotics.simulationconstructionset.physics.ScsCollisionDetector;
 
 

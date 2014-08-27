@@ -5,8 +5,7 @@ import java.util.List;
 
 import us.ihmc.robotDataCommunication.jointState.JointHolder;
 import us.ihmc.util.RealtimeTools;
-
-import com.yobotics.simulationconstructionset.YoVariable;
+import us.ihmc.yoUtilities.YoVariable;
 
 public class FullStateBuffer extends RegistryBuffer
 {

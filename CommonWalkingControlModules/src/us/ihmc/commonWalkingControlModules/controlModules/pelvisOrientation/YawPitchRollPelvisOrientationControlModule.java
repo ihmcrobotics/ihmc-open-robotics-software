@@ -8,9 +8,9 @@ import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.controller.PDController;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 import com.yobotics.simulationconstructionset.util.math.filter.FilteredVelocityYoVariable;

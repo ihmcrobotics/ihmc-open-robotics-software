@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.sensors;
 
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.SensorProcessor;
 
 public class CommonWalkingReferenceFramesUpdater implements SensorProcessor

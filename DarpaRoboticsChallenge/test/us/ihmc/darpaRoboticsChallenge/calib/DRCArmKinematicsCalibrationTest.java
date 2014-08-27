@@ -1,16 +1,16 @@
 package us.ihmc.darpaRoboticsChallenge.calib;
 
-import boofcv.io.image.UtilImageIO;
-import boofcv.struct.calib.IntrinsicParameters;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import georegression.struct.se.Se3_F64;
-
-import org.junit.Test;
-
-import us.ihmc.darpaRoboticsChallenge.calib.DRCArmKinematicsCalibration;
 
 import java.awt.image.BufferedImage;
 
-import static org.junit.Assert.*;
+import org.junit.Test;
+
+import boofcv.io.image.UtilImageIO;
+import boofcv.struct.calib.IntrinsicParameters;
 
 /**
  * @author Peter Abeles

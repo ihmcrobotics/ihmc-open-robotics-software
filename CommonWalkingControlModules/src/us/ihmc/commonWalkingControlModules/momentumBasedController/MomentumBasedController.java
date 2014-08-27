@@ -51,10 +51,10 @@ import us.ihmc.utilities.screwTheory.TotalMassCalculator;
 import us.ihmc.utilities.screwTheory.TotalWrenchCalculator;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.utilities.screwTheory.Wrench;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFrameVector2d;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;

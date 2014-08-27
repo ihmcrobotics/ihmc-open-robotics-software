@@ -1,16 +1,17 @@
 package us.ihmc.sensorProcessing.pointClouds.testbed;
 
+import georegression.struct.point.Point3D_F64;
+
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
+
+import us.ihmc.sensorProcessing.pointClouds.GeometryOps;
 import boofcv.gui.image.ShowImages;
 import bubo.gui.FactoryVisualization3D;
 import bubo.gui.UtilDisplayBubo;
 import bubo.gui.d3.PointCloudPanel;
 import bubo.io.pcl.PointCloudLibraryPcdWriter;
-import georegression.struct.point.Point3D_F64;
-import us.ihmc.sensorProcessing.pointClouds.GeometryOps;
-
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Peter Abeles

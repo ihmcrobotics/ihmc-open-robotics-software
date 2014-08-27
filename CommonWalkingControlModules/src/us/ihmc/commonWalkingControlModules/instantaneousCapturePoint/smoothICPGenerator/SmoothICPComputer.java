@@ -14,10 +14,10 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFoot
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;

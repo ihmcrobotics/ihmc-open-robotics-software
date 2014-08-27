@@ -15,11 +15,11 @@ import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions
 import us.ihmc.utilities.ForceSensorDefinition;
 import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.FloatingJoint;
 import com.yobotics.simulationconstructionset.IMUMount;
 import com.yobotics.simulationconstructionset.Joint;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 
 public class DRCPerfectSensorReaderFactory implements SensorReaderFactory

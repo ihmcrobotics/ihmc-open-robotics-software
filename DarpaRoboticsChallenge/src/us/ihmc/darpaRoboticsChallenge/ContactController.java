@@ -2,8 +2,9 @@ package us.ihmc.darpaRoboticsChallenge;
 
 import java.util.ArrayList;
 
+import us.ihmc.yoUtilities.YoVariableRegistry;
+
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.ground.Contactable;
 import com.yobotics.simulationconstructionset.util.ground.SimpleStickSlipContactModel;

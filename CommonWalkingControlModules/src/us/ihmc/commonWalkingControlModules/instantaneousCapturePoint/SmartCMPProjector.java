@@ -2,19 +2,19 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
 import javax.vecmath.Point2d;
 
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
-
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLine2d;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.yoUtilities.YoVariableRegistry;
+
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
 
 public class SmartCMPProjector
 {

@@ -10,10 +10,9 @@ import javassist.CtClass;
 import javassist.CtField;
 import javassist.CtMethod;
 import javassist.NotFoundException;
-
-import com.yobotics.simulationconstructionset.VariableChangedListener;
-import com.yobotics.simulationconstructionset.YoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import us.ihmc.yoUtilities.VariableChangedListener;
+import us.ihmc.yoUtilities.YoVariable;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 /**
  * Helper class to test that variables in a registry are only changed by a single thread

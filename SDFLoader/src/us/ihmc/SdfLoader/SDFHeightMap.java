@@ -2,9 +2,7 @@ package us.ihmc.SdfLoader;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 
 import javax.imageio.ImageIO;
 import javax.vecmath.Vector3d;

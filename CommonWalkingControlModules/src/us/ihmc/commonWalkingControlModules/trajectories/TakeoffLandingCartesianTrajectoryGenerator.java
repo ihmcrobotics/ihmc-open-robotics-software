@@ -6,10 +6,10 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrameHolder;
 import us.ihmc.utilities.math.geometry.ReferenceFrameMismatchException;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;

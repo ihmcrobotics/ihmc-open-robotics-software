@@ -2,12 +2,12 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ContactPointGroundReactionWrenchDistributor;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.yoUtilities.VariableChangedListener;
+import us.ihmc.yoUtilities.YoVariable;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.VariableChangedListener;
-import com.yobotics.simulationconstructionset.YoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.inputdevices.MidiSliderBoard;
 
 public class ContactPointWrenchDistributorSliderInput implements VariableChangedListener

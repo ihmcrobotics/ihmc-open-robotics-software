@@ -6,7 +6,6 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
-import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.RobotSpecificJointNames;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
@@ -15,11 +14,11 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RevoluteJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.yoUtilities.VariableChangedListener;
+import us.ihmc.yoUtilities.YoVariable;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.VariableChangedListener;
-import com.yobotics.simulationconstructionset.YoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 

@@ -7,10 +7,10 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LowerBodyTorques;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.humanoidRobot.partNames.RobotSpecificJointNames;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;

@@ -8,6 +8,7 @@ import java.io.File;
 import org.junit.Test;
 
 import us.ihmc.utilities.MemoryTools;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.examples.FallingBrickRobot;
 

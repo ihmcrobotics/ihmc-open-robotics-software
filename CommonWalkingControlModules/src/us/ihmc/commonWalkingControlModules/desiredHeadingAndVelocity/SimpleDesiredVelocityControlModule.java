@@ -2,10 +2,10 @@ package us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity;
 
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector2d;
 
 public class SimpleDesiredVelocityControlModule implements DesiredVelocityControlModule

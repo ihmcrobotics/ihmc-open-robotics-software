@@ -22,10 +22,10 @@ import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.SpatialMotionVector;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 
 public abstract class AbstractFootControlState extends State<ConstraintType>

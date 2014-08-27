@@ -7,10 +7,10 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.packetProviders.DesiredHighLevelStateProvider;
 import us.ihmc.communication.HighLevelState;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;

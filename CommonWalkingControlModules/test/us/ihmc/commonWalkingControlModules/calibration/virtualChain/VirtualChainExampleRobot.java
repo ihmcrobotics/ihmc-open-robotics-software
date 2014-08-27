@@ -1,11 +1,18 @@
 package us.ihmc.commonWalkingControlModules.calibration.virtualChain;
 
-import com.yobotics.simulationconstructionset.*;
-import us.ihmc.utilities.Axis;
-
-import javax.vecmath.Vector3d;
 import java.util.ArrayList;
 import java.util.Random;
+
+import javax.vecmath.Vector3d;
+
+import us.ihmc.utilities.Axis;
+
+import com.yobotics.simulationconstructionset.FloatingJoint;
+import com.yobotics.simulationconstructionset.Joint;
+import com.yobotics.simulationconstructionset.Link;
+import com.yobotics.simulationconstructionset.PinJoint;
+import com.yobotics.simulationconstructionset.Robot;
+import com.yobotics.simulationconstructionset.SliderJoint;
 
 public abstract class VirtualChainExampleRobot extends Robot implements RobotRandomPositionMover
 {

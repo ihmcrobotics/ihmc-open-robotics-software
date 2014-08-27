@@ -5,7 +5,6 @@ import javax.media.j3d.Transform3D;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepUtils;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
@@ -14,8 +13,7 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 /**
  * Very simple FinalDesiredICPCalculator that just puts the final desired ICP 4cm or so inside the transfer to foot.

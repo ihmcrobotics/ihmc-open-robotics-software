@@ -4,7 +4,6 @@ import java.util.EnumMap;
 
 import javax.media.j3d.Transform3D;
 
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;

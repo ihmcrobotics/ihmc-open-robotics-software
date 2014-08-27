@@ -4,9 +4,9 @@ import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.controlFlow.ControlFlowOutputPort;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.IMUMount;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public class SimulatedLinearAccelerationSensorFromRobot extends SimulatedSensor<Tuple3d>

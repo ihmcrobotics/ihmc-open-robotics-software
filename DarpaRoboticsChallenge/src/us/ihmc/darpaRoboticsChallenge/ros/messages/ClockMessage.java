@@ -1,6 +1,5 @@
 package us.ihmc.darpaRoboticsChallenge.ros.messages;
 
-import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 
 public class ClockMessage

@@ -1,15 +1,12 @@
 package com.yobotics.simulationconstructionset.physics.collision.gdx;
 
-import com.badlogic.gdx.math.Matrix3;
-import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.math.Vector3;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 import javax.media.j3d.Transform3D;
-import javax.vecmath.Matrix3f;
-import javax.vecmath.Vector3f;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+
+import com.badlogic.gdx.math.Matrix4;
 
 /**
  * @author Peter Abeles

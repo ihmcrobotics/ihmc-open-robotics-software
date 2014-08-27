@@ -1,13 +1,11 @@
 package us.ihmc.darpaRoboticsChallenge.sensors;
 
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.yoUtilities.YoVariableRegistry;
+
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.YoVariableLimitChecker;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
-import org.jmonkeyengine.tralala.Pair;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
-
-import java.util.ArrayList;
 
 /**
  * Created with IntelliJ IDEA.

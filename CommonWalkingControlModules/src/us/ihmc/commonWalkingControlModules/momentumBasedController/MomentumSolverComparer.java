@@ -24,8 +24,7 @@ import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
 import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
-
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 public class MomentumSolverComparer
 {

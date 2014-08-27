@@ -7,7 +7,6 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;

@@ -13,8 +13,7 @@ import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 public class StraightUpThenParabolicCartesianTrajectoryGeneratorTest
 {

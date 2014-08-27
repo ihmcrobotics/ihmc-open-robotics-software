@@ -1,17 +1,28 @@
 package us.ihmc.commonWalkingControlModules.simulationComparison;
 
-import com.yobotics.simulationconstructionset.*;
-import com.yobotics.simulationconstructionset.util.simulationTesting.AllYoVariablesSimulationComparer;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+
+import javax.vecmath.Vector3d;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.MemoryTools;
+import us.ihmc.yoUtilities.YoVariable;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
-import javax.vecmath.Vector3d;
-import java.util.ArrayList;
-
-import static org.junit.Assert.*;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.Link;
+import com.yobotics.simulationconstructionset.PinJoint;
+import com.yobotics.simulationconstructionset.Robot;
+import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import com.yobotics.simulationconstructionset.util.simulationTesting.AllYoVariablesSimulationComparer;
 
 public class AllYoVariablesSimulationComparerTest 
 {

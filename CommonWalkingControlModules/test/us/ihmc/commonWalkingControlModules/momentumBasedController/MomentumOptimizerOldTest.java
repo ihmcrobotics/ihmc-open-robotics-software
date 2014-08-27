@@ -28,8 +28,7 @@ import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.utilities.test.JUnitTools;
-
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 public class MomentumOptimizerOldTest
 {

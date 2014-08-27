@@ -66,12 +66,12 @@ import us.ihmc.utilities.math.trajectories.providers.TrajectoryParameters;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.Twist;
+import us.ihmc.yoUtilities.VariableChangedListener;
+import us.ihmc.yoUtilities.YoVariable;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
-import com.yobotics.simulationconstructionset.VariableChangedListener;
-import com.yobotics.simulationconstructionset.YoVariable;
 import com.yobotics.simulationconstructionset.util.controller.GainCalculator;
 import com.yobotics.simulationconstructionset.util.controller.PDController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;

@@ -1,9 +1,23 @@
 package us.ihmc.kalman;
 
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.IntegerYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import static com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools.checkPositiveSemiDefinite;
+import static com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools.getFromYoVariablesMatrix;
+import static com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools.getFromYoVariablesSymmetric;
+import static com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools.getFromYoVariablesVector;
+import static com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools.populateYoVariablesMatrix;
+import static com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools.populateYoVariablesSymmetricMatrix;
+import static com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools.populateYoVariablesVector;
+import static com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools.storeInYoVariablesMatrix;
+import static com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools.storeInYoVariablesSymmetric;
+import static com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools.storeInYoVariablesVector;
+import static org.ejml.ops.CommonOps.addEquals;
+import static org.ejml.ops.CommonOps.sub;
+import static org.ejml.ops.CommonOps.subEquals;
+import static us.ihmc.utilities.CheckTools.checkMatrixDimensions;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.ejml.alg.dense.mult.MatrixMatrixMult;
 import org.ejml.alg.dense.mult.MatrixVectorMult;
 import org.ejml.data.DenseMatrix64F;
@@ -12,12 +26,11 @@ import org.ejml.factory.SingularMatrixException;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.MatrixFeatures;
 
-import java.util.ArrayList;
-import java.util.List;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
-import static com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools.*;
-import static org.ejml.ops.CommonOps.*;
-import static us.ihmc.utilities.CheckTools.checkMatrixDimensions;
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.IntegerYoVariable;
 
 
 /**

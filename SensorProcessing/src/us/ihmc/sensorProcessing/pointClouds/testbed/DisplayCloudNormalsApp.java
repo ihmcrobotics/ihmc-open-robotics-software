@@ -1,12 +1,7 @@
 package us.ihmc.sensorProcessing.pointClouds.testbed;
 
-import boofcv.gui.image.ShowImages;
-import bubo.clouds.detect.PointCloudShapeFinder;
-import bubo.clouds.detect.alg.ApproximateSurfaceNormals;
-import bubo.clouds.detect.alg.PointVectorNN;
-import bubo.gui.FactoryVisualization3D;
-import bubo.gui.UtilDisplayBubo;
-import bubo.gui.d3.PointCloudPanel;
+import static us.ihmc.sensorProcessing.pointClouds.GeometryOps.loadScanLines;
+import static us.ihmc.sensorProcessing.pointClouds.testbed.CreateCloudFromFilteredScanApp.filter;
 import georegression.geometry.UtilPlane3D_F64;
 import georegression.geometry.UtilPoint2D_F64;
 import georegression.struct.plane.PlaneGeneral3D_F64;
@@ -16,14 +11,20 @@ import georegression.struct.point.Vector3D_F64;
 import georegression.struct.se.Se3_F64;
 import georegression.struct.shapes.Rectangle2D_F64;
 import georegression.transform.se.SePointOps_F64;
-import org.ddogleg.struct.FastQueue;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static us.ihmc.sensorProcessing.pointClouds.GeometryOps.loadScanLines;
-import static us.ihmc.sensorProcessing.pointClouds.testbed.CreateCloudFromFilteredScanApp.filter;
+import org.ddogleg.struct.FastQueue;
+
+import boofcv.gui.image.ShowImages;
+import bubo.clouds.detect.PointCloudShapeFinder;
+import bubo.clouds.detect.alg.ApproximateSurfaceNormals;
+import bubo.clouds.detect.alg.PointVectorNN;
+import bubo.gui.FactoryVisualization3D;
+import bubo.gui.UtilDisplayBubo;
+import bubo.gui.d3.PointCloudPanel;
 
 /**
  * @author Peter Abeles

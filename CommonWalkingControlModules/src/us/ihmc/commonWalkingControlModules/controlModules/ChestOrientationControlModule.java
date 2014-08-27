@@ -1,14 +1,15 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameQuaternion;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
+import us.ihmc.yoUtilities.YoVariableRegistry;
+
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameQuaternion;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public class ChestOrientationControlModule extends DegenerateOrientationControlModule
 {

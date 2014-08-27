@@ -15,7 +15,6 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvi
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandstepProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.HandstepProvider;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.walking.ComHeightPacket;
 import us.ihmc.communication.packets.walking.FootPosePacket;
@@ -29,9 +28,9 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
 {

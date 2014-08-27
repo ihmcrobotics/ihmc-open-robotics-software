@@ -3,11 +3,11 @@ package us.ihmc.darpaRoboticsChallenge.initialSetup;
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
-import com.yobotics.simulationconstructionset.GroundContactPoint;
-
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.robotSide.RobotSide;
+
+import com.yobotics.simulationconstructionset.GroundContactPoint;
 
 public class SquaredUpDRCRobotInitialSetup implements DRCRobotInitialSetup<SDFRobot>
 {

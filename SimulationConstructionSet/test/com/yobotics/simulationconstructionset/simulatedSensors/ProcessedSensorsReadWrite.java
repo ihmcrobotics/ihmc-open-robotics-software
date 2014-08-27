@@ -7,9 +7,9 @@ import javax.vecmath.Vector3d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.processedSensors.ProcessedIMUSensorsReadOnlyInterface;
 import com.yobotics.simulationconstructionset.processedSensors.ProcessedIMUSensorsWriteOnlyInterface;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;

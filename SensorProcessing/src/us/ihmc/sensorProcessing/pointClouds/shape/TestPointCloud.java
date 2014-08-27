@@ -2,8 +2,9 @@ package us.ihmc.sensorProcessing.pointClouds.shape;
 
 import java.util.Random;
 
-import com.jme3.app.*;
-import com.jme3.math.*;
+import com.jme3.app.SimpleApplication;
+import com.jme3.math.ColorRGBA;
+import com.jme3.math.Vector3f;
 
 
 

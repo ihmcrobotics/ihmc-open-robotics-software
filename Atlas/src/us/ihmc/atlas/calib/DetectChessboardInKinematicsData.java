@@ -1,5 +1,26 @@
 package us.ihmc.atlas.calib;
 
+import georegression.struct.point.Point2D_F64;
+import georegression.struct.point.Point3D_F64;
+import georegression.struct.point.Vector2D_F64;
+import georegression.struct.point.Vector3D_F64;
+import georegression.struct.se.Se3_F64;
+import georegression.transform.se.SePointOps_F64;
+
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import org.ejml.data.DenseMatrix64F;
+
 import boofcv.abst.calib.ConfigChessboard;
 import boofcv.abst.calib.PlanarCalibrationDetector;
 import boofcv.alg.geo.PerspectiveOps;
@@ -13,23 +34,6 @@ import boofcv.io.UtilIO;
 import boofcv.io.image.UtilImageIO;
 import boofcv.struct.calib.IntrinsicParameters;
 import boofcv.struct.image.ImageFloat32;
-import georegression.struct.point.Point2D_F64;
-import georegression.struct.point.Point3D_F64;
-import georegression.struct.point.Vector2D_F64;
-import georegression.struct.point.Vector3D_F64;
-import georegression.struct.se.Se3_F64;
-import georegression.transform.se.SePointOps_F64;
-import org.ejml.data.DenseMatrix64F;
-
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Process data collected inside the network manager for calibration robot join angles using the camera.  For each image in the sequence it computes the

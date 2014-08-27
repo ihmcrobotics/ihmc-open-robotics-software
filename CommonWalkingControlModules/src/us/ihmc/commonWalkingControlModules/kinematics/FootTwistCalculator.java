@@ -6,7 +6,6 @@ import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
-import us.ihmc.utilities.screwTheory.RevoluteJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.Twist;
 

@@ -1,9 +1,10 @@
 package us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.manipulation.states.toroidManipulation.states;
 
-import com.yobotics.simulationconstructionset.util.statemachines.State;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Wrench;
+
+import com.yobotics.simulationconstructionset.util.statemachines.State;
 
 public abstract class ToroidManipulationStateInterface<T extends Enum<T>> extends State<T>
 {

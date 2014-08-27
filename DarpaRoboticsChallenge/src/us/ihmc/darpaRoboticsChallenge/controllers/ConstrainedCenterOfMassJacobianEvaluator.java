@@ -1,15 +1,17 @@
 package us.ihmc.darpaRoboticsChallenge.controllers;
 
-import com.google.common.primitives.Doubles;
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.robotController.RobotController;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+
+import javax.vecmath.Vector3d;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.DecompositionFactory;
 import org.ejml.interfaces.decomposition.SingularValueDecomposition;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.NormOps;
+
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.ColumnSpaceProjector;
@@ -17,12 +19,19 @@ import us.ihmc.utilities.math.DampedLeastSquaresSolver;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.CenterOfMassReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.*;
+import us.ihmc.utilities.screwTheory.ConstrainedCenterOfMassJacobianCalculator;
+import us.ihmc.utilities.screwTheory.ConstrainedCentroidalMomentumMatrixCalculator;
+import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
+import us.ihmc.utilities.screwTheory.Momentum;
+import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.ScrewTools;
+import us.ihmc.utilities.screwTheory.SpatialMotionVector;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
-import javax.vecmath.Vector3d;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
+import com.google.common.primitives.Doubles;
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.robotController.RobotController;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 /**
  * See: L. Sentis. Synthesis and Control of Whole-Body Behaviors in Humanoid Systems (2007)

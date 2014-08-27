@@ -21,8 +21,7 @@ import us.ihmc.utilities.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
-
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 public class LinearAccelerationMeasurementModelElement extends AbstractMeasurementModelElement
 {

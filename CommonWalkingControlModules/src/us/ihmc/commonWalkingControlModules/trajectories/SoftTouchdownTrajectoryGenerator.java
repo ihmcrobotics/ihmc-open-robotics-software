@@ -6,15 +6,12 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
 import us.ihmc.utilities.math.trajectories.providers.PositionProvider;
 import us.ihmc.utilities.math.trajectories.providers.VectorProvider;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector2d;
-import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.YoSpline3D;
 
 public class SoftTouchdownTrajectoryGenerator

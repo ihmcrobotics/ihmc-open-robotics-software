@@ -9,8 +9,8 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public class SimulatedPointVelocitySensor extends SimulatedSensor<Vector3d>

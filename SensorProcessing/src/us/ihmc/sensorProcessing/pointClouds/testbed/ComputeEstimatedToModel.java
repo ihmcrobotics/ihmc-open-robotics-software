@@ -1,14 +1,6 @@
 package us.ihmc.sensorProcessing.pointClouds.testbed;
 
-import boofcv.gui.image.ShowImages;
-import bubo.gui.FactoryVisualization3D;
-import bubo.gui.UtilDisplayBubo;
-import bubo.gui.d3.PointCloudPanel;
-import com.thoughtworks.xstream.XStream;
-import georegression.geometry.RotationMatrixGenerator;
 import georegression.struct.se.Se3_F64;
-import georegression.struct.so.Rodrigues_F64;
-import us.ihmc.sensorProcessing.pointClouds.GeometryOps;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -16,6 +8,8 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import com.thoughtworks.xstream.XStream;
 
 /**
  * @author Peter Abeles

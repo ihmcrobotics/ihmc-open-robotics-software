@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.media.j3d.Transform3D;
-import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.packets.walking.EndOfScriptCommand;
 import us.ihmc.darpaRoboticsChallenge.scriptEngine.ScriptEngineSettings;

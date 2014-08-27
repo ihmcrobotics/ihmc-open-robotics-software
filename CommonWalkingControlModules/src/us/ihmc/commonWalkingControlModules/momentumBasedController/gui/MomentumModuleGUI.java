@@ -13,8 +13,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.AllMomentumMo
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredJointAccelerationCommandAndMotionConstraint;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredSpatialAccelerationCommandAndMotionConstraint;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
-
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 public class MomentumModuleGUI
 {

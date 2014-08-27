@@ -13,8 +13,7 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
-
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 public class PoseSequenceEditorGUI extends JFrame
 {

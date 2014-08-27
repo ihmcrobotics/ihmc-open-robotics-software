@@ -1,9 +1,9 @@
 package us.ihmc.sensorProcessing.sensorProcessors;
 
 import us.ihmc.utilities.math.MathTools;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class ElasticityCompensatorYoVariable extends DoubleYoVariable
 {

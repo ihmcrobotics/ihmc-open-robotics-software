@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+
 import us.ihmc.utilities.math.MatrixTools;
 
 public class MomentumOptimizerNativeInput

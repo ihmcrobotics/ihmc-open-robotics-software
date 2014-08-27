@@ -20,9 +20,9 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePose;
 import com.yobotics.simulationconstructionset.util.trajectory.OrientationTrajectoryGenerator;

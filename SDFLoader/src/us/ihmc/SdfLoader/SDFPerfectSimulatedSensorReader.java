@@ -15,9 +15,9 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.Twist;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RawSensorReader;
 
 public class SDFPerfectSimulatedSensorReader implements RawSensorReader

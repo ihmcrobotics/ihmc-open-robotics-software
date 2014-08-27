@@ -2,13 +2,18 @@ package us.ihmc.utilities.kinematics;
 
 //~--- non-JDK imports --------------------------------------------------------
 
+import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.Random;
+
+import javax.media.j3d.Transform3D;
+
 import org.junit.Test;
-import us.ihmc.SdfLoader.JaxbSDFLoader;
+
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
-import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -18,14 +23,6 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.test.JUnitTools;
-
-import javax.media.j3d.Transform3D;
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.Random;
-
-import static org.junit.Assert.assertTrue;
-//~--- JDK imports ------------------------------------------------------------
 
 public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implements MultiRobotTestInterface
 {

@@ -2,10 +2,8 @@ package us.ihmc.atlas;
 
 import org.junit.Assume;
 import org.junit.Test;
-
 import org.junit.internal.AssumptionViolatedException;
-import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.atlas.AtlasRobotVersion;
+
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;

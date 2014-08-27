@@ -8,11 +8,12 @@ import java.util.ArrayList;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import us.ihmc.yoUtilities.YoVariableRegistry;
+
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.examples.FallingBrickRobot;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;

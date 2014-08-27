@@ -1,6 +1,10 @@
 package us.ihmc.atlas.parameters;
 
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.*;
+import static us.ihmc.atlas.ros.AtlasOrderedJointMap.back_bkx;
+import static us.ihmc.atlas.ros.AtlasOrderedJointMap.back_bky;
+import static us.ihmc.atlas.ros.AtlasOrderedJointMap.back_bkz;
+import static us.ihmc.atlas.ros.AtlasOrderedJointMap.jointNames;
+import static us.ihmc.atlas.ros.AtlasOrderedJointMap.neck_ry;
 
 
 public class AtlasRobotMultiContactControllerParameters extends AtlasWalkingControllerParameters

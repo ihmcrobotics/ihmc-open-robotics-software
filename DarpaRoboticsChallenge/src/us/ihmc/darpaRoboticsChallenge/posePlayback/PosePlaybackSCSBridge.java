@@ -14,7 +14,6 @@ import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseInterpolator
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceReader;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceWriter;
-import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.RobotSide;
@@ -26,12 +25,12 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.yoUtilities.VariableChangedListener;
+import us.ihmc.yoUtilities.YoVariable;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.VariableChangedListener;
-import com.yobotics.simulationconstructionset.YoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.ModularRobotController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicCoordinateSystem;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;

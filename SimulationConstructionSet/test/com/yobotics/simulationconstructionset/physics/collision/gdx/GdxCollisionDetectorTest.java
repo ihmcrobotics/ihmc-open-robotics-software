@@ -1,6 +1,7 @@
 package com.yobotics.simulationconstructionset.physics.collision.gdx;
 
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import us.ihmc.yoUtilities.YoVariableRegistry;
+
 import com.yobotics.simulationconstructionset.physics.ScsCollisionDetector;
 import com.yobotics.simulationconstructionset.physics.collision.SCSCollisionDetectorTest;
 

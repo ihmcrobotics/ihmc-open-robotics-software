@@ -11,9 +11,9 @@ import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointVelocit
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.YoPointVelocityDataObject;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.AfterJointReferenceFrameNameMap;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 /**
  * @author twan

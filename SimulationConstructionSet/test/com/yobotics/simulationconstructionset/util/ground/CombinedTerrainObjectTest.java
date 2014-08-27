@@ -3,7 +3,6 @@ package com.yobotics.simulationconstructionset.util.ground;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;

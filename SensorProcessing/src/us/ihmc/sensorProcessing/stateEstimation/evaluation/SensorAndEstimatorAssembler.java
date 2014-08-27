@@ -27,8 +27,7 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.AfterJointReferenceFrameNameMap;
 import us.ihmc.utilities.screwTheory.RigidBody;
-
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 public class SensorAndEstimatorAssembler
 {

@@ -1,11 +1,5 @@
 package us.ihmc.sensorProcessing.pointClouds.testbed;
 
-import bubo.clouds.FactoryPointCloudShape;
-import bubo.clouds.detect.CloudShapeTypes;
-import bubo.clouds.detect.PointCloudShapeFinder;
-import bubo.clouds.detect.wrapper.ConfigMultiShapeRansac;
-import bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
-import bubo.clouds.filter.UniformDensityCloudOctree;
 import georegression.geometry.GeometryMath_F64;
 import georegression.geometry.UtilPlane3D_F64;
 import georegression.geometry.UtilPoint3D_F64;
@@ -23,6 +17,13 @@ import georegression.transform.se.SePointOps_F64;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import bubo.clouds.FactoryPointCloudShape;
+import bubo.clouds.detect.CloudShapeTypes;
+import bubo.clouds.detect.PointCloudShapeFinder;
+import bubo.clouds.detect.wrapper.ConfigMultiShapeRansac;
+import bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
+import bubo.clouds.filter.UniformDensityCloudOctree;
 
 /**
  * @author Peter Abeles

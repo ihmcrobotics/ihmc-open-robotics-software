@@ -13,10 +13,10 @@ import us.ihmc.communication.packets.walking.FootstepStatus;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class FootstepPathCoordinator implements FootstepProvider
 {

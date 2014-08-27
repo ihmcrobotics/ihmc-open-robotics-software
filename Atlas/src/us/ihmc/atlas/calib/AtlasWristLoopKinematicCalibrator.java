@@ -1,8 +1,11 @@
 package us.ihmc.atlas.calib;
 
-import com.yobotics.simulationconstructionset.DataBuffer;
-import com.yobotics.simulationconstructionset.IndexChangedListener;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePose;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Map;
+
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Point3d;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
@@ -13,12 +16,9 @@ import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Map;
+import com.yobotics.simulationconstructionset.DataBuffer;
+import com.yobotics.simulationconstructionset.IndexChangedListener;
+import com.yobotics.simulationconstructionset.util.math.frames.YoFramePose;
 
 public class AtlasWristLoopKinematicCalibrator extends AtlasCalibrationDataViewer
 {

@@ -1,13 +1,14 @@
 package us.ihmc.atlas;
 
-import com.jme3.math.Quaternion;
-import com.jme3.math.Transform;
-import com.jme3.math.Vector3f;
+import java.io.InputStream;
+
 import us.ihmc.darpaRoboticsChallenge.handControl.DRCHandType;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 
-import java.io.InputStream;
+import com.jme3.math.Quaternion;
+import com.jme3.math.Transform;
+import com.jme3.math.Vector3f;
 
 public enum AtlasRobotVersion {
 	ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS, DRC_NO_HANDS, DRC_HANDS, DRC_EXTENDED_HANDS, DRC_HOOKS, DRC_TASK_HOSE, DRC_EXTENDED_HOOKS, ATLAS_ROBOTIQ;

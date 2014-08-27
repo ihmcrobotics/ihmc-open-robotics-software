@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization;
 
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
+
 import us.ihmc.utilities.exeptions.NoConvergenceException;
 
 public class ConstrainedQPSolverTest

@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 
 import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 
 public class YoContactPoint extends ContactPoint

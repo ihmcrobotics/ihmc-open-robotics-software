@@ -3,11 +3,6 @@ package us.ihmc.utilities.parameterOptimization;
 import java.util.ArrayList;
 import java.util.Random;
 
-import us.ihmc.utilities.parameterOptimization.IndividualToEvaluate;
-import us.ihmc.utilities.parameterOptimization.ListOfParametersToOptimize;
-import us.ihmc.utilities.parameterOptimization.OptimizationProblem;
-import us.ihmc.utilities.parameterOptimization.ParameterOptimizer;
-
 public class SimpleRandomGradientDecentParameterOptimizer implements ParameterOptimizer
 {
    private ArrayList<EvaluatedIndividualListener> evaluatedIndividualListeners;

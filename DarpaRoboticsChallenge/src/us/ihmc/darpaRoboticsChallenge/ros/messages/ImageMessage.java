@@ -1,10 +1,10 @@
 package us.ihmc.darpaRoboticsChallenge.ros.messages;
 
-import us.ihmc.utilities.ros.RosTools;
-
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.nio.ByteBuffer;
+
+import us.ihmc.utilities.ros.RosTools;
 
 public class ImageMessage
 {

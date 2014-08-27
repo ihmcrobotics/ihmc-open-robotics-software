@@ -1,13 +1,16 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
-import com.yobotics.simulationconstructionset.BooleanYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+
 import org.apache.commons.lang.mutable.MutableDouble;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.DecompositionFactory;
 import org.ejml.interfaces.decomposition.SingularValueDecomposition;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.SingularOps;
+
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredJointAccelerationCommand;
@@ -18,11 +21,18 @@ import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.NullspaceCalculator;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
-import us.ihmc.utilities.screwTheory.*;
+import us.ihmc.utilities.screwTheory.ConvectiveTermCalculator;
+import us.ihmc.utilities.screwTheory.GeometricJacobian;
+import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
+import us.ihmc.utilities.screwTheory.PointJacobian;
+import us.ihmc.utilities.screwTheory.PointJacobianConvectiveTermCalculator;
+import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.ScrewTools;
+import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
+import us.ihmc.utilities.screwTheory.TwistCalculator;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
+import com.yobotics.simulationconstructionset.BooleanYoVariable;
 
 /**
  * @author twan

@@ -11,13 +11,14 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.yoUtilities.NameSpace;
+import us.ihmc.yoUtilities.YoVariable;
+import us.ihmc.yoUtilities.YoVariableRegistry;
+import us.ihmc.yoUtilities.YoVariableType;
+
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.IntegerYoVariable;
-import com.yobotics.simulationconstructionset.NameSpace;
-import com.yobotics.simulationconstructionset.YoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.YoVariableType;
 
 public class YoWhiteBoardTest
 {

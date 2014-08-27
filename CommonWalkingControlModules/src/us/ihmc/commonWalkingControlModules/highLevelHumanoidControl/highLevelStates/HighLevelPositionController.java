@@ -24,11 +24,11 @@ import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
+import us.ihmc.yoUtilities.VariableChangedListener;
+import us.ihmc.yoUtilities.YoVariable;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.VariableChangedListener;
-import com.yobotics.simulationconstructionset.YoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.controller.GainCalculator;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;

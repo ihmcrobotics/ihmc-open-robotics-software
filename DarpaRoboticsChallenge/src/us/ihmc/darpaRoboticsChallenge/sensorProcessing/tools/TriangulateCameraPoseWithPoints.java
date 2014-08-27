@@ -1,5 +1,17 @@
 package us.ihmc.darpaRoboticsChallenge.sensorProcessing.tools;
 
+import georegression.fitting.se.ModelManagerSe3_F64;
+import georegression.struct.GeoTuple3D_F64;
+import georegression.struct.point.Point2D_F64;
+import georegression.struct.point.Point3D_F64;
+import georegression.struct.se.Se3_F64;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.ddogleg.fitting.modelset.ModelMatcher;
+import org.ddogleg.fitting.modelset.ransac.Ransac;
+
 import boofcv.abst.geo.Estimate1ofPnP;
 import boofcv.alg.geo.DistanceModelMonoPixels;
 import boofcv.alg.geo.PerspectiveOps;
@@ -9,16 +21,6 @@ import boofcv.factory.geo.EnumPNP;
 import boofcv.factory.geo.FactoryMultiView;
 import boofcv.struct.calib.IntrinsicParameters;
 import boofcv.struct.geo.Point2D3D;
-import georegression.fitting.se.ModelManagerSe3_F64;
-import georegression.struct.GeoTuple3D_F64;
-import georegression.struct.point.Point2D_F64;
-import georegression.struct.point.Point3D_F64;
-import georegression.struct.se.Se3_F64;
-import org.ddogleg.fitting.modelset.ModelMatcher;
-import org.ddogleg.fitting.modelset.ransac.Ransac;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Given a set of known points, triangulate the camera pose in the world.

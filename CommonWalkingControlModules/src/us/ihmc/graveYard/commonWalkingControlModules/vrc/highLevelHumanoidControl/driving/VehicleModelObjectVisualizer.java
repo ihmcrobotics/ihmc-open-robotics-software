@@ -1,14 +1,15 @@
 package us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.driving;
 
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
 import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.yoUtilities.YoVariableRegistry;
+
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
 
 
 public class VehicleModelObjectVisualizer

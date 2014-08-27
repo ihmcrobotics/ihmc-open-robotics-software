@@ -10,7 +10,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import us.ihmc.atlas.AtlasRobotModelFactory;
-import us.ihmc.darpaRoboticsChallenge.processManagement.DRCDashboardTypes;
 import us.ihmc.darpaRoboticsChallenge.processManagement.DRCDashboardTypes.DRCROSTasks;
 
 public class TaskSelectionPanel extends JPanel

@@ -8,12 +8,12 @@ import java.util.List;
 
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
+import us.ihmc.yoUtilities.YoVariable;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.BooleanYoVariable;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
 import com.yobotics.simulationconstructionset.EnumYoVariable;
-import com.yobotics.simulationconstructionset.YoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 public class LegTorqueData
 {

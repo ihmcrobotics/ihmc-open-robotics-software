@@ -1,16 +1,16 @@
 package us.ihmc.sensorProcessing.pointClouds.shape;
 
+import static junit.framework.Assert.assertEquals;
 import georegression.geometry.GeometryMath_F64;
 import georegression.geometry.RotationMatrixGenerator;
 import georegression.struct.plane.PlaneNormal3D_F64;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.se.Se3_F64;
 import georegression.transform.se.SePointOps_F64;
-import org.junit.Test;
 
 import java.util.Random;
 
-import static junit.framework.Assert.assertEquals;
+import org.junit.Test;
 
 /**
  * @author Peter Abeles

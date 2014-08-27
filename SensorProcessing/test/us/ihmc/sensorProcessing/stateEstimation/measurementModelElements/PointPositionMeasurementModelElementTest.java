@@ -24,14 +24,13 @@ import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.AfterJointReferenceFrameNameMap;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTestTools.RandomFloatingChain;
-import us.ihmc.utilities.screwTheory.AfterJointReferenceFrameNameMap;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
-
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 public class PointPositionMeasurementModelElementTest
 {

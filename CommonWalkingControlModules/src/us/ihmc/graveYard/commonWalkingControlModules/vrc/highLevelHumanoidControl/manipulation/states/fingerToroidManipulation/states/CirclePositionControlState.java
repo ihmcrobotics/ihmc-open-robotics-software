@@ -11,8 +11,8 @@ import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
 import us.ihmc.utilities.math.trajectories.providers.OrientationProvider;
 import us.ihmc.utilities.math.trajectories.providers.SE3ConfigurationProvider;
 import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.controller.SE3PIDGains;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.trajectory.CirclePositionTrajectoryGenerator;

@@ -1,11 +1,22 @@
 package us.ihmc.commonWalkingControlModules.wrenchDistribution;
 
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
+import static junit.framework.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
+import javax.vecmath.Vector3d;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.EjmlUnitTests;
 import org.ejml.ops.RandomMatrices;
 import org.junit.Test;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolver;
@@ -17,11 +28,7 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTestTools;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
 import us.ihmc.utilities.screwTheory.Wrench;
-
-import javax.vecmath.Vector3d;
-import java.util.*;
-
-import static junit.framework.Assert.assertTrue;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 public class PlaneContactWrenchMatrixCalculatorTest
 {

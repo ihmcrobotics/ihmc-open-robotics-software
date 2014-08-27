@@ -1,8 +1,9 @@
 package us.ihmc.IMUKalmanFilter;
 
+import us.ihmc.yoUtilities.YoVariableRegistry;
+
 import com.mathworks.jama.Matrix;
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 
 /**
  * <p>Title: </p>

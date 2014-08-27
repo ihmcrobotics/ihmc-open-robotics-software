@@ -1,17 +1,14 @@
 package us.ihmc.sensorProcessing.pointClouds.testbed;
 
-import com.thoughtworks.xstream.XStream;
-import georegression.geometry.RotationMatrixGenerator;
+import static us.ihmc.sensorProcessing.pointClouds.GeometryOps.loadScanLines;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.se.Se3_F64;
-import georegression.struct.so.Rodrigues_F64;
 
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.List;
 
-import static us.ihmc.sensorProcessing.pointClouds.GeometryOps.loadScanLines;
+import com.thoughtworks.xstream.XStream;
 
 /**
  * @author Peter Abeles

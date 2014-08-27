@@ -1,10 +1,11 @@
 package com.yobotics.simulationconstructionset;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.yoUtilities.RewoundListener;
 
 public class SimulationRewoundListenerTest
 {
@@ -63,10 +64,10 @@ public class SimulationRewoundListenerTest
       scs.closeAndDispose();
    }
    
-   private class SimpleSimulationRewoundListener implements SimulationRewoundListener
+   private class SimpleSimulationRewoundListener implements RewoundListener
    {
       private int count = 0;
-      public void simulationWasRewound()
+      public void wasRewound()
       {
 //         System.out.println(count + ": Sim was rewound");
          count++;

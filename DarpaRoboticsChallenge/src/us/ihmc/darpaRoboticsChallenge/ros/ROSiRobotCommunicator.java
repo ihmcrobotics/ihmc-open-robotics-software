@@ -8,15 +8,11 @@ import java.net.URISyntaxException;
 import org.ros.namespace.GraphName;
 import org.ros.node.AbstractNodeMain;
 import org.ros.node.ConnectedNode;
-import org.ros.node.DefaultNodeMainExecutor;
-import org.ros.node.NodeConfiguration;
-import org.ros.node.NodeMainExecutor;
 import org.ros.node.topic.Publisher;
 
 import us.ihmc.communication.packets.manipulation.FingerStatePacket;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
-import us.ihmc.utilities.ros.RosTools;
 
 public class ROSiRobotCommunicator extends AbstractNodeMain
 {

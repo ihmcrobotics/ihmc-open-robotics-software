@@ -1,22 +1,29 @@
 package us.ihmc.atlas.calib;
 
-import boofcv.alg.geo.PerspectiveOps;
-import boofcv.alg.geo.calibration.PlanarCalibrationTarget;
-import boofcv.struct.calib.IntrinsicParameters;
 import georegression.struct.point.Point2D_F64;
-import org.ddogleg.optimization.functions.FunctionNtoM;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.robotSide.RobotSide;
-import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
-import java.util.*;
+
+import org.ddogleg.optimization.functions.FunctionNtoM;
+
+import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import boofcv.alg.geo.PerspectiveOps;
+import boofcv.alg.geo.calibration.PlanarCalibrationTarget;
+import boofcv.struct.calib.IntrinsicParameters;
 
 /**
  *

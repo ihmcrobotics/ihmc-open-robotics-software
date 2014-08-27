@@ -7,9 +7,9 @@ import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlModule

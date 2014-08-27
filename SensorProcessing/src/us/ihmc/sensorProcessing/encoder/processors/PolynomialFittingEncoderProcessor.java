@@ -1,11 +1,13 @@
 package us.ihmc.sensorProcessing.encoder.processors;
 
-import com.yobotics.simulationconstructionset.DoubleYoVariable;
-import com.yobotics.simulationconstructionset.IntegerYoVariable;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
+
+import us.ihmc.yoUtilities.YoVariableRegistry;
+
+import com.yobotics.simulationconstructionset.DoubleYoVariable;
+import com.yobotics.simulationconstructionset.IntegerYoVariable;
 
 /**
  * See Merry, van De Molengraft, Steinbuch - 2010 - Velocity and acceleration estimation for optical incremental encoders

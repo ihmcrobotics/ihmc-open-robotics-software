@@ -3,10 +3,10 @@ package us.ihmc.sensorProcessing.stateEstimation.evaluation;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimator;
+import us.ihmc.yoUtilities.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.Robot;
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 
 public class StateEstimatorErrorCalculatorController implements RobotController

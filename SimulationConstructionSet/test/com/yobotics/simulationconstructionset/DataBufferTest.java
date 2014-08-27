@@ -10,6 +10,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.yoUtilities.YoVariable;
+import us.ihmc.yoUtilities.YoVariableRegistry;
+
 import com.yobotics.simulationconstructionset.DataBuffer.RepeatDataBufferEntryException;
 import com.yobotics.simulationconstructionset.gui.config.VarGroup;
 import com.yobotics.simulationconstructionset.gui.config.VarGroupList;
