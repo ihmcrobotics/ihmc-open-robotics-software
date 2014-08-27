@@ -7,8 +7,8 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.utilities.RandomTools;
-import us.ihmc.valkyrie.kinematics.YoDesiredValkyrieJoint;
 import us.ihmc.valkyrie.kinematics.ValkyrieJointInterface;
+import us.ihmc.valkyrie.kinematics.YoDesiredValkyrieJoint;
 import us.ihmc.valkyrie.roboNet.DummyTurboDriver;
 import us.ihmc.valkyrie.roboNet.TurboDriver;
 

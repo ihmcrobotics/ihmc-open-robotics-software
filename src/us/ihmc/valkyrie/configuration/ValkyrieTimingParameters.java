@@ -1,10 +1,8 @@
 package us.ihmc.valkyrie.configuration;
 
 import us.ihmc.realtime.PriorityParameters;
-import us.ihmc.valkyrie.roboNet.api.turbodriver_api.TurbodriverAPI_DRCv4;
 import us.ihmc.valkyrie.roboNet.api.turbodriver_api.TurbodriverAPI_DRCv4_bench;
 import us.ihmc.valkyrie.roboNet.api.turbodriver_api.TurbodriverAPI_DRCv4_ihmc;
-import us.ihmc.valkyrie.roboNet.api.turbodriver_api.TurbodriverAPI_DRCv4_linear_ihmc;
 
 public class ValkyrieTimingParameters
 {

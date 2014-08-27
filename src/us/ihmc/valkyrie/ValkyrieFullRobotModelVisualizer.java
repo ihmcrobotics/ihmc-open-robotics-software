@@ -8,10 +8,8 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaElipsoidsVisualizer;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 
 import com.yobotics.simulationconstructionset.InverseDynamicsMechanismReferenceFrameVisualizer;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;

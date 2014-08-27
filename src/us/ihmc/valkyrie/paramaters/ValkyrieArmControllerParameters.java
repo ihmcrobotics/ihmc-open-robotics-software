@@ -3,17 +3,17 @@ package us.ihmc.valkyrie.paramaters;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.yobotics.simulationconstructionset.YoVariableRegistry;
-import com.yobotics.simulationconstructionset.util.controller.YoIndependentSE3PIDGains;
-import com.yobotics.simulationconstructionset.util.controller.YoPIDGains;
-import com.yobotics.simulationconstructionset.util.controller.YoSE3PIDGains;
-import com.yobotics.simulationconstructionset.util.controller.YoSymmetricSE3PIDGains;
-
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.yoUtilities.YoVariableRegistry;
+
+import com.yobotics.simulationconstructionset.util.controller.YoIndependentSE3PIDGains;
+import com.yobotics.simulationconstructionset.util.controller.YoPIDGains;
+import com.yobotics.simulationconstructionset.util.controller.YoSE3PIDGains;
+import com.yobotics.simulationconstructionset.util.controller.YoSymmetricSE3PIDGains;
 
 public class ValkyrieArmControllerParameters implements ArmControllerParameters
 {
