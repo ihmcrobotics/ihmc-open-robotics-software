@@ -6,9 +6,9 @@ import java.util.concurrent.Executors;
 
 import javax.media.j3d.Transform3D;
 
+import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packets.walking.EndOfScriptCommand;
 import us.ihmc.communication.packets.walking.FootstepDataList;
-import us.ihmc.darpaRoboticsChallenge.configuration.DRCNetClassList;
 import us.ihmc.darpaRoboticsChallenge.scriptEngine.ScriptEngineSettings;
 import us.ihmc.darpaRoboticsChallenge.scriptEngine.ScriptFileLoader;
 import us.ihmc.utilities.ThreadTools;
@@ -34,7 +34,7 @@ public class CommandPlayer implements TimestampListener
    
    private ScriptFileLoader loader;
    
-   public CommandPlayer(AtomicSettableTimestampProvider timestampProvider, ObjectCommunicator fieldComputerClient, DRCNetClassList drcNetClassList)
+   public CommandPlayer(AtomicSettableTimestampProvider timestampProvider, ObjectCommunicator fieldComputerClient, IHMCCommunicationKryoNetClassList drcNetClassList)
    {
       this.timestampProvider = timestampProvider;
       this.fieldComputerClient = fieldComputerClient;

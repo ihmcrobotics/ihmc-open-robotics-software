@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.net.URI;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packets.manipulation.HandJointAnglePacket;
 import us.ihmc.communication.producers.DRCJointConfigurationData;
 import us.ihmc.communication.producers.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
-import us.ihmc.darpaRoboticsChallenge.configuration.DRCNetClassList;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.DepthDataFilter;
@@ -57,7 +57,7 @@ public class DRCNetworkProcessor
       if (fieldComputerClient == null)
       {
          this.fieldComputerClient = new KryoObjectClient(robotModel.getNetworkParameters().getRobotControlComputerIP(), DRCConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT,
-               new DRCNetClassList());
+               new IHMCCommunicationKryoNetClassList());
          ((KryoObjectClient) this.fieldComputerClient).setReconnectAutomatically(true);
       }
       else
