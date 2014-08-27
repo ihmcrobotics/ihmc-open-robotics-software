@@ -51,6 +51,7 @@ public class EfficientPushRodTransmission implements PushRodTransmissionInterfac
       this.reflect = reflect;
       
       efficientPushrodTransmissionJacobian = new ClosedFormJacobian(pushRodTransmissionJoint);
+      efficientPushrodTransmissionJacobian.useFuteks(true);
    }
    
    private boolean invertMatrix(double[][] matrix, double[][] inverseTransposeToPack)
