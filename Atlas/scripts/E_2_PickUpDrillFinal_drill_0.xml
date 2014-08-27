@@ -52,9 +52,9 @@
     </jointAngles>
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>19460007910</long>
-  <us.ihmc.communication.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.walking.ComHeightPacket>
     <heightOffset>-0.02744</heightOffset>
-  </us.ihmc.communication.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.walking.ComHeightPacket>
   <long>25288773671</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>LEFT</robotSide>
@@ -82,13 +82,13 @@
     </jointAngles>
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>40563162590</long>
-  <us.ihmc.communication.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.walking.ComHeightPacket>
     <heightOffset>-0.050960000000000005</heightOffset>
-  </us.ihmc.communication.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.walking.ComHeightPacket>
   <long>40563715850</long>
-  <us.ihmc.communication.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.walking.ComHeightPacket>
     <heightOffset>-0.050960000000000005</heightOffset>
-  </us.ihmc.communication.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.walking.ComHeightPacket>
   <long>56998854957</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>LEFT</robotSide>

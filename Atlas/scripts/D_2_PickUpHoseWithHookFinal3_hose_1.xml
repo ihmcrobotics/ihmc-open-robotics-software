@@ -78,9 +78,9 @@
     </jointAngles>
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>37740550193</long>
-  <us.ihmc.communication.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.walking.ComHeightPacket>
     <heightOffset>-0.05488</heightOffset>
-  </us.ihmc.communication.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.walking.ComHeightPacket>
   <long>59679419767</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
@@ -373,9 +373,9 @@
     </jointAngles>
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>310756276269</long>
-  <us.ihmc.communication.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.walking.ComHeightPacket>
     <heightOffset>0.0034300000000000003</heightOffset>
-  </us.ihmc.communication.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.walking.ComHeightPacket>
   <long>240493105533</long>
   <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList>
     <footstepDataList>

@@ -112,9 +112,9 @@
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
   </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>13086447011</long>
-  <us.ihmc.communication.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.walking.ComHeightPacket>
     <heightOffset>-0.02352</heightOffset>
-  </us.ihmc.communication.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.walking.ComHeightPacket>
   <long>53688925401</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
@@ -197,9 +197,9 @@
     </jointAngles>
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>90364675183</long>
-  <us.ihmc.communication.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.walking.ComHeightPacket>
     <heightOffset>-0.07840000000000001</heightOffset>
-  </us.ihmc.communication.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.walking.ComHeightPacket>
   <long>93731823784</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
@@ -255,17 +255,17 @@
     </jointAngles>
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>116980547049</long>
-  <us.ihmc.communication.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.walking.ComHeightPacket>
     <heightOffset>-0.06272</heightOffset>
-  </us.ihmc.communication.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.walking.ComHeightPacket>
   <long>121460624315</long>
-  <us.ihmc.communication.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.walking.ComHeightPacket>
     <heightOffset>-0.09016</heightOffset>
-  </us.ihmc.communication.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.walking.ComHeightPacket>
   <long>123836562433</long>
-  <us.ihmc.communication.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.walking.ComHeightPacket>
     <heightOffset>-0.098</heightOffset>
-  </us.ihmc.communication.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.walking.ComHeightPacket>
   <long>130274247179</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
@@ -336,13 +336,13 @@
     <fingerState>CRUSH</fingerState>
   </us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
   <long>170476448690</long>
-  <us.ihmc.communication.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.walking.ComHeightPacket>
     <heightOffset>0.01372</heightOffset>
-  </us.ihmc.communication.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.walking.ComHeightPacket>
   <long>173676566663</long>
-  <us.ihmc.communication.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.walking.ComHeightPacket>
     <heightOffset>0.01568</heightOffset>
-  </us.ihmc.communication.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.walking.ComHeightPacket>
   <long>182604452470</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
@@ -533,9 +533,9 @@
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
   </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>220348570372</long>
-  <us.ihmc.communication.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.walking.ComHeightPacket>
     <heightOffset>0.00882</heightOffset>
-  </us.ihmc.communication.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.walking.ComHeightPacket>
   <long>232263662242</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
@@ -688,9 +688,9 @@
     </jointAngles>
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>356772701251</long>
-  <us.ihmc.communication.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.walking.ComHeightPacket>
     <heightOffset>0.00588</heightOffset>
-  </us.ihmc.communication.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.walking.ComHeightPacket>
   <long>359068650864</long>
   <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
@@ -1010,13 +1010,13 @@
     <fingerState>OPEN</fingerState>
   </us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
   <long>566988645969</long>
-  <us.ihmc.communication.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.walking.ComHeightPacket>
     <heightOffset>0.00392</heightOffset>
-  </us.ihmc.communication.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.walking.ComHeightPacket>
   <long>567900731333</long>
-  <us.ihmc.communication.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.walking.ComHeightPacket>
     <heightOffset>-0.019600000000000003</heightOffset>
-  </us.ihmc.communication.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.walking.ComHeightPacket>
   <long>572220851928</long>
   <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
@@ -1067,13 +1067,13 @@
     </jointAngles>
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>585132787199</long>
-  <us.ihmc.communication.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.walking.ComHeightPacket>
     <heightOffset>-0.05488</heightOffset>
-  </us.ihmc.communication.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.walking.ComHeightPacket>
   <long>587132706871</long>
-  <us.ihmc.communication.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.walking.ComHeightPacket>
     <heightOffset>-0.09016</heightOffset>
-  </us.ihmc.communication.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.walking.ComHeightPacket>
   <long>596694392070</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
@@ -1107,9 +1107,9 @@
     <fingerState>CRUSH</fingerState>
   </us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
   <long>605212665859</long>
-  <us.ihmc.communication.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.walking.ComHeightPacket>
     <heightOffset>0.004900000000000001</heightOffset>
-  </us.ihmc.communication.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.walking.ComHeightPacket>
   <long>623571443681</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
@@ -1566,21 +1566,21 @@
     </jointAngles>
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>850108791728</long>
-  <us.ihmc.communication.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.walking.ComHeightPacket>
     <heightOffset>-0.01176</heightOffset>
-  </us.ihmc.communication.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.walking.ComHeightPacket>
   <long>852484750073</long>
-  <us.ihmc.communication.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.walking.ComHeightPacket>
     <heightOffset>-0.050960000000000005</heightOffset>
-  </us.ihmc.communication.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.walking.ComHeightPacket>
   <long>854408775543</long>
-  <us.ihmc.communication.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.walking.ComHeightPacket>
     <heightOffset>-0.06664</heightOffset>
-  </us.ihmc.communication.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.walking.ComHeightPacket>
   <long>856198004794</long>
-  <us.ihmc.communication.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.walking.ComHeightPacket>
     <heightOffset>-0.08624</heightOffset>
-  </us.ihmc.communication.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.walking.ComHeightPacket>
   <long>866572711049</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
@@ -1912,9 +1912,9 @@
     <desiredNeckPitchAngle>0.0</desiredNeckPitchAngle>
   </us.ihmc.communication.packets.HeadOrientationPacket>
   <long>1016517282721</long>
-  <us.ihmc.communication.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.walking.ComHeightPacket>
     <heightOffset>-0.10976</heightOffset>
-  </us.ihmc.communication.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.walking.ComHeightPacket>
   <long>1024044997712</long>
   <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>
@@ -1969,17 +1969,17 @@
     <fingerState>CRUSH</fingerState>
   </us.ihmc.commonWalkingControlModules.packets.FingerStatePacket>
   <long>1057150205611</long>
-  <us.ihmc.communication.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.walking.ComHeightPacket>
     <heightOffset>-0.08232</heightOffset>
-  </us.ihmc.communication.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.walking.ComHeightPacket>
   <long>1059948977921</long>
-  <us.ihmc.communication.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.walking.ComHeightPacket>
     <heightOffset>-0.06664</heightOffset>
-  </us.ihmc.communication.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.walking.ComHeightPacket>
   <long>1075892835872</long>
-  <us.ihmc.communication.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.walking.ComHeightPacket>
     <heightOffset>-0.03136</heightOffset>
-  </us.ihmc.communication.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.walking.ComHeightPacket>
   <long>1080156940936</long>
   <us.ihmc.communication.packets.HeadOrientationPacket>
     <quaternion>

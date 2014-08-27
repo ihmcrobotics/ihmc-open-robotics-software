@@ -39,9 +39,9 @@
     <pause>true</pause>
   </us.ihmc.communication.packets.walking.PauseCommand>
   <long>27583428156</long>
-  <us.ihmc.communication.packets.ComHeightPacket>
+  <us.ihmc.communication.packets.walking.ComHeightPacket>
     <heightOffset>0.03332</heightOffset>
-  </us.ihmc.communication.packets.ComHeightPacket>
+  </us.ihmc.communication.packets.walking.ComHeightPacket>
   <long>31215593517</long>
   <us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList>
     <footstepDataList>

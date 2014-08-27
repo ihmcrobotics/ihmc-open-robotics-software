@@ -6,8 +6,8 @@ import java.util.HashMap;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepData;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataList;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.SquareData;
 import us.ihmc.commonWalkingControlModules.trajectories.SimpleTwoWaypointTrajectoryParameters;
-import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointTrajectoryUtils;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
@@ -45,7 +45,8 @@ public class FootstepPathConsumer implements ObjectConsumer<FootstepDataList>
       {
          if(footstepList.getTrajectoryWaypointGenerationMethod() == TrajectoryWaypointGenerationMethod.BY_BOX)
          {
-            trajectoryParameters = new SimpleTwoWaypointTrajectoryParameters(TwoWaypointTrajectoryUtils.getFlatBoxFromSquare(footstepList.getTrajectoryBoxData()));
+            SquareData trajectoryBoxData = footstepList.getTrajectoryBoxData();
+            trajectoryParameters = new SimpleTwoWaypointTrajectoryParameters(trajectoryBoxData.location, trajectoryBoxData.rotation, trajectoryBoxData.lengthX, trajectoryBoxData.widthY);
          }
          else
          {
