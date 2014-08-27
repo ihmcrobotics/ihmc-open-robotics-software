@@ -24,8 +24,8 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphic;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
 
@@ -48,7 +48,7 @@ public class CylinderAndContactPointWrenchDistributor implements GroundReactionW
    private final BooleanYoVariable debug;
    private final YoVariableRegistry registry;
 
-   private final List<DynamicGraphicObject> endEffectorResultGraphics = new ArrayList<DynamicGraphicObject>();
+   private final List<YoGraphic> endEffectorResultGraphics = new ArrayList<YoGraphic>();
    private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
    private int yoNameNumber = 0;
 

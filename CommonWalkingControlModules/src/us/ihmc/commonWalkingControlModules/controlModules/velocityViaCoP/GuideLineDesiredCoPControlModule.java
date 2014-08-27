@@ -22,9 +22,9 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphic;
 
 import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
@@ -100,7 +100,7 @@ public class GuideLineDesiredCoPControlModule implements DesiredCoPControlModule
          dynamicGraphicObjectList.add(centerOfPressureDesiredWorldGraphicPosition);
          artifactList.add(centerOfPressureDesiredWorldGraphicPosition.createArtifact());
 
-         DynamicGraphicObject desiredCapturePointGraphic = desiredCapturePointInWorld.createDynamicGraphicPosition("Desired Capture Point", 0.01,
+         YoGraphic desiredCapturePointGraphic = desiredCapturePointInWorld.createDynamicGraphicPosition("Desired Capture Point", 0.01,
                YoAppearance.Yellow(), GraphicType.ROTATED_CROSS);
          dynamicGraphicObjectList.add(desiredCapturePointGraphic);
          artifactList.add(desiredCapturePointGraphic.createArtifact());

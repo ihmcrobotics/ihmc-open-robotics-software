@@ -25,12 +25,12 @@ import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphic;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicFactory;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.RemoteDynamicGraphic;
@@ -165,7 +165,7 @@ public class YoVariableHandshakeParser
          }
          
          
-         dgoList.add((DynamicGraphicObject)getRemoteGraphic(yoProtoHandshake.getGraphicObject(i)));
+         dgoList.add((YoGraphic)getRemoteGraphic(yoProtoHandshake.getGraphicObject(i)));
       }
    
       for (String list : dgoListMap.keySet())

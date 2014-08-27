@@ -5,8 +5,8 @@ import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphic;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
@@ -46,7 +46,7 @@ public class VehicleModelObjectVisualizer
 
    public void update()
    {
-      for (DynamicGraphicObject dynamicGraphicObject : dynamicGraphicObjectsList.getDynamicGraphicObjects())
+      for (YoGraphic dynamicGraphicObject : dynamicGraphicObjectsList.getDynamicGraphicObjects())
       {
          dynamicGraphicObject.update();
       }

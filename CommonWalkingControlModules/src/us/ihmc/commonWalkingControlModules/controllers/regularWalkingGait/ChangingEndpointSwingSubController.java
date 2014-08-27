@@ -23,11 +23,11 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphic;
 
 import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
 import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicCoordinateSystem;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
@@ -183,7 +183,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
          DynamicGraphicPosition finalDesiredSwingViz = finalDesiredSwingFootPosition.createDynamicGraphicPosition("Final Desired Swing", 0.03,
                YoAppearance.Black(), GraphicType.BALL_WITH_CROSS);
 
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects("R2Sim02SwingSubController", new DynamicGraphicObject[] { swingFootOrientationViz,
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects("R2Sim02SwingSubController", new YoGraphic[] { swingFootOrientationViz,
                finalDesiredSwingViz, finalDesiredSwingOrientationViz });
 
          artifactList.add(finalDesiredSwingViz.createArtifact());

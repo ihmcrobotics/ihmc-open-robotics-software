@@ -36,10 +36,10 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphic;
 
 import com.yobotics.simulationconstructionset.util.controller.PDController;
 import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
@@ -169,7 +169,7 @@ public class OptimalSwingSubController implements SwingSubController
       if (dynamicGraphicObjectsListRegistry != null)
       {
          ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
-         ArrayList<DynamicGraphicObject> dynamicGraphicObjects = new ArrayList<DynamicGraphicObject>();
+         ArrayList<YoGraphic> dynamicGraphicObjects = new ArrayList<YoGraphic>();
 
          DynamicGraphicPosition finalDesiredViz = desiredPositionInWorld.createDynamicGraphicPosition("Final Desired Swing", 0.04, YoAppearance.Purple(),
                GraphicType.BALL);
