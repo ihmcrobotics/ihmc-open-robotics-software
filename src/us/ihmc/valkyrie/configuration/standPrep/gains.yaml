@@ -51,12 +51,12 @@ WaistRotator:
     kd: 6.2
     ki: 0.0
 WaistExtensor:
-    kp: 800.0
-    kd: 18.89
+    kp: 600.0
+    kd: 40.0
     ki: 0.0    
 WaistLateralExtensor:
-    kp: 960.0
-    kd: 18.98
+    kp: 600.0
+    kd: 40.0
     ki: 0.0  
 LeftShoulderExtensor:
     kp: 50.0
