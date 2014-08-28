@@ -29,6 +29,7 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
+import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 
 import com.yobotics.simulationconstructionset.Robot;
@@ -38,7 +39,6 @@ import com.yobotics.simulationconstructionset.plotting.SimulationOverheadPlotter
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameConvexPolygon2d;
 
 public class OneStepCaptureRegionCalculatorTest
 {

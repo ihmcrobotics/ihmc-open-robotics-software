@@ -5,12 +5,12 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
 
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicCoordinateSystem;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicYoFramePolygon;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameConvexPolygon2d;
 
 public class TransferToAndNextFootstepsDataVisualizer
 {
