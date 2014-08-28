@@ -64,7 +64,7 @@ public class EquivalentConstantCoPDesiredCoPControlModule implements DesiredCoPC
 
       if (dynamicGraphicObjectsListRegistry != null)
       {
-         YoGraphic desiredCapturePointGraphic = desiredFinalCapturePoint.createDynamicGraphicPosition("Desired Final Capture Point", 0.01,
+         YoGraphic desiredCapturePointGraphic = new DynamicGraphicPosition("Desired Final Capture Point", desiredFinalCapturePoint, 0.01,
                                                               YoAppearance.Yellow(), GraphicType.ROTATED_CROSS);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("EquivalentConstantCoPVelocityViaCoPControlModule", desiredCapturePointGraphic);
          dynamicGraphicObjectsListRegistry.registerArtifact("EquivalentConstantCoPVelocityViaCoPControlModule", desiredCapturePointGraphic.createArtifact());

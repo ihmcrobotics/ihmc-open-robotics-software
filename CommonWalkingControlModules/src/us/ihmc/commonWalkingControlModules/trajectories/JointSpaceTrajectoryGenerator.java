@@ -197,7 +197,7 @@ public class JointSpaceTrajectoryGenerator
          bagOfBalls = new BagOfBalls(50, 0.02, "estimatedBodyPosition", YoAppearance.Aqua(), parentRegistry, dynamicGraphicObjectsListRegistry);
 
          
-         DynamicGraphicPosition finalDesiredViz = desiredFinalLocationInWorldFrame.createDynamicGraphicPosition("Final Desired Swing", 0.04,
+         DynamicGraphicPosition finalDesiredViz = new DynamicGraphicPosition("Final Desired Swing", desiredFinalLocationInWorldFrame, 0.04,
                YoAppearance.Purple(), GraphicType.BALL);
          
          DynamicGraphicVector estimatedBodyVelocity = new DynamicGraphicVector("estimated body velocity", estimatedBodyPositionAtEndOfStep, estimatedBodyVelocityAtEndOfStep, YoAppearance.Purple());
@@ -210,7 +210,7 @@ public class JointSpaceTrajectoryGenerator
          {
             for (int i = 0; i < viaPointsInWorldFrame.length; i++)
             {
-               DynamicGraphicPosition viaViz = viaPointsInWorldFrame[i].createDynamicGraphicPosition("Swing via point " + i, 0.03, YoAppearance.Pink(),
+               DynamicGraphicPosition viaViz = new DynamicGraphicPosition("Swing via point " + i, viaPointsInWorldFrame[i], 0.03, YoAppearance.Pink(),
                      GraphicType.BALL);
                artifactList.add(viaViz.createArtifact());
                dynamicGraphicObjects.add(viaViz);

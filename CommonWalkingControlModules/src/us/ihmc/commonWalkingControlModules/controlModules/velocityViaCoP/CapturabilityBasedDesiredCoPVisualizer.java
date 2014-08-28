@@ -57,7 +57,7 @@ public class CapturabilityBasedDesiredCoPVisualizer
 
    private void addDesiredCoPViz(DynamicGraphicObjectsList dynamicGraphicObjectList, ArtifactList artifactList)
    {
-      DynamicGraphicPosition desiredCoPViz = desiredCoP.createDynamicGraphicPosition("Desired Center of Pressure", 0.012, YoAppearance.Gray(),
+      DynamicGraphicPosition desiredCoPViz = new DynamicGraphicPosition("Desired Center of Pressure", desiredCoP, 0.012, YoAppearance.Gray(),
                                                 GraphicType.CROSS);
       dynamicGraphicObjectList.add(desiredCoPViz);
       artifactList.add(desiredCoPViz.createArtifact());
@@ -65,12 +65,12 @@ public class CapturabilityBasedDesiredCoPVisualizer
 
    private void addDesiredCMPViz(DynamicGraphicObjectsList dynamicGraphicObjectList, ArtifactList artifactList)
    {
-      DynamicGraphicPosition desiredCMPViz = desiredCMP.createDynamicGraphicPosition("Desired CMP", 0.012, YoAppearance.Red(),
+      DynamicGraphicPosition desiredCMPViz = new DynamicGraphicPosition("Desired CMP", desiredCMP, 0.012, YoAppearance.Red(),
                                                 GraphicType.CROSS);
       dynamicGraphicObjectList.add(desiredCMPViz);
       artifactList.add(desiredCMPViz.createArtifact());
       
-      DynamicGraphicPosition pseudoCMPViz = pseudoCMP.createDynamicGraphicPosition("Pseudo CMP", 0.012, YoAppearance.Purple(),
+      DynamicGraphicPosition pseudoCMPViz = new DynamicGraphicPosition("Pseudo CMP", pseudoCMP, 0.012, YoAppearance.Purple(),
             GraphicType.CROSS);
       dynamicGraphicObjectList.add(pseudoCMPViz);
       artifactList.add(pseudoCMPViz.createArtifact());
@@ -78,7 +78,7 @@ public class CapturabilityBasedDesiredCoPVisualizer
 
    private void addDesiredCapturePointViz(DynamicGraphicObjectsList dynamicGraphicObjectList, ArtifactList artifactList)
    {
-      DynamicGraphicPosition desiredCapturePointViz = desiredCapturePoint.createDynamicGraphicPosition("Desired Capture Point", 0.01, YoAppearance.Yellow(),
+      DynamicGraphicPosition desiredCapturePointViz = new DynamicGraphicPosition("Desired Capture Point", desiredCapturePoint, 0.01, YoAppearance.Yellow(),
                                                          GraphicType.ROTATED_CROSS);
       dynamicGraphicObjectList.add(desiredCapturePointViz);
       artifactList.add(desiredCapturePointViz.createArtifact());
@@ -86,7 +86,7 @@ public class CapturabilityBasedDesiredCoPVisualizer
 
    private void addFinalDesiredCapturePointViz(DynamicGraphicObjectsList dynamicGraphicObjectList, ArtifactList artifactList)
    {
-      DynamicGraphicPosition desiredCapturePointViz = finalDesiredCapturePoint.createDynamicGraphicPosition("Final Desired Capture Point", 0.01, YoAppearance.Beige(),
+      DynamicGraphicPosition desiredCapturePointViz = new DynamicGraphicPosition("Final Desired Capture Point", finalDesiredCapturePoint, 0.01, YoAppearance.Beige(),
                                                          GraphicType.ROTATED_CROSS);
       dynamicGraphicObjectList.add(desiredCapturePointViz);
       artifactList.add(desiredCapturePointViz.createArtifact());
@@ -100,7 +100,7 @@ public class CapturabilityBasedDesiredCoPVisualizer
 
    private void addCenterOfMassViz(DynamicGraphicObjectsList dynamicGraphicObjectList, ArtifactList artifactList)
    {
-      DynamicGraphicPosition desiredCapturePointViz = centerOfMass.createDynamicGraphicPosition("Center Of Mass", 0.006, YoAppearance.Black(), GraphicType.CROSS);
+      DynamicGraphicPosition desiredCapturePointViz = new DynamicGraphicPosition("Center Of Mass", centerOfMass, 0.006, YoAppearance.Black(), GraphicType.CROSS);
       dynamicGraphicObjectList.add(desiredCapturePointViz);
       artifactList.add(desiredCapturePointViz.createArtifact());
    }

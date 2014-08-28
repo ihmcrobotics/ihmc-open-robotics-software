@@ -68,7 +68,7 @@ public class PointPositionHandControlState extends State<HandControlState>
 
       if (dynamicGraphicObjectsListRegistry != null)
       {
-         DynamicGraphicPosition desiredPositionViz = yoDesiredPosition.createDynamicGraphicPosition(desiredHandPositionName, 0.01, YoAppearance.FireBrick());
+         DynamicGraphicPosition desiredPositionViz = new DynamicGraphicPosition(desiredHandPositionName, yoDesiredPosition, 0.01, YoAppearance.FireBrick());
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(stateName, desiredPositionViz);
       }
 

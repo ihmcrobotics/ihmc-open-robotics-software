@@ -103,7 +103,7 @@ public class ICPAndMomentumBasedController
          FootPolygonVisualizer footPolygonVisualizer = new FootPolygonVisualizer(feetContactStates, dynamicGraphicObjectsListRegistry, registry);
          momentumBasedController.addUpdatable(footPolygonVisualizer);
          
-         DynamicGraphicPosition capturePointViz = yoCapturePoint.createDynamicGraphicPosition("Capture Point", 0.01, YoAppearance.Blue(),
+         DynamicGraphicPosition capturePointViz = new DynamicGraphicPosition("Capture Point", yoCapturePoint, 0.01, YoAppearance.Blue(),
                                                      GraphicType.ROTATED_CROSS);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("Capture Point", capturePointViz);
          dynamicGraphicObjectsListRegistry.registerArtifact("Capture Point", capturePointViz.createArtifact());

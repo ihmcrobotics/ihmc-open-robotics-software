@@ -37,6 +37,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 import com.yobotics.simulationconstructionset.plotting.DynamicGraphicPositionArtifact;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
 import com.yobotics.simulationconstructionset.util.math.filter.GlitchFilteredBooleanYoVariable;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
@@ -204,7 +205,7 @@ public class PelvisLinearStateUpdater
       {
          if (dynamicGraphicObjectsListRegistry != null)
          {
-            DynamicGraphicPositionArtifact comArtifact = yoCenterOfMassPosition.createDynamicGraphicPosition("Meas CoM", 0.006, YoAppearance.Black(), GraphicType.CROSS).createArtifact();
+            DynamicGraphicPositionArtifact comArtifact = new DynamicGraphicPosition("Meas CoM", yoCenterOfMassPosition, 0.006, YoAppearance.Black(), GraphicType.CROSS).createArtifact();
             dynamicGraphicObjectsListRegistry.registerArtifact("StateEstimator", comArtifact);
          }
       }

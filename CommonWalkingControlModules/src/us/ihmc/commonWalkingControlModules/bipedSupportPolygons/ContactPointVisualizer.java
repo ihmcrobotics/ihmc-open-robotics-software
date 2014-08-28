@@ -46,7 +46,7 @@ public class ContactPointVisualizer
       {
          YoFramePoint contactPointWorld = new YoFramePoint("contactPoint" + i, worldFrame, this.registry);
          contactPointsWorld.add(contactPointWorld);
-         DynamicGraphicPosition dynamicGraphicPosition = contactPointWorld.createDynamicGraphicPosition("contactViz" + i, 0.01, YoAppearance.Crimson());
+         DynamicGraphicPosition dynamicGraphicPosition = new DynamicGraphicPosition("contactViz" + i, contactPointWorld, 0.01, YoAppearance.Crimson());
          dynamicGraphicPositions.add(dynamicGraphicPosition);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("contactPoints", dynamicGraphicPosition);
 

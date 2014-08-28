@@ -69,7 +69,7 @@ public class CommonCapturePointCalculator implements CapturePointCalculatorInter
 
       if (dynamicGraphicObjectsListRegistry != null)
       {
-         DynamicGraphicPosition capturePointWorldGraphicPosition = capturePointInMultipleFrames.createDynamicGraphicPosition(CAPTURE_POINT_DYNAMIC_GRAPHIC_OBJECT_NAME, 0.01, YoAppearance.Blue(), GraphicType.ROTATED_CROSS);
+         DynamicGraphicPosition capturePointWorldGraphicPosition = new DynamicGraphicPosition(CAPTURE_POINT_DYNAMIC_GRAPHIC_OBJECT_NAME, capturePointInMultipleFrames, 0.01, YoAppearance.Blue(), GraphicType.ROTATED_CROSS);
          DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList("CapturePoint");
          dynamicGraphicObjectsList.add(capturePointWorldGraphicPosition);
 

@@ -79,7 +79,7 @@ public class BalanceSupportControlModule
 
          if (dynamicGraphicObjectsListRegistry != null)
          {
-            DynamicGraphicPosition copViz = vtp.createDynamicGraphicPosition(copName, 0.005, YoAppearance.Navy(), GraphicType.BALL);
+            DynamicGraphicPosition copViz = new DynamicGraphicPosition(copName, vtp, 0.005, YoAppearance.Navy(), GraphicType.BALL);
             dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, copViz);
             dynamicGraphicObjectsListRegistry.registerArtifact(listName, copViz.createArtifact());
             virtualToePointsInWorld.put(robotSide, vtp);

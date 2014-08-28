@@ -286,9 +286,9 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
 
       if (visualize)
       {
-         yoDesiredFootPositionGraphic = yoDesiredFootPosition.createDynamicGraphicPosition(namePrefix + "DesiredFootPosition", 0.025, YoAppearance.Red(), GraphicType.BALL);
+         yoDesiredFootPositionGraphic = new DynamicGraphicPosition(namePrefix + "DesiredFootPosition", yoDesiredFootPosition, 0.025, YoAppearance.Red(), GraphicType.BALL);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("SingularityCollapseAvoidance", yoDesiredFootPositionGraphic);
-         yoCorrectedDesiredFootPositionGraphic = yoCorrectedDesiredFootPosition.createDynamicGraphicPosition(namePrefix + "CorrectedDesiredFootPosition", 0.025, YoAppearance.Green(), GraphicType.BALL);
+         yoCorrectedDesiredFootPositionGraphic = new DynamicGraphicPosition(namePrefix + "CorrectedDesiredFootPosition", yoCorrectedDesiredFootPosition, 0.025, YoAppearance.Green(), GraphicType.BALL);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("SingularityCollapseAvoidance", yoCorrectedDesiredFootPositionGraphic);
       }
       else

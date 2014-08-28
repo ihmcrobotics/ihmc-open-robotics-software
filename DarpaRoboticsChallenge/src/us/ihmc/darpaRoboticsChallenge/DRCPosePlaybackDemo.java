@@ -131,7 +131,7 @@ public class DRCPosePlaybackDemo
             externalForcePoints.add(efp);
             jointToAddExternalForcePoints.addExternalForcePoint(efp);
 
-            efp_positionViz.add(efp.getYoPosition().createDynamicGraphicPosition(efp.getName(), 0.05, YoAppearance.Red()));
+            efp_positionViz.add(new DynamicGraphicPosition(efp.getName(), efp.getYoPosition(), 0.05, YoAppearance.Red()));
          }
 
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects("EFP", efp_positionViz);

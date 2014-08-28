@@ -34,6 +34,7 @@ import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.robotController.ModularRobotController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicCoordinateSystem;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
 public class PosePlaybackSCSBridge
@@ -99,8 +100,8 @@ public class PosePlaybackSCSBridge
       scs.addYoVariableRegistry(registry);
 
       String listName = getClass().getSimpleName();
-      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, centerOfMassPosition.createDynamicGraphicPosition("centerOfMass", 0.03, YoAppearance.Gold()));
-      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, centerOfMassPosition2d.createDynamicGraphicPosition("centerOfMass2d", 0.03, YoAppearance.Gold()));
+      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, new DynamicGraphicPosition("centerOfMass", centerOfMassPosition, 0.03, YoAppearance.Gold()));
+      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, new DynamicGraphicPosition("centerOfMass2d", centerOfMassPosition2d, 0.03, YoAppearance.Gold()));
       
       SideDependentList<AppearanceDefinition> appearance = new SideDependentList<>(YoAppearance.Red(), YoAppearance.Green());
       
@@ -108,8 +109,8 @@ public class PosePlaybackSCSBridge
       {
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
 
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, anklePositions.get(robotSide).createDynamicGraphicPosition(sidePrefix + "AnkleViz", 0.05, appearance.get(robotSide)));
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, wristPositions.get(robotSide).createDynamicGraphicPosition(sidePrefix + "WristViz", 0.05, appearance.get(robotSide)));
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, new DynamicGraphicPosition(sidePrefix + "AnkleViz", anklePositions.get(robotSide), 0.05, appearance.get(robotSide)));
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, new DynamicGraphicPosition(sidePrefix + "WristViz", wristPositions.get(robotSide), 0.05, appearance.get(robotSide)));
          
          DynamicGraphicCoordinateSystem footCoordinateSystem = new DynamicGraphicCoordinateSystem(sidePrefix + "Foot", "", registry, 0.25);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, footCoordinateSystem);

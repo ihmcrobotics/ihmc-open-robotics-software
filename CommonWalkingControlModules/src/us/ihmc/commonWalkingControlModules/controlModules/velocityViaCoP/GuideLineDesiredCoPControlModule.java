@@ -100,7 +100,7 @@ public class GuideLineDesiredCoPControlModule implements DesiredCoPControlModule
          dynamicGraphicObjectList.add(centerOfPressureDesiredWorldGraphicPosition);
          artifactList.add(centerOfPressureDesiredWorldGraphicPosition.createArtifact());
 
-         YoGraphic desiredCapturePointGraphic = desiredCapturePointInWorld.createDynamicGraphicPosition("Desired Capture Point", 0.01,
+         YoGraphic desiredCapturePointGraphic = new DynamicGraphicPosition("Desired Capture Point", desiredCapturePointInWorld, 0.01,
                YoAppearance.Yellow(), GraphicType.ROTATED_CROSS);
          dynamicGraphicObjectList.add(desiredCapturePointGraphic);
          artifactList.add(desiredCapturePointGraphic.createArtifact());
