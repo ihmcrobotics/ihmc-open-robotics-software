@@ -15,10 +15,10 @@ import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.yoUtilities.math.frames.YoFramePose;
 
 import com.yobotics.simulationconstructionset.DataBuffer;
 import com.yobotics.simulationconstructionset.IndexChangedListener;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePose;
 
 public class AtlasWristLoopKinematicCalibrator extends AtlasCalibrationDataViewer
 {
