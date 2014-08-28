@@ -12,8 +12,8 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
+import us.ihmc.yoUtilities.math.frames.YoFramePose;
 
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePose;
 
 public class UpcomingFootstepList
 {

@@ -50,6 +50,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
+import us.ihmc.yoUtilities.math.frames.YoFramePose;
 import us.ihmc.yoUtilities.math.frames.YoFrameQuaternion;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
@@ -59,7 +60,6 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
 import com.yobotics.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePose;
 import com.yobotics.simulationconstructionset.util.trajectory.ConstantPoseTrajectoryGenerator;
 
 /**

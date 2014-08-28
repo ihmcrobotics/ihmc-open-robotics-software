@@ -27,6 +27,7 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTestTools;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.math.frames.YoFramePose;
 
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
@@ -34,7 +35,6 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicYoFramePolygon;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameConvexPolygon2d;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePose;
 
 public class FootstepGeneratorVisualizer
 {
