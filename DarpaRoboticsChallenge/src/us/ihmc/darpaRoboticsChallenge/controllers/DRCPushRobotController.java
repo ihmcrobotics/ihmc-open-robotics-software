@@ -14,13 +14,13 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.graphics.YoGraphic;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
 
 public class DRCPushRobotController implements RobotController
@@ -43,7 +43,7 @@ public class DRCPushRobotController implements RobotController
    private final ExternalForcePoint forcePoint;
    private final Vector3d forceVector = new Vector3d();
    
-   private final DynamicGraphicVector forceVisualizer;
+   private final YoGraphicVector forceVisualizer;
    
    public DRCPushRobotController(SDFRobot pushableRobot, FullRobotModel fullRobotModel)
    {
@@ -56,7 +56,7 @@ public class DRCPushRobotController implements RobotController
       pushTimeSwitch.set(Double.NEGATIVE_INFINITY);
       pushForceMagnitude.set(0.0);
       
-      forceVisualizer = new DynamicGraphicVector("pushForce", forcePoint.getYoPosition(), forcePoint.getYoForce(), 0.005, YoAppearance.DarkBlue());
+      forceVisualizer = new YoGraphicVector("pushForce", forcePoint.getYoPosition(), forcePoint.getYoForce(), 0.005, YoAppearance.DarkBlue());
    }
    
    public YoGraphic getForceVisualizer()

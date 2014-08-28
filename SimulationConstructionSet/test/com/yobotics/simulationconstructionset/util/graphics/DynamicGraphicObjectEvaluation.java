@@ -9,6 +9,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
@@ -100,7 +101,7 @@ public class DynamicGraphicObjectEvaluation
       yoFramePoint.set(0.3, 0.4, 0.2);
       yoFrameVector.set(1.0, 2.0, 3.0);
 
-      final DynamicGraphicVector dynamicGraphicVector = new DynamicGraphicVector("Vector", yoFramePoint, yoFrameVector, 1.0, YoAppearance.Yellow());
+      final YoGraphicVector dynamicGraphicVector = new YoGraphicVector("Vector", yoFramePoint, yoFrameVector, 1.0, YoAppearance.Yellow());
 
       // YoFrameConvexPolygon2d:
       final YoFrameConvexPolygon2d yoFramePolygon = new YoFrameConvexPolygon2d("yoPolygon", "", worldFrame, 10, registry);

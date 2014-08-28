@@ -19,6 +19,7 @@ import us.ihmc.utilities.math.geometry.GeometryTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
@@ -29,7 +30,6 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameLine2d;
 
 public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePointToDesiredCoPControlModule, GuideLineToDesiredCoPControlModule
@@ -83,8 +83,8 @@ public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePoint
          YoFrameLine2dArtifact parallellLineArtifact = new YoFrameLine2dArtifact("Parallel Line", parallelLineWorld, Color.GREEN);
          artifactList.add(parallellLineArtifact);
          
-         DynamicGraphicVector actualVelocityDynamicGraphicVector = new DynamicGraphicVector("actualVelocity", comPosition, actualVelocityInWorld, 1.0, YoAppearance.Maroon());
-         DynamicGraphicVector desiredVelocityDynamicGraphicVector = new DynamicGraphicVector("desiredVelocity", comPosition, desiredVelocityInWorld, 1.0, YoAppearance.Pink());
+         YoGraphicVector actualVelocityDynamicGraphicVector = new YoGraphicVector("actualVelocity", comPosition, actualVelocityInWorld, 1.0, YoAppearance.Maroon());
+         YoGraphicVector desiredVelocityDynamicGraphicVector = new YoGraphicVector("desiredVelocity", comPosition, desiredVelocityInWorld, 1.0, YoAppearance.Pink());
          dynamicGraphicObjectList.add(actualVelocityDynamicGraphicVector);
          dynamicGraphicObjectList.add(desiredVelocityDynamicGraphicVector);
          

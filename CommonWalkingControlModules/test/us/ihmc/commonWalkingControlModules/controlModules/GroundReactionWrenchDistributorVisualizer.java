@@ -15,6 +15,7 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
@@ -23,7 +24,6 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicYoFramePolygon;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameConvexPolygon2d;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
@@ -88,11 +88,11 @@ public class GroundReactionWrenchDistributorVisualizer
          DynamicGraphicPosition contactCoPViz = new DynamicGraphicPosition("contactCoPViz" + i, contactCenterOfPressure, COP_VIZ_RADIUS, YoAppearance.Brown());
          dynamicGraphicObjectsList.add(contactCoPViz);
 
-         DynamicGraphicVector contactForceViz = new DynamicGraphicVector("contactForceViz" + i, contactCenterOfPressure, contactForce, FORCE_VECTOR_SCALE,
+         YoGraphicVector contactForceViz = new YoGraphicVector("contactForceViz" + i, contactCenterOfPressure, contactForce, FORCE_VECTOR_SCALE,
                                                    YoAppearance.Pink());
          dynamicGraphicObjectsList.add(contactForceViz);
 
-         DynamicGraphicVector contactMomentViz = new DynamicGraphicVector("contactMomentViz" + i, contactCenterOfPressure, contactMoment, MOMENT_VECTOR_SCALE,
+         YoGraphicVector contactMomentViz = new YoGraphicVector("contactMomentViz" + i, contactCenterOfPressure, contactMoment, MOMENT_VECTOR_SCALE,
                                                     YoAppearance.Black());
          dynamicGraphicObjectsList.add(contactMomentViz);
 
@@ -107,13 +107,13 @@ public class GroundReactionWrenchDistributorVisualizer
 
       DynamicGraphicPosition centerOfMassWorldViz = new DynamicGraphicPosition("centerOfMassViz", centerOfMassWorld, COM_VIZ_RADIUS, YoAppearance.Purple(),
                                                        GraphicType.BALL_WITH_CROSS);
-      DynamicGraphicVector desiredForceWorldViz = new DynamicGraphicVector("desiredForceViz", centerOfMassWorld, desiredForceWorld, FORCE_VECTOR_SCALE,
+      YoGraphicVector desiredForceWorldViz = new YoGraphicVector("desiredForceViz", centerOfMassWorld, desiredForceWorld, FORCE_VECTOR_SCALE,
                                                      desiredForceAppearance);
-      DynamicGraphicVector desiredMomentWorldViz = new DynamicGraphicVector("desiredMomentViz", centerOfMassWorld, desiredMomentWorld, MOMENT_VECTOR_SCALE,
+      YoGraphicVector desiredMomentWorldViz = new YoGraphicVector("desiredMomentViz", centerOfMassWorld, desiredMomentWorld, MOMENT_VECTOR_SCALE,
                                                       desiredMomentAppearance);
-      DynamicGraphicVector achievedForceWorldViz = new DynamicGraphicVector("achievedForceViz", centerOfMassWorld, achievedForceWorld, FORCE_VECTOR_SCALE,
+      YoGraphicVector achievedForceWorldViz = new YoGraphicVector("achievedForceViz", centerOfMassWorld, achievedForceWorld, FORCE_VECTOR_SCALE,
                                                       YoAppearance.Yellow());
-      DynamicGraphicVector achievedMomentWorldViz = new DynamicGraphicVector("achievedMomentViz", centerOfMassWorld, achievedMomentWorld, MOMENT_VECTOR_SCALE,
+      YoGraphicVector achievedMomentWorldViz = new YoGraphicVector("achievedMomentViz", centerOfMassWorld, achievedMomentWorld, MOMENT_VECTOR_SCALE,
                                                        YoAppearance.Purple());
 
       dynamicGraphicObjectsList.add(centerOfMassWorldViz);
