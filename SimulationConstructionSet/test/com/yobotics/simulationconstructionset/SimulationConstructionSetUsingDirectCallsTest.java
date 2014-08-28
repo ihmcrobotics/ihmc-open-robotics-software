@@ -166,7 +166,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private Graphics3DObject staticLinkGraphics = staticLink.getLinkGraphics();
    private Graphics3DNodeType graphics3DNodeType = Graphics3DNodeType.GROUND;
    private ExternalForcePoint simpleExternalForcePoint = new ExternalForcePoint("simpleExternalForcePoint", dummyRegistry);
-   private YoGraphic dynamicGraphicObject = new DynamicGraphicVector("simpleDynamicGraphicObject", simpleExternalForcePoint);
+   private YoGraphic dynamicGraphicObject = new DynamicGraphicVector("simpleDynamicGraphicObject", simpleExternalForcePoint.getYoPosition(), simpleExternalForcePoint.getYoForce(), 1.0/50.0);
    private BooleanYoVariable exitActionListenerHasBeenNotified = new BooleanYoVariable("exitActionListenerHasBeenNotified", dummyRegistry);
    private BooleanYoVariable simulationRewoundListenerHasBeenNotified = new BooleanYoVariable("simulationRewoundListenerHasBeenNotified", dummyRegistry);
    private BooleanYoVariable simulationDoneListenerHasBeenNotified = new BooleanYoVariable("simulationDoneListenerHasBeenNotified", dummyRegistry);
