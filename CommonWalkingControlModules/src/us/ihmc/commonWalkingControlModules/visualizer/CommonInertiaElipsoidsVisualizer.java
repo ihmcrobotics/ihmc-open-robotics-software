@@ -19,6 +19,7 @@ import us.ihmc.utilities.screwTheory.RigidBodyInertia;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphic;
+import us.ihmc.yoUtilities.graphics.YoGraphicShape;
 import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
@@ -27,7 +28,6 @@ import com.mathworks.jama.Matrix;
 import com.mathworks.jama.SingularValueDecomposition;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicShape;
 
 public class CommonInertiaElipsoidsVisualizer implements Updatable, RobotController
 {
@@ -147,7 +147,7 @@ public class CommonInertiaElipsoidsVisualizer implements Updatable, RobotControl
             
             
 //            new DynamicGraphicShape(rigidBodyName, linkGraphics, framePose, scale)
-            DynamicGraphicShape comViz = new DynamicGraphicShape(rigidBodyName + "CoMEllipsoid", createEllipsoid(inertiaMatrix, mass, appearance), comPosition, comOrientation, 1.0);  
+            YoGraphicShape comViz = new YoGraphicShape(rigidBodyName + "CoMEllipsoid", createEllipsoid(inertiaMatrix, mass, appearance), comPosition, comOrientation, 1.0);  
             dynamicGraphicObjects.add(comViz);
 //         }
       }

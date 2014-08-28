@@ -6,11 +6,11 @@ import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicCoordinateSystem;
+import us.ihmc.yoUtilities.graphics.YoGraphicPolygon;
 import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
 
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicYoFramePolygon;
 
 public class TransferToAndNextFootstepsDataVisualizer
 {
@@ -18,7 +18,7 @@ public class TransferToAndNextFootstepsDataVisualizer
    private final YoGraphicCoordinateSystem transferFromCoordinateSystem, transferToCoordinateSystem, nextStepCoordinateSystem,
            nextNextStepCoordinateSystem;
    private final YoFrameConvexPolygon2d transferFromPolygon, transferToPolygon, nextStepPolygon, nextNextStepPolygon;
-   private final DynamicGraphicYoFramePolygon transferFromPolygonViz, transferToPolygonViz, nextStepPolygonViz, nextNextStepPolygonViz;
+   private final YoGraphicPolygon transferFromPolygonViz, transferToPolygonViz, nextStepPolygonViz, nextNextStepPolygonViz;
 
    public TransferToAndNextFootstepsDataVisualizer(YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
@@ -41,13 +41,13 @@ public class TransferToAndNextFootstepsDataVisualizer
       YoAppearance.makeTransparent(nextFootstepPolygonAppearance, 0.5);
       AppearanceDefinition nextNextFootstepPolygonAppearance = YoAppearance.Lavender();
 
-      transferFromPolygonViz = new DynamicGraphicYoFramePolygon("transferFromPolygon2", transferFromPolygon, "transferFromPolygon2", "", registry,
+      transferFromPolygonViz = new YoGraphicPolygon("transferFromPolygon2", transferFromPolygon, "transferFromPolygon2", "", registry,
               polygonVizScale, transferFromPolygonAppearance);
-      transferToPolygonViz = new DynamicGraphicYoFramePolygon("transferToPolygon2", transferToPolygon, "transferToPolygon2", "", registry, polygonVizScale,
+      transferToPolygonViz = new YoGraphicPolygon("transferToPolygon2", transferToPolygon, "transferToPolygon2", "", registry, polygonVizScale,
               transferToPolygonAppearance);
-      nextStepPolygonViz = new DynamicGraphicYoFramePolygon("nextStepPolygon2", nextStepPolygon, "nextStepPolygon2", "", registry, polygonVizScale,
+      nextStepPolygonViz = new YoGraphicPolygon("nextStepPolygon2", nextStepPolygon, "nextStepPolygon2", "", registry, polygonVizScale,
               nextFootstepPolygonAppearance);
-      nextNextStepPolygonViz = new DynamicGraphicYoFramePolygon("nextNextStepPolygon2", nextNextStepPolygon, "nextNextStepPolygon2", "", registry,
+      nextNextStepPolygonViz = new YoGraphicPolygon("nextNextStepPolygon2", nextNextStepPolygon, "nextNextStepPolygon2", "", registry,
               polygonVizScale, nextNextFootstepPolygonAppearance);
 
       transferFromPolygonViz.setPosition(0.0, 0.0, 0.001);
@@ -88,7 +88,7 @@ public class TransferToAndNextFootstepsDataVisualizer
       visualizeFootstep(nextNextFootstep, nextNextStepPolygon, nextNextStepPolygonViz, nextNextStepCoordinateSystem);
    }
 
-   private static void visualizeFootstep(Footstep footstep, YoFrameConvexPolygon2d footstepPolygon, DynamicGraphicYoFramePolygon footstepPolygonViz,
+   private static void visualizeFootstep(Footstep footstep, YoFrameConvexPolygon2d footstepPolygon, YoGraphicPolygon footstepPolygonViz,
            YoGraphicCoordinateSystem footstepCoordinateSystem)
    {
       if (footstep != null)
