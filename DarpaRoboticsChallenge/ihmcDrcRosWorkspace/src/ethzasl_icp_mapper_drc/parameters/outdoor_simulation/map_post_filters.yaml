@@ -1,0 +1,18 @@
+- BoundingBoxDataPointsFilter:
+   xMin: -inf
+   xMax: inf
+   yMin: -inf
+   yMax: inf
+   zMin: -inf
+   zMax: 2.5
+   removeInside: 0
+- SurfaceNormalDataPointsFilter:
+    knn: 20
+    epsilon: 3.16
+    keepNormals: 1
+    keepDensities: 1
+- MaxDensityDataPointsFilter:
+    maxDensity: 20000
+- MaxPointCountDataPointsFilter:
+    maxCount: 600000
+    prob: 0.7

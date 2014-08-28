@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<package>
+  <name>ethzasl_icp_mapper_drc</name>
+  <version>0.1.0</version>
+  <description>The ethzasl_icp_mapper_drc package</description>
+  <maintainer email="pfankhauser@ethz.ch">Peter Fankhauser</maintainer>
+  <license>TODO</license>
+  <buildtool_depend>catkin</buildtool_depend>
+  <run_depend>ethzasl_icp_mapper</run_depend>
+</package>
