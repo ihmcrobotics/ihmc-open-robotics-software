@@ -12,10 +12,10 @@ import us.ihmc.utilities.math.geometry.TransformReferenceFrame;
 import us.ihmc.utilities.math.geometry.TranslationReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
 
 public class InefficientPushrodTransmissionJacobian
@@ -86,7 +86,7 @@ public class InefficientPushrodTransmissionJacobian
    private final DoubleYoVariable jBottomJoint5 = new DoubleYoVariable("jBottomJoint5", registry);
    private final DoubleYoVariable jBottomJoint6 = new DoubleYoVariable("jBottomJoint6", registry);
 
-   private final DynamicGraphicPosition b5Viz, b6Viz, t5Viz, t6Viz;
+   private final YoGraphicPosition b5Viz, b6Viz, t5Viz, t6Viz;
    
    private final DynamicGraphicReferenceFrame actuator5SlideFrameViz, actuator6SlideFrameViz;
    private final DynamicGraphicReferenceFrame topFrameViz, afterTopJointFrameViz, beforeBottomJointFrameViz, bottomFrameViz;
@@ -138,11 +138,11 @@ public class InefficientPushrodTransmissionJacobian
 
          double ballRadius = 0.005;
 
-         t5Viz = new DynamicGraphicPosition("t5Viz", "", registry, ballRadius, YoAppearance.Blue());
-         t6Viz = new DynamicGraphicPosition("t6Viz", "", registry, ballRadius, YoAppearance.Green());
+         t5Viz = new YoGraphicPosition("t5Viz", "", registry, ballRadius, YoAppearance.Blue());
+         t6Viz = new YoGraphicPosition("t6Viz", "", registry, ballRadius, YoAppearance.Green());
 
-         b5Viz = new DynamicGraphicPosition("b5Viz", "", registry, ballRadius, YoAppearance.Red());
-         b6Viz = new DynamicGraphicPosition("b6Viz", "", registry, ballRadius, YoAppearance.Gold());
+         b5Viz = new YoGraphicPosition("b5Viz", "", registry, ballRadius, YoAppearance.Red());
+         b6Viz = new YoGraphicPosition("b6Viz", "", registry, ballRadius, YoAppearance.Gold());
 
          double frameScale = 0.05;
 
