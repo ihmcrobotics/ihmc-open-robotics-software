@@ -21,6 +21,8 @@ import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicPolygon;
+import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
+import us.ihmc.yoUtilities.math.frames.YoFramePose;
 
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
@@ -726,8 +728,10 @@ public class SmartCMPProjectorTest
 
       public void addConvexPolygon(FrameConvexPolygon2d supportPolygon)
       {
-         YoGraphicPolygon dynamicGraphicPolygon = new YoGraphicPolygon("polygon", supportPolygon.getConvexPolygon2d(), "polygon", "", registry,
-               1.0, YoAppearance.Red());
+         YoFrameConvexPolygon2d yoSupportPolygon = new YoFrameConvexPolygon2d("poly", "", worldFrame, supportPolygon.getNumberOfVertices(), registry);
+         yoSupportPolygon.setFrameConvexPolygon2d(supportPolygon);
+         YoFramePose yoFramePose = new YoFramePose("polyOrigin", worldFrame, registry);
+         YoGraphicPolygon dynamicGraphicPolygon = new YoGraphicPolygon("polygon", yoSupportPolygon, yoFramePose, 1.0, YoAppearance.Red());
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("Polygon", dynamicGraphicPolygon);
 
          //         dynamicGraphicObjectsListRegistry.registerArtifact("Polygon", dynamicGraphicPolygon.createArtifact());
