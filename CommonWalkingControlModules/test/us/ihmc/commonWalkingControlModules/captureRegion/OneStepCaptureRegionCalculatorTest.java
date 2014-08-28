@@ -35,6 +35,7 @@ import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.plotting.DynamicGraphicYoPolygonArtifact;
 import com.yobotics.simulationconstructionset.plotting.SimulationOverheadPlotter;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameConvexPolygon2d;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
@@ -449,7 +450,7 @@ public class OneStepCaptureRegionCalculatorTest
       final EnumYoVariable<RobotSide> yoSupportSide = new EnumYoVariable<>("supportSide", registry, RobotSide.class);
       final DoubleYoVariable swingTimeRemaining = new DoubleYoVariable("swingTimeRemaining", registry);
       final YoFramePoint2d yoICP = new YoFramePoint2d("ICP", worldFrame, registry);
-      dynamicGraphicObjectsListRegistry.registerArtifact("ICP", yoICP.createDynamicGraphicPosition("ICP", 0.02, YoAppearance.Blue(), GraphicType.CROSS).createArtifact());
+      dynamicGraphicObjectsListRegistry.registerArtifact("ICP", new DynamicGraphicPosition("ICP", yoICP, 0.02, YoAppearance.Blue(), GraphicType.CROSS).createArtifact());
       final double omega0 = 3.4;
       
       final SimulationOverheadPlotter simulationOverheadPlotter = new SimulationOverheadPlotter();
