@@ -13,10 +13,10 @@ import us.ihmc.utilities.math.geometry.TranslationReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
+import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
 
 public class InefficientPushrodTransmissionJacobian
 {
@@ -88,8 +88,8 @@ public class InefficientPushrodTransmissionJacobian
 
    private final YoGraphicPosition b5Viz, b6Viz, t5Viz, t6Viz;
    
-   private final DynamicGraphicReferenceFrame actuator5SlideFrameViz, actuator6SlideFrameViz;
-   private final DynamicGraphicReferenceFrame topFrameViz, afterTopJointFrameViz, beforeBottomJointFrameViz, bottomFrameViz;
+   private final YoGraphicReferenceFrame actuator5SlideFrameViz, actuator6SlideFrameViz;
+   private final YoGraphicReferenceFrame topFrameViz, afterTopJointFrameViz, beforeBottomJointFrameViz, bottomFrameViz;
 
    public InefficientPushrodTransmissionJacobian(PushRodTransmissionJoint pushRodTransmissionJoint, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
@@ -146,13 +146,13 @@ public class InefficientPushrodTransmissionJacobian
 
          double frameScale = 0.05;
 
-         topFrameViz = new DynamicGraphicReferenceFrame(topFrame, registry, frameScale);
-         afterTopJointFrameViz = new DynamicGraphicReferenceFrame(afterTopJointFrame, registry, frameScale * 0.8);
-         beforeBottomJointFrameViz = new DynamicGraphicReferenceFrame(beforeBottomJointFrame, registry, frameScale * 0.6);
-         bottomFrameViz = new DynamicGraphicReferenceFrame(bottomFrame, registry, frameScale * 0.4);
+         topFrameViz = new YoGraphicReferenceFrame(topFrame, registry, frameScale);
+         afterTopJointFrameViz = new YoGraphicReferenceFrame(afterTopJointFrame, registry, frameScale * 0.8);
+         beforeBottomJointFrameViz = new YoGraphicReferenceFrame(beforeBottomJointFrame, registry, frameScale * 0.6);
+         bottomFrameViz = new YoGraphicReferenceFrame(bottomFrame, registry, frameScale * 0.4);
 
-         actuator5SlideFrameViz = new DynamicGraphicReferenceFrame(actuator5SlideFrame, registry, frameScale * 0.6);
-         actuator6SlideFrameViz = new DynamicGraphicReferenceFrame(actuator6SlideFrame, registry, frameScale * 0.6);
+         actuator5SlideFrameViz = new YoGraphicReferenceFrame(actuator5SlideFrame, registry, frameScale * 0.6);
+         actuator6SlideFrameViz = new YoGraphicReferenceFrame(actuator6SlideFrame, registry, frameScale * 0.6);
          
          dynamicGraphicObjectsList.add(b5Viz);
          dynamicGraphicObjectsList.add(b6Viz);
