@@ -20,10 +20,10 @@ import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicCoordinateSystem;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFramePose;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicCoordinateSystem;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 
 public class AtlasCalibrationDataViewer extends AtlasKinematicCalibrator
@@ -54,8 +54,8 @@ public class AtlasCalibrationDataViewer extends AtlasKinematicCalibrator
       scs.addDynamicGraphicObject(dgpLeftEE);
       scs.addDynamicGraphicObject(dgpRightEE);
 
-      DynamicGraphicCoordinateSystem dgPoseLeftEE = new DynamicGraphicCoordinateSystem("dgposeLeftEE", yposeLeftEE, 5 * scale);
-      DynamicGraphicCoordinateSystem dgPoseRightEE = new DynamicGraphicCoordinateSystem("dgposeRightEE", yposeRightEE, 5 * scale);
+      YoGraphicCoordinateSystem dgPoseLeftEE = new YoGraphicCoordinateSystem("dgposeLeftEE", yposeLeftEE, 5 * scale);
+      YoGraphicCoordinateSystem dgPoseRightEE = new YoGraphicCoordinateSystem("dgposeRightEE", yposeRightEE, 5 * scale);
       scs.addDynamicGraphicObject(dgPoseLeftEE);
       scs.addDynamicGraphicObject(dgPoseRightEE);
    }

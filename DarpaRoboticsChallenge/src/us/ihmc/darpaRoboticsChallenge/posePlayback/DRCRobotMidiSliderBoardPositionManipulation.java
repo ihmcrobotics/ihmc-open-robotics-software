@@ -38,13 +38,13 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphic;
+import us.ihmc.yoUtilities.graphics.YoGraphicCoordinateSystem;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFramePose;
 
 import com.yobotics.simulationconstructionset.FloatingJoint;
 import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicCoordinateSystem;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicLineSegment;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
@@ -260,8 +260,8 @@ public class DRCRobotMidiSliderBoardPositionManipulation
          YoFramePose handIK = new YoFramePose(sidePrefix + "HandIK", "", ReferenceFrames.getWorldFrame(), registry);
          handIKs.put(robotSide, handIK);
 
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, new DynamicGraphicCoordinateSystem(sidePrefix + "FootViz", footIK, scale));
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, new DynamicGraphicCoordinateSystem(sidePrefix + "HandViz", handIK, scale));
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, new YoGraphicCoordinateSystem(sidePrefix + "FootViz", footIK, scale));
+         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, new YoGraphicCoordinateSystem(sidePrefix + "HandViz", handIK, scale));
       }
       
       setupSymmetricModeListeners();

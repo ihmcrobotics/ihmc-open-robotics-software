@@ -29,11 +29,11 @@ import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicCoordinateSystem;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.robotController.ModularRobotController;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicCoordinateSystem;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 
@@ -63,13 +63,13 @@ public class PosePlaybackSCSBridge
 
    private PlaybackPose previousPose;
 
-   private final SideDependentList<DynamicGraphicCoordinateSystem> feetCoordinateSystems = new SideDependentList<DynamicGraphicCoordinateSystem>();
+   private final SideDependentList<YoGraphicCoordinateSystem> feetCoordinateSystems = new SideDependentList<YoGraphicCoordinateSystem>();
 
    private final YoFramePoint leftWristPosition = new YoFramePoint("leftWristPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint rightWristPosition = new YoFramePoint("rightWristPosition", ReferenceFrame.getWorldFrame(), registry);
    private final SideDependentList<YoFramePoint> wristPositions = new SideDependentList<YoFramePoint>(leftWristPosition, rightWristPosition);
 
-   private final SideDependentList<DynamicGraphicCoordinateSystem> handCoordinateSystems = new SideDependentList<>();
+   private final SideDependentList<YoGraphicCoordinateSystem> handCoordinateSystems = new SideDependentList<>();
 
    private final PoseSequenceEditorGUI poseSequenceEditorGUI;
 
@@ -112,11 +112,11 @@ public class PosePlaybackSCSBridge
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, new DynamicGraphicPosition(sidePrefix + "AnkleViz", anklePositions.get(robotSide), 0.05, appearance.get(robotSide)));
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, new DynamicGraphicPosition(sidePrefix + "WristViz", wristPositions.get(robotSide), 0.05, appearance.get(robotSide)));
          
-         DynamicGraphicCoordinateSystem footCoordinateSystem = new DynamicGraphicCoordinateSystem(sidePrefix + "Foot", "", registry, 0.25);
+         YoGraphicCoordinateSystem footCoordinateSystem = new YoGraphicCoordinateSystem(sidePrefix + "Foot", "", registry, 0.25);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, footCoordinateSystem);
          feetCoordinateSystems.put(robotSide, footCoordinateSystem);
 
-         DynamicGraphicCoordinateSystem handCoordinateSystem = new DynamicGraphicCoordinateSystem(sidePrefix + "Hand", "", registry, 0.25);
+         YoGraphicCoordinateSystem handCoordinateSystem = new YoGraphicCoordinateSystem(sidePrefix + "Hand", "", registry, 0.25);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, handCoordinateSystem);
          handCoordinateSystems.put(robotSide, handCoordinateSystem);
       }

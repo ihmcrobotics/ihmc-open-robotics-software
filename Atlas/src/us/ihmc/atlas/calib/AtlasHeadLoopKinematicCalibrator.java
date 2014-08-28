@@ -47,6 +47,7 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.yoUtilities.graphics.YoGraphicCoordinateSystem;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFramePose;
 import boofcv.alg.geo.PerspectiveOps;
@@ -56,7 +57,6 @@ import boofcv.io.UtilIO;
 import boofcv.struct.calib.IntrinsicParameters;
 
 import com.yobotics.simulationconstructionset.IndexChangedListener;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicCoordinateSystem;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 
 public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
@@ -113,10 +113,10 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       scs.addDynamicGraphicObject(dgpLeftEE);
       scs.addDynamicGraphicObject(dgpRightEE);
 
-      DynamicGraphicCoordinateSystem dgPoseLeftEE = new DynamicGraphicCoordinateSystem("dgposeLeftEE", yposeLeftEE, 5 * scale);
-      DynamicGraphicCoordinateSystem dgPoseRightEE = new DynamicGraphicCoordinateSystem("dgposeRightEE", yposeRightEE, 5 * scale);
-      DynamicGraphicCoordinateSystem dgPoseBoard = new DynamicGraphicCoordinateSystem("dgposeBoard", yposeBoard, 5 * scale);
-      DynamicGraphicCoordinateSystem dgPoseLeftCamera = new DynamicGraphicCoordinateSystem("dgposeLeftCamera", yposeLeftCamera, 5 * scale);
+      YoGraphicCoordinateSystem dgPoseLeftEE = new YoGraphicCoordinateSystem("dgposeLeftEE", yposeLeftEE, 5 * scale);
+      YoGraphicCoordinateSystem dgPoseRightEE = new YoGraphicCoordinateSystem("dgposeRightEE", yposeRightEE, 5 * scale);
+      YoGraphicCoordinateSystem dgPoseBoard = new YoGraphicCoordinateSystem("dgposeBoard", yposeBoard, 5 * scale);
+      YoGraphicCoordinateSystem dgPoseLeftCamera = new YoGraphicCoordinateSystem("dgposeLeftCamera", yposeLeftCamera, 5 * scale);
       scs.addDynamicGraphicObject(dgPoseLeftEE);
       scs.addDynamicGraphicObject(dgPoseRightEE);
       scs.addDynamicGraphicObject(dgPoseBoard);

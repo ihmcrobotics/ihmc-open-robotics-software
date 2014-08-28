@@ -24,13 +24,13 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphic;
+import us.ihmc.yoUtilities.graphics.YoGraphicCoordinateSystem;
 import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
 import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicCoordinateSystem;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
@@ -112,7 +112,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
    private final YoFrameVector desiredSwingFootAccelerationInWorldFrame = new YoFrameVector("desiredSwingAcceleration", "", worldFrame, registry);
    private final YoFrameVector desiredSwingFootAngularVelocityInWorldFrame = new YoFrameVector("desiredSwingAngularVelocity", "", worldFrame, registry);
    private final YoFrameVector desiredSwingFootAngularAccelerationInWorldFrame = new YoFrameVector("desiredSwingAngularAcceleration", "", worldFrame, registry);
-   private DynamicGraphicCoordinateSystem swingFootOrientationViz = null, finalDesiredSwingOrientationViz = null;
+   private YoGraphicCoordinateSystem swingFootOrientationViz = null, finalDesiredSwingOrientationViz = null;
 
    private final DoubleYoVariable positionErrorAtEndOfStepNorm = new DoubleYoVariable("positionErrorAtEndOfStepNorm", registry);
    private final DoubleYoVariable positionErrorAtEndOfStepX = new DoubleYoVariable("positionErrorAtEndOfStepX", registry);
@@ -171,9 +171,9 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       {
          ArtifactList artifactList = new ArtifactList("ChangingEndpoint");
 
-         swingFootOrientationViz = new DynamicGraphicCoordinateSystem("Coordinate System", desiredSwingFootPositionInWorldFrame,
+         swingFootOrientationViz = new YoGraphicCoordinateSystem("Coordinate System", desiredSwingFootPositionInWorldFrame,
                desiredFootOrientationInWorldFrame, 0.1);
-         finalDesiredSwingOrientationViz = new DynamicGraphicCoordinateSystem("Final Desired Orientation", finalDesiredSwingFootPosition,
+         finalDesiredSwingOrientationViz = new YoGraphicCoordinateSystem("Final Desired Orientation", finalDesiredSwingFootPosition,
                finalDesiredFootOrientationInWorldFrame, 0.1);
 
          int numberOfBalls = 1;
