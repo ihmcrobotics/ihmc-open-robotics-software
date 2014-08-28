@@ -18,4 +18,6 @@ public interface PushRodTransmissionInterface
 
    public abstract void jointToActuatorPosition(TurboDriver[] act_data, ValkyrieJointInterface[] jnt_data);
 
+   public abstract void updateMotorCurrents(TurboDriver[] act_data, ValkyrieJointInterface[] jnt_data);
+
 }

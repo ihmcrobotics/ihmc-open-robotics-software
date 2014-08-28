@@ -151,4 +151,16 @@ public class EfficientPushRodTransmission implements PushRodTransmissionInterfac
       
    }
 
+   @Override
+   public void updateMotorCurrents(TurboDriver[] act_data, ValkyrieJointInterface[] jnt_data)
+   {
+      assertTrue(numActuators() == act_data.length && numJoints() == jnt_data.length);
+
+      jnt_data[0].setMotorCurrent(act_data[0].getCurrentIq());
+      jnt_data[0].setCommandedMotorCurrent(act_data[0].getCurrentIqCmd());
+
+      jnt_data[1].setMotorCurrent(act_data[1].getCurrentIq());
+      jnt_data[1].setCommandedMotorCurrent(act_data[1].getCurrentIqCmd());
+   }
+
 }
