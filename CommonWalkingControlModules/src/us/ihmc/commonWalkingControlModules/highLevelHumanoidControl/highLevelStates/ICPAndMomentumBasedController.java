@@ -27,13 +27,13 @@ import us.ihmc.utilities.screwTheory.TotalMassCalculator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector2d;
 
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
 
 public class ICPAndMomentumBasedController
 {
@@ -103,7 +103,7 @@ public class ICPAndMomentumBasedController
          FootPolygonVisualizer footPolygonVisualizer = new FootPolygonVisualizer(feetContactStates, dynamicGraphicObjectsListRegistry, registry);
          momentumBasedController.addUpdatable(footPolygonVisualizer);
          
-         DynamicGraphicPosition capturePointViz = new DynamicGraphicPosition("Capture Point", yoCapturePoint, 0.01, YoAppearance.Blue(),
+         YoGraphicPosition capturePointViz = new YoGraphicPosition("Capture Point", yoCapturePoint, 0.01, YoAppearance.Blue(),
                                                      GraphicType.ROTATED_CROSS);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("Capture Point", capturePointViz);
          dynamicGraphicObjectsListRegistry.registerArtifact("Capture Point", capturePointViz.createArtifact());

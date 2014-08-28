@@ -22,10 +22,10 @@ import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.ground.steppingStones.SteppingStones;
 
 /**
@@ -116,7 +116,7 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
       if (VISUALIZE)
       {
          double scale = 0.012;
-         DynamicGraphicPosition adjustedStepPositionDynamicGraphicPosition = new DynamicGraphicPosition("Adjusted Step Position", adjustedStepPosition, scale,
+         YoGraphicPosition adjustedStepPositionDynamicGraphicPosition = new YoGraphicPosition("Adjusted Step Position", adjustedStepPosition, scale,
                YoAppearance.Yellow());
 
          dynamicGraphicObjectsListRegistry.registerArtifact("DesiredStepLocation", adjustedStepPositionDynamicGraphicPosition.createArtifact());

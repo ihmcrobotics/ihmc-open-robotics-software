@@ -22,15 +22,15 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphic;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 
 import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFramePoint2d;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 
@@ -95,12 +95,12 @@ public class GuideLineDesiredCoPControlModule implements DesiredCoPControlModule
          DynamicGraphicObjectsList dynamicGraphicObjectList = new DynamicGraphicObjectsList("VelocityViaCoPControlModule");
          ArtifactList artifactList = new ArtifactList("VelocityViaCoPControlModule");
 
-         DynamicGraphicPosition centerOfPressureDesiredWorldGraphicPosition = new DynamicGraphicPosition("Desired Center of Pressure", finalDesiredCoPInWorld,
-               0.012, YoAppearance.Gray(), DynamicGraphicPosition.GraphicType.CROSS);
+         YoGraphicPosition centerOfPressureDesiredWorldGraphicPosition = new YoGraphicPosition("Desired Center of Pressure", finalDesiredCoPInWorld,
+               0.012, YoAppearance.Gray(), YoGraphicPosition.GraphicType.CROSS);
          dynamicGraphicObjectList.add(centerOfPressureDesiredWorldGraphicPosition);
          artifactList.add(centerOfPressureDesiredWorldGraphicPosition.createArtifact());
 
-         YoGraphic desiredCapturePointGraphic = new DynamicGraphicPosition("Desired Capture Point", desiredCapturePointInWorld, 0.01,
+         YoGraphic desiredCapturePointGraphic = new YoGraphicPosition("Desired Capture Point", desiredCapturePointInWorld, 0.01,
                YoAppearance.Yellow(), GraphicType.ROTATED_CROSS);
          dynamicGraphicObjectList.add(desiredCapturePointGraphic);
          artifactList.add(desiredCapturePointGraphic.createArtifact());

@@ -16,11 +16,11 @@ import us.ihmc.utilities.math.geometry.LineSegment2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
 import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 
 public class FourPointCoMHeightTrajectoryGenerator implements CoMHeightTrajectoryGenerator
 {
@@ -41,7 +41,7 @@ public class FourPointCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    private final YoFramePoint contactFrameZeroPosition = new YoFramePoint("contactFrameZeroPosition", worldFrame, registry);
    private final YoFramePoint contactFrameOnePosition = new YoFramePoint("contactFrameOnePosition", worldFrame, registry);
 
-   private final DynamicGraphicPosition pointS0Viz, pointSFViz, pointD0Viz, pointDFViz;
+   private final YoGraphicPosition pointS0Viz, pointSFViz, pointD0Viz, pointDFViz;
    private final BagOfBalls bagOfBalls;
 
    public FourPointCoMHeightTrajectoryGenerator(double nominalHeightAboveGround, double doubleSupportPercentageIn,
@@ -62,16 +62,16 @@ public class FourPointCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       {
          double pointSize = 0.03;
 
-         DynamicGraphicPosition position0 = new DynamicGraphicPosition("contactFrame0", contactFrameZeroPosition, pointSize, YoAppearance.Purple());
-         DynamicGraphicPosition position1 = new DynamicGraphicPosition("contactFrame1", contactFrameOnePosition, pointSize, YoAppearance.Gold());
+         YoGraphicPosition position0 = new YoGraphicPosition("contactFrame0", contactFrameZeroPosition, pointSize, YoAppearance.Purple());
+         YoGraphicPosition position1 = new YoGraphicPosition("contactFrame1", contactFrameOnePosition, pointSize, YoAppearance.Gold());
 
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", position0);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", position1);
 
-         pointS0Viz = new DynamicGraphicPosition("pointS0", "", registry, pointSize, YoAppearance.CadetBlue());
-         pointSFViz = new DynamicGraphicPosition("pointSF", "", registry, pointSize, YoAppearance.Chartreuse());
-         pointD0Viz = new DynamicGraphicPosition("pointD0", "", registry, pointSize, YoAppearance.BlueViolet());
-         pointDFViz = new DynamicGraphicPosition("pointDF", "", registry, pointSize, YoAppearance.Azure());
+         pointS0Viz = new YoGraphicPosition("pointS0", "", registry, pointSize, YoAppearance.CadetBlue());
+         pointSFViz = new YoGraphicPosition("pointSF", "", registry, pointSize, YoAppearance.Chartreuse());
+         pointD0Viz = new YoGraphicPosition("pointD0", "", registry, pointSize, YoAppearance.BlueViolet());
+         pointDFViz = new YoGraphicPosition("pointDF", "", registry, pointSize, YoAppearance.Azure());
 
          bagOfBalls = new BagOfBalls(registry, dynamicGraphicObjectsListRegistry);
 

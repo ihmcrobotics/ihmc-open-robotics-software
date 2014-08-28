@@ -26,8 +26,10 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.graphics.YoGraphic;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
@@ -35,8 +37,6 @@ import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
 import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
 import com.yobotics.simulationconstructionset.util.splines.QuinticSplineInterpolator;
 
 public class JointSpaceTrajectoryGenerator
@@ -197,7 +197,7 @@ public class JointSpaceTrajectoryGenerator
          bagOfBalls = new BagOfBalls(50, 0.02, "estimatedBodyPosition", YoAppearance.Aqua(), parentRegistry, dynamicGraphicObjectsListRegistry);
 
          
-         DynamicGraphicPosition finalDesiredViz = new DynamicGraphicPosition("Final Desired Swing", desiredFinalLocationInWorldFrame, 0.04,
+         YoGraphicPosition finalDesiredViz = new YoGraphicPosition("Final Desired Swing", desiredFinalLocationInWorldFrame, 0.04,
                YoAppearance.Purple(), GraphicType.BALL);
          
          YoGraphicVector estimatedBodyVelocity = new YoGraphicVector("estimated body velocity", estimatedBodyPositionAtEndOfStep, estimatedBodyVelocityAtEndOfStep, YoAppearance.Purple());
@@ -210,7 +210,7 @@ public class JointSpaceTrajectoryGenerator
          {
             for (int i = 0; i < viaPointsInWorldFrame.length; i++)
             {
-               DynamicGraphicPosition viaViz = new DynamicGraphicPosition("Swing via point " + i, viaPointsInWorldFrame[i], 0.03, YoAppearance.Pink(),
+               YoGraphicPosition viaViz = new YoGraphicPosition("Swing via point " + i, viaPointsInWorldFrame[i], 0.03, YoAppearance.Pink(),
                      GraphicType.BALL);
                artifactList.add(viaViz.createArtifact());
                dynamicGraphicObjects.add(viaViz);

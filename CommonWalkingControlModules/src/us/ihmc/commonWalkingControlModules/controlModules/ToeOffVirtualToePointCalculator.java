@@ -21,6 +21,7 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
@@ -28,7 +29,6 @@ import com.yobotics.simulationconstructionset.plotting.DynamicGraphicYoPolygonAr
 import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 
 public class ToeOffVirtualToePointCalculator implements VirtualToePointCalculator
 {
@@ -96,8 +96,8 @@ public class ToeOffVirtualToePointCalculator implements VirtualToePointCalculato
          for (RobotSide robotSide : RobotSide.values)
          {
             final YoFramePoint virtualToePointWorld = virtualToePointsWorld.get(robotSide);
-            DynamicGraphicPosition virtualToePointViz = new DynamicGraphicPosition(robotSide.getCamelCaseNameForStartOfExpression() + "VTP",
-                  virtualToePointWorld, 0.006, YoAppearance.Orange(), DynamicGraphicPosition.GraphicType.SOLID_BALL);
+            YoGraphicPosition virtualToePointViz = new YoGraphicPosition(robotSide.getCamelCaseNameForStartOfExpression() + "VTP",
+                  virtualToePointWorld, 0.006, YoAppearance.Orange(), YoGraphicPosition.GraphicType.SOLID_BALL);
             dynamicGraphicObjectsList.add(virtualToePointViz);
             artifactList.add(virtualToePointViz.createArtifact());
          }

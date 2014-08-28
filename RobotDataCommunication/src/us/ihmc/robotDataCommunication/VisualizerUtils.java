@@ -7,9 +7,9 @@ import javax.swing.JScrollPane;
 
 import us.ihmc.commonWalkingControlModules.captureRegion.CommonCapturePointCalculator;
 import us.ihmc.plotting.Artifact;
+import us.ihmc.yoUtilities.graphics.plotting.YoArtifactPosition;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.plotting.DynamicGraphicPositionArtifact;
 import com.yobotics.simulationconstructionset.plotting.SimulationOverheadPlotter;
 import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
@@ -46,8 +46,8 @@ public class VisualizerUtils
             {
                if (artifact.getID() == CommonCapturePointCalculator.CAPTURE_POINT_DYNAMIC_GRAPHIC_OBJECT_NAME)
                {
-                  plotter.setXVariableToTrack(((DynamicGraphicPositionArtifact) artifact).getVariables()[0]);
-                  plotter.setYVariableToTrack(((DynamicGraphicPositionArtifact) artifact).getVariables()[1]);
+                  plotter.setXVariableToTrack(((YoArtifactPosition) artifact).getVariables()[0]);
+                  plotter.setYVariableToTrack(((YoArtifactPosition) artifact).getVariables()[1]);
                }
             }
          }

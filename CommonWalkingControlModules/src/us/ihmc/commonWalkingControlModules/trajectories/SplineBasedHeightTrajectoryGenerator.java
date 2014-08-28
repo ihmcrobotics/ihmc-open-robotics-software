@@ -15,10 +15,10 @@ import us.ihmc.utilities.math.geometry.LineSegment2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 
 public class SplineBasedHeightTrajectoryGenerator implements CoMHeightTrajectoryGenerator
 {
@@ -41,8 +41,8 @@ public class SplineBasedHeightTrajectoryGenerator implements CoMHeightTrajectory
 
       if (dynamicGraphicObjectsListRegistry != null)
       {
-         DynamicGraphicPosition position0 = new DynamicGraphicPosition("contactFrame0", contactFrameZeroPosition, 0.03, YoAppearance.Purple());
-         DynamicGraphicPosition position1 = new DynamicGraphicPosition("contactFrame1", contactFrameOnePosition, 0.03, YoAppearance.Gold());
+         YoGraphicPosition position0 = new YoGraphicPosition("contactFrame0", contactFrameZeroPosition, 0.03, YoAppearance.Purple());
+         YoGraphicPosition position1 = new YoGraphicPosition("contactFrame1", contactFrameOnePosition, 0.03, YoAppearance.Gold());
 
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", position0);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", position1);

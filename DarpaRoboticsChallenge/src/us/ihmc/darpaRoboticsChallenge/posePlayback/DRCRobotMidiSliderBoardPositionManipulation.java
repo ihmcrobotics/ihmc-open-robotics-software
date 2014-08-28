@@ -37,6 +37,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphic;
 import us.ihmc.yoUtilities.graphics.YoGraphicCoordinateSystem;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
@@ -48,7 +49,6 @@ import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicLineSegment;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.inputdevices.MidiSliderBoard;
 
 public class DRCRobotMidiSliderBoardPositionManipulation
@@ -1025,7 +1025,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList(namePrefix + "Points");
       for (int i = 0; i < basePoints.length; i++)
       {
-         DynamicGraphicPosition baseControlPointViz = new DynamicGraphicPosition(namePrefix + "Point" + i, basePoints[i], 0.01, colors[i]);
+         YoGraphicPosition baseControlPointViz = new YoGraphicPosition(namePrefix + "Point" + i, basePoints[i], 0.01, colors[i]);
          dynamicGraphicObjectsList.add(baseControlPointViz);
          basePointsList.add(baseControlPointViz);
          

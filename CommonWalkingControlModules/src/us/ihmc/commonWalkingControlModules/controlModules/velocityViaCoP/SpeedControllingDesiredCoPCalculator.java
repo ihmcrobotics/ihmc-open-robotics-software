@@ -19,7 +19,9 @@ import us.ihmc.utilities.math.geometry.GeometryTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphicVector;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.yoUtilities.math.frames.YoFrameLine2d;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
@@ -29,8 +31,6 @@ import com.yobotics.simulationconstructionset.plotting.YoFrameLine2dArtifact;
 import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
 
 public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePointToDesiredCoPControlModule, GuideLineToDesiredCoPControlModule
 {
@@ -72,7 +72,7 @@ public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePoint
          DynamicGraphicObjectsList dynamicGraphicObjectList = new DynamicGraphicObjectsList("CapturePointController");
          ArtifactList artifactList = new ArtifactList("Capture Point CoP Control Module");
 
-         DynamicGraphicPosition desiredCoPBeforeProjectionViz = new DynamicGraphicPosition("desiredCoPBeforeProjection", desiredCoPBeforeProjection, 0.01, YoAppearance.DarkGreen(), GraphicType.CROSS);
+         YoGraphicPosition desiredCoPBeforeProjectionViz = new YoGraphicPosition("desiredCoPBeforeProjection", desiredCoPBeforeProjection, 0.01, YoAppearance.DarkGreen(), GraphicType.CROSS);
          dynamicGraphicObjectList.add(desiredCoPBeforeProjectionViz);
          artifactList.add(desiredCoPBeforeProjectionViz.createArtifact());
          

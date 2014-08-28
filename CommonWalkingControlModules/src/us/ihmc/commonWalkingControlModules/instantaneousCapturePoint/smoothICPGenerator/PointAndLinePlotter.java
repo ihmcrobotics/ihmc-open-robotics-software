@@ -18,16 +18,16 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
+import us.ihmc.yoUtilities.graphics.plotting.YoArtifactPosition;
 import us.ihmc.yoUtilities.math.frames.YoFrameLineSegment2d;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.plotting.DynamicGraphicPositionArtifact;
 import com.yobotics.simulationconstructionset.plotting.SimulationOverheadPlotter;
 import com.yobotics.simulationconstructionset.plotting.YoFrameLineSegment2dArtifact;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 
 
 public class PointAndLinePlotter
@@ -39,8 +39,8 @@ public class PointAndLinePlotter
    private int numberOfRegisteredPoints;
    private int numberOfLines;
 
-   private ArrayList<DynamicGraphicPosition> dynamicGraphicPositions = new ArrayList<DynamicGraphicPosition>();
-   private ArrayList<DynamicGraphicPositionArtifact> dynamicGraphicPositionsArtifactList = new ArrayList<DynamicGraphicPositionArtifact>();
+   private ArrayList<YoGraphicPosition> dynamicGraphicPositions = new ArrayList<YoGraphicPosition>();
+   private ArrayList<YoArtifactPosition> dynamicGraphicPositionsArtifactList = new ArrayList<YoArtifactPosition>();
 
    private ArrayList<Artifact> lineSegmentArtifacts = new ArrayList<Artifact>();
 
@@ -121,10 +121,10 @@ public DynamicGraphicObjectsListRegistry getDynamicGraphicObjectsListRegistry()
 
    public void plotYoFramePoint(String name, YoFramePoint point, AppearanceDefinition appearance, double size)
    {
-      DynamicGraphicPosition dynamicGraphicPosition = new DynamicGraphicPosition(name + numberOfRegisteredPoints, point, size, appearance);
+      YoGraphicPosition dynamicGraphicPosition = new YoGraphicPosition(name + numberOfRegisteredPoints, point, size, appearance);
       dynamicGraphicPositions.add(dynamicGraphicPosition);
       dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("GraphicsObjects", dynamicGraphicPositions.get(numberOfRegisteredPoints));
-      DynamicGraphicPositionArtifact artifact = dynamicGraphicPositions.get(numberOfRegisteredPoints).createArtifact();
+      YoArtifactPosition artifact = dynamicGraphicPositions.get(numberOfRegisteredPoints).createArtifact();
       dynamicGraphicPositionsArtifactList.add(artifact);
       dynamicGraphicObjectsListRegistry.registerArtifact(name + numberOfRegisteredPoints, dynamicGraphicPositionsArtifactList.get(numberOfRegisteredPoints));
 

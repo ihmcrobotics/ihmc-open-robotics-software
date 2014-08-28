@@ -11,16 +11,16 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
 
 public class SmartCMPProjector
 {
    private boolean VISUALIZE = false;
 
-   private final DynamicGraphicPosition icpViz, moveAwayFromEdgeViz, projectedCMPViz, preProjectedCMPViz, edgeOneViz, edgeTwoViz;
+   private final YoGraphicPosition icpViz, moveAwayFromEdgeViz, projectedCMPViz, preProjectedCMPViz, edgeOneViz, edgeTwoViz;
    private final BooleanYoVariable cmpProjected;
    private final DoubleYoVariable cmpEdgeProjectionInside;
    private final DoubleYoVariable minICPToCMPProjection;
@@ -48,28 +48,28 @@ public class SmartCMPProjector
       {
          double VizBallSize = 0.3;
 
-         icpViz = new DynamicGraphicPosition("icpViz", "", registry, VizBallSize, YoAppearance.Blue(), GraphicType.BALL_WITH_CROSS);
+         icpViz = new YoGraphicPosition("icpViz", "", registry, VizBallSize, YoAppearance.Blue(), GraphicType.BALL_WITH_CROSS);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CMPProjection", icpViz);
          dynamicGraphicObjectsListRegistry.registerArtifact("CMPProjection", icpViz.createArtifact());
 
-         moveAwayFromEdgeViz = new DynamicGraphicPosition("moveAwayFromEdgeViz", "", registry, VizBallSize, YoAppearance.CadetBlue(),
+         moveAwayFromEdgeViz = new YoGraphicPosition("moveAwayFromEdgeViz", "", registry, VizBallSize, YoAppearance.CadetBlue(),
                GraphicType.BALL_WITH_CROSS);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CMPProjection", moveAwayFromEdgeViz);
          dynamicGraphicObjectsListRegistry.registerArtifact("CMPProjection", moveAwayFromEdgeViz.createArtifact());
 
-         projectedCMPViz = new DynamicGraphicPosition("projectedCMPViz", "", registry, VizBallSize, YoAppearance.Gold(), GraphicType.BALL_WITH_CROSS);
+         projectedCMPViz = new YoGraphicPosition("projectedCMPViz", "", registry, VizBallSize, YoAppearance.Gold(), GraphicType.BALL_WITH_CROSS);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CMPProjection", projectedCMPViz);
          dynamicGraphicObjectsListRegistry.registerArtifact("CMPProjection", projectedCMPViz.createArtifact());
 
-         preProjectedCMPViz = new DynamicGraphicPosition("preProjectedCMPViz", "", registry, VizBallSize, YoAppearance.Red(), GraphicType.BALL);
+         preProjectedCMPViz = new YoGraphicPosition("preProjectedCMPViz", "", registry, VizBallSize, YoAppearance.Red(), GraphicType.BALL);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CMPProjection", preProjectedCMPViz);
          dynamicGraphicObjectsListRegistry.registerArtifact("CMPProjection", preProjectedCMPViz.createArtifact());
 
-         edgeOneViz = new DynamicGraphicPosition("edgeOneViz", "", registry, VizBallSize, YoAppearance.Pink(), GraphicType.BALL);
+         edgeOneViz = new YoGraphicPosition("edgeOneViz", "", registry, VizBallSize, YoAppearance.Pink(), GraphicType.BALL);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CMPProjection", edgeOneViz);
          dynamicGraphicObjectsListRegistry.registerArtifact("CMPProjection", edgeOneViz.createArtifact());
 
-         edgeTwoViz = new DynamicGraphicPosition("edgeTwoViz", "", registry, VizBallSize, YoAppearance.Beige(), GraphicType.BALL);
+         edgeTwoViz = new YoGraphicPosition("edgeTwoViz", "", registry, VizBallSize, YoAppearance.Beige(), GraphicType.BALL);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CMPProjection", edgeTwoViz);
          dynamicGraphicObjectsListRegistry.registerArtifact("CMPProjection", edgeTwoViz.createArtifact());
       }

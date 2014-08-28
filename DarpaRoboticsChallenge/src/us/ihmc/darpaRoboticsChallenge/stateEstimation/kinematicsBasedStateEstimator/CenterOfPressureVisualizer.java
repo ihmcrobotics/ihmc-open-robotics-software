@@ -9,12 +9,12 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition.GraphicType;
+import us.ihmc.yoUtilities.graphics.plotting.YoArtifactPosition;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
-import com.yobotics.simulationconstructionset.plotting.DynamicGraphicPositionArtifact;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
 
 public class CenterOfPressureVisualizer
 {
@@ -40,14 +40,14 @@ public class CenterOfPressureVisualizer
          YoFramePoint rawCoPPositionInWorld = new YoFramePoint("raw" + side + "CoPPositionsInWorld", worldFrame, registry);
          footRawCoPPositionsInWorld.put(robotSide, rawCoPPositionInWorld);
 
-         DynamicGraphicPosition copDynamicGraphic = new DynamicGraphicPosition("Meas " + side + "CoP", rawCoPPositionInWorld, 0.008, YoAppearance.DarkRed(), GraphicType.DIAMOND);
-         DynamicGraphicPositionArtifact copArtifact = copDynamicGraphic.createArtifact();
+         YoGraphicPosition copDynamicGraphic = new YoGraphicPosition("Meas " + side + "CoP", rawCoPPositionInWorld, 0.008, YoAppearance.DarkRed(), GraphicType.DIAMOND);
+         YoArtifactPosition copArtifact = copDynamicGraphic.createArtifact();
          dynamicGraphicObjectsListRegistry.registerArtifact("StateEstimator", copArtifact);
       }
 
       overallRawCoPPositionInWorld = new YoFramePoint("overallRawCoPPositionInWorld", worldFrame, registry);
-      DynamicGraphicPosition overallRawCoPDynamicGraphic = new DynamicGraphicPosition("Meas CoP", overallRawCoPPositionInWorld, 0.015, YoAppearance.DarkRed(), GraphicType.DIAMOND);
-      DynamicGraphicPositionArtifact overallRawCoPArtifact = overallRawCoPDynamicGraphic.createArtifact();
+      YoGraphicPosition overallRawCoPDynamicGraphic = new YoGraphicPosition("Meas CoP", overallRawCoPPositionInWorld, 0.015, YoAppearance.DarkRed(), GraphicType.DIAMOND);
+      YoArtifactPosition overallRawCoPArtifact = overallRawCoPDynamicGraphic.createArtifact();
       dynamicGraphicObjectsListRegistry.registerArtifact("StateEstimator", overallRawCoPArtifact);
 
       parentRegistry.addChild(registry);

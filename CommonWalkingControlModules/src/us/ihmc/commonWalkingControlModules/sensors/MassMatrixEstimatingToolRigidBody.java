@@ -33,12 +33,12 @@ import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphic;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 
 
@@ -184,7 +184,7 @@ public class MassMatrixEstimatingToolRigidBody
       {
          
          DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList(name);
-         YoGraphic comViz = new DynamicGraphicPosition(name + "CenterOfMassViz", objectCenterOfMass, 0.05, YoAppearance.Red());
+         YoGraphic comViz = new YoGraphicPosition(name + "CenterOfMassViz", objectCenterOfMass, 0.05, YoAppearance.Red());
          dynamicGraphicObjectsList.add(comViz);
          
 //         for(Pair<YoFramePoint, YoFramePoint> linePair : yoLinePoints)

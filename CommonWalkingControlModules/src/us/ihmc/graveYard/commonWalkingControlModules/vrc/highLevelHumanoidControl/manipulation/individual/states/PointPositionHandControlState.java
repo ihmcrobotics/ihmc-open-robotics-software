@@ -12,11 +12,11 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
 import com.yobotics.simulationconstructionset.util.controller.PositionController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
 
@@ -68,7 +68,7 @@ public class PointPositionHandControlState extends State<HandControlState>
 
       if (dynamicGraphicObjectsListRegistry != null)
       {
-         DynamicGraphicPosition desiredPositionViz = new DynamicGraphicPosition(desiredHandPositionName, yoDesiredPosition, 0.01, YoAppearance.FireBrick());
+         YoGraphicPosition desiredPositionViz = new YoGraphicPosition(desiredHandPositionName, yoDesiredPosition, 0.01, YoAppearance.FireBrick());
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(stateName, desiredPositionViz);
       }
 

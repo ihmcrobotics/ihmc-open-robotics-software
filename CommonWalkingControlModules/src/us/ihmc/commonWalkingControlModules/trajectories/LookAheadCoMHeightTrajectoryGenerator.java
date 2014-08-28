@@ -22,11 +22,11 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
 import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.trajectory.CubicPolynomialTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.provider.YoVariableDoubleProvider;
 
@@ -72,9 +72,9 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    private final YoFramePoint contactFrameZeroPosition = new YoFramePoint("contactFrameZeroPosition", worldFrame, registry);
    private final YoFramePoint contactFrameOnePosition = new YoFramePoint("contactFrameOnePosition", worldFrame, registry);
 
-   private final DynamicGraphicPosition pointS0Viz, pointSFViz, pointD0Viz, pointDFViz, pointSNextViz;
-   private final DynamicGraphicPosition pointS0MinViz, pointSFMinViz, pointD0MinViz, pointDFMinViz, pointSNextMinViz;
-   private final DynamicGraphicPosition pointS0MaxViz, pointSFMaxViz, pointD0MaxViz, pointDFMaxViz, pointSNextMaxViz;
+   private final YoGraphicPosition pointS0Viz, pointSFViz, pointD0Viz, pointDFViz, pointSNextViz;
+   private final YoGraphicPosition pointS0MinViz, pointSFMinViz, pointD0MinViz, pointDFMinViz, pointSNextMinViz;
+   private final YoGraphicPosition pointS0MaxViz, pointSFMaxViz, pointD0MaxViz, pointDFMaxViz, pointSNextMaxViz;
 
    private final BagOfBalls bagOfBalls;
 
@@ -124,29 +124,29 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       {
          double pointSize = 0.03;
 
-         DynamicGraphicPosition position0 = new DynamicGraphicPosition("contactFrame0", contactFrameZeroPosition, pointSize, YoAppearance.Purple());
-         DynamicGraphicPosition position1 = new DynamicGraphicPosition("contactFrame1", contactFrameOnePosition, pointSize, YoAppearance.Gold());
+         YoGraphicPosition position0 = new YoGraphicPosition("contactFrame0", contactFrameZeroPosition, pointSize, YoAppearance.Purple());
+         YoGraphicPosition position1 = new YoGraphicPosition("contactFrame1", contactFrameOnePosition, pointSize, YoAppearance.Gold());
 
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", position0);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", position1);
 
-         pointS0Viz = new DynamicGraphicPosition("pointS0", "", registry, pointSize, YoAppearance.CadetBlue());
-         pointSFViz = new DynamicGraphicPosition("pointSF", "", registry, pointSize, YoAppearance.Chartreuse());
-         pointD0Viz = new DynamicGraphicPosition("pointD0", "", registry, pointSize, YoAppearance.BlueViolet());
-         pointDFViz = new DynamicGraphicPosition("pointDF", "", registry, pointSize, YoAppearance.Azure());
-         pointSNextViz = new DynamicGraphicPosition("pointSNext", "", registry, pointSize, YoAppearance.Pink());
+         pointS0Viz = new YoGraphicPosition("pointS0", "", registry, pointSize, YoAppearance.CadetBlue());
+         pointSFViz = new YoGraphicPosition("pointSF", "", registry, pointSize, YoAppearance.Chartreuse());
+         pointD0Viz = new YoGraphicPosition("pointD0", "", registry, pointSize, YoAppearance.BlueViolet());
+         pointDFViz = new YoGraphicPosition("pointDF", "", registry, pointSize, YoAppearance.Azure());
+         pointSNextViz = new YoGraphicPosition("pointSNext", "", registry, pointSize, YoAppearance.Pink());
 
-         pointS0MinViz = new DynamicGraphicPosition("pointS0Min", "", registry, 0.8 * pointSize, YoAppearance.CadetBlue());
-         pointSFMinViz = new DynamicGraphicPosition("pointSFMin", "", registry, 0.8 * pointSize, YoAppearance.Chartreuse());
-         pointD0MinViz = new DynamicGraphicPosition("pointD0Min", "", registry, 0.8 * pointSize, YoAppearance.BlueViolet());
-         pointDFMinViz = new DynamicGraphicPosition("pointDFMin", "", registry, 0.8 * pointSize, YoAppearance.Azure());
-         pointSNextMinViz = new DynamicGraphicPosition("pointSNextMin", "", registry, 0.8 * pointSize, YoAppearance.Pink());
+         pointS0MinViz = new YoGraphicPosition("pointS0Min", "", registry, 0.8 * pointSize, YoAppearance.CadetBlue());
+         pointSFMinViz = new YoGraphicPosition("pointSFMin", "", registry, 0.8 * pointSize, YoAppearance.Chartreuse());
+         pointD0MinViz = new YoGraphicPosition("pointD0Min", "", registry, 0.8 * pointSize, YoAppearance.BlueViolet());
+         pointDFMinViz = new YoGraphicPosition("pointDFMin", "", registry, 0.8 * pointSize, YoAppearance.Azure());
+         pointSNextMinViz = new YoGraphicPosition("pointSNextMin", "", registry, 0.8 * pointSize, YoAppearance.Pink());
 
-         pointS0MaxViz = new DynamicGraphicPosition("pointS0Max", "", registry, 0.9 * pointSize, YoAppearance.CadetBlue());
-         pointSFMaxViz = new DynamicGraphicPosition("pointSFMax", "", registry, 0.9 * pointSize, YoAppearance.Chartreuse());
-         pointD0MaxViz = new DynamicGraphicPosition("pointD0Max", "", registry, 0.9 * pointSize, YoAppearance.BlueViolet());
-         pointDFMaxViz = new DynamicGraphicPosition("pointDFMax", "", registry, 0.9 * pointSize, YoAppearance.Azure());
-         pointSNextMaxViz = new DynamicGraphicPosition("pointSNextMax", "", registry, 0.9 * pointSize, YoAppearance.Pink());
+         pointS0MaxViz = new YoGraphicPosition("pointS0Max", "", registry, 0.9 * pointSize, YoAppearance.CadetBlue());
+         pointSFMaxViz = new YoGraphicPosition("pointSFMax", "", registry, 0.9 * pointSize, YoAppearance.Chartreuse());
+         pointD0MaxViz = new YoGraphicPosition("pointD0Max", "", registry, 0.9 * pointSize, YoAppearance.BlueViolet());
+         pointDFMaxViz = new YoGraphicPosition("pointDFMax", "", registry, 0.9 * pointSize, YoAppearance.Azure());
+         pointSNextMaxViz = new YoGraphicPosition("pointSNextMax", "", registry, 0.9 * pointSize, YoAppearance.Pink());
 
          bagOfBalls = new BagOfBalls(registry, dynamicGraphicObjectsListRegistry);
 
@@ -168,7 +168,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointDFMaxViz);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointSNextMaxViz);
 
-         DynamicGraphicPosition desiredCoMPositionViz = new DynamicGraphicPosition("desiredCoMPosition", desiredCoMPosition, 1.1 * pointSize,
+         YoGraphicPosition desiredCoMPositionViz = new YoGraphicPosition("desiredCoMPosition", desiredCoMPosition, 1.1 * pointSize,
                YoAppearance.Gold());
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", desiredCoMPositionViz);
 

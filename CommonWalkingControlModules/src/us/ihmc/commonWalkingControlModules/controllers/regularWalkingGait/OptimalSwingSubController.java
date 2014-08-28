@@ -36,7 +36,9 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphic;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
@@ -44,8 +46,6 @@ import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.controller.PDController;
 import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 import com.yobotics.simulationconstructionset.util.splines.QuinticSplineInterpolator;
 import com.yobotics.simulationconstructionset.util.trajectory.YoMinimumJerkTrajectory;
@@ -171,7 +171,7 @@ public class OptimalSwingSubController implements SwingSubController
          ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
          ArrayList<YoGraphic> dynamicGraphicObjects = new ArrayList<YoGraphic>();
 
-         DynamicGraphicPosition finalDesiredViz = new DynamicGraphicPosition("Final Desired Swing", desiredPositionInWorld, 0.04, YoAppearance.Purple(),
+         YoGraphicPosition finalDesiredViz = new YoGraphicPosition("Final Desired Swing", desiredPositionInWorld, 0.04, YoAppearance.Purple(),
                GraphicType.BALL);
 
          artifactList.add(finalDesiredViz.createArtifact());

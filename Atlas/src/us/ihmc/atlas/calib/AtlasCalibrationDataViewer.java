@@ -20,11 +20,11 @@ import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphicCoordinateSystem;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFramePose;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 
 public class AtlasCalibrationDataViewer extends AtlasKinematicCalibrator
 {
@@ -48,8 +48,8 @@ public class AtlasCalibrationDataViewer extends AtlasKinematicCalibrator
    {
       double transparency = 0.5;
       double scale = 0.02;
-      DynamicGraphicPosition dgpLeftEE = new DynamicGraphicPosition("dgpLeftEE", ypLeftEE, scale, new YoAppearanceRGBColor(Color.BLUE, transparency));
-      DynamicGraphicPosition dgpRightEE = new DynamicGraphicPosition("dgpRightEE", ypRightEE, scale, new YoAppearanceRGBColor(Color.RED, transparency));
+      YoGraphicPosition dgpLeftEE = new YoGraphicPosition("dgpLeftEE", ypLeftEE, scale, new YoAppearanceRGBColor(Color.BLUE, transparency));
+      YoGraphicPosition dgpRightEE = new YoGraphicPosition("dgpRightEE", ypRightEE, scale, new YoAppearanceRGBColor(Color.RED, transparency));
 
       scs.addDynamicGraphicObject(dgpLeftEE);
       scs.addDynamicGraphicObject(dgpRightEE);

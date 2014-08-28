@@ -12,11 +12,11 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
 
 public class LookaheadFinalDesiredICPCalculator implements FinalDesiredICPCalculator
 {
@@ -31,7 +31,7 @@ public class LookaheadFinalDesiredICPCalculator implements FinalDesiredICPCalcul
    private final DoubleYoVariable scaleFactorForICPGenerator = new DoubleYoVariable("scaleFactorForICPGenerator", registry);
 
    private final TransferToAndNextFootstepsDataVisualizer transferToAndNextFootstepsDataVisualizer;
-   private final DynamicGraphicPosition finalDesiredICPGraphicPosition;
+   private final YoGraphicPosition finalDesiredICPGraphicPosition;
 
    private final ShiftInsideFinalDesiredICPCalculator shiftInsideFinalDesiredICPCalculator = new ShiftInsideFinalDesiredICPCalculator(registry, 0.0, 0.04);
 
@@ -48,7 +48,7 @@ public class LookaheadFinalDesiredICPCalculator implements FinalDesiredICPCalcul
          transferToAndNextFootstepsDataVisualizer = new TransferToAndNextFootstepsDataVisualizer(registry, dynamicGraphicObjectsListRegistry);
 
          double finalDesiredGraphicScale = 0.005;
-         finalDesiredICPGraphicPosition = new DynamicGraphicPosition("finalDesiredICP", "", registry, finalDesiredGraphicScale, YoAppearance.Yellow(),
+         finalDesiredICPGraphicPosition = new YoGraphicPosition("finalDesiredICP", "", registry, finalDesiredGraphicScale, YoAppearance.Yellow(),
                GraphicType.CROSS);
          dynamicGraphicObjectsList.add(finalDesiredICPGraphicPosition);
          dynamicGraphicObjectsListRegistry.registerArtifact("FinalDesiredICP", finalDesiredICPGraphicPosition.createArtifact());
