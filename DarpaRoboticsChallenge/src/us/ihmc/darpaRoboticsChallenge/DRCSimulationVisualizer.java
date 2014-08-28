@@ -44,7 +44,7 @@ public class DRCSimulationVisualizer implements RobotController
       for (GroundContactPoint groundContactPoint : groundContactPoints)
       {
          double scaleFactor = 0.0015;
-         DynamicGraphicVector dynamicGraphicVector = new DynamicGraphicVector(groundContactPoint.getName(), groundContactPoint, scaleFactor, appearance);
+         DynamicGraphicVector dynamicGraphicVector = new DynamicGraphicVector(groundContactPoint.getName(), groundContactPoint.getYoPosition(), groundContactPoint.getYoForce(), scaleFactor, appearance);
          dynamicGraphicObjectsList.add(dynamicGraphicVector);
       }
       
