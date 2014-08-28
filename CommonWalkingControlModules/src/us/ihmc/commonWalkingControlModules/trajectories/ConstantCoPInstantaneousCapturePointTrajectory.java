@@ -10,8 +10,8 @@ import us.ihmc.utilities.math.geometry.GeometryTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 
 public class ConstantCoPInstantaneousCapturePointTrajectory implements InstantaneousCapturePointTrajectory
 {

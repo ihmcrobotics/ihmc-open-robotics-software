@@ -26,8 +26,8 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
+import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint2d;
 
 public class BlindWalkingToDestinationDesiredFootstepCalculator extends AbstractAdjustableDesiredFootstepCalculator
 {
