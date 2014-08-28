@@ -17,13 +17,13 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.math.frames.YoFramePointInMultipleFrames;
 
 import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePointInMultipleFrames;
 
 
 public class CommonCapturePointCalculator implements CapturePointCalculatorInterface
