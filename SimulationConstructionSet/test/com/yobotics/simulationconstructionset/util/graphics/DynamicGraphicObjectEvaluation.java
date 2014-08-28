@@ -9,6 +9,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicPolygon;
 import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
@@ -84,7 +85,7 @@ public class DynamicGraphicObjectEvaluation
       AppearanceDefinition appearance = YoAppearance.Red();
       appearance.setTransparency(0.8);
 
-      final DynamicGraphicPolygon dynamicGraphicPolygon = new DynamicGraphicPolygon("Polygon", polygon, "polygon", "", registry, 3.0, appearance);
+      final YoGraphicPolygon dynamicGraphicPolygon = new YoGraphicPolygon("Polygon", polygon, "polygon", "", registry, 3.0, appearance);
       dynamicGraphicPolygon.setPosition(0.1, 0.2, 1.0);
       dynamicGraphicPolygon.setYawPitchRoll(-0.1, -0.4, -0.3);
 

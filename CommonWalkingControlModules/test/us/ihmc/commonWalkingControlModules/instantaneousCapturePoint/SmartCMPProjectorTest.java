@@ -20,12 +20,12 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicPolygon;
 
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.plotting.SimulationOverheadPlotter;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPolygon;
 
 public class SmartCMPProjectorTest
 {
@@ -726,7 +726,7 @@ public class SmartCMPProjectorTest
 
       public void addConvexPolygon(FrameConvexPolygon2d supportPolygon)
       {
-         DynamicGraphicPolygon dynamicGraphicPolygon = new DynamicGraphicPolygon("polygon", supportPolygon.getConvexPolygon2d(), "polygon", "", registry,
+         YoGraphicPolygon dynamicGraphicPolygon = new YoGraphicPolygon("polygon", supportPolygon.getConvexPolygon2d(), "polygon", "", registry,
                1.0, YoAppearance.Red());
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("Polygon", dynamicGraphicPolygon);
 
