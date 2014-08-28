@@ -26,25 +26,39 @@ import bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
 import bubo.clouds.filter.UniformDensityCloudOctree;
 
 /**
+ * Automatic algorithm for detecting the testbed from LIDAR scans.  Uses RANSAC to find all the larger planes then
+ * looks for perpendicular planes which are next to each other and have a blob of points near the valve.
+ *
  * @author Peter Abeles
  */
 public class TestbedAutomaticAlignment {
 
+   // Maximum Euclidean distance of a point from the sensor head
    double maxDistancePoint;
 
+   // original cloud before uniform density filtering
    List<Point3D_F64> cloud0 = new ArrayList<>();
+   // cloud after filtering
    List<Point3D_F64> cloud1 = new ArrayList<>();
 
+   // Code for detecting the planes
    PointCloudShapeFinder findPlanes;
 
+   // Ensures that the point cloud has a uniform density
    UniformDensityCloudOctree uniform = new UniformDensityCloudOctree(20,0.05,234234);
 
+   // transforms
    Se3_F64 modelToWorld = new Se3_F64();
    Se3_F64 modelToEstimated = new Se3_F64();
    Se3_F64 estimatedToWorld;
 
    Point3D_F64 headLocation = new Point3D_F64();
 
+   /**
+    *
+    * @param maxDistancePoint Points greater than this distance from the sensor head are filtered
+    * @param estimatedToModel Known transform from the found testbed to the testbed 3d model
+    */
    public TestbedAutomaticAlignment(double maxDistancePoint , Se3_F64 estimatedToModel ) {
       this.maxDistancePoint = maxDistancePoint;
       ConfigMultiShapeRansac configRansac = ConfigMultiShapeRansac.createDefault(250,1.2,0.025, CloudShapeTypes.PLANE);
@@ -56,15 +70,24 @@ public class TestbedAutomaticAlignment {
       estimatedToModel.invert(modelToEstimated);
    }
 
+   /**
+    * Clears the point clouds.  Must be called before a new set of data is processed.
+    */
    public void reset() {
       cloud0.clear();
       cloud1.clear();
    }
 
+   /**
+    * Sets the location of the sensor head in the world frame
+    */
    public void setheadLocation( double x ,double y , double z ) {
       headLocation.set(x,y,z);
    }
 
+   /**
+    * Adds a new scan to the point cloud.  Filters out noise and points far away from the robot
+    */
    public void addScan( List<Point3D_F64> scan ) {
 
       double r = maxDistancePoint*maxDistancePoint;
@@ -80,10 +103,16 @@ public class TestbedAutomaticAlignment {
       }
    }
 
+   /**
+    * Adds a whole point cloud
+    */
    public void addCloud( List<Point3D_F64> cloud ) {
       cloud0.addAll(cloud);
    }
 
+   /**
+    * Used to filter out LIDAR shadow.  Looks to see how many neighbors there are near a point
+    */
    public static int countNeighbors( Point3D_F64 target , double radius , List<Point3D_F64> scan ) {
 
       double r = radius*radius;
@@ -97,6 +126,11 @@ public class TestbedAutomaticAlignment {
       return total;
    }
 
+   /**
+    * Processes the point cloud and detects the testbed
+    *
+    * @return true if successful and false if not
+    */
    public boolean process() {
       uniform.process(cloud0,cloud1);
       findPlanes.process(cloud1, null);
@@ -111,6 +145,9 @@ public class TestbedAutomaticAlignment {
       }
    }
 
+   /**
+    * Given the found planes search for the testbed and compute its transform
+    */
    public static Se3_F64 findTestbed( List<PointCloudShapeFinder.Shape> shapes , List<Point3D_F64> cloud ) {
 
       List<Vector3D_F64> normals = new ArrayList<>();
@@ -159,6 +196,9 @@ public class TestbedAutomaticAlignment {
       return bestCount == 0 ? null : best;
    }
 
+   /**
+    * Counts how many points are in the region where the valve should be
+    */
    private static int findValve( Se3_F64 testbedToWorld , List<Point3D_F64> cloud ) {
 
       Point3D_F64 p = new Point3D_F64(0.25,0.55,1.0);
@@ -198,6 +238,7 @@ public class TestbedAutomaticAlignment {
 
       double overlap = (Math.min(whereA[1], whereB[1]) - Math.max(whereA[0], whereB[0]))/(max-min);
 
+      // the two planes should overlap
       System.out.println("Overlap = "+overlap+"  "+pointsA.size()+" "+pointsB.size());
       if( overlap < 0.7 )
          return 0;
@@ -250,6 +291,9 @@ public class TestbedAutomaticAlignment {
       }
    }
 
+   /**
+    * Finds the points at the beginning and end of the line.  coordinate specified in 1-D
+    */
    public static double[] findLineLocation( LineParametric3D_F64 line , List<Point3D_F64> points ) {
       double min = Double.MAX_VALUE;
       double max = -Double.MAX_VALUE;
@@ -282,7 +326,13 @@ public class TestbedAutomaticAlignment {
       return new double[]{min,max};
    }
 
-   private static void adjustSign( Vector3D_F64 v , Point3D_F64 start , List<Point3D_F64> cloud ) {
+   /**
+    * Adjusts the sign such that the vector is pointing towards the center of the provided cloud
+    * @param v
+    * @param start
+    * @param cloud
+    */
+   public static void adjustSign( Vector3D_F64 v , Point3D_F64 start , List<Point3D_F64> cloud ) {
       Point3D_F64 centroid = UtilPoint3D_F64.mean(cloud, cloud.size(), null);
 
       Vector3D_F64 pointing = new Vector3D_F64(start,centroid);
