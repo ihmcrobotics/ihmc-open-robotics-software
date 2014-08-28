@@ -19,6 +19,7 @@ import us.ihmc.utilities.screwTheory.RigidBodyInertia;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphic;
+import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
@@ -27,7 +28,6 @@ import com.mathworks.jama.SingularValueDecomposition;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicShape;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
 
 public class CommonInertiaElipsoidsVisualizer implements Updatable, RobotController
 {

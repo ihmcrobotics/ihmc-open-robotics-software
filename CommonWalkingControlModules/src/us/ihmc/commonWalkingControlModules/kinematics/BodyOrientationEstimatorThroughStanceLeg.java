@@ -9,9 +9,9 @@ import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
 
 import com.yobotics.simulationconstructionset.robotController.SensorProcessor;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
 
 public class BodyOrientationEstimatorThroughStanceLeg implements SensorProcessor
 {
