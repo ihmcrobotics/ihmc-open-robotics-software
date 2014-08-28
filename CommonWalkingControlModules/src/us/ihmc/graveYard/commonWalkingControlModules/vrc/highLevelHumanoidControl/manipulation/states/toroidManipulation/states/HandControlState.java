@@ -16,10 +16,10 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
 import com.yobotics.simulationconstructionset.util.trajectory.Finishable;
 import com.yobotics.simulationconstructionset.util.trajectory.OrientationTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
@@ -37,7 +37,7 @@ public class HandControlState<T extends Enum<T>> extends ToroidManipulationState
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    // viz stuff:
-   private final Collection<DynamicGraphicReferenceFrame> dynamicGraphicReferenceFrames = new ArrayList<DynamicGraphicReferenceFrame>();
+   private final Collection<YoGraphicReferenceFrame> dynamicGraphicReferenceFrames = new ArrayList<YoGraphicReferenceFrame>();
    private final SideDependentList<PoseReferenceFrame> desiredPositionFrames = new SideDependentList<PoseReferenceFrame>();
 
    // temp stuff:
@@ -85,7 +85,7 @@ public class HandControlState<T extends Enum<T>> extends ToroidManipulationState
          DynamicGraphicObjectsList list = new DynamicGraphicObjectsList(stateName);
          for (RobotSide robotSide : RobotSide.values)
          {
-            DynamicGraphicReferenceFrame dynamicGraphicReferenceFrame = new DynamicGraphicReferenceFrame(desiredPositionFrames.get(robotSide), registry, 0.3);
+            YoGraphicReferenceFrame dynamicGraphicReferenceFrame = new YoGraphicReferenceFrame(desiredPositionFrames.get(robotSide), registry, 0.3);
             dynamicGraphicReferenceFrames.add(dynamicGraphicReferenceFrame);
             list.add(dynamicGraphicReferenceFrame);
          }
@@ -158,7 +158,7 @@ public class HandControlState<T extends Enum<T>> extends ToroidManipulationState
 
    private void updateVisualizers()
    {
-      for (DynamicGraphicReferenceFrame dynamicGraphicReferenceFrame : dynamicGraphicReferenceFrames)
+      for (YoGraphicReferenceFrame dynamicGraphicReferenceFrame : dynamicGraphicReferenceFrames)
       {
          dynamicGraphicReferenceFrame.update();
       }

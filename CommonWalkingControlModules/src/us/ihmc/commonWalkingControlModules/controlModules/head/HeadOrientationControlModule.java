@@ -15,12 +15,12 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameQuaternion;
 
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
 
 public class HeadOrientationControlModule extends DegenerateOrientationControlModule
 {
@@ -31,7 +31,7 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
    private final ReferenceFrame chestFrame;
    private final ReferenceFrame headFrame;
    private final OriginAndPointFrame pointTrackingFrame;
-   private final DynamicGraphicReferenceFrame pointTrackingFrameFiz;
+   private final YoGraphicReferenceFrame pointTrackingFrameFiz;
 
    private enum HeadTrackingMode
    {
@@ -75,7 +75,7 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
 
       if (dynamicGraphicObjectsListRegistry != null)
       {
-         pointTrackingFrameFiz = new DynamicGraphicReferenceFrame(pointTrackingFrame, registry, 0.3);
+         pointTrackingFrameFiz = new YoGraphicReferenceFrame(pointTrackingFrame, registry, 0.3);
          DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList(getClass().getSimpleName());
          dynamicGraphicObjectsList.add(pointTrackingFrameFiz);
          dynamicGraphicObjectsList.hideDynamicGraphicObjects();

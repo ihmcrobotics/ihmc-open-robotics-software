@@ -5,17 +5,17 @@ import java.util.ArrayList;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
 
 public class CommonWalkingReferenceFramesVisualizer implements Updatable, RobotController
 {
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
-   private final ArrayList<DynamicGraphicReferenceFrame> referenceFramesVisualizers = new ArrayList<DynamicGraphicReferenceFrame>();
+   private final ArrayList<YoGraphicReferenceFrame> referenceFramesVisualizers = new ArrayList<YoGraphicReferenceFrame>();
 
    public CommonWalkingReferenceFramesVisualizer(CommonWalkingReferenceFrames referenceFrames,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
@@ -23,15 +23,15 @@ public class CommonWalkingReferenceFramesVisualizer implements Updatable, RobotC
       String vizName = referenceFrames.getClass().getSimpleName();
       for (RobotSide robotSide : RobotSide.values)
       {
-         DynamicGraphicReferenceFrame dynamicGraphicObject = new DynamicGraphicReferenceFrame(referenceFrames.getAnkleZUpFrame(robotSide), registry, 0.2);
+         YoGraphicReferenceFrame dynamicGraphicObject = new YoGraphicReferenceFrame(referenceFrames.getAnkleZUpFrame(robotSide), registry, 0.2);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(vizName, dynamicGraphicObject);
          referenceFramesVisualizers.add(dynamicGraphicObject);
       }
 
-      DynamicGraphicReferenceFrame midFeetFrame = new DynamicGraphicReferenceFrame(referenceFrames.getMidFeetZUpFrame(), registry, 0.2);
+      YoGraphicReferenceFrame midFeetFrame = new YoGraphicReferenceFrame(referenceFrames.getMidFeetZUpFrame(), registry, 0.2);
       dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(vizName, midFeetFrame);
       referenceFramesVisualizers.add(midFeetFrame);
-      DynamicGraphicReferenceFrame comFrame = new DynamicGraphicReferenceFrame(referenceFrames.getCenterOfMassFrame(), registry, 0.2);
+      YoGraphicReferenceFrame comFrame = new YoGraphicReferenceFrame(referenceFrames.getCenterOfMassFrame(), registry, 0.2);
       dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(vizName, comFrame);
       referenceFramesVisualizers.add(comFrame);
 

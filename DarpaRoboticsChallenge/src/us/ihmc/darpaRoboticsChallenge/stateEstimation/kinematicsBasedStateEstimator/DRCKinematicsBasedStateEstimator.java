@@ -23,9 +23,9 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
 
 public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterface, StateEstimator
 {
@@ -43,7 +43,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    private final double estimatorDT;
 
    private boolean visualizeMeasurementFrames = false;
-   private final ArrayList<DynamicGraphicReferenceFrame> dynamicGraphicMeasurementFrames = new ArrayList<>();
+   private final ArrayList<YoGraphicReferenceFrame> dynamicGraphicMeasurementFrames = new ArrayList<>();
 
    private final CenterOfPressureVisualizer copVisualizer;
 
@@ -101,7 +101,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    {
       for (int i = 0; i < imuProcessedOutputs.size(); i++)
       {
-         DynamicGraphicReferenceFrame dynamicGraphicMeasurementFrame = new DynamicGraphicReferenceFrame(imuProcessedOutputs.get(i).getMeasurementFrame(), registry, 1.0);
+         YoGraphicReferenceFrame dynamicGraphicMeasurementFrame = new YoGraphicReferenceFrame(imuProcessedOutputs.get(i).getMeasurementFrame(), registry, 1.0);
          dynamicGraphicMeasurementFrames.add(dynamicGraphicMeasurementFrame);
       }
       dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects("imuFrame", dynamicGraphicMeasurementFrames);

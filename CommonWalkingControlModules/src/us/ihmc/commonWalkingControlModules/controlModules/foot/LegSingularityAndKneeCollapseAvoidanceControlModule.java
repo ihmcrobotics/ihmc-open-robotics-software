@@ -25,13 +25,13 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
+import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 
 public class LegSingularityAndKneeCollapseAvoidanceControlModule
@@ -110,7 +110,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
    private final YoFrameVector yoDesiredFootLinearVelocity;
    private final YoFrameVector yoCorrectedDesiredFootLinearVelocity;
    
-   private final DynamicGraphicReferenceFrame virtualLegTangentialFrameHipCenteredGraphics, virtualLegTangentialFrameAnkleCenteredGraphics;
+   private final YoGraphicReferenceFrame virtualLegTangentialFrameHipCenteredGraphics, virtualLegTangentialFrameAnkleCenteredGraphics;
    private final YoGraphicPosition yoDesiredFootPositionGraphic, yoCorrectedDesiredFootPositionGraphic;
    private final YoGraphicVector yoDesiredFootLinearVelocityGraphic, yoCorrectedDesiredFootLinearVelocityGraphic;
 
@@ -299,8 +299,8 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       
       if (moreVisualizers)
       {
-         virtualLegTangentialFrameHipCenteredGraphics = new DynamicGraphicReferenceFrame(virtualLegTangentialFrameHipCentered, registry, 0.1);
-         virtualLegTangentialFrameAnkleCenteredGraphics = new DynamicGraphicReferenceFrame(virtualLegTangentialFrameAnkleCentered, registry, 0.1);
+         virtualLegTangentialFrameHipCenteredGraphics = new YoGraphicReferenceFrame(virtualLegTangentialFrameHipCentered, registry, 0.1);
+         virtualLegTangentialFrameAnkleCenteredGraphics = new YoGraphicReferenceFrame(virtualLegTangentialFrameAnkleCentered, registry, 0.1);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("SingularityCollapseAvoidance", virtualLegTangentialFrameHipCenteredGraphics);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("SingularityCollapseAvoidance", virtualLegTangentialFrameAnkleCenteredGraphics);
 
