@@ -40,13 +40,13 @@ public class CenterOfPressureVisualizer
          YoFramePoint rawCoPPositionInWorld = new YoFramePoint("raw" + side + "CoPPositionsInWorld", worldFrame, registry);
          footRawCoPPositionsInWorld.put(robotSide, rawCoPPositionInWorld);
 
-         DynamicGraphicPosition copDynamicGraphic = rawCoPPositionInWorld.createDynamicGraphicPosition("Meas " + side + "CoP", 0.008, YoAppearance.DarkRed(), GraphicType.DIAMOND);
+         DynamicGraphicPosition copDynamicGraphic = new DynamicGraphicPosition("Meas " + side + "CoP", rawCoPPositionInWorld, 0.008, YoAppearance.DarkRed(), GraphicType.DIAMOND);
          DynamicGraphicPositionArtifact copArtifact = copDynamicGraphic.createArtifact();
          dynamicGraphicObjectsListRegistry.registerArtifact("StateEstimator", copArtifact);
       }
 
       overallRawCoPPositionInWorld = new YoFramePoint("overallRawCoPPositionInWorld", worldFrame, registry);
-      DynamicGraphicPosition overallRawCoPDynamicGraphic = overallRawCoPPositionInWorld.createDynamicGraphicPosition("Meas CoP", 0.015, YoAppearance.DarkRed(), GraphicType.DIAMOND);
+      DynamicGraphicPosition overallRawCoPDynamicGraphic = new DynamicGraphicPosition("Meas CoP", overallRawCoPPositionInWorld, 0.015, YoAppearance.DarkRed(), GraphicType.DIAMOND);
       DynamicGraphicPositionArtifact overallRawCoPArtifact = overallRawCoPDynamicGraphic.createArtifact();
       dynamicGraphicObjectsListRegistry.registerArtifact("StateEstimator", overallRawCoPArtifact);
 

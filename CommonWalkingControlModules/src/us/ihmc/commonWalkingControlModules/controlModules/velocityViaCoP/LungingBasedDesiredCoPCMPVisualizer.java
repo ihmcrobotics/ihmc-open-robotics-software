@@ -38,7 +38,7 @@ public class LungingBasedDesiredCoPCMPVisualizer extends CapturabilityBasedDesir
 
    private void addDesiredCMPViz(DynamicGraphicObjectsList dynamicGraphicObjectList, ArtifactList artifactList)
    {
-      DynamicGraphicPosition desiredCMPViz = desiredCMP.createDynamicGraphicPosition("Desired Centriodal Moment Pivot", 0.012, YoAppearance.White(),
+      DynamicGraphicPosition desiredCMPViz = new DynamicGraphicPosition("Desired Centriodal Moment Pivot", desiredCMP, 0.012, YoAppearance.White(),
             DynamicGraphicPosition.GraphicType.BALL_WITH_CROSS);
       dynamicGraphicObjectList.add(desiredCMPViz);
       artifactList.add(desiredCMPViz.createArtifact());

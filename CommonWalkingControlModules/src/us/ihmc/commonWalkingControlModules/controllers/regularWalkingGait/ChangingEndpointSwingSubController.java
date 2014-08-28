@@ -180,7 +180,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
          double ballSize = (numberOfBalls > 1) ? 0.005 : 0.02;
          bagOfBalls = new BagOfBalls(numberOfBalls, ballSize, "swingTarget", YoAppearance.Aqua(), parentRegistry, dynamicGraphicObjectsListRegistry);
 
-         DynamicGraphicPosition finalDesiredSwingViz = finalDesiredSwingFootPosition.createDynamicGraphicPosition("Final Desired Swing", 0.03,
+         DynamicGraphicPosition finalDesiredSwingViz = new DynamicGraphicPosition("Final Desired Swing", finalDesiredSwingFootPosition, 0.03,
                YoAppearance.Black(), GraphicType.BALL_WITH_CROSS);
 
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects("R2Sim02SwingSubController", new YoGraphic[] { swingFootOrientationViz,

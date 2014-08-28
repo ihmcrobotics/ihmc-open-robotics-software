@@ -171,7 +171,7 @@ public class OptimalSwingSubController implements SwingSubController
          ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
          ArrayList<YoGraphic> dynamicGraphicObjects = new ArrayList<YoGraphic>();
 
-         DynamicGraphicPosition finalDesiredViz = desiredPositionInWorld.createDynamicGraphicPosition("Final Desired Swing", 0.04, YoAppearance.Purple(),
+         DynamicGraphicPosition finalDesiredViz = new DynamicGraphicPosition("Final Desired Swing", desiredPositionInWorld, 0.04, YoAppearance.Purple(),
                GraphicType.BALL);
 
          artifactList.add(finalDesiredViz.createArtifact());

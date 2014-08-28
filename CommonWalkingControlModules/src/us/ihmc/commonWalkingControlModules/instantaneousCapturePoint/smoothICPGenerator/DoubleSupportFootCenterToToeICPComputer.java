@@ -153,7 +153,7 @@ public class DoubleSupportFootCenterToToeICPComputer
 
          if (VISUALIZE)
          {
-            DynamicGraphicPosition icpCornerPointViz = yoFramePoint.createDynamicGraphicPosition(icpCornerPointsName, icpCornerPointSize, YoAppearance.Black(),
+            DynamicGraphicPosition icpCornerPointViz = new DynamicGraphicPosition(icpCornerPointsName, yoFramePoint, icpCornerPointSize, YoAppearance.Black(),
                   GraphicType.SOLID_BALL);
             dynamicGraphicObjectsList.add(icpCornerPointViz);
             artifactList.add(icpCornerPointViz.createArtifact());
@@ -167,7 +167,7 @@ public class DoubleSupportFootCenterToToeICPComputer
 
             if (VISUALIZE)
             {
-               DynamicGraphicPosition toeICPCornerPointViz = yoToeFramePoint.createDynamicGraphicPosition(toeICPCornerPointsName, icpCornerPointSize,
+               DynamicGraphicPosition toeICPCornerPointViz = new DynamicGraphicPosition(toeICPCornerPointsName, yoToeFramePoint, icpCornerPointSize,
                      YoAppearance.Chocolate(), GraphicType.SOLID_BALL);
                dynamicGraphicObjectsList.add(toeICPCornerPointViz);
                artifactList.add(toeICPCornerPointViz.createArtifact());
@@ -183,7 +183,7 @@ public class DoubleSupportFootCenterToToeICPComputer
 
          if (VISUALIZE)
          {
-            DynamicGraphicPosition constantFootCenterCentersOfPressureViz = yoFramePoint.createDynamicGraphicPosition(constantCoPName, icpCornerPointSize,
+            DynamicGraphicPosition constantFootCenterCentersOfPressureViz = new DynamicGraphicPosition(constantCoPName, yoFramePoint, icpCornerPointSize,
                   YoAppearance.Green(), GraphicType.SOLID_BALL);
             dynamicGraphicObjectsList.add(constantFootCenterCentersOfPressureViz);
             artifactList.add(constantFootCenterCentersOfPressureViz.createArtifact());
@@ -197,7 +197,7 @@ public class DoubleSupportFootCenterToToeICPComputer
 
             if (VISUALIZE)
             {
-               DynamicGraphicPosition constantToeCentersOfPressureViz = toeFramePoint.createDynamicGraphicPosition(constantToeCoPName, icpCornerPointSize,
+               DynamicGraphicPosition constantToeCentersOfPressureViz = new DynamicGraphicPosition(constantToeCoPName, toeFramePoint, icpCornerPointSize,
                      YoAppearance.Blue(), GraphicType.SOLID_BALL);
                dynamicGraphicObjectsList.add(constantToeCentersOfPressureViz);
                artifactList.add(constantToeCentersOfPressureViz.createArtifact());

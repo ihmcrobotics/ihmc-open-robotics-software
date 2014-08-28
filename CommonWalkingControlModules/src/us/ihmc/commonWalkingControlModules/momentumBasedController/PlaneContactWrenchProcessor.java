@@ -62,7 +62,7 @@ public class PlaneContactWrenchProcessor
 
          if (dynamicGraphicObjectsListRegistry != null)
          {
-            DynamicGraphicPosition copViz = cop.createDynamicGraphicPosition(copName, 0.005, YoAppearance.Navy(), DynamicGraphicPosition.GraphicType.BALL);
+            DynamicGraphicPosition copViz = new DynamicGraphicPosition(copName, cop, 0.005, YoAppearance.Navy(), DynamicGraphicPosition.GraphicType.BALL);
             dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, copViz);
             dynamicGraphicObjectsListRegistry.registerArtifact(listName, copViz.createArtifact());
          }
