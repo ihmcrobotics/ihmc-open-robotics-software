@@ -8,10 +8,10 @@ import us.ihmc.utilities.screwTheory.SpatialForceVector;
 import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
 
 public class EndEffectorOutput
 {
@@ -26,8 +26,8 @@ public class EndEffectorOutput
    private final YoVariableRegistry registry;
    private final FrameVector tempFrameVector;
    private final FramePoint tempFramePoint;
-   private final DynamicGraphicVector linearVectorGraphic;
-   private final DynamicGraphicVector angularVectorGraphic;
+   private final YoGraphicVector linearVectorGraphic;
+   private final YoGraphicVector angularVectorGraphic;
    // Only for visualization
    private final DoubleYoVariable wRhoPenalizer;
 
@@ -43,8 +43,8 @@ public class EndEffectorOutput
       this.wrenchLinear = new YoFrameVector("WrenchLinear", endEffectorFrame.getRootFrame(), this.registry);
       this.wrenchAngular = new YoFrameVector("wrenchAngular", endEffectorFrame.getRootFrame(), this.registry);
       this.wrenchOrigin = new YoFramePoint("WrenchOrigin", endEffectorFrame.getRootFrame(), this.registry);
-      linearVectorGraphic = new DynamicGraphicVector(name + "linear", wrenchOrigin, wrenchLinear, VECTOR_SCALE, new YoAppearanceRGBColor(1.0, 0.0, 0.0, 0.2), true);
-      angularVectorGraphic = new DynamicGraphicVector(name + "angular", wrenchOrigin, wrenchAngular, VECTOR_SCALE,
+      linearVectorGraphic = new YoGraphicVector(name + "linear", wrenchOrigin, wrenchLinear, VECTOR_SCALE, new YoAppearanceRGBColor(1.0, 0.0, 0.0, 0.2), true);
+      angularVectorGraphic = new YoGraphicVector(name + "angular", wrenchOrigin, wrenchAngular, VECTOR_SCALE,
             new YoAppearanceRGBColor(0.5, 0.0, 0.5, 0.2), true);
       this.tempFrameVector = new FrameVector(endEffectorFrame);
       this.tempFramePoint = new FramePoint(endEffectorFrame);
@@ -81,12 +81,12 @@ public class EndEffectorOutput
       return this.resultingWrench;
    }
 
-   public DynamicGraphicVector getWrenchLinearVectorGraphic()
+   public YoGraphicVector getWrenchLinearVectorGraphic()
    {
       return linearVectorGraphic;
    }
 
-   public DynamicGraphicVector getWrenchAngularVectorGraphic()
+   public YoGraphicVector getWrenchAngularVectorGraphic()
    {
       return angularVectorGraphic;
    }

@@ -13,12 +13,12 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
 
 /**
  * @author twan
@@ -33,8 +33,8 @@ public class WrenchVisualizer
    private final Map<RigidBody, YoFrameVector> forces = new LinkedHashMap<RigidBody, YoFrameVector>();
    private final Map<RigidBody, YoFrameVector> torques = new LinkedHashMap<RigidBody, YoFrameVector>();
    private final Map<RigidBody, YoFramePoint> pointsOfApplication = new LinkedHashMap<RigidBody, YoFramePoint>();
-   private final Map<RigidBody, DynamicGraphicVector> forceVisualizers = new LinkedHashMap<RigidBody, DynamicGraphicVector>();
-   private final Map<RigidBody, DynamicGraphicVector> torqueVisualizers = new LinkedHashMap<RigidBody, DynamicGraphicVector>();
+   private final Map<RigidBody, YoGraphicVector> forceVisualizers = new LinkedHashMap<RigidBody, YoGraphicVector>();
+   private final Map<RigidBody, YoGraphicVector> torqueVisualizers = new LinkedHashMap<RigidBody, YoGraphicVector>();
 
    private final Wrench tempWrench = new Wrench();
    private final FrameVector tempVector = new FrameVector();
@@ -64,12 +64,12 @@ public class WrenchVisualizer
          YoFramePoint pointOfApplication = new YoFramePoint(prefix + "PointOfApplication" , ReferenceFrame.getWorldFrame(), registry);
          pointsOfApplication.put(rigidBody, pointOfApplication);
 
-         DynamicGraphicVector forceVisualizer = new DynamicGraphicVector(prefix + "ForceViz", pointOfApplication, force, FORCE_VECTOR_SCALE,
+         YoGraphicVector forceVisualizer = new YoGraphicVector(prefix + "ForceViz", pointOfApplication, force, FORCE_VECTOR_SCALE,
                                                   forceAppearance, true);
          forceVisualizers.put(rigidBody, forceVisualizer);
          dynamicGraphicObjectsList.add(forceVisualizer);
 
-         DynamicGraphicVector torqueVisualizer = new DynamicGraphicVector(prefix + "TorqueViz", pointOfApplication, torque, TORQUE_VECTOR_SCALE,
+         YoGraphicVector torqueVisualizer = new YoGraphicVector(prefix + "TorqueViz", pointOfApplication, torque, TORQUE_VECTOR_SCALE,
                                                     torqueAppearance, true);
          torqueVisualizers.put(rigidBody, torqueVisualizer);
          dynamicGraphicObjectsList.add(torqueVisualizer);

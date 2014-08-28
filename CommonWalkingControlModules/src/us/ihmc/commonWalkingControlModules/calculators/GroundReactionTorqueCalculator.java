@@ -13,13 +13,13 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 import com.yobotics.simulationconstructionset.GroundContactPoint;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
 
 public class GroundReactionTorqueCalculator
 {
@@ -64,7 +64,7 @@ public class GroundReactionTorqueCalculator
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         DynamicGraphicVector dynamicGraphicVector = new DynamicGraphicVector("GroundTau" + robotSide.getCamelCaseNameForMiddleOfExpression(),
+         YoGraphicVector dynamicGraphicVector = new YoGraphicVector("GroundTau" + robotSide.getCamelCaseNameForMiddleOfExpression(),
                                                         groundTauStart.get(robotSide), groundTau.get(robotSide), scaleFactor, appearance);
          dynamicGraphicObjectsList.add(dynamicGraphicVector);
       }

@@ -8,12 +8,12 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
 
 /**
  * @author twan
@@ -26,7 +26,7 @@ public class ContactPointVisualizer
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final List<YoFramePoint> contactPointsWorld = new ArrayList<YoFramePoint>();
    private final List<DynamicGraphicPosition> dynamicGraphicPositions = new ArrayList<DynamicGraphicPosition>();
-   private final List<DynamicGraphicVector> dynamicGraphicVectors = new ArrayList<DynamicGraphicVector>();
+   private final List<YoGraphicVector> dynamicGraphicVectors = new ArrayList<YoGraphicVector>();
    private final List<YoFrameVector> normalVectors = new ArrayList<YoFrameVector>();
    private final double normalVectorScale = 0.1;
    private final int maxNumberOfDynamicGraphicPositions;
@@ -52,7 +52,7 @@ public class ContactPointVisualizer
 
          YoFrameVector normalVector = new YoFrameVector("contactNormal" + i, worldFrame, registry);
          normalVectors.add(normalVector);
-         DynamicGraphicVector dynamicGraphicVector = new DynamicGraphicVector("contactNormalViz" + i, contactPointWorld, normalVector, YoAppearance.Crimson());
+         YoGraphicVector dynamicGraphicVector = new YoGraphicVector("contactNormalViz" + i, contactPointWorld, normalVector, YoAppearance.Crimson());
          dynamicGraphicVectors.add(dynamicGraphicVector);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("contactPoints", dynamicGraphicVector);
       }

@@ -16,10 +16,10 @@ import us.ihmc.utilities.screwTheory.SpatialForceVector;
 import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.graphics.YoGraphic;
 
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
 
 public class CylinderAndPlaneContactSpatialForceVectorCalculator
 {
@@ -31,7 +31,7 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
    private List<? extends EndEffector> endEffectors;
 
    private final YoVariableRegistry registry;
-   private final DynamicGraphicVector[][][] graphicWrenches = new DynamicGraphicVector[2][][];
+   private final YoGraphicVector[][][] graphicWrenches = new YoGraphicVector[2][][];
    private final DoubleYoVariable[][][] graphicYoDoubles = new DoubleYoVariable[2][][];
    private final FramePoint tempPoint;
    private final FrameVector tempVector;
@@ -79,10 +79,10 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
 
       if (visualize)
       {
-         graphicWrenches[0] = new DynamicGraphicVector[rhoSize][2];
+         graphicWrenches[0] = new YoGraphicVector[rhoSize][2];
          graphicYoDoubles[0] = new DoubleYoVariable[rhoSize][9];
 
-         graphicWrenches[1] = new DynamicGraphicVector[phiSize][2];
+         graphicWrenches[1] = new YoGraphicVector[phiSize][2];
          graphicYoDoubles[1] = new DoubleYoVariable[phiSize][9];
          double scaleFactor = 0.01;
 
@@ -100,11 +100,11 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
             }
 
             double greenLevel = 0.25 * i / rhoSize;
-            graphicWrenches[q][i][LINEAR] = new DynamicGraphicVector("RhoGraphicOutput" + q + i + "Linear", graphicYoDoubles[q][i][X],
+            graphicWrenches[q][i][LINEAR] = new YoGraphicVector("RhoGraphicOutput" + q + i + "Linear", graphicYoDoubles[q][i][X],
                     graphicYoDoubles[q][i][Y], graphicYoDoubles[q][i][Z], graphicYoDoubles[q][i][x], graphicYoDoubles[q][i][y], graphicYoDoubles[q][i][z],
                     scaleFactor, new YoAppearanceRGBColor(0.5, greenLevel, 0.0, 0.7));
             dynamicGraphicVectorsRhoLinear.add(graphicWrenches[q][i][LINEAR]);
-            graphicWrenches[q][i][ANGULAR] = new DynamicGraphicVector("RhoGraphicOutput" + q + i + "Angular", graphicYoDoubles[q][i][X],
+            graphicWrenches[q][i][ANGULAR] = new YoGraphicVector("RhoGraphicOutput" + q + i + "Angular", graphicYoDoubles[q][i][X],
                     graphicYoDoubles[q][i][Y], graphicYoDoubles[q][i][Z], graphicYoDoubles[q][i][xx], graphicYoDoubles[q][i][yy], graphicYoDoubles[q][i][zz],
                     scaleFactor, new YoAppearanceRGBColor(0.5, greenLevel, 0.6, 0.7));
             dynamicGraphicVectorsRhoAngular.add(graphicWrenches[q][i][ANGULAR]);
@@ -120,11 +120,11 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
                graphicYoDoubles[q][i][j] = new DoubleYoVariable("rhoOptimizerOutputVectorsElement" + q + i + j, registry);
             }
 
-            graphicWrenches[q][i][LINEAR] = new DynamicGraphicVector("PhiGraphicOutput" + q + i + "Linear", graphicYoDoubles[q][i][X],
+            graphicWrenches[q][i][LINEAR] = new YoGraphicVector("PhiGraphicOutput" + q + i + "Linear", graphicYoDoubles[q][i][X],
                     graphicYoDoubles[q][i][Y], graphicYoDoubles[q][i][Z], graphicYoDoubles[q][i][x], graphicYoDoubles[q][i][y], graphicYoDoubles[q][i][z],
                     scaleFactor, new YoAppearanceRGBColor(1.0, greenLevel, 0.0, 0.7));
             dynamicGraphicVectorsPhiLinear.add(graphicWrenches[q][i][LINEAR]);
-            graphicWrenches[q][i][ANGULAR] = new DynamicGraphicVector("PhiGraphicOutput" + q + i + "Angular", graphicYoDoubles[q][i][X],
+            graphicWrenches[q][i][ANGULAR] = new YoGraphicVector("PhiGraphicOutput" + q + i + "Angular", graphicYoDoubles[q][i][X],
                     graphicYoDoubles[q][i][Y], graphicYoDoubles[q][i][Z], graphicYoDoubles[q][i][xx], graphicYoDoubles[q][i][yy], graphicYoDoubles[q][i][zz],
                     scaleFactor, new YoAppearanceRGBColor(1.0, greenLevel, 0.6, 0.7));
             dynamicGraphicVectorsPhiAngular.add(graphicWrenches[q][i][ANGULAR]);

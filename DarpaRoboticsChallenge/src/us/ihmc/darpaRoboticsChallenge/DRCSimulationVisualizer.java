@@ -9,6 +9,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
@@ -17,7 +18,6 @@ import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
 
 public class DRCSimulationVisualizer implements RobotController
 {
@@ -44,7 +44,7 @@ public class DRCSimulationVisualizer implements RobotController
       for (GroundContactPoint groundContactPoint : groundContactPoints)
       {
          double scaleFactor = 0.0015;
-         DynamicGraphicVector dynamicGraphicVector = new DynamicGraphicVector(groundContactPoint.getName(), groundContactPoint.getYoPosition(), groundContactPoint.getYoForce(), scaleFactor, appearance);
+         YoGraphicVector dynamicGraphicVector = new YoGraphicVector(groundContactPoint.getName(), groundContactPoint.getYoPosition(), groundContactPoint.getYoForce(), scaleFactor, appearance);
          dynamicGraphicObjectsList.add(dynamicGraphicVector);
       }
       

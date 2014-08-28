@@ -15,6 +15,7 @@ import us.ihmc.utilities.math.trajectories.providers.VectorProvider;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
@@ -24,7 +25,6 @@ import com.yobotics.simulationconstructionset.SupportedGraphics3DAdapter;
 import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
 import com.yobotics.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import com.yobotics.simulationconstructionset.util.trajectory.provider.YoPositionProvider;
@@ -52,7 +52,7 @@ public class TwoWaypointPositionTrajectoryGeneratorVisualizer
 
    private final BagOfBalls trajectoryBagOfBalls;
    private final DynamicGraphicPosition[] dynamicFixedPositions = new DynamicGraphicPosition[4];
-   private final DynamicGraphicVector[] dynamicFixedVelocities = new DynamicGraphicVector[2];
+   private final YoGraphicVector[] dynamicFixedVelocities = new YoGraphicVector[2];
 
    public TwoWaypointPositionTrajectoryGeneratorVisualizer() throws SimulationExceededMaximumTimeException
    {
@@ -75,8 +75,8 @@ public class TwoWaypointPositionTrajectoryGeneratorVisualizer
       dynamicFixedPositions[1] = new DynamicGraphicPosition(namePrefix + "DynamicWaypointPosition0", waypoints.get(0), 0.01, YoAppearance.White());
       dynamicFixedPositions[2] = new DynamicGraphicPosition(namePrefix + "DynamicWaypointPosition1", waypoints.get(1), 0.01, YoAppearance.White());
       dynamicFixedPositions[3] = new DynamicGraphicPosition(namePrefix + "DynamicFinalPosition", finalPosition, 0.01, YoAppearance.White());
-      dynamicFixedVelocities[0] = new DynamicGraphicVector(namePrefix + "DynamicInitialVelocity", initialPosition, initialVelocity, YoAppearance.Red());
-      dynamicFixedVelocities[1] = new DynamicGraphicVector(namePrefix + "DynamicFinalVelocity", finalPosition, finalVelocity, YoAppearance.Red());
+      dynamicFixedVelocities[0] = new YoGraphicVector(namePrefix + "DynamicInitialVelocity", initialPosition, initialVelocity, YoAppearance.Red());
+      dynamicFixedVelocities[1] = new YoGraphicVector(namePrefix + "DynamicFinalVelocity", finalPosition, finalVelocity, YoAppearance.Red());
       dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects(namePrefix + "DynamicFixedPositions", dynamicFixedPositions);
       dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects(namePrefix + "DynamicFixedVelocities", dynamicFixedVelocities);
 

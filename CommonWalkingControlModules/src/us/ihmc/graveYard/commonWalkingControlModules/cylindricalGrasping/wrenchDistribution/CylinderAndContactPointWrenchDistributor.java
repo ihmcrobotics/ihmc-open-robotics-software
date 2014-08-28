@@ -24,10 +24,10 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.graphics.YoGraphic;
 
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
 
 public class CylinderAndContactPointWrenchDistributor implements GroundReactionWrenchDistributor
 {
@@ -291,8 +291,8 @@ public class CylinderAndContactPointWrenchDistributor implements GroundReactionW
 
    public void registerEndEffectorGraphic(EndEffector endEffector)
    {
-      DynamicGraphicVector wrenchAngularVectorGraphic = endEffector.getOutput().getWrenchAngularVectorGraphic();
-      DynamicGraphicVector wrenchLinearVectorGraphic = endEffector.getOutput().getWrenchLinearVectorGraphic();
+      YoGraphicVector wrenchAngularVectorGraphic = endEffector.getOutput().getWrenchAngularVectorGraphic();
+      YoGraphicVector wrenchLinearVectorGraphic = endEffector.getOutput().getWrenchLinearVectorGraphic();
       endEffectorResultGraphics.add(wrenchAngularVectorGraphic);
       endEffectorResultGraphics.add(wrenchLinearVectorGraphic);
       String listName = this.getClass().getSimpleName() + "EndEffectorResultGraphics";

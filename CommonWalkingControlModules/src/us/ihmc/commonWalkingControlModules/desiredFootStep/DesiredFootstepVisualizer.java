@@ -37,6 +37,7 @@ import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
@@ -49,7 +50,6 @@ import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
 import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameConvexPolygon2d;
 
 public class DesiredFootstepVisualizer
@@ -338,8 +338,8 @@ public class DesiredFootstepVisualizer
       YoFrameVector velocity = new YoFrameVector("velocity", "", worldFrame, parentRegistry);
       YoFrameVector heading = new YoFrameVector("heading", "", worldFrame, parentRegistry);
 
-      DynamicGraphicVector velocityVector = new DynamicGraphicVector("velocity", position, velocity, YoAppearance.Yellow());
-      DynamicGraphicVector headingVector = new DynamicGraphicVector("heading", position, heading, YoAppearance.Blue());
+      YoGraphicVector velocityVector = new YoGraphicVector("velocity", position, velocity, YoAppearance.Yellow());
+      YoGraphicVector headingVector = new YoGraphicVector("heading", position, heading, YoAppearance.Blue());
 
       dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("velocityVector", velocityVector);
       dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("headingVector", headingVector);

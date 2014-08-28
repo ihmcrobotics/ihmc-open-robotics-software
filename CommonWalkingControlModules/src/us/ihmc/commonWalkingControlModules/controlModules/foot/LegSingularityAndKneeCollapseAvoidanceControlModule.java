@@ -24,6 +24,7 @@ import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
@@ -31,7 +32,6 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicVector;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 
 public class LegSingularityAndKneeCollapseAvoidanceControlModule
@@ -112,7 +112,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
    
    private final DynamicGraphicReferenceFrame virtualLegTangentialFrameHipCenteredGraphics, virtualLegTangentialFrameAnkleCenteredGraphics;
    private final DynamicGraphicPosition yoDesiredFootPositionGraphic, yoCorrectedDesiredFootPositionGraphic;
-   private final DynamicGraphicVector yoDesiredFootLinearVelocityGraphic, yoCorrectedDesiredFootLinearVelocityGraphic;
+   private final YoGraphicVector yoDesiredFootLinearVelocityGraphic, yoCorrectedDesiredFootLinearVelocityGraphic;
 
    private final BooleanYoVariable isSwingSingularityAvoidanceUsed;
    private final BooleanYoVariable isSupportSingularityAvoidanceUsed;
@@ -304,9 +304,9 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("SingularityCollapseAvoidance", virtualLegTangentialFrameHipCenteredGraphics);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("SingularityCollapseAvoidance", virtualLegTangentialFrameAnkleCenteredGraphics);
 
-         yoDesiredFootLinearVelocityGraphic = new DynamicGraphicVector(namePrefix + "DesiredFootLinearVelocity", yoCurrentFootPosition, yoDesiredFootLinearVelocity, 0.2, YoAppearance.Red());
+         yoDesiredFootLinearVelocityGraphic = new YoGraphicVector(namePrefix + "DesiredFootLinearVelocity", yoCurrentFootPosition, yoDesiredFootLinearVelocity, 0.2, YoAppearance.Red());
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("SingularityCollapseAvoidance", yoDesiredFootLinearVelocityGraphic);
-         yoCorrectedDesiredFootLinearVelocityGraphic = new DynamicGraphicVector(namePrefix + "CorrectedDesiredFootLinearVelocity", yoCurrentFootPosition, yoCorrectedDesiredFootLinearVelocity, 0.2, YoAppearance.Green());
+         yoCorrectedDesiredFootLinearVelocityGraphic = new YoGraphicVector(namePrefix + "CorrectedDesiredFootLinearVelocity", yoCurrentFootPosition, yoCorrectedDesiredFootLinearVelocity, 0.2, YoAppearance.Green());
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("SingularityCollapseAvoidance", yoCorrectedDesiredFootLinearVelocityGraphic);
       }
       else
