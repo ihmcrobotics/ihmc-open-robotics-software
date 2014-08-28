@@ -8,9 +8,9 @@ import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.math.frames.YoFrameQuaternion;
 
 import com.yobotics.simulationconstructionset.IMUMount;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameQuaternion;
 
 public class SimulatedOrientationSensorFromRobot extends SimulatedSensor<Matrix3d>
 {

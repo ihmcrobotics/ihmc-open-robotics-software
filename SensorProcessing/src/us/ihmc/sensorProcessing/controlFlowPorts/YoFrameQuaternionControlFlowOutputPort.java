@@ -5,8 +5,8 @@ import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.math.frames.YoFrameQuaternion;
 
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameQuaternion;
 
 public class YoFrameQuaternionControlFlowOutputPort extends ControlFlowOutputPort<FrameOrientation>
 {

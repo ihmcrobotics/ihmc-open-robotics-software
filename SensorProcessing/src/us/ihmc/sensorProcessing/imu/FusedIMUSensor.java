@@ -18,10 +18,10 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
+import us.ihmc.yoUtilities.math.frames.YoFrameQuaternion;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameQuaternion;
 
 public class FusedIMUSensor implements IMUSensorReadOnly
 {
