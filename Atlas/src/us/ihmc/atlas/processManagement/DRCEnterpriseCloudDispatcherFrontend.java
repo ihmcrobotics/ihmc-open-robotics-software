@@ -35,7 +35,7 @@ import javax.swing.text.PlainDocument;
 
 import us.ihmc.atlas.AtlasOperatorUserInterface;
 import us.ihmc.atlas.AtlasRobotModelFactory;
-import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
+import us.ihmc.communication.networking.NetworkConfigParameters;
 import us.ihmc.utilities.fixedPointRepresentation.UnsignedByteTools;
 import us.ihmc.utilities.gui.IHMCSwingTools;
 import us.ihmc.utilities.net.NetStateListener;
@@ -128,7 +128,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
 
    private void setupNetProcSocket()
    {
-      netProcClient = new ReconnectingTCPClient(netProcMachineIpAddress, DRCConfigParameters.NETWORK_PROCESSOR_CLOUD_DISPATCHER_BACKEND_TCP_PORT);
+      netProcClient = new ReconnectingTCPClient(netProcMachineIpAddress, NetworkConfigParameters.NETWORK_PROCESSOR_CLOUD_DISPATCHER_BACKEND_TCP_PORT);
       netProcClient.attachStateListener(new NetStateListener()
       {
          public void connected()
@@ -150,7 +150,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
 
    private void setupControllerSocket()
    {
-      controllerClient = new ReconnectingTCPClient(controllerMachineIpAddress, DRCConfigParameters.CONTROLLER_CLOUD_DISPATCHER_BACKEND_TCP_PORT);
+      controllerClient = new ReconnectingTCPClient(controllerMachineIpAddress, NetworkConfigParameters.CONTROLLER_CLOUD_DISPATCHER_BACKEND_TCP_PORT);
       controllerClient.attachStateListener(new NetStateListener()
       {
          public void connected()
@@ -724,7 +724,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
             Socket clientSocket = null;
             try
             {
-               clientSocket = new Socket(controllerMachineIpAddress, DRCConfigParameters.CONTROLLER_CLOUD_DISPATCHER_BACKEND_TCP_PORT + 5);
+               clientSocket = new Socket(controllerMachineIpAddress, NetworkConfigParameters.CONTROLLER_CLOUD_DISPATCHER_BACKEND_TCP_PORT + 5);
                clientSocket.setTcpNoDelay(true);
 
                DataInputStream inputStream = new DataInputStream(clientSocket.getInputStream());
@@ -773,7 +773,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
             Socket clientSocket = null;
             try
             {
-               clientSocket = new Socket(netProcMachineIpAddress, DRCConfigParameters.NETWORK_PROCESSOR_CLOUD_DISPATCHER_BACKEND_TCP_PORT + 5);
+               clientSocket = new Socket(netProcMachineIpAddress, NetworkConfigParameters.NETWORK_PROCESSOR_CLOUD_DISPATCHER_BACKEND_TCP_PORT + 5);
                clientSocket.setTcpNoDelay(true);
 
                DataInputStream inputStream = new DataInputStream(clientSocket.getInputStream());

@@ -1,6 +1,6 @@
 package us.ihmc.atlas;
 
-import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
+import us.ihmc.communication.networking.NetworkConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardControllerListener;
 import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
@@ -14,7 +14,7 @@ import com.martiansoftware.jsap.JSAPResult;
 
 public class RemoteAtlasVisualizer
 {
-   public static final int defaultPort = DRCConfigParameters.DEFAULT_YOVARIABLE_SERVER_PORT;
+   public static final int defaultPort = NetworkConfigParameters.DEFAULT_YOVARIABLE_SERVER_PORT;
    private final boolean showOverheadView = true;
    
    public RemoteAtlasVisualizer(String host, int port, int bufferSize, DRCRobotModel robotModel)
