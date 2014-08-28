@@ -34,6 +34,7 @@ import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
@@ -42,7 +43,6 @@ import com.yobotics.simulationconstructionset.util.controller.EuclideanPositionC
 import com.yobotics.simulationconstructionset.util.controller.GainCalculator;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.StraightLinePositionTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.provider.YoPositionProvider;
@@ -107,7 +107,7 @@ public class DrivingFootControlModule
    private final FrameVector pedalForceToCompensateFor = new FrameVector();
    private final IntegerYoVariable nFootTasksRemaining;
    private final YoVariableDoubleProvider averageVelocityProvider;
-   private final List<DynamicGraphicReferenceFrame> dynamicGraphicReferenceFrames = new ArrayList<DynamicGraphicReferenceFrame>();
+   private final List<YoGraphicReferenceFrame> dynamicGraphicReferenceFrames = new ArrayList<YoGraphicReferenceFrame>();
    
    private final RigidBody elevator;
 
@@ -197,7 +197,7 @@ public class DrivingFootControlModule
 
       if (dynamicGraphicObjectsListRegistry != null)
       {
-         DynamicGraphicReferenceFrame toePointFrameViz = new DynamicGraphicReferenceFrame(toePointFrame, registry, 0.1);
+         YoGraphicReferenceFrame toePointFrameViz = new YoGraphicReferenceFrame(toePointFrame, registry, 0.1);
          DynamicGraphicObjectsList list = new DynamicGraphicObjectsList("drivingFootControlModule");
          dynamicGraphicReferenceFrames.add(toePointFrameViz);
          list.add(toePointFrameViz);
@@ -270,7 +270,7 @@ public class DrivingFootControlModule
 
    private void updateVisualizers()
    {
-      for (DynamicGraphicReferenceFrame dynamicGraphicReferenceFrame : dynamicGraphicReferenceFrames)
+      for (YoGraphicReferenceFrame dynamicGraphicReferenceFrame : dynamicGraphicReferenceFrames)
       {
          dynamicGraphicReferenceFrame.update();
       }

@@ -5,9 +5,9 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
 
 public class YoCylindricalContactState implements CylindricalContactState, ModifiableContactState
 {
@@ -22,7 +22,7 @@ public class YoCylindricalContactState implements CylindricalContactState, Modif
    private final DoubleYoVariable cylinderRadius;
    private final DoubleYoVariable halfHandWidth;
    private final DoubleYoVariable gripWeaknessFactor;
-   private final DynamicGraphicReferenceFrame cylinderRefererenceFrameGraphic;
+   private final YoGraphicReferenceFrame cylinderRefererenceFrameGraphic;
 
    public YoCylindricalContactState(String namePrefix, ReferenceFrame frameAfterJoint, ReferenceFrame cylinderFrame, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
@@ -48,7 +48,7 @@ public class YoCylindricalContactState implements CylindricalContactState, Modif
       
       if (VISUALIZE)
       {
-         this.cylinderRefererenceFrameGraphic = new DynamicGraphicReferenceFrame(cylinderFrame, registry, 0.2);
+         this.cylinderRefererenceFrameGraphic = new YoGraphicReferenceFrame(cylinderFrame, registry, 0.2);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("YoCylindricalContactState", cylinderRefererenceFrameGraphic);
       }
       else

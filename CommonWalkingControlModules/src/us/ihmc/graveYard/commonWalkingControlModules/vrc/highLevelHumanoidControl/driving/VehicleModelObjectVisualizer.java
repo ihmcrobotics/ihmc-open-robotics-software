@@ -6,10 +6,10 @@ import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphic;
+import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
 
 
 public class VehicleModelObjectVisualizer
@@ -33,11 +33,11 @@ public class VehicleModelObjectVisualizer
          ReferenceFrame objectFrame = new PoseReferenceFrame(objectName, framePose);
          objectFrame.update();
 
-         DynamicGraphicReferenceFrame dynamicGraphicReferenceFrame = new DynamicGraphicReferenceFrame(objectFrame, registry, objectFrameScale);
+         YoGraphicReferenceFrame dynamicGraphicReferenceFrame = new YoGraphicReferenceFrame(objectFrame, registry, objectFrameScale);
          dynamicGraphicObjectsList.add(dynamicGraphicReferenceFrame);
       }
 
-      DynamicGraphicReferenceFrame vehicleFrameViz = new DynamicGraphicReferenceFrame(vehicleFrame, registry, vehicleFrameScale);
+      YoGraphicReferenceFrame vehicleFrameViz = new YoGraphicReferenceFrame(vehicleFrame, registry, vehicleFrameScale);
       dynamicGraphicObjectsList.add(vehicleFrameViz);
 
       dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);

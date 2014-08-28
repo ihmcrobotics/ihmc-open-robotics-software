@@ -16,12 +16,12 @@ import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 import com.yobotics.simulationconstructionset.util.math.filter.GlitchFilteredBooleanYoVariable;
 
@@ -73,7 +73,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
    private double minThresholdX;
    private double maxThresholdX;
    private final boolean showForceSensorFrames = false;
-   private final DynamicGraphicReferenceFrame dynamicGraphicForceSensorMeasurementFrame, dynamicGraphicForceSensorFootFrame;
+   private final YoGraphicReferenceFrame dynamicGraphicForceSensorMeasurementFrame, dynamicGraphicForceSensorFootFrame;
 
 
    private final AppearanceDefinition redAppearance = YoAppearance.Red();
@@ -95,8 +95,8 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       if(showForceSensorFrames && dynamicGraphicObjectsListRegistry!=null)
       {
          final double scale=1.0;
-         dynamicGraphicForceSensorMeasurementFrame = new DynamicGraphicReferenceFrame(forceSensorData.getMeasurementFrame(), registry, .6*scale, YoAppearance.Yellow());
-         dynamicGraphicForceSensorFootFrame = new DynamicGraphicReferenceFrame(contactablePlaneBody.getFrameAfterParentJoint(), registry, scale, YoAppearance.AliceBlue());
+         dynamicGraphicForceSensorMeasurementFrame = new YoGraphicReferenceFrame(forceSensorData.getMeasurementFrame(), registry, .6*scale, YoAppearance.Yellow());
+         dynamicGraphicForceSensorFootFrame = new YoGraphicReferenceFrame(contactablePlaneBody.getFrameAfterParentJoint(), registry, scale, YoAppearance.AliceBlue());
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(namePrefix+"MeasFrame",dynamicGraphicForceSensorMeasurementFrame);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(namePrefix+"FootFrame",dynamicGraphicForceSensorFootFrame);
       }

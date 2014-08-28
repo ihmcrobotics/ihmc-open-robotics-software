@@ -19,9 +19,9 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
 
 public class ManipulableToroid
 {
@@ -37,7 +37,7 @@ public class ManipulableToroid
    private final RevoluteJoint toroidJoint;
    private final DoubleYoVariable damping = new DoubleYoVariable("toroidDamping", registry);
 
-   private final List<DynamicGraphicReferenceFrame> dynamicGraphicReferenceFrames = new ArrayList<DynamicGraphicReferenceFrame>();
+   private final List<YoGraphicReferenceFrame> dynamicGraphicReferenceFrames = new ArrayList<YoGraphicReferenceFrame>();
 
    public ManipulableToroid(String namePrefix, RigidBody toroidBase,
                             DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
@@ -51,11 +51,11 @@ public class ManipulableToroid
 
       if (dynamicGraphicObjectsListRegistry != null)
       {
-         DynamicGraphicReferenceFrame toroidBeforeJointFrameViz = new DynamicGraphicReferenceFrame(toroidBeforeJointFrame, registry, 0.3);
+         YoGraphicReferenceFrame toroidBeforeJointFrameViz = new YoGraphicReferenceFrame(toroidBeforeJointFrame, registry, 0.3);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("toroidFrames", toroidBeforeJointFrameViz);
          dynamicGraphicReferenceFrames.add(toroidBeforeJointFrameViz);
 
-         DynamicGraphicReferenceFrame toroidAfterJointFrameViz = new DynamicGraphicReferenceFrame(toroid.getParentJoint().getFrameAfterJoint(), registry, 0.1);
+         YoGraphicReferenceFrame toroidAfterJointFrameViz = new YoGraphicReferenceFrame(toroid.getParentJoint().getFrameAfterJoint(), registry, 0.1);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("toroidFrames", toroidAfterJointFrameViz);
          dynamicGraphicReferenceFrames.add(toroidAfterJointFrameViz);
       }
@@ -132,7 +132,7 @@ public class ManipulableToroid
 
    private void updateVisualizers()
    {
-      for (DynamicGraphicReferenceFrame dynamicGraphicReferenceFrame : dynamicGraphicReferenceFrames)
+      for (YoGraphicReferenceFrame dynamicGraphicReferenceFrame : dynamicGraphicReferenceFrames)
       {
          dynamicGraphicReferenceFrame.update();
       }

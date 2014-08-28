@@ -16,12 +16,12 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector2d;
 
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
 
 public class CommonCouplingRegistry implements CouplingRegistry
 {
@@ -60,7 +60,7 @@ public class CommonCouplingRegistry implements CouplingRegistry
    private FramePoint2d desiredICP = new FramePoint2d(ReferenceFrame.getWorldFrame());
 
    private final PoseReferenceFrame footstepFrame = new PoseReferenceFrame("footstepFrame", ReferenceFrame.getWorldFrame());
-   private final DynamicGraphicReferenceFrame footstepFrameGraphic;
+   private final YoGraphicReferenceFrame footstepFrameGraphic;
    
   
    private EnumYoVariable<RobotSide> upcomingSupportLeg = new EnumYoVariable<RobotSide>("upcomingSupportLeg", registry, RobotSide.class);
@@ -73,7 +73,7 @@ public class CommonCouplingRegistry implements CouplingRegistry
       parentRegistry.addChild(registry);
       if (dynamicGraphicObjectsListRegistry != null)
       {
-         footstepFrameGraphic = new DynamicGraphicReferenceFrame(footstepFrame, registry, 0.1);
+         footstepFrameGraphic = new YoGraphicReferenceFrame(footstepFrame, registry, 0.1);
          DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList(getClass().getSimpleName());
          dynamicGraphicObjectsList.add(footstepFrameGraphic);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);

@@ -4,17 +4,17 @@ import java.util.ArrayList;
 
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
 
    public class VisualizeFramesController implements RobotController
    {
       private final YoVariableRegistry registry = new YoVariableRegistry("VisualizeFramesController");
 
-      private final ArrayList<DynamicGraphicReferenceFrame> dynamicGraphicReferenceFrames = new ArrayList<DynamicGraphicReferenceFrame>();
+      private final ArrayList<YoGraphicReferenceFrame> dynamicGraphicReferenceFrames = new ArrayList<YoGraphicReferenceFrame>();
 
       private final DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList("TestFramesController");
 
@@ -22,7 +22,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicRefere
       {
          for (ReferenceFrame frame : referenceFrames)
          {
-            DynamicGraphicReferenceFrame dynamicGraphicReferenceFrame = new DynamicGraphicReferenceFrame(frame, registry, coordinateSystemLength);
+            YoGraphicReferenceFrame dynamicGraphicReferenceFrame = new YoGraphicReferenceFrame(frame, registry, coordinateSystemLength);
             dynamicGraphicReferenceFrames.add(dynamicGraphicReferenceFrame);
             dynamicGraphicObjectsList.add(dynamicGraphicReferenceFrame);
          }
@@ -56,7 +56,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicRefere
 
       private void updateDynamicGraphicReferenceFrames()
       {
-         for (DynamicGraphicReferenceFrame frame : dynamicGraphicReferenceFrames)
+         for (YoGraphicReferenceFrame frame : dynamicGraphicReferenceFrames)
          {
             frame.update();
          }

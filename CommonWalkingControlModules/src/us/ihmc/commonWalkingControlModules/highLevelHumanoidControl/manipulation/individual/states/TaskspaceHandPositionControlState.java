@@ -16,10 +16,10 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
 import com.yobotics.simulationconstructionset.util.trajectory.PoseTrajectoryGenerator;
 
 /**
@@ -32,7 +32,7 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
    protected final SpatialAccelerationVector handAcceleration = new SpatialAccelerationVector();
 
    // viz stuff:
-   private final Collection<DynamicGraphicReferenceFrame> dynamicGraphicReferenceFrames = new ArrayList<DynamicGraphicReferenceFrame>();
+   private final Collection<YoGraphicReferenceFrame> dynamicGraphicReferenceFrames = new ArrayList<YoGraphicReferenceFrame>();
    protected final PoseReferenceFrame desiredPositionFrame;
 
    // temp stuff:
@@ -61,7 +61,7 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
       {
          DynamicGraphicObjectsList list = new DynamicGraphicObjectsList(name);
 
-         DynamicGraphicReferenceFrame dynamicGraphicReferenceFrame = new DynamicGraphicReferenceFrame(desiredPositionFrame, registry, 0.3);
+         YoGraphicReferenceFrame dynamicGraphicReferenceFrame = new YoGraphicReferenceFrame(desiredPositionFrame, registry, 0.3);
          dynamicGraphicReferenceFrames.add(dynamicGraphicReferenceFrame);
          list.add(dynamicGraphicReferenceFrame);
 
@@ -132,7 +132,7 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
       desiredPositionFrame.setPoseAndUpdate(desiredPosition, desiredOrientation);
       desiredPositionFrame.update();
 
-      for (DynamicGraphicReferenceFrame dynamicGraphicReferenceFrame : dynamicGraphicReferenceFrames)
+      for (YoGraphicReferenceFrame dynamicGraphicReferenceFrame : dynamicGraphicReferenceFrames)
       {
          dynamicGraphicReferenceFrame.update();
       }

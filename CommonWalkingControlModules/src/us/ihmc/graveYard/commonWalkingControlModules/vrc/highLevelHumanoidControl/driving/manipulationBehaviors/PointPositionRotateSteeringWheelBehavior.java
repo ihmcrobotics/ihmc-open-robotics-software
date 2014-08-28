@@ -17,10 +17,10 @@ import us.ihmc.utilities.math.trajectories.providers.PositionProvider;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 
 import com.yobotics.simulationconstructionset.util.controller.EuclideanPositionController;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
 import com.yobotics.simulationconstructionset.util.trajectory.CirclePositionTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.provider.YoVariableDoubleProvider;
 
@@ -49,7 +49,7 @@ public class PointPositionRotateSteeringWheelBehavior
 
    private final ReferenceFrame steeringWheelFrame;
    private final TransformReferenceFrame xTangentialFrame;
-   private final DynamicGraphicReferenceFrame xTangentialFrameViz;
+   private final YoGraphicReferenceFrame xTangentialFrameViz;
    private final MomentumBasedController momentumBasedController;
 
    private final RigidBody hand;
@@ -86,7 +86,7 @@ public class PointPositionRotateSteeringWheelBehavior
 
       if (dynamicGraphicObjectsListRegistry != null)
       {
-         xTangentialFrameViz = new DynamicGraphicReferenceFrame(xTangentialFrame, registry, 0.1);
+         xTangentialFrameViz = new YoGraphicReferenceFrame(xTangentialFrame, registry, 0.1);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("rotateSteeringWheelBehavior", xTangentialFrameViz);
       }
       else
