@@ -38,6 +38,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphic;
+import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
 import com.yobotics.simulationconstructionset.FloatingJoint;
 import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -47,7 +48,6 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.inputdevices.MidiSliderBoard;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePose;
 
 public class DRCRobotMidiSliderBoardPositionManipulation

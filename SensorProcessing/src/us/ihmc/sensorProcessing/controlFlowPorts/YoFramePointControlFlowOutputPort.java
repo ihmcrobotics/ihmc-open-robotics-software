@@ -5,8 +5,8 @@ import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
 public class YoFramePointControlFlowOutputPort extends ControlFlowOutputPort<FramePoint>
 {

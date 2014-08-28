@@ -20,10 +20,10 @@ import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicCoordinateSystem;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFramePose;
 
 public class AtlasCalibrationDataViewer extends AtlasKinematicCalibrator

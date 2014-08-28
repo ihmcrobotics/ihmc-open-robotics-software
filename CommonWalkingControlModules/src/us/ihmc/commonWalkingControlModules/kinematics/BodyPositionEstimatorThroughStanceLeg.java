@@ -10,10 +10,10 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 
 public class BodyPositionEstimatorThroughStanceLeg implements BodyPositionEstimator
 {
