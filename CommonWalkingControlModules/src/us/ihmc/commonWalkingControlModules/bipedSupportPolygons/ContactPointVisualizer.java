@@ -8,12 +8,12 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 
 /**
  * @author twan
@@ -25,7 +25,7 @@ public class ContactPointVisualizer
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final List<YoFramePoint> contactPointsWorld = new ArrayList<YoFramePoint>();
-   private final List<DynamicGraphicPosition> dynamicGraphicPositions = new ArrayList<DynamicGraphicPosition>();
+   private final List<YoGraphicPosition> dynamicGraphicPositions = new ArrayList<YoGraphicPosition>();
    private final List<YoGraphicVector> dynamicGraphicVectors = new ArrayList<YoGraphicVector>();
    private final List<YoFrameVector> normalVectors = new ArrayList<YoFrameVector>();
    private final double normalVectorScale = 0.1;
@@ -46,7 +46,7 @@ public class ContactPointVisualizer
       {
          YoFramePoint contactPointWorld = new YoFramePoint("contactPoint" + i, worldFrame, this.registry);
          contactPointsWorld.add(contactPointWorld);
-         DynamicGraphicPosition dynamicGraphicPosition = new DynamicGraphicPosition("contactViz" + i, contactPointWorld, 0.01, YoAppearance.Crimson());
+         YoGraphicPosition dynamicGraphicPosition = new YoGraphicPosition("contactViz" + i, contactPointWorld, 0.01, YoAppearance.Crimson());
          dynamicGraphicPositions.add(dynamicGraphicPosition);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("contactPoints", dynamicGraphicPosition);
 

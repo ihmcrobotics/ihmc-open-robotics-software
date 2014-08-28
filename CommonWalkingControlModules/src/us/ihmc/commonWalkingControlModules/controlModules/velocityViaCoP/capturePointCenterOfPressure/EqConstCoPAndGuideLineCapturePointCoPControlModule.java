@@ -19,6 +19,7 @@ import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.math.frames.YoFrameLine2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameLineSegment2d;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
@@ -27,7 +28,6 @@ import com.yobotics.simulationconstructionset.plotting.YoFrameLine2dArtifact;
 import com.yobotics.simulationconstructionset.plotting.YoFrameLineSegment2dArtifact;
 import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 
 public class EqConstCoPAndGuideLineCapturePointCoPControlModule implements CapturePointCenterOfPressureControlModule
 {
@@ -65,8 +65,8 @@ public class EqConstCoPAndGuideLineCapturePointCoPControlModule implements Captu
       {
          ArtifactList artifactList = new ArtifactList("Capture Point CoP Control Module");
 
-         DynamicGraphicPosition centerOfPressureDesiredGraphic = new DynamicGraphicPosition("Desired Center of Pressure", desiredCenterOfPressure, 0.012,
-                                                                    YoAppearance.Gray(), DynamicGraphicPosition.GraphicType.CROSS);
+         YoGraphicPosition centerOfPressureDesiredGraphic = new YoGraphicPosition("Desired Center of Pressure", desiredCenterOfPressure, 0.012,
+                                                                    YoAppearance.Gray(), YoGraphicPosition.GraphicType.CROSS);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("EquivalentConstantCoPVelocityViaCoPControlModule", centerOfPressureDesiredGraphic);
          artifactList.add(centerOfPressureDesiredGraphic.createArtifact());
 

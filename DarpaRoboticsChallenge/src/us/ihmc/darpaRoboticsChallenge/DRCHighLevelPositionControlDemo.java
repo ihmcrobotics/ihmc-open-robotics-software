@@ -20,6 +20,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.Joint;
@@ -27,7 +28,6 @@ import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.controller.GainCalculator;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 
 public class DRCHighLevelPositionControlDemo
 {
@@ -87,7 +87,7 @@ public class DRCHighLevelPositionControlDemo
       private final SDFRobot robot;
       
       private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
-      private final ArrayList<DynamicGraphicPosition> efp_positionViz = new ArrayList<>();
+      private final ArrayList<YoGraphicPosition> efp_positionViz = new ArrayList<>();
       
       public HoldRobotInTheAir(SDFRobot robot, SimulationConstructionSet scs, SDFFullRobotModel sdfFullRobotModel)
       {
@@ -124,7 +124,7 @@ public class DRCHighLevelPositionControlDemo
             externalForcePoints.add(efp);
             jointToAddExternalForcePoints.addExternalForcePoint(efp);
             
-            efp_positionViz.add(new DynamicGraphicPosition(efp.getName(), efp.getYoPosition(), 0.05, YoAppearance.Red()));
+            efp_positionViz.add(new YoGraphicPosition(efp.getName(), efp.getYoPosition(), 0.05, YoAppearance.Red()));
          }
          
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects("EFP", efp_positionViz);

@@ -20,6 +20,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.math.frames.YoFrameLine2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameLineSegment2d;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
@@ -29,7 +30,6 @@ import com.yobotics.simulationconstructionset.plotting.YoFrameLineSegment2dArtif
 import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 
 public class StandardCapturePointCenterOfPressureControlModule implements CapturePointCenterOfPressureControlModule
@@ -85,7 +85,7 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
 
    private final SideDependentList<YoFramePoint> centerOfPressureDesiredAnkleZUp;
 
-   private final DynamicGraphicPosition centerOfPressureDesiredWorldGraphicPosition;
+   private final YoGraphicPosition centerOfPressureDesiredWorldGraphicPosition;
 
    private final YoFrameLineSegment2d guideLineWorld;
    private final YoFrameLine2d parallelLineWorld;
@@ -124,8 +124,8 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
       {
          DynamicGraphicObjectsList dynamicGraphicObjectList = new DynamicGraphicObjectsList("CapturePointController");
 
-         centerOfPressureDesiredWorldGraphicPosition = new DynamicGraphicPosition("Desired Center of Pressure", centerOfPressureDesiredWorld, 0.012,
-               YoAppearance.Gray(), DynamicGraphicPosition.GraphicType.CROSS);
+         centerOfPressureDesiredWorldGraphicPosition = new YoGraphicPosition("Desired Center of Pressure", centerOfPressureDesiredWorld, 0.012,
+               YoAppearance.Gray(), YoGraphicPosition.GraphicType.CROSS);
 
          dynamicGraphicObjectList.add(centerOfPressureDesiredWorldGraphicPosition);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectList);

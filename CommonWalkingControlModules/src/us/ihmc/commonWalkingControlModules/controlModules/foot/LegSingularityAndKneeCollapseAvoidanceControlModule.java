@@ -24,13 +24,13 @@ import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphicVector;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicReferenceFrame;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 
@@ -111,7 +111,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
    private final YoFrameVector yoCorrectedDesiredFootLinearVelocity;
    
    private final DynamicGraphicReferenceFrame virtualLegTangentialFrameHipCenteredGraphics, virtualLegTangentialFrameAnkleCenteredGraphics;
-   private final DynamicGraphicPosition yoDesiredFootPositionGraphic, yoCorrectedDesiredFootPositionGraphic;
+   private final YoGraphicPosition yoDesiredFootPositionGraphic, yoCorrectedDesiredFootPositionGraphic;
    private final YoGraphicVector yoDesiredFootLinearVelocityGraphic, yoCorrectedDesiredFootLinearVelocityGraphic;
 
    private final BooleanYoVariable isSwingSingularityAvoidanceUsed;
@@ -286,9 +286,9 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
 
       if (visualize)
       {
-         yoDesiredFootPositionGraphic = new DynamicGraphicPosition(namePrefix + "DesiredFootPosition", yoDesiredFootPosition, 0.025, YoAppearance.Red(), GraphicType.BALL);
+         yoDesiredFootPositionGraphic = new YoGraphicPosition(namePrefix + "DesiredFootPosition", yoDesiredFootPosition, 0.025, YoAppearance.Red(), GraphicType.BALL);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("SingularityCollapseAvoidance", yoDesiredFootPositionGraphic);
-         yoCorrectedDesiredFootPositionGraphic = new DynamicGraphicPosition(namePrefix + "CorrectedDesiredFootPosition", yoCorrectedDesiredFootPosition, 0.025, YoAppearance.Green(), GraphicType.BALL);
+         yoCorrectedDesiredFootPositionGraphic = new YoGraphicPosition(namePrefix + "CorrectedDesiredFootPosition", yoCorrectedDesiredFootPosition, 0.025, YoAppearance.Green(), GraphicType.BALL);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("SingularityCollapseAvoidance", yoCorrectedDesiredFootPositionGraphic);
       }
       else

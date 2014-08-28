@@ -24,11 +24,11 @@ import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
 
 public class BalanceSupportControlModule
 {
@@ -79,7 +79,7 @@ public class BalanceSupportControlModule
 
          if (dynamicGraphicObjectsListRegistry != null)
          {
-            DynamicGraphicPosition copViz = new DynamicGraphicPosition(copName, vtp, 0.005, YoAppearance.Navy(), GraphicType.BALL);
+            YoGraphicPosition copViz = new YoGraphicPosition(copName, vtp, 0.005, YoAppearance.Navy(), GraphicType.BALL);
             dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, copViz);
             dynamicGraphicObjectsListRegistry.registerArtifact(listName, copViz.createArtifact());
             virtualToePointsInWorld.put(robotSide, vtp);

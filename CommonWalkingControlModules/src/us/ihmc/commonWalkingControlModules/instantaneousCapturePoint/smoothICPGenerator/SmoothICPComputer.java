@@ -17,10 +17,10 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 
 public class SmoothICPComputer
 {
@@ -52,7 +52,7 @@ public class SmoothICPComputer
    
    private final DoubleYoVariable omega0 = new DoubleYoVariable("icpPlannerOmega0", registry);
 
-   private final DynamicGraphicPosition[] icpCornerPointsViz;
+   private final YoGraphicPosition[] icpCornerPointsViz;
 
    //TODO: Finish YoVariablizing these to make rewindable and visualizable.
 
@@ -92,7 +92,7 @@ public class SmoothICPComputer
 
          if (VISUALIZE)
          {
-            DynamicGraphicPosition dynamicGraphicPosition = new DynamicGraphicPosition(constantCoPName, yoFramePoint, 0.005, YoAppearance.Red());
+            YoGraphicPosition dynamicGraphicPosition = new YoGraphicPosition(constantCoPName, yoFramePoint, 0.005, YoAppearance.Red());
             dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(getClass().getSimpleName(), dynamicGraphicPosition);
             dynamicGraphicObjectsListRegistry.registerArtifact(getClass().getSimpleName(), dynamicGraphicPosition.createArtifact());
          }
@@ -100,11 +100,11 @@ public class SmoothICPComputer
 
       if (VISUALIZE)
       {
-         icpCornerPointsViz = new DynamicGraphicPosition[maxNumberOfConsideredFootsteps - 1];
+         icpCornerPointsViz = new YoGraphicPosition[maxNumberOfConsideredFootsteps - 1];
 
          for (int i = 0; i < maxNumberOfConsideredFootsteps - 1; i++)
          {
-            icpCornerPointsViz[i] = new DynamicGraphicPosition("cornerPoint" + i, "", registry, 0.01, YoAppearance.Green());
+            icpCornerPointsViz[i] = new YoGraphicPosition("cornerPoint" + i, "", registry, 0.01, YoAppearance.Green());
             dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(getClass().getSimpleName(), icpCornerPointsViz[i]);
             dynamicGraphicObjectsListRegistry.registerArtifact(getClass().getSimpleName(), icpCornerPointsViz[i].createArtifact());
          }
@@ -347,7 +347,7 @@ public class SmoothICPComputer
    }
 
 
-   private void visualizeICPCornerPoints(Point3d[] icpCornerPoints, DynamicGraphicPosition[] icpCornerPointsViz2)
+   private void visualizeICPCornerPoints(Point3d[] icpCornerPoints, YoGraphicPosition[] icpCornerPointsViz2)
    {
       if (VISUALIZE)
       {

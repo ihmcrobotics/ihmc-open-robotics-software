@@ -23,8 +23,10 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphic;
 import us.ihmc.yoUtilities.graphics.YoGraphicCoordinateSystem;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
@@ -32,8 +34,6 @@ import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
 import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
 import com.yobotics.simulationconstructionset.util.kinematics.OrientationInterpolationCalculator;
 import com.yobotics.simulationconstructionset.util.trajectory.CartesianTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.YoMinimumJerkTrajectory;
@@ -180,7 +180,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
          double ballSize = (numberOfBalls > 1) ? 0.005 : 0.02;
          bagOfBalls = new BagOfBalls(numberOfBalls, ballSize, "swingTarget", YoAppearance.Aqua(), parentRegistry, dynamicGraphicObjectsListRegistry);
 
-         DynamicGraphicPosition finalDesiredSwingViz = new DynamicGraphicPosition("Final Desired Swing", finalDesiredSwingFootPosition, 0.03,
+         YoGraphicPosition finalDesiredSwingViz = new YoGraphicPosition("Final Desired Swing", finalDesiredSwingFootPosition, 0.03,
                YoAppearance.Black(), GraphicType.BALL_WITH_CROSS);
 
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects("R2Sim02SwingSubController", new YoGraphic[] { swingFootOrientationViz,

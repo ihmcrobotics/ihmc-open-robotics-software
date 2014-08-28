@@ -17,12 +17,12 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphic;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition.GraphicType;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 
@@ -64,13 +64,13 @@ public class EquivalentConstantCoPDesiredCoPControlModule implements DesiredCoPC
 
       if (dynamicGraphicObjectsListRegistry != null)
       {
-         YoGraphic desiredCapturePointGraphic = new DynamicGraphicPosition("Desired Final Capture Point", desiredFinalCapturePoint, 0.01,
+         YoGraphic desiredCapturePointGraphic = new YoGraphicPosition("Desired Final Capture Point", desiredFinalCapturePoint, 0.01,
                                                               YoAppearance.Yellow(), GraphicType.ROTATED_CROSS);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("EquivalentConstantCoPVelocityViaCoPControlModule", desiredCapturePointGraphic);
          dynamicGraphicObjectsListRegistry.registerArtifact("EquivalentConstantCoPVelocityViaCoPControlModule", desiredCapturePointGraphic.createArtifact());
 
-         DynamicGraphicPosition centerOfPressureDesiredGraphic = new DynamicGraphicPosition("Desired Center of Pressure", desiredCenterOfPressure, 0.012,
-                                                                    YoAppearance.Gray(), DynamicGraphicPosition.GraphicType.CROSS);
+         YoGraphicPosition centerOfPressureDesiredGraphic = new YoGraphicPosition("Desired Center of Pressure", desiredCenterOfPressure, 0.012,
+                                                                    YoAppearance.Gray(), YoGraphicPosition.GraphicType.CROSS);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("EquivalentConstantCoPVelocityViaCoPControlModule", centerOfPressureDesiredGraphic);
          dynamicGraphicObjectsListRegistry.registerArtifact("EquivalentConstantCoPVelocityViaCoPControlModule",
                  centerOfPressureDesiredGraphic.createArtifact());

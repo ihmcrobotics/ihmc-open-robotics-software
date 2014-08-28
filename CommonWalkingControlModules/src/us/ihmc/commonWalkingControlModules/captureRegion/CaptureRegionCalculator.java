@@ -16,6 +16,7 @@ import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
@@ -24,7 +25,6 @@ import com.yobotics.simulationconstructionset.time.GlobalTimer;
 import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicPosition;
 
 
 //import us.ihmc.plotting.shapes.PointArtifact;
@@ -174,11 +174,11 @@ public class CaptureRegionCalculator
 
          if (DRAW_CAPTURE_REGION && (dynamicGraphicObjectsListRegistry != null))
          {
-            DynamicGraphicPosition position = new DynamicGraphicPosition("BestCaseVertices" + i, 
+            YoGraphicPosition position = new YoGraphicPosition("BestCaseVertices" + i, 
                   captureRegionBestCaseVertices[i], 
                   0.004,
 //                  DRAWN_POINT_BASE_SIZE * ((4.0 + ((double) i)) / 4.0),
-                  YoAppearance.Green(), DynamicGraphicPosition.GraphicType.BALL);
+                  YoAppearance.Green(), YoGraphicPosition.GraphicType.BALL);
             dynamicGraphicObjectsList.add(position);
             artifactList.add(position.createArtifact());
          }
@@ -191,11 +191,11 @@ public class CaptureRegionCalculator
 
          if (DRAW_CAPTURE_REGION && (dynamicGraphicObjectsListRegistry != null))
          {
-            DynamicGraphicPosition position = new DynamicGraphicPosition(pointName, captureRegionKinematicLimitVertices[i],
+            YoGraphicPosition position = new YoGraphicPosition(pointName, captureRegionKinematicLimitVertices[i],
                   0.004, 
 //                  DRAWN_POINT_BASE_SIZE * ((4 + i) / 4), 
                   YoAppearance.Blue(), 
-                  DynamicGraphicPosition.GraphicType.BALL);
+                  YoGraphicPosition.GraphicType.BALL);
             dynamicGraphicObjectsList.add(position);
             artifactList.add(position.createArtifact());
          }
@@ -208,11 +208,11 @@ public class CaptureRegionCalculator
 
          if (DRAW_CAPTURE_REGION && (dynamicGraphicObjectsListRegistry != null))
          {
-            DynamicGraphicPosition position = new DynamicGraphicPosition(pointName, estimatedCOPExtremes[i], 
+            YoGraphicPosition position = new YoGraphicPosition(pointName, estimatedCOPExtremes[i], 
                   0.004,
 //                  DRAWN_POINT_BASE_SIZE * ((4 + i) / 4),
                   YoAppearance.Black(), 
-                  DynamicGraphicPosition.GraphicType.BALL);
+                  YoGraphicPosition.GraphicType.BALL);
             dynamicGraphicObjectsList.add(position);
             artifactList.add(position.createArtifact());
          }
@@ -226,8 +226,8 @@ public class CaptureRegionCalculator
 
          if (DRAW_CAPTURE_REGION && (dynamicGraphicObjectsListRegistry != null))
          {
-            DynamicGraphicPosition position = new DynamicGraphicPosition(pointName, additionalKinematicLimitPoints[i], DRAWN_POINT_BASE_SIZE * 0.5,
-                                                 YoAppearance.Aqua(), DynamicGraphicPosition.GraphicType.BALL);
+            YoGraphicPosition position = new YoGraphicPosition(pointName, additionalKinematicLimitPoints[i], DRAWN_POINT_BASE_SIZE * 0.5,
+                                                 YoAppearance.Aqua(), YoGraphicPosition.GraphicType.BALL);
 
             dynamicGraphicObjectsList.add(position);
             artifactList.add(position.createArtifact());
