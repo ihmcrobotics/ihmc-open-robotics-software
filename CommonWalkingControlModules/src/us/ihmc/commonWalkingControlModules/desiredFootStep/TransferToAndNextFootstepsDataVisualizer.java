@@ -5,9 +5,9 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicCoordinateSystem;
 import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicCoordinateSystem;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicYoFramePolygon;
@@ -15,7 +15,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicYoFram
 public class TransferToAndNextFootstepsDataVisualizer
 {
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final DynamicGraphicCoordinateSystem transferFromCoordinateSystem, transferToCoordinateSystem, nextStepCoordinateSystem,
+   private final YoGraphicCoordinateSystem transferFromCoordinateSystem, transferToCoordinateSystem, nextStepCoordinateSystem,
            nextNextStepCoordinateSystem;
    private final YoFrameConvexPolygon2d transferFromPolygon, transferToPolygon, nextStepPolygon, nextNextStepPolygon;
    private final DynamicGraphicYoFramePolygon transferFromPolygonViz, transferToPolygonViz, nextStepPolygonViz, nextNextStepPolygonViz;
@@ -60,10 +60,10 @@ public class TransferToAndNextFootstepsDataVisualizer
       dynamicGraphicObjectsList.add(nextStepPolygonViz);
       dynamicGraphicObjectsList.add(nextNextStepPolygonViz);
 
-      transferFromCoordinateSystem = new DynamicGraphicCoordinateSystem("transferFromPose", "", registry, 0.2);
-      transferToCoordinateSystem = new DynamicGraphicCoordinateSystem("transferToPose", "", registry, 0.2);
-      nextStepCoordinateSystem = new DynamicGraphicCoordinateSystem("nextStepPose", "", registry, 0.2);
-      nextNextStepCoordinateSystem = new DynamicGraphicCoordinateSystem("nextNextStepPose", "", registry, 0.2);
+      transferFromCoordinateSystem = new YoGraphicCoordinateSystem("transferFromPose", "", registry, 0.2);
+      transferToCoordinateSystem = new YoGraphicCoordinateSystem("transferToPose", "", registry, 0.2);
+      nextStepCoordinateSystem = new YoGraphicCoordinateSystem("nextStepPose", "", registry, 0.2);
+      nextNextStepCoordinateSystem = new YoGraphicCoordinateSystem("nextNextStepPose", "", registry, 0.2);
 
       dynamicGraphicObjectsList.add(transferFromCoordinateSystem);
       dynamicGraphicObjectsList.add(transferToCoordinateSystem);
@@ -89,7 +89,7 @@ public class TransferToAndNextFootstepsDataVisualizer
    }
 
    private static void visualizeFootstep(Footstep footstep, YoFrameConvexPolygon2d footstepPolygon, DynamicGraphicYoFramePolygon footstepPolygonViz,
-           DynamicGraphicCoordinateSystem footstepCoordinateSystem)
+           YoGraphicCoordinateSystem footstepCoordinateSystem)
    {
       if (footstep != null)
       {

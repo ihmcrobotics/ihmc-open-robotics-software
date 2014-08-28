@@ -13,10 +13,10 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicCoordinateSystem;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicCoordinateSystem;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class UserDesiredHandstepProvider implements HandstepProvider
@@ -30,7 +30,7 @@ public class UserDesiredHandstepProvider implements HandstepProvider
    private final DoubleYoVariable userHandstepRotationAboutNormal = new DoubleYoVariable("userHandstepRotationAboutNormal", registry);
    private final DoubleYoVariable swingTrajectoryTime = new DoubleYoVariable("userHandstepSwingTime", registry);
 
-   private final DynamicGraphicCoordinateSystem userDesiredHandstepCoordinateSystem;
+   private final YoGraphicCoordinateSystem userDesiredHandstepCoordinateSystem;
 
    private final HandstepHelper handstepHelper;
    
@@ -43,7 +43,7 @@ public class UserDesiredHandstepProvider implements HandstepProvider
       userHandstepNormal.set(-1.0, 0.0, 0.0);
       userHandstepRobotSide.set(RobotSide.LEFT);
 
-      userDesiredHandstepCoordinateSystem = new DynamicGraphicCoordinateSystem("userHandstepViz", "", parentRegistry, 0.3);
+      userDesiredHandstepCoordinateSystem = new YoGraphicCoordinateSystem("userHandstepViz", "", parentRegistry, 0.3);
       
       VariableChangedListener listener = new VariableChangedListener()
       {
