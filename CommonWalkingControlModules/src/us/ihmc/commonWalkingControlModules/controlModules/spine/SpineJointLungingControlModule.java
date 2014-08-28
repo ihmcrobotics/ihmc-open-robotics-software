@@ -29,9 +29,9 @@ import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 import com.yobotics.simulationconstructionset.util.controller.PIDController;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public class SpineJointLungingControlModule implements SpineLungingControlModule
 {

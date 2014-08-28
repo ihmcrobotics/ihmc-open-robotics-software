@@ -14,9 +14,9 @@ import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
+import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameOrientation;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public class FixedAxisOfRotationControlModule
 {

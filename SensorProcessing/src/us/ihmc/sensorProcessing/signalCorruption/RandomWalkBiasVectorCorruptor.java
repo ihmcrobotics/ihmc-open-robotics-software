@@ -8,8 +8,8 @@ import javax.vecmath.Vector3d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public class RandomWalkBiasVectorCorruptor implements SignalCorruptor<Tuple3d>
 {

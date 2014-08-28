@@ -15,10 +15,10 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
+import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameLineSegment2d;
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 public class SCSDoubleSupportICPTesterControllerHeelToToe2 implements RobotController
 {

@@ -12,8 +12,8 @@ import org.junit.Test;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.test.JUnitTools;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
+import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
-import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 
 public class KinematicPointTest 
