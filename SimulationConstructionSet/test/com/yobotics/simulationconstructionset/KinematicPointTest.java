@@ -11,8 +11,8 @@ import org.junit.Test;
 
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.test.JUnitTools;
+import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
-import com.yobotics.simulationconstructionset.util.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.util.math.frames.YoFrameVector;
 
 
