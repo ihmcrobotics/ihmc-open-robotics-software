@@ -366,14 +366,14 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    public double getKpPelvisOrientation()
    {
       if (!runningOnRealRobot) return 100.0;
-      return 80.0;
+      return 60.0;
    }
 
    @Override
    public double getZetaPelvisOrientation()
    {
       if (!runningOnRealRobot) return 0.8;
-      return 0.25;
+      return 0.4;
    }
    
 
@@ -408,7 +408,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public double getTrajectoryTimeHeadOrientation()
    {
-      return 3.0;
+      return 0.5;
    }
 
    @Override
@@ -422,7 +422,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    public double getZetaUpperBody()
    {
       if (!runningOnRealRobot) return 0.8;
-      return 0.25;
+      return 0.6;
    }
 
    @Override
