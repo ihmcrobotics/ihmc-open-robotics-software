@@ -34,8 +34,10 @@ public class YoVariableLogVisualizerGUI extends JPanel
    private final YoVariableLogPlaybackRobot robot;
    private final SimulationConstructionSet scs;
    private YoVariableLogCropper yoVariableLogCropper;
+   
+   private final File directory;
 
-   public YoVariableLogVisualizerGUI(MultiVideoDataPlayer player, YoVariableLogPlaybackRobot robot, YoVariableLogCropper yoVariableLogCropper, SimulationConstructionSet scs)
+   public YoVariableLogVisualizerGUI(File directory, MultiVideoDataPlayer player, YoVariableLogPlaybackRobot robot, YoVariableLogCropper yoVariableLogCropper, SimulationConstructionSet scs)
    {
       super();
 
@@ -43,6 +45,7 @@ public class YoVariableLogVisualizerGUI extends JPanel
       this.robot = robot;
       this.yoVariableLogCropper = yoVariableLogCropper;
       this.scs = scs;
+      this.directory = directory;
 
       
       setLayout(new GridLayout(1, 2));
@@ -162,7 +165,7 @@ public class YoVariableLogVisualizerGUI extends JPanel
       final long endTimestamp = timestamps[1];
       
       
-      JFileChooser saveDialog = new JFileChooser(System.getProperty("user.home"));
+      JFileChooser saveDialog = new JFileChooser(directory);
       saveDialog.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
       if (JFileChooser.APPROVE_OPTION == saveDialog.showSaveDialog(this))
