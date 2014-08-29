@@ -107,7 +107,7 @@ public class JointFrictionModelsHolderTest
    {
       public JointFrictionModelsHolderForTest(String name, YoVariableRegistry registry)
       {
-         super(name, registry);
+         super(name, registry, 0.0);
          frictionModels.put(FrictionModel.OFF, noCompensatingModel);
          frictionModels.put(FrictionModel.ASYMMETRIC_COULOMB_VISCOUS, asymmetricCVModel);
          frictionModels.put(FrictionModel.ASYMMETRIC_COULOMB_VISCOUS_STRIBECK, asymmetricCVSModel);
