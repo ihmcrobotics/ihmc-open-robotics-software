@@ -61,9 +61,10 @@ public class FrictionErrorComputer implements FunctionNtoM
    /**
     * This method computes the error between the measured joint torques and the predicted from the friction model.
     * Are also included an inertia parameter and a gravitational component.
-    * The angle offset for the gravitational component is already bounded between -pi and +pi.
+    * The angle offset for the gravitational component is already bounded between -pi and +pi. So to obtain the real 
+    * value use the method getBoundedOffset(argument) using as argument the optimization result.
     * 
-    * @param inputs are - Inertia + friction model parameters + mass*radius + angle offset
+    * @param inputs are - Inertia + mass*lever arm + angle offset + friction model parameters 
     * @param input[0] - is Inertia
     * @param input[1] - is mass*lever arm
     * @param input[2] - is angle offset
@@ -99,5 +100,10 @@ public class FrictionErrorComputer implements FunctionNtoM
          gravityTorque = input[1] * Math.cos(sampleMap.get("position").get(i) + boundedOffset);
          output[i] =  sampleMap.get("measuredTorque").get(i) - frictionTorque - inertiaTorque - gravityTorque;
       }
+   }
+   
+   public double getBoundedOffset(double value)
+   {
+      return OFFSET_LOWER_BOUND + (OFFSET_UPPER_BOUND - OFFSET_LOWER_BOUND) * (Math.sin(value) + 1)/2;
    }
 }
