@@ -39,6 +39,9 @@ import com.yobotics.simulationconstructionset.util.trajectory.provider.YoVelocit
 
 public class FootControlModule
 {
+   public static final boolean USE_SUPPORT_FOOT_HOLD_POSITION_STATE = false;
+   public static final boolean USE_SUPPORT_DAMPING = false;
+
    private final YoVariableRegistry registry;
    private final ContactablePlaneBody contactableFoot;
 
@@ -288,8 +291,13 @@ public class FootControlModule
          if (constraintType == ConstraintType.HOLD_POSITION)
             System.out.println("Warning: HOLD_POSITION state is handled internally.");
 
-         if (requestHoldPosition != null && requestHoldPosition.getBooleanValue())
-            constraintType = ConstraintType.HOLD_POSITION;
+         if (USE_SUPPORT_FOOT_HOLD_POSITION_STATE)
+         {
+            if (requestHoldPosition.getBooleanValue())
+               constraintType = ConstraintType.HOLD_POSITION;
+            else
+               constraintType = ConstraintType.FULL;
+         }
          else
             constraintType = ConstraintType.FULL;
 
@@ -315,7 +323,8 @@ public class FootControlModule
    public void doControl()
    {
       legSingularityAndKneeCollapseAvoidanceControlModule.update();
-      requestHoldPosition.set(footSwitch.computeFootLoadPercentage() < footLoadThresholdToHoldPosition.getDoubleValue());
+      if (USE_SUPPORT_FOOT_HOLD_POSITION_STATE)
+         requestHoldPosition.set(footSwitch.computeFootLoadPercentage() < footLoadThresholdToHoldPosition.getDoubleValue());
       jacobianDeterminant.set(jacobian.det());
 
       stateMachine.checkTransitionConditions();

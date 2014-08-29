@@ -14,9 +14,6 @@ import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 
 public class FullyConstrainedState extends AbstractFootControlState
 {
-   private static final boolean USE_SUPPORT_FOOT_HOLD_POSITION_STATE = true;
-   private static final boolean USE_SUPPORT_DAMPING = true;
-
    private final double supportKdRoll = 20.0;
    private final double supportKdPitch = 0.0;
    private final double supportKdYaw = 0.0;
@@ -60,7 +57,7 @@ public class FullyConstrainedState extends AbstractFootControlState
       if (doFancyOnToesControl.getBooleanValue())
          determineCoPOnEdge();
 
-      if (USE_SUPPORT_FOOT_HOLD_POSITION_STATE)
+      if (FootControlModule.USE_SUPPORT_FOOT_HOLD_POSITION_STATE)
       {
          if (isCoPOnEdge && doFancyOnToesControl.getBooleanValue())
             requestedState.set(ConstraintType.HOLD_POSITION);
@@ -68,7 +65,7 @@ public class FullyConstrainedState extends AbstractFootControlState
             requestedState.set(ConstraintType.HOLD_POSITION);
       }
 
-      if (!USE_SUPPORT_DAMPING)
+      if (!FootControlModule.USE_SUPPORT_DAMPING)
       {
          footAcceleration.setToZero(contactableBody.getFrameAfterParentJoint(), rootBody.getBodyFixedFrame(), contactableBody.getFrameAfterParentJoint());
       }
