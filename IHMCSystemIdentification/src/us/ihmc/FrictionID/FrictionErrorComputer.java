@@ -48,7 +48,7 @@ public class FrictionErrorComputer implements FunctionNtoM
    @Override
    public int getNumOfInputsN()
    {
-      return model.getNumberOfParameters() + 1;
+      return model.getNumberOfParameters() + 3;
    }
 
    @Override
@@ -72,6 +72,8 @@ public class FrictionErrorComputer implements FunctionNtoM
    @Override
    public void process(double[] input, double[] output)
    {
+      frictionParameters = new double[input.length-3];
+      
       for (int j = 3; j < input.length; j++)
       {
          frictionParameters[j - 3] = input[j];
