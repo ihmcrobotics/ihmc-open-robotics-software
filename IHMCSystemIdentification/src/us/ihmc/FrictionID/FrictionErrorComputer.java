@@ -75,7 +75,7 @@ public class FrictionErrorComputer implements FunctionNtoM
    {
       for (int j = 3; j < input.length; j++)
       {
-         frictionParameters[j-1] = input[j];
+         frictionParameters[j-3] = input[j];
       }
       
       model.updateParameters(frictionParameters);
