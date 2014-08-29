@@ -23,11 +23,12 @@ import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimu
 
 public abstract class DRCObstacleCourseRocksTest implements MultiRobotTestInterface
 {
-   private static final boolean KEEP_SCS_UP = false;
+	   private static final boolean alwaysShowGUI = false;
+	   private static final boolean KEEP_SCS_UP = false;
 
    private static final boolean createMovie = BambooTools.doMovieCreation();
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
-   private static final boolean showGUI = KEEP_SCS_UP || createMovie;
+   private static final boolean showGUI = alwaysShowGUI || KEEP_SCS_UP || createMovie;
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
