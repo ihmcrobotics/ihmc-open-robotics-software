@@ -1085,6 +1085,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForSingleSupport(nextFootstep, swingSide);
             instantaneousCapturePointPlanner.initializeSingleSupport(transferToAndNextFootstepsData, yoTime.getDoubleValue());
          }
+         else
+         {
+        	 updateParametersWithoutAFootstep();
+         }
 
          if (walkingControllerParameters.resetDesiredICPToCurrentAtStartOfSwing())
          {
@@ -1092,6 +1096,16 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
       }
 
+      private void updateParametersWithoutAFootstep()
+      {
+    	  FrameOrientation orientation = new FrameOrientation(desiredPelvisOrientation.getReferenceFrame());
+          desiredPelvisOrientation.getFrameOrientationIncludingFrame(orientation);
+          initialPelvisOrientationProvider.setOrientation(orientation);
+          finalPelvisOrientationProvider.setOrientation(orientation);
+          pelvisOrientationTrajectoryGenerator.initialize();
+      }
+      
+      
       private void updateFootstepParameters()
       {
          FramePoint2d nextFootstepPosition = new FramePoint2d();
