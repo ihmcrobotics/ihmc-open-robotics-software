@@ -28,7 +28,6 @@ public class FrictionErrorComputer implements FunctionNtoM
     * 
     * @param model - instance of JointFrictionModel to identify
     * @param sampleMap - an HashMap of String and ArrayList<Double> containing all samples. In particular the following quantities are required:
-    * @param   "time"
     * @param   "position"
     * @param   "velocity"
     * @param   "acceleration"
@@ -43,7 +42,7 @@ public class FrictionErrorComputer implements FunctionNtoM
       this.model = model;
       this.sampleMap = sampleMap;
 
-      numberOfSamples = sampleMap.get("time").size();
+      numberOfSamples = sampleMap.get("position").size();
    }
 
    @Override
