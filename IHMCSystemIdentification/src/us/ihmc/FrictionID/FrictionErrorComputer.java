@@ -14,15 +14,15 @@ public class FrictionErrorComputer implements FunctionNtoM
 {
    private static final double OFFSET_LOWER_BOUND = -Math.PI;
    private static final double OFFSET_UPPER_BOUND = -Math.PI;
-   
+
    private JointFrictionModel model;
    private final HashMap<String, ArrayList<Double>> sampleMap;
    private final int numberOfSamples;
-   
+
    private double frictionTorque, inertiaTorque, gravityTorque;
    private double boundedOffset;
    private double[] frictionParameters;
-   
+
    /**
     * Use this class to compute the error between measured joint torque and predicted joint torque for a set of samples.
     * 
@@ -75,19 +75,18 @@ public class FrictionErrorComputer implements FunctionNtoM
    {
       for (int j = 3; j < input.length; j++)
       {
-         frictionParameters[j-3] = input[j];
+         frictionParameters[j - 3] = input[j];
       }
-      
+
       model.updateParameters(frictionParameters);
-      
-      for(int i = 0; i <numberOfSamples; i++)
+
+      for (int i = 0; i < numberOfSamples; i++)
       {
          if (model.getFrictionModel() == FrictionModel.PRESSURE_BASED)
          {
             PressureBasedFrictionModel pressureBasedModel = (PressureBasedFrictionModel) model;
-            pressureBasedModel.computeFrictionForce(sampleMap.get("velocity").get(i),
-                                                    sampleMap.get("negativePressure").get(i), 
-                                                    sampleMap.get("positivePressure").get(i));
+            pressureBasedModel.computeFrictionForce(sampleMap.get("velocity").get(i), sampleMap.get("negativePressure").get(i),
+                  sampleMap.get("positivePressure").get(i));
          }
          else
          {
@@ -96,14 +95,14 @@ public class FrictionErrorComputer implements FunctionNtoM
 
          frictionTorque = model.getFrictionForce();
          inertiaTorque = sampleMap.get("acceleration").get(i) * input[0];
-         boundedOffset = OFFSET_LOWER_BOUND + (OFFSET_UPPER_BOUND - OFFSET_LOWER_BOUND) * (Math.sin(input[2]) + 1)/2;
+         boundedOffset = OFFSET_LOWER_BOUND + (OFFSET_UPPER_BOUND - OFFSET_LOWER_BOUND) * (Math.sin(input[2]) + 1) / 2;
          gravityTorque = input[1] * Math.cos(sampleMap.get("position").get(i) + boundedOffset);
-         output[i] =  sampleMap.get("measuredTorque").get(i) - frictionTorque - inertiaTorque - gravityTorque;
+         output[i] = sampleMap.get("measuredTorque").get(i) - frictionTorque - inertiaTorque - gravityTorque;
       }
    }
-   
+
    public double getBoundedOffset(double value)
    {
-      return OFFSET_LOWER_BOUND + (OFFSET_UPPER_BOUND - OFFSET_LOWER_BOUND) * (Math.sin(value) + 1)/2;
+      return OFFSET_LOWER_BOUND + (OFFSET_UPPER_BOUND - OFFSET_LOWER_BOUND) * (Math.sin(value) + 1) / 2;
    }
 }
