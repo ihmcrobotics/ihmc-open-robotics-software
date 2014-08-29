@@ -69,7 +69,6 @@ public class JointFrictionModelsHolderTest
       double friction = holder.getCurrentFrictionForce();
       assertEquals(FrictionState.NOT_COMPENSATING, state);
       assertEquals(0.0, friction, epsilon);
-      
 
       // FrictionModel.ASYMMETRIC_COULOMB_VISCOUS or others
       holder.setActiveFrictionModel(FrictionModel.ASYMMETRIC_COULOMB_VISCOUS);

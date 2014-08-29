@@ -9,7 +9,6 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 
-
 public abstract class JointFrictionModelsHolder
 {
    private final String name;
@@ -92,7 +91,7 @@ public abstract class JointFrictionModelsHolder
    {
       return frictionForce.getDoubleValue();
    }
-   
+
    public FrictionState getCurrentFrictionState()
    {
       return frictionCompensationState.getEnumValue();
@@ -102,6 +101,6 @@ public abstract class JointFrictionModelsHolder
    {
       return frictionModels.get(activeFrictionModel.getEnumValue());
    }
-   
+
    protected abstract void checkIfExistFrictionModelForThisJoint(FrictionModel requestedFrictionModel);
 }
