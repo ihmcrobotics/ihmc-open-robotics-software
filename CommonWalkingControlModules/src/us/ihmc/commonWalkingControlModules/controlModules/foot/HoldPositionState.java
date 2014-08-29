@@ -62,6 +62,8 @@ public class HoldPositionState extends AbstractFootControlState
 
       if (!isCoPOnEdge && (requestHoldPosition == null || !requestHoldPosition.getBooleanValue()))
          requestedState.set(ConstraintType.FULL);
+      if (!FootControlModule.USE_SUPPORT_FOOT_HOLD_POSITION_STATE)
+         requestedState.set(ConstraintType.FULL);
 
       accelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity,
             desiredLinearAcceleration, desiredAngularAcceleration, rootBody);
