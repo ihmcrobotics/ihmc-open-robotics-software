@@ -17,13 +17,14 @@ public abstract class JointFrictionModelsHolder
    private final DoubleYoVariable stictionTransitionVelocity;
    private final AlphaFilteredYoVariable filteredVelocity;
    private final DoubleYoVariable alphaForFilteredVelocity;
+   private final DoubleYoVariable forceThreshold;
 
    protected final DoubleYoVariable frictionForce;
    protected final EnumYoVariable<FrictionState> frictionCompensationState;
    protected final EnumYoVariable<FrictionModel> activeFrictionModel;
    protected final EnumMap<FrictionModel, JointFrictionModel> frictionModels;
 
-   public JointFrictionModelsHolder(String name, YoVariableRegistry registry, double alpha)
+   public JointFrictionModelsHolder(String name, YoVariableRegistry registry, double alpha, double forceThreshold, double stictionTransitionVelocity)
    {
       this.name = name;
       alphaForFilteredVelocity = new DoubleYoVariable(name + "_alphaForFilteredVelocity", registry);
@@ -32,7 +33,10 @@ public abstract class JointFrictionModelsHolder
       frictionCompensationState = new EnumYoVariable<FrictionState>(name + "_frictionCompensationState", registry, FrictionState.class);
       activeFrictionModel = new EnumYoVariable<FrictionModel>(name + "_activeFrictionModel", registry, FrictionModel.class);
       frictionForce = new DoubleYoVariable(name + "_frictionForce", registry);
-      stictionTransitionVelocity = new DoubleYoVariable(name + "_stictionTransitionVelocity", registry);
+      this.stictionTransitionVelocity = new DoubleYoVariable(name + "_stictionTransitionVelocity", registry);
+      this.stictionTransitionVelocity.set(stictionTransitionVelocity);
+      this.forceThreshold = new DoubleYoVariable(name + "_forceThreshold", registry);
+      this.forceThreshold.set(forceThreshold);
       filteredVelocity = new AlphaFilteredYoVariable(name + "_alphaFilteredVelocity", registry, alphaForFilteredVelocity);
       filteredVelocity.update(0.0);
    }
@@ -41,7 +45,9 @@ public abstract class JointFrictionModelsHolder
     * This method computes an equivalent joint velocity in case the joint is in stiction, but the operator is commanding a movement or a force.
     * In case of force, the equivalent velocity is computed as the stiction velocity with the sign of the desired force.
     * In case of velocity the equivalent velocity is the desired velocity. 
-    * As current Joint velocity use the less noisy.
+    * As current Joint velocity use the less noisy. 
+    * In case of stiction the discrimination between force or velocity mode is done based on the requested force value, so force control is predominant.
+    * 
     */
    protected Double selectFrictionStateAndFrictionVelocity(double requestedForce, double currentJointVelocity, double requestedJointVelocity)
    {
@@ -55,7 +61,7 @@ public abstract class JointFrictionModelsHolder
          return null;
       }
 
-      if (requestedJointVelocity == 0.0 && requestedForce == 0.0)
+      if (requestedJointVelocity == 0.0 && Math.abs(requestedForce) < forceThreshold.getDoubleValue())
       {
          frictionCompensationState.set(FrictionState.NOT_COMPENSATING);
          frictionForce.set(0.0);
@@ -69,15 +75,15 @@ public abstract class JointFrictionModelsHolder
       }
       else
       {
-         if (requestedJointVelocity == 0.0)
-         {
-            frictionCompensationState.set(FrictionState.IN_STICTION_FORCE_MODE);
-            velocityForFrictionCalculation = stictionTransitionVelocity.getDoubleValue() * Math.signum(requestedForce);
-         }
-         else
+         if (Math.abs(requestedForce) < forceThreshold.getDoubleValue())
          {
             frictionCompensationState.set(FrictionState.IN_STICTION_VELOCITY_MODE);
             velocityForFrictionCalculation = requestedJointVelocity;
+         }
+         else
+         {
+            frictionCompensationState.set(FrictionState.IN_STICTION_FORCE_MODE);
+            velocityForFrictionCalculation = stictionTransitionVelocity.getDoubleValue() * Math.signum(requestedForce);
          }
       }
 
@@ -88,7 +94,6 @@ public abstract class JointFrictionModelsHolder
    {
       activeFrictionModel.set(requestedFrictionModel);
       checkIfExistFrictionModelForThisJoint(requestedFrictionModel);
-      stictionTransitionVelocity.set(getActiveJointFrictionModel().getStictionTransitionVelocity());
    }
 
    public FrictionModel getActiveFrictionModel()

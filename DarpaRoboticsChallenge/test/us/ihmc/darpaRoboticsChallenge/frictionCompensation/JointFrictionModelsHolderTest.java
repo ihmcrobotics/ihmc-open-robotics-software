@@ -18,6 +18,8 @@ public class JointFrictionModelsHolderTest
    private static double epsilon = 1e-5;
 
    private double stictionTransitionVelocity = 0.011;
+   private double alphaForFilteredVelocity = 0.0;
+   private double forceThreshold = 1.0;
 
    private double positiveCoulomb = 5.5;
    private double positiveViscous = 0.2;
@@ -34,6 +36,7 @@ public class JointFrictionModelsHolderTest
    private double negativeCs = 0.007;
 
    private double requestedNonZeroForce = 10;
+   private double requestedNonZeroForceUnderThreshold = 0.5;
    private double requestedZeroForce = 0.0;
    private double currentJointVelocityLessThanStictionVelocity = 0.9 * stictionTransitionVelocity;
    private double currentJointVelocityGreaterThanStictionVelocity = 1.1 * stictionTransitionVelocity;
@@ -43,10 +46,10 @@ public class JointFrictionModelsHolderTest
    private double velocityForStictionInForceMode = stictionTransitionVelocity * Math.signum(requestedNonZeroForce);
 
    private NoCompensationFrictionModel noCompensatingModel = new NoCompensationFrictionModel();
-   private AsymmetricCoulombViscousFrictionModel asymmetricCVModel = new AsymmetricCoulombViscousFrictionModel(stictionTransitionVelocity, positiveCoulomb,
+   private AsymmetricCoulombViscousFrictionModel asymmetricCVModel = new AsymmetricCoulombViscousFrictionModel(positiveCoulomb,
          positiveViscous, negativeCoulomb, negativeViscous);
-   private AsymmetricCoulombViscousStribeckFrictionModel asymmetricCVSModel = new AsymmetricCoulombViscousStribeckFrictionModel(stictionTransitionVelocity,
-         positiveSigma, positiveFc0, positiveFs0, positiveCs, negativeSigma, negativeFc0, negativeFs0, negativeCs);
+   private AsymmetricCoulombViscousStribeckFrictionModel asymmetricCVSModel = new AsymmetricCoulombViscousStribeckFrictionModel(positiveSigma, positiveFc0, positiveFs0, positiveCs,
+                                                                                  negativeSigma, negativeFc0, negativeFs0, negativeCs);
 
    private String name = "simpleHolder";
    private YoVariableRegistry registry = new YoVariableRegistry("simpleRegistry");
@@ -101,13 +104,21 @@ public class JointFrictionModelsHolderTest
       FrictionState state5 = holder.getCurrentFrictionState();
       assertEquals(FrictionState.IN_STICTION_VELOCITY_MODE, state5);
       assertEquals(requestedNonZeroJointVelocity, velocity5, epsilon);
+      
+      Double velocity6 = holder.selectFrictionStateAndFrictionVelocity(requestedNonZeroForceUnderThreshold, currentJointVelocityLessThanStictionVelocity,
+            requestedZeroJointVelocity);
+      FrictionState state6 = holder.getCurrentFrictionState();
+      double friction6 = holder.getCurrentFrictionForce();
+      assertEquals(FrictionState.NOT_COMPENSATING, state6);
+      assertEquals(0.0, friction, epsilon);
+      assertNull(velocity6);
    }
 
    private class JointFrictionModelsHolderForTest extends JointFrictionModelsHolder
    {
       public JointFrictionModelsHolderForTest(String name, YoVariableRegistry registry)
       {
-         super(name, registry, 0.0);
+         super(name, registry, alphaForFilteredVelocity, forceThreshold, stictionTransitionVelocity);
          frictionModels.put(FrictionModel.OFF, noCompensatingModel);
          frictionModels.put(FrictionModel.ASYMMETRIC_COULOMB_VISCOUS, asymmetricCVModel);
          frictionModels.put(FrictionModel.ASYMMETRIC_COULOMB_VISCOUS_STRIBECK, asymmetricCVSModel);
