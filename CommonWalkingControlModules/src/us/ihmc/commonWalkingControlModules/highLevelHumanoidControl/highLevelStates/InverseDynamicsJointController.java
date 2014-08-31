@@ -494,7 +494,7 @@ public class InverseDynamicsJointController extends HighLevelBehavior
       }
    }
 
-   private void initializeIDCalcultor()
+   private void initializeIDCalculator()
    {
       inverseDynamicsCalculator.reset();
       for (InverseDynamicsJoint joint : allJoints)
@@ -535,7 +535,7 @@ public class InverseDynamicsJointController extends HighLevelBehavior
       
       computeGravityTorquesForViz();
 
-      initializeIDCalcultor();
+      initializeIDCalculator();
 
       if (CONTROL_FEET_IN_TASKSPACE)
       {
@@ -654,7 +654,7 @@ public class InverseDynamicsJointController extends HighLevelBehavior
 
    private void computeGravityTorquesForViz()
    {
-      initializeIDCalcultor();
+      initializeIDCalculator();
 
       twistCalculator.compute();
       inverseDynamicsCalculator.compute();
