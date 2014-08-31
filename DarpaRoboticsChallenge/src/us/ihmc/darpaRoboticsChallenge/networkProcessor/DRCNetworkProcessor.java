@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.URI;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.behaviors.BehaviorNetworkManager;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.networking.NetworkConfigParameters;
 import us.ihmc.communication.packets.manipulation.HandJointAnglePacket;
@@ -57,18 +56,13 @@ public class DRCNetworkProcessor
    {
       if (fieldComputerClient == null)
       {
-         this.fieldComputerClient = new KryoObjectClient(robotModel.getNetworkParameters().getRobotControlComputerIP(), NetworkConfigParameters.CONTROLLER_TCP_PORT,
+         this.fieldComputerClient = new KryoObjectClient(robotModel.getNetworkParameters().getRobotControlComputerIP(), NetworkConfigParameters.NETWORK_PROCESSOR_TCP_PORT,
                new IHMCCommunicationKryoNetClassList());
          ((KryoObjectClient) this.fieldComputerClient).setReconnectAutomatically(true);
       }
       else
       {
          this.fieldComputerClient = fieldComputerClient;
-      }
-      
-      if(NetworkConfigParameters.USE_BEHAVIORS_MODULE)
-      {
-    	  new BehaviorNetworkManager();
       }
       
       useSimulatedSensors = !robotModel.isRunningOnRealRobot();
