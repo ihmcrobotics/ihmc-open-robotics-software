@@ -30,6 +30,7 @@ import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.frictionModels.FrictionModel;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.math.MathTools;
@@ -51,9 +52,11 @@ import us.ihmc.utilities.screwTheory.TotalMassCalculator;
 import us.ihmc.utilities.screwTheory.TotalWrenchCalculator;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.utilities.screwTheory.Wrench;
+import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector2d;
 
@@ -133,6 +136,10 @@ public class MomentumBasedController
          new DoubleYoVariable("rightFootCoPErrorMagnitude", registry));
    private final DoubleYoVariable gainCoPX = new DoubleYoVariable("gainCoPX", registry);
    private final DoubleYoVariable gainCoPY = new DoubleYoVariable("gainCoPY", registry);
+   
+   // once we receive the data from the UI through a provider this variables souldn't be necessary
+   private final DoubleYoVariable frictionCompensationEffectiveness;
+   private final EnumYoVariable<FrictionModel> frictionModelForAllJoints;
    
    private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
 
@@ -280,6 +287,11 @@ public class MomentumBasedController
          desiredTorquesForCoPControl.put(robotSide, AlphaFilteredYoFrameVector2d.createAlphaFilteredYoFrameVector2d("desired" + robotSide.getCamelCaseNameForMiddleOfExpression() + "AnkleTorqueForCoPControl", "", registry, alphaCoPControl, feet.get(robotSide).getSoleFrame()));
          yoCoPError.put(robotSide, new YoFrameVector2d(robotSide.getCamelCaseNameForStartOfExpression() + "FootCoPError", feet.get(robotSide).getSoleFrame(), registry));
       }
+      
+      frictionModelForAllJoints = new EnumYoVariable<>("frictionModelForAllJoints", registry, FrictionModel.class);
+      frictionCompensationEffectiveness = new DoubleYoVariable("frictionCompensationEffectiveness", registry); 
+      addVariableChangedListenerToFrictionCompensationVariables(frictionCompensationEffectiveness, frictionModelForAllJoints);
+      initializeFrictionCompensationToZero();
    }
 
    public void getFeetContactStates(ArrayList<PlaneContactState> feetContactStatesToPack)
@@ -554,6 +566,54 @@ public class MomentumBasedController
       {
          desiredAccelerationYoVariables.get(joint).set(joint.getQddDesired());
       }
+   }
+   
+   private void updateFrictionModel(FrictionModel model, FullRobotModel fullRobotModel)
+   {
+      OneDoFJoint[] joints = fullRobotModel.getOneDoFJoints();
+      int numberOfJoint = joints.length;
+      for(int i = 0; i < numberOfJoint; i++)
+      {
+         joints[i].setFrictionModel(model);
+      }
+   }
+   
+   private void updateFrictionCompensationEffectiveness(double effectiveness, FullRobotModel fullRobotModel)
+   {
+      OneDoFJoint[] joints = fullRobotModel.getOneDoFJoints();
+      int numberOfJoint = joints.length;
+      for(int i = 0; i < numberOfJoint; i++)
+      {
+         joints[i].setFrictionCompensationEffectiveness(effectiveness);
+      }
+   }
+
+   private void addVariableChangedListenerToFrictionCompensationVariables(DoubleYoVariable effectiveness, EnumYoVariable<FrictionModel> model)
+   {
+      VariableChangedListener changedModel = new VariableChangedListener()
+      {
+         public void variableChanged(YoVariable<?> v)
+         {
+            updateFrictionModel(frictionModelForAllJoints.getEnumValue(), fullRobotModel);
+         }
+      };
+      
+      VariableChangedListener changedEffectiveness = new VariableChangedListener()
+      {
+         public void variableChanged(YoVariable<?> v)
+         {
+            updateFrictionCompensationEffectiveness(frictionCompensationEffectiveness.getDoubleValue(), fullRobotModel);
+         }
+      };
+      
+      effectiveness.addVariableChangedListener(changedEffectiveness);
+      model.addVariableChangedListener(changedModel);
+   }
+   
+   private void initializeFrictionCompensationToZero()
+   {
+      frictionCompensationEffectiveness.set(0.0);
+      frictionModelForAllJoints.set(FrictionModel.OFF);
    }
 
    public void initialize()
