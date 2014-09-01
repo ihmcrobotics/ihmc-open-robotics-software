@@ -13,8 +13,9 @@ import us.ihmc.utilities.frictionModels.PressureBasedFrictionModel;
 public class FrictionErrorComputer implements FunctionNtoM
 {
    private static final double OFFSET_LOWER_BOUND = -Math.PI;
-   private static final double OFFSET_UPPER_BOUND = -Math.PI;
-
+   private static final double OFFSET_UPPER_BOUND = Math.PI;
+   private static final int NUMBER_OF_ADDITIONAL_PARAMETERS = 3;
+   
    private JointFrictionModel model;
    private final HashMap<String, ArrayList<Double>> sampleMap;
    private final int numberOfSamples;
@@ -48,7 +49,7 @@ public class FrictionErrorComputer implements FunctionNtoM
    @Override
    public int getNumOfInputsN()
    {
-      return model.getNumberOfParameters() + 3;
+      return model.getNumberOfParameters() + NUMBER_OF_ADDITIONAL_PARAMETERS;
    }
 
    @Override
@@ -72,11 +73,11 @@ public class FrictionErrorComputer implements FunctionNtoM
    @Override
    public void process(double[] input, double[] output)
    {
-      frictionParameters = new double[input.length-3];
+      frictionParameters = new double[input.length-NUMBER_OF_ADDITIONAL_PARAMETERS];
       
-      for (int j = 3; j < input.length; j++)
+      for (int j = NUMBER_OF_ADDITIONAL_PARAMETERS; j < input.length; j++)
       {
-         frictionParameters[j - 3] = input[j];
+         frictionParameters[j - NUMBER_OF_ADDITIONAL_PARAMETERS] = input[j];
       }
 
       model.updateParameters(frictionParameters);
@@ -96,7 +97,7 @@ public class FrictionErrorComputer implements FunctionNtoM
 
          frictionTorque = model.getFrictionForce();
          inertiaTorque = sampleMap.get("acceleration").get(i) * input[0];
-         boundedOffset = OFFSET_LOWER_BOUND + (OFFSET_UPPER_BOUND - OFFSET_LOWER_BOUND) * (Math.sin(input[2]) + 1) / 2;
+         boundedOffset = getBoundedOffset(input[2]);
          gravityTorque = input[1] * Math.cos(sampleMap.get("position").get(i) + boundedOffset);
          output[i] = sampleMap.get("measuredTorque").get(i) - frictionTorque - inertiaTorque - gravityTorque;
       }
