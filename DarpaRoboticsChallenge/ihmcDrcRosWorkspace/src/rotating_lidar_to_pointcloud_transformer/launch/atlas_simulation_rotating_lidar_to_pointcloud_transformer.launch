@@ -12,5 +12,6 @@
     	<param name="limit_angle" type="double" value="3.14159265" />
     	<param name="limit_angle_tolerance" type="double" value="0.05" />
     	<param name="min_update_rate" type="double" value="50.0" />
+    	<param name="intersecion_filter_radius" type="double" value="1.2" />
     </node>
 </launch>

@@ -8,7 +8,7 @@
 		<param name="odom_frame" value="/world" />
 		<param name="map_frame" value="/world_icp" />
 		<param name="icp_correction_frame" value="/pelvis" />
-		<param name="publish_tf_correction" value="false" />
+		<param name="publish_tf_correction" value="true" />
 		<param name="useROSLogger" value="true" />
 		<param name="minOverlap" value="0.2" /> 
 		<param name="maxOverlapToMerge" value="0.9" /> 
