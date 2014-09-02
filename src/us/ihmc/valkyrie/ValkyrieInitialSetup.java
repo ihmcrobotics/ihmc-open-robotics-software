@@ -64,9 +64,12 @@ public class ValkyrieInitialSetup implements DRCRobotInitialSetup<SDFRobot>
          String shoulderPitch = jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH);
          String elbowPitch = jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH);
          
-         robot.getOneDegreeOfFreedomJoint(shoulderRoll).setQ(-0.18);
-         robot.getOneDegreeOfFreedomJoint(shoulderPitch).setQ(0.3);
-         robot.getOneDegreeOfFreedomJoint(elbowPitch).setQ(-1.0);
+         if (shoulderRoll != null)
+            robot.getOneDegreeOfFreedomJoint(shoulderRoll).setQ(-0.18);
+         if (shoulderPitch != null)
+            robot.getOneDegreeOfFreedomJoint(shoulderPitch).setQ(0.3);
+         if (elbowPitch != null)
+            robot.getOneDegreeOfFreedomJoint(elbowPitch).setQ(-1.0);
       }
       
       robot.update();

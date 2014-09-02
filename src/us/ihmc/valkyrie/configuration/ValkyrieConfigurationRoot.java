@@ -10,9 +10,18 @@ public class ValkyrieConfigurationRoot
 
    public static final SideDependentList<String> FOOT_SENSOR_FILES_BASENAMES = new SideDependentList<>("FT14020", "FT14175");
 
+   public static final boolean VALKYRIE_WITH_ARMS = false;
+
    public static final String SCHEDULE_FILE = "main_ihmc.yaml";
    public static final String URDF_FILE = "models/V1_hw_ihmc.urdf";
-   public static final String SDF_FILE = "models/V1/sdf/V1_sim_shells.sdf";
+   public static final String SDF_FILE;
+   static
+   {
+      if (VALKYRIE_WITH_ARMS)
+         SDF_FILE = "models/V1/sdf/V1_sim_shells.sdf";
+      else
+         SDF_FILE = "models/V1/sdf/V1_sim_shells_no_arms.sdf";
+   }
 
    public static final String BENCH_SCHEDULE_FILE = "main_bench.yaml";
    public static final String BENCH_URDF_FILE = "models/V1_hw_bench.urdf";
