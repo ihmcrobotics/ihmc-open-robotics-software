@@ -371,7 +371,7 @@ void Mapper::processCloud(unique_ptr<DP> newPointCloud, const std::string& scann
 		publishLock.unlock();
 	}
 
-	// Fetch transformation from scanner to odom
+	// Fetch transformation from odom to scanner
 	// Note: we don't need to wait for transform. It is already called in transformListenerToEigenMatrix()
 	PM::TransformationParameters TOdomToScanner;
 	try
@@ -390,6 +390,24 @@ void Mapper::processCloud(unique_ptr<DP> newPointCloud, const std::string& scann
 		return;
 	}
 
+  // Fetch transformation from scanner to icpCorrectionFrame.
+  PM::TransformationParameters TScannerToCorrectionFrame;
+  try
+  {
+    TScannerToCorrectionFrame = PointMatcher_ros::eigenMatrixToDim<float>(
+        PointMatcher_ros::transformListenerToEigenMatrix<float>(
+        tfListener,
+        scannerFrame,
+        icpCorrectionFrame,
+        stamp
+      ), dimp1);
+    ROS_DEBUG_STREAM("TScannerToCorrectionFrame:\n" << TScannerToCorrectionFrame);
+  }
+  catch(tf::ExtrapolationException e)
+  {
+    ROS_ERROR_STREAM("Extrapolation Exception. stamp = "<< stamp << " now = " << ros::Time::now() << " delta = " << ros::Time::now() - stamp);
+    return;
+  }
 
 	ROS_DEBUG_STREAM("TOdomToScanner(" << odomFrame<< " to " << scannerFrame << "):\n" << TOdomToScanner);
 	ROS_DEBUG_STREAM("TOdomToMap(" << odomFrame<< " to " << mapFrame << "):\n" << TOdomToMap);
@@ -444,6 +462,11 @@ void Mapper::processCloud(unique_ptr<DP> newPointCloud, const std::string& scann
 		publishStamp = stamp;
 		publishLock.lock();
 		TOdomToMap = Ticp * TOdomToScanner;
+
+		// Compute transform for correction for state estimation.
+	  PM::TransformationParameters TOdomToCorrectionFrame = Ticp * TScannerToCorrectionFrame;
+	  ROS_DEBUG_STREAM("TOdomToCorrectionFrame:\n" << TOdomToCorrectionFrame);
+
 		// Publish tf
 		if (publishTfCorrection) tfBroadcaster.sendTransform(PointMatcher_ros::eigenMatrixToStampedTransform<float>(TOdomToMap, mapFrame, odomFrame, stamp));
 		publishLock.unlock();
@@ -461,7 +484,20 @@ void Mapper::processCloud(unique_ptr<DP> newPointCloud, const std::string& scann
 
     // Publish correction pose for state estimation.
     if (icpCorrectionPub.getNumSubscribers())
-      icpCorrectionPub.publish(geometry_msgs::PoseStamped());
+    {
+      const tf::StampedTransform& transform = PointMatcher_ros::eigenMatrixToStampedTransform<float>(TOdomToCorrectionFrame, icpCorrectionFrame, odomFrame, stamp);
+      geometry_msgs::PoseStamped poseMessage;
+      poseMessage.header.stamp = stamp;
+      poseMessage.header.frame_id = odomFrame;
+      poseMessage.pose.position.x = transform.getOrigin().getX();
+      poseMessage.pose.position.y = transform.getOrigin().getY();
+      poseMessage.pose.position.z = transform.getOrigin().getZ();
+      poseMessage.pose.orientation.w = transform.getRotation().getW();
+      poseMessage.pose.orientation.x = transform.getRotation().getX();
+      poseMessage.pose.orientation.y = transform.getRotation().getY();
+      poseMessage.pose.orientation.z = transform.getRotation().getZ();
+      icpCorrectionPub.publish(poseMessage);
+    }
 
 		// Publish outliers
 		if (outlierPub.getNumSubscribers())
