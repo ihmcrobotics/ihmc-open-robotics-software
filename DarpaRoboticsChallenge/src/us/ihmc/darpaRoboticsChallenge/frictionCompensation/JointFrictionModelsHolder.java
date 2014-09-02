@@ -13,11 +13,11 @@ import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 
 public abstract class JointFrictionModelsHolder
 {
-   private final String name;
    private final DoubleYoVariable stictionTransitionVelocity;
    private final AlphaFilteredYoVariable filteredVelocity;
    private final DoubleYoVariable alphaForFilteredVelocity;
    private final DoubleYoVariable forceThreshold;
+   private final DoubleYoVariable frictionCompensationEffectiveness;
 
    protected final DoubleYoVariable frictionForce;
    protected final EnumYoVariable<FrictionState> frictionCompensationState;
@@ -26,7 +26,6 @@ public abstract class JointFrictionModelsHolder
 
    public JointFrictionModelsHolder(String name, YoVariableRegistry registry, double alpha, double forceThreshold, double stictionTransitionVelocity)
    {
-      this.name = name;
       alphaForFilteredVelocity = new DoubleYoVariable(name + "_alphaForFilteredVelocity", registry);
       alphaForFilteredVelocity.set(alpha);
       frictionModels = new EnumMap<FrictionModel, JointFrictionModel>(FrictionModel.class);
@@ -39,6 +38,8 @@ public abstract class JointFrictionModelsHolder
       this.forceThreshold.set(forceThreshold);
       filteredVelocity = new AlphaFilteredYoVariable(name + "_alphaFilteredVelocity", registry, alphaForFilteredVelocity);
       filteredVelocity.update(0.0);
+      frictionCompensationEffectiveness = new DoubleYoVariable(name + "_frictionCompensationEffectiveness", registry);
+      frictionCompensationEffectiveness.set(0.0);
    }
 
    /**
@@ -95,15 +96,41 @@ public abstract class JointFrictionModelsHolder
       activeFrictionModel.set(requestedFrictionModel);
       checkIfExistFrictionModelForThisJoint(requestedFrictionModel);
    }
+   
+   /**
+    * Use this method to select the effectiveness of the friction compensation.
+    * The predicted friction force is increased or reduced by multiplying it with the effectiveness parameter.
+    * 
+    * @param effectiveness - if 1.0 the effectiveFrictionForce equals the friction force predicted by the active friction model.
+    */
+   public void setFrictionCompensationEffectiveness(double effectiveness)
+   {
+      frictionCompensationEffectiveness.set(effectiveness);
+   }
 
    public FrictionModel getActiveFrictionModel()
    {
       return activeFrictionModel.getEnumValue();
    }
 
+   /**
+    * Use this method to get the friction force predicted by the active friction model
+    * 
+    * @return friction force predicted by the active friction model.
+    */
    public double getCurrentFrictionForce()
    {
       return frictionForce.getDoubleValue();
+   }
+   
+   /**
+    * Use this method to get the effective friction force which is obtained by scaling the friction force of the active friction model with the effectiveness parameter.
+    * 
+    * @return scaled friction force predicted by the active friction model.
+    */
+   public double getCurrentEffectiveFrictionForce()
+   {
+      return frictionForce.getDoubleValue() * frictionCompensationEffectiveness.getDoubleValue();
    }
 
    public FrictionState getCurrentFrictionState()
