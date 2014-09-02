@@ -16,11 +16,19 @@ import us.ihmc.graphics3DAdapter.camera.VideoSettingsH264LowLatency;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
+import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
 
 public class ValkyrieSensorInformation implements DRCRobotSensorInformation
 {
 
-   public static final String[] forceSensorNames = { "LeftAnkle", "RightAnkle", "LeftForearmSupinator", "RightForearmSupinator" };
+   public static final String[] forceSensorNames;
+   static
+   {
+      if (ValkyrieConfigurationRoot.VALKYRIE_WITH_ARMS)
+         forceSensorNames = new String[]{ "LeftAnkle", "RightAnkle", "LeftForearmSupinator", "RightForearmSupinator" };
+      else
+         forceSensorNames = new String[]{ "LeftAnkle", "RightAnkle"};
+   }
    private static final SideDependentList<String> feetForceSensorNames = new SideDependentList<String>("LeftAnkle", "RightAnkle");
    private static final SideDependentList<String> urdfFeetForceSensorNames = new SideDependentList<>("/v1/LeftLeg6Axis_Offset", "/v1/RightLeg6Axis_Offset");
 
