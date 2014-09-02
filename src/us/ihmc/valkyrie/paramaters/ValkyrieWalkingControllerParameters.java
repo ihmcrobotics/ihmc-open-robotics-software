@@ -102,8 +102,10 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    {
      
       String[] defaultHeadOrientationControlJointNames = new String[] {
-            jointMap.getSpineJointName(SpineJointName.SPINE_YAW),
-            jointMap.getNeckJointName(NeckJointName.LOWER_NECK_PITCH)
+    		  jointMap.getSpineJointName(SpineJointName.SPINE_YAW),
+    		  jointMap.getSpineJointName(SpineJointName.SPINE_PITCH),
+    		  jointMap.getSpineJointName(SpineJointName.SPINE_ROLL),
+//            jointMap.getNeckJointName(NeckJointName.LOWER_NECK_PITCH)
             };
 
       return defaultHeadOrientationControlJointNames;
@@ -118,7 +120,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public String getJointNameForExtendedPitchRange()
    {
-      return jointMap.getSpineJointName(SpineJointName.SPINE_PITCH);
+      return null; //jointMap.getSpineJointName(SpineJointName.SPINE_PITCH);
    }
 
    @Override
