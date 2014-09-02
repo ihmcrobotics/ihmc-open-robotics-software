@@ -9,6 +9,7 @@ import us.ihmc.communication.producers.DRCJointConfigurationData;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 
@@ -33,9 +34,15 @@ public class JointConfigurationGatherer
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         OneDoFJoint[] fingerJoints = ScrewTools.filterJoints(ScrewTools.computeSubtreeJoints(estimatorModel.getHand(robotSide)), OneDoFJoint.class);
-         for (OneDoFJoint fingerJoint : fingerJoints)
-            joints.remove(fingerJoint);
+         RigidBody hand = estimatorModel.getHand(robotSide);
+         if (hand != null)
+         {
+            OneDoFJoint[] fingerJoints = ScrewTools.filterJoints(ScrewTools.computeSubtreeJoints(hand), OneDoFJoint.class);
+            for (OneDoFJoint fingerJoint : fingerJoints)
+            {
+               joints.remove(fingerJoint);
+            }
+         }
       }
    }
 
