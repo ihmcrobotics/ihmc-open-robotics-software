@@ -13,11 +13,13 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.WrenchBasedFootSwitch;
 import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
+import us.ihmc.communication.packets.StampedPosePacket;
 import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadDataSynchronizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.LocalizationUpdateReceiver;
 import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.JointConfigurationGatherer;
 import us.ihmc.darpaRoboticsChallenge.sensors.RobotJointLimitWatcher;
 import us.ihmc.darpaRoboticsChallenge.stateEstimation.kinematicsBasedStateEstimator.DRCKinematicsBasedStateEstimator;
@@ -126,6 +128,8 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       if (dataProducer != null)
       {
          JointConfigurationGatherer jointConfigurationGathererAndProducer = new JointConfigurationGatherer(estimatorFullRobotModel);
+         LocalizationUpdateReceiver localizationUpdateReceiver = new LocalizationUpdateReceiver();
+         dataProducer.getObjectCommunicator().attachListener(StampedPosePacket.class, localizationUpdateReceiver);
 
          estimatorController.setRawOutputWriter(new DRCPoseCommunicator(estimatorFullRobotModel, jointConfigurationGathererAndProducer,
                  dataProducer.getObjectCommunicator(), timestampProvider, sensorInformation));
