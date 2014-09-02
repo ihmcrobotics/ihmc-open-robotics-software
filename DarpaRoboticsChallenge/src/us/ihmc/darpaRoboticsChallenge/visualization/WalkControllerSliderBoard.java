@@ -50,14 +50,14 @@ public class WalkControllerSliderBoard
       sliderBoardConfigurationManager.saveConfiguration(SliderBoardMode.WalkingGains.toString());
       sliderBoardConfigurationManager.clearControls();
 
-      sliderBoardConfigurationManager.setSlider(1, "captureKpParallel", registry, 0.0, 2.0);
-      sliderBoardConfigurationManager.setKnob(1, "captureKpOrthogonal", registry, 0.0, 2.0);
+//      sliderBoardConfigurationManager.setSlider(1, "captureKpParallel", registry, 0.0, 2.0);
+//      sliderBoardConfigurationManager.setKnob(1, "captureKpOrthogonal", registry, 0.0, 2.0);
 
 //      sliderBoardConfigurationManager.setSlider(2, "desiredICPX", registry, -0.3, 0.3);
 //      sliderBoardConfigurationManager.setKnob(2, "desiredICPY", registry, -0.3, 0.3);
       
-      sliderBoardConfigurationManager.setSlider(2, "icpStandOffsetX", registry, -0.3, 0.3);
-      sliderBoardConfigurationManager.setKnob(2, "icpStandOffsetY", registry, -0.3, 0.3);
+      sliderBoardConfigurationManager.setSlider(1, "icpStandOffsetX", registry, -0.3, 0.3);
+      sliderBoardConfigurationManager.setKnob(1, "icpStandOffsetY", registry, -0.3, 0.3);
       
       sliderBoardConfigurationManager.setKnob(9, "desiredICPEccentricity", registry, 0, .9);
       sliderBoardConfigurationManager.setKnob(10, "desiredICPAngle", registry, -Math.PI, Math.PI);
@@ -67,15 +67,20 @@ public class WalkControllerSliderBoard
 //      sliderBoardConfigurationManager.setSlider(5, "hipYJointStiffness", registry, 3000, 20000.0);
 //      sliderBoardConfigurationManager.setSlider(6, "otherJointsStiffness", registry, 3000, 20000.0);
       
-      sliderBoardConfigurationManager.setSlider(3, "userDesiredPelvisYaw", registry, -Math.PI, Math.PI);
-      sliderBoardConfigurationManager.setKnob(3, "userSetDesiredPelvis", registry, 0.0, 1.0);
-      sliderBoardConfigurationManager.setSlider(4, "userDesiredPelvisPitch", registry, -0.4, 0.4);
-      sliderBoardConfigurationManager.setSlider(5, "userDesiredPelvisRoll", registry, -0.3, 0.3);
+      sliderBoardConfigurationManager.setKnob(2, "userSetDesiredPelvis", registry, 0.0, 1.0);
 
-      sliderBoardConfigurationManager.setSlider(6, "userDesiredHeadPitch", registry, -0.5, 0.5);
-      sliderBoardConfigurationManager.setKnob(6, "userDesiredNeckPitch", registry, -0.8, 0.8);
+      sliderBoardConfigurationManager.setSlider(2, "userDesiredPelvisYaw", registry, -Math.PI, Math.PI);
+      sliderBoardConfigurationManager.setSlider(3, "userDesiredPelvisPitch", registry, -0.4, 0.4);
+      sliderBoardConfigurationManager.setSlider(4, "userDesiredPelvisRoll", registry, -0.3, 0.3);
+
+      sliderBoardConfigurationManager.setSlider(5, "userDesiredHeadYaw", registry, -0.8, 0.8);
+
+      sliderBoardConfigurationManager.setKnob(6, "userDesiredHeadPitch", registry, -0.5, 0.5);
+      sliderBoardConfigurationManager.setSlider(6, "userDesiredNeckPitch", registry, -0.8, 0.8);
       
-      sliderBoardConfigurationManager.setSlider(7, "userDesiredHeadYaw", registry, -0.8, 0.8);
+      sliderBoardConfigurationManager.setSlider(7, "userDesiredHeadRoll", registry, -0.5, 0.5);
+      sliderBoardConfigurationManager.setKnob(7, "userDesiredNeckRoll", registry, -0.8, 0.8);
+
       sliderBoardConfigurationManager.setSlider(8, "offsetHeightAboveGround", registry, 0.0, 0.20);
 
 //    sliderBoardConfigurationManager.setKnob  (8, "sliderBoardMode", registry, 0.0, SliderBoardMode.values().length);
