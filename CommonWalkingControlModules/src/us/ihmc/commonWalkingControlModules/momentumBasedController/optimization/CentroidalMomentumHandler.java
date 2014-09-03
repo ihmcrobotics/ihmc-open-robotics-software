@@ -159,7 +159,7 @@ public class CentroidalMomentumHandler
       DenseMatrix64F momentumMultipliers = momentumRateOfChangeData.getMomentumMultipliers();
 
       CommonOps.mult(momentumSubspace, momentumMultipliers, centroidalMomentumEquationRightHandSide);
-      CommonOps.subEquals(centroidalMomentumEquationRightHandSide, adotV);
+      CommonOps.subtractEquals(centroidalMomentumEquationRightHandSide, adotV);
       return centroidalMomentumEquationRightHandSide;
    }
 }

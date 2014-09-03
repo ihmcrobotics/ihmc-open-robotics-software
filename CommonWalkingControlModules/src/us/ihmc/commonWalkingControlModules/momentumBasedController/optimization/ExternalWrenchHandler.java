@@ -62,7 +62,7 @@ public class ExternalWrenchHandler
       CommonOps.changeSign(wrenchEquationRightHandSide);
       CommonOps.addEquals(wrenchEquationRightHandSide, momentumConvectiveTerm);
       CommonOps.addEquals(wrenchEquationRightHandSide, b);
-      CommonOps.subEquals(wrenchEquationRightHandSide, bHat);
+      CommonOps.subtractEquals(wrenchEquationRightHandSide, bHat);
       return wrenchEquationRightHandSide;
    }
 

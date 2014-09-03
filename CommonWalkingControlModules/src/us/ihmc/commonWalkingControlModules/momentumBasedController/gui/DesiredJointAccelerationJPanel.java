@@ -46,7 +46,7 @@ public class DesiredJointAccelerationJPanel extends JPanel
       achievedJointAcceleration.setReshape(desiredJointAccelerationCommandAndMotionConstraint.getAchievedJointAcceleration());
       
       errorAcceleration.setReshape(desiredAcceleration);
-      CommonOps.sub(achievedJointAcceleration, desiredAcceleration, errorAcceleration);
+      CommonOps.subtract(achievedJointAcceleration, desiredAcceleration, errorAcceleration);
       
       this.repaint();
    }

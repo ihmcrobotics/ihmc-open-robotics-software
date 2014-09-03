@@ -70,7 +70,7 @@ public class RootJointSolver
       // bHat
       bHat.set(b);
       CommonOps.addEquals(bHat, hdot);
-      CommonOps.subEquals(bHat, aVdotRoot1);
+      CommonOps.subtractEquals(bHat, aVdotRoot1);
 
       // alpha2Beta2
       alpha2Beta2Solver.setA(f);
@@ -102,8 +102,8 @@ public class RootJointSolver
    {
       DenseMatrix64F check = new DenseMatrix64F(6, 1);
       CommonOps.mult(aHatRoot, vdotRoot, check);
-      CommonOps.subEquals(check, hdot);
-      CommonOps.subEquals(check, b);
+      CommonOps.subtractEquals(check, hdot);
+      CommonOps.subtractEquals(check, b);
       boolean ret = MatrixFeatures.isConstantVal(check, 0.0, 1e-7);
       return ret;
    }

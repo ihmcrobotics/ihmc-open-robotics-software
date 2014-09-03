@@ -23,7 +23,7 @@ public class JointSpaceConstraintResolver
            DenseMatrix64F jointSpaceAcceleration)
    {
       CommonOps.mult(aHat, jointSpaceAcceleration, aJointSpaceVdotJointSpace);
-      CommonOps.subEquals(b, aJointSpaceVdotJointSpace);
+      CommonOps.subtractEquals(b, aJointSpaceVdotJointSpace);
    }
 
    public void solveAndSetJointspaceAccelerations(Map<InverseDynamicsJoint, DenseMatrix64F> jointSpaceAccelerations, LinkedHashMap<InverseDynamicsJoint, Boolean> jointAccelerationValidMap)
