@@ -288,7 +288,7 @@ public class YoKalmanFilterTest
       DenseMatrix64F estimatedState = kalmanFilter.getState();
 
       DenseMatrix64F stateError = new DenseMatrix64F(nStates, 1);
-      CommonOps.sub(trueState, estimatedState, stateError);
+      CommonOps.subtract(trueState, estimatedState, stateError);
 
       EjmlUnitTests.assertEquals(stateError, new DenseMatrix64F(nStates, 1), 1e-6);
 
@@ -330,7 +330,7 @@ public class YoKalmanFilterTest
 
          // Compute the next true state error:
          DenseMatrix64F nextTrueStateError = new DenseMatrix64F(nStates, 1);
-         CommonOps.sub(nextTrueState, estimatedState, nextTrueStateError);
+         CommonOps.subtract(nextTrueState, estimatedState, nextTrueStateError);
 
          printIfDebug("nextTrueStateError = " + nextTrueStateError);
 
@@ -343,7 +343,7 @@ public class YoKalmanFilterTest
          DenseMatrix64F Identity = new DenseMatrix64F(nStates, nStates);
          CommonOps.setIdentity(Identity);
          DenseMatrix64F IMinusKH = new DenseMatrix64F(Identity);
-         CommonOps.sub(IMinusKH, KH, IMinusKH);
+         CommonOps.subtract(IMinusKH, KH, IMinusKH);
 
          printIfDebug("IMinusKH = " + IMinusKH);
 
@@ -468,7 +468,7 @@ public class YoKalmanFilterTest
          CommonOps.mult(K, H, KH);
 
          DenseMatrix64F IMinusKH = CommonOps.identity(nStates);
-         CommonOps.sub(IMinusKH, KH, IMinusKH);
+         CommonOps.subtract(IMinusKH, KH, IMinusKH);
 
          DenseMatrix64F FPFTransposePlusQ = new DenseMatrix64F(nStates, nStates);
          CommonOps.add(FPFTranspose, Q, FPFTransposePlusQ);
