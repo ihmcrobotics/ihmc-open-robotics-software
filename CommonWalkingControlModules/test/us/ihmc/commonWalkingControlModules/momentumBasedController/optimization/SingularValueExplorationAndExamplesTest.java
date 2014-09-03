@@ -116,7 +116,7 @@ public class SingularValueExplorationAndExamplesTest
       System.out.println("matrixNNTranspose = " + matrixNNTranspose);
 
       DenseMatrix64F iMinusNNTranspose = new DenseMatrix64F(matrixNNTranspose.getNumRows(), matrixNNTranspose.getNumCols());
-      CommonOps.sub(identity, matrixNNTranspose, iMinusNNTranspose);
+      CommonOps.subtract(identity, matrixNNTranspose, iMinusNNTranspose);
       
       System.out.println("iMinusNNTranspose = " + iMinusNNTranspose);
 
@@ -211,7 +211,7 @@ public class SingularValueExplorationAndExamplesTest
          DenseMatrix64F identity = CommonOps.identity(jPlusJ.getNumRows());
          DenseMatrix64F matrixQ = new DenseMatrix64F(identity.getNumRows(), identity.getNumCols());
          
-         CommonOps.sub(identity, jPlusJ, matrixQ);
+         CommonOps.subtract(identity, jPlusJ, matrixQ);
          System.out.println("matrixQ = " + matrixQ);
 
 

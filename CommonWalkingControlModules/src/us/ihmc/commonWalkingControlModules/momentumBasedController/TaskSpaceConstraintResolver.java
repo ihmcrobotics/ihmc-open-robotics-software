@@ -149,7 +149,7 @@ public class TaskSpaceConstraintResolver
       // cTaskSpace
       cTaskSpace.zero();
       cTaskSpace.reshape(taskSpaceAccelerationMatrix.getNumRows(), 1);
-      CommonOps.sub(taskSpaceAccelerationMatrix, convectiveTermMatrix, cTaskSpace);
+      CommonOps.subtract(taskSpaceAccelerationMatrix, convectiveTermMatrix, cTaskSpace);
 
       // Phi * c
       CommonOps.mult(phi, cTaskSpace, phiC);

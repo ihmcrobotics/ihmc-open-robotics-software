@@ -115,7 +115,7 @@ public class SwingFullLegJacobian
    {
       DenseMatrix64F biasedAccelerations = accelerationOfFootWithRespectToBody.toMatrix();    // unbiased at this point
       DenseMatrix64F bias = jacobianDerivativeTerm.toMatrix();
-      CommonOps.subEquals(biasedAccelerations, bias);
+      CommonOps.subtractEquals(biasedAccelerations, bias);
       
       DenseMatrix64F ret = new DenseMatrix64F(geometricJacobian.getNumberOfColumns());
       jacobianSolver.setAlpha(alpha);

@@ -50,7 +50,7 @@ public class DesiredSpatialAccelerationJPanel extends JPanel
       achievedSpatialAcceleration.setReshape(desiredSpatialAccelerationCommandAndMotionConstraint.getAchievedSpatialAcceleration());
       
       errorSpatialAcceleration.setReshape(desiredSpatialAcceleration2);
-      CommonOps.sub(achievedSpatialAcceleration, desiredSpatialAcceleration2, errorSpatialAcceleration);
+      CommonOps.subtract(achievedSpatialAcceleration, desiredSpatialAcceleration2, errorSpatialAcceleration);
       
       this.repaint();
    }

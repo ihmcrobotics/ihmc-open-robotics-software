@@ -172,7 +172,7 @@ public class CentroidalMomentumRateTermCalculatorTest
    private void smartPrintOutADotV(double epsilon)
    {
       DenseMatrix64F difference = new DenseMatrix64F(aDotVNumerical.numRows, aDotVNumerical.numCols);
-      CommonOps.sub(aDotVNumerical, aDotVAnalytical, difference);
+      CommonOps.subtract(aDotVNumerical, aDotVAnalytical, difference);
 
       for (int i = 0; i < difference.numRows; i++)
          if(Math.abs(difference.get(i, 0)) > epsilon)

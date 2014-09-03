@@ -708,7 +708,7 @@ public class MomentumSolverTest
       ScrewTools.packDesiredJointAccelerationsMatrix(jointList, vdotTaskSpace);
       DenseMatrix64F nullspaceMultiplierCheck = new DenseMatrix64F(nullspace.getNumCols(), vdotTaskSpace.getNumCols());
       CommonOps.multTransA(nullspace, vdotTaskSpace, nullspaceMultiplierCheck);
-      CommonOps.subEquals(nullspaceMultiplierCheck, nullspaceMultipliers);
+      CommonOps.subtractEquals(nullspaceMultiplierCheck, nullspaceMultipliers);
 
       assertTrue(MatrixFeatures.isConstantVal(nullspaceMultiplierCheck, 0.0, 1e-7));
 

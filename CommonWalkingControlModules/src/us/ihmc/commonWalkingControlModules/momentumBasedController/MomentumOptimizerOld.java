@@ -156,8 +156,8 @@ public abstract class MomentumOptimizerOld implements Lmdif_fcn
       CommonOps.mult(centroidalMomentumMatrix.getMatrix(), jointAccelerationsMatrix, avdot);
       CommonOps.mult(centroidalMomentumMatrixDerivative, jointVelocitiesMatrix, adotv);
 
-      CommonOps.subEquals(centroidalMomentumErrorMatrix, avdot);
-      CommonOps.subEquals(centroidalMomentumErrorMatrix, adotv);
+      CommonOps.subtractEquals(centroidalMomentumErrorMatrix, avdot);
+      CommonOps.subtractEquals(centroidalMomentumErrorMatrix, adotv);
 
 
       angularCentroidalMomentumRateError.set(centroidalMomentumErrorMatrix.get(0, 0), centroidalMomentumErrorMatrix.get(1, 0),
