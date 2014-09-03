@@ -74,7 +74,7 @@ public class ExperimentalSOCPSolverUsingJOptimizerTest
       DenseMatrix64F normalNormalTranspose = new DenseMatrix64F(3, 3);
       CommonOps.multTransB(surfaceNormal, surfaceNormal, normalNormalTranspose);
       
-      CommonOps.sub(identityMatrix, normalNormalTranspose, coneInequalityMatrixB);
+      CommonOps.subtract(identityMatrix, normalNormalTranspose, coneInequalityMatrixB);
       
       double mu = 1.0;
       DenseMatrix64F coneInequalityVectorU = new DenseMatrix64F(surfaceNormal);
