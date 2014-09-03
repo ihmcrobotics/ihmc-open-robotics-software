@@ -31,7 +31,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointT
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlModuleBridge.MomentumControlModuleType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootPoseProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.FootPoseProvider;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.HeelSwitch;
 import us.ihmc.commonWalkingControlModules.sensors.ToeSwitch;
@@ -190,7 +190,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final BooleanYoVariable icpTrajectoryHasBeenInitialized;
 
    private final UpcomingFootstepList upcomingFootstepList;
-   private final DesiredFootPoseProvider footPoseProvider;
+   private final FootPoseProvider footPoseProvider;
 
    private final AverageOrientationCalculator averageOrientationCalculator = new AverageOrientationCalculator();
 

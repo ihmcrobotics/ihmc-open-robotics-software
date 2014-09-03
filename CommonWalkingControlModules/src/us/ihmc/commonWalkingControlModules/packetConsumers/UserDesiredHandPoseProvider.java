@@ -31,20 +31,9 @@ public class UserDesiredHandPoseProvider implements HandPoseProvider
 
    private final EnumYoVariable<RobotSide> userHandPoseSide = new EnumYoVariable<RobotSide>("userHandPoseSide", registry, RobotSide.class);
 
-
    private final DoubleYoVariable userHandPoseX = new DoubleYoVariable("userHandPoseX", registry);
    private final DoubleYoVariable userHandPoseY = new DoubleYoVariable("userHandPoseY", registry);
    private final DoubleYoVariable userHandPoseZ = new DoubleYoVariable("userHandPoseZ", registry);
-
-// private final DoubleYoVariable userStepWidth = new DoubleYoVariable("userStepWidth", registry);
-// private final DoubleYoVariable userStepHeight = new DoubleYoVariable("userStepHeight", registry);
-// private final DoubleYoVariable userStepYaw = new DoubleYoVariable("userStepYaw", registry);
-// private final BooleanYoVariable userStepsTakeEm = new BooleanYoVariable("userStepsTakeEm", registry);
-// private final IntegerYoVariable userStepsNotifyCompleteCount = new IntegerYoVariable("userStepsNotifyCompleteCount", registry);
-//
-// private final ArrayList<Footstep> footstepList = new ArrayList<Footstep>();
-
-
 
    private final SideDependentList<FramePose> homePositions = new SideDependentList<FramePose>();
    private final SideDependentList<FramePose> desiredHandPoses = new SideDependentList<FramePose>();
