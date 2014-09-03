@@ -17,7 +17,7 @@ import us.ihmc.utilities.net.ObjectConsumer;
  * To change this template use File | Settings | File Templates.
  */
 
-public class DesiredFootPoseProvider implements ObjectConsumer<FootPosePacket>
+public class DesiredFootPoseProvider implements ObjectConsumer<FootPosePacket>, FootPoseProvider
 {
    private final AtomicReference<FootPosePacket> footPosePacket = new AtomicReference<FootPosePacket>();
 

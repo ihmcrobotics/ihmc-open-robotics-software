@@ -10,8 +10,8 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.CoMBasedMomen
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlModuleBridge.MomentumControlModuleType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandLoadBearingProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.FootPoseProvider;
 import us.ihmc.communication.HighLevelState;
 import us.ihmc.communication.packets.manipulation.HandLoadBearingPacket;
 import us.ihmc.robotSide.RobotSide;
@@ -40,7 +40,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
    private final YoFrameOrientation desiredPelvisYawPitchRoll = new YoFrameOrientation("desiredPelvis", worldFrame, registry);
    private final YoFrameOrientation desiredChestYawPitchRoll = new YoFrameOrientation("desiredChest", worldFrame, registry);
 
-   private final DesiredFootPoseProvider footPoseProvider;
+   private final FootPoseProvider footPoseProvider;
 
    private final SideDependentList<ChangeableConfigurationProvider> desiredConfigurationProviders = 
          new SideDependentList<ChangeableConfigurationProvider>();
