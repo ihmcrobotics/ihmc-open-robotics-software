@@ -1570,7 +1570,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       CapturePointTrajectoryData capturePointTrajectoryData = new CapturePointTrajectoryData();
       capturePointTrajectoryData.set(finalDesiredICPInWorld.getFramePoint2dCopy(), desiredICP.getFramePoint2dCopy(), desiredICPVelocity.getFrameVector2dCopy());
-      boolean keepCMPInsideSupportPolygon = !(feetManager.stayOnToes() || manipulationControlModule == null || manipulationControlModule.isAtLeastOneHandLoadBearing());
+      
+      boolean keepCMPInsideSupportPolygon = true;
+      if (feetManager.stayOnToes()) keepCMPInsideSupportPolygon = false;
+      if ((manipulationControlModule != null) && (manipulationControlModule.isAtLeastOneHandLoadBearing())) keepCMPInsideSupportPolygon = false;
+      
       capturePointTrajectoryData.setProjectCMPIntoSupportPolygon(keepCMPInsideSupportPolygon);
       icpBasedMomentumRateOfChangeControlModule.getDesiredCapturePointTrajectoryInputPort().setData(capturePointTrajectoryData);
 
