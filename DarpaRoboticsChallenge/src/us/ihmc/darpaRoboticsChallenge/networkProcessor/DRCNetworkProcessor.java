@@ -56,7 +56,7 @@ public class DRCNetworkProcessor
    {
       if (fieldComputerClient == null)
       {
-         this.fieldComputerClient = new KryoObjectClient(robotModel.getNetworkParameters().getRobotControlComputerIP(), NetworkConfigParameters.NETWORK_PROCESSOR_TCP_PORT,
+         this.fieldComputerClient = new KryoObjectClient(robotModel.getNetworkParameters().getRobotControlComputerIP(), NetworkConfigParameters.CONTROLLER_TCP_PORT,
                new IHMCCommunicationKryoNetClassList());
          ((KryoObjectClient) this.fieldComputerClient).setReconnectAutomatically(true);
       }
