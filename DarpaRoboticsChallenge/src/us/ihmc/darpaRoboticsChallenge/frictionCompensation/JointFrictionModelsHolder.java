@@ -93,8 +93,11 @@ public abstract class JointFrictionModelsHolder
 
    public void setActiveFrictionModel(FrictionModel requestedFrictionModel)
    {
-      activeFrictionModel.set(requestedFrictionModel);
-      checkIfExistFrictionModelForThisJoint(requestedFrictionModel);
+      if (activeFrictionModel.getEnumValue() != requestedFrictionModel)
+      {
+         activeFrictionModel.set(requestedFrictionModel);
+         checkIfExistFrictionModelForThisJoint(requestedFrictionModel);
+      }
    }
    
    /**
