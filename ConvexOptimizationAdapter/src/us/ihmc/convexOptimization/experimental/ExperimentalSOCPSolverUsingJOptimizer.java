@@ -94,7 +94,7 @@ public class ExperimentalSOCPSolverUsingJOptimizer implements ExperimentalSOCPSo
       CommonOps.multTransB(coneInequalityVectorU, coneInequalityVectorU, coneInequalityMatrixUUTranspose);
 
       DenseMatrix64F quadraticInequalityMatrixP = new DenseMatrix64F(numberOfRows, numberOfColumns);      
-      CommonOps.sub(coneInequalityMatrixBTransposeB, coneInequalityMatrixUUTranspose, quadraticInequalityMatrixP);
+      CommonOps.subtract(coneInequalityMatrixBTransposeB, coneInequalityMatrixUUTranspose, quadraticInequalityMatrixP);
       CommonOps.scale(2.0, quadraticInequalityMatrixP);
 
       double[][] quadraticInequalityMatrixPAsDoubleArray = convertMatrixToTwoDimensionalDoubleArray(quadraticInequalityMatrixP);
