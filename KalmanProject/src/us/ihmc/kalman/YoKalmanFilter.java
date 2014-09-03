@@ -11,8 +11,6 @@ import static com.yobotics.simulationconstructionset.util.MatrixYoVariableConver
 import static com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools.storeInYoVariablesSymmetric;
 import static com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools.storeInYoVariablesVector;
 import static org.ejml.ops.CommonOps.addEquals;
-import static org.ejml.ops.CommonOps.sub;
-import static org.ejml.ops.CommonOps.subEquals;
 import static us.ihmc.utilities.CheckTools.checkMatrixDimensions;
 
 import java.util.ArrayList;
@@ -24,6 +22,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.factory.SingularMatrixException;
 import org.ejml.interfaces.linsol.LinearSolver;
+import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixFeatures;
 
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -322,7 +321,7 @@ public class YoKalmanFilter implements KalmanFilter
       // P = (I-KH)P = P - (KH)P = P-K(HP)
       MatrixMatrixMult.mult_small(H, P, c);
       MatrixMatrixMult.mult_small(K, c, b);
-      subEquals(P, b);
+      CommonOps.subtractEquals(P, b);
    }
 
    protected void updateAPosterioriState(DenseMatrix64F x, DenseMatrix64F y, DenseMatrix64F K)
@@ -331,7 +330,7 @@ public class YoKalmanFilter implements KalmanFilter
 
       // r = y - H x
       MatrixVectorMult.mult(H, x, r);
-      sub(y, r, r);
+      CommonOps.subtract(y, r, r);
 
       // x = x + Kr
       MatrixVectorMult.mult(K, r, a);
