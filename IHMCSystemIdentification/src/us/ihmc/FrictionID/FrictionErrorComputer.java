@@ -103,8 +103,13 @@ public class FrictionErrorComputer implements FunctionNtoM
       }
    }
 
-   public double getBoundedOffset(double value)
+   static public synchronized double getBoundedOffset(double value)
    {
       return OFFSET_LOWER_BOUND + (OFFSET_UPPER_BOUND - OFFSET_LOWER_BOUND) * (Math.sin(value) + 1) / 2;
+   }
+   
+   static public int getNumberOfAdditionalParameters()
+   {
+      return NUMBER_OF_ADDITIONAL_PARAMETERS;
    }
 }
