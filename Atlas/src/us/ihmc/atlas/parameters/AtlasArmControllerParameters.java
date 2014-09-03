@@ -105,7 +105,7 @@ public class AtlasArmControllerParameters implements ArmControllerParameters
    @Override
    public boolean doLowLevelPositionControl()
    {
-      return runningOnRealRobot;
+      return runningOnRealRobot; // Set to false for torque control
    }
 
    @Override
