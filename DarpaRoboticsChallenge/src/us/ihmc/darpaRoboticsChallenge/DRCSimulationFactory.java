@@ -15,6 +15,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriter;
+import us.ihmc.darpaRoboticsChallenge.outputs.DRCOutputWriterWithTorqueOffsets;
 import us.ihmc.darpaRoboticsChallenge.outputs.DRCSimulationOutputWriter;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.robotDataCommunication.VisualizerUtils;
@@ -37,6 +38,8 @@ public class DRCSimulationFactory
 {
    public static boolean RUN_MULTI_THREADED = true;
 
+   public static final boolean DO_SLOW_INTEGRATION_FOR_TORQUE_OFFSET = false;
+   
    private static final double gravity = -9.81;
 
    private final SimulationConstructionSet scs;
@@ -97,6 +100,13 @@ public class DRCSimulationFactory
       ThreadDataSynchronizer threadDataSynchronizer = new ThreadDataSynchronizer(drcRobotModel);
       DRCOutputWriter drcOutputWriter = new DRCSimulationOutputWriter(simulatedRobot);
 
+      if (DO_SLOW_INTEGRATION_FOR_TORQUE_OFFSET)
+      {
+         DRCOutputWriterWithTorqueOffsets outputWriterWithTorqueOffsets = new DRCOutputWriterWithTorqueOffsets(drcOutputWriter, drcRobotModel.getControllerDT(), true);
+         drcOutputWriter = outputWriterWithTorqueOffsets;
+      }
+      
+      
       drcEstimatorThread = new DRCEstimatorThread(drcRobotModel, sensorReaderFactory, threadDataSynchronizer, globalDataProducer,
             null, drcRobotModel.getEstimatorDT(), gravity);
 
