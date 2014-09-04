@@ -1,0 +1,42 @@
+<package>
+  <name>ethzasl_point_cloud_vtk_tools</name>
+  <description>
+     Tools to save point clouds to VTK files and to republish them
+  </description>
+  <author>François Pomerleau and Stéphane Magnenat</author>
+  <license>new BSD</license>
+  <url type="website">http://ros.org/wiki/ethzasl_point_cloud_vtk_tools</url>
+
+  <version>0.9.6</version>
+  <maintainer email="f.pomerleau@gmail.com">Francois Pomerleau</maintainer>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>roscpp</build_depend>  
+  <build_depend>rospy</build_depend>  
+  <build_depend>rosbag</build_depend>  
+  <build_depend>std_msgs</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>nav_msgs</build_depend>
+  <build_depend>tf</build_depend>
+  <build_depend>tf_conversions</build_depend>
+  <build_depend>libpointmatcher</build_depend>
+  <build_depend>libpointmatcher_ros</build_depend>
+
+  <run_depend>roscpp</run_depend>  
+  <run_depend>rospy</run_depend>  
+  <run_depend>rosbag</run_depend>  
+  <run_depend>std_msgs</run_depend>
+  <run_depend>geometry_msgs</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>nav_msgs</run_depend>
+  <run_depend>tf</run_depend>
+  <run_depend>tf_conversions</run_depend>
+  <run_depend>libpointmatcher</run_depend>
+  <run_depend>libpointmatcher_ros</run_depend>
+
+
+</package>
+
+

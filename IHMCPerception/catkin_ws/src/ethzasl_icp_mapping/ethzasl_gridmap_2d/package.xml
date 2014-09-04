@@ -1,0 +1,26 @@
+<package>
+  <name>ethzasl_gridmap_2d</name>
+  <description>
+     Two-dimensional grid map with support for ray-tracing.
+     Somehow similar to costmap_2d but also provides getters at sub-pixel
+     precision, morphological operations, fast gradient-propagation
+     algorithm as well as support for multiple grids per resize group.
+  </description>
+  <author>Stéphane Magnenat</author>
+  <license>new BSD</license>
+  <url type="website">http://ros.org/wiki/ethzasl_gridmap_2d</url>
+
+  <version>0.9.6</version>
+  <maintainer email="f.pomerleau@gmail.com">Francois Pomerleau</maintainer>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>roscpp</build_depend>
+  <build_depend>nav_msgs</build_depend>
+  <build_depend>cmake_modules</build_depend>
+
+  <run_depend>roscpp</run_depend>
+  <run_depend>nav_msgs</run_depend>
+</package>
+
+

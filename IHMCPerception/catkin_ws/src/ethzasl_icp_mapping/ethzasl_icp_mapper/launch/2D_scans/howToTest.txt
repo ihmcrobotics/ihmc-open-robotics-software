@@ -1,0 +1,30 @@
+In a console:
+$ roscore &
+$ rosparam set use_sim_time true
+
+In a second console:
+$ roscd ethzasl_icp_mapper/launch/2D_scans/
+$ rosrun rviz rviz -d ./demo_2D_scans.vcg
+
+In a third console, download the test rosbag provided by Willow Garage.
+It may take around 8 min with a good connection.
+$ wget http://pr.willowgarage.com/data/slam_karto/tilt1.bag
+
+and run it:
+$ rosbag play --clock --pause tilt1.bag
+
+In a fourth console, launch the local mapper:
+$ roslaunch ethzasl_icp_mapper 2D_mapper.launch
+
+Then unpause the rosbag and monitor the evolution of the map on rviz.
+
+
+
+
+The parameters for the mapping can be changed:
+$ roscd ethzasl_icp_mapper/launch/2D_scans/
+
+The files icp.yaml, input_filters.yaml, map_post_filters.yaml constained
+filters and ICP related parameters.
+
+

@@ -1,0 +1,7 @@
+<launch>
+	<node name="pointCloudToVtk" type="pointCloudToVtk" pkg="ethzasl_point_cloud_vtk_tools" output="screen">
+		<param name="cloudTopic" value="/cloud" />
+		<param name="mapFrameId" value="/base_link" />
+		<param name="recordOnce" value="true" />
+	</node>
+</launch>

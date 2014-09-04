@@ -1,0 +1,10 @@
+- SurfaceNormalDataPointsFilter:
+    knn: 10
+    epsilon: 3.16
+    keepNormals: 0
+    keepDensities: 1
+- MaxDensityDataPointsFilter:
+    maxDensity: 50
+- MaxPointCountDataPointsFilter:
+    maxCount: 600000
+    prob: 0.7

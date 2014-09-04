@@ -1,0 +1,24 @@
+<package>
+	<name>ethzasl_extrinsic_calibration</name>
+	<description>
+    Calibration of 3D transform of a depth sensor given two sets of TFs, one from the odometry and one from the sensor pose.
+  </description>
+  <author>François Pomerleau, Francis Colas, and Stéphane Magnenat</author>
+  <license>new BSD</license>
+  <url type="website">http://ros.org/wiki/ethzasl_extrinsic_calibration</url>
+
+  <version>0.9.6</version>
+  <maintainer email="f.pomerleau@gmail.com">Francois Pomerleau</maintainer>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>rospy</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>tf</build_depend>
+  <build_depend>cmake_modules</build_depend>
+
+  <run_depend>rospy</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>tf</run_depend>
+
+</package>

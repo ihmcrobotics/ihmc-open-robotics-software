@@ -1,0 +1,3 @@
+- RandomSamplingDataPointsFilter:
+    prob: 0.5
+
