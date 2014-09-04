@@ -18,13 +18,14 @@ public abstract class JointFrictionModelsHolder
    private final DoubleYoVariable alphaForFilteredVelocity;
    private final DoubleYoVariable forceThreshold;
    private final DoubleYoVariable frictionCompensationEffectiveness;
+   private final DoubleYoVariable maxJointVelocityToCompensate;
 
    protected final DoubleYoVariable frictionForce;
    protected final EnumYoVariable<FrictionState> frictionCompensationState;
    protected final EnumYoVariable<FrictionModel> activeFrictionModel;
    protected final EnumMap<FrictionModel, JointFrictionModel> frictionModels;
 
-   public JointFrictionModelsHolder(String name, YoVariableRegistry registry, double alpha, double forceThreshold, double stictionTransitionVelocity)
+   public JointFrictionModelsHolder(String name, YoVariableRegistry registry, double alpha, double forceThreshold, double stictionTransitionVelocity, double maxJointVelocityToCompensate)
    {
       alphaForFilteredVelocity = new DoubleYoVariable(name + "_alphaForFilteredVelocity", registry);
       alphaForFilteredVelocity.set(alpha);
@@ -40,11 +41,19 @@ public abstract class JointFrictionModelsHolder
       filteredVelocity.update(0.0);
       frictionCompensationEffectiveness = new DoubleYoVariable(name + "_frictionCompensationEffectiveness", registry);
       frictionCompensationEffectiveness.set(0.0);
+      this.maxJointVelocityToCompensate = new DoubleYoVariable(name + "_maxJointVelocityToCompensate", registry);
+      this.maxJointVelocityToCompensate.set(maxJointVelocityToCompensate);
    }
 
    /**
-    * This method computes an equivalent joint velocity in case the joint is in stiction, but the operator is commanding a movement or a force.
-    * In case of force, the equivalent velocity is computed as the stiction velocity with the sign of the desired force.
+    * This method computes an equivalent joint velocity to use as input for the friction model. It also sets the state of the friction compensation.
+    * If the active friction model is the OFF, than the friction compensation state is set to NOT_COMPENSATING.
+    * If the operator is not requesting a force or a velocity, or if the current joint velocity is bigger than a threshold the friction compensation state
+    * is set to NOT_COMPENSATING. The velocity threshold can be set to avoid compensation when the joint is moving too fast, this can be necessary to avoid over-compensations.
+    * If the abs of the filtered current joint velocity is bigger than the stiction velocity than the velocity that will be used to compute the friction force is the current joint velocity.
+    * Instead if the abs of the filtered current joint velocity is less than the stiction velocity (the joint is in stiction, but the operator is commanding a movement or a force), 
+    * the equivalent velocity is computed in two different way based on the value of the requested force.
+    * In case the requested force is greater than a force threshold, the equivalent velocity is computed as the stiction velocity with the sign of the desired force.
     * In case of velocity the equivalent velocity is the desired velocity. 
     * As current Joint velocity use the less noisy. 
     * In case of stiction the discrimination between force or velocity mode is done based on the requested force value, so force control is predominant.
@@ -62,7 +71,7 @@ public abstract class JointFrictionModelsHolder
          return null;
       }
 
-      if (requestedJointVelocity == 0.0 && Math.abs(requestedForce) < forceThreshold.getDoubleValue())
+      if (requestedJointVelocity == 0.0 && Math.abs(requestedForce) < forceThreshold.getDoubleValue() || Math.abs(filteredVelocity.getDoubleValue()) > maxJointVelocityToCompensate.getDoubleValue())
       {
          frictionCompensationState.set(FrictionState.NOT_COMPENSATING);
          frictionForce.set(0.0);

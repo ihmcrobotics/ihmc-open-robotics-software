@@ -213,7 +213,7 @@ public class FrictionErrorComputer implements FunctionNtoM
       ArrayList<Integer> newList = new ArrayList<Integer>();
       boolean enoughElementsSelected = false;
       
-      while(!enoughElementsSelected) // there might be a problem if the number of samples in the input list is close to the max number of Elements, it will take a while to collect the samples. the solution is to remove element already taken from the list
+      while(!enoughElementsSelected)
       {
          int index = (int) Math.round(Math.random() * (list.size()-1));
          
