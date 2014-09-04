@@ -128,7 +128,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
 
    private void setupNetProcSocket()
    {
-      netProcClient = new ReconnectingTCPClient(netProcMachineIpAddress, NetworkConfigParameters.NETWORK_PROCESSOR_TCP_PORT);
+      netProcClient = new ReconnectingTCPClient(netProcMachineIpAddress, NetworkConfigParameters.NETWORK_PROCESSOR_CLOUD_DISPATCHER_BACKEND_TCP_PORT);
       netProcClient.attachStateListener(new NetStateListener()
       {
          public void connected()
@@ -150,7 +150,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
 
    private void setupControllerSocket()
    {
-      controllerClient = new ReconnectingTCPClient(controllerMachineIpAddress, NetworkConfigParameters.CONTROLLER_TCP_PORT);
+      controllerClient = new ReconnectingTCPClient(controllerMachineIpAddress, NetworkConfigParameters.CONTROLLER_CLOUD_DISPATCHER_BACKEND_TCP_PORT);
       controllerClient.attachStateListener(new NetStateListener()
       {
          public void connected()
