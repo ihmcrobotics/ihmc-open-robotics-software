@@ -9,7 +9,6 @@ nav_msgs
 tf
 tf_conversions
 eigen_conversions
-libpointmatcher
 )
 
 catkin_package(
@@ -22,8 +21,9 @@ nav_msgs
 tf
 tf_conversions
 eigen_conversions
-libpointmatcher
 )
+
+find_package(libpointmatcher REQUIRED)
 
 # c++ 0x
 #if("${CMAKE_CXX_COMPILER_ID}" MATCHES "clang") 
@@ -49,7 +49,10 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 add_definitions(-DHAVE_YAML_CPP)
-include_directories(include)
+include_directories(
+  include
+  ${libpointmatcher_INCLUDE_DIRS}
+)
 
 add_library(pointmatcher_ros src/point_cloud.cpp src/transform.cpp)
 include_directories(${catkin_INCLUDE_DIRS})
