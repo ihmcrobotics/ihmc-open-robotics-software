@@ -10,17 +10,17 @@
 > sudo apt-get update
 > sudo apt-get install libnabo-dev
 
-### libnabo (for ethz_icp_mapper)
+### libpointmatcher (for ethz_icp_mapper)
 
 (Not yet available for Trusty: https://launchpad.net/~stephane.magnenat/+archive/ubuntu/trusty)
 
-Download: https://launchpad.net/~stephane.magnenat/+archive/ubuntu/raring/+files/libpointmatcher-bin_1.1.0_amd64.deb
+Download: wget https://launchpad.net/~stephane.magnenat/+archive/ubuntu/raring/+files/libpointmatcher1_1.1.0_amd64.deb
 
-> ipk ...
+> sudo dpkg -i libpointmatcher1_1.1.0_amd64.deb 
 
 ## 2. Setup Catkin Workspace
 
-> cd ~/workspace/IHMCPerception/catkin_ws/
+> cd ~/<WORKSPACE NAME>/IHMCPerception/catkin_ws/
 > catkin_make
 
 Add this to your ~/.bashrc file:
