@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import org.ros.message.Time;
 import org.ros.time.WallTimeProvider;
 
-import us.ihmc.communication.producers.DRCJointConfigurationData;
+import us.ihmc.communication.packets.dataobjects.DRCJointConfigurationData;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.net.ObjectConsumer;

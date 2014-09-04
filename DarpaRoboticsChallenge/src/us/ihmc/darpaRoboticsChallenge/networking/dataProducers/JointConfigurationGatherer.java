@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.communication.producers.DRCJointConfigurationData;
+import us.ihmc.communication.packets.dataobjects.DRCJointConfigurationData;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;

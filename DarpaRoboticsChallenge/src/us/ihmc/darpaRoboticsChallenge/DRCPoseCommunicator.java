@@ -3,8 +3,8 @@ package us.ihmc.darpaRoboticsChallenge;
 import javax.media.j3d.Transform3D;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.communication.packets.dataobjects.DRCJointConfigurationData;
 import us.ihmc.communication.packets.sensing.RobotPoseData;
-import us.ihmc.communication.producers.DRCJointConfigurationData;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParameters;
