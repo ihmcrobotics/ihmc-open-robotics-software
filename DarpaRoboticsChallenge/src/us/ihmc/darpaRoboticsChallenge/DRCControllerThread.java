@@ -1,5 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+import java.util.ArrayList;
+
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
@@ -24,7 +26,6 @@ import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
@@ -114,20 +115,30 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
 
       outputWriter.setFullRobotModel(controllerFullRobotModel, threadDataSynchronizer.getControllerRawJointSensorDataHolderMap());
       outputWriter.setForceSensorDataHolderForController(forceSensorDataHolderForController);
+
+      ArrayList<InverseDynamicsJoint> listOfJointsToIgnore = new ArrayList<>();
       
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       DRCRobotLidarParameters lidarParameters = sensorInformation.getLidarParameters(0);
-      OneDoFJoint lidarJoint = null;
       if(lidarParameters != null)
       {
-    	  lidarJoint = controllerFullRobotModel.getOneDoFJointByName(lidarParameters.getLidarSpindleJointName());
+         listOfJointsToIgnore.add(controllerFullRobotModel.getOneDoFJointByName(lidarParameters.getLidarSpindleJointName()));
+      }
+
+      String[] additionalJoinsToIgnore = robotModel.getWalkingControllerParameters().getJointsToIgnoreInController();
+      if (additionalJoinsToIgnore != null)
+      {
+         for (String jointToIgnore : additionalJoinsToIgnore)
+         {
+            listOfJointsToIgnore.add(controllerFullRobotModel.getOneDoFJointByName(jointToIgnore));
+         }
       }
 
       controllerReferenceFrames = new ReferenceFrames(controllerFullRobotModel);
 
       robotController = createMomentumBasedController(controllerFullRobotModel, controllerReferenceFrames, sensorInformation,
             controllerFactory, controllerTime, robotModel.getControllerDT(), gravity, forceSensorDataHolderForController, dynamicGraphicObjectsListRegistry,
-            registry, dataProducer, lidarJoint);
+            registry, dataProducer, listOfJointsToIgnore.toArray(new InverseDynamicsJoint[]{}));
       
       firstTick.set(true);
       registry.addChild(robotController.getYoVariableRegistry());

@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlane
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactoryHelper;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlModuleBridge.MomentumControlModuleType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredJointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredPointAccelerationCommand;
@@ -143,12 +144,14 @@ public class MomentumBasedController
    
    private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
 
+   private final InverseDynamicsJoint[] controlledJoints;
+
    public MomentumBasedController(FullRobotModel fullRobotModel, CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames,
          SideDependentList<FootSwitchInterface> footSwitches, DoubleYoVariable yoTime, double gravityZ, TwistCalculator twistCalculator,
          SideDependentList<ContactablePlaneBody> feet, SideDependentList<ContactablePlaneBody> handsWithFingersBentBack,
          SideDependentList<ContactablePlaneBody> thighs, ContactablePlaneBody pelvis, ContactablePlaneBody pelvisBack, double controlDT,
-         MomentumOptimizationSettings momentumOptimizationSettings, OldMomentumControlModule oldMomentumControlModule,
-         ArrayList<Updatable> updatables, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+         OldMomentumControlModule oldMomentumControlModule, ArrayList<Updatable> updatables,
+         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, InverseDynamicsJoint... jointsToIgnore)
    {
       this.dynamicGraphicObjectsListRegistry = dynamicGraphicObjectsListRegistry;
 
@@ -180,7 +183,10 @@ public class MomentumBasedController
 
       RigidBody elevator = fullRobotModel.getElevator();
 
-      this.inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ);
+      if (jointsToIgnore != null && jointsToIgnore.length > 0)
+         inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ, Arrays.asList(jointsToIgnore));
+      else
+         inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ);
 
       double totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
 
@@ -238,8 +244,10 @@ public class MomentumBasedController
          yoPlaneContactStateList.add(contactState);
       }
 
-      InverseDynamicsJoint[] joints = ScrewTools.computeSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
-      for (InverseDynamicsJoint joint : joints)
+      MomentumOptimizationSettings momentumOptimizationSettings = HighLevelHumanoidControllerFactoryHelper.createMomentumOptimizationSettings(fullRobotModel, registry, jointsToIgnore);
+
+      controlledJoints = momentumOptimizationSettings.getJointsToOptimizeFor();
+      for (InverseDynamicsJoint joint : controlledJoints)
       {
          if (joint instanceof OneDoFJoint)
          {
@@ -891,5 +899,10 @@ public class MomentumBasedController
    public DynamicGraphicObjectsListRegistry getDynamicGraphicObjectsListRegistry()
    {
       return dynamicGraphicObjectsListRegistry;
+   }
+
+   public InverseDynamicsJoint[] getControlledJoints()
+   {
+      return controlledJoints;
    }
 }

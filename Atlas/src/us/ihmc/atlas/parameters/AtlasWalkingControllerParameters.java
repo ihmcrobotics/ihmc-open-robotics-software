@@ -643,4 +643,10 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    {
       return runningOnRealRobot ? 80.0 : 5.0;
    }
+
+   @Override
+   public String[] getJointsToIgnoreInController()
+   {
+      return null;
+   }
 }

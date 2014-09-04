@@ -433,6 +433,9 @@ public class MotionConstraintHandler
          int[] indicesIntoCompactBlock = ScrewTools.computeIndicesForJoint(joints, joint);
          int[] indicesIntoFullBlock = columnsForJoints.get(joint);
 
+         if (indicesIntoFullBlock == null)    // don't do anything for joints that are not in the list
+            return;
+
          for (int i = 0; i < indicesIntoCompactBlock.length; i++)
          {
             int compactBlockIndex = indicesIntoCompactBlock[i];
