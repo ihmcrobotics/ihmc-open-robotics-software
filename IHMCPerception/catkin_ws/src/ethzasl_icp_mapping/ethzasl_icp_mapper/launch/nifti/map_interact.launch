@@ -1,0 +1,5 @@
+<launch>
+	<node name="interact_mapper" type="interact_mapper" pkg="ethzasl_icp_mapper" output="screen">
+		<param name="map_path" value="/home/robot/.ros/3D_maps" /> 
+	</node>
+</launch>

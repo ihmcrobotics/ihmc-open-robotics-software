@@ -1,0 +1,27 @@
+<package>
+  <name>ethzasl_icp_mapping</name>
+  <version>0.9.6</version>
+  <description>
+    3d mapping tools for robotic applications
+  </description>
+  <maintainer email="f.pomerleau@gmail.com">Francois Pomerleau</maintainer>
+  <license>new BSD</license>
+
+  <url type="website">https://github.com/ethz-asl/ethzasl_icp_mapping</url>
+  <author>François Pomerleau and Stéphane Magnenat</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <run_depend>ethzasl_icp_mapper</run_depend>
+  <run_depend>ethzasl_gridmap_2d</run_depend>
+  <run_depend>ethzasl_icp_mapper_experiments</run_depend>
+  <run_depend>ethzasl_point_cloud_vtk_tools</run_depend>
+  <run_depend>libnabo</run_depend>
+  <run_depend>libpointmatcher</run_depend>
+  <run_depend>libpointmatcher_ros</run_depend>
+
+  <export>
+    <metapackage />
+  </export>
+
+</package>

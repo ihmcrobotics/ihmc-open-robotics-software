@@ -1,0 +1,11 @@
+- ObservationDirectionDataPointsFilter
+- SurfaceNormalDataPointsFilter:
+    knn: 5
+    epsilon: 3.16
+    keepNormals: 1
+    keepDensities: 1
+- OrientNormalsDataPointsFilter 
+#- MaxDistDataPointsFilter:
+#    maxDist: 5.5
+#    dim: 1
+

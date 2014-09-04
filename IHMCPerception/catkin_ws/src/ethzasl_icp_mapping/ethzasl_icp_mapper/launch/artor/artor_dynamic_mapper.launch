@@ -1,0 +1,53 @@
+<!-- 
+FP: 30 Jan. 2013
+
+Files tuned for ethzasl_icp_mapping commit 52d78c96c2cf2f58a400c649c561dbfec95e41a4
+and for libpointmatcher commit e048c4d1180b1de005af072bf137ea4d8cf2b826
+
+Parameters for ICRA 2014: "Long-term 3D map maintenance in dynamic environments"
+-->
+
+<launch>
+	<node name="mapper" type="dynamic_mapper" pkg="ethzasl_icp_mapper" output="screen" >
+		<remap from="cloud_in" to="/velodyne/assembled_cloud2" />
+		<param name="subscribe_scan" value="false"/>
+		<param name="icpConfig" value="$(find ethzasl_icp_mapper)/launch/artor/icp_dynamic.yaml" />
+		<param name="inputFiltersConfig" value="$(find ethzasl_icp_mapper)/launch/artor/input_filters.yaml" />
+		<!--param name="mapPostFiltersConfig" value="$(find ethzasl_icp_mapper)/launch/artor/map_post_filters.yaml" /-->
+		
+		<!--Put that back! -->
+		<param name="odom_frame" value="/odom" />
+		
+		<param name="map_frame" value="/map" />
+		<param name="useROSLogger" value="false" />
+		<param name="inputQueueSize" value="1" />
+		<param name="tfRefreshPeriod" value="0.005" />
+		<param name="minOverlap" value="0.6" /> 
+		<param name="maxOverlapToMerge" value="0.99" /> 
+		<param name="minReadingPointCount" value="1000" /> 
+		<param name="minMapPointCount" value="10000" /> <!-- quick fix to have map published each time -->
+
+		<!-- Parameters for dynamic elements -->
+		<param name="priorStatic" value="0.8"/>
+		<param name="priorDyn" value="0.2"/>
+		<param name="maxAngle" value="0.04"/>
+		<param name="eps_a" value="0.20"/>
+		<param name="eps_d" value="0.1"/>
+		<param name="alpha" value="0.99"/>
+		<param name="beta" value="0.90"/>
+		<param name="maxDyn" value="0.90"/>
+		<param name="maxDistNewPoint" value="0.3"/>
+
+	</node>
+
+	<node name="point_cloud_converter" type="point_cloud_converter" pkg="point_cloud_converter">
+		<remap from="points_in" to="/velodyne/assembled_cloud" />
+		<remap from="points2_out" to="/velodyne/assembled_cloud2" />
+	</node>
+	
+	<node name="point_cloud_converter_obs" type="point_cloud_converter" pkg="point_cloud_converter">
+		<remap from="points_in" to="/obstacle_cloud" />
+		<remap from="points2_out" to="/obstacle_cloud2" />
+	</node>
+
+</launch>

@@ -1,0 +1,18 @@
+<!-- 
+-->
+
+<launch>
+  <node name="object_map" type="map_maintainer" pkg="ethzasl_icp_mapper" output="screen"> 
+		<remap from="cloud_in" to="/dynamic_point_cloud" />
+		<param name="icpConfig" value="$(find ethzasl_icp_mapper)/launch/object_inspection/nifti_cars/icp.yaml" />
+		<param name="inputFiltersConfig" value="$(find ethzasl_icp_mapper)/launch/object_inspection/nifti_cars/input_filters.yaml" />
+		<param name="mapPreFiltersConfig" value="$(find ethzasl_icp_mapper)/launch/object_inspection/nifti_cars/map_pre_filters.yaml" />
+		<param name="mapPostFiltersConfig" value="$(find ethzasl_icp_mapper)/launch/object_inspection/nifti_cars/map_post_filters.yaml" />
+		<param name="object_frame" value="/car1" />
+		<param name="map_frame" value="/map" />
+		<param name="size_x" value="5.5" />
+		<param name="size_y" value="3.0" />
+		<param name="size_z" value="2.5" />
+  </node>
+  
+</launch>

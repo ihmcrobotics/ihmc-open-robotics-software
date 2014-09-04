@@ -1,0 +1,32 @@
+<!-- 
+F. Pomerleau: 12 Feb. 2013
+
+This launch file support the publication: 
+F. Pomerleau, S. Magnenat, F. Colas, M. Liu, R. Siegwart, "Tracking a Depth Camera: Parameter Exploration for Fast ICP", Proc. of the IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS), 2011
+
+Bag files used for the results can be found at:
+http://projects.asl.ethz.ch/datasets/doku.php?id=kinect:iros2011kinect
+
+Files tuned for ethzasl_icp_mapping commit 1e03bf34170f69169aa9c4ec248421f799e2e04f
+and for libpointmatcher commit 10a14031f8aa5238804ed0d4dddf03a24bcf7310
+on ROS fuerte
+-->
+
+<launch>
+  <node name="mapper" type="mapper" pkg="ethzasl_icp_mapper" output="screen"> 
+		<remap from="cloud_in" to="/camera/depth/points2" />
+		<param name="subscribe_scan" value="false"/>
+		<param name="icpConfig" value="$(find ethzasl_icp_mapper)/launch/openni/IROS_2011/icp.yaml" />
+		<param name="inputFiltersConfig" value="$(find ethzasl_icp_mapper)/launch/openni/IROS_2011/input_filters.yaml" />
+		<param name="mapPreFiltersConfig" value="$(find ethzasl_icp_mapper)/launch/openni/IROS_2011/map_pre_filters.yaml" />
+		<param name="mapPostFiltersConfig" value="$(find ethzasl_icp_mapper)/launch/openni/IROS_2011/map_post_filters.yaml" />
+		<param name="odom_frame" value="/openni_rgb_optical_frame" />
+		<param name="map_frame" value="/map" />
+		<param name="maxOverlapToMerge" value="0.75" />
+		<param name="minOverlap" value="0.60" />
+		<param name="minMapPointCount" value="0" />
+		<param name="useROSLogger" value="false" />
+		<param name="inputQueueSize" value="1" />
+  </node>
+  
+</launch>

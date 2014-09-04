@@ -1,0 +1,12 @@
+- SurfaceNormalDataPointsFilter:
+    knn: 20
+    epsilon: 3.16
+    keepNormals: 1
+    keepDensities: 1
+# Do not use subsampling filters!
+- MaxDensityDataPointsFilter:
+   maxDensity: 5.0
+- MaxPointCountDataPointsFilter:
+    maxCount: 600000
+    prob: 0.7
+
