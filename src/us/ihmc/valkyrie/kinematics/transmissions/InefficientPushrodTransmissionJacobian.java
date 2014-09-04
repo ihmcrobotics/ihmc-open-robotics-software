@@ -370,12 +370,12 @@ public class InefficientPushrodTransmissionJacobian
       tempCrossVector.cross(tempRVector, f6VectorInBottomFrame);
       jBottomJoint6.set(tempCrossVector.getX());
       
-      //bizarre ordering is due to the NASA's [roll; pitch] convention and NASA's bass-ackwards actuator naming convention
+      //
       //NOTE: this setup will only work for ankles
-      jacobianToPack[1][1] =  jTopJoint5.getDoubleValue();
-      jacobianToPack[1][0] =  jTopJoint6.getDoubleValue();
-      jacobianToPack[0][1] = -jBottomJoint5.getDoubleValue();
-      jacobianToPack[0][0] = -jBottomJoint6.getDoubleValue();
+      jacobianToPack[0][0] =  jTopJoint6.getDoubleValue(); // top to left
+      jacobianToPack[0][1] =  jTopJoint5.getDoubleValue(); // top to right
+      jacobianToPack[1][0] = jBottomJoint6.getDoubleValue(); // bottom to left
+      jacobianToPack[1][1] = jBottomJoint5.getDoubleValue(); // bottom to right
 
       if (visualize)
       {
