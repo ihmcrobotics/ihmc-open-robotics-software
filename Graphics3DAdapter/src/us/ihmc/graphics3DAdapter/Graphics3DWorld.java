@@ -98,13 +98,6 @@ public class Graphics3DWorld implements Graphics3DFrameListener
       jFrame = Graphics3DAdapterTools.createNewWindow(viewportAdapter, worldName, windowWidth, windowHeight, cameraController);
    }
 
-   public void addFrameListener(Graphics3DFrameListener frameListener)
-   {
-      checkViewportIsNotNull();
-
-      viewportAdapter.addFrameListener(frameListener);
-   }
-
    public void startWithGui(int windowWidth, int windowHeight)
    {
       startWithGui(ClassicCameraController.CAMERA_START_X, ClassicCameraController.CAMERA_START_Y, ClassicCameraController.CAMERA_START_Z, windowWidth,
@@ -147,6 +140,13 @@ public class Graphics3DWorld implements Graphics3DFrameListener
       {
          jFrame.dispose();
       }
+   }
+
+   public void addFrameListener(Graphics3DFrameListener frameListener)
+   {
+      checkViewportIsNotNull();
+   
+      viewportAdapter.addFrameListener(frameListener);
    }
 
    public void addChild(Graphics3DNode child)
