@@ -10,6 +10,7 @@ import us.ihmc.communication.packets.sensing.DepthDataClearCommand.DepthDataTree
 import us.ihmc.communication.packets.sensing.DepthDataFilterParameters;
 import us.ihmc.communication.packets.sensing.DepthDataStateCommand.LidarState;
 import us.ihmc.communication.packets.sensing.FilteredPointCloudPacket;
+import us.ihmc.communication.packets.sensing.PointCloudPacket;
 import us.ihmc.communication.packets.sensing.SparseLidarScanPacket;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.robotSide.RobotSide;
@@ -18,10 +19,8 @@ import us.ihmc.userInterface.util.DecayingResolutionFilter;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.Octree;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.OneDimensionalBounds;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.SphericalLinearResolutionProvider;
-import us.ihmc.utilities.lidar.PointCloudPacket;
 import us.ihmc.utilities.lidar.polarLidar.AbstractLidarScan;
 import us.ihmc.utilities.lidar.polarLidar.LidarScan;
-import us.ihmc.utilities.lidar.polarLidar.SparseLidarScan;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
