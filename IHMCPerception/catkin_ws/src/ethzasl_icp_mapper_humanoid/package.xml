@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>ethzasl_icp_mapper_drc</name>
+  <name>ethzasl_icp_mapper_humanoid</name>
   <version>0.9.6</version>
   <description>
      2D/3D mapper based on libpointmatcher (http://github.com/ethz-asl/libpointmatcher)

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(ethzasl_icp_mapper_drc)
+project(ethzasl_icp_mapper_humanoid)
 
 find_package(catkin REQUIRED
 ethzasl_icp_mapper roscpp rospy rosbag std_msgs geometry_msgs nav_msgs
@@ -49,6 +49,6 @@ add_definitions(-DHAVE_YAML_CPP)
 
 include_directories(include ${catkin_INCLUDE_DIRS})
 
-add_executable(mapper src/mapper.cpp)
-add_dependencies(mapper ${PROJECT_NAME}_gencpp)
-target_link_libraries(mapper ${catkin_LIBRARIES})
+add_executable(mapper_humanoid src/mapper.cpp)
+add_dependencies(mapper_humanoid ${PROJECT_NAME}_gencpp)
+target_link_libraries(mapper_humanoid ${catkin_LIBRARIES})
