@@ -6,7 +6,6 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
-import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
 
 public class ValkyrieWalkingControllerParameters implements WalkingControllerParameters
@@ -638,5 +637,17 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    public double getContactThresholdForce()
    {
       return runningOnRealRobot ? 80.0 : 5.0;
+   }
+
+   @Override
+   public String[] getJointsToIgnoreInController()
+   {
+      String[] jointsToIgnore = new String[]
+      {
+//            jointMap.getNeckJointName(NeckJointName.LOWER_NECK_PITCH),
+//            jointMap.getNeckJointName(NeckJointName.NECK_YAW),
+//            jointMap.getNeckJointName(NeckJointName.UPPER_NECK_PITCH)
+      };
+      return jointsToIgnore;
    }
 }
