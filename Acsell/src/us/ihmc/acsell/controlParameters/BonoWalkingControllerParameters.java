@@ -567,4 +567,10 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    {
       return 5.0;
    }
+
+   @Override
+   public String[] getJointsToIgnoreInController()
+   {
+      return null;
+   }
 }
