@@ -279,7 +279,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public double getControllerDT()
    {
-      return 0.006;
+      return 0.004;
    }
 
    @Override
