@@ -88,28 +88,89 @@ public class InefficientPushRodTransmission implements PushRodTransmissionInterf
       
    }
 
+   // For ankles:
+   // jointData[0] = ankleExtensor (Top Joint -- Pitch)
+   // jointData[1] = Ankle  (Bottom Joint -- Roll)
+   // actuatorData[0] = j5 (rightSide)
+   // actuatorData[1] = j6 (leftSide)
+   // LeftLeg has reflect = +1
+   // RightLeg has reflect = -1
+   private int count = 0;
+   
    @Override
    public void actuatorToJointEffort(TurboDriver[] actuatorData, ValkyrieJointInterface[] jointData)
    {
       assertTrue(numActuators() == actuatorData.length && numJoints() == jointData.length);
 
-      double actuatorForce0 = actuatorData[0].getEffort(); //TODO: Verify the ordering here...
-      double actuatorForce1 = actuatorData[1].getEffort();
-
-      double pitchAngle = jointData[0].getPosition();
-      double rollAngle = reflect * jointData[1].getPosition();
+      TurboDriver rightTurboDriver = actuatorData[0];
+      TurboDriver leftTurboDriver = actuatorData[1];
       
-      inefficientPushrodTransmissionJacobian.computeJacobian(jacobian, pitchAngle, rollAngle);
+      ValkyrieJointInterface topJointInterface = jointData[0];
+      ValkyrieJointInterface bottomJointInterface = jointData[1];
+      
+      double rightActuatorForce = rightTurboDriver.getEffort(); 
+      double leftActuatorForce = leftTurboDriver.getEffort(); 
+
+      double topJointAngle = topJointInterface.getPosition();
+      double bottomJointAngle = reflect * bottomJointInterface.getPosition();
+      
+      inefficientPushrodTransmissionJacobian.computeJacobian(jacobian, topJointAngle, bottomJointAngle);
 
 //      System.out.println("m11: " + jacobian[0][0] + ", m12: " + jacobian[0][1] + ", m21: " + jacobian[1][0] + ", m22: " + jacobian[1][1]);
-      double rollTorque = jacobian[0][0] * actuatorForce1 + jacobian[0][1] * actuatorForce0;
-      double pitchTorque = jacobian[1][0] * actuatorForce1 + jacobian[1][1] * actuatorForce0;
+      double topJointTorque = jacobian[0][0] * leftActuatorForce + jacobian[0][1] * rightActuatorForce;
+      double bottomJointTorque = jacobian[1][0] *  leftActuatorForce + jacobian[1][1] * rightActuatorForce;
 
-      jointData[0].setEffort(pitchTorque);
-      jointData[1].setEffort(reflect * rollTorque);
+      topJointInterface.setEffort(topJointTorque);
+      bottomJointInterface.setEffort(reflect * bottomJointTorque);
+      
+      if (count == 0)
+      {
+         System.out.println("\n\ntopJointInterface.getName() = " + topJointInterface.getName());
+         System.out.println("bottomJointInterface.getName() = " + bottomJointInterface.getName());
+         
+         System.out.println("leftTurboDriver.getNodePath() = " + leftTurboDriver.getNodePath());
+         System.out.println("rightTurboDriver.getNodePath() = " + rightTurboDriver.getNodePath());
+
+         System.out.println("reflect = " + reflect);
+         
+         count++;
+      }
+      
    }
 
-   
+   @Override
+   public void jointToActuatorEffort(TurboDriver[] actuatorData, ValkyrieJointInterface[] jointData)
+   {
+      assertTrue(numActuators() == actuatorData.length && numJoints() == jointData.length);
+
+      TurboDriver rightTurboDriver = actuatorData[0];
+      TurboDriver leftTurboDriver = actuatorData[1];
+      
+      ValkyrieJointInterface topJointInterface = jointData[0];
+      ValkyrieJointInterface bottomJointInterface = jointData[1];
+      
+      double topJointAngle = topJointInterface.getPosition();
+      double bottomJointAngle = reflect * bottomJointInterface.getPosition();
+      double topJointTorque = topJointInterface.getDesiredEffort();
+      double bottomJointTorque = reflect * bottomJointInterface.getDesiredEffort();
+
+      if (Math.abs(topJointAngle) > INFINITY_THRESHOLD || Math.abs(bottomJointAngle) > INFINITY_THRESHOLD)
+      {
+         throw new RuntimeException("jointToActuatorEffort: pitchAngle or rollAngle is infinity!!\n");
+      }
+
+      inefficientPushrodTransmissionJacobian.computeJacobian(jacobian, topJointAngle, bottomJointAngle);
+      invertMatrix(jacobian, jacobianInverse);
+      double leftJointForce = jacobianInverse[0][0] * topJointTorque + jacobianInverse[0][1] * bottomJointTorque;
+      double rightJointForce = jacobianInverse[1][0] * topJointTorque + jacobianInverse[1][1] * bottomJointTorque;
+
+      checkInfinity(leftJointForce);
+      checkInfinity(rightJointForce);
+
+      rightTurboDriver.setEffortCommand(rightJointForce);
+      leftTurboDriver.setEffortCommand(leftJointForce);
+   }
+
    @Override
    public void actuatorToJointVelocity(TurboDriver[] actuatorData, ValkyrieJointInterface[] jointData)
    {
@@ -123,34 +184,8 @@ public class InefficientPushRodTransmission implements PushRodTransmissionInterf
       // TODO Auto-generated method stub
       
    }
-
-   @Override
-   public void jointToActuatorEffort(TurboDriver[] actuatorData, ValkyrieJointInterface[] jointData)
-   {
-      assertTrue(numActuators() == actuatorData.length && numJoints() == jointData.length);
-
-      double pitchAngle = jointData[0].getPosition();
-      double rollAngle = reflect * jointData[1].getPosition();
-      double pitchTorque = jointData[0].getDesiredEffort();
-      double rollTorque = reflect * jointData[1].getDesiredEffort();
-
-      if (Math.abs(pitchAngle) > INFINITY_THRESHOLD || Math.abs(rollAngle) > INFINITY_THRESHOLD)
-      {
-         throw new RuntimeException("jointToActuatorEffort: pitchAngle or rollAngle is infinity!!\n");
-      }
-
-      inefficientPushrodTransmissionJacobian.computeJacobian(jacobian, pitchAngle, rollAngle);
-      invertMatrix(jacobian, jacobianInverse);
-      double actuatorForce1 = jacobianInverse[0][0] * rollTorque + jacobianInverse[0][1] * pitchTorque;
-      double actuatorForce0 = jacobianInverse[1][0] * rollTorque + jacobianInverse[1][1] * pitchTorque;
-
-      checkInfinity(actuatorForce0);
-      checkInfinity(actuatorForce1);
-
-      actuatorData[0].setEffortCommand(actuatorForce0); //TODO: Verify the ordering here...
-      actuatorData[1].setEffortCommand(actuatorForce1);
-   }
-
+   
+   
    @Override
    public void jointToActuatorVelocity(TurboDriver[] actuatorData, ValkyrieJointInterface[] jointData)
    {
