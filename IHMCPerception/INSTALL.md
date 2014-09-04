@@ -14,9 +14,17 @@
 
 (Not yet available for Trusty: https://launchpad.net/~stephane.magnenat/+archive/ubuntu/trusty)
 
-Download: wget https://launchpad.net/~stephane.magnenat/+archive/ubuntu/raring/+files/libpointmatcher1_1.1.0_amd64.deb
+> wget https://launchpad.net/~stephane.magnenat/+archive/ubuntu/raring/+files/libpointmatcher1_1.1.0_amd64.deb
+> sudo dpkg -i libpointmatcher1_1.1.0_amd64.deb
 
-> sudo dpkg -i libpointmatcher1_1.1.0_amd64.deb 
+### Kindr
+
+> cd ~/<WORKSPACE NAME>/IHMCPerception/third-party/kindr/
+> mkdir build
+> cd build
+> cmake ..
+> make
+> sudo make install
 
 ## 2. Setup Catkin Workspace
 
