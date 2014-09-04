@@ -57,3 +57,4 @@ include_directories(
 add_library(pointmatcher_ros src/point_cloud.cpp src/transform.cpp)
 include_directories(${catkin_INCLUDE_DIRS})
 target_link_libraries(pointmatcher_ros ${catkin_LIBRARIES})
+

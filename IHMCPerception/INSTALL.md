@@ -12,10 +12,13 @@
 
 ### libpointmatcher (for ethz_icp_mapper)
 
-(Not yet available for Trusty: https://launchpad.net/~stephane.magnenat/+archive/ubuntu/trusty)
+(Not yet available for Trusty yet: https://launchpad.net/~stephane.magnenat/+archive/ubuntu/trusty)
 
-> wget https://launchpad.net/~stephane.magnenat/+archive/ubuntu/raring/+files/libpointmatcher1_1.1.0_amd64.deb
-> sudo dpkg -i libpointmatcher1_1.1.0_amd64.deb
+> cd ~/<WORKSPACE NAME>/IHMCPerception/third-party/libpointmatcher/
+> mkdir build && cd build
+> cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
+> make -j8
+> sudo make install
 
 ### Kindr
 
@@ -29,8 +32,6 @@
 ## 2. Setup Catkin Workspace
 
 > cd ~/<WORKSPACE NAME>/IHMCPerception/catkin_ws/
-> mkdir devel
-> mkdir devel/include
 > catkin_make
 
 Add this to your ~/.bashrc file:
