@@ -169,4 +169,6 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract double getDesiredTouchdownVelocity();
 
    public abstract double getContactThresholdForce();
+
+   public abstract String[] getJointsToIgnoreInController();
 }

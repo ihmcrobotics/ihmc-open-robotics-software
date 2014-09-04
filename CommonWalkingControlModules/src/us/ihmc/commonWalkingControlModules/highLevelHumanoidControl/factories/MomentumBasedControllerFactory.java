@@ -19,7 +19,6 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.Instantaneo
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.SmoothICPComputer2D;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.OldMomentumControlModule;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.FootSwitchInterface;
@@ -134,9 +133,6 @@ public class MomentumBasedControllerFactory
               walkingControllerParameters.getCaptureFilterBreakFrequencyInHz(), walkingControllerParameters.getCMPRateLimit(),
               walkingControllerParameters.getCMPAccelerationLimit());
 
-      MomentumOptimizationSettings momentumOptimizationSettings = HighLevelHumanoidControllerFactoryHelper.createMomentumOptimizationSettings(fullRobotModel,
-            registry, jointsToIgnore);
-
       // No longer need old one. Don't create it.
       // TODO: Remove OldMomentumControlModule completely once QP stuff is solidified.
       OldMomentumControlModule oldMomentumControlModule = null;
@@ -185,8 +181,8 @@ public class MomentumBasedControllerFactory
       // Setup the MomentumBasedController ////////////////////////////////////////////////////////
       momentumBasedController = new MomentumBasedController(fullRobotModel, centerOfMassJacobian, referenceFrames, footSwitches,
                                    yoTime, gravityZ, twistCalculator, feet, handContactableBodies, thighs, pelvisContactablePlaneBody,
-                                   pelvisBackContactablePlaneBody, controlDT, momentumOptimizationSettings, oldMomentumControlModule,
-                                   updatables, dynamicGraphicObjectsListRegistry);
+                                   pelvisBackContactablePlaneBody, controlDT, oldMomentumControlModule,
+                                   updatables, dynamicGraphicObjectsListRegistry, jointsToIgnore);
 
       TransferTimeCalculationProvider transferTimeCalculationProvider = new TransferTimeCalculationProvider("providedTransferTime", registry, transferTimeCalculator, transferTime);
       SwingTimeCalculationProvider swingTimeCalculationProvider = new SwingTimeCalculationProvider("providedSwingTime", registry, swingTimeCalculator, swingTime);
