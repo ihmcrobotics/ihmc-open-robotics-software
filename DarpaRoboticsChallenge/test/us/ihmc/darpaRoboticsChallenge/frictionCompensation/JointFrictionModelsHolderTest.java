@@ -20,6 +20,7 @@ public class JointFrictionModelsHolderTest
    private double stictionTransitionVelocity = 0.011;
    private double alphaForFilteredVelocity = 0.0;
    private double forceThreshold = 1.0;
+   private double maxVelocityForCompensation = 5;
 
    private double positiveCoulomb = 5.5;
    private double positiveViscous = 0.2;
@@ -40,6 +41,7 @@ public class JointFrictionModelsHolderTest
    private double requestedZeroForce = 0.0;
    private double currentJointVelocityLessThanStictionVelocity = 0.9 * stictionTransitionVelocity;
    private double currentJointVelocityGreaterThanStictionVelocity = 1.1 * stictionTransitionVelocity;
+   private double currentJointVelocityGreaterThanMaxVelocity = 5 * maxVelocityForCompensation;
    private double requestedNonZeroJointVelocity = 1.2;
    private double requestedZeroJointVelocity = 0.0;
 
@@ -110,15 +112,23 @@ public class JointFrictionModelsHolderTest
       FrictionState state6 = holder.getCurrentFrictionState();
       double friction6 = holder.getCurrentFrictionForce();
       assertEquals(FrictionState.NOT_COMPENSATING, state6);
-      assertEquals(0.0, friction, epsilon);
+      assertEquals(0.0, friction6, epsilon);
       assertNull(velocity6);
+      
+      Double velocity7 = holder.selectFrictionStateAndFrictionVelocity(requestedNonZeroForceUnderThreshold, currentJointVelocityGreaterThanMaxVelocity,
+            requestedZeroJointVelocity);
+      FrictionState state7 = holder.getCurrentFrictionState();
+      double friction7 = holder.getCurrentFrictionForce();
+      assertEquals(FrictionState.NOT_COMPENSATING, state7);
+      assertEquals(0.0, friction7, epsilon);
+      assertNull(velocity7);
    }
 
    private class JointFrictionModelsHolderForTest extends JointFrictionModelsHolder
    {
       public JointFrictionModelsHolderForTest(String name, YoVariableRegistry registry)
       {
-         super(name, registry, alphaForFilteredVelocity, forceThreshold, stictionTransitionVelocity);
+         super(name, registry, alphaForFilteredVelocity, forceThreshold, stictionTransitionVelocity, maxVelocityForCompensation);
          frictionModels.put(FrictionModel.OFF, noCompensatingModel);
          frictionModels.put(FrictionModel.ASYMMETRIC_COULOMB_VISCOUS, asymmetricCVModel);
          frictionModels.put(FrictionModel.ASYMMETRIC_COULOMB_VISCOUS_STRIBECK, asymmetricCVSModel);
