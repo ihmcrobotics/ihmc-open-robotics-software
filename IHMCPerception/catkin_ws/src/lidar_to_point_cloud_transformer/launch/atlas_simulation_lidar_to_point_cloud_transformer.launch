@@ -1,17 +1,11 @@
 <launch>
-	<node type="laser_scan_assembler" pkg="laser_assembler" name="laser_scan_assembler">
-		<remap from="scan" to="/multisense/lidar_scan" />
-		<param name="max_scans" value="400" />
-		<param name="fixed_frame" value="world" />
-		<param name="ignore_laser_skew" value="false" />
-	</node>
- 	<node pkg="rotating_lidar_to_pointcloud_transformer" type="rotating_lidar_to_pointcloud_transformer" name="rotating_lidar_to_pointcloud_transformer" output="screen">
-    	<param name="base_frame_id" type="string" value="/head" />
-    	<param name="rotating_frame_id" type="string" value="/hokuyo_link" />
-    	<param name="export_frame_id" type="string" value="/head" />
+ 	<node pkg="lidar_to_point_cloud_transformer" type="lidar_to_point_cloud_transformer" name="lidar_to_point_cloud_transformer" output="screen">
+    	<param name="laser_scan_topic" type="string" value="/multisense/lidar_scan" />
+    	<param name="fixed_frame" type="string" value="world" />
+	<param name="target_frame" type="string" value="head" />
+	<param name="base_frame_id" type="string" value="head" />
+    	<param name="rotating_frame_id" type="string" value="hokuyo_link" />
     	<param name="limit_angle" type="double" value="3.14159265" />
-    	<param name="limit_angle_tolerance" type="double" value="0.05" />
-    	<param name="min_update_rate" type="double" value="50.0" />
-    	<param name="intersecion_filter_radius" type="double" value="1.2" />
+    	<rosparam command="load" file="$(find lidar_to_point_cloud_transformer)/parameters/atlas_laser_scan_filter_chain.yaml" />
     </node>
 </launch>
