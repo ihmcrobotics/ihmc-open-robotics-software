@@ -29,6 +29,14 @@ import bubo.clouds.filter.UniformDensityCloudOctree;
  * Automatic algorithm for detecting the testbed from LIDAR scans.  Uses RANSAC to find all the larger planes then
  * looks for perpendicular planes which are next to each other and have a blob of points near the valve.
  *
+ * A transform is needed to go from found testbed reference frame to the testbed model reference frame.  The transform
+ * is found using manually aligned data so that it can emulate what a user would selects.
+ *
+ * 1) Collect point cloud data
+ * 2) Manually align data using TestBedManualAlignmentApplication.  It will save the results in the same directory
+ * 3) Specify directory in ComputeEstimatedToWorldBatch to the same dataset
+ * 4) Run ComputeEstimatedToModel on that directory and it will create a estimatedToModel transform and save it
+ *
  * @author Peter Abeles
  */
 public class TestbedAutomaticAlignment {
@@ -164,7 +172,6 @@ public class TestbedAutomaticAlignment {
       Se3_F64 best = new Se3_F64();
       int bestCount = 0;
 
-      int total = 0;
       Se3_F64 found = new Se3_F64();
       for (int i = 0; i < normals.size(); i++) {
          PlaneGeneral3D_F64 planeA = (PlaneGeneral3D_F64)shapes.get(i).parameters;
@@ -177,7 +184,6 @@ public class TestbedAutomaticAlignment {
 
             double angle = a.acute(b);
             angle = Math.min(Math.PI-angle,angle);
-            total++;
 
             System.out.println("Angle "+angle);
 
@@ -328,9 +334,6 @@ public class TestbedAutomaticAlignment {
 
    /**
     * Adjusts the sign such that the vector is pointing towards the center of the provided cloud
-    * @param v
-    * @param start
-    * @param cloud
     */
    public static void adjustSign( Vector3D_F64 v , Point3D_F64 start , List<Point3D_F64> cloud ) {
       Point3D_F64 centroid = UtilPoint3D_F64.mean(cloud, cloud.size(), null);

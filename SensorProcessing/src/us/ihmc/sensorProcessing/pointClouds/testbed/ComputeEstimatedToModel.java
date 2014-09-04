@@ -12,6 +12,9 @@ import java.util.List;
 import com.thoughtworks.xstream.XStream;
 
 /**
+ * Processes transforms found be the automated algorithm and manually aligned.  It selects the transform which minimizes
+ * the error across the set as the official transform from estimated to model.
+ *
  * @author Peter Abeles
  */
 public class ComputeEstimatedToModel {
