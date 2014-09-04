@@ -102,7 +102,8 @@ public abstract class JointFrictionModelsHolder
 
    public void setActiveFrictionModel(FrictionModel requestedFrictionModel)
    {
-      if (frictionModels.containsKey(requestedFrictionModel) && requestedFrictionModel != null)
+      if ((frictionModels.containsKey(requestedFrictionModel) && frictionModels.get(requestedFrictionModel) != null) 
+            && requestedFrictionModel != null )
       {
          if (activeFrictionModel.getEnumValue() != requestedFrictionModel)
          {
