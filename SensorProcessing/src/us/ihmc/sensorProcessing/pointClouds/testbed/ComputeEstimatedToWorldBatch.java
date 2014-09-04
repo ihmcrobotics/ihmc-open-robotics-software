@@ -11,6 +11,8 @@ import java.util.List;
 import com.thoughtworks.xstream.XStream;
 
 /**
+ * Processes a set of point clouds and saves the found location of the testbed.
+ *
  * @author Peter Abeles
  */
 public class ComputeEstimatedToWorldBatch {
