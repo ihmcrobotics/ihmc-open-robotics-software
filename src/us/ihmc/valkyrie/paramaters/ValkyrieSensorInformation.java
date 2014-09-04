@@ -40,13 +40,14 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    {
 //      SpatialForceVector leftFootForceSensorTareOffset_20140406 = new SpatialForceVector(null, new double[] { 7.1, -23.7, 3.8, 186.2, 319.7, 1067.7 });
 //      SpatialForceVector rightFootForceSensorTareOffset_20140406 = new SpatialForceVector(null, new double[] { -1.08, -2.79, -9.63, 38.05, 7.35, -109.3 });
-//      SpatialForceVector leftFootForceSensorTareOffset_zero = new SpatialForceVector(null, new double[6]);
-//      SpatialForceVector rightFootForceSensorTareOffset_zero = new SpatialForceVector(null, new double[6]); 
 
-      SpatialForceVector leftFootForceSensorTareOffset_20140512 = new SpatialForceVector(null, new double[] { 7.02, -23.79, 3.09, 189.6, 322.5, 1081.0 });
-      SpatialForceVector rightFootForceSensorTareOffset_20140512 = new SpatialForceVector(null, new double[] {-1.12, -2.46, -8.94, 27.54, 3.70, -101.7});
-      
-      footForceSensorTareOffsets = new SideDependentList<SpatialForceVector>(leftFootForceSensorTareOffset_20140512, rightFootForceSensorTareOffset_20140512);
+//      SpatialForceVector leftFootForceSensorTareOffset_20140512 = new SpatialForceVector(null, new double[] { 7.02, -23.79, 3.09, 189.6, 322.5, 1081.0 });
+//      SpatialForceVector rightFootForceSensorTareOffset_20140512 = new SpatialForceVector(null, new double[] {-1.12, -2.46, -8.94, 27.54, 3.70, -101.7});
+
+      SpatialForceVector leftFootForceSensorTareOffset_20140903 = new SpatialForceVector(null, new double[] { 7.1, -24.2, 1.96, 187.9, 306.0, 1131.6 });
+      SpatialForceVector rightFootForceSensorTareOffset_20140903 = new SpatialForceVector(null, new double[] { -1.0, -2.7, -10.1, 61.1, 16.3, -143.0 });
+
+      footForceSensorTareOffsets = new SideDependentList<SpatialForceVector>(leftFootForceSensorTareOffset_20140903, rightFootForceSensorTareOffset_20140903);
    }
 
    public static final SideDependentList<Transform3D> transformFromMeasurementToAnkleZUpFrames = new SideDependentList<>();
