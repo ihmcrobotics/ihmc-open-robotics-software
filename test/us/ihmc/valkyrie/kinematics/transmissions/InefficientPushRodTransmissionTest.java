@@ -21,10 +21,14 @@ public class InefficientPushRodTransmissionTest
    {
       Random random = new Random(1234L);
 
-      double reflect = 1.0;
+      double reflectBottom = 1.0;
+      double reflectTop = 1.0;
+      boolean topJointFirst = true;
+      
       PushRodTransmissionJoint pushRodTransmissionJoint = PushRodTransmissionJoint.ANKLE;
 
-      InefficientPushRodTransmission inefficientPushrodTransmission = new InefficientPushRodTransmission(pushRodTransmissionJoint, reflect, null, null);
+      InefficientPushRodTransmission inefficientPushrodTransmission = new InefficientPushRodTransmission(pushRodTransmissionJoint, 
+            reflectTop, reflectBottom, topJointFirst, null, null);
 
       TurboDriver[] actuatorData = new DummyTurboDriver[2];
       actuatorData[0] = new DummyTurboDriver();
@@ -80,10 +84,14 @@ public class InefficientPushRodTransmissionTest
    @Test
    public void testRegression()
    {
-      double reflect = 1.0;
+      double reflectBottom = 1.0;
+      double reflectTop = 1.0;
+      boolean topJointFirst = true;
+
       PushRodTransmissionJoint pushRodTransmissionJoint = PushRodTransmissionJoint.ANKLE;
 
-      InefficientPushRodTransmission inefficientPushrodTransmission = new InefficientPushRodTransmission(pushRodTransmissionJoint, reflect, null, null);
+      InefficientPushRodTransmission inefficientPushrodTransmission = new InefficientPushRodTransmission(pushRodTransmissionJoint, 
+            reflectTop, reflectBottom, topJointFirst, null, null);
 
       TurboDriver[] actuatorData = new DummyTurboDriver[2];
       actuatorData[0] = new DummyTurboDriver();
@@ -100,7 +108,7 @@ public class InefficientPushRodTransmissionTest
       double actuatorForce0 = 0.0;
 
       double regressionPitchTorque = -0.0366712094326246;
-      double regressionRollTorque = 0.034118686505983736;
+      double regressionRollTorque = -0.034118686505983736;
       verifyARegressionTest(inefficientPushrodTransmission, pitch, roll, actuatorData, jointData, actuatorForce0, actuatorForce1, regressionPitchTorque,
                             regressionRollTorque);
 
@@ -108,7 +116,7 @@ public class InefficientPushRodTransmissionTest
       actuatorForce1 = 0.0;
       actuatorForce0 = 1.0;
       regressionPitchTorque = -0.0366712094326246;
-      regressionRollTorque = -0.034118686505983736;
+      regressionRollTorque = 0.034118686505983736;
 
       verifyARegressionTest(inefficientPushrodTransmission, pitch, roll, actuatorData, jointData, actuatorForce0, actuatorForce1, regressionPitchTorque,
                             regressionRollTorque);
@@ -119,7 +127,7 @@ public class InefficientPushRodTransmissionTest
       actuatorForce1 = 1.0;
       actuatorForce0 = 0.0;
       regressionPitchTorque = -0.03695254741929382;
-      regressionRollTorque = 0.02988230913579041;
+      regressionRollTorque = -0.02988230913579041;
 
       verifyARegressionTest(inefficientPushrodTransmission, pitch, roll, actuatorData, jointData, actuatorForce0, actuatorForce1, regressionPitchTorque,
                             regressionRollTorque);
@@ -127,7 +135,7 @@ public class InefficientPushRodTransmissionTest
       actuatorForce1 = 0.0;
       actuatorForce0 = 1.0;
       regressionPitchTorque = -0.034740329545336665;
-      regressionRollTorque = -0.03440182578269918;
+      regressionRollTorque = 0.03440182578269918;
 
       verifyARegressionTest(inefficientPushrodTransmission, pitch, roll, actuatorData, jointData, actuatorForce0, actuatorForce1, regressionPitchTorque,
                             regressionRollTorque);
