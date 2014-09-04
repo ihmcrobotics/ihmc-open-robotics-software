@@ -44,13 +44,18 @@ public class InefficientPushRodTransmission implements PushRodTransmissionInterf
 
    private final InefficientPushrodTransmissionJacobian inefficientPushrodTransmissionJacobian;
    
-   private final double reflect;
+   private final double reflectBottom;
+   private final double reflectTop;
+   private final boolean topJointFirst;
    
-   public InefficientPushRodTransmission(PushRodTransmissionJoint pushRodTransmissionJoint, double reflect, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public InefficientPushRodTransmission(PushRodTransmissionJoint pushRodTransmissionJoint, 
+         double reflectTop, double reflectBottom, boolean topJointFirst,
+         YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      if (Math.abs(Math.abs(reflect) - 1.0) > 1e-7) throw new RuntimeException("reflect must be 1.0 or -1.0");
-      this.reflect = reflect;
-      
+      if (Math.abs(Math.abs(reflectBottom) - 1.0) > 1e-7) throw new RuntimeException("reflect must be 1.0 or -1.0");
+      this.reflectBottom = reflectBottom;
+      this.reflectTop = reflectTop;
+      this.topJointFirst = topJointFirst;
        inefficientPushrodTransmissionJacobian = new InefficientPushrodTransmissionJacobian(pushRodTransmissionJoint, parentRegistry, dynamicGraphicObjectsListRegistry);
    }
   
@@ -105,14 +110,24 @@ public class InefficientPushRodTransmission implements PushRodTransmissionInterf
       TurboDriver rightTurboDriver = actuatorData[0];
       TurboDriver leftTurboDriver = actuatorData[1];
       
-      ValkyrieJointInterface topJointInterface = jointData[0];
-      ValkyrieJointInterface bottomJointInterface = jointData[1];
+      ValkyrieJointInterface topJointInterface, bottomJointInterface;
+
+      if (topJointFirst)
+      {
+         topJointInterface = jointData[0];
+         bottomJointInterface = jointData[1];
+      }
+      else
+      {
+         topJointInterface = jointData[1];
+         bottomJointInterface = jointData[0];
+      }
       
       double rightActuatorForce = rightTurboDriver.getEffort(); 
       double leftActuatorForce = leftTurboDriver.getEffort(); 
 
-      double topJointAngle = topJointInterface.getPosition();
-      double bottomJointAngle = reflect * bottomJointInterface.getPosition();
+      double topJointAngle = reflectTop * topJointInterface.getPosition();
+      double bottomJointAngle = reflectBottom * bottomJointInterface.getPosition();
       
       inefficientPushrodTransmissionJacobian.computeJacobian(jacobian, topJointAngle, bottomJointAngle);
 
@@ -120,8 +135,8 @@ public class InefficientPushRodTransmission implements PushRodTransmissionInterf
       double topJointTorque = jacobian[0][0] * leftActuatorForce + jacobian[0][1] * rightActuatorForce;
       double bottomJointTorque = jacobian[1][0] *  leftActuatorForce + jacobian[1][1] * rightActuatorForce;
 
-      topJointInterface.setEffort(topJointTorque);
-      bottomJointInterface.setEffort(reflect * bottomJointTorque);
+      topJointInterface.setEffort(reflectTop * topJointTorque);
+      bottomJointInterface.setEffort(reflectBottom * bottomJointTorque);
       
       if (count == 0)
       {
@@ -131,7 +146,8 @@ public class InefficientPushRodTransmission implements PushRodTransmissionInterf
          System.out.println("leftTurboDriver.getNodePath() = " + leftTurboDriver.getNodePath());
          System.out.println("rightTurboDriver.getNodePath() = " + rightTurboDriver.getNodePath());
 
-         System.out.println("reflect = " + reflect);
+         System.out.println("reflectBottom = " + reflectBottom);
+         System.out.println("reflectTop = " + reflectTop);
          
          count++;
       }
@@ -146,13 +162,23 @@ public class InefficientPushRodTransmission implements PushRodTransmissionInterf
       TurboDriver rightTurboDriver = actuatorData[0];
       TurboDriver leftTurboDriver = actuatorData[1];
       
-      ValkyrieJointInterface topJointInterface = jointData[0];
-      ValkyrieJointInterface bottomJointInterface = jointData[1];
+      ValkyrieJointInterface topJointInterface, bottomJointInterface;
+
+      if (topJointFirst)
+      {
+         topJointInterface = jointData[0];
+         bottomJointInterface = jointData[1];
+      }
+      else
+      {
+         topJointInterface = jointData[1];
+         bottomJointInterface = jointData[0];
+      }
       
-      double topJointAngle = topJointInterface.getPosition();
-      double bottomJointAngle = reflect * bottomJointInterface.getPosition();
-      double topJointTorque = topJointInterface.getDesiredEffort();
-      double bottomJointTorque = reflect * bottomJointInterface.getDesiredEffort();
+      double topJointAngle = reflectTop * topJointInterface.getPosition();
+      double bottomJointAngle = reflectBottom * bottomJointInterface.getPosition();
+      double topJointTorque = reflectTop * topJointInterface.getDesiredEffort();
+      double bottomJointTorque = reflectBottom * bottomJointInterface.getDesiredEffort();
 
       if (Math.abs(topJointAngle) > INFINITY_THRESHOLD || Math.abs(bottomJointAngle) > INFINITY_THRESHOLD)
       {

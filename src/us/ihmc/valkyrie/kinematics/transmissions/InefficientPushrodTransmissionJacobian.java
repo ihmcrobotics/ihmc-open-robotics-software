@@ -354,22 +354,22 @@ public class InefficientPushrodTransmissionJacobian
       tempRVector.setIncludingFrame(t5InTopFrame); //kjb5InBoneFrame);
       tempCrossVector.setToZero(tempRVector.getReferenceFrame());
       tempCrossVector.cross(tempRVector, f5VectorInTopFrame);
-      jTopJoint5.set(tempCrossVector.getY());
+      setJacobianElement(jTopJoint5, tempCrossVector, topJointAxis);
 
       tempRVector.setIncludingFrame(t6InTopFrame); //b6InBoneFrame);
       tempCrossVector.cross(tempRVector, f6VectorInTopFrame);
-      jTopJoint6.set(tempCrossVector.getY());
+      setJacobianElement(jTopJoint6, tempCrossVector, topJointAxis);
 
 
       tempRVector.setIncludingFrame(t5InBottomFrame); //b5InFootFrame);
       tempCrossVector.setToZero(tempRVector.getReferenceFrame());
       tempCrossVector.cross(tempRVector, f5VectorInBottomFrame);
-      jBottomJoint5.set(tempCrossVector.getX());
+      setJacobianElement(jBottomJoint5, tempCrossVector, bottomJointAxis);
 
       tempRVector.setIncludingFrame(t6InBottomFrame); //b6InFootFrame);
       tempCrossVector.cross(tempRVector, f6VectorInBottomFrame);
-      jBottomJoint6.set(tempCrossVector.getX());
-      
+      setJacobianElement(jBottomJoint6, tempCrossVector, bottomJointAxis);
+
       //
       //NOTE: this setup will only work for ankles
       jacobianToPack[0][0] =  jTopJoint6.getDoubleValue(); // top to left
@@ -404,6 +404,22 @@ public class InefficientPushrodTransmissionJacobian
 
    }
    
+   private void setJacobianElement(DoubleYoVariable jacobianElement, FrameVector rCrossFVector, Axis jointAxis)
+   {
+      if (jointAxis == Axis.X)
+      {
+         jacobianElement.set(rCrossFVector.getX());
+      }
+      else if (jointAxis == Axis.Y)
+      {
+         jacobianElement.set(rCrossFVector.getY());
+      }
+      else
+      {
+         throw new RuntimeException("Shouldn't get here!");
+      }
+   }
+
    private static void computeRotationTransform(Transform3D transform3DToPack, double rotationAngle, Axis rotationAxis)
    {
       transform3DToPack.setIdentity();
