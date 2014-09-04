@@ -32,14 +32,17 @@ public class ComparePushRodTransmissionsTest
       Random random = new Random(1255L);
       double epsilon = 1e-7;
 
-      double reflect = 1.0;
+      double reflectTop = 1.0;
+      double reflectBottom = 1.0;
+      boolean topJointFirst = true;
+
       PushRodTransmissionJoint pushRodTransmissionJoint = PushRodTransmissionJoint.ANKLE;
       
       YoVariableRegistry registry = new YoVariableRegistry("test");
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
       
-      InefficientPushRodTransmission inefficientPushrodTransmission = new InefficientPushRodTransmission(pushRodTransmissionJoint, reflect, registry, dynamicGraphicObjectsListRegistry);
-      EfficientPushRodTransmission efficientPushrodTransmission = new EfficientPushRodTransmission(pushRodTransmissionJoint, reflect);
+      InefficientPushRodTransmission inefficientPushrodTransmission = new InefficientPushRodTransmission(pushRodTransmissionJoint, reflectTop, reflectBottom, topJointFirst, registry, dynamicGraphicObjectsListRegistry);
+      EfficientPushRodTransmission efficientPushrodTransmission = new EfficientPushRodTransmission(pushRodTransmissionJoint, reflectBottom);
 
       compareTwoPushRodTransmissionInterfaces(random, epsilon, inefficientPushrodTransmission, efficientPushrodTransmission, registry, dynamicGraphicObjectsListRegistry);
    }
@@ -51,14 +54,17 @@ public class ComparePushRodTransmissionsTest
       Random random = new Random(1255L);
       double epsilon = 1e-7;
 
-      double reflect = 1.0;
+      double reflectTop = 1.0;
+      double reflectBottom = 1.0;
+      boolean topJointFirst = true;
+
       PushRodTransmissionJoint pushRodTransmissionJoint = PushRodTransmissionJoint.WAIST;
       
       YoVariableRegistry registry = new YoVariableRegistry("test");
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
 
-      InefficientPushRodTransmission inefficientPushrodTransmission = new InefficientPushRodTransmission(pushRodTransmissionJoint, reflect, registry, dynamicGraphicObjectsListRegistry);
-      EfficientPushRodTransmission efficientPushrodTransmission = new EfficientPushRodTransmission(pushRodTransmissionJoint, reflect);
+      InefficientPushRodTransmission inefficientPushrodTransmission = new InefficientPushRodTransmission(pushRodTransmissionJoint, reflectTop, reflectBottom, topJointFirst, registry, dynamicGraphicObjectsListRegistry);
+      EfficientPushRodTransmission efficientPushrodTransmission = new EfficientPushRodTransmission(pushRodTransmissionJoint, reflectBottom);
 
       compareTwoPushRodTransmissionInterfaces(random, epsilon, inefficientPushrodTransmission, efficientPushrodTransmission, registry, dynamicGraphicObjectsListRegistry);
    }
@@ -73,14 +79,17 @@ public class ComparePushRodTransmissionsTest
 
       String ankleNamespace = "v1_ankle";
       double compliance = 0.0;
-      double reflect = 1.0;
+      double reflectTop = 1.0;
+      double reflectBottom = 1.0;
+      boolean topJointFirst = true;
+
       PushRodTransmissionJoint pushRodTransmissionJoint = PushRodTransmissionJoint.ANKLE;
 
       YoVariableRegistry registry = new YoVariableRegistry("test");
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
 
-      InterpolatedPushRodTransmission interpolatedPushRodTransmission = new InterpolatedPushRodTransmission(ankleNamespace, reflect, compliance);
-      InefficientPushRodTransmission inefficientPushrodTransmission = new InefficientPushRodTransmission(pushRodTransmissionJoint, reflect, registry, dynamicGraphicObjectsListRegistry);
+      InterpolatedPushRodTransmission interpolatedPushRodTransmission = new InterpolatedPushRodTransmission(ankleNamespace, reflectBottom, compliance);
+      InefficientPushRodTransmission inefficientPushrodTransmission = new InefficientPushRodTransmission(pushRodTransmissionJoint, reflectTop, reflectBottom, topJointFirst, registry, dynamicGraphicObjectsListRegistry);
       inefficientPushrodTransmission.setUseFuteks(false);
 
       double epsilon = 1e-7;
@@ -97,14 +106,17 @@ public class ComparePushRodTransmissionsTest
 
       String ankleNamespace = "v1_waist";
       double compliance = 0.0;
-      double reflect = 1.0;
+      double reflectTop = 1.0;
+      double reflectBottom = 1.0;
+      boolean topJointFirst = true;
+
       PushRodTransmissionJoint pushRodTransmissionJoint = PushRodTransmissionJoint.WAIST;
 
       YoVariableRegistry registry = new YoVariableRegistry("test");
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
 
-      InefficientPushRodTransmission inefficientPushrodTransmission = new InefficientPushRodTransmission(pushRodTransmissionJoint, reflect, registry, dynamicGraphicObjectsListRegistry);
-      InterpolatedPushRodTransmission interpolatedPushRodTransmission = new InterpolatedPushRodTransmission(ankleNamespace, reflect, compliance);
+      InefficientPushRodTransmission inefficientPushrodTransmission = new InefficientPushRodTransmission(pushRodTransmissionJoint, reflectTop, reflectBottom, topJointFirst, registry, dynamicGraphicObjectsListRegistry);
+      InterpolatedPushRodTransmission interpolatedPushRodTransmission = new InterpolatedPushRodTransmission(ankleNamespace, reflectBottom, compliance);
       inefficientPushrodTransmission.setUseFuteks(false);
 
       double epsilon = 1e-7;
