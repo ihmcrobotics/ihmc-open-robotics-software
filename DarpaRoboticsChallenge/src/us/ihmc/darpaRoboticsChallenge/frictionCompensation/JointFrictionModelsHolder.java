@@ -102,10 +102,24 @@ public abstract class JointFrictionModelsHolder
 
    public void setActiveFrictionModel(FrictionModel requestedFrictionModel)
    {
-      if (activeFrictionModel.getEnumValue() != requestedFrictionModel)
+      if (frictionModels.containsKey(requestedFrictionModel) && requestedFrictionModel != null)
       {
-         activeFrictionModel.set(requestedFrictionModel);
-         checkIfExistFrictionModelForThisJoint(requestedFrictionModel);
+         if (activeFrictionModel.getEnumValue() != requestedFrictionModel)
+         {
+            activeFrictionModel.set(requestedFrictionModel);
+            checkIfExistFrictionModelForThisJoint(requestedFrictionModel);
+         }
+      }
+      else
+      {
+         if (requestedFrictionModel != null)
+         {
+            System.out.println("No model exist for " + requestedFrictionModel.name());
+         }
+         else
+         {
+            System.out.println("Requested model is null");
+         }
       }
    }
    
