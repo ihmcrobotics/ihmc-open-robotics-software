@@ -35,6 +35,7 @@ import javax.swing.text.PlainDocument;
 
 import us.ihmc.atlas.AtlasOperatorUserInterface;
 import us.ihmc.atlas.AtlasRobotModelFactory;
+import us.ihmc.behaviors.BehaviorNetworkManager;
 import us.ihmc.communication.networking.NetworkConfigParameters;
 import us.ihmc.utilities.fixedPointRepresentation.UnsignedByteTools;
 import us.ihmc.utilities.gui.IHMCSwingTools;
@@ -84,8 +85,9 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
    private final JTextArea netProcConsole, controllerConsole;
    private JScrollPane robotModelScrollPane;
 
-   private final JavaProcessSpawner uiSpawner = new JavaProcessSpawner(true);
+   private final JavaProcessSpawner localSpawner = new JavaProcessSpawner(true);
    private JButton spawnUIButton;
+   private JButton spawnBehaviorModuleButton;
    private JPanel handIPPanel;
    private JTextField leftHandField;
    private JTextField rightHandField;
@@ -418,7 +420,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
                String[] javaArgs = new String[] {"-Xms4096m", "-Xmx4096m"};
                String[] programArgs = new String[] {"-m", selectRobotModelRadioButtonGroup.getSelection().getActionCommand(), "--realRobot"};
 
-               uiSpawner.spawn(AtlasOperatorUserInterface.class, javaArgs, programArgs, new ExitListener()
+               localSpawner.spawn(AtlasOperatorUserInterface.class, javaArgs, programArgs, new ExitListener()
                {
                   @Override
                   public void exited(int statusValue)
@@ -431,6 +433,25 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
          }
       });
       panel.add(spawnUIButton);
+
+      spawnBehaviorModuleButton = new JButton("[DEBUG]: Spawn Local Behavior Module");
+      spawnBehaviorModuleButton.addActionListener(new ActionListener()
+      {
+         @Override
+         public void actionPerformed(ActionEvent e)
+         {
+            localSpawner.spawn(BehaviorNetworkManager.class, new String[]{}, new String[]{}, new ExitListener()
+            {
+               @Override
+               public void exited(int statusValue)
+               {
+                  spawnBehaviorModuleButton.setEnabled(true);
+               }
+            });
+            spawnBehaviorModuleButton.setEnabled(false);
+         }
+      });
+      panel.add(spawnBehaviorModuleButton);
 
       c.gridy++;
       mainPanel.add(panel, c);
