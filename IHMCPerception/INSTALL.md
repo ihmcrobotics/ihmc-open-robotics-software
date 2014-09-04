@@ -29,6 +29,8 @@
 ## 2. Setup Catkin Workspace
 
 > cd ~/<WORKSPACE NAME>/IHMCPerception/catkin_ws/
+> mkdir devel
+> mkdir devel/include
 > catkin_make
 
 Add this to your ~/.bashrc file:
