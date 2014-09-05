@@ -28,7 +28,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.ConstantTransferTimeCalc
 import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.TransferTimeCalculationProvider;
-import us.ihmc.communication.HighLevelState;
+import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.sensors.ForceSensorData;

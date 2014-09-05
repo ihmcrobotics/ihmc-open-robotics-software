@@ -6,7 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
-import us.ihmc.communication.HighLevelState;
+import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;

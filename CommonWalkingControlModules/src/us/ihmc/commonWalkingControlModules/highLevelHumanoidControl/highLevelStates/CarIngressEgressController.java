@@ -24,7 +24,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisLoadBear
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootPoseProvider;
-import us.ihmc.communication.HighLevelState;
+import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
