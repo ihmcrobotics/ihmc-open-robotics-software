@@ -3,6 +3,9 @@ package us.ihmc.commonWalkingControlModules.configurations;
 import javax.media.j3d.Transform3D;
 
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+
+import com.yobotics.simulationconstructionset.util.controller.YoOrientationPIDGains;
 
 public interface WalkingControllerParameters extends HeadOrientationControllerParameters
 {
@@ -111,6 +114,8 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract double getMaxAccelerationUpperBody();
 
    public abstract double getMaxJerkUpperBody();
+
+   public abstract YoOrientationPIDGains createChestControlGains(YoVariableRegistry registry);
 
    public abstract double getSwingKpXY();
 

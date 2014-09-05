@@ -9,10 +9,14 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
+import com.yobotics.simulationconstructionset.util.controller.YoOrientationPIDGains;
+import com.yobotics.simulationconstructionset.util.controller.YoSymmetricSE3PIDGains;
+
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 
 public class AtlasWalkingControllerParameters implements WalkingControllerParameters
@@ -432,7 +436,30 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       if (!runningOnRealRobot) return 540.0; // 270.0; //1000.0;
       return 60.0;
    }
-   
+
+   @Override
+   public YoOrientationPIDGains createChestControlGains(YoVariableRegistry registry)
+   {
+      YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("ChestOrientation", registry);
+
+      double kp = 80.0;
+      double zeta = runningOnRealRobot ? 0.25 : 0.8;
+      double ki = 0.0;
+      double maxIntegralError = 0.0;
+      double maxAccel = runningOnRealRobot ? 6.0 : 36.0;
+      double maxJerk = runningOnRealRobot ? 60.0 : 540.0;
+
+      gains.setProportionalGain(kp);
+      gains.setDampingRatio(zeta);
+      gains.setIntegralGain(ki);
+      gains.setMaximumIntegralError(maxIntegralError);
+      gains.setMaximumAcceleration(maxAccel);
+      gains.setMaximumJerk(maxJerk);
+      gains.createDerivativeGainUpdater(true);
+
+      return gains;
+   }
+
    @Override
    public double getSwingKpXY()
    {
