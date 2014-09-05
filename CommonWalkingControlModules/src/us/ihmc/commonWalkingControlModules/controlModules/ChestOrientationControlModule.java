@@ -19,20 +19,21 @@ public class ChestOrientationControlModule extends DegenerateOrientationControlM
    private final YoFrameVector feedForwardAngularAcceleration;
    private final RigidBody chest;
 
-   public ChestOrientationControlModule(RigidBody pelvis, RigidBody chest, TwistCalculator twistCalculator, double controlDT, YoVariableRegistry parentRegistry)
+   public ChestOrientationControlModule(ReferenceFrame chestOrientationExpressedInFrame, RigidBody chest, TwistCalculator twistCalculator, double controlDT,
+         YoVariableRegistry parentRegistry)
    {
-      this(pelvis, chest, twistCalculator, controlDT, null, parentRegistry);
+      this(chestOrientationExpressedInFrame, chest, twistCalculator, controlDT, null, parentRegistry);
    }
 
-   public ChestOrientationControlModule(RigidBody pelvis, RigidBody chest, TwistCalculator twistCalculator, double controlDT, YoOrientationPIDGains gains, YoVariableRegistry parentRegistry)
+   public ChestOrientationControlModule(ReferenceFrame chestOrientationExpressedInFrame, RigidBody chest, TwistCalculator twistCalculator, double controlDT,
+         YoOrientationPIDGains gains, YoVariableRegistry parentRegistry)
    {
-      super("chest", new RigidBody[] {}, chest, new GeometricJacobian[]{}, twistCalculator, controlDT, gains, parentRegistry);
+      super("chest", new RigidBody[] {}, chest, new GeometricJacobian[] {}, twistCalculator, controlDT, gains, parentRegistry);
 
       this.chest = chest;
-      ReferenceFrame baseFrame = pelvis.getBodyFixedFrame();
-      this.desiredOrientation = new YoFrameQuaternion("desiredChestOrientation", baseFrame, registry);
-      this.desiredAngularVelocity = new YoFrameVector("desiredChestAngularVelocity", baseFrame, registry);
-      this.feedForwardAngularAcceleration = new YoFrameVector("desiredChestAngularAcceleration", baseFrame, registry);
+      this.desiredOrientation = new YoFrameQuaternion("desiredChestOrientation", chestOrientationExpressedInFrame, registry);
+      this.desiredAngularVelocity = new YoFrameVector("desiredChestAngularVelocity", chestOrientationExpressedInFrame, registry);
+      this.feedForwardAngularAcceleration = new YoFrameVector("desiredChestAngularAcceleration", chestOrientationExpressedInFrame, registry);
    }
 
    public RigidBody getChest()
