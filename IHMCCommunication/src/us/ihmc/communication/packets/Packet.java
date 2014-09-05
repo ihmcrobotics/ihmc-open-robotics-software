@@ -1,4 +1,4 @@
-package us.ihmc.communication;
+package us.ihmc.communication.packets;
 
 import us.ihmc.utilities.net.ComparableDataObject;
 

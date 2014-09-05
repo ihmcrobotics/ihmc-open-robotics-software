@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
-import us.ihmc.communication.HighLevelState;
+import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.util.statemachines.State;
