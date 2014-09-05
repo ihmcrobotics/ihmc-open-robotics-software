@@ -32,10 +32,10 @@ import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalcula
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantTransferTimeCalculator;
 import us.ihmc.communication.packets.BumStatePacket;
 import us.ihmc.communication.packets.HighLevelStatePacket;
-import us.ihmc.communication.packets.LookAtPacket;
 import us.ihmc.communication.packets.manipulation.HandLoadBearingPacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandstepPacket;
+import us.ihmc.communication.packets.sensing.LookAtPacket;
 import us.ihmc.communication.packets.walking.BlindWalkingPacket;
 import us.ihmc.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.communication.packets.walking.ComHeightPacket;
