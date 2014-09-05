@@ -622,13 +622,13 @@ public class SimulationConstructionSetUsingDirectCallsTest
       Graphics3DNode graphics3DNodeFromSCS3 = scs.addStaticLink(staticLink);
       assertNotNull(graphics3DNodeFromSCS3);
 
-      GraphicsDynamicGraphicsObject graphicsDynamicGraphicsObjectFromSCS = scs.addDynamicGraphicObject(dynamicGraphicObject);
+      GraphicsDynamicGraphicsObject graphicsDynamicGraphicsObjectFromSCS = scs.addYoGraphic(dynamicGraphicObject);
       assertNotNull(graphicsDynamicGraphicsObjectFromSCS);
 
-      GraphicsDynamicGraphicsObject graphicsDynamicGraphicsObjectFromSCS2 = scs.addDynamicGraphicObject(dynamicGraphicObject, true);
+      GraphicsDynamicGraphicsObject graphicsDynamicGraphicsObjectFromSCS2 = scs.addYoGraphic(dynamicGraphicObject, true);
       assertNotNull(graphicsDynamicGraphicsObjectFromSCS2);
 
-      GraphicsDynamicGraphicsObject graphicsDynamicGraphicsObjectFromSCS3 = scs.addDynamicGraphicObject(dynamicGraphicObject, false);
+      GraphicsDynamicGraphicsObject graphicsDynamicGraphicsObjectFromSCS3 = scs.addYoGraphic(dynamicGraphicObject, false);
       assertNotNull(graphicsDynamicGraphicsObjectFromSCS3);
 
       scs.setGroundVisible(false);

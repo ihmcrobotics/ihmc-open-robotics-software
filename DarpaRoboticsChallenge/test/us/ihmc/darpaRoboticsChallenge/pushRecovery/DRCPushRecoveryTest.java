@@ -134,7 +134,7 @@ public abstract class DRCPushRecoveryTest
       pushRobotController = new DRCPushRobotController(drcSimulationTestHelper.getRobot(), fullRobotModel);
       
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-      scs.addDynamicGraphicObject(pushRobotController.getForceVisualizer());
+      scs.addYoGraphic(pushRobotController.getForceVisualizer());
       
       // get rid of this once push recovery is enabled by default
       BooleanYoVariable enable = (BooleanYoVariable) scs.getVariable("PushRecoveryControlModule", "enablePushRecovery");

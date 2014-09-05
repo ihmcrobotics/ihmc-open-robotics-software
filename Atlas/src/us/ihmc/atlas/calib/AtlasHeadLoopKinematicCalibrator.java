@@ -110,17 +110,17 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       YoGraphicPosition dgpLeftEE = new YoGraphicPosition("dgpLeftEE", ypLeftEE, scale, new YoAppearanceRGBColor(Color.BLUE, transparency));
       YoGraphicPosition dgpRightEE = new YoGraphicPosition("dgpRightEE", ypRightEE, scale, new YoAppearanceRGBColor(Color.RED, transparency));
 
-      scs.addDynamicGraphicObject(dgpLeftEE);
-      scs.addDynamicGraphicObject(dgpRightEE);
+      scs.addYoGraphic(dgpLeftEE);
+      scs.addYoGraphic(dgpRightEE);
 
       YoGraphicCoordinateSystem dgPoseLeftEE = new YoGraphicCoordinateSystem("dgposeLeftEE", yposeLeftEE, 5 * scale);
       YoGraphicCoordinateSystem dgPoseRightEE = new YoGraphicCoordinateSystem("dgposeRightEE", yposeRightEE, 5 * scale);
       YoGraphicCoordinateSystem dgPoseBoard = new YoGraphicCoordinateSystem("dgposeBoard", yposeBoard, 5 * scale);
       YoGraphicCoordinateSystem dgPoseLeftCamera = new YoGraphicCoordinateSystem("dgposeLeftCamera", yposeLeftCamera, 5 * scale);
-      scs.addDynamicGraphicObject(dgPoseLeftEE);
-      scs.addDynamicGraphicObject(dgPoseRightEE);
-      scs.addDynamicGraphicObject(dgPoseBoard);
-      scs.addDynamicGraphicObject(dgPoseLeftCamera);
+      scs.addYoGraphic(dgPoseLeftEE);
+      scs.addYoGraphic(dgPoseRightEE);
+      scs.addYoGraphic(dgPoseBoard);
+      scs.addYoGraphic(dgPoseLeftCamera);
 
       //Homemade Image Display Panel - updated by the IndexChangedListener 
       iiDisplay = new ImageIcon();

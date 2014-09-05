@@ -311,7 +311,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       if (VISUALIZE_FORCE)
       {
-         scs.addDynamicGraphicObject(pushRobotController.getForceVisualizer());
+         scs.addYoGraphic(pushRobotController.getForceVisualizer());
       }
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
