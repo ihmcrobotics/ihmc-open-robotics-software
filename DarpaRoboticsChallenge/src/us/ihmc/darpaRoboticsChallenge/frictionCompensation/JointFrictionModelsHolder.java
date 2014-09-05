@@ -34,7 +34,7 @@ public abstract class JointFrictionModelsHolder
       activeFrictionModel = new EnumYoVariable<FrictionModel>(name + "_activeFrictionModel", registry, FrictionModel.class);
       frictionForce = new DoubleYoVariable(name + "_frictionForce", registry);
       this.stictionTransitionVelocity = new DoubleYoVariable(name + "_stictionTransitionVelocity", registry);
-      this.stictionTransitionVelocity.set(stictionTransitionVelocity);
+      this.stictionTransitionVelocity.set(Math.abs(stictionTransitionVelocity));
       this.forceThreshold = new DoubleYoVariable(name + "_forceThreshold", registry);
       this.forceThreshold.set(forceThreshold);
       filteredVelocity = new AlphaFilteredYoVariable(name + "_alphaFilteredVelocity", registry, alphaForFilteredVelocity);
@@ -71,7 +71,7 @@ public abstract class JointFrictionModelsHolder
          return null;
       }
 
-      if (requestedJointVelocity == 0.0 && Math.abs(requestedForce) < forceThreshold.getDoubleValue() || Math.abs(filteredVelocity.getDoubleValue()) > maxJointVelocityToCompensate.getDoubleValue())
+      if ((requestedJointVelocity == 0.0 && Math.abs(requestedForce) < forceThreshold.getDoubleValue()) || Math.abs(filteredVelocity.getDoubleValue()) > maxJointVelocityToCompensate.getDoubleValue())
       {
          frictionCompensationState.set(FrictionState.NOT_COMPENSATING);
          frictionForce.set(0.0);
