@@ -19,6 +19,7 @@ import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameQuaternion;
 
+import com.yobotics.simulationconstructionset.util.controller.YoOrientationPIDGains;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
@@ -60,8 +61,15 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
          HeadOrientationControllerParameters headOrientationControllerParameters, YoVariableRegistry parentRegistry,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
+      this(momentumBasedController, headOrientationExpressedInFrame, headOrientationControllerParameters, null, parentRegistry, dynamicGraphicObjectsListRegistry);
+   }
+
+   public HeadOrientationControlModule(MomentumBasedController momentumBasedController, ReferenceFrame headOrientationExpressedInFrame,
+         HeadOrientationControllerParameters headOrientationControllerParameters, YoOrientationPIDGains gains, YoVariableRegistry parentRegistry,
+         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   {
       super("head", new RigidBody[] {}, momentumBasedController.getFullRobotModel().getHead(), new GeometricJacobian[] {}, momentumBasedController
-            .getTwistCalculator(), momentumBasedController.getControlDT(), parentRegistry);
+            .getTwistCalculator(), momentumBasedController.getControlDT(), gains, parentRegistry);
 
       FullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
       this.head = fullRobotModel.getHead();

@@ -119,13 +119,12 @@ public class VariousWalkingManagers
       else
          headOrientationExpressedInFrame = referenceFrames.getPelvisZUpFrame(); // ReferenceFrame.getWorldFrame(); //
 
+      YoOrientationPIDGains gains = headOrientationControllerParameters.createHeadOrientationControlGains(registry);
       HeadOrientationControlModule headOrientationControlModule = new HeadOrientationControlModule(momentumBasedController, headOrientationExpressedInFrame,
-            headOrientationControllerParameters, registry, dynamicGraphicObjectsListRegistry);
+            headOrientationControllerParameters, gains, registry, dynamicGraphicObjectsListRegistry);
 
       // Setting initial head pitch
-      // This magic number (0.67) is a good default head pitch for getting good LIDAR point coverage of ground by feet
-      // it would be in DRC config parameters, but the would require updating several nested constructors with an additional parameter
-      FrameOrientation orientation = new FrameOrientation(headOrientationExpressedInFrame, 0.0, 0.67, 0.0);
+      FrameOrientation orientation = new FrameOrientation(headOrientationExpressedInFrame, headOrientationControllerParameters.getInitialHeadYawPitchRoll());
       headOrientationControlModule.setOrientationToTrack(new FrameOrientation(orientation));
 
       return headOrientationControlModule;

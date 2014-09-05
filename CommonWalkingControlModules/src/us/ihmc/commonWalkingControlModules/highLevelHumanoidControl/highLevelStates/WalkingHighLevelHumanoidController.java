@@ -225,9 +225,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final VariousWalkingManagers variousWalkingManagers;
 
-   private final DoubleYoVariable walkingHeadOrientationKp = new DoubleYoVariable("walkingHeadOrientationKp", registry);
-   private final DoubleYoVariable walkingHeadOrientationZeta = new DoubleYoVariable("walkingHeadOrientationZeta", registry);
-
    private final YoFramePoint2dInPolygonCoordinate doubleSupportDesiredICP;
 
    private final BooleanYoVariable doPrepareManipulationForLocomotion = new BooleanYoVariable("doPrepareManipulationForLocomotion", registry);
@@ -485,11 +482,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       if (headOrientationManager != null)
       {
          headOrientationManager.setUp(baseForHeadOrientationControl, jacobianIdForHeadOrientationControl);
-         headOrientationManager.setMaxAccelerationAndJerk(walkingControllerParameters.getMaxAccelerationUpperBody(), walkingControllerParameters.getMaxJerkUpperBody());
-         walkingHeadOrientationKp.set(walkingControllerParameters.getKpHeadOrientation());
-         walkingHeadOrientationZeta.set(walkingControllerParameters.getZetaHeadOrientation());
-         VariableChangedListener headGainsChangedListener = createHeadGainsChangedListener();
-         headGainsChangedListener.variableChanged(null);
       }
 
       ReferenceFrame ankleZUpFrame = referenceFrames.getAnkleZUpFrame(upcomingSupportLeg.getEnumValue());
@@ -505,25 +497,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       stateMachine.setCurrentState(WalkingState.DOUBLE_SUPPORT);
 
-   }
-
-   private VariableChangedListener createHeadGainsChangedListener()
-   {
-      VariableChangedListener ret = new VariableChangedListener()
-      {
-         public void variableChanged(YoVariable<?> v)
-         {
-            double headKp = walkingHeadOrientationKp.getDoubleValue();
-            double headZeta = walkingHeadOrientationZeta.getDoubleValue();
-            double headKd = GainCalculator.computeDerivativeGain(headKp, headZeta);
-            headOrientationManager.setControlGains(headKp, headKd);
-         }
-      };
-
-      walkingHeadOrientationKp.addVariableChangedListener(ret);
-      walkingHeadOrientationZeta.addVariableChangedListener(ret);
-
-      return ret;
    }
 
    private void initializeContacts()

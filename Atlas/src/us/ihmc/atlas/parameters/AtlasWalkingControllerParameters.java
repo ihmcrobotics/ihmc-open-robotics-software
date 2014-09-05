@@ -384,23 +384,38 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    }
 
    @Override
-   public double getKpHeadOrientation()
+   public YoOrientationPIDGains createHeadOrientationControlGains(YoVariableRegistry registry)
    {
-      if (!runningOnRealRobot) return 40.0;
-      return 40.0; 
-   }
+      YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("HeadOrientation", registry);
 
-   @Override
-   public double getZetaHeadOrientation()
-   {
-      if (!runningOnRealRobot) return 0.8; //1.0;
-      return 0.4;
+      double kp = 40.0;
+      double zeta = runningOnRealRobot ? 0.4 : 0.8;
+      double ki = 0.0;
+      double maxIntegralError = 0.0;
+      double maxAccel = runningOnRealRobot ? 6.0 : 36.0;
+      double maxJerk = runningOnRealRobot ? 60.0 : 540.0;
+
+      gains.setProportionalGain(kp);
+      gains.setDampingRatio(zeta);
+      gains.setIntegralGain(ki);
+      gains.setMaximumIntegralError(maxIntegralError);
+      gains.setMaximumAcceleration(maxAccel);
+      gains.setMaximumJerk(maxJerk);
+      gains.createDerivativeGainUpdater(true);
+
+      return gains;
    }
 
    @Override
    public double getTrajectoryTimeHeadOrientation()
    {
       return 3.0;
+   }
+
+   @Override
+   public double[] getInitialHeadYawPitchRoll()
+   {
+      return new double[]{0.0, 0.67, 0.0};
    }
 
    @Override
