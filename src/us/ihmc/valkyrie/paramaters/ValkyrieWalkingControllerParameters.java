@@ -2,11 +2,15 @@ package us.ihmc.valkyrie.paramaters;
 
 import javax.media.j3d.Transform3D;
 
+import com.yobotics.simulationconstructionset.util.controller.YoOrientationPIDGains;
+import com.yobotics.simulationconstructionset.util.controller.YoSymmetricSE3PIDGains;
+
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class ValkyrieWalkingControllerParameters implements WalkingControllerParameters
 {
@@ -99,13 +103,10 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public String[] getDefaultHeadOrientationControlJointNames()
    {
-     
-      String[] defaultHeadOrientationControlJointNames = new String[] {
-    		  jointMap.getSpineJointName(SpineJointName.SPINE_YAW),
-    		  jointMap.getSpineJointName(SpineJointName.SPINE_PITCH),
-    		  jointMap.getSpineJointName(SpineJointName.SPINE_ROLL),
+      String[] defaultHeadOrientationControlJointNames = new String[]
+      {
 //            jointMap.getNeckJointName(NeckJointName.LOWER_NECK_PITCH)
-            };
+      };
 
       return defaultHeadOrientationControlJointNames;
    }
@@ -113,7 +114,14 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public String[] getDefaultChestOrientationControlJointNames()
    {
-      return new String[] {};
+      String[] defaultChestOrientationControlJointNames = new String[]
+      {
+            jointMap.getSpineJointName(SpineJointName.SPINE_YAW),
+            jointMap.getSpineJointName(SpineJointName.SPINE_PITCH),
+            jointMap.getSpineJointName(SpineJointName.SPINE_ROLL)
+      };
+      
+      return defaultChestOrientationControlJointNames;
    }
 
    @Override
@@ -438,6 +446,29 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    {
       if (!runningOnRealRobot) return 270.0;
       return 270.0; //360;//180.0; //60.0;
+   }
+
+   @Override
+   public YoOrientationPIDGains createChestControlGains(YoVariableRegistry registry)
+   {
+      YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("ChestOrientation", registry);
+
+      double kp = runningOnRealRobot ? 80.0 : 100.0;
+      double zeta = runningOnRealRobot ? 0.6 : 0.8;
+      double ki = 0.0;
+      double maxIntegralError = 0.0;
+      double maxAccel = runningOnRealRobot ? 18.0 : 18.0;
+      double maxJerk = runningOnRealRobot ? 270.0 : 270.0;
+
+      gains.setProportionalGain(kp);
+      gains.setDampingRatio(zeta);
+      gains.setIntegralGain(ki);
+      gains.setMaximumIntegralError(maxIntegralError);
+      gains.setMaximumAcceleration(maxAccel);
+      gains.setMaximumJerk(maxJerk);
+      gains.createDerivativeGainUpdater(true);
+
+      return gains;
    }
 
    @Override
