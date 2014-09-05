@@ -32,7 +32,9 @@ public class DesiredChestOrientationProvider implements ObjectConsumer<ChestOrie
 
    public void consumeObject(ChestOrientationPacket object)
    {
-      desiredChestOrientation.set(new FrameOrientation(ReferenceFrame.getWorldFrame(), object.getQuaternion()));
+      FrameOrientation frameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), object.getQuaternion());
+      frameOrientation.changeFrame(chestOrientationFrame);
+      desiredChestOrientation.set(frameOrientation);
    }
 
    @Override
