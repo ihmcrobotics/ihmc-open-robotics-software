@@ -5,8 +5,6 @@ find_package(catkin REQUIRED
 ethzasl_icp_mapper roscpp rospy rosbag std_msgs geometry_msgs nav_msgs
 tf tf2 tf_conversions message_filters map_msgs libpointmatcher_ros libpointmatcher)
 
-generate_messages(DEPENDENCIES sensor_msgs nav_msgs std_msgs geometry_msgs actionlib_msgs)
-
 catkin_package (
 	CATKIN_DEPENDS ethzasl_icp_mapper roscpp rospy rosbag std_msgs geometry_msgs nav_msgs
 tf tf2 tf_conversions message_filters map_msgs libpointmatcher_ros libpointmatcher
