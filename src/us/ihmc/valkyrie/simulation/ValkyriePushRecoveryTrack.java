@@ -71,7 +71,7 @@ public class ValkyriePushRecoveryTrack
       
       if(VISUALIZE_FORCE)
       {
-         scs.addDynamicGraphicObject(pushRobotController.getForceVisualizer());
+         scs.addYoGraphic(pushRobotController.getForceVisualizer());
       }
       
       pushRobotController.setPushDuration(defaultForceDurationInSeconds);
