@@ -10,7 +10,7 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviderFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredChestOrientationProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.ChestOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootStateProvider;
@@ -70,7 +70,7 @@ public class VariousWalkingProviderFromScriptFactory implements VariousWalkingPr
       DesiredHeadOrientationProvider headOrientationProvider = new UserDesiredHeadOrientationProvider(referenceFrames.getPelvisZUpFrame(), registry);
       DesiredComHeightProvider desiredComHeightProvider = footstepProvider.getDesiredComHeightProvider();
       DesiredPelvisPoseProvider pelvisPoseProvider = null;
-      DesiredChestOrientationProvider chestOrientationProvider = null;
+      ChestOrientationProvider chestOrientationProvider = null;
       DesiredFootPoseProvider footPoseProvider = footstepProvider.getDesiredFootPoseProvider();
   
       HandLoadBearingProvider handLoadBearingProvider = null;

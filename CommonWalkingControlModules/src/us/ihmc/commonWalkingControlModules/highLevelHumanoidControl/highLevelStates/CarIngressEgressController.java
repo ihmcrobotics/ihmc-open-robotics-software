@@ -18,7 +18,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Va
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlModuleBridge.MomentumControlModuleType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredChestOrientationProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.ChestOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootStateProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisPoseProvider;
@@ -67,7 +67,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    private final OrientationInterpolationTrajectoryGenerator pelvisOrientationTrajectoryGenerator;
    private double pelvisTrajectoryStartTime = 0.0;
 
-   private final DesiredChestOrientationProvider chestOrientationProvider;
+   private final ChestOrientationProvider chestOrientationProvider;
    private final ReferenceFrame chestPositionControlFrame;
    private final YoQuaternionProvider finalDesiredChestOrientation, initialDesiredChestOrientation;
    private final OrientationInterpolationTrajectoryGenerator chestOrientationTrajectoryGenerator;
@@ -446,7 +446,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    {
       if (chestOrientationProvider != null)
       {
-         if (chestOrientationProvider.checkForNewPose())
+         if (chestOrientationProvider.isNewChestOrientationInformationAvailable())
          {
             chestOrientationTrajectoryGenerator.compute(yoTime.getDoubleValue() - chestTrajectoryStartTime);
             FrameOrientation previousDesiredChestOrientation = new FrameOrientation(chestPositionControlFrame);

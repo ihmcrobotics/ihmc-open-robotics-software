@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredChestOrientationProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.ChestOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootStateProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHeadOrientationProvider;
@@ -32,7 +32,7 @@ public class VariousWalkingProviders
    private final DesiredPelvisPoseProvider desiredPelvisPoseProvider;
    private final DesiredComHeightProvider desiredComHeightProvider;
    private final HandPoseProvider desiredHandPoseProvider;
-   private final DesiredChestOrientationProvider desiredChestOrientationProvider;
+   private final ChestOrientationProvider desiredChestOrientationProvider;
    private final FootPoseProvider footPoseProvider;
   
    // TODO: Rename DesiredFootStateProvider to DesiredFootLoadBearingProvider, do the same for the packet, etc.
@@ -48,7 +48,7 @@ public class VariousWalkingProviders
          HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters,
          DesiredHeadOrientationProvider desiredHeadOrientationProvider, DesiredComHeightProvider desiredComHeightProvider,
          DesiredPelvisPoseProvider desiredPelvisPoseProvider, HandPoseProvider desiredHandPoseProvider,
-         HandLoadBearingProvider desiredHandLoadBearingProvider, DesiredChestOrientationProvider desiredChestOrientationProvider,
+         HandLoadBearingProvider desiredHandLoadBearingProvider, ChestOrientationProvider desiredChestOrientationProvider,
          FootPoseProvider footPoseProvider, DesiredFootStateProvider footStateProvider, DesiredHighLevelStateProvider desiredHighLevelStateProvider,
          DesiredThighLoadBearingProvider thighLoadBearingProvider, DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider,
          ControlStatusProducer controlStatusProducer)
@@ -147,7 +147,7 @@ public class VariousWalkingProviders
       return mapFromFootstepsToTrajectoryParameters;
    }
 
-   public DesiredChestOrientationProvider getDesiredChestOrientationProvider()
+   public ChestOrientationProvider getDesiredChestOrientationProvider()
    {
       return desiredChestOrientationProvider;
    }
