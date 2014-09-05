@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.packetConsumers;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import us.ihmc.communication.packets.LookAtPacket;
+import us.ihmc.communication.packets.sensing.LookAtPacket;
 import us.ihmc.communication.packets.walking.HeadOrientationPacket;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;

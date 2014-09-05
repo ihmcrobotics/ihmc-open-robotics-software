@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.communication.packets.VehiclePosePacket;
+import us.ihmc.communication.packets.driving.VehiclePosePacket;
 import us.ihmc.utilities.net.ObjectConsumer;
 
 public class VehiclePoseProvider implements ObjectConsumer<VehiclePosePacket>
