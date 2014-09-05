@@ -89,13 +89,7 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 
    public abstract double getDefaultDesiredPelvisPitch();
 
-   public abstract double getKpPelvisOrientation();
-
-   public abstract double getZetaPelvisOrientation();
-
-   public abstract double getMaxAccelerationPelvisOrientation();
-
-   public abstract double getMaxJerkPelvisOrientation();
+   public abstract YoOrientationPIDGains createPelvisOrientationControlGains(YoVariableRegistry registry);
 
    public abstract double getKpCoMHeight();
 
