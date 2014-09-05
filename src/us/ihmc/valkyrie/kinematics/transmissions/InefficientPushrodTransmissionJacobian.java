@@ -12,10 +12,10 @@ import us.ihmc.utilities.math.geometry.TransformReferenceFrame;
 import us.ihmc.utilities.math.geometry.TranslationReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class InefficientPushrodTransmissionJacobian
@@ -134,7 +134,7 @@ public class InefficientPushrodTransmissionJacobian
 
       if (visualize)
       {
-         DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList(getClass().getSimpleName());
+         YoGraphicsList dynamicGraphicObjectsList = new YoGraphicsList(getClass().getSimpleName());
 
          double ballRadius = 0.005;
 
