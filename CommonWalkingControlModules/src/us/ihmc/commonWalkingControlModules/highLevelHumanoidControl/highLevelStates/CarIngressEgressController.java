@@ -262,7 +262,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       baseForHeadOrientationControl = fullRobotModel.getPelvis();
       HeadOrientationManager headOrientationManager = variousWalkingManagers.getHeadOrientationManager();
       String[] headOrientationControlJointNames = walkingControllerParameters.getDefaultHeadOrientationControlJointNames();
-      jacobianIdForHeadOrientationControl = headOrientationManager.createJacobian(fullRobotModel, headOrientationControlJointNames);
+      jacobianIdForHeadOrientationControl = headOrientationManager.createJacobian(headOrientationControlJointNames);
    }
 
    public void initialize()
