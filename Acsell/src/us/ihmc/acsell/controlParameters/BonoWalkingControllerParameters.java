@@ -313,27 +313,26 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    }
 
    @Override
-   public double getKpPelvisOrientation()
+   public YoOrientationPIDGains createPelvisOrientationControlGains(YoVariableRegistry registry)
    {
-      return 100.0;
-   }
+      YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("PelvisOrientation", registry);
 
-   @Override
-   public double getZetaPelvisOrientation()
-   {
-      return 0.8; //1.0;
-   }
+      double kp = 100.0;
+      double zeta = 0.8;
+      double ki = 0.0;
+      double maxIntegralError = 0.0;
+      double maxAccel = Double.POSITIVE_INFINITY;
+      double maxJerk = Double.POSITIVE_INFINITY;
 
-   @Override
-   public double getMaxAccelerationPelvisOrientation()
-   {
-      return Double.POSITIVE_INFINITY;
-   }
+      gains.setProportionalGain(kp);
+      gains.setDampingRatio(zeta);
+      gains.setIntegralGain(ki);
+      gains.setMaximumIntegralError(maxIntegralError);
+      gains.setMaximumAcceleration(maxAccel);
+      gains.setMaximumJerk(maxJerk);
+      gains.createDerivativeGainUpdater(true);
 
-   @Override
-   public double getMaxJerkPelvisOrientation()
-   {
-      return Double.POSITIVE_INFINITY;
+      return gains;
    }
 
    @Override
