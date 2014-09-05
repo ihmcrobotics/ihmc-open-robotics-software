@@ -73,13 +73,22 @@ public class WalkControllerSliderBoard
       sliderBoardConfigurationManager.setSlider(3, "userDesiredPelvisPitch", registry, -0.4, 0.4);
       sliderBoardConfigurationManager.setSlider(4, "userDesiredPelvisRoll", registry, -0.3, 0.3);
 
-      sliderBoardConfigurationManager.setSlider(5, "userDesiredHeadYaw", registry, -0.8, 0.8);
-
-      sliderBoardConfigurationManager.setKnob(6, "userDesiredHeadPitch", registry, -0.5, 0.5);
-      sliderBoardConfigurationManager.setSlider(6, "userDesiredNeckPitch", registry, -0.8, 0.8);
+//      sliderBoardConfigurationManager.setSlider(5, "userDesiredHeadYaw", registry, -0.8, 0.8);
+//
+//      sliderBoardConfigurationManager.setKnob(6, "userDesiredHeadPitch", registry, -0.5, 0.5);
+//      sliderBoardConfigurationManager.setSlider(6, "userDesiredNeckPitch", registry, -0.8, 0.8);
+//      
+//      sliderBoardConfigurationManager.setSlider(7, "userDesiredHeadRoll", registry, -0.5, 0.5);
+//      sliderBoardConfigurationManager.setKnob(7, "userDesiredNeckRoll", registry, -0.8, 0.8);
       
-      sliderBoardConfigurationManager.setSlider(7, "userDesiredHeadRoll", registry, -0.5, 0.5);
-      sliderBoardConfigurationManager.setKnob(7, "userDesiredNeckRoll", registry, -0.8, 0.8);
+      sliderBoardConfigurationManager.setSlider(5, "userChestYaw", registry, -0.8, 0.8);
+      sliderBoardConfigurationManager.setKnob(5, "userDesiredHeadYaw", registry, -0.8, 0.8);
+
+      sliderBoardConfigurationManager.setSlider(6, "userChestPitch", registry, -0.8, 0.8);
+      sliderBoardConfigurationManager.setKnob(6, "userDesiredHeadPitch", registry, -0.5, 0.5);
+      
+      sliderBoardConfigurationManager.setSlider(7, "userChestRoll", registry, -0.5, 0.5);
+      sliderBoardConfigurationManager.setKnob(7, "userDesiredHeadRoll", registry, -0.8, 0.8);
 
       sliderBoardConfigurationManager.setSlider(8, "offsetHeightAboveGround", registry, 0.0, 0.20);
 
