@@ -263,7 +263,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
       if (VISUALIZE_FORCE)
       {
-         track.getSimulationConstructionSet().addDynamicGraphicObject(pushRobotController.getForceVisualizer());
+         track.getSimulationConstructionSet().addYoGraphic(pushRobotController.getForceVisualizer());
       }
       
       SimulationConstructionSet scs = track.getSimulationConstructionSet();
