@@ -11,7 +11,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationCo
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHeadOrientationProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.HeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
@@ -52,7 +52,7 @@ public class VariousWalkingManagers
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
       double controlDT = momentumBasedController.getControlDT();
 
-      DesiredHeadOrientationProvider desiredHeadOrientationProvider = null;
+      HeadOrientationProvider desiredHeadOrientationProvider = null;
       HeadOrientationControlModule headOrientationControlModule = null;
       HeadOrientationManager headOrientationManager = null;
 
@@ -108,7 +108,7 @@ public class VariousWalkingManagers
    }
 
    private static HeadOrientationControlModule setupHeadOrientationControlModule(MomentumBasedController momentumBasedController,
-         DesiredHeadOrientationProvider desiredHeadOrientationProvider, HeadOrientationControllerParameters headOrientationControllerParameters,
+         HeadOrientationProvider desiredHeadOrientationProvider, HeadOrientationControllerParameters headOrientationControllerParameters,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry registry)
    {
       CommonWalkingReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();

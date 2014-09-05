@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.head;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHeadOrientationProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.HeadOrientationProvider;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -23,7 +23,7 @@ public class HeadOrientationManager
    private final YoVariableRegistry registry;
    private final HeadOrientationControlModule headOrientationControlModule;
    private final MomentumBasedController momentumBasedController;
-   private final DesiredHeadOrientationProvider desiredHeadOrientationProvider;
+   private final HeadOrientationProvider desiredHeadOrientationProvider;
    private final DoubleYoVariable yoTime;
    private final DoubleYoVariable receivedNewHeadOrientationTime;
    private final DoubleYoVariable headOrientationTrajectoryTime;
@@ -37,7 +37,7 @@ public class HeadOrientationManager
    private int jacobianId = -1;
 
    public HeadOrientationManager(MomentumBasedController momentumBasedController, HeadOrientationControlModule headOrientationControlModule,
-         DesiredHeadOrientationProvider desiredHeadOrientationProvider, double trajectoryTime, YoVariableRegistry parentRegistry)
+         HeadOrientationProvider desiredHeadOrientationProvider, double trajectoryTime, YoVariableRegistry parentRegistry)
    {
       this.momentumBasedController = momentumBasedController;
       this.yoTime = momentumBasedController.getYoTime();

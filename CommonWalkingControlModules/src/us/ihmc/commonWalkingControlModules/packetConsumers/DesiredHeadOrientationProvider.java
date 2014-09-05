@@ -11,18 +11,18 @@ import us.ihmc.utilities.net.ObjectConsumer;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
-public class DesiredHeadOrientationProvider
+public class DesiredHeadOrientationProvider implements HeadOrientationProvider
 {
    private final AtomicReference<LookAtPacket> lookAtPacket = new AtomicReference<LookAtPacket>();
    private final AtomicReference<HeadOrientationPacket> headOrientationPacket = new AtomicReference<HeadOrientationPacket>();
-   
+
    private final HeadOrientationPacketConsumer headOrientationPacketConsumer;
    private final LookAtPacketConsumer lookAtPacketConsumer;
    private final ReferenceFrame headOrientationFrame;
 
    private AtomicDouble desiredJointForExtendedNeckPitchRangeAngle = new AtomicDouble(0.0);
    private AtomicDouble desiredNeckPitchAngle = new AtomicDouble(0.0);
-   
+
    private final ReferenceFrame lookAtFrame = ReferenceFrame.getWorldFrame();
    private final FramePoint pointToTrack = new FramePoint(lookAtFrame);
    private final FrameOrientation headOrientation;
@@ -50,9 +50,8 @@ public class DesiredHeadOrientationProvider
       public void consumeObject(LookAtPacket object)
       {
          lookAtPacket.set(object);
-       }
+      }
    }
-
 
    private class HeadOrientationPacketConsumer implements ObjectConsumer<HeadOrientationPacket>
    {
@@ -62,11 +61,11 @@ public class DesiredHeadOrientationProvider
       }
    }
 
-
+   @Override
    public boolean isNewLookAtInformationAvailable()
    {
       LookAtPacket object = lookAtPacket.getAndSet(null);
-      if(object != null)
+      if (object != null)
       {
          pointToTrack.setIncludingFrame(lookAtFrame, object.getLookAtPoint());
          desiredJointForExtendedNeckPitchRangeAngle.set(0.0);
@@ -78,10 +77,11 @@ public class DesiredHeadOrientationProvider
       }
    }
 
+   @Override
    public boolean isNewHeadOrientationInformationAvailable()
    {
       HeadOrientationPacket packet = headOrientationPacket.getAndSet(null);
-      if(packet != null)
+      if (packet != null)
       {
          headOrientation.set(packet.getQuaternion());
          desiredJointForExtendedNeckPitchRangeAngle.set(packet.getDesiredJointForExtendedNeckPitchRangeAngle());
@@ -92,32 +92,30 @@ public class DesiredHeadOrientationProvider
       {
          return false;
       }
-      
+
    }
 
+   @Override
    public FrameOrientation getDesiredHeadOrientation()
    {
       return headOrientation;
    }
 
+   @Override
    public FramePoint getLookAtPoint()
    {
       return pointToTrack;
    }
 
+   @Override
    public ReferenceFrame getHeadOrientationExpressedInFrame()
    {
       return headOrientationFrame;
    }
 
+   @Override
    public double getDesiredExtendedNeckPitchJointAngle()
    {
       return desiredJointForExtendedNeckPitchRangeAngle.getAndSet(Double.NaN);
    }
-   
-   public double getDesiredNeckPitchAngle()
-   {
-      return desiredNeckPitchAngle.getAndSet(Double.NaN);
-   }
-
 }

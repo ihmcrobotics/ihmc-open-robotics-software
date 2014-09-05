@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.packetConsumers;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import us.ihmc.utilities.math.geometry.FrameOrientation;
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -11,7 +12,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
-public class UserDesiredHeadOrientationProvider extends DesiredHeadOrientationProvider
+public class UserDesiredHeadOrientationProvider implements HeadOrientationProvider
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final DoubleYoVariable userDesiredHeadPitch, userDesiredHeadYaw, userDesiredNeckPitch, userDesiredHeadRoll;
@@ -23,8 +24,6 @@ public class UserDesiredHeadOrientationProvider extends DesiredHeadOrientationPr
 
    public UserDesiredHeadOrientationProvider(ReferenceFrame headOrientationFrame, YoVariableRegistry parentRegistry)
    {
-      super(headOrientationFrame);
-
       this.headOrientationFrame = headOrientationFrame;
 
       userDesiredHeadPitch = new DoubleYoVariable("userDesiredHeadPitch", registry);
@@ -78,5 +77,23 @@ public class UserDesiredHeadOrientationProvider extends DesiredHeadOrientationPr
    public FrameOrientation getDesiredHeadOrientation()
    {
       return desiredHeadOrientation;
+   }
+
+   @Override
+   public boolean isNewLookAtInformationAvailable()
+   {
+      return false;
+   }
+
+   @Override
+   public FramePoint getLookAtPoint()
+   {
+      return null;
+   }
+
+   @Override
+   public ReferenceFrame getHeadOrientationExpressedInFrame()
+   {
+      return headOrientationFrame;
    }
 }

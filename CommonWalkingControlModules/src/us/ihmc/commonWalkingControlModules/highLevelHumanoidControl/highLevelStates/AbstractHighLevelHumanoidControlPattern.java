@@ -16,7 +16,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.OrientationTrajectoryData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAngularAccelerationControlModule;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHeadOrientationProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.HeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.communication.HighLevelState;
 import us.ihmc.robotSide.RobotSide;
@@ -57,7 +57,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
 
    protected final TwistCalculator twistCalculator;
 
-   private final DesiredHeadOrientationProvider desiredHeadOrientationProvider;
+   private final HeadOrientationProvider desiredHeadOrientationProvider;
 
    protected final ChestOrientationManager chestOrientationManager;
    protected final HeadOrientationManager headOrientationManager;
