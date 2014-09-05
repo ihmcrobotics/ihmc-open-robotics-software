@@ -336,21 +336,38 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    }
 
    @Override
-   public double getKpHeadOrientation()
+   public YoOrientationPIDGains createHeadOrientationControlGains(YoVariableRegistry registry)
    {
-      return 40.0;
-   }
+      YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("HeadOrientation", registry);
 
-   @Override
-   public double getZetaHeadOrientation()
-   {
-      return 0.8; //1.0;
+      double kp = 40.0;
+      double zeta = 0.8;
+      double ki = 0.0;
+      double maxIntegralError = 0.0;
+      double maxAccel = Double.POSITIVE_INFINITY;
+      double maxJerk = Double.POSITIVE_INFINITY;
+
+      gains.setProportionalGain(kp);
+      gains.setDampingRatio(zeta);
+      gains.setIntegralGain(ki);
+      gains.setMaximumIntegralError(maxIntegralError);
+      gains.setMaximumAcceleration(maxAccel);
+      gains.setMaximumJerk(maxJerk);
+      gains.createDerivativeGainUpdater(true);
+
+      return gains;
    }
 
    @Override
    public double getTrajectoryTimeHeadOrientation()
    {
       return 3.0;
+   }
+
+   @Override
+   public double[] getInitialHeadYawPitchRoll()
+   {
+      return new double[]{0.0, 0.0, 0.0};
    }
 
    @Override
