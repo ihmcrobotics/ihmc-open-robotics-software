@@ -9,30 +9,38 @@ import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.util.controller.AxisAngleOrientationController;
+import com.yobotics.simulationconstructionset.util.controller.YoOrientationPIDGains;
 
 public class RigidBodyOrientationControlModule
 {
    private final AxisAngleOrientationController axisAngleOrientationController;
-   
+
    private final RigidBody endEffector;
    private final RigidBody base;
    private final TwistCalculator twistCalculator;
    private final Twist endEffectorTwist = new Twist();
    private final FrameVector currentAngularVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
 
-   public RigidBodyOrientationControlModule(String namePrefix, RigidBody base, RigidBody endEffector, TwistCalculator twistCalculator, double dt, YoVariableRegistry parentRegistry)
+   public RigidBodyOrientationControlModule(String namePrefix, RigidBody base, RigidBody endEffector, TwistCalculator twistCalculator, double dt,
+         YoVariableRegistry parentRegistry)
+   {
+      this(namePrefix, base, endEffector, twistCalculator, dt, null, parentRegistry);
+   }
+
+   public RigidBodyOrientationControlModule(String namePrefix, RigidBody base, RigidBody endEffector, TwistCalculator twistCalculator, double dt,
+         YoOrientationPIDGains gains, YoVariableRegistry parentRegistry)
    {
       this.base = base;
       this.endEffector = endEffector;
-      this.axisAngleOrientationController = new AxisAngleOrientationController(namePrefix, endEffector.getBodyFixedFrame(), dt, parentRegistry);
+      this.axisAngleOrientationController = new AxisAngleOrientationController(namePrefix, endEffector.getBodyFixedFrame(), dt, gains, parentRegistry);
       this.twistCalculator = twistCalculator;
    }
-   
+
    public void reset()
    {
       axisAngleOrientationController.reset();
    }
-   
+
    public void compute(FrameVector outputToPack, FrameOrientation desiredOrientation, FrameVector desiredAngularVelocity, FrameVector feedForwardAngularAcceleration)
    {
       // using twists is a bit overkill; optimize if needed.
@@ -41,10 +49,15 @@ public class RigidBodyOrientationControlModule
       endEffectorTwist.packAngularPart(currentAngularVelocity.getVector());
 
       desiredAngularVelocity.changeFrame(currentAngularVelocity.getReferenceFrame());
-      
+
       feedForwardAngularAcceleration.changeFrame(endEffectorTwist.getExpressedInFrame());
 
       axisAngleOrientationController.compute(outputToPack, desiredOrientation, desiredAngularVelocity, currentAngularVelocity, feedForwardAngularAcceleration);
+   }
+
+   public void setGains(YoOrientationPIDGains gains)
+   {
+      axisAngleOrientationController.setGains(gains);
    }
 
    public void setProportionalGains(double proportionalGainX, double proportionalGainY, double proportionalGainZ)
@@ -56,7 +69,7 @@ public class RigidBodyOrientationControlModule
    {
       axisAngleOrientationController.setDerivativeGains(derivativeGainX, derivativeGainY, derivativeGainZ);
    }
-   
+
    public void setMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
    {
       axisAngleOrientationController.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
@@ -71,7 +84,4 @@ public class RigidBodyOrientationControlModule
    {
       return endEffector;
    }
-
-   
 }
-
