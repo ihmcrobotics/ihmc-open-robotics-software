@@ -9,6 +9,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
@@ -16,7 +17,6 @@ import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.GroundContactPoint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class DRCSimulationVisualizer implements RobotController
@@ -36,7 +36,7 @@ public class DRCSimulationVisualizer implements RobotController
    {
       this.robot = robot;
       
-      DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList("Simulation Viz");
+      YoGraphicsList dynamicGraphicObjectsList = new YoGraphicsList("Simulation Viz");
 
       ArrayList<GroundContactPoint> groundContactPoints = robot.getAllGroundContactPoints();
       AppearanceDefinition appearance = YoAppearance.Red(); // BlackMetalMaterial();

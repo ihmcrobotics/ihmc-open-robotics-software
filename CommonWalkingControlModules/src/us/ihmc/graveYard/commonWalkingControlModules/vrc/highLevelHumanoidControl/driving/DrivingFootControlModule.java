@@ -34,6 +34,7 @@ import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
@@ -41,7 +42,6 @@ import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.controller.AxisAngleOrientationController;
 import com.yobotics.simulationconstructionset.util.controller.EuclideanPositionController;
 import com.yobotics.simulationconstructionset.util.controller.GainCalculator;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.StraightLinePositionTrajectoryGenerator;
@@ -198,7 +198,7 @@ public class DrivingFootControlModule
       if (dynamicGraphicObjectsListRegistry != null)
       {
          YoGraphicReferenceFrame toePointFrameViz = new YoGraphicReferenceFrame(toePointFrame, registry, 0.1);
-         DynamicGraphicObjectsList list = new DynamicGraphicObjectsList("drivingFootControlModule");
+         YoGraphicsList list = new YoGraphicsList("drivingFootControlModule");
          dynamicGraphicReferenceFrames.add(toePointFrameViz);
          list.add(toePointFrameViz);
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(list);

@@ -21,11 +21,11 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 
 import com.yobotics.simulationconstructionset.util.controller.YoPIDGains;
 import com.yobotics.simulationconstructionset.util.controller.YoSE3PIDGains;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 /**
@@ -94,7 +94,7 @@ public class ManipulationControlModule
    private void createFrameVisualizers(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, FullRobotModel fullRobotModel, String listName,
          boolean enable)
    {
-      DynamicGraphicObjectsList list = new DynamicGraphicObjectsList(listName);
+      YoGraphicsList list = new YoGraphicsList(listName);
       if (dynamicGraphicObjectsListRegistry != null)
       {
          for (RobotSide robotSide : RobotSide.values)
@@ -110,7 +110,7 @@ public class ManipulationControlModule
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(list);
 
          if (!enable)
-            list.hideDynamicGraphicObjects();
+            list.hideYoGraphics();
       }
    }
 

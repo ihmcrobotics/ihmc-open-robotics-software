@@ -14,13 +14,13 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class DoubleSupportFootCenterToToeICPComputer
@@ -141,7 +141,7 @@ public class DoubleSupportFootCenterToToeICPComputer
 
       this.numberOfCornerPoints = maxNumberOfConsideredFootsteps - 1;
 
-      DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList("ICPComputer");
+      YoGraphicsList dynamicGraphicObjectsList = new YoGraphicsList("ICPComputer");
       ArtifactList artifactList = new ArtifactList("ICPComputer");
       double icpCornerPointSize = 0.004;
 

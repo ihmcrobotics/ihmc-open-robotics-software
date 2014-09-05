@@ -21,13 +21,13 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
 import com.yobotics.simulationconstructionset.plotting.DynamicGraphicYoPolygonArtifact;
 import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class ToeOffVirtualToePointCalculator implements VirtualToePointCalculator
@@ -87,7 +87,7 @@ public class ToeOffVirtualToePointCalculator implements VirtualToePointCalculato
 
       if (dynamicGraphicObjectsListRegistry != null)
       {
-         DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList("VTP Calculator");
+         YoGraphicsList dynamicGraphicObjectsList = new YoGraphicsList("VTP Calculator");
          ArtifactList artifactList = new ArtifactList("VTP Calculator");
 
          DynamicGraphicYoPolygonArtifact vtpConvexPolygonArtifact = new DynamicGraphicYoPolygonArtifact("vtpConvexPolygon", vtpConvexPolygon, Color.cyan, false);

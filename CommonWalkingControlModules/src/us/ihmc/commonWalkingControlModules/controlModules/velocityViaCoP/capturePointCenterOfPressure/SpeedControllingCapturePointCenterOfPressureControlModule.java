@@ -17,6 +17,7 @@ import us.ihmc.utilities.math.geometry.GeometryTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.math.frames.YoFrameLine2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameLineSegment2d;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
@@ -24,7 +25,6 @@ import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 import com.yobotics.simulationconstructionset.plotting.YoFrameLine2dArtifact;
 import com.yobotics.simulationconstructionset.plotting.YoFrameLineSegment2dArtifact;
 import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class SpeedControllingCapturePointCenterOfPressureControlModule implements CapturePointCenterOfPressureControlModule
@@ -64,7 +64,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
 
       if (dynamicGraphicObjectsListRegistry != null)
       {
-         DynamicGraphicObjectsList dynamicGraphicObjectList = new DynamicGraphicObjectsList("CapturePointController");
+         YoGraphicsList dynamicGraphicObjectList = new YoGraphicsList("CapturePointController");
          ArtifactList artifactList = new ArtifactList("Capture Point CoP Control Module");
 
          YoFrameLine2dArtifact cpLineArtifact = new YoFrameLine2dArtifact("CP Line", capturePointLine, Color.MAGENTA);

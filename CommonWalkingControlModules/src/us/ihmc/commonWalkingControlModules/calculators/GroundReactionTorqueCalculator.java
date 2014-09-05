@@ -13,12 +13,12 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 import com.yobotics.simulationconstructionset.GroundContactPoint;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class GroundReactionTorqueCalculator
@@ -57,7 +57,7 @@ public class GroundReactionTorqueCalculator
 
    private void createDynamicGrapicVectors(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList("Ground-Foot Torques");
+      YoGraphicsList dynamicGraphicObjectsList = new YoGraphicsList("Ground-Foot Torques");
 
       double scaleFactor = 0.01;
       AppearanceDefinition appearance = YoAppearance.Purple();    // BlackMetalMaterial();

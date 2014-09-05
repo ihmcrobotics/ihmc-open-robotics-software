@@ -22,6 +22,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphic;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition.GraphicType;
@@ -29,7 +30,6 @@ import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 
 import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFramePoint2d;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
@@ -92,7 +92,7 @@ public class GuideLineDesiredCoPControlModule implements DesiredCoPControlModule
 
       if (dynamicGraphicObjectsListRegistry != null)
       {
-         DynamicGraphicObjectsList dynamicGraphicObjectList = new DynamicGraphicObjectsList("VelocityViaCoPControlModule");
+         YoGraphicsList dynamicGraphicObjectList = new YoGraphicsList("VelocityViaCoPControlModule");
          ArtifactList artifactList = new ArtifactList("VelocityViaCoPControlModule");
 
          YoGraphicPosition centerOfPressureDesiredWorldGraphicPosition = new YoGraphicPosition("Desired Center of Pressure", finalDesiredCoPInWorld,

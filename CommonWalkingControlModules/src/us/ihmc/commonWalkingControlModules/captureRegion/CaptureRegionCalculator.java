@@ -16,6 +16,7 @@ import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
@@ -23,7 +24,6 @@ import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.plotting.DynamicGraphicYoPolygonArtifact;
 import com.yobotics.simulationconstructionset.time.GlobalTimer;
 import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 
@@ -146,7 +146,7 @@ public class CaptureRegionCalculator
 
       // Done setting up the scoring function
 
-      DynamicGraphicObjectsList dynamicGraphicObjectsList = null;
+      YoGraphicsList dynamicGraphicObjectsList = null;
       ArtifactList artifactList = null;
       captureRegionGraphic = new YoFrameConvexPolygon2d("captureRegion", "", worldFrame, MAX_CAPTURE_REGION_POLYGON_POINTS, registry);
 
@@ -157,7 +157,7 @@ public class CaptureRegionCalculator
 
       if (DRAW_CAPTURE_REGION && (dynamicGraphicObjectsListRegistry != null))
       {
-         dynamicGraphicObjectsList = new DynamicGraphicObjectsList("CaptureRegionCalculator");
+         dynamicGraphicObjectsList = new YoGraphicsList("CaptureRegionCalculator");
          artifactList = new ArtifactList("CaptureRegionCalculator");
 
          DynamicGraphicYoPolygonArtifact dynamicGraphicYoPolygonArtifact = new DynamicGraphicYoPolygonArtifact("CaptureRegion", captureRegionGraphic,

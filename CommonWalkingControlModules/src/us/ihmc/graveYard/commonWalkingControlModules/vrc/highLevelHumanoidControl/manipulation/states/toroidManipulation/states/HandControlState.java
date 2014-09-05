@@ -16,9 +16,9 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.trajectory.Finishable;
 import com.yobotics.simulationconstructionset.util.trajectory.OrientationTrajectoryGenerator;
@@ -82,7 +82,7 @@ public class HandControlState<T extends Enum<T>> extends ToroidManipulationState
 
       if (dynamicGraphicObjectsListRegistry != null)
       {
-         DynamicGraphicObjectsList list = new DynamicGraphicObjectsList(stateName);
+         YoGraphicsList list = new YoGraphicsList(stateName);
          for (RobotSide robotSide : RobotSide.values)
          {
             YoGraphicReferenceFrame dynamicGraphicReferenceFrame = new YoGraphicReferenceFrame(desiredPositionFrames.get(robotSide), registry, 0.3);
@@ -90,7 +90,7 @@ public class HandControlState<T extends Enum<T>> extends ToroidManipulationState
             list.add(dynamicGraphicReferenceFrame);
          }
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(list);
-         list.hideDynamicGraphicObjects();
+         list.hideYoGraphics();
       }
 
       parentRegistry.addChild(registry);
