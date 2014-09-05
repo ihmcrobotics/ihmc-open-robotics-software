@@ -9,7 +9,7 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.ComponentBasedDesiredFootstepCalculator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorFootstepProviderWrapper;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredChestOrientationProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.ChestOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootStateProvider;
@@ -73,7 +73,7 @@ public class ComponentBasedVariousWalkingProviderFactory implements VariousWalki
       DesiredHeadOrientationProvider headOrientationProvider = null;
       DesiredComHeightProvider comHeightProvider = null;
       DesiredPelvisPoseProvider pelvisPoseProvider = null;
-      DesiredChestOrientationProvider chestOrientationProvider = null;
+      ChestOrientationProvider chestOrientationProvider = null;
       DesiredHandPoseProvider handPoseProvider = null;
       if ((fullRobotModel.getHand(RobotSide.LEFT) != null) && (fullRobotModel.getHand(RobotSide.RIGHT) != null))
          handPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame());

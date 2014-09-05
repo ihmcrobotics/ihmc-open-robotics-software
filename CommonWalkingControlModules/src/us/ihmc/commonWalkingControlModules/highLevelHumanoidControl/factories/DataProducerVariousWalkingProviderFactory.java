@@ -92,7 +92,7 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
       DesiredHeadOrientationProvider headOrientationProvider = new DesiredHeadOrientationProvider(referenceFrames.getPelvisZUpFrame());
       DesiredComHeightProvider desiredComHeightProvider = new DesiredComHeightProvider();
       DesiredPelvisPoseProvider pelvisPoseProvider = new DesiredPelvisPoseProvider();
-      DesiredChestOrientationProvider chestOrientationProvider = new DesiredChestOrientationProvider();
+      DesiredChestOrientationProvider chestOrientationProvider = new DesiredChestOrientationProvider(referenceFrames.getPelvisZUpFrame());
       DesiredFootPoseProvider footPoseProvider = new DesiredFootPoseProvider();
    
 
