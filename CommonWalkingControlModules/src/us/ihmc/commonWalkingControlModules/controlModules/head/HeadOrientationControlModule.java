@@ -60,8 +60,8 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
          HeadOrientationControllerParameters headOrientationControllerParameters, YoVariableRegistry parentRegistry,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      super("head", new RigidBody[] {}, momentumBasedController.getFullRobotModel().getHead(), new GeometricJacobian[] {}, momentumBasedController,
-            parentRegistry);
+      super("head", new RigidBody[] {}, momentumBasedController.getFullRobotModel().getHead(), new GeometricJacobian[] {}, momentumBasedController
+            .getTwistCalculator(), momentumBasedController.getControlDT(), parentRegistry);
 
       FullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
       this.head = fullRobotModel.getHead();

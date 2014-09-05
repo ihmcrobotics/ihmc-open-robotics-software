@@ -7,7 +7,6 @@ import javax.vecmath.Vector3d;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -21,6 +20,8 @@ import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 
+import com.yobotics.simulationconstructionset.util.controller.YoAxisAngleOrientationGains;
+import com.yobotics.simulationconstructionset.util.controller.YoOrientationPIDGains;
 
 public abstract class DegenerateOrientationControlModule
 {
@@ -32,34 +33,39 @@ public abstract class DegenerateOrientationControlModule
    private final ArrayList<RigidBodyOrientationControlModule> rigidBodyOrientationControlModules = new ArrayList<RigidBodyOrientationControlModule>();
    private final ArrayList<RigidBody> bases = new ArrayList<RigidBody>();
    private final IntegerYoVariable baseIndex;
-   
+
    private final DenseMatrix64F nullspaceMultipliers = new DenseMatrix64F(0, 1);
    private final SpatialAccelerationVector spatialAcceleration = new SpatialAccelerationVector();
 
    private final TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
-   
+
    private final String namePrefix;
    private final RigidBody endEffector;
    private final TwistCalculator twistCalculator;
-   
-   private final double controlDT;
 
-   public DegenerateOrientationControlModule(String namePrefix, RigidBody[] defaultBases, RigidBody endEffector, GeometricJacobian[] defaultJacobians,
-         MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
-   {
-      this(namePrefix, defaultBases, endEffector, defaultJacobians, momentumBasedController.getTwistCalculator(), momentumBasedController.getControlDT(),
-            parentRegistry);
-   }
+   private final YoOrientationPIDGains gains;
+
+   private final double controlDT;
 
    public DegenerateOrientationControlModule(String namePrefix, RigidBody[] defaultBases, RigidBody endEffector, GeometricJacobian[] defaultJacobians,
          TwistCalculator twistCalculator, double controlDT, YoVariableRegistry parentRegistry)
    {
+      this(namePrefix, defaultBases, endEffector, defaultJacobians, twistCalculator, controlDT, null, parentRegistry);
+   }
+
+   public DegenerateOrientationControlModule(String namePrefix, RigidBody[] defaultBases, RigidBody endEffector, GeometricJacobian[] defaultJacobians,
+         TwistCalculator twistCalculator, double controlDT, YoOrientationPIDGains gains, YoVariableRegistry parentRegistry)
+   {
       this.namePrefix = namePrefix;
       this.endEffector = endEffector;
       this.twistCalculator = twistCalculator;
-      
       this.controlDT = controlDT;
-      
+
+      if (gains == null)
+         gains = new YoAxisAngleOrientationGains(namePrefix, registry);
+
+      this.gains = gains;
+
       this.jacobianIndex = new IntegerYoVariable(namePrefix + "JacobianIndex", registry);
       jacobianIndex.set(-1);
 
@@ -67,7 +73,7 @@ public abstract class DegenerateOrientationControlModule
       {
          addJacobian(jacobian);
       }
-      
+
       this.baseIndex = new IntegerYoVariable(namePrefix + "BaseIndex", registry);
       this.baseIndex.set(-1);
 
@@ -76,10 +82,9 @@ public abstract class DegenerateOrientationControlModule
          addBase(base);
       }
 
-      
       parentRegistry.addChild(registry);
    }
-   
+
    public void reset()
    {
       for (int i = 0; i < rigidBodyOrientationControlModules.size(); i++)
@@ -87,38 +92,35 @@ public abstract class DegenerateOrientationControlModule
          rigidBodyOrientationControlModules.get(i).reset();
       }
    }
-   
+
    public int addJacobian(GeometricJacobian jacobian)
-   {      
+   {
       jacobians.add(jacobian);
       this.selectionMatrices.add(new DenseMatrix64F(jacobian.getNumberOfColumns(), Twist.SIZE));
-      
-      int index = jacobians.size()-1;
+
+      int index = jacobians.size() - 1;
       if (index != selectionMatrices.size() - 1) throw new RuntimeException("RepInvariant Violation");
-      
+
       jacobianIndex.set(index);
-      
+
       return index;
    }
-   
+
    public int addBase(RigidBody base)
    {
       bases.add(base);
       String baseName = FormattingTools.capitalizeFirstLetter(base.getName());
       RigidBodyOrientationControlModule rigidBodyOrientationControlModule = new RigidBodyOrientationControlModule(namePrefix + baseName, base, endEffector,
-                                                                               twistCalculator, controlDT, registry);
-      
-      rigidBodyOrientationControlModule.setProportionalGains(proportionalGainX, proportionalGainY, proportionalGainZ);
-      rigidBodyOrientationControlModule.setDerivativeGains(derivativeGainX, derivativeGainY, derivativeGainZ);
-      rigidBodyOrientationControlModule.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
-      
+            twistCalculator, controlDT, gains, registry);
+
       rigidBodyOrientationControlModules.add(rigidBodyOrientationControlModule);
-      
+
       int index = bases.size() - 1;
-      if (index != rigidBodyOrientationControlModules.size() - 1) throw new RuntimeException("RepInvariant Violation");
-      
+      if (index != rigidBodyOrientationControlModules.size() - 1)
+         throw new RuntimeException("RepInvariant Violation");
+
       baseIndex.set(index);
-      
+
       return index;
    }
 
@@ -136,13 +138,15 @@ public abstract class DegenerateOrientationControlModule
 
    public void compute()
    {
+      if (jacobians.get(jacobianIndex.getIntegerValue()).getNumberOfColumns() == 0) return;
+
       packDesiredFrameOrientation(desiredOrientation);
       packDesiredAngularVelocity(desiredAngularVelocity);
       packDesiredAngularAccelerationFeedForward(feedForwardAngularAcceleration);
 
       int localJacobianIndex = this.jacobianIndex.getIntegerValue();
       if (localJacobianIndex == -1) return;
-      
+
       GeometricJacobian jacobian = jacobians.get(localJacobianIndex);
       DenseMatrix64F selectionMatrix = selectionMatrices.get(localJacobianIndex);
 
@@ -171,44 +175,19 @@ public abstract class DegenerateOrientationControlModule
       return taskspaceConstraintData;
    }
 
-   private double proportionalGainX, proportionalGainY, proportionalGainZ;
-   private double derivativeGainX, derivativeGainY, derivativeGainZ;
-   
    public void setProportionalGains(double proportionalGainX, double proportionalGainY, double proportionalGainZ)
    {
-      this.proportionalGainX = proportionalGainX;
-      this.proportionalGainY = proportionalGainY;
-      this.proportionalGainZ = proportionalGainZ;
-      
-      for (RigidBodyOrientationControlModule rigidBodyOrientationControlModule : rigidBodyOrientationControlModules)
-      {
-         rigidBodyOrientationControlModule.setProportionalGains(proportionalGainX, proportionalGainY, proportionalGainZ);
-      }
+      gains.setProportionalGains(proportionalGainX, proportionalGainY, proportionalGainZ);
    }
 
    public void setDerivativeGains(double derivativeGainX, double derivativeGainY, double derivativeGainZ)
    {
-      this.derivativeGainX = derivativeGainX;
-      this.derivativeGainY = derivativeGainY;
-      this.derivativeGainZ = derivativeGainZ;
-      
-      for (RigidBodyOrientationControlModule rigidBodyOrientationControlModule : rigidBodyOrientationControlModules)
-      {
-         rigidBodyOrientationControlModule.setDerivativeGains(derivativeGainX, derivativeGainY, derivativeGainZ);
-      }
+      gains.setDerivativeGains(derivativeGainX, derivativeGainY, derivativeGainZ);
    }
-
-   private double maxAcceleration = Double.POSITIVE_INFINITY, maxJerk = Double.POSITIVE_INFINITY;
 
    public void setMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
    {
-      this.maxAcceleration = maxAcceleration;
-      this.maxJerk = maxJerk;
-      
-      for (RigidBodyOrientationControlModule rigidBodyOrientationControlModule : rigidBodyOrientationControlModules)
-      {
-         rigidBodyOrientationControlModule.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
-      }
+      gains.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
    }
 
    public void setJacobian(GeometricJacobian jacobian)
@@ -218,34 +197,35 @@ public abstract class DegenerateOrientationControlModule
          this.jacobianIndex.set(-1);
          return;
       }
-      
+
       int jacobianIndex = jacobians.indexOf(jacobian);
       if (jacobianIndex == -1)
       {
          jacobianIndex = addJacobian(jacobian);
       }
-      
+
       setJacobian(jacobianIndex);
    }
-   
+
    public void setJacobian(int jacobianIndex)
    {
       this.jacobianIndex.set(jacobianIndex);
    }
-   
+
    public ArrayList<GeometricJacobian> getAvailableJacobians()
    {
       return jacobians;
    }
-   
+
    public GeometricJacobian getJacobian()
    {
       int localJacobianIndex = jacobianIndex.getIntegerValue();
-      if (localJacobianIndex == -1) return null;
-      
+      if (localJacobianIndex == -1)
+         return null;
+
       return jacobians.get(localJacobianIndex);
    }
-   
+
    public void setBase(RigidBody base)
    {
       if (base == null)
@@ -253,7 +233,7 @@ public abstract class DegenerateOrientationControlModule
          this.baseIndex.set(-1);
          return;
       }
-      
+
       int baseIndex = bases.indexOf(base);
       if (baseIndex == -1)
       {
@@ -261,8 +241,8 @@ public abstract class DegenerateOrientationControlModule
       }
 
       setBase(baseIndex);
-   }  
-   
+   }
+
    public void setBase(int baseIndex)
    {
       this.baseIndex.set(baseIndex);
