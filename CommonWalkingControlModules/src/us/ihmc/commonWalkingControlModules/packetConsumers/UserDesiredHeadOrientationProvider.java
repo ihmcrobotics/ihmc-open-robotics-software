@@ -13,6 +13,7 @@ import com.google.common.util.concurrent.AtomicDouble;
 
 public class UserDesiredHeadOrientationProvider extends DesiredHeadOrientationProvider
 {
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final DoubleYoVariable userDesiredHeadPitch, userDesiredHeadYaw, userDesiredNeckPitch, userDesiredHeadRoll;
    private final ReferenceFrame headOrientationFrame;
 
@@ -20,7 +21,7 @@ public class UserDesiredHeadOrientationProvider extends DesiredHeadOrientationPr
    private final AtomicDouble desiredJointForExtendedNeckPitchRangeAngle = new AtomicDouble(0.0);
    private final FrameOrientation desiredHeadOrientation = new FrameOrientation();
 
-   public UserDesiredHeadOrientationProvider(ReferenceFrame headOrientationFrame, YoVariableRegistry registry)
+   public UserDesiredHeadOrientationProvider(ReferenceFrame headOrientationFrame, YoVariableRegistry parentRegistry)
    {
       super(headOrientationFrame);
 
@@ -40,6 +41,8 @@ public class UserDesiredHeadOrientationProvider extends DesiredHeadOrientationPr
       });
 
       setupListeners();
+
+      parentRegistry.addChild(registry);
    }
 
    private void setupListeners()
