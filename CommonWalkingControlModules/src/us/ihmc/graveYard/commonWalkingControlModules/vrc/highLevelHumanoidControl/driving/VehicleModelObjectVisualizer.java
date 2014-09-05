@@ -5,24 +5,24 @@ import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphic;
 import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 
 public class VehicleModelObjectVisualizer
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final DynamicGraphicObjectsList dynamicGraphicObjectsList;
+   private final YoGraphicsList dynamicGraphicObjectsList;
    private final double objectFrameScale = 0.2;
    private final double vehicleFrameScale = 1.0;
 
    public VehicleModelObjectVisualizer(ReferenceFrame vehicleFrame, VehicleModelObjects vehicleModelObjects,
                                 DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
    {
-      dynamicGraphicObjectsList = new DynamicGraphicObjectsList("vehicleObjects");
+      dynamicGraphicObjectsList = new YoGraphicsList("vehicleObjects");
 
       for (VehicleObject vehicleObject : VehicleObject.values())
       {
@@ -46,7 +46,7 @@ public class VehicleModelObjectVisualizer
 
    public void update()
    {
-      for (YoGraphic dynamicGraphicObject : dynamicGraphicObjectsList.getDynamicGraphicObjects())
+      for (YoGraphic dynamicGraphicObject : dynamicGraphicObjectsList.getYoGraphics())
       {
          dynamicGraphicObject.update();
       }

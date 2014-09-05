@@ -37,6 +37,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphic;
 import us.ihmc.yoUtilities.graphics.YoGraphicCoordinateSystem;
@@ -47,7 +48,6 @@ import com.yobotics.simulationconstructionset.FloatingJoint;
 import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicLineSegment;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.inputdevices.MidiSliderBoard;
 
@@ -1022,7 +1022,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
    private void addSupportBaseGraphics(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,YoFramePoint[] basePoints, ArrayList<YoGraphic> basePointsList, ArrayList<YoGraphic> linesList, String namePrefix,AppearanceDefinition appearance)
    {
       AppearanceDefinition[] colors = { YoAppearance.Red(), YoAppearance.Green(), YoAppearance.Blue(), YoAppearance.Yellow() };
-      DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList(namePrefix + "Points");
+      YoGraphicsList dynamicGraphicObjectsList = new YoGraphicsList(namePrefix + "Points");
       for (int i = 0; i < basePoints.length; i++)
       {
          YoGraphicPosition baseControlPointViz = new YoGraphicPosition(namePrefix + "Point" + i, basePoints[i], 0.01, colors[i]);
@@ -1040,7 +1040,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
 
       if (dynamicGraphicObjectsListRegistry != null)
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
-      dynamicGraphicObjectsList.hideDynamicGraphicObjects();
+      dynamicGraphicObjectsList.hideYoGraphics();
    }
 
    public void addCaptureSnapshotListener(VariableChangedListener variableChangedListener)

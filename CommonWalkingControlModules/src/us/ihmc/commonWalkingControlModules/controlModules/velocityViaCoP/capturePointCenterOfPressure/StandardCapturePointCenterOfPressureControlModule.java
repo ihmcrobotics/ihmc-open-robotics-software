@@ -20,6 +20,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.math.frames.YoFrameLine2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameLineSegment2d;
@@ -28,7 +29,6 @@ import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import com.yobotics.simulationconstructionset.plotting.YoFrameLine2dArtifact;
 import com.yobotics.simulationconstructionset.plotting.YoFrameLineSegment2dArtifact;
 import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 
@@ -122,7 +122,7 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
 
       if (dynamicGraphicObjectsListRegistry != null)
       {
-         DynamicGraphicObjectsList dynamicGraphicObjectList = new DynamicGraphicObjectsList("CapturePointController");
+         YoGraphicsList dynamicGraphicObjectList = new YoGraphicsList("CapturePointController");
 
          centerOfPressureDesiredWorldGraphicPosition = new YoGraphicPosition("Desired Center of Pressure", centerOfPressureDesiredWorld, 0.012,
                YoAppearance.Gray(), YoGraphicPosition.GraphicType.CROSS);

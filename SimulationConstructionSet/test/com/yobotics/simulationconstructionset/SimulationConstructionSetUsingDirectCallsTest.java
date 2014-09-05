@@ -47,6 +47,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariableList;
+import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.graphics.YoGraphic;
 
@@ -67,7 +68,6 @@ import com.yobotics.simulationconstructionset.physics.ScsCollisionDetector;
 import com.yobotics.simulationconstructionset.physics.ScsPhysics;
 import com.yobotics.simulationconstructionset.physics.visualize.DefaultCollisionVisualize;
 import com.yobotics.simulationconstructionset.robotcommprotocol.RobotSocketConnection;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class SimulationConstructionSetUsingDirectCallsTest
@@ -1243,7 +1243,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private DynamicGraphicObjectsListRegistry createDynamicGraphicObjectsListRegistryWithObject()
    {
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
-      DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList(dynamicGraphicObjectsListName);
+      YoGraphicsList dynamicGraphicObjectsList = new YoGraphicsList(dynamicGraphicObjectsListName);
       dynamicGraphicObjectsList.add(dynamicGraphicObject);
       dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
       

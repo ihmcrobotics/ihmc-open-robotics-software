@@ -9,6 +9,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicPolygon;
 import us.ihmc.yoUtilities.graphics.YoGraphicShape;
 import us.ihmc.yoUtilities.graphics.YoGraphicText3D;
@@ -54,7 +55,7 @@ public class DynamicGraphicObjectEvaluation
       YoGraphicPolygon transferToPolygonViz = new YoGraphicPolygon("transferToPolygon", transferToPolygon, "transferToPolygon", "", registry, polygonVizScale, YoAppearance.Bisque());
       transferToPolygonViz.setPosition(0.0, 0.0, 0.1);
       
-      DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList("FinalDesiredICPCalculator");
+      YoGraphicsList dynamicGraphicObjectsList = new YoGraphicsList("FinalDesiredICPCalculator");
 
       dynamicGraphicObjectsList.add(transferToPolygonViz);
 
@@ -133,7 +134,7 @@ public class DynamicGraphicObjectEvaluation
       YoFrameOrientation boxOrientation = new YoFrameOrientation("boxOrientation", worldFrame, registry);
       YoGraphicShape dynamicGraphicBoxGhost = new YoGraphicShape("boxGhost", boxGhostGraphics, boxPosition, boxOrientation, boxSize);
 
-      DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList("Polygon");
+      YoGraphicsList dynamicGraphicObjectsList = new YoGraphicsList("Polygon");
       dynamicGraphicObjectsList.add(dynamicGraphicPolygon);
       dynamicGraphicObjectsList.add(dynamicGraphicText);
       dynamicGraphicObjectsList.add(dynamicGraphicVector);

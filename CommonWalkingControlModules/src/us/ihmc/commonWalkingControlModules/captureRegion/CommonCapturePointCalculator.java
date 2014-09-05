@@ -17,12 +17,12 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.yoUtilities.math.frames.YoFramePointInMultipleFrames;
 
 import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 
@@ -70,7 +70,7 @@ public class CommonCapturePointCalculator implements CapturePointCalculatorInter
       if (dynamicGraphicObjectsListRegistry != null)
       {
          YoGraphicPosition capturePointWorldGraphicPosition = new YoGraphicPosition(CAPTURE_POINT_DYNAMIC_GRAPHIC_OBJECT_NAME, capturePointInMultipleFrames, 0.01, YoAppearance.Blue(), GraphicType.ROTATED_CROSS);
-         DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList("CapturePoint");
+         YoGraphicsList dynamicGraphicObjectsList = new YoGraphicsList("CapturePoint");
          dynamicGraphicObjectsList.add(capturePointWorldGraphicPosition);
 
          ArtifactList artifactList = new ArtifactList("CapturePointCalculator");

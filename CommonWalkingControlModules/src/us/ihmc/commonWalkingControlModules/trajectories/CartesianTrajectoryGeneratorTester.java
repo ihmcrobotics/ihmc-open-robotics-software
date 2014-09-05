@@ -11,6 +11,7 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
@@ -19,7 +20,6 @@ import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.inputdevices.MidiSliderBoard;
 import com.yobotics.simulationconstructionset.util.trajectory.CartesianTrajectoryGenerator;
@@ -210,7 +210,7 @@ public class CartesianTrajectoryGeneratorTester
 
          if (dynamicGraphicObjectsListRegistry != null)
          {
-            DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList("CartesianTrajectoryTester");
+            YoGraphicsList dynamicGraphicObjectsList = new YoGraphicsList("CartesianTrajectoryTester");
 
             dynamicGraphicObjectsList.add(new YoGraphicPosition("Final Desired", finalDesiredPosition, 0.02, YoAppearance.Red()));
             dynamicGraphicObjectsList.add(new YoGraphicPosition("Original Final Desired", originalFinalDesiredPosition, 0.02, YoAppearance.Black()));

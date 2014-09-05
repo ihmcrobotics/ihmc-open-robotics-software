@@ -16,9 +16,9 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.trajectory.PoseTrajectoryGenerator;
 
@@ -59,14 +59,14 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
 
       if (dynamicGraphicObjectsListRegistry != null)
       {
-         DynamicGraphicObjectsList list = new DynamicGraphicObjectsList(name);
+         YoGraphicsList list = new YoGraphicsList(name);
 
          YoGraphicReferenceFrame dynamicGraphicReferenceFrame = new YoGraphicReferenceFrame(desiredPositionFrame, registry, 0.3);
          dynamicGraphicReferenceFrames.add(dynamicGraphicReferenceFrame);
          list.add(dynamicGraphicReferenceFrame);
 
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(list);
-         list.hideDynamicGraphicObjects();
+         list.hideYoGraphics();
       }
 
       doneTrajectoryTime = new DoubleYoVariable(namePrefix + "DoneTrajectoryTime", registry);

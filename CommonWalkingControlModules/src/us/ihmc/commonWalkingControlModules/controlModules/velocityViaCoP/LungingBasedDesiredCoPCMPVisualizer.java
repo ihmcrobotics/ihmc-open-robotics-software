@@ -5,11 +5,11 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
 import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class LungingBasedDesiredCoPCMPVisualizer extends CapturabilityBasedDesiredCoPVisualizer
@@ -23,7 +23,7 @@ public class LungingBasedDesiredCoPCMPVisualizer extends CapturabilityBasedDesir
    {
       super(parentRegistry, dynamicGraphicObjectsListRegistry);
       
-      DynamicGraphicObjectsList dynamicGraphicObjectList = new DynamicGraphicObjectsList("LungingBasedDesiredCoPVisualizer");
+      YoGraphicsList dynamicGraphicObjectList = new YoGraphicsList("LungingBasedDesiredCoPVisualizer");
       ArtifactList artifactList = new ArtifactList("LungingBasedDesiredCoPVisualizer");
       if (dynamicGraphicObjectsListRegistry != null)
       {
@@ -36,7 +36,7 @@ public class LungingBasedDesiredCoPCMPVisualizer extends CapturabilityBasedDesir
       parentRegistry.addChild(registry);
    }
 
-   private void addDesiredCMPViz(DynamicGraphicObjectsList dynamicGraphicObjectList, ArtifactList artifactList)
+   private void addDesiredCMPViz(YoGraphicsList dynamicGraphicObjectList, ArtifactList artifactList)
    {
       YoGraphicPosition desiredCMPViz = new YoGraphicPosition("Desired Centriodal Moment Pivot", desiredCMP, 0.012, YoAppearance.White(),
             YoGraphicPosition.GraphicType.BALL_WITH_CROSS);

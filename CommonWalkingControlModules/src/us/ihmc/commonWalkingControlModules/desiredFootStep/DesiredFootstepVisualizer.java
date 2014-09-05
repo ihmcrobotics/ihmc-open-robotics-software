@@ -37,6 +37,7 @@ import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
@@ -49,7 +50,6 @@ import com.yobotics.simulationconstructionset.plotting.SimulationOverheadPlotter
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
 import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class DesiredFootstepVisualizer
@@ -121,7 +121,7 @@ public class DesiredFootstepVisualizer
          ankleZUpFrames.get(robotSide).update();
       }
 
-      DynamicGraphicObjectsList dynamicGraphicObjectsList = new DynamicGraphicObjectsList("FeetPolygons");
+      YoGraphicsList dynamicGraphicObjectsList = new YoGraphicsList("FeetPolygons");
       ArtifactList artifactList = new ArtifactList("FeetPolygons");
       SideDependentList<Color> footColors = new SideDependentList<Color>(Color.pink, Color.blue);
       for (RobotSide robotSide : RobotSide.values)
