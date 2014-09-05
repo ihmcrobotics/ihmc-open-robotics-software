@@ -2,6 +2,8 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
 import org.ejml.data.DenseMatrix64F;
 
+import com.yobotics.simulationconstructionset.util.controller.YoOrientationPIDGains;
+
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodyOrientationControlModule;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
@@ -29,6 +31,11 @@ public class RootJointAngularAccelerationControlModule
 
    public RootJointAngularAccelerationControlModule(double controlDT, MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
    {
+      this(controlDT, momentumBasedController, null, parentRegistry);
+   }
+
+   public RootJointAngularAccelerationControlModule(double controlDT, MomentumBasedController momentumBasedController, YoOrientationPIDGains gains, YoVariableRegistry parentRegistry)
+   {
       this.rootJoint = momentumBasedController.getFullRobotModel().getRootJoint();
       
       rootPredecessor = rootJoint.getPredecessor();
@@ -38,7 +45,7 @@ public class RootJointAngularAccelerationControlModule
       
       registry = new YoVariableRegistry(getClass().getSimpleName());
       rootJointOrientationControlModule = new RigidBodyOrientationControlModule(rootJoint.getName(), rootPredecessor, rootSuccessor,
-              momentumBasedController.getTwistCalculator(), controlDT, registry);
+              momentumBasedController.getTwistCalculator(), controlDT, gains, registry);
       this.controlledPelvisAngularAcceleration = new YoFrameVector("controlled" + rootJoint.getName() + "AngularAcceleration", rootJoint.getFrameAfterJoint(),
               registry);
 

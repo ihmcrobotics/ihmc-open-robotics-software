@@ -361,32 +361,26 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    }
 
    @Override
-   public double getKpPelvisOrientation()
+   public YoOrientationPIDGains createPelvisOrientationControlGains(YoVariableRegistry registry)
    {
-      if (!runningOnRealRobot) return 80.0; //100.0;
-      return 80.0; //30.0; 
-   }
+      YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("PelvisOrientation", registry);
 
-   @Override
-   public double getZetaPelvisOrientation()
-   {
-      if (!runningOnRealRobot) return 0.8; //1.0;
-      return 0.25;
-   }
-   
+      double kp = 80.0;
+      double zeta = runningOnRealRobot ? 0.25 : 0.8;
+      double ki = 0.0;
+      double maxIntegralError = 0.0;
+      double maxAccel = runningOnRealRobot ? 12.0 : 36.0;
+      double maxJerk = runningOnRealRobot ? 180.0 : 540.0;
 
-   @Override
-   public double getMaxAccelerationPelvisOrientation()
-   {
-      if (!runningOnRealRobot) return 36.0; // 18.0;
-      return 12.0; 
-   }
+      gains.setProportionalGain(kp);
+      gains.setDampingRatio(zeta);
+      gains.setIntegralGain(ki);
+      gains.setMaximumIntegralError(maxIntegralError);
+      gains.setMaximumAcceleration(maxAccel);
+      gains.setMaximumJerk(maxJerk);
+      gains.createDerivativeGainUpdater(true);
 
-   @Override
-   public double getMaxJerkPelvisOrientation()
-   {
-      if (!runningOnRealRobot) return 540.0; // 270.0;
-      return 180.0; 
+      return gains;
    }
 
    @Override
