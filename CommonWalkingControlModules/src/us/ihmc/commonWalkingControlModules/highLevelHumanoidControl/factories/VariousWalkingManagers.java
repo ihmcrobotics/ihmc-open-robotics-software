@@ -22,6 +22,7 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
+import com.yobotics.simulationconstructionset.util.controller.YoOrientationPIDGains;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class VariousWalkingManagers
@@ -43,8 +44,8 @@ public class VariousWalkingManagers
    }
 
    public static VariousWalkingManagers create(MomentumBasedController momentumBasedController, VariousWalkingProviders variousWalkingProviders,
-         WalkingControllerParameters walkingControllerParameters, ArmControllerParameters armControlParameters,
-         YoVariableRegistry registry, DoubleProvider swingTimeProvider)
+         WalkingControllerParameters walkingControllerParameters, ArmControllerParameters armControlParameters, YoVariableRegistry registry,
+         DoubleProvider swingTimeProvider)
    {
       FullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
       TwistCalculator twistCalculator = momentumBasedController.getTwistCalculator();
@@ -71,8 +72,9 @@ public class VariousWalkingManagers
 
       if (fullRobotModel.getChest() != null)
       {
-         chestOrientationControlModule = setupChestOrientationControlModule(controlDT, fullRobotModel, twistCalculator, registry);
-         chestOrientationManager = new ChestOrientationManager(momentumBasedController, chestOrientationControlModule, registry);
+         chestOrientationControlModule = setupChestOrientationControlModule(controlDT, fullRobotModel, twistCalculator, walkingControllerParameters, registry);
+         chestOrientationManager = new ChestOrientationManager(momentumBasedController, chestOrientationControlModule,
+               variousWalkingProviders.getDesiredChestOrientationProvider(), walkingControllerParameters.getTrajectoryTimeHeadOrientation(), registry);
       }
 
       ManipulationControlModule manipulationControlModule = null;
@@ -94,12 +96,13 @@ public class VariousWalkingManagers
    }
 
    private static ChestOrientationControlModule setupChestOrientationControlModule(double controlDT, FullRobotModel fullRobotModel,
-         TwistCalculator twistCalculator, YoVariableRegistry registry)
+         TwistCalculator twistCalculator, WalkingControllerParameters walkingControllerParameters, YoVariableRegistry registry)
    {
       RigidBody chest = fullRobotModel.getChest();
       RigidBody pelvis = fullRobotModel.getPelvis();
+      YoOrientationPIDGains chestControlGains = walkingControllerParameters.createChestControlGains(registry);
 
-      ChestOrientationControlModule chestOrientationControlModule = new ChestOrientationControlModule(pelvis, chest, twistCalculator, controlDT, registry);
+      ChestOrientationControlModule chestOrientationControlModule = new ChestOrientationControlModule(pelvis, chest, twistCalculator, controlDT, chestControlGains, registry);
 
       return chestOrientationControlModule;
    }

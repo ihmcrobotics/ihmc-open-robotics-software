@@ -20,6 +20,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.FootPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandstepProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.UserDesiredChestOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.UserDesiredFootPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.UserDesiredHandLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.UserDesiredHandPoseProvider;
@@ -59,7 +60,7 @@ public class YoVariableVariousWalkingProviderFactory implements VariousWalkingPr
       DesiredHeadOrientationProvider headOrientationProvider = new UserDesiredHeadOrientationProvider(referenceFrames.getPelvisZUpFrame(), registry);
       DesiredComHeightProvider desiredComHeightProvider = null;
       DesiredPelvisPoseProvider pelvisPoseProvider = null;
-      ChestOrientationProvider chestOrientationProvider = null;
+      ChestOrientationProvider chestOrientationProvider = new UserDesiredChestOrientationProvider(referenceFrames.getPelvisZUpFrame(), registry);
       
       FootPoseProvider footPoseProvider = new UserDesiredFootPoseProvider(fullRobotModel, registry);
      

@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
+import com.yobotics.simulationconstructionset.util.controller.YoOrientationPIDGains;
+
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -10,7 +12,6 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFrameQuaternion;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
-
 public class ChestOrientationControlModule extends DegenerateOrientationControlModule
 {
    private final YoFrameQuaternion desiredOrientation;
@@ -18,10 +19,14 @@ public class ChestOrientationControlModule extends DegenerateOrientationControlM
    private final YoFrameVector feedForwardAngularAcceleration;
    private final RigidBody chest;
 
-   public ChestOrientationControlModule(RigidBody pelvis, RigidBody chest, TwistCalculator twistCalculator,
-                                        double controlDT, YoVariableRegistry parentRegistry)
+   public ChestOrientationControlModule(RigidBody pelvis, RigidBody chest, TwistCalculator twistCalculator, double controlDT, YoVariableRegistry parentRegistry)
    {
-      super("chest", new RigidBody[] {}, chest, new GeometricJacobian[]{}, twistCalculator, controlDT, parentRegistry);
+      this(pelvis, chest, twistCalculator, controlDT, null, parentRegistry);
+   }
+
+   public ChestOrientationControlModule(RigidBody pelvis, RigidBody chest, TwistCalculator twistCalculator, double controlDT, YoOrientationPIDGains gains, YoVariableRegistry parentRegistry)
+   {
+      super("chest", new RigidBody[] {}, chest, new GeometricJacobian[]{}, twistCalculator, controlDT, gains, parentRegistry);
 
       this.chest = chest;
       ReferenceFrame baseFrame = pelvis.getBodyFixedFrame();

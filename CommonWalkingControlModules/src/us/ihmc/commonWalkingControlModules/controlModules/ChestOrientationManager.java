@@ -1,35 +1,98 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.packetConsumers.ChestOrientationProvider;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-
+import com.yobotics.simulationconstructionset.util.trajectory.OrientationInterpolationTrajectoryGenerator;
+import com.yobotics.simulationconstructionset.util.trajectory.provider.YoQuaternionProvider;
+import com.yobotics.simulationconstructionset.util.trajectory.provider.YoVariableDoubleProvider;
 
 public class ChestOrientationManager
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoVariableRegistry registry;
    private final ChestOrientationControlModule chestOrientationControlModule;
    private final MomentumBasedController momentumBasedController;
-   private final DoubleYoVariable timeLastUpdated = new DoubleYoVariable("chestDesiredTimelastUpdated", registry);
    private int jacobianId = -1;
 
-   public ChestOrientationManager(MomentumBasedController momentumBasedController, ChestOrientationControlModule chestOrientationControlModule, YoVariableRegistry parentRegistry)
+   private final ChestOrientationProvider chestOrientationProvider;
+   private final DoubleYoVariable yoTime;
+   private final DoubleYoVariable receivedNewChestOrientationTime;
+   private final DoubleYoVariable chestOrientationTrajectoryTime;
+   private final OrientationInterpolationTrajectoryGenerator orientationTrajectoryGenerator;
+   private final YoQuaternionProvider initialOrientationProvider;
+   private final YoQuaternionProvider finalOrientationProvider;
+   private final ReferenceFrame chestOrientationExpressedInFrame;
+
+   private final BooleanYoVariable isTrackingOrientation;
+
+   public ChestOrientationManager(MomentumBasedController momentumBasedController, ChestOrientationControlModule chestOrientationControlModule,
+         ChestOrientationProvider chestOrientationProvider, double trajectoryTime, YoVariableRegistry parentRegistry)
    {
       this.momentumBasedController = momentumBasedController;
+      this.yoTime = momentumBasedController.getYoTime();
       this.chestOrientationControlModule = chestOrientationControlModule;
-      timeLastUpdated.set(Double.NaN);
-      parentRegistry.addChild(registry);
+      this.chestOrientationProvider = chestOrientationProvider;
+
+      if (chestOrientationProvider != null)
+      {
+         chestOrientationExpressedInFrame = chestOrientationProvider.getChestOrientationExpressedInFrame();
+
+         registry = new YoVariableRegistry(getClass().getSimpleName());
+         isTrackingOrientation = new BooleanYoVariable("isTrackingOrientation", registry);
+         receivedNewChestOrientationTime = new DoubleYoVariable("receivedNewChestOrientationTime", registry);
+         chestOrientationTrajectoryTime = new DoubleYoVariable("chestOrientationTrajectoryTime", registry);
+
+         chestOrientationTrajectoryTime.set(trajectoryTime);
+         DoubleProvider trajectoryTimeProvider = new YoVariableDoubleProvider(chestOrientationTrajectoryTime);
+         initialOrientationProvider = new YoQuaternionProvider("chestInitialOrientation", chestOrientationExpressedInFrame, registry);
+         finalOrientationProvider = new YoQuaternionProvider("chestFinalOrientation", chestOrientationExpressedInFrame, registry);
+         orientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator("chestOrientation", chestOrientationExpressedInFrame,
+               trajectoryTimeProvider, initialOrientationProvider, finalOrientationProvider, registry);
+         orientationTrajectoryGenerator.setContinuouslyUpdateFinalOrientation(true);
+         orientationTrajectoryGenerator.initialize();
+         parentRegistry.addChild(registry);
+      }
+      else
+      {
+         chestOrientationExpressedInFrame = null;
+         registry = null;
+         isTrackingOrientation = null;
+         receivedNewChestOrientationTime = null;
+         chestOrientationTrajectoryTime = null;
+         initialOrientationProvider = null;
+         finalOrientationProvider = null;
+         orientationTrajectoryGenerator = null;
+      }
    }
+
+   private final FrameOrientation desiredOrientation = new FrameOrientation();
+   private final FrameVector desiredAngularVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
+   private final FrameVector feedForwardAngularAcceleration = new FrameVector(ReferenceFrame.getWorldFrame());
 
    public void compute()
    {
+      checkForNewDesiredOrientationInformation();
+
+      if (chestOrientationProvider != null && isTrackingOrientation.getBooleanValue())
+      {
+         double deltaTime = yoTime.getDoubleValue() - receivedNewChestOrientationTime.getDoubleValue();
+         orientationTrajectoryGenerator.compute(deltaTime);
+         orientationTrajectoryGenerator.get(desiredOrientation);
+         chestOrientationControlModule.setDesireds(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
+         isTrackingOrientation.set(!orientationTrajectoryGenerator.isDone());
+      }
+
       if (jacobianId >= 0)
       {
          chestOrientationControlModule.compute();
@@ -38,10 +101,25 @@ public class ChestOrientationManager
       }
    }
 
+   private void checkForNewDesiredOrientationInformation()
+   {
+      if (chestOrientationProvider == null)
+         return;
+
+      if (chestOrientationProvider.isNewChestOrientationInformationAvailable())
+      {
+         orientationTrajectoryGenerator.get(desiredOrientation);
+         initialOrientationProvider.setOrientation(desiredOrientation);
+         finalOrientationProvider.setOrientation(chestOrientationProvider.getDesiredChestOrientation());
+         receivedNewChestOrientationTime.set(yoTime.getDoubleValue());
+         orientationTrajectoryGenerator.initialize();
+         isTrackingOrientation.set(true);
+      }
+   }  
+
    public void setDesireds(FrameOrientation desiredOrientation, FrameVector desiredAngularVelocity, FrameVector desiredAngularAcceleration)
    {
       chestOrientationControlModule.setDesireds(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
-      timeLastUpdated.set(momentumBasedController.getYoTime().getDoubleValue());
    }
 
    public int createJacobian(FullRobotModel fullRobotModel, String[] chestOrientationControlJointNames)
@@ -49,7 +127,8 @@ public class ChestOrientationManager
       InverseDynamicsJoint[] allJoints = ScrewTools.computeSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
       InverseDynamicsJoint[] chestOrientationControlJoints = ScrewTools.findJointsWithNames(allJoints, chestOrientationControlJointNames);
 
-      int jacobianId = momentumBasedController.getOrCreateGeometricJacobian(chestOrientationControlJoints, chestOrientationControlModule.getChest().getBodyFixedFrame());
+      int jacobianId = momentumBasedController.getOrCreateGeometricJacobian(chestOrientationControlJoints, chestOrientationControlModule.getChest()
+            .getBodyFixedFrame());
       return jacobianId;
    }
 
@@ -59,9 +138,9 @@ public class ChestOrientationManager
       chestOrientationControlModule.setBase(base);
       chestOrientationControlModule.setJacobian(momentumBasedController.getJacobian(jacobianId));
    }
-   
-   public void setUp(RigidBody base, int jacobianId, double proportionalGainX, double proportionalGainY, double proportionalGainZ,
-                     double derivativeGainX, double derivativeGainY, double derivativeGainZ)
+
+   public void setUp(RigidBody base, int jacobianId, double proportionalGainX, double proportionalGainY, double proportionalGainZ, double derivativeGainX,
+         double derivativeGainY, double derivativeGainZ)
    {
       this.jacobianId = jacobianId;
       chestOrientationControlModule.setBase(base);
@@ -69,21 +148,20 @@ public class ChestOrientationManager
       chestOrientationControlModule.setProportionalGains(proportionalGainX, proportionalGainY, proportionalGainZ);
       chestOrientationControlModule.setDerivativeGains(derivativeGainX, derivativeGainY, derivativeGainZ);
    }
-   
+
    public void setControlGains(double proportionalGain, double derivativeGain)
    {
       chestOrientationControlModule.setProportionalGains(proportionalGain, proportionalGain, proportionalGain);
       chestOrientationControlModule.setDerivativeGains(derivativeGain, derivativeGain, derivativeGain);
    }
 
+   public void setMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
+   {
+      chestOrientationControlModule.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
+   }
+
    public void turnOff()
    {
       setUp(null, -1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-   }
-
-   public boolean areDesiredsValid()
-   {
-      double timeSinceLastUpdate = momentumBasedController.getYoTime().getDoubleValue() - timeLastUpdated.getDoubleValue();
-      return timeSinceLastUpdate < 1.5 * momentumBasedController.getControlDT();
    }
 }
