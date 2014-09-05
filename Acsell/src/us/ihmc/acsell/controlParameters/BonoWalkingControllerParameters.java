@@ -2,10 +2,14 @@ package us.ihmc.acsell.controlParameters;
 
 import javax.media.j3d.Transform3D;
 
+import com.yobotics.simulationconstructionset.util.controller.YoOrientationPIDGains;
+import com.yobotics.simulationconstructionset.util.controller.YoSymmetricSE3PIDGains;
+
 import us.ihmc.acsell.parameters.BonoPhysicalProperties;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 /**
  * Created by dstephen on 2/14/14.
@@ -374,6 +378,29 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
       return Double.POSITIVE_INFINITY;//270.0; //1000.0;
    }
 
+
+   @Override
+   public YoOrientationPIDGains createChestControlGains(YoVariableRegistry registry)
+   {
+      YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("ChestOrientation", registry);
+
+      double kp = 100.0;
+      double zeta = 0.8;
+      double ki = 0.0;
+      double maxIntegralError = 0.0;
+      double maxAccel = Double.POSITIVE_INFINITY;
+      double maxJerk = Double.POSITIVE_INFINITY;
+
+      gains.setProportionalGain(kp);
+      gains.setDampingRatio(zeta);
+      gains.setIntegralGain(ki);
+      gains.setMaximumIntegralError(maxIntegralError);
+      gains.setMaximumAcceleration(maxAccel);
+      gains.setMaximumJerk(maxJerk);
+      gains.createDerivativeGainUpdater(true);
+
+      return gains;
+   }
    @Override
    public double getSwingKpXY()
    {
