@@ -10,7 +10,7 @@ public class ValkyrieConfigurationRoot
 
    public static final SideDependentList<String> FOOT_SENSOR_FILES_BASENAMES = new SideDependentList<>("FT14020", "FT14175");
 
-   public static final boolean VALKYRIE_WITH_ARMS = false;
+   public static final boolean VALKYRIE_WITH_ARMS = true;
 
    public static final String SCHEDULE_FILE = "main_ihmc.yaml";
    public static final String URDF_FILE = "models/V1_hw_ihmc.urdf";
