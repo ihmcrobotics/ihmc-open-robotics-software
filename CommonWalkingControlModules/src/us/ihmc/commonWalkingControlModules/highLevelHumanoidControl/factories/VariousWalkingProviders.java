@@ -7,7 +7,6 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ChestOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootStateProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBearingProvider;
@@ -15,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.FootPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandstepProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.HeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.DesiredHighLevelStateProvider;
 import us.ihmc.robotSide.RobotSide;
@@ -28,7 +28,7 @@ public class VariousWalkingProviders
    private final HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters;
 
    private final DesiredHighLevelStateProvider desiredHighLevelStateProvider;
-   private final DesiredHeadOrientationProvider desiredHeadOrientationProvider;
+   private final HeadOrientationProvider desiredHeadOrientationProvider;
    private final DesiredPelvisPoseProvider desiredPelvisPoseProvider;
    private final DesiredComHeightProvider desiredComHeightProvider;
    private final HandPoseProvider desiredHandPoseProvider;
@@ -46,7 +46,7 @@ public class VariousWalkingProviders
 
    public VariousWalkingProviders(FootstepProvider footstepProvider, HandstepProvider handstepProvider, 
          HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters,
-         DesiredHeadOrientationProvider desiredHeadOrientationProvider, DesiredComHeightProvider desiredComHeightProvider,
+         HeadOrientationProvider desiredHeadOrientationProvider, DesiredComHeightProvider desiredComHeightProvider,
          DesiredPelvisPoseProvider desiredPelvisPoseProvider, HandPoseProvider desiredHandPoseProvider,
          HandLoadBearingProvider desiredHandLoadBearingProvider, ChestOrientationProvider desiredChestOrientationProvider,
          FootPoseProvider footPoseProvider, DesiredFootStateProvider footStateProvider, DesiredHighLevelStateProvider desiredHighLevelStateProvider,
@@ -112,7 +112,7 @@ public class VariousWalkingProviders
       return handstepProvider;
    }
 
-   public DesiredHeadOrientationProvider getDesiredHeadOrientationProvider()
+   public HeadOrientationProvider getDesiredHeadOrientationProvider()
    {
       return desiredHeadOrientationProvider;
    }

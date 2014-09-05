@@ -15,12 +15,12 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootPoseProvid
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootStateProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandPoseProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandstepProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.HeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.DesiredHighLevelStateProvider;
 import us.ihmc.commonWalkingControlModules.packetProviders.SystemErrControlStatusProducer;
@@ -70,7 +70,7 @@ public class ComponentBasedVariousWalkingProviderFactory implements VariousWalki
       LinkedHashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = new LinkedHashMap<Footstep, TrajectoryParameters>();
 
       DesiredHighLevelStateProvider highLevelStateProvider = null;
-      DesiredHeadOrientationProvider headOrientationProvider = null;
+      HeadOrientationProvider headOrientationProvider = null;
       DesiredComHeightProvider comHeightProvider = null;
       DesiredPelvisPoseProvider pelvisPoseProvider = null;
       ChestOrientationProvider chestOrientationProvider = null;
