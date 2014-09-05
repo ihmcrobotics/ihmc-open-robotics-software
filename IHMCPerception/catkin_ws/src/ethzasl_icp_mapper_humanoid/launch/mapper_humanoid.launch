@@ -1,10 +1,10 @@
 <launch>
-	<node name="mapper" type="mapper" pkg="ethzasl_icp_mapper_drc" output="screen">
+	<node name="mapper_humanoid" type="mapper_humanoid" pkg="ethzasl_icp_mapper_humanoid" output="screen">
 		<remap from="cloud_in" to="/lidar_to_point_cloud_transformer/assembled_lidar_point_cloud" />
 		<param name="subscribe_scan" value="false" />
-		<param name="icpConfig" value="$(find ethzasl_icp_mapper_drc)/parameters/standard/icp.yaml" />
-		<param name="inputFiltersConfig" value="$(find ethzasl_icp_mapper_drc)/parameters/standard/input_filters.yaml" />
-		<param name="mapPostFiltersConfig" value="$(find ethzasl_icp_mapper_drc)/parameters/standard/map_post_filters.yaml" />
+		<param name="icpConfig" value="$(find ethzasl_icp_mapper_humanoid)/parameters/standard/icp.yaml" />
+		<param name="inputFiltersConfig" value="$(find ethzasl_icp_mapper_humanoid)/parameters/standard/input_filters.yaml" />
+		<param name="mapPostFiltersConfig" value="$(find ethzasl_icp_mapper_humanoid)/parameters/standard/map_post_filters.yaml" />
 		<param name="odom_frame" value="/world" />
 		<param name="map_frame" value="/world_icp" />
 		<param name="icp_correction_frame" value="/pelvis" />
