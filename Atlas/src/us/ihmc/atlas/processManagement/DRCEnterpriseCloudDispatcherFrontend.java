@@ -451,6 +451,12 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
             spawnBehaviorModuleButton.setEnabled(false);
          }
       });
+
+      if(!NetworkConfigParameters.USE_BEHAVIORS_MODULE)
+      {
+         spawnBehaviorModuleButton.setEnabled(false);
+      }
+
       panel.add(spawnBehaviorModuleButton);
 
       c.gridy++;
