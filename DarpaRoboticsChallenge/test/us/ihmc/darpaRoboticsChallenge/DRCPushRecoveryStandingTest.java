@@ -107,7 +107,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
       BambooTools.reportTestFinishedMessage();
    }
-   
+
    @Test
    public void TestPushForwardInDoubleSupportAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException
    {
@@ -133,14 +133,14 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
       // simulate for a little while longer
       blockingSimulationRunner.simulateAndBlock(forceDuration + 2.0);
-      
+
       //re-enable walking
       walk.set(true);
       blockingSimulationRunner.simulateAndBlock(6.0);
 
       BambooTools.reportTestFinishedMessage();
    }
-   
+
    @Test
    public void TestDoublePushForwardInDoubleSupportAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException
    {
@@ -166,20 +166,20 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
       // simulate for a little while longer
       blockingSimulationRunner.simulateAndBlock(forceDuration + 2.0);
-      
+
       // push the robot
       pushRobotController.applyForce(forceDirection, forceMagnitude, forceDuration);
 
       // simulate for a little while longer
       blockingSimulationRunner.simulateAndBlock(forceDuration + 2.0);
-      
+
       //re-enable walking
       walk.set(true);
       blockingSimulationRunner.simulateAndBlock(6.0);
 
       BambooTools.reportTestFinishedMessage();
    }
-   
+
    @Test
    public void TestPushBackwardInDoubleSupportAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException
    {
@@ -205,14 +205,14 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
       // simulate for a little while longer
       blockingSimulationRunner.simulateAndBlock(forceDuration + 2.0);
-      
+
       //re-enable walking
       walk.set(true);
       blockingSimulationRunner.simulateAndBlock(6.0);
 
       BambooTools.reportTestFinishedMessage();
    }
-   
+
    @Test
    public void TestPushBackwardForwardInDoubleSupportAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException
    {
@@ -238,15 +238,15 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
       // simulate for a little while longer
       blockingSimulationRunner.simulateAndBlock(forceDuration + 3.0);
-      
+
       forceMagnitude = 450.0;
-      
+
       // push the robot
       pushRobotController.applyForce(forceDirection, forceMagnitude, forceDuration);
 
       // simulate for a little while longer
       blockingSimulationRunner.simulateAndBlock(forceDuration + 3.0);
-      
+
       //re-enable walking
       walk.set(true);
       blockingSimulationRunner.simulateAndBlock(6.0);
@@ -265,20 +265,18 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
       {
          track.getSimulationConstructionSet().addYoGraphic(pushRobotController.getForceVisualizer());
       }
-      
+
       SimulationConstructionSet scs = track.getSimulationConstructionSet();
-      
+
       BooleanYoVariable enable = (BooleanYoVariable) scs.getVariable("PushRecoveryControlModule", "enablePushRecovery");
       BooleanYoVariable enableDS = (BooleanYoVariable) scs.getVariable("PushRecoveryControlModule", "enablePushRecoveryFromDoubleSupport");
-      BooleanYoVariable useICPProjectionPlanner = (BooleanYoVariable) scs.getVariable("PushRecoveryControlModule", "useICPProjection");
       BooleanYoVariable usePushRecoveryICPPlanner = (BooleanYoVariable) scs.getVariable("PushRecoveryControlModule", "usePushRecoveryICPPlanner");
 
       // enable push recovery
       enable.set(true);
       enableDS.set(true);
-      
+
       // enable ICP push recovery planner and disable projection planner
-      useICPProjectionPlanner.set(false);
       usePushRecoveryICPPlanner.set(true);
 
       return track;
