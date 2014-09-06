@@ -39,8 +39,8 @@ import com.yobotics.simulationconstructionset.util.trajectory.provider.YoVelocit
 
 public class FootControlModule
 {
-   public static final boolean USE_SUPPORT_FOOT_HOLD_POSITION_STATE = false;
-   public static final boolean USE_SUPPORT_DAMPING = false;
+   public static final boolean USE_SUPPORT_FOOT_HOLD_POSITION_STATE = true;
+   public static final boolean USE_SUPPORT_DAMPING = true;
 
    private final YoVariableRegistry registry;
    private final ContactablePlaneBody contactableFoot;
