@@ -358,7 +358,7 @@ public class PushRecoveryControlModule
    /**
     * This is a simple ICP planner that can work in two different ways. First way computes the desired ICP using a strait line position trajectory, while the second way 
     * (active if enableProjectionInsidePushRecoveryICPPlanner is true) simply defines the desired ICP as the projection of the ICP on the capture point trajectory,
-    * which is the line connecting the initial ICP to the final).
+    * which is the line connecting the initial ICP to the final). For the second way the desired ICP is set to be the previous desired ICP in order to try to slow down the current ICP.
     *
     */
    public class PushRecoveryICPPlanner extends StraightLinePositionTrajectoryGenerator
