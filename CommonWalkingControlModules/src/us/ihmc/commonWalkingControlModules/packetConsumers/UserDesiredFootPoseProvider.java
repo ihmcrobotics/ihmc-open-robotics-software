@@ -28,6 +28,11 @@ public class UserDesiredFootPoseProvider implements FootPoseProvider
    private final DoubleYoVariable userFootPoseY = new DoubleYoVariable("userFootPoseY", registry);
    private final DoubleYoVariable userFootPoseZ = new DoubleYoVariable("userFootPoseZ", registry);
 
+   private final DoubleYoVariable footPoseYawCheck = new DoubleYoVariable("footPoseYawCheck", registry);
+   private final DoubleYoVariable footPosePitchCheck = new DoubleYoVariable("footPosePitchCheck", registry);
+   private final DoubleYoVariable footPoseRollCheck = new DoubleYoVariable("footPoseRollCheck", registry);
+
+   
    private final FullRobotModel fullRobotModel;
 
    public UserDesiredFootPoseProvider(FullRobotModel fullRobotModel, YoVariableRegistry parentRegistry)
@@ -67,7 +72,13 @@ public class UserDesiredFootPoseProvider implements FootPoseProvider
       
       
       FramePose framePose = new FramePose(footFrame, transform);
+      
       framePose.changeFrame(ReferenceFrame.getWorldFrame());
+      
+      footPoseYawCheck.set(framePose.getYaw());
+      footPosePitchCheck.set(framePose.getPitch());
+      footPoseRollCheck.set(framePose.getRoll());
+
       
       userFootPoseTakeEm.set(false);
       
