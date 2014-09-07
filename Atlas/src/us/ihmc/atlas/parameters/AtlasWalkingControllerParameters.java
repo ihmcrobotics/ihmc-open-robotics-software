@@ -9,14 +9,16 @@ import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
-import com.yobotics.simulationconstructionset.util.controller.YoOrientationPIDGains;
-import com.yobotics.simulationconstructionset.util.controller.YoSymmetricSE3PIDGains;
-
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+
+import com.yobotics.simulationconstructionset.util.controller.YoOrientationPIDGains;
+import com.yobotics.simulationconstructionset.util.controller.YoSE3PIDGains;
+import com.yobotics.simulationconstructionset.util.controller.YoSymmetricSE3PIDGains;
 
 
 public class AtlasWalkingControllerParameters implements WalkingControllerParameters
@@ -470,43 +472,37 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    }
 
    @Override
-   public double getSwingKpXY()
+   public YoSE3PIDGains createSwingFootControlGains(YoVariableRegistry registry)
    {
-      return 100.0;
+      YoFootSE3Gains gains = new YoFootSE3Gains("SwingFoot", registry);
+
+      double kpXY = 100.0;
+      double kpZ = 200.0;
+      double zetaXYZ = runningOnRealRobot ? 0.25 : 0.7;
+      double kpOrientation = 200.0;
+      double zetaOrientation = 0.7;
+      double maxPositionAcceleration = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
+      double maxPositionJerk = runningOnRealRobot ? 150.0 : Double.POSITIVE_INFINITY;
+      double maxOrientationAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
+      double maxOrientationJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
+      
+      gains.setPositionProportionalGains(kpXY, kpZ);
+      gains.setPositionDampingRatio(zetaXYZ);
+      gains.setPositionMaxAccelerationAndJerk(maxPositionAcceleration, maxPositionJerk);
+      gains.setOrientationProportionalGains(kpOrientation, kpOrientation);
+      gains.setOrientationDampingRatio(zetaOrientation);
+      gains.setOrientationMaxAccelerationAndJerk(maxOrientationAcceleration, maxOrientationJerk);
+      gains.createDerivativeGainUpdater(true);
+
+      return gains;
    }
-   
+
    @Override
    public double getSwingHeightMaxForPushRecoveryTrajectory()
    {
       return 0.12;
    }
    
-   @Override
-   public double getSwingKpZ()
-   {
-      return 200.0;
-   }
-   
-   @Override
-   public double getSwingKpOrientation()
-   {
-      return 200.0;
-   }
-   
-   @Override
-   public double getSwingZetaXYZ()
-   {
-      if (!runningOnRealRobot) return 0.7;
-      return 0.25;
-   }
-   
-   @Override
-   public double getSwingZetaOrientation()
-   {
-      if (!runningOnRealRobot) return 0.7;
-      return 0.7; 
-   }
-
    @Override
    public double getHoldKpXY()
    {
@@ -527,38 +523,11 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       return 0.2;
    }
 
-   @Override
-   public double getSwingMaxPositionAcceleration()
-   {
-      if (!runningOnRealRobot) return Double.POSITIVE_INFINITY;
-      return 10.0;
-   }
-   
-   @Override
-   public double getSwingMaxPositionJerk()
-   {
-      if (!runningOnRealRobot) return Double.POSITIVE_INFINITY;
-      return 150.0;
-   }
-   
-   @Override
-   public double getSwingMaxOrientationAcceleration()
-   {
-      if (!runningOnRealRobot) return Double.POSITIVE_INFINITY;
-      return 100.0;
-   }
-   
    public double getSwingMaxHeightForPushRecoveryTrajectory()
    {
 	   return 0.15;
    }
    
-   @Override
-   public double getSwingMaxOrientationJerk()
-   {
-      if (!runningOnRealRobot) return Double.POSITIVE_INFINITY;
-      return 1500.0;
-   }
    @Override
    public double getSupportSingularityEscapeMultiplier()
    {
