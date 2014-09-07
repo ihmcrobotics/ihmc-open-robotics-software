@@ -6,6 +6,7 @@ import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.util.controller.YoOrientationPIDGains;
+import com.yobotics.simulationconstructionset.util.controller.YoSE3PIDGains;
 
 public interface WalkingControllerParameters extends HeadOrientationControllerParameters
 {
@@ -106,32 +107,16 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract double getMaxJerkUpperBody();
 
    public abstract YoOrientationPIDGains createChestControlGains(YoVariableRegistry registry);
-
-   public abstract double getSwingKpXY();
-
-   public abstract double getSwingKpZ();
+   
+   public abstract YoSE3PIDGains createSwingFootControlGains(YoVariableRegistry registry);
 
    public abstract double getSwingHeightMaxForPushRecoveryTrajectory();
-
-   public abstract double getSwingKpOrientation();
-
-   public abstract double getSwingZetaXYZ();
-
-   public abstract double getSwingZetaOrientation();
 
    public abstract double getHoldKpXY();
 
    public abstract double getHoldKpOrientation();
 
    public abstract double getHoldZeta();
-
-   public abstract double getSwingMaxPositionAcceleration();
-
-   public abstract double getSwingMaxPositionJerk();
-
-   public abstract double getSwingMaxOrientationAcceleration();
-
-   public abstract double getSwingMaxOrientationJerk();
 
    public abstract double getSupportSingularityEscapeMultiplier();
 

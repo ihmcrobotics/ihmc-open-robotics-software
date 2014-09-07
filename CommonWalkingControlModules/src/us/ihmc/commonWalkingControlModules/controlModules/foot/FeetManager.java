@@ -44,12 +44,6 @@ public class FeetManager
 
    private final SideDependentList<FootSwitchInterface> footSwitches;
 
-   private final DoubleYoVariable swingKpXY = new DoubleYoVariable("swingKpXY", registry);
-   private final DoubleYoVariable swingKpZ = new DoubleYoVariable("swingKpZ", registry);
-   private final DoubleYoVariable swingKpOrientation = new DoubleYoVariable("swingKpOrientation", registry);
-   private final DoubleYoVariable swingZetaXYZ = new DoubleYoVariable("swingZetaXYZ", registry);
-   private final DoubleYoVariable swingZetaOrientation = new DoubleYoVariable("swingZetaOrientation", registry);
-
    private final DoubleYoVariable holdKpXY = new DoubleYoVariable("holdKpXY", registry);
    private final DoubleYoVariable holdKpOrientation = new DoubleYoVariable("holdKpOrientation", registry);
    private final DoubleYoVariable holdZeta = new DoubleYoVariable("holdZeta", registry);
@@ -78,12 +72,6 @@ public class FeetManager
       singularityEscapeNullspaceMultiplierSupportLeg.set(walkingControllerParameters.getSupportSingularityEscapeMultiplier());
       singularityEscapeNullspaceMultiplierSupportLegLocking.set(0.0); // -0.5);
 
-      swingKpXY.set(walkingControllerParameters.getSwingKpXY());
-      swingKpZ.set(walkingControllerParameters.getSwingKpZ());
-      swingKpOrientation.set(walkingControllerParameters.getSwingKpOrientation());
-      swingZetaXYZ.set(walkingControllerParameters.getSwingZetaXYZ());
-      swingZetaOrientation.set(walkingControllerParameters.getSwingZetaOrientation());
-
       holdKpXY.set(walkingControllerParameters.getHoldKpXY());
       holdKpOrientation.set(walkingControllerParameters.getHoldKpOrientation());
       holdZeta.set(walkingControllerParameters.getHoldZeta());
@@ -91,11 +79,6 @@ public class FeetManager
       toeOffKpXY.set(walkingControllerParameters.getToeOffKpXY());
       toeOffKpOrientation.set(walkingControllerParameters.getToeOffKpOrientation());
       toeOffZeta.set(walkingControllerParameters.getToeOffZeta());
-
-      swingMaxPositionAcceleration.set(walkingControllerParameters.getSwingMaxPositionAcceleration());
-      swingMaxPositionJerk.set(walkingControllerParameters.getSwingMaxPositionJerk());
-      swingMaxOrientationAcceleration.set(walkingControllerParameters.getSwingMaxOrientationAcceleration());
-      swingMaxOrientationJerk.set(walkingControllerParameters.getSwingMaxOrientationJerk());
 
       feet = momentumBasedController.getContactableFeet();
       walkOnTheEdgesManager = new WalkOnTheEdgesManager(walkingControllerParameters, feet, footControlModules, registry);
@@ -127,19 +110,11 @@ public class FeetManager
          public void variableChanged(YoVariable<?> v)
          {
             endEffectorControlModule.setHoldGains(holdKpXY.getDoubleValue(), holdKpOrientation.getDoubleValue(), holdZeta.getDoubleValue());
-            endEffectorControlModule.setSwingGains(swingKpXY.getDoubleValue(), swingKpZ.getDoubleValue(), swingKpOrientation.getDoubleValue(),
-                  swingZetaXYZ.getDoubleValue(), swingZetaOrientation.getDoubleValue());
             endEffectorControlModule.setToeOffGains(toeOffKpXY.getDoubleValue(), toeOffKpOrientation.getDoubleValue(), toeOffZeta.getDoubleValue());
             endEffectorControlModule.setMaxAccelerationAndJerk(swingMaxPositionAcceleration.getDoubleValue(), swingMaxPositionJerk.getDoubleValue(),
                   swingMaxOrientationAcceleration.getDoubleValue(), swingMaxOrientationJerk.getDoubleValue());
          }
       };
-
-      swingKpXY.addVariableChangedListener(ret);
-      swingKpZ.addVariableChangedListener(ret);
-      swingKpOrientation.addVariableChangedListener(ret);
-      swingZetaXYZ.addVariableChangedListener(ret);
-      swingZetaOrientation.addVariableChangedListener(ret);
 
       swingMaxPositionAcceleration.addVariableChangedListener(ret);
       swingMaxPositionJerk.addVariableChangedListener(ret);

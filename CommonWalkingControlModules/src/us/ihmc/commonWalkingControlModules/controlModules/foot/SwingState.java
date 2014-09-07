@@ -29,6 +29,7 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
+import com.yobotics.simulationconstructionset.util.controller.YoSE3PIDGains;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.trajectory.OrientationInterpolationTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
@@ -53,12 +54,12 @@ public class SwingState extends AbstractUnconstrainedState
    public SwingState(DoubleProvider swingTimeProvider, VectorProvider touchdownVelocityProvider, RigidBodySpatialAccelerationControlModule accelerationControlModule,
          MomentumBasedController momentumBasedController, ContactablePlaneBody contactableBody, int jacobianId, DoubleYoVariable nullspaceMultiplier,
          BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape,
-         LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule, RobotSide robotSide,
+         LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule, YoSE3PIDGains gains, RobotSide robotSide,
          YoVariableRegistry registry, WalkingControllerParameters walkingControllerParameters)
    {
       super(ConstraintType.SWING, accelerationControlModule, momentumBasedController,
             contactableBody, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape,
-            legSingularityAndKneeCollapseAvoidanceControlModule, robotSide, registry);
+            legSingularityAndKneeCollapseAvoidanceControlModule, gains, robotSide, registry);
 
       RigidBody rigidBody = contactableBody.getRigidBody();
       String namePrefix = rigidBody.getName();

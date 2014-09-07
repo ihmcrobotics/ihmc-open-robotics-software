@@ -16,7 +16,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
-import com.yobotics.simulationconstructionset.util.controller.GainCalculator;
+import com.yobotics.simulationconstructionset.util.controller.YoSE3PIDGains;
 
 /**
  * The unconstrained state is used if the foot is moved free in space without constrains. Depending on the type of trajectory
@@ -30,7 +30,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
 
    protected boolean trajectoryWasReplanned;
 
-   protected double swingKpXY, swingKpZ, swingKpOrientation, swingZetaXYZ, swingZetaOrientation;
+   protected final YoSE3PIDGains gains;
 
    private final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
    
@@ -42,7 +42,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    public AbstractUnconstrainedState(ConstraintType constraintType, RigidBodySpatialAccelerationControlModule accelerationControlModule,
          MomentumBasedController momentumBasedController, ContactablePlaneBody contactableBody, int jacobianId, DoubleYoVariable nullspaceMultiplier,
          BooleanYoVariable jacobianDeterminantInRange, BooleanYoVariable doSingularityEscape,
-         LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule, RobotSide robotSide,
+         LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule, YoSE3PIDGains gains, RobotSide robotSide,
          YoVariableRegistry registry)
    {
       super(constraintType, accelerationControlModule, momentumBasedController,
@@ -50,6 +50,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
             robotSide, registry);
       
       this.legSingularityAndKneeCollapseAvoidanceControlModule = legSingularityAndKneeCollapseAvoidanceControlModule;
+      this.gains = gains;
 
       this.hipYawJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.HIP_YAW);
       this.ankleRollJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.ANKLE_ROLL);
@@ -84,11 +85,13 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       isCoPOnEdge = false;
       initializeTrajectory();
 
-      setSwingControlGains(swingKpXY, swingKpZ, swingKpOrientation, swingZetaXYZ, swingZetaOrientation);
+      accelerationControlModule.setGains(gains);
    }
 
    public void doSpecificAction()
    {
+      accelerationControlModule.setGains(gains);
+
       if (doSingularityEscape.getBooleanValue())
       {
          initializeTrajectory();
@@ -197,26 +200,5 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       trajectoryWasReplanned = false;
 
       accelerationControlModule.reset();
-   }
-
-   public void setSwingGains(double swingKpXY, double swingKpZ, double swingKpOrientation, double swingZetaXYZ, double swingZetaOrientation)
-   {
-      this.swingKpXY = swingKpXY;
-      this.swingKpZ = swingKpZ;
-      this.swingKpOrientation = swingKpOrientation;
-      this.swingZetaXYZ = swingZetaXYZ;
-      this.swingZetaOrientation = swingZetaOrientation;
-   }
-
-   private void setSwingControlGains(double kxyPosition, double kzPosition, double kOrientation, double zetaXYZ, double zetaOrientation)
-   {
-      double dxyPosition = GainCalculator.computeDerivativeGain(kxyPosition, zetaXYZ);
-      double dzPosition = GainCalculator.computeDerivativeGain(kzPosition, zetaXYZ);
-      double dOrientation = GainCalculator.computeDerivativeGain(kOrientation, zetaOrientation);
-
-      accelerationControlModule.setPositionProportionalGains(kxyPosition, kxyPosition, kzPosition);
-      accelerationControlModule.setPositionDerivativeGains(dxyPosition, dxyPosition, dzPosition);
-      accelerationControlModule.setOrientationProportionalGains(kOrientation, kOrientation, kOrientation);
-      accelerationControlModule.setOrientationDerivativeGains(dOrientation, dOrientation, dOrientation);
    }
 }

@@ -32,6 +32,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 
 import com.yobotics.simulationconstructionset.util.controller.GainCalculator;
+import com.yobotics.simulationconstructionset.util.controller.YoSE3PIDGains;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
@@ -143,6 +144,8 @@ public class FootControlModule
       YoVelocityProvider touchdownVelocityProvider = new YoVelocityProvider(namePrefix + "TouchdownVelocity", ReferenceFrame.getWorldFrame(), registry);
       touchdownVelocityProvider.set(new Vector3d(0.0, 0.0, walkingControllerParameters.getDesiredTouchdownVelocity()));
 
+      YoSE3PIDGains swingFootControlGains = walkingControllerParameters.createSwingFootControlGains(registry);
+
       List<AbstractFootControlState> states = new ArrayList<AbstractFootControlState>();
       touchdownOnToesState = new TouchdownState(ConstraintType.TOES_TOUCHDOWN, walkingControllerParameters, touchdownVelocityProvider,
             accelerationControlModule, momentumBasedController, contactableFoot, jacobianId, nullspaceMultiplier, jacobianDeterminantInRange,
@@ -168,12 +171,13 @@ public class FootControlModule
       states.add(holdPositionState);
 
       swingState = new SwingState(swingTimeProvider, touchdownVelocityProvider, accelerationControlModule, momentumBasedController, contactableFoot,
-            jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, legSingularityAndKneeCollapseAvoidanceControlModule, robotSide,
-            registry, walkingControllerParameters);
+            jacobianId, nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, legSingularityAndKneeCollapseAvoidanceControlModule,
+            swingFootControlGains, robotSide, registry, walkingControllerParameters);
       states.add(swingState);
 
       moveStraightState = new MoveStraightState(swingTimeProvider, accelerationControlModule, momentumBasedController, contactableFoot, jacobianId,
-            nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, legSingularityAndKneeCollapseAvoidanceControlModule, robotSide, registry);
+            nullspaceMultiplier, jacobianDeterminantInRange, doSingularityEscape, legSingularityAndKneeCollapseAvoidanceControlModule, swingFootControlGains,
+            robotSide, registry);
       states.add(moveStraightState);
 
       setupStateMachine(states);
@@ -183,12 +187,6 @@ public class FootControlModule
    {
       accelerationControlModule.setPositionMaxAccelerationAndJerk(maxPositionAcceleration, maxPositionJerk);
       accelerationControlModule.setOrientationMaxAccelerationAndJerk(maxOrientationAcceleration, maxOrientationJerk);
-   }
-
-   public void setSwingGains(double swingKpXY, double swingKpZ, double swingKpOrientation, double swingZetaXYZ, double swingZetaOrientation)
-   {
-      swingState.setSwingGains(swingKpXY, swingKpZ, swingKpOrientation, swingZetaXYZ, swingZetaOrientation);
-      moveStraightState.setSwingGains(swingKpXY, swingKpZ, swingKpOrientation, swingZetaXYZ, swingZetaOrientation);
    }
 
    public void setHoldGains(double holdKpXY, double holdKpOrientation, double holdZeta)
