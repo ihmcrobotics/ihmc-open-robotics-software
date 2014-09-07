@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
+import com.yobotics.simulationconstructionset.util.controller.YoSE3PIDGains;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkOnTheEdgesManager;
@@ -88,9 +90,11 @@ public class FeetManager
       pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
       ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
 
+      YoSE3PIDGains swingFootControlGains = walkingControllerParameters.createSwingFootControlGains(registry);
+
       for (RobotSide robotSide : RobotSide.values)
       {
-         FootControlModule footControlModule = new FootControlModule(robotSide, walkingControllerParameters, swingTimeProvider, momentumBasedController,
+         FootControlModule footControlModule = new FootControlModule(robotSide, walkingControllerParameters, swingFootControlGains, swingTimeProvider, momentumBasedController,
                registry);
          footControlModule.setParameters(singularityEscapeMultiplierForSwing);
 

@@ -86,7 +86,7 @@ public class FootControlModule
    private final FootSwitchInterface footSwitch;
    private final DoubleYoVariable footLoadThresholdToHoldPosition;
 
-   public FootControlModule(RobotSide robotSide, WalkingControllerParameters walkingControllerParameters, DoubleProvider swingTimeProvider,
+   public FootControlModule(RobotSide robotSide, WalkingControllerParameters walkingControllerParameters, YoSE3PIDGains swingFootControlGains, DoubleProvider swingTimeProvider,
          MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
    {
       contactableFoot = momentumBasedController.getContactableFeet().get(robotSide);
@@ -143,8 +143,6 @@ public class FootControlModule
 
       YoVelocityProvider touchdownVelocityProvider = new YoVelocityProvider(namePrefix + "TouchdownVelocity", ReferenceFrame.getWorldFrame(), registry);
       touchdownVelocityProvider.set(new Vector3d(0.0, 0.0, walkingControllerParameters.getDesiredTouchdownVelocity()));
-
-      YoSE3PIDGains swingFootControlGains = walkingControllerParameters.createSwingFootControlGains(registry);
 
       List<AbstractFootControlState> states = new ArrayList<AbstractFootControlState>();
       touchdownOnToesState = new TouchdownState(ConstraintType.TOES_TOUCHDOWN, walkingControllerParameters, touchdownVelocityProvider,
