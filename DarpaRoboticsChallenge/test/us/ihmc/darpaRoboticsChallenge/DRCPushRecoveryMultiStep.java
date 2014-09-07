@@ -82,7 +82,7 @@ public abstract class DRCPushRecoveryMultiStep  implements MultiRobotTestInterfa
    }
    
    @Test
-   public void TestMultiStepForward() throws SimulationExceededMaximumTimeException, InterruptedException
+   public void TestMultiStepForwardAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException
    {
       BambooTools.reportTestStartedMessage();
 
@@ -115,7 +115,7 @@ public abstract class DRCPushRecoveryMultiStep  implements MultiRobotTestInterfa
    }
    
    @Test
-   public void TestMultiStepBackward() throws SimulationExceededMaximumTimeException, InterruptedException
+   public void TestMultiStepBackwardAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException
    {
       BambooTools.reportTestStartedMessage();
 
