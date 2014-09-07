@@ -373,8 +373,8 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    {
       YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("PelvisOrientation", registry);
 
-      double kp = runningOnRealRobot ? 60.0 : 100.0;
-      double zeta = runningOnRealRobot ? 0.4 : 0.8;
+      double kp = runningOnRealRobot ? 80.0 : 100.0;
+      double zeta = runningOnRealRobot ? 0.5 : 0.8;
       double ki = 0.0;
       double maxIntegralError = 0.0;
       double maxAccel = runningOnRealRobot ? 36.0 : 18.0;
@@ -459,7 +459,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    {
       YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("ChestOrientation", registry);
 
-      double kp = runningOnRealRobot ? 80.0 : 100.0;
+      double kp = runningOnRealRobot ? 100.0 : 100.0;
       double zeta = runningOnRealRobot ? 0.6 : 0.8;
       double ki = 0.0;
       double maxIntegralError = 0.0;
@@ -485,7 +485,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       double kpXY = 100.0;
       double kpZ = runningOnRealRobot ? 100.0 : 200.0;
       double zetaXYZ = runningOnRealRobot ? 0.3 : 0.7;
-      double kpXYOrientation = runningOnRealRobot ? 40.0 : 200.0;
+      double kpXYOrientation = runningOnRealRobot ? 300.0 : 300.0;
       double kpZOrientation = runningOnRealRobot ? 40.0 : 200.0;
       double zetaOrientation = runningOnRealRobot ? 0.3 : 0.7;
       double maxPositionAcceleration = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
