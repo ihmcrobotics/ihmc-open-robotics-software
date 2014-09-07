@@ -64,6 +64,41 @@ public class FullRobotModelCorruptor
          }
       });
 
+      // Feet
+      
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
+         final DoubleYoVariable footMass = new DoubleYoVariable(sidePrefix + "FootMass", registry);
+         final RigidBody foot = fullRobotModel.getFoot(robotSide);
+         footMass.set(foot.getInertia().getMass());
+         
+         footMass.addVariableChangedListener(new VariableChangedListener()
+         {
+            @Override
+            public void variableChanged(YoVariable<?> v)
+            {
+               foot.getInertia().setMass(footMass.getDoubleValue());
+            }
+         });
+         FramePoint originalFootCoMOffset = new FramePoint();
+         foot.packCoMOffset(originalFootCoMOffset);
+         final YoFramePoint footCoMOffset = new YoFramePoint(sidePrefix + "FootCoMOffset", originalFootCoMOffset.getReferenceFrame(), registry);
+         footCoMOffset.set(originalFootCoMOffset);
+         
+         footCoMOffset.attachVariableChangedListener(new VariableChangedListener()
+         {
+            private final FramePoint tempFramePoint = new FramePoint();
+            @Override
+            public void variableChanged(YoVariable<?> v)
+            {
+               footCoMOffset.getFrameTupleIncludingFrame(tempFramePoint);
+               foot.setCoMOffset(tempFramePoint);
+            }
+         });
+     }
+      
+      
 //      for (RobotSide robotSide : RobotSide.values)
 //      {
 //         FramePoint originalArmCoMOffset = new FramePoint();
