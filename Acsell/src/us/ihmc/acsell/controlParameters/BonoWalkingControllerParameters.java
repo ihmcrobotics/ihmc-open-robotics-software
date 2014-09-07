@@ -3,10 +3,12 @@ package us.ihmc.acsell.controlParameters;
 import javax.media.j3d.Transform3D;
 
 import com.yobotics.simulationconstructionset.util.controller.YoOrientationPIDGains;
+import com.yobotics.simulationconstructionset.util.controller.YoSE3PIDGains;
 import com.yobotics.simulationconstructionset.util.controller.YoSymmetricSE3PIDGains;
 
 import us.ihmc.acsell.parameters.BonoPhysicalProperties;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -20,12 +22,12 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    private final SideDependentList<Transform3D> handPosesWithRespectToChestFrame = new SideDependentList<Transform3D>();
 
    private final boolean runningOnRealRobot;
-   
+
    public BonoWalkingControllerParameters(boolean runningOnRealRobot)
    {
       this.runningOnRealRobot = runningOnRealRobot;
-      
-      for(RobotSide robotSide : RobotSide.values())
+
+      for (RobotSide robotSide : RobotSide.values())
       {
          handPosesWithRespectToChestFrame.put(robotSide, new Transform3D());
       }
@@ -233,11 +235,11 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    {
       return 0.15;
    }
-   
+
    @Override
    public double getFootSwitchCoPThresholdFraction()
    {
-	   return 0.02;
+      return 0.02;
    }
 
    @Override
@@ -367,7 +369,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    @Override
    public double[] getInitialHeadYawPitchRoll()
    {
-      return new double[]{0.0, 0.0, 0.0};
+      return new double[] { 0.0, 0.0, 0.0 };
    }
 
    @Override
@@ -394,7 +396,6 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
       return Double.POSITIVE_INFINITY;//270.0; //1000.0;
    }
 
-
    @Override
    public YoOrientationPIDGains createChestControlGains(YoVariableRegistry registry)
    {
@@ -417,34 +418,31 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
 
       return gains;
    }
-   @Override
-   public double getSwingKpXY()
-   {
-      return 100.0;
-   }
 
    @Override
-   public double getSwingKpZ()
+   public YoSE3PIDGains createSwingFootControlGains(YoVariableRegistry registry)
    {
-      return 200.0;
-   }
+      YoFootSE3Gains gains = new YoFootSE3Gains("SwingFoot", registry);
 
-   @Override
-   public double getSwingKpOrientation()
-   {
-      return 200.0;
-   }
+      double kpXY = 100.0;
+      double kpZ = 200.0;
+      double zetaXYZ = 0.7;
+      double kpOrientation = 200.0;
+      double zetaOrientation = 0.7;
+      double maxPositionAcceleration = Double.POSITIVE_INFINITY;
+      double maxPositionJerk = Double.POSITIVE_INFINITY;
+      double maxOrientationAcceleration = Double.POSITIVE_INFINITY;
+      double maxOrientationJerk = Double.POSITIVE_INFINITY;
 
-   @Override
-   public double getSwingZetaXYZ()
-   {
-      return 0.7;
-   }
+      gains.setPositionProportionalGains(kpXY, kpZ);
+      gains.setPositionDampingRatio(zetaXYZ);
+      gains.setPositionMaxAccelerationAndJerk(maxPositionAcceleration, maxPositionJerk);
+      gains.setOrientationProportionalGains(kpOrientation, kpOrientation);
+      gains.setOrientationDampingRatio(zetaOrientation);
+      gains.setOrientationMaxAccelerationAndJerk(maxOrientationAcceleration, maxOrientationJerk);
+      gains.createDerivativeGainUpdater(true);
 
-   @Override
-   public double getSwingZetaOrientation()
-   {
-      return 0.7;
+      return gains;
    }
 
    @Override
@@ -466,33 +464,9 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    }
 
    @Override
-   public double getSwingMaxPositionAcceleration()
-   {
-      return Double.POSITIVE_INFINITY;
-   }
-
-   @Override
-   public double getSwingMaxPositionJerk()
-   {
-      return Double.POSITIVE_INFINITY;
-   }
-
-   @Override
-   public double getSwingMaxOrientationAcceleration()
-   {
-      return Double.POSITIVE_INFINITY;
-   }
-
-   @Override
-   public double getSwingMaxOrientationJerk()
-   {
-      return Double.POSITIVE_INFINITY;
-   }
-
-   @Override
    public double getSupportSingularityEscapeMultiplier()
    {
-      return 30; 
+      return 30;
    }
 
    @Override
@@ -596,7 +570,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    @Override
    public double getSwingHeightMaxForPushRecoveryTrajectory()
    {
-	   return 0.15;
+      return 0.15;
    }
 
    @Override
