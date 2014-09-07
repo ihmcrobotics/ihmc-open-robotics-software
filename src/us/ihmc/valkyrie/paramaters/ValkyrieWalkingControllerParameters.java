@@ -3,9 +3,11 @@ package us.ihmc.valkyrie.paramaters;
 import javax.media.j3d.Transform3D;
 
 import com.yobotics.simulationconstructionset.util.controller.YoOrientationPIDGains;
+import com.yobotics.simulationconstructionset.util.controller.YoSE3PIDGains;
 import com.yobotics.simulationconstructionset.util.controller.YoSymmetricSE3PIDGains;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -476,38 +478,30 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
-   public double getSwingKpXY()
+   public YoSE3PIDGains createSwingFootControlGains(YoVariableRegistry registry)
    {
-      if (!runningOnRealRobot) return 100.0;
-      return 100.0;
-   }
+      YoFootSE3Gains gains = new YoFootSE3Gains("SwingFoot", registry);
 
-   @Override
-   public double getSwingKpZ()
-   {
-      if (!runningOnRealRobot) return 200.0;
-      return 100.0;
-   }
+      double kpXY = 100.0;
+      double kpZ = runningOnRealRobot ? 100.0 : 200.0;
+      double zetaXYZ = runningOnRealRobot ? 0.3 : 0.7;
+      double kpXYOrientation = runningOnRealRobot ? 40.0 : 200.0;
+      double kpZOrientation = runningOnRealRobot ? 40.0 : 200.0;
+      double zetaOrientation = runningOnRealRobot ? 0.3 : 0.7;
+      double maxPositionAcceleration = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
+      double maxPositionJerk = runningOnRealRobot ? 150.0 : Double.POSITIVE_INFINITY;
+      double maxOrientationAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
+      double maxOrientationJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
+      
+      gains.setPositionProportionalGains(kpXY, kpZ);
+      gains.setPositionDampingRatio(zetaXYZ);
+      gains.setPositionMaxAccelerationAndJerk(maxPositionAcceleration, maxPositionJerk);
+      gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
+      gains.setOrientationDampingRatio(zetaOrientation);
+      gains.setOrientationMaxAccelerationAndJerk(maxOrientationAcceleration, maxOrientationJerk);
+      gains.createDerivativeGainUpdater(true);
 
-   @Override
-   public double getSwingKpOrientation()
-   {
-      if (!runningOnRealRobot) return 200.0;
-      return 40.0;
-   }
-
-   @Override
-   public double getSwingZetaXYZ()
-   {
-      if (!runningOnRealRobot) return 0.7;
-      return 0.3;
-   }
-
-   @Override
-   public double getSwingZetaOrientation()
-   {
-      if (!runningOnRealRobot) return 0.7;
-      return 0.3;
+      return gains;
    }
 
    @Override
@@ -528,34 +522,6 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    {
       if (!runningOnRealRobot) return 1.0;
       return 0.2;
-   }
-
-   @Override
-   public double getSwingMaxPositionAcceleration()
-   {
-      if (!runningOnRealRobot) return Double.POSITIVE_INFINITY;
-      return 10.0;
-   }
-
-   @Override
-   public double getSwingMaxPositionJerk()
-   {
-      if (!runningOnRealRobot) return Double.POSITIVE_INFINITY;
-      return 150.0;
-   }
-
-   @Override
-   public double getSwingMaxOrientationAcceleration()
-   {
-      if (!runningOnRealRobot) return Double.POSITIVE_INFINITY;
-      return 100.0;
-   }
-
-   @Override
-   public double getSwingMaxOrientationJerk()
-   {
-      if (!runningOnRealRobot) return Double.POSITIVE_INFINITY;
-      return 1500.0;
    }
 
    @Override
