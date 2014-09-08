@@ -60,7 +60,7 @@ public class SmartCMPProjectorTest
 
       if (SHOW_SCS)
       {
-         dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
+         scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
          createOverheadPlotter(dynamicGraphicObjectsListRegistry, scs, true);
          scs.startOnAThread();
       }
@@ -755,7 +755,7 @@ public class SmartCMPProjectorTest
 
       public void start()
       {
-         dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
+         scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
          createOverheadPlotter(dynamicGraphicObjectsListRegistry, scs, true);
          scs.startOnAThread();
       }

@@ -66,7 +66,7 @@ public class DRCVehicleSDFLoader extends DRCWorld
       vehicleModelObjectVisualizer.setVisible(true);
       vehicleModelObjectVisualizer.update();
 
-      dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
+      scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
 
       Thread thread = new Thread(scs);
       thread.start();

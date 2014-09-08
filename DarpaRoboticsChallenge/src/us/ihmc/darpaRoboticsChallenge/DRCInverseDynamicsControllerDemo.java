@@ -137,7 +137,7 @@ public class DRCInverseDynamicsControllerDemo
          }
 
          dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects("EFP", efp_positionViz);
-         dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
+         scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
       }
 
       @Override

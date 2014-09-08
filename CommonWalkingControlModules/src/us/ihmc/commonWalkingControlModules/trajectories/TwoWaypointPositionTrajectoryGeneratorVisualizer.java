@@ -95,7 +95,7 @@ public class TwoWaypointPositionTrajectoryGeneratorVisualizer
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot[] {new Robot("null")}, graphics3DAdapterToUse, initialBufferSize);
       scs.setDT(stepTime.getDoubleValue() / (double) numberOfTicks, 5);
       scs.addYoVariableRegistry(registry);
-      dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
+      scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
 
       SliderBoardConfigurationManager sliderBoardConfigurationManager = new SliderBoardConfigurationManager(scs);
       YoFramePoint[] positions = new YoFramePoint[] {initialPosition, waypoints.get(0), waypoints.get(1), finalPosition};

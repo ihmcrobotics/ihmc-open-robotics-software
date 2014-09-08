@@ -76,7 +76,7 @@ public class CaptureRegionCalculatorTest
          robot.addYoVariableRegistry(yoVariableRegistry);
          
          SimulationConstructionSet scs = new SimulationConstructionSet(robot);
-         dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
+         scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
                  
          SimulationOverheadPlotter plotter = new SimulationOverheadPlotter();
          plotter.setDrawHistory(false);

@@ -150,14 +150,14 @@ public DynamicGraphicObjectsListRegistry getDynamicGraphicObjectsListRegistry()
 
    public void addPointsAndLinesToSCS(SimulationConstructionSet scs)
    {
-      dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
+      scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
       dynamicGraphicObjectsListRegistry.addArtifactListsToPlotter(simulationOverheadPlotter.getPlotter());
    }
 
    public void addGraphicObjectsAndArtifactsToSCS(SimulationConstructionSet scs)
    {
       dynamicGraphicObjectsListRegistry.addArtifactListsToPlotter(simulationOverheadPlotter.getPlotter());
-      dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
+      scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
    }
 
 

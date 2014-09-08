@@ -499,7 +499,7 @@ public class OneStepCaptureRegionCalculatorTest
       scs.getStandardSimulationGUI().selectPanel(plotterName);
 
       dynamicGraphicObjectsListRegistry.update();
-      dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs, false);
+      scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry, false);
       dynamicGraphicObjectsListRegistry.addArtifactListsToPlotter(simulationOverheadPlotter.getPlotter());
       Thread myThread = new Thread(scs);
       myThread.start();

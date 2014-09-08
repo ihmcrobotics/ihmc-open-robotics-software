@@ -115,7 +115,7 @@ public class SCSYoVariablesUpdatedListener implements YoVariablesUpdatedListener
 
    public void registerDynamicGraphicObjectListsRegistry(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, boolean showOverheadView)
    {
-      dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
+      scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
 
       VisualizerUtils.createOverheadPlotter(scs, showOverheadView, dynamicGraphicObjectsListRegistry);
    }
