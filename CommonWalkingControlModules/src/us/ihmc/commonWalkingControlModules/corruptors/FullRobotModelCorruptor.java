@@ -64,6 +64,74 @@ public class FullRobotModelCorruptor
          }
       });
 
+
+      //Thighs
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
+         final DoubleYoVariable thighMass = new DoubleYoVariable(sidePrefix + "ThighMass", registry);
+         final RigidBody thigh = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE).getPredecessor();
+         thighMass.set(thigh.getInertia().getMass());
+         
+         thighMass.addVariableChangedListener(new VariableChangedListener()
+         {
+            @Override
+            public void variableChanged(YoVariable<?> v)
+            {
+               thigh.getInertia().setMass(thighMass.getDoubleValue());
+            }
+         });
+         FramePoint originalThighCoMOffset = new FramePoint();
+         thigh.packCoMOffset(originalThighCoMOffset);
+         final YoFramePoint thighCoMOffset = new YoFramePoint(sidePrefix + "ThighCoMOffset", originalThighCoMOffset.getReferenceFrame(), registry);
+         thighCoMOffset.set(originalThighCoMOffset);
+         
+         thighCoMOffset.attachVariableChangedListener(new VariableChangedListener()
+         {
+            private final FramePoint tempFramePoint = new FramePoint();
+            @Override
+            public void variableChanged(YoVariable<?> v)
+            {
+               thighCoMOffset.getFrameTupleIncludingFrame(tempFramePoint);
+               thigh.setCoMOffset(tempFramePoint);
+            }
+         });
+     }
+
+      //Shins
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
+         final DoubleYoVariable shinMass = new DoubleYoVariable(sidePrefix + "ShinMass", registry);
+         final RigidBody shin = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE).getSuccessor();
+         shinMass.set(shin.getInertia().getMass());
+         
+         shinMass.addVariableChangedListener(new VariableChangedListener()
+         {
+            @Override
+            public void variableChanged(YoVariable<?> v)
+            {
+               shin.getInertia().setMass(shinMass.getDoubleValue());
+            }
+         });
+         FramePoint originalShinCoMOffset = new FramePoint();
+         shin.packCoMOffset(originalShinCoMOffset);
+         final YoFramePoint shinCoMOffset = new YoFramePoint(sidePrefix + "ShinCoMOffset", originalShinCoMOffset.getReferenceFrame(), registry);
+         shinCoMOffset.set(originalShinCoMOffset);
+         
+         shinCoMOffset.attachVariableChangedListener(new VariableChangedListener()
+         {
+            private final FramePoint tempFramePoint = new FramePoint();
+            @Override
+            public void variableChanged(YoVariable<?> v)
+            {
+               shinCoMOffset.getFrameTupleIncludingFrame(tempFramePoint);
+               shin.setCoMOffset(tempFramePoint);
+            }
+         });
+     }
+      
+      
       // Feet
       
       for (RobotSide robotSide : RobotSide.values)
