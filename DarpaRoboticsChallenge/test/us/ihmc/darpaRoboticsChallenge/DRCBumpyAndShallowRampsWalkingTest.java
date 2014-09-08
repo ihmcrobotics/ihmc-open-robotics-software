@@ -111,9 +111,11 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       boolean drawGroundProfile = false;
 
       double rampEndX = combinedTerrainObjectAndRampEndX.second();
+      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
+      
       
       DRCFlatGroundWalkingTrack track = setupSimulationTrack(drcControlParameters, armControllerParameters, null, combinedTerrainObject, drawGroundProfile, useVelocityAndHeadingScript,
-            cheatWithGroundHeightAtForFootstep);
+            cheatWithGroundHeightAtForFootstep, robotInitialSetup);
 
       drcSimulation = track.getDrcSimulation();
 
@@ -192,9 +194,10 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       boolean drawGroundProfile = false;
 
       double rampEndX = combinedTerrainObjectAndRampEndX.second();
+      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.01, 0);
       
       DRCFlatGroundWalkingTrack track = setupSimulationTrack(drcControlParameters, armControllerParameters, null, combinedTerrainObject, drawGroundProfile, useVelocityAndHeadingScript,
-            cheatWithGroundHeightAtForFootstep);
+            cheatWithGroundHeightAtForFootstep, robotInitialSetup);
 
       drcSimulation = track.getDrcSimulation();
 
@@ -314,8 +317,10 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       
       WalkingControllerParameters drcControlParameters = robotModel.getWalkingControllerParameters();
       ArmControllerParameters armControllerParameters = robotModel.getArmControllerParameters();
+      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
+      
       DRCFlatGroundWalkingTrack track = setupSimulationTrack(drcControlParameters, armControllerParameters, groundProfile, null, drawGroundProfile,
-            useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep);
+            useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, robotInitialSetup);
 
       drcSimulation = track.getDrcSimulation();
       SimulationConstructionSet scs = track.getSimulationConstructionSet();
@@ -366,11 +371,9 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
 
    private DRCFlatGroundWalkingTrack setupSimulationTrack(WalkingControllerParameters drcControlParameters, ArmControllerParameters
          armControllerParameters, GroundProfile3D groundProfile, GroundProfile3D groundProfile3D, boolean drawGroundProfile,
-         boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep)
+         boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep, DRCRobotInitialSetup<SDFRobot> robotInitialSetup)
    {
       DRCGuiInitialSetup guiInitialSetup = createGUIInitialSetup();
-      
-      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
       
       DRCSCSInitialSetup scsInitialSetup;
       
