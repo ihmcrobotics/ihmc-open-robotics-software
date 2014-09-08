@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.sensors.ReferenceFrameUpdater;
 import us.ihmc.commonWalkingControlModules.sensors.TwistUpdater;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaElipsoidsVisualizer;
 import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
+import us.ihmc.darpaRoboticsChallenge.calib.CenterOfMassCalibrationTool;
 import us.ihmc.darpaRoboticsChallenge.controllers.ConstrainedCenterOfMassJacobianEvaluator;
 import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadDataSynchronizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotLidarParameters;
@@ -50,6 +51,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    private static final boolean SHOW_REFERENCE_FRAMES = false;
    private static final boolean SHOW_JOINTAXIS_ZALIGN_FRAMES = false;
  
+   private static final boolean CREATE_COM_CALIBRATION_TOOL = false;
    
    private final YoVariableRegistry registry = new YoVariableRegistry("DRCControllerThread");
    private final RobotVisualizer robotVisualizer;
@@ -164,6 +166,12 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
 
       TwistCalculator twistCalculator = inverseDynamicsStructureForController.getTwistCalculator();
 
+      if (CREATE_COM_CALIBRATION_TOOL)
+      {
+         CenterOfMassCalibrationTool centerOfMassCalibrationTool = new CenterOfMassCalibrationTool(controllerModel, dynamicGraphicObjectsListRegistry, registry);
+         controllerFactory.addUpdatable(centerOfMassCalibrationTool);
+      }
+      
       RobotController robotController = controllerFactory.getController(controllerModel, referenceFramesForController, controlDT, gravity, yoTime,
             dynamicGraphicObjectsListRegistry, twistCalculator, centerOfMassJacobian, forceSensorDataHolderForController,
             dataProducer, jointsToIgnore);
