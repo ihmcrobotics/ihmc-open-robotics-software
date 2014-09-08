@@ -26,7 +26,7 @@ import com.yobotics.simulationconstructionset.util.ground.FlatGroundProfile;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
-public abstract class DRCPushRecoveryMultiStep  implements MultiRobotTestInterface
+public abstract class DRCPushRecoveryMultiStepTest  implements MultiRobotTestInterface
 {
    private final static boolean KEEP_SCS_UP = false;
    private static final boolean createMovie = BambooTools.doMovieCreation();
@@ -99,7 +99,7 @@ public abstract class DRCPushRecoveryMultiStep  implements MultiRobotTestInterfa
 
       // disable walking
       walk.set(false);
-      blockingSimulationRunner.simulateAndBlock(6.0);
+      blockingSimulationRunner.simulateAndBlock(4.0);
 
       // push the robot
       pushRobotController.applyForce(forceDirection, forceMagnitude, forceDuration);
@@ -132,7 +132,7 @@ public abstract class DRCPushRecoveryMultiStep  implements MultiRobotTestInterfa
 
       // disable walking
       walk.set(false);
-      blockingSimulationRunner.simulateAndBlock(6.0);
+      blockingSimulationRunner.simulateAndBlock(4.0);
 
       // push the robot
       pushRobotController.applyForce(forceDirection, forceMagnitude, forceDuration);
