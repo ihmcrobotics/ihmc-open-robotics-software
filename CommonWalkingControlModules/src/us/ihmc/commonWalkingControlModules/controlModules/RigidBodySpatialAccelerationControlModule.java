@@ -10,8 +10,6 @@ import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 import com.yobotics.simulationconstructionset.util.controller.SE3PIDController;
@@ -30,9 +28,6 @@ public class RigidBodySpatialAccelerationControlModule
    private final ReferenceFrame endEffectorFrame;
 
    private final YoFrameVector desiredAccelerationLinearViz, desiredAccelerationAngularViz;
-
-   private final DoubleYoVariable maximumLinearAccelerationMagnitude, maximumAngularAccelerationMagnitude;
-   private final BooleanYoVariable limitAccelerations;
 
    public RigidBodySpatialAccelerationControlModule(String namePrefix, TwistCalculator twistCalculator, RigidBody endEffector, ReferenceFrame endEffectorFrame,
          double dt, YoVariableRegistry parentRegistry)
@@ -53,32 +48,12 @@ public class RigidBodySpatialAccelerationControlModule
       desiredAccelerationLinearViz = new YoFrameVector(namePrefix + "LinearAccelViz", endEffectorFrame, registry);
       desiredAccelerationAngularViz = new YoFrameVector(namePrefix + "AngularAccelViz", endEffectorFrame, registry);
 
-      maximumLinearAccelerationMagnitude = new DoubleYoVariable(namePrefix + "MaxLinearAccelMagnitude", registry);
-      maximumAngularAccelerationMagnitude = new DoubleYoVariable(namePrefix + "MaxAngularAccelMagnitude", registry);
-      limitAccelerations = new BooleanYoVariable(namePrefix + "LimitAccelerations", registry);
-      limitAccelerations.set(false);
-
       parentRegistry.addChild(registry);
    }
 
    public void reset()
    {
       se3pdController.reset();
-   }
-
-   public void setMaximumLinearAccelerationMagnitude(double maximumLinearAccelerationMagnitude)
-   {
-      this.maximumLinearAccelerationMagnitude.set(maximumLinearAccelerationMagnitude);
-   }
-
-   public void setMaximumAngularAccelerationMagnitude(double maximumAngularAccelerationMagnitude)
-   {
-      this.maximumAngularAccelerationMagnitude.set(maximumAngularAccelerationMagnitude);
-   }
-
-   public void setLimitAccelerations(boolean limitAccelerations)
-   {
-      this.limitAccelerations.set(limitAccelerations);
    }
 
    public RigidBody getEndEffector()
@@ -100,12 +75,6 @@ public class RigidBodySpatialAccelerationControlModule
       currentTwist.changeFrame(endEffectorFrame);
 
       se3pdController.compute(acceleration, desiredEndEffectorPose, desiredEndEffectorTwist, feedForwardEndEffectorSpatialAcceleration, currentTwist);
-
-      if (limitAccelerations.getBooleanValue())
-      {
-         acceleration.limitLinearPartMagnitude(maximumLinearAccelerationMagnitude.getDoubleValue());
-         acceleration.limitAngularPartMagnitude(maximumAngularAccelerationMagnitude.getDoubleValue());
-      }
 
       acceleration.getExpressedInFrame().checkReferenceFrameMatch(desiredAccelerationLinearViz.getReferenceFrame());
 
