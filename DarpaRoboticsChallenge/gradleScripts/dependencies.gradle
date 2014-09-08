@@ -45,7 +45,6 @@ dependencies {
 	compile project(':BambooTools')
 	compile project(':CommonAvatarInterfaces')
 	compile project(':CommonWalkingControlModules')
-	compile project(':GazeboStateCommunicator')
 	compile project(':Graphics3DAdapter')
 	compile project(':IHMCControlFlow')
 	compile project(':IHMCSystemIdentification')
