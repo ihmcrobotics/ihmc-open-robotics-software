@@ -4,4 +4,5 @@ dependencies {
 	compile project(':IHMCUtilities')
 	compile project(':DarpaRoboticsChallenge')
 	compile project(':CommonWalkingControlModules')
+	compile project(':IHMCCommunication')
 }

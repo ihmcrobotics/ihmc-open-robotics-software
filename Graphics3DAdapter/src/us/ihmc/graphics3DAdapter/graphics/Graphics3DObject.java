@@ -337,7 +337,7 @@ public class Graphics3DObject
 
    /**
     * Adds the specified model file to the center of the current coordinate system
-    * with a default appearance.  Supported model files are .stl, .obj, .dae, .vrml and .3ds.
+    * with a default appearance.  Supported model files are .stl, .obj and .dae
     *
     * Appearances of model files can only be changed at runtime if an appearance is given while loading the model
     *
@@ -351,7 +351,7 @@ public class Graphics3DObject
 
    /**
     * Adds the specified model file to the center of the current coordinate system
-    * with the given appearance.    Supported model files are .stl, .obj, .dae, .vrml and .3ds.
+    * with the given appearance.    Supported model files are .stl, .obj and .dae.
     *
     * Appearances of model files can only be changed at runtime if an appearance is given while loading the model
     *

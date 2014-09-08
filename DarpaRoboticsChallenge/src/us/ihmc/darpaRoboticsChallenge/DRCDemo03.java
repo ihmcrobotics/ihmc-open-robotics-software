@@ -132,7 +132,7 @@ public abstract class DRCDemo03
 //    seatGraphics.scale(0.25);
 //    seatGraphics.translate(-1.25, 0, 3.25);
 //    seatGraphics.rotate(Math.toRadians(90), Graphics3DObject.Z);
-//    seatGraphics.addModelFile(DRCDemo03.class.getClassLoader().getResource("models/seat.3DS"));
+//    seatGraphics.addModelFile(DRCDemo03.class.getClassLoader().getResource("models/seat.obj"));
 //    sim.addStaticLinkGraphics(seatGraphics);
 // }
 

@@ -23,10 +23,10 @@ dependencies {
     compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-visualize', version: '0.18'
     compile group: 'us.ihmc.thirdparty.boofcv', name: 'boofcv-sfm', version: '0.18'
 	compile group: 'us.ihmc.thirdparty', name: 'georegression', version: '0.5.3'
-	compile group: 'us.ihmc.thirdparty', name: 'bubo', version: '0.4'
-	compile group: 'com.googlecode.efficient-java-matrix-library', name: 'ejml', version: '0.25'
+	compile group: 'us.ihmc.thirdparty', name: 'bubo', version: '0.4.+'
+	compile group: 'us.ihmc.thirdparty', name: 'ejml', version: '0.25.+'
 	compile group: 'commons-lang', name: 'commons-lang', version: '2.6'
-	compile group: 'us.ihmc.thirdparty', name: 'ddogleg', version: 'x'
+	compile group: 'us.ihmc.thirdparty', name: 'ddogleg', version: '0.6.+'
 	compile group: 'net.java.jinput', name: 'jinput', version: '2.0.5'
 	compile group: 'org.javassist', name: 'javassist', version: '3.18.1-GA'
 	compile group: 'com.thoughtworks.xstream', name: 'xstream', version: '1.4.7'
@@ -59,6 +59,8 @@ dependencies {
 	compile project(':SimulationConstructionSet')
 	compile project(':UserInterface')
 	compile project(':ROSJavaGeometry')
+	compile project(':IHMCCommunication')
+	compile project(':IHMCHumanoidBehaviors')
 
 	testCompile project(':CommonWalkingControlModules').sourceSets.test.output
 	testCompile project(':IHMCUtilities').sourceSets.test.output
