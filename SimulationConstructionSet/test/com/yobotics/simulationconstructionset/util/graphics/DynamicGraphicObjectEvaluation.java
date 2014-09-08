@@ -62,7 +62,7 @@ public class DynamicGraphicObjectEvaluation
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
       dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
       
-      dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
+      scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
       
       scs.startOnAThread();
 
@@ -143,7 +143,7 @@ public class DynamicGraphicObjectEvaluation
 
       dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
 
-      dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
+      scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
       scs.addYoVariableRegistry(registry);
 
       Graphics3DObject coordinateSystem = new Graphics3DObject();

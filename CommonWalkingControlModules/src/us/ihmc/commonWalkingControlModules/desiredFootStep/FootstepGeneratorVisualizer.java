@@ -227,7 +227,7 @@ public class FootstepGeneratorVisualizer
       int maxPointsPerContact = 4;
       FootstepGeneratorVisualizer footstepGeneratorVisualizer = new FootstepGeneratorVisualizer(maxNumberOfContacts, maxPointsPerContact, rootRegistry,
                                                                    dynamicGraphicObjectsListRegistry);
-      dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
+      scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
       footstepGeneratorVisualizer.addFootstepsAndTickAndUpdate(scs, footsteps);
 
       scs.startOnAThread();

@@ -66,7 +66,7 @@ public class GroundReactionWrenchSliderInput
       GroundReactionWrenchDistributor distributor = contactPointWrenchDistributorSliderInput.getDistributor();
       GroundReactionWrenchDistributorInputData inputData = new GroundReactionWrenchDistributorInputData();
 
-      dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
+      scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
 
 
       ArrayList<PlaneContactState> contactStates = new ArrayList<PlaneContactState>();

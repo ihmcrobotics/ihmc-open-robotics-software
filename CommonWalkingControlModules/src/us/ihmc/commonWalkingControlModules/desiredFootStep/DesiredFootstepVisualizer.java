@@ -178,7 +178,7 @@ public class DesiredFootstepVisualizer
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);
 
-      dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
+      scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
 
       // Create and attach plotter as listener
       SimulationOverheadPlotter simulationOverheadPlotter = new SimulationOverheadPlotter();

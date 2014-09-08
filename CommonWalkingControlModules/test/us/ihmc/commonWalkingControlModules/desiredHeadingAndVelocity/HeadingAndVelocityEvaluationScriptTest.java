@@ -214,7 +214,7 @@ public class HeadingAndVelocityEvaluationScriptTest
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);
       scs.setDT(controlDT, 1);
       
-      dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
+      scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
       
       Thread thread = new Thread(scs);
       thread.start();

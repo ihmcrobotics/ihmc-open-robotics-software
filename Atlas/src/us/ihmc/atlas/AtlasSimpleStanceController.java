@@ -85,7 +85,7 @@ public class AtlasSimpleStanceController {
 
 	      SimulationConstructionSet scs = new SimulationConstructionSet(robot);
 	      scs.setDT(simDT, 50);
-	      dynamicGraphicObjectsListsRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
+	      scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListsRegistry);
 
 	      scs.startOnAThread();
 	   }

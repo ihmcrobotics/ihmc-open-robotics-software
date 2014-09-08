@@ -549,7 +549,7 @@ public class GroundReactionWrenchDistributorTest
          visualizer = new GroundReactionWrenchDistributorVisualizer(maxNumberOfFeet, maxNumberOfVertices, 0, scs.getRootRegistry(),
                dynamicGraphicObjectsListRegistry);
 
-         dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
+         scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
 
          addCoordinateSystem(scs);
          scs.startOnAThread();
@@ -595,7 +595,7 @@ public class GroundReactionWrenchDistributorTest
          visualizer = new GroundReactionWrenchDistributorVisualizer(maxNumberOfFeet, maxNumberOfVertices, 0, scs.getRootRegistry(),
                dynamicGraphicObjectsListRegistry);
 
-         dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
+         scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
 
          addCoordinateSystem(scs);
          scs.startOnAThread();
@@ -734,7 +734,7 @@ public class GroundReactionWrenchDistributorTest
          GroundReactionWrenchDistributorVisualizer visualizer = new GroundReactionWrenchDistributorVisualizer(maxNumberOfFeet, maxNumberOfVertices, 0,
                scs.getRootRegistry(), dynamicGraphicObjectsListRegistry);
 
-         dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
+         scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
          addCoordinateSystem(scs);
 
          scs.startOnAThread();
@@ -801,7 +801,7 @@ public class GroundReactionWrenchDistributorTest
          GroundReactionWrenchDistributorVisualizer visualizer = new GroundReactionWrenchDistributorVisualizer(maxNumberOfFeet, maxNumberOfVertices,
                maxNumberOfCylinders, scs.getRootRegistry(), dynamicGraphicObjectsListRegistry);
 
-         dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
+         scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
          addCoordinateSystem(scs);
 
          scs.startOnAThread();

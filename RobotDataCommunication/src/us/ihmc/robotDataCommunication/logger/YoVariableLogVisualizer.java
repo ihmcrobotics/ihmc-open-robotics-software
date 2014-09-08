@@ -83,7 +83,7 @@ public class YoVariableLogVisualizer
       scs.setPlaybackDesiredFrameRate(0.04);
       
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = parser.getDynamicGraphicObjectsListRegistry();
-      dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
+      scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
       VisualizerUtils.createOverheadPlotter(scs, showOverheadView, dynamicGraphicObjectsListRegistry);
       scs.getRootRegistry().addChild(parser.getRootRegistry());
       scs.setGroundVisible(false);

@@ -60,7 +60,7 @@ public class CartesianTrajectoryGeneratorTester
 
       scs.addVarLists(registry.createVarListsIncludingChildren());
 
-      dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
+      scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
 
 //    yoVariableRegistry.addVarListsToSimulationConstructionSet(scs);
 

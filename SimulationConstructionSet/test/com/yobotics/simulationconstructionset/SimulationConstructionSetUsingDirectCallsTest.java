@@ -662,9 +662,9 @@ public class SimulationConstructionSetUsingDirectCallsTest
       boolean dynamicGraphicObjectsAreShowing2 = scs.checkAllDynamicGraphicObjectsListRegistriesAreShowing();
       assertTrue(dynamicGraphicObjectsAreShowing2);
       
-      scs.setDynamicGraphicMenuManager(dynamicGraphicMenuManager);
-      DynamicGraphicMenuManager dynamicGraphicMenuManagerFromSCS =  scs.getDynamicGraphicMenuManager();
-      assertEquals(dynamicGraphicMenuManager, dynamicGraphicMenuManagerFromSCS);
+//      scs.setDynamicGraphicMenuManager(dynamicGraphicMenuManager);
+//      DynamicGraphicMenuManager dynamicGraphicMenuManagerFromSCS =  scs.getDynamicGraphicMenuManager();
+//      assertEquals(dynamicGraphicMenuManager, dynamicGraphicMenuManagerFromSCS);
       
       scs.disableGUIComponents();
       assertIfGUIComponentsAreDisableOrEnabled(scs, false);

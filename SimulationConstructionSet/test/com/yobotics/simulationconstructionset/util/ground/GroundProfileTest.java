@@ -76,7 +76,7 @@ public abstract class GroundProfileTest
          
          scs = new SimulationConstructionSet(robot);
          scs.setGroundVisible(true);
-         dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
+         scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
 
          scs.startOnAThread();
       }

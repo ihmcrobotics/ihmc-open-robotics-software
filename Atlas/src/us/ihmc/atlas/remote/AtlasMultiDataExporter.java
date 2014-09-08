@@ -354,7 +354,7 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
       scs.setPlaybackDesiredFrameRate(0.04);
 
       DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = parser.getDynamicGraphicObjectsListRegistry();
-      dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
+      scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
       scs.getRootRegistry().addChild(parser.getRootRegistry());
       scs.setGroundVisible(false);
 
