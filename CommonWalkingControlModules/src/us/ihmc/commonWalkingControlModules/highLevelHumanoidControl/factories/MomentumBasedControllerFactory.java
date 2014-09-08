@@ -75,6 +75,8 @@ public class MomentumBasedControllerFactory
    private final SideDependentList<String> footSensorNames;
    private final ContactableBodiesFactory contactableBodiesFactory;
 
+   private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
+
    public MomentumBasedControllerFactory(ContactableBodiesFactory contactableBodiesFactory, SideDependentList<String> footSensorNames,
          WalkingControllerParameters walkingControllerParameters, ArmControllerParameters armControllerParameters, HighLevelState initialBehavior)
    {
@@ -95,6 +97,11 @@ public class MomentumBasedControllerFactory
    public void setVariousWalkingProviderFactory(VariousWalkingProviderFactory variousWalkingProviderFactory)
    {
       this.variousWalkingProviderFactory = variousWalkingProviderFactory;
+   }
+   
+   public void addUpdatable(Updatable updatable)
+   {
+      this.updatables.add(updatable);
    }
 
    public RobotController getController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, double controlDT, double gravity,
@@ -140,8 +147,6 @@ public class MomentumBasedControllerFactory
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup different things relative to GUI communication and WalkingProviders ////////////////
       
-      ArrayList<Updatable> updatables = new ArrayList<Updatable>();
-
       if (variousWalkingProviderFactory == null)
       {
          variousWalkingProviderFactory = new DoNothingVariousWalkingProviderFactory(controlDT);
