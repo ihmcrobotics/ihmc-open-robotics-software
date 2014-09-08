@@ -65,7 +65,7 @@ public class ValkyrieFullRobotModelVisualizer
       referenceFrameVis.doControl();
       
       SimulationConstructionSet scs = new SimulationConstructionSet();
-      dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
+      scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
       
       scs.getGraphics3dAdapter().addRootNode(robotGraphics.getRootNode());
       scs.setGroundVisible(false);

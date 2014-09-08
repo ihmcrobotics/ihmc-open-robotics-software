@@ -47,7 +47,7 @@ public class InefficientPushrodTransmissionJacobianTest
       if (visualizeAndKeepUp)
       {
          scs = new SimulationConstructionSet(robot);
-         dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
+         scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
          scs.setCameraPosition(0.62, -0.4, 1.26);
          scs.setCameraFix(0.0, 0.0, 1.02);
 
@@ -147,7 +147,7 @@ public class InefficientPushrodTransmissionJacobianTest
       if (visualizeAndKeepUp)
       {
          scs = new SimulationConstructionSet(robot);
-         dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
+         scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
          scs.setCameraPosition(0.62, -0.4, 1.26);
          scs.setCameraFix(0.0, 0.0, 1.02);
 

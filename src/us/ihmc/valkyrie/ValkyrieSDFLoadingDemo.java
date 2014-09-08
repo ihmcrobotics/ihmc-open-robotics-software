@@ -44,7 +44,7 @@ public class ValkyrieSDFLoadingDemo
       
       
       scs = new SimulationConstructionSet(valkyrieRobot);
-      dynamicGraphicObjectsListRegistry.addDynamicGraphicsObjectListsToSimulationConstructionSet(scs);
+      scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
       scs.setGroundVisible(false);
       scs.startOnAThread();
    }
