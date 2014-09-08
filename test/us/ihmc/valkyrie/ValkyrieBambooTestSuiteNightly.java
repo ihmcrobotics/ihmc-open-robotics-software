@@ -12,7 +12,7 @@ import org.junit.runners.Suite;
    ValkyrieObstacleCourseEveryBuildTest.class,
    ValkyriePushRecoveryStandingTest.class,
    ValkyriePushRecoveryTest.class,
-   ValkyriePushRecoveryMultiStep.class
+   ValkyriePushRecoveryMultiStepTest.class
 })
 
 public class ValkyrieBambooTestSuiteNightly
