@@ -47,7 +47,7 @@ public class PushRecoveryControlModule
    private static final boolean USE_PUSH_RECOVERY_ICP_PLANNER = true;
    private static final boolean ENABLE_PROJECTION_INSIDE_PUSH_RECOVERY_ICP_PLANNER = true;
 
-   private static final double MINIMUM_TIME_BEFORE_RECOVER_WITH_REDUCED_POLYGON = 2.0;
+   private static final double MINIMUM_TIME_BEFORE_RECOVER_WITH_REDUCED_POLYGON = 3.0;
    private static final double DOUBLESUPPORT_SUPPORT_POLYGON_SCALE = 0.75;
    private static final double TRUST_TIME_SCALE = 0.95;
    private static final double MINIMUM_TIME_TO_REPLAN = 0.1;
@@ -495,7 +495,7 @@ public class PushRecoveryControlModule
     * a percentage of the foot area. This is required to guarantee that the capture region is large enough to safely recover from a push. 
     * The swing time is reduced up to a MINIMUM_TIME_TO_REPLAN (defined as a simple variable to exit from the loop, will not be used to perform the swing). 
     * In case the swing time is less than MINIMUM_TIME_TO_REPLAN we check if for this swing time exist a capture region, if exist we will try to perform a step with the MINIMUM_SWING_TIME_FOR_DOUBLE_SUPPORT_RECOVERY anyway,
-    * if doesn't exist we should prepare to fall.
+    * if doesn't exist we should prepare to fall(see description inside of the state transition condition 'isFallingFromDoubleSupport').
     * 
     * @param swingSide
     * @param swingTimeRemaining
@@ -641,7 +641,7 @@ public class PushRecoveryControlModule
 
    /**
     * This method returns the swing time that is used to perform the double support push recovery swing, but reduced by a small amount.
-    * This is required to activate the transition between single support and double support as soon as the foot touches the ground. 
+    * This is required to activate the transition between single support and double support as soon as the swing is finished. 
     * 
     * @return reduced swing time
     */
