@@ -5,5 +5,6 @@ public enum Graphics3DNodeType
    JOINT,
    ROOTJOINT,
    GROUND,
-   VISUALIZATION
+   VISUALIZATION,
+   TRANSFORM
 }
