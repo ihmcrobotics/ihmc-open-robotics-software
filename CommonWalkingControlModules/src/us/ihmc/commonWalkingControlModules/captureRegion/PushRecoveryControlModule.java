@@ -77,11 +77,10 @@ public class PushRecoveryControlModule
    private boolean recoveringFromDoubleSupportFall;
    private boolean usingReducedSwingTime;
    private double reducedSwingTime, doubleSupportInitialSwingTime;
-   private Footstep recoverFromDoubleSupportFallFootStep;
    private final BooleanYoVariable recovering;
    private final BooleanYoVariable tryingUncertainRecover;
    private final BooleanYoVariable existsAMinimumSwingTimeCaptureRegion;
-   private BooleanYoVariable readyToGrabNextFootstep;
+   private final BooleanYoVariable readyToGrabNextFootstep;
    private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
    private final SideDependentList<? extends ContactablePlaneBody> feet;
    private final List<FramePoint> tempContactPoints;
@@ -94,6 +93,10 @@ public class PushRecoveryControlModule
    private final Point2d projectedCapturePoint;
    private final DoubleYoVariable swingTimeRemaining;
    private final DoubleYoVariable captureRegionAreaWithDoubleSupportMinimumSwingTime;
+   
+   private Footstep recoverFromDoubleSupportFallFootStep;
+   private RobotSide swingSideFromHighLevel;
+   private Footstep nextFootstepFromHighLevel;
 
    public PushRecoveryControlModule(MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters,
          BooleanYoVariable readyToGrabNextFootstep, ICPAndMomentumBasedController icpAndMomentumBasedController, StateMachine<?> stateMachine,
@@ -428,6 +431,8 @@ public class PushRecoveryControlModule
          FrameConvexPolygon2d footPolygon)
    {
       this.swingTimeRemaining.set(swingTimeRemaining);
+      this.swingSideFromHighLevel = swingSide;
+      this.nextFootstepFromHighLevel = nextFootstep;
 
       if (enablePushRecovery.getBooleanValue())
       {
@@ -580,6 +585,18 @@ public class PushRecoveryControlModule
       Footstep footstep = new Footstep(foot, poseReferenceFrame, trustHeight);
 
       return footstep;
+   }
+   
+   public double getDistanceBetweenCurrentAndDesiredFootStep()
+   {
+      Footstep currentFootstep = createFootstepAtCurrentLocation(this.swingSideFromHighLevel);
+      FramePoint framePointToPack = new FramePoint();
+      this.nextFootstepFromHighLevel.getPositionIncludingFrame(framePointToPack);
+      
+      FramePoint framePointToPack2 = new FramePoint();
+      currentFootstep.getPositionIncludingFrame(framePointToPack2);
+      
+      return framePointToPack.getXYplaneDistance(framePointToPack2);
    }
 
    /**
