@@ -187,7 +187,7 @@ public class MomentumBasedControllerFactory
       momentumBasedController = new MomentumBasedController(fullRobotModel, centerOfMassJacobian, referenceFrames, footSwitches,
                                    yoTime, gravityZ, twistCalculator, feet, handContactableBodies, thighs, pelvisContactablePlaneBody,
                                    pelvisBackContactablePlaneBody, controlDT, oldMomentumControlModule,
-                                   updatables, dynamicGraphicObjectsListRegistry, jointsToIgnore);
+                                   updatables, walkingControllerParameters, dynamicGraphicObjectsListRegistry, jointsToIgnore);
 
       TransferTimeCalculationProvider transferTimeCalculationProvider = new TransferTimeCalculationProvider("providedTransferTime", registry, transferTimeCalculator, transferTime);
       SwingTimeCalculationProvider swingTimeCalculationProvider = new SwingTimeCalculationProvider("providedSwingTime", registry, swingTimeCalculator, swingTime);

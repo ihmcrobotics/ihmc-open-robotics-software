@@ -115,21 +115,4 @@ public class HighLevelHumanoidControllerFactoryHelper
 
       return joints.toArray(new InverseDynamicsJoint[joints.size()]);
    }
-
-   public static MomentumOptimizationSettings createMomentumOptimizationSettings(FullRobotModel fullRobotModel, YoVariableRegistry registry,
-         InverseDynamicsJoint... jointsToIgnore)
-   {
-      InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerFactoryHelper.computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
-
-      MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings(jointsToOptimizeFor, registry);
-      momentumOptimizationSettings.setDampedLeastSquaresFactor(0.05);
-      momentumOptimizationSettings.setRhoPlaneContactRegularization(0.001);
-      momentumOptimizationSettings.setMomentumWeight(1.0, 1.0, 10.0, 10.0);
-      momentumOptimizationSettings.setRhoMin(4.0);
-      momentumOptimizationSettings.setRateOfChangeOfRhoPlaneContactRegularization(0.01);
-      momentumOptimizationSettings.setRhoPenalizerPlaneContactRegularization(0.01);
-
-      return momentumOptimizationSettings;
-   }
-
 }
