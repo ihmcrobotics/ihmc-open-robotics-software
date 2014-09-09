@@ -11,6 +11,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
@@ -653,5 +654,16 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    public String[] getJointsToIgnoreInController()
    {
       return null;
+   }
+
+   @Override
+   public void setupMomentumOptimizationSettings(MomentumOptimizationSettings momentumOptimizationSettings)
+   {
+      momentumOptimizationSettings.setDampedLeastSquaresFactor(0.05);
+      momentumOptimizationSettings.setRhoPlaneContactRegularization(0.001);
+      momentumOptimizationSettings.setMomentumWeight(1.0, 1.0, 10.0, 10.0);
+      momentumOptimizationSettings.setRhoMin(4.0);
+      momentumOptimizationSettings.setRateOfChangeOfRhoPlaneContactRegularization(0.01);
+      momentumOptimizationSettings.setRhoPenalizerPlaneContactRegularization(0.01);
    }
 }

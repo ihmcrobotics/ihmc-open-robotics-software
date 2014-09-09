@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.configurations;
 
 import javax.media.j3d.Transform3D;
 
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
@@ -151,4 +152,6 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract double getContactThresholdForce();
 
    public abstract String[] getJointsToIgnoreInController();
+
+   public abstract void setupMomentumOptimizationSettings(MomentumOptimizationSettings momentumOptimizationSettings);
 }

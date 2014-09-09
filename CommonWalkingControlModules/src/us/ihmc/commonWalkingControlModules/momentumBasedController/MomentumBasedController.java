@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointVisu
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactoryHelper;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlModuleBridge.MomentumControlModuleType;
@@ -151,7 +152,7 @@ public class MomentumBasedController
          SideDependentList<FootSwitchInterface> footSwitches, DoubleYoVariable yoTime, double gravityZ, TwistCalculator twistCalculator,
          SideDependentList<ContactablePlaneBody> feet, SideDependentList<ContactablePlaneBody> handsWithFingersBentBack,
          SideDependentList<ContactablePlaneBody> thighs, ContactablePlaneBody pelvis, ContactablePlaneBody pelvisBack, double controlDT,
-         OldMomentumControlModule oldMomentumControlModule, ArrayList<Updatable> updatables,
+         OldMomentumControlModule oldMomentumControlModule, ArrayList<Updatable> updatables, WalkingControllerParameters walkingControllerParameters,
          DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, InverseDynamicsJoint... jointsToIgnore)
    {
       this.dynamicGraphicObjectsListRegistry = dynamicGraphicObjectsListRegistry;
@@ -245,8 +246,9 @@ public class MomentumBasedController
          yoPlaneContactStateList.add(contactState);
       }
 
-      MomentumOptimizationSettings momentumOptimizationSettings = HighLevelHumanoidControllerFactoryHelper.createMomentumOptimizationSettings(fullRobotModel,
-            registry, jointsToIgnore);
+      InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerFactoryHelper.computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
+      MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings(jointsToOptimizeFor, registry);
+      walkingControllerParameters.setupMomentumOptimizationSettings(momentumOptimizationSettings);
 
       controlledJoints = momentumOptimizationSettings.getJointsToOptimizeFor();
       for (InverseDynamicsJoint joint : controlledJoints)
