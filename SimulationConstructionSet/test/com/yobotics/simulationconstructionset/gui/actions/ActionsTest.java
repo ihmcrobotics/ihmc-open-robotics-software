@@ -10,6 +10,7 @@ import com.yobotics.simulationconstructionset.commands.AddKeyPointCommandExecuto
 import com.yobotics.simulationconstructionset.commands.CreateNewGraphWindowCommandExecutor;
 import com.yobotics.simulationconstructionset.commands.CreateNewViewportWindowCommandExecutor;
 import com.yobotics.simulationconstructionset.commands.CropBufferCommandExecutor;
+import com.yobotics.simulationconstructionset.commands.CutBufferCommandExecutor;
 import com.yobotics.simulationconstructionset.commands.GotoInPointCommandExecutor;
 import com.yobotics.simulationconstructionset.commands.GotoOutPointCommandExecutor;
 import com.yobotics.simulationconstructionset.commands.NextCameraKeyCommandExecutor;
@@ -178,6 +179,25 @@ public class ActionsTest
       };
 
       CropBufferAction action = new CropBufferAction(executor);
+      action.actionPerformed(null);
+
+      assertTrue(executorCalled[0]);
+   }
+   
+   @Test
+   public void testCutBufferAction()
+   {
+      final boolean[] executorCalled = new boolean[] {false};
+
+      CutBufferCommandExecutor executor = new CutBufferCommandExecutor()
+      {
+         public void cutBuffer()
+         {
+            executorCalled[0] = true;
+         }
+      };
+
+      CutBufferAction action = new CutBufferAction(executor);
       action.actionPerformed(null);
 
       assertTrue(executorCalled[0]);

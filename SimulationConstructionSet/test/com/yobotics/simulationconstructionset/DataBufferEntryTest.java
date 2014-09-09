@@ -14,34 +14,16 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class DataBufferEntryTest
 {
-
-   private DataBufferEntry dataBufferEntry;
-   private DoubleYoVariable doubleYoVariable;
-   private int nPoints;
-   private Random rng;
-
-   @Before
-   public void setUp()
-   {
-      nPoints = 10000;
-      rng = new Random();
-      doubleYoVariable = new DoubleYoVariable("doubleYoVariable", null);
-      doubleYoVariable.set(0);
-      dataBufferEntry = new DataBufferEntry(doubleYoVariable, nPoints);
-   }
-
-   @After
-   public void tearDown()
-   {
-      doubleYoVariable = null;
-      dataBufferEntry = null;
-      rng = null;
-   }
-
    @Test
    public void testGetVal()
    {
-      double tempDouble = (double) rng.nextInt(20000) / (double) rng.nextInt(30);
+      int nPoints = 10000;
+      Random random = new Random();
+      DoubleYoVariable doubleYoVariable = new DoubleYoVariable("doubleYoVariable", null);
+      doubleYoVariable.set(0);
+      DataBufferEntry dataBufferEntry = new DataBufferEntry(doubleYoVariable, nPoints);
+      
+      double tempDouble = (double) random.nextInt(20000) / (double) random.nextInt(30);
       doubleYoVariable.set(tempDouble);
       assertEquals(tempDouble, dataBufferEntry.getVariableValueAsADouble(), 0);
    }
@@ -49,11 +31,17 @@ public class DataBufferEntryTest
    @Test
    public void testTickAndUpdate()
    {
+      int nPoints = 10000;
+      Random random = new Random();
+      DoubleYoVariable doubleYoVariable = new DoubleYoVariable("doubleYoVariable", null);
+      doubleYoVariable.set(0);
+      DataBufferEntry dataBufferEntry = new DataBufferEntry(doubleYoVariable, nPoints);
+      
       double epsilon = 0;
       double[] tempData = new double[nPoints];
       for (int i = 0; i < nPoints; i++)
       {
-         tempData[i] = (double) rng.nextInt(20000) / (double) rng.nextInt(30);
+         tempData[i] = (double) random.nextInt(20000) / (double) random.nextInt(30);
          doubleYoVariable.set(tempData[i]);
          dataBufferEntry.tickAndUpdate(i);
       }
@@ -69,11 +57,17 @@ public class DataBufferEntryTest
    @Test
    public void testUpdateValue()
    {
+      int nPoints = 10000;
+      Random random = new Random();
+      DoubleYoVariable doubleYoVariable = new DoubleYoVariable("doubleYoVariable", null);
+      doubleYoVariable.set(0);
+      DataBufferEntry dataBufferEntry = new DataBufferEntry(doubleYoVariable, nPoints);
+      
       double epsilon = 0;
       double[] tempData = new double[nPoints];
       for (int i = 0; i < nPoints; i++)
       {
-         tempData[i] = (double) rng.nextInt(20000) / (double) rng.nextInt(30);
+         tempData[i] = (double) random.nextInt(20000) / (double) random.nextInt(30);
          doubleYoVariable.set(tempData[i]);
          dataBufferEntry.tickAndUpdate(i);
       }
@@ -88,6 +82,12 @@ public class DataBufferEntryTest
    @Test
    public void testCheckIfDataIsEqual()
    {
+      int nPoints = 10000;
+      Random random = new Random();
+      DoubleYoVariable doubleYoVariable = new DoubleYoVariable("doubleYoVariable", null);
+      doubleYoVariable.set(0);
+      DataBufferEntry dataBufferEntry = new DataBufferEntry(doubleYoVariable, nPoints);
+      
       double temp;
       double epsilon = 0;
       DoubleYoVariable doubleYoVariable2 = new DoubleYoVariable("doubleYoVariable2", null);
@@ -96,7 +96,7 @@ public class DataBufferEntryTest
 
       for (int i = 0; i < nPoints; i++)
       {
-         temp = (double) rng.nextInt(20000) / (double) rng.nextInt(30);
+         temp = (double) random.nextInt(20000) / (double) random.nextInt(30);
 
          doubleYoVariable.set(temp);
          doubleYoVariable2.set(temp);
@@ -114,7 +114,7 @@ public class DataBufferEntryTest
 
       for (int i = 0; i < nPoints; i++)
       {
-         temp = (double) rng.nextInt(20000) / (double) rng.nextInt(30);
+         temp = (double) random.nextInt(20000) / (double) random.nextInt(30);
 
          doubleYoVariable.set(temp);
          doubleYoVariable2.set(-temp);
@@ -131,8 +131,14 @@ public class DataBufferEntryTest
    @Test
    public void testGetMinAndMaxScaling()
    {
-      double minScaling = rng.nextDouble();
-      double maxScaling = rng.nextDouble() + 2;
+      int nPoints = 10000;
+      Random random = new Random();
+      DoubleYoVariable doubleYoVariable = new DoubleYoVariable("doubleYoVariable", null);
+      doubleYoVariable.set(0);
+      DataBufferEntry dataBufferEntry = new DataBufferEntry(doubleYoVariable, nPoints);
+      
+      double minScaling = random.nextDouble();
+      double maxScaling = random.nextDouble() + 2;
       dataBufferEntry.setManualScaling(minScaling, maxScaling);
 
       assertEquals(minScaling, dataBufferEntry.getManualMinScaling(), 0);
@@ -142,13 +148,25 @@ public class DataBufferEntryTest
    @Test
    public void testGetVariable()
    {
+      int nPoints = 10000;
+      Random random = new Random();
+      DoubleYoVariable doubleYoVariable = new DoubleYoVariable("doubleYoVariable", null);
+      doubleYoVariable.set(0);
+      DataBufferEntry dataBufferEntry = new DataBufferEntry(doubleYoVariable, nPoints);
+      
       assertEquals(doubleYoVariable, dataBufferEntry.getVariable());
    }
 
    @Test
    public void testCopyValueThrough()
    {
-      double tempDouble = rng.nextDouble();
+      int nPoints = 10000;
+      Random random = new Random();
+      DoubleYoVariable doubleYoVariable = new DoubleYoVariable("doubleYoVariable", null);
+      doubleYoVariable.set(0);
+      DataBufferEntry dataBufferEntry = new DataBufferEntry(doubleYoVariable, nPoints);
+      
+      double tempDouble = random.nextDouble();
       doubleYoVariable.set(tempDouble);
       dataBufferEntry.tickAndUpdate(0);
       dataBufferEntry.copyValueThrough();
@@ -162,12 +180,18 @@ public class DataBufferEntryTest
    @Test
    public void testEnlargeBufferSize()
    {
+      int nPoints = 10000;
+      Random random = new Random();
+      DoubleYoVariable doubleYoVariable = new DoubleYoVariable("doubleYoVariable", null);
+      doubleYoVariable.set(0);
+      DataBufferEntry dataBufferEntry = new DataBufferEntry(doubleYoVariable, nPoints);
+      
       double[] tempData = new double[nPoints];
-      int newSizeDelta = rng.nextInt(100);
+      int newSizeDelta = random.nextInt(100);
 
       for (int i = 0; i < nPoints; i++)
       {
-         tempData[i] = (double) rng.nextInt(20000) / (double) rng.nextInt(30);
+         tempData[i] = (double) random.nextInt(20000) / (double) random.nextInt(30);
          doubleYoVariable.set(tempData[i]);
          dataBufferEntry.tickAndUpdate(i);
       }
@@ -184,11 +208,17 @@ public class DataBufferEntryTest
    @Test
    public void testCropData()
    {
+      int nPoints = 10000;
+      Random random = new Random();
+      DoubleYoVariable doubleYoVariable = new DoubleYoVariable("doubleYoVariable", null);
+      doubleYoVariable.set(0);
+      DataBufferEntry dataBufferEntry = new DataBufferEntry(doubleYoVariable, nPoints);
+      
       double[] tempData = new double[nPoints];
 
       for (int i = 0; i < nPoints; i++)
       {
-         tempData[i] = (double) rng.nextInt(20000) / (double) rng.nextInt(30);
+         tempData[i] = (double) random.nextInt(20000) / (double) random.nextInt(30);
          doubleYoVariable.set(tempData[i]);
          dataBufferEntry.tickAndUpdate(i);
       }
@@ -235,15 +265,111 @@ public class DataBufferEntryTest
          assertEquals(tempData[100 + i], dataBufferEntry.getData()[i], 0);
       }
    }
+   
+   
+   @Test
+   public void testCutData()
+   {
+      int nPoints = 1000;
+      Random random = new Random();
+      DoubleYoVariable doubleYoVariable = new DoubleYoVariable("doubleYoVariable", null);
+      doubleYoVariable.set(0);
+      DataBufferEntry dataBufferEntry = new DataBufferEntry(doubleYoVariable, nPoints);
+      
+      double[] tempData = new double[nPoints];
+
+      for (int i = 0; i < nPoints; i++)
+      {
+         tempData[i] = (double) random.nextInt(20000) / (double) random.nextInt(30);
+         doubleYoVariable.set(tempData[i]);
+         dataBufferEntry.tickAndUpdate(i);
+      }
+
+      // Test Failure Conditions; data remains unchanged so only examine lengths
+      assertEquals(-1, dataBufferEntry.cropData(-1, nPoints));
+      assertEquals(nPoints, dataBufferEntry.getData().length);
+      assertEquals(-1, dataBufferEntry.cropData(0, nPoints + 1));
+      assertEquals(nPoints, dataBufferEntry.getData().length);
+
+      // Test unchanged size
+      assertEquals(-1, dataBufferEntry.cutData(nPoints/2 + 1, nPoints/2 - 1));
+      assertEquals(nPoints, dataBufferEntry.getData().length);
+
+      // Verify data integrity
+      for (int i = 0; i < nPoints; i++)
+      {
+         assertEquals(tempData[i], dataBufferEntry.getData()[i], 0);
+      }
+
+      // Test cut one point in the middle:
+      int cutPoint = nPoints/2;
+      int sizeAfterCut = dataBufferEntry.cutData(cutPoint, cutPoint);
+      assertEquals(nPoints-1, sizeAfterCut);
+      assertEquals(nPoints-1, dataBufferEntry.getData().length);
+      
+      // Verify data integrity
+      for (int i = 0; i < cutPoint; i++)
+      {
+         assertEquals(tempData[i], dataBufferEntry.getData()[i], 0);
+      }
+      
+      for (int i = cutPoint; i < nPoints-1; i++)
+      {
+         assertEquals(tempData[i+1], dataBufferEntry.getData()[i], 0);
+      }
+      
+   // Restore dataBufferEntry to original state.     
+      dataBufferEntry.enlargeBufferSize(nPoints);
+      for (int i = 0; i < nPoints; i++)
+      {
+         doubleYoVariable.set(tempData[i]);
+         dataBufferEntry.tickAndUpdate(i);
+      }
+      
+      // Test cutting at beginning   
+      sizeAfterCut = dataBufferEntry.cutData(0, 2);
+      assertEquals(nPoints - 3, sizeAfterCut);
+
+      // Verify data integrity
+      for (int i = 0; i < nPoints-3; i++)
+      {
+         assertEquals(tempData[i+3], dataBufferEntry.getData()[i], 0);
+      }
+
+      // Restore dataBufferEntry to original state.     
+      dataBufferEntry.enlargeBufferSize(nPoints);
+      for (int i = 0; i < nPoints; i++)
+      {
+         doubleYoVariable.set(tempData[i]);
+         dataBufferEntry.tickAndUpdate(i);
+      }
+
+      // Test cutting at end
+      sizeAfterCut = dataBufferEntry.cutData(nPoints - 3, nPoints-1);
+      assertEquals(nPoints - 3, sizeAfterCut);
+
+      // Verify data integrity
+      for (int i = 0; i < dataBufferEntry.getData().length; i++)
+      {
+         assertEquals(tempData[i], dataBufferEntry.getData()[i], 0);
+      }
+   }
+
 
    @Test
    public void testPackData()
    {
+      int nPoints = 10000;
+      Random random = new Random();
+      DoubleYoVariable doubleYoVariable = new DoubleYoVariable("doubleYoVariable", null);
+      doubleYoVariable.set(0);
+      DataBufferEntry dataBufferEntry = new DataBufferEntry(doubleYoVariable, nPoints);
+      
       double[] tempData = new double[nPoints];
-      int newStartIndex = rng.nextInt(nPoints - 1);
+      int newStartIndex = random.nextInt(nPoints - 1);
       for (int i = 0; i < nPoints; i++)
       {
-         tempData[i] = (double) rng.nextInt(20000) / (double) rng.nextInt(30);
+         tempData[i] = (double) random.nextInt(20000) / (double) random.nextInt(30);
          doubleYoVariable.set(tempData[i]);
          dataBufferEntry.tickAndUpdate(i);
       }
@@ -273,7 +399,13 @@ public class DataBufferEntryTest
    @Test
    public void testGetMax()
    {
-      int tempInteger = rng.nextInt(500) + 11;
+      int nPoints = 10000;
+      Random random = new Random();
+      DoubleYoVariable doubleYoVariable = new DoubleYoVariable("doubleYoVariable", null);
+      doubleYoVariable.set(0);
+      DataBufferEntry dataBufferEntry = new DataBufferEntry(doubleYoVariable, nPoints);
+      
+      int tempInteger = random.nextInt(500) + 11;
       doubleYoVariable.set(tempInteger);
       dataBufferEntry.tickAndUpdate(0);
       doubleYoVariable.set(tempInteger + 10);
@@ -286,7 +418,13 @@ public class DataBufferEntryTest
    @Test
    public void testGetMin()
    {
-      int tempInteger = rng.nextInt(500) + 11;
+      int nPoints = 10000;
+      Random random = new Random();
+      DoubleYoVariable doubleYoVariable = new DoubleYoVariable("doubleYoVariable", null);
+      doubleYoVariable.set(0);
+      DataBufferEntry dataBufferEntry = new DataBufferEntry(doubleYoVariable, nPoints);
+      
+      int tempInteger = random.nextInt(500) + 11;
       doubleYoVariable.set(tempInteger);
       dataBufferEntry.tickAndUpdate(0);
       doubleYoVariable.set(tempInteger + 10);
@@ -299,6 +437,11 @@ public class DataBufferEntryTest
    @Test
    public void testMinMaxWithNaN()
    {
+      int nPoints = 10000;
+      DoubleYoVariable doubleYoVariable = new DoubleYoVariable("doubleYoVariable", null);
+      doubleYoVariable.set(0);
+      DataBufferEntry dataBufferEntry = new DataBufferEntry(doubleYoVariable, nPoints);
+      
       for (int i = 0; i < 100; i++)
       {
          doubleYoVariable.set(Double.NaN);
@@ -311,12 +454,18 @@ public class DataBufferEntryTest
    @Test
    public void testMinMaxWithNaN2()
    {
+      int nPoints = 10000;
+      Random random = new Random();
+      DoubleYoVariable doubleYoVariable = new DoubleYoVariable("doubleYoVariable", null);
+      doubleYoVariable.set(0);
+      DataBufferEntry dataBufferEntry = new DataBufferEntry(doubleYoVariable, nPoints);
+      
       for (int i = 0; i < 100; i++)
       {
          if (i == 50)
             doubleYoVariable.set(Double.NaN);
          else
-            doubleYoVariable.set(rng.nextDouble());
+            doubleYoVariable.set(random.nextDouble());
          dataBufferEntry.tickAndUpdate(i);
       }
       assertFalse(Double.isNaN(dataBufferEntry.getMin()));
@@ -327,7 +476,13 @@ public class DataBufferEntryTest
    @Test
    public void testResetMinMaxChanged()
    {
-      int tempInteger = rng.nextInt(500) + 11;
+      int nPoints = 10000;
+      Random random = new Random();
+      DoubleYoVariable doubleYoVariable = new DoubleYoVariable("doubleYoVariable", null);
+      doubleYoVariable.set(0);
+      DataBufferEntry dataBufferEntry = new DataBufferEntry(doubleYoVariable, nPoints);
+      
+      int tempInteger = random.nextInt(500) + 11;
       doubleYoVariable.set(tempInteger);
       dataBufferEntry.tickAndUpdate(0);
       assertTrue(dataBufferEntry.minMaxChanged());
@@ -338,8 +493,14 @@ public class DataBufferEntryTest
    @Test
    public void testSetData()
    {
-      double tempDouble = (double) rng.nextInt(20000) / (double) rng.nextInt(30);
-      int randomIndex = rng.nextInt(nPoints);
+      int nPoints = 10000;
+      Random random = new Random();
+      DoubleYoVariable doubleYoVariable = new DoubleYoVariable("doubleYoVariable", null);
+      doubleYoVariable.set(0);
+      DataBufferEntry dataBufferEntry = new DataBufferEntry(doubleYoVariable, nPoints);
+      
+      double tempDouble = (double) random.nextInt(20000) / (double) random.nextInt(30);
+      int randomIndex = random.nextInt(nPoints);
       dataBufferEntry.setData(tempDouble, randomIndex);
       
       assertEquals(tempDouble, dataBufferEntry.getData()[randomIndex], 0);
@@ -348,11 +509,17 @@ public class DataBufferEntryTest
    @Test
    public void testGetWindowedData()
    {
+      int nPoints = 10000;
+      Random random = new Random();
+      DoubleYoVariable doubleYoVariable = new DoubleYoVariable("doubleYoVariable", null);
+      doubleYoVariable.set(0);
+      DataBufferEntry dataBufferEntry = new DataBufferEntry(doubleYoVariable, nPoints);
+      
       double tempData[] = new double[nPoints];
-      int randomIndex = rng.nextInt(nPoints-1);
+      int randomIndex = random.nextInt(nPoints-1);
       for (int i = 0; i < nPoints; i++)
       {
-         tempData[i] = (double) rng.nextInt(20000) / (double) rng.nextInt(30);
+         tempData[i] = (double) random.nextInt(20000) / (double) random.nextInt(30);
          doubleYoVariable.set(tempData[i]);
          dataBufferEntry.tickAndUpdate(i);
       }
@@ -374,6 +541,11 @@ public class DataBufferEntryTest
    @Test
    public void testEnableAutoScale()
    {
+      int nPoints = 10000;
+      DoubleYoVariable doubleYoVariable = new DoubleYoVariable("doubleYoVariable", null);
+      doubleYoVariable.set(0);
+      DataBufferEntry dataBufferEntry = new DataBufferEntry(doubleYoVariable, nPoints);
+      
       dataBufferEntry.enableAutoScale(true);
       assertTrue(dataBufferEntry.isAutoScaleEnabled());
       dataBufferEntry.enableAutoScale(false);
@@ -383,9 +555,15 @@ public class DataBufferEntryTest
    @Test
    public void testGetMaxWithParameters()
    {
+      int nPoints = 10000;
+      Random random = new Random();
+      DoubleYoVariable doubleYoVariable = new DoubleYoVariable("doubleYoVariable", null);
+      doubleYoVariable.set(0);
+      DataBufferEntry dataBufferEntry = new DataBufferEntry(doubleYoVariable, nPoints);
+      
       for (int i = 0; i < nPoints; i++)
       {
-         doubleYoVariable.set((double) rng.nextInt(20000) / (double) rng.nextInt(30));
+         doubleYoVariable.set((double) random.nextInt(20000) / (double) random.nextInt(30));
          dataBufferEntry.tickAndUpdate(i);
       }
       
@@ -407,9 +585,15 @@ public class DataBufferEntryTest
    @Test
    public void testGetMinWithParameters()
    {
+      int nPoints = 10000;
+      Random random = new Random();
+      DoubleYoVariable doubleYoVariable = new DoubleYoVariable("doubleYoVariable", null);
+      doubleYoVariable.set(0);
+      DataBufferEntry dataBufferEntry = new DataBufferEntry(doubleYoVariable, nPoints);
+      
       for (int i = 0; i < nPoints; i++)
       {
-         doubleYoVariable.set((double) rng.nextInt(20000) / (double) rng.nextInt(30));
+         doubleYoVariable.set((double) random.nextInt(20000) / (double) random.nextInt(30));
          dataBufferEntry.tickAndUpdate(i);
       }
       
