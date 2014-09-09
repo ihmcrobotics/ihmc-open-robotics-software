@@ -43,7 +43,7 @@ public class RosMainNode implements NodeMain
   
    public RosMainNode(URI masterURI, String graphName)
    {
-      this(masterURI, graphName, false);
+      this(masterURI, graphName, true);
    }
    
    public RosMainNode(URI masterURI, String graphName, boolean useTf2)
