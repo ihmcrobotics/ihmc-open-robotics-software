@@ -23,6 +23,7 @@ import javax.vecmath.Vector3d;
 
 import org.apache.batik.dom.util.HashTable;
 
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
@@ -35,8 +36,10 @@ import us.ihmc.robotDataCommunication.logger.YoVariableLogCropper;
 import us.ihmc.robotDataCommunication.logger.YoVariableLogPlaybackRobot;
 import us.ihmc.robotDataCommunication.logger.YoVariableLogVisualizerGUI;
 import us.ihmc.robotDataCommunication.logger.YoVariableLoggerListener;
+import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.SwingUtils;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 import com.yobotics.simulationconstructionset.DataBuffer;
@@ -80,6 +83,8 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
       int numberOfEntries = 0;
       DRCRobotModel model = new AtlasRobotModel(ATLAS_ROBOT_VERSION, false, false);
       DRCRobotJointMap jointMap = model.getJointMap();
+      ArmJointName[] joints = jointMap.getArmJointNames();
+      SDFFullRobotModel robotModel = model.createFullRobotModel();
       boolean showGUIAndSaveSCSVideo = false;
       boolean showCameraVideo = false;
 
@@ -96,15 +101,28 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
       String[] timeVariable;
 
       // variables to export (starts from 1: vars[0] is reserved for timeVariable)
-      vars = new String[7];
-      String jointName = "r_arm_wry";
-
-      vars[1] = "ll_in_" + jointName + "_qd_bef";
-      vars[2] = "ll_in_" + jointName + "_qd_aft";
-      vars[3] = "ll_in_" + jointName + "_psi_pos";
-      vars[4] = "ll_in_" + jointName + "_psi_neg";
-      vars[5] = "ll_in_" + jointName + "_f";
-      vars[6] = "jointVelocity";
+      vars = new String[49];
+      int i = 0;
+      int jj = 0;
+      
+      for(RobotSide side : RobotSide.values())
+      {
+         jj = 0;
+         for (ArmJointName joint: joints)
+         {
+            String jointName = robotModel.getArmJoint(side, joint).getName();
+            
+            vars[i * joints.length * 4 + jj + 1] = "ll_in_" + jointName + "_qd_bef";
+            jj++;
+            vars[i * joints.length * 4 + jj + 1] = "ll_in_" + jointName + "_qd_aft";
+            jj++;
+            vars[i * joints.length * 4 + jj + 1] = "ll_in_" + jointName + "_f";
+            jj++;
+            vars[i * joints.length * 4 + jj + 1] = "ll_in_" + jointName + "_q_bef";
+            jj++;
+         }
+         i++;
+      }
 
       // select the file with export parameters
       File inputParameters = selectInputFile();
