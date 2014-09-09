@@ -55,6 +55,7 @@ import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
@@ -88,7 +89,7 @@ public class MomentumBasedController
    private final DoubleYoVariable leftPassiveKneeTorque = new DoubleYoVariable("leftPassiveKneeTorque", registry);
    private final DoubleYoVariable rightPassiveKneeTorque = new DoubleYoVariable("rightPassiveKneeTorque", registry);
    private final SideDependentList<DoubleYoVariable> passiveKneeTorque = new SideDependentList<DoubleYoVariable>(leftPassiveKneeTorque, rightPassiveKneeTorque);
-   
+
    private final DoubleYoVariable passiveQKneeThreshold = new DoubleYoVariable("passiveQKneeThreshold", registry);
    private final DoubleYoVariable passiveKneeMaxTorque = new DoubleYoVariable("passiveKneeMaxTorque", registry);
    private final DoubleYoVariable passiveKneeKv = new DoubleYoVariable("passiveKneeKv", registry);
@@ -105,12 +106,12 @@ public class MomentumBasedController
 
    private final YoFrameVector admissibleDesiredGroundReactionTorque;
    private final YoFrameVector admissibleDesiredGroundReactionForce;
-//   private final YoFrameVector groundReactionTorqueCheck;
-//   private final YoFrameVector groundReactionForceCheck;
+   //   private final YoFrameVector groundReactionTorqueCheck;
+   //   private final YoFrameVector groundReactionForceCheck;
 
    private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> preRateLimitedDesiredAccelerations = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
    private final LinkedHashMap<OneDoFJoint, RateLimitedYoVariable> rateLimitedDesiredAccelerations = new LinkedHashMap<OneDoFJoint, RateLimitedYoVariable>();
-   
+
    private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> desiredAccelerationYoVariables = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
 
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
@@ -126,22 +127,22 @@ public class MomentumBasedController
    private final WrenchVisualizer wrenchVisualizer;
 
    private final GeometricJacobianHolder robotJacobianHolder = new GeometricJacobianHolder();
-   
+
    private final SideDependentList<FootSwitchInterface> footSwitches;
    private final DoubleYoVariable alphaCoPControl = new DoubleYoVariable("alphaCoPControl", registry);
    private final DoubleYoVariable maxAnkleTorqueCoPControl = new DoubleYoVariable("maxAnkleTorqueCoPControl", registry);
    private final SideDependentList<AlphaFilteredYoFrameVector2d> desiredTorquesForCoPControl;
    private final SideDependentList<YoFrameVector2d> yoCoPError;
-   private final SideDependentList<DoubleYoVariable> yoCoPErrorMagnitude = new SideDependentList<DoubleYoVariable>(
-         new DoubleYoVariable("leftFootCoPErrorMagnitude", registry),
-         new DoubleYoVariable("rightFootCoPErrorMagnitude", registry));
+   private final SideDependentList<DoubleYoVariable> yoCoPErrorMagnitude = new SideDependentList<DoubleYoVariable>(new DoubleYoVariable(
+         "leftFootCoPErrorMagnitude", registry), new DoubleYoVariable("rightFootCoPErrorMagnitude", registry));
    private final DoubleYoVariable gainCoPX = new DoubleYoVariable("gainCoPX", registry);
    private final DoubleYoVariable gainCoPY = new DoubleYoVariable("gainCoPY", registry);
-   
+
    // once we receive the data from the UI through a provider this variables souldn't be necessary
    private final DoubleYoVariable frictionCompensationEffectiveness;
    private final EnumYoVariable<FrictionModel> frictionModelForAllJoints;
-   
+   private final BooleanYoVariable useBeforeTransmissionVelocityForFriction;
+
    private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
 
    private final InverseDynamicsJoint[] controlledJoints;
@@ -156,7 +157,7 @@ public class MomentumBasedController
       this.dynamicGraphicObjectsListRegistry = dynamicGraphicObjectsListRegistry;
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
-      
+
       this.footSwitches = footSwitches;
 
       if (SPY_ON_MOMENTUM_BASED_CONTROLLER)
@@ -201,8 +202,8 @@ public class MomentumBasedController
       this.admissibleDesiredGroundReactionTorque = new YoFrameVector("admissibleDesiredGroundReactionTorque", centerOfMassFrame, registry);
       this.admissibleDesiredGroundReactionForce = new YoFrameVector("admissibleDesiredGroundReactionForce", centerOfMassFrame, registry);
 
-//      this.groundReactionTorqueCheck = new YoFrameVector("groundReactionTorqueCheck", centerOfMassFrame, registry);
-//      this.groundReactionForceCheck = new YoFrameVector("groundReactionForceCheck", centerOfMassFrame, registry);
+      //      this.groundReactionTorqueCheck = new YoFrameVector("groundReactionTorqueCheck", centerOfMassFrame, registry);
+      //      this.groundReactionForceCheck = new YoFrameVector("groundReactionForceCheck", centerOfMassFrame, registry);
 
       if (updatables != null)
       {
@@ -244,7 +245,8 @@ public class MomentumBasedController
          yoPlaneContactStateList.add(contactState);
       }
 
-      MomentumOptimizationSettings momentumOptimizationSettings = HighLevelHumanoidControllerFactoryHelper.createMomentumOptimizationSettings(fullRobotModel, registry, jointsToIgnore);
+      MomentumOptimizationSettings momentumOptimizationSettings = HighLevelHumanoidControllerFactoryHelper.createMomentumOptimizationSettings(fullRobotModel,
+            registry, jointsToIgnore);
 
       controlledJoints = momentumOptimizationSettings.getJointsToOptimizeFor();
       for (InverseDynamicsJoint joint : controlledJoints)
@@ -261,7 +263,8 @@ public class MomentumBasedController
 
       if (dynamicGraphicObjectsListRegistry != null)
       {
-         contactPointVisualizer = new ContactPointVisualizer(new ArrayList<YoPlaneContactState>(yoPlaneContactStateList), dynamicGraphicObjectsListRegistry, registry);
+         contactPointVisualizer = new ContactPointVisualizer(new ArrayList<YoPlaneContactState>(yoPlaneContactStateList), dynamicGraphicObjectsListRegistry,
+               registry);
          List<RigidBody> rigidBodies = Arrays.asList(ScrewTools.computeSupportAndSubtreeSuccessors(fullRobotModel.getRootJoint().getSuccessor()));
          wrenchVisualizer = new WrenchVisualizer("DesiredExternalWrench", rigidBodies, dynamicGraphicObjectsListRegistry, registry);
       }
@@ -270,35 +273,43 @@ public class MomentumBasedController
          contactPointVisualizer = null;
          wrenchVisualizer = null;
       }
-      
+
       OptimizationMomentumControlModule optimizationMomentumControlModule = null;
       if (momentumOptimizationSettings != null)
       {
          optimizationMomentumControlModule = new OptimizationMomentumControlModule(fullRobotModel.getRootJoint(), referenceFrames.getCenterOfMassFrame(),
-               controlDT, gravityZ, momentumOptimizationSettings, twistCalculator, robotJacobianHolder, yoPlaneContactStateList, dynamicGraphicObjectsListRegistry, registry);
+               controlDT, gravityZ, momentumOptimizationSettings, twistCalculator, robotJacobianHolder, yoPlaneContactStateList,
+               dynamicGraphicObjectsListRegistry, registry);
       }
 
       momentumControlModuleBridge = new MomentumControlModuleBridge(optimizationMomentumControlModule, oldMomentumControlModule, centerOfMassFrame, registry);
-      
+
       passiveQKneeThreshold.set(0.55);
       passiveKneeMaxTorque.set(60.0);
       passiveKneeKv.set(5.0);
 
       desiredTorquesForCoPControl = new SideDependentList<AlphaFilteredYoFrameVector2d>();
       yoCoPError = new SideDependentList<YoFrameVector2d>();
-      
+
       alphaCoPControl.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(16.0, controlDT));
       maxAnkleTorqueCoPControl.set(10.0);
-      
+
       for (RobotSide robotSide : RobotSide.values)
       {
-         desiredTorquesForCoPControl.put(robotSide, AlphaFilteredYoFrameVector2d.createAlphaFilteredYoFrameVector2d("desired" + robotSide.getCamelCaseNameForMiddleOfExpression() + "AnkleTorqueForCoPControl", "", registry, alphaCoPControl, feet.get(robotSide).getSoleFrame()));
-         yoCoPError.put(robotSide, new YoFrameVector2d(robotSide.getCamelCaseNameForStartOfExpression() + "FootCoPError", feet.get(robotSide).getSoleFrame(), registry));
+         desiredTorquesForCoPControl.put(
+               robotSide,
+               AlphaFilteredYoFrameVector2d.createAlphaFilteredYoFrameVector2d("desired" + robotSide.getCamelCaseNameForMiddleOfExpression()
+                     + "AnkleTorqueForCoPControl", "", registry, alphaCoPControl, feet.get(robotSide).getSoleFrame()));
+         yoCoPError.put(robotSide, new YoFrameVector2d(robotSide.getCamelCaseNameForStartOfExpression() + "FootCoPError", feet.get(robotSide).getSoleFrame(),
+               registry));
       }
-      
+
+      // friction variables for all robot
       frictionModelForAllJoints = new EnumYoVariable<>("frictionModelForAllJoints", registry, FrictionModel.class);
-      frictionCompensationEffectiveness = new DoubleYoVariable("frictionCompensationEffectiveness", registry); 
-      addVariableChangedListenerToFrictionCompensationVariables(frictionCompensationEffectiveness, frictionModelForAllJoints);
+      frictionCompensationEffectiveness = new DoubleYoVariable("frictionCompensationEffectiveness", registry);
+      useBeforeTransmissionVelocityForFriction = new BooleanYoVariable("usePreTransmissionVelocityForFriction", registry);
+      addVariableChangedListenerToFrictionCompensationVariables(frictionCompensationEffectiveness, frictionModelForAllJoints,
+            useBeforeTransmissionVelocityForFriction);
       initializeFrictionCompensationToZero();
    }
 
@@ -340,7 +351,7 @@ public class MomentumBasedController
       }
 
       robotJacobianHolder.compute();
-      
+
       callUpdatables();
 
       inverseDynamicsCalculator.reset();
@@ -364,7 +375,7 @@ public class MomentumBasedController
       {
          if (momentumBasedControllerSpy != null)
             momentumBasedControllerSpy.printMomentumCommands(System.err);
-         
+
          // Don't crash and burn. Instead do the best you can with what you have.
          // Or maybe just use the previous ticks solution.
          // Need to test these.
@@ -379,19 +390,21 @@ public class MomentumBasedController
          inverseDynamicsCalculator.setExternalWrench(rigidBody, externalWrenches.get(rigidBody));
       }
 
-      planeContactWrenchProcessor.compute(externalWrenches); 
+      planeContactWrenchProcessor.compute(externalWrenches);
       if (wrenchVisualizer != null)
          wrenchVisualizer.visualize(externalWrenches);
 
       SpatialForceVector totalGroundReactionWrench = new SpatialForceVector(centerOfMassFrame);
       Wrench admissibleGroundReactionWrench = TotalWrenchCalculator.computeTotalWrench(externalWrenches.values(),
             totalGroundReactionWrench.getExpressedInFrame());
-      admissibleDesiredGroundReactionTorque.set(admissibleGroundReactionWrench.getAngularPartX(), admissibleGroundReactionWrench.getAngularPartY(), admissibleGroundReactionWrench.getAngularPartZ());
-      admissibleDesiredGroundReactionForce.set(admissibleGroundReactionWrench.getLinearPartX(), admissibleGroundReactionWrench.getLinearPartY(), admissibleGroundReactionWrench.getLinearPartZ());
+      admissibleDesiredGroundReactionTorque.set(admissibleGroundReactionWrench.getAngularPartX(), admissibleGroundReactionWrench.getAngularPartY(),
+            admissibleGroundReactionWrench.getAngularPartZ());
+      admissibleDesiredGroundReactionForce.set(admissibleGroundReactionWrench.getLinearPartX(), admissibleGroundReactionWrench.getLinearPartY(),
+            admissibleGroundReactionWrench.getLinearPartZ());
 
-//      SpatialForceVector groundReactionWrenchCheck = inverseDynamicsCalculator.computeTotalExternalWrench(centerOfMassFrame);
-//      groundReactionTorqueCheck.set(groundReactionWrenchCheck.getAngularPartCopy());
-//      groundReactionForceCheck.set(groundReactionWrenchCheck.getLinearPartCopy());
+      //      SpatialForceVector groundReactionWrenchCheck = inverseDynamicsCalculator.computeTotalExternalWrench(centerOfMassFrame);
+      //      groundReactionTorqueCheck.set(groundReactionWrenchCheck.getAngularPartCopy());
+      //      groundReactionForceCheck.set(groundReactionWrenchCheck.getLinearPartCopy());
 
       inverseDynamicsCalculator.compute();
 
@@ -408,7 +421,7 @@ public class MomentumBasedController
       double maxPassiveTorque = passiveKneeMaxTorque.getDoubleValue();
       double kneeLimit = passiveQKneeThreshold.getDoubleValue();
       double kdKnee = passiveKneeKv.getDoubleValue();
-      
+
       for (RobotSide robotSide : RobotSide.values)
       {
          OneDoFJoint kneeJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE);
@@ -419,7 +432,7 @@ public class MomentumBasedController
          if (qKnee < kneeLimit)
          {
             double percent = 1.0 - qKnee / kneeLimit;
-            percent = MathTools.clipToMinMax(percent,  0.0, 1.0);
+            percent = MathTools.clipToMinMax(percent, 0.0, 1.0);
             passiveKneeTorque.get(robotSide).set(sign * maxPassiveTorque * MathTools.square(percent) - kdKnee * qdKnee);
             tauKnee += passiveKneeTorque.get(robotSide).getDoubleValue();
             kneeJoint.setTau(tauKnee);
@@ -434,7 +447,7 @@ public class MomentumBasedController
    private final FramePoint2d copDesired = new FramePoint2d();
    private final FramePoint2d copActual = new FramePoint2d();
    private final FrameVector2d copError = new FrameVector2d();
-   
+
    public final void doProportionalControlOnCoP()
    {
       for (RobotSide robotSide : RobotSide.values)
@@ -442,43 +455,42 @@ public class MomentumBasedController
          ContactablePlaneBody contactablePlaneBody = feet.get(robotSide);
          ReferenceFrame planeFrame = contactablePlaneBody.getSoleFrame();
          AlphaFilteredYoFrameVector2d desiredTorqueForCoPControl = desiredTorquesForCoPControl.get(robotSide);
-         
+
          FramePoint2d cop = planeContactWrenchProcessor.getCops().get(contactablePlaneBody);
-         
+
          if (cop == null || cop.containsNaN())
          {
             desiredTorqueForCoPControl.setToZero();
             return;
          }
-         
+
          copDesired.setIncludingFrame(cop);
          footSwitches.get(robotSide).computeAndPackCoP(copActual);
-         
+
          if (copActual.containsNaN())
          {
             desiredTorqueForCoPControl.setToZero();
             return;
          }
-         
+
          copError.setToZero(planeFrame);
          copError.sub(copDesired, copActual);
          yoCoPError.get(robotSide).set(copError);
          yoCoPErrorMagnitude.get(robotSide).set(copError.length());
-         
+
          copError.scale(gainCoPX.getDoubleValue(), -gainCoPY.getDoubleValue());
          copError.clipMaxLength(maxAnkleTorqueCoPControl.getDoubleValue());
-         
+
          desiredTorqueForCoPControl.update(copError);
-         
+
          OneDoFJoint anklePitchJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_PITCH);
          anklePitchJoint.setTau(anklePitchJoint.getTau() + desiredTorqueForCoPControl.getX());
-         
+
          OneDoFJoint ankleRollJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_ROLL);
          ankleRollJoint.setTau(ankleRollJoint.getTau() + desiredTorqueForCoPControl.getY());
       }
    }
 
-   
    private void updateMomentumBasedControllerSpy()
    {
       if (momentumBasedControllerSpy != null)
@@ -528,18 +540,18 @@ public class MomentumBasedController
       RateLimitedYoVariable rateLimitedDesiredAcceleration = this.rateLimitedDesiredAccelerations.get(joint);
       rateLimitedDesiredAcceleration.setMaxRate(maxJerk);
       rateLimitedDesiredAcceleration.update(desiredAcceleration);
-      
+
       setOneDoFJointAcceleration(joint, rateLimitedDesiredAcceleration.getDoubleValue());
    }
 
    private final Map<OneDoFJoint, DenseMatrix64F> tempJointAcceleration = new LinkedHashMap<OneDoFJoint, DenseMatrix64F>();
-   
+
    public void setOneDoFJointAcceleration(OneDoFJoint joint, double desiredAcceleration)
    {
-      
+
       if (tempJointAcceleration.get(joint) == null)
          tempJointAcceleration.put(joint, new DenseMatrix64F(joint.getDegreesOfFreedom(), 1));
-      
+
       DenseMatrix64F jointAcceleration = tempJointAcceleration.get(joint);
       jointAcceleration.set(0, 0, desiredAcceleration);
 
@@ -554,13 +566,14 @@ public class MomentumBasedController
 
    private final SpatialAccelerationVector pelvisAcceleration = new SpatialAccelerationVector();
    private final Wrench pelvisJointWrench = new Wrench();
-   
+
    private void updateYoVariables()
    {
       fullRobotModel.getRootJoint().packDesiredJointAcceleration(pelvisAcceleration);
 
       finalDesiredPelvisAngularAcceleration.checkReferenceFrameMatch(pelvisAcceleration.getExpressedInFrame());
-      finalDesiredPelvisAngularAcceleration.set(pelvisAcceleration.getAngularPartX(), pelvisAcceleration.getAngularPartY(), pelvisAcceleration.getAngularPartZ());
+      finalDesiredPelvisAngularAcceleration.set(pelvisAcceleration.getAngularPartX(), pelvisAcceleration.getAngularPartY(),
+            pelvisAcceleration.getAngularPartZ());
 
       finalDesiredPelvisLinearAcceleration.checkReferenceFrameMatch(pelvisAcceleration.getExpressedInFrame());
       finalDesiredPelvisLinearAcceleration.set(pelvisAcceleration.getLinearPartX(), pelvisAcceleration.getLinearPartY(), pelvisAcceleration.getLinearPartZ());
@@ -575,28 +588,39 @@ public class MomentumBasedController
          desiredAccelerationYoVariables.get(joint).set(joint.getQddDesired());
       }
    }
-   
+
    private void updateFrictionModel(FrictionModel model, FullRobotModel fullRobotModel)
    {
       OneDoFJoint[] joints = fullRobotModel.getOneDoFJoints();
       int numberOfJoint = joints.length;
-      for(int i = 0; i < numberOfJoint; i++)
+      for (int i = 0; i < numberOfJoint; i++)
       {
          joints[i].setFrictionModel(model);
       }
    }
-   
+
    private void updateFrictionCompensationEffectiveness(double effectiveness, FullRobotModel fullRobotModel)
    {
       OneDoFJoint[] joints = fullRobotModel.getOneDoFJoints();
       int numberOfJoint = joints.length;
-      for(int i = 0; i < numberOfJoint; i++)
+      for (int i = 0; i < numberOfJoint; i++)
       {
          joints[i].setFrictionCompensationEffectiveness(effectiveness);
       }
    }
 
-   private void addVariableChangedListenerToFrictionCompensationVariables(DoubleYoVariable effectiveness, EnumYoVariable<FrictionModel> model)
+   private void updateUseBeforeTransmissionVelocityForFriction(boolean value, FullRobotModel fullRobotModel)
+   {
+      OneDoFJoint[] joints = fullRobotModel.getOneDoFJoints();
+      int numberOfJoint = joints.length;
+      for (int i = 0; i < numberOfJoint; i++)
+      {
+         joints[i].setUseBeforeTransmissionVelocityForFriction(value);
+      }
+   }
+
+   private void addVariableChangedListenerToFrictionCompensationVariables(DoubleYoVariable effectiveness, EnumYoVariable<FrictionModel> model,
+         BooleanYoVariable selectedVelocity)
    {
       VariableChangedListener changedModel = new VariableChangedListener()
       {
@@ -605,7 +629,7 @@ public class MomentumBasedController
             updateFrictionModel(frictionModelForAllJoints.getEnumValue(), fullRobotModel);
          }
       };
-      
+
       VariableChangedListener changedEffectiveness = new VariableChangedListener()
       {
          public void variableChanged(YoVariable<?> v)
@@ -613,15 +637,25 @@ public class MomentumBasedController
             updateFrictionCompensationEffectiveness(frictionCompensationEffectiveness.getDoubleValue(), fullRobotModel);
          }
       };
-      
+
+      VariableChangedListener changedVelocity = new VariableChangedListener()
+      {
+         public void variableChanged(YoVariable<?> v)
+         {
+            updateUseBeforeTransmissionVelocityForFriction(useBeforeTransmissionVelocityForFriction.getBooleanValue(), fullRobotModel);
+         }
+      };
+
       effectiveness.addVariableChangedListener(changedEffectiveness);
       model.addVariableChangedListener(changedModel);
+      selectedVelocity.addVariableChangedListener(changedVelocity);
    }
-   
+
    private void initializeFrictionCompensationToZero()
    {
       frictionCompensationEffectiveness.set(0.0);
       frictionModelForAllJoints.set(FrictionModel.OFF);
+      useBeforeTransmissionVelocityForFriction.set(true);
    }
 
    public void initialize()
@@ -708,7 +742,7 @@ public class MomentumBasedController
    public void setDesiredSpatialAcceleration(int jacobianId, TaskspaceConstraintData taskspaceConstraintData)
    {
       GeometricJacobian jacobian = getJacobian(jacobianId);
-      
+
       if (momentumBasedControllerSpy != null)
       {
          momentumBasedControllerSpy.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
@@ -721,7 +755,7 @@ public class MomentumBasedController
    public void setDesiredPointAcceleration(int rootToEndEffectorJacobianId, FramePoint contactPoint, FrameVector desiredAcceleration)
    {
       GeometricJacobian rootToEndEffectorJacobian = getJacobian(rootToEndEffectorJacobianId);
-      
+
       if (momentumBasedControllerSpy != null)
       {
          momentumBasedControllerSpy.setDesiredPointAcceleration(rootToEndEffectorJacobian, contactPoint, desiredAcceleration);
@@ -736,7 +770,7 @@ public class MomentumBasedController
          DenseMatrix64F selectionMatrix)
    {
       GeometricJacobian rootToEndEffectorJacobian = getJacobian(rootToEndEffectorJacobianId);
-      
+
       if (momentumBasedControllerSpy != null)
       {
          momentumBasedControllerSpy.setDesiredPointAcceleration(rootToEndEffectorJacobian, contactPoint, desiredAcceleration);
@@ -875,12 +909,12 @@ public class MomentumBasedController
    {
       return robotJacobianHolder.getOrCreateGeometricJacobian(ancestor, descendant, jacobianFrame);
    }
-   
+
    public int getOrCreateGeometricJacobian(InverseDynamicsJoint[] joints, ReferenceFrame jacobianFrame)
    {
       return robotJacobianHolder.getOrCreateGeometricJacobian(joints, jacobianFrame);
    }
-   
+
    /**
     * Return a jacobian previously created with the getOrCreate method using a jacobianId.
     * @param jacobianId

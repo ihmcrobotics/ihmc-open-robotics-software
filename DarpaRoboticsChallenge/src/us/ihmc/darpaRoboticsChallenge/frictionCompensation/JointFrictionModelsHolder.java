@@ -2,14 +2,14 @@ package us.ihmc.darpaRoboticsChallenge.frictionCompensation;
 
 import java.util.EnumMap;
 
-import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
-
 import us.ihmc.utilities.frictionModels.FrictionModel;
 import us.ihmc.utilities.frictionModels.FrictionState;
 import us.ihmc.utilities.frictionModels.JointFrictionModel;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
+
+import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 
 public abstract class JointFrictionModelsHolder
 {
@@ -25,7 +25,8 @@ public abstract class JointFrictionModelsHolder
    protected final EnumYoVariable<FrictionModel> activeFrictionModel;
    protected final EnumMap<FrictionModel, JointFrictionModel> frictionModels;
 
-   public JointFrictionModelsHolder(String name, YoVariableRegistry registry, double alpha, double forceThreshold, double stictionTransitionVelocity, double maxJointVelocityToCompensate)
+   public JointFrictionModelsHolder(String name, YoVariableRegistry registry, double alpha, double forceThreshold, double stictionTransitionVelocity,
+         double maxJointVelocityToCompensate)
    {
       alphaForFilteredVelocity = new DoubleYoVariable(name + "_alphaForFilteredVelocity", registry);
       alphaForFilteredVelocity.set(alpha);
@@ -71,7 +72,8 @@ public abstract class JointFrictionModelsHolder
          return null;
       }
 
-      if ((requestedJointVelocity == 0.0 && Math.abs(requestedForce) < forceThreshold.getDoubleValue()) || Math.abs(filteredVelocity.getDoubleValue()) > maxJointVelocityToCompensate.getDoubleValue())
+      if ((requestedJointVelocity == 0.0 && Math.abs(requestedForce) < forceThreshold.getDoubleValue())
+            || Math.abs(filteredVelocity.getDoubleValue()) > maxJointVelocityToCompensate.getDoubleValue())
       {
          frictionCompensationState.set(FrictionState.NOT_COMPENSATING);
          frictionForce.set(0.0);
@@ -102,8 +104,7 @@ public abstract class JointFrictionModelsHolder
 
    public void setActiveFrictionModel(FrictionModel requestedFrictionModel)
    {
-      if ((frictionModels.containsKey(requestedFrictionModel) && frictionModels.get(requestedFrictionModel) != null) 
-            && requestedFrictionModel != null )
+      if ((frictionModels.containsKey(requestedFrictionModel) && frictionModels.get(requestedFrictionModel) != null) && requestedFrictionModel != null)
       {
          if (activeFrictionModel.getEnumValue() != requestedFrictionModel)
          {
@@ -123,7 +124,7 @@ public abstract class JointFrictionModelsHolder
          }
       }
    }
-   
+
    /**
     * Use this method to select the effectiveness of the friction compensation.
     * The predicted friction force is increased or reduced by multiplying it with the effectiveness parameter.
@@ -149,7 +150,7 @@ public abstract class JointFrictionModelsHolder
    {
       return frictionForce.getDoubleValue();
    }
-   
+
    /**
     * Use this method to get the effective friction force which is obtained by scaling the friction force of the active friction model with the effectiveness parameter.
     * 
@@ -168,6 +169,11 @@ public abstract class JointFrictionModelsHolder
    protected JointFrictionModel getActiveJointFrictionModel()
    {
       return frictionModels.get(activeFrictionModel.getEnumValue());
+   }
+   
+   public void setStictionTransitionVelocity(double value)
+   {
+      stictionTransitionVelocity.set(value);
    }
 
    protected abstract void checkIfExistFrictionModelForThisJoint(FrictionModel requestedFrictionModel);
