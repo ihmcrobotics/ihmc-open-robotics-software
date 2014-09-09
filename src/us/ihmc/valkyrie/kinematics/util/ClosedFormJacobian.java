@@ -210,7 +210,7 @@ public class ClosedFormJacobian
       { 
       //Ankle Specific
       pitch = -pitch;
-      roll = -roll;
+//      roll = -roll;
       rotX(rollTransform, roll);
       CommonOps.mult(rollTransform, transform01StaticPart, transform_0_1);
       rotY(pitchTransform, pitch);
@@ -303,7 +303,7 @@ public class ClosedFormJacobian
 //         output[1][0] = m11; output[1][1] = m12;
 //         break;
          
-         roll = -roll;
+//         roll = -roll;
          double J2A_11, J2A_12, J2A_21, J2A_22;
          double cosRoll = Math.cos(roll);
          double cosPitch = Math.cos(pitch);
@@ -331,7 +331,7 @@ public class ClosedFormJacobian
         // Create the transformation matrices
         rotY(pitchTransform, -pitch);
         CommonOps.mult(pitchTransform, transform01StaticPart, transform_0_1);
-        rotX(rollTransform, roll);
+        rotX(rollTransform, -roll);
         CommonOps.mult(rollTransform, transform12StaticPart, transform_1_2);
         CommonOps.mult(transform_0_1, transform_1_2, transform_0_2);
         CommonOps.invert(transform_0_2, transform_2_0);
@@ -416,7 +416,7 @@ public class ClosedFormJacobian
 //           output[0][0] =  m11; output[0][1] =  m12;
 //           output[1][0] =  m21; output[1][1] =  m22;
 //           break;
-           roll = -roll;
+           roll = roll;
            double J2A_11, J2A_12, J2A_21, J2A_22;
            double cosRoll = Math.cos(roll);
            double cosPitch = Math.cos(pitch);

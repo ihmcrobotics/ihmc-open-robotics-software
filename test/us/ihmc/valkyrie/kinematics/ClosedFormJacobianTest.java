@@ -103,10 +103,10 @@ public class ClosedFormJacobianTest
             System.out.println("m11_matlab: " + m12_matlab[i] + ", m12_matlab: " + m11_matlab[i] + ", m21_matlab: " + -m22_matlab[i] + ", m22_matlab: " + -m21_matlab[i]);         
             System.out.println(" ");
          }
-         assertEquals(J[0][0],  m12_matlab[i], TOLERANCE);
-         assertEquals(J[0][1],  m11_matlab[i], TOLERANCE);
-         assertEquals(J[1][0], -m22_matlab[i], TOLERANCE);
-         assertEquals(J[1][1], -m21_matlab[i], TOLERANCE);
+         assertEquals(J[0][0], -m11_matlab[i], TOLERANCE);
+         assertEquals(J[0][1], -m12_matlab[i], TOLERANCE);
+         assertEquals(J[1][0], -m21_matlab[i], TOLERANCE);
+         assertEquals(J[1][1], -m22_matlab[i], TOLERANCE);
       }
    }
 
@@ -118,10 +118,10 @@ public class ClosedFormJacobianTest
       for (int i = 0; i < 7; i++)
       {
          double[][] J = closedFormJacobianAnkle.getUpdatedTransform( roll[i], pitch[i]);    // + 7.5*Math.PI/180.0);
-         double m11_will = J[0][0];
-         double m12_will = J[0][1];
-         double m21_will =  J[1][0];
-         double m22_will =  J[1][1];
+         double m11_will = J[1][1];
+         double m12_will = J[1][0];
+         double m21_will =  J[0][1];
+         double m22_will =  J[0][0];
 
          double[][] inefficientJacobian = new double[2][2];
          inefficientButReadablePushrodTransmission.computeJacobian(inefficientJacobian, pitch[i], roll[i]);
@@ -151,12 +151,12 @@ public void testJacobianMatchesMATLABWaist()
       double[][] J = closedFormJacobianWaist.getUpdatedTransform( roll[i], pitch[i] );
       if(DEBUG){
          System.out.println("m11_java: " + J[0][0] + ", m12_java: " + J[0][1] + ", m21_java: " + J[1][0] + ", m22_java: " + J[1][1]);
-         System.out.println("m11_matlab: " + m21_matlab_waist[i] + ", m12_matlab: " + m22_matlab_waist[i] + ", m21_matlab: " + -m11_matlab_waist[i] + ", m22_matlab: " + -m12_matlab_waist[i]);         
+         System.out.println("m11_matlab: " + m22_matlab_waist[i] + ", m12_matlab: " + m21_matlab_waist[i] + ", m21_matlab: " + -m12_matlab_waist[i] + ", m22_matlab: " + -m11_matlab_waist[i]);         
       }
-      assertEquals(J[0][0], m21_matlab_waist[i], TOLERANCE);
-      assertEquals(J[0][1], m22_matlab_waist[i], TOLERANCE);
-      assertEquals(J[1][0], -m11_matlab_waist[i], TOLERANCE);
-      assertEquals(J[1][1], -m12_matlab_waist[i], TOLERANCE);
+      assertEquals(J[0][0], -m22_matlab_waist[i], TOLERANCE);
+      assertEquals(J[0][1], -m21_matlab_waist[i], TOLERANCE);
+      assertEquals(J[1][0], -m12_matlab_waist[i], TOLERANCE);
+      assertEquals(J[1][1], -m11_matlab_waist[i], TOLERANCE);
    }
 }
 
@@ -214,13 +214,13 @@ public void testEfficentMatchesInterpolatedJacobianWaist()
       if (DEBUG)
       {
          System.out.println("m11_will = " + m11_will + ", m12_will = " + m12_will + ", m21_will = " + m21_will + ", m22_will = " + m22_will);
-         System.out.println("m11_inter = " + m11_inter + ", m12_inter = " + m12_inter + ", m21_inter = " + m21_inter + ", m22_inter = " + m22_inter);
+         System.out.println("m11_inter = " + -m12_inter + ", m12_inter = " + -m11_inter + ", m21_inter = " + m21_inter + ", m22_inter = " + m22_inter);
          System.out.println(" ");
       }
-      assertEquals(m11_will, m11_inter, TOLERANCE_GOOD_ENOUGH_FOR_GOVERNMENT_WORK);
-      assertEquals(m12_will, m12_inter, TOLERANCE_GOOD_ENOUGH_FOR_GOVERNMENT_WORK);
-      assertEquals(m21_will, m21_inter, TOLERANCE_GOOD_ENOUGH_FOR_GOVERNMENT_WORK);
-      assertEquals(m22_will, m22_inter, TOLERANCE_GOOD_ENOUGH_FOR_GOVERNMENT_WORK);
+      assertEquals(m11_will, -m12_inter, TOLERANCE_GOOD_ENOUGH_FOR_GOVERNMENT_WORK);
+      assertEquals(m12_will, -m11_inter, TOLERANCE_GOOD_ENOUGH_FOR_GOVERNMENT_WORK);
+      assertEquals(m21_will, m22_inter, TOLERANCE_GOOD_ENOUGH_FOR_GOVERNMENT_WORK);
+      assertEquals(m22_will, m21_inter, TOLERANCE_GOOD_ENOUGH_FOR_GOVERNMENT_WORK);
    }
 }
 
