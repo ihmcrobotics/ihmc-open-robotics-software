@@ -14,12 +14,13 @@ import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.WrenchBasedFootSwitch;
 import us.ihmc.commonWalkingControlModules.visualizer.RobotVisualizer;
 import us.ihmc.communication.packets.StampedPosePacket;
+import us.ihmc.communication.subscribers.ExternalPelvisPoseSubscriberInterface;
+import us.ihmc.communication.subscribers.ExternalTimeStampedPoseSubscriber;
 import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadDataSynchronizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotContactPointParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.state.LocalizationUpdateReceiver;
 import us.ihmc.darpaRoboticsChallenge.networking.dataProducers.JointConfigurationGatherer;
 import us.ihmc.darpaRoboticsChallenge.sensors.RobotJointLimitWatcher;
 import us.ihmc.darpaRoboticsChallenge.stateEstimation.kinematicsBasedStateEstimator.DRCKinematicsBasedStateEstimator;
@@ -37,6 +38,7 @@ import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.io.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.net.AtomicSettableTimestampProvider;
+import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.utilities.screwTheory.TotalMassCalculator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -104,7 +106,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       {
          SensorOutputMapReadOnly sensorOutputMapReadOnly = sensorReader.getSensorOutputMapReadOnly();
          drcStateEstimator = createStateEstimator(estimatorFullRobotModel, robotModel, sensorOutputMapReadOnly, gravity, stateEstimatorParameters,
-               contactPointParamaters, forceSensorDataHolderForEstimator, dynamicGraphicObjectsListRegistry, estimatorRegistry);
+               contactPointParamaters, forceSensorDataHolderForEstimator, dynamicGraphicObjectsListRegistry, estimatorRegistry, dataProducer, timestampProvider);
          estimatorController.addRobotController(drcStateEstimator);
       }
       else
@@ -127,12 +129,11 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       
       if (dataProducer != null)
       {
+         ObjectCommunicator objectCommunicator = dataProducer.getObjectCommunicator();
          JointConfigurationGatherer jointConfigurationGathererAndProducer = new JointConfigurationGatherer(estimatorFullRobotModel);
-         LocalizationUpdateReceiver localizationUpdateReceiver = new LocalizationUpdateReceiver();
-         dataProducer.getObjectCommunicator().attachListener(StampedPosePacket.class, localizationUpdateReceiver);
-
+         
          estimatorController.setRawOutputWriter(new DRCPoseCommunicator(estimatorFullRobotModel, jointConfigurationGathererAndProducer,
-                 dataProducer.getObjectCommunicator(), timestampProvider, sensorInformation));
+               objectCommunicator, timestampProvider, sensorInformation));
       }
       
       firstTick.set(true);
@@ -200,7 +201,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    public static DRCKinematicsBasedStateEstimator createStateEstimator(SDFFullRobotModel estimatorFullRobotModel, DRCRobotModel drcRobotModel,
          SensorOutputMapReadOnly sensorOutputMapReadOnly, double gravity, StateEstimatorParameters stateEstimatorParameters,
          DRCRobotContactPointParameters contactPointParamaters, ForceSensorDataHolder forceSensorDataHolderForEstimator,
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry registry)
+         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry registry, GlobalDataProducer dataProducer, AtomicSettableTimestampProvider timestampProvider)
    {
       DRCRobotJointMap jointMap = drcRobotModel.getJointMap();
       FullInverseDynamicsStructure inverseDynamicsStructure = DRCControllerThread.createInverseDynamicsStructure(estimatorFullRobotModel);
@@ -227,10 +228,18 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
                footSwitchCoPThresholdFraction, totalRobotWeight, bipedFeet.get(robotSide), null, contactTresholdForce, registry);
          footSwitchesForEstimator.put(robotSide, wrenchBasedFootSwitchForEstimator);
       }
-
+      
+      ExternalPelvisPoseSubscriberInterface externalPelvisPoseSubscriber = null;
+      
+      if (dataProducer != null)
+      {
+         externalPelvisPoseSubscriber = new ExternalTimeStampedPoseSubscriber();
+         dataProducer.attachListener(StampedPosePacket.class, externalPelvisPoseSubscriber);
+      }
+      
       // Create the sensor readers and state estimator here:
       DRCKinematicsBasedStateEstimator drcStateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure, stateEstimatorParameters,
-            sensorOutputMapReadOnly, gravityMagnitude, footSwitchesForEstimator, bipedFeet, dynamicGraphicObjectsListRegistry);
+            sensorOutputMapReadOnly, gravityMagnitude, footSwitchesForEstimator, bipedFeet, dynamicGraphicObjectsListRegistry, externalPelvisPoseSubscriber, timestampProvider);
 
       return drcStateEstimator;
    }

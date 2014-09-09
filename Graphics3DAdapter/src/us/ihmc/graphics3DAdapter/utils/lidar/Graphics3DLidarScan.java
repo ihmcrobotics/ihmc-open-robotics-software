@@ -76,7 +76,8 @@ public class Graphics3DLidarScan
                Transform3D pointTransform = new Transform3D();
 
                Point3d p = new Point3d(lidarScan.getRange(i) + (SPHERE_RADIUS * 1.1), 0.0, 0.0);
-               Transform3D transform = lidarScan.getInterpolatedTransform(i);
+               Transform3D transform = new Transform3D();
+               lidarScan.packInterpolatedTransform(i, transform);
                transform.mul(lidarScan.getSweepTransform(i));
                transform.transform(p);
 
@@ -88,7 +89,8 @@ public class Graphics3DLidarScan
 
          if (showScanRays)
          {
-            Transform3D rayTransform = lidarScan.getInterpolatedTransform(i);
+            Transform3D rayTransform = new Transform3D();
+            lidarScan.packInterpolatedTransform(i, rayTransform);
             rayTransform.mul(lidarScan.getSweepTransform(i));
             rays[i].setTransform(rayTransform);
          }

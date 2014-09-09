@@ -10,6 +10,7 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.sensors.WrenchBasedFootSwitch;
+import us.ihmc.communication.subscribers.ExternalPelvisPoseSubscriberInterface;
 import us.ihmc.darpaRoboticsChallenge.stateEstimation.DRCStateEstimatorInterface;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.imu.FusedIMUSensor;
@@ -21,6 +22,7 @@ import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsSt
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.net.AtomicSettableTimestampProvider;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
@@ -40,6 +42,9 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    private final PelvisRotationalStateUpdater pelvisRotationalStateUpdater;
    private final PelvisLinearStateUpdater pelvisLinearStateUpdater;
 
+   private final PelvisPoseHistoryCorrection pelvisPoseHistoryCorrection;
+   private final PelvisPoseNoiseGenerator pelvisPoseNoiseGenerator;
+
    private final double estimatorDT;
 
    private boolean visualizeMeasurementFrames = false;
@@ -47,13 +52,21 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 
    private final CenterOfPressureVisualizer copVisualizer;
 
+   private boolean usePelvisCorrector = false;
+   private boolean addNoise = false;
+
    public DRCKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, StateEstimatorParameters stateEstimatorParameters,
          SensorOutputMapReadOnly sensorOutputMapReadOnly, double gravitationalAcceleration, SideDependentList<WrenchBasedFootSwitch> footSwitches,
-         SideDependentList<ContactablePlaneBody> bipedFeet, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+         SideDependentList<ContactablePlaneBody> bipedFeet, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+         ExternalPelvisPoseSubscriberInterface externalPelvisSubscriber, AtomicSettableTimestampProvider timestampProvider)
    {
       this.estimatorDT = stateEstimatorParameters.getEstimatorDT();
 
       jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorOutputMapReadOnly, registry);
+
+      this.pelvisPoseHistoryCorrection = new PelvisPoseHistoryCorrection(inverseDynamicsStructure, externalPelvisSubscriber,
+            stateEstimatorParameters.getEstimatorDT(), registry, 1000, timestampProvider);
+      pelvisPoseNoiseGenerator = new PelvisPoseNoiseGenerator(inverseDynamicsStructure, registry);
 
       List<? extends IMUSensorReadOnly> imuProcessedOutputs = sensorOutputMapReadOnly.getIMUProcessedOutputs();
       List<IMUSensorReadOnly> imusToUse = new ArrayList<>();
@@ -62,7 +75,8 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       {
          if (imuProcessedOutputs.size() != 2)
             throw new RuntimeException("Cannot create FusedIMUSensor.");
-         fusedIMUSensor = new FusedIMUSensor(imuProcessedOutputs.get(0), imuProcessedOutputs.get(1), estimatorDT, stateEstimatorParameters.getIMUDriftFilterFreqInHertz(), registry);
+         fusedIMUSensor = new FusedIMUSensor(imuProcessedOutputs.get(0), imuProcessedOutputs.get(1), estimatorDT,
+               stateEstimatorParameters.getIMUDriftFilterFreqInHertz(), registry);
          imusToUse.add(fusedIMUSensor);
       }
       else
@@ -132,6 +146,16 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       jointStateUpdater.updateJointState();
       pelvisRotationalStateUpdater.updateRootJointOrientationAndAngularVelocity();
       pelvisLinearStateUpdater.updateRootJointPositionAndLinearVelocity();
+      
+      if(addNoise)
+      {
+         pelvisPoseNoiseGenerator.addNoise();
+      }
+      
+      if (usePelvisCorrector && pelvisPoseHistoryCorrection != null)
+      {
+         pelvisPoseHistoryCorrection.doControl();
+      }
 
       updateVisualizers();
    }

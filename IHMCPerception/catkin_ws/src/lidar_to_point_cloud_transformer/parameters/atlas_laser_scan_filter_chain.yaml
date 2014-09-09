@@ -2,7 +2,7 @@ laser_scan_filter_chain:
 - name: range
   type: laser_filters/LaserScanRangeFilter
   params:
-    lower_threshold: 0.3
+    lower_threshold: 0.8
     upper_threshold: .inf
 - name: shadows
   type: laser_filters/ScanShadowsFilter
