@@ -13,12 +13,17 @@ import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVa
 
 public abstract class JointFrictionModelsHolder
 {
+   private static final double SMALL_VELOCITY_ABS = 0.005;
+   private static final double ACCELERATION_THRESHOLD = 0.5;
+   
    private final DoubleYoVariable stictionTransitionVelocity;
    private final AlphaFilteredYoVariable filteredVelocity;
    private final DoubleYoVariable alphaForFilteredVelocity;
    private final DoubleYoVariable forceThreshold;
    private final DoubleYoVariable frictionCompensationEffectiveness;
    private final DoubleYoVariable maxJointVelocityToCompensate;
+   private final DoubleYoVariable smallVelocityAbs;
+   private final DoubleYoVariable accelerationThreshold;
 
    protected final DoubleYoVariable frictionForce;
    protected final EnumYoVariable<FrictionState> frictionCompensationState;
@@ -37,15 +42,20 @@ public abstract class JointFrictionModelsHolder
       this.stictionTransitionVelocity = new DoubleYoVariable(name + "_stictionTransitionVelocity", registry);
       this.stictionTransitionVelocity.set(Math.abs(stictionTransitionVelocity));
       this.forceThreshold = new DoubleYoVariable(name + "_forceThreshold", registry);
-      this.forceThreshold.set(forceThreshold);
+      this.forceThreshold.set(Math.abs(forceThreshold));
       filteredVelocity = new AlphaFilteredYoVariable(name + "_alphaFilteredVelocity", registry, alphaForFilteredVelocity);
       filteredVelocity.update(0.0);
       frictionCompensationEffectiveness = new DoubleYoVariable(name + "_frictionCompensationEffectiveness", registry);
       frictionCompensationEffectiveness.set(0.0);
       this.maxJointVelocityToCompensate = new DoubleYoVariable(name + "_maxJointVelocityToCompensate", registry);
-      this.maxJointVelocityToCompensate.set(maxJointVelocityToCompensate);
+      this.maxJointVelocityToCompensate.set(Math.abs(maxJointVelocityToCompensate));
+      smallVelocityAbs = new DoubleYoVariable(name + "_stictionEquivalentVelocity", registry);
+      smallVelocityAbs.set(Math.abs(SMALL_VELOCITY_ABS));
+      accelerationThreshold = new DoubleYoVariable(name + "_accelerationThreshold", registry);
+      this.accelerationThreshold.set(Math.abs(ACCELERATION_THRESHOLD)); // maybe take in the constructor and set in the friction parameters
    }
 
+   // TODO update description
    /**
     * This method computes an equivalent joint velocity to use as input for the friction model. It also sets the state of the friction compensation.
     * If the active friction model is the OFF, than the friction compensation state is set to NOT_COMPENSATING.
@@ -60,7 +70,7 @@ public abstract class JointFrictionModelsHolder
     * In case of stiction the discrimination between force or velocity mode is done based on the requested force value, so force control is predominant.
     * 
     */
-   protected Double selectFrictionStateAndFrictionVelocity(double requestedForce, double currentJointVelocity, double requestedJointVelocity)
+   protected Double selectFrictionStateAndFrictionVelocity(double requestedForce, double currentJointVelocity, double requestedJointAcceleration)
    {
       double velocityForFrictionCalculation;
       filteredVelocity.update(currentJointVelocity);
@@ -72,7 +82,7 @@ public abstract class JointFrictionModelsHolder
          return null;
       }
 
-      if ((requestedJointVelocity == 0.0 && Math.abs(requestedForce) < forceThreshold.getDoubleValue())
+      if ((Math.abs(requestedJointAcceleration) < accelerationThreshold.getDoubleValue() && Math.abs(requestedForce) < forceThreshold.getDoubleValue())
             || Math.abs(filteredVelocity.getDoubleValue()) > maxJointVelocityToCompensate.getDoubleValue())
       {
          frictionCompensationState.set(FrictionState.NOT_COMPENSATING);
@@ -82,20 +92,28 @@ public abstract class JointFrictionModelsHolder
 
       if (Math.abs(filteredVelocity.getDoubleValue()) > stictionTransitionVelocity.getDoubleValue())
       {
-         frictionCompensationState.set(FrictionState.OUT_STICTION);
-         velocityForFrictionCalculation = currentJointVelocity;
-      }
-      else
-      {
-         if (Math.abs(requestedForce) < forceThreshold.getDoubleValue())
+         if (Math.abs(requestedJointAcceleration) < accelerationThreshold.getDoubleValue())
          {
-            frictionCompensationState.set(FrictionState.IN_STICTION_VELOCITY_MODE);
-            velocityForFrictionCalculation = requestedJointVelocity;
+            frictionCompensationState.set(FrictionState.OUT_STICTION_CURRENT_VELOCITY);
+            velocityForFrictionCalculation = currentJointVelocity;
          }
          else
          {
-            frictionCompensationState.set(FrictionState.IN_STICTION_FORCE_MODE);
-            velocityForFrictionCalculation = stictionTransitionVelocity.getDoubleValue() * Math.signum(requestedForce);
+            frictionCompensationState.set(FrictionState.OUT_STICTION_DESIRED_ACCELERATION);
+            velocityForFrictionCalculation = Math.signum(requestedJointAcceleration) * smallVelocityAbs.getDoubleValue();
+         }
+      }
+      else
+      {
+         if (Math.abs(requestedJointAcceleration) > accelerationThreshold.getDoubleValue())
+         {
+            frictionCompensationState.set(FrictionState.IN_STICTION_DESIRED_ACCELERATION);
+            velocityForFrictionCalculation = Math.signum(requestedJointAcceleration) * smallVelocityAbs.getDoubleValue();
+         }
+         else
+         {
+            frictionCompensationState.set(FrictionState.IN_STICTION_DESIRED_FORCE);
+            velocityForFrictionCalculation = Math.signum(requestedForce) * smallVelocityAbs.getDoubleValue();
          }
       }
 
