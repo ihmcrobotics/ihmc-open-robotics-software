@@ -88,7 +88,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
          tfPublisher = new RosTfPublisher(rosMainNode);
          new RosRobotPosePublisher(fieldObjectCommunicator, rosMainNode, ppsTimestampOffsetProvider, robotPoseBuffer, sensorInformation, "atlas", tfPublisher);
          new RosRobotJointStatePublisher(fieldObjectCommunicator, rosMainNode, ppsTimestampOffsetProvider, "atlas");
-         new RosLocalizationUpdateSubscriber(rosMainNode, fieldObjectCommunicator);
+         new RosLocalizationUpdateSubscriber(rosMainNode, fieldObjectCommunicator, ppsTimestampOffsetProvider);
 
          ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
          rosMainNode.execute();
@@ -151,7 +151,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       {
          RosTfPublisher tfPublisher = new RosTfPublisher(rosMainNode);
          RosRobotPosePublisher robotPosePublisher = new RosRobotPosePublisher(objectCommunicator, rosMainNode, ppsTimestampOffsetProvider, robotPoseBuffer, sensorInformation, "atlas", tfPublisher);
-         new RosLocalizationUpdateSubscriber(rosMainNode, objectCommunicator);
+         new RosLocalizationUpdateSubscriber(rosMainNode, objectCommunicator, ppsTimestampOffsetProvider);
          multiSenseSensorManager.setRobotPosePublisher(robotPosePublisher);
          new RosRobotJointStatePublisher(objectCommunicator, rosMainNode, ppsTimestampOffsetProvider,"atlas");
       }
