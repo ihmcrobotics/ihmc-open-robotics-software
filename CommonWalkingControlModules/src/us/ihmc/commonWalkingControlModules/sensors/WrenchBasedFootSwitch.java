@@ -219,6 +219,8 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
    
    private boolean isCoPPastThreshold()
    {
+      if (Double.isNaN(footSwitchCoPThresholdFraction.getDoubleValue())) return true;
+      
       updateCoP();
 
       minThresholdX = (footMinX + footSwitchCoPThresholdFraction.getDoubleValue() * footLength);
