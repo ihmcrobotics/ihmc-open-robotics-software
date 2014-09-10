@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.vecmath.Vector3d;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
@@ -66,11 +64,9 @@ import us.ihmc.utilities.math.trajectories.providers.TrajectoryParameters;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.Twist;
-import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
@@ -83,9 +79,6 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionAction;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
-import com.yobotics.simulationconstructionset.util.trajectory.OrientationInterpolationTrajectoryGenerator;
-import com.yobotics.simulationconstructionset.util.trajectory.OrientationTrajectoryGenerator;
-import com.yobotics.simulationconstructionset.util.trajectory.provider.YoQuaternionProvider;
 
 public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoidControlPattern
 {
@@ -159,15 +152,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final DoubleYoVariable amountToBeInsideSingleSupport = new DoubleYoVariable("amountToBeInsideSingleSupport", registry);
    private final DoubleYoVariable amountToBeInsideDoubleSupport = new DoubleYoVariable("amountToBeInsideDoubleSupport", registry);
 
-   private final DoubleYoVariable userDesiredPelvisYaw = new DoubleYoVariable("userDesiredPelvisYaw", registry);
-   private final DoubleYoVariable userDesiredPelvisPitch = new DoubleYoVariable("userDesiredPelvisPitch", registry);
-   private final DoubleYoVariable userDesiredPelvisRoll = new DoubleYoVariable("userDesiredPelvisRoll", registry);
-   private final BooleanYoVariable userSetDesiredPelvis = new BooleanYoVariable("userSetDesiredPelvis", registry);
-
-   private final YoQuaternionProvider initialPelvisOrientationProvider;
-   private final YoQuaternionProvider finalPelvisOrientationProvider;
-   private final OrientationTrajectoryGenerator pelvisOrientationTrajectoryGenerator;
-
    private final SwingTimeCalculationProvider swingTimeCalculationProvider;
    private final TransferTimeCalculationProvider transferTimeCalculationProvider;
 
@@ -222,8 +206,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private YoFramePoint ecmpViz = new YoFramePoint("ecmpViz", worldFrame, registry);
    private TransferToAndNextFootstepsData neutralFootstepsData;
 
-   private final VariousWalkingManagers variousWalkingManagers;
-
    private final YoFramePoint2dInPolygonCoordinate doubleSupportDesiredICP;
 
    private final BooleanYoVariable doPrepareManipulationForLocomotion = new BooleanYoVariable("doPrepareManipulationForLocomotion", registry);
@@ -240,19 +222,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       super(variousWalkingProviders, variousWalkingManagers, momentumBasedController, walkingControllerParameters, controllerState);
 
       super.addUpdatables(icpAndMomentumBasedController.getUpdatables());
-
-      userSetDesiredPelvis.addVariableChangedListener(new VariableChangedListener()
-      {
-         public void variableChanged(YoVariable<?> v)
-         {
-            FrameOrientation frameOrientation = new FrameOrientation(referenceFrames.getPelvisFrame());
-            frameOrientation.changeFrame(ReferenceFrame.getWorldFrame());
-
-            userDesiredPelvisYaw.set(frameOrientation.getYawPitchRoll()[0]);
-         }
-      });
-
-      this.variousWalkingManagers = variousWalkingManagers;
 
       setupManagers(variousWalkingManagers);
 
@@ -329,11 +298,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       this.centerOfMassHeightTrajectoryGenerator.attachWalkOnToesManager(feetManager.getWalkOnTheEdgesManager());
 
-      initialPelvisOrientationProvider = new YoQuaternionProvider("initialPelvis", worldFrame, registry);
-      finalPelvisOrientationProvider = new YoQuaternionProvider("finalPelvis", worldFrame, registry);
-      this.pelvisOrientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator("pelvis", worldFrame, swingTimeCalculationProvider,
-            initialPelvisOrientationProvider, finalPelvisOrientationProvider, registry);
-
       pushRecoveryModule = new PushRecoveryControlModule(momentumBasedController, walkingControllerParameters, readyToGrabNextFootstep,
             icpAndMomentumBasedController, stateMachine, registry, swingTimeCalculationProvider, feet);
 
@@ -350,7 +314,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       transferTimeCalculationProvider.updateTransferTime();
 
       stopInDoubleSupporTrajectoryTime.set(0.5);
-      this.userDesiredPelvisPitch.set(walkingControllerParameters.getDefaultDesiredPelvisPitch());
 
       additionalSwingTimeForICP.set(0.1);
       minimumSwingFraction.set(0.5); // 0.8);
@@ -483,13 +446,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          headOrientationManager.setUp(baseForHeadOrientationControl, jacobianIdForHeadOrientationControl);
       }
 
-      ReferenceFrame ankleZUpFrame = referenceFrames.getAnkleZUpFrame(upcomingSupportLeg.getEnumValue());
-      FrameOrientation initialDesiredPelvisOrientation = new FrameOrientation(ankleZUpFrame);
-      initialDesiredPelvisOrientation.changeFrame(worldFrame);
-      double yaw = initialDesiredPelvisOrientation.getYawPitchRoll()[0];
-      initialDesiredPelvisOrientation.setYawPitchRoll(yaw, userDesiredPelvisPitch.getDoubleValue(), userDesiredPelvisRoll.getDoubleValue());
-      desiredPelvisOrientation.set(initialDesiredPelvisOrientation);
-      finalPelvisOrientationProvider.setOrientation(initialDesiredPelvisOrientation); // yes, final. To make sure that the first swing phase has the right initial
+      pelvisOrientationManager.setToZeroInSupportFoot(upcomingSupportLeg.getEnumValue());
 
       icpAndMomentumBasedController.computeCapturePoint();
       desiredICP.set(capturePoint.getFramePoint2dCopy());
@@ -589,23 +546,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
 
          initializeECMPbasedToeOffIfNotInitializedYet();
-
-         // Only during the first few seconds, we will control the pelvis orientation based on midfeetZup
-         if (((yoTime.getDoubleValue() - controllerInitializationTime.getDoubleValue()) < PELVIS_YAW_INITIALIZATION_TIME)
-               && !alreadyBeenInDoubleSupportOnce.getBooleanValue())
-         {
-            setDesiredPelvisYawToAverageOfFeetOnStartupOnly(transferToSide);
-         }
-
-         if (userSetDesiredPelvis.getBooleanValue())
-         {
-            desiredPelvisOrientation
-                  .set(userDesiredPelvisYaw.getDoubleValue(), userDesiredPelvisPitch.getDoubleValue(), userDesiredPelvisRoll.getDoubleValue());
-         }
-
-         // keep desired pelvis orientation as it is
-         desiredPelvisAngularVelocity.set(0.0, 0.0, 0.0);
-         desiredPelvisAngularAcceleration.set(0.0, 0.0, 0.0);
       }
 
       boolean initializedAtStart = false;
@@ -821,6 +761,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             pushRecoveryModule.setRecoverFromDoubleSupportFootStep(null);
             pushRecoveryModule.setRecoveringFromDoubleSupportState(false);
          }
+         
+         pelvisOrientationManager.setToHoldCurrentDesired();
       }
 
       @Override
@@ -843,22 +785,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          if (manipulationControlModule != null && doPrepareManipulationForLocomotion.getBooleanValue())
             manipulationControlModule.prepareForLocomotion();
       }
-   }
-
-   private void setDesiredPelvisYawToAverageOfFeetOnStartupOnly(RobotSide transferToSide)
-   {
-      FrameOrientation averageOrientation = new FrameOrientation(worldFrame);
-      averageOrientationCalculator.computeAverageOrientation(averageOrientation, feet.get(RobotSide.LEFT).getSoleFrame(), feet.get(RobotSide.RIGHT)
-            .getSoleFrame(), worldFrame);
-
-      double[] yawPitchRoll = averageOrientation.getYawPitchRoll();
-
-      double yawOffset = 0.0;
-      if (transferToSide != null)
-         yawOffset = transferToSide.negateIfLeftSide(userDesiredPelvisYaw.getDoubleValue());
-
-      averageOrientation.setYawPitchRoll(yawPitchRoll[0] + yawOffset, userDesiredPelvisPitch.getDoubleValue(), userDesiredPelvisRoll.getDoubleValue());
-      desiredPelvisOrientation.set(averageOrientation);
    }
 
    private class SingleSupportState extends State<WalkingState>
@@ -981,14 +907,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             ecmpViz.set(desiredECMP.getX(), desiredECMP.getY(), 0.0);
          }
 
-         pelvisOrientationTrajectoryGenerator.compute(stateMachine.timeInCurrentState() - captureTime);
-         pelvisOrientationTrajectoryGenerator.get(desiredPelvisOrientationToPack);
-         pelvisOrientationTrajectoryGenerator.packAngularVelocity(desiredPelvisAngularVelocityToPack);
-         pelvisOrientationTrajectoryGenerator.packAngularAcceleration(desiredPelvisAngularAccelerationToPack);
-         desiredPelvisOrientation.set(desiredPelvisOrientationToPack);
-         desiredPelvisAngularVelocity.set(desiredPelvisAngularVelocityToPack);
-         desiredPelvisAngularAcceleration.set(desiredPelvisAngularAccelerationToPack);
-
          if ((stateMachine.timeInCurrentState() - captureTime < 0.5 * swingTimeCalculationProvider.getValue())
                && feetManager.isInSingularityNeighborhood(swingSide))
          {
@@ -1075,7 +993,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
          else
          {
-            updateParametersWithoutAFootstep();
+            pelvisOrientationManager.setToZeroInSupportFoot(supportSide);
          }
 
          if (walkingControllerParameters.resetDesiredICPToCurrentAtStartOfSwing())
@@ -1084,48 +1002,14 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
       }
 
-      private void updateParametersWithoutAFootstep()
-      {
-         FrameOrientation orientation = new FrameOrientation(desiredPelvisOrientation.getReferenceFrame());
-         desiredPelvisOrientation.getFrameOrientationIncludingFrame(orientation);
-         initialPelvisOrientationProvider.setOrientation(orientation);
-         finalPelvisOrientationProvider.setOrientation(orientation);
-         pelvisOrientationTrajectoryGenerator.initialize();
-      }
-
       private void updateFootstepParameters()
       {
          FramePoint2d nextFootstepPosition = new FramePoint2d();
          nextFootstep.getPosition2d(nextFootstepPosition);
          transferToFootstep.set(nextFootstepPosition);
          RobotSide supportSide = swingSide.getOppositeSide();
-
-         FrameOrientation orientation = new FrameOrientation(desiredPelvisOrientation.getReferenceFrame());
-         desiredPelvisOrientation.getFrameOrientationIncludingFrame(orientation);
-         initialPelvisOrientationProvider.setOrientation(orientation);
-
-         FrameOrientation finalPelvisOrientation = new FrameOrientation();
-         nextFootstep.getOrientationIncludingFrame(finalPelvisOrientation);
-         finalPelvisOrientation.changeFrame(worldFrame);
-         FrameOrientation tempOrientation = new FrameOrientation();
-         tempOrientation.interpolate(orientation, finalPelvisOrientation, 0.5);
-         finalPelvisOrientation.setYawPitchRoll(tempOrientation.getYaw(), 0.0, 0.0);
-         FramePoint swingFootFinalPosition = new FramePoint();
-         nextFootstep.getPositionIncludingFrame(swingFootFinalPosition);
-         swingFootFinalPosition.changeFrame(referenceFrames.getAnkleZUpFrame(swingSide.getOppositeSide()));
-         FrameVector supportFootToSwingFoot = new FrameVector(swingFootFinalPosition);
-         Vector3d temp = supportFootToSwingFoot.getVectorCopy();
-         double desiredPelvisYawAngle = 0.0;
-         if (Math.abs(temp.x) > 0.1)
-         {
-            desiredPelvisYawAngle = Math.atan2(temp.y, temp.x);
-            desiredPelvisYawAngle -= swingSide.negateIfRightSide(Math.PI / 2.0);
-         }
-
-         finalPelvisOrientation.setYawPitchRoll(finalPelvisOrientation.getYaw() + userDesiredPelvisYaw.getDoubleValue() * desiredPelvisYawAngle,
-               userDesiredPelvisPitch.getDoubleValue(), userDesiredPelvisRoll.getDoubleValue());
-         finalPelvisOrientationProvider.setOrientation(finalPelvisOrientation);
-         pelvisOrientationTrajectoryGenerator.initialize();
+         
+         pelvisOrientationManager.setWithUpcomingFootstep(nextFootstep, swingSide);
 
          FramePoint centerOfMass = new FramePoint(referenceFrames.getCenterOfMassFrame());
          centerOfMass.changeFrame(worldFrame);

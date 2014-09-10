@@ -5,7 +5,7 @@ import us.ihmc.commonWalkingControlModules.configurations.HeadOrientationControl
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
-import us.ihmc.commonWalkingControlModules.controlModules.PelvisDesiredsHandler;
+import us.ihmc.commonWalkingControlModules.controlModules.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ChestOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HeadOrientationProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisPoseProvider;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
@@ -32,16 +33,16 @@ public class VariousWalkingManagers
    private final ChestOrientationManager chestOrientationManager;
    private final ManipulationControlModule manipulationControlModule;
    private final FeetManager feetManager;
-   private final PelvisDesiredsHandler pelvisDesiredsHandler; // mid competition hack
+   private final PelvisOrientationManager pelvisOrientationManager; // mid competition hack
 
    public VariousWalkingManagers(HeadOrientationManager headOrientationManager, ChestOrientationManager chestOrientationManager,
-         ManipulationControlModule manipulationControlModule, FeetManager feetManager, PelvisDesiredsHandler pelvisDesiredsHandler)
+         ManipulationControlModule manipulationControlModule, FeetManager feetManager, PelvisOrientationManager pelvisOrientationManager)
    {
       this.headOrientationManager = headOrientationManager;
       this.chestOrientationManager = chestOrientationManager;
       this.manipulationControlModule = manipulationControlModule;
       this.feetManager = feetManager;
-      this.pelvisDesiredsHandler = pelvisDesiredsHandler;
+      this.pelvisOrientationManager = pelvisOrientationManager;
    }
 
    public static VariousWalkingManagers create(MomentumBasedController momentumBasedController, VariousWalkingProviders variousWalkingProviders,
@@ -97,12 +98,14 @@ public class VariousWalkingManagers
          manipulationControlModule = new ManipulationControlModule(variousWalkingProviders, armControlParameters, momentumBasedController, registry);
       }
 
-      PelvisDesiredsHandler pelvisDesiredsHandler = new PelvisDesiredsHandler(controlDT, momentumBasedController.getYoTime(), registry);
-
       FeetManager feetManager = new FeetManager(momentumBasedController, walkingControllerParameters, swingTimeProvider, registry);
 
+      PelvisPoseProvider desiredPelvisPoseProvider = variousWalkingProviders.getDesiredPelvisPoseProvider();
+      PelvisOrientationManager pelvisOrientationManager = new PelvisOrientationManager(walkingControllerParameters, swingTimeProvider, momentumBasedController, desiredPelvisPoseProvider, registry);
+      
+
       VariousWalkingManagers variousWalkingManagers = new VariousWalkingManagers(headOrientationManager, chestOrientationManager, manipulationControlModule,
-            feetManager, pelvisDesiredsHandler);
+            feetManager, pelvisOrientationManager);
 
       return variousWalkingManagers;
    }
@@ -156,8 +159,8 @@ public class VariousWalkingManagers
       return feetManager;
    }
 
-   public PelvisDesiredsHandler getPelvisDesiredsHandler()
+   public PelvisOrientationManager getPelvisOrientationManager()
    {
-      return pelvisDesiredsHandler;
+      return pelvisOrientationManager;
    }
 }

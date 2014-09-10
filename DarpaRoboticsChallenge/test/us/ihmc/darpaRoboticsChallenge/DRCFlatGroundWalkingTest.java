@@ -134,37 +134,39 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
+      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("walk");
 //    DoubleYoVariable desiredHeading = (DoubleYoVariable) scs.getVariable("desiredHeading");
 //    DoubleYoVariable pelvisYaw = (DoubleYoVariable) scs.getVariable("q_yaw");
 //    DoubleYoVariable centerOfMassHeight = (DoubleYoVariable) scs.getVariable("ProcessedSensors.comPositionz");
       DoubleYoVariable comError = (DoubleYoVariable) scs.getVariable("positionError_comHeight");
 
       DoubleYoVariable userDesiredPelvisYaw = (DoubleYoVariable) scs.getVariable("userDesiredPelvisYaw");
-      BooleanYoVariable userSetDesiredPelvis = (BooleanYoVariable) scs.getVariable("userSetDesiredPelvis");
+      DoubleYoVariable userPelvisTrajectoryTime = (DoubleYoVariable) scs.getVariable("userDesiredPelvisTrajectoryTime");
       DoubleYoVariable icpErrorX = (DoubleYoVariable) scs.getVariable("icpErrorX");
       DoubleYoVariable icpErrorY = (DoubleYoVariable) scs.getVariable("icpErrorY");
 
-      initiateMotion(scs, standingTimeDuration, blockingSimulationRunner);
+      blockingSimulationRunner.simulateAndBlock(standingTimeDuration);
+
+      walk.set(false);
 
       if (doPelvisYawWarmup)
       {
-         userSetDesiredPelvis.set(true);
-         userDesiredPelvisYaw.add(Math.PI/4.0);
+         userPelvisTrajectoryTime.set(0.0);
+         userDesiredPelvisYaw.set(Math.PI/4.0);
 
-         initiateMotion(scs, yawingTimeDuration, blockingSimulationRunner);
+         blockingSimulationRunner.simulateAndBlock(yawingTimeDuration);
 
          double icpError = Math.sqrt(icpErrorX.getDoubleValue() * icpErrorX.getDoubleValue() + icpErrorY.getDoubleValue() * icpErrorY.getDoubleValue());
          assertTrue(icpError < 0.005);
 
-         userSetDesiredPelvis.set(true);
-         userDesiredPelvisYaw.sub(Math.PI/4.0);
-         initiateMotion(scs, yawingTimeDuration, blockingSimulationRunner);
-
-         userSetDesiredPelvis.set(false);
+         userDesiredPelvisYaw.set(0.0);
+         blockingSimulationRunner.simulateAndBlock(yawingTimeDuration + 0.3);
 
          icpError = Math.sqrt(icpErrorX.getDoubleValue() * icpErrorX.getDoubleValue() + icpErrorY.getDoubleValue() * icpErrorY.getDoubleValue());
          assertTrue(icpError < 0.005);
       }
+
+      walk.set(true);
 
       double timeIncrement = 1.0;
 
@@ -193,15 +195,6 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       BambooTools.reportTestFinishedMessage();
    }
  
-   private void initiateMotion(SimulationConstructionSet scs, double standingTimeDuration, BlockingSimulationRunner runner)
-           throws SimulationExceededMaximumTimeException
-   {
-      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("walk");
-      walk.set(false);
-      runner.simulateAndBlock(standingTimeDuration);
-      walk.set(true);
-   }
-
    private void createMovie(SimulationConstructionSet scs)
    {
       if (CREATE_MOVIE)

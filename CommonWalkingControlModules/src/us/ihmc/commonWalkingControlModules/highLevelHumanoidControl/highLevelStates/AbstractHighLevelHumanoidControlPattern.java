@@ -7,6 +7,7 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
+import us.ihmc.commonWalkingControlModules.controlModules.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
@@ -14,15 +15,12 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Va
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.OrientationTrajectoryData;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.RootJointAngularAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
-import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
@@ -33,11 +31,8 @@ import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.math.frames.YoFrameQuaternion;
-import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 import com.yobotics.simulationconstructionset.util.controller.GainCalculator;
-import com.yobotics.simulationconstructionset.util.controller.YoOrientationPIDGains;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.trajectory.CubicPolynomialTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.provider.YoVariableDoubleProvider;
@@ -58,6 +53,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
 
    private final HeadOrientationProvider desiredHeadOrientationProvider;
 
+   protected final PelvisOrientationManager pelvisOrientationManager;
    protected final ChestOrientationManager chestOrientationManager;
    protected final HeadOrientationManager headOrientationManager;
    protected final ManipulationControlModule manipulationControlModule;
@@ -67,10 +63,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
    private final List<OneDoFJoint> torqueControlJoints = new ArrayList<OneDoFJoint>();
    protected final OneDoFJoint[] positionControlJoints;
 
-   protected final YoFrameQuaternion desiredPelvisOrientation = new YoFrameQuaternion("desiredPelvis", worldFrame, registry);
-   protected final YoFrameVector desiredPelvisAngularVelocity = new YoFrameVector("desiredPelvisAngularVelocity", worldFrame, registry);
-
-   protected final YoFrameVector desiredPelvisAngularAcceleration = new YoFrameVector("desiredPelvisAngularAcceleration", worldFrame, registry);
    protected final FullRobotModel fullRobotModel;
    protected final MomentumBasedController momentumBasedController;
    protected final WalkingControllerParameters walkingControllerParameters;
@@ -83,7 +75,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
    protected final SideDependentList<? extends ContactablePlaneBody> feet, handPalms;
 
    protected final DoubleYoVariable coefficientOfFriction = new DoubleYoVariable("coefficientOfFriction", registry);
-   private final RootJointAngularAccelerationControlModule rootJointAccelerationControlModule;
 
    private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
 
@@ -116,6 +107,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
       feet = momentumBasedController.getContactableFeet();
       handPalms = momentumBasedController.getContactableHands();
 
+      this.pelvisOrientationManager = variousWalkingManagers.getPelvisOrientationManager();
       this.desiredHeadOrientationProvider = variousWalkingProviders.getDesiredHeadOrientationProvider();
       this.headOrientationManager = variousWalkingManagers.getHeadOrientationManager();
       this.chestOrientationManager = variousWalkingManagers.getChestOrientationManager();
@@ -132,16 +124,10 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
       // Setup foot control modules:
 //    setupFootControlModules(); //TODO: get rid of that?
 
-//      DesiredHandPoseProvider handPoseProvider = variousWalkingProviders.getDesiredHandPoseProvider();
-//      TorusPoseProvider torusPoseProvider = variousWalkingProviders.getTorusPoseProvider();
-//      TorusManipulationProvider torusManipulationProvider = variousWalkingProviders.getTorusManipulationProvider();
-
       jointForExtendedNeckPitchRange = setupJointForExtendedNeckPitchRange();
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the RootJointAngularAccelerationControlModule for PelvisOrientation control ////////
-      YoOrientationPIDGains pelvisOrientationControlGains = walkingControllerParameters.createPelvisOrientationControlGains(registry);
-      rootJointAccelerationControlModule = new RootJointAngularAccelerationControlModule(momentumBasedController, pelvisOrientationControlGains, registry);
 
       // Setup joint constraints
       positionControlJoints = setupJointConstraints();
@@ -365,13 +351,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
 
    protected void doPelvisControl()
    {
-      OrientationTrajectoryData pelvisOrientationTrajectoryData = new OrientationTrajectoryData();
-      FrameOrientation orientation = new FrameOrientation(desiredPelvisOrientation.getReferenceFrame());
-      desiredPelvisOrientation.getFrameOrientationIncludingFrame(orientation);
-      pelvisOrientationTrajectoryData.set(orientation, desiredPelvisAngularVelocity.getFrameVectorCopy(),
-              desiredPelvisAngularAcceleration.getFrameVectorCopy());
-
-      rootJointAccelerationControlModule.doControl(pelvisOrientationTrajectoryData);
+      pelvisOrientationManager.compute();
    }
 
    protected void doJointPositionControl()
