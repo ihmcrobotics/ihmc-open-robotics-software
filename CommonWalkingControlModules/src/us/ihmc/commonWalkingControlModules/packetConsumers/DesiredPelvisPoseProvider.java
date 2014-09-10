@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.packetConsumers;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import us.ihmc.communication.packets.walking.PelvisOrientationPacket;
+import us.ihmc.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.ObjectConsumer;
@@ -12,7 +12,7 @@ import us.ihmc.utilities.net.ObjectConsumer;
  * User: Matt
  * Date: 2/18/13
  */
-public class DesiredPelvisPoseProvider implements ObjectConsumer<PelvisOrientationPacket>
+public class DesiredPelvisPoseProvider implements ObjectConsumer<PelvisPosePacket>
 {
 
    private AtomicReference<FramePose> desiredPelvisPose = new AtomicReference<FramePose>(new FramePose(ReferenceFrame.getWorldFrame()));
@@ -31,7 +31,7 @@ public class DesiredPelvisPoseProvider implements ObjectConsumer<PelvisOrientati
       return desiredPelvisPose.getAndSet(null);
    }
 
-   public void consumeObject(PelvisOrientationPacket object)
+   public void consumeObject(PelvisPosePacket object)
    {
       desiredPelvisPose.set(new FramePose(ReferenceFrame.getWorldFrame(), object.getPoint(), object.getQuaternion()));
    }
