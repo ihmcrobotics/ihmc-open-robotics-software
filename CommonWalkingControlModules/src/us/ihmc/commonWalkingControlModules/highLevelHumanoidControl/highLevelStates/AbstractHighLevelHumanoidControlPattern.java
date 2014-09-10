@@ -141,7 +141,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the RootJointAngularAccelerationControlModule for PelvisOrientation control ////////
       YoOrientationPIDGains pelvisOrientationControlGains = walkingControllerParameters.createPelvisOrientationControlGains(registry);
-      rootJointAccelerationControlModule = new RootJointAngularAccelerationControlModule(controlDT, momentumBasedController, pelvisOrientationControlGains, registry);
+      rootJointAccelerationControlModule = new RootJointAngularAccelerationControlModule(momentumBasedController, pelvisOrientationControlGains, registry);
 
       // Setup joint constraints
       positionControlJoints = setupJointConstraints();
