@@ -17,10 +17,10 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFrameLine2d;
 
 import com.yobotics.simulationconstructionset.plotting.YoFrameLine2dArtifact;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.trajectory.YoMinimumJerkTrajectory;
 
 public class TrajectoryDesiredCapturePointCalculator implements DesiredCapturePointCalculator
@@ -50,7 +50,7 @@ public class TrajectoryDesiredCapturePointCalculator implements DesiredCapturePo
    private final YoFrameLine2d captureLine = new YoFrameLine2d("captureLine", "", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameLine2d switchLine = new YoFrameLine2d("switchLine", "", ReferenceFrame.getWorldFrame(), registry);
    
-   public TrajectoryDesiredCapturePointCalculator(ProcessedSensorsInterface processedSensors, DynamicGraphicObjectsListRegistry dynamicGraphicObjectListRegistry, YoVariableRegistry parentRegistry)
+   public TrajectoryDesiredCapturePointCalculator(ProcessedSensorsInterface processedSensors, YoGraphicsListRegistry dynamicGraphicObjectListRegistry, YoVariableRegistry parentRegistry)
    {
       this.processedSensors = processedSensors;
       parentRegistry.addChild(registry);

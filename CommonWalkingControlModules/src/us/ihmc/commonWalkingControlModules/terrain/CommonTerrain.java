@@ -14,8 +14,8 @@ import us.ihmc.graphics3DAdapter.HeightMapWithNormals;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.ground.AlternatingSlopesGroundProfile;
 import com.yobotics.simulationconstructionset.util.ground.BumpyGroundProfile;
 import com.yobotics.simulationconstructionset.util.ground.FlatGroundProfile;
@@ -104,7 +104,7 @@ public class CommonTerrain
 
    }
 
-   public void registerSteppingStonesArtifact(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public void registerSteppingStonesArtifact(YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       System.out.println("Registering Stepping Stones Artifact");
 

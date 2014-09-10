@@ -21,11 +21,11 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.plotting.SimulationOverheadPlotter;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class CaptureRegionCalculatorTest
 {
@@ -59,7 +59,7 @@ public class CaptureRegionCalculatorTest
       CapturePointCalculatorInterface capturePointCalculator = new SimpleCapturePointCalculator();
       YoVariableRegistry yoVariableRegistry = new YoVariableRegistry("CaptureRegionCalculatorTest");
 
-      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
       
       RobotSide supportSide = RobotSide.LEFT;
 

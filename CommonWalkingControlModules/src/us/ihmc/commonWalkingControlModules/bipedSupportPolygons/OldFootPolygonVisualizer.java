@@ -7,10 +7,10 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
 
 import com.yobotics.simulationconstructionset.plotting.DynamicGraphicYoPolygonArtifact;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class OldFootPolygonVisualizer implements Updatable
 {
@@ -20,7 +20,7 @@ public class OldFootPolygonVisualizer implements Updatable
    private final SideDependentList<YoFrameConvexPolygon2d> yoFootPolygons = new SideDependentList<YoFrameConvexPolygon2d>();
    private static final SideDependentList<Color> colors = new SideDependentList<Color>(new Color(53, 184, 144), new Color(202, 119, 11));
 
-   public OldFootPolygonVisualizer(SideDependentList<? extends BipedFootInterface> bipedFeet, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+   public OldFootPolygonVisualizer(SideDependentList<? extends BipedFootInterface> bipedFeet, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry,
                                 YoVariableRegistry parentRegistry)
    {
       this.bipedFeet = bipedFeet;

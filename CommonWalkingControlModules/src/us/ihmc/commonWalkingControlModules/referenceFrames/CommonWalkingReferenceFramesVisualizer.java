@@ -5,10 +5,10 @@ import java.util.ArrayList;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 
 import com.yobotics.simulationconstructionset.robotController.RobotController;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class CommonWalkingReferenceFramesVisualizer implements Updatable, RobotController
 {
@@ -18,7 +18,7 @@ public class CommonWalkingReferenceFramesVisualizer implements Updatable, RobotC
    private final ArrayList<YoGraphicReferenceFrame> referenceFramesVisualizers = new ArrayList<YoGraphicReferenceFrame>();
 
    public CommonWalkingReferenceFramesVisualizer(CommonWalkingReferenceFrames referenceFrames,
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+         YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       String vizName = referenceFrames.getClass().getSimpleName();
       for (RobotSide robotSide : RobotSide.values)

@@ -18,6 +18,7 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.plotting.YoArtifactPosition;
 import us.ihmc.yoUtilities.math.frames.YoFrameLineSegment2d;
@@ -27,13 +28,12 @@ import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.plotting.SimulationOverheadPlotter;
 import com.yobotics.simulationconstructionset.plotting.YoFrameLineSegment2dArtifact;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 
 public class PointAndLinePlotter
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+   private final YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
    private SimulationOverheadPlotter simulationOverheadPlotter;
 
    private int numberOfRegisteredPoints;
@@ -54,7 +54,7 @@ public class PointAndLinePlotter
       parentRegistry.addChild(registry);
    }
 
-public DynamicGraphicObjectsListRegistry getDynamicGraphicObjectsListRegistry()
+public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()
 {
    return dynamicGraphicObjectsListRegistry;
 }

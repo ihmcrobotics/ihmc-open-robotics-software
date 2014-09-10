@@ -12,10 +12,10 @@ import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class SDFFullRobotModelVisualizer implements RobotVisualizer
 {
@@ -51,7 +51,7 @@ public class SDFFullRobotModelVisualizer implements RobotVisualizer
       return null;
    }
    
-   public void setMainRegistry(YoVariableRegistry registry, FullRobotModel fullRobotModel, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public void setMainRegistry(YoVariableRegistry registry, FullRobotModel fullRobotModel, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       this.rootJoint = fullRobotModel.getRootJoint();
       
@@ -127,7 +127,7 @@ public class SDFFullRobotModelVisualizer implements RobotVisualizer
    }
 
    @Override
-   public void addRegistry(YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public void addRegistry(YoVariableRegistry registry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       // TODO Auto-generated method stub
       

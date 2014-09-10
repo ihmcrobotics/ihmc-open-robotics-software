@@ -8,6 +8,7 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition.GraphicType;
@@ -16,7 +17,6 @@ import us.ihmc.yoUtilities.math.frames.YoFrameLineSegment2d;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
 import com.yobotics.simulationconstructionset.plotting.YoFrameLineSegment2dArtifact;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class CapturabilityBasedDesiredCoPVisualizer
 {
@@ -31,7 +31,7 @@ public class CapturabilityBasedDesiredCoPVisualizer
    private final YoFramePoint finalDesiredCapturePoint = new YoFramePoint("finalDesiredCapturePoint", "", world, registry);
    private final YoFramePoint centerOfMass = new YoFramePoint("centerOfMass", world, registry);
    
-   public CapturabilityBasedDesiredCoPVisualizer(YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public CapturabilityBasedDesiredCoPVisualizer(YoVariableRegistry parentRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       YoGraphicsList dynamicGraphicObjectList = new YoGraphicsList("CapturabilityBasedDesiredCoPVisualizer");
       ArtifactList artifactList = new ArtifactList("CapturabilityBasedDesiredCoPVisualizer");

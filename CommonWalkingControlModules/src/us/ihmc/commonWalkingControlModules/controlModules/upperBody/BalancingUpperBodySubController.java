@@ -32,6 +32,7 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
@@ -39,7 +40,6 @@ import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 import com.yobotics.simulationconstructionset.util.controller.PIDController;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
@@ -120,7 +120,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 	public BalancingUpperBodySubController(CouplingRegistry couplingRegistry, ProcessedSensorsInterface processedSensors,
 			CommonWalkingReferenceFrames referenceFrames, double controlDT, RigidBody chest, ArmControlModule armControlModule,
 			SpineLungingControlModule spineControlModule, YoVariableRegistry parentRegistry,
-			DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+			YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
 	{
 		this.couplingRegistry = couplingRegistry;
 		this.processedSensors = processedSensors;
@@ -819,7 +819,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 		}
 	}
 
-	private void populateDynamicsGraphicObjects(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+	private void populateDynamicsGraphicObjects(YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
 	{
 		YoGraphicVector lungeAxisVisual = new YoGraphicVector("lungeAxisVisual", robotCoMPosition, lungeAxisGraphic, 1.0, YoAppearance.DarkRed());
 		dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(name, lungeAxisVisual);

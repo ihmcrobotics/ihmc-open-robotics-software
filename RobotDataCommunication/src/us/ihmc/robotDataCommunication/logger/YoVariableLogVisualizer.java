@@ -12,9 +12,9 @@ import us.ihmc.SdfLoader.SDFJointNameMap;
 import us.ihmc.robotDataCommunication.VisualizerUtils;
 import us.ihmc.robotDataCommunication.YoVariableHandshakeParser;
 import us.ihmc.robotDataCommunication.logger.util.FileSelectionDialog;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class YoVariableLogVisualizer
 {
@@ -82,7 +82,7 @@ public class YoVariableLogVisualizer
       scs.setDT(dt, 1);
       scs.setPlaybackDesiredFrameRate(0.04);
       
-      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = parser.getDynamicGraphicObjectsListRegistry();
+      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = parser.getDynamicGraphicObjectsListRegistry();
       scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
       VisualizerUtils.createOverheadPlotter(scs, showOverheadView, dynamicGraphicObjectsListRegistry);
       scs.getRootRegistry().addChild(parser.getRootRegistry());

@@ -24,11 +24,11 @@ import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class BalanceSupportControlModule
 {
@@ -57,7 +57,7 @@ public class BalanceSupportControlModule
                                       VirtualSupportActuatorControlModule virtualSupportActuatorControlModule, KneeDamperControlModule kneeDamperControlModule,
                                       HipDamperControlModule hipDamperControlModule, BipedSupportPolygons bipedSupportPolygons,
                                       AnkleOverRotationControlModule ankleOverRotationControlModule, CouplingRegistry couplingRegistry,
-                                      YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+                                      YoVariableRegistry parentRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       this.velocityViaCoPControlModule = velocityViaCoPControlModule;
       this.virtualToePointCalculator = virtualToePointAndLegStrengthCalculator;

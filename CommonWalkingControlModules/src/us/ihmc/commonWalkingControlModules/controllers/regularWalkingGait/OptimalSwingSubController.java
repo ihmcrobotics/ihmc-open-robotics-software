@@ -36,6 +36,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphic;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition.GraphicType;
@@ -45,7 +46,6 @@ import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 import com.yobotics.simulationconstructionset.util.controller.PDController;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 import com.yobotics.simulationconstructionset.util.splines.QuinticSplineInterpolator;
 import com.yobotics.simulationconstructionset.util.trajectory.YoMinimumJerkTrajectory;
@@ -127,7 +127,7 @@ public class OptimalSwingSubController implements SwingSubController
          CommonWalkingReferenceFrames referenceFrames, FullRobotModel fullRobotModel, DesiredFootstepCalculator desiredFootstepCalculator,
          SideDependentList<FootSwitchInterface> footSwitches, CouplingRegistry couplingRegistry, SwingParameters swingParameters, LegTorqueData legTorqueData,
          SwingLegTorqueControlOnlyModule swingLegTorqueControlModule, DesiredHeadingControlModule desiredHeadingControlModule,
-         SideDependentList<LegJointPositionControlModule> legJointPositionControlModules, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+         SideDependentList<LegJointPositionControlModule> legJointPositionControlModules, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry,
          SwingLegAnglesAtEndOfStepEstimator swingLegAnglesAtEndOfStepEstimator, double controlDT, YoVariableRegistry parentRegistry)
    {
       this.referenceFrames = referenceFrames;

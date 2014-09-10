@@ -35,11 +35,11 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.trajectory.YoMinimumJerkTrajectory;
 
 public class JointSpaceSwingSubController implements SwingSubController
@@ -101,7 +101,7 @@ public class JointSpaceSwingSubController implements SwingSubController
          FullRobotModel fullRobotModel, SideDependentList<FootSwitchInterface> footSwitches, CommonWalkingReferenceFrames referenceFrames,
          DesiredFootstepCalculator desiredFootstepCalculator, CouplingRegistry couplingRegistry, LegInverseKinematicsCalculator inverseKinematicsCalculator,
          SwingLegTorqueControlOnlyModule swingLegTorqueControlModule, SwingLegAnglesAtEndOfStepEstimator swingLegAnglesAtEndOfStepEstimator,
-         DesiredHeadingControlModule desiredHeadingControlModule, double controlDT, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+         DesiredHeadingControlModule desiredHeadingControlModule, double controlDT, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry,
          YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(name);

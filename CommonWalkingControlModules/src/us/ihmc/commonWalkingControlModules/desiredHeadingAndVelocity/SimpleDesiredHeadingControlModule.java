@@ -9,8 +9,8 @@ import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlModule
 {
@@ -50,7 +50,7 @@ public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlM
       return maxHeadingDot.getDoubleValue();
    }
    
-   public void initializeVisualizer(ProcessedSensorsInterface processedSensors, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public void initializeVisualizer(ProcessedSensorsInterface processedSensors, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       if (simpleDesiredHeadingControlModuleVisualizer != null)
       {

@@ -17,13 +17,13 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.yoUtilities.graphics.plotting.ArtifactList;
 import us.ihmc.yoUtilities.math.frames.YoFramePointInMultipleFrames;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 
 public class CommonCapturePointCalculator implements CapturePointCalculatorInterface
@@ -48,7 +48,7 @@ public class CommonCapturePointCalculator implements CapturePointCalculatorInter
    private final boolean useWorldFrame;
 
    public CommonCapturePointCalculator(ProcessedSensorsInterface processedSensors, CommonWalkingReferenceFrames referenceFrames, boolean useWorldFrame,
-           YoVariableRegistry yoVariableRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+           YoVariableRegistry yoVariableRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       this.processedSensors = processedSensors;
 

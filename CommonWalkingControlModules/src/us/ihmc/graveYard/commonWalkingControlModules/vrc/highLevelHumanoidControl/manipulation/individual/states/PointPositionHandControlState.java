@@ -12,11 +12,11 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
 import com.yobotics.simulationconstructionset.util.controller.PositionController;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
 
@@ -54,7 +54,7 @@ public class PointPositionHandControlState extends State<HandControlState>
    private final FramePoint point = new FramePoint(worldFrame);
 
    public PointPositionHandControlState(MomentumBasedController momentumBasedController, RobotSide robotSide,
-                                        DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+                                        YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
    {
       super(null); //HandControlState.POINT_POSITION);
       this.momentumBasedController = momentumBasedController;

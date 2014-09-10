@@ -42,9 +42,9 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 import com.yobotics.simulationconstructionset.time.ExecutionTimer;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 /**
  * @author twan
@@ -96,7 +96,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
    public OptimizationMomentumControlModule(InverseDynamicsJoint rootJoint, ReferenceFrame centerOfMassFrame, double controlDT, double gravityZ,
            MomentumOptimizationSettings momentumOptimizationSettings, TwistCalculator twistCalculator, GeometricJacobianHolder geometricJacobianHolder,
-           Collection<? extends PlaneContactState> planeContactStates, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+           Collection<? extends PlaneContactState> planeContactStates, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry,
            YoVariableRegistry parentRegistry)
    {
       this.jointsToOptimizeFor = momentumOptimizationSettings.getJointsToOptimizeFor();

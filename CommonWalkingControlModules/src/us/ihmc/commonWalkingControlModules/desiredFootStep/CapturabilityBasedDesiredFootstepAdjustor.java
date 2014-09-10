@@ -15,8 +15,8 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.ground.steppingStones.SteppingStones;
 
 public class CapturabilityBasedDesiredFootstepAdjustor implements DesiredFootstepAdjustor
@@ -40,7 +40,7 @@ public class CapturabilityBasedDesiredFootstepAdjustor implements DesiredFootste
    private double footWidth;
 
    public CapturabilityBasedDesiredFootstepAdjustor(CouplingRegistry couplingRegistry, SideDependentList<? extends ContactablePlaneBody> feet,
-         SteppingStones steppingStones, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+         SteppingStones steppingStones, YoVariableRegistry parentRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       this.couplingRegistry = couplingRegistry;
       this.feet = feet;

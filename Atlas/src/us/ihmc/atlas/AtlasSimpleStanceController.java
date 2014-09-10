@@ -12,13 +12,13 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class AtlasSimpleStanceController {
 
@@ -73,7 +73,7 @@ public class AtlasSimpleStanceController {
 
 
 
-	      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListsRegistry = new DynamicGraphicObjectsListRegistry();
+	      YoGraphicsListRegistry dynamicGraphicObjectsListsRegistry = new YoGraphicsListRegistry();
 	      new DRCSimulationVisualizer(robot, dynamicGraphicObjectsListsRegistry);
 
 	      double simDT = 1e-4;

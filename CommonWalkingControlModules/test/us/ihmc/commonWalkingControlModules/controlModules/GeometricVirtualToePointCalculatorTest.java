@@ -24,8 +24,8 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.GeometryTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class GeometricVirtualToePointCalculatorTest
 {
@@ -525,7 +525,7 @@ public class GeometricVirtualToePointCalculatorTest
    private VirtualToePointCalculator createVirtualToePointCalculator(boolean debugViz, boolean removeDebugVizEachTime)
    {
       YoVariableRegistry registry = new YoVariableRegistry("parent");
-      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = null;
+      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = null;
 
       GeometricVirtualToePointCalculator geometricVirtualToePointCalculator = new GeometricVirtualToePointCalculator(registry,
             dynamicGraphicObjectsListRegistry);

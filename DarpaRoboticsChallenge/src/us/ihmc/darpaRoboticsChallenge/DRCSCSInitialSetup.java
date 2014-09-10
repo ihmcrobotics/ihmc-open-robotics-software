@@ -12,6 +12,7 @@ import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 import com.yobotics.simulationconstructionset.DynamicIntegrationMethod;
 import com.yobotics.simulationconstructionset.Robot;
@@ -24,7 +25,6 @@ import com.yobotics.simulationconstructionset.physics.collision.SpringCollisionH
 import com.yobotics.simulationconstructionset.physics.collision.bullet.JBulletCollisionDetector;
 import com.yobotics.simulationconstructionset.physics.visualize.DefaultCollisionVisualize;
 import com.yobotics.simulationconstructionset.util.LinearGroundContactModel;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.ground.TerrainObject3D;
 
 public class DRCSCSInitialSetup implements ScsInitialSetup
@@ -76,7 +76,7 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
       return new ScsPhysics(collisionConfigure,collision,visualize);
    }
 
-   public void initializeRobot(Robot robot, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public void initializeRobot(Robot robot, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       robot.setGravity(gravity);
 

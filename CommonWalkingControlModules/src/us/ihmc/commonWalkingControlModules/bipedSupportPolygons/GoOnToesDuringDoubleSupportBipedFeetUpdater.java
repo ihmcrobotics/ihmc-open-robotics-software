@@ -21,12 +21,12 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.plotting.ArtifactList;
 import us.ihmc.yoUtilities.math.frames.YoFrameLine2d;
 
 import com.yobotics.simulationconstructionset.plotting.YoFrameLine2dArtifact;
 import com.yobotics.simulationconstructionset.time.GlobalTimer;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.math.filter.GlitchFilteredBooleanYoVariable;
 
 
@@ -60,7 +60,7 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
    private final BooleanYoVariable doPolygonResizeInDoubleSupport = new BooleanYoVariable("doPolygonResizeInDoubleSupport", registry);
 
    public GoOnToesDuringDoubleSupportBipedFeetUpdater(CommonWalkingReferenceFrames referenceFrames, double footForward, double footBack,
-           YoVariableRegistry yoVariableRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+           YoVariableRegistry yoVariableRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       this.footForward = footForward;
       this.footBack = footBack;

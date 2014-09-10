@@ -11,8 +11,8 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrameMismatchException;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 // Class defining a contactable rolling body
 public class ListofPointsContactableRollingBody implements ContactableRollingBody
@@ -28,7 +28,7 @@ public class ListofPointsContactableRollingBody implements ContactableRollingBod
    private final int totalNumberOfContactPoints;
 
    public ListofPointsContactableRollingBody(String name, RigidBody rigidBody, ReferenceFrame bodyFrame, double cylinderRadius, FramePoint originInBodyFrame,
-         List<Double> contactPositionOnCylinderEdge, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry registry)
+         List<Double> contactPositionOnCylinderEdge, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry registry)
    {
       this.rigidBody = rigidBody;
       this.bodyFrame = bodyFrame;

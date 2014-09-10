@@ -24,10 +24,10 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.graphics.YoGraphic;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class CylinderAndContactPointWrenchDistributor implements GroundReactionWrenchDistributor
 {
@@ -49,7 +49,7 @@ public class CylinderAndContactPointWrenchDistributor implements GroundReactionW
    private final YoVariableRegistry registry;
 
    private final List<YoGraphic> endEffectorResultGraphics = new ArrayList<YoGraphic>();
-   private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
+   private final YoGraphicsListRegistry dynamicGraphicObjectsListRegistry;
    private int yoNameNumber = 0;
 
    DenseMatrix64F Cmatrix = CommonOps.diag(new double[]
@@ -61,7 +61,7 @@ public class CylinderAndContactPointWrenchDistributor implements GroundReactionW
 
 
    public CylinderAndContactPointWrenchDistributor(ReferenceFrame centerOfMassFrame, YoVariableRegistry paentRegistry,
-                                                   DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+                                                   YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       this.registry = new YoVariableRegistry(this.getClass().getSimpleName());
       paentRegistry.addChild(this.registry);

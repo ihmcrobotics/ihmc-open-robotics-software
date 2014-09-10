@@ -15,10 +15,10 @@ import us.ihmc.darpaRoboticsChallenge.environment.DRCWorld;
 import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.driving.VehicleModelObjectVisualizer;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class DRCVehicleSDFLoader extends DRCWorld
 {
@@ -60,7 +60,7 @@ public class DRCVehicleSDFLoader extends DRCWorld
       ReferenceFrame vehicleFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("vehicle", ReferenceFrame.getWorldFrame(),
             vehicleToWorldTransform, false, true, true);
       DRCVehicleModelObjects vehicleModelObjects = new DRCVehicleModelObjects();
-      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
       YoVariableRegistry registry = scs.getRootRegistry();
       VehicleModelObjectVisualizer vehicleModelObjectVisualizer = new VehicleModelObjectVisualizer(vehicleFrame, vehicleModelObjects, dynamicGraphicObjectsListRegistry, registry);
       vehicleModelObjectVisualizer.setVisible(true);

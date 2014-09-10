@@ -20,10 +20,10 @@ import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 import com.yobotics.simulationconstructionset.util.controller.PIDController;
 import com.yobotics.simulationconstructionset.util.controller.YoPIDGains;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.math.filter.RateLimitedYoVariable;
 import com.yobotics.simulationconstructionset.util.trajectory.PoseTrajectoryGenerator;
 
@@ -41,7 +41,7 @@ public class InverseKinematicsTaskspaceHandPositionControlState extends Taskspac
 
    public InverseKinematicsTaskspaceHandPositionControlState(String namePrefix, HandControlState stateEnum, RobotSide robotSide,
          MomentumBasedController momentumBasedController, int jacobianId, RigidBody base, RigidBody endEffector,
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, ArmControllerParameters armControllerParameters,
+         YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, ArmControllerParameters armControllerParameters,
          ControlStatusProducer controlStatusProducer, YoPIDGains gains, double controlDT, YoVariableRegistry parentRegistry)
    {
       super(namePrefix, stateEnum, momentumBasedController, jacobianId, base, endEffector, dynamicGraphicObjectsListRegistry, parentRegistry);

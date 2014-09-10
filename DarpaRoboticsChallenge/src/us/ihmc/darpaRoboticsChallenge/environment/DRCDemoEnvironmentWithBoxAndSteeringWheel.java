@@ -13,6 +13,7 @@ import us.ihmc.darpaRoboticsChallenge.controllers.SteeringWheelDisturbanceContro
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.driving.VehicleObject;
 import us.ihmc.utilities.math.geometry.Box3d;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.Robot;
@@ -20,7 +21,6 @@ import com.yobotics.simulationconstructionset.util.environments.ContactableStati
 import com.yobotics.simulationconstructionset.util.environments.ContactableToroidRobot;
 import com.yobotics.simulationconstructionset.util.environments.SelectableObject;
 import com.yobotics.simulationconstructionset.util.environments.SelectableObjectListener;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import com.yobotics.simulationconstructionset.util.ground.Contactable;
 import com.yobotics.simulationconstructionset.util.ground.TerrainObject3D;
@@ -35,7 +35,7 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
    private final ArrayList<Contactable> contactables = new ArrayList<Contactable>();
    private final ContactableToroidRobot steeringWheelRobot;
 
-   public DRCDemoEnvironmentWithBoxAndSteeringWheel(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public DRCDemoEnvironmentWithBoxAndSteeringWheel(YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       DRCVehicleModelObjects drcVehicleModelObjects = new DRCVehicleModelObjects();
 

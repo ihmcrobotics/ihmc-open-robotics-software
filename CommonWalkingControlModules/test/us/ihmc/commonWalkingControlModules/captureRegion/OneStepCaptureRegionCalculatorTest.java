@@ -29,6 +29,7 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
@@ -38,7 +39,6 @@ import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.plotting.DynamicGraphicYoPolygonArtifact;
 import com.yobotics.simulationconstructionset.plotting.SimulationOverheadPlotter;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class OneStepCaptureRegionCalculatorTest
 {
@@ -406,7 +406,7 @@ public class OneStepCaptureRegionCalculatorTest
       final SideDependentList<FrameConvexPolygon2d> footPolygons = new SideDependentList<>();
       final SideDependentList<YoFrameConvexPolygon2d> yoFootPolygons = new SideDependentList<>();
       YoVariableRegistry registry = robot.getRobotsYoVariableRegistry();
-      final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+      final YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
       final SideDependentList<DynamicGraphicYoPolygonArtifact> footArtifacts = new SideDependentList<>();
       for (final RobotSide robotSide : RobotSide.values)
       {

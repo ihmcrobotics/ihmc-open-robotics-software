@@ -17,10 +17,10 @@ import us.ihmc.utilities.math.trajectories.providers.PositionProvider;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 
 import com.yobotics.simulationconstructionset.util.controller.EuclideanPositionController;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.trajectory.CirclePositionTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.provider.YoVariableDoubleProvider;
 
@@ -58,7 +58,7 @@ public class PointPositionRotateSteeringWheelBehavior
    public PointPositionRotateSteeringWheelBehavior(double dt, RobotSide robotSide, HandControlModule individualHandControlModule,
                                                    ReferenceFrame creepyGripHandPositionControlFrame, FullRobotModel fullRobotModel,
                                                    ReferenceFrame steeringWheelFrame, MomentumBasedController momentumBasedController,
-                                                   DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+                                                   YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.individualHandControlModule = individualHandControlModule;
       this.creepyGripHandPositionControlFrame = creepyGripHandPositionControlFrame;

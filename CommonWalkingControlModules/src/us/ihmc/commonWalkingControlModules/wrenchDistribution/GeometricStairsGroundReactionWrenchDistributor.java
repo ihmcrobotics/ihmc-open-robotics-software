@@ -27,8 +27,8 @@ import us.ihmc.utilities.math.geometry.TranslationReferenceFrame;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class GeometricStairsGroundReactionWrenchDistributor implements GroundReactionWrenchDistributor
 {
@@ -56,7 +56,7 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
    private final FrameVector up;
 
    public GeometricStairsGroundReactionWrenchDistributor(CommonWalkingReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
-           SideDependentList<? extends ContactablePlaneBody> bipedFeet, double totalMass, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+           SideDependentList<? extends ContactablePlaneBody> bipedFeet, double totalMass, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry,
            YoVariableRegistry parentRegistry)
    {
       double maximumLegStrengthWhenTransferringAway = 0.95;

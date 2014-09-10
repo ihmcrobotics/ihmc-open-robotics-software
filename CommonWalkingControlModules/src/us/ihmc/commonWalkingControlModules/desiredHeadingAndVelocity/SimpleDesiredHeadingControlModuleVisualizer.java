@@ -7,11 +7,11 @@ import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.plotting.ArtifactList;
 import us.ihmc.yoUtilities.math.frames.YoFrameLineSegment2d;
 
 import com.yobotics.simulationconstructionset.plotting.YoFrameLineSegment2dArtifact;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
    public class SimpleDesiredHeadingControlModuleVisualizer
    {     
@@ -20,7 +20,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 
       private final ProcessedSensorsInterface processedSensors;
 
-      public SimpleDesiredHeadingControlModuleVisualizer(ProcessedSensorsInterface processedSensors, YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+      public SimpleDesiredHeadingControlModuleVisualizer(ProcessedSensorsInterface processedSensors, YoVariableRegistry registry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
       {
          this.processedSensors = processedSensors;
 

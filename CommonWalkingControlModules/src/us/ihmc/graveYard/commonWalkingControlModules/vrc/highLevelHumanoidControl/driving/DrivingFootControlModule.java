@@ -34,6 +34,7 @@ import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
@@ -42,7 +43,6 @@ import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.util.controller.AxisAngleOrientationController;
 import com.yobotics.simulationconstructionset.util.controller.EuclideanPositionController;
 import com.yobotics.simulationconstructionset.util.controller.GainCalculator;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.StraightLinePositionTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.provider.YoPositionProvider;
@@ -115,7 +115,7 @@ public class DrivingFootControlModule
    public DrivingFootControlModule(FullRobotModel fullRobotModel, ContactablePlaneBody contactablePlaneFoot, MomentumBasedController momentumBasedController,
                                    DrivingReferenceFrames drivingReferenceFrames, double dt, DoubleYoVariable yoTime, TwistCalculator twistCalculator,
                                    YoVariableRegistry parentRegistry, GlobalDataProducer statusProducer,
-                                   DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+                                   YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       this.statusProducer = statusProducer;
       this.foot = contactablePlaneFoot.getRigidBody();

@@ -19,6 +19,7 @@ import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.plotting.ArtifactList;
 import us.ihmc.yoUtilities.math.frames.YoFrameLine2d;
@@ -27,7 +28,6 @@ import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 
 import com.yobotics.simulationconstructionset.plotting.YoFrameLine2dArtifact;
 import com.yobotics.simulationconstructionset.plotting.YoFrameLineSegment2dArtifact;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class EqConstCoPAndGuideLineCapturePointCoPControlModule implements CapturePointCenterOfPressureControlModule
 {
@@ -50,7 +50,7 @@ public class EqConstCoPAndGuideLineCapturePointCoPControlModule implements Captu
 
 
    public EqConstCoPAndGuideLineCapturePointCoPControlModule(CommonWalkingReferenceFrames referenceFrames, ProcessedSensorsInterface processedSensors,
-           CouplingRegistry couplingRegistry, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+           CouplingRegistry couplingRegistry, YoVariableRegistry parentRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       this.referenceFrames = referenceFrames;
       this.processedSensors = processedSensors;

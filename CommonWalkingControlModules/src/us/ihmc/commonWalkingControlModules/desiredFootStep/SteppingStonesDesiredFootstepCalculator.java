@@ -22,10 +22,10 @@ import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.ground.steppingStones.SteppingStones;
 
 /**
@@ -76,7 +76,7 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
    // Constructors
    public SteppingStonesDesiredFootstepCalculator(SideDependentList<? extends ContactablePlaneBody> contactableBodies, SteppingStones steppingStones,
          CouplingRegistry couplingRegistry, CommonWalkingReferenceFrames commonWalkingReferenceFrames, OneStepCaptureRegionCalculator captureRegionCalculator,
-         YoVariableRegistry yoVariableRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+         YoVariableRegistry yoVariableRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       percentNominalToAdjusted.set(1.0);
 

@@ -20,6 +20,7 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicPolygon;
 import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.yoUtilities.math.frames.YoFramePose;
@@ -27,7 +28,6 @@ import us.ihmc.yoUtilities.math.frames.YoFramePose;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.plotting.SimulationOverheadPlotter;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class SmartCMPProjectorTest
 {
@@ -51,7 +51,7 @@ public class SmartCMPProjectorTest
          registry = new YoVariableRegistry("Test");
       }
 
-      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
       SmartCMPProjector smartCMPProjector = new SmartCMPProjector(registry, dynamicGraphicObjectsListRegistry);
       double cmpEdgeProjectionInside = 0.05;
       smartCMPProjector.setCMPEdgeProjectionInside(cmpEdgeProjectionInside);
@@ -688,7 +688,7 @@ public class SmartCMPProjectorTest
       }
    }
 
-   private static void createOverheadPlotter(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, SimulationConstructionSet scs,
+   private static void createOverheadPlotter(YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, SimulationConstructionSet scs,
          boolean showOverheadView)
    {
       SimulationOverheadPlotter plotter = new SimulationOverheadPlotter();
@@ -716,14 +716,14 @@ public class SmartCMPProjectorTest
    {
       private final YoVariableRegistry registry;
       private final SimulationConstructionSet scs;
-      private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
+      private final YoGraphicsListRegistry dynamicGraphicObjectsListRegistry;
 
       public Vizzy()
       {
          scs = new SimulationConstructionSet(new Robot("null"));
          registry = scs.getRootRegistry();
 
-         dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+         dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
       }
 
       public void addConvexPolygon(FrameConvexPolygon2d supportPolygon)
@@ -743,7 +743,7 @@ public class SmartCMPProjectorTest
          return registry;
       }
 
-      public DynamicGraphicObjectsListRegistry getDynamicGraphicObjectsListRegistry()
+      public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()
       {
          return dynamicGraphicObjectsListRegistry;
       }

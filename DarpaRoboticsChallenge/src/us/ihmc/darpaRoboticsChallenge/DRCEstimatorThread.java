@@ -44,11 +44,11 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 import com.yobotics.simulationconstructionset.robotController.ModularRobotController;
 import com.yobotics.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 import com.yobotics.simulationconstructionset.time.ExecutionTimer;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 {
@@ -57,7 +57,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    private final SDFFullRobotModel estimatorFullRobotModel;
    private final ForceSensorDataHolder forceSensorDataHolderForEstimator;
    private final ModularRobotController estimatorController;
-   private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+   private final YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
    private final DRCKinematicsBasedStateEstimator drcStateEstimator;
 
    private final ThreadDataSynchronizer threadDataSynchronizer;
@@ -201,7 +201,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    public static DRCKinematicsBasedStateEstimator createStateEstimator(SDFFullRobotModel estimatorFullRobotModel, DRCRobotModel drcRobotModel,
          SensorOutputMapReadOnly sensorOutputMapReadOnly, double gravity, StateEstimatorParameters stateEstimatorParameters,
          DRCRobotContactPointParameters contactPointParamaters, ForceSensorDataHolder forceSensorDataHolderForEstimator,
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry registry, GlobalDataProducer dataProducer, AtomicSettableTimestampProvider timestampProvider)
+         YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry registry, GlobalDataProducer dataProducer, AtomicSettableTimestampProvider timestampProvider)
    {
       DRCRobotJointMap jointMap = drcRobotModel.getJointMap();
       FullInverseDynamicsStructure inverseDynamicsStructure = DRCControllerThread.createInverseDynamicsStructure(estimatorFullRobotModel);
@@ -245,7 +245,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    }
 
    @Override
-   public DynamicGraphicObjectsListRegistry getDynamicGraphicObjectsListRegistry()
+   public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()
    {
       return dynamicGraphicObjectsListRegistry;
    }

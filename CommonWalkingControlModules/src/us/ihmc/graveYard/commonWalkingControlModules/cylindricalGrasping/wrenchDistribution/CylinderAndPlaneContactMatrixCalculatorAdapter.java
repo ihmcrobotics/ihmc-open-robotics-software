@@ -18,10 +18,10 @@ import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.graphics.YoGraphic;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 /**
  * @author twan
@@ -34,7 +34,7 @@ public class CylinderAndPlaneContactMatrixCalculatorAdapter
    private final CylinderAndPlaneContactSpatialForceVectorCalculator cylinderAndPlaneContactSpatialForceVectorCalculator;
    private final ReferenceFrame centerOfMassFrame;
    private final Map<RigidBody, Wrench> wrenches = new LinkedHashMap<RigidBody, Wrench>();
-   private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
+   private final YoGraphicsListRegistry dynamicGraphicObjectsListRegistry;
    private final IntegerYoVariable planeContactIndex = new IntegerYoVariable("planeContactIndex", registry);
 
    private final DoubleYoVariable wRhoCylinderContacts = new DoubleYoVariable("wRhoCylinderContacts", registry);
@@ -55,7 +55,7 @@ public class CylinderAndPlaneContactMatrixCalculatorAdapter
    public CylinderAndPlaneContactMatrixCalculatorAdapter(ReferenceFrame centerOfMassFrame, int rhoSize, int phiSize, double wRhoCylinderContacts,
            double wPhiCylinderContacts, double wRhoPlaneContacts, double wRhoSmoother, double wRhoPenalizer,
            Collection<? extends PlaneContactState> planeContactStates, Collection<? extends CylindricalContactState> cylindricalContactStates,
-           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+           YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.centerOfMassFrame = centerOfMassFrame;
 

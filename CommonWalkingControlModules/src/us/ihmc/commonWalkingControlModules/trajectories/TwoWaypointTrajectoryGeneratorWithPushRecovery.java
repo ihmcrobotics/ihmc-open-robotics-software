@@ -15,11 +15,11 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
 
 /** 
@@ -74,7 +74,7 @@ public class TwoWaypointTrajectoryGeneratorWithPushRecovery implements PositionT
    public TwoWaypointTrajectoryGeneratorWithPushRecovery(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider swingTimeProvider, DoubleProvider swingTimeRemainingProvider,
          PositionProvider initialPositionProvider, VectorProvider initialVelocityProvider, PositionProvider finalPositionProvider,
          VectorProvider finalDesiredVelocityProvider, TrajectoryParametersProvider trajectoryParametersProvider, YoVariableRegistry parentRegistry,
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, PositionTrajectoryGenerator nominalTrajectoryGenerator,
+         YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, PositionTrajectoryGenerator nominalTrajectoryGenerator,
          WalkingControllerParameters walkingControllerParameters, boolean visualize)
    {
       registry = new YoVariableRegistry(namePrefix + namePostFix);

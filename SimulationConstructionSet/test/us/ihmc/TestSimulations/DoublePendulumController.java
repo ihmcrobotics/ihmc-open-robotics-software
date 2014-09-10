@@ -4,9 +4,9 @@ import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 import com.yobotics.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class DoublePendulumController implements MultiThreadedRobotControlElement
 {
@@ -83,7 +83,7 @@ public class DoublePendulumController implements MultiThreadedRobotControlElemen
       return getClass().getSimpleName();
    }
 
-   public DynamicGraphicObjectsListRegistry getDynamicGraphicObjectsListRegistry()
+   public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()
    {
       return null;
    }

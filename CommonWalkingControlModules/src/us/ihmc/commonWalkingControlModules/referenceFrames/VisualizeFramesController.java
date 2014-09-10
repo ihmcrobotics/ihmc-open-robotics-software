@@ -4,11 +4,11 @@ import java.util.ArrayList;
 
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 
 import com.yobotics.simulationconstructionset.robotController.RobotController;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
    public class VisualizeFramesController implements RobotController
    {
@@ -18,7 +18,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 
       private final YoGraphicsList dynamicGraphicObjectsList = new YoGraphicsList("TestFramesController");
 
-      public VisualizeFramesController(ArrayList<ReferenceFrame> referenceFrames, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, double coordinateSystemLength)
+      public VisualizeFramesController(ArrayList<ReferenceFrame> referenceFrames, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, double coordinateSystemLength)
       {
          for (ReferenceFrame frame : referenceFrames)
          {

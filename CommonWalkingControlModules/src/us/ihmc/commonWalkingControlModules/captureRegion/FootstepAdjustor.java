@@ -9,8 +9,8 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.ground.steppingStones.SteppingStones;
 
 /**
@@ -35,7 +35,7 @@ public class FootstepAdjustor
    private FootstepAdjusterVisualizer footstepAdjusterVisualizer = null;
    private SteppingStones steppingStones = null;
 
-   public FootstepAdjustor(YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public FootstepAdjustor(YoVariableRegistry parentRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       parentRegistry.addChild(registry);
       if (dynamicGraphicObjectsListRegistry != null && VISUALIZE)

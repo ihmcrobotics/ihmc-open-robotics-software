@@ -11,8 +11,8 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 /**
  * @author twan
@@ -27,7 +27,7 @@ public class HighLevelToroidManipulationState implements Task
 
    public HighLevelToroidManipulationState(double controlDT, DoubleYoVariable yoTime, FullRobotModel fullRobotModel, TwistCalculator twistCalculator,
            SideDependentList<ReferenceFrame> handPositionControlFrames, SideDependentList<Integer> jacobianIds,
-           TorusPoseProvider torusPoseProvider, MomentumBasedController momentumBasedController, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+           TorusPoseProvider torusPoseProvider, MomentumBasedController momentumBasedController, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry,
            YoVariableRegistry parentRegistry)
    {
       RigidBody toroidBase = fullRobotModel.getElevator();

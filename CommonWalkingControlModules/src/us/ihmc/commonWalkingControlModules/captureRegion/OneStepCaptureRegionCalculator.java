@@ -12,9 +12,9 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 import com.yobotics.simulationconstructionset.time.GlobalTimer;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class OneStepCaptureRegionCalculator
 {
@@ -41,7 +41,7 @@ public class OneStepCaptureRegionCalculator
    private final SideDependentList<FrameConvexPolygon2d> reachableRegions;
 
    public OneStepCaptureRegionCalculator(CommonWalkingReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters,
-         YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+         YoVariableRegistry parentRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       this(walkingControllerParameters.getFootForwardOffset() - walkingControllerParameters.getFootLength() / 2.0, walkingControllerParameters.getFootWidth(),
             walkingControllerParameters.getMaxStepLength(), referenceFrames.getAnkleZUpReferenceFrames(), parentRegistry, dynamicGraphicObjectsListRegistry);
@@ -49,7 +49,7 @@ public class OneStepCaptureRegionCalculator
 
    public OneStepCaptureRegionCalculator(double midFootAnkleXOffset, double footWidth, double kinematicStepRange,
          SideDependentList<ReferenceFrame> ankleZUpFrames, YoVariableRegistry parentRegistry,
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+         YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       this.kinematicStepRange = kinematicStepRange;
       this.ankleZUpFrames = ankleZUpFrames;

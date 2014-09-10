@@ -18,6 +18,7 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.RigidBodyInertia;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphic;
 import us.ihmc.yoUtilities.graphics.YoGraphicShape;
 import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
@@ -27,7 +28,6 @@ import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 import com.mathworks.jama.Matrix;
 import com.mathworks.jama.SingularValueDecomposition;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class CommonInertiaElipsoidsVisualizer implements Updatable, RobotController
 {
@@ -59,12 +59,12 @@ public class CommonInertiaElipsoidsVisualizer implements Updatable, RobotControl
    }
    private final ArrayList<RigidBodyVisualizationData> centerOfMassData = new ArrayList<RigidBodyVisualizationData>();
 
-   public CommonInertiaElipsoidsVisualizer(RigidBody rootBody, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+   public CommonInertiaElipsoidsVisualizer(RigidBody rootBody, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
    {
       this(rootBody, dynamicGraphicObjectsListRegistry);
       parentRegistry.addChild(registry);
    }  
-   public CommonInertiaElipsoidsVisualizer(RigidBody rootBody, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public CommonInertiaElipsoidsVisualizer(RigidBody rootBody, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
       {
       inertiaEllipsoidGhostOffset.set(0, 0.0, 0.0);
 

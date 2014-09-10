@@ -21,8 +21,8 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.AfterJointReferenceFrameNameMap;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class DRCKalmanFilterBasedStateEstimator implements DRCStateEstimatorInterface
 {
@@ -40,7 +40,7 @@ public class DRCKalmanFilterBasedStateEstimator implements DRCStateEstimatorInte
          FullInverseDynamicsStructure inverseDynamicsStructure, AfterJointReferenceFrameNameMap estimatorReferenceFrameMap,
          RigidBodyToIndexMap estimatorRigidBodyToIndexMap, JointAndIMUSensorMap jointAndIMUSensorMap, double gravitationalAcceleration,
          StateEstimatorParameters stateEstimatorParameters, SideDependentList<WrenchBasedFootSwitch> footSwitches,
-         SideDependentList<ContactablePlaneBody> bipedFeet, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+         SideDependentList<ContactablePlaneBody> bipedFeet, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       this.assumePerfectIMU = stateEstimatorParameters.getAssumePerfectIMU();
       

@@ -17,8 +17,8 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 
 public class ResizableBipedFoot implements BipedFootInterface
@@ -48,7 +48,7 @@ public class ResizableBipedFoot implements BipedFootInterface
    public ResizableBipedFoot(RigidBody body, ReferenceFrame ankleZUpFrame, ReferenceFrame soleFrame, RobotSide robotSide,
                              ArrayList<Point3d> clockwiseToePoints, ArrayList<Point3d> clockwiseHeelPoints, double maxToePointsBack,
                              double maxHeelPointsForward, double narrowWidthOnToesPercentage, YoVariableRegistry yoVariableRegistry,
-                             DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+                             YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       registry = new YoVariableRegistry(robotSide + "BipedFoot");
       this.narrowWidthOnToesPercentage = narrowWidthOnToesPercentage;
@@ -326,7 +326,7 @@ public class ResizableBipedFoot implements BipedFootInterface
 
    public static ResizableBipedFoot createRectangularRightFoot(double footForward, double footBack, double footWidth, double footHeight,
            double narrowWidthOnToesPercentage, RigidBody body, ReferenceFrame ankleZUpFrame, ReferenceFrame soleFrame, DoubleYoVariable time,
-           YoVariableRegistry yoVariableRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+           YoVariableRegistry yoVariableRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       double PREVENT_ROTATION_FACTOR = 0.75;    // 0.8;//0.8;
 
@@ -339,7 +339,7 @@ public class ResizableBipedFoot implements BipedFootInterface
    public static ResizableBipedFoot createRectangularRightFoot(double preventRotationFactorLength, double preventRotationFactorWidth, double footForward,
            double footBack, double footWidth, double footHeight, double narrowWidthOnToesPercentage, double maxToePointsBack, double maxHeelPointsForward,
            RigidBody body, ReferenceFrame ankleZUpFrame, ReferenceFrame soleFrame, YoVariableRegistry yoVariableRegistry,
-           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+           YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       Point3d frontLeft = new Point3d(preventRotationFactorLength * footForward, preventRotationFactorWidth * footWidth / 2.0, -footHeight);
       Point3d frontRight = new Point3d(preventRotationFactorLength * footForward, -preventRotationFactorWidth * footWidth / 2.0, -footHeight);
@@ -362,7 +362,7 @@ public class ResizableBipedFoot implements BipedFootInterface
    }
 
    public ResizableBipedFoot createLeftFootAsMirrorImage(RigidBody body, ReferenceFrame ankleZUpFrame, ReferenceFrame soleFrame,
-           YoVariableRegistry yoVariableRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+           YoVariableRegistry yoVariableRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       if (this.getRobotSide() != RobotSide.RIGHT)
          throw new RuntimeException("Implicit parameter is not a right foot!");

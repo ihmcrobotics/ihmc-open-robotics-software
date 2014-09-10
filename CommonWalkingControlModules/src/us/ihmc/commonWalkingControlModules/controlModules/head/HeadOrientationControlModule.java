@@ -15,13 +15,13 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameQuaternion;
 
 import com.yobotics.simulationconstructionset.util.controller.YoOrientationPIDGains;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class HeadOrientationControlModule extends DegenerateOrientationControlModule
 {
@@ -59,14 +59,14 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
 
    public HeadOrientationControlModule(MomentumBasedController momentumBasedController, ReferenceFrame headOrientationExpressedInFrame,
          HeadOrientationControllerParameters headOrientationControllerParameters, YoVariableRegistry parentRegistry,
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+         YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       this(momentumBasedController, headOrientationExpressedInFrame, headOrientationControllerParameters, null, parentRegistry, dynamicGraphicObjectsListRegistry);
    }
 
    public HeadOrientationControlModule(MomentumBasedController momentumBasedController, ReferenceFrame headOrientationExpressedInFrame,
          HeadOrientationControllerParameters headOrientationControllerParameters, YoOrientationPIDGains gains, YoVariableRegistry parentRegistry,
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+         YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       super("head", new RigidBody[] {}, momentumBasedController.getFullRobotModel().getHead(), new GeometricJacobian[] {}, momentumBasedController
             .getTwistCalculator(), momentumBasedController.getControlDT(), gains, parentRegistry);

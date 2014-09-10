@@ -8,10 +8,10 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
 
 import com.yobotics.simulationconstructionset.plotting.DynamicGraphicYoPolygonArtifact;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class FootPolygonVisualizer implements Updatable
 {
@@ -33,7 +33,7 @@ public class FootPolygonVisualizer implements Updatable
       colors.add(defaultRightColor);
    }
 
-   public FootPolygonVisualizer(List<? extends PlaneContactState> contactStates, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+   public FootPolygonVisualizer(List<? extends PlaneContactState> contactStates, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry,
          YoVariableRegistry parentRegistry)
    {
       this.contactStates = new ArrayList<PlaneContactState>(contactStates);

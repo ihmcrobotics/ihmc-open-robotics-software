@@ -9,6 +9,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicPolygon;
 import us.ihmc.yoUtilities.graphics.YoGraphicShape;
@@ -59,7 +60,7 @@ public class DynamicGraphicObjectEvaluation
 
       dynamicGraphicObjectsList.add(transferToPolygonViz);
 
-      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
       dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
       
       scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
@@ -76,7 +77,7 @@ public class DynamicGraphicObjectEvaluation
       scs.setDT(0.1, 1);
 
       YoVariableRegistry registry = new YoVariableRegistry("Polygon");
-      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
 
       // Polygon:
       final double[][] pointList = new double[][]

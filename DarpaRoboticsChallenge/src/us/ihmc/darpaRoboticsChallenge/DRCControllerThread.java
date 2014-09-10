@@ -34,6 +34,7 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 import com.yobotics.simulationconstructionset.InverseDynamicsMechanismReferenceFrameVisualizer;
 import com.yobotics.simulationconstructionset.JointAxisVisualizer;
@@ -42,7 +43,6 @@ import com.yobotics.simulationconstructionset.robotController.ModularSensorProce
 import com.yobotics.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.time.ExecutionTimer;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class DRCControllerThread implements MultiThreadedRobotControlElement
 {
@@ -67,7 +67,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    private final SDFFullRobotModel controllerFullRobotModel;
    private final ReferenceFrames controllerReferenceFrames;
 
-   private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+   private final YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
    private final ForceSensorDataHolder forceSensorDataHolderForController;
 
    private final ThreadDataSynchronizer threadDataSynchronizer;
@@ -157,7 +157,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
 
    public static RobotController createMomentumBasedController(SDFFullRobotModel controllerModel, ReferenceFrames referenceFramesForController,
          DRCRobotSensorInformation sensorInformation, MomentumBasedControllerFactory controllerFactory, DoubleYoVariable yoTime, double controlDT,
-         double gravity, ForceSensorDataHolder forceSensorDataHolderForController, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+         double gravity, ForceSensorDataHolder forceSensorDataHolderForController, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry,
          YoVariableRegistry registry, GlobalDataProducer dataProducer, InverseDynamicsJoint... jointsToIgnore)
    {
       CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(controllerModel.getElevator());
@@ -337,7 +337,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    }
 
    @Override
-   public DynamicGraphicObjectsListRegistry getDynamicGraphicObjectsListRegistry()
+   public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()
    {
       return dynamicGraphicObjectsListRegistry;
    }
