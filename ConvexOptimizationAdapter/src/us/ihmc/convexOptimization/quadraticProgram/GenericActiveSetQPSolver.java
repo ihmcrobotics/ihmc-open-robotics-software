@@ -293,7 +293,7 @@ public class GenericActiveSetQPSolver extends AbstractActiveSetQPSolver
         for(int i=0;i<singularValues.length;i++)
         {
            double sv=singularValues[i];
-           if(Double.isFinite(sv))
+           if(!Double.isInfinite(sv))
            {
             if(sv>0)
               projectedGRank++;
