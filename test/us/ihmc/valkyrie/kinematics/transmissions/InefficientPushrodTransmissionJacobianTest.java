@@ -29,25 +29,25 @@ public class InefficientPushrodTransmissionJacobianTest
       DoubleYoVariable pitch = new DoubleYoVariable("pitch", registry);
       DoubleYoVariable roll = new DoubleYoVariable("roll", registry);
 
-      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry;
+      YoGraphicsListRegistry yoGraphicsListRegistry;
       if (visualizeAndKeepUp)
       {
-         dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
+         yoGraphicsListRegistry = new YoGraphicsListRegistry();
       }
       else
       {
-         dynamicGraphicObjectsListRegistry = null;
+         yoGraphicsListRegistry = null;
       }
 
       PushRodTransmissionJoint pushRodTransmissionJoint = PushRodTransmissionJoint.ANKLE;
       InefficientPushrodTransmissionJacobian inefficientPushrodTransmissionJacobian = new InefficientPushrodTransmissionJacobian(pushRodTransmissionJoint, registry,
-            dynamicGraphicObjectsListRegistry);
+            yoGraphicsListRegistry);
 
       SimulationConstructionSet scs;
       if (visualizeAndKeepUp)
       {
          scs = new SimulationConstructionSet(robot);
-         scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
+         scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
          scs.setCameraPosition(0.62, -0.4, 1.26);
          scs.setCameraFix(0.0, 0.0, 1.02);
 
@@ -129,25 +129,25 @@ public class InefficientPushrodTransmissionJacobianTest
       DoubleYoVariable pitch = new DoubleYoVariable("pitch", registry);
       DoubleYoVariable roll = new DoubleYoVariable("roll", registry);
 
-      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry;
+      YoGraphicsListRegistry yoGraphicsListRegistry;
       if (visualizeAndKeepUp)
       {
-         dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
+         yoGraphicsListRegistry = new YoGraphicsListRegistry();
       }
       else
       {
-         dynamicGraphicObjectsListRegistry = null;
+         yoGraphicsListRegistry = null;
       }
 
       PushRodTransmissionJoint pushRodTransmissionJoint = PushRodTransmissionJoint.WAIST;
       InefficientPushrodTransmissionJacobian inefficientPushrodTransmissionJacobian = new InefficientPushrodTransmissionJacobian(pushRodTransmissionJoint, registry,
-            dynamicGraphicObjectsListRegistry);
+            yoGraphicsListRegistry);
 
       SimulationConstructionSet scs;
       if (visualizeAndKeepUp)
       {
          scs = new SimulationConstructionSet(robot);
-         scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
+         scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
          scs.setCameraPosition(0.62, -0.4, 1.26);
          scs.setCameraFix(0.0, 0.0, 1.02);
 
