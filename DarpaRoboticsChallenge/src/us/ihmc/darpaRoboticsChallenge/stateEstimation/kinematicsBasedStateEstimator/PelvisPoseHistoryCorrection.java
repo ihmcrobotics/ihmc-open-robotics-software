@@ -1,6 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.stateEstimation.kinematicsBasedStateEstimator;
 
 import javax.media.j3d.Transform3D;
+import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
@@ -13,6 +14,7 @@ import us.ihmc.utilities.kinematics.TimeStampedTransform3D;
 import us.ihmc.utilities.kinematics.TransformInterpolationCalculator;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.math.geometry.TransformTools;
 import us.ihmc.utilities.net.AtomicSettableTimestampProvider;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
@@ -45,7 +47,7 @@ public class PelvisPoseHistoryCorrection
    private final Transform3D previousInterpolatedError = new Transform3D();
    private final Transform3D interpolatorStartingPosition = new Transform3D();
    private final Transform3D pelvisPose = new Transform3D();
-   private final Transform3D workingArea = new Transform3D();
+   private final Transform3D correctedPelvisPoseWorkingArea = new Transform3D();
 
    private final AlphaFilteredYoVariable interpolationAlphaFilter;
    private final DoubleYoVariable confidenceFactor; // target for alpha filter
@@ -192,9 +194,9 @@ public class PelvisPoseHistoryCorrection
    
    private void calculateCorrectedPelvisPose()
    {
-      workingArea.set(getInterpolatedPelvisError());
-      workingArea.mul(pelvisPose);
-      pelvisPose.set(workingArea);
+      correctedPelvisPoseWorkingArea.set(getInterpolatedPelvisError());
+      correctedPelvisPoseWorkingArea.mul(pelvisPose);
+      pelvisPose.set(correctedPelvisPoseWorkingArea);
    }
    
    /**
@@ -276,6 +278,7 @@ public class PelvisPoseHistoryCorrection
       }
    }
 
+   Matrix3d rotationMatrix = new Matrix3d();
    /**
     * Calculates the difference between the external at t with the state estimated pelvis pose at t and stores it in the target
     * @param localizationPose - the corrected pelvis pose
@@ -288,6 +291,11 @@ public class PelvisPoseHistoryCorrection
       TimeStampedTransform3D sePose = stateEstimatorPelvisPoseBuffer.interpolate(timeStamp);
       Transform3D error = localizationPose.getTransform3D();
       error.mulInverse(sePose.getTransform3D());
+      
+      error.get(rotationMatrix);
+      RotationFunctions.setYawPitchRoll(rotationMatrix, RotationFunctions.getYaw(rotationMatrix), 0, 0);
+      error.setRotation(rotationMatrix);
+      
       errorToPack.setTransform3D(error);
    }
    
