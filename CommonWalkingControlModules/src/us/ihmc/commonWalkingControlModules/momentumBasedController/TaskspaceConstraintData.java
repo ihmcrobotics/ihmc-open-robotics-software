@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
@@ -85,6 +86,19 @@ public class TaskspaceConstraintData
       this.selectionMatrix.set(0, 3, 1.0);
       this.selectionMatrix.set(1, 4, 1.0);
       this.selectionMatrix.set(2, 5, 1.0);
+   }
+
+   public void setLinearAcceleration(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, FrameVector desiredLinearAcceleration, DenseMatrix64F selectionMatrix)
+   {
+      this.spatialAcceleration.setToZero(bodyFrame, baseFrame, desiredLinearAcceleration.getReferenceFrame());
+      this.spatialAcceleration.setLinearPart(desiredLinearAcceleration.getVector());
+      spatialAcceleration.changeFrameNoRelativeMotion(bodyFrame);
+
+      this.nullspaceMultipliers.reshape(0, 1);
+
+      MathTools.checkIfInRange(selectionMatrix.numRows, 0, 3);
+
+      this.selectionMatrix.setReshape(selectionMatrix);
    }
 
    public SpatialAccelerationVector getSpatialAcceleration()
