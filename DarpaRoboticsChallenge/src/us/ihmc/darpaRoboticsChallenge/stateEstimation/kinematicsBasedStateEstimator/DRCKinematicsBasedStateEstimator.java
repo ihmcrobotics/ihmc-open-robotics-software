@@ -58,7 +58,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 
    public DRCKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, StateEstimatorParameters stateEstimatorParameters,
          SensorOutputMapReadOnly sensorOutputMapReadOnly, double gravitationalAcceleration, SideDependentList<WrenchBasedFootSwitch> footSwitches,
-         SideDependentList<ContactablePlaneBody> bipedFeet, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry,
+         SideDependentList<ContactablePlaneBody> bipedFeet, YoGraphicsListRegistry yoGraphicsListRegistry,
          ExternalPelvisPoseSubscriberInterface externalPelvisSubscriber, AtomicSettableTimestampProvider timestampProvider)
    {
       this.estimatorDT = stateEstimatorParameters.getEstimatorDT();
@@ -93,18 +93,18 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       pelvisRotationalStateUpdater = new PelvisRotationalStateUpdater(inverseDynamicsStructure, imusToUse, registry);
 
       pelvisLinearStateUpdater = new PelvisLinearStateUpdater(inverseDynamicsStructure, imusToUse, footSwitches, bipedFeet, gravitationalAcceleration, yoTime,
-            stateEstimatorParameters, dynamicGraphicObjectsListRegistry, registry);
+            stateEstimatorParameters, yoGraphicsListRegistry, registry);
 
-      if (dynamicGraphicObjectsListRegistry != null)
+      if (yoGraphicsListRegistry != null)
       {
-         copVisualizer = new CenterOfPressureVisualizer(footSwitches, dynamicGraphicObjectsListRegistry, registry);
+         copVisualizer = new CenterOfPressureVisualizer(footSwitches, yoGraphicsListRegistry, registry);
       }
       else
       {
          copVisualizer = null;
       }
 
-      visualizeMeasurementFrames = visualizeMeasurementFrames && dynamicGraphicObjectsListRegistry != null;
+      visualizeMeasurementFrames = visualizeMeasurementFrames && yoGraphicsListRegistry != null;
 
       List<IMUSensorReadOnly> imusToDisplay = new ArrayList<>();
       imusToDisplay.addAll(imuProcessedOutputs);
@@ -112,10 +112,10 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
          imusToDisplay.add(fusedIMUSensor);
 
       if (visualizeMeasurementFrames)
-         setupDynamicGraphicObjects(dynamicGraphicObjectsListRegistry, imusToDisplay);
+         setupDynamicGraphicObjects(yoGraphicsListRegistry, imusToDisplay);
    }
 
-   private void setupDynamicGraphicObjects(YoGraphicsListRegistry dynamicGraphicObjectsListRegistry,
+   private void setupDynamicGraphicObjects(YoGraphicsListRegistry yoGraphicsListRegistry,
          List<? extends IMUSensorReadOnly> imuProcessedOutputs)
    {
       for (int i = 0; i < imuProcessedOutputs.size(); i++)
@@ -123,7 +123,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
          YoGraphicReferenceFrame dynamicGraphicMeasurementFrame = new YoGraphicReferenceFrame(imuProcessedOutputs.get(i).getMeasurementFrame(), registry, 1.0);
          dynamicGraphicMeasurementFrames.add(dynamicGraphicMeasurementFrame);
       }
-      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects("imuFrame", dynamicGraphicMeasurementFrames);
+      yoGraphicsListRegistry.registerDynamicGraphicObjects("imuFrame", dynamicGraphicMeasurementFrames);
    }
 
    public StateEstimator getStateEstimator()

@@ -43,9 +43,9 @@ public class SmoothICPComputer2D extends DoubleSupportFootCenterToToeICPComputer
    private final Vector3d deltaVectorTemp = new Vector3d();
 
    public SmoothICPComputer2D(CommonWalkingReferenceFrames referenceFrames, double dt, double doubleSupportFirstStepFraction,
-         int maxNumberOfConsideredFootsteps, YoVariableRegistry parentRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+         int maxNumberOfConsideredFootsteps, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      super(dt, doubleSupportFirstStepFraction, maxNumberOfConsideredFootsteps, parentRegistry, dynamicGraphicObjectsListRegistry);
+      super(dt, doubleSupportFirstStepFraction, maxNumberOfConsideredFootsteps, parentRegistry, yoGraphicsListRegistry);
 
       alphaDeltaFootPosition.set(0.65);
       this.referenceFrames = referenceFrames;

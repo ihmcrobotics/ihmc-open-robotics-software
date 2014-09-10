@@ -52,10 +52,10 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelBehav
       momentumRateOfChangeControlModule.setProportionalGains(comProportionalGain, comProportionalGain, comProportionalGain);
       momentumRateOfChangeControlModule.setDerivativeGains(comDerivativeGain, comDerivativeGain, comDerivativeGain);
 
-      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
+      YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
       MultiContactTestHumanoidController multiContactTestHumanoidController = new MultiContactTestHumanoidController(variousWalkingProviders,
             variousWalkingManagers, momentumRateOfChangeControlModule, momentumBasedController, multiContactControllerParameters,
-            dynamicGraphicObjectsListRegistry);
+            yoGraphicsListRegistry);
       multiContactTestHumanoidController.initializeContactStates(areHandsInContact, areFeetInContact);
       return multiContactTestHumanoidController;
    }

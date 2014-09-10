@@ -49,7 +49,7 @@ public class CylinderAndContactPointWrenchDistributor implements GroundReactionW
    private final YoVariableRegistry registry;
 
    private final List<YoGraphic> endEffectorResultGraphics = new ArrayList<YoGraphic>();
-   private final YoGraphicsListRegistry dynamicGraphicObjectsListRegistry;
+   private final YoGraphicsListRegistry yoGraphicsListRegistry;
    private int yoNameNumber = 0;
 
    DenseMatrix64F Cmatrix = CommonOps.diag(new double[]
@@ -61,22 +61,22 @@ public class CylinderAndContactPointWrenchDistributor implements GroundReactionW
 
 
    public CylinderAndContactPointWrenchDistributor(ReferenceFrame centerOfMassFrame, YoVariableRegistry paentRegistry,
-                                                   YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+                                                   YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.registry = new YoVariableRegistry(this.getClass().getSimpleName());
       paentRegistry.addChild(this.registry);
 
       nativeOptimizer = new CylinderAndPlaneContactForceOptimizerNative(registry);
-      this.dynamicGraphicObjectsListRegistry = dynamicGraphicObjectsListRegistry;
+      this.yoGraphicsListRegistry = yoGraphicsListRegistry;
       this.debug = new BooleanYoVariable(this.getClass().getSimpleName() + "Debug", registry);
       this.debug.set(false);
       this.centerOfMassFrame = centerOfMassFrame;
       int rhoSize = CylinderAndPlaneContactForceOptimizerNative.rhoSize;
       int phiSize = CylinderAndPlaneContactForceOptimizerNative.phiSize;
       optimizerInputPopulator = new CylinderAndPlaneContactMatrixCalculator(centerOfMassFrame, registry,
-              dynamicGraphicObjectsListRegistry, rhoSize, phiSize);
+              yoGraphicsListRegistry, rhoSize, phiSize);
       optimizerOutputExtractor = new CylinderAndPlaneContactSpatialForceVectorCalculator(centerOfMassFrame, registry,
-              dynamicGraphicObjectsListRegistry, rhoSize, phiSize);
+              yoGraphicsListRegistry, rhoSize, phiSize);
    }
 
    public void setWeights(double[] diagonalCWeights, double phiWeight, double rhoWeight)
@@ -296,10 +296,10 @@ public class CylinderAndContactPointWrenchDistributor implements GroundReactionW
       endEffectorResultGraphics.add(wrenchAngularVectorGraphic);
       endEffectorResultGraphics.add(wrenchLinearVectorGraphic);
       String listName = this.getClass().getSimpleName() + "EndEffectorResultGraphics";
-      if (dynamicGraphicObjectsListRegistry != null)
+      if (yoGraphicsListRegistry != null)
       {
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, wrenchAngularVectorGraphic);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, wrenchLinearVectorGraphic);
+         yoGraphicsListRegistry.registerDynamicGraphicObject(listName, wrenchAngularVectorGraphic);
+         yoGraphicsListRegistry.registerDynamicGraphicObject(listName, wrenchLinearVectorGraphic);
       }
    }
 

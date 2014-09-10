@@ -54,7 +54,7 @@ public class PointPositionHandControlState extends State<HandControlState>
    private final FramePoint point = new FramePoint(worldFrame);
 
    public PointPositionHandControlState(MomentumBasedController momentumBasedController, RobotSide robotSide,
-                                        YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+                                        YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       super(null); //HandControlState.POINT_POSITION);
       this.momentumBasedController = momentumBasedController;
@@ -66,10 +66,10 @@ public class PointPositionHandControlState extends State<HandControlState>
       String desiredHandPositionName = robotSide.getCamelCaseNameForStartOfExpression() + "HandDesPointPosition";
       yoDesiredPosition = new YoFramePoint(desiredHandPositionName, worldFrame, registry);
 
-      if (dynamicGraphicObjectsListRegistry != null)
+      if (yoGraphicsListRegistry != null)
       {
          YoGraphicPosition desiredPositionViz = new YoGraphicPosition(desiredHandPositionName, yoDesiredPosition, 0.01, YoAppearance.FireBrick());
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(stateName, desiredPositionViz);
+         yoGraphicsListRegistry.registerDynamicGraphicObject(stateName, desiredPositionViz);
       }
 
       parentRegistry.addChild(registry);

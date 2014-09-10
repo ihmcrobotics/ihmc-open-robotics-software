@@ -36,9 +36,9 @@ public abstract class DRCDemo03
    {
       DRCSCSInitialSetup scsInitialSetup;
       
-      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
+      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       
-      environment = new DRCDemoEnvironmentWithBoxAndSteeringWheel(dynamicGraphicObjectsListRegistry);
+      environment = new DRCDemoEnvironmentWithBoxAndSteeringWheel(yoGraphicsListRegistry);
       scsInitialSetup = new DRCSCSInitialSetup(environment, robotModel.getSimulateDT());
       
       scsInitialSetup.setInitializeEstimatorToActual(true);

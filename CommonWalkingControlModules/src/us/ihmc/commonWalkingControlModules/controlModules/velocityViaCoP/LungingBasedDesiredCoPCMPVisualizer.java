@@ -19,28 +19,28 @@ public class LungingBasedDesiredCoPCMPVisualizer extends CapturabilityBasedDesir
    
    private final YoFramePoint desiredCMP = new YoFramePoint("desiredCMP", "", world, registry);
 
-   public LungingBasedDesiredCoPCMPVisualizer(YoVariableRegistry parentRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+   public LungingBasedDesiredCoPCMPVisualizer(YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      super(parentRegistry, dynamicGraphicObjectsListRegistry);
+      super(parentRegistry, yoGraphicsListRegistry);
       
-      YoGraphicsList dynamicGraphicObjectList = new YoGraphicsList("LungingBasedDesiredCoPVisualizer");
+      YoGraphicsList yoGraphicList = new YoGraphicsList("LungingBasedDesiredCoPVisualizer");
       ArtifactList artifactList = new ArtifactList("LungingBasedDesiredCoPVisualizer");
-      if (dynamicGraphicObjectsListRegistry != null)
+      if (yoGraphicsListRegistry != null)
       {
-         addDesiredCMPViz(dynamicGraphicObjectList, artifactList);
+         addDesiredCMPViz(yoGraphicList, artifactList);
 
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectList);
-         dynamicGraphicObjectsListRegistry.registerArtifactList(artifactList);
+         yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicList);
+         yoGraphicsListRegistry.registerArtifactList(artifactList);
       }
       
       parentRegistry.addChild(registry);
    }
 
-   private void addDesiredCMPViz(YoGraphicsList dynamicGraphicObjectList, ArtifactList artifactList)
+   private void addDesiredCMPViz(YoGraphicsList yoGraphicList, ArtifactList artifactList)
    {
       YoGraphicPosition desiredCMPViz = new YoGraphicPosition("Desired Centriodal Moment Pivot", desiredCMP, 0.012, YoAppearance.White(),
             YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
-      dynamicGraphicObjectList.add(desiredCMPViz);
+      yoGraphicList.add(desiredCMPViz);
       artifactList.add(desiredCMPViz.createArtifact());
    }
    

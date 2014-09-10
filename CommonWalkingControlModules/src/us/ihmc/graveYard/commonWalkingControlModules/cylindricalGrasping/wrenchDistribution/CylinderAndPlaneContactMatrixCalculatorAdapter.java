@@ -34,7 +34,7 @@ public class CylinderAndPlaneContactMatrixCalculatorAdapter
    private final CylinderAndPlaneContactSpatialForceVectorCalculator cylinderAndPlaneContactSpatialForceVectorCalculator;
    private final ReferenceFrame centerOfMassFrame;
    private final Map<RigidBody, Wrench> wrenches = new LinkedHashMap<RigidBody, Wrench>();
-   private final YoGraphicsListRegistry dynamicGraphicObjectsListRegistry;
+   private final YoGraphicsListRegistry yoGraphicsListRegistry;
    private final IntegerYoVariable planeContactIndex = new IntegerYoVariable("planeContactIndex", registry);
 
    private final DoubleYoVariable wRhoCylinderContacts = new DoubleYoVariable("wRhoCylinderContacts", registry);
@@ -55,7 +55,7 @@ public class CylinderAndPlaneContactMatrixCalculatorAdapter
    public CylinderAndPlaneContactMatrixCalculatorAdapter(ReferenceFrame centerOfMassFrame, int rhoSize, int phiSize, double wRhoCylinderContacts,
            double wPhiCylinderContacts, double wRhoPlaneContacts, double wRhoSmoother, double wRhoPenalizer,
            Collection<? extends PlaneContactState> planeContactStates, Collection<? extends CylindricalContactState> cylindricalContactStates,
-           YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+           YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.centerOfMassFrame = centerOfMassFrame;
 
@@ -92,13 +92,13 @@ public class CylinderAndPlaneContactMatrixCalculatorAdapter
       }
 
 
-      cylinderAndPlaneContactMatrixCalculator = new CylinderAndPlaneContactMatrixCalculator(centerOfMassFrame, registry, dynamicGraphicObjectsListRegistry,
+      cylinderAndPlaneContactMatrixCalculator = new CylinderAndPlaneContactMatrixCalculator(centerOfMassFrame, registry, yoGraphicsListRegistry,
               rhoSize, phiSize);
       cylinderAndPlaneContactSpatialForceVectorCalculator = new CylinderAndPlaneContactSpatialForceVectorCalculator(centerOfMassFrame, registry,
-              dynamicGraphicObjectsListRegistry, rhoSize, phiSize);
+              yoGraphicsListRegistry, rhoSize, phiSize);
 
 
-      this.dynamicGraphicObjectsListRegistry = dynamicGraphicObjectsListRegistry;
+      this.yoGraphicsListRegistry = yoGraphicsListRegistry;
       parentRegistry.addChild(registry);
    }
 
@@ -198,10 +198,10 @@ public class CylinderAndPlaneContactMatrixCalculatorAdapter
       endEffectorResultGraphics.add(wrenchAngularVectorGraphic);
       endEffectorResultGraphics.add(wrenchLinearVectorGraphic);
       String listName = this.getClass().getSimpleName() + "EndEffectorResultGraphics";
-      if (dynamicGraphicObjectsListRegistry != null)
+      if (yoGraphicsListRegistry != null)
       {
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, wrenchAngularVectorGraphic);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, wrenchLinearVectorGraphic);
+         yoGraphicsListRegistry.registerDynamicGraphicObject(listName, wrenchAngularVectorGraphic);
+         yoGraphicsListRegistry.registerDynamicGraphicObject(listName, wrenchLinearVectorGraphic);
       }
    }
 

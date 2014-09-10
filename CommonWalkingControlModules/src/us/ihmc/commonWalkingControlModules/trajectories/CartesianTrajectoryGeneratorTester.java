@@ -42,7 +42,7 @@ public class CartesianTrajectoryGeneratorTester
    private String name;
 
    public CartesianTrajectoryGeneratorTester(CartesianTrajectoryGenerator cartesianTrajectoryGenerator, YoVariableRegistry registry,
-           YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, String name)
+           YoGraphicsListRegistry yoGraphicsListRegistry, String name)
    {
       this.name = name;
       Robot nullRobot = new Robot("null")
@@ -51,7 +51,7 @@ public class CartesianTrajectoryGeneratorTester
       };
 
       CartesianTrajectoryGeneratorTesterController controller = new CartesianTrajectoryGeneratorTesterController((DoubleYoVariable) nullRobot.getVariable("t"),
-                                                                   cartesianTrajectoryGenerator, dynamicGraphicObjectsListRegistry,
+                                                                   cartesianTrajectoryGenerator, yoGraphicsListRegistry,
                                                                    "cartesianTrajectoryGeneratorTesterController");
       nullRobot.setController(controller);
 
@@ -60,7 +60,7 @@ public class CartesianTrajectoryGeneratorTester
 
       scs.addVarLists(registry.createVarListsIncludingChildren());
 
-      scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
+      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
 //    yoVariableRegistry.addVarListsToSimulationConstructionSet(scs);
 
@@ -172,13 +172,13 @@ public class CartesianTrajectoryGeneratorTester
 
 
       public CartesianTrajectoryGeneratorTesterController(DoubleYoVariable t, CartesianTrajectoryGenerator cartesianTrajectoryGenerator,
-              YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, String name)
+              YoGraphicsListRegistry yoGraphicsListRegistry, String name)
       {
-         this(t, cartesianTrajectoryGenerator, new double[] {0.0, 0.0, 0.0}, generateStandardFinalPoints(), dynamicGraphicObjectsListRegistry, name);
+         this(t, cartesianTrajectoryGenerator, new double[] {0.0, 0.0, 0.0}, generateStandardFinalPoints(), yoGraphicsListRegistry, name);
       }
 
       public CartesianTrajectoryGeneratorTesterController(DoubleYoVariable t, CartesianTrajectoryGenerator cartesianTrajectoryGenerator,
-              double[] startingTestPoint, double[][] testPointsToCycleThrough, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, String name)
+              double[] startingTestPoint, double[][] testPointsToCycleThrough, YoGraphicsListRegistry yoGraphicsListRegistry, String name)
       {
          this.name = name;
          this.t = t;
@@ -203,18 +203,18 @@ public class CartesianTrajectoryGeneratorTester
 
          cartesianTrajectoryGenerator.initialize(this.startingTestPoint, startingTestVelocity, null, this.testPointsToCycleThrough.get(0), null);
 
-         bagOfBalls = BagOfBalls.createPatrioticBag(500, 0.006, "tester", registry, dynamicGraphicObjectsListRegistry);
+         bagOfBalls = BagOfBalls.createPatrioticBag(500, 0.006, "tester", registry, yoGraphicsListRegistry);
 
 //       finalDesiredPosition.set(0.0, 2.0, 1.0);
 //       reset.set(true);
 
-         if (dynamicGraphicObjectsListRegistry != null)
+         if (yoGraphicsListRegistry != null)
          {
-            YoGraphicsList dynamicGraphicObjectsList = new YoGraphicsList("CartesianTrajectoryTester");
+            YoGraphicsList yoGraphicsList = new YoGraphicsList("CartesianTrajectoryTester");
 
-            dynamicGraphicObjectsList.add(new YoGraphicPosition("Final Desired", finalDesiredPosition, 0.02, YoAppearance.Red()));
-            dynamicGraphicObjectsList.add(new YoGraphicPosition("Original Final Desired", originalFinalDesiredPosition, 0.02, YoAppearance.Black()));
-            dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
+            yoGraphicsList.add(new YoGraphicPosition("Final Desired", finalDesiredPosition, 0.02, YoAppearance.Red()));
+            yoGraphicsList.add(new YoGraphicPosition("Original Final Desired", originalFinalDesiredPosition, 0.02, YoAppearance.Black()));
+            yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicsList);
          }
       }
 

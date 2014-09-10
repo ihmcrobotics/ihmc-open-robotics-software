@@ -58,7 +58,7 @@ public class PointPositionRotateSteeringWheelBehavior
    public PointPositionRotateSteeringWheelBehavior(double dt, RobotSide robotSide, HandControlModule individualHandControlModule,
                                                    ReferenceFrame creepyGripHandPositionControlFrame, FullRobotModel fullRobotModel,
                                                    ReferenceFrame steeringWheelFrame, MomentumBasedController momentumBasedController,
-                                                   YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+                                                   YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.individualHandControlModule = individualHandControlModule;
       this.creepyGripHandPositionControlFrame = creepyGripHandPositionControlFrame;
@@ -84,10 +84,10 @@ public class PointPositionRotateSteeringWheelBehavior
       trajectoryGenerator = new CirclePositionTrajectoryGenerator("rotateSteeringWheelTrajectory", steeringWheelFrame, trajectoryTimeProvider,
               initialPositionProvider, registry, desiredRotationAngleProvider);
 
-      if (dynamicGraphicObjectsListRegistry != null)
+      if (yoGraphicsListRegistry != null)
       {
          xTangentialFrameViz = new YoGraphicReferenceFrame(xTangentialFrame, registry, 0.1);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("rotateSteeringWheelBehavior", xTangentialFrameViz);
+         yoGraphicsListRegistry.registerDynamicGraphicObject("rotateSteeringWheelBehavior", xTangentialFrameViz);
       }
       else
       {

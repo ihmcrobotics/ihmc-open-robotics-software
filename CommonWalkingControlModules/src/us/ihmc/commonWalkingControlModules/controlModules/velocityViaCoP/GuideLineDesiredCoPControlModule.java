@@ -66,7 +66,7 @@ public class GuideLineDesiredCoPControlModule implements DesiredCoPControlModule
    private final BooleanYoVariable lastTickDoubleSupport = new BooleanYoVariable("lastTickDoubleSupport", registry);
 
    public GuideLineDesiredCoPControlModule(double controlDT, CouplingRegistry couplingRegistry, ProcessedSensorsInterface processedSensors,
-         CommonWalkingReferenceFrames referenceFrames, YoVariableRegistry parentRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry,
+         CommonWalkingReferenceFrames referenceFrames, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry,
          GuideLineCalculator guideLineCalculator, CapturePointCenterOfPressureControlModule capturePointCenterOfPressureControlModule)
    {
       this.controlDT = controlDT;
@@ -90,23 +90,23 @@ public class GuideLineDesiredCoPControlModule implements DesiredCoPControlModule
          parentRegistry.addChild(registry);
       }
 
-      if (dynamicGraphicObjectsListRegistry != null)
+      if (yoGraphicsListRegistry != null)
       {
-         YoGraphicsList dynamicGraphicObjectList = new YoGraphicsList("VelocityViaCoPControlModule");
+         YoGraphicsList yoGraphicList = new YoGraphicsList("VelocityViaCoPControlModule");
          ArtifactList artifactList = new ArtifactList("VelocityViaCoPControlModule");
 
          YoGraphicPosition centerOfPressureDesiredWorldGraphicPosition = new YoGraphicPosition("Desired Center of Pressure", finalDesiredCoPInWorld,
                0.012, YoAppearance.Gray(), YoGraphicPosition.GraphicType.CROSS);
-         dynamicGraphicObjectList.add(centerOfPressureDesiredWorldGraphicPosition);
+         yoGraphicList.add(centerOfPressureDesiredWorldGraphicPosition);
          artifactList.add(centerOfPressureDesiredWorldGraphicPosition.createArtifact());
 
          YoGraphic desiredCapturePointGraphic = new YoGraphicPosition("Desired Capture Point", desiredCapturePointInWorld, 0.01,
                YoAppearance.Yellow(), GraphicType.ROTATED_CROSS);
-         dynamicGraphicObjectList.add(desiredCapturePointGraphic);
+         yoGraphicList.add(desiredCapturePointGraphic);
          artifactList.add(desiredCapturePointGraphic.createArtifact());
 
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectList);
-         dynamicGraphicObjectsListRegistry.registerArtifactList(artifactList);
+         yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicList);
+         yoGraphicsListRegistry.registerArtifactList(artifactList);
       }
    }
 

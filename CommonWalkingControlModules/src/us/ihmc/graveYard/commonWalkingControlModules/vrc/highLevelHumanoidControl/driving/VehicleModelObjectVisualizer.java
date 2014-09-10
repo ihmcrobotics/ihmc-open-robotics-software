@@ -15,14 +15,14 @@ import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 public class VehicleModelObjectVisualizer
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final YoGraphicsList dynamicGraphicObjectsList;
+   private final YoGraphicsList yoGraphicsList;
    private final double objectFrameScale = 0.2;
    private final double vehicleFrameScale = 1.0;
 
    public VehicleModelObjectVisualizer(ReferenceFrame vehicleFrame, VehicleModelObjects vehicleModelObjects,
-                                YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+                                YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
-      dynamicGraphicObjectsList = new YoGraphicsList("vehicleObjects");
+      yoGraphicsList = new YoGraphicsList("vehicleObjects");
 
       for (VehicleObject vehicleObject : VehicleObject.values())
       {
@@ -34,26 +34,26 @@ public class VehicleModelObjectVisualizer
          objectFrame.update();
 
          YoGraphicReferenceFrame dynamicGraphicReferenceFrame = new YoGraphicReferenceFrame(objectFrame, registry, objectFrameScale);
-         dynamicGraphicObjectsList.add(dynamicGraphicReferenceFrame);
+         yoGraphicsList.add(dynamicGraphicReferenceFrame);
       }
 
       YoGraphicReferenceFrame vehicleFrameViz = new YoGraphicReferenceFrame(vehicleFrame, registry, vehicleFrameScale);
-      dynamicGraphicObjectsList.add(vehicleFrameViz);
+      yoGraphicsList.add(vehicleFrameViz);
 
-      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
+      yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicsList);
       parentRegistry.addChild(registry);
    }
 
    public void update()
    {
-      for (YoGraphic dynamicGraphicObject : dynamicGraphicObjectsList.getYoGraphics())
+      for (YoGraphic yoGraphic : yoGraphicsList.getYoGraphics())
       {
-         dynamicGraphicObject.update();
+         yoGraphic.update();
       }
    }
 
    public void setVisible(boolean visible)
    {
-      dynamicGraphicObjectsList.setVisible(visible);
+      yoGraphicsList.setVisible(visible);
    }
 }

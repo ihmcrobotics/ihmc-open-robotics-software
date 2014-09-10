@@ -54,7 +54,7 @@ public class HandControlState<T extends Enum<T>> extends ToroidManipulationState
    public HandControlState(T stateEnum, RigidBody base, SideDependentList<PositionTrajectoryGenerator> positionTrajectoryGenerators,
                                      SideDependentList<OrientationTrajectoryGenerator> orientationTrajectoryGenerators,
                                      SideDependentList<RigidBodySpatialAccelerationControlModule> handSpatialAccelerationControlModules,
-                                     YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+                                     YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       super(stateEnum);
 
@@ -80,7 +80,7 @@ public class HandControlState<T extends Enum<T>> extends ToroidManipulationState
          desiredPositionFrames.put(robotSide, referenceFrame);
       }
 
-      if (dynamicGraphicObjectsListRegistry != null)
+      if (yoGraphicsListRegistry != null)
       {
          YoGraphicsList list = new YoGraphicsList(stateName);
          for (RobotSide robotSide : RobotSide.values)
@@ -89,7 +89,7 @@ public class HandControlState<T extends Enum<T>> extends ToroidManipulationState
             dynamicGraphicReferenceFrames.add(dynamicGraphicReferenceFrame);
             list.add(dynamicGraphicReferenceFrame);
          }
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(list);
+         yoGraphicsListRegistry.registerDynamicGraphicObjectsList(list);
          list.hideYoGraphics();
       }
 

@@ -35,7 +35,7 @@ public class FootCenterToToeEvaluator
    private boolean visualize = false;
 
    private PointAndLinePlotter pointAndLinePlotter = null;
-   private YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = null;
+   private YoGraphicsListRegistry yoGraphicsListRegistry = null;
    private SimulationConstructionSet scs = null;
    private DoubleYoVariable timeYoVariable = null;
 
@@ -75,7 +75,7 @@ public class FootCenterToToeEvaluator
    {
       registry = new YoVariableRegistry(getClass().getSimpleName());
       smoothICPComputer = new DoubleSupportFootCenterToToeICPComputer(deltaT, doubleSupportFirstStepFraction,  
-            maxNumberOfConsideredFootsteps, registry, dynamicGraphicObjectsListRegistry);
+            maxNumberOfConsideredFootsteps, registry, yoGraphicsListRegistry);
    }
 
    private DoubleYoVariable stopSignalTime = new DoubleYoVariable("stopSignalTime", registry);
@@ -92,7 +92,7 @@ public class FootCenterToToeEvaluator
       visualize = false;
 
       pointAndLinePlotter = null;
-      dynamicGraphicObjectsListRegistry = null;
+      yoGraphicsListRegistry = null;
       scs = null;
       timeYoVariable = null;
       registry = null;
@@ -673,7 +673,7 @@ public class FootCenterToToeEvaluator
       pointAndLinePlotter.plotYoFramePoint("doubleSupportICPStart", doubleSupportStartICPYoFramePoint, YoAppearance.Cyan(), 0.003);
       pointAndLinePlotter.plotYoFramePoint("doubleSupportICPEnd", doubleSupportEndICPYoFramePoint, YoAppearance.Cyan(), 0.004);
 
-      dynamicGraphicObjectsListRegistry = pointAndLinePlotter.getDynamicGraphicObjectsListRegistry();
+      yoGraphicsListRegistry = pointAndLinePlotter.getDynamicGraphicObjectsListRegistry();
    }
 
 

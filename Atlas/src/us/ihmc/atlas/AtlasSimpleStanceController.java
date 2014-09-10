@@ -73,19 +73,19 @@ public class AtlasSimpleStanceController {
 
 
 
-	      YoGraphicsListRegistry dynamicGraphicObjectsListsRegistry = new YoGraphicsListRegistry();
-	      new DRCSimulationVisualizer(robot, dynamicGraphicObjectsListsRegistry);
+	      YoGraphicsListRegistry yoGraphicsListsRegistry = new YoGraphicsListRegistry();
+	      new DRCSimulationVisualizer(robot, yoGraphicsListsRegistry);
 
 	      double simDT = 1e-4;
 	      int simulationTicksPerControlTick = (int) (controlDT / simDT);
 	      robot.setController(controller, simulationTicksPerControlTick);
 
 	      DRCSCSInitialSetup drcscsInitialSetup = new DRCSCSInitialSetup(TerrainType.FLAT_Z_ZERO, simDT);
-	      drcscsInitialSetup.initializeRobot(robot, dynamicGraphicObjectsListsRegistry);
+	      drcscsInitialSetup.initializeRobot(robot, yoGraphicsListsRegistry);
 
 	      SimulationConstructionSet scs = new SimulationConstructionSet(robot);
 	      scs.setDT(simDT, 50);
-	      scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListsRegistry);
+	      scs.addYoGraphicsListRegistry(yoGraphicsListsRegistry);
 
 	      scs.startOnAThread();
 	   }

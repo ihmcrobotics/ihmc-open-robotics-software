@@ -37,22 +37,22 @@ public class LookaheadFinalDesiredICPCalculator implements FinalDesiredICPCalcul
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   public LookaheadFinalDesiredICPCalculator(YoVariableRegistry parentRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+   public LookaheadFinalDesiredICPCalculator(YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      if (dynamicGraphicObjectsListRegistry == null)
+      if (yoGraphicsListRegistry == null)
          VISUALIZE = false;
 
       if (VISUALIZE)
       {
-         YoGraphicsList dynamicGraphicObjectsList = new YoGraphicsList("FinalDesiredICPCalculator");
-         transferToAndNextFootstepsDataVisualizer = new TransferToAndNextFootstepsDataVisualizer(registry, dynamicGraphicObjectsListRegistry);
+         YoGraphicsList yoGraphicsList = new YoGraphicsList("FinalDesiredICPCalculator");
+         transferToAndNextFootstepsDataVisualizer = new TransferToAndNextFootstepsDataVisualizer(registry, yoGraphicsListRegistry);
 
          double finalDesiredGraphicScale = 0.005;
          finalDesiredICPGraphicPosition = new YoGraphicPosition("finalDesiredICP", "", registry, finalDesiredGraphicScale, YoAppearance.Yellow(),
                GraphicType.CROSS);
-         dynamicGraphicObjectsList.add(finalDesiredICPGraphicPosition);
-         dynamicGraphicObjectsListRegistry.registerArtifact("FinalDesiredICP", finalDesiredICPGraphicPosition.createArtifact());
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
+         yoGraphicsList.add(finalDesiredICPGraphicPosition);
+         yoGraphicsListRegistry.registerArtifact("FinalDesiredICP", finalDesiredICPGraphicPosition.createArtifact());
+         yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicsList);
       }
 
       else

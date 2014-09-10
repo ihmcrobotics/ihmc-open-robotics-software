@@ -56,7 +56,7 @@ public class VariousWalkingProviderFromScriptFactory implements VariousWalkingPr
    public VariousWalkingProviders createVariousWalkingProviders(final DoubleYoVariable time, FullRobotModel fullRobotModel,
          WalkingControllerParameters walkingControllerParameters, CommonWalkingReferenceFrames referenceFrames, SideDependentList<ContactablePlaneBody> feet,
          ConstantTransferTimeCalculator transferTimeCalculator, ConstantSwingTimeCalculator swingTimeCalculator, ArrayList<Updatable> updatables, 
-         YoVariableRegistry registry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+         YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       ScriptBasedFootstepProvider footstepProvider = new ScriptBasedFootstepProvider(scriptFileLoader, time, feet, fullRobotModel, walkingControllerParameters, registry);
 

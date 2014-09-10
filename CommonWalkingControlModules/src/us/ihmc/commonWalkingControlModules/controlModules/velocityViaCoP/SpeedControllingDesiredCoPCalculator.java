@@ -61,19 +61,19 @@ public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePoint
    private final DoubleYoVariable omega0 = new DoubleYoVariable("omega0", registry);
    
    public SpeedControllingDesiredCoPCalculator(ProcessedSensorsInterface processedSensors, CommonWalkingReferenceFrames referenceFrames,
-           YoVariableRegistry parentRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+           YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.processedSensors = processedSensors;
       this.referenceFrames = referenceFrames;
       parentRegistry.addChild(registry);
       
-      if (dynamicGraphicObjectsListRegistry != null)
+      if (yoGraphicsListRegistry != null)
       {
-         YoGraphicsList dynamicGraphicObjectList = new YoGraphicsList("CapturePointController");
+         YoGraphicsList yoGraphicList = new YoGraphicsList("CapturePointController");
          ArtifactList artifactList = new ArtifactList("Capture Point CoP Control Module");
 
          YoGraphicPosition desiredCoPBeforeProjectionViz = new YoGraphicPosition("desiredCoPBeforeProjection", desiredCoPBeforeProjection, 0.01, YoAppearance.DarkGreen(), GraphicType.CROSS);
-         dynamicGraphicObjectList.add(desiredCoPBeforeProjectionViz);
+         yoGraphicList.add(desiredCoPBeforeProjectionViz);
          artifactList.add(desiredCoPBeforeProjectionViz.createArtifact());
          
 
@@ -85,15 +85,15 @@ public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePoint
          
          YoGraphicVector actualVelocityDynamicGraphicVector = new YoGraphicVector("actualVelocity", comPosition, actualVelocityInWorld, 1.0, YoAppearance.Maroon());
          YoGraphicVector desiredVelocityDynamicGraphicVector = new YoGraphicVector("desiredVelocity", comPosition, desiredVelocityInWorld, 1.0, YoAppearance.Pink());
-         dynamicGraphicObjectList.add(actualVelocityDynamicGraphicVector);
-         dynamicGraphicObjectList.add(desiredVelocityDynamicGraphicVector);
+         yoGraphicList.add(actualVelocityDynamicGraphicVector);
+         yoGraphicList.add(desiredVelocityDynamicGraphicVector);
          
 //         artifactList.add(actualVelocityDynamicGraphicVector.createArtifact());
 //         artifactList.add(desiredVelocityDynamicGraphicVector.createArtifact());
          
          
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectList);
-         dynamicGraphicObjectsListRegistry.registerArtifactList(artifactList);
+         yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicList);
+         yoGraphicsListRegistry.registerArtifactList(artifactList);
       }
       omega0.set(Double.POSITIVE_INFINITY);
    }

@@ -51,8 +51,8 @@ public class SmartCMPProjectorTest
          registry = new YoVariableRegistry("Test");
       }
 
-      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
-      SmartCMPProjector smartCMPProjector = new SmartCMPProjector(registry, dynamicGraphicObjectsListRegistry);
+      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
+      SmartCMPProjector smartCMPProjector = new SmartCMPProjector(registry, yoGraphicsListRegistry);
       double cmpEdgeProjectionInside = 0.05;
       smartCMPProjector.setCMPEdgeProjectionInside(cmpEdgeProjectionInside);
       double minICPToCMPProjection = 0.02;
@@ -60,8 +60,8 @@ public class SmartCMPProjectorTest
 
       if (SHOW_SCS)
       {
-         scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
-         createOverheadPlotter(dynamicGraphicObjectsListRegistry, scs, true);
+         scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
+         createOverheadPlotter(yoGraphicsListRegistry, scs, true);
          scs.startOnAThread();
       }
 
@@ -688,7 +688,7 @@ public class SmartCMPProjectorTest
       }
    }
 
-   private static void createOverheadPlotter(YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, SimulationConstructionSet scs,
+   private static void createOverheadPlotter(YoGraphicsListRegistry yoGraphicsListRegistry, SimulationConstructionSet scs,
          boolean showOverheadView)
    {
       SimulationOverheadPlotter plotter = new SimulationOverheadPlotter();
@@ -706,7 +706,7 @@ public class SmartCMPProjectorTest
 
       scs.addExtraJpanel(scrollPane, "Plotter Legend");
 
-      dynamicGraphicObjectsListRegistry.addArtifactListsToPlotter(plotter.getPlotter());
+      yoGraphicsListRegistry.addArtifactListsToPlotter(plotter.getPlotter());
 
       if (showOverheadView)
          scs.getStandardSimulationGUI().selectPanel(plotterName);
@@ -716,14 +716,14 @@ public class SmartCMPProjectorTest
    {
       private final YoVariableRegistry registry;
       private final SimulationConstructionSet scs;
-      private final YoGraphicsListRegistry dynamicGraphicObjectsListRegistry;
+      private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
       public Vizzy()
       {
          scs = new SimulationConstructionSet(new Robot("null"));
          registry = scs.getRootRegistry();
 
-         dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
+         yoGraphicsListRegistry = new YoGraphicsListRegistry();
       }
 
       public void addConvexPolygon(FrameConvexPolygon2d supportPolygon)
@@ -732,9 +732,9 @@ public class SmartCMPProjectorTest
          yoSupportPolygon.setFrameConvexPolygon2d(supportPolygon);
          YoFramePose yoFramePose = new YoFramePose("polyOrigin", worldFrame, registry);
          YoGraphicPolygon dynamicGraphicPolygon = new YoGraphicPolygon("polygon", yoSupportPolygon, yoFramePose, 1.0, YoAppearance.Red());
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("Polygon", dynamicGraphicPolygon);
+         yoGraphicsListRegistry.registerDynamicGraphicObject("Polygon", dynamicGraphicPolygon);
 
-         //         dynamicGraphicObjectsListRegistry.registerArtifact("Polygon", dynamicGraphicPolygon.createArtifact());
+         //         yoGraphicsListRegistry.registerArtifact("Polygon", dynamicGraphicPolygon.createArtifact());
 
       }
 
@@ -745,7 +745,7 @@ public class SmartCMPProjectorTest
 
       public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()
       {
-         return dynamicGraphicObjectsListRegistry;
+         return yoGraphicsListRegistry;
       }
 
       public SimulationConstructionSet getSimulationConstructionSet()
@@ -755,8 +755,8 @@ public class SmartCMPProjectorTest
 
       public void start()
       {
-         scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
-         createOverheadPlotter(dynamicGraphicObjectsListRegistry, scs, true);
+         scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
+         createOverheadPlotter(yoGraphicsListRegistry, scs, true);
          scs.startOnAThread();
       }
 

@@ -32,7 +32,7 @@ public class GroundReactionTorqueCalculator
    private final SideDependentList<ArrayList<GroundContactPoint>> contactPointList;
    
    public GroundReactionTorqueCalculator(SideDependentList<ArrayList<GroundContactPoint>> contactPointList, CommonWalkingReferenceFrames commonWalkingReferenceFrames, YoVariableRegistry parentRegistry,
-           YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+           YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.contactPointList = new SideDependentList<ArrayList<GroundContactPoint>>(contactPointList);
       this.commonWalkingReferenceFrames = commonWalkingReferenceFrames;
@@ -50,14 +50,14 @@ public class GroundReactionTorqueCalculator
 
       parentRegistry.addChild(registry);
          
-      if (dynamicGraphicObjectsListRegistry != null)
-         createDynamicGrapicVectors(dynamicGraphicObjectsListRegistry);
+      if (yoGraphicsListRegistry != null)
+         createDynamicGrapicVectors(yoGraphicsListRegistry);
    }
 
 
-   private void createDynamicGrapicVectors(YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+   private void createDynamicGrapicVectors(YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      YoGraphicsList dynamicGraphicObjectsList = new YoGraphicsList("Ground-Foot Torques");
+      YoGraphicsList yoGraphicsList = new YoGraphicsList("Ground-Foot Torques");
 
       double scaleFactor = 0.01;
       AppearanceDefinition appearance = YoAppearance.Purple();    // BlackMetalMaterial();
@@ -66,11 +66,11 @@ public class GroundReactionTorqueCalculator
       {
          YoGraphicVector dynamicGraphicVector = new YoGraphicVector("GroundTau" + robotSide.getCamelCaseNameForMiddleOfExpression(),
                                                         groundTauStart.get(robotSide), groundTau.get(robotSide), scaleFactor, appearance);
-         dynamicGraphicObjectsList.add(dynamicGraphicVector);
+         yoGraphicsList.add(dynamicGraphicVector);
       }
 
 
-      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
+      yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicsList);
    }
 
 

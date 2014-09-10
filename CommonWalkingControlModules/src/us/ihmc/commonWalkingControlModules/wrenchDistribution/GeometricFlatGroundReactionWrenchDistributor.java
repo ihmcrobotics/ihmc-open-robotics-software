@@ -48,9 +48,9 @@ public class GeometricFlatGroundReactionWrenchDistributor implements GroundReact
    private final SideDependentList<FramePoint2d> virtualToePoints = new SideDependentList<FramePoint2d>(new FramePoint2d(worldFrame), new FramePoint2d(worldFrame));
    private final SideDependentList<Double> legStrengths = new SideDependentList<Double>();
    
-   public GeometricFlatGroundReactionWrenchDistributor(YoVariableRegistry parentRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+   public GeometricFlatGroundReactionWrenchDistributor(YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this.virtualToePointCalculator = new NewGeometricVirtualToePointCalculator(parentRegistry, dynamicGraphicObjectsListRegistry, 0.95);
+      this.virtualToePointCalculator = new NewGeometricVirtualToePointCalculator(parentRegistry, yoGraphicsListRegistry, 0.95);
       this.legStrengthCalculator = new TeeterTotterLegStrengthCalculator(parentRegistry);
       
       virtualToePointCalculator.setAllFramesToComputeInToWorld();

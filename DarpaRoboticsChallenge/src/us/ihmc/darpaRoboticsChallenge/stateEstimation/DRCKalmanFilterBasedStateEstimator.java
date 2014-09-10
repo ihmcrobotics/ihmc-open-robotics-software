@@ -40,7 +40,7 @@ public class DRCKalmanFilterBasedStateEstimator implements DRCStateEstimatorInte
          FullInverseDynamicsStructure inverseDynamicsStructure, AfterJointReferenceFrameNameMap estimatorReferenceFrameMap,
          RigidBodyToIndexMap estimatorRigidBodyToIndexMap, JointAndIMUSensorMap jointAndIMUSensorMap, double gravitationalAcceleration,
          StateEstimatorParameters stateEstimatorParameters, SideDependentList<WrenchBasedFootSwitch> footSwitches,
-         SideDependentList<ContactablePlaneBody> bipedFeet, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+         SideDependentList<ContactablePlaneBody> bipedFeet, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.assumePerfectIMU = stateEstimatorParameters.getAssumePerfectIMU();
       

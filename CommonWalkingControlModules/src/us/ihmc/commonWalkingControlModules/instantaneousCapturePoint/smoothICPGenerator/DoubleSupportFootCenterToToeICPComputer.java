@@ -109,7 +109,7 @@ public class DoubleSupportFootCenterToToeICPComputer
    private final DoubleSupportPolynomialTrajectory doubleSupportPolynomialTrajectory;
    
    public DoubleSupportFootCenterToToeICPComputer(double dt, double doubleSupportFirstStepFraction, int maxNumberOfConsideredFootsteps,
-         YoVariableRegistry parentRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+         YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       
       this.dt = dt;
@@ -141,7 +141,7 @@ public class DoubleSupportFootCenterToToeICPComputer
 
       this.numberOfCornerPoints = maxNumberOfConsideredFootsteps - 1;
 
-      YoGraphicsList dynamicGraphicObjectsList = new YoGraphicsList("ICPComputer");
+      YoGraphicsList yoGraphicsList = new YoGraphicsList("ICPComputer");
       ArtifactList artifactList = new ArtifactList("ICPComputer");
       double icpCornerPointSize = 0.004;
 
@@ -155,7 +155,7 @@ public class DoubleSupportFootCenterToToeICPComputer
          {
             YoGraphicPosition icpCornerPointViz = new YoGraphicPosition(icpCornerPointsName, yoFramePoint, icpCornerPointSize, YoAppearance.Black(),
                   GraphicType.SOLID_BALL);
-            dynamicGraphicObjectsList.add(icpCornerPointViz);
+            yoGraphicsList.add(icpCornerPointViz);
             artifactList.add(icpCornerPointViz.createArtifact());
          }
 
@@ -169,7 +169,7 @@ public class DoubleSupportFootCenterToToeICPComputer
             {
                YoGraphicPosition toeICPCornerPointViz = new YoGraphicPosition(toeICPCornerPointsName, yoToeFramePoint, icpCornerPointSize,
                      YoAppearance.Chocolate(), GraphicType.SOLID_BALL);
-               dynamicGraphicObjectsList.add(toeICPCornerPointViz);
+               yoGraphicsList.add(toeICPCornerPointViz);
                artifactList.add(toeICPCornerPointViz.createArtifact());
             }
          }
@@ -185,7 +185,7 @@ public class DoubleSupportFootCenterToToeICPComputer
          {
             YoGraphicPosition constantFootCenterCentersOfPressureViz = new YoGraphicPosition(constantCoPName, yoFramePoint, icpCornerPointSize,
                   YoAppearance.Green(), GraphicType.SOLID_BALL);
-            dynamicGraphicObjectsList.add(constantFootCenterCentersOfPressureViz);
+            yoGraphicsList.add(constantFootCenterCentersOfPressureViz);
             artifactList.add(constantFootCenterCentersOfPressureViz.createArtifact());
          }
 
@@ -199,7 +199,7 @@ public class DoubleSupportFootCenterToToeICPComputer
             {
                YoGraphicPosition constantToeCentersOfPressureViz = new YoGraphicPosition(constantToeCoPName, toeFramePoint, icpCornerPointSize,
                      YoAppearance.Blue(), GraphicType.SOLID_BALL);
-               dynamicGraphicObjectsList.add(constantToeCentersOfPressureViz);
+               yoGraphicsList.add(constantToeCentersOfPressureViz);
                artifactList.add(constantToeCentersOfPressureViz.createArtifact());
             }
          }
@@ -207,8 +207,8 @@ public class DoubleSupportFootCenterToToeICPComputer
 
       if (VISUALIZE)
       {
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
-         dynamicGraphicObjectsListRegistry.registerArtifactList(artifactList);
+         yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicsList);
+         yoGraphicsListRegistry.registerArtifactList(artifactList);
       }
 
    }

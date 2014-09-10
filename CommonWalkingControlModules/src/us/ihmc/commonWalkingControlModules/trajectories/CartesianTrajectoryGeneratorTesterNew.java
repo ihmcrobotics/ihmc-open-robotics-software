@@ -59,7 +59,7 @@ public class CartesianTrajectoryGeneratorTesterNew
       private final BagOfBalls bagOfBalls;
 
       private TrajectoryEvaluatorController(double straightUpTime, double stepTime, double groundClearance, double dt,
-            YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+            YoGraphicsListRegistry yoGraphicsListRegistry)
       {
          this.dt = dt;
          trajectoryGenerator = new StraightUpThenParabolicCartesianTrajectoryGenerator("test", referenceFrame, straightUpTime, stepTime, groundClearance,
@@ -69,7 +69,7 @@ public class CartesianTrajectoryGeneratorTesterNew
 //         trajectoryGenerator = new FifthOrderWaypointCartesianTrajectoryGenerator("test", referenceFrame, new ConstantDoubleProvider(stepTime), groundClearance, registry);
          trajectoryGenerator.initialize(initialPosition, initialVelocity, initialAcceleration, finalDesiredPosition, finalDesiredVelocity);
 
-         bagOfBalls = new BagOfBalls((int) (getTrajectoryTime() / dt), registry, dynamicGraphicObjectsListRegistry);
+         bagOfBalls = new BagOfBalls((int) (getTrajectoryTime() / dt), registry, yoGraphicsListRegistry);
       }
 
       public double getTrajectoryTime()
@@ -109,13 +109,13 @@ public class CartesianTrajectoryGeneratorTesterNew
    public static void main(String[] args)
    {
       final double dt = 1e-3;
-      final YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
+      final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
       double straightUpAverageVelocity = 0.2;
       double parabolicTime = 1.5;
       double groundClearance = 0.1;
       TrajectoryEvaluatorController robotController = new TrajectoryEvaluatorController(straightUpAverageVelocity, parabolicTime, groundClearance, dt,
-            dynamicGraphicObjectsListRegistry);
+            yoGraphicsListRegistry);
 
       robotController.initialize();
 
@@ -125,7 +125,7 @@ public class CartesianTrajectoryGeneratorTesterNew
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);
       scs.setDT(dt, 1);
 
-      scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
+      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       Thread thread = new Thread(scs);
       thread.start();
       scs.simulate(robotController.getTrajectoryTime());

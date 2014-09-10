@@ -34,7 +34,7 @@ public class GroundReactionWrenchSliderInput
 {
    public static void main(String[] args)
    {
-      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
+      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
       Robot nullRobot = new Robot("null");
       SimulationConstructionSet scs = new SimulationConstructionSet(nullRobot);
@@ -42,7 +42,7 @@ public class GroundReactionWrenchSliderInput
       int numberOfContacts = 2;
       int maxNumberOfVertices = 10;
       GroundReactionWrenchDistributorVisualizer visualizer = new GroundReactionWrenchDistributorVisualizer(numberOfContacts, maxNumberOfVertices, 0,
-                                                                scs.getRootRegistry(), dynamicGraphicObjectsListRegistry);
+                                                                scs.getRootRegistry(), yoGraphicsListRegistry);
 
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -58,7 +58,7 @@ public class GroundReactionWrenchSliderInput
 
       ArrayList<YoFrameVector> contactTranslations = new ArrayList<YoFrameVector>();
 
-//    GroundReactionWrenchDistributorInterface distributor = new GeometricFlatGroundReactionWrenchDistributor(registry, dynamicGraphicObjectsListRegistry);
+//    GroundReactionWrenchDistributorInterface distributor = new GeometricFlatGroundReactionWrenchDistributor(registry, yoGraphicsListRegistry);
 //    GroundReactionWrenchDistributorInterface distributor = new LeeGoswamiGroundReactionWrenchDistributor(centerOfMassFrame, nSupportVectors, parentRegistry);
 
       ContactPointWrenchDistributorSliderInput contactPointWrenchDistributorSliderInput = new ContactPointWrenchDistributorSliderInput(scs, registry,
@@ -66,7 +66,7 @@ public class GroundReactionWrenchSliderInput
       GroundReactionWrenchDistributor distributor = contactPointWrenchDistributorSliderInput.getDistributor();
       GroundReactionWrenchDistributorInputData inputData = new GroundReactionWrenchDistributorInputData();
 
-      scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
+      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
 
       ArrayList<PlaneContactState> contactStates = new ArrayList<PlaneContactState>();

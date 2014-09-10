@@ -41,15 +41,15 @@ public class OneStepCaptureRegionCalculator
    private final SideDependentList<FrameConvexPolygon2d> reachableRegions;
 
    public OneStepCaptureRegionCalculator(CommonWalkingReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters,
-         YoVariableRegistry parentRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+         YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(walkingControllerParameters.getFootForwardOffset() - walkingControllerParameters.getFootLength() / 2.0, walkingControllerParameters.getFootWidth(),
-            walkingControllerParameters.getMaxStepLength(), referenceFrames.getAnkleZUpReferenceFrames(), parentRegistry, dynamicGraphicObjectsListRegistry);
+            walkingControllerParameters.getMaxStepLength(), referenceFrames.getAnkleZUpReferenceFrames(), parentRegistry, yoGraphicsListRegistry);
    }
 
    public OneStepCaptureRegionCalculator(double midFootAnkleXOffset, double footWidth, double kinematicStepRange,
          SideDependentList<ReferenceFrame> ankleZUpFrames, YoVariableRegistry parentRegistry,
-         YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.kinematicStepRange = kinematicStepRange;
       this.ankleZUpFrames = ankleZUpFrames;
@@ -61,9 +61,9 @@ public class OneStepCaptureRegionCalculator
 
       // set up registry and visualizer
       parentRegistry.addChild(registry);
-      if (dynamicGraphicObjectsListRegistry != null && VISUALIZE)
+      if (yoGraphicsListRegistry != null && VISUALIZE)
       {
-         captureRegionVisualizer = new CaptureRegionVisualizer(this, dynamicGraphicObjectsListRegistry, registry);
+         captureRegionVisualizer = new CaptureRegionVisualizer(this, yoGraphicsListRegistry, registry);
       }
    }
 

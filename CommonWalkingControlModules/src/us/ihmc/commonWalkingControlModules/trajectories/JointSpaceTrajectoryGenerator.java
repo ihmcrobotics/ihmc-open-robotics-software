@@ -97,7 +97,7 @@ public class JointSpaceTrajectoryGenerator
    
 
    public JointSpaceTrajectoryGenerator(String name, int maximumNumberOfViaPoints, CommonWalkingReferenceFrames referenceFrames,
-         LegInverseKinematicsCalculator inverseKinematicsCalculator, ProcessedSensorsInterface processedSensors, double controlDT, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry,
+         LegInverseKinematicsCalculator inverseKinematicsCalculator, ProcessedSensorsInterface processedSensors, double controlDT, YoGraphicsListRegistry yoGraphicsListRegistry,
          BodyPositionInTimeEstimator bodyPositionInTimeEstimator, SwingLegAnglesAtEndOfStepEstimator swingLegAnglesAtEndOfStepEstimator, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(name);
@@ -158,7 +158,7 @@ public class JointSpaceTrajectoryGenerator
       new IntegerYoVariable("pointsRemaining", registry);
 
       new FramePoint(ReferenceFrame.getWorldFrame());
-      createVisualizers(dynamicGraphicObjectsListRegistry, registry);
+      createVisualizers(yoGraphicsListRegistry, registry);
 
       // New Stuff
       initialPositionInPelvisFrame = new YoFramePoint("initialPositionInPelvisFrame", "", referenceFrames.getPelvisFrame(), registry);
@@ -187,14 +187,14 @@ public class JointSpaceTrajectoryGenerator
       parentRegistry.addChild(registry);
    }
 
-   private void createVisualizers(YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+   private void createVisualizers(YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
-      if (dynamicGraphicObjectsListRegistry != null)
+      if (yoGraphicsListRegistry != null)
       {
          ArtifactList artifactList = new ArtifactList("JointSpaceTrajectory");
-         ArrayList<YoGraphic> dynamicGraphicObjects = new ArrayList<YoGraphic>();
+         ArrayList<YoGraphic> yoGraphics = new ArrayList<YoGraphic>();
 
-         bagOfBalls = new BagOfBalls(50, 0.02, "estimatedBodyPosition", YoAppearance.Aqua(), parentRegistry, dynamicGraphicObjectsListRegistry);
+         bagOfBalls = new BagOfBalls(50, 0.02, "estimatedBodyPosition", YoAppearance.Aqua(), parentRegistry, yoGraphicsListRegistry);
 
          
          YoGraphicPosition finalDesiredViz = new YoGraphicPosition("Final Desired Swing", desiredFinalLocationInWorldFrame, 0.04,
@@ -203,8 +203,8 @@ public class JointSpaceTrajectoryGenerator
          YoGraphicVector estimatedBodyVelocity = new YoGraphicVector("estimated body velocity", estimatedBodyPositionAtEndOfStep, estimatedBodyVelocityAtEndOfStep, YoAppearance.Purple());
 
          artifactList.add(finalDesiredViz.createArtifact());
-         dynamicGraphicObjects.add(finalDesiredViz);
-         dynamicGraphicObjects.add(estimatedBodyVelocity);
+         yoGraphics.add(finalDesiredViz);
+         yoGraphics.add(estimatedBodyVelocity);
 
          if (maximumNumberOfViaPoints > 0)
          {
@@ -213,13 +213,13 @@ public class JointSpaceTrajectoryGenerator
                YoGraphicPosition viaViz = new YoGraphicPosition("Swing via point " + i, viaPointsInWorldFrame[i], 0.03, YoAppearance.Pink(),
                      GraphicType.BALL);
                artifactList.add(viaViz.createArtifact());
-               dynamicGraphicObjects.add(viaViz);
+               yoGraphics.add(viaViz);
             }
          }
 
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects("R2Sim02SwingSubController", dynamicGraphicObjects);
+         yoGraphicsListRegistry.registerDynamicGraphicObjects("R2Sim02SwingSubController", yoGraphics);
 
-         dynamicGraphicObjectsListRegistry.registerArtifactList(artifactList);
+         yoGraphicsListRegistry.registerArtifactList(artifactList);
       }
    }
 

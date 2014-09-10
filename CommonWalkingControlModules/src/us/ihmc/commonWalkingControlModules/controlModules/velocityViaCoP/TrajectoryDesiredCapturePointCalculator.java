@@ -50,18 +50,18 @@ public class TrajectoryDesiredCapturePointCalculator implements DesiredCapturePo
    private final YoFrameLine2d captureLine = new YoFrameLine2d("captureLine", "", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameLine2d switchLine = new YoFrameLine2d("switchLine", "", ReferenceFrame.getWorldFrame(), registry);
    
-   public TrajectoryDesiredCapturePointCalculator(ProcessedSensorsInterface processedSensors, YoGraphicsListRegistry dynamicGraphicObjectListRegistry, YoVariableRegistry parentRegistry)
+   public TrajectoryDesiredCapturePointCalculator(ProcessedSensorsInterface processedSensors, YoGraphicsListRegistry yoGraphicListRegistry, YoVariableRegistry parentRegistry)
    {
       this.processedSensors = processedSensors;
       parentRegistry.addChild(registry);
       stateInLastTick.set(TransferState.DOUBLE_SUPPORT);
       
-      if (dynamicGraphicObjectListRegistry != null)
+      if (yoGraphicListRegistry != null)
       {
          YoFrameLine2dArtifact captureLineArtifact = new YoFrameLine2dArtifact("Capture Line", captureLine, Color.orange);
          YoFrameLine2dArtifact switchLineArtifact = new YoFrameLine2dArtifact("Switch Line", switchLine, Color.pink);
 
-         dynamicGraphicObjectListRegistry.registerArtifacts("Trajectory Desired Capture Point", new Artifact[]{captureLineArtifact, switchLineArtifact});
+         yoGraphicListRegistry.registerArtifacts("Trajectory Desired Capture Point", new Artifact[]{captureLineArtifact, switchLineArtifact});
       }
    }
   

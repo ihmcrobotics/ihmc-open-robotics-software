@@ -52,9 +52,9 @@ public class FootstepGeneratorVisualizer
 
 
    public FootstepGeneratorVisualizer(int maxNumberOfContacts, int maxPointsPerContact, YoVariableRegistry parentRegistry,
-                                      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+                                      YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      YoGraphicsList dynamicGraphicObjectsList = new YoGraphicsList("FootstepGeneratorVisualizer");
+      YoGraphicsList yoGraphicsList = new YoGraphicsList("FootstepGeneratorVisualizer");
 
       AppearanceDefinition[] appearances = new AppearanceDefinition[] {YoAppearance.Red(), YoAppearance.Green(), YoAppearance.Blue(), YoAppearance.Purple()};
 
@@ -68,10 +68,10 @@ public class FootstepGeneratorVisualizer
 
          YoGraphicPolygon dynamicGraphicPolygon = new YoGraphicPolygon("contactPolygon" + i, contactPolygon, contactPose, 1.0,
                                                                  appearances[i % appearances.length]);
-         dynamicGraphicObjectsList.add(dynamicGraphicPolygon);
+         yoGraphicsList.add(dynamicGraphicPolygon);
       }
 
-      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
+      yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicsList);
       parentRegistry.addChild(registry);
    }
 
@@ -222,12 +222,12 @@ public class FootstepGeneratorVisualizer
       SimulationConstructionSet scs = new SimulationConstructionSet(nullRobot);
       scs.setDT(0.25, 1);
       YoVariableRegistry rootRegistry = scs.getRootRegistry();
-      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
+      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       int maxNumberOfContacts = 2;
       int maxPointsPerContact = 4;
       FootstepGeneratorVisualizer footstepGeneratorVisualizer = new FootstepGeneratorVisualizer(maxNumberOfContacts, maxPointsPerContact, rootRegistry,
-                                                                   dynamicGraphicObjectsListRegistry);
-      scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
+                                                                   yoGraphicsListRegistry);
+      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       footstepGeneratorVisualizer.addFootstepsAndTickAndUpdate(scs, footsteps);
 
       scs.startOnAThread();

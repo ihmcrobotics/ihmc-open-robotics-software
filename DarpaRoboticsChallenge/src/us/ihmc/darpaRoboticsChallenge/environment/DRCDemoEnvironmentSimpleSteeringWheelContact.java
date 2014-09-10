@@ -38,7 +38,7 @@ public class DRCDemoEnvironmentSimpleSteeringWheelContact implements CommonAvata
    private final ArrayList<ExternalForcePoint> contactPoints = new ArrayList<ExternalForcePoint>();
    private final ArrayList<Contactable> contactables = new ArrayList<Contactable>();
 
-   public DRCDemoEnvironmentSimpleSteeringWheelContact(YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+   public DRCDemoEnvironmentSimpleSteeringWheelContact(YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       combinedTerrainObject = createCombinedTerrainObject();
 
@@ -134,8 +134,8 @@ public class DRCDemoEnvironmentSimpleSteeringWheelContact implements CommonAvata
 
    public static void main(String[] args)
    {
-      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
-      DRCDemoEnvironmentSimpleSteeringWheelContact env = new DRCDemoEnvironmentSimpleSteeringWheelContact(dynamicGraphicObjectsListRegistry);
+      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
+      DRCDemoEnvironmentSimpleSteeringWheelContact env = new DRCDemoEnvironmentSimpleSteeringWheelContact(yoGraphicsListRegistry);
 
       List<Robot> robots = env.getEnvironmentRobots();
       Robot[] robotArray = new Robot[robots.size()];
@@ -147,7 +147,7 @@ public class DRCDemoEnvironmentSimpleSteeringWheelContact implements CommonAvata
       TerrainObject3D terrainObject = env.getTerrainObject3D();
       scs.addStaticLinkGraphics(terrainObject.getLinkGraphics());
 
-      scs.addDynamicGraphicObjectListRegistries(dynamicGraphicObjectsListRegistry);
+      scs.addDynamicGraphicObjectListRegistries(yoGraphicsListRegistry);
       scs.setGroundVisible(false);
 
       scs.startOnAThread();

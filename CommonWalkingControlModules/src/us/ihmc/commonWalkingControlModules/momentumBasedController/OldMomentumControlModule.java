@@ -84,7 +84,7 @@ public class OldMomentumControlModule implements MomentumControlModule
 
    public OldMomentumControlModule(SixDoFJoint rootJoint, double gravityZ, GroundReactionWrenchDistributor groundReactionWrenchDistributor,
          ReferenceFrame centerOfMassFrame, double controlDT, TwistCalculator twistCalculator, LinearSolver<DenseMatrix64F> jacobianSolver,
-         YoVariableRegistry parentRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+         YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
       this.solver = new MomentumSolver(rootJoint, rootJoint.getPredecessor(), centerOfMassFrame, twistCalculator, jacobianSolver, controlDT, registry);

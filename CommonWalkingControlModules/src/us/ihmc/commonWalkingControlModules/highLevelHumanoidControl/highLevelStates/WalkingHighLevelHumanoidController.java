@@ -227,14 +227,14 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       doPrepareManipulationForLocomotion.set(walkingControllerParameters.doPrepareManipulationForLocomotion());
 
-      if (dynamicGraphicObjectsListRegistry == null)
+      if (yoGraphicsListRegistry == null)
       {
          VISUALIZE = false;
       }
 
       if (VISUALIZE)
       {
-         transferToAndNextFootstepsDataVisualizer = new TransferToAndNextFootstepsDataVisualizer(registry, dynamicGraphicObjectsListRegistry);
+         transferToAndNextFootstepsDataVisualizer = new TransferToAndNextFootstepsDataVisualizer(registry, yoGraphicsListRegistry);
       }
       else
       {
@@ -244,8 +244,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       if (VISUALIZE)
       {
          YoGraphicPosition dynamicGraphicPositionECMP = new YoGraphicPosition("ecmpviz", ecmpViz, 0.002, YoAppearance.BlueViolet());
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("ecmpviz", dynamicGraphicPositionECMP);
-         dynamicGraphicObjectsListRegistry.registerArtifact("ecmpviz", dynamicGraphicPositionECMP.createArtifact());
+         yoGraphicsListRegistry.registerDynamicGraphicObject("ecmpviz", dynamicGraphicPositionECMP);
+         yoGraphicsListRegistry.registerArtifact("ecmpviz", dynamicGraphicPositionECMP.createArtifact());
       }
 
       // Getting parameters from the icpAndMomentumBasedController

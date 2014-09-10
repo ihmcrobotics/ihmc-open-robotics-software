@@ -67,9 +67,9 @@ public class ICPProportionalController
 
    private final SmartCMPProjector smartCMPProjector;
 
-   public ICPProportionalController(double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+   public ICPProportionalController(double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      smartCMPProjector = new SmartCMPProjector(parentRegistry, dynamicGraphicObjectsListRegistry);
+      smartCMPProjector = new SmartCMPProjector(parentRegistry, yoGraphicsListRegistry);
 
       this.controlDT = controlDT;
       

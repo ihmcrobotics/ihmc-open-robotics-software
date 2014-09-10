@@ -20,9 +20,9 @@ public class TransferToAndNextFootstepsDataVisualizer
    private final YoFrameConvexPolygon2d transferFromPolygon, transferToPolygon, nextStepPolygon, nextNextStepPolygon;
    private final YoGraphicPolygon transferFromPolygonViz, transferToPolygonViz, nextStepPolygonViz, nextNextStepPolygonViz;
 
-   public TransferToAndNextFootstepsDataVisualizer(YoVariableRegistry registry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+   public TransferToAndNextFootstepsDataVisualizer(YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      YoGraphicsList dynamicGraphicObjectsList = new YoGraphicsList("TransferToAndNextFootstepsDataVisualizer");
+      YoGraphicsList yoGraphicsList = new YoGraphicsList("TransferToAndNextFootstepsDataVisualizer");
 
       int maxNumberOfVertices = 6;
       transferFromPolygon = new YoFrameConvexPolygon2d("transferFromPolygon", "", worldFrame, maxNumberOfVertices, registry);
@@ -55,22 +55,22 @@ public class TransferToAndNextFootstepsDataVisualizer
       nextStepPolygonViz.setPosition(0.0, 0.0, 0.001);
       nextNextStepPolygonViz.setPosition(0.0, 0.0, 0.001);
 
-      dynamicGraphicObjectsList.add(transferFromPolygonViz);
-      dynamicGraphicObjectsList.add(transferToPolygonViz);
-      dynamicGraphicObjectsList.add(nextStepPolygonViz);
-      dynamicGraphicObjectsList.add(nextNextStepPolygonViz);
+      yoGraphicsList.add(transferFromPolygonViz);
+      yoGraphicsList.add(transferToPolygonViz);
+      yoGraphicsList.add(nextStepPolygonViz);
+      yoGraphicsList.add(nextNextStepPolygonViz);
 
       transferFromCoordinateSystem = new YoGraphicCoordinateSystem("transferFromPose", "", registry, 0.2);
       transferToCoordinateSystem = new YoGraphicCoordinateSystem("transferToPose", "", registry, 0.2);
       nextStepCoordinateSystem = new YoGraphicCoordinateSystem("nextStepPose", "", registry, 0.2);
       nextNextStepCoordinateSystem = new YoGraphicCoordinateSystem("nextNextStepPose", "", registry, 0.2);
 
-      dynamicGraphicObjectsList.add(transferFromCoordinateSystem);
-      dynamicGraphicObjectsList.add(transferToCoordinateSystem);
-      dynamicGraphicObjectsList.add(nextStepCoordinateSystem);
-      dynamicGraphicObjectsList.add(nextNextStepCoordinateSystem);
+      yoGraphicsList.add(transferFromCoordinateSystem);
+      yoGraphicsList.add(transferToCoordinateSystem);
+      yoGraphicsList.add(nextStepCoordinateSystem);
+      yoGraphicsList.add(nextNextStepCoordinateSystem);
 
-      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
+      yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicsList);
    }
 
    public void visualizeFootsteps(TransferToAndNextFootstepsData transferToAndNextFootstepsData)

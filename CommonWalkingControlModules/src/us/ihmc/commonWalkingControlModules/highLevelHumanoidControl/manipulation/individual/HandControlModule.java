@@ -131,13 +131,13 @@ public class HandControlModule
             fullRobotModel.getHandControlFrame(robotSide), controlDT, registry);
       handSpatialAccelerationControlModule.setGains(taskspaceGains);
 
-      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
+      YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
       boolean visualize = true;
       holdPoseTrajectoryGenerator = new ConstantPoseTrajectoryGenerator(name + "Hold", true, worldFrame, parentRegistry);
-      straightLinePoseTrajectoryGenerator = new StraightLinePoseTrajectoryGenerator(name + "StraightLine", true, worldFrame, registry, visualize, dynamicGraphicObjectsListRegistry);
-      finalApproachPoseTrajectoryGenerator = new FinalApproachPoseTrajectoryGenerator(name, true, worldFrame, registry, visualize, dynamicGraphicObjectsListRegistry);
-      initialClearancePoseTrajectoryGenerator = new InitialClearancePoseTrajectoryGenerator(name + "MoveAway", true, worldFrame, registry, visualize, dynamicGraphicObjectsListRegistry);
-      leadInOutPoseTrajectoryGenerator = new LeadInOutPoseTrajectoryGenerator(name + "Swing", true, worldFrame, registry, visualize, dynamicGraphicObjectsListRegistry);
+      straightLinePoseTrajectoryGenerator = new StraightLinePoseTrajectoryGenerator(name + "StraightLine", true, worldFrame, registry, visualize, yoGraphicsListRegistry);
+      finalApproachPoseTrajectoryGenerator = new FinalApproachPoseTrajectoryGenerator(name, true, worldFrame, registry, visualize, yoGraphicsListRegistry);
+      initialClearancePoseTrajectoryGenerator = new InitialClearancePoseTrajectoryGenerator(name + "MoveAway", true, worldFrame, registry, visualize, yoGraphicsListRegistry);
+      leadInOutPoseTrajectoryGenerator = new LeadInOutPoseTrajectoryGenerator(name + "Swing", true, worldFrame, registry, visualize, yoGraphicsListRegistry);
 
       loadBearingControlState = new LoadBearingPlaneHandControlState(namePrefix, HandControlState.LOAD_BEARING, robotSide, momentumBasedController,
             fullRobotModel.getElevator(), hand, jacobianId, registry);
@@ -159,20 +159,20 @@ public class HandControlModule
          if (armControlParameters.doLowLevelPositionControl())
          {
             taskSpacePositionControlState = new LowLevelInverseKinematicsTaskspaceHandPositionControlState(namePrefix, HandControlState.TASK_SPACE_POSITION,
-                  robotSide, momentumBasedController, jacobianId, chest, hand, dynamicGraphicObjectsListRegistry, armControlParameters, controlStatusProducer,
+                  robotSide, momentumBasedController, jacobianId, chest, hand, yoGraphicsListRegistry, armControlParameters, controlStatusProducer,
                   controlDT, registry);
          }
          else
          {
             taskSpacePositionControlState = new InverseKinematicsTaskspaceHandPositionControlState(namePrefix, HandControlState.TASK_SPACE_POSITION, robotSide,
-                  momentumBasedController, jacobianId, chest, hand, dynamicGraphicObjectsListRegistry, armControlParameters, controlStatusProducer, jointspaceGains, controlDT,
+                  momentumBasedController, jacobianId, chest, hand, yoGraphicsListRegistry, armControlParameters, controlStatusProducer, jointspaceGains, controlDT,
                   registry);
          }
       }
       else
       {
          taskSpacePositionControlState = new TaskspaceHandPositionControlState(namePrefix, HandControlState.TASK_SPACE_POSITION, momentumBasedController,
-               jacobianId, chest, hand, dynamicGraphicObjectsListRegistry, registry);
+               jacobianId, chest, hand, yoGraphicsListRegistry, registry);
       }
 
       setupStateMachine();

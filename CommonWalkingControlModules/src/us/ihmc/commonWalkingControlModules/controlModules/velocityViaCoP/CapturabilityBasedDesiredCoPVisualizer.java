@@ -31,22 +31,22 @@ public class CapturabilityBasedDesiredCoPVisualizer
    private final YoFramePoint finalDesiredCapturePoint = new YoFramePoint("finalDesiredCapturePoint", "", world, registry);
    private final YoFramePoint centerOfMass = new YoFramePoint("centerOfMass", world, registry);
    
-   public CapturabilityBasedDesiredCoPVisualizer(YoVariableRegistry parentRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+   public CapturabilityBasedDesiredCoPVisualizer(YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      YoGraphicsList dynamicGraphicObjectList = new YoGraphicsList("CapturabilityBasedDesiredCoPVisualizer");
+      YoGraphicsList yoGraphicList = new YoGraphicsList("CapturabilityBasedDesiredCoPVisualizer");
       ArtifactList artifactList = new ArtifactList("CapturabilityBasedDesiredCoPVisualizer");
 
-      if (dynamicGraphicObjectsListRegistry != null)
+      if (yoGraphicsListRegistry != null)
       {
-         addFinalDesiredCapturePointViz(dynamicGraphicObjectList, artifactList);
-         addDesiredCoPViz(dynamicGraphicObjectList, artifactList);
-         addDesiredCapturePointViz(dynamicGraphicObjectList, artifactList);
-         addDesiredCMPViz(dynamicGraphicObjectList, artifactList);
-         addCenterOfMassViz(dynamicGraphicObjectList, artifactList);
+         addFinalDesiredCapturePointViz(yoGraphicList, artifactList);
+         addDesiredCoPViz(yoGraphicList, artifactList);
+         addDesiredCapturePointViz(yoGraphicList, artifactList);
+         addDesiredCMPViz(yoGraphicList, artifactList);
+         addCenterOfMassViz(yoGraphicList, artifactList);
          addGuideLineViz(artifactList);
 
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectList);
-         dynamicGraphicObjectsListRegistry.registerArtifactList(artifactList);
+         yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicList);
+         yoGraphicsListRegistry.registerArtifactList(artifactList);
       }
       desiredCMP.setToNaN();
       pseudoCMP.setToNaN();
@@ -55,40 +55,40 @@ public class CapturabilityBasedDesiredCoPVisualizer
       parentRegistry.addChild(registry);
    }
 
-   private void addDesiredCoPViz(YoGraphicsList dynamicGraphicObjectList, ArtifactList artifactList)
+   private void addDesiredCoPViz(YoGraphicsList yoGraphicList, ArtifactList artifactList)
    {
       YoGraphicPosition desiredCoPViz = new YoGraphicPosition("Desired Center of Pressure", desiredCoP, 0.012, YoAppearance.Gray(),
                                                 GraphicType.CROSS);
-      dynamicGraphicObjectList.add(desiredCoPViz);
+      yoGraphicList.add(desiredCoPViz);
       artifactList.add(desiredCoPViz.createArtifact());
    }
 
-   private void addDesiredCMPViz(YoGraphicsList dynamicGraphicObjectList, ArtifactList artifactList)
+   private void addDesiredCMPViz(YoGraphicsList yoGraphicList, ArtifactList artifactList)
    {
       YoGraphicPosition desiredCMPViz = new YoGraphicPosition("Desired CMP", desiredCMP, 0.012, YoAppearance.Red(),
                                                 GraphicType.CROSS);
-      dynamicGraphicObjectList.add(desiredCMPViz);
+      yoGraphicList.add(desiredCMPViz);
       artifactList.add(desiredCMPViz.createArtifact());
       
       YoGraphicPosition pseudoCMPViz = new YoGraphicPosition("Pseudo CMP", pseudoCMP, 0.012, YoAppearance.Purple(),
             GraphicType.CROSS);
-      dynamicGraphicObjectList.add(pseudoCMPViz);
+      yoGraphicList.add(pseudoCMPViz);
       artifactList.add(pseudoCMPViz.createArtifact());
    }
 
-   private void addDesiredCapturePointViz(YoGraphicsList dynamicGraphicObjectList, ArtifactList artifactList)
+   private void addDesiredCapturePointViz(YoGraphicsList yoGraphicList, ArtifactList artifactList)
    {
       YoGraphicPosition desiredCapturePointViz = new YoGraphicPosition("Desired Capture Point", desiredCapturePoint, 0.01, YoAppearance.Yellow(),
                                                          GraphicType.ROTATED_CROSS);
-      dynamicGraphicObjectList.add(desiredCapturePointViz);
+      yoGraphicList.add(desiredCapturePointViz);
       artifactList.add(desiredCapturePointViz.createArtifact());
    }
 
-   private void addFinalDesiredCapturePointViz(YoGraphicsList dynamicGraphicObjectList, ArtifactList artifactList)
+   private void addFinalDesiredCapturePointViz(YoGraphicsList yoGraphicList, ArtifactList artifactList)
    {
       YoGraphicPosition desiredCapturePointViz = new YoGraphicPosition("Final Desired Capture Point", finalDesiredCapturePoint, 0.01, YoAppearance.Beige(),
                                                          GraphicType.ROTATED_CROSS);
-      dynamicGraphicObjectList.add(desiredCapturePointViz);
+      yoGraphicList.add(desiredCapturePointViz);
       artifactList.add(desiredCapturePointViz.createArtifact());
    }
 
@@ -98,10 +98,10 @@ public class CapturabilityBasedDesiredCoPVisualizer
       artifactList.add(guideLineArtifact);
    }
 
-   private void addCenterOfMassViz(YoGraphicsList dynamicGraphicObjectList, ArtifactList artifactList)
+   private void addCenterOfMassViz(YoGraphicsList yoGraphicList, ArtifactList artifactList)
    {
       YoGraphicPosition desiredCapturePointViz = new YoGraphicPosition("Center Of Mass", centerOfMass, 0.006, YoAppearance.Black(), GraphicType.CROSS);
-      dynamicGraphicObjectList.add(desiredCapturePointViz);
+      yoGraphicList.add(desiredCapturePointViz);
       artifactList.add(desiredCapturePointViz.createArtifact());
    }
 

@@ -45,7 +45,7 @@ public class YoVariableHandshakeParser
    private double dt;
    private final ArrayList<YoVariableRegistry> registries = new ArrayList<YoVariableRegistry>();
    private final ArrayList<YoVariable> variables = new ArrayList<YoVariable>();
-   private final YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
+   private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private final ArrayList<JointState<? extends Joint>> jointStates = new ArrayList<>();
    private final DynamicEnumCreator dynamicEnumCreator = new DynamicEnumCreator();
 
@@ -63,7 +63,7 @@ public class YoVariableHandshakeParser
 
    public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()
    {
-      return dynamicGraphicObjectsListRegistry;
+      return yoGraphicsListRegistry;
    }
 
    private static YoProtoHandshake parseYoProtoHandshake(byte[] handShake) 
@@ -170,7 +170,7 @@ public class YoVariableHandshakeParser
    
       for (String list : dgoListMap.keySet())
       {
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dgoListMap.get(list));
+         yoGraphicsListRegistry.registerDynamicGraphicObjectsList(dgoListMap.get(list));
       }
    
       
@@ -179,7 +179,7 @@ public class YoVariableHandshakeParser
       {
          artifactList.add((Artifact)getRemoteGraphic(yoProtoHandshake.getArtifact(i)));
       }
-      dynamicGraphicObjectsListRegistry.registerArtifactList(artifactList);
+      yoGraphicsListRegistry.registerArtifactList(artifactList);
    }
 
    private RemoteYoGraphic getRemoteGraphic(DynamicGraphicMessage msg)
@@ -200,7 +200,7 @@ public class YoVariableHandshakeParser
                .getZ()), msg.getAppearance().getTransparency());
       }
    
-      return DynamicGraphicFactory.dynamicGraphicObjectFromMessage(type, name, vars, consts, appearance);
+      return DynamicGraphicFactory.yoGraphicFromMessage(type, name, vars, consts, appearance);
    }
 
    public YoVariableRegistry getYoVariableRegistry()

@@ -28,7 +28,7 @@ public class ListofPointsContactableRollingBody implements ContactableRollingBod
    private final int totalNumberOfContactPoints;
 
    public ListofPointsContactableRollingBody(String name, RigidBody rigidBody, ReferenceFrame bodyFrame, double cylinderRadius, FramePoint originInBodyFrame,
-         List<Double> contactPositionOnCylinderEdge, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry registry)
+         List<Double> contactPositionOnCylinderEdge, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
    {
       this.rigidBody = rigidBody;
       this.bodyFrame = bodyFrame;

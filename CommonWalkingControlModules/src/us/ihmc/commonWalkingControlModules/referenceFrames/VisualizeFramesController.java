@@ -16,18 +16,18 @@ import com.yobotics.simulationconstructionset.robotController.RobotController;
 
       private final ArrayList<YoGraphicReferenceFrame> dynamicGraphicReferenceFrames = new ArrayList<YoGraphicReferenceFrame>();
 
-      private final YoGraphicsList dynamicGraphicObjectsList = new YoGraphicsList("TestFramesController");
+      private final YoGraphicsList yoGraphicsList = new YoGraphicsList("TestFramesController");
 
-      public VisualizeFramesController(ArrayList<ReferenceFrame> referenceFrames, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, double coordinateSystemLength)
+      public VisualizeFramesController(ArrayList<ReferenceFrame> referenceFrames, YoGraphicsListRegistry yoGraphicsListRegistry, double coordinateSystemLength)
       {
          for (ReferenceFrame frame : referenceFrames)
          {
             YoGraphicReferenceFrame dynamicGraphicReferenceFrame = new YoGraphicReferenceFrame(frame, registry, coordinateSystemLength);
             dynamicGraphicReferenceFrames.add(dynamicGraphicReferenceFrame);
-            dynamicGraphicObjectsList.add(dynamicGraphicReferenceFrame);
+            yoGraphicsList.add(dynamicGraphicReferenceFrame);
          }
 
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
+         yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicsList);
       }
 
       public void doControl()

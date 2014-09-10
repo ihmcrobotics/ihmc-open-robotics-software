@@ -48,7 +48,7 @@ public class CommonCapturePointCalculator implements CapturePointCalculatorInter
    private final boolean useWorldFrame;
 
    public CommonCapturePointCalculator(ProcessedSensorsInterface processedSensors, CommonWalkingReferenceFrames referenceFrames, boolean useWorldFrame,
-           YoVariableRegistry yoVariableRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+           YoVariableRegistry yoVariableRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.processedSensors = processedSensors;
 
@@ -67,11 +67,11 @@ public class CommonCapturePointCalculator implements CapturePointCalculatorInter
          yoVariableRegistry.addChild(registry);
       }
 
-      if (dynamicGraphicObjectsListRegistry != null)
+      if (yoGraphicsListRegistry != null)
       {
          YoGraphicPosition capturePointWorldGraphicPosition = new YoGraphicPosition(CAPTURE_POINT_DYNAMIC_GRAPHIC_OBJECT_NAME, capturePointInMultipleFrames, 0.01, YoAppearance.Blue(), GraphicType.ROTATED_CROSS);
-         YoGraphicsList dynamicGraphicObjectsList = new YoGraphicsList("CapturePoint");
-         dynamicGraphicObjectsList.add(capturePointWorldGraphicPosition);
+         YoGraphicsList yoGraphicsList = new YoGraphicsList("CapturePoint");
+         yoGraphicsList.add(capturePointWorldGraphicPosition);
 
          ArtifactList artifactList = new ArtifactList("CapturePointCalculator");
 
@@ -81,8 +81,8 @@ public class CommonCapturePointCalculator implements CapturePointCalculatorInter
          artifactsToRecordHistory.add(capturePointArtifact);
          artifactList.add(capturePointArtifact);
 
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
-         dynamicGraphicObjectsListRegistry.registerArtifactList(artifactList);
+         yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicsList);
+         yoGraphicsListRegistry.registerArtifactList(artifactList);
       }
    }
 

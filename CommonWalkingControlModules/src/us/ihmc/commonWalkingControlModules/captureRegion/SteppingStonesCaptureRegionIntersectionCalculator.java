@@ -40,7 +40,7 @@ public class SteppingStonesCaptureRegionIntersectionCalculator
    private boolean VISUALIZE = true;
 
    public SteppingStonesCaptureRegionIntersectionCalculator(SteppingStones steppingStones, YoVariableRegistry yoVariableRegistry,
-           YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+           YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.steppingStones = steppingStones;
       ArrayList<ConvexPolygon2d> convexPolygons = steppingStones.getShrunkenConvexPolygons();
@@ -48,7 +48,7 @@ public class SteppingStonesCaptureRegionIntersectionCalculator
 //    ArrayList<ConvexPolygon2d> convexPolygons = steppingStones.getConvexPolygons();
       convexPolygon2dIntersectionSetCalculator = new ConvexPolygon2dIntersectionSetCalculator(convexPolygons);
 
-      if (dynamicGraphicObjectsListRegistry == null)
+      if (yoGraphicsListRegistry == null)
          VISUALIZE = false;
 
       if (VISUALIZE)
@@ -74,7 +74,7 @@ public class SteppingStonesCaptureRegionIntersectionCalculator
 //            YoboticsBipedPlotter.registerDynamicGraphicPolygon("Intersection_" + i, Color.BLACK, polygonViz, true);
          }
 
-         dynamicGraphicObjectsListRegistry.registerArtifactList(artifactList);
+         yoGraphicsListRegistry.registerArtifactList(artifactList);
 
       }
       else

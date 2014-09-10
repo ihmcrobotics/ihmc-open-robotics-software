@@ -115,7 +115,7 @@ public class DrivingFootControlModule
    public DrivingFootControlModule(FullRobotModel fullRobotModel, ContactablePlaneBody contactablePlaneFoot, MomentumBasedController momentumBasedController,
                                    DrivingReferenceFrames drivingReferenceFrames, double dt, DoubleYoVariable yoTime, TwistCalculator twistCalculator,
                                    YoVariableRegistry parentRegistry, GlobalDataProducer statusProducer,
-                                   YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+                                   YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.statusProducer = statusProducer;
       this.foot = contactablePlaneFoot.getRigidBody();
@@ -195,13 +195,13 @@ public class DrivingFootControlModule
 
       parentRegistry.addChild(registry);
 
-      if (dynamicGraphicObjectsListRegistry != null)
+      if (yoGraphicsListRegistry != null)
       {
          YoGraphicReferenceFrame toePointFrameViz = new YoGraphicReferenceFrame(toePointFrame, registry, 0.1);
          YoGraphicsList list = new YoGraphicsList("drivingFootControlModule");
          dynamicGraphicReferenceFrames.add(toePointFrameViz);
          list.add(toePointFrameViz);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(list);
+         yoGraphicsListRegistry.registerDynamicGraphicObjectsList(list);
       }
 
    }

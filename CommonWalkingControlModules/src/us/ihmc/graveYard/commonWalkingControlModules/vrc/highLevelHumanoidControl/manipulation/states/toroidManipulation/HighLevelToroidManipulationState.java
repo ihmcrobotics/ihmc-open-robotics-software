@@ -27,15 +27,15 @@ public class HighLevelToroidManipulationState implements Task
 
    public HighLevelToroidManipulationState(double controlDT, DoubleYoVariable yoTime, FullRobotModel fullRobotModel, TwistCalculator twistCalculator,
            SideDependentList<ReferenceFrame> handPositionControlFrames, SideDependentList<Integer> jacobianIds,
-           TorusPoseProvider torusPoseProvider, MomentumBasedController momentumBasedController, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry,
+           TorusPoseProvider torusPoseProvider, MomentumBasedController momentumBasedController, YoGraphicsListRegistry yoGraphicsListRegistry,
            YoVariableRegistry parentRegistry)
    {
       RigidBody toroidBase = fullRobotModel.getElevator();
       double gravityZ = momentumBasedController.getGravityZ();
       this.torusPoseProvider = torusPoseProvider;
-      this.manipulableToroid = new ManipulableToroid("twoHandGrip", toroidBase, dynamicGraphicObjectsListRegistry, registry);
+      this.manipulableToroid = new ManipulableToroid("twoHandGrip", toroidBase, yoGraphicsListRegistry, registry);
       this.toroidManipulationStateMachine = new ToroidManipulationStateMachine(yoTime, fullRobotModel, twistCalculator, manipulableToroid,
-              handPositionControlFrames, jacobianIds, gravityZ, momentumBasedController, controlDT, registry, dynamicGraphicObjectsListRegistry);
+              handPositionControlFrames, jacobianIds, gravityZ, momentumBasedController, controlDT, registry, yoGraphicsListRegistry);
 
       toroidManipulationStateMachine.setIndividualHandPositionControlGains(100.0, 20.0, 100.0, 20.0);
 

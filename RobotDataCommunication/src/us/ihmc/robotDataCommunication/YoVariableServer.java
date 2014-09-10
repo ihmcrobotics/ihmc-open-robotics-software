@@ -143,11 +143,11 @@ public class YoVariableServer implements RobotVisualizer
    {
       ArrayList<YoVariable> variables = new ArrayList<>();
       YoVariableRegistry registry = data.first();
-      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = data.second();
+      YoGraphicsListRegistry yoGraphicsListRegistry = data.second();
       int variableOffset = handshakeServer.addRegistry(registry, variables);
-      if(dynamicGraphicObjectsListRegistry != null)
+      if(yoGraphicsListRegistry != null)
       {
-         handshakeServer.addDynamicGraphicObjects(dynamicGraphicObjectsListRegistry);
+         handshakeServer.addDynamicGraphicObjects(yoGraphicsListRegistry);
       }
       RegistryBuffer.Builder builder = new RegistryBuffer.Builder(variableOffset, variables);
       ConcurrentRingBuffer<RegistryBuffer> buffer = new ConcurrentRingBuffer<>(builder, VARIABLE_BUFFER_CAPACITY);
@@ -178,20 +178,20 @@ public class YoVariableServer implements RobotVisualizer
       }
    }
    
-   public void addRegistry(YoVariableRegistry registry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+   public void addRegistry(YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      Pair<YoVariableRegistry, YoGraphicsListRegistry> data = new Pair<YoVariableRegistry, YoGraphicsListRegistry>(registry, dynamicGraphicObjectsListRegistry);
+      Pair<YoVariableRegistry, YoGraphicsListRegistry> data = new Pair<YoVariableRegistry, YoGraphicsListRegistry>(registry, yoGraphicsListRegistry);
       variableData.add(data);
    }
 
    @Override
-   public void setMainRegistry(YoVariableRegistry registry, FullRobotModel fullRobotModel, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+   public void setMainRegistry(YoVariableRegistry registry, FullRobotModel fullRobotModel, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       if(fullRobotModel != null)
       {
          mainBodies.add(fullRobotModel.getElevator());
       }
       mainRegistry = registry;
-      mainDynamicGraphicObjectsListRegistry = dynamicGraphicObjectsListRegistry;
+      mainDynamicGraphicObjectsListRegistry = yoGraphicsListRegistry;
    }
 }

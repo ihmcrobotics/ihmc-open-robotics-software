@@ -32,7 +32,7 @@ public class ContactPointVisualizer
    private final int maxNumberOfDynamicGraphicPositions;
    private final ArrayList<? extends PlaneContactState> contactStates;
 
-   public ContactPointVisualizer(ArrayList<? extends PlaneContactState> contactStates, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry,
+   public ContactPointVisualizer(ArrayList<? extends PlaneContactState> contactStates, YoGraphicsListRegistry yoGraphicsListRegistry,
          YoVariableRegistry parentRegistry)
    {
       this.contactStates = contactStates;
@@ -48,13 +48,13 @@ public class ContactPointVisualizer
          contactPointsWorld.add(contactPointWorld);
          YoGraphicPosition dynamicGraphicPosition = new YoGraphicPosition("contactViz" + i, contactPointWorld, 0.01, YoAppearance.Crimson());
          dynamicGraphicPositions.add(dynamicGraphicPosition);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("contactPoints", dynamicGraphicPosition);
+         yoGraphicsListRegistry.registerDynamicGraphicObject("contactPoints", dynamicGraphicPosition);
 
          YoFrameVector normalVector = new YoFrameVector("contactNormal" + i, worldFrame, registry);
          normalVectors.add(normalVector);
          YoGraphicVector dynamicGraphicVector = new YoGraphicVector("contactNormalViz" + i, contactPointWorld, normalVector, YoAppearance.Crimson());
          dynamicGraphicVectors.add(dynamicGraphicVector);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("contactPoints", dynamicGraphicVector);
+         yoGraphicsListRegistry.registerDynamicGraphicObject("contactPoints", dynamicGraphicVector);
       }
       parentRegistry.addChild(registry);
    }

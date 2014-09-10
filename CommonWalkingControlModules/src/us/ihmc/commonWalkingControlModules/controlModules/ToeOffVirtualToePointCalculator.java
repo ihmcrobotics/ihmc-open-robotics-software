@@ -53,7 +53,7 @@ public class ToeOffVirtualToePointCalculator implements VirtualToePointCalculato
    private final double footLength;
 
    public ToeOffVirtualToePointCalculator(CommonWalkingReferenceFrames referenceFrames, CouplingRegistry couplingRegistry, double footForward, double footBack,
-         double footWidth, YoVariableRegistry parentRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+         double footWidth, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       SimpleDesiredCapturePointCalculator.USEUPCOMINGSWINGTOEASSWEETSPOT = true; // TODO: AAAAAAAAAAAAAAAAAAAARRRRRRRRRRRRRGHHHHHHHHHHHHHHHH
 
@@ -85,9 +85,9 @@ public class ToeOffVirtualToePointCalculator implements VirtualToePointCalculato
 
       }
 
-      if (dynamicGraphicObjectsListRegistry != null)
+      if (yoGraphicsListRegistry != null)
       {
-         YoGraphicsList dynamicGraphicObjectsList = new YoGraphicsList("VTP Calculator");
+         YoGraphicsList yoGraphicsList = new YoGraphicsList("VTP Calculator");
          ArtifactList artifactList = new ArtifactList("VTP Calculator");
 
          DynamicGraphicYoPolygonArtifact vtpConvexPolygonArtifact = new DynamicGraphicYoPolygonArtifact("vtpConvexPolygon", vtpConvexPolygon, Color.cyan, false);
@@ -98,15 +98,15 @@ public class ToeOffVirtualToePointCalculator implements VirtualToePointCalculato
             final YoFramePoint virtualToePointWorld = virtualToePointsWorld.get(robotSide);
             YoGraphicPosition virtualToePointViz = new YoGraphicPosition(robotSide.getCamelCaseNameForStartOfExpression() + "VTP",
                   virtualToePointWorld, 0.006, YoAppearance.Orange(), YoGraphicPosition.GraphicType.SOLID_BALL);
-            dynamicGraphicObjectsList.add(virtualToePointViz);
+            yoGraphicsList.add(virtualToePointViz);
             artifactList.add(virtualToePointViz.createArtifact());
          }
 
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
-         dynamicGraphicObjectsListRegistry.registerArtifactList(artifactList);
+         yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicsList);
+         yoGraphicsListRegistry.registerArtifactList(artifactList);
 
       }
-      geometricVirtualToePointCalculator = new GeometricVirtualToePointCalculator(referenceFrames, parentRegistry, dynamicGraphicObjectsListRegistry);
+      geometricVirtualToePointCalculator = new GeometricVirtualToePointCalculator(referenceFrames, parentRegistry, yoGraphicsListRegistry);
       footLength = (footBack + footForward) * 0.7;
 
       minICPToEdgeY.set(0.05);

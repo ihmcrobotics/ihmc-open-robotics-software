@@ -32,7 +32,7 @@ public class VisualizePoseWorkspace
    private final YoVariableRegistry registry = new YoVariableRegistry("PlaybackPoseSCSBridge");
    private final double controlDT;
    
-   private YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
+   private YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    
    public VisualizePoseWorkspace(DRCRobotModel robotModel) throws IOException
    {
@@ -45,10 +45,10 @@ public class VisualizePoseWorkspace
 
       SimulationConstructionSet scs = new SimulationConstructionSet(sdfRobot);
       scs.addYoVariableRegistry(registry);
-      scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
+      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
       fullRobotModelForSlider = robotModel.createFullRobotModel();
-      DRCRobotMidiSliderBoardPositionManipulation sliderBoard = new DRCRobotMidiSliderBoardPositionManipulation(scs, sdfRobot, fullRobotModelForSlider, dynamicGraphicObjectsListRegistry);
+      DRCRobotMidiSliderBoardPositionManipulation sliderBoard = new DRCRobotMidiSliderBoardPositionManipulation(scs, sdfRobot, fullRobotModelForSlider, yoGraphicsListRegistry);
 
       posePlaybackRobotPoseSequence = new PlaybackPoseSequence(fullRobotModelForSlider);
       

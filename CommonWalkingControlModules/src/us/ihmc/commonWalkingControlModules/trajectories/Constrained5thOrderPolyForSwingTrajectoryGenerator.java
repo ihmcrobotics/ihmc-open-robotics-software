@@ -48,7 +48,7 @@ public class Constrained5thOrderPolyForSwingTrajectoryGenerator
    
    public Constrained5thOrderPolyForSwingTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, double initialTime,
          DoubleProvider stepTimeProvider,PositionProvider initialPositionProvider, PositionProvider finalDesiredPositionProvider, 
-         VectorProvider finalDesiredVelocityProvider, YoVariableRegistry parentRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry,
+         VectorProvider finalDesiredVelocityProvider, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry,
          WalkingControllerParameters walkingControllerParameters)
    {
       this.registry = new YoVariableRegistry(getClass().getSimpleName());

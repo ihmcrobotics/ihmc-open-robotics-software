@@ -32,11 +32,11 @@ public class DRCSimulationVisualizer implements RobotController
    private final Vector3d copForceTemp = new Vector3d();
    private final Vector3d copMomentTemp = new Vector3d();
    
-   public DRCSimulationVisualizer(Robot robot, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+   public DRCSimulationVisualizer(Robot robot, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.robot = robot;
       
-      YoGraphicsList dynamicGraphicObjectsList = new YoGraphicsList("Simulation Viz");
+      YoGraphicsList yoGraphicsList = new YoGraphicsList("Simulation Viz");
 
       ArrayList<GroundContactPoint> groundContactPoints = robot.getAllGroundContactPoints();
       AppearanceDefinition appearance = YoAppearance.Red(); // BlackMetalMaterial();
@@ -45,11 +45,11 @@ public class DRCSimulationVisualizer implements RobotController
       {
          double scaleFactor = 0.0015;
          YoGraphicVector dynamicGraphicVector = new YoGraphicVector(groundContactPoint.getName(), groundContactPoint.getYoPosition(), groundContactPoint.getYoForce(), scaleFactor, appearance);
-         dynamicGraphicObjectsList.add(dynamicGraphicVector);
+         yoGraphicsList.add(dynamicGraphicVector);
       }
       
-      if (dynamicGraphicObjectsListRegistry != null)
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
+      if (yoGraphicsListRegistry != null)
+         yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicsList);
       
       
       robot.setController(this, 10);

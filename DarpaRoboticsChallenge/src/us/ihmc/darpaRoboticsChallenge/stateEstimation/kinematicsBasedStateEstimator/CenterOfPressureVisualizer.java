@@ -30,7 +30,7 @@ public class CenterOfPressureVisualizer
    private final SideDependentList<WrenchBasedFootSwitch> footSwitches;
 
    public CenterOfPressureVisualizer(SideDependentList<WrenchBasedFootSwitch> footSwitches,
-         YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+         YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.footSwitches = footSwitches;
 
@@ -42,13 +42,13 @@ public class CenterOfPressureVisualizer
 
          YoGraphicPosition copDynamicGraphic = new YoGraphicPosition("Meas " + side + "CoP", rawCoPPositionInWorld, 0.008, YoAppearance.DarkRed(), GraphicType.DIAMOND);
          YoArtifactPosition copArtifact = copDynamicGraphic.createArtifact();
-         dynamicGraphicObjectsListRegistry.registerArtifact("StateEstimator", copArtifact);
+         yoGraphicsListRegistry.registerArtifact("StateEstimator", copArtifact);
       }
 
       overallRawCoPPositionInWorld = new YoFramePoint("overallRawCoPPositionInWorld", worldFrame, registry);
       YoGraphicPosition overallRawCoPDynamicGraphic = new YoGraphicPosition("Meas CoP", overallRawCoPPositionInWorld, 0.015, YoAppearance.DarkRed(), GraphicType.DIAMOND);
       YoArtifactPosition overallRawCoPArtifact = overallRawCoPDynamicGraphic.createArtifact();
-      dynamicGraphicObjectsListRegistry.registerArtifact("StateEstimator", overallRawCoPArtifact);
+      yoGraphicsListRegistry.registerArtifact("StateEstimator", overallRawCoPArtifact);
 
       parentRegistry.addChild(registry);
    }

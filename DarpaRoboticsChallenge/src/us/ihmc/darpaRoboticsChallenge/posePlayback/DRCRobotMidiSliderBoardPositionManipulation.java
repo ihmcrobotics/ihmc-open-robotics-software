@@ -153,12 +153,12 @@ public class DRCRobotMidiSliderBoardPositionManipulation
    
    private final BooleanYoVariable controlFingers = new BooleanYoVariable("controlFingers", registry);
 
-   public DRCRobotMidiSliderBoardPositionManipulation(SimulationConstructionSet scs, SDFRobot sdfRobot, FullRobotModel fullRobotModel, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+   public DRCRobotMidiSliderBoardPositionManipulation(SimulationConstructionSet scs, SDFRobot sdfRobot, FullRobotModel fullRobotModel, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(false, scs, sdfRobot, fullRobotModel, dynamicGraphicObjectsListRegistry);
+      this(false, scs, sdfRobot, fullRobotModel, yoGraphicsListRegistry);
    }
    
-   public DRCRobotMidiSliderBoardPositionManipulation(boolean controlFingers, SimulationConstructionSet scs, SDFRobot sdfRobot, FullRobotModel fullRobotModel, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+   public DRCRobotMidiSliderBoardPositionManipulation(boolean controlFingers, SimulationConstructionSet scs, SDFRobot sdfRobot, FullRobotModel fullRobotModel, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.scs = scs;
       this.fullRobotModel = fullRobotModel;
@@ -260,16 +260,16 @@ public class DRCRobotMidiSliderBoardPositionManipulation
          YoFramePose handIK = new YoFramePose(sidePrefix + "HandIK", "", ReferenceFrames.getWorldFrame(), registry);
          handIKs.put(robotSide, handIK);
 
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, new YoGraphicCoordinateSystem(sidePrefix + "FootViz", footIK, scale));
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, new YoGraphicCoordinateSystem(sidePrefix + "HandViz", handIK, scale));
+         yoGraphicsListRegistry.registerDynamicGraphicObject(listName, new YoGraphicCoordinateSystem(sidePrefix + "FootViz", footIK, scale));
+         yoGraphicsListRegistry.registerDynamicGraphicObject(listName, new YoGraphicCoordinateSystem(sidePrefix + "HandViz", handIK, scale));
       }
       
       setupSymmetricModeListeners();
 
-      setupSupportPolygonDisplayAndControl(dynamicGraphicObjectsListRegistry);
+      setupSupportPolygonDisplayAndControl(yoGraphicsListRegistry);
    }
 
-   private void setupSupportPolygonDisplayAndControl(YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+   private void setupSupportPolygonDisplayAndControl(YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       for (int i = 0; i < baseControlPoints.length; i++)
       {
@@ -294,8 +294,8 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       isSupportBaseControlTargetRequested.addVariableChangedListener(supportBaseControlTargetRequestedListener);
       isSupportBaseTargetToggleRequested.addVariableChangedListener(supportBaseControlTargetRequestedListener);
 
-      addSupportBaseControlGraphics(dynamicGraphicObjectsListRegistry);
-      addSupportBaseControlTargetGraphics(dynamicGraphicObjectsListRegistry);
+      addSupportBaseControlGraphics(yoGraphicsListRegistry);
+      addSupportBaseControlTargetGraphics(yoGraphicsListRegistry);
    }
 
    private void init()
@@ -1008,39 +1008,39 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       return registry;
    }
    
-   private void addSupportBaseControlGraphics(YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+   private void addSupportBaseControlGraphics(YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      addSupportBaseGraphics(dynamicGraphicObjectsListRegistry,baseControlPoints,baseControlPointsList,baseControlLinesList,"baseControl",YoAppearance.Green());
+      addSupportBaseGraphics(yoGraphicsListRegistry,baseControlPoints,baseControlPointsList,baseControlLinesList,"baseControl",YoAppearance.Green());
 
    }
 
-   private void addSupportBaseControlTargetGraphics(YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+   private void addSupportBaseControlTargetGraphics(YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      addSupportBaseGraphics(dynamicGraphicObjectsListRegistry,baseControlTargetPoints,baseControlTargetPointsList,baseControlTargetLinesList,"baseControlTarget",YoAppearance.Red());
+      addSupportBaseGraphics(yoGraphicsListRegistry,baseControlTargetPoints,baseControlTargetPointsList,baseControlTargetLinesList,"baseControlTarget",YoAppearance.Red());
    }
 
-   private void addSupportBaseGraphics(YoGraphicsListRegistry dynamicGraphicObjectsListRegistry,YoFramePoint[] basePoints, ArrayList<YoGraphic> basePointsList, ArrayList<YoGraphic> linesList, String namePrefix,AppearanceDefinition appearance)
+   private void addSupportBaseGraphics(YoGraphicsListRegistry yoGraphicsListRegistry,YoFramePoint[] basePoints, ArrayList<YoGraphic> basePointsList, ArrayList<YoGraphic> linesList, String namePrefix,AppearanceDefinition appearance)
    {
       AppearanceDefinition[] colors = { YoAppearance.Red(), YoAppearance.Green(), YoAppearance.Blue(), YoAppearance.Yellow() };
-      YoGraphicsList dynamicGraphicObjectsList = new YoGraphicsList(namePrefix + "Points");
+      YoGraphicsList yoGraphicsList = new YoGraphicsList(namePrefix + "Points");
       for (int i = 0; i < basePoints.length; i++)
       {
          YoGraphicPosition baseControlPointViz = new YoGraphicPosition(namePrefix + "Point" + i, basePoints[i], 0.01, colors[i]);
-         dynamicGraphicObjectsList.add(baseControlPointViz);
+         yoGraphicsList.add(baseControlPointViz);
          basePointsList.add(baseControlPointViz);
          
          for (int j = i + 1; j < basePoints.length; j++)
          {
             DynamicGraphicLineSegment dynamicGraphicLineSegment = new DynamicGraphicLineSegment(namePrefix + "SupportLine", basePoints[i], basePoints[j],
                   1.0, appearance, false);
-            dynamicGraphicObjectsList.add(dynamicGraphicLineSegment);
+            yoGraphicsList.add(dynamicGraphicLineSegment);
             linesList.add(dynamicGraphicLineSegment);
          }
       }
 
-      if (dynamicGraphicObjectsListRegistry != null)
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
-      dynamicGraphicObjectsList.hideYoGraphics();
+      if (yoGraphicsListRegistry != null)
+         yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicsList);
+      yoGraphicsList.hideYoGraphics();
    }
 
    public void addCaptureSnapshotListener(VariableChangedListener variableChangedListener)

@@ -126,7 +126,7 @@ public class PelvisLinearStateUpdater
    
    public PelvisLinearStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, List<? extends IMUSensorReadOnly> imuProcessedOutputs,
          SideDependentList<WrenchBasedFootSwitch> footSwitches, SideDependentList<ContactablePlaneBody> bipedFeet, double gravitationalAcceleration,
-         DoubleYoVariable yoTime, StateEstimatorParameters stateEstimatorParameters, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry,
+         DoubleYoVariable yoTime, StateEstimatorParameters stateEstimatorParameters, YoGraphicsListRegistry yoGraphicsListRegistry,
          YoVariableRegistry parentRegistry)
    {      
       this.estimatorDT = stateEstimatorParameters.getEstimatorDT();
@@ -171,7 +171,7 @@ public class PelvisLinearStateUpdater
       stateMachine = new StateMachine<EstimationState>("LinearEstimationStateMachine", "switchTime", EstimationState.class, yoTime, registry);
       setupStateMachine();
       
-      kinematicsBasedLinearStateCalculator = new PelvisKinematicsBasedLinearStateCalculator(inverseDynamicsStructure, bipedFeet, estimatorDT, dynamicGraphicObjectsListRegistry, registry);
+      kinematicsBasedLinearStateCalculator = new PelvisKinematicsBasedLinearStateCalculator(inverseDynamicsStructure, bipedFeet, estimatorDT, yoGraphicsListRegistry, registry);
       kinematicsBasedLinearStateCalculator.setAlphaPelvisPosition(computeAlphaGivenBreakFrequencyProperly(stateEstimatorParameters.getKinematicsPelvisPositionFilterFreqInHertz(), estimatorDT));
       double alphaFilter = computeAlphaGivenBreakFrequencyProperly(stateEstimatorParameters.getKinematicsPelvisLinearVelocityFilterFreqInHertz(), estimatorDT);
       kinematicsBasedLinearStateCalculator.setPelvisLinearVelocityAlphaNewTwist(stateEstimatorParameters.getPelvisLinearVelocityAlphaNewTwist());
@@ -203,10 +203,10 @@ public class PelvisLinearStateUpdater
 
       if (VISUALIZE)
       {
-         if (dynamicGraphicObjectsListRegistry != null)
+         if (yoGraphicsListRegistry != null)
          {
             YoArtifactPosition comArtifact = new YoGraphicPosition("Meas CoM", yoCenterOfMassPosition, 0.006, YoAppearance.Black(), GraphicType.CROSS).createArtifact();
-            dynamicGraphicObjectsListRegistry.registerArtifact("StateEstimator", comArtifact);
+            yoGraphicsListRegistry.registerArtifact("StateEstimator", comArtifact);
          }
       }
       parentRegistry.addChild(registry);

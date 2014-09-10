@@ -85,7 +85,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
 
    public LookAheadCoMHeightTrajectoryGenerator(DesiredComHeightProvider desiredComHeightProvider, double minimumHeightAboveGround,
          double nominalHeightAboveGround, double maximumHeightAboveGround, double doubleSupportPercentageIn, final DoubleYoVariable yoTime,
-         YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+         YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.desiredComHeightProvider = desiredComHeightProvider;
 
@@ -116,7 +116,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
 
       parentRegistry.addChild(registry);
 
-      if (dynamicGraphicObjectsListRegistry == null)
+      if (yoGraphicsListRegistry == null)
       {
          VISUALIZE = false;
       }
@@ -127,8 +127,8 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
          YoGraphicPosition position0 = new YoGraphicPosition("contactFrame0", contactFrameZeroPosition, pointSize, YoAppearance.Purple());
          YoGraphicPosition position1 = new YoGraphicPosition("contactFrame1", contactFrameOnePosition, pointSize, YoAppearance.Gold());
 
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", position0);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", position1);
+         yoGraphicsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", position0);
+         yoGraphicsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", position1);
 
          pointS0Viz = new YoGraphicPosition("pointS0", "", registry, pointSize, YoAppearance.CadetBlue());
          pointSFViz = new YoGraphicPosition("pointSF", "", registry, pointSize, YoAppearance.Chartreuse());
@@ -148,29 +148,29 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
          pointDFMaxViz = new YoGraphicPosition("pointDFMax", "", registry, 0.9 * pointSize, YoAppearance.Azure());
          pointSNextMaxViz = new YoGraphicPosition("pointSNextMax", "", registry, 0.9 * pointSize, YoAppearance.Pink());
 
-         bagOfBalls = new BagOfBalls(registry, dynamicGraphicObjectsListRegistry);
+         bagOfBalls = new BagOfBalls(registry, yoGraphicsListRegistry);
 
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointS0Viz);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointSFViz);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointD0Viz);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointDFViz);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointSNextViz);
+         yoGraphicsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointS0Viz);
+         yoGraphicsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointSFViz);
+         yoGraphicsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointD0Viz);
+         yoGraphicsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointDFViz);
+         yoGraphicsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointSNextViz);
 
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointS0MinViz);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointSFMinViz);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointD0MinViz);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointDFMinViz);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointSNextMinViz);
+         yoGraphicsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointS0MinViz);
+         yoGraphicsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointSFMinViz);
+         yoGraphicsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointD0MinViz);
+         yoGraphicsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointDFMinViz);
+         yoGraphicsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointSNextMinViz);
 
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointS0MaxViz);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointSFMaxViz);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointD0MaxViz);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointDFMaxViz);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointSNextMaxViz);
+         yoGraphicsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointS0MaxViz);
+         yoGraphicsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointSFMaxViz);
+         yoGraphicsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointD0MaxViz);
+         yoGraphicsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointDFMaxViz);
+         yoGraphicsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointSNextMaxViz);
 
          YoGraphicPosition desiredCoMPositionViz = new YoGraphicPosition("desiredCoMPosition", desiredCoMPosition, 1.1 * pointSize,
                YoAppearance.Gold());
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", desiredCoMPositionViz);
+         yoGraphicsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", desiredCoMPositionViz);
 
       }
       else

@@ -35,7 +35,7 @@ public class UserDesiredHandstepProvider implements HandstepProvider
    private final HandstepHelper handstepHelper;
    
    public UserDesiredHandstepProvider(FullRobotModel fullRobotModel, YoVariableRegistry parentRegistry,
-                                      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+                                      YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.handstepHelper = new HandstepHelper(fullRobotModel); 
       
@@ -56,7 +56,7 @@ public class UserDesiredHandstepProvider implements HandstepProvider
          }
       };
 
-      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("UserDesiredHandstep", userDesiredHandstepCoordinateSystem);
+      yoGraphicsListRegistry.registerDynamicGraphicObject("UserDesiredHandstep", userDesiredHandstepCoordinateSystem);
 
       userHandstepNormal.attachVariableChangedListener(listener);
       userHandstepRotationAboutNormal.addVariableChangedListener(listener);

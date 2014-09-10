@@ -104,12 +104,12 @@ public class CommonTerrain
 
    }
 
-   public void registerSteppingStonesArtifact(YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+   public void registerSteppingStonesArtifact(YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       System.out.println("Registering Stepping Stones Artifact");
 
       SteppingStonesArtifact steppingStonesArtifact = new SteppingStonesArtifact("SteppingStones", steppingStones, Color.magenta, Color.GREEN);
-      dynamicGraphicObjectsListRegistry.registerArtifact("Stepping Stones", steppingStonesArtifact);
+      yoGraphicsListRegistry.registerArtifact("Stepping Stones", steppingStonesArtifact);
    }
 
    private SteppingStones setUpSteppingStones(ConvexPolygon2d footPolygon, SteppingStonePattern steppingStonePattern, boolean useSteppingStonesGroundModel)

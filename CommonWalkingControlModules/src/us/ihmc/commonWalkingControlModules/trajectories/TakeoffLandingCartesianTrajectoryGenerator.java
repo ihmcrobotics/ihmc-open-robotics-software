@@ -466,7 +466,7 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
    public static void main(String[] args)
    {
       YoVariableRegistry yoVariableRegistry = new YoVariableRegistry("ParentRegistry");
-      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
+      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
       double maxVel = 1.0;
       double maxAccel = 10.0 * maxVel;
@@ -486,7 +486,7 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
 
       cartesianTrajectoryGenerator.initialize(initialPosition, initialVelocity, null, finalDesiredPosition, null);
 
-      new CartesianTrajectoryGeneratorTester(cartesianTrajectoryGenerator, yoVariableRegistry, dynamicGraphicObjectsListRegistry,
+      new CartesianTrajectoryGeneratorTester(cartesianTrajectoryGenerator, yoVariableRegistry, yoGraphicsListRegistry,
               "cartesianTrajectoryGeneratorTester");
    }
 

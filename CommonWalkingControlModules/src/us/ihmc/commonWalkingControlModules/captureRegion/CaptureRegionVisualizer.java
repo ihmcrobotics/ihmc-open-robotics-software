@@ -24,7 +24,7 @@ public class CaptureRegionVisualizer
    private OneStepCaptureRegionCalculator captureRegionCalculator;
    
    public CaptureRegionVisualizer(OneStepCaptureRegionCalculator captureRegionCalculator,
-                                  YoGraphicsListRegistry dynamicGraphicObjectsListRegistry,
+                                  YoGraphicsListRegistry yoGraphicsListRegistry,
                                   YoVariableRegistry parentRegistry)
    {
       this.captureRegionCalculator = captureRegionCalculator;
@@ -34,7 +34,7 @@ public class CaptureRegionVisualizer
       
       DynamicGraphicYoPolygonArtifact dynamicGraphicYoPolygonArtifact = 
             new DynamicGraphicYoPolygonArtifact(caption, yoCaptureRegionPolygon, color, false);
-      dynamicGraphicObjectsListRegistry.registerArtifact(caption, dynamicGraphicYoPolygonArtifact);
+      yoGraphicsListRegistry.registerArtifact(caption, dynamicGraphicYoPolygonArtifact);
       
       parentRegistry.addChild(registry);
    }

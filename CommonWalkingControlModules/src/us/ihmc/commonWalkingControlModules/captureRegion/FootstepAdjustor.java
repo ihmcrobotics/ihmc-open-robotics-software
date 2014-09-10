@@ -35,12 +35,12 @@ public class FootstepAdjustor
    private FootstepAdjusterVisualizer footstepAdjusterVisualizer = null;
    private SteppingStones steppingStones = null;
 
-   public FootstepAdjustor(YoVariableRegistry parentRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+   public FootstepAdjustor(YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       parentRegistry.addChild(registry);
-      if (dynamicGraphicObjectsListRegistry != null && VISUALIZE)
+      if (yoGraphicsListRegistry != null && VISUALIZE)
       {
-         footstepAdjusterVisualizer = new FootstepAdjusterVisualizer(this, dynamicGraphicObjectsListRegistry, registry);
+         footstepAdjusterVisualizer = new FootstepAdjusterVisualizer(this, yoGraphicsListRegistry, registry);
       }
    }
 

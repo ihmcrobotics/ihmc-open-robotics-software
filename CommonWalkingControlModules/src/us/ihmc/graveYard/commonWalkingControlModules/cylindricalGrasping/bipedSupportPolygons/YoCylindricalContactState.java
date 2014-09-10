@@ -24,11 +24,11 @@ public class YoCylindricalContactState implements CylindricalContactState, Modif
    private final DoubleYoVariable gripWeaknessFactor;
    private final YoGraphicReferenceFrame cylinderRefererenceFrameGraphic;
 
-   public YoCylindricalContactState(String namePrefix, ReferenceFrame frameAfterJoint, ReferenceFrame cylinderFrame, YoVariableRegistry parentRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+   public YoCylindricalContactState(String namePrefix, ReferenceFrame frameAfterJoint, ReferenceFrame cylinderFrame, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
 
-      if (dynamicGraphicObjectsListRegistry == null)
+      if (yoGraphicsListRegistry == null)
       {
          VISUALIZE = false;
       }
@@ -49,7 +49,7 @@ public class YoCylindricalContactState implements CylindricalContactState, Modif
       if (VISUALIZE)
       {
          this.cylinderRefererenceFrameGraphic = new YoGraphicReferenceFrame(cylinderFrame, registry, 0.2);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("YoCylindricalContactState", cylinderRefererenceFrameGraphic);
+         yoGraphicsListRegistry.registerDynamicGraphicObject("YoCylindricalContactState", cylinderRefererenceFrameGraphic);
       }
       else
       {

@@ -93,20 +93,20 @@ public class ICPAndMomentumBasedController
       this.updatables.add(new BipedSupportPolygonsUpdater());
       this.updatables.add(new CapturePointUpdater());
 
-      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
+      YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
 
-      if (dynamicGraphicObjectsListRegistry != null)
+      if (yoGraphicsListRegistry != null)
       {
          ArrayList<PlaneContactState> feetContactStates = new ArrayList<PlaneContactState>();
          momentumBasedController.getFeetContactStates(feetContactStates);
 //         Collection<PlaneContactState> planeContactStates = momentumBasedController.getPlaneContactStates();
-         FootPolygonVisualizer footPolygonVisualizer = new FootPolygonVisualizer(feetContactStates, dynamicGraphicObjectsListRegistry, registry);
+         FootPolygonVisualizer footPolygonVisualizer = new FootPolygonVisualizer(feetContactStates, yoGraphicsListRegistry, registry);
          momentumBasedController.addUpdatable(footPolygonVisualizer);
          
          YoGraphicPosition capturePointViz = new YoGraphicPosition("Capture Point", yoCapturePoint, 0.01, YoAppearance.Blue(),
                                                      GraphicType.ROTATED_CROSS);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("Capture Point", capturePointViz);
-         dynamicGraphicObjectsListRegistry.registerArtifact("Capture Point", capturePointViz.createArtifact());
+         yoGraphicsListRegistry.registerDynamicGraphicObject("Capture Point", capturePointViz);
+         yoGraphicsListRegistry.registerArtifact("Capture Point", capturePointViz.createArtifact());
       }
       
       capturePointOffsetY.set(0.0);

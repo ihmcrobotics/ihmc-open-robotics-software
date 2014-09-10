@@ -94,7 +94,7 @@ public class MassMatrixEstimatingToolRigidBody
    
    
    public MassMatrixEstimatingToolRigidBody(String name, final InverseDynamicsJoint wristJoint, final FullRobotModel fullRobotModel, double gravity, 
-         double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+         double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.registry = new YoVariableRegistry(name);
       this.gravity = gravity;
@@ -180,20 +180,20 @@ public class MassMatrixEstimatingToolRigidBody
 //         yoLinePoints[i] = linePair;
 //      }
       
-      if(dynamicGraphicObjectsListRegistry != null)
+      if(yoGraphicsListRegistry != null)
       {
          
-         YoGraphicsList dynamicGraphicObjectsList = new YoGraphicsList(name);
+         YoGraphicsList yoGraphicsList = new YoGraphicsList(name);
          YoGraphic comViz = new YoGraphicPosition(name + "CenterOfMassViz", objectCenterOfMass, 0.05, YoAppearance.Red());
-         dynamicGraphicObjectsList.add(comViz);
+         yoGraphicsList.add(comViz);
          
 //         for(Pair<YoFramePoint, YoFramePoint> linePair : yoLinePoints)
 //         {
 //            DynamicGraphicObject comLineViz = new DynamicGraphicLineSegment(name + "CoMApplicationLineViz", linePair.first(), linePair.second(), 1.0, YoAppearance.Red(), false, 0.0002);
-//            dynamicGraphicObjectsList.add(comLineViz);
+//            yoGraphicsList.add(comLineViz);
 //         }                  
          
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
+         yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicsList);
       }
       parentRegistry.addChild(registry);
    }

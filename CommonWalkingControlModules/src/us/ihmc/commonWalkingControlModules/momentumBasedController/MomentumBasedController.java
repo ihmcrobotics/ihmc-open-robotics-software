@@ -144,7 +144,7 @@ public class MomentumBasedController
    private final EnumYoVariable<FrictionModel> frictionModelForAllJoints;
    private final BooleanYoVariable useBeforeTransmissionVelocityForFriction;
 
-   private final YoGraphicsListRegistry dynamicGraphicObjectsListRegistry;
+   private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
    private final InverseDynamicsJoint[] controlledJoints;
 
@@ -153,9 +153,9 @@ public class MomentumBasedController
          SideDependentList<ContactablePlaneBody> feet, SideDependentList<ContactablePlaneBody> handsWithFingersBentBack,
          SideDependentList<ContactablePlaneBody> thighs, ContactablePlaneBody pelvis, ContactablePlaneBody pelvisBack, double controlDT,
          OldMomentumControlModule oldMomentumControlModule, ArrayList<Updatable> updatables, WalkingControllerParameters walkingControllerParameters,
-         YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, InverseDynamicsJoint... jointsToIgnore)
+         YoGraphicsListRegistry yoGraphicsListRegistry, InverseDynamicsJoint... jointsToIgnore)
    {
-      this.dynamicGraphicObjectsListRegistry = dynamicGraphicObjectsListRegistry;
+      this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
 
@@ -261,14 +261,14 @@ public class MomentumBasedController
          }
       }
 
-      this.planeContactWrenchProcessor = new PlaneContactWrenchProcessor(this.contactablePlaneBodyList, dynamicGraphicObjectsListRegistry, registry);
+      this.planeContactWrenchProcessor = new PlaneContactWrenchProcessor(this.contactablePlaneBodyList, yoGraphicsListRegistry, registry);
 
-      if (dynamicGraphicObjectsListRegistry != null)
+      if (yoGraphicsListRegistry != null)
       {
-         contactPointVisualizer = new ContactPointVisualizer(new ArrayList<YoPlaneContactState>(yoPlaneContactStateList), dynamicGraphicObjectsListRegistry,
+         contactPointVisualizer = new ContactPointVisualizer(new ArrayList<YoPlaneContactState>(yoPlaneContactStateList), yoGraphicsListRegistry,
                registry);
          List<RigidBody> rigidBodies = Arrays.asList(ScrewTools.computeSupportAndSubtreeSuccessors(fullRobotModel.getRootJoint().getSuccessor()));
-         wrenchVisualizer = new WrenchVisualizer("DesiredExternalWrench", rigidBodies, dynamicGraphicObjectsListRegistry, registry);
+         wrenchVisualizer = new WrenchVisualizer("DesiredExternalWrench", rigidBodies, yoGraphicsListRegistry, registry);
       }
       else
       {
@@ -281,7 +281,7 @@ public class MomentumBasedController
       {
          optimizationMomentumControlModule = new OptimizationMomentumControlModule(fullRobotModel.getRootJoint(), referenceFrames.getCenterOfMassFrame(),
                controlDT, gravityZ, momentumOptimizationSettings, twistCalculator, robotJacobianHolder, yoPlaneContactStateList,
-               dynamicGraphicObjectsListRegistry, registry);
+               yoGraphicsListRegistry, registry);
       }
 
       momentumControlModuleBridge = new MomentumControlModuleBridge(optimizationMomentumControlModule, oldMomentumControlModule, centerOfMassFrame, registry);
@@ -935,7 +935,7 @@ public class MomentumBasedController
 
    public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()
    {
-      return dynamicGraphicObjectsListRegistry;
+      return yoGraphicsListRegistry;
    }
 
    public InverseDynamicsJoint[] getControlledJoints()

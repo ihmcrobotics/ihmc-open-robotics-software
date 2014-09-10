@@ -97,7 +97,7 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
    ReferenceFrame bodyZUp, midFeetZUp, world;
 
    public StandardCapturePointCenterOfPressureControlModule(double controlDT, CommonWalkingReferenceFrames referenceFrames,
-         YoVariableRegistry yoVariableRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+         YoVariableRegistry yoVariableRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.controlDT = controlDT;
       this.yoboticsBipedReferenceFrames = referenceFrames;
@@ -120,15 +120,15 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
 
       centerOfPressureDesiredAnkleZUp = new SideDependentList<YoFramePoint>(centerOfPressureDesiredLeftAnkleZUp, centerOfPressureDesiredRightAnkleZUp);
 
-      if (dynamicGraphicObjectsListRegistry != null)
+      if (yoGraphicsListRegistry != null)
       {
-         YoGraphicsList dynamicGraphicObjectList = new YoGraphicsList("CapturePointController");
+         YoGraphicsList yoGraphicList = new YoGraphicsList("CapturePointController");
 
          centerOfPressureDesiredWorldGraphicPosition = new YoGraphicPosition("Desired Center of Pressure", centerOfPressureDesiredWorld, 0.012,
                YoAppearance.Gray(), YoGraphicPosition.GraphicType.CROSS);
 
-         dynamicGraphicObjectList.add(centerOfPressureDesiredWorldGraphicPosition);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectList);
+         yoGraphicList.add(centerOfPressureDesiredWorldGraphicPosition);
+         yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicList);
 
          ArtifactList artifactList = new ArtifactList("Capture Point CoP Control Module");
 
@@ -140,7 +140,7 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
          YoFrameLine2dArtifact dynamicGraphicYoFrameLine2dArtifact = new YoFrameLine2dArtifact("Parallel Line", parallelLineWorld, Color.GREEN);
          artifactList.add(dynamicGraphicYoFrameLine2dArtifact);
 
-         dynamicGraphicObjectsListRegistry.registerArtifactList(artifactList);
+         yoGraphicsListRegistry.registerArtifactList(artifactList);
       }
       else
       {

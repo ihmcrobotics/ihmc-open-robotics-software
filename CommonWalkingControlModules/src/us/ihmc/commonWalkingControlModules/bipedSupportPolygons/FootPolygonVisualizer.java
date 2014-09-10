@@ -33,12 +33,12 @@ public class FootPolygonVisualizer implements Updatable
       colors.add(defaultRightColor);
    }
 
-   public FootPolygonVisualizer(List<? extends PlaneContactState> contactStates, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry,
+   public FootPolygonVisualizer(List<? extends PlaneContactState> contactStates, YoGraphicsListRegistry yoGraphicsListRegistry,
          YoVariableRegistry parentRegistry)
    {
       this.contactStates = new ArrayList<PlaneContactState>(contactStates);
 
-      if (dynamicGraphicObjectsListRegistry != null)
+      if (yoGraphicsListRegistry != null)
       {
          int colorIndex = 0;
          for (int i = 0; i < contactStates.size(); i++)
@@ -54,7 +54,7 @@ public class FootPolygonVisualizer implements Updatable
             Color color = colors.get(colorIndex++);
 
             DynamicGraphicYoPolygonArtifact dynamicGraphicYoPolygonArtifact = new DynamicGraphicYoPolygonArtifact(contactStateName, yoFootPolygon, color, false);
-            dynamicGraphicObjectsListRegistry.registerArtifact(contactStateName, dynamicGraphicYoPolygonArtifact);
+            yoGraphicsListRegistry.registerArtifact(contactStateName, dynamicGraphicYoPolygonArtifact);
          }
       }
 

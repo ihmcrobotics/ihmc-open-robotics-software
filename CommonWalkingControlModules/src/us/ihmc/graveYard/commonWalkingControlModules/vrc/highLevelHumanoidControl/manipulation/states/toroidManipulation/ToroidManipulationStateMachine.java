@@ -95,7 +95,7 @@ public class ToroidManipulationStateMachine
    public ToroidManipulationStateMachine(DoubleYoVariable simulationTime, FullRobotModel fullRobotModel, TwistCalculator twistCalculator,
            final ManipulableToroid toroidUpdater, SideDependentList<ReferenceFrame> handPositionControlFrames,
            SideDependentList<Integer> jacobianIds, double gravityZ, MomentumBasedController momentumBasedController,
-           double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+           double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       stateMachine = new StateMachine<ToroidManipulationState>(name, name + "SwitchTime", ToroidManipulationState.class, simulationTime, registry);
       moveToToroid1ExtraRadius.set(0.2);
@@ -147,32 +147,32 @@ public class ToroidManipulationStateMachine
       HandControlState<ToroidManipulationState> moveToSteeringWheel1State = createIndividualHandControlState(1.0, ToroidManipulationState.MOVE_TO_TOROID_1,
                                                                                toroidUpdater.getStaticToroidReferenceFrame(), elevator,
                                                                                currentHandConfigurationProviders, moveToWheel1ConfigurationProviders,
-                                                                               dynamicGraphicObjectsListRegistry);
+                                                                               yoGraphicsListRegistry);
 
 
       HandControlState<ToroidManipulationState> moveToSteeringWheel2State = createIndividualHandControlState(1.0, ToroidManipulationState.MOVE_TO_TOROID_2,
                                                                                toroidUpdater.getStaticToroidReferenceFrame(), elevator,
                                                                                moveToWheel1ConfigurationProviders, moveToWheel2ConfigurationProviders,
-                                                                               dynamicGraphicObjectsListRegistry);
+                                                                               yoGraphicsListRegistry);
 
 
 
 
       HandControlState<ToroidManipulationState> grabSteeringWheelState = createIndividualHoldHandPositionState(ToroidManipulationState.GRAB_TOROID, elevator,
-                                                                            moveToWheel2ConfigurationProviders, dynamicGraphicObjectsListRegistry);
+                                                                            moveToWheel2ConfigurationProviders, yoGraphicsListRegistry);
 
 
       RotateToroidState<ToroidManipulationState> moveSteeringWheel = new RotateToroidState<ToroidManipulationState>(ToroidManipulationState.MOVE_TOROID,
                                                                         toroidUpdater, hands, gravityZ, registry);
 
       HandControlState<ToroidManipulationState> releaseSteeringWheelState = createIndividualHoldHandPositionState(ToroidManipulationState.RELEASE_TOROID,
-                                                                               elevator, moveToWheel2ConfigurationProviders, dynamicGraphicObjectsListRegistry);
+                                                                               elevator, moveToWheel2ConfigurationProviders, yoGraphicsListRegistry);
 
       HandControlState<ToroidManipulationState> moveAwayFromSteeringWheel1State = createIndividualHandControlState(1.0,
                                                                                      ToroidManipulationState.MOVE_AWAY_FROM_TOROID_1,
                                                                                      toroidUpdater.getStaticToroidReferenceFrame(), elevator,
                                                                                      moveToWheel2ConfigurationProviders, moveToWheel1ConfigurationProviders,
-                                                                                     dynamicGraphicObjectsListRegistry);
+                                                                                     yoGraphicsListRegistry);
 
 
 
@@ -300,7 +300,7 @@ public class ToroidManipulationStateMachine
    }
 
    private HandControlState<ToroidManipulationState> createIndividualHoldHandPositionState(ToroidManipulationState steeringState, RigidBody base,
-           SideDependentList<SE3ConfigurationProvider> configurationProviders, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+           SideDependentList<SE3ConfigurationProvider> configurationProviders, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       SideDependentList<OrientationTrajectoryGenerator> orientationTrajectoryGenerators = new SideDependentList<OrientationTrajectoryGenerator>();
       SideDependentList<PositionTrajectoryGenerator> positionTrajectoryGenerators = new SideDependentList<PositionTrajectoryGenerator>();
@@ -324,14 +324,14 @@ public class ToroidManipulationStateMachine
 
       final HandControlState<ToroidManipulationState> ret = new HandControlState<ToroidManipulationState>(steeringState, base, positionTrajectoryGenerators,
                                                                orientationTrajectoryGenerators, individualHandSpatialAccelerationControlModules,
-                                                               dynamicGraphicObjectsListRegistry, registry);
+                                                               yoGraphicsListRegistry, registry);
 
       return ret;
    }
 
    private HandControlState<ToroidManipulationState> createIndividualHandControlState(double trajectoryTime, ToroidManipulationState steeringState,
            ReferenceFrame referenceFrame, RigidBody base, SideDependentList<SE3ConfigurationProvider> initialConfigurationProviders,
-           SideDependentList<SE3ConfigurationProvider> finalConfigurationProviders, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+           SideDependentList<SE3ConfigurationProvider> finalConfigurationProviders, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       ConstantDoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(trajectoryTime);
       SideDependentList<PositionTrajectoryGenerator> positionTrajectoryGenerators = new SideDependentList<PositionTrajectoryGenerator>();
@@ -355,7 +355,7 @@ public class ToroidManipulationStateMachine
 
       final HandControlState<ToroidManipulationState> ret = new HandControlState<ToroidManipulationState>(steeringState, base, positionTrajectoryGenerators,
                                                                orientationTrajectoryGenerators, individualHandSpatialAccelerationControlModules,
-                                                               dynamicGraphicObjectsListRegistry, registry);
+                                                               yoGraphicsListRegistry, registry);
 
       return ret;
    }

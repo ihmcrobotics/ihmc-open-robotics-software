@@ -40,7 +40,7 @@ public class CapturabilityBasedDesiredFootstepAdjustor implements DesiredFootste
    private double footWidth;
 
    public CapturabilityBasedDesiredFootstepAdjustor(CouplingRegistry couplingRegistry, SideDependentList<? extends ContactablePlaneBody> feet,
-         SteppingStones steppingStones, YoVariableRegistry parentRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+         SteppingStones steppingStones, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.couplingRegistry = couplingRegistry;
       this.feet = feet;
@@ -48,7 +48,7 @@ public class CapturabilityBasedDesiredFootstepAdjustor implements DesiredFootste
       if (steppingStones != null)
       {
          steppingStonesCaptureRegionIntersectionCalculator = new SteppingStonesCaptureRegionIntersectionCalculator(steppingStones, registry,
-               dynamicGraphicObjectsListRegistry);
+               yoGraphicsListRegistry);
       }
       else
       {

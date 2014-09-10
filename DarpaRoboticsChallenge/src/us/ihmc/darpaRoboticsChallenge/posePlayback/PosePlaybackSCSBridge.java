@@ -53,7 +53,7 @@ public class PosePlaybackSCSBridge
    private final YoVariableRegistry registry = new YoVariableRegistry("PlaybackPoseSCSBridge");
 
    // private final BooleanYoVariable plotBalls = new BooleanYoVariable("plotBalls", registry);
-   private final YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
+   private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private final YoFramePoint centerOfMassPosition = new YoFramePoint("centerOfMass", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint centerOfMassPosition2d = new YoFramePoint("centerOfMass2d", ReferenceFrame.getWorldFrame(), registry);
 
@@ -79,7 +79,7 @@ public class PosePlaybackSCSBridge
    
    private final double controlDT;
 
-   // private final BagOfBalls balls = new BagOfBalls(500, 0.01, YoAppearance.AliceBlue(), registry, dynamicGraphicObjectsListRegistry);
+   // private final BagOfBalls balls = new BagOfBalls(500, 0.01, YoAppearance.AliceBlue(), registry, yoGraphicsListRegistry);
 
    public PosePlaybackSCSBridge(SDFRobot sdfRobot, FullRobotModel fullRobotModel, FullRobotModel fullRobotModelForSlider, double controlDT) throws IOException
    {
@@ -100,8 +100,8 @@ public class PosePlaybackSCSBridge
       scs.addYoVariableRegistry(registry);
 
       String listName = getClass().getSimpleName();
-      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, new YoGraphicPosition("centerOfMass", centerOfMassPosition, 0.03, YoAppearance.Gold()));
-      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, new YoGraphicPosition("centerOfMass2d", centerOfMassPosition2d, 0.03, YoAppearance.Gold()));
+      yoGraphicsListRegistry.registerDynamicGraphicObject(listName, new YoGraphicPosition("centerOfMass", centerOfMassPosition, 0.03, YoAppearance.Gold()));
+      yoGraphicsListRegistry.registerDynamicGraphicObject(listName, new YoGraphicPosition("centerOfMass2d", centerOfMassPosition2d, 0.03, YoAppearance.Gold()));
       
       SideDependentList<AppearanceDefinition> appearance = new SideDependentList<>(YoAppearance.Red(), YoAppearance.Green());
       
@@ -109,22 +109,22 @@ public class PosePlaybackSCSBridge
       {
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
 
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, new YoGraphicPosition(sidePrefix + "AnkleViz", anklePositions.get(robotSide), 0.05, appearance.get(robotSide)));
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, new YoGraphicPosition(sidePrefix + "WristViz", wristPositions.get(robotSide), 0.05, appearance.get(robotSide)));
+         yoGraphicsListRegistry.registerDynamicGraphicObject(listName, new YoGraphicPosition(sidePrefix + "AnkleViz", anklePositions.get(robotSide), 0.05, appearance.get(robotSide)));
+         yoGraphicsListRegistry.registerDynamicGraphicObject(listName, new YoGraphicPosition(sidePrefix + "WristViz", wristPositions.get(robotSide), 0.05, appearance.get(robotSide)));
          
          YoGraphicCoordinateSystem footCoordinateSystem = new YoGraphicCoordinateSystem(sidePrefix + "Foot", "", registry, 0.25);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, footCoordinateSystem);
+         yoGraphicsListRegistry.registerDynamicGraphicObject(listName, footCoordinateSystem);
          feetCoordinateSystems.put(robotSide, footCoordinateSystem);
 
          YoGraphicCoordinateSystem handCoordinateSystem = new YoGraphicCoordinateSystem(sidePrefix + "Hand", "", registry, 0.25);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, handCoordinateSystem);
+         yoGraphicsListRegistry.registerDynamicGraphicObject(listName, handCoordinateSystem);
          handCoordinateSystems.put(robotSide, handCoordinateSystem);
       }
       
-      scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
+      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
       
-      DRCRobotMidiSliderBoardPositionManipulation sliderBoard = new DRCRobotMidiSliderBoardPositionManipulation(scs, sdfRobot, fullRobotModelForSlider, dynamicGraphicObjectsListRegistry);
+      DRCRobotMidiSliderBoardPositionManipulation sliderBoard = new DRCRobotMidiSliderBoardPositionManipulation(scs, sdfRobot, fullRobotModelForSlider, yoGraphicsListRegistry);
 
       sliderBoard.addCaptureSnapshotListener(new CaptureSnapshotListener(fullRobotModel, controller));
       sliderBoard.addSaveSequenceRequestedListener(new SaveSequenceListener());

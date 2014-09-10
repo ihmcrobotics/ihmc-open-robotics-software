@@ -155,7 +155,7 @@ public class AtlasMultiContact
          public VariousWalkingProviders createVariousWalkingProviders(DoubleYoVariable yoTime, FullRobotModel fullRobotModel,
                WalkingControllerParameters walkingControllerParameters, CommonWalkingReferenceFrames referenceFrames, SideDependentList<ContactablePlaneBody> feet,
                ConstantTransferTimeCalculator transferTimeCalculator, ConstantSwingTimeCalculator swingTimeCalculator, ArrayList<Updatable> updatables,
-               YoVariableRegistry registry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+               YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
          {
             PelvisPoseProvider desiredPelvisPoseProvider = new UserDesiredPelvisPoseProvider(registry);
             HandPoseProvider desiredHandPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame());

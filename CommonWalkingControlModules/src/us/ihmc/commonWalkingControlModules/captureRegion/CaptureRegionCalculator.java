@@ -83,7 +83,7 @@ public class CaptureRegionCalculator
    
    public CaptureRegionCalculator(SideDependentList<ReferenceFrame> ankleZUpFrames, double midFootAnkleXOffset, double footWidth, double kinematicRangeFromContactReferencePoint,
                                   CapturePointCalculatorInterface capturePointCalculator, YoVariableRegistry yoVariableRegistry,
-                                  YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+                                  YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       globalTimer = new GlobalTimer("captureRegionCalculator", registry);
 
@@ -146,18 +146,18 @@ public class CaptureRegionCalculator
 
       // Done setting up the scoring function
 
-      YoGraphicsList dynamicGraphicObjectsList = null;
+      YoGraphicsList yoGraphicsList = null;
       ArtifactList artifactList = null;
       captureRegionGraphic = new YoFrameConvexPolygon2d("captureRegion", "", worldFrame, MAX_CAPTURE_REGION_POLYGON_POINTS, registry);
 
-      if (dynamicGraphicObjectsListRegistry == null)
+      if (yoGraphicsListRegistry == null)
       {
          DRAW_CAPTURE_REGION = false;
       }
 
-      if (DRAW_CAPTURE_REGION && (dynamicGraphicObjectsListRegistry != null))
+      if (DRAW_CAPTURE_REGION && (yoGraphicsListRegistry != null))
       {
-         dynamicGraphicObjectsList = new YoGraphicsList("CaptureRegionCalculator");
+         yoGraphicsList = new YoGraphicsList("CaptureRegionCalculator");
          artifactList = new ArtifactList("CaptureRegionCalculator");
 
          DynamicGraphicYoPolygonArtifact dynamicGraphicYoPolygonArtifact = new DynamicGraphicYoPolygonArtifact("CaptureRegion", captureRegionGraphic,
@@ -172,14 +172,14 @@ public class CaptureRegionCalculator
          String pointName = "captureRegionBestCaseVertex" + i;
          captureRegionBestCaseVertices[i] = new YoFramePoint(pointName, "", worldFrame, registry);
 
-         if (DRAW_CAPTURE_REGION && (dynamicGraphicObjectsListRegistry != null))
+         if (DRAW_CAPTURE_REGION && (yoGraphicsListRegistry != null))
          {
             YoGraphicPosition position = new YoGraphicPosition("BestCaseVertices" + i, 
                   captureRegionBestCaseVertices[i], 
                   0.004,
 //                  DRAWN_POINT_BASE_SIZE * ((4.0 + ((double) i)) / 4.0),
                   YoAppearance.Green(), YoGraphicPosition.GraphicType.BALL);
-            dynamicGraphicObjectsList.add(position);
+            yoGraphicsList.add(position);
             artifactList.add(position.createArtifact());
          }
       }
@@ -189,14 +189,14 @@ public class CaptureRegionCalculator
          String pointName = "captureRegionKinematicLimitVertex" + i;
          captureRegionKinematicLimitVertices[i] = new YoFramePoint(pointName, "", worldFrame, registry);
 
-         if (DRAW_CAPTURE_REGION && (dynamicGraphicObjectsListRegistry != null))
+         if (DRAW_CAPTURE_REGION && (yoGraphicsListRegistry != null))
          {
             YoGraphicPosition position = new YoGraphicPosition(pointName, captureRegionKinematicLimitVertices[i],
                   0.004, 
 //                  DRAWN_POINT_BASE_SIZE * ((4 + i) / 4), 
                   YoAppearance.Blue(), 
                   YoGraphicPosition.GraphicType.BALL);
-            dynamicGraphicObjectsList.add(position);
+            yoGraphicsList.add(position);
             artifactList.add(position.createArtifact());
          }
       }
@@ -206,14 +206,14 @@ public class CaptureRegionCalculator
          String pointName = "estimatedCOPExtreme" + i;
          estimatedCOPExtremes[i] = new YoFramePoint(pointName, "", worldFrame, registry);
 
-         if (DRAW_CAPTURE_REGION && (dynamicGraphicObjectsListRegistry != null))
+         if (DRAW_CAPTURE_REGION && (yoGraphicsListRegistry != null))
          {
             YoGraphicPosition position = new YoGraphicPosition(pointName, estimatedCOPExtremes[i], 
                   0.004,
 //                  DRAWN_POINT_BASE_SIZE * ((4 + i) / 4),
                   YoAppearance.Black(), 
                   YoGraphicPosition.GraphicType.BALL);
-            dynamicGraphicObjectsList.add(position);
+            yoGraphicsList.add(position);
             artifactList.add(position.createArtifact());
          }
       }
@@ -224,20 +224,20 @@ public class CaptureRegionCalculator
          String pointName = "additionalKinematicLimitPoint" + i;
          additionalKinematicLimitPoints[i] = new YoFramePoint(pointName, "", worldFrame, registry);
 
-         if (DRAW_CAPTURE_REGION && (dynamicGraphicObjectsListRegistry != null))
+         if (DRAW_CAPTURE_REGION && (yoGraphicsListRegistry != null))
          {
             YoGraphicPosition position = new YoGraphicPosition(pointName, additionalKinematicLimitPoints[i], DRAWN_POINT_BASE_SIZE * 0.5,
                                                  YoAppearance.Aqua(), YoGraphicPosition.GraphicType.BALL);
 
-            dynamicGraphicObjectsList.add(position);
+            yoGraphicsList.add(position);
             artifactList.add(position.createArtifact());
          }
       }
 
-      if (DRAW_CAPTURE_REGION && (dynamicGraphicObjectsListRegistry != null))
+      if (DRAW_CAPTURE_REGION && (yoGraphicsListRegistry != null))
       {
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
-         dynamicGraphicObjectsListRegistry.registerArtifactList(artifactList);
+         yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicsList);
+         yoGraphicsListRegistry.registerArtifactList(artifactList);
       }
 
       if (yoVariableRegistry != null)
