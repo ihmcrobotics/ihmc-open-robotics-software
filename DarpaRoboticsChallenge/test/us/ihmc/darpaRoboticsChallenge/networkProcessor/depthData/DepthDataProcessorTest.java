@@ -13,15 +13,14 @@ import org.junit.Test;
 
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.communication.packets.sensing.DepthDataStateCommand;
-import us.ihmc.communication.packets.sensing.SparseLidarScanPacket;
 import us.ihmc.communication.packets.sensing.DepthDataStateCommand.LidarState;
+import us.ihmc.communication.packets.sensing.SparseLidarScanPacket;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCWallAtDistanceEnvironment;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCUserInterfaceNetworkingManager;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationNetworkTestHelper;
 import us.ihmc.graphics3DAdapter.jme.util.JMELidarScanVisualizer;
 import us.ihmc.utilities.MemoryTools;
-import us.ihmc.utilities.lidar.polarLidar.SparseLidarScan;
 import us.ihmc.utilities.net.NetStateListener;
 import us.ihmc.utilities.net.ObjectConsumer;
 
@@ -29,6 +28,8 @@ public abstract class DepthDataProcessorTest implements MultiRobotTestInterface,
 {
    private static final float SCAN_TOLERANCE = 0.001f;
    private static final double WALL_DISTANCE = 1.0;
+   private static final boolean ALLOW_PERCENTAGE_OUT_OF_RANGE = true;
+   private static final double PERCENT_ALLOWABLE_OUT_OF_RANGE = .05;
 
    private int numberOfLidarScansConsumed = 0;
    private long numberOfLidarPointsConsumed = 0;
@@ -68,8 +69,9 @@ public abstract class DepthDataProcessorTest implements MultiRobotTestInterface,
       System.out.println("Number of points consumed: " + numberOfLidarPointsConsumed + " Points out of range: " + errorQueue.size() + " Percentage: "
             + ((double) errorQueue.size() / numberOfLidarPointsConsumed) + " less than .05");
       
-      assertTrue("Too many points are out of range: ", (double) errorQueue.size() / numberOfLidarPointsConsumed < .05);
-//    throwAllAssertionErrors();
+      assertTrue("Too many points are out of range: ", (double) errorQueue.size() / numberOfLidarPointsConsumed < PERCENT_ALLOWABLE_OUT_OF_RANGE);
+      if (!ALLOW_PERCENTAGE_OUT_OF_RANGE)
+         throwAllAssertionErrors();
       
       BambooTools.reportTestFinishedMessage();
    }
