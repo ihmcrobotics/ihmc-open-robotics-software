@@ -639,6 +639,12 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    {
       return runningOnRealRobot ? 80.0 : 5.0;
    }
+   
+   @Override
+   public double getCoPThresholdFraction()
+   {
+      return Double.NaN;
+   }
 
    @Override
    public String[] getJointsToIgnoreInController()
