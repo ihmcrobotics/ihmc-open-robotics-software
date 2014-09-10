@@ -649,6 +649,12 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    {
       return runningOnRealRobot ? 80.0 : 5.0;
    }
+   
+   @Override
+   public double getCoPThresholdFraction()
+   {
+      return 0.02;
+   }
 
    @Override
    public String[] getJointsToIgnoreInController()

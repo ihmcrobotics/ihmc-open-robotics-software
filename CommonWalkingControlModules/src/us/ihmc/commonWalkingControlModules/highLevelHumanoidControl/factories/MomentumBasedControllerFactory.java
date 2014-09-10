@@ -248,7 +248,8 @@ public class MomentumBasedControllerFactory
       {
          ForceSensorData footForceSensor = forceSensorDataHolder.getByName(footSensorNames.get(robotSide));
          double contactThresholdForce = walkingControllerParameters.getContactThresholdForce();
-         WrenchBasedFootSwitch wrenchBasedFootSwitch = new WrenchBasedFootSwitch(bipedFeet.get(robotSide).getName(), footForceSensor, 0.02, totalRobotWeight,
+         double footSwitchCoPThresholdFraction = walkingControllerParameters.getCoPThresholdFraction();
+         WrenchBasedFootSwitch wrenchBasedFootSwitch = new WrenchBasedFootSwitch(bipedFeet.get(robotSide).getName(), footForceSensor, footSwitchCoPThresholdFraction, totalRobotWeight,
                bipedFeet.get(robotSide), dynamicGraphicObjectsListRegistry, contactThresholdForce, registry);
          footSwitches.put(robotSide, wrenchBasedFootSwitch);
       }

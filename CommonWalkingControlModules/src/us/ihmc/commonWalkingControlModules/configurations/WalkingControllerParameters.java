@@ -151,7 +151,10 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 
    public abstract double getContactThresholdForce();
 
+   public abstract double getCoPThresholdFraction();
+
    public abstract String[] getJointsToIgnoreInController();
 
    public abstract void setupMomentumOptimizationSettings(MomentumOptimizationSettings momentumOptimizationSettings);
+
 }
