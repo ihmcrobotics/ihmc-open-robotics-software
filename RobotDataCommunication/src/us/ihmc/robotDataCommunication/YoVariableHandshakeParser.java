@@ -25,6 +25,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicFactory;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.RemoteYoGraphic;
@@ -34,7 +35,6 @@ import us.ihmc.yoUtilities.graphics.plotting.ArtifactList;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.yobotics.simulationconstructionset.Joint;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicFactory;
 
 public class YoVariableHandshakeParser
 {
@@ -200,7 +200,7 @@ public class YoVariableHandshakeParser
                .getZ()), msg.getAppearance().getTransparency());
       }
    
-      return DynamicGraphicFactory.yoGraphicFromMessage(type, name, vars, consts, appearance);
+      return YoGraphicFactory.yoGraphicFromMessage(type, name, vars, consts, appearance);
    }
 
    public YoVariableRegistry getYoVariableRegistry()
