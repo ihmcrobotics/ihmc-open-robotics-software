@@ -1,5 +1,6 @@
 package us.ihmc.atlas;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -9,11 +10,24 @@ import us.ihmc.atlas.initialSetup.MultiContactDRCRobotInitialSetup;
 import us.ihmc.atlas.initialSetup.PushUpDRCRobotInitialSetup;
 import us.ihmc.atlas.parameters.AtlasArmControllerParameters;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MultiContactTestHumanoidControllerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviderFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandLoadBearingProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandPoseProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.HandLoadBearingProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.HandPoseProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisPoseProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.UserDesiredPelvisPoseProvider;
+import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
+import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalculator;
+import us.ihmc.commonWalkingControlModules.trajectories.ConstantTransferTimeCalculator;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
@@ -22,12 +36,16 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.environment.MultiContactTestEnvironment;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 import com.martiansoftware.jsap.JSAPException;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
+import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.inputdevices.MidiSliderBoard;
 
 public class AtlasMultiContact
@@ -104,6 +122,8 @@ public class AtlasMultiContact
             HighLevelState.DO_NOTHING_BEHAVIOR);
       
       controllerFactory.addHighLevelBehaviorFactory(new MultiContactTestHumanoidControllerFactory(controllerParameters, footContactSides, handContactSides, true));
+      VariousWalkingProviderFactory variousWalkingProviderFactory = createVariousWalkingProviderFactory();
+      controllerFactory.setVariousWalkingProviderFactory(variousWalkingProviderFactory);
 
       drcSimulation = new DRCSimulationFactory(robotModel, controllerFactory, environment.getTerrainObject3D().getLinkGraphics(), robotInitialSetup, scsInitialSetup,
             guiInitialSetup, null);
@@ -114,9 +134,9 @@ public class AtlasMultiContact
       sliderBoard.setSlider(1, "desiredCoMX", simulationConstructionSet, -0.2, 0.2);
       sliderBoard.setSlider(2, "desiredCoMY", simulationConstructionSet, -0.2, 0.2);
       sliderBoard.setSlider(3, "desiredCoMZ", simulationConstructionSet, 0.5, 1.5);
-      sliderBoard.setSlider(4, "desiredPelvisYaw", simulationConstructionSet, -Math.PI / 8.0, Math.PI / 8.0);
-      sliderBoard.setSlider(5, "desiredPelvisPitch", simulationConstructionSet, -Math.PI / 8.0, Math.PI / 8.0);
-      sliderBoard.setSlider(6, "desiredPelvisRoll", simulationConstructionSet, -Math.PI / 8.0, Math.PI / 8.0);
+      sliderBoard.setSlider(4, "userDesiredPelvisYaw", simulationConstructionSet, -Math.PI / 8.0, Math.PI / 8.0);
+      sliderBoard.setSlider(5, "userDesiredPelvisPitch", simulationConstructionSet, -Math.PI / 8.0, Math.PI / 8.0);
+      sliderBoard.setSlider(6, "userDesiredPelvisRoll", simulationConstructionSet, -Math.PI / 8.0, Math.PI / 8.0);
       sliderBoard.setKnob(1, "desiredChestYaw", simulationConstructionSet, -Math.PI / 8.0, Math.PI / 8.0);
       sliderBoard.setKnob(2, "desiredChestPitch", simulationConstructionSet, -Math.PI / 8.0, Math.PI / 8.0);
       sliderBoard.setKnob(3, "desiredChestRoll", simulationConstructionSet, -Math.PI / 8.0, Math.PI / 8.0);
@@ -125,6 +145,25 @@ public class AtlasMultiContact
       simulationConstructionSet.setCameraFix(-0.44, -0.17, 0.75);
 
       drcSimulation.start();
+   }
+
+   private VariousWalkingProviderFactory createVariousWalkingProviderFactory()
+   {
+      return new VariousWalkingProviderFactory()
+      {
+         @Override
+         public VariousWalkingProviders createVariousWalkingProviders(DoubleYoVariable yoTime, FullRobotModel fullRobotModel,
+               WalkingControllerParameters walkingControllerParameters, CommonWalkingReferenceFrames referenceFrames, SideDependentList<ContactablePlaneBody> feet,
+               ConstantTransferTimeCalculator transferTimeCalculator, ConstantSwingTimeCalculator swingTimeCalculator, ArrayList<Updatable> updatables,
+               YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+         {
+            PelvisPoseProvider desiredPelvisPoseProvider = new UserDesiredPelvisPoseProvider(registry);
+            HandPoseProvider desiredHandPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame());
+            HandLoadBearingProvider desiredHandLoadBearingProvider = new DesiredHandLoadBearingProvider();
+            return new VariousWalkingProviders(null, null, null, null, null, desiredPelvisPoseProvider, desiredHandPoseProvider,
+                  desiredHandLoadBearingProvider, null, null, null, null, null, null, null);
+         }
+      };
    }
 
    public DRCSimulationFactory getDRCSimulation()

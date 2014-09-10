@@ -37,7 +37,6 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
    private final static MomentumControlModuleType MOMENTUM_CONTROL_MODULE_TO_USE = MomentumControlModuleType.OPT_NULLSPACE;
 
    private final YoFramePoint desiredCoMPosition = new YoFramePoint("desiredCoM", worldFrame, registry);
-   private final YoFrameOrientation desiredPelvisYawPitchRoll = new YoFrameOrientation("desiredPelvis", worldFrame, registry);
    private final YoFrameOrientation desiredChestYawPitchRoll = new YoFrameOrientation("desiredChest", worldFrame, registry);
 
    private final FootPoseProvider footPoseProvider;
@@ -67,18 +66,6 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
       chestOrientationManager.setUp(pelvis, spineJacobianId, 100.0, 100.0, 100.0, 20.0, 20.0, 20.0);
 
       this.neckJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(chest, fullRobotModel.getHead()), OneDoFJoint.class);
-
-      desiredPelvisYawPitchRoll.attachVariableChangedListener(new VariableChangedListener()
-      {
-         private final FrameOrientation tempOrientation = new FrameOrientation(desiredPelvisYawPitchRoll.getReferenceFrame());
-         
-         @Override
-         public void variableChanged(YoVariable<?> v)
-         {
-            desiredPelvisYawPitchRoll.getFrameOrientationIncludingFrame(tempOrientation);
-            desiredPelvisOrientation.set(tempOrientation);
-         }
-      });
 
       desiredChestYawPitchRoll.attachVariableChangedListener(new VariableChangedListener()
       {
@@ -112,13 +99,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
       currentCoM.changeFrame(desiredCoMPosition.getReferenceFrame());
       desiredCoMPosition.set(currentCoM);
 
-      FrameOrientation currentPelvisOrientaton = new FrameOrientation(referenceFrames.getPelvisFrame());
-      currentPelvisOrientaton.changeFrame(desiredPelvisOrientation.getReferenceFrame());
-      desiredPelvisOrientation.set(currentPelvisOrientaton);
-
-      // keep desired pelvis orientation as it is
-      desiredPelvisAngularVelocity.set(0.0, 0.0, 0.0);
-      desiredPelvisAngularAcceleration.set(0.0, 0.0, 0.0);
+      pelvisOrientationManager.setToHoldCurrent();
       
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -156,7 +137,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
       {
          ContactablePlaneBody foot = feet.get(robotSide);
 
-         if (footPoseProvider.checkForNewPose(robotSide))
+         if (footPoseProvider != null && footPoseProvider.checkForNewPose(robotSide))
          {
             FramePose newFootPose = footPoseProvider.getDesiredFootPose(robotSide);
             desiredConfigurationProviders.get(foot).set(newFootPose);
