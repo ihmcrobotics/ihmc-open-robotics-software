@@ -11,7 +11,6 @@ import org.ejml.interfaces.decomposition.QRPDecomposition;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.NormOps;
 
-import com.sun.media.multiplexer.audio.AUMux;
 
 import us.ihmc.utilities.math.MatrixTools;
 
