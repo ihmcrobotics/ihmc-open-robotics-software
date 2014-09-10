@@ -15,12 +15,14 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvi
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandstepProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisPoseProvider;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.walking.ComHeightPacket;
 import us.ihmc.communication.packets.walking.FootPosePacket;
 import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.communication.packets.walking.PauseCommand;
+import us.ihmc.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
@@ -43,6 +45,7 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
    private final ConcurrentLinkedQueue<ScriptObject> scriptObjects = new ConcurrentLinkedQueue<ScriptObject>();
 
    private final DesiredHandPoseProvider desiredHandPoseProvider; 
+   private final DesiredPelvisPoseProvider desiredPelvisPoseProvider; 
    private final DesiredHandstepProvider handstepProvider;
    private final DesiredComHeightProvider desiredComHeightProvider;
    private final DesiredFootPoseProvider desiredFootPoseProvider;
@@ -65,6 +68,7 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
       
       this.scriptFileLoader = scriptFileLoader;
       desiredHandPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame());
+      desiredPelvisPoseProvider = new DesiredPelvisPoseProvider();
       handstepProvider = new DesiredHandstepProvider(fullRobotModel);
       desiredComHeightProvider = new DesiredComHeightProvider();
 
@@ -117,6 +121,13 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
          desiredHandPoseProvider.consumeObject(handPosePacket);
          
          setupTimesForNewScriptEvent(handPosePacket.getTrajectoryTime());
+      }
+      else if (scriptObject instanceof PelvisPosePacket)
+      {
+         PelvisPosePacket pelvisPosePacket = (PelvisPosePacket) scriptObject;
+         desiredPelvisPoseProvider.consumeObject(pelvisPosePacket);
+         
+         setupTimesForNewScriptEvent(pelvisPosePacket.getTrajectoryTime());
       }
       else if (scriptObject instanceof PauseCommand)
       {
@@ -225,6 +236,11 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
       return desiredHandPoseProvider;
    }
    
+   public DesiredPelvisPoseProvider getDesiredPelvisPoseProvider()
+   {
+      return desiredPelvisPoseProvider;
+   }
+
    public DesiredComHeightProvider getDesiredComHeightProvider()
    {
       return desiredComHeightProvider;
