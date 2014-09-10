@@ -26,6 +26,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.UserDesiredHandLoadBe
 import us.ihmc.commonWalkingControlModules.packetConsumers.UserDesiredHandPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.UserDesiredHandstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.UserDesiredHeadOrientationProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.UserDesiredPelvisPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.DesiredHighLevelStateProvider;
 import us.ihmc.commonWalkingControlModules.packetProviders.SystemErrControlStatusProducer;
@@ -43,14 +44,14 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 public class YoVariableVariousWalkingProviderFactory implements VariousWalkingProviderFactory
 {
    public VariousWalkingProviders createVariousWalkingProviders(DoubleYoVariable yoTime, FullRobotModel fullRobotModel,
-           WalkingControllerParameters walkingControllerParameters, CommonWalkingReferenceFrames referenceFrames, SideDependentList<ContactablePlaneBody> feet,
-           ConstantTransferTimeCalculator transferTimeCalculator, ConstantSwingTimeCalculator swingTimeCalculator, ArrayList<Updatable> updatables,
-           YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+         WalkingControllerParameters walkingControllerParameters, CommonWalkingReferenceFrames referenceFrames, SideDependentList<ContactablePlaneBody> feet,
+         ConstantTransferTimeCalculator transferTimeCalculator, ConstantSwingTimeCalculator swingTimeCalculator, ArrayList<Updatable> updatables,
+         YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
    {
       HandstepProvider handstepProvider = new UserDesiredHandstepProvider(fullRobotModel, registry, dynamicGraphicObjectsListRegistry);
 
       HandPoseProvider handPoseProvider = new UserDesiredHandPoseProvider(fullRobotModel,
-                                             walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame(), registry);
+            walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame(), registry);
 
       LinkedHashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = new LinkedHashMap<Footstep, TrajectoryParameters>();
 
@@ -59,11 +60,10 @@ public class YoVariableVariousWalkingProviderFactory implements VariousWalkingPr
       DesiredHighLevelStateProvider highLevelStateProvider = null;
       HeadOrientationProvider headOrientationProvider = new UserDesiredHeadOrientationProvider(referenceFrames.getPelvisZUpFrame(), registry);
       DesiredComHeightProvider desiredComHeightProvider = null;
-      PelvisPoseProvider pelvisPoseProvider = null;
+      PelvisPoseProvider pelvisPoseProvider = new UserDesiredPelvisPoseProvider(registry);
       ChestOrientationProvider chestOrientationProvider = new UserDesiredChestOrientationProvider(referenceFrames.getPelvisZUpFrame(), registry);
-      
+
       FootPoseProvider footPoseProvider = new UserDesiredFootPoseProvider(fullRobotModel, registry);
-     
 
       HandLoadBearingProvider handLoadBearingProvider = new UserDesiredHandLoadBearingProvider(registry);
       DesiredFootStateProvider footLoadBearingProvider = null;
@@ -73,10 +73,8 @@ public class YoVariableVariousWalkingProviderFactory implements VariousWalkingPr
       ControlStatusProducer controlStatusProducer = new SystemErrControlStatusProducer();
 
       VariousWalkingProviders variousProviders = new VariousWalkingProviders(footstepPovider, handstepProvider, mapFromFootstepsToTrajectoryParameters,
-                                                    headOrientationProvider, desiredComHeightProvider, pelvisPoseProvider, handPoseProvider,
-                                                    handLoadBearingProvider, chestOrientationProvider, footPoseProvider, footLoadBearingProvider,
-                                                    highLevelStateProvider, thighLoadBearingProvider, pelvisLoadBearingProvider,
-                                                    controlStatusProducer);
+            headOrientationProvider, desiredComHeightProvider, pelvisPoseProvider, handPoseProvider, handLoadBearingProvider, chestOrientationProvider,
+            footPoseProvider, footLoadBearingProvider, highLevelStateProvider, thighLoadBearingProvider, pelvisLoadBearingProvider, controlStatusProducer);
 
       return variousProviders;
    }

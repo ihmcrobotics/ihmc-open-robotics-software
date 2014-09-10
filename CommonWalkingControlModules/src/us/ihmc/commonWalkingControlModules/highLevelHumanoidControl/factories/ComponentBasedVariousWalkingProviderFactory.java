@@ -21,6 +21,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.HandLoadBearingProvid
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisPoseProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.UserDesiredPelvisPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.DesiredHighLevelStateProvider;
 import us.ihmc.commonWalkingControlModules.packetProviders.SystemErrControlStatusProducer;
@@ -72,7 +73,7 @@ public class ComponentBasedVariousWalkingProviderFactory implements VariousWalki
       DesiredHighLevelStateProvider highLevelStateProvider = null;
       HeadOrientationProvider headOrientationProvider = null;
       DesiredComHeightProvider comHeightProvider = null;
-      PelvisPoseProvider pelvisPoseProvider = null;
+      PelvisPoseProvider pelvisPoseProvider = new UserDesiredPelvisPoseProvider(registry);
       ChestOrientationProvider chestOrientationProvider = null;
       DesiredHandPoseProvider handPoseProvider = null;
       if ((fullRobotModel.getHand(RobotSide.LEFT) != null) && (fullRobotModel.getHand(RobotSide.RIGHT) != null))
