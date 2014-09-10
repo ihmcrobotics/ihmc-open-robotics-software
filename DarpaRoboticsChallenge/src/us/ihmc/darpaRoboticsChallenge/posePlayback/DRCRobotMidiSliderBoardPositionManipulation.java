@@ -37,6 +37,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphic;
@@ -48,7 +49,6 @@ import com.yobotics.simulationconstructionset.FloatingJoint;
 import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicLineSegment;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.inputdevices.MidiSliderBoard;
 
 public class DRCRobotMidiSliderBoardPositionManipulation
@@ -153,12 +153,12 @@ public class DRCRobotMidiSliderBoardPositionManipulation
    
    private final BooleanYoVariable controlFingers = new BooleanYoVariable("controlFingers", registry);
 
-   public DRCRobotMidiSliderBoardPositionManipulation(SimulationConstructionSet scs, SDFRobot sdfRobot, FullRobotModel fullRobotModel, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public DRCRobotMidiSliderBoardPositionManipulation(SimulationConstructionSet scs, SDFRobot sdfRobot, FullRobotModel fullRobotModel, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       this(false, scs, sdfRobot, fullRobotModel, dynamicGraphicObjectsListRegistry);
    }
    
-   public DRCRobotMidiSliderBoardPositionManipulation(boolean controlFingers, SimulationConstructionSet scs, SDFRobot sdfRobot, FullRobotModel fullRobotModel, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public DRCRobotMidiSliderBoardPositionManipulation(boolean controlFingers, SimulationConstructionSet scs, SDFRobot sdfRobot, FullRobotModel fullRobotModel, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       this.scs = scs;
       this.fullRobotModel = fullRobotModel;
@@ -269,7 +269,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       setupSupportPolygonDisplayAndControl(dynamicGraphicObjectsListRegistry);
    }
 
-   private void setupSupportPolygonDisplayAndControl(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   private void setupSupportPolygonDisplayAndControl(YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       for (int i = 0; i < baseControlPoints.length; i++)
       {
@@ -1008,18 +1008,18 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       return registry;
    }
    
-   private void addSupportBaseControlGraphics(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   private void addSupportBaseControlGraphics(YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       addSupportBaseGraphics(dynamicGraphicObjectsListRegistry,baseControlPoints,baseControlPointsList,baseControlLinesList,"baseControl",YoAppearance.Green());
 
    }
 
-   private void addSupportBaseControlTargetGraphics(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   private void addSupportBaseControlTargetGraphics(YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       addSupportBaseGraphics(dynamicGraphicObjectsListRegistry,baseControlTargetPoints,baseControlTargetPointsList,baseControlTargetLinesList,"baseControlTarget",YoAppearance.Red());
    }
 
-   private void addSupportBaseGraphics(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,YoFramePoint[] basePoints, ArrayList<YoGraphic> basePointsList, ArrayList<YoGraphic> linesList, String namePrefix,AppearanceDefinition appearance)
+   private void addSupportBaseGraphics(YoGraphicsListRegistry dynamicGraphicObjectsListRegistry,YoFramePoint[] basePoints, ArrayList<YoGraphic> basePointsList, ArrayList<YoGraphic> linesList, String namePrefix,AppearanceDefinition appearance)
    {
       AppearanceDefinition[] colors = { YoAppearance.Red(), YoAppearance.Green(), YoAppearance.Blue(), YoAppearance.Yellow() };
       YoGraphicsList dynamicGraphicObjectsList = new YoGraphicsList(namePrefix + "Points");

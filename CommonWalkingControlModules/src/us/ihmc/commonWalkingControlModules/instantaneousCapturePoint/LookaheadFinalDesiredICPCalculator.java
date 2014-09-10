@@ -12,11 +12,11 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class LookaheadFinalDesiredICPCalculator implements FinalDesiredICPCalculator
 {
@@ -37,7 +37,7 @@ public class LookaheadFinalDesiredICPCalculator implements FinalDesiredICPCalcul
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   public LookaheadFinalDesiredICPCalculator(YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public LookaheadFinalDesiredICPCalculator(YoVariableRegistry parentRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       if (dynamicGraphicObjectsListRegistry == null)
          VISUALIZE = false;

@@ -16,10 +16,10 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.trajectory.Finishable;
 import com.yobotics.simulationconstructionset.util.trajectory.OrientationTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
@@ -54,7 +54,7 @@ public class HandControlState<T extends Enum<T>> extends ToroidManipulationState
    public HandControlState(T stateEnum, RigidBody base, SideDependentList<PositionTrajectoryGenerator> positionTrajectoryGenerators,
                                      SideDependentList<OrientationTrajectoryGenerator> orientationTrajectoryGenerators,
                                      SideDependentList<RigidBodySpatialAccelerationControlModule> handSpatialAccelerationControlModules,
-                                     DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+                                     YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
    {
       super(stateEnum);
 

@@ -17,6 +17,7 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
@@ -24,7 +25,6 @@ import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class HeadingAndVelocityEvaluationScriptTest
 {
@@ -49,7 +49,7 @@ public class HeadingAndVelocityEvaluationScriptTest
    public void testHeadingAndVelocityEvaluationScript()
    {
       YoVariableRegistry parentRegistry = new YoVariableRegistry("HeadingAndVelocityEvaluationScriptTest");
-      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
       
       double controlDT = 0.1;
       double desiredHeadingFinal = 0.0;
@@ -206,7 +206,7 @@ public class HeadingAndVelocityEvaluationScriptTest
       }
    }
    
-   private SimulationConstructionSet setupAndStartSCS(YoVariableRegistry registryToWatch, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, double controlDT)
+   private SimulationConstructionSet setupAndStartSCS(YoVariableRegistry registryToWatch, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, double controlDT)
    {
       Robot robot = new Robot("robot");
       

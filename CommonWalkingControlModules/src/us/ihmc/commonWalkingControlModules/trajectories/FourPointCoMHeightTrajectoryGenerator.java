@@ -16,11 +16,11 @@ import us.ihmc.utilities.math.geometry.LineSegment2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
 import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class FourPointCoMHeightTrajectoryGenerator implements CoMHeightTrajectoryGenerator
 {
@@ -45,7 +45,7 @@ public class FourPointCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    private final BagOfBalls bagOfBalls;
 
    public FourPointCoMHeightTrajectoryGenerator(double nominalHeightAboveGround, double doubleSupportPercentageIn,
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+         YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
    {
       setNominalHeightAboveGround(nominalHeightAboveGround);
       this.doubleSupportPercentageIn.set(doubleSupportPercentageIn);

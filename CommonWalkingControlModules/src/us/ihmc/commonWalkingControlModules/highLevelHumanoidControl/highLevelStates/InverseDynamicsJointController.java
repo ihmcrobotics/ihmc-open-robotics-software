@@ -48,6 +48,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
@@ -58,7 +59,6 @@ import us.ihmc.yoUtilities.math.frames.YoFrameQuaternion;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.util.controller.GainCalculator;
 import com.yobotics.simulationconstructionset.util.controller.PDController;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
 import com.yobotics.simulationconstructionset.util.trajectory.ConstantPoseTrajectoryGenerator;
 
@@ -233,7 +233,7 @@ public class InverseDynamicsJointController extends HighLevelBehavior
          YoFramePoint cop = new YoFramePoint(CONTROLLER_PREFIX + robotSide.getCamelCaseNameForMiddleOfExpression() + "CoPDesired", worldFrame, registry);
          cops.put(robotSide, cop);
          
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
+         YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
          if (dynamicGraphicObjectsListRegistry != null)
          {
             Artifact artifact = new YoGraphicPosition(CONTROLLER_PREFIX + robotSide.getCamelCaseNameForMiddleOfExpression() + "CoP", cop, 0.005, YoAppearance.Brown(), GraphicType.BALL_WITH_CROSS).createArtifact();

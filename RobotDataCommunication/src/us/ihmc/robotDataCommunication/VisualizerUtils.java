@@ -7,16 +7,16 @@ import javax.swing.JScrollPane;
 
 import us.ihmc.commonWalkingControlModules.captureRegion.CommonCapturePointCalculator;
 import us.ihmc.plotting.Artifact;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.plotting.ArtifactList;
 import us.ihmc.yoUtilities.graphics.plotting.YoArtifactPosition;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.plotting.SimulationOverheadPlotter;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class VisualizerUtils
 {
-   public static void createOverheadPlotter(SimulationConstructionSet scs, boolean showOverheadView, DynamicGraphicObjectsListRegistry... dynamicGraphicObjectsListRegistries)
+   public static void createOverheadPlotter(SimulationConstructionSet scs, boolean showOverheadView, YoGraphicsListRegistry... dynamicGraphicObjectsListRegistries)
    {
       SimulationOverheadPlotter plotter = new SimulationOverheadPlotter();
       plotter.setDrawHistory(false);
@@ -35,7 +35,7 @@ public class VisualizerUtils
 
       for (int i = 0; i < dynamicGraphicObjectsListRegistries.length; i++)
       {
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = dynamicGraphicObjectsListRegistries[i];
+         YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = dynamicGraphicObjectsListRegistries[i];
          dynamicGraphicObjectsListRegistry.addArtifactListsToPlotter(plotter.getPlotter());
          ArrayList<ArtifactList> buffer = new ArrayList<>();
          dynamicGraphicObjectsListRegistry.getRegisteredArtifactLists(buffer);

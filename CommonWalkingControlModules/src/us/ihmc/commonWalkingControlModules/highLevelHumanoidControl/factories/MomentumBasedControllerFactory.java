@@ -42,9 +42,9 @@ import us.ihmc.utilities.screwTheory.TotalMassCalculator;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 import com.yobotics.simulationconstructionset.robotController.RobotController;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class MomentumBasedControllerFactory
 {   
@@ -105,7 +105,7 @@ public class MomentumBasedControllerFactory
    }
 
    public RobotController getController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, double controlDT, double gravity,
-         DoubleYoVariable yoTime, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, TwistCalculator twistCalculator,
+         DoubleYoVariable yoTime, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, TwistCalculator twistCalculator,
          CenterOfMassJacobian centerOfMassJacobian, ForceSensorDataHolder forceSensorDataHolder, GlobalDataProducer dataProducer,
          InverseDynamicsJoint... jointsToIgnore)
    {      
@@ -239,7 +239,7 @@ public class MomentumBasedControllerFactory
    }
 
    private SideDependentList<FootSwitchInterface> createFootSwitches(SideDependentList<ContactablePlaneBody> bipedFeet,
-         ForceSensorDataHolder forceSensorDataHolder, double totalRobotWeight, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+         ForceSensorDataHolder forceSensorDataHolder, double totalRobotWeight, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry,
          YoVariableRegistry registry)
    {
       SideDependentList<FootSwitchInterface> footSwitches = new SideDependentList<FootSwitchInterface>();

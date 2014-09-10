@@ -24,9 +24,9 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 import com.yobotics.simulationconstructionset.time.GlobalTimer;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class GeometricVirtualToePointCalculator implements VirtualToePointCalculator
 {
@@ -50,13 +50,13 @@ public class GeometricVirtualToePointCalculator implements VirtualToePointCalcul
    private FrameGeometry2dPlotter plotter;
 
    public GeometricVirtualToePointCalculator(CommonWalkingReferenceFrames referenceFrames, YoVariableRegistry parentRegistry,
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+         YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       this(parentRegistry, dynamicGraphicObjectsListRegistry);
       this.setFramesToComputeIn(referenceFrames);
    }
 
-   public GeometricVirtualToePointCalculator(YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public GeometricVirtualToePointCalculator(YoVariableRegistry parentRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       globalTimer = new GlobalTimer("VTPCalculatorTimer", registry);
 

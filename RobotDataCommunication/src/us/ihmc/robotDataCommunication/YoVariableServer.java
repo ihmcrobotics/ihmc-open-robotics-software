@@ -12,8 +12,8 @@ import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class YoVariableServer implements RobotVisualizer
 {
@@ -25,8 +25,8 @@ public class YoVariableServer implements RobotVisualizer
    // Data to send
    private List<RigidBody> mainBodies = new ArrayList<>();
    private YoVariableRegistry mainRegistry;
-   private DynamicGraphicObjectsListRegistry mainDynamicGraphicObjectsListRegistry;
-   private final ArrayList<Pair<YoVariableRegistry, DynamicGraphicObjectsListRegistry>> variableData = new ArrayList<>();
+   private YoGraphicsListRegistry mainDynamicGraphicObjectsListRegistry;
+   private final ArrayList<Pair<YoVariableRegistry, YoGraphicsListRegistry>> variableData = new ArrayList<>();
    
    // Variable data
    private ConcurrentRingBuffer<FullStateBuffer> mainBuffer;
@@ -77,7 +77,7 @@ public class YoVariableServer implements RobotVisualizer
       mainBuffer = new ConcurrentRingBuffer<FullStateBuffer>(builder, VARIABLE_BUFFER_CAPACITY);
       variableChangeData.put(mainRegistry, new ConcurrentRingBuffer<>(new VariableChangedMessage.Builder(), CHANGED_BUFFER_CAPACITY));
       
-      for(Pair<YoVariableRegistry, DynamicGraphicObjectsListRegistry> data : variableData)
+      for(Pair<YoVariableRegistry, YoGraphicsListRegistry> data : variableData)
       {
          addVariableBuffer(data);
       }
@@ -139,11 +139,11 @@ public class YoVariableServer implements RobotVisualizer
       
    }
    
-   private void addVariableBuffer(Pair<YoVariableRegistry, DynamicGraphicObjectsListRegistry> data)
+   private void addVariableBuffer(Pair<YoVariableRegistry, YoGraphicsListRegistry> data)
    {
       ArrayList<YoVariable> variables = new ArrayList<>();
       YoVariableRegistry registry = data.first();
-      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = data.second();
+      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = data.second();
       int variableOffset = handshakeServer.addRegistry(registry, variables);
       if(dynamicGraphicObjectsListRegistry != null)
       {
@@ -178,14 +178,14 @@ public class YoVariableServer implements RobotVisualizer
       }
    }
    
-   public void addRegistry(YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public void addRegistry(YoVariableRegistry registry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
-      Pair<YoVariableRegistry, DynamicGraphicObjectsListRegistry> data = new Pair<YoVariableRegistry, DynamicGraphicObjectsListRegistry>(registry, dynamicGraphicObjectsListRegistry);
+      Pair<YoVariableRegistry, YoGraphicsListRegistry> data = new Pair<YoVariableRegistry, YoGraphicsListRegistry>(registry, dynamicGraphicObjectsListRegistry);
       variableData.add(data);
    }
 
    @Override
-   public void setMainRegistry(YoVariableRegistry registry, FullRobotModel fullRobotModel, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public void setMainRegistry(YoVariableRegistry registry, FullRobotModel fullRobotModel, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       if(fullRobotModel != null)
       {

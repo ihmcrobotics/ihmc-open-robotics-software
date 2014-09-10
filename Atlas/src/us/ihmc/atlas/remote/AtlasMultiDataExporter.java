@@ -41,6 +41,7 @@ import us.ihmc.utilities.SwingUtils;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 import com.yobotics.simulationconstructionset.DataBuffer;
 import com.yobotics.simulationconstructionset.DataBufferEntry;
@@ -49,7 +50,6 @@ import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.SimulationDoneListener;
 import com.yobotics.simulationconstructionset.UnreasonableAccelerationException;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class AtlasMultiDataExporter implements SimulationDoneListener
 {
@@ -371,7 +371,7 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
       scs.setDT(dt, 1);
       scs.setPlaybackDesiredFrameRate(0.04);
 
-      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = parser.getDynamicGraphicObjectsListRegistry();
+      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = parser.getDynamicGraphicObjectsListRegistry();
       scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
       scs.getRootRegistry().addChild(parser.getRootRegistry());
       scs.setGroundVisible(false);

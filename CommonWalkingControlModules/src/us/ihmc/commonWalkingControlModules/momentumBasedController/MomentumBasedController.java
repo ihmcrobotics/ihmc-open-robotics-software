@@ -60,10 +60,10 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector2d;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFrameVector2d;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 import com.yobotics.simulationconstructionset.util.math.filter.RateLimitedYoVariable;
@@ -144,7 +144,7 @@ public class MomentumBasedController
    private final EnumYoVariable<FrictionModel> frictionModelForAllJoints;
    private final BooleanYoVariable useBeforeTransmissionVelocityForFriction;
 
-   private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
+   private final YoGraphicsListRegistry dynamicGraphicObjectsListRegistry;
 
    private final InverseDynamicsJoint[] controlledJoints;
 
@@ -153,7 +153,7 @@ public class MomentumBasedController
          SideDependentList<ContactablePlaneBody> feet, SideDependentList<ContactablePlaneBody> handsWithFingersBentBack,
          SideDependentList<ContactablePlaneBody> thighs, ContactablePlaneBody pelvis, ContactablePlaneBody pelvisBack, double controlDT,
          OldMomentumControlModule oldMomentumControlModule, ArrayList<Updatable> updatables, WalkingControllerParameters walkingControllerParameters,
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, InverseDynamicsJoint... jointsToIgnore)
+         YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, InverseDynamicsJoint... jointsToIgnore)
    {
       this.dynamicGraphicObjectsListRegistry = dynamicGraphicObjectsListRegistry;
 
@@ -933,7 +933,7 @@ public class MomentumBasedController
       return footSwitches;
    }
 
-   public DynamicGraphicObjectsListRegistry getDynamicGraphicObjectsListRegistry()
+   public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()
    {
       return dynamicGraphicObjectsListRegistry;
    }

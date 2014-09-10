@@ -16,9 +16,9 @@ import us.ihmc.robotDataCommunication.jointState.JointState;
 import us.ihmc.robotDataCommunication.logger.util.CookieJar;
 import us.ihmc.robotDataCommunication.logger.util.PipedCommandExecutor;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 import com.yobotics.simulationconstructionset.Joint;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class YoVariableLoggerListener implements YoVariablesUpdatedListener
 {
@@ -61,7 +61,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       
    }
 
-   public void registerDynamicGraphicObjectListsRegistry(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, boolean showOverheadView)
+   public void registerDynamicGraphicObjectListsRegistry(YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, boolean showOverheadView)
    {
       
    }

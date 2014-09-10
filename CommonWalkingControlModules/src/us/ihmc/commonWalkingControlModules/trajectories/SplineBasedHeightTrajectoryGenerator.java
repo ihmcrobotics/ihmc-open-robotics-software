@@ -15,10 +15,10 @@ import us.ihmc.utilities.math.geometry.LineSegment2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class SplineBasedHeightTrajectoryGenerator implements CoMHeightTrajectoryGenerator
 {
@@ -33,7 +33,7 @@ public class SplineBasedHeightTrajectoryGenerator implements CoMHeightTrajectory
    private final YoFramePoint contactFrameZeroPosition = new YoFramePoint("contactFrameZeroPosition", worldFrame, registry);
    private final YoFramePoint contactFrameOnePosition = new YoFramePoint("contactFrameOnePosition", worldFrame, registry);
 
-   public SplineBasedHeightTrajectoryGenerator(double nominalHeightAboveGround, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+   public SplineBasedHeightTrajectoryGenerator(double nominalHeightAboveGround, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry,
          YoVariableRegistry parentRegistry)
    {
       this.nominalHeightAboveGround.set(nominalHeightAboveGround);

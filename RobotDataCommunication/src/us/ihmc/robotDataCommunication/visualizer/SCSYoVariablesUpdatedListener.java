@@ -18,13 +18,13 @@ import us.ihmc.robotDataCommunication.jointState.JointState;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 import com.yobotics.simulationconstructionset.DataBuffer;
 import com.yobotics.simulationconstructionset.ExitActionListener;
 import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class SCSYoVariablesUpdatedListener implements YoVariablesUpdatedListener, ExitActionListener
 {
@@ -113,7 +113,7 @@ public class SCSYoVariablesUpdatedListener implements YoVariablesUpdatedListener
       JointUpdater.getJointUpdaterList(robot.getRootJoints(), jointStates, jointUpdaters);
    }
 
-   public void registerDynamicGraphicObjectListsRegistry(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, boolean showOverheadView)
+   public void registerDynamicGraphicObjectListsRegistry(YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, boolean showOverheadView)
    {
       scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
 

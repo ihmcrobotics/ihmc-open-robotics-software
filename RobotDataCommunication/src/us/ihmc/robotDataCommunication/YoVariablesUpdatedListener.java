@@ -6,9 +6,9 @@ import java.util.List;
 import us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake;
 import us.ihmc.robotDataCommunication.jointState.JointState;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 import com.yobotics.simulationconstructionset.Joint;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public interface YoVariablesUpdatedListener
 {
@@ -18,7 +18,7 @@ public interface YoVariablesUpdatedListener
 
    public void setRegistry(YoVariableRegistry registry);
 
-   public void registerDynamicGraphicObjectListsRegistry(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, boolean showOverheadView);
+   public void registerDynamicGraphicObjectListsRegistry(YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, boolean showOverheadView);
 
    public void receivedHandshake(YoProtoHandshake handshake);
 

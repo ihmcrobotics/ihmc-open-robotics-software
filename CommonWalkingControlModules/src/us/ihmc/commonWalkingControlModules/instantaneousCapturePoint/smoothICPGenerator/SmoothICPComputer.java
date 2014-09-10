@@ -17,10 +17,10 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class SmoothICPComputer
 {
@@ -68,7 +68,7 @@ public class SmoothICPComputer
    private boolean VISUALIZE = true;
 
    public SmoothICPComputer(double doubleSupportFirstStepFraction, int maxNumberOfConsideredFootsteps, YoVariableRegistry parentRegistry,
-                            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+                            YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       hasBeenInitialized.set(false);
       

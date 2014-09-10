@@ -18,9 +18,9 @@ import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class VisualizePoseWorkspace
 {
@@ -32,7 +32,7 @@ public class VisualizePoseWorkspace
    private final YoVariableRegistry registry = new YoVariableRegistry("PlaybackPoseSCSBridge");
    private final double controlDT;
    
-   private DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+   private YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
    
    public VisualizePoseWorkspace(DRCRobotModel robotModel) throws IOException
    {

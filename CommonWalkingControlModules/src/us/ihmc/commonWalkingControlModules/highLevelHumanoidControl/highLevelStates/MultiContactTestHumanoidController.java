@@ -26,10 +26,10 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoidControlPattern
 {
@@ -52,7 +52,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
 
    public MultiContactTestHumanoidController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
          CoMBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule, MomentumBasedController momentumBasedController,
-         WalkingControllerParameters walkingControllerParameters, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+         WalkingControllerParameters walkingControllerParameters, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       super(variousWalkingProviders, variousWalkingManagers, momentumBasedController, walkingControllerParameters, controllerState);
 

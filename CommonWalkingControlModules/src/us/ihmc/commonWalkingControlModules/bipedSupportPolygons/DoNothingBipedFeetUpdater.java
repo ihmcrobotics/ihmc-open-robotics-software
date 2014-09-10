@@ -6,8 +6,8 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 
 public class DoNothingBipedFeetUpdater implements BipedFeetUpdater
@@ -17,7 +17,7 @@ public class DoNothingBipedFeetUpdater implements BipedFeetUpdater
    private final YoVariableRegistry registry = new YoVariableRegistry("BipedFeetUpdater");
 
    public DoNothingBipedFeetUpdater(CommonWalkingReferenceFrames referenceFrames, double footForward, double footBack,
-           YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+           YoVariableRegistry parentRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
 

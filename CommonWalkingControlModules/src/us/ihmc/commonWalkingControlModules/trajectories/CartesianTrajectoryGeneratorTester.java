@@ -11,6 +11,7 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
@@ -20,7 +21,6 @@ import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.inputdevices.MidiSliderBoard;
 import com.yobotics.simulationconstructionset.util.trajectory.CartesianTrajectoryGenerator;
 
@@ -42,7 +42,7 @@ public class CartesianTrajectoryGeneratorTester
    private String name;
 
    public CartesianTrajectoryGeneratorTester(CartesianTrajectoryGenerator cartesianTrajectoryGenerator, YoVariableRegistry registry,
-           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, String name)
+           YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, String name)
    {
       this.name = name;
       Robot nullRobot = new Robot("null")
@@ -172,13 +172,13 @@ public class CartesianTrajectoryGeneratorTester
 
 
       public CartesianTrajectoryGeneratorTesterController(DoubleYoVariable t, CartesianTrajectoryGenerator cartesianTrajectoryGenerator,
-              DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, String name)
+              YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, String name)
       {
          this(t, cartesianTrajectoryGenerator, new double[] {0.0, 0.0, 0.0}, generateStandardFinalPoints(), dynamicGraphicObjectsListRegistry, name);
       }
 
       public CartesianTrajectoryGeneratorTesterController(DoubleYoVariable t, CartesianTrajectoryGenerator cartesianTrajectoryGenerator,
-              double[] startingTestPoint, double[][] testPointsToCycleThrough, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, String name)
+              double[] startingTestPoint, double[][] testPointsToCycleThrough, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, String name)
       {
          this.name = name;
          this.t = t;

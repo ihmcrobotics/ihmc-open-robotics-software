@@ -9,11 +9,11 @@ import us.ihmc.utilities.math.geometry.ReferenceFrameMismatchException;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector2d;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.trajectory.CartesianTrajectoryGenerator;
 
 
@@ -466,7 +466,7 @@ public class TakeoffLandingCartesianTrajectoryGenerator implements CartesianTraj
    public static void main(String[] args)
    {
       YoVariableRegistry yoVariableRegistry = new YoVariableRegistry("ParentRegistry");
-      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
 
       double maxVel = 1.0;
       double maxAccel = 10.0 * maxVel;

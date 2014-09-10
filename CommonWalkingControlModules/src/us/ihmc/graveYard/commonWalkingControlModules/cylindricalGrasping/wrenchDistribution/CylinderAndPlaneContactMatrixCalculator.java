@@ -15,10 +15,10 @@ import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.graphics.YoGraphic;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 
 public class CylinderAndPlaneContactMatrixCalculator
@@ -59,7 +59,7 @@ public class CylinderAndPlaneContactMatrixCalculator
 
 
    public CylinderAndPlaneContactMatrixCalculator(ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry,
-                                                  DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, int rhoSize, int phiSize)
+                                                  YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, int rhoSize, int phiSize)
    {
       int wrenchLength = Wrench.SIZE;
 

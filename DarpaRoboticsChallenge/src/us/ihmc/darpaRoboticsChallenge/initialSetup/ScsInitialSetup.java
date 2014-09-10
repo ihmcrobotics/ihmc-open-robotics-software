@@ -2,13 +2,13 @@ package us.ihmc.darpaRoboticsChallenge.initialSetup;
 
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 import com.yobotics.simulationconstructionset.DynamicIntegrationMethod;
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.physics.ScsCollisionConfigure;
 import com.yobotics.simulationconstructionset.physics.ScsPhysics;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 /*
  * SCS Initial Setup
@@ -21,7 +21,7 @@ import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObject
 public interface ScsInitialSetup
 {
 // FIXME: delete this method from this interface once ground contact profiles aren't guified via the first robot in the list of robots with which you create the sim...
-   public abstract void initializeRobot(Robot robot, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry);
+   public abstract void initializeRobot(Robot robot, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry);
    
    public abstract void initializeSimulation(SimulationConstructionSet scs);
    public abstract double getDT();

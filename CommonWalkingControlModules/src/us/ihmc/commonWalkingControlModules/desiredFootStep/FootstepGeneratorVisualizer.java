@@ -27,6 +27,7 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTestTools;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicPolygon;
 import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
@@ -34,7 +35,6 @@ import us.ihmc.yoUtilities.math.frames.YoFramePose;
 
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class FootstepGeneratorVisualizer
 {
@@ -52,7 +52,7 @@ public class FootstepGeneratorVisualizer
 
 
    public FootstepGeneratorVisualizer(int maxNumberOfContacts, int maxPointsPerContact, YoVariableRegistry parentRegistry,
-                                      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+                                      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       YoGraphicsList dynamicGraphicObjectsList = new YoGraphicsList("FootstepGeneratorVisualizer");
 
@@ -222,7 +222,7 @@ public class FootstepGeneratorVisualizer
       SimulationConstructionSet scs = new SimulationConstructionSet(nullRobot);
       scs.setDT(0.25, 1);
       YoVariableRegistry rootRegistry = scs.getRootRegistry();
-      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
       int maxNumberOfContacts = 2;
       int maxPointsPerContact = 4;
       FootstepGeneratorVisualizer footstepGeneratorVisualizer = new FootstepGeneratorVisualizer(maxNumberOfContacts, maxPointsPerContact, rootRegistry,

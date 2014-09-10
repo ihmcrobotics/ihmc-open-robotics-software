@@ -15,6 +15,7 @@ import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
 import us.ihmc.darpaRoboticsChallenge.ContactController;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.GroundContactModel;
@@ -26,7 +27,6 @@ import com.yobotics.simulationconstructionset.util.environments.ContactableSelec
 import com.yobotics.simulationconstructionset.util.environments.ContactableToroidRobot;
 import com.yobotics.simulationconstructionset.util.environments.SelectableObject;
 import com.yobotics.simulationconstructionset.util.environments.SelectableObjectListener;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import com.yobotics.simulationconstructionset.util.ground.Contactable;
 import com.yobotics.simulationconstructionset.util.ground.TerrainObject3D;
@@ -38,7 +38,7 @@ public class DRCDemoEnvironmentSimpleSteeringWheelContact implements CommonAvata
    private final ArrayList<ExternalForcePoint> contactPoints = new ArrayList<ExternalForcePoint>();
    private final ArrayList<Contactable> contactables = new ArrayList<Contactable>();
 
-   public DRCDemoEnvironmentSimpleSteeringWheelContact(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public DRCDemoEnvironmentSimpleSteeringWheelContact(YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       combinedTerrainObject = createCombinedTerrainObject();
 
@@ -134,7 +134,7 @@ public class DRCDemoEnvironmentSimpleSteeringWheelContact implements CommonAvata
 
    public static void main(String[] args)
    {
-      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
       DRCDemoEnvironmentSimpleSteeringWheelContact env = new DRCDemoEnvironmentSimpleSteeringWheelContact(dynamicGraphicObjectsListRegistry);
 
       List<Robot> robots = env.getEnvironmentRobots();

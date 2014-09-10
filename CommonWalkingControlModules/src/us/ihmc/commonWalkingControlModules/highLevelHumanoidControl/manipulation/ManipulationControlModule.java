@@ -21,12 +21,12 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 
 import com.yobotics.simulationconstructionset.util.controller.YoPIDGains;
 import com.yobotics.simulationconstructionset.util.controller.YoSE3PIDGains;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 /**
  * @author twan
@@ -62,7 +62,7 @@ public class ManipulationControlModule
       fullRobotModel = momentumBasedController.getFullRobotModel();
       this.armControlParameters = armControllerParameters;
 
-      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
+      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
       createFrameVisualizers(dynamicGraphicObjectsListRegistry, fullRobotModel, "HandControlFrames", true);
 
       handPoseProvider = variousWalkingProviders.getDesiredHandPoseProvider();
@@ -91,7 +91,7 @@ public class ManipulationControlModule
       parentRegistry.addChild(registry);
    }
 
-   private void createFrameVisualizers(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, FullRobotModel fullRobotModel, String listName,
+   private void createFrameVisualizers(YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, FullRobotModel fullRobotModel, String listName,
          boolean enable)
    {
       YoGraphicsList list = new YoGraphicsList(listName);

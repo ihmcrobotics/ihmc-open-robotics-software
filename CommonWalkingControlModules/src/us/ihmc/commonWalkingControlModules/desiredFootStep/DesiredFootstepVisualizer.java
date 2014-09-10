@@ -37,6 +37,7 @@ import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.graphics.plotting.ArtifactList;
@@ -50,7 +51,6 @@ import com.yobotics.simulationconstructionset.plotting.DynamicGraphicYoPolygonAr
 import com.yobotics.simulationconstructionset.plotting.SimulationOverheadPlotter;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class DesiredFootstepVisualizer
 {
@@ -71,7 +71,7 @@ public class DesiredFootstepVisualizer
 
    private final SideDependentList<BagOfBalls> bagsOfBalls;
 
-   public DesiredFootstepVisualizer(YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public DesiredFootstepVisualizer(YoVariableRegistry parentRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       BagOfBalls leftBagOfBalls = new BagOfBalls(1000, 0.05, "leftBalls", YoAppearance.Red(), parentRegistry, dynamicGraphicObjectsListRegistry);
       BagOfBalls rightBagOfBalls = new BagOfBalls(1000, 0.05, "rightBalls", YoAppearance.Blue(), parentRegistry, dynamicGraphicObjectsListRegistry);
@@ -162,7 +162,7 @@ public class DesiredFootstepVisualizer
    }
 
    private SimulationConstructionSet createSCSAndAttachVisualizer(YoVariableRegistry registryToAddToRobot,
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+         YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       ArrayList<RobotController> robotControllers = new ArrayList<RobotController>();
       VisualizeFramesController visualizeFramesController = new VisualizeFramesController(framesToVisualize, dynamicGraphicObjectsListRegistry, 1.0);
@@ -278,7 +278,7 @@ public class DesiredFootstepVisualizer
    public static void visualizePathBasedFootstepListCreator()
    {
       YoVariableRegistry parentRegistry = new YoVariableRegistry("parent");
-      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
 
       DesiredFootstepVisualizer desiredFootstepVisualizer = new DesiredFootstepVisualizer(parentRegistry, dynamicGraphicObjectsListRegistry);
 
@@ -326,7 +326,7 @@ public class DesiredFootstepVisualizer
    public static void visualizeDesiredFootstepCalculator()
    {
       YoVariableRegistry parentRegistry = new YoVariableRegistry("parent");
-      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
 
       DesiredFootstepVisualizer desiredFootstepVisualizer = new DesiredFootstepVisualizer(parentRegistry, dynamicGraphicObjectsListRegistry);
 

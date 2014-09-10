@@ -16,8 +16,8 @@ import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 
 public class AdjustableDesiredFootstepCalculator extends AbstractAdjustableDesiredFootstepCalculator
@@ -65,7 +65,7 @@ public class AdjustableDesiredFootstepCalculator extends AbstractAdjustableDesir
 
    public AdjustableDesiredFootstepCalculator(SideDependentList<? extends ContactablePlaneBody> contactableBodies, CouplingRegistry couplingRegistry,
            DesiredHeadingControlModule desiredHeadingControlModule, DesiredVelocityControlModule desiredVelocityControlModule,
-           YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+           YoVariableRegistry parentRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry,
            SideDependentList<ReferenceFrame> ankleZUpFrames)
    {
       super(contactableBodies, getFramesToSaveFootstepIn(ankleZUpFrames), parentRegistry);

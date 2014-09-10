@@ -16,6 +16,7 @@ import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.plotting.ArtifactList;
@@ -24,7 +25,6 @@ import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
 import com.yobotics.simulationconstructionset.plotting.DynamicGraphicYoPolygonArtifact;
 import com.yobotics.simulationconstructionset.time.GlobalTimer;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 
 //import us.ihmc.plotting.shapes.PointArtifact;
@@ -83,7 +83,7 @@ public class CaptureRegionCalculator
    
    public CaptureRegionCalculator(SideDependentList<ReferenceFrame> ankleZUpFrames, double midFootAnkleXOffset, double footWidth, double kinematicRangeFromContactReferencePoint,
                                   CapturePointCalculatorInterface capturePointCalculator, YoVariableRegistry yoVariableRegistry,
-                                  DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+                                  YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       globalTimer = new GlobalTimer("captureRegionCalculator", registry);
 

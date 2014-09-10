@@ -26,6 +26,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.graphics.YoGraphic;
@@ -36,7 +37,6 @@ import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.splines.QuinticSplineInterpolator;
 
 public class JointSpaceTrajectoryGenerator
@@ -97,7 +97,7 @@ public class JointSpaceTrajectoryGenerator
    
 
    public JointSpaceTrajectoryGenerator(String name, int maximumNumberOfViaPoints, CommonWalkingReferenceFrames referenceFrames,
-         LegInverseKinematicsCalculator inverseKinematicsCalculator, ProcessedSensorsInterface processedSensors, double controlDT, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+         LegInverseKinematicsCalculator inverseKinematicsCalculator, ProcessedSensorsInterface processedSensors, double controlDT, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry,
          BodyPositionInTimeEstimator bodyPositionInTimeEstimator, SwingLegAnglesAtEndOfStepEstimator swingLegAnglesAtEndOfStepEstimator, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(name);
@@ -187,7 +187,7 @@ public class JointSpaceTrajectoryGenerator
       parentRegistry.addChild(registry);
    }
 
-   private void createVisualizers(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+   private void createVisualizers(YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
    {
       if (dynamicGraphicObjectsListRegistry != null)
       {

@@ -26,9 +26,9 @@ import us.ihmc.utilities.net.AtomicSettableTimestampProvider;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterface, StateEstimator
 {
@@ -58,7 +58,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 
    public DRCKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, StateEstimatorParameters stateEstimatorParameters,
          SensorOutputMapReadOnly sensorOutputMapReadOnly, double gravitationalAcceleration, SideDependentList<WrenchBasedFootSwitch> footSwitches,
-         SideDependentList<ContactablePlaneBody> bipedFeet, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+         SideDependentList<ContactablePlaneBody> bipedFeet, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry,
          ExternalPelvisPoseSubscriberInterface externalPelvisSubscriber, AtomicSettableTimestampProvider timestampProvider)
    {
       this.estimatorDT = stateEstimatorParameters.getEstimatorDT();
@@ -115,7 +115,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
          setupDynamicGraphicObjects(dynamicGraphicObjectsListRegistry, imusToDisplay);
    }
 
-   private void setupDynamicGraphicObjects(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+   private void setupDynamicGraphicObjects(YoGraphicsListRegistry dynamicGraphicObjectsListRegistry,
          List<? extends IMUSensorReadOnly> imuProcessedOutputs)
    {
       for (int i = 0; i < imuProcessedOutputs.size(); i++)

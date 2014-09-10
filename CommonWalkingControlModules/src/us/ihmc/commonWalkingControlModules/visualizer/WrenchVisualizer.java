@@ -13,12 +13,12 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 /**
  * @author twan
@@ -41,12 +41,12 @@ public class WrenchVisualizer
    private final FramePoint tempPoint = new FramePoint();
    private final ArrayList<RigidBody> rigidBodies = new ArrayList<RigidBody>();
 
-   public WrenchVisualizer(String name, List<RigidBody> rigidBodies, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+   public WrenchVisualizer(String name, List<RigidBody> rigidBodies, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
    {
       this(name, rigidBodies, dynamicGraphicObjectsListRegistry, parentRegistry, YoAppearance.OrangeRed(), YoAppearance.CornflowerBlue());
    }
    
-   public WrenchVisualizer(String name, List<RigidBody> rigidBodies, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry, 
+   public WrenchVisualizer(String name, List<RigidBody> rigidBodies, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry, 
          AppearanceDefinition forceAppearance, AppearanceDefinition torqueAppearance)
    {
       YoGraphicsList dynamicGraphicObjectsList = new YoGraphicsList(name);

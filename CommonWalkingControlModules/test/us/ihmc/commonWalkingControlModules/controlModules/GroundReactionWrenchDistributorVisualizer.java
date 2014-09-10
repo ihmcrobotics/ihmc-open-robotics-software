@@ -15,6 +15,7 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicPolygon;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
@@ -26,7 +27,6 @@ import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class GroundReactionWrenchDistributorVisualizer
 {
@@ -58,7 +58,7 @@ public class GroundReactionWrenchDistributorVisualizer
    private final ArrayList<YoFrameVector> cylinderWrenchTorques= new ArrayList<YoFrameVector>();
 
    public GroundReactionWrenchDistributorVisualizer(int maxNumberOfFeet, int maxNumberOfVertices, int maxNumberOfCylinders, YoVariableRegistry parentRegistry,
-           DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+           YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       YoGraphicsList dynamicGraphicObjectsList = new YoGraphicsList("GroundReactionWrenchDistributorVisuzalizer");
 

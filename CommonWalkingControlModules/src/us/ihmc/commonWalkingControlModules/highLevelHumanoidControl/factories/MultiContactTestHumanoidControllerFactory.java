@@ -12,9 +12,9 @@ import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.TotalMassCalculator;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 import com.yobotics.simulationconstructionset.util.controller.GainCalculator;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class MultiContactTestHumanoidControllerFactory implements HighLevelBehaviorFactory
 {
@@ -52,7 +52,7 @@ public class MultiContactTestHumanoidControllerFactory implements HighLevelBehav
       momentumRateOfChangeControlModule.setProportionalGains(comProportionalGain, comProportionalGain, comProportionalGain);
       momentumRateOfChangeControlModule.setDerivativeGains(comDerivativeGain, comDerivativeGain, comDerivativeGain);
 
-      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
+      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
       MultiContactTestHumanoidController multiContactTestHumanoidController = new MultiContactTestHumanoidController(variousWalkingProviders,
             variousWalkingManagers, momentumRateOfChangeControlModule, momentumBasedController, multiContactControllerParameters,
             dynamicGraphicObjectsListRegistry);

@@ -14,10 +14,10 @@ import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicCoordinateSystem;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class CenterOfMassCalibrationTool implements Updatable
 {
@@ -33,7 +33,7 @@ public class CenterOfMassCalibrationTool implements Updatable
 
    private final FullRobotModel fullRobotModel;
    
-   public CenterOfMassCalibrationTool(FullRobotModel fullRobotModel, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+   public CenterOfMassCalibrationTool(FullRobotModel fullRobotModel, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry,
                                       YoVariableRegistry registry)
    {
       this.fullRobotModel = fullRobotModel;

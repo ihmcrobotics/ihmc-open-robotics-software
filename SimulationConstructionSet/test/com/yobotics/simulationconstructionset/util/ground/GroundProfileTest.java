@@ -22,6 +22,7 @@ import us.ihmc.utilities.math.geometry.BoundingBox3d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.test.JUnitTools;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
@@ -30,7 +31,6 @@ import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.util.LinearStickSlipGroundContactModel;
 import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public abstract class GroundProfileTest
 {
@@ -66,7 +66,7 @@ public abstract class GroundProfileTest
 
          robot.setGroundContactModel(groundModel);
          
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+         YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
          bagOfBalls = new BagOfBalls(robot.getRobotsYoVariableRegistry(), dynamicGraphicObjectsListRegistry);
          surfaceNormalPointForViz = new YoFramePoint("surfaceNormalPointForViz", ReferenceFrame.getWorldFrame(), robot.getRobotsYoVariableRegistry());
          surfaceNormalViz = new YoFrameVector("surfaceNormalVector", ReferenceFrame.getWorldFrame(), robot.getRobotsYoVariableRegistry());

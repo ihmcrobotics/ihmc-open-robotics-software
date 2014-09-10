@@ -25,6 +25,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.RemoteYoGraphic;
 import us.ihmc.yoUtilities.graphics.YoGraphic;
@@ -34,7 +35,6 @@ import us.ihmc.yoUtilities.graphics.plotting.ArtifactList;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicFactory;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class YoVariableHandshakeParser
 {
@@ -45,7 +45,7 @@ public class YoVariableHandshakeParser
    private double dt;
    private final ArrayList<YoVariableRegistry> registries = new ArrayList<YoVariableRegistry>();
    private final ArrayList<YoVariable> variables = new ArrayList<YoVariable>();
-   private final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+   private final YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
    private final ArrayList<JointState<? extends Joint>> jointStates = new ArrayList<>();
    private final DynamicEnumCreator dynamicEnumCreator = new DynamicEnumCreator();
 
@@ -61,7 +61,7 @@ public class YoVariableHandshakeParser
       this.registryPrefix = registryPrefix;
    }
 
-   public DynamicGraphicObjectsListRegistry getDynamicGraphicObjectsListRegistry()
+   public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()
    {
       return dynamicGraphicObjectsListRegistry;
    }

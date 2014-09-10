@@ -23,19 +23,19 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFrameLineSegment2d;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class FootCenterToToeEvaluator
 {
    private boolean visualize = false;
 
    private PointAndLinePlotter pointAndLinePlotter = null;
-   private DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = null;
+   private YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = null;
    private SimulationConstructionSet scs = null;
    private DoubleYoVariable timeYoVariable = null;
 

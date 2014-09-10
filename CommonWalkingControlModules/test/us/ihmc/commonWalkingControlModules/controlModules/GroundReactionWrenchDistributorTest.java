@@ -49,10 +49,10 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
 import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class GroundReactionWrenchDistributorTest
 {
@@ -284,7 +284,7 @@ public class GroundReactionWrenchDistributorTest
       YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
       Point3d centerOfMassPoint3d = new Point3d(0.0, 0.0, 1.0);
       PoseReferenceFrame centerOfMassFrame = createCenterOfMassFrame(centerOfMassPoint3d);
-      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
       
       GroundReactionWrenchDistributor distributor = new CylinderAndContactPointWrenchDistributor(centerOfMassFrame, parentRegistry,
             dynamicGraphicObjectsListRegistry);
@@ -342,7 +342,7 @@ public class GroundReactionWrenchDistributorTest
          YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
          Point3d centerOfMassPoint3d = new Point3d(0.2, 0.1, 1.07);
          PoseReferenceFrame centerOfMassFrame = createCenterOfMassFrame(centerOfMassPoint3d);
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+         YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
          
          GroundReactionWrenchDistributor distributor = new CylinderAndContactPointWrenchDistributor(centerOfMassFrame, parentRegistry,
                dynamicGraphicObjectsListRegistry);
@@ -370,7 +370,7 @@ public class GroundReactionWrenchDistributorTest
    }
 
    private void testSimpleWrenchDistributionWithCylinders(ReferenceFrame centerOfMassFrame, GroundReactionWrenchDistributor distributor,
-         YoVariableRegistry parentRegistry, double epsilon, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+         YoVariableRegistry parentRegistry, double epsilon, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       double coefficientOfFriction = 0.3;
       double footLength = 0.3;
@@ -424,7 +424,7 @@ public class GroundReactionWrenchDistributorTest
    }
 
    private void testRandomMultiContact(ReferenceFrame centerOfMassFrame, GroundReactionWrenchDistributor distributor, YoVariableRegistry parentRegistry,
-         double epsilon, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, Random random)
+         double epsilon, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, Random random)
    {
       double coefficientOfFriction = 0.3;
       double footLength = 0.3;
@@ -541,7 +541,7 @@ public class GroundReactionWrenchDistributorTest
       {
          Robot robot = new Robot("null");
 
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+         YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
          scs = new SimulationConstructionSet(robot);
 
          int maxNumberOfFeet = 2; // 6;
@@ -587,7 +587,7 @@ public class GroundReactionWrenchDistributorTest
       {
          Robot robot = new Robot("null");
 
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+         YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
          scs = new SimulationConstructionSet(robot);
 
          int maxNumberOfFeet = 2; // 6;
@@ -726,7 +726,7 @@ public class GroundReactionWrenchDistributorTest
       {
          Robot robot = new Robot("null");
 
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+         YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
          SimulationConstructionSet scs = new SimulationConstructionSet(robot);
 
          int maxNumberOfFeet = 2;
@@ -753,7 +753,7 @@ public class GroundReactionWrenchDistributorTest
 
    private void simpleNFootMCylinderTest(ReferenceFrame centerOfMassFrame, GroundReactionWrenchDistributor distributor, YoVariableRegistry parentRegistry,
          PlaneContactState[] feetContactStates, CylindricalContactState[] handContactStates, double coefficientOfFriction, double epsilon,
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, SpatialForceVector desiredNetSpatialForceVector)
+         YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, SpatialForceVector desiredNetSpatialForceVector)
    {
       ArrayList<PlaneContactState> planeContactState = new ArrayList<PlaneContactState>();
       ArrayList<CylindricalContactState> handContactStatesList = new ArrayList<CylindricalContactState>();
@@ -1196,7 +1196,7 @@ public class GroundReactionWrenchDistributorTest
    }
 
    private CylinderAndContactPointWrenchDistributor createOptimizationBasedWrenchDistributor(YoVariableRegistry parentRegistry,
-         PoseReferenceFrame centerOfMassFrame, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+         PoseReferenceFrame centerOfMassFrame, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       CylinderAndContactPointWrenchDistributor distributor = new CylinderAndContactPointWrenchDistributor(centerOfMassFrame, parentRegistry,
             dynamicGraphicObjectsListRegistry);

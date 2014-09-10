@@ -5,10 +5,10 @@ import java.awt.Color;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
 
 import com.yobotics.simulationconstructionset.plotting.DynamicGraphicYoPolygonArtifact;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class CaptureRegionVisualizer
 {
@@ -24,7 +24,7 @@ public class CaptureRegionVisualizer
    private OneStepCaptureRegionCalculator captureRegionCalculator;
    
    public CaptureRegionVisualizer(OneStepCaptureRegionCalculator captureRegionCalculator,
-                                  DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry,
+                                  YoGraphicsListRegistry dynamicGraphicObjectsListRegistry,
                                   YoVariableRegistry parentRegistry)
    {
       this.captureRegionCalculator = captureRegionCalculator;

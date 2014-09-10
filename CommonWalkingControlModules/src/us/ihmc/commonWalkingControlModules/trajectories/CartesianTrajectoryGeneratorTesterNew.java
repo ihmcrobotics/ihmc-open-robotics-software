@@ -4,6 +4,7 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
@@ -11,7 +12,6 @@ import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.trajectory.CartesianTrajectoryGenerator;
 
 public class CartesianTrajectoryGeneratorTesterNew
@@ -59,7 +59,7 @@ public class CartesianTrajectoryGeneratorTesterNew
       private final BagOfBalls bagOfBalls;
 
       private TrajectoryEvaluatorController(double straightUpTime, double stepTime, double groundClearance, double dt,
-            DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+            YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
       {
          this.dt = dt;
          trajectoryGenerator = new StraightUpThenParabolicCartesianTrajectoryGenerator("test", referenceFrame, straightUpTime, stepTime, groundClearance,
@@ -109,7 +109,7 @@ public class CartesianTrajectoryGeneratorTesterNew
    public static void main(String[] args)
    {
       final double dt = 1e-3;
-      final DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+      final YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
 
       double straightUpAverageVelocity = 0.2;
       double parabolicTime = 1.5;

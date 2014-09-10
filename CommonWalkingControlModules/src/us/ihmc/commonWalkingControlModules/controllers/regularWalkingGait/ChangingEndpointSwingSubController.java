@@ -23,6 +23,7 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphic;
 import us.ihmc.yoUtilities.graphics.YoGraphicCoordinateSystem;
@@ -33,7 +34,6 @@ import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.kinematics.OrientationInterpolationCalculator;
 import com.yobotics.simulationconstructionset.util.trajectory.CartesianTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.YoMinimumJerkTrajectory;
@@ -128,7 +128,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
    public ChangingEndpointSwingSubController(ProcessedSensorsInterface processedSensors, CommonWalkingReferenceFrames referenceFrames,
          CouplingRegistry couplingRegistry, DesiredFootstepCalculator desiredFootstepCalculator,
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry,
+         YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry,
          SideDependentList<AnkleVelocityCalculator> ankleVelocityCalculators, SideDependentList<FootSwitchInterface> footSwitches,
          CartesianTrajectoryGenerator walkingCartesianTrajectoryGenerator,
          SideDependentList<CartesianTrajectoryGenerator> swingInAirCartesianTrajectoryGenerators, PreSwingControlModule preSwingControlModule,
@@ -165,7 +165,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
       parentRegistry.addChild(registry);
    }
 
-   private void createVisualizers(DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+   private void createVisualizers(YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
    {
       if (dynamicGraphicObjectsListRegistry != null)
       {

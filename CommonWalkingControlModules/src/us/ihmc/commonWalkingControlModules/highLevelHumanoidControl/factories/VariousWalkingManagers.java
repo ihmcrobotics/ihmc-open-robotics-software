@@ -23,9 +23,9 @@ import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 import com.yobotics.simulationconstructionset.util.controller.YoOrientationPIDGains;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class VariousWalkingManagers
 {
@@ -51,7 +51,7 @@ public class VariousWalkingManagers
    {
       FullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
       TwistCalculator twistCalculator = momentumBasedController.getTwistCalculator();
-      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
+      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
       double controlDT = momentumBasedController.getControlDT();
 
       HeadOrientationProvider desiredHeadOrientationProvider = null;
@@ -112,7 +112,7 @@ public class VariousWalkingManagers
 
    private static HeadOrientationControlModule setupHeadOrientationControlModule(MomentumBasedController momentumBasedController,
          HeadOrientationProvider desiredHeadOrientationProvider, HeadOrientationControllerParameters headOrientationControllerParameters,
-         DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry registry)
+         YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry registry)
    {
       CommonWalkingReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
 
