@@ -10,9 +10,9 @@ import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.net.ObjectConsumer;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.yoUtilities.graphics.GraphicsUpdatable;
 
 import com.yobotics.simulationconstructionset.graphics.GraphicsRobot;
-import com.yobotics.simulationconstructionset.graphics.GraphicsUpdatable;
 
 public class HandJointAngleProvider implements ObjectConsumer<HandJointAnglePacket>
 {
