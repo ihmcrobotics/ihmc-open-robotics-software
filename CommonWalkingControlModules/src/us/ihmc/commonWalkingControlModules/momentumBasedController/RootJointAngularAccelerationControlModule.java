@@ -29,12 +29,12 @@ public class RootJointAngularAccelerationControlModule
    private final RigidBody rootPredecessor;
    private final RigidBody rootSuccessor;
 
-   public RootJointAngularAccelerationControlModule(double controlDT, MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
+   public RootJointAngularAccelerationControlModule(MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
    {
-      this(controlDT, momentumBasedController, null, parentRegistry);
+      this(momentumBasedController, null, parentRegistry);
    }
 
-   public RootJointAngularAccelerationControlModule(double controlDT, MomentumBasedController momentumBasedController, YoOrientationPIDGains gains, YoVariableRegistry parentRegistry)
+   public RootJointAngularAccelerationControlModule(MomentumBasedController momentumBasedController, YoOrientationPIDGains gains, YoVariableRegistry parentRegistry)
    {
       this.rootJoint = momentumBasedController.getFullRobotModel().getRootJoint();
       
@@ -44,6 +44,7 @@ public class RootJointAngularAccelerationControlModule
       taskspaceConstraintData.set(rootPredecessor, rootSuccessor);
       
       registry = new YoVariableRegistry(getClass().getSimpleName());
+      double controlDT = momentumBasedController.getControlDT();
       rootJointOrientationControlModule = new RigidBodyOrientationControlModule(rootJoint.getName(), rootPredecessor, rootSuccessor,
               momentumBasedController.getTwistCalculator(), controlDT, gains, registry);
       this.controlledPelvisAngularAcceleration = new YoFrameVector("controlled" + rootJoint.getName() + "AngularAcceleration", rootJoint.getFrameAfterJoint(),
