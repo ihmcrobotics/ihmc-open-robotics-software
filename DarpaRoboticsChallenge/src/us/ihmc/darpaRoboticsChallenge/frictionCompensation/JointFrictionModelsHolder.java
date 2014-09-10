@@ -129,11 +129,11 @@ public abstract class JointFrictionModelsHolder
     * Use this method to select the effectiveness of the friction compensation.
     * The predicted friction force is increased or reduced by multiplying it with the effectiveness parameter.
     * 
-    * @param effectiveness - if 1.0 the effectiveFrictionForce equals the friction force predicted by the active friction model.
+    * @param effectiveness - if 1.0 the effectiveFrictionForce equals the friction force predicted by the active friction model. Currently is clamped between 0.0 and 1.0.
     */
    public void setFrictionCompensationEffectiveness(double effectiveness)
    {
-      frictionCompensationEffectiveness.set(effectiveness);
+      frictionCompensationEffectiveness.set(clampValue(effectiveness, 0.0, 1.0));
    }
 
    public FrictionModel getActiveFrictionModel()
@@ -175,6 +175,11 @@ public abstract class JointFrictionModelsHolder
    {
       stictionTransitionVelocity.set(value);
    }
+   
+   private double clampValue(double val, double min, double max) 
+   {
+      return Math.max(min, Math.min(max, val));
+  }
 
    protected abstract void checkIfExistFrictionModelForThisJoint(FrictionModel requestedFrictionModel);
 }
