@@ -21,9 +21,9 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceCons
 import us.ihmc.commonWalkingControlModules.packetConsumers.ChestOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootStateProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisLoadBearingProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootPoseProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisPoseProvider;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
@@ -57,7 +57,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    private DesiredThighLoadBearingProvider thighLoadBearingProvider;
    private DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider;
 
-   private final DesiredPelvisPoseProvider pelvisPoseProvider;
+   private final PelvisPoseProvider pelvisPoseProvider;
    private final RigidBodySpatialAccelerationControlModule pelvisController;
    private final ReferenceFrame pelvisPositionControlFrame;
    private final int pelvisJacobianId;
@@ -367,25 +367,32 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
    protected void doPelvisControl()
    {
-      if (pelvisPoseProvider != null && pelvisPoseProvider.checkForNewPose())
+      if (pelvisPoseProvider != null)
       {
-         double time = yoTime.getDoubleValue() - pelvisTrajectoryStartTime;
-         pelvisPositionTrajectoryGenerator.compute(time);
-         pelvisOrientationTrajectoryGenerator.compute(time);
+         if (pelvisPoseProvider.checkForNewPosition() || pelvisPoseProvider.checkForNewOrientation())
+         {
+            double time = yoTime.getDoubleValue() - pelvisTrajectoryStartTime;
+            pelvisPositionTrajectoryGenerator.compute(time);
+            pelvisOrientationTrajectoryGenerator.compute(time);
 
-         FramePoint previousDesiredPosition = new FramePoint(pelvisPositionControlFrame);
-         FrameOrientation previousDesiredOrientation = new FrameOrientation(pelvisPositionControlFrame);
-         pelvisPositionTrajectoryGenerator.get(previousDesiredPosition);
-         pelvisOrientationTrajectoryGenerator.get(previousDesiredOrientation);
+            FramePoint previousDesiredPosition = new FramePoint(pelvisPositionControlFrame);
+            FrameOrientation previousDesiredOrientation = new FrameOrientation(pelvisPositionControlFrame);
+            pelvisPositionTrajectoryGenerator.get(previousDesiredPosition);
+            pelvisOrientationTrajectoryGenerator.get(previousDesiredOrientation);
 
-         FramePose previousDesiredPelvisConfiguration = new FramePose(previousDesiredPosition, previousDesiredOrientation);
-         initialPelvisConfigurationProvider.set(previousDesiredPelvisConfiguration);
+            FramePose previousDesiredPelvisConfiguration = new FramePose(previousDesiredPosition, previousDesiredOrientation);
+            initialPelvisConfigurationProvider.set(previousDesiredPelvisConfiguration);
 
-         desiredPelvisConfigurationProvider.set(pelvisPoseProvider.getDesiredPelvisPose());
-         pelvisTrajectoryStartTime = yoTime.getDoubleValue();
+            FramePoint position = pelvisPoseProvider.checkForNewPosition() ? pelvisPoseProvider.getDesiredPelvisPosition() : previousDesiredPosition;
+            FrameOrientation orientation = pelvisPoseProvider.checkForNewOrientation() ? pelvisPoseProvider.getDesiredPelvisOrientation() : previousDesiredOrientation;;
+            
+            FramePose desiredPelvisPose = new FramePose(position, orientation);
+            desiredPelvisConfigurationProvider.set(desiredPelvisPose);
+            pelvisTrajectoryStartTime = yoTime.getDoubleValue();
 
-         pelvisPositionTrajectoryGenerator.initialize();
-         pelvisOrientationTrajectoryGenerator.initialize();
+            pelvisPositionTrajectoryGenerator.initialize();
+            pelvisOrientationTrajectoryGenerator.initialize();
+         }
       }
 
       double time = yoTime.getDoubleValue() - pelvisTrajectoryStartTime;
