@@ -19,8 +19,8 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
+import us.ihmc.yoUtilities.math.trajectories.PoseTrajectoryGenerator;
 
-import com.yobotics.simulationconstructionset.util.trajectory.PoseTrajectoryGenerator;
 
 /**
  * @author twan

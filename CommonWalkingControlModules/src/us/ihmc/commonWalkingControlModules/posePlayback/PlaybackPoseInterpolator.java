@@ -4,8 +4,8 @@ import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
+import us.ihmc.yoUtilities.math.trajectories.YoPolynomial;
 
-import com.yobotics.simulationconstructionset.util.trajectory.YoPolynomial;
 
 public class PlaybackPoseInterpolator
 {

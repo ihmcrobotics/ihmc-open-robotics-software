@@ -3,8 +3,8 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import javax.vecmath.Point2d;
 
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.math.trajectories.YoPolynomial;
 
-import com.yobotics.simulationconstructionset.util.trajectory.YoPolynomial;
 
 public class FourPointSpline1D
 {

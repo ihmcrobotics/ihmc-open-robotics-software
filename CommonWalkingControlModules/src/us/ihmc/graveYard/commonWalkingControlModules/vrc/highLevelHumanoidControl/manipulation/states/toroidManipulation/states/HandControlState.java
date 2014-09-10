@@ -19,10 +19,10 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
+import us.ihmc.yoUtilities.math.trajectories.Finishable;
+import us.ihmc.yoUtilities.math.trajectories.OrientationTrajectoryGenerator;
+import us.ihmc.yoUtilities.math.trajectories.PositionTrajectoryGenerator;
 
-import com.yobotics.simulationconstructionset.util.trajectory.Finishable;
-import com.yobotics.simulationconstructionset.util.trajectory.OrientationTrajectoryGenerator;
-import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
 
 public class HandControlState<T extends Enum<T>> extends ToroidManipulationStateInterface<T>
 {

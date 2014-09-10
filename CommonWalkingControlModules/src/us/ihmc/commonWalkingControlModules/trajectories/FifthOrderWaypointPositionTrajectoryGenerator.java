@@ -14,9 +14,9 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
+import us.ihmc.yoUtilities.math.trajectories.PositionTrajectoryGenerator;
+import us.ihmc.yoUtilities.math.trajectories.YoPolynomial;
 
-import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
-import com.yobotics.simulationconstructionset.util.trajectory.YoPolynomial;
 
 public class FifthOrderWaypointPositionTrajectoryGenerator implements PositionTrajectoryGenerator
 {

@@ -31,6 +31,12 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.yoUtilities.math.trajectories.ConstantPositionTrajectoryGenerator;
+import us.ihmc.yoUtilities.math.trajectories.OrientationInterpolationTrajectoryGenerator;
+import us.ihmc.yoUtilities.math.trajectories.OrientationTrajectoryGenerator;
+import us.ihmc.yoUtilities.math.trajectories.PositionTrajectoryGenerator;
+import us.ihmc.yoUtilities.math.trajectories.ProviderBasedConstantOrientationTrajectoryGenerator;
+import us.ihmc.yoUtilities.math.trajectories.StraightLinePositionTrajectoryGenerator;
 
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 import com.yobotics.simulationconstructionset.util.math.filter.FilteredDiscreteVelocityYoVariable;
@@ -38,12 +44,6 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionAction;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
-import com.yobotics.simulationconstructionset.util.trajectory.ConstantPositionTrajectoryGenerator;
-import com.yobotics.simulationconstructionset.util.trajectory.OrientationInterpolationTrajectoryGenerator;
-import com.yobotics.simulationconstructionset.util.trajectory.OrientationTrajectoryGenerator;
-import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
-import com.yobotics.simulationconstructionset.util.trajectory.ProviderBasedConstantOrientationTrajectoryGenerator;
-import com.yobotics.simulationconstructionset.util.trajectory.StraightLinePositionTrajectoryGenerator;
 
 public class ToroidManipulationStateMachine
 {
