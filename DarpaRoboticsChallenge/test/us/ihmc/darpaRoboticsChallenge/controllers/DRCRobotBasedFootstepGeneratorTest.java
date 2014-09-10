@@ -26,7 +26,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.Tur
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.userInterface.DRCOperatorUserInterface;
+import us.ihmc.darpaRoboticsChallenge.userInterface.DRCOperatorInterface;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.MemoryTools;
@@ -165,6 +165,6 @@ public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTe
       walkingParamaters = robotModel.getWalkingControllerParameters();
       fullRobotModel = robotModel.createFullRobotModel();
       referenceFrames = new ReferenceFrames(fullRobotModel);
-      bipedFeet = DRCOperatorUserInterface.setupBipedFeet(referenceFrames, fullRobotModel, walkingParamaters);
+      bipedFeet = DRCOperatorInterface.setupBipedFeet(referenceFrames, fullRobotModel, walkingParamaters);
    }
 }
