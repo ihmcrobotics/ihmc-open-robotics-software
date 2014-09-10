@@ -149,14 +149,14 @@ public void testJacobianMatchesMATLABWaist()
    for (int i = 0; i < 7; i++)
    {
       double[][] J = closedFormJacobianWaist.getUpdatedTransform( roll[i], pitch[i] );
-      if(DEBUG){
+      if(true){
          System.out.println("m11_java: " + J[0][0] + ", m12_java: " + J[0][1] + ", m21_java: " + J[1][0] + ", m22_java: " + J[1][1]);
-         System.out.println("m11_matlab: " + m22_matlab_waist[i] + ", m12_matlab: " + m21_matlab_waist[i] + ", m21_matlab: " + -m12_matlab_waist[i] + ", m22_matlab: " + -m11_matlab_waist[i]);         
+         System.out.println("m11_matlab: " + m12_matlab_waist[i] + ", m12_matlab: " + m11_matlab_waist[i] + ", m21_matlab: " + -m22_matlab_waist[i] + ", m22_matlab: " + -m21_matlab_waist[i]);         
       }
-      assertEquals(J[0][0], -m22_matlab_waist[i], TOLERANCE);
-      assertEquals(J[0][1], -m21_matlab_waist[i], TOLERANCE);
-      assertEquals(J[1][0], -m12_matlab_waist[i], TOLERANCE);
-      assertEquals(J[1][1], -m11_matlab_waist[i], TOLERANCE);
+      assertEquals(J[0][0], m12_matlab_waist[i], TOLERANCE);
+      assertEquals(J[0][1], m11_matlab_waist[i], TOLERANCE);
+      assertEquals(J[1][0], -m22_matlab_waist[i], TOLERANCE);
+      assertEquals(J[1][1], -m21_matlab_waist[i], TOLERANCE);
    }
 }
 
