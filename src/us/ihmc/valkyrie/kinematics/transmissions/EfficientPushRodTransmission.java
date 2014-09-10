@@ -90,9 +90,10 @@ public class EfficientPushRodTransmission implements PushRodTransmissionInterfac
         double rollAngle         = reflect * jnt_data[1].getPosition();
 
         jacobian = efficientPushrodTransmissionJacobian.getUpdatedTransform(rollAngle, pitchAngle);
+        invertMatrix(jacobian, jacobianInverse);
 
-        double rollVelocity  = jacobian[0][0] * actuatorVelocity0 + jacobian[0][1] * actuatorVelocity1;
-        double pitchVelocity = jacobian[1][0] * actuatorVelocity0 + jacobian[1][1] * actuatorVelocity1;
+        double rollVelocity  = jacobianInverse[0][0] * actuatorVelocity0 + jacobianInverse[0][1] * actuatorVelocity1;
+        double pitchVelocity = jacobianInverse[1][0] * actuatorVelocity0 + jacobianInverse[1][1] * actuatorVelocity1;
 
         jnt_data[0].setValidationVelocity(pitchVelocity);
         jnt_data[1].setValidationVelocity(reflect * rollVelocity);
