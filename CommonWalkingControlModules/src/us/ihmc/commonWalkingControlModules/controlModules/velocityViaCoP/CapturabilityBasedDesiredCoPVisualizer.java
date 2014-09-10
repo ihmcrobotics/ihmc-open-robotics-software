@@ -13,10 +13,10 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.yoUtilities.graphics.plotting.ArtifactList;
+import us.ihmc.yoUtilities.graphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameLineSegment2d;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
-import com.yobotics.simulationconstructionset.plotting.YoFrameLineSegment2dArtifact;
 
 public class CapturabilityBasedDesiredCoPVisualizer
 {
@@ -94,7 +94,7 @@ public class CapturabilityBasedDesiredCoPVisualizer
 
    private void addGuideLineViz(ArtifactList artifactList)
    {
-      YoFrameLineSegment2dArtifact guideLineArtifact = new YoFrameLineSegment2dArtifact("Guide Line", guideLine, Color.RED);
+      YoArtifactLineSegment2d guideLineArtifact = new YoArtifactLineSegment2d("Guide Line", guideLine, Color.RED);
       artifactList.add(guideLineArtifact);
    }
 
