@@ -37,6 +37,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicLineSegment;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
@@ -48,7 +49,6 @@ import us.ihmc.yoUtilities.math.frames.YoFramePose;
 import com.yobotics.simulationconstructionset.FloatingJoint;
 import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicLineSegment;
 import com.yobotics.simulationconstructionset.util.inputdevices.MidiSliderBoard;
 
 public class DRCRobotMidiSliderBoardPositionManipulation
@@ -1031,7 +1031,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
          
          for (int j = i + 1; j < basePoints.length; j++)
          {
-            DynamicGraphicLineSegment dynamicGraphicLineSegment = new DynamicGraphicLineSegment(namePrefix + "SupportLine", basePoints[i], basePoints[j],
+            YoGraphicLineSegment dynamicGraphicLineSegment = new YoGraphicLineSegment(namePrefix + "SupportLine", basePoints[i], basePoints[j],
                   1.0, appearance, false);
             yoGraphicsList.add(dynamicGraphicLineSegment);
             linesList.add(dynamicGraphicLineSegment);
