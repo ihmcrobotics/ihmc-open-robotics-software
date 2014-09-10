@@ -9,9 +9,9 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Random;
 
-import us.ihmc.communication.networking.SerializerFactory;
-import us.ihmc.communication.networking.UplinkSerializerFactory;
 import us.ihmc.communication.serializers.Serializer;
+import us.ihmc.communication.util.SerializerFactory;
+import us.ihmc.communication.util.UplinkSerializerFactory;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.mapper.MapperWrapper;

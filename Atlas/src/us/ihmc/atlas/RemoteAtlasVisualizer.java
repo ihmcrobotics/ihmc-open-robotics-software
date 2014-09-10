@@ -1,6 +1,6 @@
 package us.ihmc.atlas;
 
-import us.ihmc.communication.networking.NetworkConfigParameters;
+import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardControllerListener;
 import us.ihmc.darpaRoboticsChallenge.visualization.SliderBoardFactory;
