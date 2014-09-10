@@ -228,4 +228,11 @@ public class RandomSearchConvexOptimizationAdapter implements ConvexOptimization
    {
       throw new RuntimeException("Not yet implemented");      
    }
+
+   public void addSecondOrderConeConstraints(double[][] secondOrderConeAMatrix, double[] secondOrderConeBVector, double[] secondOrderConeCVector,
+         double secondOrderConeDScalar)
+   {
+      throw new RuntimeException("Not yet implemented");
+
+   }
 }

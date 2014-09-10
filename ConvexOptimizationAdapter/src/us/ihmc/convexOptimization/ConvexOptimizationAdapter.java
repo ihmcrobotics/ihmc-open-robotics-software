@@ -14,7 +14,7 @@ public interface ConvexOptimizationAdapter
    
    public abstract void addQuadraticInequalities(double[][] quadraticPMatrix, double[] quadraticQVector, double quadraticRScalar);
 
-   public abstract void addSecondOrderConeConstraints(double[][] secondOrderConeAMatrix, double secondOrderConeBScalar, double[] secondOrderConeCVector, double secondOrderConeDScalar);
+   public abstract void addSecondOrderConeConstraints(double[][] secondOrderConeAMatrix, double[] secondOrderConeBVector, double[] secondOrderConeCVector, double secondOrderConeDScalar);
    
    public abstract double[] solve();
    
