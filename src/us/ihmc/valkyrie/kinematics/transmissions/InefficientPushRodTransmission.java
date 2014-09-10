@@ -3,8 +3,8 @@ package us.ihmc.valkyrie.kinematics.transmissions;
 import us.ihmc.valkyrie.kinematics.ValkyrieJointInterface;
 import us.ihmc.valkyrie.roboNet.TurboDriver;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class InefficientPushRodTransmission implements PushRodTransmissionInterface
 {
@@ -50,7 +50,7 @@ public class InefficientPushRodTransmission implements PushRodTransmissionInterf
    
    public InefficientPushRodTransmission(PushRodTransmissionJoint pushRodTransmissionJoint, 
          double reflectTop, double reflectBottom, boolean topJointFirst,
-         YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+         YoVariableRegistry parentRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       if (Math.abs(Math.abs(reflectBottom) - 1.0) > 1e-7) throw new RuntimeException("reflect must be 1.0 or -1.0");
       this.reflectBottom = reflectBottom;
