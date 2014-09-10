@@ -55,7 +55,7 @@ import us.ihmc.darpaRoboticsChallenge.configuration.LocalCloudMachines;
 import us.ihmc.darpaRoboticsChallenge.processManagement.DRCDashboardTypes.DRCPluginTasks;
 import us.ihmc.darpaRoboticsChallenge.processManagement.DRCDashboardTypes.DRCROSTasks;
 import us.ihmc.darpaRoboticsChallenge.processManagement.GazeboRemoteSimulationAdapter;
-import us.ihmc.darpaRoboticsChallenge.userInterface.DRCOperatorUserInterface;
+import us.ihmc.darpaRoboticsChallenge.userInterface.DRCOperatorInterface;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.gui.IHMCSwingTools;
@@ -917,7 +917,7 @@ public class DRCDashboard
       {
          public void actionPerformed(ActionEvent e)
          {
-            uiSpawner.spawn(DRCOperatorUserInterface.class, new String[] {"-Xms1024m", "-Xmx2048m"}, null);
+            uiSpawner.spawn(DRCOperatorInterface.class, new String[] {"-Xms1024m", "-Xmx2048m"}, null);
          }
       });
    }
@@ -1201,7 +1201,7 @@ public class DRCDashboard
    {
       if (operatorUICheckBox.isSelected() &&!uiSpawner.hasRunningProcesses())
       {
-         uiSpawner.spawn(DRCOperatorUserInterface.class, new String[] {"-Xms1024m", "-Xmx2048m"}, null);
+         uiSpawner.spawn(DRCOperatorInterface.class, new String[] {"-Xms1024m", "-Xmx2048m"}, null);
       }
    }
 
