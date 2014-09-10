@@ -8,13 +8,13 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.ChestOrientationProvi
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootStateProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisLoadBearingProvider;
-import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HeadOrientationProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.DesiredHighLevelStateProvider;
 import us.ihmc.robotSide.RobotSide;
@@ -29,7 +29,7 @@ public class VariousWalkingProviders
 
    private final DesiredHighLevelStateProvider desiredHighLevelStateProvider;
    private final HeadOrientationProvider desiredHeadOrientationProvider;
-   private final DesiredPelvisPoseProvider desiredPelvisPoseProvider;
+   private final PelvisPoseProvider desiredPelvisPoseProvider;
    private final DesiredComHeightProvider desiredComHeightProvider;
    private final HandPoseProvider desiredHandPoseProvider;
    private final ChestOrientationProvider desiredChestOrientationProvider;
@@ -47,7 +47,7 @@ public class VariousWalkingProviders
    public VariousWalkingProviders(FootstepProvider footstepProvider, HandstepProvider handstepProvider, 
          HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters,
          HeadOrientationProvider desiredHeadOrientationProvider, DesiredComHeightProvider desiredComHeightProvider,
-         DesiredPelvisPoseProvider desiredPelvisPoseProvider, HandPoseProvider desiredHandPoseProvider,
+         PelvisPoseProvider desiredPelvisPoseProvider, HandPoseProvider desiredHandPoseProvider,
          HandLoadBearingProvider desiredHandLoadBearingProvider, ChestOrientationProvider desiredChestOrientationProvider,
          FootPoseProvider footPoseProvider, DesiredFootStateProvider footStateProvider, DesiredHighLevelStateProvider desiredHighLevelStateProvider,
          DesiredThighLoadBearingProvider thighLoadBearingProvider, DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider,
@@ -76,7 +76,8 @@ public class VariousWalkingProviders
    {
       if (desiredPelvisPoseProvider != null)
       {
-         desiredPelvisPoseProvider.getDesiredPelvisPose();
+         desiredPelvisPoseProvider.getDesiredPelvisPosition();
+         desiredPelvisPoseProvider.getDesiredPelvisOrientation();
       }
       if (desiredChestOrientationProvider != null)
       {
@@ -117,7 +118,7 @@ public class VariousWalkingProviders
       return desiredHeadOrientationProvider;
    }
 
-   public DesiredPelvisPoseProvider getDesiredPelvisPoseProvider()
+   public PelvisPoseProvider getDesiredPelvisPoseProvider()
    {
       return desiredPelvisPoseProvider;
    }
