@@ -145,10 +145,10 @@ public class CylinderAndPlaneContactMatrixCalculator
 
          }
 
-         yoGraphicsListRegistry.registerDynamicGraphicObjects("rawBasisVectorsRhoLinear ", dynamicGraphicVectorsRhoLinear);
-         yoGraphicsListRegistry.registerDynamicGraphicObjects("rawBasisVectorsRhoAngular", dynamicGraphicVectorsRhoAngular);
-         yoGraphicsListRegistry.registerDynamicGraphicObjects("rawBasisVectorsPhiLinear ", dynamicGraphicVectorsPhiLinear);
-         yoGraphicsListRegistry.registerDynamicGraphicObjects("rawBasisVectorsPhiAngular", dynamicGraphicVectorsPhiAngular);
+         yoGraphicsListRegistry.registerYoGraphics("rawBasisVectorsRhoLinear ", dynamicGraphicVectorsRhoLinear);
+         yoGraphicsListRegistry.registerYoGraphics("rawBasisVectorsRhoAngular", dynamicGraphicVectorsRhoAngular);
+         yoGraphicsListRegistry.registerYoGraphics("rawBasisVectorsPhiLinear ", dynamicGraphicVectorsPhiLinear);
+         yoGraphicsListRegistry.registerYoGraphics("rawBasisVectorsPhiAngular", dynamicGraphicVectorsPhiAngular);
       }
 
       this.debug = new BooleanYoVariable(this.getClass().getSimpleName() + "Debug", registry);

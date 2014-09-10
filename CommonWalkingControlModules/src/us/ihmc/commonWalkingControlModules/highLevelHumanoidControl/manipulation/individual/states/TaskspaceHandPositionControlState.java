@@ -65,7 +65,7 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
          dynamicGraphicReferenceFrames.add(dynamicGraphicReferenceFrame);
          list.add(dynamicGraphicReferenceFrame);
 
-         yoGraphicsListRegistry.registerDynamicGraphicObjectsList(list);
+         yoGraphicsListRegistry.registerYoGraphicsList(list);
          list.hideYoGraphics();
       }
 

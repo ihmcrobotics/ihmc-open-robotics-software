@@ -44,8 +44,8 @@ public class SplineBasedHeightTrajectoryGenerator implements CoMHeightTrajectory
          YoGraphicPosition position0 = new YoGraphicPosition("contactFrame0", contactFrameZeroPosition, 0.03, YoAppearance.Purple());
          YoGraphicPosition position1 = new YoGraphicPosition("contactFrame1", contactFrameOnePosition, 0.03, YoAppearance.Gold());
 
-         yoGraphicsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", position0);
-         yoGraphicsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", position1);
+         yoGraphicsListRegistry.registerYoGraphic("CoMHeightTrajectoryGenerator", position0);
+         yoGraphicsListRegistry.registerYoGraphic("CoMHeightTrajectoryGenerator", position1);
       }
    }
 

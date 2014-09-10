@@ -76,7 +76,7 @@ public class CommonCouplingRegistry implements CouplingRegistry
          footstepFrameGraphic = new YoGraphicReferenceFrame(footstepFrame, registry, 0.1);
          YoGraphicsList yoGraphicsList = new YoGraphicsList(getClass().getSimpleName());
          yoGraphicsList.add(footstepFrameGraphic);
-         yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicsList);
+         yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
 
       }
       else

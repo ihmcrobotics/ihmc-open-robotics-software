@@ -201,7 +201,7 @@ public class DrivingFootControlModule
          YoGraphicsList list = new YoGraphicsList("drivingFootControlModule");
          dynamicGraphicReferenceFrames.add(toePointFrameViz);
          list.add(toePointFrameViz);
-         yoGraphicsListRegistry.registerDynamicGraphicObjectsList(list);
+         yoGraphicsListRegistry.registerYoGraphicsList(list);
       }
 
    }

@@ -214,7 +214,7 @@ public class CartesianTrajectoryGeneratorTester
 
             yoGraphicsList.add(new YoGraphicPosition("Final Desired", finalDesiredPosition, 0.02, YoAppearance.Red()));
             yoGraphicsList.add(new YoGraphicPosition("Original Final Desired", originalFinalDesiredPosition, 0.02, YoAppearance.Black()));
-            yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicsList);
+            yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
          }
       }
 

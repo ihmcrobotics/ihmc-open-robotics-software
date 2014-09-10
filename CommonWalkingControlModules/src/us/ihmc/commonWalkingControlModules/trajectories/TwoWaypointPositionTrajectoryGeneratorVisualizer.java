@@ -77,8 +77,8 @@ public class TwoWaypointPositionTrajectoryGeneratorVisualizer
       dynamicFixedPositions[3] = new YoGraphicPosition(namePrefix + "DynamicFinalPosition", finalPosition, 0.01, YoAppearance.White());
       dynamicFixedVelocities[0] = new YoGraphicVector(namePrefix + "DynamicInitialVelocity", initialPosition, initialVelocity, YoAppearance.Red());
       dynamicFixedVelocities[1] = new YoGraphicVector(namePrefix + "DynamicFinalVelocity", finalPosition, finalVelocity, YoAppearance.Red());
-      yoGraphicsListRegistry.registerDynamicGraphicObjects(namePrefix + "DynamicFixedPositions", dynamicFixedPositions);
-      yoGraphicsListRegistry.registerDynamicGraphicObjects(namePrefix + "DynamicFixedVelocities", dynamicFixedVelocities);
+      yoGraphicsListRegistry.registerYoGraphics(namePrefix + "DynamicFixedPositions", dynamicFixedPositions);
+      yoGraphicsListRegistry.registerYoGraphics(namePrefix + "DynamicFixedVelocities", dynamicFixedVelocities);
 
       initialPosition.set(0.0, 0.0, 0.0);
       finalPosition.set(0.6, 0.0, 0.0);

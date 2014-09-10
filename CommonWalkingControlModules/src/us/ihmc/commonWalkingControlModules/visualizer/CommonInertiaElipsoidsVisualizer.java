@@ -70,7 +70,7 @@ public class CommonInertiaElipsoidsVisualizer implements Updatable, RobotControl
 
       findMinimumAndMaximumMassOfRigidBodies(rootBody);
       addRigidBodyAndChilderenToVisualization(rootBody);
-      yoGraphicsListRegistry.registerDynamicGraphicObjects(name, yoGraphics);
+      yoGraphicsListRegistry.registerYoGraphics(name, yoGraphics);
       update();
    
    }

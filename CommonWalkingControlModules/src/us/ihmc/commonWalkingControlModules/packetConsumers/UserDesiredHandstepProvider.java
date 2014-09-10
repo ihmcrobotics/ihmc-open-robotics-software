@@ -56,7 +56,7 @@ public class UserDesiredHandstepProvider implements HandstepProvider
          }
       };
 
-      yoGraphicsListRegistry.registerDynamicGraphicObject("UserDesiredHandstep", userDesiredHandstepCoordinateSystem);
+      yoGraphicsListRegistry.registerYoGraphic("UserDesiredHandstep", userDesiredHandstepCoordinateSystem);
 
       userHandstepNormal.attachVariableChangedListener(listener);
       userHandstepRotationAboutNormal.addVariableChangedListener(listener);

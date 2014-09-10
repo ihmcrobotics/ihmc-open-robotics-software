@@ -87,7 +87,7 @@ public class PointPositionRotateSteeringWheelBehavior
       if (yoGraphicsListRegistry != null)
       {
          xTangentialFrameViz = new YoGraphicReferenceFrame(xTangentialFrame, registry, 0.1);
-         yoGraphicsListRegistry.registerDynamicGraphicObject("rotateSteeringWheelBehavior", xTangentialFrameViz);
+         yoGraphicsListRegistry.registerYoGraphic("rotateSteeringWheelBehavior", xTangentialFrameViz);
       }
       else
       {

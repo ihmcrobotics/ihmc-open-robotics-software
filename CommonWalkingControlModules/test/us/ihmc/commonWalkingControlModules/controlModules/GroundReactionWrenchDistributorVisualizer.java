@@ -122,7 +122,7 @@ public class GroundReactionWrenchDistributorVisualizer
       yoGraphicsList.add(achievedForceWorldViz);
       yoGraphicsList.add(achievedMomentWorldViz);
 
-      yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicsList);
+      yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
 
       parentRegistry.addChild(registry);
    }

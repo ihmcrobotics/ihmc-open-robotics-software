@@ -69,8 +69,8 @@ public class HeadingAndVelocityEvaluationScriptTest
       YoGraphicVector velocityVector = new YoGraphicVector("velocity", position, velocity, YoAppearance.Yellow());
       YoGraphicVector headingVector = new YoGraphicVector("heading", position, heading, YoAppearance.Blue());
       
-      yoGraphicsListRegistry.registerDynamicGraphicObject("velocityVector", velocityVector);
-      yoGraphicsListRegistry.registerDynamicGraphicObject("headingVector", headingVector);
+      yoGraphicsListRegistry.registerYoGraphic("velocityVector", velocityVector);
+      yoGraphicsListRegistry.registerYoGraphic("headingVector", headingVector);
       
       BagOfBalls bagOfBalls = new BagOfBalls(1200, 0.03, YoAppearance.Red(), parentRegistry, yoGraphicsListRegistry);
 

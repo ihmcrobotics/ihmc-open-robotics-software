@@ -105,7 +105,7 @@ public class ICPAndMomentumBasedController
          
          YoGraphicPosition capturePointViz = new YoGraphicPosition("Capture Point", yoCapturePoint, 0.01, YoAppearance.Blue(),
                                                      GraphicType.ROTATED_CROSS);
-         yoGraphicsListRegistry.registerDynamicGraphicObject("Capture Point", capturePointViz);
+         yoGraphicsListRegistry.registerYoGraphic("Capture Point", capturePointViz);
          yoGraphicsListRegistry.registerArtifact("Capture Point", capturePointViz.createArtifact());
       }
       

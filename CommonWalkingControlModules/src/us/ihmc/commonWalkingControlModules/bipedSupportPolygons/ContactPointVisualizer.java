@@ -48,13 +48,13 @@ public class ContactPointVisualizer
          contactPointsWorld.add(contactPointWorld);
          YoGraphicPosition dynamicGraphicPosition = new YoGraphicPosition("contactViz" + i, contactPointWorld, 0.01, YoAppearance.Crimson());
          dynamicGraphicPositions.add(dynamicGraphicPosition);
-         yoGraphicsListRegistry.registerDynamicGraphicObject("contactPoints", dynamicGraphicPosition);
+         yoGraphicsListRegistry.registerYoGraphic("contactPoints", dynamicGraphicPosition);
 
          YoFrameVector normalVector = new YoFrameVector("contactNormal" + i, worldFrame, registry);
          normalVectors.add(normalVector);
          YoGraphicVector dynamicGraphicVector = new YoGraphicVector("contactNormalViz" + i, contactPointWorld, normalVector, YoAppearance.Crimson());
          dynamicGraphicVectors.add(dynamicGraphicVector);
-         yoGraphicsListRegistry.registerDynamicGraphicObject("contactPoints", dynamicGraphicVector);
+         yoGraphicsListRegistry.registerYoGraphic("contactPoints", dynamicGraphicVector);
       }
       parentRegistry.addChild(registry);
    }

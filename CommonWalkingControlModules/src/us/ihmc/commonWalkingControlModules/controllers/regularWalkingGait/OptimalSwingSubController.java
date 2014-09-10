@@ -177,7 +177,7 @@ public class OptimalSwingSubController implements SwingSubController
          artifactList.add(finalDesiredViz.createArtifact());
          yoGraphics.add(finalDesiredViz);
 
-         yoGraphicsListRegistry.registerDynamicGraphicObjects("OptimalSwingSubController", yoGraphics);
+         yoGraphicsListRegistry.registerYoGraphics("OptimalSwingSubController", yoGraphics);
 
          yoGraphicsListRegistry.registerArtifactList(artifactList);
       }

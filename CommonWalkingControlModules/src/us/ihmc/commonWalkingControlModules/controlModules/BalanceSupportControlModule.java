@@ -80,7 +80,7 @@ public class BalanceSupportControlModule
          if (yoGraphicsListRegistry != null)
          {
             YoGraphicPosition copViz = new YoGraphicPosition(copName, vtp, 0.005, YoAppearance.Navy(), GraphicType.BALL);
-            yoGraphicsListRegistry.registerDynamicGraphicObject(listName, copViz);
+            yoGraphicsListRegistry.registerYoGraphic(listName, copViz);
             yoGraphicsListRegistry.registerArtifact(listName, copViz.createArtifact());
             virtualToePointsInWorld.put(robotSide, vtp);
          }

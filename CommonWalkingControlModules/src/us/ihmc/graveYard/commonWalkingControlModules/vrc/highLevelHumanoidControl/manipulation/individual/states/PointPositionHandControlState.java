@@ -69,7 +69,7 @@ public class PointPositionHandControlState extends State<HandControlState>
       if (yoGraphicsListRegistry != null)
       {
          YoGraphicPosition desiredPositionViz = new YoGraphicPosition(desiredHandPositionName, yoDesiredPosition, 0.01, YoAppearance.FireBrick());
-         yoGraphicsListRegistry.registerDynamicGraphicObject(stateName, desiredPositionViz);
+         yoGraphicsListRegistry.registerYoGraphic(stateName, desiredPositionViz);
       }
 
       parentRegistry.addChild(registry);

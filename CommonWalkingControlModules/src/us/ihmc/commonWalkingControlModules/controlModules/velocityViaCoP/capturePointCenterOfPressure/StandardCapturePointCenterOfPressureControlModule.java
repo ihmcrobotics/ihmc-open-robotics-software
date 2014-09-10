@@ -128,7 +128,7 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
                YoAppearance.Gray(), YoGraphicPosition.GraphicType.CROSS);
 
          yoGraphicList.add(centerOfPressureDesiredWorldGraphicPosition);
-         yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicList);
+         yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicList);
 
          ArtifactList artifactList = new ArtifactList("Capture Point CoP Control Module");
 

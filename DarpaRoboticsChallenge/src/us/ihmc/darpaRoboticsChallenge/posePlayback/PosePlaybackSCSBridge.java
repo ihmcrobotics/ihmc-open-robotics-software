@@ -100,8 +100,8 @@ public class PosePlaybackSCSBridge
       scs.addYoVariableRegistry(registry);
 
       String listName = getClass().getSimpleName();
-      yoGraphicsListRegistry.registerDynamicGraphicObject(listName, new YoGraphicPosition("centerOfMass", centerOfMassPosition, 0.03, YoAppearance.Gold()));
-      yoGraphicsListRegistry.registerDynamicGraphicObject(listName, new YoGraphicPosition("centerOfMass2d", centerOfMassPosition2d, 0.03, YoAppearance.Gold()));
+      yoGraphicsListRegistry.registerYoGraphic(listName, new YoGraphicPosition("centerOfMass", centerOfMassPosition, 0.03, YoAppearance.Gold()));
+      yoGraphicsListRegistry.registerYoGraphic(listName, new YoGraphicPosition("centerOfMass2d", centerOfMassPosition2d, 0.03, YoAppearance.Gold()));
       
       SideDependentList<AppearanceDefinition> appearance = new SideDependentList<>(YoAppearance.Red(), YoAppearance.Green());
       
@@ -109,15 +109,15 @@ public class PosePlaybackSCSBridge
       {
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
 
-         yoGraphicsListRegistry.registerDynamicGraphicObject(listName, new YoGraphicPosition(sidePrefix + "AnkleViz", anklePositions.get(robotSide), 0.05, appearance.get(robotSide)));
-         yoGraphicsListRegistry.registerDynamicGraphicObject(listName, new YoGraphicPosition(sidePrefix + "WristViz", wristPositions.get(robotSide), 0.05, appearance.get(robotSide)));
+         yoGraphicsListRegistry.registerYoGraphic(listName, new YoGraphicPosition(sidePrefix + "AnkleViz", anklePositions.get(robotSide), 0.05, appearance.get(robotSide)));
+         yoGraphicsListRegistry.registerYoGraphic(listName, new YoGraphicPosition(sidePrefix + "WristViz", wristPositions.get(robotSide), 0.05, appearance.get(robotSide)));
          
          YoGraphicCoordinateSystem footCoordinateSystem = new YoGraphicCoordinateSystem(sidePrefix + "Foot", "", registry, 0.25);
-         yoGraphicsListRegistry.registerDynamicGraphicObject(listName, footCoordinateSystem);
+         yoGraphicsListRegistry.registerYoGraphic(listName, footCoordinateSystem);
          feetCoordinateSystems.put(robotSide, footCoordinateSystem);
 
          YoGraphicCoordinateSystem handCoordinateSystem = new YoGraphicCoordinateSystem(sidePrefix + "Hand", "", registry, 0.25);
-         yoGraphicsListRegistry.registerDynamicGraphicObject(listName, handCoordinateSystem);
+         yoGraphicsListRegistry.registerYoGraphic(listName, handCoordinateSystem);
          handCoordinateSystems.put(robotSide, handCoordinateSystem);
       }
       

@@ -134,7 +134,7 @@ public class DRCPosePlaybackDemo
             efp_positionViz.add(new YoGraphicPosition(efp.getName(), efp.getYoPosition(), 0.05, YoAppearance.Red()));
          }
 
-         yoGraphicsListRegistry.registerDynamicGraphicObjects("EFP", efp_positionViz);
+         yoGraphicsListRegistry.registerYoGraphics("EFP", efp_positionViz);
          scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       }
 

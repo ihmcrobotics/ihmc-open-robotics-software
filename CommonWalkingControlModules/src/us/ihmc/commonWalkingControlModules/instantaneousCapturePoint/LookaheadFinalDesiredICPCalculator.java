@@ -52,7 +52,7 @@ public class LookaheadFinalDesiredICPCalculator implements FinalDesiredICPCalcul
                GraphicType.CROSS);
          yoGraphicsList.add(finalDesiredICPGraphicPosition);
          yoGraphicsListRegistry.registerArtifact("FinalDesiredICP", finalDesiredICPGraphicPosition.createArtifact());
-         yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicsList);
+         yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
       }
 
       else

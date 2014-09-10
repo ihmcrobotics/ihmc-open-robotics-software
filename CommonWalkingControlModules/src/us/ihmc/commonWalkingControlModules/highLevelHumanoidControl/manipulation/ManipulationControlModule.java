@@ -107,7 +107,7 @@ public class ManipulationControlModule
                list.add(dynamicGraphicReferenceFrame);
             }
          }
-         yoGraphicsListRegistry.registerDynamicGraphicObjectsList(list);
+         yoGraphicsListRegistry.registerYoGraphicsList(list);
 
          if (!enable)
             list.hideYoGraphics();

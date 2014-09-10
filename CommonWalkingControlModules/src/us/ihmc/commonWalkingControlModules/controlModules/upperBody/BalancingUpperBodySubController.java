@@ -822,22 +822,22 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 	private void populateDynamicsGraphicObjects(YoGraphicsListRegistry yoGraphicsListRegistry)
 	{
 		YoGraphicVector lungeAxisVisual = new YoGraphicVector("lungeAxisVisual", robotCoMPosition, lungeAxisGraphic, 1.0, YoAppearance.DarkRed());
-		yoGraphicsListRegistry.registerDynamicGraphicObject(name, lungeAxisVisual);
+		yoGraphicsListRegistry.registerYoGraphic(name, lungeAxisVisual);
 
 		YoGraphicPosition icpDesiredVisual = new YoGraphicPosition("icpDesiredVisual", icpDesired, 0.05, YoAppearance.Yellow());
-		yoGraphicsListRegistry.registerDynamicGraphicObject(name, icpDesiredVisual);
+		yoGraphicsListRegistry.registerYoGraphic(name, icpDesiredVisual);
 
 		YoGraphicPosition icpActualVisual = new YoGraphicPosition("icpActualVisual", icpActual, 0.05, YoAppearance.Blue());
-		yoGraphicsListRegistry.registerDynamicGraphicObject(name, icpActualVisual);
+		yoGraphicsListRegistry.registerYoGraphic(name, icpActualVisual);
 
 		YoGraphicPosition icpPredictedVisual = new YoGraphicPosition("icpPredictedVisual", predictedICPAtChestStopYo, 0.05, YoAppearance.Purple());
-		yoGraphicsListRegistry.registerDynamicGraphicObject(name, icpPredictedVisual);
+		yoGraphicsListRegistry.registerYoGraphic(name, icpPredictedVisual);
 
 		YoGraphicPosition lungeAxisPerpIntersectionWithBoSVisual = new YoGraphicPosition("lungeAxisPerpIntersectionWithBoSVisual", maxCopYo, 0.02, YoAppearance.Pink());
-		yoGraphicsListRegistry.registerDynamicGraphicObject(name, lungeAxisPerpIntersectionWithBoSVisual);
+		yoGraphicsListRegistry.registerYoGraphic(name, lungeAxisPerpIntersectionWithBoSVisual);
 
 		YoGraphicVector chestAxisAngleVisual = new YoGraphicVector("chestAxisVisual", chestCoMPosition, lungeAxisGraphic, 2.0, YoAppearance.DarkRed());
-		yoGraphicsListRegistry.registerDynamicGraphicObject(name, chestAxisAngleVisual);
+		yoGraphicsListRegistry.registerYoGraphic(name, chestAxisAngleVisual);
 
 	}
 

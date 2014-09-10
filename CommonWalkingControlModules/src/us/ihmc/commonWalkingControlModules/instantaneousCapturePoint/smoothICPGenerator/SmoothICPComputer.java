@@ -93,7 +93,7 @@ public class SmoothICPComputer
          if (VISUALIZE)
          {
             YoGraphicPosition dynamicGraphicPosition = new YoGraphicPosition(constantCoPName, yoFramePoint, 0.005, YoAppearance.Red());
-            yoGraphicsListRegistry.registerDynamicGraphicObject(getClass().getSimpleName(), dynamicGraphicPosition);
+            yoGraphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), dynamicGraphicPosition);
             yoGraphicsListRegistry.registerArtifact(getClass().getSimpleName(), dynamicGraphicPosition.createArtifact());
          }
       }
@@ -105,7 +105,7 @@ public class SmoothICPComputer
          for (int i = 0; i < maxNumberOfConsideredFootsteps - 1; i++)
          {
             icpCornerPointsViz[i] = new YoGraphicPosition("cornerPoint" + i, "", registry, 0.01, YoAppearance.Green());
-            yoGraphicsListRegistry.registerDynamicGraphicObject(getClass().getSimpleName(), icpCornerPointsViz[i]);
+            yoGraphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), icpCornerPointsViz[i]);
             yoGraphicsListRegistry.registerArtifact(getClass().getSimpleName(), icpCornerPointsViz[i].createArtifact());
          }
       }

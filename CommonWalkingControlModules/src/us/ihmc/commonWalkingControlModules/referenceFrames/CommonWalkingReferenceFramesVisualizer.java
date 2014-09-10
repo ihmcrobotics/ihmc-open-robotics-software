@@ -24,15 +24,15 @@ public class CommonWalkingReferenceFramesVisualizer implements Updatable, RobotC
       for (RobotSide robotSide : RobotSide.values)
       {
          YoGraphicReferenceFrame yoGraphic = new YoGraphicReferenceFrame(referenceFrames.getAnkleZUpFrame(robotSide), registry, 0.2);
-         yoGraphicsListRegistry.registerDynamicGraphicObject(vizName, yoGraphic);
+         yoGraphicsListRegistry.registerYoGraphic(vizName, yoGraphic);
          referenceFramesVisualizers.add(yoGraphic);
       }
 
       YoGraphicReferenceFrame midFeetFrame = new YoGraphicReferenceFrame(referenceFrames.getMidFeetZUpFrame(), registry, 0.2);
-      yoGraphicsListRegistry.registerDynamicGraphicObject(vizName, midFeetFrame);
+      yoGraphicsListRegistry.registerYoGraphic(vizName, midFeetFrame);
       referenceFramesVisualizers.add(midFeetFrame);
       YoGraphicReferenceFrame comFrame = new YoGraphicReferenceFrame(referenceFrames.getCenterOfMassFrame(), registry, 0.2);
-      yoGraphicsListRegistry.registerDynamicGraphicObject(vizName, comFrame);
+      yoGraphicsListRegistry.registerYoGraphic(vizName, comFrame);
       referenceFramesVisualizers.add(comFrame);
 
    }

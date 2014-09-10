@@ -70,7 +70,7 @@ public class GroundReactionTorqueCalculator
       }
 
 
-      yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicsList);
+      yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
    }
 
 

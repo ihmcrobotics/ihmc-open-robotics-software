@@ -71,7 +71,7 @@ public class FootstepGeneratorVisualizer
          yoGraphicsList.add(dynamicGraphicPolygon);
       }
 
-      yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicsList);
+      yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
       parentRegistry.addChild(registry);
    }
 

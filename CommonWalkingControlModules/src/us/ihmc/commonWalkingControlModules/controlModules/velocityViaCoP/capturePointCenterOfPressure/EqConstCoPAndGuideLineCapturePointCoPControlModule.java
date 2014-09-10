@@ -67,7 +67,7 @@ public class EqConstCoPAndGuideLineCapturePointCoPControlModule implements Captu
 
          YoGraphicPosition centerOfPressureDesiredGraphic = new YoGraphicPosition("Desired Center of Pressure", desiredCenterOfPressure, 0.012,
                                                                     YoAppearance.Gray(), YoGraphicPosition.GraphicType.CROSS);
-         yoGraphicsListRegistry.registerDynamicGraphicObject("EquivalentConstantCoPVelocityViaCoPControlModule", centerOfPressureDesiredGraphic);
+         yoGraphicsListRegistry.registerYoGraphic("EquivalentConstantCoPVelocityViaCoPControlModule", centerOfPressureDesiredGraphic);
          artifactList.add(centerOfPressureDesiredGraphic.createArtifact());
 
          YoFrameLineSegment2dArtifact guideLineArtifact = new YoFrameLineSegment2dArtifact("Guide Line", guideLineWorld, Color.RED);

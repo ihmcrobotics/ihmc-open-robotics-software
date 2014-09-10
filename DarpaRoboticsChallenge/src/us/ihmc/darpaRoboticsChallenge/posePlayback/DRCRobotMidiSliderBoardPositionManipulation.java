@@ -260,8 +260,8 @@ public class DRCRobotMidiSliderBoardPositionManipulation
          YoFramePose handIK = new YoFramePose(sidePrefix + "HandIK", "", ReferenceFrames.getWorldFrame(), registry);
          handIKs.put(robotSide, handIK);
 
-         yoGraphicsListRegistry.registerDynamicGraphicObject(listName, new YoGraphicCoordinateSystem(sidePrefix + "FootViz", footIK, scale));
-         yoGraphicsListRegistry.registerDynamicGraphicObject(listName, new YoGraphicCoordinateSystem(sidePrefix + "HandViz", handIK, scale));
+         yoGraphicsListRegistry.registerYoGraphic(listName, new YoGraphicCoordinateSystem(sidePrefix + "FootViz", footIK, scale));
+         yoGraphicsListRegistry.registerYoGraphic(listName, new YoGraphicCoordinateSystem(sidePrefix + "HandViz", handIK, scale));
       }
       
       setupSymmetricModeListeners();
@@ -1039,7 +1039,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       }
 
       if (yoGraphicsListRegistry != null)
-         yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicsList);
+         yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
       yoGraphicsList.hideYoGraphics();
    }
 
