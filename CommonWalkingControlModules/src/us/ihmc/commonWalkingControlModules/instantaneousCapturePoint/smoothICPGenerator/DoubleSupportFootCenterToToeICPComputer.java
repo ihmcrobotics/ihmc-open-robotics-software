@@ -207,7 +207,7 @@ public class DoubleSupportFootCenterToToeICPComputer
 
       if (VISUALIZE)
       {
-         yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicsList);
+         yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
          yoGraphicsListRegistry.registerArtifactList(artifactList);
       }
 

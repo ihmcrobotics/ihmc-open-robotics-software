@@ -102,7 +102,7 @@ public class ToeOffVirtualToePointCalculator implements VirtualToePointCalculato
             artifactList.add(virtualToePointViz.createArtifact());
          }
 
-         yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicsList);
+         yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
          yoGraphicsListRegistry.registerArtifactList(artifactList);
 
       }

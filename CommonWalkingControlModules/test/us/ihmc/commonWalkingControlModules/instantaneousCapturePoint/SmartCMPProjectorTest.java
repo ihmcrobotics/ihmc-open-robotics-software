@@ -732,7 +732,7 @@ public class SmartCMPProjectorTest
          yoSupportPolygon.setFrameConvexPolygon2d(supportPolygon);
          YoFramePose yoFramePose = new YoFramePose("polyOrigin", worldFrame, registry);
          YoGraphicPolygon dynamicGraphicPolygon = new YoGraphicPolygon("polygon", yoSupportPolygon, yoFramePose, 1.0, YoAppearance.Red());
-         yoGraphicsListRegistry.registerDynamicGraphicObject("Polygon", dynamicGraphicPolygon);
+         yoGraphicsListRegistry.registerYoGraphic("Polygon", dynamicGraphicPolygon);
 
          //         yoGraphicsListRegistry.registerArtifact("Polygon", dynamicGraphicPolygon.createArtifact());
 

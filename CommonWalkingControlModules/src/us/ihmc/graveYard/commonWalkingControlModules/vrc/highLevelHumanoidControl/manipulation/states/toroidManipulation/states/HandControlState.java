@@ -89,7 +89,7 @@ public class HandControlState<T extends Enum<T>> extends ToroidManipulationState
             dynamicGraphicReferenceFrames.add(dynamicGraphicReferenceFrame);
             list.add(dynamicGraphicReferenceFrame);
          }
-         yoGraphicsListRegistry.registerDynamicGraphicObjectsList(list);
+         yoGraphicsListRegistry.registerYoGraphicsList(list);
          list.hideYoGraphics();
       }
 

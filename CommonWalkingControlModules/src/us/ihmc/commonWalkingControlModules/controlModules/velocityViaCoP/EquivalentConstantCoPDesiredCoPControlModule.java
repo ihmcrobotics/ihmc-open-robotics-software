@@ -66,12 +66,12 @@ public class EquivalentConstantCoPDesiredCoPControlModule implements DesiredCoPC
       {
          YoGraphic desiredCapturePointGraphic = new YoGraphicPosition("Desired Final Capture Point", desiredFinalCapturePoint, 0.01,
                                                               YoAppearance.Yellow(), GraphicType.ROTATED_CROSS);
-         yoGraphicsListRegistry.registerDynamicGraphicObject("EquivalentConstantCoPVelocityViaCoPControlModule", desiredCapturePointGraphic);
+         yoGraphicsListRegistry.registerYoGraphic("EquivalentConstantCoPVelocityViaCoPControlModule", desiredCapturePointGraphic);
          yoGraphicsListRegistry.registerArtifact("EquivalentConstantCoPVelocityViaCoPControlModule", desiredCapturePointGraphic.createArtifact());
 
          YoGraphicPosition centerOfPressureDesiredGraphic = new YoGraphicPosition("Desired Center of Pressure", desiredCenterOfPressure, 0.012,
                                                                     YoAppearance.Gray(), YoGraphicPosition.GraphicType.CROSS);
-         yoGraphicsListRegistry.registerDynamicGraphicObject("EquivalentConstantCoPVelocityViaCoPControlModule", centerOfPressureDesiredGraphic);
+         yoGraphicsListRegistry.registerYoGraphic("EquivalentConstantCoPVelocityViaCoPControlModule", centerOfPressureDesiredGraphic);
          yoGraphicsListRegistry.registerArtifact("EquivalentConstantCoPVelocityViaCoPControlModule",
                  centerOfPressureDesiredGraphic.createArtifact());
       }

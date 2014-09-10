@@ -52,11 +52,11 @@ public class ManipulableToroid
       if (yoGraphicsListRegistry != null)
       {
          YoGraphicReferenceFrame toroidBeforeJointFrameViz = new YoGraphicReferenceFrame(toroidBeforeJointFrame, registry, 0.3);
-         yoGraphicsListRegistry.registerDynamicGraphicObject("toroidFrames", toroidBeforeJointFrameViz);
+         yoGraphicsListRegistry.registerYoGraphic("toroidFrames", toroidBeforeJointFrameViz);
          dynamicGraphicReferenceFrames.add(toroidBeforeJointFrameViz);
 
          YoGraphicReferenceFrame toroidAfterJointFrameViz = new YoGraphicReferenceFrame(toroid.getParentJoint().getFrameAfterJoint(), registry, 0.1);
-         yoGraphicsListRegistry.registerDynamicGraphicObject("toroidFrames", toroidAfterJointFrameViz);
+         yoGraphicsListRegistry.registerYoGraphic("toroidFrames", toroidAfterJointFrameViz);
          dynamicGraphicReferenceFrames.add(toroidAfterJointFrameViz);
       }
 

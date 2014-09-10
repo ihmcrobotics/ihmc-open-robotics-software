@@ -79,7 +79,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
          YoFrameLine2dArtifact parallellLineArtifact = new YoFrameLine2dArtifact("Parallel Line", parallelLineWorld, Color.GREEN);
          artifactList.add(parallellLineArtifact);
 
-         yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicList);
+         yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicList);
          yoGraphicsListRegistry.registerArtifactList(artifactList);
       }
 

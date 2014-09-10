@@ -70,7 +70,7 @@ public class TransferToAndNextFootstepsDataVisualizer
       yoGraphicsList.add(nextStepCoordinateSystem);
       yoGraphicsList.add(nextNextStepCoordinateSystem);
 
-      yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicsList);
+      yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
    }
 
    public void visualizeFootsteps(TransferToAndNextFootstepsData transferToAndNextFootstepsData)

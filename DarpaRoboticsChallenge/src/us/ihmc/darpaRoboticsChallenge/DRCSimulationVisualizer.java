@@ -49,7 +49,7 @@ public class DRCSimulationVisualizer implements RobotController
       }
       
       if (yoGraphicsListRegistry != null)
-         yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicsList);
+         yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
       
       
       robot.setController(this, 10);

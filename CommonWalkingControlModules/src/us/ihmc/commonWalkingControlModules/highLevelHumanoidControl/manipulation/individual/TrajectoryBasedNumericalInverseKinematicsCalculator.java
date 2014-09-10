@@ -151,7 +151,7 @@ public class TrajectoryBasedNumericalInverseKinematicsCalculator
 
       if (yoGraphicsListRegistry != null)
       {
-         yoGraphicsListRegistry.registerDynamicGraphicObject("", new YoGraphicCoordinateSystem(endEffector.getName() + "DesiredTrajectoryPose", yoDesiredTrajectoryPose, 0.2));
+         yoGraphicsListRegistry.registerYoGraphic("", new YoGraphicCoordinateSystem(endEffector.getName() + "DesiredTrajectoryPose", yoDesiredTrajectoryPose, 0.2));
       }
 
       if (parentRegistry != null)

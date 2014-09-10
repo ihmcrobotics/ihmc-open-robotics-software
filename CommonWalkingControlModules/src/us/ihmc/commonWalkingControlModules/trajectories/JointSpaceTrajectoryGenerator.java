@@ -217,7 +217,7 @@ public class JointSpaceTrajectoryGenerator
             }
          }
 
-         yoGraphicsListRegistry.registerDynamicGraphicObjects("R2Sim02SwingSubController", yoGraphics);
+         yoGraphicsListRegistry.registerYoGraphics("R2Sim02SwingSubController", yoGraphics);
 
          yoGraphicsListRegistry.registerArtifactList(artifactList);
       }

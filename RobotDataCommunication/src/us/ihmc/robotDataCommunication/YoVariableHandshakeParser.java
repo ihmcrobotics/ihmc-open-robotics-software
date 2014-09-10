@@ -170,7 +170,7 @@ public class YoVariableHandshakeParser
    
       for (String list : dgoListMap.keySet())
       {
-         yoGraphicsListRegistry.registerDynamicGraphicObjectsList(dgoListMap.get(list));
+         yoGraphicsListRegistry.registerYoGraphicsList(dgoListMap.get(list));
       }
    
       

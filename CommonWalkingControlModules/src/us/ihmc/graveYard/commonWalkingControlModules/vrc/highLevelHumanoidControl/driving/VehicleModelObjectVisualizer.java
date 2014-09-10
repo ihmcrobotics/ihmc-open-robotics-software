@@ -40,7 +40,7 @@ public class VehicleModelObjectVisualizer
       YoGraphicReferenceFrame vehicleFrameViz = new YoGraphicReferenceFrame(vehicleFrame, registry, vehicleFrameScale);
       yoGraphicsList.add(vehicleFrameViz);
 
-      yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicsList);
+      yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
       parentRegistry.addChild(registry);
    }
 

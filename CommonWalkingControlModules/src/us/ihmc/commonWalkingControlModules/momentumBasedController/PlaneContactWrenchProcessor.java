@@ -63,7 +63,7 @@ public class PlaneContactWrenchProcessor
          if (yoGraphicsListRegistry != null)
          {
             YoGraphicPosition copViz = new YoGraphicPosition(copName, cop, 0.005, YoAppearance.Navy(), YoGraphicPosition.GraphicType.BALL);
-            yoGraphicsListRegistry.registerDynamicGraphicObject(listName, copViz);
+            yoGraphicsListRegistry.registerYoGraphic(listName, copViz);
             yoGraphicsListRegistry.registerArtifact(listName, copViz.createArtifact());
          }
       }

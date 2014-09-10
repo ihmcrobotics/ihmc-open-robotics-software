@@ -61,7 +61,7 @@ public class DynamicGraphicObjectEvaluation
       yoGraphicsList.add(transferToPolygonViz);
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicsList);
+      yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
       
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       
@@ -142,7 +142,7 @@ public class DynamicGraphicObjectEvaluation
       yoGraphicsList.add(dynamicGraphicYoFramePolygon);
       yoGraphicsList.add(dynamicGraphicBoxGhost);
 
-      yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicsList);
+      yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
 
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       scs.addYoVariableRegistry(registry);

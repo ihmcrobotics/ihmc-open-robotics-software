@@ -1245,7 +1245,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       YoGraphicsList yoGraphicsList = new YoGraphicsList(yoGraphicsListName);
       yoGraphicsList.add(yoGraphic);
-      yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicsList);
+      yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
       
       return yoGraphicsListRegistry;
    }

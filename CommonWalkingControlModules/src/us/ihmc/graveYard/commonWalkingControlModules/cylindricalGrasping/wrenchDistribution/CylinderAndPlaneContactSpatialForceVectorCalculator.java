@@ -131,10 +131,10 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
 
          }
 
-         yoGraphicsListRegistry.registerDynamicGraphicObjects("OptimizerOutputVectorsRhoLinear ", dynamicGraphicVectorsRhoLinear);
-         yoGraphicsListRegistry.registerDynamicGraphicObjects("OptimizerOutputVectorsRhoAngular", dynamicGraphicVectorsRhoAngular);
-         yoGraphicsListRegistry.registerDynamicGraphicObjects("OptimizerOutputVectorsPhiLinear ", dynamicGraphicVectorsPhiLinear);
-         yoGraphicsListRegistry.registerDynamicGraphicObjects("OptimizerOutputVectorsPhiAngular", dynamicGraphicVectorsPhiAngular);
+         yoGraphicsListRegistry.registerYoGraphics("OptimizerOutputVectorsRhoLinear ", dynamicGraphicVectorsRhoLinear);
+         yoGraphicsListRegistry.registerYoGraphics("OptimizerOutputVectorsRhoAngular", dynamicGraphicVectorsRhoAngular);
+         yoGraphicsListRegistry.registerYoGraphics("OptimizerOutputVectorsPhiLinear ", dynamicGraphicVectorsPhiLinear);
+         yoGraphicsListRegistry.registerYoGraphics("OptimizerOutputVectorsPhiAngular", dynamicGraphicVectorsPhiAngular);
       }
    }
 

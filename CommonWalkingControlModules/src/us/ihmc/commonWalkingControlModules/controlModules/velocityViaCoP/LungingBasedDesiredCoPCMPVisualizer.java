@@ -29,7 +29,7 @@ public class LungingBasedDesiredCoPCMPVisualizer extends CapturabilityBasedDesir
       {
          addDesiredCMPViz(yoGraphicList, artifactList);
 
-         yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicList);
+         yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicList);
          yoGraphicsListRegistry.registerArtifactList(artifactList);
       }
       

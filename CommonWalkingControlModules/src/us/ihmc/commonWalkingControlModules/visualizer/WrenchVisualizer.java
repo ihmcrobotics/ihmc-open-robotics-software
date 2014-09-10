@@ -75,7 +75,7 @@ public class WrenchVisualizer
          yoGraphicsList.add(torqueVisualizer);
       }
 
-      yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicsList);
+      yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
 
       parentRegistry.addChild(registry);
    }

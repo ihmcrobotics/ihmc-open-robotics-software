@@ -105,7 +105,7 @@ public class GuideLineDesiredCoPControlModule implements DesiredCoPControlModule
          yoGraphicList.add(desiredCapturePointGraphic);
          artifactList.add(desiredCapturePointGraphic.createArtifact());
 
-         yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicList);
+         yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicList);
          yoGraphicsListRegistry.registerArtifactList(artifactList);
       }
    }

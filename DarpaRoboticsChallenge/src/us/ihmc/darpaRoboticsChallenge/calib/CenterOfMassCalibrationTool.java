@@ -59,13 +59,13 @@ public class CenterOfMassCalibrationTool implements Updatable
       rightKneeCoMInZUpFrame = new YoFramePoint("rightKneeCoMInZUpFrame", rightKneeCenterOfMassCalculator.getDesiredFrame(), registry);
 
       spinePitchZUpFrameViz = new YoGraphicCoordinateSystem("spinePitchZUpFrameViz", "", registry, 0.3);
-      yoGraphicsListRegistry.registerDynamicGraphicObject("CenterOfMassCalibrationTool", spinePitchZUpFrameViz);
+      yoGraphicsListRegistry.registerYoGraphic("CenterOfMassCalibrationTool", spinePitchZUpFrameViz);
       
       leftHipPitchZUpFrameViz = new YoGraphicCoordinateSystem("leftHipPitchZUpFrameViz", "", registry, 0.3);
-      yoGraphicsListRegistry.registerDynamicGraphicObject("CenterOfMassCalibrationTool", leftHipPitchZUpFrameViz);
+      yoGraphicsListRegistry.registerYoGraphic("CenterOfMassCalibrationTool", leftHipPitchZUpFrameViz);
       
       leftHipPitchFrameViz = new YoGraphicCoordinateSystem("leftHipPitchFrameViz", "", registry, 0.3);
-      yoGraphicsListRegistry.registerDynamicGraphicObject("CenterOfMassCalibrationTool", leftHipPitchFrameViz);
+      yoGraphicsListRegistry.registerYoGraphic("CenterOfMassCalibrationTool", leftHipPitchFrameViz);
    }
 
    @Override

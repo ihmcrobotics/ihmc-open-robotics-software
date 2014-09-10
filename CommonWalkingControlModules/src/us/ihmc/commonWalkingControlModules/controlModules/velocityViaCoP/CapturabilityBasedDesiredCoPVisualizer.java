@@ -45,7 +45,7 @@ public class CapturabilityBasedDesiredCoPVisualizer
          addCenterOfMassViz(yoGraphicList, artifactList);
          addGuideLineViz(artifactList);
 
-         yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicList);
+         yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicList);
          yoGraphicsListRegistry.registerArtifactList(artifactList);
       }
       desiredCMP.setToNaN();

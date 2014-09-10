@@ -123,7 +123,7 @@ public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()
    {
       YoGraphicPosition dynamicGraphicPosition = new YoGraphicPosition(name + numberOfRegisteredPoints, point, size, appearance);
       dynamicGraphicPositions.add(dynamicGraphicPosition);
-      yoGraphicsListRegistry.registerDynamicGraphicObject("GraphicsObjects", dynamicGraphicPositions.get(numberOfRegisteredPoints));
+      yoGraphicsListRegistry.registerYoGraphic("GraphicsObjects", dynamicGraphicPositions.get(numberOfRegisteredPoints));
       YoArtifactPosition artifact = dynamicGraphicPositions.get(numberOfRegisteredPoints).createArtifact();
       dynamicGraphicPositionsArtifactList.add(artifact);
       yoGraphicsListRegistry.registerArtifact(name + numberOfRegisteredPoints, dynamicGraphicPositionsArtifactList.get(numberOfRegisteredPoints));

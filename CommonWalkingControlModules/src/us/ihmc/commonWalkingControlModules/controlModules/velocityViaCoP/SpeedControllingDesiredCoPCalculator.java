@@ -92,7 +92,7 @@ public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePoint
 //         artifactList.add(desiredVelocityDynamicGraphicVector.createArtifact());
          
          
-         yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicList);
+         yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicList);
          yoGraphicsListRegistry.registerArtifactList(artifactList);
       }
       omega0.set(Double.POSITIVE_INFINITY);

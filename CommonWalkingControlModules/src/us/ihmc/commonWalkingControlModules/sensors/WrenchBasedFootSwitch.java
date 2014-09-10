@@ -97,8 +97,8 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
          final double scale=1.0;
          dynamicGraphicForceSensorMeasurementFrame = new YoGraphicReferenceFrame(forceSensorData.getMeasurementFrame(), registry, .6*scale, YoAppearance.Yellow());
          dynamicGraphicForceSensorFootFrame = new YoGraphicReferenceFrame(contactablePlaneBody.getFrameAfterParentJoint(), registry, scale, YoAppearance.AliceBlue());
-         yoGraphicsListRegistry.registerDynamicGraphicObject(namePrefix+"MeasFrame",dynamicGraphicForceSensorMeasurementFrame);
-         yoGraphicsListRegistry.registerDynamicGraphicObject(namePrefix+"FootFrame",dynamicGraphicForceSensorFootFrame);
+         yoGraphicsListRegistry.registerYoGraphic(namePrefix+"MeasFrame",dynamicGraphicForceSensorMeasurementFrame);
+         yoGraphicsListRegistry.registerYoGraphic(namePrefix+"FootFrame",dynamicGraphicForceSensorFootFrame);
       }
       else
       {

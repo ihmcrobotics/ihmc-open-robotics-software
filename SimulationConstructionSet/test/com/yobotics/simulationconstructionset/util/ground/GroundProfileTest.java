@@ -72,7 +72,7 @@ public abstract class GroundProfileTest
          surfaceNormalViz = new YoFrameVector("surfaceNormalVector", ReferenceFrame.getWorldFrame(), robot.getRobotsYoVariableRegistry());
          YoGraphicVector surfaceNormalGraphicVector = new YoGraphicVector("surfaceNormalViz", surfaceNormalPointForViz, surfaceNormalViz, YoAppearance.AliceBlue());
           
-         yoGraphicsListRegistry.registerDynamicGraphicObject("Viz", surfaceNormalGraphicVector);
+         yoGraphicsListRegistry.registerYoGraphic("Viz", surfaceNormalGraphicVector);
          
          scs = new SimulationConstructionSet(robot);
          scs.setGroundVisible(true);

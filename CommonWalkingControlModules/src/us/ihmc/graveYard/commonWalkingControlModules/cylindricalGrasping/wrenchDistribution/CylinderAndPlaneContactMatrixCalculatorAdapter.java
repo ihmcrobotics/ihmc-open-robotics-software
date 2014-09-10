@@ -200,8 +200,8 @@ public class CylinderAndPlaneContactMatrixCalculatorAdapter
       String listName = this.getClass().getSimpleName() + "EndEffectorResultGraphics";
       if (yoGraphicsListRegistry != null)
       {
-         yoGraphicsListRegistry.registerDynamicGraphicObject(listName, wrenchAngularVectorGraphic);
-         yoGraphicsListRegistry.registerDynamicGraphicObject(listName, wrenchLinearVectorGraphic);
+         yoGraphicsListRegistry.registerYoGraphic(listName, wrenchAngularVectorGraphic);
+         yoGraphicsListRegistry.registerYoGraphic(listName, wrenchLinearVectorGraphic);
       }
    }
 

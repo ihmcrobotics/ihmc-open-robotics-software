@@ -183,7 +183,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
          YoGraphicPosition finalDesiredSwingViz = new YoGraphicPosition("Final Desired Swing", finalDesiredSwingFootPosition, 0.03,
                YoAppearance.Black(), GraphicType.BALL_WITH_CROSS);
 
-         yoGraphicsListRegistry.registerDynamicGraphicObjects("R2Sim02SwingSubController", new YoGraphic[] { swingFootOrientationViz,
+         yoGraphicsListRegistry.registerYoGraphics("R2Sim02SwingSubController", new YoGraphic[] { swingFootOrientationViz,
                finalDesiredSwingViz, finalDesiredSwingOrientationViz });
 
          artifactList.add(finalDesiredSwingViz.createArtifact());

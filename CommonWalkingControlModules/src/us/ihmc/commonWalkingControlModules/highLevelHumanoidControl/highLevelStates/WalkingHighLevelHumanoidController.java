@@ -244,7 +244,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       if (VISUALIZE)
       {
          YoGraphicPosition dynamicGraphicPositionECMP = new YoGraphicPosition("ecmpviz", ecmpViz, 0.002, YoAppearance.BlueViolet());
-         yoGraphicsListRegistry.registerDynamicGraphicObject("ecmpviz", dynamicGraphicPositionECMP);
+         yoGraphicsListRegistry.registerYoGraphic("ecmpviz", dynamicGraphicPositionECMP);
          yoGraphicsListRegistry.registerArtifact("ecmpviz", dynamicGraphicPositionECMP.createArtifact());
       }
 

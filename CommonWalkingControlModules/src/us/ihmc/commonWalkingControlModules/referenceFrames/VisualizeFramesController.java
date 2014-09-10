@@ -27,7 +27,7 @@ import com.yobotics.simulationconstructionset.robotController.RobotController;
             yoGraphicsList.add(dynamicGraphicReferenceFrame);
          }
 
-         yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicsList);
+         yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
       }
 
       public void doControl()

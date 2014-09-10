@@ -49,7 +49,7 @@ public class YoCylindricalContactState implements CylindricalContactState, Modif
       if (VISUALIZE)
       {
          this.cylinderRefererenceFrameGraphic = new YoGraphicReferenceFrame(cylinderFrame, registry, 0.2);
-         yoGraphicsListRegistry.registerDynamicGraphicObject("YoCylindricalContactState", cylinderRefererenceFrameGraphic);
+         yoGraphicsListRegistry.registerYoGraphic("YoCylindricalContactState", cylinderRefererenceFrameGraphic);
       }
       else
       {

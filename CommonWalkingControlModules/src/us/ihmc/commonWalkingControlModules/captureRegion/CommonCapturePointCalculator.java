@@ -81,7 +81,7 @@ public class CommonCapturePointCalculator implements CapturePointCalculatorInter
          artifactsToRecordHistory.add(capturePointArtifact);
          artifactList.add(capturePointArtifact);
 
-         yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicsList);
+         yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
          yoGraphicsListRegistry.registerArtifactList(artifactList);
       }
    }

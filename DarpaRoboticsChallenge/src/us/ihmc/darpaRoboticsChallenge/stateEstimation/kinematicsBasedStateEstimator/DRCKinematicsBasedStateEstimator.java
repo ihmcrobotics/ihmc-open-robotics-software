@@ -123,7 +123,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
          YoGraphicReferenceFrame dynamicGraphicMeasurementFrame = new YoGraphicReferenceFrame(imuProcessedOutputs.get(i).getMeasurementFrame(), registry, 1.0);
          dynamicGraphicMeasurementFrames.add(dynamicGraphicMeasurementFrame);
       }
-      yoGraphicsListRegistry.registerDynamicGraphicObjects("imuFrame", dynamicGraphicMeasurementFrames);
+      yoGraphicsListRegistry.registerYoGraphics("imuFrame", dynamicGraphicMeasurementFrames);
    }
 
    public StateEstimator getStateEstimator()

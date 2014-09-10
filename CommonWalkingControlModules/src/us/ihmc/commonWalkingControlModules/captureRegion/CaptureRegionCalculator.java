@@ -236,7 +236,7 @@ public class CaptureRegionCalculator
 
       if (DRAW_CAPTURE_REGION && (yoGraphicsListRegistry != null))
       {
-         yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicsList);
+         yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
          yoGraphicsListRegistry.registerArtifactList(artifactList);
       }
 

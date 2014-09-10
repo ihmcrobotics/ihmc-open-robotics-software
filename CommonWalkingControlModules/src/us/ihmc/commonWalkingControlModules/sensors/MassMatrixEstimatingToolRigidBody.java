@@ -193,7 +193,7 @@ public class MassMatrixEstimatingToolRigidBody
 //            yoGraphicsList.add(comLineViz);
 //         }                  
          
-         yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicsList);
+         yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
       }
       parentRegistry.addChild(registry);
    }
