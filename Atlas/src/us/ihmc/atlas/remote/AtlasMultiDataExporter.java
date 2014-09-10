@@ -78,7 +78,6 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
    public static void main(String[] args) throws IOException
    {
       final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.DRC_NO_HANDS;
-      String[] jointNamesInOrder;
       String[] vars = null;
       int numberOfEntries = 0;
       DRCRobotModel model = new AtlasRobotModel(ATLAS_ROBOT_VERSION, false, false);
@@ -546,7 +545,7 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
 
          DataBuffer dataBuffer = exportData.scs.getDataBuffer();
 
-         ArrayList<YoVariable> varsYo = exportData.scs.getVars(vars, new String[0]);
+         ArrayList<YoVariable<?>> varsYo = exportData.scs.getVars(vars, new String[0]);
          writeSpreadsheetFormattedData(chosenFile, dataBuffer, varsYo, timeVariable);
       }
 
@@ -592,7 +591,7 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
 
       }
 
-      private void writeSpreadsheetFormattedData(File chosenFile, DataBuffer dataBuffer, ArrayList<? extends YoVariable> vars, String timeVariable)
+      private void writeSpreadsheetFormattedData(File chosenFile, DataBuffer dataBuffer, ArrayList<? extends YoVariable<?>> vars, String timeVariable)
       {
          ArrayList<DataBufferEntry> entries = dataBuffer.getEntries();
 
@@ -610,7 +609,7 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
             for (int i = 0; i < entries.size(); i++)
             {
                DataBufferEntry entry = entries.get(i);
-               YoVariable variable = entry.getVariable();
+               YoVariable<?> variable = entry.getVariable();
                entry.getData();
 
                if (vars.contains(variable))

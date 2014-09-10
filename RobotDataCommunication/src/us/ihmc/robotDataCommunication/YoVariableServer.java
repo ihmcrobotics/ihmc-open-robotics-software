@@ -67,7 +67,7 @@ public class YoVariableServer implements RobotVisualizer
       handshakeServer = new YoVariableHandshakeServer(handshakePort, mainBodies, dt);
       List<JointHolder> jointHolders = handshakeServer.getJointHolders();
       
-      ArrayList<YoVariable> variables = new ArrayList<>();
+      ArrayList<YoVariable<?>> variables = new ArrayList<>();
       int mainOffset = handshakeServer.addRegistry(mainRegistry, variables);
       if(mainDynamicGraphicObjectsListRegistry != null)
       {
@@ -141,7 +141,7 @@ public class YoVariableServer implements RobotVisualizer
    
    private void addVariableBuffer(Pair<YoVariableRegistry, YoGraphicsListRegistry> data)
    {
-      ArrayList<YoVariable> variables = new ArrayList<>();
+      ArrayList<YoVariable<?>> variables = new ArrayList<>();
       YoVariableRegistry registry = data.first();
       YoGraphicsListRegistry yoGraphicsListRegistry = data.second();
       int variableOffset = handshakeServer.addRegistry(registry, variables);

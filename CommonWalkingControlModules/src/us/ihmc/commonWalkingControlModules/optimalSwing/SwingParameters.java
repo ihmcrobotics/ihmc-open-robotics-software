@@ -42,7 +42,7 @@ public class SwingParameters
 
    private final LegJointName[] legJointNames;
 
-   private final ArrayList<YoVariable> allVariables;
+   private final ArrayList<YoVariable<?>> allVariables;
 
    public SwingParameters(LegJointName[] legJointNames, YoVariableRegistry parentRegistry)
    {
@@ -132,7 +132,7 @@ public class SwingParameters
       return desiredJointVelocitiesAtEndOfStep.get(robotSide).get(jointName).getDoubleValue();
    }
 
-   public ArrayList<YoVariable> getAllVariables()
+   public ArrayList<YoVariable<?>> getAllVariables()
    {
       return allVariables;
    }

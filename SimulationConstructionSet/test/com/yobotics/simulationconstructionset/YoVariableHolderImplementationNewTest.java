@@ -27,7 +27,7 @@ public class YoVariableHolderImplementationNewTest
    }
 
    private YoVariableHolderImplementation yoVariableHolderImplementation;
-   private ArrayList<YoVariable> testVariables;
+   private ArrayList<YoVariable<?>> testVariables;
 
 
    public YoVariableHolderImplementationNewTest()
@@ -39,7 +39,7 @@ public class YoVariableHolderImplementationNewTest
    public void setUp()
    {
       yoVariableHolderImplementation = new YoVariableHolderImplementation();
-      testVariables = new ArrayList<YoVariable>(); 
+      testVariables = new ArrayList<YoVariable<?>>(); 
       testVariables.add(new DoubleYoVariable("doubleYoVariable", null));
       testVariables.add(new BooleanYoVariable("booleanYoVariable", null));
       testVariables.add(new IntegerYoVariable("integerYoVariable", null));
@@ -66,7 +66,7 @@ public class YoVariableHolderImplementationNewTest
    {
       yoVariableHolderImplementation.addVariablesToHolder(testVariables);
       
-      for(YoVariable var : yoVariableHolderImplementation.getAllVariables())
+      for(YoVariable<?> var : yoVariableHolderImplementation.getAllVariables())
       {
          assertTrue(testVariables.contains(var));
       }
@@ -76,7 +76,7 @@ public class YoVariableHolderImplementationNewTest
    public void testGetAllVariablesArray()
    {
       yoVariableHolderImplementation.addVariablesToHolder(testVariables);
-      YoVariable[] testVariableArray = new YoVariable[4];
+      YoVariable<?>[] testVariableArray = new YoVariable[4];
       testVariableArray = yoVariableHolderImplementation.getAllVariablesArray();
       
       for(int i = 0; i < 4; i++)
@@ -120,7 +120,7 @@ public class YoVariableHolderImplementationNewTest
    public void testGetVariableCaseInsensitive()
    {
       yoVariableHolderImplementation.addVariablesToHolder(testVariables);
-      YoVariable variable = yoVariableHolderImplementation.getVariable("DoubleYoVariable");
+      YoVariable<?> variable = yoVariableHolderImplementation.getVariable("DoubleYoVariable");
       assertTrue(testVariables.get(0) == variable);
    }
    
@@ -202,7 +202,7 @@ public class YoVariableHolderImplementationNewTest
       yoVariableHolderImplementation.addVariableToHolder(integerYoVariableWithNameSpace1);
       yoVariableHolderImplementation.addVariableToHolder(integerYoVariableWithNameSpace2);
       
-      ArrayList<YoVariable> expectedArrayListFromNameSpaceTestRegistry1 = new ArrayList<YoVariable>();
+      ArrayList<YoVariable<?>> expectedArrayListFromNameSpaceTestRegistry1 = new ArrayList<YoVariable<?>>();
       expectedArrayListFromNameSpaceTestRegistry1.add(doubleYoVariableWithNameSpace1);
       expectedArrayListFromNameSpaceTestRegistry1.add(booleanYoVariableWithNameSpace1);
       expectedArrayListFromNameSpaceTestRegistry1.add(integerYoVariableWithNameSpace1);

@@ -83,7 +83,7 @@ public class DataFileWriterTest
 
       Robot robot = new Robot("testRobot");
 
-      ArrayList<YoVariable> allVariables = rootRegistry.getAllVariablesIncludingDescendants();
+      ArrayList<YoVariable<?>> allVariables = rootRegistry.getAllVariablesIncludingDescendants();
 
       boolean binary = false;
       boolean compress = false;
@@ -107,7 +107,7 @@ public class DataFileWriterTest
 
    }
 
-   private void testDataWriteReadIsTheSame(DataBuffer dataBuffer, ArrayList<YoVariable> allVariables, boolean binary, boolean compress,
+   private void testDataWriteReadIsTheSame(DataBuffer dataBuffer, ArrayList<YoVariable<?>> allVariables, boolean binary, boolean compress,
            boolean spreadsheetFormatted, Robot robot)
            throws IOException
    {
@@ -286,7 +286,7 @@ public class DataFileWriterTest
       long seed = 1776L;
       int numberOfVariables = 2000;    // 12000 for when testing long files for efficiency;
       Random random = new Random(seed);
-      ArrayList<YoVariable> variables = createALargeNumberOfVariables(random, numberOfVariables);
+      ArrayList<YoVariable<?>> variables = createALargeNumberOfVariables(random, numberOfVariables);
       YoVariableList originalVarList = new YoVariableList("originalVarList");
       originalVarList.addVariables(variables);
 
@@ -305,8 +305,8 @@ public class DataFileWriterTest
 
       for (int i = 0; i < originalVarList.size(); i++)
       {
-         YoVariable originalVariable = originalVarList.getVariable(i);
-         YoVariable newVariable = newVarList.getVariable(originalVariable.getName());
+         YoVariable<?> originalVariable = originalVarList.getVariable(i);
+         YoVariable<?> newVariable = newVarList.getVariable(originalVariable.getName());
 
          assertFalse(originalVariable == newVariable);
          assertEquals(originalVariable.getValueAsDouble(), newVariable.getValueAsDouble(), 1e-7);
@@ -316,7 +316,7 @@ public class DataFileWriterTest
       fileOne.delete();
    }
 
-   private void writeALongStateFile(File file, ArrayList<YoVariable> variables)
+   private void writeALongStateFile(File file, ArrayList<YoVariable<?>> variables)
    {
       DataFileWriter dataFileWriter = new DataFileWriter(file);
 
@@ -327,7 +327,7 @@ public class DataFileWriterTest
    }
 
 
-   private ArrayList<YoVariable> createALargeNumberOfVariables(Random random, int numberOfVariables)
+   private ArrayList<YoVariable<?>> createALargeNumberOfVariables(Random random, int numberOfVariables)
    {
       YoVariableRegistry rootRegistry = new YoVariableRegistry("rootRegistry");
       YoVariableRegistry registryOne = new YoVariableRegistry("registryOne");

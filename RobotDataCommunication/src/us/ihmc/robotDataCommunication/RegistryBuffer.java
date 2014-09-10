@@ -10,11 +10,11 @@ public class RegistryBuffer
    private final int variableOffset;
    
    private final long[] data;
-   private final YoVariable[] variables;
+   private final YoVariable<?>[] variables;
 
    private long timestamp;
    
-   public RegistryBuffer(int variableOffset, List<YoVariable> variables)
+   public RegistryBuffer(int variableOffset, List<YoVariable<?>> variables)
    {
       this.variableOffset = variableOffset;
       this.data = new long[variables.size()];
@@ -39,9 +39,9 @@ public class RegistryBuffer
    public static class Builder implements us.ihmc.concurrent.Builder<RegistryBuffer>
    {
       private final int variableOffset;
-      private final List<YoVariable> variables;
+      private final List<YoVariable<?>> variables;
 
-      public Builder(int variableOffset, List<YoVariable> variables)
+      public Builder(int variableOffset, List<YoVariable<?>> variables)
       {
          this.variableOffset = variableOffset;
          this.variables = variables;

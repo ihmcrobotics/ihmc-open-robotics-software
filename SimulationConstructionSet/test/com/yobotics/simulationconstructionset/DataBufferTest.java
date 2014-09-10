@@ -168,7 +168,7 @@ public class DataBufferTest
    @Test
    public void testAddVariableWithArrayList() throws RepeatDataBufferEntryException
    {
-      ArrayList<YoVariable> arrayListToBeAdded = new ArrayList<YoVariable>();
+      ArrayList<YoVariable<?>> arrayListToBeAdded = new ArrayList<YoVariable<?>>();
       arrayListToBeAdded.add(doubleYoVariable);
       arrayListToBeAdded.add(booleanYoVariable);
       arrayListToBeAdded.add(integerYoVariable);
@@ -198,7 +198,7 @@ public class DataBufferTest
       DoubleYoVariable yoVariable12 = new DoubleYoVariable("12", registry);
       DoubleYoVariable yoVariable1 = new DoubleYoVariable("1", registry);
       
-      ArrayList<YoVariable> currentlyMatched = new ArrayList<YoVariable>();
+      ArrayList<YoVariable<?>> currentlyMatched = new ArrayList<YoVariable<?>>();
       
       currentlyMatched.add(yoVariable123456789);
       currentlyMatched.add(yoVariable12345678);
@@ -278,13 +278,13 @@ public class DataBufferTest
       dataBuffer.addVariable(integerYoVariable, testBufferSize);
       dataBuffer.addVariable(enumYoVariable, testBufferSize);
       
-      ArrayList<YoVariable> expectedArrayOfVariables = new ArrayList<YoVariable>();
+      ArrayList<YoVariable<?>> expectedArrayOfVariables = new ArrayList<YoVariable<?>>();
       expectedArrayOfVariables.add(doubleYoVariable);
       expectedArrayOfVariables.add(booleanYoVariable);
       expectedArrayOfVariables.add(integerYoVariable);
       expectedArrayOfVariables.add(enumYoVariable);
       
-      ArrayList<YoVariable> actualArrayOfVariables = dataBuffer.getAllVariables();
+      ArrayList<YoVariable<?>> actualArrayOfVariables = dataBuffer.getAllVariables();
       
       for(int i = 0; i < actualArrayOfVariables.size(); i++)
       {
@@ -513,7 +513,7 @@ public class DataBufferTest
    @Test
    public void testGetVariablesTwo() //Luke Morris
    {
-      ArrayList<YoVariable> variables = dataBuffer.getVariables();
+      ArrayList<YoVariable<?>> variables = dataBuffer.getVariables();
       //    return dataBuffer.toString();
       //    return variables.toString();
    }
@@ -537,37 +537,37 @@ public class DataBufferTest
       String[] allRegularExpressions = { ".*" };
       String[] cRegularExpressions = { "c.*" };
 
-      ArrayList<YoVariable> both = dataBuffer.getVars(varNames, allRegularExpressions);
+      ArrayList<YoVariable<?>> both = dataBuffer.getVars(varNames, allRegularExpressions);
 
       assertTrue(both.contains(a));
       assertTrue(both.contains(b));
       assertTrue(both.contains(c));
 
-      ArrayList<YoVariable> justNames = dataBuffer.getVars(varNames, null);
+      ArrayList<YoVariable<?>> justNames = dataBuffer.getVars(varNames, null);
 
       assertTrue(justNames.contains(a));
       assertTrue(justNames.contains(b));
       assertTrue(justNames.contains(c));
 
-      ArrayList<YoVariable> justA = dataBuffer.getVars(aNames, null);
+      ArrayList<YoVariable<?>> justA = dataBuffer.getVars(aNames, null);
 
       assertTrue(justA.contains(a));
       assertFalse(justA.contains(b));
       assertFalse(justA.contains(c));
 
-      ArrayList<YoVariable> justRegExp = dataBuffer.getVars(null, allRegularExpressions);
+      ArrayList<YoVariable<?>> justRegExp = dataBuffer.getVars(null, allRegularExpressions);
 
       assertTrue(justRegExp.contains(a));
       assertTrue(justRegExp.contains(b));
       assertTrue(justRegExp.contains(c));
 
-      ArrayList<YoVariable> cRegExp = dataBuffer.getVars(null, cRegularExpressions);
+      ArrayList<YoVariable<?>> cRegExp = dataBuffer.getVars(null, cRegularExpressions);
 
       assertFalse(cRegExp.contains(a));
       assertFalse(cRegExp.contains(b));
       assertTrue(cRegExp.contains(c));
 
-      ArrayList<YoVariable> neither = dataBuffer.getVars(null, null);
+      ArrayList<YoVariable<?>> neither = dataBuffer.getVars(null, null);
 
       assertFalse(neither.contains(a));
       assertFalse(neither.contains(b));
@@ -599,25 +599,25 @@ public class DataBufferTest
       varGroupList.addVarGroup(varGroupTwo);
       varGroupList.addVarGroup(varGroupThree);
 
-      ArrayList<YoVariable> allVarsFromGroup = dataBuffer.getVarsFromGroup("all", varGroupList);
+      ArrayList<YoVariable<?>> allVarsFromGroup = dataBuffer.getVarsFromGroup("all", varGroupList);
 
       assertTrue(allVarsFromGroup.contains(a));
       assertTrue(allVarsFromGroup.contains(b));
       assertTrue(allVarsFromGroup.contains(c));
 
-      ArrayList<YoVariable> aVarsFromGroup = dataBuffer.getVarsFromGroup("varGroupOne", varGroupList);
+      ArrayList<YoVariable<?>> aVarsFromGroup = dataBuffer.getVarsFromGroup("varGroupOne", varGroupList);
 
       assertTrue(aVarsFromGroup.contains(a));
       assertFalse(aVarsFromGroup.contains(b));
       assertTrue(aVarsFromGroup.contains(c));
 
-      ArrayList<YoVariable> regExpVarsFromGroup = dataBuffer.getVarsFromGroup("varGroupTwo", varGroupList);
+      ArrayList<YoVariable<?>> regExpVarsFromGroup = dataBuffer.getVarsFromGroup("varGroupTwo", varGroupList);
 
       assertTrue(regExpVarsFromGroup.contains(a));
       assertTrue(regExpVarsFromGroup.contains(b));
       assertTrue(regExpVarsFromGroup.contains(c));
 
-      ArrayList<YoVariable> cRegExpVarsFromGroup = dataBuffer.getVarsFromGroup("varGroupThree", varGroupList);
+      ArrayList<YoVariable<?>> cRegExpVarsFromGroup = dataBuffer.getVarsFromGroup("varGroupThree", varGroupList);
 
       assertFalse(cRegExpVarsFromGroup.contains(a));
       assertFalse(cRegExpVarsFromGroup.contains(b));
@@ -660,14 +660,14 @@ public class DataBufferTest
        dataBuffer.addEntry(bBuffer);
        dataBuffer.addEntry(cBuffer);
        
-       ArrayList<YoVariable> withVariables = dataBuffer.getVariables();
+       ArrayList<YoVariable<?>> withVariables = dataBuffer.getVariables();
        
        System.out.println(withVariables.size());
        assertTrue(withVariables.size() > 0);
        
        dataBuffer.resetDataBuffer();
        
-       ArrayList<YoVariable> resetVariables = dataBuffer.getVariables();
+       ArrayList<YoVariable<?>> resetVariables = dataBuffer.getVariables();
        
        System.out.println(resetVariables.size());
 //       assertTrue(resetVariables.size() == 0);

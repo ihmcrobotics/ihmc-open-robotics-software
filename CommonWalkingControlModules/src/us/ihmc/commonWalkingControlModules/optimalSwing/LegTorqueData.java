@@ -28,7 +28,7 @@ public class LegTorqueData
    
    private final EnumYoVariable<RobotSide> robotSide = new EnumYoVariable<RobotSide>("robotSide", registry, RobotSide.class);
 
-   private final ArrayList<YoVariable> allVariables;
+   private final ArrayList<YoVariable<?>> allVariables;
    private final BooleanYoVariable dataValid = new BooleanYoVariable("dataValid", registry);
    private final DoubleYoVariable timeTakenForSwingOptimization = new DoubleYoVariable("timeTakenForSwingOptimization", registry);
 
@@ -107,7 +107,7 @@ public class LegTorqueData
       return jointNames;
    } 
    
-   public ArrayList<YoVariable> getAllVariables()
+   public ArrayList<YoVariable<?>> getAllVariables()
    {
       return allVariables;
    }

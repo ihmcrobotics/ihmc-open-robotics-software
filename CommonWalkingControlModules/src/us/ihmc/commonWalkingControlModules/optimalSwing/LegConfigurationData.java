@@ -51,7 +51,7 @@ public class LegConfigurationData
    private final YoFramePoint upperBodyPositionInWorld = new YoFramePoint("upperBodyPosition", "InWorld", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameOrientation upperBodyOrientationInWorld = new YoFrameOrientation("upperBodyOrientation", "InWorld", ReferenceFrame.getWorldFrame(), registry);
    
-   private final ArrayList<YoVariable> allVariables;
+   private final ArrayList<YoVariable<?>> allVariables;
 
    public LegConfigurationData(LegJointName[] jointsToInterpolate, LegJointName[] jointsToOptimize, YoVariableRegistry parentRegistry)
    {
@@ -191,7 +191,7 @@ public class LegConfigurationData
       return jointsToInterpolate.get(index);
    }
    
-   public ArrayList<YoVariable> getAllVariables()
+   public ArrayList<YoVariable<?>> getAllVariables()
    {
       return allVariables;
    }
