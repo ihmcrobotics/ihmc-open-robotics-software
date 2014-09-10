@@ -23,10 +23,11 @@ processedObj = convert(rawObj);
 if(~isempty(varargin))
     x0 = zeros(size(processedObj.H,1));
     options = optimset('Algorithm','interior-point-convex','Display','off');
-    [X,FVAL] = quadprog(2*processedObj.H,processedObj.f,processedObj.A,processedObj.b,processedObj.Aeq, ...
+    [processedObj.X,processedObj.FVAL] = quadprog(2*processedObj.H,processedObj.f,processedObj.A,processedObj.b,processedObj.Aeq, ...
         processedObj.beq,processedObj.lb,processedObj.ub,x0,options)
 end
 
+fprintf(1,'write out\n');
 fileToWrite = fopen(fileNameToWrite{1},'w+');
 WriteYaml(fileNameToWrite{1},processedObj);
 
