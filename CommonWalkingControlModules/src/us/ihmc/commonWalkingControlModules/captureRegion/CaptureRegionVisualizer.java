@@ -6,9 +6,9 @@ import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.yoUtilities.graphics.plotting.YoArtifactPolygon;
 import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
 
-import com.yobotics.simulationconstructionset.plotting.DynamicGraphicYoPolygonArtifact;
 
 public class CaptureRegionVisualizer
 {
@@ -32,8 +32,8 @@ public class CaptureRegionVisualizer
       yoCaptureRegionPolygon = new YoFrameConvexPolygon2d(caption, "", worldFrame, 30, registry);
       captureRegionPolygon = new FrameConvexPolygon2d(worldFrame);
       
-      DynamicGraphicYoPolygonArtifact dynamicGraphicYoPolygonArtifact = 
-            new DynamicGraphicYoPolygonArtifact(caption, yoCaptureRegionPolygon, color, false);
+      YoArtifactPolygon dynamicGraphicYoPolygonArtifact = 
+            new YoArtifactPolygon(caption, yoCaptureRegionPolygon, color, false);
       yoGraphicsListRegistry.registerArtifact(caption, dynamicGraphicYoPolygonArtifact);
       
       parentRegistry.addChild(registry);

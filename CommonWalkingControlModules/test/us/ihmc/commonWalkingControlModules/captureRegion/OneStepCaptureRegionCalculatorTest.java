@@ -32,12 +32,12 @@ import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition.GraphicType;
+import us.ihmc.yoUtilities.graphics.plotting.YoArtifactPolygon;
 import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.plotting.DynamicGraphicYoPolygonArtifact;
 import com.yobotics.simulationconstructionset.plotting.SimulationOverheadPlotter;
 
 public class OneStepCaptureRegionCalculatorTest
@@ -407,7 +407,7 @@ public class OneStepCaptureRegionCalculatorTest
       final SideDependentList<YoFrameConvexPolygon2d> yoFootPolygons = new SideDependentList<>();
       YoVariableRegistry registry = robot.getRobotsYoVariableRegistry();
       final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      final SideDependentList<DynamicGraphicYoPolygonArtifact> footArtifacts = new SideDependentList<>();
+      final SideDependentList<YoArtifactPolygon> footArtifacts = new SideDependentList<>();
       for (final RobotSide robotSide : RobotSide.values)
       {
          ReferenceFrame ankleZUpFrame = new ReferenceFrame(robotSide.getCamelCaseNameForStartOfExpression() + "AnkleZUpFrame", worldFrame)
@@ -438,14 +438,14 @@ public class OneStepCaptureRegionCalculatorTest
          Color footColor;
          if (robotSide == RobotSide.LEFT) footColor = Color.pink;
          else                             footColor = Color.green;
-         DynamicGraphicYoPolygonArtifact footArtifact = new DynamicGraphicYoPolygonArtifact(robotSide.getCamelCaseNameForStartOfExpression(), yoFootPolygon, footColor, false);
+         YoArtifactPolygon footArtifact = new YoArtifactPolygon(robotSide.getCamelCaseNameForStartOfExpression(), yoFootPolygon, footColor, false);
          yoGraphicsListRegistry.registerArtifact("Feet", footArtifact);
          footArtifacts.put(robotSide, footArtifact);
       }
       final OneStepCaptureRegionCalculator oneStepCaptureRegionCalculator = new OneStepCaptureRegionCalculator(midFootAnkleXOffset, footWidth, kinematicStepRange, ankleZUpFrames, registry, null);
       
       final YoFrameConvexPolygon2d yoCaptureRegion = new YoFrameConvexPolygon2d("captureRegion", "", worldFrame, 50, registry);
-      DynamicGraphicYoPolygonArtifact captureRegionArtifact = new DynamicGraphicYoPolygonArtifact("CaptureRegion", yoCaptureRegion, Color.BLACK, false);
+      YoArtifactPolygon captureRegionArtifact = new YoArtifactPolygon("CaptureRegion", yoCaptureRegion, Color.BLACK, false);
       yoGraphicsListRegistry.registerArtifact("Capture", captureRegionArtifact);
       final EnumYoVariable<RobotSide> yoSupportSide = new EnumYoVariable<>("supportSide", registry, RobotSide.class);
       final DoubleYoVariable swingTimeRemaining = new DoubleYoVariable("swingTimeRemaining", registry);

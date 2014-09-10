@@ -11,11 +11,11 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.yoUtilities.graphics.plotting.YoArtifactPolygon;
 import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector2d;
 
-import com.yobotics.simulationconstructionset.plotting.DynamicGraphicYoPolygonArtifact;
 import com.yobotics.simulationconstructionset.plotting.DynamicGraphicYoVectorArtifact;
 
 public class OrientationStateVisualizer 
@@ -30,7 +30,7 @@ public class OrientationStateVisualizer
 	private final String name = getClass().getSimpleName();
 	private final YoVariableRegistry registry = new YoVariableRegistry(name + "Registry");
 	
-	private final DynamicGraphicYoPolygonArtifact reducedSupportPolygonArtifact;  
+	private final YoArtifactPolygon reducedSupportPolygonArtifact;  
 	private YoFrameConvexPolygon2d yoreducedSupportPolygon;
 	private FrameConvexPolygon2d reducedSupportPolygon;
 	
@@ -52,7 +52,7 @@ public class OrientationStateVisualizer
       String reducedSupportPolygonCaption = "ReducedSupportPolygon";
       yoreducedSupportPolygon = new YoFrameConvexPolygon2d(reducedSupportPolygonCaption, "", worldFrame, 8, registry);
       reducedSupportPolygon = new FrameConvexPolygon2d(worldFrame);
-      reducedSupportPolygonArtifact = new DynamicGraphicYoPolygonArtifact(reducedSupportPolygonCaption, yoreducedSupportPolygon, REDUCED_SUPPORT_POLYGON_COLOR,
+      reducedSupportPolygonArtifact = new YoArtifactPolygon(reducedSupportPolygonCaption, yoreducedSupportPolygon, REDUCED_SUPPORT_POLYGON_COLOR,
             false);
 
       String pelvisXaxisCaption = "PelvisXaxis";

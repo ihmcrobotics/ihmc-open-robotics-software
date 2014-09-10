@@ -9,9 +9,9 @@ import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.yoUtilities.graphics.plotting.YoArtifactPolygon;
 import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
 
-import com.yobotics.simulationconstructionset.plotting.DynamicGraphicYoPolygonArtifact;
 
 public class FootPolygonVisualizer implements Updatable
 {
@@ -53,7 +53,7 @@ public class FootPolygonVisualizer implements Updatable
 
             Color color = colors.get(colorIndex++);
 
-            DynamicGraphicYoPolygonArtifact dynamicGraphicYoPolygonArtifact = new DynamicGraphicYoPolygonArtifact(contactStateName, yoFootPolygon, color, false);
+            YoArtifactPolygon dynamicGraphicYoPolygonArtifact = new YoArtifactPolygon(contactStateName, yoFootPolygon, color, false);
             yoGraphicsListRegistry.registerArtifact(contactStateName, dynamicGraphicYoPolygonArtifact);
          }
       }

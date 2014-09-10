@@ -6,9 +6,9 @@ import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.yoUtilities.graphics.plotting.YoArtifactPolygon;
 import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
 
-import com.yobotics.simulationconstructionset.plotting.DynamicGraphicYoPolygonArtifact;
 
 public class FootstepAdjusterVisualizer
 {
@@ -17,7 +17,7 @@ public class FootstepAdjusterVisualizer
    
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name + "Registry");
-   private final DynamicGraphicYoPolygonArtifact nextFootstepPolygonArtifact;
+   private final YoArtifactPolygon nextFootstepPolygonArtifact;
    
    private final FootstepAdjustor footstepAdjustor;
    
@@ -36,7 +36,7 @@ public class FootstepAdjusterVisualizer
       nextFootstepPolygon = new FrameConvexPolygon2d(worldFrame);
       
       nextFootstepPolygonArtifact = 
-            new DynamicGraphicYoPolygonArtifact(nextFootstepCaption, yoNextFootstepPolygon, colorDefault, false);
+            new YoArtifactPolygon(nextFootstepCaption, yoNextFootstepPolygon, colorDefault, false);
       yoGraphicsListRegistry.registerArtifact(nextFootstepCaption, nextFootstepPolygonArtifact);
       
       parentRegistry.addChild(registry);

@@ -41,13 +41,13 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.graphics.plotting.ArtifactList;
+import us.ihmc.yoUtilities.graphics.plotting.YoArtifactPolygon;
 import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.plotting.DynamicGraphicYoPolygonArtifact;
 import com.yobotics.simulationconstructionset.plotting.SimulationOverheadPlotter;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 import com.yobotics.simulationconstructionset.util.graphics.BagOfBalls;
@@ -131,7 +131,7 @@ public class DesiredFootstepVisualizer
          YoFrameConvexPolygon2d yoFrameFootPolygonInWorld = new YoFrameConvexPolygon2d(footName, "", worldFrame, maxNumberOfVertices, registry);
          this.feetPolygonsInWorld.put(robotSide, yoFrameFootPolygonInWorld);
 
-         DynamicGraphicYoPolygonArtifact dynamicGraphicYoPolygonArtifact = new DynamicGraphicYoPolygonArtifact(footName, yoFrameFootPolygonInWorld,
+         YoArtifactPolygon dynamicGraphicYoPolygonArtifact = new YoArtifactPolygon(footName, yoFrameFootPolygonInWorld,
                footColors.get(robotSide), false);
          artifactList.add(dynamicGraphicYoPolygonArtifact);
       }
