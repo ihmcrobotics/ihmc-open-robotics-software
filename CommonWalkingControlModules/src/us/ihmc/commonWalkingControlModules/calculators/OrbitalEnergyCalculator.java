@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.calculators;
 
 import us.ihmc.utilities.math.MathTools;
+import us.ihmc.yoUtilities.math.trajectories.YoPolynomial;
 
-import com.yobotics.simulationconstructionset.util.trajectory.YoPolynomial;
 
 public class OrbitalEnergyCalculator
 {

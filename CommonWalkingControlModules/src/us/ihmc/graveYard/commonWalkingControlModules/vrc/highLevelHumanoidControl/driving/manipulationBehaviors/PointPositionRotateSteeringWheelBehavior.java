@@ -19,10 +19,10 @@ import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
+import us.ihmc.yoUtilities.math.trajectories.CirclePositionTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.providers.YoVariableDoubleProvider;
 
 import com.yobotics.simulationconstructionset.util.controller.EuclideanPositionController;
-import com.yobotics.simulationconstructionset.util.trajectory.CirclePositionTrajectoryGenerator;
 
 /**
  * @author twan

@@ -55,12 +55,12 @@ import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFramePose;
 import us.ihmc.yoUtilities.math.frames.YoFrameQuaternion;
+import us.ihmc.yoUtilities.math.trajectories.ConstantPoseTrajectoryGenerator;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.util.controller.GainCalculator;
 import com.yobotics.simulationconstructionset.util.controller.PDController;
 import com.yobotics.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
-import com.yobotics.simulationconstructionset.util.trajectory.ConstantPoseTrajectoryGenerator;
 
 /**
  * Simple controller using an inverse dynamics calculator. Mainly used to check gravity compensation, and simple controls while having the robot hanging in the air.

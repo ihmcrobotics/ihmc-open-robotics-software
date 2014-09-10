@@ -27,8 +27,8 @@ import us.ihmc.utilities.math.trajectories.providers.OrientationProvider;
 import us.ihmc.utilities.math.trajectories.providers.PositionProvider;
 import us.ihmc.utilities.test.JUnitTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.math.trajectories.CirclePositionAndOrientationTrajectoryGenerator;
 
-import com.yobotics.simulationconstructionset.util.trajectory.CirclePositionAndOrientationTrajectoryGenerator;
 
 /**
  * @author twan

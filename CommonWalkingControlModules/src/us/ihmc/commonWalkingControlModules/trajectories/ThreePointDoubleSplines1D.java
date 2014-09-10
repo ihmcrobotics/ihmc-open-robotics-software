@@ -4,8 +4,8 @@ import javax.vecmath.Point2d;
 
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.math.trajectories.YoPolynomial;
 
-import com.yobotics.simulationconstructionset.util.trajectory.YoPolynomial;
 
 public class ThreePointDoubleSplines1D
 {

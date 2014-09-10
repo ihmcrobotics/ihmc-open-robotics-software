@@ -8,10 +8,10 @@ import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
 import us.ihmc.utilities.math.trajectories.providers.PositionProvider;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.math.trajectories.PositionTrajectoryGenerator;
+import us.ihmc.yoUtilities.math.trajectories.YoMinimumJerkTrajectory;
+import us.ihmc.yoUtilities.math.trajectories.YoParabolicTrajectoryGenerator;
 
-import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
-import com.yobotics.simulationconstructionset.util.trajectory.YoMinimumJerkTrajectory;
-import com.yobotics.simulationconstructionset.util.trajectory.YoParabolicTrajectoryGenerator;
 
 public class ParabolicPositionTrajectoryGenerator implements PositionTrajectoryGenerator
 {

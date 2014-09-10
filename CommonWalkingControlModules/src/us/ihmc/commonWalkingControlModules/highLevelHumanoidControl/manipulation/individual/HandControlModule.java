@@ -30,6 +30,13 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.yoUtilities.math.trajectories.ConstantPoseTrajectoryGenerator;
+import us.ihmc.yoUtilities.math.trajectories.FinalApproachPoseTrajectoryGenerator;
+import us.ihmc.yoUtilities.math.trajectories.InitialClearancePoseTrajectoryGenerator;
+import us.ihmc.yoUtilities.math.trajectories.LeadInOutPoseTrajectoryGenerator;
+import us.ihmc.yoUtilities.math.trajectories.OneDoFJointQuinticTrajectoryGenerator;
+import us.ihmc.yoUtilities.math.trajectories.PoseTrajectoryGenerator;
+import us.ihmc.yoUtilities.math.trajectories.StraightLinePoseTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.providers.YoVariableDoubleProvider;
 
 import com.yobotics.simulationconstructionset.util.controller.YoPIDGains;
@@ -39,13 +46,6 @@ import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionAction;
 import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
-import com.yobotics.simulationconstructionset.util.trajectory.ConstantPoseTrajectoryGenerator;
-import com.yobotics.simulationconstructionset.util.trajectory.FinalApproachPoseTrajectoryGenerator;
-import com.yobotics.simulationconstructionset.util.trajectory.InitialClearancePoseTrajectoryGenerator;
-import com.yobotics.simulationconstructionset.util.trajectory.LeadInOutPoseTrajectoryGenerator;
-import com.yobotics.simulationconstructionset.util.trajectory.OneDoFJointQuinticTrajectoryGenerator;
-import com.yobotics.simulationconstructionset.util.trajectory.PoseTrajectoryGenerator;
-import com.yobotics.simulationconstructionset.util.trajectory.StraightLinePoseTrajectoryGenerator;
 
 public class HandControlModule
 {

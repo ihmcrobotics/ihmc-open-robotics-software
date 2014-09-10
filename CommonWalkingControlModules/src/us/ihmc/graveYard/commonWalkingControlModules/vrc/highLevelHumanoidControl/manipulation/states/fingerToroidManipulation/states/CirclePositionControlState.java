@@ -12,13 +12,13 @@ import us.ihmc.utilities.math.trajectories.providers.OrientationProvider;
 import us.ihmc.utilities.math.trajectories.providers.SE3ConfigurationProvider;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.math.trajectories.CirclePositionTrajectoryGenerator;
+import us.ihmc.yoUtilities.math.trajectories.OrientationInterpolationTrajectoryGenerator;
+import us.ihmc.yoUtilities.math.trajectories.OrientationTrajectoryGenerator;
+import us.ihmc.yoUtilities.math.trajectories.PositionTrajectoryGenerator;
 
 import com.yobotics.simulationconstructionset.util.controller.SE3PIDGains;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
-import com.yobotics.simulationconstructionset.util.trajectory.CirclePositionTrajectoryGenerator;
-import com.yobotics.simulationconstructionset.util.trajectory.OrientationInterpolationTrajectoryGenerator;
-import com.yobotics.simulationconstructionset.util.trajectory.OrientationTrajectoryGenerator;
-import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
 
 
 public class CirclePositionControlState extends State<FingerToroidManipulationState>

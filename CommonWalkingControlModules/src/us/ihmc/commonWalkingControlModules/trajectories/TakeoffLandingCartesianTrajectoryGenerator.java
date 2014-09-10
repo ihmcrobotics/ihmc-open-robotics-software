@@ -13,8 +13,8 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector2d;
+import us.ihmc.yoUtilities.math.trajectories.CartesianTrajectoryGenerator;
 
-import com.yobotics.simulationconstructionset.util.trajectory.CartesianTrajectoryGenerator;
 
 
 

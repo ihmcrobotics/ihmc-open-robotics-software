@@ -11,8 +11,8 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
+import us.ihmc.yoUtilities.math.trajectories.YoSpline3D;
 
-import com.yobotics.simulationconstructionset.util.trajectory.YoSpline3D;
 
 public class SoftTouchdownTrajectoryGenerator
 {

@@ -15,10 +15,10 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
+import us.ihmc.yoUtilities.math.trajectories.PositionTrajectoryGenerator;
 
 import com.yobotics.simulationconstructionset.util.controller.PositionController;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
-import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
 
 /**
  * @author twan
