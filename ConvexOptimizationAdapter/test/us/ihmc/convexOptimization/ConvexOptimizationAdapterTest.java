@@ -1,12 +1,12 @@
 package us.ihmc.convexOptimization;
 
 import static org.junit.Assert.assertEquals;
+import us.ihmc.utilities.math.MatrixTools;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
@@ -27,6 +27,7 @@ public abstract class ConvexOptimizationAdapterTest
    @Ignore
    public void qpsFileTest() throws IOException
    {
+
       DenseMatrix64F beq = new DenseMatrix64F(0,0);
       DenseMatrix64F Aeq = new DenseMatrix64F(0,0);
       DenseMatrix64F b = new DenseMatrix64F(0,0);
@@ -43,76 +44,20 @@ public abstract class ConvexOptimizationAdapterTest
       for(int i = 0; i < yamlQpProblemFileList.length; i++)
       {
          InputStream input = new FileInputStream(yamlQpProblemFileList[i]);
-            
+      
          Map<String, Object> object = (Map<String, Object>) yaml.load(input);
          System.out.print(object + "\n");
          
-         yamlFieldToMatrix(beq,"beq",object);
-         yamlFieldToMatrix(Aeq,"Aeq",object);
-         yamlFieldToMatrix(A,"A",object);
-         yamlFieldToMatrix(b,"b",object);
-         yamlFieldToMatrix(H,"H",object);
-         yamlFieldToMatrix(f,"f",object);
+         MatrixTools.yamlFieldToMatrix(beq,"beq",object);
+         MatrixTools.yamlFieldToMatrix(Aeq,"Aeq",object);
+         MatrixTools.yamlFieldToMatrix(A,"A",object);
+         MatrixTools.yamlFieldToMatrix(b,"b",object);
+         MatrixTools.yamlFieldToMatrix(H,"H",object);
+         MatrixTools.yamlFieldToMatrix(f,"f",object);
       }
    }
-   
-   /**
-    * This method tries to be smart about converting the various yaml fields to DenseMatrix64F
-    * @param val
-    * @param fieldName
-    * @param object
-    */
-   private void yamlFieldToMatrix(DenseMatrix64F val, String fieldName, Map<String,Object> object)
-   {
-      if(object.get(fieldName) instanceof ArrayList<?>)
-      {
-         ArrayList<?> arrayList = (ArrayList<?>) object.get(fieldName);
-         try
-         {
-            if(arrayList.get(0) instanceof ArrayList)
-            {
-               @SuppressWarnings("unchecked")
-               ArrayList<ArrayList<Double>> tmp2DArrayList = (ArrayList<ArrayList<Double>>) arrayList;
-               // 2D
-               val.reshape(tmp2DArrayList.size(), tmp2DArrayList.get(0).size());
-               for(int i = 0; i<tmp2DArrayList.size(); i++)
-               {
-                  for(int j = 0; j<tmp2DArrayList.get(0).size(); j++)
-                  {
-                     val.set(i, j, tmp2DArrayList.get(i).get(j));
-                  }
-               }
-            }
-            else
-            {
-               @SuppressWarnings("unchecked")
-               ArrayList<Double> tmp1DArrayList = (ArrayList<Double>) arrayList;
-               // 1D
-               val.reshape(arrayList.size(), 1);
-               for(int i = 0; i<tmp1DArrayList.size(); i++)
-               {
-                  val.set(i,0,tmp1DArrayList.get(i));
-               }
-            }
-         }
-         catch(Exception e)
-         {
-            //Field is empty
-            val.reshape(0,0);
-         }
-      }
-      else if(object.get(fieldName) instanceof Double)
-      {
-         val.reshape(1, 1);
-         Double tmpDouble = (Double) object.get(fieldName);
-         
-         val.set(0,0,tmpDouble);
-      }
-      else
-      {
-         throw new RuntimeException("Unsupported data type:" + object.get(fieldName).getClass());
-      }
-   }
+      
+  
    
    @Test
    public void testASimpleRedundantEqualityCase()
@@ -191,6 +136,7 @@ public abstract class ConvexOptimizationAdapterTest
       assertEquals(1.5, sol2[0], 1e-5);
       assertEquals(0, sol2[1], 1e-5);
    }
+  
    
    @Test
    public void testASimpleInequalityCase() throws Exception
@@ -313,9 +259,9 @@ public abstract class ConvexOptimizationAdapterTest
       assertEquals(1.0/2.0 * (-1.0 - Math.sqrt(17.0)), solution[0], 1e-5);
       assertEquals(1.0/2.0 * (9.0 + Math.sqrt(17.0)), solution[1], 1e-5);
    }
+
+
    
-   
-   @Ignore //not implement yet
    @Test
    public void testASecondOrderLorenzConeProblemUsingSOCP() throws Exception
    {
@@ -324,18 +270,18 @@ public abstract class ConvexOptimizationAdapterTest
       convexOptimizationAdapter.setLinearCostFunctionVector(new double[]{-1.0, -1.0, 0.0});
 
       double[][] secondOrderConeAMatrix = new double[][]{{1.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, {0.0, 0.0, 0.0}};
-      double secondOrderConeBScalar = 0.0;
+      double[] secondOrderConeBVector = new double[]{0.0,0.0,0.0};
       double[] secondOrderConeCVector = new double[]{0.0, 0.0, 1.0};
       double secondOrderConeDScalar = 0.0;
       
-      convexOptimizationAdapter.addSecondOrderConeConstraints(secondOrderConeAMatrix, secondOrderConeBScalar, secondOrderConeCVector, secondOrderConeDScalar);
+      convexOptimizationAdapter.addSecondOrderConeConstraints(secondOrderConeAMatrix, secondOrderConeBVector, secondOrderConeCVector, secondOrderConeDScalar);
 
       // inequalities
       convexOptimizationAdapter.setLinearInequalityConstraints(new double[][]{{0.0, 0.0, 1.0}}, new double[]{Math.sqrt(18.0)}); // z <= sqrt(18.0)
 
       double[] solution = convexOptimizationAdapter.solve();
 
-//      if (VERBOSE) System.out.println("solution = (" + solution[0] + ", " + solution[1] + ", " + solution[2] + ")");
+      System.out.println("solution = (" + solution[0] + ", " + solution[1] + ", " + solution[2] + ")");
 
       assertEquals(3.0, solution[0], 1e-5);
       assertEquals(3.0, solution[1], 1e-5);
