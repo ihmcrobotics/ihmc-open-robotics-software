@@ -101,7 +101,7 @@ public class JointSpaceSwingSubController implements SwingSubController
          FullRobotModel fullRobotModel, SideDependentList<FootSwitchInterface> footSwitches, CommonWalkingReferenceFrames referenceFrames,
          DesiredFootstepCalculator desiredFootstepCalculator, CouplingRegistry couplingRegistry, LegInverseKinematicsCalculator inverseKinematicsCalculator,
          SwingLegTorqueControlOnlyModule swingLegTorqueControlModule, SwingLegAnglesAtEndOfStepEstimator swingLegAnglesAtEndOfStepEstimator,
-         DesiredHeadingControlModule desiredHeadingControlModule, double controlDT, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry,
+         DesiredHeadingControlModule desiredHeadingControlModule, double controlDT, YoGraphicsListRegistry yoGraphicsListRegistry,
          YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(name);
@@ -119,7 +119,7 @@ public class JointSpaceSwingSubController implements SwingSubController
       bodyPositionInTimeEstimator = new BodyPositionInTimeEstimator(processedSensors, referenceFrames, desiredHeadingControlModule, couplingRegistry, registry);
 
       jointSpaceTrajectoryGenerator = new JointSpaceTrajectoryGenerator("jointSpaceTrajectory", 2, referenceFrames, inverseKinematicsCalculator,
-            processedSensors, controlDT, dynamicGraphicObjectsListRegistry, bodyPositionInTimeEstimator, swingLegAnglesAtEndOfStepEstimator, registry);
+            processedSensors, controlDT, yoGraphicsListRegistry, bodyPositionInTimeEstimator, swingLegAnglesAtEndOfStepEstimator, registry);
 
       timeSpentInPreSwing = new DoubleYoVariable("timeSpentInPreSwing", "This is the time spent in Pre swing.", registry);
       timeSpentInInitialSwing = new DoubleYoVariable("timeSpentInInitialSwing", "This is the time spent in initial swing.", registry);

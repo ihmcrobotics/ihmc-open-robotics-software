@@ -52,13 +52,13 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
    private final EnumYoVariable<RobotSide> supportLegPreviousTick = EnumYoVariable.create("supportLegPreviousTick", "", RobotSide.class, registry, true);
 
    public ICPBasedLinearMomentumRateOfChangeControlModule(ReferenceFrame centerOfMassFrame,
-           double controlDT, double totalMass, double gravityZ, YoVariableRegistry parentRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+           double controlDT, double totalMass, double gravityZ, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
-      this.icpProportionalController = new ICPProportionalController(controlDT, registry, dynamicGraphicObjectsListRegistry);
+      this.icpProportionalController = new ICPProportionalController(controlDT, registry, yoGraphicsListRegistry);
       this.centerOfMassFrame = centerOfMassFrame;
-      this.visualizer = new CapturabilityBasedDesiredCoPVisualizer(registry, dynamicGraphicObjectsListRegistry);
+      this.visualizer = new CapturabilityBasedDesiredCoPVisualizer(registry, yoGraphicsListRegistry);
       this.totalMass = totalMass;
       this.centerOfMass = new FramePoint(centerOfMassFrame);
       this.gravityZ = gravityZ;

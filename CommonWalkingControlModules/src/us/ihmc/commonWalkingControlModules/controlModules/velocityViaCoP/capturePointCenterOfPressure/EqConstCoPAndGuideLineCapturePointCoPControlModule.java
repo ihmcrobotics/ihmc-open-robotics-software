@@ -50,7 +50,7 @@ public class EqConstCoPAndGuideLineCapturePointCoPControlModule implements Captu
 
 
    public EqConstCoPAndGuideLineCapturePointCoPControlModule(CommonWalkingReferenceFrames referenceFrames, ProcessedSensorsInterface processedSensors,
-           CouplingRegistry couplingRegistry, YoVariableRegistry parentRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+           CouplingRegistry couplingRegistry, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.referenceFrames = referenceFrames;
       this.processedSensors = processedSensors;
@@ -61,13 +61,13 @@ public class EqConstCoPAndGuideLineCapturePointCoPControlModule implements Captu
          parentRegistry.addChild(registry);
       }
 
-      if (dynamicGraphicObjectsListRegistry != null)
+      if (yoGraphicsListRegistry != null)
       {
          ArtifactList artifactList = new ArtifactList("Capture Point CoP Control Module");
 
          YoGraphicPosition centerOfPressureDesiredGraphic = new YoGraphicPosition("Desired Center of Pressure", desiredCenterOfPressure, 0.012,
                                                                     YoAppearance.Gray(), YoGraphicPosition.GraphicType.CROSS);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("EquivalentConstantCoPVelocityViaCoPControlModule", centerOfPressureDesiredGraphic);
+         yoGraphicsListRegistry.registerDynamicGraphicObject("EquivalentConstantCoPVelocityViaCoPControlModule", centerOfPressureDesiredGraphic);
          artifactList.add(centerOfPressureDesiredGraphic.createArtifact());
 
          YoFrameLineSegment2dArtifact guideLineArtifact = new YoFrameLineSegment2dArtifact("Guide Line", guideLineWorld, Color.RED);
@@ -76,7 +76,7 @@ public class EqConstCoPAndGuideLineCapturePointCoPControlModule implements Captu
          YoFrameLine2dArtifact parallellLineArtifact = new YoFrameLine2dArtifact("Parallel Line", parallelLineWorld, Color.GREEN);
          artifactList.add(parallellLineArtifact);
 
-         dynamicGraphicObjectsListRegistry.registerArtifactList(artifactList);
+         yoGraphicsListRegistry.registerArtifactList(artifactList);
       }
    }
 

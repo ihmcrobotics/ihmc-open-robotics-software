@@ -78,17 +78,17 @@ public class SwingState extends AbstractUnconstrainedState
 
       initialConfigurationProvider = new CurrentConfigurationProvider(footFrame);
 
-      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
+      YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
       PositionTrajectoryGenerator swingTrajectoryGenerator = new TwoWaypointPositionTrajectoryGenerator(namePrefix + "Swing", worldFrame, swingTimeProvider,
             initialConfigurationProvider, initialVelocityProvider, finalConfigurationProvider, touchdownVelocityProvider, trajectoryParametersProvider,
-            registry, dynamicGraphicObjectsListRegistry, walkingControllerParameters, visualizeSwingTrajectory);
+            registry, yoGraphicsListRegistry, walkingControllerParameters, visualizeSwingTrajectory);
 
       PositionTrajectoryGenerator touchdownTrajectoryGenerator = new SoftTouchdownPositionTrajectoryGenerator(namePrefix + "Touchdown", worldFrame,
             finalConfigurationProvider, touchdownVelocityProvider, swingTimeProvider, registry);
 
       PositionTrajectoryGenerator pushRecoverySwingTrajectoryGenerator = new TwoWaypointTrajectoryGeneratorWithPushRecovery(namePrefix + "PushRecoverySwing",
             worldFrame, swingTimeProvider, swingTimeRemaining, initialConfigurationProvider, initialVelocityProvider, finalConfigurationProvider,
-            touchdownVelocityProvider, trajectoryParametersProvider, registry, dynamicGraphicObjectsListRegistry, swingTrajectoryGenerator,
+            touchdownVelocityProvider, trajectoryParametersProvider, registry, yoGraphicsListRegistry, swingTrajectoryGenerator,
             walkingControllerParameters, visualizeSwingTrajectory);
 
       positionTrajectoryGenerators.add(swingTrajectoryGenerator);

@@ -58,9 +58,9 @@ public class GroundReactionWrenchDistributorVisualizer
    private final ArrayList<YoFrameVector> cylinderWrenchTorques= new ArrayList<YoFrameVector>();
 
    public GroundReactionWrenchDistributorVisualizer(int maxNumberOfFeet, int maxNumberOfVertices, int maxNumberOfCylinders, YoVariableRegistry parentRegistry,
-           YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+           YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      YoGraphicsList dynamicGraphicObjectsList = new YoGraphicsList("GroundReactionWrenchDistributorVisuzalizer");
+      YoGraphicsList yoGraphicsList = new YoGraphicsList("GroundReactionWrenchDistributorVisuzalizer");
 
       for (int i = 0; i < maxNumberOfFeet; i++)
       {
@@ -75,7 +75,7 @@ public class GroundReactionWrenchDistributorVisualizer
 
          YoGraphicPolygon dynamicGraphicPolygon = new YoGraphicPolygon("contactPolygon" + i, contactPolygon, contactReferencePoint,
                                                                  contactPlaneOrientation, 1.0, YoAppearance.Green());
-         dynamicGraphicObjectsList.add(dynamicGraphicPolygon);
+         yoGraphicsList.add(dynamicGraphicPolygon);
 
          YoFramePoint contactCenterOfPressure = new YoFramePoint("contactCoPViz" + i, worldFrame, registry);
          YoFrameVector contactForce = new YoFrameVector("contactForceViz" + i, worldFrame, registry);
@@ -86,15 +86,15 @@ public class GroundReactionWrenchDistributorVisualizer
          contactMoments.add(contactMoment);
 
          YoGraphicPosition contactCoPViz = new YoGraphicPosition("contactCoPViz" + i, contactCenterOfPressure, COP_VIZ_RADIUS, YoAppearance.Brown());
-         dynamicGraphicObjectsList.add(contactCoPViz);
+         yoGraphicsList.add(contactCoPViz);
 
          YoGraphicVector contactForceViz = new YoGraphicVector("contactForceViz" + i, contactCenterOfPressure, contactForce, FORCE_VECTOR_SCALE,
                                                    YoAppearance.Pink());
-         dynamicGraphicObjectsList.add(contactForceViz);
+         yoGraphicsList.add(contactForceViz);
 
          YoGraphicVector contactMomentViz = new YoGraphicVector("contactMomentViz" + i, contactCenterOfPressure, contactMoment, MOMENT_VECTOR_SCALE,
                                                     YoAppearance.Black());
-         dynamicGraphicObjectsList.add(contactMomentViz);
+         yoGraphicsList.add(contactMomentViz);
 
       }
 
@@ -116,13 +116,13 @@ public class GroundReactionWrenchDistributorVisualizer
       YoGraphicVector achievedMomentWorldViz = new YoGraphicVector("achievedMomentViz", centerOfMassWorld, achievedMomentWorld, MOMENT_VECTOR_SCALE,
                                                        YoAppearance.Purple());
 
-      dynamicGraphicObjectsList.add(centerOfMassWorldViz);
-      dynamicGraphicObjectsList.add(desiredForceWorldViz);
-      dynamicGraphicObjectsList.add(desiredMomentWorldViz);
-      dynamicGraphicObjectsList.add(achievedForceWorldViz);
-      dynamicGraphicObjectsList.add(achievedMomentWorldViz);
+      yoGraphicsList.add(centerOfMassWorldViz);
+      yoGraphicsList.add(desiredForceWorldViz);
+      yoGraphicsList.add(desiredMomentWorldViz);
+      yoGraphicsList.add(achievedForceWorldViz);
+      yoGraphicsList.add(achievedMomentWorldViz);
 
-      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
+      yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicsList);
 
       parentRegistry.addChild(registry);
    }

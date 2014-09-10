@@ -38,7 +38,7 @@ public class PlaneContactWrenchProcessor
    private final Map<ContactablePlaneBody, FramePoint2d> cops = new LinkedHashMap<ContactablePlaneBody, FramePoint2d>();
    private final YoVariableRegistry registry;
 
-   public PlaneContactWrenchProcessor(List<ContactablePlaneBody> contactablePlaneBodies, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+   public PlaneContactWrenchProcessor(List<ContactablePlaneBody> contactablePlaneBodies, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(getClass().getSimpleName());
       this.contactablePlaneBodies = contactablePlaneBodies;
@@ -60,11 +60,11 @@ public class PlaneContactWrenchProcessor
          YoFramePoint cop = new YoFramePoint(copName, ReferenceFrame.getWorldFrame(), registry);
          centersOfPressureWorld.put(contactableBody, cop);
 
-         if (dynamicGraphicObjectsListRegistry != null)
+         if (yoGraphicsListRegistry != null)
          {
             YoGraphicPosition copViz = new YoGraphicPosition(copName, cop, 0.005, YoAppearance.Navy(), YoGraphicPosition.GraphicType.BALL);
-            dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, copViz);
-            dynamicGraphicObjectsListRegistry.registerArtifact(listName, copViz.createArtifact());
+            yoGraphicsListRegistry.registerDynamicGraphicObject(listName, copViz);
+            yoGraphicsListRegistry.registerArtifact(listName, copViz.createArtifact());
          }
       }
       

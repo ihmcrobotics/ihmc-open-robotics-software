@@ -113,11 +113,11 @@ public class SCSYoVariablesUpdatedListener implements YoVariablesUpdatedListener
       JointUpdater.getJointUpdaterList(robot.getRootJoints(), jointStates, jointUpdaters);
    }
 
-   public void registerDynamicGraphicObjectListsRegistry(YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, boolean showOverheadView)
+   public void registerDynamicGraphicObjectListsRegistry(YoGraphicsListRegistry yoGraphicsListRegistry, boolean showOverheadView)
    {
-      scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
+      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
-      VisualizerUtils.createOverheadPlotter(scs, showOverheadView, dynamicGraphicObjectsListRegistry);
+      VisualizerUtils.createOverheadPlotter(scs, showOverheadView, yoGraphicsListRegistry);
    }
 
    public void disconnected()

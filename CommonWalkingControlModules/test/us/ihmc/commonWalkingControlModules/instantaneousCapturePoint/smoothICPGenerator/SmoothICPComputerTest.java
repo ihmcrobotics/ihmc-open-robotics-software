@@ -40,7 +40,7 @@ public class SmoothICPComputerTest
    private boolean visualize = false;
 
    private PointAndLinePlotter pointAndLinePlotter = null;
-   private YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = null;
+   private YoGraphicsListRegistry yoGraphicsListRegistry = null;
    private SimulationConstructionSet scs = null;
    private DoubleYoVariable timeYoVariable = null;
 
@@ -83,7 +83,7 @@ public class SmoothICPComputerTest
       visualize = false;
 
       pointAndLinePlotter = null;
-      dynamicGraphicObjectsListRegistry = null;
+      yoGraphicsListRegistry = null;
       scs = null;
       timeYoVariable = null;
       registry = null;
@@ -116,7 +116,7 @@ public class SmoothICPComputerTest
       double doubleSupportFirstStepFraction = 0.5;
 
       SmoothICPComputer smoothICPComputer = new SmoothICPComputer(doubleSupportFirstStepFraction, maxNumberOfConsideredFootsteps, registry,
-                                               dynamicGraphicObjectsListRegistry);
+                                               yoGraphicsListRegistry);
 
       RobotSide stepSide = RobotSide.LEFT;
       int numberOfStepsInStepList = 7;
@@ -277,7 +277,7 @@ public class SmoothICPComputerTest
       double doubleSupportFirstStepFraction = 0.5;
 
       SmoothICPComputer smoothICPComputer = new SmoothICPComputer(doubleSupportFirstStepFraction, maxNumberOfConsideredFootsteps, registry,
-                                               dynamicGraphicObjectsListRegistry);
+                                               yoGraphicsListRegistry);
 
       RobotSide stepSide = RobotSide.LEFT;
       int numberOfStepsInStepList = 7;
@@ -674,7 +674,7 @@ public class SmoothICPComputerTest
       int maxNumberOfConsideredFootsteps = 4;
       double doubleSupportFirstStepFraction = 0.55;
       SmoothICPComputer smoothICPComputer = new SmoothICPComputer(doubleSupportFirstStepFraction, maxNumberOfConsideredFootsteps, registry,
-                                               dynamicGraphicObjectsListRegistry);
+                                               yoGraphicsListRegistry);
 
       ArrayList<FramePoint> footLocations = new ArrayList<FramePoint>();
       footLocations.add(new FramePoint(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 0.0));
@@ -771,7 +771,7 @@ public class SmoothICPComputerTest
       pointAndLinePlotter.plotYoFramePoint("doubleSupportICPStart", doubleSupportStartICPYoFramePoint, YoAppearance.Cyan(), 0.01);
       pointAndLinePlotter.plotYoFramePoint("doubleSupportICPEnd", doubleSupportEndICPYoFramePoint, YoAppearance.Cyan(), 0.01);
 
-      dynamicGraphicObjectsListRegistry = pointAndLinePlotter.getDynamicGraphicObjectsListRegistry();
+      yoGraphicsListRegistry = pointAndLinePlotter.getDynamicGraphicObjectsListRegistry();
    }
 
 

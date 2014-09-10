@@ -91,7 +91,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    public TwoWaypointPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider stepTimeProvider,
          PositionProvider initialPositionProvider, VectorProvider initialVelocityProvider, PositionProvider finalPositionProvider,
          VectorProvider finalDesiredVelocityProvider, TrajectoryParametersProvider trajectoryParametersProvider, YoVariableRegistry parentRegistry,
-         YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, WalkingControllerParameters walkingControllerParameters, boolean visualize)
+         YoGraphicsListRegistry yoGraphicsListRegistry, WalkingControllerParameters walkingControllerParameters, boolean visualize)
    {
       registry = new YoVariableRegistry(namePrefix + namePostFix);
       parentRegistry.addChild(registry);
@@ -101,8 +101,8 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       if (visualize)
       {
          trajectoryBagOfBalls = new BagOfBalls(numberOfVisualizationMarkers, 0.01, namePrefix + "TrajectoryBagOfBalls", registry,
-               dynamicGraphicObjectsListRegistry);
-         fixedPointBagOfBalls = new BagOfBalls(6, 0.02, namePrefix + "WaypointBagOfBalls", registry, dynamicGraphicObjectsListRegistry);
+               yoGraphicsListRegistry);
+         fixedPointBagOfBalls = new BagOfBalls(6, 0.02, namePrefix + "WaypointBagOfBalls", registry, yoGraphicsListRegistry);
       }
 
       else

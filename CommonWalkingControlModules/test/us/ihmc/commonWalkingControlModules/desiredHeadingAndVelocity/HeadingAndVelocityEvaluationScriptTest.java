@@ -49,7 +49,7 @@ public class HeadingAndVelocityEvaluationScriptTest
    public void testHeadingAndVelocityEvaluationScript()
    {
       YoVariableRegistry parentRegistry = new YoVariableRegistry("HeadingAndVelocityEvaluationScriptTest");
-      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
+      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       
       double controlDT = 0.1;
       double desiredHeadingFinal = 0.0;
@@ -69,15 +69,15 @@ public class HeadingAndVelocityEvaluationScriptTest
       YoGraphicVector velocityVector = new YoGraphicVector("velocity", position, velocity, YoAppearance.Yellow());
       YoGraphicVector headingVector = new YoGraphicVector("heading", position, heading, YoAppearance.Blue());
       
-      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("velocityVector", velocityVector);
-      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("headingVector", headingVector);
+      yoGraphicsListRegistry.registerDynamicGraphicObject("velocityVector", velocityVector);
+      yoGraphicsListRegistry.registerDynamicGraphicObject("headingVector", headingVector);
       
-      BagOfBalls bagOfBalls = new BagOfBalls(1200, 0.03, YoAppearance.Red(), parentRegistry, dynamicGraphicObjectsListRegistry);
+      BagOfBalls bagOfBalls = new BagOfBalls(1200, 0.03, YoAppearance.Red(), parentRegistry, yoGraphicsListRegistry);
 
       boolean[] seenEvents = new boolean[HeadingAndVelocityEvaluationEvent.values().length];      
       
       SimulationConstructionSet scs = null;
-      if (SHOW_GUI) scs = setupAndStartSCS(parentRegistry, dynamicGraphicObjectsListRegistry, controlDT);
+      if (SHOW_GUI) scs = setupAndStartSCS(parentRegistry, yoGraphicsListRegistry, controlDT);
       
       int numberOfTicksToTest = 1200;
       
@@ -206,7 +206,7 @@ public class HeadingAndVelocityEvaluationScriptTest
       }
    }
    
-   private SimulationConstructionSet setupAndStartSCS(YoVariableRegistry registryToWatch, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, double controlDT)
+   private SimulationConstructionSet setupAndStartSCS(YoVariableRegistry registryToWatch, YoGraphicsListRegistry yoGraphicsListRegistry, double controlDT)
    {
       Robot robot = new Robot("robot");
       
@@ -214,7 +214,7 @@ public class HeadingAndVelocityEvaluationScriptTest
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);
       scs.setDT(controlDT, 1);
       
-      scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
+      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       
       Thread thread = new Thread(scs);
       thread.start();

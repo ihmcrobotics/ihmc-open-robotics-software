@@ -48,7 +48,7 @@ public class EquivalentConstantCoPDesiredCoPControlModule implements DesiredCoPC
 
    public EquivalentConstantCoPDesiredCoPControlModule(CommonWalkingReferenceFrames referenceFrames, ProcessedSensorsInterface processedSensors,
            CouplingRegistry couplingRegistry, double controlDT, YoVariableRegistry parentRegistry,
-           YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+           YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.referenceFrames = referenceFrames;
       this.processedSensors = processedSensors;
@@ -62,17 +62,17 @@ public class EquivalentConstantCoPDesiredCoPControlModule implements DesiredCoPC
          parentRegistry.addChild(registry);
       }
 
-      if (dynamicGraphicObjectsListRegistry != null)
+      if (yoGraphicsListRegistry != null)
       {
          YoGraphic desiredCapturePointGraphic = new YoGraphicPosition("Desired Final Capture Point", desiredFinalCapturePoint, 0.01,
                                                               YoAppearance.Yellow(), GraphicType.ROTATED_CROSS);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("EquivalentConstantCoPVelocityViaCoPControlModule", desiredCapturePointGraphic);
-         dynamicGraphicObjectsListRegistry.registerArtifact("EquivalentConstantCoPVelocityViaCoPControlModule", desiredCapturePointGraphic.createArtifact());
+         yoGraphicsListRegistry.registerDynamicGraphicObject("EquivalentConstantCoPVelocityViaCoPControlModule", desiredCapturePointGraphic);
+         yoGraphicsListRegistry.registerArtifact("EquivalentConstantCoPVelocityViaCoPControlModule", desiredCapturePointGraphic.createArtifact());
 
          YoGraphicPosition centerOfPressureDesiredGraphic = new YoGraphicPosition("Desired Center of Pressure", desiredCenterOfPressure, 0.012,
                                                                     YoAppearance.Gray(), YoGraphicPosition.GraphicType.CROSS);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("EquivalentConstantCoPVelocityViaCoPControlModule", centerOfPressureDesiredGraphic);
-         dynamicGraphicObjectsListRegistry.registerArtifact("EquivalentConstantCoPVelocityViaCoPControlModule",
+         yoGraphicsListRegistry.registerDynamicGraphicObject("EquivalentConstantCoPVelocityViaCoPControlModule", centerOfPressureDesiredGraphic);
+         yoGraphicsListRegistry.registerArtifact("EquivalentConstantCoPVelocityViaCoPControlModule",
                  centerOfPressureDesiredGraphic.createArtifact());
       }
    }

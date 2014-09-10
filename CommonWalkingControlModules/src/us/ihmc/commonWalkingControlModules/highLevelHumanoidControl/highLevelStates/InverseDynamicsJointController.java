@@ -233,11 +233,11 @@ public class InverseDynamicsJointController extends HighLevelBehavior
          YoFramePoint cop = new YoFramePoint(CONTROLLER_PREFIX + robotSide.getCamelCaseNameForMiddleOfExpression() + "CoPDesired", worldFrame, registry);
          cops.put(robotSide, cop);
          
-         YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
-         if (dynamicGraphicObjectsListRegistry != null)
+         YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
+         if (yoGraphicsListRegistry != null)
          {
             Artifact artifact = new YoGraphicPosition(CONTROLLER_PREFIX + robotSide.getCamelCaseNameForMiddleOfExpression() + "CoP", cop, 0.005, YoAppearance.Brown(), GraphicType.BALL_WITH_CROSS).createArtifact();
-            dynamicGraphicObjectsListRegistry.registerArtifact(CONTROLLER_PREFIX + "CoP", artifact);
+            yoGraphicsListRegistry.registerArtifact(CONTROLLER_PREFIX + "CoP", artifact);
          }
          
          BooleanYoVariable copyGainsToOppositeSide = new BooleanYoVariable(CONTROLLER_PREFIX + "copyLegGainsTo" + robotSide.getOppositeSide().getCamelCaseNameForMiddleOfExpression() + "Side", registry);

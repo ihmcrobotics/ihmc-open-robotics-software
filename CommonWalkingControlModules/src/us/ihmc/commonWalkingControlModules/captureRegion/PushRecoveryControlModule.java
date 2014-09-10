@@ -81,7 +81,7 @@ public class PushRecoveryControlModule
    private final BooleanYoVariable tryingUncertainRecover;
    private final BooleanYoVariable existsAMinimumSwingTimeCaptureRegion;
    private final BooleanYoVariable readyToGrabNextFootstep;
-   private final YoGraphicsListRegistry dynamicGraphicObjectsListRegistry;
+   private final YoGraphicsListRegistry yoGraphicsListRegistry;
    private final SideDependentList<? extends ContactablePlaneBody> feet;
    private final List<FramePoint> tempContactPoints;
    private final FrameConvexPolygon2d tempFootPolygon;
@@ -121,10 +121,10 @@ public class PushRecoveryControlModule
       this.enableProjectionInsidePushRecoveryICPPlanner = new BooleanYoVariable("enableProjectionInsidePushRecoveryICPPlanner", registry);
       this.enableProjectionInsidePushRecoveryICPPlanner.set(ENABLE_PROJECTION_INSIDE_PUSH_RECOVERY_ICP_PLANNER);
       this.usingReducedSwingTime = false;
-      this.dynamicGraphicObjectsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
-      captureRegionCalculator = new OneStepCaptureRegionCalculator(referenceFrames, walkingControllerParameters, registry, dynamicGraphicObjectsListRegistry);
-      footstepAdjustor = new FootstepAdjustor(registry, dynamicGraphicObjectsListRegistry);
-      orientationStateVisualizer = new OrientationStateVisualizer(dynamicGraphicObjectsListRegistry, registry);
+      this.yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
+      captureRegionCalculator = new OneStepCaptureRegionCalculator(referenceFrames, walkingControllerParameters, registry, yoGraphicsListRegistry);
+      footstepAdjustor = new FootstepAdjustor(registry, yoGraphicsListRegistry);
+      orientationStateVisualizer = new OrientationStateVisualizer(yoGraphicsListRegistry, registry);
 
       footstepWasProjectedInCaptureRegion = new BooleanYoVariable("footstepWasProjectedInCaptureRegion", registry);
       recovering = new BooleanYoVariable("recovering", registry);
@@ -142,8 +142,8 @@ public class PushRecoveryControlModule
       captureRegionAreaWithDoubleSupportMinimumSwingTime = new DoubleYoVariable("captureRegionAreaWithMinimumSwingTime", registry);
 
       this.capturePointTrajectoryLineArtifact = new YoFrameLine2dArtifact("CapturePointTrajectoryLineArtifact", capturePointTrajectoryLine, Color.red);
-      dynamicGraphicObjectsListRegistry.registerArtifact("CapturePointTrajectoryArtifact", capturePointTrajectoryLineArtifact);
-      dynamicGraphicObjectsListRegistry.registerArtifact("ProjectedCapturePointArtifact", projectedCapturePointArtifact);
+      yoGraphicsListRegistry.registerArtifact("CapturePointTrajectoryArtifact", capturePointTrajectoryLineArtifact);
+      yoGraphicsListRegistry.registerArtifact("ProjectedCapturePointArtifact", projectedCapturePointArtifact);
 
       parentRegistry.addChild(registry);
 

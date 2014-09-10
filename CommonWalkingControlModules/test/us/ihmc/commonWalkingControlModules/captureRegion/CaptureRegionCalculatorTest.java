@@ -59,11 +59,11 @@ public class CaptureRegionCalculatorTest
       CapturePointCalculatorInterface capturePointCalculator = new SimpleCapturePointCalculator();
       YoVariableRegistry yoVariableRegistry = new YoVariableRegistry("CaptureRegionCalculatorTest");
 
-      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
+      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       
       RobotSide supportSide = RobotSide.LEFT;
 
-      CaptureRegionCalculator calculator = new CaptureRegionCalculator(ankleZUpFrames, midFootAnkleXOffset, footWidth, kinematicRangeFromContactReferencePoint, capturePointCalculator, yoVariableRegistry, dynamicGraphicObjectsListRegistry);
+      CaptureRegionCalculator calculator = new CaptureRegionCalculator(ankleZUpFrames, midFootAnkleXOffset, footWidth, kinematicRangeFromContactReferencePoint, capturePointCalculator, yoVariableRegistry, yoGraphicsListRegistry);
       
       double swingTimeRemaining = 0.1;
       
@@ -76,7 +76,7 @@ public class CaptureRegionCalculatorTest
          robot.addYoVariableRegistry(yoVariableRegistry);
          
          SimulationConstructionSet scs = new SimulationConstructionSet(robot);
-         scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
+         scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
                  
          SimulationOverheadPlotter plotter = new SimulationOverheadPlotter();
          plotter.setDrawHistory(false);
@@ -92,7 +92,7 @@ public class CaptureRegionCalculatorTest
 
          scs.addExtraJpanel(scrollPane, "Plotter Legend");
 
-         dynamicGraphicObjectsListRegistry.addArtifactListsToPlotter(plotter.getPlotter());
+         yoGraphicsListRegistry.addArtifactListsToPlotter(plotter.getPlotter());
 
          scs.addExtraJpanel(plotter.getJPanel(), "Plotter");
          

@@ -20,12 +20,12 @@ public class OldFootPolygonVisualizer implements Updatable
    private final SideDependentList<YoFrameConvexPolygon2d> yoFootPolygons = new SideDependentList<YoFrameConvexPolygon2d>();
    private static final SideDependentList<Color> colors = new SideDependentList<Color>(new Color(53, 184, 144), new Color(202, 119, 11));
 
-   public OldFootPolygonVisualizer(SideDependentList<? extends BipedFootInterface> bipedFeet, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry,
+   public OldFootPolygonVisualizer(SideDependentList<? extends BipedFootInterface> bipedFeet, YoGraphicsListRegistry yoGraphicsListRegistry,
                                 YoVariableRegistry parentRegistry)
    {
       this.bipedFeet = bipedFeet;
 
-      if (dynamicGraphicObjectsListRegistry != null)
+      if (yoGraphicsListRegistry != null)
       {       
         for (RobotSide robotSide : RobotSide.values)
         {
@@ -35,7 +35,7 @@ public class OldFootPolygonVisualizer implements Updatable
            
            DynamicGraphicYoPolygonArtifact dynamicGraphicYoPolygonArtifact = new DynamicGraphicYoPolygonArtifact(robotSide + " Foot", yoFootPolygon,
                  color, false);
-           dynamicGraphicObjectsListRegistry.registerArtifact(robotSide + " Foot", dynamicGraphicYoPolygonArtifact);
+           yoGraphicsListRegistry.registerArtifact(robotSide + " Foot", dynamicGraphicYoPolygonArtifact);
         }
       }
 

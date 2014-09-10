@@ -69,7 +69,7 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
    public VariousWalkingProviders createVariousWalkingProviders(DoubleYoVariable yoTime, FullRobotModel fullRobotModel,
            WalkingControllerParameters walkingControllerParameters, CommonWalkingReferenceFrames referenceFrames, SideDependentList<ContactablePlaneBody> feet,
            ConstantTransferTimeCalculator transferTimeCalculator, ConstantSwingTimeCalculator swingTimeCalculator, ArrayList<Updatable> updatables,
-           YoVariableRegistry registry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+           YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       DesiredHandstepProvider handstepProvider = new DesiredHandstepProvider(fullRobotModel);
 

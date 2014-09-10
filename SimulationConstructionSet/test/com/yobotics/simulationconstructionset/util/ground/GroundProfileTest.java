@@ -66,17 +66,17 @@ public abstract class GroundProfileTest
 
          robot.setGroundContactModel(groundModel);
          
-         YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
-         bagOfBalls = new BagOfBalls(robot.getRobotsYoVariableRegistry(), dynamicGraphicObjectsListRegistry);
+         YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
+         bagOfBalls = new BagOfBalls(robot.getRobotsYoVariableRegistry(), yoGraphicsListRegistry);
          surfaceNormalPointForViz = new YoFramePoint("surfaceNormalPointForViz", ReferenceFrame.getWorldFrame(), robot.getRobotsYoVariableRegistry());
          surfaceNormalViz = new YoFrameVector("surfaceNormalVector", ReferenceFrame.getWorldFrame(), robot.getRobotsYoVariableRegistry());
          YoGraphicVector surfaceNormalGraphicVector = new YoGraphicVector("surfaceNormalViz", surfaceNormalPointForViz, surfaceNormalViz, YoAppearance.AliceBlue());
           
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("Viz", surfaceNormalGraphicVector);
+         yoGraphicsListRegistry.registerDynamicGraphicObject("Viz", surfaceNormalGraphicVector);
          
          scs = new SimulationConstructionSet(robot);
          scs.setGroundVisible(true);
-         scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
+         scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
          scs.startOnAThread();
       }

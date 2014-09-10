@@ -47,7 +47,7 @@ public class OrientationStateVisualizer
 	private final YoFramePoint2d yoPelvisYaxisBase;
 	private final FramePoint pelvisYaxisBase;
 	
-	public OrientationStateVisualizer(YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+	public OrientationStateVisualizer(YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       String reducedSupportPolygonCaption = "ReducedSupportPolygon";
       yoreducedSupportPolygon = new YoFrameConvexPolygon2d(reducedSupportPolygonCaption, "", worldFrame, 8, registry);
@@ -69,11 +69,11 @@ public class OrientationStateVisualizer
       pelvisYaxisBase = new FramePoint(worldFrame, 0, 0, 0);
       pelvisYaxisArtifact = new DynamicGraphicYoVectorArtifact(pelvisYaxisCaption, yoPelvisYaxisBase, yoPelvisYaxis, PELVIS_Y_AXIS_COLOR);
 
-      if (dynamicGraphicObjectsListRegistry != null)
+      if (yoGraphicsListRegistry != null)
       {
-         dynamicGraphicObjectsListRegistry.registerArtifact(reducedSupportPolygonCaption, reducedSupportPolygonArtifact);
-         dynamicGraphicObjectsListRegistry.registerArtifact(pelvisXaxisCaption, pelvisXaxisArtifact);
-         dynamicGraphicObjectsListRegistry.registerArtifact(pelvisYaxisCaption, pelvisYaxisArtifact);
+         yoGraphicsListRegistry.registerArtifact(reducedSupportPolygonCaption, reducedSupportPolygonArtifact);
+         yoGraphicsListRegistry.registerArtifact(pelvisXaxisCaption, pelvisXaxisArtifact);
+         yoGraphicsListRegistry.registerArtifact(pelvisYaxisCaption, pelvisYaxisArtifact);
       }
 
       parentRegistry.addChild(registry);

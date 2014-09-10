@@ -60,13 +60,13 @@ public class DRCVehicleSDFLoader extends DRCWorld
       ReferenceFrame vehicleFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("vehicle", ReferenceFrame.getWorldFrame(),
             vehicleToWorldTransform, false, true, true);
       DRCVehicleModelObjects vehicleModelObjects = new DRCVehicleModelObjects();
-      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
+      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       YoVariableRegistry registry = scs.getRootRegistry();
-      VehicleModelObjectVisualizer vehicleModelObjectVisualizer = new VehicleModelObjectVisualizer(vehicleFrame, vehicleModelObjects, dynamicGraphicObjectsListRegistry, registry);
+      VehicleModelObjectVisualizer vehicleModelObjectVisualizer = new VehicleModelObjectVisualizer(vehicleFrame, vehicleModelObjects, yoGraphicsListRegistry, registry);
       vehicleModelObjectVisualizer.setVisible(true);
       vehicleModelObjectVisualizer.update();
 
-      scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
+      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
       Thread thread = new Thread(scs);
       thread.start();

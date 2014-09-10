@@ -33,7 +33,7 @@ public class CenterOfMassCalibrationTool implements Updatable
 
    private final FullRobotModel fullRobotModel;
    
-   public CenterOfMassCalibrationTool(FullRobotModel fullRobotModel, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry,
+   public CenterOfMassCalibrationTool(FullRobotModel fullRobotModel, YoGraphicsListRegistry yoGraphicsListRegistry,
                                       YoVariableRegistry registry)
    {
       this.fullRobotModel = fullRobotModel;
@@ -59,13 +59,13 @@ public class CenterOfMassCalibrationTool implements Updatable
       rightKneeCoMInZUpFrame = new YoFramePoint("rightKneeCoMInZUpFrame", rightKneeCenterOfMassCalculator.getDesiredFrame(), registry);
 
       spinePitchZUpFrameViz = new YoGraphicCoordinateSystem("spinePitchZUpFrameViz", "", registry, 0.3);
-      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CenterOfMassCalibrationTool", spinePitchZUpFrameViz);
+      yoGraphicsListRegistry.registerDynamicGraphicObject("CenterOfMassCalibrationTool", spinePitchZUpFrameViz);
       
       leftHipPitchZUpFrameViz = new YoGraphicCoordinateSystem("leftHipPitchZUpFrameViz", "", registry, 0.3);
-      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CenterOfMassCalibrationTool", leftHipPitchZUpFrameViz);
+      yoGraphicsListRegistry.registerDynamicGraphicObject("CenterOfMassCalibrationTool", leftHipPitchZUpFrameViz);
       
       leftHipPitchFrameViz = new YoGraphicCoordinateSystem("leftHipPitchFrameViz", "", registry, 0.3);
-      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CenterOfMassCalibrationTool", leftHipPitchFrameViz);
+      yoGraphicsListRegistry.registerDynamicGraphicObject("CenterOfMassCalibrationTool", leftHipPitchFrameViz);
    }
 
    @Override

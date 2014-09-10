@@ -127,7 +127,7 @@ public class OptimalSwingSubController implements SwingSubController
          CommonWalkingReferenceFrames referenceFrames, FullRobotModel fullRobotModel, DesiredFootstepCalculator desiredFootstepCalculator,
          SideDependentList<FootSwitchInterface> footSwitches, CouplingRegistry couplingRegistry, SwingParameters swingParameters, LegTorqueData legTorqueData,
          SwingLegTorqueControlOnlyModule swingLegTorqueControlModule, DesiredHeadingControlModule desiredHeadingControlModule,
-         SideDependentList<LegJointPositionControlModule> legJointPositionControlModules, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry,
+         SideDependentList<LegJointPositionControlModule> legJointPositionControlModules, YoGraphicsListRegistry yoGraphicsListRegistry,
          SwingLegAnglesAtEndOfStepEstimator swingLegAnglesAtEndOfStepEstimator, double controlDT, YoVariableRegistry parentRegistry)
    {
       this.referenceFrames = referenceFrames;
@@ -166,20 +166,20 @@ public class OptimalSwingSubController implements SwingSubController
 
       initialAnkleOrientation = new YoFrameOrientation("initialAnkleOrientation", "", desiredHeadingFrame, registry);
 
-      if (dynamicGraphicObjectsListRegistry != null)
+      if (yoGraphicsListRegistry != null)
       {
          ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
-         ArrayList<YoGraphic> dynamicGraphicObjects = new ArrayList<YoGraphic>();
+         ArrayList<YoGraphic> yoGraphics = new ArrayList<YoGraphic>();
 
          YoGraphicPosition finalDesiredViz = new YoGraphicPosition("Final Desired Swing", desiredPositionInWorld, 0.04, YoAppearance.Purple(),
                GraphicType.BALL);
 
          artifactList.add(finalDesiredViz.createArtifact());
-         dynamicGraphicObjects.add(finalDesiredViz);
+         yoGraphics.add(finalDesiredViz);
 
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects("OptimalSwingSubController", dynamicGraphicObjects);
+         yoGraphicsListRegistry.registerDynamicGraphicObjects("OptimalSwingSubController", yoGraphics);
 
-         dynamicGraphicObjectsListRegistry.registerArtifactList(artifactList);
+         yoGraphicsListRegistry.registerArtifactList(artifactList);
       }
 
       parentRegistry.addChild(registry);

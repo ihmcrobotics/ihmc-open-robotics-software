@@ -56,14 +56,14 @@ public class DynamicGraphicObjectEvaluation
       YoGraphicPolygon transferToPolygonViz = new YoGraphicPolygon("transferToPolygon", transferToPolygon, "transferToPolygon", "", registry, polygonVizScale, YoAppearance.Bisque());
       transferToPolygonViz.setPosition(0.0, 0.0, 0.1);
       
-      YoGraphicsList dynamicGraphicObjectsList = new YoGraphicsList("FinalDesiredICPCalculator");
+      YoGraphicsList yoGraphicsList = new YoGraphicsList("FinalDesiredICPCalculator");
 
-      dynamicGraphicObjectsList.add(transferToPolygonViz);
+      yoGraphicsList.add(transferToPolygonViz);
 
-      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
-      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
+      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
+      yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicsList);
       
-      scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
+      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       
       scs.startOnAThread();
 
@@ -77,7 +77,7 @@ public class DynamicGraphicObjectEvaluation
       scs.setDT(0.1, 1);
 
       YoVariableRegistry registry = new YoVariableRegistry("Polygon");
-      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
+      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
       // Polygon:
       final double[][] pointList = new double[][]
@@ -135,16 +135,16 @@ public class DynamicGraphicObjectEvaluation
       YoFrameOrientation boxOrientation = new YoFrameOrientation("boxOrientation", worldFrame, registry);
       YoGraphicShape dynamicGraphicBoxGhost = new YoGraphicShape("boxGhost", boxGhostGraphics, boxPosition, boxOrientation, boxSize);
 
-      YoGraphicsList dynamicGraphicObjectsList = new YoGraphicsList("Polygon");
-      dynamicGraphicObjectsList.add(dynamicGraphicPolygon);
-      dynamicGraphicObjectsList.add(dynamicGraphicText);
-      dynamicGraphicObjectsList.add(dynamicGraphicVector);
-      dynamicGraphicObjectsList.add(dynamicGraphicYoFramePolygon);
-      dynamicGraphicObjectsList.add(dynamicGraphicBoxGhost);
+      YoGraphicsList yoGraphicsList = new YoGraphicsList("Polygon");
+      yoGraphicsList.add(dynamicGraphicPolygon);
+      yoGraphicsList.add(dynamicGraphicText);
+      yoGraphicsList.add(dynamicGraphicVector);
+      yoGraphicsList.add(dynamicGraphicYoFramePolygon);
+      yoGraphicsList.add(dynamicGraphicBoxGhost);
 
-      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
+      yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicsList);
 
-      scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
+      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       scs.addYoVariableRegistry(registry);
 
       Graphics3DObject coordinateSystem = new Graphics3DObject();

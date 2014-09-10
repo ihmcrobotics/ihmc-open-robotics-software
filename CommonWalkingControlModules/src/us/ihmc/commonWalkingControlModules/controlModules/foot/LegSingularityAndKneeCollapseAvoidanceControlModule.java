@@ -270,8 +270,8 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          }
       };
       
-      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
-      visualize = visualize && dynamicGraphicObjectsListRegistry != null;
+      YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
+      visualize = visualize && yoGraphicsListRegistry != null;
       moreVisualizers = visualize && moreVisualizers;
 
       yoCurrentFootPosition = new YoFramePoint(namePrefix + "CurrentFootPosition", worldFrame, registry);
@@ -287,9 +287,9 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       if (visualize)
       {
          yoDesiredFootPositionGraphic = new YoGraphicPosition(namePrefix + "DesiredFootPosition", yoDesiredFootPosition, 0.025, YoAppearance.Red(), GraphicType.BALL);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("SingularityCollapseAvoidance", yoDesiredFootPositionGraphic);
+         yoGraphicsListRegistry.registerDynamicGraphicObject("SingularityCollapseAvoidance", yoDesiredFootPositionGraphic);
          yoCorrectedDesiredFootPositionGraphic = new YoGraphicPosition(namePrefix + "CorrectedDesiredFootPosition", yoCorrectedDesiredFootPosition, 0.025, YoAppearance.Green(), GraphicType.BALL);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("SingularityCollapseAvoidance", yoCorrectedDesiredFootPositionGraphic);
+         yoGraphicsListRegistry.registerDynamicGraphicObject("SingularityCollapseAvoidance", yoCorrectedDesiredFootPositionGraphic);
       }
       else
       {
@@ -301,13 +301,13 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       {
          virtualLegTangentialFrameHipCenteredGraphics = new YoGraphicReferenceFrame(virtualLegTangentialFrameHipCentered, registry, 0.1);
          virtualLegTangentialFrameAnkleCenteredGraphics = new YoGraphicReferenceFrame(virtualLegTangentialFrameAnkleCentered, registry, 0.1);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("SingularityCollapseAvoidance", virtualLegTangentialFrameHipCenteredGraphics);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("SingularityCollapseAvoidance", virtualLegTangentialFrameAnkleCenteredGraphics);
+         yoGraphicsListRegistry.registerDynamicGraphicObject("SingularityCollapseAvoidance", virtualLegTangentialFrameHipCenteredGraphics);
+         yoGraphicsListRegistry.registerDynamicGraphicObject("SingularityCollapseAvoidance", virtualLegTangentialFrameAnkleCenteredGraphics);
 
          yoDesiredFootLinearVelocityGraphic = new YoGraphicVector(namePrefix + "DesiredFootLinearVelocity", yoCurrentFootPosition, yoDesiredFootLinearVelocity, 0.2, YoAppearance.Red());
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("SingularityCollapseAvoidance", yoDesiredFootLinearVelocityGraphic);
+         yoGraphicsListRegistry.registerDynamicGraphicObject("SingularityCollapseAvoidance", yoDesiredFootLinearVelocityGraphic);
          yoCorrectedDesiredFootLinearVelocityGraphic = new YoGraphicVector(namePrefix + "CorrectedDesiredFootLinearVelocity", yoCurrentFootPosition, yoCorrectedDesiredFootLinearVelocity, 0.2, YoAppearance.Green());
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("SingularityCollapseAvoidance", yoCorrectedDesiredFootLinearVelocityGraphic);
+         yoGraphicsListRegistry.registerDynamicGraphicObject("SingularityCollapseAvoidance", yoCorrectedDesiredFootLinearVelocityGraphic);
       }
       else
       {

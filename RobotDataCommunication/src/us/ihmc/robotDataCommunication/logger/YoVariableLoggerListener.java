@@ -61,7 +61,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       
    }
 
-   public void registerDynamicGraphicObjectListsRegistry(YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, boolean showOverheadView)
+   public void registerDynamicGraphicObjectListsRegistry(YoGraphicsListRegistry yoGraphicsListRegistry, boolean showOverheadView)
    {
       
    }

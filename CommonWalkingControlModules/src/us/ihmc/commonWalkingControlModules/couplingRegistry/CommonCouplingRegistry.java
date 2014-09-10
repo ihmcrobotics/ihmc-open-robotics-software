@@ -65,18 +65,18 @@ public class CommonCouplingRegistry implements CouplingRegistry
   
    private EnumYoVariable<RobotSide> upcomingSupportLeg = new EnumYoVariable<RobotSide>("upcomingSupportLeg", registry, RobotSide.class);
 
-   public CommonCouplingRegistry(CommonWalkingReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons, YoVariableRegistry parentRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+   public CommonCouplingRegistry(CommonWalkingReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.referenceFrames = referenceFrames;
       this.bipedSupportPolygons = bipedSupportPolygons;
       
       parentRegistry.addChild(registry);
-      if (dynamicGraphicObjectsListRegistry != null)
+      if (yoGraphicsListRegistry != null)
       {
          footstepFrameGraphic = new YoGraphicReferenceFrame(footstepFrame, registry, 0.1);
-         YoGraphicsList dynamicGraphicObjectsList = new YoGraphicsList(getClass().getSimpleName());
-         dynamicGraphicObjectsList.add(footstepFrameGraphic);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
+         YoGraphicsList yoGraphicsList = new YoGraphicsList(getClass().getSimpleName());
+         yoGraphicsList.add(footstepFrameGraphic);
+         yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicsList);
 
       }
       else

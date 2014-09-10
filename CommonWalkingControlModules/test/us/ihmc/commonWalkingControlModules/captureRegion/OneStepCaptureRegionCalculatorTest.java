@@ -406,7 +406,7 @@ public class OneStepCaptureRegionCalculatorTest
       final SideDependentList<FrameConvexPolygon2d> footPolygons = new SideDependentList<>();
       final SideDependentList<YoFrameConvexPolygon2d> yoFootPolygons = new SideDependentList<>();
       YoVariableRegistry registry = robot.getRobotsYoVariableRegistry();
-      final YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
+      final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       final SideDependentList<DynamicGraphicYoPolygonArtifact> footArtifacts = new SideDependentList<>();
       for (final RobotSide robotSide : RobotSide.values)
       {
@@ -439,18 +439,18 @@ public class OneStepCaptureRegionCalculatorTest
          if (robotSide == RobotSide.LEFT) footColor = Color.pink;
          else                             footColor = Color.green;
          DynamicGraphicYoPolygonArtifact footArtifact = new DynamicGraphicYoPolygonArtifact(robotSide.getCamelCaseNameForStartOfExpression(), yoFootPolygon, footColor, false);
-         dynamicGraphicObjectsListRegistry.registerArtifact("Feet", footArtifact);
+         yoGraphicsListRegistry.registerArtifact("Feet", footArtifact);
          footArtifacts.put(robotSide, footArtifact);
       }
       final OneStepCaptureRegionCalculator oneStepCaptureRegionCalculator = new OneStepCaptureRegionCalculator(midFootAnkleXOffset, footWidth, kinematicStepRange, ankleZUpFrames, registry, null);
       
       final YoFrameConvexPolygon2d yoCaptureRegion = new YoFrameConvexPolygon2d("captureRegion", "", worldFrame, 50, registry);
       DynamicGraphicYoPolygonArtifact captureRegionArtifact = new DynamicGraphicYoPolygonArtifact("CaptureRegion", yoCaptureRegion, Color.BLACK, false);
-      dynamicGraphicObjectsListRegistry.registerArtifact("Capture", captureRegionArtifact);
+      yoGraphicsListRegistry.registerArtifact("Capture", captureRegionArtifact);
       final EnumYoVariable<RobotSide> yoSupportSide = new EnumYoVariable<>("supportSide", registry, RobotSide.class);
       final DoubleYoVariable swingTimeRemaining = new DoubleYoVariable("swingTimeRemaining", registry);
       final YoFramePoint2d yoICP = new YoFramePoint2d("ICP", worldFrame, registry);
-      dynamicGraphicObjectsListRegistry.registerArtifact("ICP", new YoGraphicPosition("ICP", yoICP, 0.02, YoAppearance.Blue(), GraphicType.CROSS).createArtifact());
+      yoGraphicsListRegistry.registerArtifact("ICP", new YoGraphicPosition("ICP", yoICP, 0.02, YoAppearance.Blue(), GraphicType.CROSS).createArtifact());
       final double omega0 = 3.4;
       
       final SimulationOverheadPlotter simulationOverheadPlotter = new SimulationOverheadPlotter();
@@ -498,9 +498,9 @@ public class OneStepCaptureRegionCalculatorTest
 
       scs.getStandardSimulationGUI().selectPanel(plotterName);
 
-      dynamicGraphicObjectsListRegistry.update();
-      scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry, false);
-      dynamicGraphicObjectsListRegistry.addArtifactListsToPlotter(simulationOverheadPlotter.getPlotter());
+      yoGraphicsListRegistry.update();
+      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry, false);
+      yoGraphicsListRegistry.addArtifactListsToPlotter(simulationOverheadPlotter.getPlotter());
       Thread myThread = new Thread(scs);
       myThread.start();
    }

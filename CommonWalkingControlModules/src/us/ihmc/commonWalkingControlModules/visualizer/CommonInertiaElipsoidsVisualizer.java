@@ -38,7 +38,7 @@ public class CommonInertiaElipsoidsVisualizer implements Updatable, RobotControl
    
    private final YoFrameVector inertiaEllipsoidGhostOffset = new YoFrameVector("inertiaEllipsoidGhostOffset", "", worldFrame, registry);
    
-   private final ArrayList<YoGraphic> dynamicGraphicObjects = new ArrayList<YoGraphic>();
+   private final ArrayList<YoGraphic> yoGraphics = new ArrayList<YoGraphic>();
    
    private final DoubleYoVariable minimumMassOfRigidBodies = new DoubleYoVariable("minimumMassOfRigidBodies", registry);
    private final DoubleYoVariable maximumMassOfRigidBodies = new DoubleYoVariable("maximumMassOfRigidBodies", registry);
@@ -59,18 +59,18 @@ public class CommonInertiaElipsoidsVisualizer implements Updatable, RobotControl
    }
    private final ArrayList<RigidBodyVisualizationData> centerOfMassData = new ArrayList<RigidBodyVisualizationData>();
 
-   public CommonInertiaElipsoidsVisualizer(RigidBody rootBody, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+   public CommonInertiaElipsoidsVisualizer(RigidBody rootBody, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
-      this(rootBody, dynamicGraphicObjectsListRegistry);
+      this(rootBody, yoGraphicsListRegistry);
       parentRegistry.addChild(registry);
    }  
-   public CommonInertiaElipsoidsVisualizer(RigidBody rootBody, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+   public CommonInertiaElipsoidsVisualizer(RigidBody rootBody, YoGraphicsListRegistry yoGraphicsListRegistry)
       {
       inertiaEllipsoidGhostOffset.set(0, 0.0, 0.0);
 
       findMinimumAndMaximumMassOfRigidBodies(rootBody);
       addRigidBodyAndChilderenToVisualization(rootBody);
-      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects(name, dynamicGraphicObjects);
+      yoGraphicsListRegistry.registerDynamicGraphicObjects(name, yoGraphics);
       update();
    
    }
@@ -148,7 +148,7 @@ public class CommonInertiaElipsoidsVisualizer implements Updatable, RobotControl
             
 //            new DynamicGraphicShape(rigidBodyName, linkGraphics, framePose, scale)
             YoGraphicShape comViz = new YoGraphicShape(rigidBodyName + "CoMEllipsoid", createEllipsoid(inertiaMatrix, mass, appearance), comPosition, comOrientation, 1.0);  
-            dynamicGraphicObjects.add(comViz);
+            yoGraphics.add(comViz);
 //         }
       }
       

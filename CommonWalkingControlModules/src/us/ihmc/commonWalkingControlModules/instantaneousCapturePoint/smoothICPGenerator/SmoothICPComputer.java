@@ -68,11 +68,11 @@ public class SmoothICPComputer
    private boolean VISUALIZE = true;
 
    public SmoothICPComputer(double doubleSupportFirstStepFraction, int maxNumberOfConsideredFootsteps, YoVariableRegistry parentRegistry,
-                            YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+                            YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       hasBeenInitialized.set(false);
       
-      if (dynamicGraphicObjectsListRegistry == null)
+      if (yoGraphicsListRegistry == null)
       {
          VISUALIZE = false;
       }
@@ -93,8 +93,8 @@ public class SmoothICPComputer
          if (VISUALIZE)
          {
             YoGraphicPosition dynamicGraphicPosition = new YoGraphicPosition(constantCoPName, yoFramePoint, 0.005, YoAppearance.Red());
-            dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(getClass().getSimpleName(), dynamicGraphicPosition);
-            dynamicGraphicObjectsListRegistry.registerArtifact(getClass().getSimpleName(), dynamicGraphicPosition.createArtifact());
+            yoGraphicsListRegistry.registerDynamicGraphicObject(getClass().getSimpleName(), dynamicGraphicPosition);
+            yoGraphicsListRegistry.registerArtifact(getClass().getSimpleName(), dynamicGraphicPosition.createArtifact());
          }
       }
 
@@ -105,8 +105,8 @@ public class SmoothICPComputer
          for (int i = 0; i < maxNumberOfConsideredFootsteps - 1; i++)
          {
             icpCornerPointsViz[i] = new YoGraphicPosition("cornerPoint" + i, "", registry, 0.01, YoAppearance.Green());
-            dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(getClass().getSimpleName(), icpCornerPointsViz[i]);
-            dynamicGraphicObjectsListRegistry.registerArtifact(getClass().getSimpleName(), icpCornerPointsViz[i].createArtifact());
+            yoGraphicsListRegistry.registerDynamicGraphicObject(getClass().getSimpleName(), icpCornerPointsViz[i]);
+            yoGraphicsListRegistry.registerArtifact(getClass().getSimpleName(), icpCornerPointsViz[i].createArtifact());
          }
       }
       else

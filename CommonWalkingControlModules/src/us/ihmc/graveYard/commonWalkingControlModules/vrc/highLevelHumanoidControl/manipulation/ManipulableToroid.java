@@ -40,7 +40,7 @@ public class ManipulableToroid
    private final List<YoGraphicReferenceFrame> dynamicGraphicReferenceFrames = new ArrayList<YoGraphicReferenceFrame>();
 
    public ManipulableToroid(String namePrefix, RigidBody toroidBase,
-                            YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+                            YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       toroidBeforeJointFrame = new TorusLocatorFrame(namePrefix + "ToroidLocatorFrame", toroidBase.getBodyFixedFrame());
       toroidBeforeJointFrame.update();
@@ -49,14 +49,14 @@ public class ManipulableToroid
       toroidJoint = new RevoluteJoint("toroidJoint", toroidBase, toroidBeforeJointFrame, toroidJointAxis);
       toroid = ScrewTools.addRigidBody("toroid", toroidJoint, new Matrix3d(), 0.0, new Vector3d());    // TODO: set mass properties
 
-      if (dynamicGraphicObjectsListRegistry != null)
+      if (yoGraphicsListRegistry != null)
       {
          YoGraphicReferenceFrame toroidBeforeJointFrameViz = new YoGraphicReferenceFrame(toroidBeforeJointFrame, registry, 0.3);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("toroidFrames", toroidBeforeJointFrameViz);
+         yoGraphicsListRegistry.registerDynamicGraphicObject("toroidFrames", toroidBeforeJointFrameViz);
          dynamicGraphicReferenceFrames.add(toroidBeforeJointFrameViz);
 
          YoGraphicReferenceFrame toroidAfterJointFrameViz = new YoGraphicReferenceFrame(toroid.getParentJoint().getFrameAfterJoint(), registry, 0.1);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("toroidFrames", toroidAfterJointFrameViz);
+         yoGraphicsListRegistry.registerDynamicGraphicObject("toroidFrames", toroidAfterJointFrameViz);
          dynamicGraphicReferenceFrames.add(toroidAfterJointFrameViz);
       }
 

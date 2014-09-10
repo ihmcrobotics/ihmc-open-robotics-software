@@ -21,7 +21,7 @@ import com.yobotics.simulationconstructionset.physics.ScsPhysics;
 public interface ScsInitialSetup
 {
 // FIXME: delete this method from this interface once ground contact profiles aren't guified via the first robot in the list of robots with which you create the sim...
-   public abstract void initializeRobot(Robot robot, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry);
+   public abstract void initializeRobot(Robot robot, YoGraphicsListRegistry yoGraphicsListRegistry);
    
    public abstract void initializeSimulation(SimulationConstructionSet scs);
    public abstract double getDT();

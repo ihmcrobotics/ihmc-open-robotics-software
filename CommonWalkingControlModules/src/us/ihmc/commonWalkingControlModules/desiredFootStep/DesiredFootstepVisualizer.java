@@ -71,10 +71,10 @@ public class DesiredFootstepVisualizer
 
    private final SideDependentList<BagOfBalls> bagsOfBalls;
 
-   public DesiredFootstepVisualizer(YoVariableRegistry parentRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+   public DesiredFootstepVisualizer(YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      BagOfBalls leftBagOfBalls = new BagOfBalls(1000, 0.05, "leftBalls", YoAppearance.Red(), parentRegistry, dynamicGraphicObjectsListRegistry);
-      BagOfBalls rightBagOfBalls = new BagOfBalls(1000, 0.05, "rightBalls", YoAppearance.Blue(), parentRegistry, dynamicGraphicObjectsListRegistry);
+      BagOfBalls leftBagOfBalls = new BagOfBalls(1000, 0.05, "leftBalls", YoAppearance.Red(), parentRegistry, yoGraphicsListRegistry);
+      BagOfBalls rightBagOfBalls = new BagOfBalls(1000, 0.05, "rightBalls", YoAppearance.Blue(), parentRegistry, yoGraphicsListRegistry);
       bagsOfBalls = new SideDependentList<BagOfBalls>(leftBagOfBalls, rightBagOfBalls);
 
       framesToVisualize = new ArrayList<ReferenceFrame>();
@@ -121,7 +121,7 @@ public class DesiredFootstepVisualizer
          ankleZUpFrames.get(robotSide).update();
       }
 
-      YoGraphicsList dynamicGraphicObjectsList = new YoGraphicsList("FeetPolygons");
+      YoGraphicsList yoGraphicsList = new YoGraphicsList("FeetPolygons");
       ArtifactList artifactList = new ArtifactList("FeetPolygons");
       SideDependentList<Color> footColors = new SideDependentList<Color>(Color.pink, Color.blue);
       for (RobotSide robotSide : RobotSide.values)
@@ -136,8 +136,8 @@ public class DesiredFootstepVisualizer
          artifactList.add(dynamicGraphicYoPolygonArtifact);
       }
 
-      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
-      dynamicGraphicObjectsListRegistry.registerArtifactList(artifactList);
+      yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicsList);
+      yoGraphicsListRegistry.registerArtifactList(artifactList);
       parentRegistry.addChild(registry);
    }
 
@@ -162,10 +162,10 @@ public class DesiredFootstepVisualizer
    }
 
    private SimulationConstructionSet createSCSAndAttachVisualizer(YoVariableRegistry registryToAddToRobot,
-         YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       ArrayList<RobotController> robotControllers = new ArrayList<RobotController>();
-      VisualizeFramesController visualizeFramesController = new VisualizeFramesController(framesToVisualize, dynamicGraphicObjectsListRegistry, 1.0);
+      VisualizeFramesController visualizeFramesController = new VisualizeFramesController(framesToVisualize, yoGraphicsListRegistry, 1.0);
       robotControllers.add(visualizeFramesController);
 
       Robot robot = new Robot("DesiredFootstepVisualizerRobot");
@@ -178,7 +178,7 @@ public class DesiredFootstepVisualizer
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);
 
-      scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
+      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
       // Create and attach plotter as listener
       SimulationOverheadPlotter simulationOverheadPlotter = new SimulationOverheadPlotter();
@@ -193,7 +193,7 @@ public class DesiredFootstepVisualizer
 
       scs.addExtraJpanel(scrollPane, "Plotter Legend");
 
-      dynamicGraphicObjectsListRegistry.addArtifactListsToPlotter(simulationOverheadPlotter.getPlotter());
+      yoGraphicsListRegistry.addArtifactListsToPlotter(simulationOverheadPlotter.getPlotter());
 
       Thread thread = new Thread(scs);
       thread.start();
@@ -278,9 +278,9 @@ public class DesiredFootstepVisualizer
    public static void visualizePathBasedFootstepListCreator()
    {
       YoVariableRegistry parentRegistry = new YoVariableRegistry("parent");
-      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
+      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
-      DesiredFootstepVisualizer desiredFootstepVisualizer = new DesiredFootstepVisualizer(parentRegistry, dynamicGraphicObjectsListRegistry);
+      DesiredFootstepVisualizer desiredFootstepVisualizer = new DesiredFootstepVisualizer(parentRegistry, yoGraphicsListRegistry);
 
       SideDependentList<ContactablePlaneBody> bipedFeet = desiredFootstepVisualizer.getBipedFeet();
 
@@ -311,7 +311,7 @@ public class DesiredFootstepVisualizer
 
       double controlDT = 0.1;
 
-      SimulationConstructionSet scs = desiredFootstepVisualizer.createSCSAndAttachVisualizer(parentRegistry, dynamicGraphicObjectsListRegistry);
+      SimulationConstructionSet scs = desiredFootstepVisualizer.createSCSAndAttachVisualizer(parentRegistry, yoGraphicsListRegistry);
       scs.setDT(controlDT, 1);
 
       int numberOfSteps = footsteps.size();
@@ -326,9 +326,9 @@ public class DesiredFootstepVisualizer
    public static void visualizeDesiredFootstepCalculator()
    {
       YoVariableRegistry parentRegistry = new YoVariableRegistry("parent");
-      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
+      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
-      DesiredFootstepVisualizer desiredFootstepVisualizer = new DesiredFootstepVisualizer(parentRegistry, dynamicGraphicObjectsListRegistry);
+      DesiredFootstepVisualizer desiredFootstepVisualizer = new DesiredFootstepVisualizer(parentRegistry, yoGraphicsListRegistry);
 
       double HEADING_VIZ_Z = 0.03;
       double VELOCITY_VIZ_Z = 0.06;
@@ -341,10 +341,10 @@ public class DesiredFootstepVisualizer
       YoGraphicVector velocityVector = new YoGraphicVector("velocity", position, velocity, YoAppearance.Yellow());
       YoGraphicVector headingVector = new YoGraphicVector("heading", position, heading, YoAppearance.Blue());
 
-      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("velocityVector", velocityVector);
-      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("headingVector", headingVector);
+      yoGraphicsListRegistry.registerDynamicGraphicObject("velocityVector", velocityVector);
+      yoGraphicsListRegistry.registerDynamicGraphicObject("headingVector", headingVector);
 
-      BagOfBalls bagOfBalls = new BagOfBalls(1200, 0.03, YoAppearance.Red(), parentRegistry, dynamicGraphicObjectsListRegistry);
+      BagOfBalls bagOfBalls = new BagOfBalls(1200, 0.03, YoAppearance.Red(), parentRegistry, yoGraphicsListRegistry);
 
       double desiredHeadingFinal = 0.0;
       double controlDT = 0.1;
@@ -379,7 +379,7 @@ public class DesiredFootstepVisualizer
       footstepProvider.setWalk(true);
       desiredFootstepVisualizer.setFootstepProvider(footstepProvider);
 
-      SimulationConstructionSet scs = desiredFootstepVisualizer.createSCSAndAttachVisualizer(parentRegistry, dynamicGraphicObjectsListRegistry);
+      SimulationConstructionSet scs = desiredFootstepVisualizer.createSCSAndAttachVisualizer(parentRegistry, yoGraphicsListRegistry);
       scs.setDT(controlDT, 1);
 
       RobotSide swingLegSide = RobotSide.LEFT;

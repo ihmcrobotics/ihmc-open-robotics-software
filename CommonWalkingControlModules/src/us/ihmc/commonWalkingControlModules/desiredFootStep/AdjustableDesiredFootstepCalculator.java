@@ -65,7 +65,7 @@ public class AdjustableDesiredFootstepCalculator extends AbstractAdjustableDesir
 
    public AdjustableDesiredFootstepCalculator(SideDependentList<? extends ContactablePlaneBody> contactableBodies, CouplingRegistry couplingRegistry,
            DesiredHeadingControlModule desiredHeadingControlModule, DesiredVelocityControlModule desiredVelocityControlModule,
-           YoVariableRegistry parentRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry,
+           YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry,
            SideDependentList<ReferenceFrame> ankleZUpFrames)
    {
       super(contactableBodies, getFramesToSaveFootstepIn(ankleZUpFrames), parentRegistry);

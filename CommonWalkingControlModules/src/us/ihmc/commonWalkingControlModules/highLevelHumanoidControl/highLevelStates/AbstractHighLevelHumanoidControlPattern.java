@@ -82,7 +82,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
 
    protected final VariousWalkingManagers variousWalkingManagers;
 
-   protected final YoGraphicsListRegistry dynamicGraphicObjectsListRegistry;
+   protected final YoGraphicsListRegistry yoGraphicsListRegistry;
 
    public AbstractHighLevelHumanoidControlPattern(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
          MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters, HighLevelState controllerState)
@@ -93,7 +93,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
 
       this.variousWalkingManagers = variousWalkingManagers;
 
-      this.dynamicGraphicObjectsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
+      this.yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
 
       // Getting parameters from the momentumBasedController
       this.momentumBasedController = momentumBasedController;

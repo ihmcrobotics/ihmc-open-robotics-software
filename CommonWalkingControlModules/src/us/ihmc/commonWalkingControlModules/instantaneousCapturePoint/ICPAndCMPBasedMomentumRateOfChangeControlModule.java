@@ -75,16 +75,16 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule extends AbstractCon
 
    public ICPAndCMPBasedMomentumRateOfChangeControlModule(ReferenceFrame pelvisFrame,
            ReferenceFrame centerOfMassFrame, TwistCalculator twistCalculator, double controlDT, double totalMass, double gravityZ,
-           YoVariableRegistry parentRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+           YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
-      this.icpProportionalController = new ICPProportionalController(controlDT, registry, dynamicGraphicObjectsListRegistry);
+      this.icpProportionalController = new ICPProportionalController(controlDT, registry, yoGraphicsListRegistry);
       this.groundReactionMomentControlModule = new GroundReactionMomentControlModule(pelvisFrame, registry);
       this.groundReactionMomentControlModule.setGains(10.0, 100.0);    // kPelvisYaw was 0.0 for M3 movie TODO: move to setGains method
 
       this.momentumCalculator = new MomentumCalculator(twistCalculator);
-      this.visualizer = new CapturabilityBasedDesiredCoPVisualizer(registry, dynamicGraphicObjectsListRegistry);
+      this.visualizer = new CapturabilityBasedDesiredCoPVisualizer(registry, yoGraphicsListRegistry);
       this.pelvisFrame = pelvisFrame;
       this.centerOfMassFrame = centerOfMassFrame;
       this.totalMass = totalMass;

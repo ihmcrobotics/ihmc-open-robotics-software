@@ -60,7 +60,7 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
    private final BooleanYoVariable doPolygonResizeInDoubleSupport = new BooleanYoVariable("doPolygonResizeInDoubleSupport", registry);
 
    public GoOnToesDuringDoubleSupportBipedFeetUpdater(CommonWalkingReferenceFrames referenceFrames, double footForward, double footBack,
-           YoVariableRegistry yoVariableRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+           YoVariableRegistry yoVariableRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.footForward = footForward;
       this.footBack = footBack;
@@ -96,12 +96,12 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
          artifactList.add(leftOnToesArtifact);
          artifactList.add(rightOnToesArtifact);
 
-         dynamicGraphicObjectsListRegistry.registerArtifactList(artifactList);
+         yoGraphicsListRegistry.registerArtifactList(artifactList);
 
 //       YoboticsBipedPlotter.registerYoFrameLine2d("Left On Toes Line", Color.pink, leftOnToesLineViz);
 //       YoboticsBipedPlotter.registerYoFrameLine2d("Right On Toes Line", Color.pink, rightOnToesLineViz);
 
-//       DynamicGraphicObjectsList dynamicGraphicObjectList = new DynamicGraphicObjectsList("BipedFeetUpdater");
+//       DynamicGraphicObjectsList yoGraphicList = new DynamicGraphicObjectsList("BipedFeetUpdater");
 //
 //       DynamicGraphicLineSegment leftOnToesLine = new DynamicGraphicLineSegment()
 //       leftOnToesLine = new
@@ -112,9 +112,9 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
 //
 //       YoboticsBipedPlotter.registerDynamicGraphicPosition("Desired Capture Point", capturePointDesiredWorldGraphicPosition);
 //
-//       dynamicGraphicObjectList.add(capturePointDesiredWorldGraphicPosition);
+//       yoGraphicList.add(capturePointDesiredWorldGraphicPosition);
 //
-//       dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectList);
+//       yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicList);
       }
       else
       {

@@ -56,11 +56,11 @@ public class GeometricStairsGroundReactionWrenchDistributor implements GroundRea
    private final FrameVector up;
 
    public GeometricStairsGroundReactionWrenchDistributor(CommonWalkingReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
-           SideDependentList<? extends ContactablePlaneBody> bipedFeet, double totalMass, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry,
+           SideDependentList<? extends ContactablePlaneBody> bipedFeet, double totalMass, YoGraphicsListRegistry yoGraphicsListRegistry,
            YoVariableRegistry parentRegistry)
    {
       double maximumLegStrengthWhenTransferringAway = 0.95;
-      this.virtualToePointCalculator = new NewGeometricVirtualToePointCalculator(referenceFrames, registry, dynamicGraphicObjectsListRegistry,
+      this.virtualToePointCalculator = new NewGeometricVirtualToePointCalculator(referenceFrames, registry, yoGraphicsListRegistry,
               maximumLegStrengthWhenTransferringAway);
       this.legStrengthCalculator = new TeeterTotterLegStrengthCalculator(registry);
       this.bipedSupportPolygons = bipedSupportPolygons;

@@ -46,9 +46,9 @@ public class YoVariableVariousWalkingProviderFactory implements VariousWalkingPr
    public VariousWalkingProviders createVariousWalkingProviders(DoubleYoVariable yoTime, FullRobotModel fullRobotModel,
          WalkingControllerParameters walkingControllerParameters, CommonWalkingReferenceFrames referenceFrames, SideDependentList<ContactablePlaneBody> feet,
          ConstantTransferTimeCalculator transferTimeCalculator, ConstantSwingTimeCalculator swingTimeCalculator, ArrayList<Updatable> updatables,
-         YoVariableRegistry registry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+         YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      HandstepProvider handstepProvider = new UserDesiredHandstepProvider(fullRobotModel, registry, dynamicGraphicObjectsListRegistry);
+      HandstepProvider handstepProvider = new UserDesiredHandstepProvider(fullRobotModel, registry, yoGraphicsListRegistry);
 
       HandPoseProvider handPoseProvider = new UserDesiredHandPoseProvider(fullRobotModel,
             walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame(), registry);

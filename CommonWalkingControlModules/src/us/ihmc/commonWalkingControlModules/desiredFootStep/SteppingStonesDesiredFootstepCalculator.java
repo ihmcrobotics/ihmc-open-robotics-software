@@ -76,7 +76,7 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
    // Constructors
    public SteppingStonesDesiredFootstepCalculator(SideDependentList<? extends ContactablePlaneBody> contactableBodies, SteppingStones steppingStones,
          CouplingRegistry couplingRegistry, CommonWalkingReferenceFrames commonWalkingReferenceFrames, OneStepCaptureRegionCalculator captureRegionCalculator,
-         YoVariableRegistry yoVariableRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+         YoVariableRegistry yoVariableRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       percentNominalToAdjusted.set(1.0);
 
@@ -101,7 +101,7 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
       if (steppingStones != null)
       {
          steppingStonesCaptureRegionIntersectionCalculator = new SteppingStonesCaptureRegionIntersectionCalculator(steppingStones, yoVariableRegistry,
-               dynamicGraphicObjectsListRegistry);
+               yoGraphicsListRegistry);
       }
       else
       {
@@ -110,7 +110,7 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
 
       yoVariableRegistry.addChild(registry);
 
-      if (dynamicGraphicObjectsListRegistry == null)
+      if (yoGraphicsListRegistry == null)
          VISUALIZE = false;
 
       if (VISUALIZE)
@@ -119,7 +119,7 @@ public class SteppingStonesDesiredFootstepCalculator implements DesiredFootstepC
          YoGraphicPosition adjustedStepPositionDynamicGraphicPosition = new YoGraphicPosition("Adjusted Step Position", adjustedStepPosition, scale,
                YoAppearance.Yellow());
 
-         dynamicGraphicObjectsListRegistry.registerArtifact("DesiredStepLocation", adjustedStepPositionDynamicGraphicPosition.createArtifact());
+         yoGraphicsListRegistry.registerArtifact("DesiredStepLocation", adjustedStepPositionDynamicGraphicPosition.createArtifact());
       }
    }
 

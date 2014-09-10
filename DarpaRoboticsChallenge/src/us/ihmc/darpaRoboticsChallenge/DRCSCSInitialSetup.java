@@ -76,7 +76,7 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
       return new ScsPhysics(collisionConfigure,collision,visualize);
    }
 
-   public void initializeRobot(Robot robot, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+   public void initializeRobot(Robot robot, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       robot.setGravity(gravity);
 
@@ -90,8 +90,8 @@ public class DRCSCSInitialSetup implements ScsInitialSetup
       LinearGroundContactModel groundContactModel = new LinearGroundContactModel(robot, groundKxy, groundBxy, groundKz, groundBz,
             robot.getRobotsYoVariableRegistry());
 
-//      if ((commonTerrain.getSteppingStones() != null) && (dynamicGraphicObjectsListRegistry != null))
-//         commonTerrain.registerSteppingStonesArtifact(dynamicGraphicObjectsListRegistry);
+//      if ((commonTerrain.getSteppingStones() != null) && (yoGraphicsListRegistry != null))
+//         commonTerrain.registerSteppingStonesArtifact(yoGraphicsListRegistry);
 
 //      groundContactModel.setGroundProfile(commonTerrain.getGroundProfile());
       if (groundProfile3D != null) groundContactModel.setGroundProfile3D(groundProfile3D);

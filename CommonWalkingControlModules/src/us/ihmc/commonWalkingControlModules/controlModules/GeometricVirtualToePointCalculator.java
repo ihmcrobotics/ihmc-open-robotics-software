@@ -50,13 +50,13 @@ public class GeometricVirtualToePointCalculator implements VirtualToePointCalcul
    private FrameGeometry2dPlotter plotter;
 
    public GeometricVirtualToePointCalculator(CommonWalkingReferenceFrames referenceFrames, YoVariableRegistry parentRegistry,
-         YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(parentRegistry, dynamicGraphicObjectsListRegistry);
+      this(parentRegistry, yoGraphicsListRegistry);
       this.setFramesToComputeIn(referenceFrames);
    }
 
-   public GeometricVirtualToePointCalculator(YoVariableRegistry parentRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+   public GeometricVirtualToePointCalculator(YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       globalTimer = new GlobalTimer("VTPCalculatorTimer", registry);
 

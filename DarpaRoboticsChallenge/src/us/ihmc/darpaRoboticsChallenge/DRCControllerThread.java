@@ -67,7 +67,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    private final SDFFullRobotModel controllerFullRobotModel;
    private final ReferenceFrames controllerReferenceFrames;
 
-   private final YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
+   private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private final ForceSensorDataHolder forceSensorDataHolderForController;
 
    private final ThreadDataSynchronizer threadDataSynchronizer;
@@ -139,7 +139,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       controllerReferenceFrames = new ReferenceFrames(controllerFullRobotModel);
 
       robotController = createMomentumBasedController(controllerFullRobotModel, controllerReferenceFrames, sensorInformation,
-            controllerFactory, controllerTime, robotModel.getControllerDT(), gravity, forceSensorDataHolderForController, dynamicGraphicObjectsListRegistry,
+            controllerFactory, controllerTime, robotModel.getControllerDT(), gravity, forceSensorDataHolderForController, yoGraphicsListRegistry,
             registry, dataProducer, listOfJointsToIgnore.toArray(new InverseDynamicsJoint[]{}));
       
       firstTick.set(true);
@@ -151,13 +151,13 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       
       if(robotVisualizer != null)
       {
-         robotVisualizer.addRegistry(registry, dynamicGraphicObjectsListRegistry);
+         robotVisualizer.addRegistry(registry, yoGraphicsListRegistry);
       }
    }
 
    public static RobotController createMomentumBasedController(SDFFullRobotModel controllerModel, ReferenceFrames referenceFramesForController,
          DRCRobotSensorInformation sensorInformation, MomentumBasedControllerFactory controllerFactory, DoubleYoVariable yoTime, double controlDT,
-         double gravity, ForceSensorDataHolder forceSensorDataHolderForController, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry,
+         double gravity, ForceSensorDataHolder forceSensorDataHolderForController, YoGraphicsListRegistry yoGraphicsListRegistry,
          YoVariableRegistry registry, GlobalDataProducer dataProducer, InverseDynamicsJoint... jointsToIgnore)
    {
       CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(controllerModel.getElevator());
@@ -168,12 +168,12 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
 
       if (CREATE_COM_CALIBRATION_TOOL)
       {
-         CenterOfMassCalibrationTool centerOfMassCalibrationTool = new CenterOfMassCalibrationTool(controllerModel, dynamicGraphicObjectsListRegistry, registry);
+         CenterOfMassCalibrationTool centerOfMassCalibrationTool = new CenterOfMassCalibrationTool(controllerModel, yoGraphicsListRegistry, registry);
          controllerFactory.addUpdatable(centerOfMassCalibrationTool);
       }
       
       RobotController robotController = controllerFactory.getController(controllerModel, referenceFramesForController, controlDT, gravity, yoTime,
-            dynamicGraphicObjectsListRegistry, twistCalculator, centerOfMassJacobian, forceSensorDataHolderForController,
+            yoGraphicsListRegistry, twistCalculator, centerOfMassJacobian, forceSensorDataHolderForController,
             dataProducer, jointsToIgnore);
       final ModularSensorProcessor sensorProcessor = createSensorProcessor(twistCalculator, centerOfMassJacobian, referenceFramesForController);
 
@@ -181,30 +181,30 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       modularRobotController.setSensorProcessor(sensorProcessor);
       modularRobotController.addRobotController(robotController);
 
-      if (dynamicGraphicObjectsListRegistry != null)
+      if (yoGraphicsListRegistry != null)
       {
         if (SHOW_INERTIA_GRAPHICS)
         {
             CommonInertiaElipsoidsVisualizer commonInertiaElipsoidsVisualizer = new CommonInertiaElipsoidsVisualizer(controllerModel.getElevator(),
-                  dynamicGraphicObjectsListRegistry);
+                  yoGraphicsListRegistry);
             modularRobotController.addRobotController(commonInertiaElipsoidsVisualizer);
          }
 
         if (SHOW_REFERENCE_FRAMES)
         {
               InverseDynamicsMechanismReferenceFrameVisualizer inverseDynamicsMechanismReferenceFrameVisualizer = new InverseDynamicsMechanismReferenceFrameVisualizer(
-                    controllerModel.getElevator(), dynamicGraphicObjectsListRegistry, 0.5);
+                    controllerModel.getElevator(), yoGraphicsListRegistry, 0.5);
               modularRobotController.addRobotController(inverseDynamicsMechanismReferenceFrameVisualizer);
         }
         
         if (SHOW_JOINTAXIS_ZALIGN_FRAMES)
         {
-              JointAxisVisualizer jointAxisVisualizer= new JointAxisVisualizer(controllerModel.getElevator(), dynamicGraphicObjectsListRegistry, 0.3);
+              JointAxisVisualizer jointAxisVisualizer= new JointAxisVisualizer(controllerModel.getElevator(), yoGraphicsListRegistry, 0.3);
               modularRobotController.addRobotController(jointAxisVisualizer);
           
         }
 
-        CommonWalkingReferenceFramesVisualizer referenceFramesVisualizer = new CommonWalkingReferenceFramesVisualizer(referenceFramesForController, dynamicGraphicObjectsListRegistry);
+        CommonWalkingReferenceFramesVisualizer referenceFramesVisualizer = new CommonWalkingReferenceFramesVisualizer(referenceFramesForController, yoGraphicsListRegistry);
         modularRobotController.addRobotController(referenceFramesVisualizer);
       }
       
@@ -339,7 +339,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    @Override
    public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()
    {
-      return dynamicGraphicObjectsListRegistry;
+      return yoGraphicsListRegistry;
    }
 
    @Override

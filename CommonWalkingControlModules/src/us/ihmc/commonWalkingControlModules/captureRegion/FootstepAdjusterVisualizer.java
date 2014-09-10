@@ -25,7 +25,7 @@ public class FootstepAdjusterVisualizer
    private FrameConvexPolygon2d nextFootstepPolygon;
    
    public FootstepAdjusterVisualizer(FootstepAdjustor footstepAdjustor,
-                                     YoGraphicsListRegistry dynamicGraphicObjectsListRegistry,
+                                     YoGraphicsListRegistry yoGraphicsListRegistry,
                                      YoVariableRegistry parentRegistry)
    {
       this.footstepAdjustor = footstepAdjustor;
@@ -37,7 +37,7 @@ public class FootstepAdjusterVisualizer
       
       nextFootstepPolygonArtifact = 
             new DynamicGraphicYoPolygonArtifact(nextFootstepCaption, yoNextFootstepPolygon, colorDefault, false);
-      dynamicGraphicObjectsListRegistry.registerArtifact(nextFootstepCaption, nextFootstepPolygonArtifact);
+      yoGraphicsListRegistry.registerArtifact(nextFootstepCaption, nextFootstepPolygonArtifact);
       
       parentRegistry.addChild(registry);
    }

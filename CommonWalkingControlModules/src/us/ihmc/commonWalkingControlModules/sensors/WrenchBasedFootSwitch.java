@@ -80,7 +80,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
    private final AppearanceDefinition blueAppearance = YoAppearance.Blue();
 
    public WrenchBasedFootSwitch(String namePrefix, ForceSensorData forceSensorData, double footSwitchCoPThresholdFraction, double robotTotalWeight, ContactablePlaneBody contactablePlaneBody,
-         YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, double contactThresholdForce, YoVariableRegistry parentRegistry)
+         YoGraphicsListRegistry yoGraphicsListRegistry, double contactThresholdForce, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
 
@@ -92,13 +92,13 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       yoFootForceInFoot = new YoFrameVector(namePrefix + "ForceFootFrame", contactablePlaneBody.getFrameAfterParentJoint(), registry);
       yoFootTorqueInFoot = new YoFrameVector(namePrefix + "TorqueFootFrame", contactablePlaneBody.getFrameAfterParentJoint(), registry);
 
-      if(showForceSensorFrames && dynamicGraphicObjectsListRegistry!=null)
+      if(showForceSensorFrames && yoGraphicsListRegistry!=null)
       {
          final double scale=1.0;
          dynamicGraphicForceSensorMeasurementFrame = new YoGraphicReferenceFrame(forceSensorData.getMeasurementFrame(), registry, .6*scale, YoAppearance.Yellow());
          dynamicGraphicForceSensorFootFrame = new YoGraphicReferenceFrame(contactablePlaneBody.getFrameAfterParentJoint(), registry, scale, YoAppearance.AliceBlue());
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(namePrefix+"MeasFrame",dynamicGraphicForceSensorMeasurementFrame);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(namePrefix+"FootFrame",dynamicGraphicForceSensorFootFrame);
+         yoGraphicsListRegistry.registerDynamicGraphicObject(namePrefix+"MeasFrame",dynamicGraphicForceSensorMeasurementFrame);
+         yoGraphicsListRegistry.registerDynamicGraphicObject(namePrefix+"FootFrame",dynamicGraphicForceSensorFootFrame);
       }
       else
       {
@@ -121,7 +121,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
 
       double copVisualizerSize = 0.025;
       this.footswitchCOPBagOfBalls = new BagOfBalls(1, copVisualizerSize, namePrefix + "FootswitchCOP", registry,
-            dynamicGraphicObjectsListRegistry);
+            yoGraphicsListRegistry);
 
       this.pastThreshold = new BooleanYoVariable(namePrefix + "PastFootswitchThreshold", registry);
       this.heelHitGround = new BooleanYoVariable(namePrefix + "HeelHitGround", registry);

@@ -35,7 +35,7 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
    private final ArrayList<Contactable> contactables = new ArrayList<Contactable>();
    private final ContactableToroidRobot steeringWheelRobot;
 
-   public DRCDemoEnvironmentWithBoxAndSteeringWheel(YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+   public DRCDemoEnvironmentWithBoxAndSteeringWheel(YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       DRCVehicleModelObjects drcVehicleModelObjects = new DRCVehicleModelObjects();
 

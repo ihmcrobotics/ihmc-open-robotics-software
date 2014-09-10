@@ -99,7 +99,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
    private final RobotSide[] singleElementRobotSideArray = new RobotSide[1];
 
    public PelvisKinematicsBasedLinearStateCalculator(FullInverseDynamicsStructure inverseDynamicsStructure, SideDependentList<ContactablePlaneBody> bipedFeet,
-         double estimatorDT, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+         double estimatorDT, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.rootBody = inverseDynamicsStructure.getRootJoint().getSuccessor();
       this.bipedFeet = bipedFeet;
@@ -158,13 +158,13 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
       if (VISUALIZE)
       {
-         if (dynamicGraphicObjectsListRegistry != null)
+         if (yoGraphicsListRegistry != null)
          {
             for (RobotSide robotSide : RobotSide.values)
             {
                String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
                YoGraphicPosition copInWorld = new YoGraphicPosition(sidePrefix + "StateEstimatorCoP", copPositionsInWorld.get(robotSide), 0.005, YoAppearance.DeepPink());
-               dynamicGraphicObjectsListRegistry.registerArtifact("StateEstimator", copInWorld.createArtifact());
+               yoGraphicsListRegistry.registerArtifact("StateEstimator", copInWorld.createArtifact());
             }
          }
       }

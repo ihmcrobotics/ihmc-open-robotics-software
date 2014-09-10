@@ -41,14 +41,14 @@ public class InverseKinematicsTaskspaceHandPositionControlState extends Taskspac
 
    public InverseKinematicsTaskspaceHandPositionControlState(String namePrefix, HandControlState stateEnum, RobotSide robotSide,
          MomentumBasedController momentumBasedController, int jacobianId, RigidBody base, RigidBody endEffector,
-         YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, ArmControllerParameters armControllerParameters,
+         YoGraphicsListRegistry yoGraphicsListRegistry, ArmControllerParameters armControllerParameters,
          ControlStatusProducer controlStatusProducer, YoPIDGains gains, double controlDT, YoVariableRegistry parentRegistry)
    {
-      super(namePrefix, stateEnum, momentumBasedController, jacobianId, base, endEffector, dynamicGraphicObjectsListRegistry, parentRegistry);
+      super(namePrefix, stateEnum, momentumBasedController, jacobianId, base, endEffector, yoGraphicsListRegistry, parentRegistry);
       this.controlDT = controlDT;
       this.controlStatusProducer = controlStatusProducer;
       this.robotSide = robotSide;
-      inverseKinematicsCalculator = new TrajectoryBasedNumericalInverseKinematicsCalculator(base, endEffector, controlDT, momentumBasedController.getTwistCalculator(), parentRegistry, dynamicGraphicObjectsListRegistry);
+      inverseKinematicsCalculator = new TrajectoryBasedNumericalInverseKinematicsCalculator(base, endEffector, controlDT, momentumBasedController.getTwistCalculator(), parentRegistry, yoGraphicsListRegistry);
       
       inverseKinematicsSolutionIsValid = new BooleanYoVariable("inverseKinematicsSolutionIsValid", registry);
 

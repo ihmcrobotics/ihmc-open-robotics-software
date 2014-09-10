@@ -90,7 +90,7 @@ public class DRCPosePlaybackDemo
 
       private final SDFRobot robot;
 
-      private final YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
+      private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       private final ArrayList<YoGraphicPosition> efp_positionViz = new ArrayList<>();
 
       public HoldRobotInTheAir(SDFRobot robot, SimulationConstructionSet scs, SDFFullRobotModel sdfFullRobotModel)
@@ -134,8 +134,8 @@ public class DRCPosePlaybackDemo
             efp_positionViz.add(new YoGraphicPosition(efp.getName(), efp.getYoPosition(), 0.05, YoAppearance.Red()));
          }
 
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects("EFP", efp_positionViz);
-         scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
+         yoGraphicsListRegistry.registerDynamicGraphicObjects("EFP", efp_positionViz);
+         scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       }
 
       @Override

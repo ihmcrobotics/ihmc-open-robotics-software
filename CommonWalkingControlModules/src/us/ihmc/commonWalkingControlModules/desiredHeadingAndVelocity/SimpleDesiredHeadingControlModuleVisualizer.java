@@ -20,14 +20,14 @@ import com.yobotics.simulationconstructionset.plotting.YoFrameLineSegment2dArtif
 
       private final ProcessedSensorsInterface processedSensors;
 
-      public SimpleDesiredHeadingControlModuleVisualizer(ProcessedSensorsInterface processedSensors, YoVariableRegistry registry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+      public SimpleDesiredHeadingControlModuleVisualizer(ProcessedSensorsInterface processedSensors, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
       {
          this.processedSensors = processedSensors;
 
          desiredHeadingLine = new YoFrameLineSegment2d("desiredHeadingLine", "", ReferenceFrame.getWorldFrame(), registry);
          finalHeadingLine = new YoFrameLineSegment2d("finalHeadingLine", "", ReferenceFrame.getWorldFrame(), registry);
 
-         if (dynamicGraphicObjectsListRegistry != null)
+         if (yoGraphicsListRegistry != null)
          {
             ArtifactList artifactList = new ArtifactList("Simple Desired Heading");
 
@@ -38,7 +38,7 @@ import com.yobotics.simulationconstructionset.plotting.YoFrameLineSegment2dArtif
             yoFrameLineSegment2dArtifact = new YoFrameLineSegment2dArtifact("Final Heading Line", finalHeadingLine, Color.ORANGE);
             artifactList.add(yoFrameLineSegment2dArtifact);
 
-            dynamicGraphicObjectsListRegistry.registerArtifactList(artifactList);
+            yoGraphicsListRegistry.registerArtifactList(artifactList);
          }
       }
 

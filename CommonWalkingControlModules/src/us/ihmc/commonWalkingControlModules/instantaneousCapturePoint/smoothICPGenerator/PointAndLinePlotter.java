@@ -33,7 +33,7 @@ import com.yobotics.simulationconstructionset.plotting.YoFrameLineSegment2dArtif
 public class PointAndLinePlotter
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
+   private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private SimulationOverheadPlotter simulationOverheadPlotter;
 
    private int numberOfRegisteredPoints;
@@ -56,7 +56,7 @@ public class PointAndLinePlotter
 
 public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()
 {
-   return dynamicGraphicObjectsListRegistry;
+   return yoGraphicsListRegistry;
 }
 
    public void createAndShowOverheadPlotterInSCS(SimulationConstructionSet scs)
@@ -123,10 +123,10 @@ public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()
    {
       YoGraphicPosition dynamicGraphicPosition = new YoGraphicPosition(name + numberOfRegisteredPoints, point, size, appearance);
       dynamicGraphicPositions.add(dynamicGraphicPosition);
-      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("GraphicsObjects", dynamicGraphicPositions.get(numberOfRegisteredPoints));
+      yoGraphicsListRegistry.registerDynamicGraphicObject("GraphicsObjects", dynamicGraphicPositions.get(numberOfRegisteredPoints));
       YoArtifactPosition artifact = dynamicGraphicPositions.get(numberOfRegisteredPoints).createArtifact();
       dynamicGraphicPositionsArtifactList.add(artifact);
-      dynamicGraphicObjectsListRegistry.registerArtifact(name + numberOfRegisteredPoints, dynamicGraphicPositionsArtifactList.get(numberOfRegisteredPoints));
+      yoGraphicsListRegistry.registerArtifact(name + numberOfRegisteredPoints, dynamicGraphicPositionsArtifactList.get(numberOfRegisteredPoints));
 
       numberOfRegisteredPoints += 1;
    }
@@ -135,7 +135,7 @@ public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()
    {
       Artifact lineSegmentArtifact = new YoFrameLineSegment2dArtifact("line" + numberOfLines, lineSegment, color);
       lineSegmentArtifacts.add(lineSegmentArtifact);
-      dynamicGraphicObjectsListRegistry.registerArtifact("line" + numberOfLines, lineSegmentArtifact);
+      yoGraphicsListRegistry.registerArtifact("line" + numberOfLines, lineSegmentArtifact);
 
       numberOfLines += 1;
    }
@@ -150,14 +150,14 @@ public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()
 
    public void addPointsAndLinesToSCS(SimulationConstructionSet scs)
    {
-      scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
-      dynamicGraphicObjectsListRegistry.addArtifactListsToPlotter(simulationOverheadPlotter.getPlotter());
+      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
+      yoGraphicsListRegistry.addArtifactListsToPlotter(simulationOverheadPlotter.getPlotter());
    }
 
    public void addGraphicObjectsAndArtifactsToSCS(SimulationConstructionSet scs)
    {
-      dynamicGraphicObjectsListRegistry.addArtifactListsToPlotter(simulationOverheadPlotter.getPlotter());
-      scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
+      yoGraphicsListRegistry.addArtifactListsToPlotter(simulationOverheadPlotter.getPlotter());
+      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
    }
 
 

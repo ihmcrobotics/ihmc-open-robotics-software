@@ -57,7 +57,7 @@ public class BalanceSupportControlModule
                                       VirtualSupportActuatorControlModule virtualSupportActuatorControlModule, KneeDamperControlModule kneeDamperControlModule,
                                       HipDamperControlModule hipDamperControlModule, BipedSupportPolygons bipedSupportPolygons,
                                       AnkleOverRotationControlModule ankleOverRotationControlModule, CouplingRegistry couplingRegistry,
-                                      YoVariableRegistry parentRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+                                      YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.velocityViaCoPControlModule = velocityViaCoPControlModule;
       this.virtualToePointCalculator = virtualToePointAndLegStrengthCalculator;
@@ -77,11 +77,11 @@ public class BalanceSupportControlModule
          String listName = "VTPs";
          YoFramePoint vtp = new YoFramePoint(copName, ReferenceFrame.getWorldFrame(), registry);
 
-         if (dynamicGraphicObjectsListRegistry != null)
+         if (yoGraphicsListRegistry != null)
          {
             YoGraphicPosition copViz = new YoGraphicPosition(copName, vtp, 0.005, YoAppearance.Navy(), GraphicType.BALL);
-            dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(listName, copViz);
-            dynamicGraphicObjectsListRegistry.registerArtifact(listName, copViz.createArtifact());
+            yoGraphicsListRegistry.registerDynamicGraphicObject(listName, copViz);
+            yoGraphicsListRegistry.registerArtifact(listName, copViz.createArtifact());
             virtualToePointsInWorld.put(robotSide, vtp);
          }
       }

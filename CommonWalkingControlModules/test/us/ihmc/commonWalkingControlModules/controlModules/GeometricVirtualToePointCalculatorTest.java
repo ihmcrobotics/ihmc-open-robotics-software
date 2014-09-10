@@ -525,10 +525,10 @@ public class GeometricVirtualToePointCalculatorTest
    private VirtualToePointCalculator createVirtualToePointCalculator(boolean debugViz, boolean removeDebugVizEachTime)
    {
       YoVariableRegistry registry = new YoVariableRegistry("parent");
-      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = null;
+      YoGraphicsListRegistry yoGraphicsListRegistry = null;
 
       GeometricVirtualToePointCalculator geometricVirtualToePointCalculator = new GeometricVirtualToePointCalculator(registry,
-            dynamicGraphicObjectsListRegistry);
+            yoGraphicsListRegistry);
       geometricVirtualToePointCalculator.setAllFramesToComputeInToWorld();
       
       setParametersForGeometricVirtualToePointCalculator(geometricVirtualToePointCalculator);

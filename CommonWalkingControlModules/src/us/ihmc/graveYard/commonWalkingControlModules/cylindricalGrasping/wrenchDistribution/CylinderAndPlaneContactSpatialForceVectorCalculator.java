@@ -57,7 +57,7 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
    private final DenseMatrix64F rhoMeanLoadedEndEffectors;
 
    public CylinderAndPlaneContactSpatialForceVectorCalculator(ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry,
-           YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, int rhoSize, int phiSize)
+           YoGraphicsListRegistry yoGraphicsListRegistry, int rhoSize, int phiSize)
    {
       int wrenchLength = Wrench.SIZE;
 
@@ -66,7 +66,7 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
       rhoMean = new DenseMatrix64F(rhoSize, 1);
       rhoMeanLoadedEndEffectors = new DenseMatrix64F(4, 1);
 
-      visualize = dynamicGraphicObjectsListRegistry != null;
+      visualize = yoGraphicsListRegistry != null;
       String name = getClass().getSimpleName();
       registry = new YoVariableRegistry(name);
       parentRegistry.addChild(registry);
@@ -131,10 +131,10 @@ public class CylinderAndPlaneContactSpatialForceVectorCalculator
 
          }
 
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects("OptimizerOutputVectorsRhoLinear ", dynamicGraphicVectorsRhoLinear);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects("OptimizerOutputVectorsRhoAngular", dynamicGraphicVectorsRhoAngular);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects("OptimizerOutputVectorsPhiLinear ", dynamicGraphicVectorsPhiLinear);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects("OptimizerOutputVectorsPhiAngular", dynamicGraphicVectorsPhiAngular);
+         yoGraphicsListRegistry.registerDynamicGraphicObjects("OptimizerOutputVectorsRhoLinear ", dynamicGraphicVectorsRhoLinear);
+         yoGraphicsListRegistry.registerDynamicGraphicObjects("OptimizerOutputVectorsRhoAngular", dynamicGraphicVectorsRhoAngular);
+         yoGraphicsListRegistry.registerDynamicGraphicObjects("OptimizerOutputVectorsPhiLinear ", dynamicGraphicVectorsPhiLinear);
+         yoGraphicsListRegistry.registerDynamicGraphicObjects("OptimizerOutputVectorsPhiAngular", dynamicGraphicVectorsPhiAngular);
       }
    }
 

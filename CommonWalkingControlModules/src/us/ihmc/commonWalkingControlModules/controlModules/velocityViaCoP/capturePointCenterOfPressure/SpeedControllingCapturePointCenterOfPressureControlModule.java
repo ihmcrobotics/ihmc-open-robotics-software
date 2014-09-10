@@ -57,14 +57,14 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
    //TODO: 110523: Clean this up and make it better. ComVelocity control line is still hackish.
 
    public SpeedControllingCapturePointCenterOfPressureControlModule(double controlDT, CommonWalkingReferenceFrames referenceFrames,
-           YoVariableRegistry parentRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, ReferenceFrame desiredHeadingFrame)
+           YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, ReferenceFrame desiredHeadingFrame)
    {
       midFeetZUp = referenceFrames.getMidFeetZUpFrame();
       this.desiredHeadingFrame = desiredHeadingFrame;
 
-      if (dynamicGraphicObjectsListRegistry != null)
+      if (yoGraphicsListRegistry != null)
       {
-         YoGraphicsList dynamicGraphicObjectList = new YoGraphicsList("CapturePointController");
+         YoGraphicsList yoGraphicList = new YoGraphicsList("CapturePointController");
          ArtifactList artifactList = new ArtifactList("Capture Point CoP Control Module");
 
          YoFrameLine2dArtifact cpLineArtifact = new YoFrameLine2dArtifact("CP Line", capturePointLine, Color.MAGENTA);
@@ -79,8 +79,8 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
          YoFrameLine2dArtifact parallellLineArtifact = new YoFrameLine2dArtifact("Parallel Line", parallelLineWorld, Color.GREEN);
          artifactList.add(parallellLineArtifact);
 
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectList);
-         dynamicGraphicObjectsListRegistry.registerArtifactList(artifactList);
+         yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicList);
+         yoGraphicsListRegistry.registerArtifactList(artifactList);
       }
 
       if (parentRegistry != null)

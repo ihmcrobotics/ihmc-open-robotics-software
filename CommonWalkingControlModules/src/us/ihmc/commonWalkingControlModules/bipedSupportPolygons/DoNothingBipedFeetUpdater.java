@@ -17,7 +17,7 @@ public class DoNothingBipedFeetUpdater implements BipedFeetUpdater
    private final YoVariableRegistry registry = new YoVariableRegistry("BipedFeetUpdater");
 
    public DoNothingBipedFeetUpdater(CommonWalkingReferenceFrames referenceFrames, double footForward, double footBack,
-           YoVariableRegistry parentRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+           YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
 

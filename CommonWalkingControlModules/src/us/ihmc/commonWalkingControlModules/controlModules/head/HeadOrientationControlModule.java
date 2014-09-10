@@ -59,14 +59,14 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
 
    public HeadOrientationControlModule(MomentumBasedController momentumBasedController, ReferenceFrame headOrientationExpressedInFrame,
          HeadOrientationControllerParameters headOrientationControllerParameters, YoVariableRegistry parentRegistry,
-         YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(momentumBasedController, headOrientationExpressedInFrame, headOrientationControllerParameters, null, parentRegistry, dynamicGraphicObjectsListRegistry);
+      this(momentumBasedController, headOrientationExpressedInFrame, headOrientationControllerParameters, null, parentRegistry, yoGraphicsListRegistry);
    }
 
    public HeadOrientationControlModule(MomentumBasedController momentumBasedController, ReferenceFrame headOrientationExpressedInFrame,
          HeadOrientationControllerParameters headOrientationControllerParameters, YoOrientationPIDGains gains, YoVariableRegistry parentRegistry,
-         YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super("head", new RigidBody[] {}, momentumBasedController.getFullRobotModel().getHead(), new GeometricJacobian[] {}, momentumBasedController
             .getTwistCalculator(), momentumBasedController.getControlDT(), gains, parentRegistry);
@@ -81,12 +81,12 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
       orientationToTrack = new YoFrameQuaternion("headOrientationToTrack", headOrientationExpressedInFrame, registry);
       pointToTrack = new YoFramePoint("headPointToTrack", worldFrame, registry);
 
-      if (dynamicGraphicObjectsListRegistry != null)
+      if (yoGraphicsListRegistry != null)
       {
          pointTrackingFrameFiz = new YoGraphicReferenceFrame(pointTrackingFrame, registry, 0.3);
-         YoGraphicsList dynamicGraphicObjectsList = new YoGraphicsList(getClass().getSimpleName());
-         dynamicGraphicObjectsList.add(pointTrackingFrameFiz);
-         dynamicGraphicObjectsList.hideYoGraphics();
+         YoGraphicsList yoGraphicsList = new YoGraphicsList(getClass().getSimpleName());
+         yoGraphicsList.add(pointTrackingFrameFiz);
+         yoGraphicsList.hideYoGraphics();
       }
       else
       {

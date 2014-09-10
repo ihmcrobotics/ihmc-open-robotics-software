@@ -48,7 +48,7 @@ public class ResizableBipedFoot implements BipedFootInterface
    public ResizableBipedFoot(RigidBody body, ReferenceFrame ankleZUpFrame, ReferenceFrame soleFrame, RobotSide robotSide,
                              ArrayList<Point3d> clockwiseToePoints, ArrayList<Point3d> clockwiseHeelPoints, double maxToePointsBack,
                              double maxHeelPointsForward, double narrowWidthOnToesPercentage, YoVariableRegistry yoVariableRegistry,
-                             YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+                             YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       registry = new YoVariableRegistry(robotSide + "BipedFoot");
       this.narrowWidthOnToesPercentage = narrowWidthOnToesPercentage;
@@ -326,20 +326,20 @@ public class ResizableBipedFoot implements BipedFootInterface
 
    public static ResizableBipedFoot createRectangularRightFoot(double footForward, double footBack, double footWidth, double footHeight,
            double narrowWidthOnToesPercentage, RigidBody body, ReferenceFrame ankleZUpFrame, ReferenceFrame soleFrame, DoubleYoVariable time,
-           YoVariableRegistry yoVariableRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+           YoVariableRegistry yoVariableRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       double PREVENT_ROTATION_FACTOR = 0.75;    // 0.8;//0.8;
 
       return createRectangularRightFoot(PREVENT_ROTATION_FACTOR, PREVENT_ROTATION_FACTOR, footForward, footBack, footWidth, footHeight,
                                         narrowWidthOnToesPercentage, 0.8, 0.8, body, ankleZUpFrame, soleFrame, yoVariableRegistry,
-                                        dynamicGraphicObjectsListRegistry);
+                                        yoGraphicsListRegistry);
    }
 
    // Foot creators:
    public static ResizableBipedFoot createRectangularRightFoot(double preventRotationFactorLength, double preventRotationFactorWidth, double footForward,
            double footBack, double footWidth, double footHeight, double narrowWidthOnToesPercentage, double maxToePointsBack, double maxHeelPointsForward,
            RigidBody body, ReferenceFrame ankleZUpFrame, ReferenceFrame soleFrame, YoVariableRegistry yoVariableRegistry,
-           YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+           YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       Point3d frontLeft = new Point3d(preventRotationFactorLength * footForward, preventRotationFactorWidth * footWidth / 2.0, -footHeight);
       Point3d frontRight = new Point3d(preventRotationFactorLength * footForward, -preventRotationFactorWidth * footWidth / 2.0, -footHeight);
@@ -358,11 +358,11 @@ public class ResizableBipedFoot implements BipedFootInterface
       heelPoints.add(hindLeft);
 
       return new ResizableBipedFoot(body, ankleZUpFrame, soleFrame, RobotSide.RIGHT, toePoints, heelPoints, maxToePointsBack, maxHeelPointsForward,
-                                    narrowWidthOnToesPercentage, yoVariableRegistry, dynamicGraphicObjectsListRegistry);
+                                    narrowWidthOnToesPercentage, yoVariableRegistry, yoGraphicsListRegistry);
    }
 
    public ResizableBipedFoot createLeftFootAsMirrorImage(RigidBody body, ReferenceFrame ankleZUpFrame, ReferenceFrame soleFrame,
-           YoVariableRegistry yoVariableRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+           YoVariableRegistry yoVariableRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       if (this.getRobotSide() != RobotSide.RIGHT)
          throw new RuntimeException("Implicit parameter is not a right foot!");
@@ -382,7 +382,7 @@ public class ResizableBipedFoot implements BipedFootInterface
       }
 
       return new ResizableBipedFoot(body, ankleZUpFrame, soleFrame, RobotSide.LEFT, mirrorToePoints, mirrorHeelPoints, this.maxToePointsBack,
-                                    this.maxHeelPointsForward, this.narrowWidthOnToesPercentage, yoVariableRegistry, dynamicGraphicObjectsListRegistry);
+                                    this.maxHeelPointsForward, this.narrowWidthOnToesPercentage, yoVariableRegistry, yoGraphicsListRegistry);
    }
 
    private static FramePoint minXMaxYPointCopy(ArrayList<FramePoint> pointList)

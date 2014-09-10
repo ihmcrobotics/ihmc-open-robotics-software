@@ -16,7 +16,7 @@ import com.yobotics.simulationconstructionset.plotting.SimulationOverheadPlotter
 
 public class VisualizerUtils
 {
-   public static void createOverheadPlotter(SimulationConstructionSet scs, boolean showOverheadView, YoGraphicsListRegistry... dynamicGraphicObjectsListRegistries)
+   public static void createOverheadPlotter(SimulationConstructionSet scs, boolean showOverheadView, YoGraphicsListRegistry... yoGraphicsListRegistries)
    {
       SimulationOverheadPlotter plotter = new SimulationOverheadPlotter();
       plotter.setDrawHistory(false);
@@ -33,12 +33,12 @@ public class VisualizerUtils
 
       scs.addExtraJpanel(scrollPane, "Plotter Legend");
 
-      for (int i = 0; i < dynamicGraphicObjectsListRegistries.length; i++)
+      for (int i = 0; i < yoGraphicsListRegistries.length; i++)
       {
-         YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = dynamicGraphicObjectsListRegistries[i];
-         dynamicGraphicObjectsListRegistry.addArtifactListsToPlotter(plotter.getPlotter());
+         YoGraphicsListRegistry yoGraphicsListRegistry = yoGraphicsListRegistries[i];
+         yoGraphicsListRegistry.addArtifactListsToPlotter(plotter.getPlotter());
          ArrayList<ArtifactList> buffer = new ArrayList<>();
-         dynamicGraphicObjectsListRegistry.getRegisteredArtifactLists(buffer);
+         yoGraphicsListRegistry.getRegisteredArtifactLists(buffer);
 
          for (ArtifactList artifactList : buffer)
          {

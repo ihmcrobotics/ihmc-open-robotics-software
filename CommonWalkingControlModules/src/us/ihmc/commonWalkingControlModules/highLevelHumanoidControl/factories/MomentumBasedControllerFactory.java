@@ -105,7 +105,7 @@ public class MomentumBasedControllerFactory
    }
 
    public RobotController getController(FullRobotModel fullRobotModel, CommonWalkingReferenceFrames referenceFrames, double controlDT, double gravity,
-         DoubleYoVariable yoTime, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, TwistCalculator twistCalculator,
+         DoubleYoVariable yoTime, YoGraphicsListRegistry yoGraphicsListRegistry, TwistCalculator twistCalculator,
          CenterOfMassJacobian centerOfMassJacobian, ForceSensorDataHolder forceSensorDataHolder, GlobalDataProducer dataProducer,
          InverseDynamicsJoint... jointsToIgnore)
    {      
@@ -116,7 +116,7 @@ public class MomentumBasedControllerFactory
       double totalRobotWeight = totalMass * gravityZ;
 
       SideDependentList<FootSwitchInterface> footSwitches = createFootSwitches(feet, forceSensorDataHolder, totalRobotWeight,
-            dynamicGraphicObjectsListRegistry, registry);
+            yoGraphicsListRegistry, registry);
 
 
       /////////////////////////////////////////////////////////////////////////////////////////////
@@ -132,7 +132,7 @@ public class MomentumBasedControllerFactory
       // Setup the ICPBasedLinearMomentumRateOfChangeControlModule ////////////////////////////////
       ICPBasedLinearMomentumRateOfChangeControlModule iCPBasedLinearMomentumRateOfChangeControlModule =
          new ICPBasedLinearMomentumRateOfChangeControlModule(referenceFrames.getCenterOfMassFrame(), controlDT, totalMass, gravityZ, registry,
-            dynamicGraphicObjectsListRegistry);
+            yoGraphicsListRegistry);
 
       iCPBasedLinearMomentumRateOfChangeControlModule.setGains(walkingControllerParameters.getCaptureKpParallelToMotion(),
               walkingControllerParameters.getCaptureKpOrthogonalToMotion(), walkingControllerParameters.getCaptureKi(),
@@ -153,7 +153,7 @@ public class MomentumBasedControllerFactory
       }
       
       variousWalkingProviders = variousWalkingProviderFactory.createVariousWalkingProviders(yoTime, fullRobotModel, walkingControllerParameters,
-            referenceFrames, feet, transferTimeCalculator, swingTimeCalculator, updatables, registry, dynamicGraphicObjectsListRegistry);
+            referenceFrames, feet, transferTimeCalculator, swingTimeCalculator, updatables, registry, yoGraphicsListRegistry);
       if (variousWalkingProviders == null)
          throw new RuntimeException("Couldn't create various walking providers!");
 
@@ -169,14 +169,14 @@ public class MomentumBasedControllerFactory
       LookAheadCoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator = new LookAheadCoMHeightTrajectoryGenerator(desiredComHeightProvider,
                                                                                        minimumHeightAboveGround, nominalHeightAboveGround,
                                                                                        maximumHeightAboveGround, doubleSupportPercentageIn, yoTime,
-                                                                                       dynamicGraphicObjectsListRegistry, registry);
+                                                                                       yoGraphicsListRegistry, registry);
       
       double icpInFromCenter = 0.006; //0.01;
       double doubleSupportFirstStepFraction = 0.5;
       int maxNumberOfConsideredFootsteps = 4;
 
       SmoothICPComputer2D smoothICPComputer2D = new SmoothICPComputer2D(referenceFrames, controlDT, doubleSupportFirstStepFraction,
-                                                   maxNumberOfConsideredFootsteps, registry, dynamicGraphicObjectsListRegistry);
+                                                   maxNumberOfConsideredFootsteps, registry, yoGraphicsListRegistry);
       smoothICPComputer2D.setICPInFromCenter(icpInFromCenter);
 
 
@@ -187,7 +187,7 @@ public class MomentumBasedControllerFactory
       momentumBasedController = new MomentumBasedController(fullRobotModel, centerOfMassJacobian, referenceFrames, footSwitches,
                                    yoTime, gravityZ, twistCalculator, feet, handContactableBodies, thighs, pelvisContactablePlaneBody,
                                    pelvisBackContactablePlaneBody, controlDT, oldMomentumControlModule,
-                                   updatables, walkingControllerParameters, dynamicGraphicObjectsListRegistry, jointsToIgnore);
+                                   updatables, walkingControllerParameters, yoGraphicsListRegistry, jointsToIgnore);
 
       TransferTimeCalculationProvider transferTimeCalculationProvider = new TransferTimeCalculationProvider("providedTransferTime", registry, transferTimeCalculator, transferTime);
       SwingTimeCalculationProvider swingTimeCalculationProvider = new SwingTimeCalculationProvider("providedSwingTime", registry, swingTimeCalculator, swingTime);
@@ -198,7 +198,7 @@ public class MomentumBasedControllerFactory
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the ICPAndMomentumBasedController //////////////////////////////////////////////////
       BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons(referenceFrames.getAnkleZUpReferenceFrames(), referenceFrames.getMidFeetZUpFrame(),
-                                                     registry, dynamicGraphicObjectsListRegistry, false);
+                                                     registry, yoGraphicsListRegistry, false);
 
 
       icpAndMomentumBasedController = new ICPAndMomentumBasedController(momentumBasedController, fullRobotModel, feet, bipedSupportPolygons, registry);
@@ -229,7 +229,7 @@ public class MomentumBasedControllerFactory
       
       ret.getYoVariableRegistry().addChild(registry);
 
-      if (dynamicGraphicObjectsListRegistry != null)
+      if (yoGraphicsListRegistry != null)
       {
          RobotControllerUpdatablesAdapter highLevelHumanoidControllerUpdatables = new RobotControllerUpdatablesAdapter(ret);
 
@@ -239,7 +239,7 @@ public class MomentumBasedControllerFactory
    }
 
    private SideDependentList<FootSwitchInterface> createFootSwitches(SideDependentList<ContactablePlaneBody> bipedFeet,
-         ForceSensorDataHolder forceSensorDataHolder, double totalRobotWeight, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry,
+         ForceSensorDataHolder forceSensorDataHolder, double totalRobotWeight, YoGraphicsListRegistry yoGraphicsListRegistry,
          YoVariableRegistry registry)
    {
       SideDependentList<FootSwitchInterface> footSwitches = new SideDependentList<FootSwitchInterface>();
@@ -250,7 +250,7 @@ public class MomentumBasedControllerFactory
          double contactThresholdForce = walkingControllerParameters.getContactThresholdForce();
          double footSwitchCoPThresholdFraction = walkingControllerParameters.getCoPThresholdFraction();
          WrenchBasedFootSwitch wrenchBasedFootSwitch = new WrenchBasedFootSwitch(bipedFeet.get(robotSide).getName(), footForceSensor, footSwitchCoPThresholdFraction, totalRobotWeight,
-               bipedFeet.get(robotSide), dynamicGraphicObjectsListRegistry, contactThresholdForce, registry);
+               bipedFeet.get(robotSide), yoGraphicsListRegistry, contactThresholdForce, registry);
          footSwitches.put(robotSide, wrenchBasedFootSwitch);
       }
 

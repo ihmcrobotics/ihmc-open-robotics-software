@@ -51,7 +51,7 @@ public class VariousWalkingManagers
    {
       FullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
       TwistCalculator twistCalculator = momentumBasedController.getTwistCalculator();
-      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
+      YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
       double controlDT = momentumBasedController.getControlDT();
 
       HeadOrientationProvider desiredHeadOrientationProvider = null;
@@ -63,7 +63,7 @@ public class VariousWalkingManagers
          desiredHeadOrientationProvider = variousWalkingProviders.getDesiredHeadOrientationProvider();
 
          headOrientationControlModule = setupHeadOrientationControlModule(momentumBasedController, desiredHeadOrientationProvider, walkingControllerParameters,
-               dynamicGraphicObjectsListRegistry, registry);
+               yoGraphicsListRegistry, registry);
 
          headOrientationManager = new HeadOrientationManager(momentumBasedController, headOrientationControlModule, desiredHeadOrientationProvider,
                walkingControllerParameters.getTrajectoryTimeHeadOrientation(), registry);
@@ -112,7 +112,7 @@ public class VariousWalkingManagers
 
    private static HeadOrientationControlModule setupHeadOrientationControlModule(MomentumBasedController momentumBasedController,
          HeadOrientationProvider desiredHeadOrientationProvider, HeadOrientationControllerParameters headOrientationControllerParameters,
-         YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry registry)
+         YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
    {
       CommonWalkingReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
 
@@ -124,7 +124,7 @@ public class VariousWalkingManagers
 
       YoOrientationPIDGains gains = headOrientationControllerParameters.createHeadOrientationControlGains(registry);
       HeadOrientationControlModule headOrientationControlModule = new HeadOrientationControlModule(momentumBasedController, headOrientationExpressedInFrame,
-            headOrientationControllerParameters, gains, registry, dynamicGraphicObjectsListRegistry);
+            headOrientationControllerParameters, gains, registry, yoGraphicsListRegistry);
 
       // Setting initial head pitch
       FrameOrientation orientation = new FrameOrientation(headOrientationExpressedInFrame, headOrientationControllerParameters.getInitialHeadYawPitchRoll());

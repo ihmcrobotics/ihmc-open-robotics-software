@@ -51,7 +51,7 @@ public class SDFFullRobotModelVisualizer implements RobotVisualizer
       return null;
    }
    
-   public void setMainRegistry(YoVariableRegistry registry, FullRobotModel fullRobotModel, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+   public void setMainRegistry(YoVariableRegistry registry, FullRobotModel fullRobotModel, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.rootJoint = fullRobotModel.getRootJoint();
       
@@ -127,7 +127,7 @@ public class SDFFullRobotModelVisualizer implements RobotVisualizer
    }
 
    @Override
-   public void addRegistry(YoVariableRegistry registry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+   public void addRegistry(YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       // TODO Auto-generated method stub
       

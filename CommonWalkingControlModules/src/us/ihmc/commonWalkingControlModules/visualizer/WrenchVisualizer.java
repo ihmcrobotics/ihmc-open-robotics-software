@@ -41,15 +41,15 @@ public class WrenchVisualizer
    private final FramePoint tempPoint = new FramePoint();
    private final ArrayList<RigidBody> rigidBodies = new ArrayList<RigidBody>();
 
-   public WrenchVisualizer(String name, List<RigidBody> rigidBodies, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+   public WrenchVisualizer(String name, List<RigidBody> rigidBodies, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
-      this(name, rigidBodies, dynamicGraphicObjectsListRegistry, parentRegistry, YoAppearance.OrangeRed(), YoAppearance.CornflowerBlue());
+      this(name, rigidBodies, yoGraphicsListRegistry, parentRegistry, YoAppearance.OrangeRed(), YoAppearance.CornflowerBlue());
    }
    
-   public WrenchVisualizer(String name, List<RigidBody> rigidBodies, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry, 
+   public WrenchVisualizer(String name, List<RigidBody> rigidBodies, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry, 
          AppearanceDefinition forceAppearance, AppearanceDefinition torqueAppearance)
    {
-      YoGraphicsList dynamicGraphicObjectsList = new YoGraphicsList(name);
+      YoGraphicsList yoGraphicsList = new YoGraphicsList(name);
 
       this.rigidBodies.addAll(rigidBodies);
       for (RigidBody rigidBody : rigidBodies)
@@ -67,15 +67,15 @@ public class WrenchVisualizer
          YoGraphicVector forceVisualizer = new YoGraphicVector(prefix + "ForceViz", pointOfApplication, force, FORCE_VECTOR_SCALE,
                                                   forceAppearance, true);
          forceVisualizers.put(rigidBody, forceVisualizer);
-         dynamicGraphicObjectsList.add(forceVisualizer);
+         yoGraphicsList.add(forceVisualizer);
 
          YoGraphicVector torqueVisualizer = new YoGraphicVector(prefix + "TorqueViz", pointOfApplication, torque, TORQUE_VECTOR_SCALE,
                                                     torqueAppearance, true);
          torqueVisualizers.put(rigidBody, torqueVisualizer);
-         dynamicGraphicObjectsList.add(torqueVisualizer);
+         yoGraphicsList.add(torqueVisualizer);
       }
 
-      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
+      yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicsList);
 
       parentRegistry.addChild(registry);
    }

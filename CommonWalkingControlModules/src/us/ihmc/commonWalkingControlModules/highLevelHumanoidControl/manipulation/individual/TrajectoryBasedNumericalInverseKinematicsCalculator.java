@@ -106,7 +106,7 @@ public class TrajectoryBasedNumericalInverseKinematicsCalculator
    private final YoFramePose yoDesiredTrajectoryPose = new YoFramePose("desiredTrajectoryPose", "", worldFrame, registry);
 
    public TrajectoryBasedNumericalInverseKinematicsCalculator(RigidBody base, RigidBody endEffector, double controlDT, TwistCalculator twistCalculator,
-         YoVariableRegistry parentRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+         YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.base = base;
       this.dt = controlDT;
@@ -149,9 +149,9 @@ public class TrajectoryBasedNumericalInverseKinematicsCalculator
       maximumIKError.set(0.06);
       maximumAngleOutsideLimits.set(0.1);
 
-      if (dynamicGraphicObjectsListRegistry != null)
+      if (yoGraphicsListRegistry != null)
       {
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("", new YoGraphicCoordinateSystem(endEffector.getName() + "DesiredTrajectoryPose", yoDesiredTrajectoryPose, 0.2));
+         yoGraphicsListRegistry.registerDynamicGraphicObject("", new YoGraphicCoordinateSystem(endEffector.getName() + "DesiredTrajectoryPose", yoDesiredTrajectoryPose, 0.2));
       }
 
       if (parentRegistry != null)

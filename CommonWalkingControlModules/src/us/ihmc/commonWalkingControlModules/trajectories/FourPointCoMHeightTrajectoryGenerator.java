@@ -45,7 +45,7 @@ public class FourPointCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    private final BagOfBalls bagOfBalls;
 
    public FourPointCoMHeightTrajectoryGenerator(double nominalHeightAboveGround, double doubleSupportPercentageIn,
-         YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+         YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       setNominalHeightAboveGround(nominalHeightAboveGround);
       this.doubleSupportPercentageIn.set(doubleSupportPercentageIn);
@@ -54,7 +54,7 @@ public class FourPointCoMHeightTrajectoryGenerator implements CoMHeightTrajector
 
       parentRegistry.addChild(registry);
 
-      if (dynamicGraphicObjectsListRegistry == null)
+      if (yoGraphicsListRegistry == null)
       {
          VISUALIZE = false;
       }
@@ -65,20 +65,20 @@ public class FourPointCoMHeightTrajectoryGenerator implements CoMHeightTrajector
          YoGraphicPosition position0 = new YoGraphicPosition("contactFrame0", contactFrameZeroPosition, pointSize, YoAppearance.Purple());
          YoGraphicPosition position1 = new YoGraphicPosition("contactFrame1", contactFrameOnePosition, pointSize, YoAppearance.Gold());
 
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", position0);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", position1);
+         yoGraphicsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", position0);
+         yoGraphicsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", position1);
 
          pointS0Viz = new YoGraphicPosition("pointS0", "", registry, pointSize, YoAppearance.CadetBlue());
          pointSFViz = new YoGraphicPosition("pointSF", "", registry, pointSize, YoAppearance.Chartreuse());
          pointD0Viz = new YoGraphicPosition("pointD0", "", registry, pointSize, YoAppearance.BlueViolet());
          pointDFViz = new YoGraphicPosition("pointDF", "", registry, pointSize, YoAppearance.Azure());
 
-         bagOfBalls = new BagOfBalls(registry, dynamicGraphicObjectsListRegistry);
+         bagOfBalls = new BagOfBalls(registry, yoGraphicsListRegistry);
 
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointS0Viz);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointSFViz);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointD0Viz);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointDFViz);
+         yoGraphicsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointS0Viz);
+         yoGraphicsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointSFViz);
+         yoGraphicsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointD0Viz);
+         yoGraphicsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", pointDFViz);
       }
       else
       {

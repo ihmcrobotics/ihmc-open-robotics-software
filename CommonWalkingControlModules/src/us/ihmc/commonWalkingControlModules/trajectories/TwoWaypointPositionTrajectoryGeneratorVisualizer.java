@@ -36,7 +36,7 @@ public class TwoWaypointPositionTrajectoryGeneratorVisualizer
    private static final int numberOfTicks = 100;
 
    private final YoVariableRegistry registry;
-   private final YoGraphicsListRegistry dynamicGraphicObjectsListRegistry;
+   private final YoGraphicsListRegistry yoGraphicsListRegistry;
    private static final SupportedGraphics3DAdapter graphics3DAdapterToUse = SupportedGraphics3DAdapter.JAVA_MONKEY_ENGINE;
    private static final String namePrefix = "Viz";
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -57,7 +57,7 @@ public class TwoWaypointPositionTrajectoryGeneratorVisualizer
    public TwoWaypointPositionTrajectoryGeneratorVisualizer() throws SimulationExceededMaximumTimeException
    {
       registry = new YoVariableRegistry(namePrefix);
-      dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
+      yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
       initialPosition = new YoFramePoint(namePrefix + "P0", worldFrame, registry);
       finalPosition = new YoFramePoint(namePrefix + "P3", worldFrame, registry);
@@ -70,15 +70,15 @@ public class TwoWaypointPositionTrajectoryGeneratorVisualizer
       cartesianSpeed = new DoubleYoVariable(namePrefix + "CartesianSpeed", registry);
       drawTrajectory = new BooleanYoVariable(namePrefix + "DrawTrajectory", registry);
 
-      trajectoryBagOfBalls = new BagOfBalls(numberOfTicks, 0.005, namePrefix + "TrajectoryBagOfBallsVisualizer", registry, dynamicGraphicObjectsListRegistry);
+      trajectoryBagOfBalls = new BagOfBalls(numberOfTicks, 0.005, namePrefix + "TrajectoryBagOfBallsVisualizer", registry, yoGraphicsListRegistry);
       dynamicFixedPositions[0] = new YoGraphicPosition(namePrefix + "DynamicInitialPosition", initialPosition, 0.01, YoAppearance.White());
       dynamicFixedPositions[1] = new YoGraphicPosition(namePrefix + "DynamicWaypointPosition0", waypoints.get(0), 0.01, YoAppearance.White());
       dynamicFixedPositions[2] = new YoGraphicPosition(namePrefix + "DynamicWaypointPosition1", waypoints.get(1), 0.01, YoAppearance.White());
       dynamicFixedPositions[3] = new YoGraphicPosition(namePrefix + "DynamicFinalPosition", finalPosition, 0.01, YoAppearance.White());
       dynamicFixedVelocities[0] = new YoGraphicVector(namePrefix + "DynamicInitialVelocity", initialPosition, initialVelocity, YoAppearance.Red());
       dynamicFixedVelocities[1] = new YoGraphicVector(namePrefix + "DynamicFinalVelocity", finalPosition, finalVelocity, YoAppearance.Red());
-      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects(namePrefix + "DynamicFixedPositions", dynamicFixedPositions);
-      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects(namePrefix + "DynamicFixedVelocities", dynamicFixedVelocities);
+      yoGraphicsListRegistry.registerDynamicGraphicObjects(namePrefix + "DynamicFixedPositions", dynamicFixedPositions);
+      yoGraphicsListRegistry.registerDynamicGraphicObjects(namePrefix + "DynamicFixedVelocities", dynamicFixedVelocities);
 
       initialPosition.set(0.0, 0.0, 0.0);
       finalPosition.set(0.6, 0.0, 0.0);
@@ -95,7 +95,7 @@ public class TwoWaypointPositionTrajectoryGeneratorVisualizer
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot[] {new Robot("null")}, graphics3DAdapterToUse, initialBufferSize);
       scs.setDT(stepTime.getDoubleValue() / (double) numberOfTicks, 5);
       scs.addYoVariableRegistry(registry);
-      scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
+      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
       SliderBoardConfigurationManager sliderBoardConfigurationManager = new SliderBoardConfigurationManager(scs);
       YoFramePoint[] positions = new YoFramePoint[] {initialPosition, waypoints.get(0), waypoints.get(1), finalPosition};
@@ -185,7 +185,7 @@ public class TwoWaypointPositionTrajectoryGeneratorVisualizer
 
       return new TwoWaypointPositionTrajectorySpecifiedByPoints(namePrefix + "Generator", worldFrame, stepTimeProvider, initialPositionProvider,
               initialVelocityProvider, finalPositionProvider, finalDesiredVelocityProvider, trajectoryParametersProvider, registry,
-              arcLengthCalculatorDivisionsPerPolynomial, dynamicGraphicObjectsListRegistry, null, false, null);
+              arcLengthCalculatorDivisionsPerPolynomial, yoGraphicsListRegistry, null, false, null);
    }
    
    public static class TwoWaypointPositionTrajectorySpecifiedByPoints extends TwoWaypointPositionTrajectoryGenerator
@@ -196,11 +196,11 @@ public class TwoWaypointPositionTrajectoryGeneratorVisualizer
       public TwoWaypointPositionTrajectorySpecifiedByPoints(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider stepTimeProvider,
             PositionProvider initialPositionProvider, VectorProvider initialVelocityProvider, PositionProvider finalPositionProvider,
             VectorProvider finalDesiredVelocityProvider, TrajectoryParametersProvider trajectoryParametersProvider, YoVariableRegistry parentRegistry,
-            int arcLengthCalculatorDivisionsPerPolynomial, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry,
+            int arcLengthCalculatorDivisionsPerPolynomial, YoGraphicsListRegistry yoGraphicsListRegistry,
             WalkingControllerParameters walkingControllerParameters, boolean visualize, List<FramePoint> waypoints)
       {
          super(namePrefix, referenceFrame, stepTimeProvider, initialPositionProvider, initialVelocityProvider, finalPositionProvider, finalDesiredVelocityProvider,
-               trajectoryParametersProvider, parentRegistry, dynamicGraphicObjectsListRegistry, walkingControllerParameters,
+               trajectoryParametersProvider, parentRegistry, yoGraphicsListRegistry, walkingControllerParameters,
                visualize);
          
          this.referenceFrame = referenceFrame;

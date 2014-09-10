@@ -33,19 +33,19 @@ public class SplineBasedHeightTrajectoryGenerator implements CoMHeightTrajectory
    private final YoFramePoint contactFrameZeroPosition = new YoFramePoint("contactFrameZeroPosition", worldFrame, registry);
    private final YoFramePoint contactFrameOnePosition = new YoFramePoint("contactFrameOnePosition", worldFrame, registry);
 
-   public SplineBasedHeightTrajectoryGenerator(double nominalHeightAboveGround, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry,
+   public SplineBasedHeightTrajectoryGenerator(double nominalHeightAboveGround, YoGraphicsListRegistry yoGraphicsListRegistry,
          YoVariableRegistry parentRegistry)
    {
       this.nominalHeightAboveGround.set(nominalHeightAboveGround);
       parentRegistry.addChild(registry);
 
-      if (dynamicGraphicObjectsListRegistry != null)
+      if (yoGraphicsListRegistry != null)
       {
          YoGraphicPosition position0 = new YoGraphicPosition("contactFrame0", contactFrameZeroPosition, 0.03, YoAppearance.Purple());
          YoGraphicPosition position1 = new YoGraphicPosition("contactFrame1", contactFrameOnePosition, 0.03, YoAppearance.Gold());
 
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", position0);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", position1);
+         yoGraphicsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", position0);
+         yoGraphicsListRegistry.registerDynamicGraphicObject("CoMHeightTrajectoryGenerator", position1);
       }
    }
 

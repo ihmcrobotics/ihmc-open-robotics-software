@@ -96,7 +96,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 
    public OptimizationMomentumControlModule(InverseDynamicsJoint rootJoint, ReferenceFrame centerOfMassFrame, double controlDT, double gravityZ,
            MomentumOptimizationSettings momentumOptimizationSettings, TwistCalculator twistCalculator, GeometricJacobianHolder geometricJacobianHolder,
-           Collection<? extends PlaneContactState> planeContactStates, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry,
+           Collection<? extends PlaneContactState> planeContactStates, YoGraphicsListRegistry yoGraphicsListRegistry,
            YoVariableRegistry parentRegistry)
    {
       this.jointsToOptimizeFor = momentumOptimizationSettings.getJointsToOptimizeFor();

@@ -128,7 +128,7 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
    public ChangingEndpointSwingSubController(ProcessedSensorsInterface processedSensors, CommonWalkingReferenceFrames referenceFrames,
          CouplingRegistry couplingRegistry, DesiredFootstepCalculator desiredFootstepCalculator,
-         YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry,
+         YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry,
          SideDependentList<AnkleVelocityCalculator> ankleVelocityCalculators, SideDependentList<FootSwitchInterface> footSwitches,
          CartesianTrajectoryGenerator walkingCartesianTrajectoryGenerator,
          SideDependentList<CartesianTrajectoryGenerator> swingInAirCartesianTrajectoryGenerators, PreSwingControlModule preSwingControlModule,
@@ -160,14 +160,14 @@ public class ChangingEndpointSwingSubController implements SwingSubController
          desiredFootOrientations.set(side, desiredFootOrientation);
       }
 
-      createVisualizers(dynamicGraphicObjectsListRegistry, parentRegistry);
+      createVisualizers(yoGraphicsListRegistry, parentRegistry);
       couplingRegistry.setEstimatedSwingTimeRemaining(estimatedSwingTimeRemaining.getDoubleValue());
       parentRegistry.addChild(registry);
    }
 
-   private void createVisualizers(YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+   private void createVisualizers(YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
-      if (dynamicGraphicObjectsListRegistry != null)
+      if (yoGraphicsListRegistry != null)
       {
          ArtifactList artifactList = new ArtifactList("ChangingEndpoint");
 
@@ -178,16 +178,16 @@ public class ChangingEndpointSwingSubController implements SwingSubController
 
          int numberOfBalls = 1;
          double ballSize = (numberOfBalls > 1) ? 0.005 : 0.02;
-         bagOfBalls = new BagOfBalls(numberOfBalls, ballSize, "swingTarget", YoAppearance.Aqua(), parentRegistry, dynamicGraphicObjectsListRegistry);
+         bagOfBalls = new BagOfBalls(numberOfBalls, ballSize, "swingTarget", YoAppearance.Aqua(), parentRegistry, yoGraphicsListRegistry);
 
          YoGraphicPosition finalDesiredSwingViz = new YoGraphicPosition("Final Desired Swing", finalDesiredSwingFootPosition, 0.03,
                YoAppearance.Black(), GraphicType.BALL_WITH_CROSS);
 
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects("R2Sim02SwingSubController", new YoGraphic[] { swingFootOrientationViz,
+         yoGraphicsListRegistry.registerDynamicGraphicObjects("R2Sim02SwingSubController", new YoGraphic[] { swingFootOrientationViz,
                finalDesiredSwingViz, finalDesiredSwingOrientationViz });
 
          artifactList.add(finalDesiredSwingViz.createArtifact());
-         dynamicGraphicObjectsListRegistry.registerArtifactList(artifactList);
+         yoGraphicsListRegistry.registerArtifactList(artifactList);
       }
    }
 

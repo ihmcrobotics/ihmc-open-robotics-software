@@ -50,14 +50,14 @@ public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlM
       return maxHeadingDot.getDoubleValue();
    }
    
-   public void initializeVisualizer(ProcessedSensorsInterface processedSensors, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+   public void initializeVisualizer(ProcessedSensorsInterface processedSensors, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       if (simpleDesiredHeadingControlModuleVisualizer != null)
       {
          throw new RuntimeException("Already setupVisualizer");
       }
       
-      simpleDesiredHeadingControlModuleVisualizer = new SimpleDesiredHeadingControlModuleVisualizer(processedSensors, registry, dynamicGraphicObjectsListRegistry);
+      simpleDesiredHeadingControlModuleVisualizer = new SimpleDesiredHeadingControlModuleVisualizer(processedSensors, registry, yoGraphicsListRegistry);
    }
 
    public void updateDesiredHeadingFrame()

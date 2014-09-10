@@ -75,7 +75,7 @@ public class BipedSupportPolygons
    private final GlobalTimer timer = new GlobalTimer(getClass().getSimpleName() + "Timer", registry);
 
    public BipedSupportPolygons(SideDependentList<ReferenceFrame> ankleZUpFrames, ReferenceFrame midFeetZUpFrame, YoVariableRegistry parentRegistry,
-         YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, boolean useConnectingEdges)
+         YoGraphicsListRegistry yoGraphicsListRegistry, boolean useConnectingEdges)
    {
       this.ankleZUpFrames = ankleZUpFrames;
       this.midFeetZUp = midFeetZUpFrame;
@@ -103,9 +103,9 @@ public class BipedSupportPolygons
       connectingEdge1 = new FrameLineSegment2d(midFeetZUp);
       connectingEdge2 = new FrameLineSegment2d(midFeetZUp);
 
-      if (dynamicGraphicObjectsListRegistry != null)
+      if (yoGraphicsListRegistry != null)
       {
-         dynamicGraphicObjectsListRegistry.registerArtifactList(artifactList);
+         yoGraphicsListRegistry.registerArtifactList(artifactList);
       }
 
       parentRegistry.addChild(registry);

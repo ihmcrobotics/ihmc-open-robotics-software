@@ -120,7 +120,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 	public BalancingUpperBodySubController(CouplingRegistry couplingRegistry, ProcessedSensorsInterface processedSensors,
 			CommonWalkingReferenceFrames referenceFrames, double controlDT, RigidBody chest, ArmControlModule armControlModule,
 			SpineLungingControlModule spineControlModule, YoVariableRegistry parentRegistry,
-			YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+			YoGraphicsListRegistry yoGraphicsListRegistry)
 	{
 		this.couplingRegistry = couplingRegistry;
 		this.processedSensors = processedSensors;
@@ -148,7 +148,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 		this.desiredCopDirection = new EnumMap<BalancingUpperBodySubControllerState, Double>(BalancingUpperBodySubControllerState.class);
 
 
-		populateDynamicsGraphicObjects(dynamicGraphicObjectsListRegistry);
+		populateDynamicsGraphicObjects(yoGraphicsListRegistry);
 		populateYoVariables();
 
 		populateControllers();
@@ -819,25 +819,25 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 		}
 	}
 
-	private void populateDynamicsGraphicObjects(YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+	private void populateDynamicsGraphicObjects(YoGraphicsListRegistry yoGraphicsListRegistry)
 	{
 		YoGraphicVector lungeAxisVisual = new YoGraphicVector("lungeAxisVisual", robotCoMPosition, lungeAxisGraphic, 1.0, YoAppearance.DarkRed());
-		dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(name, lungeAxisVisual);
+		yoGraphicsListRegistry.registerDynamicGraphicObject(name, lungeAxisVisual);
 
 		YoGraphicPosition icpDesiredVisual = new YoGraphicPosition("icpDesiredVisual", icpDesired, 0.05, YoAppearance.Yellow());
-		dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(name, icpDesiredVisual);
+		yoGraphicsListRegistry.registerDynamicGraphicObject(name, icpDesiredVisual);
 
 		YoGraphicPosition icpActualVisual = new YoGraphicPosition("icpActualVisual", icpActual, 0.05, YoAppearance.Blue());
-		dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(name, icpActualVisual);
+		yoGraphicsListRegistry.registerDynamicGraphicObject(name, icpActualVisual);
 
 		YoGraphicPosition icpPredictedVisual = new YoGraphicPosition("icpPredictedVisual", predictedICPAtChestStopYo, 0.05, YoAppearance.Purple());
-		dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(name, icpPredictedVisual);
+		yoGraphicsListRegistry.registerDynamicGraphicObject(name, icpPredictedVisual);
 
 		YoGraphicPosition lungeAxisPerpIntersectionWithBoSVisual = new YoGraphicPosition("lungeAxisPerpIntersectionWithBoSVisual", maxCopYo, 0.02, YoAppearance.Pink());
-		dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(name, lungeAxisPerpIntersectionWithBoSVisual);
+		yoGraphicsListRegistry.registerDynamicGraphicObject(name, lungeAxisPerpIntersectionWithBoSVisual);
 
 		YoGraphicVector chestAxisAngleVisual = new YoGraphicVector("chestAxisVisual", chestCoMPosition, lungeAxisGraphic, 2.0, YoAppearance.DarkRed());
-		dynamicGraphicObjectsListRegistry.registerDynamicGraphicObject(name, chestAxisAngleVisual);
+		yoGraphicsListRegistry.registerDynamicGraphicObject(name, chestAxisAngleVisual);
 
 	}
 

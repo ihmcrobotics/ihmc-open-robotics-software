@@ -62,8 +62,8 @@ public class ManipulationControlModule
       fullRobotModel = momentumBasedController.getFullRobotModel();
       this.armControlParameters = armControllerParameters;
 
-      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
-      createFrameVisualizers(dynamicGraphicObjectsListRegistry, fullRobotModel, "HandControlFrames", true);
+      YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
+      createFrameVisualizers(yoGraphicsListRegistry, fullRobotModel, "HandControlFrames", true);
 
       handPoseProvider = variousWalkingProviders.getDesiredHandPoseProvider();
       handstepProvider = variousWalkingProviders.getHandstepProvider();
@@ -91,11 +91,11 @@ public class ManipulationControlModule
       parentRegistry.addChild(registry);
    }
 
-   private void createFrameVisualizers(YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, FullRobotModel fullRobotModel, String listName,
+   private void createFrameVisualizers(YoGraphicsListRegistry yoGraphicsListRegistry, FullRobotModel fullRobotModel, String listName,
          boolean enable)
    {
       YoGraphicsList list = new YoGraphicsList(listName);
-      if (dynamicGraphicObjectsListRegistry != null)
+      if (yoGraphicsListRegistry != null)
       {
          for (RobotSide robotSide : RobotSide.values)
          {
@@ -107,7 +107,7 @@ public class ManipulationControlModule
                list.add(dynamicGraphicReferenceFrame);
             }
          }
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(list);
+         yoGraphicsListRegistry.registerDynamicGraphicObjectsList(list);
 
          if (!enable)
             list.hideYoGraphics();

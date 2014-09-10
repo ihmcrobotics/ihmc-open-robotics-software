@@ -151,7 +151,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private String extraPanelConfigurationName = "simpleExtraPanelConfigurationName";
    private String simpleComponentName =  "simpleComponent";
    private String runningName = "simpleRunningName";
-   private String dynamicGraphicObjectsListName = "simpleDynamicGraphicObjectsList";
+   private String yoGraphicsListName = "simpleDynamicGraphicObjectsList";
    private String[][] graphGroupVars = { cameraTrackingXYZVarNames, cameraDollyXYZVarNames };
    private String[][][] graphGroupVarsWithConfig = { { cameraTrackingXYZVarNames, { "config_1" } }, { cameraDollyXYZVarNames, { "config_2" } } };
    private String simpleRobotFirstVariableName = getFirstVariableNameFromRobotRegistry(simpleRobot);
@@ -166,7 +166,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private Graphics3DObject staticLinkGraphics = staticLink.getLinkGraphics();
    private Graphics3DNodeType graphics3DNodeType = Graphics3DNodeType.GROUND;
    private ExternalForcePoint simpleExternalForcePoint = new ExternalForcePoint("simpleExternalForcePoint", dummyRegistry);
-   private YoGraphic dynamicGraphicObject = new YoGraphicVector("simpleDynamicGraphicObject", simpleExternalForcePoint.getYoPosition(), simpleExternalForcePoint.getYoForce(), 1.0/50.0);
+   private YoGraphic yoGraphic = new YoGraphicVector("simpleDynamicGraphicObject", simpleExternalForcePoint.getYoPosition(), simpleExternalForcePoint.getYoForce(), 1.0/50.0);
    private BooleanYoVariable exitActionListenerHasBeenNotified = new BooleanYoVariable("exitActionListenerHasBeenNotified", dummyRegistry);
    private BooleanYoVariable simulationRewoundListenerHasBeenNotified = new BooleanYoVariable("simulationRewoundListenerHasBeenNotified", dummyRegistry);
    private BooleanYoVariable simulationDoneListenerHasBeenNotified = new BooleanYoVariable("simulationDoneListenerHasBeenNotified", dummyRegistry);
@@ -178,7 +178,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private DoubleYoVariable realTimeRateInSCS = new DoubleYoVariable("realTimeRate", dummyRegistry);
    private BooleanYoVariable processDataHasBeenCalled = new BooleanYoVariable("processDataHasBeenCalled", dummyRegistry);
    private BooleanYoVariable toggleKeyPointModeCommandListenerHasBeenCalled = new BooleanYoVariable("toggleKeyPointModeCommandListenerHasBeenCalled", dummyRegistry);
-   private YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = createDynamicGraphicObjectsListRegistryWithObject();
+   private YoGraphicsListRegistry yoGraphicsListRegistry = createDynamicGraphicObjectsListRegistryWithObject();
    private DynamicGraphicMenuManager dynamicGraphicMenuManager = new DynamicGraphicMenuManager();
    private ScsPhysics simpleScsPhysics = createScsPhysics();
    private WrenchContactPoint simpleWrenchContactPoint = new WrenchContactPoint("simpleWrenchContactPoint", dummyRegistry, staticLink);
@@ -611,7 +611,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    @Test
    public void test3DGraphicsMethods()
    {
-      scs.addDynamicGraphicObjectListRegistries(dynamicGraphicObjectsListRegistry);
+      scs.addDynamicGraphicObjectListRegistries(yoGraphicsListRegistry);
       
       Graphics3DNode graphics3DNodeFromSCS = scs.addStaticLinkGraphics(staticLinkGraphics);
       assertNotNull(graphics3DNodeFromSCS);
@@ -622,13 +622,13 @@ public class SimulationConstructionSetUsingDirectCallsTest
       Graphics3DNode graphics3DNodeFromSCS3 = scs.addStaticLink(staticLink);
       assertNotNull(graphics3DNodeFromSCS3);
 
-      GraphicsDynamicGraphicsObject graphicsDynamicGraphicsObjectFromSCS = scs.addYoGraphic(dynamicGraphicObject);
+      GraphicsDynamicGraphicsObject graphicsDynamicGraphicsObjectFromSCS = scs.addYoGraphic(yoGraphic);
       assertNotNull(graphicsDynamicGraphicsObjectFromSCS);
 
-      GraphicsDynamicGraphicsObject graphicsDynamicGraphicsObjectFromSCS2 = scs.addYoGraphic(dynamicGraphicObject, true);
+      GraphicsDynamicGraphicsObject graphicsDynamicGraphicsObjectFromSCS2 = scs.addYoGraphic(yoGraphic, true);
       assertNotNull(graphicsDynamicGraphicsObjectFromSCS2);
 
-      GraphicsDynamicGraphicsObject graphicsDynamicGraphicsObjectFromSCS3 = scs.addYoGraphic(dynamicGraphicObject, false);
+      GraphicsDynamicGraphicsObject graphicsDynamicGraphicsObjectFromSCS3 = scs.addYoGraphic(yoGraphic, false);
       assertNotNull(graphicsDynamicGraphicsObjectFromSCS3);
 
       scs.setGroundVisible(false);
@@ -649,18 +649,18 @@ public class SimulationConstructionSetUsingDirectCallsTest
       ArrayList<CollisionGroup> collisionGroupFromSCS2 = scs.getCollisionGroups();
       assertArrayOfObjectsContainsTheArrayOfObject(collisionGroupFromSCS2, arrayListOfCollisionGroup);
 
-      ArrayList<YoGraphicsListRegistry> dynamicGraphicObjectListRegistriesFromSCS = scs.getDynamicGraphicObjectsListRegistries();
-      assertArrayOfObjectsContainsTheObject(dynamicGraphicObjectListRegistriesFromSCS, dynamicGraphicObjectsListRegistry);
+      ArrayList<YoGraphicsListRegistry> yoGraphicListRegistriesFromSCS = scs.getDynamicGraphicObjectsListRegistries();
+      assertArrayOfObjectsContainsTheObject(yoGraphicListRegistriesFromSCS, yoGraphicsListRegistry);
       
-      scs.setDynamicGraphicObjectsListVisible(dynamicGraphicObjectsListName, true);
+      scs.setDynamicGraphicObjectsListVisible(yoGraphicsListName, true);
       scs.hideAllDynamicGraphicObjects();
-      boolean dynamicGraphicObjectsAreShowing = scs.checkAllDynamicGraphicObjectsListRegistriesAreShowing();
-      assertFalse(dynamicGraphicObjectsAreShowing);
+      boolean yoGraphicsAreShowing = scs.checkAllDynamicGraphicObjectsListRegistriesAreShowing();
+      assertFalse(yoGraphicsAreShowing);
       
       scs.hideAllDynamicGraphicObjects();
-      scs.setDynamicGraphicObjectsListVisible(dynamicGraphicObjectsListName, true);
-      boolean dynamicGraphicObjectsAreShowing2 = scs.checkAllDynamicGraphicObjectsListRegistriesAreShowing();
-      assertTrue(dynamicGraphicObjectsAreShowing2);
+      scs.setDynamicGraphicObjectsListVisible(yoGraphicsListName, true);
+      boolean yoGraphicsAreShowing2 = scs.checkAllDynamicGraphicObjectsListRegistriesAreShowing();
+      assertTrue(yoGraphicsAreShowing2);
       
 //      scs.setDynamicGraphicMenuManager(dynamicGraphicMenuManager);
 //      DynamicGraphicMenuManager dynamicGraphicMenuManagerFromSCS =  scs.getDynamicGraphicMenuManager();
@@ -1242,12 +1242,12 @@ public class SimulationConstructionSetUsingDirectCallsTest
    
    private YoGraphicsListRegistry createDynamicGraphicObjectsListRegistryWithObject()
    {
-      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
-      YoGraphicsList dynamicGraphicObjectsList = new YoGraphicsList(dynamicGraphicObjectsListName);
-      dynamicGraphicObjectsList.add(dynamicGraphicObject);
-      dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
+      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
+      YoGraphicsList yoGraphicsList = new YoGraphicsList(yoGraphicsListName);
+      yoGraphicsList.add(yoGraphic);
+      yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicsList);
       
-      return dynamicGraphicObjectsListRegistry;
+      return yoGraphicsListRegistry;
    }
    
    private ToggleKeyPointModeCommandListener createToggleKeyPointModeCommandListener()

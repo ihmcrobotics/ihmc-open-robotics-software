@@ -74,7 +74,7 @@ public class TwoWaypointTrajectoryGeneratorWithPushRecovery implements PositionT
    public TwoWaypointTrajectoryGeneratorWithPushRecovery(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider swingTimeProvider, DoubleProvider swingTimeRemainingProvider,
          PositionProvider initialPositionProvider, VectorProvider initialVelocityProvider, PositionProvider finalPositionProvider,
          VectorProvider finalDesiredVelocityProvider, TrajectoryParametersProvider trajectoryParametersProvider, YoVariableRegistry parentRegistry,
-         YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, PositionTrajectoryGenerator nominalTrajectoryGenerator,
+         YoGraphicsListRegistry yoGraphicsListRegistry, PositionTrajectoryGenerator nominalTrajectoryGenerator,
          WalkingControllerParameters walkingControllerParameters, boolean visualize)
    {
       registry = new YoVariableRegistry(namePrefix + namePostFix);
@@ -121,10 +121,10 @@ public class TwoWaypointTrajectoryGeneratorWithPushRecovery implements PositionT
 
       this.pushRecoveryTrajectoryGenerator = new SmoothCartesianWaypointConnectorTrajectoryGenerator2D(namePrefix + "PushRecoveryTrajectory", referenceFrame,
             initialTime, swingTimeProvider, initialPositionProvider, finalPositionProvider, initialVelocityProvider, parentRegistry,
-            dynamicGraphicObjectsListRegistry, walkingControllerParameters);
+            yoGraphicsListRegistry, walkingControllerParameters);
       
       this.bagOfBalls = new BagOfBalls(numberOfBallsInBag, 0.01, namePrefix + "SwingTrajectoryBagOfBalls", registry,
-            dynamicGraphicObjectsListRegistry);
+            yoGraphicsListRegistry);
    }
 
    public void initialize()

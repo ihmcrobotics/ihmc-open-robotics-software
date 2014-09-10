@@ -51,13 +51,13 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
    private final DoubleYoVariable holdPositionDuration;
 
    public TaskspaceHandPositionControlState(String namePrefix, HandControlState stateEnum, MomentumBasedController momentumBasedController, int jacobianId,
-         RigidBody base, RigidBody endEffector, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, YoVariableRegistry parentRegistry)
+         RigidBody base, RigidBody endEffector, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       super(namePrefix, stateEnum, momentumBasedController, jacobianId, base, endEffector, parentRegistry);
 
       desiredPositionFrame = new PoseReferenceFrame(name + "DesiredFrame", worldFrame);
 
-      if (dynamicGraphicObjectsListRegistry != null)
+      if (yoGraphicsListRegistry != null)
       {
          YoGraphicsList list = new YoGraphicsList(name);
 
@@ -65,7 +65,7 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
          dynamicGraphicReferenceFrames.add(dynamicGraphicReferenceFrame);
          list.add(dynamicGraphicReferenceFrame);
 
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(list);
+         yoGraphicsListRegistry.registerDynamicGraphicObjectsList(list);
          list.hideYoGraphics();
       }
 

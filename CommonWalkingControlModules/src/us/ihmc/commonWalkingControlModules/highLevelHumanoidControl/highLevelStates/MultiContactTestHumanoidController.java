@@ -52,7 +52,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
 
    public MultiContactTestHumanoidController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
          CoMBasedMomentumRateOfChangeControlModule momentumRateOfChangeControlModule, MomentumBasedController momentumBasedController,
-         WalkingControllerParameters walkingControllerParameters, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+         WalkingControllerParameters walkingControllerParameters, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(variousWalkingProviders, variousWalkingManagers, momentumBasedController, walkingControllerParameters, controllerState);
 

@@ -59,7 +59,7 @@ public class CylinderAndPlaneContactMatrixCalculator
 
 
    public CylinderAndPlaneContactMatrixCalculator(ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry,
-                                                  YoGraphicsListRegistry dynamicGraphicObjectsListRegistry, int rhoSize, int phiSize)
+                                                  YoGraphicsListRegistry yoGraphicsListRegistry, int rhoSize, int phiSize)
    {
       int wrenchLength = Wrench.SIZE;
 
@@ -71,7 +71,7 @@ public class CylinderAndPlaneContactMatrixCalculator
       wRho = new DenseMatrix64F(rhoSize, rhoSize);
       wPhi = new DenseMatrix64F(phiSize, phiSize);
 
-      visualize = dynamicGraphicObjectsListRegistry != null;
+      visualize = yoGraphicsListRegistry != null;
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
       parentRegistry.addChild(registry);
       this.centerOfMassFrame = centerOfMassFrame;
@@ -145,10 +145,10 @@ public class CylinderAndPlaneContactMatrixCalculator
 
          }
 
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects("rawBasisVectorsRhoLinear ", dynamicGraphicVectorsRhoLinear);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects("rawBasisVectorsRhoAngular", dynamicGraphicVectorsRhoAngular);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects("rawBasisVectorsPhiLinear ", dynamicGraphicVectorsPhiLinear);
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjects("rawBasisVectorsPhiAngular", dynamicGraphicVectorsPhiAngular);
+         yoGraphicsListRegistry.registerDynamicGraphicObjects("rawBasisVectorsRhoLinear ", dynamicGraphicVectorsRhoLinear);
+         yoGraphicsListRegistry.registerDynamicGraphicObjects("rawBasisVectorsRhoAngular", dynamicGraphicVectorsRhoAngular);
+         yoGraphicsListRegistry.registerDynamicGraphicObjects("rawBasisVectorsPhiLinear ", dynamicGraphicVectorsPhiLinear);
+         yoGraphicsListRegistry.registerDynamicGraphicObjects("rawBasisVectorsPhiAngular", dynamicGraphicVectorsPhiAngular);
       }
 
       this.debug = new BooleanYoVariable(this.getClass().getSimpleName() + "Debug", registry);
