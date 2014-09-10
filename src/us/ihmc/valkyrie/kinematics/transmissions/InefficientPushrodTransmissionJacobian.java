@@ -167,7 +167,7 @@ public class InefficientPushrodTransmissionJacobian
          yoGraphicsList.add(actuator5SlideFrameViz);
          yoGraphicsList.add(actuator6SlideFrameViz);
 
-         yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicsList);
+         yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
       }
       else
       {
