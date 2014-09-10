@@ -29,10 +29,10 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.RemoteYoGraphic;
 import us.ihmc.yoUtilities.graphics.YoGraphic;
 import us.ihmc.yoUtilities.graphics.RemoteYoGraphic.RemoteGraphicType;
+import us.ihmc.yoUtilities.graphics.plotting.ArtifactList;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.yobotics.simulationconstructionset.Joint;
-import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicFactory;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 

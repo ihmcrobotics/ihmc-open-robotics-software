@@ -39,12 +39,12 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphic;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition.GraphicType;
+import us.ihmc.yoUtilities.graphics.plotting.ArtifactList;
 import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 import com.yobotics.simulationconstructionset.util.controller.PDController;
-import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 import com.yobotics.simulationconstructionset.util.splines.QuinticSplineInterpolator;

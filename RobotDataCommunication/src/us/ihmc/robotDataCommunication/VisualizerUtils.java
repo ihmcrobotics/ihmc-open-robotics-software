@@ -7,11 +7,11 @@ import javax.swing.JScrollPane;
 
 import us.ihmc.commonWalkingControlModules.captureRegion.CommonCapturePointCalculator;
 import us.ihmc.plotting.Artifact;
+import us.ihmc.yoUtilities.graphics.plotting.ArtifactList;
 import us.ihmc.yoUtilities.graphics.plotting.YoArtifactPosition;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.plotting.SimulationOverheadPlotter;
-import com.yobotics.simulationconstructionset.util.graphics.ArtifactList;
 import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class VisualizerUtils
