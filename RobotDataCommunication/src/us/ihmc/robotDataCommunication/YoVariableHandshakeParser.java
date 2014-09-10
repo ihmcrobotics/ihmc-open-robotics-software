@@ -44,7 +44,7 @@ public class YoVariableHandshakeParser
    private YoVariableRegistry registry;
    private double dt;
    private final ArrayList<YoVariableRegistry> registries = new ArrayList<YoVariableRegistry>();
-   private final ArrayList<YoVariable> variables = new ArrayList<YoVariable>();
+   private final ArrayList<YoVariable<?>> variables = new ArrayList<YoVariable<?>>();
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private final ArrayList<JointState<? extends Joint>> jointStates = new ArrayList<>();
    private final DynamicEnumCreator dynamicEnumCreator = new DynamicEnumCreator();
@@ -187,7 +187,7 @@ public class YoVariableHandshakeParser
       RemoteGraphicType type = RemoteGraphicType.values()[msg.getType()];
    
       String name = msg.getName();
-      YoVariable[] vars = new YoVariable[msg.getYoIndexCount()];
+      YoVariable<?>[] vars = new YoVariable[msg.getYoIndexCount()];
       for (int v = 0; v < vars.length; v++)
          vars[v] = variables.get(msg.getYoIndex(v));
    
@@ -224,7 +224,7 @@ public class YoVariableHandshakeParser
       }
    }
 
-   public List<YoVariable> getYoVariablesList()
+   public List<YoVariable<?>> getYoVariablesList()
    {
       return Collections.unmodifiableList(variables);
    }
@@ -236,7 +236,7 @@ public class YoVariableHandshakeParser
          String name = yoVariableDefinition.getName();
          YoVariableRegistry parent = registries.get(yoVariableDefinition.getRegistry());
    
-         YoVariable variable;
+         YoVariable<?> variable;
          switch (yoVariableDefinition.getType())
          {
          case DoubleYoVariable:
@@ -263,7 +263,7 @@ public class YoVariableHandshakeParser
    }
 
    @SuppressWarnings({ "rawtypes", "unchecked" })
-   private YoVariable createEnumYoVariable(String name, List<String> values, YoVariableRegistry parent)
+   private YoVariable<?> createEnumYoVariable(String name, List<String> values, YoVariableRegistry parent)
    {
       Class<?> enumType = dynamicEnumCreator.createEnum(name, values);
       return new EnumYoVariable(name, "", parent, enumType, true);

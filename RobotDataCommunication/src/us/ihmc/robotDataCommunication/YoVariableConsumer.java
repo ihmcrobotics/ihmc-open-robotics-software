@@ -26,7 +26,7 @@ public class YoVariableConsumer extends Thread
    private final String host;
    private final int port;
    
-   private final List<YoVariable> variables;
+   private final List<YoVariable<?>> variables;
    private final List<JointState<?>> jointStates;
    private final YoVariablesUpdatedListener listener;
    
@@ -37,7 +37,7 @@ public class YoVariableConsumer extends Thread
    private int numberOfVariables;
    private int numberOfJointStateVariables;
    
-   public YoVariableConsumer(String host, int port, List<YoVariable> variables, List<JointState<?>> jointStates, YoVariablesUpdatedListener listener)
+   public YoVariableConsumer(String host, int port, List<YoVariable<?>> variables, List<JointState<?>> jointStates, YoVariablesUpdatedListener listener)
    {
       super();
       this.host = host;
@@ -145,7 +145,7 @@ public class YoVariableConsumer extends Thread
 
             for (int i = 0; i < variables.size(); i++)
             {
-               YoVariable variable = variables.get(i);
+               YoVariable<?> variable = variables.get(i);
                long previousValue = variable.getValueAsLongBits();
                long newValue = data.get();
                variable.setValueFromLongBits(newValue, false);

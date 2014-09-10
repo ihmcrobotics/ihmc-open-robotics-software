@@ -147,7 +147,7 @@ public class AllYoVariablesSimulationComparerTest
 		doubleYoVariable3.set(1.0);
 		doubleYoVariable4.set(2.0);
 		assertFalse(comparerWithZeroEpsilon.compare(scs1, scs2));
-		ArrayList<YoVariable[]> differences = comparerWithZeroEpsilon.getDifferences();
+		ArrayList<YoVariable<?>[]> differences = comparerWithZeroEpsilon.getDifferences();
 		assertEquals(1, differences.size());
 		assertEquals(doubleYoVariable2, differences.get(0)[0]);
 		assertEquals(doubleYoVariable4, differences.get(0)[1]);

@@ -22,12 +22,10 @@ import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 
 public class YoVariableLogPlaybackRobot extends SDFRobot implements RewoundListener
 {
-   private static final long serialVersionUID = -1461790917855807447L;
-
    private final SimulationConstructionSet scs;
    private final LongYoVariable timestamp;
    private final FileChannel logChannel;
-   private final List<YoVariable> variables;
+   private final List<YoVariable<?>> variables;
 
    private final List<JointState<? extends Joint>> jointStates;
    private final ArrayList<JointUpdater> jointUpdaters = new ArrayList<JointUpdater>();
@@ -42,7 +40,7 @@ public class YoVariableLogPlaybackRobot extends SDFRobot implements RewoundListe
    private final long finalTimestamp = 0;
    
    public YoVariableLogPlaybackRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap,
-         List<JointState<? extends Joint>> jointStates, List<YoVariable> variables, FileChannel logChannel, SimulationConstructionSet scs)
+         List<JointState<? extends Joint>> jointStates, List<YoVariable<?>> variables, FileChannel logChannel, SimulationConstructionSet scs)
    {
       super(generalizedSDFRobotModel, sdfJointNameMap, false);
       this.timestamp = new LongYoVariable("timestamp", getRobotsYoVariableRegistry());
@@ -142,7 +140,7 @@ public class YoVariableLogPlaybackRobot extends SDFRobot implements RewoundListe
                
          for (int i = 0; i < variables.size(); i++)
          {
-            YoVariable variable = variables.get(i);
+            YoVariable<?> variable = variables.get(i);
             variable.setValueFromLongBits(logLongArray.get());
          }
 

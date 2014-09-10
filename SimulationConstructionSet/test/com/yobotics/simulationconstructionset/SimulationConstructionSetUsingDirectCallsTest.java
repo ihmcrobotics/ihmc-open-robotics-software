@@ -676,32 +676,32 @@ public class SimulationConstructionSetUsingDirectCallsTest
    @Test
    public void testGetVariableMethods() throws AWTException
    {
-      ArrayList<YoVariable> allVariablesFromRobot = simpleRobot.getAllVariables();
-      ArrayList<YoVariable> allVariablesFromSCS = scs.getAllVariables();
+      ArrayList<YoVariable<?>> allVariablesFromRobot = simpleRobot.getAllVariables();
+      ArrayList<YoVariable<?>> allVariablesFromSCS = scs.getAllVariables();
       assertEquals(allVariablesFromRobot, allVariablesFromSCS);
 
       int allVariablesArrayFromRobot = simpleRobot.getAllVariablesArray().length;
       int allVariablesArrayFromSCS = scs.getAllVariablesArray().length;
       assertEquals(allVariablesArrayFromRobot, allVariablesArrayFromSCS);
 
-      YoVariable yoVariableFromSCS = scs.getVariable(simpleRobotFirstVariableName);
+      YoVariable<?> yoVariableFromSCS = scs.getVariable(simpleRobotFirstVariableName);
       String variableNameFromSCS = yoVariableFromSCS.getName();
       assertEquals(simpleRobotFirstVariableName, variableNameFromSCS);
 
-      YoVariable yoVariableFromRobot = simpleRobot.getVariable(simpleRobotFirstVariableName);
-      YoVariable yoVariableFromSCS2 = scs.getVariable(simpleRobotRegistryNameSpace, simpleRobotFirstVariableName);
+      YoVariable<?> yoVariableFromRobot = simpleRobot.getVariable(simpleRobotFirstVariableName);
+      YoVariable<?> yoVariableFromSCS2 = scs.getVariable(simpleRobotRegistryNameSpace, simpleRobotFirstVariableName);
       assertEquals(yoVariableFromRobot, yoVariableFromSCS2);
 
-      ArrayList<YoVariable> yoVariableArrayFromRobot = simpleRobot.getVariables(simpleRobotRegistryNameSpace, simpleRobotFirstVariableName);
-      ArrayList<YoVariable> yoVariableArrayFromSCS = scs.getVariables(simpleRobotRegistryNameSpace, simpleRobotFirstVariableName);
+      ArrayList<YoVariable<?>> yoVariableArrayFromRobot = simpleRobot.getVariables(simpleRobotRegistryNameSpace, simpleRobotFirstVariableName);
+      ArrayList<YoVariable<?>> yoVariableArrayFromSCS = scs.getVariables(simpleRobotRegistryNameSpace, simpleRobotFirstVariableName);
       assertEquals(yoVariableArrayFromRobot, yoVariableArrayFromSCS);
 
-      ArrayList<YoVariable> yoVariableFromRobot2 = simpleRobot.getVariables(simpleRobotFirstVariableName);
-      ArrayList<YoVariable> yoVariableFromSCS3 = scs.getVariables(simpleRobotFirstVariableName);
+      ArrayList<YoVariable<?>> yoVariableFromRobot2 = simpleRobot.getVariables(simpleRobotFirstVariableName);
+      ArrayList<YoVariable<?>> yoVariableFromSCS3 = scs.getVariables(simpleRobotFirstVariableName);
       assertEquals(yoVariableFromRobot2, yoVariableFromSCS3);
 
-      ArrayList<YoVariable> yoVariableFromRobot3 = simpleRobot.getVariables(simpleRobotRegistryNameSpace);
-      ArrayList<YoVariable> yoVariableFromSCS4 = scs.getVariables(simpleRobotRegistryNameSpace);
+      ArrayList<YoVariable<?>> yoVariableFromRobot3 = simpleRobot.getVariables(simpleRobotRegistryNameSpace);
+      ArrayList<YoVariable<?>> yoVariableFromSCS4 = scs.getVariables(simpleRobotRegistryNameSpace);
       assertEquals(yoVariableFromRobot3, yoVariableFromSCS4);
 
       boolean hasUniqueVariableRobot = simpleRobot.hasUniqueVariable(simpleRobotFirstVariableName);
@@ -712,21 +712,21 @@ public class SimulationConstructionSetUsingDirectCallsTest
       boolean hasUniqueVariableSCS2 = scs.hasUniqueVariable(simpleRobotRegistryNameSpace, simpleRobotFirstVariableName);
       assertEquals(hasUniqueVariableRobot2, hasUniqueVariableSCS2);
 
-      ArrayList<YoVariable> arrayOfVariablesContainingRobot = getSimpleRobotVariablesThatContain(searchString, false, simpleRobot);
-      ArrayList<YoVariable> arrayOfVariablesContainingSCS = scs.getVariablesThatContain(searchString);
+      ArrayList<YoVariable<?>> arrayOfVariablesContainingRobot = getSimpleRobotVariablesThatContain(searchString, false, simpleRobot);
+      ArrayList<YoVariable<?>> arrayOfVariablesContainingSCS = scs.getVariablesThatContain(searchString);
       assertEquals(arrayOfVariablesContainingRobot, arrayOfVariablesContainingSCS);
 
-      ArrayList<YoVariable> arrayOfVariablesContainingRobot2 = getSimpleRobotVariablesThatContain(searchString, true, simpleRobot);
-      ArrayList<YoVariable> arrayOfVariablesContainingSCS2 = scs.getVariablesThatContain(searchString, true);
+      ArrayList<YoVariable<?>> arrayOfVariablesContainingRobot2 = getSimpleRobotVariablesThatContain(searchString, true, simpleRobot);
+      ArrayList<YoVariable<?>> arrayOfVariablesContainingSCS2 = scs.getVariablesThatContain(searchString, true);
       assertEquals(arrayOfVariablesContainingRobot2, arrayOfVariablesContainingSCS2);
 
-      ArrayList<YoVariable> arrayOfVariablesStartingRobot = getSimpleRobotVariablesThatStartWith(searchStringStart, simpleRobot);
-      ArrayList<YoVariable> arrayOfVariablesStartingSCS = scs.getVariablesThatStartWith(searchStringStart);
+      ArrayList<YoVariable<?>> arrayOfVariablesStartingRobot = getSimpleRobotVariablesThatStartWith(searchStringStart, simpleRobot);
+      ArrayList<YoVariable<?>> arrayOfVariablesStartingSCS = scs.getVariablesThatStartWith(searchStringStart);
       assertEquals(arrayOfVariablesStartingRobot, arrayOfVariablesStartingSCS);
 
       String[] varNames = getVariableNamesGivenArrayListOfYoVariables(arrayOfVariablesContainingRobot);
-      ArrayList<YoVariable> arrayOfVariablesRegExprRobot = getSimpleRobotRegExpVariables(varNames, regularExpressions, simpleRobot);
-      ArrayList<YoVariable> arrayOfVariablesRegExprSCS = scs.getVars(varNames, regularExpressions);
+      ArrayList<YoVariable<?>> arrayOfVariablesRegExprRobot = getSimpleRobotRegExpVariables(varNames, regularExpressions, simpleRobot);
+      ArrayList<YoVariable<?>> arrayOfVariablesRegExprSCS = scs.getVars(varNames, regularExpressions);
       assertEquals(arrayOfVariablesRegExprRobot, arrayOfVariablesRegExprSCS);
    }
 
@@ -1351,7 +1351,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
 
       for (int j = 0; j < numberOfList; j++)
       {
-         YoVariable[] variables = arrayLists.get(j).getAllVariables();
+         YoVariable<?>[] variables = arrayLists.get(j).getAllVariables();
 
          int numberOfVariables = variables.length;
 
@@ -1363,7 +1363,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       }
    }
 
-   private void assertYoVariableListContainsVariables(YoVariableList yoVariableList, YoVariable[] variables)
+   private void assertYoVariableListContainsVariables(YoVariableList yoVariableList, YoVariable<?>[] variables)
    {
       int numberOfVariables = variables.length;
 
@@ -1433,7 +1433,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       return doubleYoVariables;
    }
 
-   private YoVariableList createYoVariableList(String name, YoVariable[] yoVariables)
+   private YoVariableList createYoVariableList(String name, YoVariable<?>[] yoVariables)
    {
       YoVariableList yoVariableList = new YoVariableList(name);
       yoVariableList.addVariables(yoVariables);
@@ -2008,10 +2008,10 @@ public class SimulationConstructionSetUsingDirectCallsTest
       scs.setOutPoint();
    }
 
-   private ArrayList<YoVariable> getSimpleRobotVariablesThatContain(String searchString, boolean caseSensitive, Robot robotModel)
+   private ArrayList<YoVariable<?>> getSimpleRobotVariablesThatContain(String searchString, boolean caseSensitive, Robot robotModel)
    {
-      ArrayList<YoVariable> currentlyMatched = robotModel.getAllVariables();
-      ArrayList<YoVariable> ret = null;
+      ArrayList<YoVariable<?>> currentlyMatched = robotModel.getAllVariables();
+      ArrayList<YoVariable<?>> ret = null;
 
       if (currentlyMatched != null)
       {
@@ -2022,13 +2022,13 @@ public class SimulationConstructionSetUsingDirectCallsTest
 
          for (int i = 0; i < currentlyMatched.size(); i++)
          {
-            YoVariable entry = currentlyMatched.get(i);
+            YoVariable<?> entry = currentlyMatched.get(i);
 
             if (entry.getName().toLowerCase().contains((searchString)))
             {
                if (ret == null)
                {
-                  ret = new ArrayList<YoVariable>();
+                  ret = new ArrayList<YoVariable<?>>();
                }
 
                ret.add(entry);
@@ -2039,20 +2039,20 @@ public class SimulationConstructionSetUsingDirectCallsTest
       return ret;
    }
 
-   private ArrayList<YoVariable> getSimpleRobotVariablesThatStartWith(String searchString, Robot robotModel)
+   private ArrayList<YoVariable<?>> getSimpleRobotVariablesThatStartWith(String searchString, Robot robotModel)
    {
-      ArrayList<YoVariable> currentlyMatched = robotModel.getAllVariables();
-      ArrayList<YoVariable> ret = null;
+      ArrayList<YoVariable<?>> currentlyMatched = robotModel.getAllVariables();
+      ArrayList<YoVariable<?>> ret = null;
 
       for (int i = 0; i < currentlyMatched.size(); i++)
       {
-         YoVariable Variable = currentlyMatched.get(i);
+         YoVariable<?> Variable = currentlyMatched.get(i);
 
          if (Variable.getName().startsWith(searchString))
          {
             if (ret == null)
             {
-               ret = new ArrayList<YoVariable>();
+               ret = new ArrayList<YoVariable<?>>();
             }
 
             ret.add(Variable);
@@ -2062,7 +2062,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       return ret;
    }
 
-   private String[] getVariableNamesGivenArrayListOfYoVariables(ArrayList<YoVariable> yoVariableList)
+   private String[] getVariableNamesGivenArrayListOfYoVariables(ArrayList<YoVariable<?>> yoVariableList)
    {
       String[] ret = null;
 
@@ -2081,9 +2081,9 @@ public class SimulationConstructionSetUsingDirectCallsTest
       return ret;
    }
 
-   private ArrayList<YoVariable> getSimpleRobotRegExpVariables(String[] varNames, String[] regularExpressions, Robot robotModel)
+   private ArrayList<YoVariable<?>> getSimpleRobotRegExpVariables(String[] varNames, String[] regularExpressions, Robot robotModel)
    {
-      ArrayList<YoVariable> currentlyMatched = robotModel.getAllVariables();
+      ArrayList<YoVariable<?>> currentlyMatched = robotModel.getAllVariables();
       YoVariableList tempList = new YoVariableList("temp");
 
       for (int i = 0; i < currentlyMatched.size(); i++)

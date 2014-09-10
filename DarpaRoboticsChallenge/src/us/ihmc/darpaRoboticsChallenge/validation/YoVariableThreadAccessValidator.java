@@ -61,7 +61,7 @@ public class YoVariableThreadAccessValidator
       this.root = root;
    }
 
-   public void validateReadAccess(YoVariable v)
+   public void validateReadAccess(YoVariable<?> v)
    {
       Thread currentThread = Thread.currentThread();
       
@@ -94,7 +94,7 @@ public class YoVariableThreadAccessValidator
       }
    }
 
-   private void testAccess(YoVariable v)
+   private void testAccess(YoVariable<?> v)
    {
       Thread currentThread = Thread.currentThread();
 
@@ -129,7 +129,7 @@ public class YoVariableThreadAccessValidator
 
    public void start()
    {
-      ArrayList<YoVariable> variables = root.getAllVariablesIncludingDescendants();
+      ArrayList<YoVariable<?>> variables = root.getAllVariablesIncludingDescendants();
       
       Field validator = null;
       if(REGISTERED_ACCESS_VALIDATOR)
@@ -146,12 +146,12 @@ public class YoVariableThreadAccessValidator
       
       for (int i = 0; i < variables.size(); i++)
       {
-         YoVariable yoVariable = variables.get(i);
+         YoVariable<?> yoVariable = variables.get(i);
          yoVariable.addVariableChangedListener(new VariableChangedListener()
          {
 
             @Override
-            public void variableChanged(YoVariable v)
+            public void variableChanged(YoVariable<?> v)
             {
                testAccess(v);
             }

@@ -14,7 +14,7 @@ public class FullStateBuffer extends RegistryBuffer
    private final List<JointHolder> jointHolders;
    private final int numberOfJointStates;
    
-   public FullStateBuffer(int variableOffset, List<YoVariable> variables, List<JointHolder> jointHolders)
+   public FullStateBuffer(int variableOffset, List<YoVariable<?>> variables, List<JointHolder> jointHolders)
    {
       super(variableOffset, variables);
       this.numberOfJointStates = getNumberOfJointStates(jointHolders);
@@ -58,9 +58,9 @@ public class FullStateBuffer extends RegistryBuffer
    {
       private final List<JointHolder> jointHolders;
       private final int variableOffset;
-      private final List<YoVariable> variables;
+      private final List<YoVariable<?>> variables;
       
-      public Builder(int variableOffset, List<YoVariable> variables, List<JointHolder> jointHolders)
+      public Builder(int variableOffset, List<YoVariable<?>> variables, List<JointHolder> jointHolders)
       {
          this.jointHolders = jointHolders;
          this.variableOffset = variableOffset;
