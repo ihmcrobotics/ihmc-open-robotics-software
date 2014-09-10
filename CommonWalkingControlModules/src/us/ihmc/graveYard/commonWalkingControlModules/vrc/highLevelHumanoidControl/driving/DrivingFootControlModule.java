@@ -39,14 +39,14 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
+import us.ihmc.yoUtilities.math.trajectories.providers.YoPositionProvider;
+import us.ihmc.yoUtilities.math.trajectories.providers.YoVariableDoubleProvider;
 
 import com.yobotics.simulationconstructionset.util.controller.AxisAngleOrientationController;
 import com.yobotics.simulationconstructionset.util.controller.EuclideanPositionController;
 import com.yobotics.simulationconstructionset.util.controller.GainCalculator;
 import com.yobotics.simulationconstructionset.util.trajectory.PositionTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.StraightLinePositionTrajectoryGenerator;
-import com.yobotics.simulationconstructionset.util.trajectory.provider.YoPositionProvider;
-import com.yobotics.simulationconstructionset.util.trajectory.provider.YoVariableDoubleProvider;
 
 /**
  * @author twan

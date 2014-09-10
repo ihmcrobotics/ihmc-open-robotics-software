@@ -30,6 +30,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.yoUtilities.math.trajectories.providers.YoVariableDoubleProvider;
 
 import com.yobotics.simulationconstructionset.util.controller.YoPIDGains;
 import com.yobotics.simulationconstructionset.util.controller.YoSE3PIDGains;
@@ -45,7 +46,6 @@ import com.yobotics.simulationconstructionset.util.trajectory.LeadInOutPoseTraje
 import com.yobotics.simulationconstructionset.util.trajectory.OneDoFJointQuinticTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.PoseTrajectoryGenerator;
 import com.yobotics.simulationconstructionset.util.trajectory.StraightLinePoseTrajectoryGenerator;
-import com.yobotics.simulationconstructionset.util.trajectory.provider.YoVariableDoubleProvider;
 
 public class HandControlModule
 {
