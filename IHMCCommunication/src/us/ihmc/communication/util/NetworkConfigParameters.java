@@ -1,4 +1,4 @@
-package us.ihmc.communication.networking;
+package us.ihmc.communication.util;
 
 public class NetworkConfigParameters
 {

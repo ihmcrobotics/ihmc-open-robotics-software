@@ -8,7 +8,7 @@ import java.net.Socket;
 
 import us.ihmc.atlas.AtlasNetworkProcessor;
 import us.ihmc.atlas.AtlasRobotModelFactory;
-import us.ihmc.communication.networking.NetworkConfigParameters;
+import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.fixedPointRepresentation.UnsignedByteTools;
 import us.ihmc.utilities.net.tcpServer.DisconnectedException;
