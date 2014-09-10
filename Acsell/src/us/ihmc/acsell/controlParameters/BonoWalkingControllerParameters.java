@@ -585,6 +585,12 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    {
       return 5.0;
    }
+   
+   @Override
+   public double getCoPThresholdFraction()
+   {
+      return 0.02;
+   }
 
    @Override
    public String[] getJointsToIgnoreInController()
