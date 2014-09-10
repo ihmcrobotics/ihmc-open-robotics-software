@@ -36,5 +36,9 @@ public interface ValkyrieJointInterface
    public abstract double getCommandedMotorCurrent();
 
    public abstract void setCommandedMotorCurrent(double commandedMotorCurrent);
+   
+   public abstract void setValidationVelocity(double velocityFromJacobian);
+   
+   public abstract double getValidationVelocity();
 
 }

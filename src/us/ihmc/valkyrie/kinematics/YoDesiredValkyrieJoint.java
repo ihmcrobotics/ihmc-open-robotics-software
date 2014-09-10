@@ -10,6 +10,7 @@ public class YoDesiredValkyrieJoint implements ValkyrieJointInterface
    private double q;
    private double qd;
    private double f;
+   private double qd_validation;
    private double motorCurrent;
    private double commandedMotorCurrent;
 
@@ -24,6 +25,7 @@ public class YoDesiredValkyrieJoint implements ValkyrieJointInterface
       this.q_d = new DoubleYoVariable(name + "_q_d", registry);
       this.qd_d = new DoubleYoVariable(name + "_qd_d", registry);
       this.f_d = new DoubleYoVariable(name + "_tau_d", registry);
+      
    }
 
    @Override
@@ -61,6 +63,12 @@ public class YoDesiredValkyrieJoint implements ValkyrieJointInterface
    {
       return f;
    }
+   
+   @Override
+   public double getValidationVelocity()
+   {
+      return qd_validation;
+   }
 
    @Override
    public double getPosition()
@@ -90,6 +98,12 @@ public class YoDesiredValkyrieJoint implements ValkyrieJointInterface
    public void setDesiredPosition(double position)
    {
       this.q_d.set(position);
+   }
+
+   @Override
+   public void setValidationVelocity(double velocityFromJacobian)
+   {
+	   this.qd_validation = velocityFromJacobian;
    }
 
    @Override
@@ -127,6 +141,7 @@ public class YoDesiredValkyrieJoint implements ValkyrieJointInterface
    {
       this.commandedMotorCurrent = commandedMotorCurrent;
    }
+   
 
    public void set(ValkyrieJointInterface valkyrieJoint)
    {
