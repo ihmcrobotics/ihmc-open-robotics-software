@@ -3,13 +3,12 @@ package us.ihmc.robotDataCommunication;
 import java.nio.ByteBuffer;
 import java.nio.LongBuffer;
 import java.util.Collection;
+import java.util.zip.CRC32;
 
-import org.jvcompress.util.LZOException;
-import org.jvcompress.util.LZOUtils;
-import org.jvcompress.util.MInt;
 import org.zeromq.ZMQ;
 
 import us.ihmc.concurrent.ConcurrentRingBuffer;
+import us.ihmc.utilities.compression.SnappyUtils;
 
 public class YoVariableProducer extends Thread
 {
@@ -44,7 +43,7 @@ public class YoVariableProducer extends Thread
       byteWriteBuffer = ByteBuffer.allocate(bufferSize);
       writeBuffer = byteWriteBuffer.asLongBuffer();
 
-      compressedBackingArray = new byte[bufferSize + bufferSize / 64 + 1];
+      compressedBackingArray = new byte[SnappyUtils.maxCompressedLength(bufferSize) + 4];
       compressedBuffer = ByteBuffer.wrap(compressedBackingArray);
    }
 
@@ -85,8 +84,7 @@ public class YoVariableProducer extends Thread
          messages[i] = new zmq.Msg(messageBuffers[i]);
       }
 
-      int[] dictionary = LZOUtils.createDictionary();
-      MInt outputLength = LZOUtils.createOutputLength();
+      CRC32 crc32 = new CRC32();
 
       while (true)
       {
@@ -107,18 +105,26 @@ public class YoVariableProducer extends Thread
 
                byteWriteBuffer.clear();
                compressedBuffer.clear();
+               compressedBuffer.position(4);
                try
                {
-                  LZOUtils.compress(byteWriteBuffer, compressedBuffer, outputLength, dictionary);
+                  SnappyUtils.compress(byteWriteBuffer, compressedBuffer);
+                  compressedBuffer.flip();
+                  compressedBuffer.position(4);
                }
-               catch (LZOException e)
+               catch (IllegalArgumentException e)
                {
                   e.printStackTrace();
                   continue;
                }
 
+               crc32.reset();
+               crc32.update(compressedBackingArray, compressedBuffer.position(), compressedBuffer.remaining());
+               compressedBuffer.putInt(0, (int) crc32.getValue());
+               
                msg.setSize(compressedBuffer.limit());
                System.arraycopy(compressedBackingArray, 0, messageBuffer, 0, compressedBuffer.limit());
+               
                
                if(!variablePublisher.send(msg, 0))
                {
