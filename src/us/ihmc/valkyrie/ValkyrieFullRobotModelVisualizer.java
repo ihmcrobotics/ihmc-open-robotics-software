@@ -57,15 +57,15 @@ public class ValkyrieFullRobotModelVisualizer
       GraphicsRobot robotGraphics = new GraphicsRobot(generalizedSDFRobotModel.getName(), sdfFullRobotModel.getElevator(), generalizedSDFRobotModel, false);
       robotGraphics.update();
       
-      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
-      CommonInertiaElipsoidsVisualizer inertiaVis = new CommonInertiaElipsoidsVisualizer(sdfFullRobotModel.getElevator(), dynamicGraphicObjectsListRegistry);
+      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
+      CommonInertiaElipsoidsVisualizer inertiaVis = new CommonInertiaElipsoidsVisualizer(sdfFullRobotModel.getElevator(), yoGraphicsListRegistry);
       inertiaVis.update();
       
-      InverseDynamicsMechanismReferenceFrameVisualizer referenceFrameVis = new InverseDynamicsMechanismReferenceFrameVisualizer(sdfFullRobotModel.getElevator(), dynamicGraphicObjectsListRegistry, 0.5);
+      InverseDynamicsMechanismReferenceFrameVisualizer referenceFrameVis = new InverseDynamicsMechanismReferenceFrameVisualizer(sdfFullRobotModel.getElevator(), yoGraphicsListRegistry, 0.5);
       referenceFrameVis.doControl();
       
       SimulationConstructionSet scs = new SimulationConstructionSet();
-      scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
+      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       
       scs.getGraphics3dAdapter().addRootNode(robotGraphics.getRootNode());
       scs.setGroundVisible(false);

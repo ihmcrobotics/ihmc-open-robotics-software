@@ -91,7 +91,7 @@ public class InefficientPushrodTransmissionJacobian
    private final YoGraphicReferenceFrame actuator5SlideFrameViz, actuator6SlideFrameViz;
    private final YoGraphicReferenceFrame topFrameViz, afterTopJointFrameViz, beforeBottomJointFrameViz, bottomFrameViz;
 
-   public InefficientPushrodTransmissionJacobian(PushRodTransmissionJoint pushRodTransmissionJoint, YoVariableRegistry parentRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+   public InefficientPushrodTransmissionJacobian(PushRodTransmissionJoint pushRodTransmissionJoint, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       switch (pushRodTransmissionJoint)
       {
@@ -127,14 +127,14 @@ public class InefficientPushrodTransmissionJacobian
       
       beforeBottomJointFrame.updateTranslation(new FrameVector(afterTopJointFrame, 0.0, 0.0, -heightOfTopAxisAboveBottomAxis));
 
-      if (dynamicGraphicObjectsListRegistry == null)
+      if (yoGraphicsListRegistry == null)
       {
          visualize = false;
       }
 
       if (visualize)
       {
-         YoGraphicsList dynamicGraphicObjectsList = new YoGraphicsList(getClass().getSimpleName());
+         YoGraphicsList yoGraphicsList = new YoGraphicsList(getClass().getSimpleName());
 
          double ballRadius = 0.005;
 
@@ -154,20 +154,20 @@ public class InefficientPushrodTransmissionJacobian
          actuator5SlideFrameViz = new YoGraphicReferenceFrame(actuator5SlideFrame, registry, frameScale * 0.6);
          actuator6SlideFrameViz = new YoGraphicReferenceFrame(actuator6SlideFrame, registry, frameScale * 0.6);
          
-         dynamicGraphicObjectsList.add(b5Viz);
-         dynamicGraphicObjectsList.add(b6Viz);
-         dynamicGraphicObjectsList.add(t5Viz);
-         dynamicGraphicObjectsList.add(t6Viz);
+         yoGraphicsList.add(b5Viz);
+         yoGraphicsList.add(b6Viz);
+         yoGraphicsList.add(t5Viz);
+         yoGraphicsList.add(t6Viz);
 
-         dynamicGraphicObjectsList.add(topFrameViz);
-         dynamicGraphicObjectsList.add(afterTopJointFrameViz);
-         dynamicGraphicObjectsList.add(beforeBottomJointFrameViz);
-         dynamicGraphicObjectsList.add(bottomFrameViz);
+         yoGraphicsList.add(topFrameViz);
+         yoGraphicsList.add(afterTopJointFrameViz);
+         yoGraphicsList.add(beforeBottomJointFrameViz);
+         yoGraphicsList.add(bottomFrameViz);
          
-         dynamicGraphicObjectsList.add(actuator5SlideFrameViz);
-         dynamicGraphicObjectsList.add(actuator6SlideFrameViz);
+         yoGraphicsList.add(actuator5SlideFrameViz);
+         yoGraphicsList.add(actuator6SlideFrameViz);
 
-         dynamicGraphicObjectsListRegistry.registerDynamicGraphicObjectsList(dynamicGraphicObjectsList);
+         yoGraphicsListRegistry.registerDynamicGraphicObjectsList(yoGraphicsList);
       }
       else
       {

@@ -50,13 +50,13 @@ public class InefficientPushRodTransmission implements PushRodTransmissionInterf
    
    public InefficientPushRodTransmission(PushRodTransmissionJoint pushRodTransmissionJoint, 
          double reflectTop, double reflectBottom, boolean topJointFirst,
-         YoVariableRegistry parentRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
+         YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       if (Math.abs(Math.abs(reflectBottom) - 1.0) > 1e-7) throw new RuntimeException("reflect must be 1.0 or -1.0");
       this.reflectBottom = reflectBottom;
       this.reflectTop = reflectTop;
       this.topJointFirst = topJointFirst;
-       inefficientPushrodTransmissionJacobian = new InefficientPushrodTransmissionJacobian(pushRodTransmissionJoint, parentRegistry, dynamicGraphicObjectsListRegistry);
+       inefficientPushrodTransmissionJacobian = new InefficientPushrodTransmissionJacobian(pushRodTransmissionJoint, parentRegistry, yoGraphicsListRegistry);
    }
   
    public void setUseFuteks(boolean useFuteks)

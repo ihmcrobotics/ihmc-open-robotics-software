@@ -38,13 +38,13 @@ public class ValkyrieSDFLoadingDemo
       }
 
       SDFFullRobotModel sdfFullRobotModel = robotModel.createFullRobotModel();
-      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
-      CommonInertiaElipsoidsVisualizer inertiaVis = new CommonInertiaElipsoidsVisualizer(sdfFullRobotModel.getElevator(), dynamicGraphicObjectsListRegistry);
+      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
+      CommonInertiaElipsoidsVisualizer inertiaVis = new CommonInertiaElipsoidsVisualizer(sdfFullRobotModel.getElevator(), yoGraphicsListRegistry);
       inertiaVis.update();
       
       
       scs = new SimulationConstructionSet(valkyrieRobot);
-      scs.addYoGraphicsListRegistry(dynamicGraphicObjectsListRegistry);
+      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       scs.setGroundVisible(false);
       scs.startOnAThread();
    }
