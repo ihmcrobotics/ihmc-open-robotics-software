@@ -1,15 +1,9 @@
 package us.ihmc.utilities.ros;
 
-import javax.media.j3d.Transform3D;
-import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import org.ros.message.Time;
-
 import us.ihmc.utilities.kinematics.TimeStampedTransform3D;
-import us.ihmc.utilities.lidar.polarLidar.LidarScan;
-import us.ihmc.utilities.net.ObjectCommunicator;
 
 public abstract class RosPoseStampedSubscriber extends AbstractRosTopicSubscriber<geometry_msgs.PoseStamped>
 {
