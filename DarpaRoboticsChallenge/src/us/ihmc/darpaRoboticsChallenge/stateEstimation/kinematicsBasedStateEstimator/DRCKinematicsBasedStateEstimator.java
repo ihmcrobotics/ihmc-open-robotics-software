@@ -24,6 +24,7 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.net.AtomicSettableTimestampProvider;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 
@@ -52,8 +53,8 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 
    private final CenterOfPressureVisualizer copVisualizer;
 
-   private boolean usePelvisCorrector = false;
-   private boolean addNoise = false;
+   private final BooleanYoVariable usePelvisCorrector;
+   private final BooleanYoVariable addNoise;
 
    public DRCKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, StateEstimatorParameters stateEstimatorParameters,
          SensorOutputMapReadOnly sensorOutputMapReadOnly, double gravitationalAcceleration, SideDependentList<WrenchBasedFootSwitch> footSwitches,
@@ -62,6 +63,10 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    {
       this.estimatorDT = stateEstimatorParameters.getEstimatorDT();
 
+      
+      usePelvisCorrector = new BooleanYoVariable("useExternalPelvisCorrector", registry);
+      addNoise = new BooleanYoVariable("useNoiseGenerator", registry);
+      
       jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorOutputMapReadOnly, registry);
 
       this.pelvisPoseHistoryCorrection = new PelvisPoseHistoryCorrection(inverseDynamicsStructure, externalPelvisSubscriber,
@@ -147,12 +152,12 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       pelvisRotationalStateUpdater.updateRootJointOrientationAndAngularVelocity();
       pelvisLinearStateUpdater.updateRootJointPositionAndLinearVelocity();
       
-      if(addNoise)
+      if(addNoise.getBooleanValue())
       {
          pelvisPoseNoiseGenerator.addNoise();
       }
       
-      if (usePelvisCorrector && pelvisPoseHistoryCorrection != null)
+      if (usePelvisCorrector.getBooleanValue() && pelvisPoseHistoryCorrection != null)
       {
          pelvisPoseHistoryCorrection.doControl();
       }
