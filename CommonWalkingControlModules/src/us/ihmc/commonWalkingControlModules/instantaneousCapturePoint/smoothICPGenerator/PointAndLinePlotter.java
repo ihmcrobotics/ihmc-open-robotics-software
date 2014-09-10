@@ -21,13 +21,13 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.plotting.YoArtifactPosition;
+import us.ihmc.yoUtilities.graphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameLineSegment2d;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.plotting.SimulationOverheadPlotter;
-import com.yobotics.simulationconstructionset.plotting.YoFrameLineSegment2dArtifact;
 
 
 public class PointAndLinePlotter
@@ -133,7 +133,7 @@ public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()
 
    public void plotLineSegment(String name, YoFrameLineSegment2d lineSegment, Color color)
    {
-      Artifact lineSegmentArtifact = new YoFrameLineSegment2dArtifact("line" + numberOfLines, lineSegment, color);
+      Artifact lineSegmentArtifact = new YoArtifactLineSegment2d("line" + numberOfLines, lineSegment, color);
       lineSegmentArtifacts.add(lineSegmentArtifact);
       yoGraphicsListRegistry.registerArtifact("line" + numberOfLines, lineSegmentArtifact);
 

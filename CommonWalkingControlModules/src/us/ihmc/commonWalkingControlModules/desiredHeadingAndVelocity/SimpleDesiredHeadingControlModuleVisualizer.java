@@ -9,9 +9,9 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.plotting.ArtifactList;
+import us.ihmc.yoUtilities.graphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameLineSegment2d;
 
-import com.yobotics.simulationconstructionset.plotting.YoFrameLineSegment2dArtifact;
 
    public class SimpleDesiredHeadingControlModuleVisualizer
    {     
@@ -31,11 +31,11 @@ import com.yobotics.simulationconstructionset.plotting.YoFrameLineSegment2dArtif
          {
             ArtifactList artifactList = new ArtifactList("Simple Desired Heading");
 
-            YoFrameLineSegment2dArtifact yoFrameLineSegment2dArtifact = new YoFrameLineSegment2dArtifact("Desired Heading Line", desiredHeadingLine,
+            YoArtifactLineSegment2d yoFrameLineSegment2dArtifact = new YoArtifactLineSegment2d("Desired Heading Line", desiredHeadingLine,
                   Color.MAGENTA);
             artifactList.add(yoFrameLineSegment2dArtifact);
 
-            yoFrameLineSegment2dArtifact = new YoFrameLineSegment2dArtifact("Final Heading Line", finalHeadingLine, Color.ORANGE);
+            yoFrameLineSegment2dArtifact = new YoArtifactLineSegment2d("Final Heading Line", finalHeadingLine, Color.ORANGE);
             artifactList.add(yoFrameLineSegment2dArtifact);
 
             yoGraphicsListRegistry.registerArtifactList(artifactList);
