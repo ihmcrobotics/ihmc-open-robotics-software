@@ -6,13 +6,13 @@ import java.nio.LongBuffer;
 import java.nio.channels.Selector;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.CRC32;
 
-import org.jvcompress.util.LZOUtils;
-import org.jvcompress.util.MInt;
 import org.zeromq.ZMQ;
 
 import us.ihmc.robotDataCommunication.YoVariableChangedProducer.YoVariableClientChangedListener;
 import us.ihmc.robotDataCommunication.jointState.JointState;
+import us.ihmc.utilities.compression.SnappyUtils;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import zmq.PollItem;
@@ -93,8 +93,8 @@ public class YoVariableConsumer extends Thread
       ByteBuffer decompressed = ByteBuffer.allocate(bufferSize);
       
       connected = true;
-      
-      MInt outputLength = LZOUtils.createOutputLength();
+      CRC32 crc32 = new CRC32();
+
       while (connected)
       {
          
@@ -119,9 +119,20 @@ public class YoVariableConsumer extends Thread
             ByteBuffer buf = msg.buf();
             decompressed.clear();
             buf.clear();
+            
+            long checksum = buf.getInt() & 0xffffffffL;
+            crc32.reset();
+            crc32.update(buf.array(), buf.position() + buf.arrayOffset(), buf.remaining());
+            
+            if(crc32.getValue() != checksum)
+            {
+               System.err.println("[" + getClass().getSimpleName() + "] Checksum validation failure. Ignoring packet " + packetNumber + ".");
+               continue;
+            }
             try
             {
-               LZOUtils.decompress(buf, decompressed, outputLength);
+               SnappyUtils.uncompress(buf, decompressed);
+               decompressed.flip();
             }
             catch (Exception e)
             {
@@ -182,6 +193,6 @@ public class YoVariableConsumer extends Thread
          {
          }
       }
-      
+
    }
 }
