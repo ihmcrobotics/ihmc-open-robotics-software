@@ -12,11 +12,11 @@ import us.ihmc.utilities.math.geometry.TransformReferenceFrame;
 import us.ihmc.utilities.math.geometry.TranslationReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class InefficientPushrodTransmissionJacobian
 {
@@ -91,7 +91,7 @@ public class InefficientPushrodTransmissionJacobian
    private final YoGraphicReferenceFrame actuator5SlideFrameViz, actuator6SlideFrameViz;
    private final YoGraphicReferenceFrame topFrameViz, afterTopJointFrameViz, beforeBottomJointFrameViz, bottomFrameViz;
 
-   public InefficientPushrodTransmissionJacobian(PushRodTransmissionJoint pushRodTransmissionJoint, YoVariableRegistry parentRegistry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+   public InefficientPushrodTransmissionJacobian(PushRodTransmissionJoint pushRodTransmissionJoint, YoVariableRegistry parentRegistry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       switch (pushRodTransmissionJoint)
       {

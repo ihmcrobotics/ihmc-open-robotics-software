@@ -8,10 +8,10 @@ import org.junit.Test;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 
 public class InefficientPushrodTransmissionJacobianTest
@@ -29,10 +29,10 @@ public class InefficientPushrodTransmissionJacobianTest
       DoubleYoVariable pitch = new DoubleYoVariable("pitch", registry);
       DoubleYoVariable roll = new DoubleYoVariable("roll", registry);
 
-      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
+      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry;
       if (visualizeAndKeepUp)
       {
-         dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+         dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
       }
       else
       {
@@ -129,10 +129,10 @@ public class InefficientPushrodTransmissionJacobianTest
       DoubleYoVariable pitch = new DoubleYoVariable("pitch", registry);
       DoubleYoVariable roll = new DoubleYoVariable("roll", registry);
 
-      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry;
+      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry;
       if (visualizeAndKeepUp)
       {
-         dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+         dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
       }
       else
       {

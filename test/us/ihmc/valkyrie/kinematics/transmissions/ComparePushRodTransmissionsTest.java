@@ -16,10 +16,10 @@ import us.ihmc.valkyrie.roboNet.DummyTurboDriver;
 import us.ihmc.valkyrie.roboNet.TurboDriver;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 import com.yobotics.simulationconstructionset.Robot;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.util.graphics.DynamicGraphicObjectsListRegistry;
 
 public class ComparePushRodTransmissionsTest
 {
@@ -39,7 +39,7 @@ public class ComparePushRodTransmissionsTest
       PushRodTransmissionJoint pushRodTransmissionJoint = PushRodTransmissionJoint.ANKLE;
       
       YoVariableRegistry registry = new YoVariableRegistry("test");
-      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
       
       InefficientPushRodTransmission inefficientPushrodTransmission = new InefficientPushRodTransmission(pushRodTransmissionJoint, reflectTop, reflectBottom, topJointFirst, registry, dynamicGraphicObjectsListRegistry);
       EfficientPushRodTransmission efficientPushrodTransmission = new EfficientPushRodTransmission(pushRodTransmissionJoint, reflectBottom);
@@ -61,7 +61,7 @@ public class ComparePushRodTransmissionsTest
       PushRodTransmissionJoint pushRodTransmissionJoint = PushRodTransmissionJoint.WAIST;
       
       YoVariableRegistry registry = new YoVariableRegistry("test");
-      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
 
       InefficientPushRodTransmission inefficientPushrodTransmission = new InefficientPushRodTransmission(pushRodTransmissionJoint, reflectTop, reflectBottom, topJointFirst, registry, dynamicGraphicObjectsListRegistry);
       EfficientPushRodTransmission efficientPushrodTransmission = new EfficientPushRodTransmission(pushRodTransmissionJoint, reflectBottom);
@@ -86,7 +86,7 @@ public class ComparePushRodTransmissionsTest
       PushRodTransmissionJoint pushRodTransmissionJoint = PushRodTransmissionJoint.ANKLE;
 
       YoVariableRegistry registry = new YoVariableRegistry("test");
-      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
 
       InterpolatedPushRodTransmission interpolatedPushRodTransmission = new InterpolatedPushRodTransmission(ankleNamespace, reflectBottom, compliance);
       InefficientPushRodTransmission inefficientPushrodTransmission = new InefficientPushRodTransmission(pushRodTransmissionJoint, reflectTop, reflectBottom, topJointFirst, registry, dynamicGraphicObjectsListRegistry);
@@ -113,7 +113,7 @@ public class ComparePushRodTransmissionsTest
       PushRodTransmissionJoint pushRodTransmissionJoint = PushRodTransmissionJoint.WAIST;
 
       YoVariableRegistry registry = new YoVariableRegistry("test");
-      DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry = new DynamicGraphicObjectsListRegistry();
+      YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = new YoGraphicsListRegistry();
 
       InefficientPushRodTransmission inefficientPushrodTransmission = new InefficientPushRodTransmission(pushRodTransmissionJoint, reflectTop, reflectBottom, topJointFirst, registry, dynamicGraphicObjectsListRegistry);
       InterpolatedPushRodTransmission interpolatedPushRodTransmission = new InterpolatedPushRodTransmission(ankleNamespace, reflectBottom, compliance);
@@ -125,7 +125,7 @@ public class ComparePushRodTransmissionsTest
    }
    
    private void compareTwoPushRodTransmissionInterfaces(Random random, double epsilon, PushRodTransmissionInterface pushrodTransmissionA,
-           PushRodTransmissionInterface pushrodTransmissionB, YoVariableRegistry registry, DynamicGraphicObjectsListRegistry dynamicGraphicObjectsListRegistry)
+           PushRodTransmissionInterface pushrodTransmissionB, YoVariableRegistry registry, YoGraphicsListRegistry dynamicGraphicObjectsListRegistry)
    {
       Robot robot = new Robot("comparePushrodTransmission");
       robot.getRobotsYoVariableRegistry().addChild(registry);
