@@ -44,7 +44,7 @@ import us.ihmc.communication.packets.walking.FootStatePacket;
 import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.communication.packets.walking.HeadOrientationPacket;
 import us.ihmc.communication.packets.walking.PauseCommand;
-import us.ihmc.communication.packets.walking.PelvisOrientationPacket;
+import us.ihmc.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.communication.packets.walking.ThighStatePacket;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
@@ -109,7 +109,7 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
       objectCommunicator.attachListener(HeadOrientationPacket.class, headOrientationProvider.getHeadOrientationPacketConsumer());
       objectCommunicator.attachListener(ComHeightPacket.class, desiredComHeightProvider.getComHeightPacketConsumer());
       objectCommunicator.attachListener(LookAtPacket.class, headOrientationProvider.getLookAtPacketConsumer());
-      objectCommunicator.attachListener(PelvisOrientationPacket.class, pelvisPoseProvider);
+      objectCommunicator.attachListener(PelvisPosePacket.class, pelvisPoseProvider);
       objectCommunicator.attachListener(HandPosePacket.class, handPoseProvider);
       objectCommunicator.attachListener(FootPosePacket.class, footPoseProvider);
       objectCommunicator.attachListener(ChestOrientationPacket.class, chestOrientationProvider);

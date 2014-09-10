@@ -12,7 +12,7 @@ import javax.vecmath.Quat4d;
 
 import org.junit.Test;
 
-import us.ihmc.communication.packets.walking.PelvisOrientationPacket;
+import us.ihmc.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -25,10 +25,10 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
  * Time: 7:29 PM
  * To change this template use File | Settings | File Templates.
  */
-public class PelvisOrientationPacketTransformerTest
+public class PelvisPosePacketTransformerTest
 {
    @Test
-   public void testPelvisOrientationPacketTransformer()
+   public void testPelvisPosePacketTransformer()
    {
       int numberOfTests = 10;
       Random random = new Random(100L);
@@ -39,11 +39,11 @@ public class PelvisOrientationPacketTransformerTest
          Quat4d quat = new Quat4d();
          quat.set(axisAngle);
 
-         PelvisOrientationPacket starting = new PelvisOrientationPacket(quat);
+         PelvisPosePacket starting = new PelvisPosePacket(quat);
 
          transform3D = RandomTools.generateRandomTransform(random);
 
-         PelvisOrientationPacket ending = starting.transform(transform3D);
+         PelvisPosePacket ending = starting.transform(transform3D);
 
          performEqualsTestForQuat(starting, transform3D, ending);
       }
@@ -52,14 +52,14 @@ public class PelvisOrientationPacketTransformerTest
       {
          Point3d point3d = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
 
-         PelvisOrientationPacket starting = new PelvisOrientationPacket(point3d);
+         PelvisPosePacket starting = new PelvisPosePacket(point3d);
          transform3D = RandomTools.generateRandomTransform(random);
-         PelvisOrientationPacket ending = starting.transform(transform3D);
+         PelvisPosePacket ending = starting.transform(transform3D);
          performEqualsTestForPoint(starting, transform3D, ending);
       }
    }
 
-   private static void performEqualsTestForQuat(PelvisOrientationPacket starting, Transform3D transform3D, PelvisOrientationPacket ending)
+   private static void performEqualsTestForQuat(PelvisPosePacket starting, Transform3D transform3D, PelvisPosePacket ending)
    {
 //    public Quat4d quaternion;
       Quat4d startQuat = starting.getQuaternion();
@@ -72,7 +72,7 @@ public class PelvisOrientationPacketTransformerTest
 
    }
 
-   private static void performEqualsTestForPoint(PelvisOrientationPacket starting, Transform3D transform3D, PelvisOrientationPacket ending)
+   private static void performEqualsTestForPoint(PelvisPosePacket starting, Transform3D transform3D, PelvisPosePacket ending)
    {
 //    public Quat4d quaternion;
       Point3d startPoint = starting.getPoint();
