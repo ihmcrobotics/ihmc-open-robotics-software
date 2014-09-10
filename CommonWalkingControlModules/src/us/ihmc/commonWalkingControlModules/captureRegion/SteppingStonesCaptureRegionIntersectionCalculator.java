@@ -10,9 +10,9 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.plotting.ArtifactList;
+import us.ihmc.yoUtilities.graphics.plotting.YoArtifactPolygon;
 import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
 
-import com.yobotics.simulationconstructionset.plotting.DynamicGraphicYoPolygonArtifact;
 import com.yobotics.simulationconstructionset.util.ground.steppingStones.SteppingStones;
 
 /**
@@ -67,7 +67,7 @@ public class SteppingStonesCaptureRegionIntersectionCalculator
                                                    maxNumberVerticesPerPolygon, registry);
             intersectionPolygonsViz.add(polygonViz);
 
-            DynamicGraphicYoPolygonArtifact dynamicGraphicYoPolygonArtifact = new DynamicGraphicYoPolygonArtifact("Intersection_" + i, polygonViz, Color.BLACK, true);
+            YoArtifactPolygon dynamicGraphicYoPolygonArtifact = new YoArtifactPolygon("Intersection_" + i, polygonViz, Color.BLACK, true);
             artifactList.add(dynamicGraphicYoPolygonArtifact);
 
 //          YoboticsBipedPlotter.registerDynamicGraphicPolygon("Intersection_" + i, colorsToUse[i % colorsToUse.length], polygonViz, true);

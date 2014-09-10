@@ -8,9 +8,9 @@ import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.yoUtilities.graphics.plotting.YoArtifactPolygon;
 import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
 
-import com.yobotics.simulationconstructionset.plotting.DynamicGraphicYoPolygonArtifact;
 
 public class OldFootPolygonVisualizer implements Updatable
 {
@@ -33,7 +33,7 @@ public class OldFootPolygonVisualizer implements Updatable
            yoFootPolygons.put(robotSide, yoFootPolygon);
            Color color = colors.get(robotSide);
            
-           DynamicGraphicYoPolygonArtifact dynamicGraphicYoPolygonArtifact = new DynamicGraphicYoPolygonArtifact(robotSide + " Foot", yoFootPolygon,
+           YoArtifactPolygon dynamicGraphicYoPolygonArtifact = new YoArtifactPolygon(robotSide + " Foot", yoFootPolygon,
                  color, false);
            yoGraphicsListRegistry.registerArtifact(robotSide + " Foot", dynamicGraphicYoPolygonArtifact);
         }

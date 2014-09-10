@@ -25,10 +25,10 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.plotting.ArtifactList;
+import us.ihmc.yoUtilities.graphics.plotting.YoArtifactPolygon;
 import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
-import com.yobotics.simulationconstructionset.plotting.DynamicGraphicYoPolygonArtifact;
 
 public class ToeOffVirtualToePointCalculator implements VirtualToePointCalculator
 {
@@ -90,7 +90,7 @@ public class ToeOffVirtualToePointCalculator implements VirtualToePointCalculato
          YoGraphicsList yoGraphicsList = new YoGraphicsList("VTP Calculator");
          ArtifactList artifactList = new ArtifactList("VTP Calculator");
 
-         DynamicGraphicYoPolygonArtifact vtpConvexPolygonArtifact = new DynamicGraphicYoPolygonArtifact("vtpConvexPolygon", vtpConvexPolygon, Color.cyan, false);
+         YoArtifactPolygon vtpConvexPolygonArtifact = new YoArtifactPolygon("vtpConvexPolygon", vtpConvexPolygon, Color.cyan, false);
          artifactList.add(vtpConvexPolygonArtifact);
 
          for (RobotSide robotSide : RobotSide.values)

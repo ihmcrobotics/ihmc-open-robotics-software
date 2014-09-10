@@ -14,10 +14,10 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.plotting.ArtifactList;
+import us.ihmc.yoUtilities.graphics.plotting.YoArtifactPolygon;
 import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameLineSegment2d;
 
-import com.yobotics.simulationconstructionset.plotting.DynamicGraphicYoPolygonArtifact;
 import com.yobotics.simulationconstructionset.time.GlobalTimer;
 
 /**
@@ -86,7 +86,7 @@ public class BipedSupportPolygons
 
       ArtifactList artifactList = new ArtifactList("Biped Support Polygon");
 
-      DynamicGraphicYoPolygonArtifact dynamicGraphicYoPolygonArtifact = new DynamicGraphicYoPolygonArtifact("Combined Polygon", supportPolygonViz, Color.pink,
+      YoArtifactPolygon dynamicGraphicYoPolygonArtifact = new YoArtifactPolygon("Combined Polygon", supportPolygonViz, Color.pink,
             false);
       artifactList.add(dynamicGraphicYoPolygonArtifact);
 
