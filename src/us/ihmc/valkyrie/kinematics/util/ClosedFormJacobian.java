@@ -485,5 +485,9 @@ public class ClosedFormJacobian
    public void useFuteks(boolean bool){
       this.useFuteks=bool;
    }
+   
+   public boolean isUsingFuteks(){
+	   return useFuteks;
+   }
 
 }
