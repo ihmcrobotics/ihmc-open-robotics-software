@@ -8,9 +8,9 @@ import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoFrameVector;
+import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 
-import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFrameVector;
-import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 
 public class SineWaveDesiredPelvisOrientationControlModule implements DesiredPelvisOrientationControlModule
 {

@@ -28,11 +28,11 @@ import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphic;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.yoUtilities.graphics.plotting.ArtifactList;
+import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoFramePoint2d;
+import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 
-import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFramePoint2d;
-import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 
 public class GuideLineDesiredCoPControlModule implements DesiredCoPControlModule
 {

@@ -8,8 +8,8 @@ import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 
-import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 import com.yobotics.simulationconstructionset.util.math.functionGenerator.YoFunctionGenerator;
 
 public class JointPDHighLevelHumanoidController extends HighLevelBehavior

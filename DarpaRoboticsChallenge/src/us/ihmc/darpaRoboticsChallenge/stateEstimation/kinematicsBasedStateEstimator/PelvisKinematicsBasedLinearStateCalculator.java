@@ -26,13 +26,13 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
+import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoFramePoint2d;
+import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoFrameVector;
+import us.ihmc.yoUtilities.math.filters.BacklashCompensatingVelocityYoFrameVector;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
-import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFramePoint2d;
-import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFrameVector;
-import com.yobotics.simulationconstructionset.util.math.filter.BacklashCompensatingVelocityYoFrameVector;
 
 /**
  * PelvisKinematicsBasedPositionCalculator estimates the pelvis position and linear velocity using the leg kinematics.

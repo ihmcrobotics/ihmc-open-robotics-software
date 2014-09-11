@@ -18,13 +18,13 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoFrameQuaternion;
+import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoFrameVector;
+import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
+import us.ihmc.yoUtilities.math.filters.FilteredVelocityYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFrameQuaternion;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
-import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFrameQuaternion;
-import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFrameVector;
-import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
-import com.yobotics.simulationconstructionset.util.math.filter.FilteredVelocityYoVariable;
 
 public class SensorProcessing implements SensorOutputMapReadOnly
 {

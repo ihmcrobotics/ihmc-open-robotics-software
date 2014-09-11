@@ -13,13 +13,13 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.yoUtilities.math.filters.AccelerationLimitedYoFrameVector2d;
+import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoFrameVector2d;
+import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
+import us.ihmc.yoUtilities.math.filters.FilteredVelocityYoFrameVector;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector2d;
 
-import com.yobotics.simulationconstructionset.util.math.filter.AccelerationLimitedYoFrameVector2d;
-import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFrameVector2d;
-import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
-import com.yobotics.simulationconstructionset.util.math.filter.FilteredVelocityYoFrameVector;
 
 public class ICPProportionalController
 {   

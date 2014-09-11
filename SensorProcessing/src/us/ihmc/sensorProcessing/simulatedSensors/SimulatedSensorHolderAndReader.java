@@ -14,10 +14,10 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
+import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
+import us.ihmc.yoUtilities.math.filters.BacklashCompensatingVelocityYoVariable;
 
 import com.yobotics.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
-import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
-import com.yobotics.simulationconstructionset.util.math.filter.BacklashCompensatingVelocityYoVariable;
 
 public class SimulatedSensorHolderAndReader implements SensorReader
 {

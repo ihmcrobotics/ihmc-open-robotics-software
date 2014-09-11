@@ -12,9 +12,9 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
+import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoFramePoint2d;
+import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 
-import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFramePoint2d;
-import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 
 public class SimpleDesiredCenterOfPressureFilter implements DesiredCenterOfPressureFilter
 {
