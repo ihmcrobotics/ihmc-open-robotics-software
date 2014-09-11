@@ -2,7 +2,7 @@
 %flist=strsplit('DUAL1.QPS PRIMAL1.QPS MOSARQP2.QPS','GOULDQP3.QPS') 
 flist=strsplit('CVXQP3_M.QPS AUG3DQP.QPS PRIMAL4.QPS KSIP.QPS PRIMAL3.QPS AUG3DCQP.QPS AUG3D.QPS AUG3DC.QPS')
 
-
+flist={'DUALC1.QPS'};
 for s=flist
     qpsName=s{:}
     yamlName=[qpsName(1:end-4) '.yaml'];

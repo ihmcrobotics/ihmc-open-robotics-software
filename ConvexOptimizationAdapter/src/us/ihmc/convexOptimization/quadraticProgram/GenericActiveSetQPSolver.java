@@ -338,7 +338,7 @@ public class GenericActiveSetQPSolver extends AbstractActiveSetQPSolver
         DenseMatrix64F tmpp = new DenseMatrix64F(gradient0); //-Z' "gradient0"
         CommonOps.multAdd(quadraticCostGMatrix, p, tmpp); //    Z'  "-G*Zpz"
         Double Gp_grad = NormOps.normP1(tmpp);
-        System.out.println("Gp_grad: G p = -gradient0"+Gp_grad);
+        System.out.println("Gp_grad: G p = -gradient0 "+Gp_grad);
         System.out.println("stop");
       }
       //xXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -444,7 +444,7 @@ public class GenericActiveSetQPSolver extends AbstractActiveSetQPSolver
 
       x=new DenseMatrix64F(x0);
       
-      int maximumIteration=5000;
+      int maximumIteration=2000;
       int iteration=0;
       Step step = new Step();
       
@@ -458,7 +458,7 @@ public class GenericActiveSetQPSolver extends AbstractActiveSetQPSolver
 //         System.out.println(activeSetA);
 //         System.out.println("ActiveSetB=");
 //         System.out.println(activeSetB);
-//         System.out.println("Obj= "+ getObjectiveCost(x));
+         System.out.println("Obj= "+ getObjectiveCost(x));
 //         System.out.println("------------------");
 
         DenseMatrix64F activeSetLagrangeMultipliers = new DenseMatrix64F(activeSetA.numRows,1);
