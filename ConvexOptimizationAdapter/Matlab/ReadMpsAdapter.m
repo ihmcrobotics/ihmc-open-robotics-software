@@ -21,15 +21,15 @@ processedObj = convert(rawObj);
 
 %optional argument to solve the QP given at filePath
 if(~isempty(varargin))
-    x0 = zeros(size(processedObj.H,1));
-    options = optimset('Algorithm','interior-point-convex','Display','off');
-    [processedObj.X,processedObj.FVAL] = quadprog(2*processedObj.H,processedObj.f,processedObj.A,processedObj.b,processedObj.Aeq, ...
+    x0 = rand(size(processedObj.H,1),1);
+    options = optimset('Algorithm','active-set','Display','on');
+    [processedObj.X,processedObj.FVAL,exitFlag,output] = quadprog(2*processedObj.H,processedObj.f',processedObj.A,processedObj.b,processedObj.Aeq, ...
         processedObj.beq,processedObj.lb,processedObj.ub,x0,options)
 end
 
 fprintf(1,'write out\n');
 fileToWrite = fopen(fileNameToWrite{1},'w+');
-WriteYaml(fileNameToWrite{1},processedObj);
+%WriteYaml(fileNameToWrite{1},processedObj);
 
 end
 
