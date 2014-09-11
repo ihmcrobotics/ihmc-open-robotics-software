@@ -35,7 +35,7 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    @Override
    protected DoubleYoVariable getPelvisOrientationErrorVariableName(SimulationConstructionSet scs)
    {
-      return (DoubleYoVariable) scs.getVariable("WalkingHighLevelHumanoidController.RootJointAngularAccelerationControlModule.pelvisAxisAngleOrientationController",
+      return (DoubleYoVariable) scs.getVariable("MomentumBasedControllerFactory.PelvisOrientationManager.RootJointAngularAccelerationControlModule.pelvisAxisAngleOrientationController",
                                                 "pelvisOrientationErrorMagnitude");
    }
 
