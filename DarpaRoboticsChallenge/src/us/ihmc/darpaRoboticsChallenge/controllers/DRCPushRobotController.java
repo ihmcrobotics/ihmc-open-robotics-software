@@ -17,11 +17,11 @@ import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.graphics.YoGraphic;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
+import us.ihmc.yoUtilities.stateMachines.StateTransitionCondition;
 
 import com.yobotics.simulationconstructionset.ExternalForcePoint;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
-import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
 
 public class DRCPushRobotController implements RobotController
 {

@@ -35,10 +35,10 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFrameLine2d;
 import us.ihmc.yoUtilities.math.trajectories.StraightLinePositionTrajectoryGenerator;
+import us.ihmc.yoUtilities.stateMachines.StateMachine;
+import us.ihmc.yoUtilities.stateMachines.StateTransitionCondition;
 
 import com.yobotics.simulationconstructionset.plotting.YoFrameLine2dArtifact;
-import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
-import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
 
 public class PushRecoveryControlModule
 {

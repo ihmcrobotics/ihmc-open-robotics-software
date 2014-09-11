@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual;
 
-import static com.yobotics.simulationconstructionset.util.statemachines.StateMachineTools.addRequestedStateTransition;
+import static us.ihmc.yoUtilities.stateMachines.StateMachineTools.addRequestedStateTransition;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -38,14 +38,14 @@ import us.ihmc.yoUtilities.math.trajectories.OneDoFJointQuinticTrajectoryGenerat
 import us.ihmc.yoUtilities.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.StraightLinePoseTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.providers.YoVariableDoubleProvider;
+import us.ihmc.yoUtilities.stateMachines.State;
+import us.ihmc.yoUtilities.stateMachines.StateMachine;
+import us.ihmc.yoUtilities.stateMachines.StateTransition;
+import us.ihmc.yoUtilities.stateMachines.StateTransitionAction;
+import us.ihmc.yoUtilities.stateMachines.StateTransitionCondition;
 
 import com.yobotics.simulationconstructionset.util.controller.YoPIDGains;
 import com.yobotics.simulationconstructionset.util.controller.YoSE3PIDGains;
-import com.yobotics.simulationconstructionset.util.statemachines.State;
-import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
-import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
-import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionAction;
-import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
 
 public class HandControlModule
 {

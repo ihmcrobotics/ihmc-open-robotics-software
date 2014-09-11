@@ -41,10 +41,10 @@ import us.ihmc.yoUtilities.graphics.plotting.YoArtifactPosition;
 import us.ihmc.yoUtilities.math.filters.GlitchFilteredBooleanYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
+import us.ihmc.yoUtilities.stateMachines.State;
+import us.ihmc.yoUtilities.stateMachines.StateMachine;
+import us.ihmc.yoUtilities.stateMachines.StateMachineTools;
 
-import com.yobotics.simulationconstructionset.util.statemachines.State;
-import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
-import com.yobotics.simulationconstructionset.util.statemachines.StateMachineTools;
 
 /**
  * PelvisLinearUpdater estimates the pelvis position and linear velocity using leg kinematics and IMU acceleration data.

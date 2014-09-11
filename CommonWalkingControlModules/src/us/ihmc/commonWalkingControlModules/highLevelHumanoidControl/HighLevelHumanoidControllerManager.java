@@ -10,11 +10,11 @@ import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
+import us.ihmc.yoUtilities.stateMachines.State;
+import us.ihmc.yoUtilities.stateMachines.StateMachine;
+import us.ihmc.yoUtilities.stateMachines.StateMachineTools;
 
 import com.yobotics.simulationconstructionset.robotController.RobotController;
-import com.yobotics.simulationconstructionset.util.statemachines.State;
-import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
-import com.yobotics.simulationconstructionset.util.statemachines.StateMachineTools;
 
 public class HighLevelHumanoidControllerManager implements RobotController
 {

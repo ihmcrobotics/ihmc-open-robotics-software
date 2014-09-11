@@ -38,12 +38,12 @@ import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
+import us.ihmc.yoUtilities.stateMachines.State;
+import us.ihmc.yoUtilities.stateMachines.StateMachine;
+import us.ihmc.yoUtilities.stateMachines.StateTransition;
+import us.ihmc.yoUtilities.stateMachines.StateTransitionCondition;
 
 import com.yobotics.simulationconstructionset.util.controller.PIDController;
-import com.yobotics.simulationconstructionset.util.statemachines.State;
-import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
-import com.yobotics.simulationconstructionset.util.statemachines.StateTransition;
-import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionCondition;
 
 public class BalancingUpperBodySubController implements UpperBodySubController
 {

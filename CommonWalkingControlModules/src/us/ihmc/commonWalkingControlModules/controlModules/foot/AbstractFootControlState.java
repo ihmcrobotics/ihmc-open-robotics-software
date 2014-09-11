@@ -25,8 +25,8 @@ import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.stateMachines.State;
 
-import com.yobotics.simulationconstructionset.util.statemachines.State;
 
 public abstract class AbstractFootControlState extends State<ConstraintType>
 {
