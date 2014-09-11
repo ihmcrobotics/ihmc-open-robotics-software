@@ -36,8 +36,8 @@ import us.ihmc.yoUtilities.graphics.plotting.ArtifactList;
 import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
+import us.ihmc.yoUtilities.math.interpolators.QuinticSplineInterpolator;
 
-import com.yobotics.simulationconstructionset.util.splines.QuinticSplineInterpolator;
 
 public class JointSpaceTrajectoryGenerator
 {
