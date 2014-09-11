@@ -3,6 +3,9 @@ package com.yobotics.simulationconstructionset.gui.actions;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.awt.Dimension;
+import java.awt.Point;
+
 import org.junit.Test;
 
 import com.yobotics.simulationconstructionset.commands.AddCameraKeyCommandExecutor;
@@ -112,7 +115,7 @@ public class ActionsTest
             throw new RuntimeException("Shouldn't call this one in the test!");
          }
 
-         public GraphArrayWindow createNewGraphWindow(String graphGroupName, int screenID, boolean maximizeWindow)
+         public GraphArrayWindow createNewGraphWindow(String graphGroupName, int screenID, Point windowLocation, Dimension windowSize, boolean maximizeWindow)
          {      
             throw new RuntimeException("Shouldn't call this one in the test!");
          }
