@@ -205,9 +205,9 @@ public class GenericActiveSetQPSolver extends AbstractActiveSetQPSolver
       
 
       lpSolver.setZeroSizeMatrixForNullFields();
-      lpSolver.displayProblem();
-      System.out.println("Initial x0 for feasible point problem");
-      System.out.println(augmentX0);
+//      lpSolver.displayProblem();
+//      System.out.println("Initial x0 for feasible point problem");
+//      System.out.println(augmentX0);
 
       DenseMatrix64F solution0=lpSolver.solve(augmentX0);
       double slack=solution0.get(augmentNumVariables-1, 0);
@@ -326,7 +326,7 @@ public class GenericActiveSetQPSolver extends AbstractActiveSetQPSolver
         DenseMatrix64F sol=new DenseMatrix64F(steepestDirection);
         CommonOps.multAdd(-1,projectedG, pz, sol);
         double solNorm=NormOps.normP1(sol);
-        System.out.println("projG pz = steepestDirection, svd accuracy->"+ solNorm);
+//        System.out.println("projG pz = steepestDirection, svd accuracy->"+ solNorm);
         try{
           assert(solNorm<eps);
         }
@@ -338,8 +338,7 @@ public class GenericActiveSetQPSolver extends AbstractActiveSetQPSolver
         DenseMatrix64F tmpp = new DenseMatrix64F(gradient0); //-Z' "gradient0"
         CommonOps.multAdd(quadraticCostGMatrix, p, tmpp); //    Z'  "-G*Zpz"
         Double Gp_grad = NormOps.normP1(tmpp);
-        System.out.println("Gp_grad: G p = -gradient0 "+Gp_grad);
-        System.out.println("stop");
+//        System.out.println("Gp_grad: G p = -gradient0 "+Gp_grad);
       }
       //xXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
       
@@ -598,6 +597,7 @@ public class GenericActiveSetQPSolver extends AbstractActiveSetQPSolver
    @Override
    public double[] solve()
    {
-      return null;
+      solve();
+      return getSolution().getData();
    }
 }
