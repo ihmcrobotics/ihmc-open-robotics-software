@@ -266,8 +266,8 @@ public class ClosedFormJacobian
          double m21 = m21v.getY() / length;
          double m22 = m22v.getY() / length;
          
-         output[0][1] =   m11; output[0][0] =   m12;
-         output[1][1] =  -m21; output[1][0] =  -m22;
+         output[1][1] =   m11; output[0][1] =   m12;
+         output[1][0] =  -m21; output[0][0] =  -m22;
          
          break;
       
@@ -416,7 +416,7 @@ public class ClosedFormJacobian
 //           output[0][0] =  m11; output[0][1] =  m12;
 //           output[1][0] =  m21; output[1][1] =  m22;
 //           break;
-           roll = roll;
+//           roll = -roll;
            double J2A_11, J2A_12, J2A_21, J2A_22;
            double cosRoll = Math.cos(roll);
            double cosPitch = Math.cos(pitch);

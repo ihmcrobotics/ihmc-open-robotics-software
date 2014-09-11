@@ -10,8 +10,10 @@ public class EfficientPushRodTransmission implements PushRodTransmissionInterfac
     private static final double INFINITY_THRESHOLD = 1e10;
 
     // Temporary matrix
-    private double[][]               jacobian        = new double[2][2];
-    private final double[][]         jacobianInverse = new double[2][2];
+    private double[][]               jacobian                  = new double[2][2];
+    private final double[][]         jacobianTranspose         = new double[2][2];
+    private final double[][]         jacobianInverse           = new double[2][2];
+    private final double[][]         jacobianInvertedTranspose = new double[2][2];
     private final ClosedFormJacobian efficientPushrodTransmissionJacobian;
     private final double             reflect;
 
@@ -45,19 +47,26 @@ public class EfficientPushRodTransmission implements PushRodTransmissionInterfac
         }
     }
 
-    private boolean invertMatrix(double[][] matrix, double[][] inverseTransposeToPack) {
+    private boolean invertMatrix(double[][] matrix, double[][] inverseToPack) {
         double det = (matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0]);
 
         if (det != 0.0) {
-            inverseTransposeToPack[0][0] = (1.0 / det) * matrix[1][1];
-            inverseTransposeToPack[0][1] = (1.0 / det) * (-matrix[0][1]);
-            inverseTransposeToPack[1][0] = (1.0 / det) * (-matrix[1][0]);
-            inverseTransposeToPack[1][1] = (1.0 / det) * matrix[0][0];
+            inverseToPack[0][0] = (1.0 / det) * matrix[1][1];
+            inverseToPack[0][1] = (1.0 / det) * (-matrix[0][1]);
+            inverseToPack[1][0] = (1.0 / det) * (-matrix[1][0]);
+            inverseToPack[1][1] = (1.0 / det) * matrix[0][0];
 
             return true;
         } else {
             return false;
         }
+    }
+
+    private void transposeMatrix(double[][] matrix, double[][] transposeToPack) {
+        transposeToPack[0][0] = matrix[0][0];
+        transposeToPack[0][1] = matrix[1][0];
+        transposeToPack[1][0] = matrix[0][1];
+        transposeToPack[1][1] = matrix[1][1];
     }
 
     @Override
@@ -70,9 +79,11 @@ public class EfficientPushRodTransmission implements PushRodTransmissionInterfac
         double rollAngle      = reflect * jointData[1].getPosition();
 
         jacobian = efficientPushrodTransmissionJacobian.getUpdatedTransform(rollAngle, pitchAngle);
+        transposeMatrix(jacobian, jacobianTranspose);
 
-        double rollTorque  = jacobian[0][0] * actuatorForce0 + jacobian[0][1] * actuatorForce1;
-        double pitchTorque = jacobian[1][0] * actuatorForce0 + jacobian[1][1] * actuatorForce1;
+        // tau = (J^T) * F
+        double pitchTorque  = jacobianTranspose[0][0] * actuatorForce0 + jacobianTranspose[0][1] * actuatorForce1;
+        double rollTorque = jacobianTranspose[1][0] * actuatorForce0 + jacobianTranspose[1][1] * actuatorForce1;
 
         jointData[0].setEffort(pitchTorque);
         jointData[1].setEffort(reflect * rollTorque);
@@ -92,8 +103,9 @@ public class EfficientPushRodTransmission implements PushRodTransmissionInterfac
         jacobian = efficientPushrodTransmissionJacobian.getUpdatedTransform(rollAngle, pitchAngle);
         invertMatrix(jacobian, jacobianInverse);
 
-        double rollVelocity  = jacobianInverse[0][0] * actuatorVelocity0 + jacobianInverse[0][1] * actuatorVelocity1;
-        double pitchVelocity = jacobianInverse[1][0] * actuatorVelocity0 + jacobianInverse[1][1] * actuatorVelocity1;
+        // theta_dot = J^-1 * x_dot
+        double pitchVelocity  = jacobianInverse[0][0] * actuatorVelocity0 + jacobianInverse[0][1] * actuatorVelocity1;
+        double rollVelocity = jacobianInverse[1][0] * actuatorVelocity0 + jacobianInverse[1][1] * actuatorVelocity1;
 
         jnt_data[0].setValidationVelocity(pitchVelocity);
         jnt_data[1].setValidationVelocity(reflect * rollVelocity);
@@ -119,13 +131,16 @@ public class EfficientPushRodTransmission implements PushRodTransmissionInterfac
         }
 
         jacobian = efficientPushrodTransmissionJacobian.getUpdatedTransform(rollAngle, pitchAngle);
-        invertMatrix(jacobian, jacobianInverse);
+        transposeMatrix(jacobian, jacobianTranspose);
+        invertMatrix(jacobianTranspose, jacobianInvertedTranspose);
 
-        double actuatorForce0 = jacobianInverse[0][0] * rollTorque + jacobianInverse[0][1] * pitchTorque;
-        double actuatorForce1 = jacobianInverse[1][0] * rollTorque + jacobianInverse[1][1] * pitchTorque;
+        // F = (J^T)^-1 * tau
+        double actuatorForce0 = jacobianInvertedTranspose[0][0] * pitchTorque + jacobianInvertedTranspose[0][1] * rollTorque;
+        double actuatorForce1 = jacobianInvertedTranspose[1][0] * pitchTorque + jacobianInvertedTranspose[1][1] * rollTorque;
 
         checkInfinity(actuatorForce0);
         checkInfinity(actuatorForce1);
+        
         actuatorData[0].setEffortCommand(actuatorForce0);
         actuatorData[1].setEffortCommand(actuatorForce1);
     }
