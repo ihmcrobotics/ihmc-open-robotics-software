@@ -23,7 +23,7 @@ import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 
 public class ComparePushRodTransmissionsTest
 {
-   private static final boolean DEBUG = false;
+   private static final boolean DEBUG = true;
    private static final boolean VISUALIZE = false;
    
    @Test

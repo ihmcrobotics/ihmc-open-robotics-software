@@ -99,14 +99,14 @@ public class ClosedFormJacobianTest
       {
          double[][] J = closedFormJacobianAnkle.getUpdatedTransform( -roll[i], -pitch[i]);
          if (DEBUG){
-            System.out.println("m11_java: " + J[0][0] + ", m12_java: " + J[0][1] + ", m21_java: " + J[1][0] + ", m22_java: " + J[1][1]);
-            System.out.println("m11_matlab: " + m12_matlab[i] + ", m12_matlab: " + m11_matlab[i] + ", m21_matlab: " + -m22_matlab[i] + ", m22_matlab: " + -m21_matlab[i]);         
+            System.out.println("java: " + J[0][0] + ", " + J[0][1] + ", " + J[1][0] + ", " + J[1][1]);
+            System.out.println("matlab: " + -m21_matlab[i] + ", " + -m11_matlab[i] + ", " + -m22_matlab[i] + ", " + -m12_matlab[i]);         
             System.out.println(" ");
          }
-         assertEquals(J[0][0], -m11_matlab[i], TOLERANCE);
-         assertEquals(J[0][1], -m12_matlab[i], TOLERANCE);
-         assertEquals(J[1][0], -m21_matlab[i], TOLERANCE);
-         assertEquals(J[1][1], -m22_matlab[i], TOLERANCE);
+         assertEquals(J[0][0], -m21_matlab[i], TOLERANCE);
+         assertEquals(J[0][1], -m11_matlab[i], TOLERANCE);
+         assertEquals(J[1][0], -m22_matlab[i], TOLERANCE);
+         assertEquals(J[1][1], -m12_matlab[i], TOLERANCE);
       }
    }
 
@@ -118,12 +118,13 @@ public class ClosedFormJacobianTest
       for (int i = 0; i < 7; i++)
       {
          double[][] J = closedFormJacobianAnkle.getUpdatedTransform( roll[i], pitch[i]);    // + 7.5*Math.PI/180.0);
-         double m11_will = J[1][1];
-         double m12_will = J[1][0];
-         double m21_will =  J[0][1];
-         double m22_will =  J[0][0];
+         double m11_will = J[0][0];
+         double m12_will = J[0][1];
+         double m21_will =  J[1][0];
+         double m22_will =  J[1][1];
 
          double[][] inefficientJacobian = new double[2][2];
+         
          inefficientButReadablePushrodTransmission.computeJacobian(inefficientJacobian, pitch[i], roll[i]);
 
          double m11_jerry = inefficientJacobian[0][0];
@@ -133,13 +134,14 @@ public class ClosedFormJacobianTest
 
          if(DEBUG)
          {
-            System.out.println("m11_will = " + m11_will + ", m12_will = " + m12_will + ", m21_will = " + m21_will + ", m22_will = " + m22_will);
-            System.out.println("m11_jerry = " + m11_jerry + ", m12_jerry = " + m12_jerry + ", m21_jerry = " + m21_jerry + ", m22_jerry = " + m22_jerry);
+            System.out.println("will:" + m11_will + ", " + m12_will + ", " + m21_will + ", = " + m22_will);
+            System.out.println("jerry:" + m12_jerry + ", " + m22_jerry + ", " + m11_jerry + ", = " + m21_jerry);
          }
-         assertEquals(m11_will, m11_jerry, TOLERANCE);
-         assertEquals(m12_will, m12_jerry, TOLERANCE);
-         assertEquals(m21_will, m21_jerry, TOLERANCE);
-         assertEquals(m22_will, m22_jerry, TOLERANCE);
+         //Jerry's Jacobian starts off transposed whereas Will's does not.
+         assertEquals(m11_will, m12_jerry, TOLERANCE);
+         assertEquals(m12_will, m22_jerry, TOLERANCE);
+         assertEquals(m21_will, m11_jerry, TOLERANCE);
+         assertEquals(m22_will, m21_jerry, TOLERANCE);
       }
    }
 
@@ -149,7 +151,7 @@ public void testJacobianMatchesMATLABWaist()
    for (int i = 0; i < 7; i++)
    {
       double[][] J = closedFormJacobianWaist.getUpdatedTransform( roll[i], pitch[i] );
-      if(true){
+      if(DEBUG){
          System.out.println("m11_java: " + J[0][0] + ", m12_java: " + J[0][1] + ", m21_java: " + J[1][0] + ", m22_java: " + J[1][1]);
          System.out.println("m11_matlab: " + m12_matlab_waist[i] + ", m12_matlab: " + m11_matlab_waist[i] + ", m21_matlab: " + -m22_matlab_waist[i] + ", m22_matlab: " + -m21_matlab_waist[i]);         
       }
