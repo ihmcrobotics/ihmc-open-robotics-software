@@ -3,8 +3,8 @@ package us.ihmc.darpaRoboticsChallenge.sensors;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.math.YoVariableLimitChecker;
 
-import com.yobotics.simulationconstructionset.YoVariableLimitChecker;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
 
 /**
