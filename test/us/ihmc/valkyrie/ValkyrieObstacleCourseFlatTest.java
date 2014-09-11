@@ -33,7 +33,7 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    @Override
    protected DoubleYoVariable getPelvisOrientationErrorVariableName(SimulationConstructionSet scs)
    {
-      return (DoubleYoVariable) scs.getVariable("WalkingHighLevelHumanoidController.RootJointAngularAccelerationControlModule.v1PelvisAxisAngleOrientationController",
+      return (DoubleYoVariable) scs.getVariable("MomentumBasedControllerFactory.PelvisOrientationManager.RootJointAngularAccelerationControlModule.v1PelvisAxisAngleOrientationController",
                                                 "v1PelvisOrientationErrorMagnitude");
    }
 
