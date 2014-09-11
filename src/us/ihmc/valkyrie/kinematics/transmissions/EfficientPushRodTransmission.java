@@ -91,7 +91,8 @@ public class EfficientPushRodTransmission implements PushRodTransmissionInterfac
 
     @Override
     public void actuatorToJointVelocity(TurboDriver[] act_data, ValkyrieJointInterface[] jnt_data) {
-
+    	if(!efficientPushrodTransmissionJacobian.isUsingFuteks()){
+    		
         // Validation Velocity is used to validate the correct order and sign of the jacobian matrix elements.
         assertTrue((numActuators() == act_data.length) && (numJoints() == jnt_data.length));
 
@@ -109,6 +110,7 @@ public class EfficientPushRodTransmission implements PushRodTransmissionInterfac
 
         jnt_data[0].setValidationVelocity(pitchVelocity);
         jnt_data[1].setValidationVelocity(reflect * rollVelocity);
+    	}
     }
 
     @Override
