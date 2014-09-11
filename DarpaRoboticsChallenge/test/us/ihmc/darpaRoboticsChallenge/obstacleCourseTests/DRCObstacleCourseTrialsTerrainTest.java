@@ -25,8 +25,8 @@ import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimu
 public abstract class DRCObstacleCourseTrialsTerrainTest implements
 		MultiRobotTestInterface {
 	private static final Class<DRCObstacleCourseTrialsTerrainTest> thisClass = DRCObstacleCourseTrialsTerrainTest.class;
-	private static final boolean alwaysShowGUI = true;
-	private static final boolean KEEP_SCS_UP = true;
+	private static final boolean alwaysShowGUI = false;
+	private static final boolean KEEP_SCS_UP = false;
 
 	private static final boolean createMovie = BambooTools.doMovieCreation();
 	private static final boolean checkNothingChanged = BambooTools
