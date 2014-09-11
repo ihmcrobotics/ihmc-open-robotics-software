@@ -44,10 +44,10 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoFrameVector;
+import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
-import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFrameVector;
-import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 
 public class OldMomentumControlModule implements MomentumControlModule
 {

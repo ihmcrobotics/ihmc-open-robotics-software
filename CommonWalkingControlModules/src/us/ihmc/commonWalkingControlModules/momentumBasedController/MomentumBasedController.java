@@ -61,12 +61,12 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoFrameVector2d;
+import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
+import us.ihmc.yoUtilities.math.filters.RateLimitedYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector2d;
 
-import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoFrameVector2d;
-import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
-import com.yobotics.simulationconstructionset.util.math.filter.RateLimitedYoVariable;
 
 public class MomentumBasedController
 {

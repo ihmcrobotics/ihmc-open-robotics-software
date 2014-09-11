@@ -1,7 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.stateEstimation.kinematicsBasedStateEstimator;
 
 
-import static com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly;
+import static us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly;
 
 import java.util.List;
 
@@ -38,10 +38,10 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.yoUtilities.graphics.plotting.YoArtifactPosition;
+import us.ihmc.yoUtilities.math.filters.GlitchFilteredBooleanYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
-import com.yobotics.simulationconstructionset.util.math.filter.GlitchFilteredBooleanYoVariable;
 import com.yobotics.simulationconstructionset.util.statemachines.State;
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachine;
 import com.yobotics.simulationconstructionset.util.statemachines.StateMachineTools;

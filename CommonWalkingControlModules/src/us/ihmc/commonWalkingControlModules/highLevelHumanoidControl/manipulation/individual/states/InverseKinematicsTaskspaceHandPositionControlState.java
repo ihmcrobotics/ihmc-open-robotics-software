@@ -21,11 +21,11 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.yoUtilities.math.filters.RateLimitedYoVariable;
 import us.ihmc.yoUtilities.math.trajectories.PoseTrajectoryGenerator;
 
 import com.yobotics.simulationconstructionset.util.controller.PIDController;
 import com.yobotics.simulationconstructionset.util.controller.YoPIDGains;
-import com.yobotics.simulationconstructionset.util.math.filter.RateLimitedYoVariable;
 
 public class InverseKinematicsTaskspaceHandPositionControlState extends TaskspaceHandPositionControlState
 {

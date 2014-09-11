@@ -11,9 +11,9 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
 
-import com.yobotics.simulationconstructionset.util.math.filter.AlphaFilteredYoVariable;
 
 public class SimpleDesiredPelvisOrientationControlModule implements DesiredPelvisOrientationControlModule
 {

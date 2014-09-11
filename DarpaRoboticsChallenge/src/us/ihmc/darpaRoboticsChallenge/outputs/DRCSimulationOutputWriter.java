@@ -12,10 +12,10 @@ import us.ihmc.utilities.maps.ObjectObjectMap;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.math.filters.DelayedDoubleYoVariable;
 
 import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 import com.yobotics.simulationconstructionset.robotController.RawOutputWriter;
-import com.yobotics.simulationconstructionset.util.math.filter.DelayedDoubleYoVariable;
 
 public class DRCSimulationOutputWriter extends SDFPerfectSimulatedOutputWriter implements DRCOutputWriter
 {

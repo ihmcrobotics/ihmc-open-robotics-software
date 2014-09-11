@@ -23,11 +23,11 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.plotting.ArtifactList;
+import us.ihmc.yoUtilities.math.filters.GlitchFilteredBooleanYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFrameLine2d;
 
 import com.yobotics.simulationconstructionset.plotting.YoFrameLine2dArtifact;
 import com.yobotics.simulationconstructionset.time.GlobalTimer;
-import com.yobotics.simulationconstructionset.util.math.filter.GlitchFilteredBooleanYoVariable;
 
 
 public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpdater
