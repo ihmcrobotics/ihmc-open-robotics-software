@@ -30,10 +30,10 @@ import us.ihmc.yoUtilities.graphics.YoGraphic;
 import us.ihmc.yoUtilities.graphics.YoGraphicCoordinateSystem;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.yoUtilities.graphics.plotting.ArtifactList;
-import us.ihmc.yoUtilities.math.OrientationInterpolationCalculator;
 import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
+import us.ihmc.yoUtilities.math.interpolators.OrientationInterpolationCalculator;
 import us.ihmc.yoUtilities.math.trajectories.CartesianTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.YoMinimumJerkTrajectory;
 
