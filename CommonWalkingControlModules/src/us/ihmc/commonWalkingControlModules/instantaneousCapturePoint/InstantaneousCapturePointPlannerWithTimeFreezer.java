@@ -23,7 +23,10 @@ public class InstantaneousCapturePointPlannerWithTimeFreezer implements Instanta
    private final DoubleYoVariable previousTime = new DoubleYoVariable("previousTime", registry);
    private final DoubleYoVariable freezeTimeFactor = new DoubleYoVariable("freezeTimeFactor", "Set to 0.0 to turn off, 1.0 to completely freeze time", registry);
    private final double maxFreezeLineICPErrorWithoutTimeFreeze = 0.03; 
-   
+
+   private final FrameVector2d normalizedVelocityVector;
+   private final FrameVector2d vectorFromDesiredToActualICP;
+   private final FrameVector2d deltaICP;
    
    private final InstantaneousCapturePointPlanner instantaneousCapturePointPlanner;
    
@@ -31,10 +34,14 @@ public class InstantaneousCapturePointPlannerWithTimeFreezer implements Instanta
    {
       this.instantaneousCapturePointPlanner = instantaneousCapturePointPlanner;
       
+      normalizedVelocityVector = new FrameVector2d(ReferenceFrame.getWorldFrame());
+      vectorFromDesiredToActualICP = new FrameVector2d(ReferenceFrame.getWorldFrame());
+      deltaICP = new FrameVector2d(ReferenceFrame.getWorldFrame());
+      
       parentRegistry.addChild(registry);
       timeDelay.set(0.0);
       freezeTimeFactor.set(0.9); 
-      maxICPErrorForStartingSwing.set(0.02); 
+      maxICPErrorForStartingSwing.set(0.035); 
    }
    
    public void initializeSingleSupport(TransferToAndNextFootstepsData transferToAndNextFootstepsData, double initialTime)
@@ -76,8 +83,8 @@ public class InstantaneousCapturePointPlannerWithTimeFreezer implements Instanta
       }
       else if ((getEstimatedTimeRemainingForState(time) < 0.1) && 
             (instantaneousCapturePointPlanner.isPerformingICPDoubleSupport()) && 
-            //            (icpError.getDoubleValue() > maxICPErrorForStartingSwing.getDoubleValue()))
-            (icpDistanceToFreezeLine.getDoubleValue() > maxICPErrorForStartingSwing.getDoubleValue()))
+            (icpDistanceToFreezeLine.getDoubleValue() > maxICPErrorForStartingSwing.getDoubleValue()) &&
+            Double.isNaN(icpDistanceToFreezeLine.getDoubleValue()))
       {
          freezeTime(time, 1.0);
       }
@@ -89,14 +96,12 @@ public class InstantaneousCapturePointPlannerWithTimeFreezer implements Instanta
       
       previousTime.set(time);
    }
-
-   private FrameVector2d normalizedVelocityVector = new FrameVector2d(ReferenceFrame.getWorldFrame());
-   private FrameVector2d vectorFromDesiredToActualICP = new FrameVector2d(ReferenceFrame.getWorldFrame());
-   private FrameVector2d deltaICP = new FrameVector2d(ReferenceFrame.getWorldFrame());
    
    private double computeDistanceFromFreezeLine(FramePoint2d icpPostionToPack, FrameVector2d icpVelocityToPack, FramePoint2d actualICP)
    {
       normalizedVelocityVector.setIncludingFrame(icpVelocityToPack);
+      //If the icp velocity is zero, this normalize will return NaN. In this 
+      //case, the comparison with another double will return false.
       normalizedVelocityVector.normalize();
             
       vectorFromDesiredToActualICP.setIncludingFrame(actualICP);
@@ -106,6 +111,7 @@ public class InstantaneousCapturePointPlannerWithTimeFreezer implements Instanta
       
       deltaICP.setIncludingFrame(normalizedVelocityVector);
       deltaICP.scale(distance);
+      
       return -distance;
    }
 
