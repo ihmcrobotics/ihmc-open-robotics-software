@@ -19,8 +19,8 @@ import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 import us.ihmc.utilities.screwTheory.TotalMassCalculator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.math.MatrixYoVariableConversionTools;
 
-import com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools;
 
 /**
  * @author twan
