@@ -1,17 +1,17 @@
 package us.ihmc.kalman;
 
-import static com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools.checkPositiveSemiDefinite;
-import static com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools.getFromYoVariablesMatrix;
-import static com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools.getFromYoVariablesSymmetric;
-import static com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools.getFromYoVariablesVector;
-import static com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools.populateYoVariablesMatrix;
-import static com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools.populateYoVariablesSymmetricMatrix;
-import static com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools.populateYoVariablesVector;
-import static com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools.storeInYoVariablesMatrix;
-import static com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools.storeInYoVariablesSymmetric;
-import static com.yobotics.simulationconstructionset.util.MatrixYoVariableConversionTools.storeInYoVariablesVector;
 import static org.ejml.ops.CommonOps.addEquals;
 import static us.ihmc.utilities.CheckTools.checkMatrixDimensions;
+import static us.ihmc.yoUtilities.math.MatrixYoVariableConversionTools.checkPositiveSemiDefinite;
+import static us.ihmc.yoUtilities.math.MatrixYoVariableConversionTools.getFromYoVariablesMatrix;
+import static us.ihmc.yoUtilities.math.MatrixYoVariableConversionTools.getFromYoVariablesSymmetric;
+import static us.ihmc.yoUtilities.math.MatrixYoVariableConversionTools.getFromYoVariablesVector;
+import static us.ihmc.yoUtilities.math.MatrixYoVariableConversionTools.populateYoVariablesMatrix;
+import static us.ihmc.yoUtilities.math.MatrixYoVariableConversionTools.populateYoVariablesSymmetricMatrix;
+import static us.ihmc.yoUtilities.math.MatrixYoVariableConversionTools.populateYoVariablesVector;
+import static us.ihmc.yoUtilities.math.MatrixYoVariableConversionTools.storeInYoVariablesMatrix;
+import static us.ihmc.yoUtilities.math.MatrixYoVariableConversionTools.storeInYoVariablesSymmetric;
+import static us.ihmc.yoUtilities.math.MatrixYoVariableConversionTools.storeInYoVariablesVector;
 
 import java.util.ArrayList;
 import java.util.List;
