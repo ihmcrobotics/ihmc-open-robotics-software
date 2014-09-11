@@ -3,8 +3,8 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
+import us.ihmc.yoUtilities.stateMachines.StateTransitionAction;
 
-import com.yobotics.simulationconstructionset.util.statemachines.StateTransitionAction;
 
 public class FootStateTransitionAction implements StateTransitionAction
 {

@@ -16,9 +16,9 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.trajectories.PositionTrajectoryGenerator;
+import us.ihmc.yoUtilities.stateMachines.State;
 
 import com.yobotics.simulationconstructionset.util.controller.PositionController;
-import com.yobotics.simulationconstructionset.util.statemachines.State;
 
 /**
  * @author twan

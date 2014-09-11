@@ -7,8 +7,8 @@ import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.stateMachines.State;
 
-import com.yobotics.simulationconstructionset.util.statemachines.State;
 
 public abstract class TaskspaceHandControlState extends State<HandControlState>
 {

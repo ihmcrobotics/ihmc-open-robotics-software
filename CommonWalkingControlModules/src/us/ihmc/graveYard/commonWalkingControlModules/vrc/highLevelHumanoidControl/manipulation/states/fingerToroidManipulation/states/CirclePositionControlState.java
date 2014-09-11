@@ -16,9 +16,9 @@ import us.ihmc.yoUtilities.math.trajectories.CirclePositionTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.OrientationTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.PositionTrajectoryGenerator;
+import us.ihmc.yoUtilities.stateMachines.State;
 
 import com.yobotics.simulationconstructionset.util.controller.SE3PIDGains;
-import com.yobotics.simulationconstructionset.util.statemachines.State;
 
 
 public class CirclePositionControlState extends State<FingerToroidManipulationState>

@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.stateMachines.State;
 
-import com.yobotics.simulationconstructionset.util.statemachines.State;
 
 public abstract class HighLevelBehavior extends State<HighLevelState>
 {
