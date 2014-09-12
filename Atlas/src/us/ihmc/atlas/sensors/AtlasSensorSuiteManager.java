@@ -4,6 +4,7 @@ import java.net.URI;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
+import us.ihmc.communication.packets.walking.SnapFootstepPacket;
 import us.ihmc.communication.producers.RobotPoseBuffer;
 import us.ihmc.communication.util.DRCSensorParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
@@ -31,6 +32,7 @@ import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.darpaRoboticsChallenge.sensors.multisense.MultiSenseSensorManager;
 import us.ihmc.utilities.net.LocalObjectCommunicator;
 import us.ihmc.utilities.net.ObjectCommunicator;
+import us.ihmc.utilities.ros.RosFootstepServiceClient;
 import us.ihmc.utilities.ros.RosMainNode;
 
 public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
@@ -68,6 +70,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       RosMainNode rosMainNode;
       RosTfPublisher tfPublisher;
       
+      
       if (DRCConfigParameters.SEND_SIMULATION_DATA_TO_ROS)
       {
          rosMainNode = new RosMainNode(rosCoreURI,
@@ -89,6 +92,10 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
          new RosRobotPosePublisher(fieldObjectCommunicator, rosMainNode, ppsTimestampOffsetProvider, robotPoseBuffer, sensorInformation, "atlas", tfPublisher);
          new RosRobotJointStatePublisher(fieldObjectCommunicator, rosMainNode, ppsTimestampOffsetProvider, "atlas");
          new RosLocalizationUpdateSubscriber(rosMainNode, fieldObjectCommunicator, ppsTimestampOffsetProvider);
+         
+         
+         RosFootstepServiceClient rosFootstepServiceClient = new RosFootstepServiceClient(fieldObjectCommunicator, rosMainNode);
+         //networkingManager.getControllerStateHandler(). method to send packet to UI????
 
          ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
          rosMainNode.execute();
