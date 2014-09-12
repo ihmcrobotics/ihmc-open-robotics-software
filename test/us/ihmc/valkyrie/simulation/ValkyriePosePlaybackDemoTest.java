@@ -34,9 +34,9 @@ import us.ihmc.utilities.screwTheory.TotalMassCalculator;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.posePlayback.ValkyrieWarmupPoseSequencePacket;
 import us.ihmc.yoUtilities.controllers.GainCalculator;
+import us.ihmc.yoUtilities.time.GlobalTimer;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.time.GlobalTimer;
 import com.yobotics.simulationconstructionset.util.ground.FlatGroundProfile;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
