@@ -349,11 +349,11 @@ public class ClosedFormJacobian
            
            double m11 = m11v.getX() / length;
            double m12 = m12v.getX() / length;
-           double m21 = -m21v.getY() / length;
-           double m22 = -m22v.getY() / length;
+           double m21 = m21v.getY() / length;
+           double m22 = m22v.getY() / length;
            
-           output[0][0] = -m21; output[0][1] = -m22;
-           output[1][0] = -m11;  output[1][1] = -m12;
+           output[0][0] = -m11;  output[0][1] = -m12;
+           output[1][0] = -m21;  output[1][1] = -m22;
            break;
            
         }else{
@@ -398,6 +398,18 @@ public class ClosedFormJacobian
    
    public boolean isUsingFuteks(){
 	   return useFuteks;
+   }
+   
+   public double cosineOfTheta5(){
+	   double cosine;
+	   cosine = Math.abs(t5SecondFrame.get(2)-b5SecondFrame.get(2))/length;
+	   return cosine;
+   }
+   
+   public double cosineOfTheta6(){
+	   double cosine;
+	   cosine = Math.abs(t6SecondFrame.get(2)-b6SecondFrame.get(2))/length;
+	   return cosine;
    }
 
 }
