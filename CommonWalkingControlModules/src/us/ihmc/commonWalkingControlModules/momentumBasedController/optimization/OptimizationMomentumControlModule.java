@@ -43,8 +43,8 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.yoUtilities.time.ExecutionTimer;
 
-import com.yobotics.simulationconstructionset.time.ExecutionTimer;
 
 /**
  * @author twan
