@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
+import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
-import com.yobotics.simulationconstructionset.util.controller.YoSE3PIDGains;
 
 public class YoFootSE3Gains implements YoSE3PIDGains
 {

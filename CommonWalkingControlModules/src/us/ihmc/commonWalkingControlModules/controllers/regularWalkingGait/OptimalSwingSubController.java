@@ -33,6 +33,7 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.yoUtilities.controllers.PDController;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -48,7 +49,6 @@ import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 import us.ihmc.yoUtilities.math.interpolators.QuinticSplineInterpolator;
 import us.ihmc.yoUtilities.math.trajectories.YoMinimumJerkTrajectory;
 
-import com.yobotics.simulationconstructionset.util.controller.PDController;
 
 public class OptimalSwingSubController implements SwingSubController
 {

@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.configurations;
 
+import us.ihmc.yoUtilities.controllers.YoOrientationPIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
-import com.yobotics.simulationconstructionset.util.controller.YoOrientationPIDGains;
 
 public interface HeadOrientationControllerParameters
 {

@@ -9,12 +9,12 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
+import us.ihmc.yoUtilities.controllers.SE3PIDController;
+import us.ihmc.yoUtilities.controllers.SE3PIDGains;
+import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
-import com.yobotics.simulationconstructionset.util.controller.SE3PIDController;
-import com.yobotics.simulationconstructionset.util.controller.SE3PIDGains;
-import com.yobotics.simulationconstructionset.util.controller.YoSE3PIDGains;
 
 public class RigidBodySpatialAccelerationControlModule
 {

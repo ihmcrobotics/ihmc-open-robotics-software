@@ -17,11 +17,11 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
+import us.ihmc.yoUtilities.controllers.YoAxisAngleOrientationGains;
+import us.ihmc.yoUtilities.controllers.YoOrientationPIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 
-import com.yobotics.simulationconstructionset.util.controller.YoAxisAngleOrientationGains;
-import com.yobotics.simulationconstructionset.util.controller.YoOrientationPIDGains;
 
 public abstract class DegenerateOrientationControlModule
 {

@@ -14,6 +14,8 @@ import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RevoluteJoint;
 import us.ihmc.utilities.screwTheory.ScrewTools;
+import us.ihmc.yoUtilities.controllers.PIDController;
+import us.ihmc.yoUtilities.controllers.YoPIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -21,8 +23,6 @@ import us.ihmc.yoUtilities.math.filters.RateLimitedYoVariable;
 import us.ihmc.yoUtilities.math.trajectories.DoubleTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.OneDoFJointQuinticTrajectoryGenerator;
 
-import com.yobotics.simulationconstructionset.util.controller.PIDController;
-import com.yobotics.simulationconstructionset.util.controller.YoPIDGains;
 
 public class JointSpaceHandControlState extends AbstractJointSpaceHandControlState
 {

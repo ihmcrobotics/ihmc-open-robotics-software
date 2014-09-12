@@ -2,12 +2,12 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
 import org.ejml.data.DenseMatrix64F;
 
-import com.yobotics.simulationconstructionset.util.controller.YoOrientationPIDGains;
 
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodyOrientationControlModule;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.yoUtilities.controllers.YoOrientationPIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
