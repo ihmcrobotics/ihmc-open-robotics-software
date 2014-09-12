@@ -108,7 +108,7 @@ public class DRCSimulationFactory
       
       
       drcEstimatorThread = new DRCEstimatorThread(drcRobotModel, sensorReaderFactory, threadDataSynchronizer, globalDataProducer,
-            null, drcRobotModel.getEstimatorDT(), gravity);
+            null, gravity);
 
       drcControllerThread = new DRCControllerThread(drcRobotModel, controllerFactory, threadDataSynchronizer, drcOutputWriter,
             globalDataProducer, null, gravity);
