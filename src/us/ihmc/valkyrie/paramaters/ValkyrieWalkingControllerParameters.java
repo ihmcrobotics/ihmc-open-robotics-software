@@ -2,9 +2,6 @@ package us.ihmc.valkyrie.paramaters;
 
 import javax.media.j3d.Transform3D;
 
-import com.yobotics.simulationconstructionset.util.controller.YoOrientationPIDGains;
-import com.yobotics.simulationconstructionset.util.controller.YoSE3PIDGains;
-import com.yobotics.simulationconstructionset.util.controller.YoSymmetricSE3PIDGains;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
@@ -13,6 +10,9 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
+import us.ihmc.yoUtilities.controllers.YoOrientationPIDGains;
+import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
+import us.ihmc.yoUtilities.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class ValkyrieWalkingControllerParameters implements WalkingControllerParameters
