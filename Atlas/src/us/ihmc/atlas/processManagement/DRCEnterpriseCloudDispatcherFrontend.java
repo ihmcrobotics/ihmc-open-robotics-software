@@ -35,8 +35,8 @@ import javax.swing.text.PlainDocument;
 
 import us.ihmc.atlas.AtlasOperatorUserInterface;
 import us.ihmc.atlas.AtlasRobotModelFactory;
-import us.ihmc.behaviors.BehaviorNetworkManager;
 import us.ihmc.communication.util.NetworkConfigParameters;
+import us.ihmc.humanoidBehaviors.behaviorManager.BehaviorNetworkManager;
 import us.ihmc.utilities.fixedPointRepresentation.UnsignedByteTools;
 import us.ihmc.utilities.gui.IHMCSwingTools;
 import us.ihmc.utilities.net.NetStateListener;
