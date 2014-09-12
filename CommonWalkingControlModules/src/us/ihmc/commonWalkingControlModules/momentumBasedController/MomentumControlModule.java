@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.D
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumControlModuleException;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.Wrench;
 
@@ -35,6 +36,8 @@ public interface MomentumControlModule
    public abstract void setDesiredSpatialAcceleration(DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand);
    public abstract void setDesiredPointAcceleration(DesiredPointAccelerationCommand desiredPointAccelerationCommand);
 
+   public abstract void setFootCoPControlData(RobotSide side, ReferenceFrame frame);
+   
    // Known external wrenches
    public abstract void setExternalWrenchToCompensateFor(RigidBody rigidBody, Wrench wrench);
 

@@ -28,7 +28,7 @@ public interface MomentumOptimizerInterface
                          DenseMatrix64F WRho, DenseMatrix64F Lambda,
                          DenseMatrix64F RhoSmoother, DenseMatrix64F rhoPrevAvg, DenseMatrix64F WRhoCop,
                          DenseMatrix64F QRho, DenseMatrix64F c,
-                         DenseMatrix64F rhoMin
+                         DenseMatrix64F rhoMin, DenseMatrix64F QfeetCoP
                          );
 
    public abstract int solve() throws NoConvergenceException;

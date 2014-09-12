@@ -38,6 +38,7 @@ public class ActiveSetQPMomentumOptimizer extends QPMomentumOptimizer implements
 
          loadNativeLibraries();
          initializeNative(nDoF, MAX_ITER);
+         
    }
 
    public void setSaveNoConvergeProblem(boolean saveNoConvergeProblem)
@@ -165,7 +166,7 @@ public class ActiveSetQPMomentumOptimizer extends QPMomentumOptimizer implements
          double[] QRho, double[] c, double[] rhoMin,
          double[] vd, double[] rho,
          int[] activeSet);
-
+   
    public interface JnaInterface extends Library
    {
       int solveNative(
@@ -182,7 +183,7 @@ public class ActiveSetQPMomentumOptimizer extends QPMomentumOptimizer implements
       JnaInterface INSTANCE = (JnaInterface) Native.loadLibrary("ActiveSetQPMomentumOptimizer_rel", JnaInterface.class);
    }
 
-
+   
    
    static String[] nativeLibraryCandidates = {"ActiveSetQPMomentumOptimizer_rel","ActiveSetQPMomentumOptimizer_msz","ActiveSetQPMomentumOptimizer"};
    /*

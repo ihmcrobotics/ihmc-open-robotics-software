@@ -278,6 +278,11 @@ public class MomentumControlModuleBridge implements MomentumControlModule
    {
       momentumModuleDataObject.setExternalWrenchToCompensateFor(rigidBody, wrench);
    }
+   
+   public void setFootCoPControlData(RobotSide side, ReferenceFrame frame)
+   {
+      activeMomentumControlModule.setFootCoPControlData(side, frame);
+   }
 
    public MomentumModuleSolution compute(Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates, RobotSide upcomingSupportSide)
            throws MomentumControlModuleException
