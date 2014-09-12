@@ -170,11 +170,19 @@ public class PlaneContactWrenchMatrixCalculator
                wRhoMatrix.set(iRho, iRho, wRho.getDoubleValue());
                wRhoSmootherMatrix.set(iRho, iRho, wRhoSmoother.getDoubleValue());
                
-               if(planeContactState.getPlaneFrame() == footCoPReferenceFrame.getParent())
+               if (footCoPReferenceFrame != null)
                {
-                  computeCoPBasisVector(planeContactState, contactPoint, k);
-                  qFeetCoP.set(0, iRho, currentBasisVectorCoP.getAngularPartX());
-                  qFeetCoP.set(1, iRho, currentBasisVectorCoP.getAngularPartY());
+                  if (planeContactState.getPlaneFrame() == footCoPReferenceFrame.getParent())
+                  {
+                     computeCoPBasisVector(planeContactState, contactPoint, k);
+                     qFeetCoP.set(0, iRho, currentBasisVectorCoP.getAngularPartX());
+                     qFeetCoP.set(1, iRho, currentBasisVectorCoP.getAngularPartY());
+                  }
+                  else
+                  {
+                     qFeetCoP.set(0, iRho, 0.0);
+                     qFeetCoP.set(1, iRho, 0.0);
+                  }
                }
                else
                {
