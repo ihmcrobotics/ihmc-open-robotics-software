@@ -1,9 +1,5 @@
 package us.ihmc.atlas.ObstacleCourseTests;
 
-import static org.junit.Assert.fail;
-
-import org.junit.Test;
-
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.bambooTools.BambooTools;
@@ -24,11 +20,4 @@ public class AtlasObstacleCourseTrialsWalkingTaskTest extends DRCObstacleCourseT
    {
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
-   
-   @Test
-   public void failTest()
-   {
-	   fail();
-   }
-
 }
