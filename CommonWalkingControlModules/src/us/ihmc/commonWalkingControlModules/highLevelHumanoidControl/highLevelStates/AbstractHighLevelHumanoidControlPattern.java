@@ -29,13 +29,13 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
+import us.ihmc.yoUtilities.controllers.GainCalculator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.trajectories.CubicPolynomialTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.providers.YoVariableDoubleProvider;
 
-import com.yobotics.simulationconstructionset.util.controller.GainCalculator;
 
 public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelBehavior
 {

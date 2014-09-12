@@ -22,12 +22,12 @@ import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 import us.ihmc.utilities.screwTheory.Twist;
+import us.ihmc.yoUtilities.controllers.GainCalculator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.trajectories.providers.YoVariableDoubleProvider;
 
-import com.yobotics.simulationconstructionset.util.controller.GainCalculator;
 
 public class OnToesState extends AbstractFootControlState
 {

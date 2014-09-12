@@ -25,6 +25,7 @@ import us.ihmc.utilities.math.trajectories.providers.TrajectoryParameters;
 import us.ihmc.utilities.math.trajectories.providers.TrajectoryParametersProvider;
 import us.ihmc.utilities.math.trajectories.providers.VectorProvider;
 import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -35,7 +36,6 @@ import us.ihmc.yoUtilities.math.trajectories.WrapperForMultiplePositionTrajector
 import us.ihmc.yoUtilities.math.trajectories.providers.YoSE3ConfigurationProvider;
 import us.ihmc.yoUtilities.math.trajectories.providers.YoVariableDoubleProvider;
 
-import com.yobotics.simulationconstructionset.util.controller.YoSE3PIDGains;
 
 public class SwingState extends AbstractUnconstrainedState
 {

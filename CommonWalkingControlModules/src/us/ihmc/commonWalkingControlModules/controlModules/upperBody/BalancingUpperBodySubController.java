@@ -28,6 +28,7 @@ import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.Wrench;
+import us.ihmc.yoUtilities.controllers.PIDController;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -43,7 +44,6 @@ import us.ihmc.yoUtilities.stateMachines.StateMachine;
 import us.ihmc.yoUtilities.stateMachines.StateTransition;
 import us.ihmc.yoUtilities.stateMachines.StateTransitionCondition;
 
-import com.yobotics.simulationconstructionset.util.controller.PIDController;
 
 public class BalancingUpperBodySubController implements UpperBodySubController
 {

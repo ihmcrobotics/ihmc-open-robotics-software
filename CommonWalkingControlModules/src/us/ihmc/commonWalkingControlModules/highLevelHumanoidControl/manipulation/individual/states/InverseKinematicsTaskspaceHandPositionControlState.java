@@ -17,6 +17,8 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RevoluteJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
+import us.ihmc.yoUtilities.controllers.PIDController;
+import us.ihmc.yoUtilities.controllers.YoPIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -24,8 +26,6 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.filters.RateLimitedYoVariable;
 import us.ihmc.yoUtilities.math.trajectories.PoseTrajectoryGenerator;
 
-import com.yobotics.simulationconstructionset.util.controller.PIDController;
-import com.yobotics.simulationconstructionset.util.controller.YoPIDGains;
 
 public class InverseKinematicsTaskspaceHandPositionControlState extends TaskspaceHandPositionControlState
 {

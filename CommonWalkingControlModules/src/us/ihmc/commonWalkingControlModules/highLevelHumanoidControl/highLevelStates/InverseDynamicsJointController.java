@@ -42,6 +42,8 @@ import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.utilities.screwTheory.TotalMassCalculator;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.utilities.screwTheory.Wrench;
+import us.ihmc.yoUtilities.controllers.GainCalculator;
+import us.ihmc.yoUtilities.controllers.PDController;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -58,8 +60,6 @@ import us.ihmc.yoUtilities.math.frames.YoFrameQuaternion;
 import us.ihmc.yoUtilities.math.trajectories.ConstantPoseTrajectoryGenerator;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.util.controller.GainCalculator;
-import com.yobotics.simulationconstructionset.util.controller.PDController;
 import com.yobotics.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
 
 /**

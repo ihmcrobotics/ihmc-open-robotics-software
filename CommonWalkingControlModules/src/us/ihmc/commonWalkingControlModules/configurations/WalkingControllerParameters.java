@@ -4,10 +4,10 @@ import javax.media.j3d.Transform3D;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.yoUtilities.controllers.YoOrientationPIDGains;
+import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
-import com.yobotics.simulationconstructionset.util.controller.YoOrientationPIDGains;
-import com.yobotics.simulationconstructionset.util.controller.YoSE3PIDGains;
 
 public interface WalkingControllerParameters extends HeadOrientationControllerParameters
 {

@@ -31,6 +31,9 @@ import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.utilities.screwTheory.Wrench;
+import us.ihmc.yoUtilities.controllers.AxisAngleOrientationController;
+import us.ihmc.yoUtilities.controllers.EuclideanPositionController;
+import us.ihmc.yoUtilities.controllers.GainCalculator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
@@ -44,9 +47,6 @@ import us.ihmc.yoUtilities.math.trajectories.StraightLinePositionTrajectoryGener
 import us.ihmc.yoUtilities.math.trajectories.providers.YoPositionProvider;
 import us.ihmc.yoUtilities.math.trajectories.providers.YoVariableDoubleProvider;
 
-import com.yobotics.simulationconstructionset.util.controller.AxisAngleOrientationController;
-import com.yobotics.simulationconstructionset.util.controller.EuclideanPositionController;
-import com.yobotics.simulationconstructionset.util.controller.GainCalculator;
 
 /**
  * @author twan

@@ -15,11 +15,11 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
+import us.ihmc.yoUtilities.controllers.YoOrientationPIDGains;
+import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
+import us.ihmc.yoUtilities.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
-import com.yobotics.simulationconstructionset.util.controller.YoOrientationPIDGains;
-import com.yobotics.simulationconstructionset.util.controller.YoSE3PIDGains;
-import com.yobotics.simulationconstructionset.util.controller.YoSymmetricSE3PIDGains;
 
 
 public class AtlasWalkingControllerParameters implements WalkingControllerParameters

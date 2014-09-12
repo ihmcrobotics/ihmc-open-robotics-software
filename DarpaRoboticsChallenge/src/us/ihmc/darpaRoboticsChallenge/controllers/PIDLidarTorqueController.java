@@ -1,12 +1,12 @@
 package us.ihmc.darpaRoboticsChallenge.controllers;
 
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.yoUtilities.controllers.PIDController;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 import com.yobotics.simulationconstructionset.OneDegreeOfFreedomJoint;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
-import com.yobotics.simulationconstructionset.util.controller.PIDController;
 
 public class PIDLidarTorqueController implements RobotController
 {

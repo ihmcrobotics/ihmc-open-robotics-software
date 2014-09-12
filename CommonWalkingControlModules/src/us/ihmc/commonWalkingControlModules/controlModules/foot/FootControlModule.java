@@ -26,6 +26,8 @@ import us.ihmc.utilities.math.trajectories.providers.TrajectoryParameters;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
+import us.ihmc.yoUtilities.controllers.GainCalculator;
+import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -35,8 +37,6 @@ import us.ihmc.yoUtilities.stateMachines.State;
 import us.ihmc.yoUtilities.stateMachines.StateMachine;
 import us.ihmc.yoUtilities.stateMachines.StateTransition;
 
-import com.yobotics.simulationconstructionset.util.controller.GainCalculator;
-import com.yobotics.simulationconstructionset.util.controller.YoSE3PIDGains;
 
 public class FootControlModule
 {

@@ -11,6 +11,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
+import us.ihmc.yoUtilities.controllers.PositionController;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
@@ -18,7 +19,6 @@ import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.yoUtilities.stateMachines.State;
 
-import com.yobotics.simulationconstructionset.util.controller.PositionController;
 
 /**
  * @author twan

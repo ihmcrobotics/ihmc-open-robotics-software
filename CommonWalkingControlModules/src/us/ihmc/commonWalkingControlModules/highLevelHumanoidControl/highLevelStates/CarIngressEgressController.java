@@ -35,6 +35,7 @@ import us.ihmc.utilities.math.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.utilities.math.trajectories.providers.PositionProvider;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialMotionVector;
+import us.ihmc.yoUtilities.controllers.GainCalculator;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -46,7 +47,6 @@ import us.ihmc.yoUtilities.math.trajectories.StraightLinePositionTrajectoryGener
 import us.ihmc.yoUtilities.math.trajectories.providers.YoPositionProvider;
 import us.ihmc.yoUtilities.math.trajectories.providers.YoQuaternionProvider;
 
-import com.yobotics.simulationconstructionset.util.controller.GainCalculator;
 
 public class CarIngressEgressController extends AbstractHighLevelHumanoidControlPattern
 {

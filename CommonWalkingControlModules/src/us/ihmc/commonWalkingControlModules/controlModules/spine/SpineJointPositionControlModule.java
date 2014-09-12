@@ -7,10 +7,10 @@ import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineTorques;
 import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.utilities.containers.ContainerTools;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
+import us.ihmc.yoUtilities.controllers.PIDController;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-import com.yobotics.simulationconstructionset.util.controller.PIDController;
 
 public class SpineJointPositionControlModule implements SpineControlModule
 {

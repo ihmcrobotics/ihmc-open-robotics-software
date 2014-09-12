@@ -12,6 +12,7 @@ import us.ihmc.utilities.math.geometry.OriginAndPointFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.yoUtilities.controllers.YoOrientationPIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
@@ -21,7 +22,6 @@ import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameQuaternion;
 
-import com.yobotics.simulationconstructionset.util.controller.YoOrientationPIDGains;
 
 public class HeadOrientationControlModule extends DegenerateOrientationControlModule
 {
