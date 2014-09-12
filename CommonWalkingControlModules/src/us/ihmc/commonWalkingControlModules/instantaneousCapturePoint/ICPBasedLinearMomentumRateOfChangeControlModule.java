@@ -21,6 +21,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
+import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 
 public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractControlFlowElement implements ICPBasedMomentumRateOfChangeControlModule
@@ -42,6 +43,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
    private final ReferenceFrame centerOfMassFrame;
 
    private final YoFramePoint2d controlledCMP = new YoFramePoint2d("controlledCMP", "", worldFrame, registry);
+   private final YoFrameVector controlledCoMAcceleration;
 
    private final double totalMass;
    private final FramePoint centerOfMass;
@@ -68,6 +70,9 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
 
       // hide CoP since we won't be calculating it explicitly in this class
       visualizer.setDesiredCoP(new FramePoint2d(controlledCMP.getReferenceFrame(), Double.NaN, Double.NaN));
+      
+      controlledCoMAcceleration = new YoFrameVector("controlledCoMAcceleration", "", centerOfMassFrame, registry);
+
    }
 
       
@@ -111,6 +116,8 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends AbstractCon
       if (linearMomentumRateOfChange.containsNaN())
          throw new RuntimeException("linearMomentumRateOfChange = " + linearMomentumRateOfChange);
 
+      this.controlledCoMAcceleration.set(linearMomentumRateOfChange);
+      this.controlledCoMAcceleration.scale(1.0/totalMass);
       momentumRateOfChangeData.setLinearMomentumRateOfChange(linearMomentumRateOfChange);
    }
 
