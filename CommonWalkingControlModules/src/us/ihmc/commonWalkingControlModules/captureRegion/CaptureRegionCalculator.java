@@ -23,8 +23,8 @@ import us.ihmc.yoUtilities.graphics.plotting.ArtifactList;
 import us.ihmc.yoUtilities.graphics.plotting.YoArtifactPolygon;
 import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
+import us.ihmc.yoUtilities.time.GlobalTimer;
 
-import com.yobotics.simulationconstructionset.time.GlobalTimer;
 
 
 //import us.ihmc.plotting.shapes.PointArtifact;

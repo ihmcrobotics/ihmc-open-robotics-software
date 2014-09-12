@@ -28,9 +28,9 @@ import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.time.GlobalTimer;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
-import com.yobotics.simulationconstructionset.time.GlobalTimer;
 import com.yobotics.simulationconstructionset.util.ground.BumpyGroundProfile;
 import com.yobotics.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;

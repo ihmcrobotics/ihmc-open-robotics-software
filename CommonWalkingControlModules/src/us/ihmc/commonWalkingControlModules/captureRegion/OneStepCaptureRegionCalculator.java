@@ -13,8 +13,8 @@ import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.yoUtilities.time.GlobalTimer;
 
-import com.yobotics.simulationconstructionset.time.GlobalTimer;
 
 public class OneStepCaptureRegionCalculator
 {

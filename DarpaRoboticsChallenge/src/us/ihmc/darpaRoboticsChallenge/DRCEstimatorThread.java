@@ -45,10 +45,10 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.yoUtilities.time.ExecutionTimer;
 
 import com.yobotics.simulationconstructionset.robotController.ModularRobotController;
 import com.yobotics.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
-import com.yobotics.simulationconstructionset.time.ExecutionTimer;
 
 public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 {

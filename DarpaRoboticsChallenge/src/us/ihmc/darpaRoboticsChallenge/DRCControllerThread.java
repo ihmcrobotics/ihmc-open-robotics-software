@@ -35,6 +35,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.yoUtilities.time.ExecutionTimer;
 
 import com.yobotics.simulationconstructionset.InverseDynamicsMechanismReferenceFrameVisualizer;
 import com.yobotics.simulationconstructionset.JointAxisVisualizer;
@@ -42,7 +43,6 @@ import com.yobotics.simulationconstructionset.robotController.ModularRobotContro
 import com.yobotics.simulationconstructionset.robotController.ModularSensorProcessor;
 import com.yobotics.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 import com.yobotics.simulationconstructionset.robotController.RobotController;
-import com.yobotics.simulationconstructionset.time.ExecutionTimer;
 
 public class DRCControllerThread implements MultiThreadedRobotControlElement
 {
