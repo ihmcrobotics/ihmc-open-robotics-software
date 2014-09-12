@@ -25,12 +25,12 @@ import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.yoUtilities.graphics.plotting.ArtifactList;
+import us.ihmc.yoUtilities.graphics.plotting.YoArtifactLine2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameLine2d;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
-import com.yobotics.simulationconstructionset.plotting.YoFrameLine2dArtifact;
 
 public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePointToDesiredCoPControlModule, GuideLineToDesiredCoPControlModule
 {
@@ -77,10 +77,10 @@ public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePoint
          artifactList.add(desiredCoPBeforeProjectionViz.createArtifact());
          
 
-         YoFrameLine2dArtifact speedControlLineArtifact = new YoFrameLine2dArtifact("speedControlLineWorld", speedControlLineWorld, Color.BLUE);
+         YoArtifactLine2d speedControlLineArtifact = new YoArtifactLine2d("speedControlLineWorld", speedControlLineWorld, Color.BLUE);
          artifactList.add(speedControlLineArtifact);
 
-         YoFrameLine2dArtifact parallellLineArtifact = new YoFrameLine2dArtifact("Parallel Line", parallelLineWorld, Color.GREEN);
+         YoArtifactLine2d parallellLineArtifact = new YoArtifactLine2d("Parallel Line", parallelLineWorld, Color.GREEN);
          artifactList.add(parallellLineArtifact);
          
          YoGraphicVector actualVelocityDynamicGraphicVector = new YoGraphicVector("actualVelocity", comPosition, actualVelocityInWorld, 1.0, YoAppearance.Maroon());

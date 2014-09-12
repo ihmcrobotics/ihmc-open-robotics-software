@@ -21,11 +21,11 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.plotting.ArtifactList;
 import us.ihmc.yoUtilities.graphics.plotting.YoArtifactLineSegment2d;
+import us.ihmc.yoUtilities.graphics.plotting.YoArtifactLine2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameLine2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameLineSegment2d;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 
-import com.yobotics.simulationconstructionset.plotting.YoFrameLine2dArtifact;
 
 public class SpeedControllingCapturePointCenterOfPressureControlModule implements CapturePointCenterOfPressureControlModule
 {
@@ -67,16 +67,16 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
          YoGraphicsList yoGraphicList = new YoGraphicsList("CapturePointController");
          ArtifactList artifactList = new ArtifactList("Capture Point CoP Control Module");
 
-         YoFrameLine2dArtifact cpLineArtifact = new YoFrameLine2dArtifact("CP Line", capturePointLine, Color.MAGENTA);
+         YoArtifactLine2d cpLineArtifact = new YoArtifactLine2d("CP Line", capturePointLine, Color.MAGENTA);
          artifactList.add(cpLineArtifact);
 
-         YoFrameLine2dArtifact comSpeedControllingArtifact = new YoFrameLine2dArtifact("comSpeedControllingLine", comSpeedControllingLine, Color.BLUE);
+         YoArtifactLine2d comSpeedControllingArtifact = new YoArtifactLine2d("comSpeedControllingLine", comSpeedControllingLine, Color.BLUE);
          artifactList.add(comSpeedControllingArtifact);
 
          YoArtifactLineSegment2d guideLineArtifact = new YoArtifactLineSegment2d("Guide Line", guideLineWorld, Color.RED);
          artifactList.add(guideLineArtifact);
 
-         YoFrameLine2dArtifact parallellLineArtifact = new YoFrameLine2dArtifact("Parallel Line", parallelLineWorld, Color.GREEN);
+         YoArtifactLine2d parallellLineArtifact = new YoArtifactLine2d("Parallel Line", parallelLineWorld, Color.GREEN);
          artifactList.add(parallellLineArtifact);
 
          yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicList);

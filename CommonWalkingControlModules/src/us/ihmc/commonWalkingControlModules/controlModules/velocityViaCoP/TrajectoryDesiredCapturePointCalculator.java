@@ -18,10 +18,10 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.yoUtilities.graphics.plotting.YoArtifactLine2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameLine2d;
 import us.ihmc.yoUtilities.math.trajectories.YoMinimumJerkTrajectory;
 
-import com.yobotics.simulationconstructionset.plotting.YoFrameLine2dArtifact;
 
 public class TrajectoryDesiredCapturePointCalculator implements DesiredCapturePointCalculator
 {
@@ -58,8 +58,8 @@ public class TrajectoryDesiredCapturePointCalculator implements DesiredCapturePo
       
       if (yoGraphicListRegistry != null)
       {
-         YoFrameLine2dArtifact captureLineArtifact = new YoFrameLine2dArtifact("Capture Line", captureLine, Color.orange);
-         YoFrameLine2dArtifact switchLineArtifact = new YoFrameLine2dArtifact("Switch Line", switchLine, Color.pink);
+         YoArtifactLine2d captureLineArtifact = new YoArtifactLine2d("Capture Line", captureLine, Color.orange);
+         YoArtifactLine2d switchLineArtifact = new YoArtifactLine2d("Switch Line", switchLine, Color.pink);
 
          yoGraphicListRegistry.registerArtifacts("Trajectory Desired Capture Point", new Artifact[]{captureLineArtifact, switchLineArtifact});
       }
