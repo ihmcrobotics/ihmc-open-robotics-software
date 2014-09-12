@@ -7,7 +7,7 @@ import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.SpineControlM
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.UpperBodySubController;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.NeckTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.UpperBodyTorques;
-import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
+import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
 import us.ihmc.utilities.containers.ContainerTools;
 import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
 import us.ihmc.yoUtilities.controllers.PIDController;

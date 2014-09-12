@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.kinematics;
+package us.ihmc.sensorProcessing.stateEstimation;
 
 import javax.vecmath.Tuple3d;
 

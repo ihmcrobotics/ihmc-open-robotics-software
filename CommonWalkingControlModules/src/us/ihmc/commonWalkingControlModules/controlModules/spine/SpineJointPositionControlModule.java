@@ -4,7 +4,7 @@ import java.util.EnumMap;
 
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.SpineControlModule;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.SpineTorques;
-import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
+import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
 import us.ihmc.utilities.containers.ContainerTools;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
 import us.ihmc.yoUtilities.controllers.PIDController;

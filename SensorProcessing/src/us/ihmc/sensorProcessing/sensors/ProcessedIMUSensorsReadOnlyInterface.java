@@ -1,4 +1,4 @@
-package com.yobotics.simulationconstructionset.processedSensors;
+package us.ihmc.sensorProcessing.sensors;
 
 import javax.vecmath.Quat4d;
 

@@ -1,4 +1,4 @@
-package com.yobotics.simulationconstructionset.simulatedSensors;
+package us.ihmc.sensorProcessing;
 
 import java.util.Random;
 
@@ -7,6 +7,7 @@ import javax.vecmath.Vector3d;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.sensorProcessing.ProcessedSensorsReadWrite;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
@@ -15,6 +16,12 @@ import us.ihmc.utilities.test.JUnitTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 import com.yobotics.simulationconstructionset.UnreasonableAccelerationException;
+import com.yobotics.simulationconstructionset.simulatedSensors.PerfectIMUSensorProcessor;
+import com.yobotics.simulationconstructionset.simulatedSensors.PerfectSimulatedIMURawSensorReader;
+import com.yobotics.simulationconstructionset.simulatedSensors.RawSensors;
+import com.yobotics.simulationconstructionset.simulatedSensors.SimulatedIMURawSensorReader;
+import com.yobotics.simulationconstructionset.simulatedSensors.SimulatedSensorsTestFullRobotModel;
+import com.yobotics.simulationconstructionset.simulatedSensors.SingleRigidBodyRobot;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 

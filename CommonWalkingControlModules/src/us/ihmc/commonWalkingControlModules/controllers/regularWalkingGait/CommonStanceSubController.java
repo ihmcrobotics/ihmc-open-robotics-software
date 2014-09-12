@@ -11,9 +11,9 @@ import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredVelo
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LegTorques;
 import us.ihmc.commonWalkingControlModules.partNamesAndTorques.LowerBodyTorques;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
-import us.ihmc.commonWalkingControlModules.sensors.LegToTrustForVelocityWriteOnly;
-import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
+import us.ihmc.sensorProcessing.stateEstimation.LegToTrustForVelocityWriteOnly;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
