@@ -340,7 +340,7 @@ public class OptimizationMomentumControlModuleTest
          Map<RigidBody, Wrench> externalWrenchSolution = momentumModuleSolution.getExternalWrenchSolution();
          
          assertWrenchesSumUpToMomentumDot(externalWrenchSolution.values(), momentumRateOfChangeOut, gravityZ, totalMass,
-                                          centerOfMassFrame, 1e-3);
+                                          centerOfMassFrame, 1e-2);
          JUnitTools.assertSpatialForceVectorEquals(desiredRateOfChangeOfMomentum, momentumRateOfChangeOut, 1e-1);
          assertWrenchesInFrictionCones(externalWrenchSolution, contactStates, coefficientOfFriction);
          assertRootJointWrenchZero(externalWrenchSolution, rootJoint, gravityZ, 1e-2);
