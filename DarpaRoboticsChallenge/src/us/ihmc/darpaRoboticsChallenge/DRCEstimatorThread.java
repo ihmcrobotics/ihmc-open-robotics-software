@@ -75,7 +75,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    private final AtomicSettableTimestampProvider timestampProvider = new AtomicSettableTimestampProvider();
 
    public DRCEstimatorThread(DRCRobotModel robotModel, SensorReaderFactory sensorReaderFactory, ThreadDataSynchronizer threadDataSynchronizer,
-         GlobalDataProducer dataProducer, RobotVisualizer robotVisualizer, double estimatorDT, double gravity)
+         GlobalDataProducer dataProducer, RobotVisualizer robotVisualizer, double gravity)
    {
       this.threadDataSynchronizer = threadDataSynchronizer;
       this.robotVisualizer = robotVisualizer;
