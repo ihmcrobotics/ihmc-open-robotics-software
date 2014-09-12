@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization;
 import org.ejml.data.DenseMatrix64F;
-
 import us.ihmc.utilities.exeptions.NoConvergenceException;
 
 public abstract class ConstrainedQPSolver
@@ -14,6 +13,11 @@ public abstract class ConstrainedQPSolver
     */
    public abstract void solve(DenseMatrix64F Q, DenseMatrix64F f, DenseMatrix64F Aeq, DenseMatrix64F beq, 
             DenseMatrix64F Ain, DenseMatrix64F bin, DenseMatrix64F x, boolean initialize) throws NoConvergenceException;
+
+   public abstract void solve(DenseMatrix64F Q, DenseMatrix64F f, DenseMatrix64F Aeq, DenseMatrix64F beq, 
+            DenseMatrix64F Ain, DenseMatrix64F bin, DenseMatrix64F lb, DenseMatrix64F ub, DenseMatrix64F x, boolean initialize) throws NoConvergenceException;
+   
+   public abstract boolean supportBoxConstraints();
    
    static double[][] DenseMatrixToDoubleArray(DenseMatrix64F Q)
    {
