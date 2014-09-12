@@ -68,7 +68,7 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    private final String lidarPoseLink = "hokuyo_link"; 
    private final String lidarJointName = "hokuyo_joint";
    private final String lidarEndFrameInSdf = "/head_hokuyo_frame";
-   private final String lidarBaseFrame = multisense_namespace + "/head";
+   private final String lidarBaseFrame = "/head";
    private final String lidarEndFrame = multisense_namespace + lidarEndFrameInSdf;
    
    private static final String lidarSensorName = "head_hokuyo_sensor";
