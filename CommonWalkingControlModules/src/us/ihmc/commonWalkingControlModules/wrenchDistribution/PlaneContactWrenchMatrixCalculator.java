@@ -15,6 +15,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
+import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -30,6 +31,8 @@ import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 
 public class PlaneContactWrenchMatrixCalculator
 {
+   public static final int footCoPXYComponents = 2;
+   
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    
@@ -49,10 +52,13 @@ public class PlaneContactWrenchMatrixCalculator
    private final DenseMatrix64F wRhoMatrix;
    private final DenseMatrix64F wRhoSmootherMatrix;
    private final DenseMatrix64F wRhoPenalizerMatrix;
+   private final DenseMatrix64F qFeetCoP;
 
    private final DoubleYoVariable rhoTotal;
    private final DenseMatrix64F rhoMean;
    private final DenseMatrix64F rhoMeanLoadedEndEffectors;
+   private RobotSide footUnderCoPControl;
+   private ReferenceFrame footCoPReferenceFrame; 
 
    private final int rhoSize;
    private final int nSupportVectors;
@@ -61,12 +67,16 @@ public class PlaneContactWrenchMatrixCalculator
 
    // Temporary variables
    private final SpatialForceVector currentBasisVector = new SpatialForceVector();
+   private final SpatialForceVector currentBasisVectorCoP = new SpatialForceVector();
    private final FrameVector tempContactNormalVector = new FrameVector();
    private final AxisAngle4d normalContactVectorRotation = new AxisAngle4d();
    private final Matrix3d tempNormalContactVectorRotationMatrix = new Matrix3d();
    private final Vector3d tempLinearPart = new Vector3d();
+   private final Vector3d tempLinearPartCoP = new Vector3d();
    private final Vector3d tempArm = new Vector3d();
+   private final Vector3d tempArmCoP = new Vector3d();
    private final FramePoint tempFramePoint = new FramePoint();
+   private final FramePoint tempFramePointCoP = new FramePoint();
    
    private final DenseMatrix64F tempSum = new DenseMatrix64F(SpatialForceVector.SIZE, 1);
    private final DenseMatrix64F tempVector = new DenseMatrix64F(SpatialForceVector.SIZE, 1);
@@ -96,6 +106,8 @@ public class PlaneContactWrenchMatrixCalculator
       wRhoMatrix = new DenseMatrix64F(rhoSize, rhoSize);
       CommonOps.setIdentity(wRhoMatrix);
       CommonOps.scale(wRho, wRhoMatrix);
+      
+      qFeetCoP = new DenseMatrix64F(footCoPXYComponents,rhoSize);
       
       wRhoSmootherMatrix = new DenseMatrix64F(rhoSize, rhoSize);
       CommonOps.setIdentity(wRhoSmootherMatrix);
@@ -157,6 +169,19 @@ public class PlaneContactWrenchMatrixCalculator
                rhoMin.set(iRho, 0, rhoMinScalar.getDoubleValue());
                wRhoMatrix.set(iRho, iRho, wRho.getDoubleValue());
                wRhoSmootherMatrix.set(iRho, iRho, wRhoSmoother.getDoubleValue());
+               
+               if(planeContactState.getPlaneFrame() == footCoPReferenceFrame.getParent())
+               {
+                  computeCoPBasisVector(planeContactState, contactPoint, k);
+                  qFeetCoP.set(0, iRho, currentBasisVectorCoP.getAngularPartX());
+                  qFeetCoP.set(1, iRho, currentBasisVectorCoP.getAngularPartY());
+               }
+               else
+               {
+                  qFeetCoP.set(0, iRho, 0.0);
+                  qFeetCoP.set(1, iRho, 0.0);
+               }
+               
                iRho++;
             }
          }
@@ -174,6 +199,23 @@ public class PlaneContactWrenchMatrixCalculator
       tempContactNormalVector.normalize();
       GeometryTools.getRotationBasedOnNormal(normalContactVectorRotation, tempContactNormalVector.getVector());
       tempNormalContactVectorRotationMatrix.set(normalContactVectorRotation);
+   }
+   
+   private void computeCoPBasisVector(PlaneContactState planeContactState, ContactPoint contactPoint, int k)
+   {
+      double angle = k * supportVectorAngleIncrement;
+      double mu = planeContactState.getCoefficientOfFriction();
+
+      tempFramePointCoP.setIncludingFrame(contactPoint.getPosition());
+      tempFramePointCoP.changeFrame(footCoPReferenceFrame);
+
+      // Compute the linear part considering a normal contact vector pointing up
+      tempLinearPartCoP.set(Math.cos(angle) * mu, Math.sin(angle) * mu, 1);
+      tempLinearPartCoP.normalize();
+
+      // Compute the unit wrench corresponding to the basis vector
+      tempArmCoP.set(tempFramePointCoP.getX(), tempFramePointCoP.getY(), 0.0);
+      currentBasisVectorCoP.setUsingArm(footCoPReferenceFrame, tempLinearPartCoP, tempArmCoP);
    }
 
    private void computeBasisVector(PlaneContactState planeContactState, ContactPoint contactPoint, int k)
@@ -285,6 +327,12 @@ public class PlaneContactWrenchMatrixCalculator
    {
       this.rhoMinScalar.set(rhoMinScalar);
    }
+   
+   public void setFootCoPControlData(RobotSide side, ReferenceFrame frame)
+   {
+      this.footCoPReferenceFrame = frame;
+      this.footUnderCoPControl = side;
+   }
 
    public DenseMatrix64F getWRho()
    {
@@ -314,5 +362,10 @@ public class PlaneContactWrenchMatrixCalculator
    public DenseMatrix64F getQRho()
    {
       return qRho;
+   }
+   
+   public DenseMatrix64F getQFeetCoP()
+   {
+      return qFeetCoP;
    }
 }

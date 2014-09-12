@@ -69,7 +69,7 @@ public class CVXMomentumOptimizerAdapter implements MomentumOptimizerInterface
                          DenseMatrix64F WRho, DenseMatrix64F Lambda,
                          DenseMatrix64F WRhoSmoother, DenseMatrix64F rhoPrevAvg, DenseMatrix64F WRhoCop,
                          DenseMatrix64F QRho, DenseMatrix64F c,
-                         DenseMatrix64F rhoMin
+                         DenseMatrix64F rhoMin, DenseMatrix64F QfeetCoP
                          )
    {
       //A,b,c
@@ -100,7 +100,9 @@ public class CVXMomentumOptimizerAdapter implements MomentumOptimizerInterface
       
       //Wrho
       momentumOptimizerWithGRFPenalizedSmootherNativeInput.setRhoPrevious(rhoPrevious);
-
+      
+      //QfeetCoP
+//      momentumOptimizerWithGRFPenalizedSmootherNativeInput.setQfeetCoP(QfeetCoP);
    }
 
    
@@ -149,7 +151,7 @@ public class CVXMomentumOptimizerAdapter implements MomentumOptimizerInterface
          DenseMatrix64F jSecondary, DenseMatrix64F pSecondary, DenseMatrix64F weightMatrixSecondary, DenseMatrix64F WRho, DenseMatrix64F Lambda,
          DenseMatrix64F RhoSmoother, DenseMatrix64F rhoPrevAvg, DenseMatrix64F WRhoCop, DenseMatrix64F QRho, DenseMatrix64F c, DenseMatrix64F rhoMin)
    {
-      throw new RuntimeException("Not implemented, current CVXGEN version do not take primary contraints");
+      throw new RuntimeException("Not implemented, current CVXGEN version do not take primary constraints");
       
    }
 }

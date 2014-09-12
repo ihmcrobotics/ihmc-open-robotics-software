@@ -52,7 +52,7 @@ public abstract class QPMomentumOptimizer implements MomentumOptimizerInterface
    @Override
    public void setInputs(DenseMatrix64F _a, DenseMatrix64F _b, DenseMatrix64F _momentumDotWeight, DenseMatrix64F _jSecondary, DenseMatrix64F _pSecondary,
          DenseMatrix64F _weightMatrixSecondary, DenseMatrix64F _WRho, DenseMatrix64F _Lambda, DenseMatrix64F _WRhoSmoother, DenseMatrix64F _rhoPrevAvg,
-         DenseMatrix64F _WRhoCop, DenseMatrix64F _QRho, DenseMatrix64F _c, DenseMatrix64F _rhoMin)
+         DenseMatrix64F _WRhoCop, DenseMatrix64F _QRho, DenseMatrix64F _c, DenseMatrix64F _rhoMin, DenseMatrix64F QfeetCoP)
    {
       A=_a;
       b=_b;
@@ -89,7 +89,7 @@ public abstract class QPMomentumOptimizer implements MomentumOptimizerInterface
    {
       setInputs(a, b, momentumDotWeight, jSecondary, pSecondary,
          weightMatrixSecondary, WRho, Lambda, WRhoSmoother, rhoPrevAvg,
-         WRhoCop, QRho, c, rhoMin);
+         WRhoCop, QRho, c, rhoMin, null);
       
       //note: the nrow(Jp vd=pp) may change
       CommonOps.insert(jPrimary, Jp, 0, 0);

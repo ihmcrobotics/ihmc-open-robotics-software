@@ -349,4 +349,9 @@ public class OldMomentumControlModule implements MomentumControlModule
       }
    }
 
+   public void setFootCoPControlData(RobotSide side, ReferenceFrame frame)
+   {
+      // TODO Auto-generated method stub 
+   }
+
 }

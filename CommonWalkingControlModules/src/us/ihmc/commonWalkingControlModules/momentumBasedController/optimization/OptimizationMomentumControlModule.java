@@ -123,7 +123,6 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       momentumOptimizers.put(QPSolverFlavor.CQP_OASES_DIRECT, new CQPMomentumBasedOptimizer(nDoF, new OASESConstrainedQPSolver(registry)));
 //      momentumOptimizers.put(QPSolverFlavor.CQP_JOPT_DIRECT, new CQPMomentumBasedOptimizer(nDoF, new JOptimizerConstrainedQPSolver()));
 
-
       //initialize default solver
       final QPSolverFlavor defaultSolver =QPSolverFlavor.CVX_NULL;
       requestedQPSolver.set(defaultSolver);
@@ -268,7 +267,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       DenseMatrix64F weightMatrixSecondary = secondaryMotionConstraintHandler.getWeightMatrix();
       if(useNullSpaceProjection)
       {
-              equalityConstraintEnforcer.constrainEquation(jSecondary, pSecondary);
+         equalityConstraintEnforcer.constrainEquation(jSecondary, pSecondary);
       }
 
       //C
@@ -285,7 +284,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
                     wrenchMatrixCalculator.getWRho(), dampedLeastSquaresFactorMatrix, 
                     wrenchMatrixCalculator.getWRhoSmoother(), wrenchMatrixCalculator.getRhoPreviousAverage(), wrenchMatrixCalculator.getWRhoPenalizer(),
                     wrenchMatrixCalculator.getQRho(), wrenchEquationRightHandSide, 
-                    wrenchMatrixCalculator.getRhoMin());
+                    wrenchMatrixCalculator.getRhoMin(), wrenchMatrixCalculator.getQFeetCoP());
       }
       else
       {
@@ -476,6 +475,10 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
       externalWrenchHandler.setExternalWrenchToCompensateFor(rigidBody, wrench);
    }
    
+   public void setFootCoPControlData(RobotSide side, ReferenceFrame frame)
+   {
+      wrenchMatrixCalculator.setFootCoPControlData(side, frame);
+   }
 
 
 // public SpatialForceVector getDesiredCentroidalMomentumRate()

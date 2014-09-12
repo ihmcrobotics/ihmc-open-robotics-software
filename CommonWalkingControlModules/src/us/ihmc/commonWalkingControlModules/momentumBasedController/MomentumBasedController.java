@@ -147,6 +147,10 @@ public class MomentumBasedController
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
    private final InverseDynamicsJoint[] controlledJoints;
+   
+   private final BooleanYoVariable activateFeetCoPControl;
+   private final DoubleYoVariable footCoPOffsetX, footCoPOffsetY;
+   private final EnumYoVariable<RobotSide> footUnderCoPControl;   
 
    public MomentumBasedController(FullRobotModel fullRobotModel, CenterOfMassJacobian centerOfMassJacobian, CommonWalkingReferenceFrames referenceFrames,
          SideDependentList<FootSwitchInterface> footSwitches, DoubleYoVariable yoTime, double gravityZ, TwistCalculator twistCalculator,
@@ -313,6 +317,11 @@ public class MomentumBasedController
       addVariableChangedListenerToFrictionCompensationVariables(frictionCompensationEffectiveness, frictionModelForAllJoints,
             useBeforeTransmissionVelocityForFriction);
       initializeFrictionCompensationToZero();
+
+      activateFeetCoPControl = new BooleanYoVariable("activateFeetCoPControl", registry);
+      footCoPOffsetX = new DoubleYoVariable("footCoPOffsetX", registry);
+      footCoPOffsetY = new DoubleYoVariable("footCoPOffsetY", registry);
+      footUnderCoPControl = new EnumYoVariable<RobotSide>("footUnderCoPControl", registry, RobotSide.class);
    }
 
    public void getFeetContactStates(ArrayList<PlaneContactState> feetContactStatesToPack)
@@ -369,6 +378,28 @@ public class MomentumBasedController
       updateMomentumBasedControllerSpy();
 
       MomentumModuleSolution momentumModuleSolution;
+      
+      if (activateFeetCoPControl.getBooleanValue())
+      {
+         if(footCoPOffsetX.isNaN() || footCoPOffsetY.isNaN())
+         {
+            footCoPOffsetX.set(0.0);
+            footCoPOffsetY.set(0.0);
+         }
+         
+         ReferenceFrame selectedFootSoleFrame = feet.get(footUnderCoPControl.getEnumValue()).getSoleFrame();
+         Vector3d copOffset = new Vector3d(footCoPOffsetX.getDoubleValue(), footCoPOffsetY.getDoubleValue(), 0.0);
+         String sideName = footUnderCoPControl.getEnumValue().name(); 
+         ReferenceFrame desiredCoPFrame = ReferenceFrame.constructBodyFrameWithUnchangingTranslationFromParent(sideName +"_desiredCoPFrame", selectedFootSoleFrame, copOffset); 
+         
+         momentumControlModuleBridge.setFootCoPControlData(footUnderCoPControl.getEnumValue(), desiredCoPFrame);
+      }
+      else
+      {
+         footCoPOffsetX.set(Double.NaN);
+         footCoPOffsetY.set(Double.NaN);
+      }
+      
       try
       {
          momentumModuleSolution = momentumControlModuleBridge.compute(this.yoPlaneContactStates, upcomingSupportLeg.getEnumValue());
