@@ -25,7 +25,9 @@ public abstract class QPMomentumOptimizer implements MomentumOptimizerInterface
 
       rhoPrevMean, WRhoCoPPenalty, //quad(rho)
 
-      QRho, c, rhoMin;  //constraints
+      QRho, c, rhoMin,  //constraints
+   
+      QfeetCop;
      
    public DenseMatrix64F vd, rho;
    public DenseMatrix64F prevVd, prevRho;
@@ -46,6 +48,8 @@ public abstract class QPMomentumOptimizer implements MomentumOptimizerInterface
       Jp = new DenseMatrix64F(nDoF, nDoF);
       pp = new DenseMatrix64F(nDoF, 1);
       Ws = new DenseMatrix64F(nDoF, nDoF);
+      
+      QfeetCop = null;
    }
 
 
@@ -79,17 +83,20 @@ public abstract class QPMomentumOptimizer implements MomentumOptimizerInterface
       QRho = _QRho; 
       c = _c;
       rhoMin = _rhoMin;
+      
+      this.QfeetCop = QfeetCoP;
 
    }
 
    @Override
    public void setInputs(DenseMatrix64F a, DenseMatrix64F b, DenseMatrix64F momentumDotWeight, DenseMatrix64F jPrimary, DenseMatrix64F pPrimary,
          DenseMatrix64F jSecondary, DenseMatrix64F pSecondary, DenseMatrix64F weightMatrixSecondary, DenseMatrix64F WRho, DenseMatrix64F Lambda,
-         DenseMatrix64F WRhoSmoother, DenseMatrix64F rhoPrevAvg, DenseMatrix64F WRhoCop, DenseMatrix64F QRho, DenseMatrix64F c, DenseMatrix64F rhoMin)
+         DenseMatrix64F WRhoSmoother, DenseMatrix64F rhoPrevAvg, DenseMatrix64F WRhoCop, DenseMatrix64F QRho, DenseMatrix64F c, DenseMatrix64F rhoMin,
+         DenseMatrix64F QfeetCoP)
    {
       setInputs(a, b, momentumDotWeight, jSecondary, pSecondary,
          weightMatrixSecondary, WRho, Lambda, WRhoSmoother, rhoPrevAvg,
-         WRhoCop, QRho, c, rhoMin, null);
+         WRhoCop, QRho, c, rhoMin, QfeetCoP);
       
       //note: the nrow(Jp vd=pp) may change
       CommonOps.insert(jPrimary, Jp, 0, 0);

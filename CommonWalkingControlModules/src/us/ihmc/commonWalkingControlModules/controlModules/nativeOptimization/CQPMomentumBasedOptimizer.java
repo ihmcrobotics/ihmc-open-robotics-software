@@ -16,91 +16,89 @@ public class CQPMomentumBasedOptimizer extends QPMomentumOptimizer
 
    DenseMatrix64F AtC, JstWs, Q, QBlk1, QBlk2, f, fBlk1, fBlk2, Aeq, negA, beq, Ain, bin, x0, IdentityMatrix;
    DenseMatrix64F lb, ub;
-   
+
    public CQPMomentumBasedOptimizer(int nDoF, ConstrainedQPSolver CQPsolver)
    {
       super(nDoF);
       //pre-allocation matrices to avoid gc()
       AtC = new DenseMatrix64F(nDoF, nWrench);
-      Q = new DenseMatrix64F(nDoF+nRho, nDoF+nRho);
-      QBlk1 = new DenseMatrix64F(nDoF,nDoF);
+      Q = new DenseMatrix64F(nDoF + nRho, nDoF + nRho);
+      QBlk1 = new DenseMatrix64F(nDoF, nDoF);
       QBlk2 = new DenseMatrix64F(nRho, nRho);
 
-      f = new DenseMatrix64F(nDoF+nRho,1);
-      fBlk1 = new DenseMatrix64F(nDoF,1);
-      fBlk2 = new DenseMatrix64F(nRho,1);
+      f = new DenseMatrix64F(nDoF + nRho, 1);
+      fBlk1 = new DenseMatrix64F(nDoF, 1);
+      fBlk2 = new DenseMatrix64F(nRho, 1);
 
-      Aeq = new DenseMatrix64F(nWrench+nDoF, nDoF+nRho);
-      negA = new DenseMatrix64F(nWrench,nDoF);
-      beq = new DenseMatrix64F(nWrench+nDoF,1);
-      x0 = new DenseMatrix64F(nDoF+nRho,1);
-      IdentityMatrix = CommonOps.identity(nDoF+nRho,nDoF+nRho);
-      
+      Aeq = new DenseMatrix64F(nWrench + nDoF, nDoF + nRho);
+      negA = new DenseMatrix64F(nWrench, nDoF);
+      beq = new DenseMatrix64F(nWrench + nDoF, 1);
+      x0 = new DenseMatrix64F(nDoF + nRho, 1);
+      IdentityMatrix = CommonOps.identity(nDoF + nRho, nDoF + nRho);
+
       useBoxContraints = CQPsolver.supportBoxConstraints();
-      if(useBoxContraints)
+      if (useBoxContraints)
       {
-          Ain = new DenseMatrix64F(0, nDoF+nRho);
-          bin = new DenseMatrix64F(0, 1);
-          lb=new DenseMatrix64F(nRho+nDoF,1);
-          ub=new DenseMatrix64F(nRho+nDoF,1);
+         Ain = new DenseMatrix64F(0, nDoF + nRho);
+         bin = new DenseMatrix64F(0, 1);
+         lb = new DenseMatrix64F(nRho + nDoF, 1);
+         ub = new DenseMatrix64F(nRho + nDoF, 1);
       }
       else
       {
-          Ain = new DenseMatrix64F(nRho, nDoF+nRho);
-          bin = new DenseMatrix64F(nRho, 1);
-          lb=null;
-          ub=null;
+         Ain = new DenseMatrix64F(nRho, nDoF + nRho);
+         bin = new DenseMatrix64F(nRho, 1);
+         lb = null;
+         ub = null;
       }
-      
-      firstCall=true;
+
+      firstCall = true;
       this.CQPsolver = CQPsolver;
    }
-   
+
    private static double findMinEigenValue(DenseMatrix64F Q)
    {
-      EigenDecomposition<DenseMatrix64F> decomposer=DecompositionFactory.eig(Q.numCols, false, true);
+      EigenDecomposition<DenseMatrix64F> decomposer = DecompositionFactory.eig(Q.numCols, false, true);
       decomposer.decompose(Q);
-      
-      double minVal=Double.MAX_VALUE;
-      for(int i=0;i<Q.numCols;i++)
+
+      double minVal = Double.MAX_VALUE;
+      for (int i = 0; i < Q.numCols; i++)
       {
-         double ev=decomposer.getEigenvalue(i).getReal();
-        if(minVal > ev)
-           minVal = ev;
+         double ev = decomposer.getEigenvalue(i).getReal();
+         if (minVal > ev)
+            minVal = ev;
       }
       return minVal;
    }
 
    @Override
-   public int solve() throws NoConvergenceException 
+   public int solve() throws NoConvergenceException
    {
-      CommonOps.multTransA(A,C, AtC); 
-      if(JstWs==null)
+      CommonOps.multTransA(A, C, AtC);
+      if (JstWs == null)
          JstWs = new DenseMatrix64F(nDoF, Ws.numCols);
-      CommonOps.multTransA(Js,Ws,JstWs); 
+      CommonOps.multTransA(Js, Ws, JstWs);
       /*
-       *  Q = [A'CA + Js'Ws Js + Lambda  0
-       *         0                       Wp+Wpsm+Wpcop ]
+       * Q = [A'CA + Js'Ws Js + Lambda 0 0 Wp+Wpsm+Wpcop + QfeetCoP'QfeetCoP ]
        */
-      
+
       CommonOps.mult(AtC, A, QBlk1);
       CommonOps.multAdd(JstWs, Js, QBlk1);
       CommonOps.add(QBlk1, Lambda, QBlk1);
-      
+
       CommonOps.add(WRho, WRhoSmoother, QBlk2);
-      CommonOps.add(QBlk2, WRhoCoPPenalty,QBlk2);
+      CommonOps.add(QBlk2, WRhoCoPPenalty, QBlk2);
+      CommonOps.multAddTransA(QfeetCop, QfeetCop, QBlk2);
 
       CommonOps.insert(QBlk1, Q, 0, 0);
       CommonOps.insert(QBlk2, Q, nDoF, nDoF);
 
-      CommonOps.add(1e-8, IdentityMatrix,Q, Q); //regularization
+      CommonOps.add(1e-8, IdentityMatrix, Q, Q); //regularization
 
       /*
-       *  f = -[A'C b   Js' Ws ps
-       *       Wpsm Pprev   Wpcop Ppavg]
+       * f = -[A'C b Js' Ws ps Wpsm Pprev Wpcop Ppavg]
        */
 
-      
       //blk1
       CommonOps.mult(AtC, b, fBlk1);
       CommonOps.multAdd(JstWs, ps, fBlk1);
@@ -109,34 +107,28 @@ public class CQPMomentumBasedOptimizer extends QPMomentumOptimizer
       //blk2
       CommonOps.mult(WRhoSmoother, prevRho, fBlk2);
       CommonOps.multAdd(WRhoCoPPenalty, rhoPrevMean, fBlk2);
-      
+
       //assemble
-      CommonOps.insert(fBlk1, f,0,0);
+      CommonOps.insert(fBlk1, f, 0, 0);
       CommonOps.insert(fBlk2, f, nDoF, 0);
       CommonOps.changeSign(f);
-      
-      /*        nDoF|nRho 
-       *  Aeq = [-A  QRho]  nWrench
-       *        [Jp      ]  nDoF
-       *  beq = [c
-       *         pp]
+
+      /*
+       * nDoF|nRho Aeq = [-A QRho] nWrench [Jp ] nDoF beq = [c pp]
        */
       CommonOps.scale(-1, A, negA);
-      
+
       CommonOps.insert(negA, Aeq, 0, 0);
       CommonOps.insert(QRho, Aeq, 0, nDoF);
       CommonOps.insert(Jp, Aeq, nWrench, 0);
-      
+
       CommonOps.insert(c, beq, 0, 0);
       CommonOps.insert(pp, beq, nWrench, 0);
-      /* Equality Constraint
-       *   Ain - 
-       *    nDoF  nRho
-       *  ----------------
-       *  | Zero|  -I     | nRho
-       *  ----------------
+      /*
+       * Equality Constraint Ain - nDoF nRho ---------------- | Zero| -I | nRho
+       * ----------------
        */
-      if(useBoxContraints)
+      if (useBoxContraints)
       {
          CommonOps.fill(lb, Double.NEGATIVE_INFINITY);
          CommonOps.fill(ub, Double.POSITIVE_INFINITY);
@@ -144,18 +136,17 @@ public class CQPMomentumBasedOptimizer extends QPMomentumOptimizer
       }
       else
       {
-         for(int i=0;i<nRho;i++)
-            Ain.set(i,i+nDoF,-1.0);
+         for (int i = 0; i < nRho; i++)
+            Ain.set(i, i + nDoF, -1.0);
          CommonOps.scale(-1, rhoMin, bin);
       }
-      
-      
+
       /*
        * initial x
        */
-      CommonOps.insert(vd, x0, 0 ,0);
-      CommonOps.insert(rho, x0, nDoF ,0);
-      if(useBoxContraints)
+      CommonOps.insert(vd, x0, 0, 0);
+      CommonOps.insert(rho, x0, nDoF, 0);
+      if (useBoxContraints)
       {
          CQPsolver.solve(Q, f, Aeq, beq, Ain, bin, lb, ub, x0, firstCall);
       }
@@ -163,11 +154,10 @@ public class CQPMomentumBasedOptimizer extends QPMomentumOptimizer
       {
          CQPsolver.solve(Q, f, Aeq, beq, Ain, bin, x0, firstCall);
       }
-      firstCall=false;
+      firstCall = false;
       CommonOps.extract(x0, 0, nDoF, 0, 1, vd, 0, 0);
-      CommonOps.extract(x0, nDoF, nDoF+nRho, 0, 1, rho, 0, 0);
+      CommonOps.extract(x0, nDoF, nDoF + nRho, 0, 1, rho, 0, 0);
       return 1; //dummy return
    }
-   
 
 }
