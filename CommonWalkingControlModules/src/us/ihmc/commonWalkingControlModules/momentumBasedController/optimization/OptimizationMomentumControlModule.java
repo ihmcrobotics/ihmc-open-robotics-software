@@ -295,7 +295,7 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
                     wrenchMatrixCalculator.getWRho(), dampedLeastSquaresFactorMatrix, 
                     wrenchMatrixCalculator.getWRhoSmoother(), wrenchMatrixCalculator.getRhoPreviousAverage(), wrenchMatrixCalculator.getWRhoPenalizer(),
                     wrenchMatrixCalculator.getQRho(), wrenchEquationRightHandSide, 
-                    wrenchMatrixCalculator.getRhoMin());
+                    wrenchMatrixCalculator.getRhoMin(), wrenchMatrixCalculator.getQFeetCoP());
       }
               
       NoConvergenceException noConvergenceException = null;
