@@ -12,6 +12,7 @@ import com.joptimizer.functions.PDQuadraticMultivariateRealFunction;
 import com.joptimizer.optimizers.JOptimizer;
 import com.joptimizer.optimizers.OptimizationRequest;
 
+
 public class JOptimizerConstrainedQPSolver extends ConstrainedQPSolver
 {
 
@@ -71,6 +72,18 @@ public class JOptimizerConstrainedQPSolver extends ConstrainedQPSolver
       }
       double[] xopt = opt.getOptimizationResponse().getSolution();
       System.arraycopy(xopt, 0, x0, 0, xopt.length);
+   }
+   @Override
+   public void solve(DenseMatrix64F Q, DenseMatrix64F f, DenseMatrix64F Aeq, DenseMatrix64F beq, DenseMatrix64F Ain, DenseMatrix64F bin, DenseMatrix64F lb,
+         DenseMatrix64F ub, DenseMatrix64F x, boolean initialize) throws NoConvergenceException
+   {
+      //TODO: automatically fold boxConstraints into inequality constraint
+      throw new UnsupportedOperationException("JOptimizer does not support boxConstraints, please fold them into inequality constraints");
+   }
+   @Override
+   public boolean supportBoxConstraints()
+   {
+      return false;
    }
    
 }
