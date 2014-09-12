@@ -1,4 +1,4 @@
-package com.yobotics.simulationconstructionset.simulatedSensors;
+package us.ihmc.sensorProcessing;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
