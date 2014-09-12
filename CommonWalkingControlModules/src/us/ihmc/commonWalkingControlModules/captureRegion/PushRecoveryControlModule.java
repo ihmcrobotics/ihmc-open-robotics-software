@@ -33,12 +33,12 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.yoUtilities.graphics.plotting.YoArtifactLine2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameLine2d;
 import us.ihmc.yoUtilities.math.trajectories.StraightLinePositionTrajectoryGenerator;
 import us.ihmc.yoUtilities.stateMachines.StateMachine;
 import us.ihmc.yoUtilities.stateMachines.StateTransitionCondition;
 
-import com.yobotics.simulationconstructionset.plotting.YoFrameLine2dArtifact;
 
 public class PushRecoveryControlModule
 {
@@ -88,7 +88,7 @@ public class PushRecoveryControlModule
    private final FramePoint2d initialDesiredICP, finalDesiredICP;
 
    private final YoFrameLine2d capturePointTrajectoryLine;
-   private final YoFrameLine2dArtifact capturePointTrajectoryLineArtifact;
+   private final YoArtifactLine2d capturePointTrajectoryLineArtifact;
    private final PointArtifact projectedCapturePointArtifact;
    private final Point2d projectedCapturePoint;
    private final DoubleYoVariable swingTimeRemaining;
@@ -141,7 +141,7 @@ public class PushRecoveryControlModule
       swingTimeRemaining = new DoubleYoVariable("pushRecoverySwingTimeRemaining", registry);
       captureRegionAreaWithDoubleSupportMinimumSwingTime = new DoubleYoVariable("captureRegionAreaWithMinimumSwingTime", registry);
 
-      this.capturePointTrajectoryLineArtifact = new YoFrameLine2dArtifact("CapturePointTrajectoryLineArtifact", capturePointTrajectoryLine, Color.red);
+      this.capturePointTrajectoryLineArtifact = new YoArtifactLine2d("CapturePointTrajectoryLineArtifact", capturePointTrajectoryLine, Color.red);
       yoGraphicsListRegistry.registerArtifact("CapturePointTrajectoryArtifact", capturePointTrajectoryLineArtifact);
       yoGraphicsListRegistry.registerArtifact("ProjectedCapturePointArtifact", projectedCapturePointArtifact);
 

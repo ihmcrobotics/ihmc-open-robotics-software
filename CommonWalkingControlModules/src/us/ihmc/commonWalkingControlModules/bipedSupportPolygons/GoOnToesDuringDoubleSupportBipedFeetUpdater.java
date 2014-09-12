@@ -23,11 +23,11 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.plotting.ArtifactList;
+import us.ihmc.yoUtilities.graphics.plotting.YoArtifactLine2d;
 import us.ihmc.yoUtilities.math.filters.GlitchFilteredBooleanYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFrameLine2d;
 import us.ihmc.yoUtilities.time.GlobalTimer;
 
-import com.yobotics.simulationconstructionset.plotting.YoFrameLine2dArtifact;
 
 
 public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpdater
@@ -89,8 +89,8 @@ public class GoOnToesDuringDoubleSupportBipedFeetUpdater implements BipedFeetUpd
          leftOnToesLineViz = new YoFrameLine2d("leftOnToesLine", "", ReferenceFrame.getWorldFrame(), registry);
          rightOnToesLineViz = new YoFrameLine2d("rightOnToesLineViz", "", ReferenceFrame.getWorldFrame(), registry);
 
-         YoFrameLine2dArtifact leftOnToesArtifact = new YoFrameLine2dArtifact("Left On Toes Line", leftOnToesLineViz, Color.pink);
-         YoFrameLine2dArtifact rightOnToesArtifact = new YoFrameLine2dArtifact("Right On Toes Line", rightOnToesLineViz, Color.pink);
+         YoArtifactLine2d leftOnToesArtifact = new YoArtifactLine2d("Left On Toes Line", leftOnToesLineViz, Color.pink);
+         YoArtifactLine2d rightOnToesArtifact = new YoArtifactLine2d("Right On Toes Line", rightOnToesLineViz, Color.pink);
 
          ArtifactList artifactList = new ArtifactList("GoOnToes");
          artifactList.add(leftOnToesArtifact);

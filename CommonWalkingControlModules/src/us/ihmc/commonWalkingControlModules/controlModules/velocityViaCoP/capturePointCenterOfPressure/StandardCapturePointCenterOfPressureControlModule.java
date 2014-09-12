@@ -25,12 +25,12 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.plotting.ArtifactList;
 import us.ihmc.yoUtilities.graphics.plotting.YoArtifactLineSegment2d;
+import us.ihmc.yoUtilities.graphics.plotting.YoArtifactLine2d;
 import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFrameLine2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameLineSegment2d;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
-import com.yobotics.simulationconstructionset.plotting.YoFrameLine2dArtifact;
 
 public class StandardCapturePointCenterOfPressureControlModule implements CapturePointCenterOfPressureControlModule
 {
@@ -137,7 +137,7 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
          YoArtifactLineSegment2d dynamicGraphicYoFrameLineSegment2dArtifact = new YoArtifactLineSegment2d("Guide Line", guideLineWorld, Color.RED);
          artifactList.add(dynamicGraphicYoFrameLineSegment2dArtifact);
 
-         YoFrameLine2dArtifact dynamicGraphicYoFrameLine2dArtifact = new YoFrameLine2dArtifact("Parallel Line", parallelLineWorld, Color.GREEN);
+         YoArtifactLine2d dynamicGraphicYoFrameLine2dArtifact = new YoArtifactLine2d("Parallel Line", parallelLineWorld, Color.GREEN);
          artifactList.add(dynamicGraphicYoFrameLine2dArtifact);
 
          yoGraphicsListRegistry.registerArtifactList(artifactList);
