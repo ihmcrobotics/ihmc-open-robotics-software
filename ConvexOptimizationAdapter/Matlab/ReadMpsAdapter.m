@@ -14,7 +14,7 @@ addpath(genpath(pwd));
 filePath = strcat('MpsParser/QpsFiles/',fileName);
 
 fileNameNoExtensionVector = strsplit(fileName,'.');
-fileNameToWrite = strcat(pwd,'/YamlQpProblems/',fileNameNoExtensionVector(1),'.yaml');
+fileNameToWrite = strcat(pwd,'/../resources/YamlQpProblems/',fileNameNoExtensionVector(1),'.yaml');
 
 rawObj = readmps(filePath);
 processedObj = convert(rawObj);

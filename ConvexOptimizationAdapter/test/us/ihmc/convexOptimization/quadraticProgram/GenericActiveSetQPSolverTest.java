@@ -400,80 +400,78 @@ public class GenericActiveSetQPSolverTest
         DenseMatrix64F x =null; 
         Yaml yaml = new Yaml();
         
-        String qpsPath="Matlab/YamlQpProblems/";
-        InputStream input = new FileInputStream(new File(qpsPath+ qpsFileName));
-      
-         Map<String, Object> object = (Map<String, Object>) yaml.load(input);
-//         System.out.print(object + "\n");
-         
-         beq=MatrixTools.yamlFieldToMatrix(null,"beq",object);
-         Aeq=MatrixTools.yamlFieldToMatrix(null,"Aeq",object);
-         A=MatrixTools.yamlFieldToMatrix(null,"A",object);
-         b=MatrixTools.yamlFieldToMatrix(null,"b",object);
-         H=MatrixTools.yamlFieldToMatrix(null,"H",object);
-         f=MatrixTools.yamlFieldToMatrix(null,"f",object);
-         lb=MatrixTools.yamlFieldToMatrix(null,"lb",object);
-         ub=MatrixTools.yamlFieldToMatrix(null,"ub",object);
-         x=MatrixTools.yamlFieldToMatrix(null,"X",object);
+        String qpsPath="YamlQpProblems/";
+        InputStream input = getClass().getClassLoader().getResourceAsStream(qpsPath+qpsFileName);
+        Map<String, Object> object = (Map<String, Object>) yaml.load(input);
+        
+        beq=MatrixTools.yamlFieldToMatrix(null,"beq",object);
+        Aeq=MatrixTools.yamlFieldToMatrix(null,"Aeq",object);
+        A=MatrixTools.yamlFieldToMatrix(null,"A",object);
+        b=MatrixTools.yamlFieldToMatrix(null,"b",object);
+        H=MatrixTools.yamlFieldToMatrix(null,"H",object);
+        f=MatrixTools.yamlFieldToMatrix(null,"f",object);
+        lb=MatrixTools.yamlFieldToMatrix(null,"lb",object);
+        ub=MatrixTools.yamlFieldToMatrix(null,"ub",object);
+        x=MatrixTools.yamlFieldToMatrix(null,"X",object);
 
-         CommonOps.scale(2.0, H);
-         
-         if(f==null)
-            f=new DenseMatrix64F(H.numRows,1);
-         solver.setQuadraticCostFunction(H, f, 0);
-         
-         if(Aeq!=null)
-            solver.setLinearEqualityConstraints(Aeq, beq);
-         
-         int maxInequalityRows=solver.numberOfVariablesToSolve*2 +( A==null?0:A.numRows);
-         DenseMatrix64F aggregatedInequalityMatrix = new DenseMatrix64F(maxInequalityRows, solver.numberOfVariablesToSolve);
-         DenseMatrix64F aggregatedInequalityVector = new DenseMatrix64F(maxInequalityRows, 1);
-         int offset=0;
-         if(A!=null)
-         {
-            CommonOps.insert(A,aggregatedInequalityMatrix,0,0);
-            CommonOps.insert(b, aggregatedInequalityVector, 0, 0);
-            assert(A.numRows==b.numRows);
-            offset+=A.numRows;
-         }
-         
-         if(ub!=null)
-         {
-            for(int j=0;j<solver.numberOfVariablesToSolve;j++)
-                aggregatedInequalityMatrix.set(j+offset,j,1);
-            CommonOps.insert(ub, aggregatedInequalityVector, offset, 0);
-            offset+=ub.numRows;
-         }
-         
-         if(lb!=null)
-         {
-            for(int j=0;j<solver.numberOfVariablesToSolve;j++)
-               aggregatedInequalityMatrix.set(j+offset,j,-1);
-            CommonOps.scale(-1, lb);
-            CommonOps.insert(lb, aggregatedInequalityVector, offset, 0);
-            offset+=lb.numRows;
-         }
-         
-         aggregatedInequalityMatrix.setNumRows(offset);
-         aggregatedInequalityVector.setNumRows(offset);
-         
-         if(offset>0)
-            solver.setLinearInequalityConstraints(aggregatedInequalityMatrix, aggregatedInequalityVector);
-         
-         solver.displayProblem();
-         try{
-          solver.solve(null);
-         }
-         catch(RuntimeException e)
-         {
-            System.out.println("Solver exceeeded max iteration");
-            e.printStackTrace();
-         }
-         DenseMatrix64F solution = solver.getSolution();
-         CommonOps.subtract(solution, x, solution);
-         System.out.println("File"+qpsFileName);
-         double norm=NormOps.normP1(solution);
-         System.out.println("Norm="+ norm);
+        CommonOps.scale(2.0, H);
+        
+        if(f==null)
+           f=new DenseMatrix64F(H.numRows,1);
+        solver.setQuadraticCostFunction(H, f, 0);
+        
+        if(Aeq!=null)
+           solver.setLinearEqualityConstraints(Aeq, beq);
+        
+        int maxInequalityRows=solver.numberOfVariablesToSolve*2 +( A==null?0:A.numRows);
+        DenseMatrix64F aggregatedInequalityMatrix = new DenseMatrix64F(maxInequalityRows, solver.numberOfVariablesToSolve);
+        DenseMatrix64F aggregatedInequalityVector = new DenseMatrix64F(maxInequalityRows, 1);
+        int offset=0;
+        if(A!=null)
+        {
+           CommonOps.insert(A,aggregatedInequalityMatrix,0,0);
+           CommonOps.insert(b, aggregatedInequalityVector, 0, 0);
+           assert(A.numRows==b.numRows);
+           offset+=A.numRows;
+        }
+        
+        if(ub!=null)
+        {
+           for(int j=0;j<solver.numberOfVariablesToSolve;j++)
+               aggregatedInequalityMatrix.set(j+offset,j,1);
+           CommonOps.insert(ub, aggregatedInequalityVector, offset, 0);
+           offset+=ub.numRows;
+        }
+        
+        if(lb!=null)
+        {
+           for(int j=0;j<solver.numberOfVariablesToSolve;j++)
+              aggregatedInequalityMatrix.set(j+offset,j,-1);
+           CommonOps.scale(-1, lb);
+           CommonOps.insert(lb, aggregatedInequalityVector, offset, 0);
+           offset+=lb.numRows;
+        }
+        
+        aggregatedInequalityMatrix.setNumRows(offset);
+        aggregatedInequalityVector.setNumRows(offset);
+        
+        if(offset>0)
+           solver.setLinearInequalityConstraints(aggregatedInequalityMatrix, aggregatedInequalityVector);
+        
+        solver.displayProblem();
+        try{
+         solver.solve(null);
+        }
+        catch(RuntimeException e)
+        {
+           System.out.println("Solver exceeeded max iteration");
+           e.printStackTrace();
+        }
+        DenseMatrix64F solution = solver.getSolution();
+        CommonOps.subtract(solution, x, solution);
+        System.out.println("File"+qpsFileName);
+        double norm=NormOps.normP1(solution);
+        System.out.println("Norm="+ norm);
    }
    
    @Test
