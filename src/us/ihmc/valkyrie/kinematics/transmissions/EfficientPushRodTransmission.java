@@ -17,14 +17,14 @@ public class EfficientPushRodTransmission implements PushRodTransmissionInterfac
     private final ClosedFormJacobian efficientPushrodTransmissionJacobian;
     private final double             reflect;
 
-    public EfficientPushRodTransmission(PushRodTransmissionJoint pushRodTransmissionJoint, double reflect) {
+    public EfficientPushRodTransmission(PushRodTransmissionJoint pushRodTransmissionJoint, double reflect, boolean futekBoolean) {
         if (Math.abs(Math.abs(reflect) - 1.0) > 1e-7) {
             throw new RuntimeException("reflect must be 1.0 or -1.0");
         }
 
         this.reflect                         = reflect;
         efficientPushrodTransmissionJacobian = new ClosedFormJacobian(pushRodTransmissionJoint);
-        efficientPushrodTransmissionJacobian.useFuteks(true);
+        efficientPushrodTransmissionJacobian.useFuteks(futekBoolean);
     }
 
     private int numActuators() {

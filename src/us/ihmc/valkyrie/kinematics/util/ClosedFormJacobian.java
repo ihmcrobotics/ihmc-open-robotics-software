@@ -171,7 +171,7 @@ public class ClosedFormJacobian
       matrixToPack.set(3, 2, 0.0);
       matrixToPack.set(3, 3, 1.0);
    }
-      
+   
 //   private void denavitHartenbergTransformationMatrix(DenseMatrix64F matrixToPack, double a, double alpha, double d, double theta)
 //   {
 //      double cosTheta = Math.cos(theta);
@@ -271,38 +271,7 @@ public class ClosedFormJacobian
          
          break;
       
-      }else{
-//         
-//         //Use downward unit vectors in second frame for renishaw r x F calculations
-//         CommonOps.mult( transform_0_2, renishawUnitForceVectorSecondFrame, renishawUnitForceVectorZerothFrame);
-//         CommonOps.mult( transform_1_2, renishawUnitForceVectorSecondFrame, renishawUnitForceVectorFirstFrame);
-//         
-//         //Compute radius and Force vectors for use in r x F calculation in zeroth frame for renishaws
-//         radius5LowerDOF.set(t5ZerothFrame.get(0), t5ZerothFrame.get(1), t5ZerothFrame.get(2));
-//         radius6LowerDOF.set(t6ZerothFrame.get(0), t6ZerothFrame.get(1), t6ZerothFrame.get(2));
-//         unitForceVector5LowerDOF.set(renishawUnitForceVectorZerothFrame.get(0), renishawUnitForceVectorZerothFrame.get(1), renishawUnitForceVectorZerothFrame.get(2));
-//         unitForceVector6LowerDOF.set(renishawUnitForceVectorZerothFrame.get(0), renishawUnitForceVectorZerothFrame.get(1), renishawUnitForceVectorZerothFrame.get(2));
-//         
-//         //Compute radius and Force vectors for use in r x F calculation in first joint frame for renishaws
-//         radius5UpperDOF.set(t5FirstFrame.get(0), t5FirstFrame.get(1), t5FirstFrame.get(2));
-//         radius6UpperDOF.set(t6FirstFrame.get(0), t6FirstFrame.get(1), t6FirstFrame.get(2));
-//         unitForceVector5UpperDOF.set(renishawUnitForceVectorFirstFrame.get(0), renishawUnitForceVectorFirstFrame.get(1), renishawUnitForceVectorFirstFrame.get(2));
-//         unitForceVector6UpperDOF.set(renishawUnitForceVectorFirstFrame.get(0), renishawUnitForceVectorFirstFrame.get(1), renishawUnitForceVectorFirstFrame.get(2));
-//         
-//         m11v.cross(radius5UpperDOF, unitForceVector5LowerDOF);
-//         m12v.cross(radius6LowerDOF, unitForceVector6UpperDOF);
-//         m21v.cross(radius5UpperDOF, unitForceVector5UpperDOF);
-//         m22v.cross(radius6UpperDOF, unitForceVector6UpperDOF);
-//         
-//         double m11 = m11v.getX() / length;
-//         double m12 = m12v.getX() / length;
-//         double m21 = m21v.getY() / length;
-//         double m22 = m22v.getY() / length;
-//         
-//         output[0][0] = m21; output[0][1] = m22;
-//         output[1][0] = m11; output[1][1] = m12;
-//         break;
-         
+      }else{        
 //         roll = -roll;
          double J2A_11, J2A_12, J2A_21, J2A_22;
          double cosRoll = Math.cos(roll);
@@ -319,8 +288,10 @@ public class ClosedFormJacobian
          J2A_12 = cosPitchMinusRoll*(-7.1E1/4.0E3)+cosPitchPlusRoll*(7.1E1/4.0E3)-cosPitch*(9.1E1/2.5E3)+sinPitch*(1.27E2/1.0E4)-cosRoll*sinPitch*(1.1E1/6.25E2)-1.0/Math.sqrt(-Math.pow(cosRoll*(-7.1E1/2.0E3)+sinRoll*(1.1E1/6.25E2)+5.950307148629379E15/1.441151880758559E17,2.0)-Math.pow(cosPitchMinusRoll*(7.1E1/4.0E3)+sinPitchMinusRoll*(1.1E1/1.25E3)-cosPitchPlusRoll*(7.1E1/4.0E3)+sinPitchPlusRoll*(1.1E1/1.25E3)+cosPitch*(9.1E1/2.5E3)-sinPitch*(1.27E2/1.0E4)-6.216812160178655E15/2.882303761517117E17,2.0)+3.96956501382951E14/3.602879701896397E16)*(cosPitchMinusRoll*(1.1E1/1.25E3)-sinPitchMinusRoll*(7.1E1/4.0E3)+cosPitchPlusRoll*(1.1E1/1.25E3)+sinPitchPlusRoll*(7.1E1/4.0E3)-cosPitch*(1.27E2/1.0E4)-sinPitch*(9.1E1/2.5E3))*(cosPitchMinusRoll*(7.1E1/4.0E3)+sinPitchMinusRoll*(1.1E1/1.25E3)-cosPitchPlusRoll*(7.1E1/4.0E3)+sinPitchPlusRoll*(1.1E1/1.25E3)+cosPitch*(9.1E1/2.5E3)-sinPitch*(1.27E2/1.0E4)-6.216812160178655E15/2.882303761517117E17);
          J2A_21 = cosPitch*cosRoll*(-7.1E1/2.0E3)-cosPitch*sinRoll*(1.1E1/6.25E2)+((cosPitchMinusRoll*(1.1E1/1.25E3)+sinPitchMinusRoll*(7.1E1/4.0E3)-cosPitchPlusRoll*(1.1E1/1.25E3)+sinPitchPlusRoll*(7.1E1/4.0E3))*(cosPitchMinusRoll*(-7.1E1/4.0E3)+sinPitchMinusRoll*(1.1E1/1.25E3)+cosPitchPlusRoll*(7.1E1/4.0E3)+sinPitchPlusRoll*(1.1E1/1.25E3)+cosPitch*(9.1E1/2.5E3)-sinPitch*(1.27E2/1.0E4)-6.216812160178655E15/2.882303761517117E17)*2.0-(cosRoll*(1.1E1/6.25E2)-sinRoll*(7.1E1/2.0E3))*(cosRoll*(7.1E1/2.0E3)+sinRoll*(1.1E1/6.25E2)-5.950307148629379E15/1.441151880758559E17)*2.0)*1.0/Math.sqrt(-Math.pow(cosRoll*(7.1E1/2.0E3)+sinRoll*(1.1E1/6.25E2)-5.950307148629379E15/1.441151880758559E17,2.0)-Math.pow(cosPitchMinusRoll*(-7.1E1/4.0E3)+sinPitchMinusRoll*(1.1E1/1.25E3)+cosPitchPlusRoll*(7.1E1/4.0E3)+sinPitchPlusRoll*(1.1E1/1.25E3)+cosPitch*(9.1E1/2.5E3)-sinPitch*(1.27E2/1.0E4)-6.216812160178655E15/2.882303761517117E17,2.0)+3.96956501382951E14/3.602879701896397E16)*(1.0/2.0);
          J2A_22 = cosPitchMinusRoll*(7.1E1/4.0E3)-cosPitchPlusRoll*(7.1E1/4.0E3)-cosPitch*(9.1E1/2.5E3)+sinPitch*(1.27E2/1.0E4)-cosRoll*sinPitch*(1.1E1/6.25E2)-1.0/Math.sqrt(-Math.pow(cosRoll*(7.1E1/2.0E3)+sinRoll*(1.1E1/6.25E2)-5.950307148629379E15/1.441151880758559E17,2.0)-Math.pow(cosPitchMinusRoll*(-7.1E1/4.0E3)+sinPitchMinusRoll*(1.1E1/1.25E3)+cosPitchPlusRoll*(7.1E1/4.0E3)+sinPitchPlusRoll*(1.1E1/1.25E3)+cosPitch*(9.1E1/2.5E3)-sinPitch*(1.27E2/1.0E4)-6.216812160178655E15/2.882303761517117E17,2.0)+3.96956501382951E14/3.602879701896397E16)*(cosPitchMinusRoll*(1.1E1/1.25E3)+sinPitchMinusRoll*(7.1E1/4.0E3)+cosPitchPlusRoll*(1.1E1/1.25E3)-sinPitchPlusRoll*(7.1E1/4.0E3)-cosPitch*(1.27E2/1.0E4)-sinPitch*(9.1E1/2.5E3))*(cosPitchMinusRoll*(-7.1E1/4.0E3)+sinPitchMinusRoll*(1.1E1/1.25E3)+cosPitchPlusRoll*(7.1E1/4.0E3)+sinPitchPlusRoll*(1.1E1/1.25E3)+cosPitch*(9.1E1/2.5E3)-sinPitch*(1.27E2/1.0E4)-6.216812160178655E15/2.882303761517117E17);         
+         
          output[0][0]=J2A_11; output[1][0]=J2A_12;
          output[0][1]=J2A_21; output[1][1]=J2A_22;
+         
          break;
       }
       
@@ -386,36 +357,6 @@ public class ClosedFormJacobian
            break;
            
         }else{
-           
-//           //Use downward unit vectors in second frame for renishaw r x F calculations
-//           CommonOps.mult(transform_0_2, renishawUnitForceVectorSecondFrame, renishawUnitForceVectorZerothFrame);
-//           CommonOps.mult(transform_1_2, renishawUnitForceVectorSecondFrame, renishawUnitForceVectorFirstFrame);
-//           
-//           //Compute radius and Force vectors for use in r x F calculation in zeroth frame for renishaws
-//           radius5LowerDOF.set(t5ZerothFrame.get(0), t5ZerothFrame.get(1), t5ZerothFrame.get(2));
-//           radius6LowerDOF.set(t6ZerothFrame.get(0), t6ZerothFrame.get(1), t6ZerothFrame.get(2));
-//           unitForceVector5LowerDOF.set(renishawUnitForceVectorZerothFrame.get(0), renishawUnitForceVectorZerothFrame.get(1), renishawUnitForceVectorZerothFrame.get(2));
-//           unitForceVector6LowerDOF.set(renishawUnitForceVectorZerothFrame.get(0), renishawUnitForceVectorZerothFrame.get(1), renishawUnitForceVectorZerothFrame.get(2));
-//           
-//           //Compute radius and Force vectors for use in r x F calculation in first joint frame for renishaws
-//           radius5UpperDOF.set(t5FirstFrame.get(0), t5FirstFrame.get(1), t5FirstFrame.get(2));
-//           radius6UpperDOF.set(t6FirstFrame.get(0), t6FirstFrame.get(1), t6FirstFrame.get(2));
-//           unitForceVector5UpperDOF.set(renishawUnitForceVectorFirstFrame.get(0), renishawUnitForceVectorFirstFrame.get(1), renishawUnitForceVectorFirstFrame.get(2));
-//           unitForceVector6UpperDOF.set(renishawUnitForceVectorFirstFrame.get(0), renishawUnitForceVectorFirstFrame.get(1), renishawUnitForceVectorFirstFrame.get(2));
-//           
-//           m11v.cross(radius5LowerDOF, unitForceVector5LowerDOF);
-//           m12v.cross(radius6LowerDOF, unitForceVector6LowerDOF);
-//           m21v.cross(radius5UpperDOF, unitForceVector5UpperDOF);
-//           m22v.cross(radius6UpperDOF, unitForceVector6UpperDOF);
-//           
-//           double m11 = m11v.getY() / length;
-//           double m12 = m12v.getY() / length;
-//           double m21 = m21v.getX() / length;
-//           double m22 = m22v.getX() / length;
-//           
-//           output[0][0] =  m11; output[0][1] =  m12;
-//           output[1][0] =  m21; output[1][1] =  m22;
-//           break;
 //           roll = -roll;
            double J2A_11, J2A_12, J2A_21, J2A_22;
            double cosRoll = Math.cos(roll);
@@ -450,37 +391,6 @@ public class ClosedFormJacobian
       if(DEBUG)System.out.println(output[0][0] +", " + output[0][1] +", " + output[1][0] +", " + output[1][1]);
       return output;
    }
-
-//   private void printMatrixIfDebug(String name, DenseMatrix64F matrix)
-//   {
-//      if (DEBUG)
-//      {
-//         System.out.println(name + "= ");
-//
-//         int numCols = matrix.getNumCols();
-//         int numRows = matrix.getNumRows();
-//
-//         for (int i = 0; i < numRows; i++)
-//         {
-//            for (int j = 0; j < numCols; j++)
-//            {
-//               System.out.print(matrix.get(i, j));
-//               if (j < numCols - 1)
-//                  System.out.print(", ");
-//            }
-//
-//            System.out.println();
-//         }
-//      }
-//
-//   }
-//
-//
-//   private void printIfDebug(String message)
-//   {
-//      if (DEBUG)
-//         System.out.println(message);
-//   }
    
    public void useFuteks(boolean bool){
       this.useFuteks=bool;
