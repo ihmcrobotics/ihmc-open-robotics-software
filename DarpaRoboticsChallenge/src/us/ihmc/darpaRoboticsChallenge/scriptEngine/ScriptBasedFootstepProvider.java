@@ -23,6 +23,8 @@ import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.communication.packets.walking.PauseCommand;
 import us.ihmc.communication.packets.walking.PelvisPosePacket;
+import us.ihmc.humanoidBehaviors.scripting.ScriptFileLoader;
+import us.ihmc.humanoidBehaviors.scripting.ScriptObject;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;

@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import javax.media.j3d.Transform3D;
 
 import us.ihmc.communication.packets.walking.EndOfScriptCommand;
-import us.ihmc.darpaRoboticsChallenge.scriptEngine.ScriptEngineSettings;
-import us.ihmc.darpaRoboticsChallenge.scriptEngine.ScriptFileSaver;
+import us.ihmc.humanoidBehaviors.scripting.ScriptEngineSettings;
+import us.ihmc.humanoidBehaviors.scripting.ScriptFileSaver;
 import us.ihmc.utilities.FileTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.net.TimestampProvider;
