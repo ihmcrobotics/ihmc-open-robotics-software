@@ -11,12 +11,12 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.yoUtilities.graphics.plotting.YoArtifactVector;
 import us.ihmc.yoUtilities.graphics.plotting.YoArtifactPolygon;
 import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector2d;
 
-import com.yobotics.simulationconstructionset.plotting.DynamicGraphicYoVectorArtifact;
 
 public class OrientationStateVisualizer 
 {
@@ -35,13 +35,13 @@ public class OrientationStateVisualizer
 	private FrameConvexPolygon2d reducedSupportPolygon;
 	
 
-	private final DynamicGraphicYoVectorArtifact pelvisXaxisArtifact;
+	private final YoArtifactVector pelvisXaxisArtifact;
 	private final YoFrameVector2d yoPelvisXaxis;
 	private final FrameVector pelvisXaxis;
 	private final YoFramePoint2d yoPelvisXaxisBase;
 	private final FramePoint pelvisXaxisBase;
 	
-	private final DynamicGraphicYoVectorArtifact pelvisYaxisArtifact;
+	private final YoArtifactVector pelvisYaxisArtifact;
 	private final YoFrameVector2d yoPelvisYaxis;
 	private final FrameVector pelvisYaxis;
 	private final YoFramePoint2d yoPelvisYaxisBase;
@@ -60,14 +60,14 @@ public class OrientationStateVisualizer
       pelvisXaxis = new FrameVector(worldFrame, PELVIS_SYS_SCALING, 0, 0);
       yoPelvisXaxisBase = new YoFramePoint2d(pelvisXaxisCaption + "Base", worldFrame, registry);
       pelvisXaxisBase = new FramePoint(worldFrame, 0, 0, 0);
-      pelvisXaxisArtifact = new DynamicGraphicYoVectorArtifact(pelvisXaxisCaption, yoPelvisXaxisBase, yoPelvisXaxis, PELVIS_X_AXIS_COLOR);
+      pelvisXaxisArtifact = new YoArtifactVector(pelvisXaxisCaption, yoPelvisXaxisBase, yoPelvisXaxis, PELVIS_X_AXIS_COLOR);
 
       String pelvisYaxisCaption = "PelvisYaxis";
       yoPelvisYaxis = new YoFrameVector2d(pelvisYaxisCaption, worldFrame, registry);
       pelvisYaxis = new FrameVector(worldFrame, 0, PELVIS_SYS_SCALING, 0);
       yoPelvisYaxisBase = new YoFramePoint2d(pelvisYaxisCaption + "Base", worldFrame, registry);
       pelvisYaxisBase = new FramePoint(worldFrame, 0, 0, 0);
-      pelvisYaxisArtifact = new DynamicGraphicYoVectorArtifact(pelvisYaxisCaption, yoPelvisYaxisBase, yoPelvisYaxis, PELVIS_Y_AXIS_COLOR);
+      pelvisYaxisArtifact = new YoArtifactVector(pelvisYaxisCaption, yoPelvisYaxisBase, yoPelvisYaxis, PELVIS_Y_AXIS_COLOR);
 
       if (yoGraphicsListRegistry != null)
       {
