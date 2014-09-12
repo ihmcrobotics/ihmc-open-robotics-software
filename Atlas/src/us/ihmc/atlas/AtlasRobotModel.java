@@ -52,11 +52,12 @@ public class AtlasRobotModel implements DRCRobotModel
 {
    private final AtlasRobotVersion selectedVersion;
 
-   public static final long ESTIMATOR_DT_IN_NS = 1000000;
-   public static final double ESTIMATOR_DT = TimeTools.nanoSecondstoSeconds(ESTIMATOR_DT_IN_NS);
-   public static final double CONTROL_DT = 0.006;
+   private static final long ESTIMATOR_DT_IN_NS = 1000000;
+   private static final double ESTIMATOR_DT = TimeTools.nanoSecondstoSeconds(ESTIMATOR_DT_IN_NS);
+   private static final double CONTROL_DT = 0.006;
 
-   public static final double ATLAS_ONBOARD_SAMPLINGFREQ = 1000.0;
+   
+   private static final double ATLAS_ONBOARD_SAMPLINGFREQ = 1000.0;
    public static final double ATLAS_ONBOARD_DT = 1.0 / ATLAS_ONBOARD_SAMPLINGFREQ;
 
    private static final String ATLAS_NETWORK_CONFIG = "Configurations/atlas_network_config.ini";
