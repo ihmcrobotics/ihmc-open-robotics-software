@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.bodyPositionAndVelocity;
+package us.ihmc.sensorProcessing.stateEstimation;
 
 import com.yobotics.simulationconstructionset.robotController.SensorProcessor;
 

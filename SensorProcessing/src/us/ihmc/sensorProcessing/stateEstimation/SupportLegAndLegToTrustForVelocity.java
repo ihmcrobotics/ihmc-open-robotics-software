@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.sensors;
+package us.ihmc.sensorProcessing.stateEstimation;
 
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;

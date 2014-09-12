@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.bodyPositionAndVelocity;
+package us.ihmc.sensorProcessing.stateEstimation;
 
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
@@ -9,10 +9,11 @@ import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.commonWalkingControlModules.kinematics.BodyPositionEstimator;
-import us.ihmc.commonWalkingControlModules.kinematics.BodyVelocityEstimator;
 import us.ihmc.kalman.KalmanFilter;
 import us.ihmc.kalman.YoKalmanFilter;
+import us.ihmc.sensorProcessing.sensors.ProcessedBodyPositionSensorsWriteOnlyInterface;
+import us.ihmc.sensorProcessing.sensors.ProcessedIMUSensorsReadOnlyInterface;
+import us.ihmc.sensorProcessing.sensors.ProcessedTimeSensorsReadOnlyInterface;
 import us.ihmc.utilities.math.geometry.Direction;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -20,9 +21,6 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-import com.yobotics.simulationconstructionset.processedSensors.ProcessedBodyPositionSensorsWriteOnlyInterface;
-import com.yobotics.simulationconstructionset.processedSensors.ProcessedIMUSensorsReadOnlyInterface;
-import com.yobotics.simulationconstructionset.processedSensors.ProcessedTimeSensorsReadOnlyInterface;
 import com.yobotics.simulationconstructionset.robotController.SensorProcessor;
 
 public class BodyPositionAndVelocityEstimatorKalman implements BodyPositionAndVelocityEstimator

@@ -1,8 +1,9 @@
-package us.ihmc.commonWalkingControlModules.sensors;
+package us.ihmc.sensorProcessing;
 
 import java.util.HashMap;
 
 import us.ihmc.robotSide.RobotSide;
+import us.ihmc.sensorProcessing.sensors.FingerForceSensors;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;

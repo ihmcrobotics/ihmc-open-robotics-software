@@ -1,4 +1,4 @@
-package com.yobotics.simulationconstructionset.processedSensors;
+package us.ihmc.sensorProcessing.sensors;
 
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;

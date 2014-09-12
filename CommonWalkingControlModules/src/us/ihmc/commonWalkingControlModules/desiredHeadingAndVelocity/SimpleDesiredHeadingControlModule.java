@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity;
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Matrix3d;
 
-import us.ihmc.commonWalkingControlModules.sensors.ProcessedSensorsInterface;
+import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
