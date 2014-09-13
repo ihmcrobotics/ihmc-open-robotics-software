@@ -71,8 +71,8 @@ public class OASESConstrainedQPSolver extends ConstrainedQPSolver
    public OASESConstrainedQPSolver(int nvar, int ncon, YoVariableRegistry parentRegistry)
    {
       initialize(nvar, ncon);
-      maxCPUTime.set(0);
-      maxWorkingSetChange.set(1000);
+      maxCPUTime.set(Double.POSITIVE_INFINITY);
+      maxWorkingSetChange.set(10000);
       if(parentRegistry!=null)
         parentRegistry.addChild(this.registry);
    }
