@@ -148,7 +148,7 @@ public class MomentumBasedController
 
    private final InverseDynamicsJoint[] controlledJoints;
    
-   private final BooleanYoVariable activateFeetCoPControl;
+   private final BooleanYoVariable feetCoPControlIsActive;
    private final DoubleYoVariable footCoPOffsetX, footCoPOffsetY;
    private final EnumYoVariable<RobotSide> footUnderCoPControl;   
 
@@ -318,7 +318,7 @@ public class MomentumBasedController
             useBeforeTransmissionVelocityForFriction);
       initializeFrictionCompensationToZero();
 
-      activateFeetCoPControl = new BooleanYoVariable("activateFeetCoPControl", registry);
+      feetCoPControlIsActive = new BooleanYoVariable("activateFeetCoPControl", registry);
       footCoPOffsetX = new DoubleYoVariable("footCoPOffsetX", registry);
       footCoPOffsetY = new DoubleYoVariable("footCoPOffsetY", registry);
       footUnderCoPControl = new EnumYoVariable<RobotSide>("footUnderCoPControl", registry, RobotSide.class);
@@ -379,7 +379,7 @@ public class MomentumBasedController
 
       MomentumModuleSolution momentumModuleSolution;
       
-      if (activateFeetCoPControl.getBooleanValue())
+      if (feetCoPControlIsActive.getBooleanValue())
       {
          if(footCoPOffsetX.isNaN() || footCoPOffsetY.isNaN())
          {
@@ -932,6 +932,26 @@ public class MomentumBasedController
       {
          yoPlaneContactStateList.get(i).clear();
       }
+   }
+   
+   public void setSideOfFootUnderCoPControl(RobotSide side)
+   {
+      footUnderCoPControl.set(side);
+   }
+   
+   public void setFeetCoPControlIsActive(boolean isActive)
+   {
+      feetCoPControlIsActive.set(isActive);
+   }
+   
+   public void setFootCoPOffsetX(double offseX)
+   {
+      footCoPOffsetX.set(offseX);
+   }
+   
+   public void setFootCoPOffsetY(double offseY)
+   {
+      footCoPOffsetY.set(offseY);
    }
 
    public void setMomentumControlModuleToUse(MomentumControlModuleType momentumControlModuleToUse)
