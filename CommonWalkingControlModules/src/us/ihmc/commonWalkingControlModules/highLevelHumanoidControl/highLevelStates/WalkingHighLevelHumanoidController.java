@@ -885,11 +885,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
                removeAllUpcomingFootstepsAndStand();
             }
-
-            if (pushRecoveryModule.isRecovering())
-            {
-               desiredICPVelocityLocal.setToZero();
-            }
          }
 
          if (!isInFlamingoStance.getBooleanValue())
