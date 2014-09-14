@@ -3,6 +3,7 @@ package us.ihmc.valkyrie.kinematics.transmissions;
 import us.ihmc.valkyrie.kinematics.ValkyrieJointInterface;
 import us.ihmc.valkyrie.roboNet.TurboDriver;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 
@@ -48,6 +49,8 @@ public class InefficientPushRodTransmission implements PushRodTransmissionInterf
    private final double reflectTop;
    private final boolean topJointFirst;
    
+   private DoubleYoVariable topJointAngleOffset;
+   
    public InefficientPushRodTransmission(PushRodTransmissionJoint pushRodTransmissionJoint, 
          double reflectTop, double reflectBottom, boolean topJointFirst,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -56,7 +59,14 @@ public class InefficientPushRodTransmission implements PushRodTransmissionInterf
       this.reflectBottom = reflectBottom;
       this.reflectTop = reflectTop;
       this.topJointFirst = topJointFirst;
+      
        inefficientPushrodTransmissionJacobian = new InefficientPushrodTransmissionJacobian(pushRodTransmissionJoint, parentRegistry, yoGraphicsListRegistry);
+   }
+   
+   public void allowTopJointAngleOffset(String namePrefix, double offset, YoVariableRegistry registry)
+   {
+      topJointAngleOffset = new DoubleYoVariable(namePrefix + "TopJointAngleOffset", registry);
+      topJointAngleOffset.set(offset);
    }
   
    public void setUseFuteks(boolean useFuteks)
@@ -127,6 +137,7 @@ public class InefficientPushRodTransmission implements PushRodTransmissionInterf
       double leftActuatorForce = leftTurboDriver.getEffort(); 
 
       double topJointAngle = reflectTop * topJointInterface.getPosition();
+      if (topJointAngleOffset != null) topJointAngle += topJointAngleOffset.getDoubleValue();
       double bottomJointAngle = reflectBottom * bottomJointInterface.getPosition();
       
       inefficientPushrodTransmissionJacobian.computeJacobian(jacobian, topJointAngle, bottomJointAngle);
@@ -177,6 +188,8 @@ public class InefficientPushRodTransmission implements PushRodTransmissionInterf
       
       double topJointAngle = reflectTop * topJointInterface.getPosition();
       double bottomJointAngle = reflectBottom * bottomJointInterface.getPosition();
+      if (topJointAngleOffset != null) topJointAngle += topJointAngleOffset.getDoubleValue();
+
       double topJointTorque = reflectTop * topJointInterface.getDesiredEffort();
       double bottomJointTorque = reflectBottom * bottomJointInterface.getDesiredEffort();
 
