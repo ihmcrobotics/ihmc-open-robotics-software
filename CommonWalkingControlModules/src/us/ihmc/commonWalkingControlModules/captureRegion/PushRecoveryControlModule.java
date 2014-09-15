@@ -397,7 +397,7 @@ public class PushRecoveryControlModule
       {
          if (enableProjectionInsidePushRecoveryICPPlanner.getBooleanValue())
          {
-            desiredICPVelocityToPack.setToZero(worldFrame);
+            desiredICPVelocityToPack.setToZero(worldFrame); // sure?
          }
          else
          {

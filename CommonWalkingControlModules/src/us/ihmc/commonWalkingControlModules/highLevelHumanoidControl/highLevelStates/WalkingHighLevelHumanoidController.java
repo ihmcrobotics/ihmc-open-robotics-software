@@ -304,7 +304,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       pushRecoveryModule = new PushRecoveryControlModule(momentumBasedController, walkingControllerParameters, readyToGrabNextFootstep,
             icpAndMomentumBasedController, stateMachine, registry, swingTimeCalculationProvider, feet);
       
-      footExplorationControlModule = new FootExplorationControlModule(registry, momentumBasedController);
+      footExplorationControlModule = new FootExplorationControlModule(registry, momentumBasedController, yoTime);
 
       setupStateMachine();
       readyToGrabNextFootstep.set(true);
@@ -547,7 +547,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          
          if(footExplorationControlModule.isControllingSwingFoot() && !pushRecoveryModule.isRecovering() && !isInFlamingoStance.getBooleanValue())
          {
-            footExplorationControlModule.controlSwingFoot(yoTime.getDoubleValue(), desiredICP, desiredICPVelocity, capturePoint2d);
+            footExplorationControlModule.controlSwingFoot(desiredICP, desiredICPVelocity, capturePoint2d);
          }
 
          if (VISUALIZE)
@@ -914,7 +914,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          
          if(footExplorationControlModule.isControllingSwingFoot() && !pushRecoveryModule.isRecovering() && !isInFlamingoStance.getBooleanValue())
          {
-            footExplorationControlModule.controlSwingFoot(yoTime.getDoubleValue(), desiredICP, desiredICPVelocity, capturePoint2d);
+            footExplorationControlModule.controlSwingFoot(desiredICP, desiredICPVelocity, capturePoint2d);
          }
 
          if (VISUALIZE)
@@ -1017,7 +1017,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
          
          FrameConvexPolygon2d footPolygon = computeFootPolygon(supportSide, referenceFrames.getAnkleZUpFrame(supportSide));
-         footExplorationControlModule.initialize(nextFootstep, yoTime.getDoubleValue(), footPolygon, swingSide);
+         footExplorationControlModule.initialize(nextFootstep, footPolygon, swingSide);
       }
 
       private void updateFootstepParameters()
