@@ -168,8 +168,15 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
 
       if (CREATE_COM_CALIBRATION_TOOL)
       {
-         CenterOfMassCalibrationTool centerOfMassCalibrationTool = new CenterOfMassCalibrationTool(controllerModel, yoGraphicsListRegistry, registry);
-         controllerFactory.addUpdatable(centerOfMassCalibrationTool);
+         try
+         {
+            CenterOfMassCalibrationTool centerOfMassCalibrationTool = new CenterOfMassCalibrationTool(controllerModel, forceSensorDataHolderForController, yoGraphicsListRegistry, registry);
+            controllerFactory.addUpdatable(centerOfMassCalibrationTool);
+         }
+         catch(Exception e)
+         {
+            System.err.println("Couldn't create CenterOfMassCalibrationTool");
+         }
       }
       
       RobotController robotController = controllerFactory.getController(controllerModel, referenceFramesForController, controlDT, gravity, yoTime,
