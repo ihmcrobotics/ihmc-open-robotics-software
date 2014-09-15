@@ -1,6 +1,6 @@
 package us.ihmc.plotting.shapes;
 
-import java.awt.Graphics;
+import java.awt.*;
 
 import javax.swing.ImageIcon;
 
@@ -16,6 +16,16 @@ public class CenteredImageIconArtifact extends Artifact
    {
       super(filepath);
       imageIcon = new ImageIcon(filepath);
+   }
+
+   public int getHeight()
+   {
+      return imageIcon.getIconHeight();
+   }
+
+   public int getWidth()
+   {
+      return imageIcon.getIconWidth();
    }
 
    public void draw(Graphics g, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
