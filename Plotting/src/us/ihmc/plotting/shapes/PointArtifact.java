@@ -23,7 +23,7 @@ public class PointArtifact extends Artifact implements Serializable
    private Color historyColor = Color.blue;
    int _medianFilterSize = 20;
    int _meanFilterSize = 999;
-    private int size = 10;
+   private int size = 10;
 
    @SuppressWarnings("unused")
    private long _startTime;
@@ -63,7 +63,7 @@ public class PointArtifact extends Artifact implements Serializable
 
    public void setSize(int size)
    {
-       this.size = size;
+      this.size = size;
    }
 
    public void setCoordinate(Coordinate coordinate)
@@ -174,32 +174,37 @@ public class PointArtifact extends Artifact implements Serializable
       {
          // paint points
          coordinate = _sonarHistory.elementAt(i);
-         int x = Xcenter + ((int)Math.round(coordinate.x * scaleFactor) - (size / 2));
-         int y = Ycenter - ((int)Math.round(coordinate.y * scaleFactor)) - (size / 2);
-         if (i == (_sonarHistory.size() - 1))
+
+         if (coordinate != null)
          {
-            g.setColor(color);
-            g.fillOval(x, y, size, size);
-         }
-         else
-         {
-            g.setColor(historyColor);
-            g.fillOval(x, y, (int)(size*0.7), (int)(size*0.7));
-         }
+            int x = Xcenter + ((int) Math.round(coordinate.x * scaleFactor) - (size / 2));
+            int y = Ycenter - ((int) Math.round(coordinate.y * scaleFactor)) - (size / 2);
+            if (i == (_sonarHistory.size() - 1))
+            {
+               g.setColor(color);
+               g.fillOval(x, y, size, size);
+            }
+            else
+            {
+               g.setColor(historyColor);
+               g.fillOval(x, y, (int) (size * 0.7), (int) (size * 0.7));
+            }
 
 
-         // save for median and mean
-         if (i >= (_sonarHistory.size() - _medianFilterSize))
-         {
-            xMedianFliter.addElement(new Double(coordinate.x));
-            yMedianFliter.addElement(new Double(coordinate.y));
+            // save for median and mean
+            if (i >= (_sonarHistory.size() - _medianFilterSize))
+            {
+               xMedianFliter.addElement(new Double(coordinate.x));
+               yMedianFliter.addElement(new Double(coordinate.y));
+            }
+
+            if (i >= (_sonarHistory.size() - _meanFilterSize))
+            {
+               xMeanFilter.addElement(new Double(coordinate.x));
+               yMeanFilter.addElement(new Double(coordinate.y));
+            }
          }
 
-         if (i >= (_sonarHistory.size() - _meanFilterSize))
-         {
-            xMeanFilter.addElement(new Double(coordinate.x));
-            yMeanFilter.addElement(new Double(coordinate.y));
-         }
       }
 
       // paint median
