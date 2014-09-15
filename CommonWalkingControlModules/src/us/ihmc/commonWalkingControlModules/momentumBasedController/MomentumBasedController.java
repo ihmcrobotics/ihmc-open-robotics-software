@@ -318,7 +318,7 @@ public class MomentumBasedController
             useBeforeTransmissionVelocityForFriction);
       initializeFrictionCompensationToZero();
 
-      feetCoPControlIsActive = new BooleanYoVariable("activateFeetCoPControl", registry);
+      feetCoPControlIsActive = new BooleanYoVariable("feetCoPControlIsActive", registry);
       footCoPOffsetX = new DoubleYoVariable("footCoPOffsetX", registry);
       footCoPOffsetY = new DoubleYoVariable("footCoPOffsetY", registry);
       footUnderCoPControl = new EnumYoVariable<RobotSide>("footUnderCoPControl", registry, RobotSide.class);
@@ -398,6 +398,7 @@ public class MomentumBasedController
       {
          footCoPOffsetX.set(Double.NaN);
          footCoPOffsetY.set(Double.NaN);
+         momentumControlModuleBridge.setFootCoPControlData(footUnderCoPControl.getEnumValue(), null);
       }
       
       try
