@@ -49,6 +49,28 @@ public class ComparePushRodTransmissionsTest
 
    @Ignore
    @Test
+   public void testTiming()
+   {
+      Random random = new Random(1255L);
+      double epsilon = 1e-7;
+
+      double reflectTop = 1.0;
+      double reflectBottom = 1.0;
+      boolean topJointFirst = true;
+
+      PushRodTransmissionJoint pushRodTransmissionJoint = PushRodTransmissionJoint.ANKLE;
+      
+      YoVariableRegistry registry = new YoVariableRegistry("test");
+      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
+      
+      InefficientPushRodTransmission inefficientPushrodTransmission = new InefficientPushRodTransmission(pushRodTransmissionJoint, reflectTop, reflectBottom, topJointFirst, registry, yoGraphicsListRegistry);
+      EfficientPushRodTransmission efficientPushrodTransmission = new EfficientPushRodTransmission(pushRodTransmissionJoint, reflectBottom, true);
+
+      testTimingTwoPushRodTransmissionInterfaces(random, epsilon, inefficientPushrodTransmission, efficientPushrodTransmission, registry, yoGraphicsListRegistry);
+   }
+
+   @Ignore
+   @Test
    public void testCompareInefficientToEfficientWaist()
    {
       Random random = new Random(1255L);
@@ -295,6 +317,107 @@ public class ComparePushRodTransmissionsTest
          ThreadTools.sleepForever();
       }
    }
+   
+
+   private void testTimingTwoPushRodTransmissionInterfaces(Random random, double epsilon, PushRodTransmissionInterface pushrodTransmissionA,
+         PushRodTransmissionInterface pushrodTransmissionB, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      Robot robot = new Robot("testTimingPushrodTransmission");
+      robot.getRobotsYoVariableRegistry().addChild(registry);
+
+      DoubleYoVariable topJointAngle = new DoubleYoVariable("topJointAngle", registry);
+      DoubleYoVariable bottomJointAngle = new DoubleYoVariable("bottomJointAngle", registry);
+
+      DoubleYoVariable actuatorForceA0 = new DoubleYoVariable("actuatorForceA0", registry);
+      DoubleYoVariable actuatorForceA1 = new DoubleYoVariable("actuatorForceA1", registry);
+
+      DoubleYoVariable actuatorForceB0 = new DoubleYoVariable("actuatorForceB0", registry);
+      DoubleYoVariable actuatorForceB1 = new DoubleYoVariable("actuatorForceB1", registry);
+
+      DoubleYoVariable force0 = new DoubleYoVariable("force0", registry);
+      DoubleYoVariable force1 = new DoubleYoVariable("force1", registry);
+
+      DoubleYoVariable topJointTorqueA = new DoubleYoVariable("topJointTorqueA", registry);
+      DoubleYoVariable bottomJointTorqueA = new DoubleYoVariable("bottomJointTorqueA", registry);
+      DoubleYoVariable topJointTorqueB = new DoubleYoVariable("topJointTorqueB", registry);
+      DoubleYoVariable bottomJointTorqueB = new DoubleYoVariable("bottomJointTorqueB", registry);
+
+      DoubleYoVariable topJointTorque = new DoubleYoVariable("topJointTorque", registry);
+      DoubleYoVariable bottomJointTorque = new DoubleYoVariable("bottomJointTorque", registry);
+
+
+      TurboDriver[] actuatorData = new DummyTurboDriver[2];
+      actuatorData[0] = new DummyTurboDriver();
+      actuatorData[1] = new DummyTurboDriver();
+
+      ValkyrieJointInterface[] jointData = new ValkyrieJointInterface[2];
+      jointData[0] = new YoDesiredValkyrieJoint("joint0", registry);
+      jointData[1] = new YoDesiredValkyrieJoint("joint1", registry);
+
+      double topJoint = 0.5;
+      double bottomJoint = -0.25;
+
+      jointData[0].setPosition(topJoint);
+      jointData[1].setPosition(bottomJoint);
+
+      topJointAngle.set(topJoint);
+      bottomJointAngle.set(bottomJoint);
+
+      force0.set(1.0);
+      force1.set(1.0);
+
+      actuatorData[0].setEffortCommand(force0.getDoubleValue());
+      actuatorData[1].setEffortCommand(force1.getDoubleValue());
+
+      jointData[0].setEffort(Double.NaN);
+      jointData[1].setEffort(Double.NaN);
+
+      int numberOfCalls = 10000000;
+      
+      long startTimeA = System.currentTimeMillis();
+      for (int i=0; i<numberOfCalls; i++)
+      {
+         pushrodTransmissionA.jointToActuatorPosition(actuatorData, jointData);
+         pushrodTransmissionA.actuatorToJointEffort(actuatorData, jointData);
+      }
+      long endTimeA = System.currentTimeMillis();
+
+      topJointTorqueA.set(jointData[0].getEffort());
+      bottomJointTorqueA.set(jointData[1].getEffort());
+
+      jointData[0].setEffort(Double.NaN);
+      jointData[1].setEffort(Double.NaN);
+      
+      long startTimeB = System.currentTimeMillis();
+      for (int i=0; i<numberOfCalls; i++)
+      {
+         pushrodTransmissionB.jointToActuatorPosition(actuatorData, jointData);
+         pushrodTransmissionB.actuatorToJointEffort(actuatorData, jointData);
+      }
+      long endTimeB = System.currentTimeMillis();
+
+      double totalTimeA = (endTimeA - startTimeA) * 0.001;
+      double totalTimeB = (endTimeB - startTimeB) * 0.001;
+      
+      double timePerA = totalTimeA / (double) numberOfCalls;
+      double timePerB = totalTimeB / (double) numberOfCalls;
+      
+      System.out.println("totalTimeA = " + totalTimeA);
+      System.out.println("totalTimeB = " + totalTimeB);
+      
+      System.out.println("timePerA = " + timePerA * 1000.0 + " milliseconds.");
+      System.out.println("timePerB = " + timePerB * 1000.0 + " milliseconds.");
+      
+      topJointTorqueB.set(jointData[0].getEffort());
+      bottomJointTorqueB.set(jointData[1].getEffort());
+
+      assertFalse(Double.isNaN(topJointTorqueA.getDoubleValue()));
+      assertFalse(Double.isNaN(bottomJointTorqueA.getDoubleValue()));
+
+      assertEquals(topJointTorqueA.getDoubleValue(), topJointTorqueB.getDoubleValue(), epsilon);
+      assertEquals(bottomJointTorqueA.getDoubleValue(), bottomJointTorqueB.getDoubleValue(), epsilon);
+
+   }
 
    private void printIfDebug(String string)
    {
@@ -302,4 +425,5 @@ public class ComparePushRodTransmissionsTest
          System.out.println(string);
 
    }
+   
 }
