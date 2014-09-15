@@ -66,84 +66,110 @@ public class ISS_Simulator
       pa.setColor(Color.red);
       p.getPlotter().addArtifact(pa);
 
-      pa = new PointArtifact("test2.11", new Point2d(-8.0, 2.2));
-      pa.setColor(Color.blue);
+      pa = new PointArtifact("test2.11", new Point2d(-7.8, 2.2));
+      pa.setColor(Color.gray);
       p.getPlotter().addArtifact(pa);
 
-      pa = new PointArtifact("test2.12", new Point2d(-8.0, 2.8));
-      pa.setColor(Color.blue);
+      pa = new PointArtifact("test2.12", new Point2d(-7.8, 2.8));
+      pa.setColor(Color.gray);
       p.getPlotter().addArtifact(pa);
 
-      pa = new PointArtifact("test2.21", new Point2d(-5.0, 2.2));
-      pa.setColor(Color.blue);
+      pa = new PointArtifact("test2.21", new Point2d(-5.3, 2.2));
+      pa.setColor(Color.gray);
       p.getPlotter().addArtifact(pa);
 
-      pa = new PointArtifact("test2.22", new Point2d(-5.0, 2.8));
-      pa.setColor(Color.blue);
+      pa = new PointArtifact("test2.22", new Point2d(-5.3, 2.8));
+      pa.setColor(Color.gray);
       p.getPlotter().addArtifact(pa);
 
       pa = new PointArtifact("test2.3", new Point2d(-2.5, 2.5));
-      pa.setColor(Color.blue);
+      pa.setColor(Color.gray);
       p.getPlotter().addArtifact(pa);
 
       pa = new PointArtifact("test2.4", new Point2d(0.0, 2.5));
+      pa.setColor(Color.gray);
+      p.getPlotter().addArtifact(pa);
+
+      pa = new PointArtifact("test1.1", new Point2d(-0.7, 3.3));
+      pa.setColor(Color.red);
+      p.getPlotter().addArtifact(pa);
+      pa = new PointArtifact("test1.2", new Point2d(-0.3, 3.3));
+      pa.setColor(Color.green);
+      p.getPlotter().addArtifact(pa);
+      pa = new PointArtifact("test1.3", new Point2d(0.3, 3.3));
       pa.setColor(Color.blue);
+      p.getPlotter().addArtifact(pa);
+      pa = new PointArtifact("test1.4", new Point2d(0.7, 3.3));
+      pa.setColor(Color.yellow);
+      p.getPlotter().addArtifact(pa);
+
+      pa = new PointArtifact("test5.1", new Point2d(-0.7, -7.8));
+      pa.setColor(Color.red);
+      p.getPlotter().addArtifact(pa);
+      pa = new PointArtifact("test5.2", new Point2d(-0.3, -7.8));
+      pa.setColor(Color.green);
+      p.getPlotter().addArtifact(pa);
+      pa = new PointArtifact("test5.3", new Point2d(0.3, -7.8));
+      pa.setColor(Color.blue);
+      p.getPlotter().addArtifact(pa);
+      pa = new PointArtifact("test5.4", new Point2d(0.7, -7.8));
+      pa.setColor(Color.yellow);
       p.getPlotter().addArtifact(pa);
 
       pa = new PointArtifact("test2.5", new Point2d(2.5, 2.5));
-      pa.setColor(Color.blue);
+      pa.setColor(Color.gray);
       p.getPlotter().addArtifact(pa);
 
       pa = new PointArtifact("test2.61", new Point2d(5.0, 2.2));
-      pa.setColor(Color.blue);
+      pa.setColor(Color.gray);
       p.getPlotter().addArtifact(pa);
 
       pa = new PointArtifact("test2.62", new Point2d(5.0, 2.8));
-      pa.setColor(Color.blue);
+      pa.setColor(Color.gray);
       p.getPlotter().addArtifact(pa);
 
       pa = new PointArtifact("test3.1", new Point2d(0.0, 0.0));
-      pa.setColor(Color.green);
+      pa.setColor(Color.gray);
       p.getPlotter().addArtifact(pa);
 
       pa = new PointArtifact("test3.2", new Point2d(-0.5, -1.0));
-      pa.setColor(Color.green);
+      pa.setColor(Color.gray);
       p.getPlotter().addArtifact(pa);
 
       pa = new PointArtifact("test3.3", new Point2d(0.5, -1.0));
-      pa.setColor(Color.green);
+      pa.setColor(Color.gray);
       p.getPlotter().addArtifact(pa);
 
-      pa = new PointArtifact("test3.4", new Point2d(-0.5, -2.5));
-      pa.setColor(Color.green);
+      pa = new PointArtifact("test3.4", new Point2d(-0.5, -2.7));
+      pa.setColor(Color.gray);
       p.getPlotter().addArtifact(pa);
 
-      pa = new PointArtifact("test3.5", new Point2d(0.5, -2.5));
-      pa.setColor(Color.green);
+      pa = new PointArtifact("test3.5", new Point2d(0.5, -2.7));
+      pa.setColor(Color.gray);
       p.getPlotter().addArtifact(pa);
 
       pa = new PointArtifact("test3.6", new Point2d(0.0, -3.5));
-      pa.setColor(Color.green);
+      pa.setColor(Color.gray);
       p.getPlotter().addArtifact(pa);
 
       pa = new PointArtifact("test4.1", new Point2d(0.0, -6.2));
-      pa.setColor(Color.green);
+      pa.setColor(Color.gray);
       p.getPlotter().addArtifact(pa);
 
       pa = new PointArtifact("test4.2", new Point2d(3.0, -6.2));
-      pa.setColor(Color.green);
+      pa.setColor(Color.gray);
       p.getPlotter().addArtifact(pa);
 
       pa = new PointArtifact("test4.3", new Point2d(-3.0, -6.2));
-      pa.setColor(Color.green);
+      pa.setColor(Color.gray);
       p.getPlotter().addArtifact(pa);
 
       pa = new PointArtifact("test4.4", new Point2d(-4.3, -5.8));
-      pa.setColor(Color.green);
+      pa.setColor(Color.gray);
       p.getPlotter().addArtifact(pa);
 
       pa = new PointArtifact("test4.5", new Point2d(-4.3, -6.7));
-      pa.setColor(Color.green);
+      pa.setColor(Color.gray);
       p.getPlotter().addArtifact(pa);
 
 //    }
