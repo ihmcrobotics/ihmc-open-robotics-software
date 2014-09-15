@@ -1,6 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.testTools;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -33,9 +34,11 @@ import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.math.geometry.BoundingBox3d;
 import us.ihmc.utilities.net.ObjectCommunicator;
 import us.ihmc.yoUtilities.time.GlobalTimer;
 
+import com.yobotics.simulationconstructionset.FloatingJoint;
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.util.ground.TerrainObject3D;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
@@ -270,6 +273,18 @@ public class DRCSimulationTestHelper
       scs.selectCamera("testCamera");
    }
 
+   
+   public void assertRobotsRootJointIsInBoundingBox(BoundingBox3d boundingBox)
+   {
+      FloatingJoint rootJoint = getRobot().getRootJoint();
+      Point3d position = new Point3d();
+      rootJoint.getPosition(position);
+      boolean inside = boundingBox.isInside(position);
+      if (!inside)
+      {
+         fail("Joint was at " + position + ". Expecting it to be inside boundingBox " + boundingBox);
+      }
+   }
 
 
 }
