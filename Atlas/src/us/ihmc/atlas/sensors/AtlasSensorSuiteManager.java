@@ -19,6 +19,7 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.SCSCameraDataRecei
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.DepthDataFilter;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.DepthDataProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.SCSLidarDataReceiver;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosFootstepServiceClient;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosNativeNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
@@ -32,7 +33,6 @@ import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.darpaRoboticsChallenge.sensors.multisense.MultiSenseSensorManager;
 import us.ihmc.utilities.net.LocalObjectCommunicator;
 import us.ihmc.utilities.net.ObjectCommunicator;
-import us.ihmc.utilities.ros.RosFootstepServiceClient;
 import us.ihmc.utilities.ros.RosMainNode;
 
 public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
@@ -94,8 +94,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
          new RosLocalizationUpdateSubscriber(rosMainNode, fieldObjectCommunicator, ppsTimestampOffsetProvider);
          
          
-         RosFootstepServiceClient rosFootstepServiceClient = new RosFootstepServiceClient(fieldObjectCommunicator, rosMainNode);
-         //networkingManager.getControllerStateHandler(). method to send packet to UI????
+         RosFootstepServiceClient rosFootstepServiceClient = new RosFootstepServiceClient(fieldObjectCommunicator, networkingManager, rosMainNode);
 
          ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
          rosMainNode.execute();
