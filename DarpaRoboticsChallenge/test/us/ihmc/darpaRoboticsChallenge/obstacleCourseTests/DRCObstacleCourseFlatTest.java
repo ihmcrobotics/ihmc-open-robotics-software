@@ -101,7 +101,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       assertTrue(success);
 
-      Point3d center = new Point3d();
+      Point3d center = new Point3d(-8.956281888358388E-4, -3.722237566790175E-7, 0.8882009563211146);
       Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
@@ -233,7 +233,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       assertTrue(success);
 
-      Point3d center = new Point3d();
+      Point3d center = new Point3d(0.011508654344298094, -0.005208268357032689, 0.780662368979778);
       Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
