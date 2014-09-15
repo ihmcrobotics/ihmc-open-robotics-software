@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFramesVisualizer;
 import us.ihmc.commonWalkingControlModules.referenceFrames.ReferenceFrames;
 import us.ihmc.commonWalkingControlModules.sensors.CenterOfMassJacobianUpdater;
@@ -97,7 +97,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    
    private final BooleanYoVariable runController = new BooleanYoVariable("runController", registry);
    
-   public DRCControllerThread(DRCRobotModel robotModel, MomentumBasedControllerFactory controllerFactory,
+   public DRCControllerThread(DRCRobotModel robotModel, HumanoidControllerFactory controllerFactory,
          ThreadDataSynchronizer threadDataSynchronizer, DRCOutputWriter outputWriter, GlobalDataProducer dataProducer, RobotVisualizer robotVisualizer,
          double gravity)
    {
@@ -156,7 +156,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    }
 
    public static RobotController createMomentumBasedController(SDFFullRobotModel controllerModel, ReferenceFrames referenceFramesForController,
-         DRCRobotSensorInformation sensorInformation, MomentumBasedControllerFactory controllerFactory, DoubleYoVariable yoTime, double controlDT,
+         DRCRobotSensorInformation sensorInformation, HumanoidControllerFactory controllerFactory, DoubleYoVariable yoTime, double controlDT,
          double gravity, ForceSensorDataHolder forceSensorDataHolderForController, YoGraphicsListRegistry yoGraphicsListRegistry,
          YoVariableRegistry registry, GlobalDataProducer dataProducer, InverseDynamicsJoint... jointsToIgnore)
    {

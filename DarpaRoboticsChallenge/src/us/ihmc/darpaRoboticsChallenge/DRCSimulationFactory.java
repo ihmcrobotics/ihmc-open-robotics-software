@@ -5,7 +5,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HumanoidControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.controllers.PIDLidarTorqueController;
 import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadDataSynchronizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotJointMap;
@@ -51,7 +51,7 @@ public class DRCSimulationFactory
 
    private final SimulatedDRCRobotTimeProvider simulatedDRCRobotTimeProvider;
 
-   public DRCSimulationFactory(DRCRobotModel drcRobotModel, MomentumBasedControllerFactory controllerFactory, Graphics3DObject environmentGraphics,
+   public DRCSimulationFactory(DRCRobotModel drcRobotModel, HumanoidControllerFactory controllerFactory, Graphics3DObject environmentGraphics,
          DRCRobotInitialSetup<SDFRobot> robotInitialSetup, DRCSCSInitialSetup scsInitialSetup, DRCGuiInitialSetup guiInitialSetup,
          GlobalDataProducer globalDataProducer)
    {
@@ -87,7 +87,7 @@ public class DRCSimulationFactory
       setupJointDamping(simulatedRobot, drcRobotModel);
    }
 
-   private void createRobotController(DRCRobotModel drcRobotModel, MomentumBasedControllerFactory controllerFactory, GlobalDataProducer globalDataProducer,
+   private void createRobotController(DRCRobotModel drcRobotModel, HumanoidControllerFactory controllerFactory, GlobalDataProducer globalDataProducer,
          SDFRobot simulatedRobot, SimulationConstructionSet scs, DRCSCSInitialSetup scsInitialSetup,
          DRCRobotInitialSetup<SDFRobot> robotInitialSetup)
    {
