@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.LegSingularityAndKneeCollapseAvoidanceControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
+import us.ihmc.commonWalkingControlModules.controllers.roughTerrain.FootExplorationControlModule;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
@@ -212,6 +213,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final BooleanYoVariable isInFlamingoStance = new BooleanYoVariable("isInFlamingoStance", registry);
    private final DoubleYoVariable icpProjectionTimeOffset = new DoubleYoVariable("icpProjectionTimeOffset", registry);
+   
+   private final FootExplorationControlModule footExplorationControlModule;
 
    public WalkingHighLevelHumanoidController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
          CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator, TransferTimeCalculationProvider transferTimeCalculationProvider,
@@ -300,6 +303,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       pushRecoveryModule = new PushRecoveryControlModule(momentumBasedController, walkingControllerParameters, readyToGrabNextFootstep,
             icpAndMomentumBasedController, stateMachine, registry, swingTimeCalculationProvider, feet);
+      
+      footExplorationControlModule = new FootExplorationControlModule(registry, momentumBasedController);
 
       setupStateMachine();
       readyToGrabNextFootstep.set(true);
@@ -539,6 +544,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          desiredICPVelocity.set(desiredICPVelocityLocal);
 
          desiredECMP.set(ecmpLocal);
+         
+         if(footExplorationControlModule.isControllingSwingFoot() && !pushRecoveryModule.isRecovering() && !isInFlamingoStance.getBooleanValue())
+         {
+            footExplorationControlModule.controlSwingFoot(yoTime.getDoubleValue(), desiredICP, desiredICPVelocity, capturePoint2d);
+         }
 
          if (VISUALIZE)
          {
@@ -763,6 +773,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
          
          pelvisOrientationManager.setToHoldCurrentDesired();
+         
+         footExplorationControlModule.setSwingIsFinished(true);
       }
 
       @Override
@@ -784,6 +796,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          if (manipulationControlModule != null && doPrepareManipulationForLocomotion.getBooleanValue())
             manipulationControlModule.prepareForLocomotion();
+         
+         footExplorationControlModule.reset();
       }
    }
 
@@ -893,9 +907,15 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             desiredICP.set(desiredICPLocal);
          if (isInFlamingoStance.getBooleanValue())
             desiredICP.add(icpStandOffsetX.getDoubleValue(), icpStandOffsetY.getDoubleValue());
+         
          desiredICPVelocity.set(desiredICPVelocityLocal);
 
          desiredECMP.set(ecmpLocal);
+         
+         if(footExplorationControlModule.isControllingSwingFoot() && !pushRecoveryModule.isRecovering() && !isInFlamingoStance.getBooleanValue())
+         {
+            footExplorationControlModule.controlSwingFoot(yoTime.getDoubleValue(), desiredICP, desiredICPVelocity, capturePoint2d);
+         }
 
          if (VISUALIZE)
          {
@@ -995,6 +1015,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          {
             desiredICP.set(capturePoint.getFramePoint2dCopy()); // TODO: currently necessary for stairs because of the omega0 jump, but should get rid of this
          }
+         
+         FrameConvexPolygon2d footPolygon = computeFootPolygon(supportSide, referenceFrames.getAnkleZUpFrame(supportSide));
+         footExplorationControlModule.initialize(nextFootstep, yoTime.getDoubleValue(), footPolygon, swingSide);
       }
 
       private void updateFootstepParameters()
@@ -1119,6 +1142,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       public boolean checkCondition()
       {
+         if(footExplorationControlModule.isControllingSwingFoot() && !stayInTransferWalkingState.getBooleanValue())
+            return footExplorationControlModule.isDone();
+         
          if (stayInTransferWalkingState.getBooleanValue())
             return false;
 
@@ -1246,7 +1272,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                return true;
          }
 
-         if (walkingControllerParameters.finishSwingWhenTrajectoryDone())
+         if (walkingControllerParameters.finishSwingWhenTrajectoryDone() || footExplorationControlModule.isControllingSwingFoot())
          {
             return hasMinimumTimePassed.getBooleanValue() && (hasICPPlannerFinished.getBooleanValue() || footSwitchActivated);
          }
