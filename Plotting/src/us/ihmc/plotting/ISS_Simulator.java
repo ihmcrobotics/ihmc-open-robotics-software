@@ -21,7 +21,7 @@ public class ISS_Simulator
       BufferedImage image = null;
       try
       {
-         image = ImageIO.read(new File("ISS.jpg"));
+         image = ImageIO.read(new File("./resources/ISS.jpg"));
       }
       catch (IOException e)
       {
