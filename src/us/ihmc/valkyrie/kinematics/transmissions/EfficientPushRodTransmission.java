@@ -5,6 +5,8 @@ package us.ihmc.valkyrie.kinematics.transmissions;
 import us.ihmc.valkyrie.kinematics.ValkyrieJointInterface;
 import us.ihmc.valkyrie.kinematics.util.ClosedFormJacobian;
 import us.ihmc.valkyrie.roboNet.TurboDriver;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class EfficientPushRodTransmission implements PushRodTransmissionInterface {
     private static final double INFINITY_THRESHOLD = 1e10;
@@ -16,6 +18,8 @@ public class EfficientPushRodTransmission implements PushRodTransmissionInterfac
     private final double[][]         jacobianInvertedTranspose = new double[2][2];
     private final ClosedFormJacobian efficientPushrodTransmissionJacobian;
     private final double             reflect;
+
+	private DoubleYoVariable pitchAngleOffset;
 
     public EfficientPushRodTransmission(PushRodTransmissionJoint pushRodTransmissionJoint, double reflect, boolean futekBoolean) {
         if (Math.abs(Math.abs(reflect) - 1.0) > 1e-7) {
@@ -76,6 +80,7 @@ public class EfficientPushRodTransmission implements PushRodTransmissionInterfac
         double actuatorForce0 = actuatorData[0].getEffort();
         double actuatorForce1 = actuatorData[1].getEffort();
         double pitchAngle     = jointData[0].getPosition();
+        if(pitchAngleOffset != null) pitchAngle += pitchAngleOffset.getDoubleValue();
         double rollAngle      = reflect * jointData[1].getPosition();
 
         jacobian = efficientPushrodTransmissionJacobian.getUpdatedTransform(rollAngle, pitchAngle);
@@ -99,6 +104,7 @@ public class EfficientPushRodTransmission implements PushRodTransmissionInterfac
         double actuatorVelocity0 = act_data[0].getVelocity();
         double actuatorVelocity1 = act_data[1].getVelocity();
         double pitchAngle        = jnt_data[0].getPosition();
+        if(pitchAngleOffset != null) pitchAngle += pitchAngleOffset.getDoubleValue();
         double rollAngle         = reflect * jnt_data[1].getPosition();
 
         jacobian = efficientPushrodTransmissionJacobian.getUpdatedTransform(rollAngle, pitchAngle);
@@ -124,9 +130,11 @@ public class EfficientPushRodTransmission implements PushRodTransmissionInterfac
         assertTrue((numActuators() == actuatorData.length) && (numJoints() == jointData.length));
 
         double pitchAngle  = jointData[0].getPosition();
+        if(pitchAngleOffset != null) pitchAngle += pitchAngleOffset.getDoubleValue();
         double rollAngle   = reflect * jointData[1].getPosition();
         double pitchTorque = jointData[0].getDesiredEffort();
         double rollTorque  = reflect * jointData[1].getDesiredEffort();
+        
 
         if ((Math.abs(pitchAngle) > INFINITY_THRESHOLD) || (Math.abs(rollAngle) > INFINITY_THRESHOLD)) {
             throw new RuntimeException("jointToActuatorEffort: pitchAngle or rollAngle is infinity!!\n");
@@ -155,8 +163,6 @@ public class EfficientPushRodTransmission implements PushRodTransmissionInterfac
 
     @Override
     public void jointToActuatorPosition(TurboDriver[] act_data, ValkyrieJointInterface[] jnt_data) {
-
-        // TODO Auto-generated method stub
     }
 
     @Override
@@ -167,4 +173,44 @@ public class EfficientPushRodTransmission implements PushRodTransmissionInterfac
         jnt_data[1].setMotorCurrent(act_data[1].getCurrentIq());
         jnt_data[1].setCommandedMotorCurrent(act_data[1].getCurrentIqCmd());
     }
+
+	public void allowTopJointAngleOffset(String string, double topJointOffset, YoVariableRegistry parentRegistry) {
+	      pitchAngleOffset = new DoubleYoVariable(string + "pitchAngleOffset", parentRegistry);
+	      pitchAngleOffset.set(topJointOffset);
+	}
+	
+	public void renishawToFutekForce(TurboDriver[] actuatorData, ValkyrieJointInterface[] jointData, DoubleYoVariable renishawInFutekSpace0, DoubleYoVariable renishawInFutekSpace1){
+		if(!efficientPushrodTransmissionJacobian.isUsingFuteks()){
+			
+		double actuatorForce0 = actuatorData[0].getEffort();
+        double actuatorForce1 = actuatorData[1].getEffort();
+        double pitchAngle     = jointData[0].getPosition();
+        if(pitchAngleOffset != null) pitchAngle += pitchAngleOffset.getDoubleValue();
+        double rollAngle      = reflect * jointData[1].getPosition();
+        jacobian = efficientPushrodTransmissionJacobian.getUpdatedTransform(rollAngle, pitchAngle);
+        transposeMatrix(jacobian, jacobianTranspose);
+
+        // tau = (J^T) * F
+        double pitchTorque  = jacobianTranspose[0][0] * actuatorForce0 + jacobianTranspose[0][1] * actuatorForce1;
+        double rollTorque = jacobianTranspose[1][0] * actuatorForce0 + jacobianTranspose[1][1] * actuatorForce1;
+        
+        efficientPushrodTransmissionJacobian.useFuteks(true);
+        jacobian = efficientPushrodTransmissionJacobian.getUpdatedTransform(rollAngle, pitchAngle);
+        transposeMatrix(jacobian, jacobianTranspose);
+        invertMatrix(jacobianTranspose, jacobianInvertedTranspose);
+
+        // F = (J^T)^-1 * tau
+        actuatorForce0 = jacobianInvertedTranspose[0][0] * pitchTorque + jacobianInvertedTranspose[0][1] * rollTorque;
+        actuatorForce1 = jacobianInvertedTranspose[1][0] * pitchTorque + jacobianInvertedTranspose[1][1] * rollTorque;
+
+        checkInfinity(actuatorForce0);
+        checkInfinity(actuatorForce1);
+        
+        renishawInFutekSpace0.set(actuatorForce0);
+        renishawInFutekSpace1.set(actuatorForce1);
+        
+        efficientPushrodTransmissionJacobian.useFuteks(false);
+        
+		}
+	}
 }
