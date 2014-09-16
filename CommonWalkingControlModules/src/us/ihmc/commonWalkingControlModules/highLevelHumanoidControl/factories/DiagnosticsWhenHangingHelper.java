@@ -32,7 +32,7 @@ public class DiagnosticsWhenHangingHelper
    private FrameVector rCrossFVector = new FrameVector();
    
    private final DoubleYoVariable totalMass;
-   private final DoubleYoVariable estimatedTorque;
+   private final DoubleYoVariable estimatedTorque, torqueOffset, appliedTorque;
 
    public DiagnosticsWhenHangingHelper(OneDoFJoint parentJoint, boolean preserveY, YoVariableRegistry registry)
    {
@@ -47,6 +47,9 @@ public class DiagnosticsWhenHangingHelper
       yoForceVector = new YoFrameVector(parentJoint.getName() + "ForceVector", ReferenceFrame.getWorldFrame(), registry);
       
       estimatedTorque = new DoubleYoVariable("tau_est_" + parentJoint.getName(), registry);
+      torqueOffset = new DoubleYoVariable("tau_off_" + parentJoint.getName(), registry);
+      appliedTorque = new DoubleYoVariable("tau_app_" + parentJoint.getName(), registry);
+      
       totalMass = new DoubleYoVariable("totalMass_" + parentJoint.getName(), registry);
    }
 
@@ -80,6 +83,12 @@ public class DiagnosticsWhenHangingHelper
       return centerOfMassCalculator;
    }
 
+   public double getTorqueToApply(double desiredTorque)
+   {
+      appliedTorque.set(desiredTorque);
+      return desiredTorque - torqueOffset.getDoubleValue();
+   }
+   
    public void update()
    {
       centerOfMassCalculator.getDesiredFrame().update();
