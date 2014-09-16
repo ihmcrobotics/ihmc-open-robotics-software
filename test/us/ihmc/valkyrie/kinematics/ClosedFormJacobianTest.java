@@ -13,7 +13,7 @@ import us.ihmc.valkyrie.kinematics.util.ClosedFormJacobian;
 import static org.junit.Assert.assertEquals;
 
 public class ClosedFormJacobianTest {
-    private static final boolean DEBUG                                     = false;
+    private static final boolean DEBUG                                     = true;
     private final double         TOLERANCE                                 = 1E-7;
     private final double         TOLERANCE_GOOD_ENOUGH_FOR_GOVERNMENT_WORK = 2E-3;
     private double[]             roll                                      = new double[] {
@@ -108,7 +108,7 @@ public class ClosedFormJacobianTest {
             new InefficientPushrodTransmissionJacobian(PushRodTransmissionJoint.ANKLE, null, null);
 
         for (int i = 0; i < 7; i++) {
-            double[][] efficientJacobian = closedFormJacobianAnkle.getUpdatedTransform(roll[i], pitch[i]);    // + 7.5*Math.PI/180.0);
+            double[][] efficientJacobian = closedFormJacobianAnkle.getUpdatedTransform(roll[i], pitch[i]);
             double[][] inefficientJacobian         = new double[2][2];
             double[][] modifiedInefficientJacobian = new double[2][2];
 
@@ -131,7 +131,7 @@ public class ClosedFormJacobianTest {
             new InefficientPushrodTransmissionJacobian(PushRodTransmissionJoint.ANKLE, null, null);
 
         for (int i = 0; i < 7; i++) {
-            double[][] efficientJacobian = closedFormJacobianAnkleRenishaws.getUpdatedTransform(roll[i], pitch[i]);    // + 7.5*Math.PI/180.0);
+            double[][] efficientJacobian = closedFormJacobianAnkleRenishaws.getUpdatedTransform(roll[i], pitch[i]);
             double[][] inefficientJacobian         = new double[2][2];
             double[][] modifiedInefficientJacobian = new double[2][2];
 
@@ -149,9 +149,9 @@ public class ClosedFormJacobianTest {
     public void testEfficientMatchesInefficientJacobianWaist() {
         InefficientPushrodTransmissionJacobian inefficientButReadablePushrodTransmission =
             new InefficientPushrodTransmissionJacobian(PushRodTransmissionJoint.WAIST, null, null);
-
+        closedFormJacobianWaistRenishaws.useFuteks(false);
         for (int i = 0; i < 7; i++) {
-            double[][] efficientJacobian = closedFormJacobianWaist.getUpdatedTransform(roll[i], pitch[i]);    // + 7.5*Math.PI/180.0);
+            double[][] efficientJacobian = closedFormJacobianWaistRenishaws.getUpdatedTransform(roll[i], pitch[i]);    
             double[][] inefficientJacobian         = new double[2][2];
             double[][] modifiedInefficientJacobian = new double[2][2];
 
@@ -160,7 +160,7 @@ public class ClosedFormJacobianTest {
             modifiedInefficientJacobian[0][1] = inefficientJacobian[1][1];
             modifiedInefficientJacobian[1][0] = inefficientJacobian[0][0];
             modifiedInefficientJacobian[1][1] = inefficientJacobian[1][0];
-            compareMatrices(efficientJacobian, inefficientJacobian, TOLERANCE_GOOD_ENOUGH_FOR_GOVERNMENT_WORK);
+            compareMatrices(efficientJacobian, modifiedInefficientJacobian, TOLERANCE_GOOD_ENOUGH_FOR_GOVERNMENT_WORK);
         }
     }
 
@@ -169,7 +169,7 @@ public class ClosedFormJacobianTest {
         closedFormJacobianAnkleRenishaws.useFuteks(false);
 
         for (int i = 0; i < 7; i++) {
-            double[][] efficientJacobian = closedFormJacobianAnkleRenishaws.getUpdatedTransform(roll[i], pitch[i]);    // + 7.5*Math.PI/180.0);
+            double[][] efficientJacobian = closedFormJacobianAnkleRenishaws.getUpdatedTransform(roll[i], pitch[i]);
             double[][]                      interpolatedJacobian            = new double[2][2];
             double[][]                      modifiedInterpolatedJacobian    = new double[2][2];
             InterpolatedPushRodTransmission interpolatedPushRodTransmission =
@@ -199,10 +199,10 @@ public class ClosedFormJacobianTest {
 
             interpolatedJacobian = interpolatedPushRodTransmission.getInterpolatedActuatorToJointJacobian(pitch[i],
                     roll[i], PushRodTransmissionJoint.WAIST);
-            modifiedInterpolatedJacobian[0][0] = -interpolatedJacobian[0][1];
-            modifiedInterpolatedJacobian[0][1] = -interpolatedJacobian[0][0];
-            modifiedInterpolatedJacobian[1][0] = interpolatedJacobian[1][1];
-            modifiedInterpolatedJacobian[1][1] = interpolatedJacobian[1][0];
+            modifiedInterpolatedJacobian[0][0] = -interpolatedJacobian[1][1];
+            modifiedInterpolatedJacobian[0][1] = interpolatedJacobian[0][1];
+            modifiedInterpolatedJacobian[1][0] = -interpolatedJacobian[1][0];
+            modifiedInterpolatedJacobian[1][1] = interpolatedJacobian[0][0];
             compareMatrices(efficientJacobian, modifiedInterpolatedJacobian, TOLERANCE_GOOD_ENOUGH_FOR_GOVERNMENT_WORK);
         }
     }
@@ -243,7 +243,6 @@ public class ClosedFormJacobianTest {
         }
     }
     
-    @Ignore
     @Test
     public void consineTestWaist() {
 //      A Test to ensure Renishaw and Futek Jacobians are in agreement with each other
@@ -253,15 +252,14 @@ public class ClosedFormJacobianTest {
         double[][] renishawJacobian, futekJacobian;
 
         for (int i = 0; i < 7; i++) {
-            closedFormJacobianAnkleRenishaws.useFuteks(false);
-            futekJacobian = invertMatrix(transposeMatrix(closedFormJacobianAnkle.getUpdatedTransform(roll[i],
-                    pitch[i])));
+        	closedFormJacobianWaistRenishaws.useFuteks(false);
+            futekJacobian = invertMatrix(transposeMatrix(closedFormJacobianWaist.getUpdatedTransform(roll[i], pitch[i])));
 
             // The cosineOfTheta functions must be called after getUpdatedTransform to update properly
-            cosine5          = closedFormJacobianAnkle.cosineOfTheta5();
-            cosine6          = closedFormJacobianAnkle.cosineOfTheta6();
+            cosine5          = closedFormJacobianWaist.cosineOfTheta5();
+            cosine6          = closedFormJacobianWaist.cosineOfTheta6();
             renishawJacobian =
-                invertMatrix(transposeMatrix(closedFormJacobianAnkleRenishaws.getUpdatedTransform(roll[i], pitch[i])));
+                invertMatrix(transposeMatrix(closedFormJacobianWaistRenishaws.getUpdatedTransform(roll[i], pitch[i])));
             futek5    = futekJacobian[0][0] * pitchTorque + futekJacobian[0][1] * rollTorque;
             futek6    = futekJacobian[1][0] * pitchTorque + futekJacobian[1][1] * rollTorque;
             
@@ -269,14 +267,14 @@ public class ClosedFormJacobianTest {
             renishaw6 = renishawJacobian[1][0] * pitchTorque + renishawJacobian[1][1] * rollTorque;
 
             if (DEBUG) {
-                System.out.println("cos5: " + cosine6 + ", r5/f5: " + renishaw5 / futek5);
-                System.out.println("cos6: " + cosine5 + ", r6/f6: " + renishaw6 / futek6);
+                System.out.println("cos5: " + cosine5 + ", r5/f5: " + renishaw5 / futek5);
+                System.out.println("cos6: " + cosine6 + ", r6/f6: " + renishaw6 / futek6);
                 System.out.println(" ");
             }
 
             // TODO: The cosine5 and consine6 switch is a hack. Investigate this further.
-            assertEquals(cosine6, renishaw5 / futek5, TOLERANCE);
-            assertEquals(cosine5, renishaw6 / futek6, TOLERANCE);
+            assertEquals(cosine5, renishaw5 / futek5, TOLERANCE);
+            assertEquals(cosine6, renishaw6 / futek6, TOLERANCE);
         }
     }
 
