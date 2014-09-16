@@ -46,7 +46,6 @@ public class DiagnosticsWhenHangingHelper
       yoJointToCenterOfMass = new YoFrameVector(parentJoint.getName() + "JointToCoM", ReferenceFrame.getWorldFrame(), registry);
       yoForceVector = new YoFrameVector(parentJoint.getName() + "ForceVector", ReferenceFrame.getWorldFrame(), registry);
       
-      
       estimatedTorque = new DoubleYoVariable("tau_est_" + parentJoint.getName(), registry);
       totalMass = new DoubleYoVariable("totalMass_" + parentJoint.getName(), registry);
    }
