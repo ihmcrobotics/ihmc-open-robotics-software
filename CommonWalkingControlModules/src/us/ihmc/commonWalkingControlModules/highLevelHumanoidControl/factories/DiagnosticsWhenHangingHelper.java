@@ -10,6 +10,7 @@ import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
+import us.ihmc.yoUtilities.controllers.PDController;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
@@ -33,6 +34,8 @@ public class DiagnosticsWhenHangingHelper
    
    private final DoubleYoVariable totalMass;
    private final DoubleYoVariable estimatedTorque, torqueOffset, appliedTorque;
+   
+   private final PDController torqueCorrectionPdController;
 
    public DiagnosticsWhenHangingHelper(OneDoFJoint parentJoint, boolean preserveY, YoVariableRegistry registry)
    {
@@ -51,6 +54,10 @@ public class DiagnosticsWhenHangingHelper
       appliedTorque = new DoubleYoVariable("tau_app_" + parentJoint.getName(), registry);
       
       totalMass = new DoubleYoVariable("totalMass_" + parentJoint.getName(), registry);
+      
+      torqueCorrectionPdController = new PDController("tau_corr_" + parentJoint.getName(), registry);
+      torqueCorrectionPdController.setProportionalGain(0.1);
+      torqueCorrectionPdController.setDerivativeGain(0.02);
    }
 
    private static CenterOfMassCalculator createCenterOfMassCalculatorInJointZUpFrame(InverseDynamicsJoint parentJoint, boolean preserveY)
@@ -85,8 +92,11 @@ public class DiagnosticsWhenHangingHelper
 
    public double getTorqueToApply(double desiredTorque)
    {
-      appliedTorque.set(desiredTorque + estimatedTorque.getDoubleValue());
-      return appliedTorque.getDoubleValue() - torqueOffset.getDoubleValue();
+      if (appliedTorque.getDoubleValue() < 4)
+           torqueOffset.set(torqueCorrectionPdController.compute(torqueOffset.getDoubleValue(), estimatedTorque.getDoubleValue() - desiredTorque, 1.0, 1.0));
+      
+      appliedTorque.set(desiredTorque + estimatedTorque.getDoubleValue() - torqueOffset.getDoubleValue());
+      return appliedTorque.getDoubleValue();
    }
    
    public double getEstimatedTorque()
