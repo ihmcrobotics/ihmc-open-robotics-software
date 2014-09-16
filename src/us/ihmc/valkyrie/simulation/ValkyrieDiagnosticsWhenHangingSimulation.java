@@ -11,6 +11,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.valkyrie.ValkyrieInitialSetup;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
+import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
 
 import com.yobotics.simulationconstructionset.Joint;
 import com.yobotics.simulationconstructionset.util.virtualHoist.VirtualHoist;
@@ -24,7 +25,7 @@ public class ValkyrieDiagnosticsWhenHangingSimulation
       double initialYaw = 0.0;
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = new ValkyrieInitialSetup(groundZ, initialYaw);
       
-      new HumanoidDiagnosticsWhenHangingSimulation(robotModel, robotInitialSetup);
+      new HumanoidDiagnosticsWhenHangingSimulation(ValkyrieConfigurationRoot.VALKYRIE_WITH_ARMS, robotModel, robotInitialSetup);
    }
 
    public static void main(String[] args)
