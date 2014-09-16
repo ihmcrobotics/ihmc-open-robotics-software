@@ -85,8 +85,13 @@ public class DiagnosticsWhenHangingHelper
 
    public double getTorqueToApply(double desiredTorque)
    {
-      appliedTorque.set(desiredTorque);
-      return desiredTorque - torqueOffset.getDoubleValue();
+      appliedTorque.set(desiredTorque + estimatedTorque.getDoubleValue());
+      return appliedTorque.getDoubleValue() - torqueOffset.getDoubleValue();
+   }
+   
+   public double getEstimatedTorque()
+   {
+      return estimatedTorque.getDoubleValue();
    }
    
    public void update()
