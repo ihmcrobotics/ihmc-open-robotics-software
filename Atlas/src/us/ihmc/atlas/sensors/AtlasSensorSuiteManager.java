@@ -93,7 +93,6 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
          new RosRobotJointStatePublisher(fieldObjectCommunicator, rosMainNode, ppsTimestampOffsetProvider, "atlas");
          new RosLocalizationUpdateSubscriber(rosMainNode, fieldObjectCommunicator, ppsTimestampOffsetProvider);
          
-         
          RosFootstepServiceClient rosFootstepServiceClient = new RosFootstepServiceClient(fieldObjectCommunicator, networkingManager, rosMainNode);
 
          ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
