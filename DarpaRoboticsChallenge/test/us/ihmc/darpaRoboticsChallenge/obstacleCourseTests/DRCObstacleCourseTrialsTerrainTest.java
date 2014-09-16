@@ -336,7 +336,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements
 		BambooTools.reportTestFinishedMessage();
 	}
 
-	// @Test //ignored due to need to rerecord
+	@Test //ignored due to need to rerecord
 	public void testTrialsTerrainCinderblockEntireFieldScript()
 			throws SimulationExceededMaximumTimeException {
 		BambooTools.reportTestStartedMessage();
