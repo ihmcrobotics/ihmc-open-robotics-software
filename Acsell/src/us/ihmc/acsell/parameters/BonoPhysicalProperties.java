@@ -1,6 +1,6 @@
 package us.ihmc.acsell.parameters;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
@@ -20,12 +20,12 @@ public class BonoPhysicalProperties extends DRCRobotPhysicalProperties
    public static final double legLength = thighLength + shinLength;
    public static final double pelvisToFoot = 0.887;
 
-   public static final SideDependentList<Transform3D> soleToAnkleFrameTransforms = new SideDependentList<Transform3D>();
+   public static final SideDependentList<Transform3d> soleToAnkleFrameTransforms = new SideDependentList<Transform3d>();
    static
    {
       for (RobotSide robotSide : RobotSide.values())
       {
-         Transform3D soleToAnkleFrame = TransformTools.yawPitchDegreesTransform(new Vector3d(footLength / 2.0 - footBack, 0.0, -ankleHeight), 0.0, Math.toDegrees(0.0 * 0.18704));
+         Transform3d soleToAnkleFrame = TransformTools.yawPitchDegreesTransform(new Vector3d(footLength / 2.0 - footBack, 0.0, -ankleHeight), 0.0, Math.toDegrees(0.0 * 0.18704));
          soleToAnkleFrameTransforms.put(robotSide, soleToAnkleFrame);
       }
    }
@@ -36,7 +36,7 @@ public class BonoPhysicalProperties extends DRCRobotPhysicalProperties
       return ankleHeight;
    }
 
-   public static Transform3D getAnkleToSoleFrameTransform(RobotSide side)
+   public static Transform3d getAnkleToSoleFrameTransform(RobotSide side)
    {
       return soleToAnkleFrameTransforms.get(side);
    }
