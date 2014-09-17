@@ -14,7 +14,7 @@
 		<param name="maxOverlapToMerge" value="0.9" /> 
 		<param name="minReadingPointCount" value="1000" /> 
 		<param name="minMapPointCount" value="1000" /> 
-		<param name="localizing" value="true" /> 
-		<param name="mapping" value="true" />
+		<param name="localizing" value="false" /> 
+		<param name="mapping" value="false" />
 	</node>
 </launch>
