@@ -24,6 +24,7 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.ros.RosNativeNetworkProce
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.networking.DRCNetworkProcessorNetworkingManager;
 import us.ihmc.darpaRoboticsChallenge.ros.ROSNativeTransformTools;
+import us.ihmc.darpaRoboticsChallenge.ros.RosLocalizationServiceClient;
 import us.ihmc.darpaRoboticsChallenge.ros.RosLocalizationUpdateSubscriber;
 import us.ihmc.darpaRoboticsChallenge.ros.RosRobotJointStatePublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosRobotPosePublisher;
@@ -94,6 +95,8 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
          new RosLocalizationUpdateSubscriber(rosMainNode, fieldObjectCommunicator, ppsTimestampOffsetProvider);
          
          RosFootstepServiceClient rosFootstepServiceClient = new RosFootstepServiceClient(fieldObjectCommunicator, networkingManager, rosMainNode);
+         
+         RosLocalizationServiceClient rosLocalizationServiceClient = new RosLocalizationServiceClient(fieldObjectCommunicator, rosMainNode);
 
          ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
          rosMainNode.execute();
