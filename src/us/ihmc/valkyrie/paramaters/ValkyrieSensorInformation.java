@@ -3,7 +3,7 @@ package us.ihmc.valkyrie.paramaters;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParameters;
@@ -50,29 +50,29 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
       footForceSensorTareOffsets = new SideDependentList<SpatialForceVector>(leftFootForceSensorTareOffset_20140903, rightFootForceSensorTareOffset_20140903);
    }
 
-   public static final SideDependentList<Transform3D> transformFromMeasurementToAnkleZUpFrames = new SideDependentList<>();
+   public static final SideDependentList<Transform3d> transformFromMeasurementToAnkleZUpFrames = new SideDependentList<>();
    static
    {     
-      Transform3D translateForwardAndDownOnFoot = new Transform3D();
+      Transform3d translateForwardAndDownOnFoot = new Transform3d();
       translateForwardAndDownOnFoot.setTranslation(new Vector3d(0.02150, 0.0, -0.058547));  //from Will's CAD measurement
       
-      Transform3D rotYBy7dot5 = new Transform3D();
+      Transform3d rotYBy7dot5 = new Transform3d();
       rotYBy7dot5.rotY(-Math.PI/24.0);
       
-      Transform3D rotXByPi = new Transform3D();
+      Transform3d rotXByPi = new Transform3d();
       rotXByPi.rotX(Math.PI);
       
-      Transform3D rotateZ60Degrees = new Transform3D();
+      Transform3d rotateZ60Degrees = new Transform3d();
       rotateZ60Degrees.rotZ(-Math.PI/3.0);
       
-      Transform3D leftTransform = new Transform3D();
+      Transform3d leftTransform = new Transform3d();
       leftTransform.mul(translateForwardAndDownOnFoot);
       leftTransform.mul(rotYBy7dot5);
       leftTransform.mul(rotateZ60Degrees);
       leftTransform.mul(rotXByPi);
 
       transformFromMeasurementToAnkleZUpFrames.put(RobotSide.LEFT, leftTransform);
-      transformFromMeasurementToAnkleZUpFrames.put(RobotSide.RIGHT, new Transform3D(leftTransform));
+      transformFromMeasurementToAnkleZUpFrames.put(RobotSide.RIGHT, new Transform3d(leftTransform));
    }
 
    /**
@@ -175,7 +175,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
       return footForceSensorTareOffsets.get(robotSide);
    }
    
-   public Transform3D getTransformFromAnkleURDFFrameToZUpFrame(RobotSide robotSide)
+   public Transform3d getTransformFromAnkleURDFFrameToZUpFrame(RobotSide robotSide)
    {
       return transformFromMeasurementToAnkleZUpFrames.get(robotSide);
    }
