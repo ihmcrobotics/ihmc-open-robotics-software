@@ -2,16 +2,16 @@ package us.ihmc.graphics3DAdapter;
 
 import java.util.concurrent.Callable;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 
 public class GraphicsTransformUpdate implements Callable<Object>
 {
-   private Transform3D transform;
+   private Transform3d transform;
    private Graphics3DNode node;
 
-   public GraphicsTransformUpdate(Graphics3DNode node, Transform3D transform)
+   public GraphicsTransformUpdate(Graphics3DNode node, Transform3d transform)
    {
       this.node = node;
       this.transform = transform;

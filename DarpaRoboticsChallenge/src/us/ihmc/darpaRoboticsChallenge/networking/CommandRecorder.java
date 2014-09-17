@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 
 import us.ihmc.communication.packets.walking.EndOfScriptCommand;
 import us.ihmc.humanoidBehaviors.scripting.ScriptEngineSettings;
@@ -20,7 +20,7 @@ public class CommandRecorder
    private boolean isRecording = false;
    private long startTime = Long.MIN_VALUE;
    private ReferenceFrame recordFrame;
-   private Transform3D recordTransform = new Transform3D();
+   private Transform3d recordTransform = new Transform3d();
 
    private ScriptFileSaver scriptFileSaver;
 
@@ -100,7 +100,7 @@ public class CommandRecorder
             if(recordFrame!=null)
             {
                recordFrame.update();
-               recordTransform = new Transform3D(ReferenceFrame.getWorldFrame().getTransformToDesiredFrame(recordFrame));
+               recordTransform = new Transform3d(ReferenceFrame.getWorldFrame().getTransformToDesiredFrame(recordFrame));
                
             }
             scriptFileSaver.recordObject(timestamp, object, recordTransform);

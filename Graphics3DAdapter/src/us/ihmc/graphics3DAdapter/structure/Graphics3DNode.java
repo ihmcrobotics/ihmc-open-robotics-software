@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
@@ -21,7 +21,7 @@ public class Graphics3DNode
    private static final Graphics3DNodeType DEFAULT_NODE_TYPE = Graphics3DNodeType.JOINT;
    private final String name;
    private final Graphics3DNodeType nodeType;
-   private final Transform3D transform = new Transform3D();
+   private final Transform3d transform = new Transform3d();
 
    private Graphics3DObject graphicsObject;
    private boolean hasGraphicsObjectChanged = false;
@@ -55,12 +55,12 @@ public class Graphics3DNode
       this(name, DEFAULT_NODE_TYPE, null);
    }
 
-   public synchronized Transform3D getTransform()
+   public synchronized Transform3d getTransform()
    {
       return transform;
    }
 
-   public synchronized void setTransform(Transform3D transform)
+   public synchronized void setTransform(Transform3d transform)
    {
       assert(!RotationFunctions.isNaNorInf(transform));
       this.transform.set(transform);
@@ -84,7 +84,7 @@ public class Graphics3DNode
 
    public void translate(double x, double y, double z)
    {
-      Transform3D translator = new Transform3D();
+      Transform3d translator = new Transform3d();
       translator.set(new Vector3d(x, y, z));
 
       transform.mul(translator);

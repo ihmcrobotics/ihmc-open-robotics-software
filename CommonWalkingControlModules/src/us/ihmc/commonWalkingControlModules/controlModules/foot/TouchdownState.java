@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Vector3d;
 
 import org.ejml.ops.CommonOps;
@@ -243,12 +243,12 @@ public class TouchdownState extends AbstractFootControlState
       else
          edgeToAnkle = new Vector3d(walkingControllerParameters.getFootBackwardOffset(), 0.0, walkingControllerParameters.getAnkleHeight());
 
-      Transform3D rotationByPitch = new Transform3D();
+      Transform3d rotationByPitch = new Transform3d();
       rotationByPitch.rotY(-touchdownInitialPitchProvider.getValue());
       rotationByPitch.transform(edgeToAnkle);
 
       Vector3d orthonormalToHeelToAnkle = new Vector3d(edgeToAnkle);
-      Transform3D perpendicularRotation = new Transform3D();
+      Transform3d perpendicularRotation = new Transform3d();
       perpendicularRotation.rotY(-Math.PI / 2.0);
       perpendicularRotation.transform(orthonormalToHeelToAnkle);
       orthonormalToHeelToAnkle.normalize();

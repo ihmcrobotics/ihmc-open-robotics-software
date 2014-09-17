@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.upperBody;
 
 import java.util.EnumMap;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector2d;
@@ -646,7 +646,7 @@ public class BalancingUpperBodySubController implements UpperBodySubController
 		double scaledAngle = 0.0;
 		if (lungeAxis != null)
 		{
-			Transform3D chestTransformToWorld = chest.getBodyFixedFrame().getTransformToDesiredFrame(expressedInFrame);
+			Transform3d chestTransformToWorld = chest.getBodyFixedFrame().getTransformToDesiredFrame(expressedInFrame);
 			Quat4d chestToWorldQuat = new Quat4d();
 			chestTransformToWorld.get(chestToWorldQuat);
 			AxisAngle4d chestToWorldAxisAndAngle = new AxisAngle4d();

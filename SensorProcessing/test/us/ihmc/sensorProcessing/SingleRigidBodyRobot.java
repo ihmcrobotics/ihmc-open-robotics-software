@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
@@ -67,7 +67,7 @@ public class SingleRigidBodyRobot extends Robot
       return ret;
    }
    
-   public void getTransformToWorld(Transform3D transformToPack)
+   public void getTransformToWorld(Transform3d transformToPack)
    {
       bodyJoint.getTransformToWorld(transformToPack);
    }

@@ -7,7 +7,7 @@ import static us.ihmc.atlas.parameters.AtlasPhysicalProperties.toeWidth;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
@@ -30,24 +30,24 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
    private final double pelvisBoxSizeX = 0.100000;
    private final double pelvisBoxSizeY = 0.150000;
    private final double pelvisBoxSizeZ = 0.200000;
-   private final Transform3D pelvisContactPointTransform = new Transform3D();
+   private final Transform3d pelvisContactPointTransform = new Transform3d();
    private final List<Point2d> pelvisContactPoints = new ArrayList<Point2d>();
-   private final Transform3D pelvisBackContactPointTransform = new Transform3D();
+   private final Transform3d pelvisBackContactPointTransform = new Transform3d();
    private final List<Point2d> pelvisBackContactPoints = new ArrayList<Point2d>();
 
    private final Vector3d chestBoxOffset = new Vector3d(0.044600, 0.000000, 0.186900);
    private final double chestBoxSizeX = 0.318800;
    private final double chestBoxSizeY = 0.240000;
    private final double chestBoxSizeZ = 0.316200;
-   private final Transform3D chestBackContactPointTransform = new Transform3D();
+   private final Transform3d chestBackContactPointTransform = new Transform3d();
    private final List<Point2d> chestBackContactPoints = new ArrayList<Point2d>();
-   private final SideDependentList<Transform3D> thighContactPointTransforms = new SideDependentList<Transform3D>();
+   private final SideDependentList<Transform3d> thighContactPointTransforms = new SideDependentList<Transform3d>();
    private final SideDependentList<List<Point2d>> thighContactPoints = new SideDependentList<List<Point2d>>();
 
    private final List<Pair<String, Vector3d>> jointNameGroundContactPointMap = new ArrayList<Pair<String, Vector3d>>();
 
    private boolean handContactPointsHaveBeenCreated = false;
-   private final SideDependentList<Transform3D> handContactPointTransforms = new SideDependentList<>();
+   private final SideDependentList<Transform3d> handContactPointTransforms = new SideDependentList<>();
    private final SideDependentList<List<Point2d>> handContactPoints = new SideDependentList<>();
 
    private final SideDependentList<ArrayList<Point2d>> footGroundContactPoints = new SideDependentList<>();
@@ -129,7 +129,7 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         Transform3D thighContactPointTransform = new Transform3D();
+         Transform3d thighContactPointTransform = new Transform3d();
          double pitch = Math.PI / 2.0;
          thighContactPointTransform.setEuler(new Vector3d(0.0, pitch, 0.0));
          thighContactPointTransform.setTranslation(new Vector3d(-0.1179, robotSide.negateIfRightSide(0.02085), -0.08));
@@ -190,7 +190,7 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
       SideDependentList<String> nameOfJointBeforeHands = jointMap.getNameOfJointBeforeHands();
       for (RobotSide robotSide : RobotSide.values)
       {
-         handContactPointTransforms.put(robotSide, new Transform3D());
+         handContactPointTransforms.put(robotSide, new Transform3d());
 
          double y0 = 0.0;
          handContactPoints.put(robotSide, new ArrayList<Point2d>());
@@ -219,7 +219,7 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
       SideDependentList<String> nameOfJointBeforeHands = jointMap.getNameOfJointBeforeHands();
       for (RobotSide robotSide : RobotSide.values)
       {
-         Transform3D handContactPointTransform = new Transform3D();
+         Transform3d handContactPointTransform = new Transform3d();
          handContactPointTransform.rotX(robotSide.negateIfRightSide(Math.PI / 2.0));
          handContactPointTransform.setTranslation(new Vector3d(0.0, robotSide.negateIfRightSide(0.13), robotSide.negateIfRightSide(0.01)));
          handContactPointTransforms.put(robotSide, handContactPointTransform);
@@ -238,7 +238,7 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
    }
 
    @Override
-   public Transform3D getPelvisContactPointTransform()
+   public Transform3d getPelvisContactPointTransform()
    {
       return pelvisContactPointTransform;
    }
@@ -250,7 +250,7 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
    }
 
    @Override
-   public Transform3D getPelvisBackContactPointTransform()
+   public Transform3d getPelvisBackContactPointTransform()
    {
       return pelvisBackContactPointTransform;
    }
@@ -262,7 +262,7 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
    }
 
    @Override
-   public Transform3D getChestBackContactPointTransform()
+   public Transform3d getChestBackContactPointTransform()
    {
       return chestBackContactPointTransform;
    }
@@ -274,7 +274,7 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
    }
 
    @Override
-   public SideDependentList<Transform3D> getThighContactPointTransforms()
+   public SideDependentList<Transform3d> getThighContactPointTransforms()
    {
       return thighContactPointTransforms;
    }
@@ -286,7 +286,7 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
    }
 
    @Override
-   public SideDependentList<Transform3D> getHandContactPointTransforms()
+   public SideDependentList<Transform3d> getHandContactPointTransforms()
    {
       return handContactPointTransforms;
    }

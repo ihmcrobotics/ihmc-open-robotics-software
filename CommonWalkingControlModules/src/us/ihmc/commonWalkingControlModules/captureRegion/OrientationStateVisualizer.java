@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.captureRegion;
 
 import java.awt.Color;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Color3f;
 
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
@@ -94,7 +94,7 @@ public class OrientationStateVisualizer
 	    }
 	}
 	
-	public void updatePelvisReferenceFrame(Transform3D fromWoldToPelvis)
+	public void updatePelvisReferenceFrame(Transform3d fromWoldToPelvis)
 	{
 		pelvisXaxis.applyTransform(fromWoldToPelvis);
 		pelvisXaxisBase.applyTransform(fromWoldToPelvis);

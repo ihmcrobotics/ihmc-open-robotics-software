@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -36,7 +36,7 @@ public class FootstepDataTansformerTest
    @Test
    public void test()
    {
-      Transform3D transform3D;
+      Transform3d transform3D;
       FootstepData originalFootstepData;
       FootstepData transformedFootstepData;
 
@@ -45,7 +45,7 @@ public class FootstepDataTansformerTest
       for (int i = 0; i < numberOfTests; i++)
       {
          originalFootstepData = getTestFootstepData();
-         transform3D = new Transform3D();
+         transform3D = new Transform3d();
          transform3D = RandomTools.generateRandomTransform(random);
          
          transformedFootstepData = originalFootstepData.transform(transform3D);
@@ -74,7 +74,7 @@ public class FootstepDataTansformerTest
       return ret;
    }
 
-   private static void performEqualsTestsWithTransform(FootstepData footstepData, Transform3D transform3D, FootstepData transformedFootstepData)
+   private static void performEqualsTestsWithTransform(FootstepData footstepData, Transform3d transform3D, FootstepData transformedFootstepData)
    {
       double distance;
 
@@ -95,7 +95,7 @@ public class FootstepDataTansformerTest
    public void testDistance()
    {
       Point3d startPoint = new Point3d(2.0, 6.0, 5.0);
-      Transform3D transform3D = new Transform3D();
+      Transform3d transform3D = new Transform3d();
       transform3D.set(new Vector3d(1.0, 2.0, 3.0));
 
       Point3d endPoint = new Point3d();
@@ -105,7 +105,7 @@ public class FootstepDataTansformerTest
       assertEquals("not equal", 0.0, distance, 1e-6);
    }
 
-   private static boolean areOrientationsEqualWithTransform(Quat4d orientationStart, Transform3D transform3D, Quat4d orientationEnd)
+   private static boolean areOrientationsEqualWithTransform(Quat4d orientationStart, Transform3d transform3D, Quat4d orientationEnd)
    {
       ReferenceFrame ending = ReferenceFrame.constructARootFrame("ending", false, true, true);
       ReferenceFrame starting = ReferenceFrame.constructFrameWithUnchangingTransformToParent("starting", ending, transform3D, false, true, true);
@@ -118,7 +118,7 @@ public class FootstepDataTansformerTest
       return equalsFrameOrientation(start, end);
    }
 
-   private static double getDistanceBetweenPoints(Point3d startingPoint, Transform3D transform3D, Point3d endPoint)
+   private static double getDistanceBetweenPoints(Point3d startingPoint, Transform3d transform3D, Point3d endPoint)
    {
       ReferenceFrame ending = ReferenceFrame.constructARootFrame("ending", false, true, true);
       ReferenceFrame starting = ReferenceFrame.constructFrameWithUnchangingTransformToParent("starting", ending, transform3D, false, true, true);

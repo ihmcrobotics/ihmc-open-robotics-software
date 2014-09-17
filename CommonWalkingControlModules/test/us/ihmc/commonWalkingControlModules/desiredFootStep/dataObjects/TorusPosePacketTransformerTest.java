@@ -5,7 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -34,7 +34,7 @@ public class TorusPosePacketTransformerTest
       double radius = 1.0;
 
       Random random = new Random(100L);
-      Transform3D transform3D;
+      Transform3d transform3D;
 
       for (int i = 0; i < numberOfTests; i++)
       {
@@ -54,7 +54,7 @@ public class TorusPosePacketTransformerTest
       }
    }
 
-   private static void performEqualsTest(TorusPosePacket starting, Transform3D transform3D, TorusPosePacket ending)
+   private static void performEqualsTest(TorusPosePacket starting, Transform3d transform3D, TorusPosePacket ending)
    {
       // Point3d position;
       double distance = getDistanceBetweenPoints(starting.getPosition(), transform3D, ending.getPosition());
@@ -65,7 +65,7 @@ public class TorusPosePacketTransformerTest
       assertTrue(areOrientationsEqualWithTransform(startQuat, transform3D, endQuat));
    }
 
-   private static double getDistanceBetweenPoints(Point3d startingPoint, Transform3D transform3D, Point3d endPoint)
+   private static double getDistanceBetweenPoints(Point3d startingPoint, Transform3d transform3D, Point3d endPoint)
    {
       ReferenceFrame ending = ReferenceFrame.constructARootFrame("ending", false, true, true);
       ReferenceFrame starting = ReferenceFrame.constructFrameWithUnchangingTransformToParent("starting", ending, transform3D, false, true, true);
@@ -78,7 +78,7 @@ public class TorusPosePacketTransformerTest
       return end.distance(start);
    }
 
-   private static boolean areOrientationsEqualWithTransform(Quat4d orientationStart, Transform3D transform3D, Quat4d orientationEnd)
+   private static boolean areOrientationsEqualWithTransform(Quat4d orientationStart, Transform3d transform3D, Quat4d orientationEnd)
    {
       ReferenceFrame ending = ReferenceFrame.constructARootFrame("ending", false, true, true);
       ReferenceFrame starting = ReferenceFrame.constructFrameWithUnchangingTransformToParent("starting", ending, transform3D, false, true, true);

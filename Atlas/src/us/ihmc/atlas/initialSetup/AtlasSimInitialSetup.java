@@ -1,6 +1,6 @@
 package us.ihmc.atlas.initialSetup;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
@@ -19,7 +19,7 @@ public class AtlasSimInitialSetup implements DRCRobotInitialSetup<SDFRobot>
 {
    private double groundZ;
    private double initialYaw;
-   private final Transform3D rootToWorld = new Transform3D();
+   private final Transform3d rootToWorld = new Transform3d();
    private final Vector3d positionInWorld = new Vector3d();
    private final Vector3d offset = new Vector3d();
    private final Quat4d rotation = new Quat4d();

@@ -1,8 +1,8 @@
 package us.ihmc.graphics3DAdapter;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 
 public interface GPULidarListener
 {
-   public void scan(float[] scan, Transform3D currentTransform, double time);
+   public void scan(float[] scan, Transform3d currentTransform, double time);
 }

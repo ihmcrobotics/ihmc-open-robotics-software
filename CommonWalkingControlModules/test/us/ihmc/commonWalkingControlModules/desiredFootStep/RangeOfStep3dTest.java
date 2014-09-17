@@ -6,7 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Vector3d;
 
 import org.junit.After;
@@ -73,7 +73,7 @@ public class RangeOfStep3dTest
       double yTranslation = random.nextDouble();
       double zTranslation = random.nextDouble();
       
-      Transform3D transform = new Transform3D();
+      Transform3d transform = new Transform3d();
       transform.setTranslation(new Vector3d(xTranslation, yTranslation, zTranslation));
       
       ReferenceFrame frame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("translatedFrame", ReferenceFrame.getWorldFrame(), transform);
@@ -104,7 +104,7 @@ public class RangeOfStep3dTest
             
             for (int j = 0; j < 3; j++)
             {
-               Transform3D transform = new Transform3D();
+               Transform3d transform = new Transform3d();
                
                if (j == 0)
                   transform.rotX(Math.PI / 2.0);
@@ -207,7 +207,7 @@ public class RangeOfStep3dTest
 
                for (int i = 0; i < 3; i++)
                {
-                  Transform3D transform = new Transform3D();
+                  Transform3d transform = new Transform3d();
 
                   if (i == 0)
                      transform.rotX(angle);

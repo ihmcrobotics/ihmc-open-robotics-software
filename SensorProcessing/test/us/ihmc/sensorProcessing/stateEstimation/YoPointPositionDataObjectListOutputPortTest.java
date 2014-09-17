@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 
 import org.junit.Test;
 
@@ -37,7 +37,7 @@ public class YoPointPositionDataObjectListOutputPortTest
       int nFrames = 10;
       for (int i = 0; i < nFrames; i++)
       {
-         Transform3D transformToParent = RandomTools.generateRandomTransform(random);
+         Transform3d transformToParent = RandomTools.generateRandomTransform(random);
          ReferenceFrame frame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("frame" + i, ReferenceFrame.getWorldFrame(), transformToParent);
          frame.update();
          frames.add(frame);

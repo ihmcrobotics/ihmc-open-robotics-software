@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.vecmath.Color3f;
@@ -348,7 +348,7 @@ public class GraphicsDemoTools
 
       public void run()
       {
-         Transform3D transform = new Transform3D();
+         Transform3d transform = new Transform3d();
          transform.setEuler(nextVector3d(parametersHolder.getRotationTrajectory()));
          transform.setTranslation(nextVector3d(parametersHolder.getTranslationTrajectory()));
          transform.setScale(parametersHolder.getScaleTrajectory().getNextValue());

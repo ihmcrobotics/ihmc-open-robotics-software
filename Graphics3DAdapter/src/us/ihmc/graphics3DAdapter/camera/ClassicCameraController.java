@@ -2,7 +2,7 @@ package us.ihmc.graphics3DAdapter.camera;
 
 import java.util.ArrayList;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
@@ -684,7 +684,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
    }
 
    private Vector3d v3d = new Vector3d();
-   private Transform3D t3d = new Transform3D();
+   private Transform3d t3d = new Transform3d();
    private Vector3d rotVector = new Vector3d();
    private AxisAngle4d rotAxisAngle4d = new AxisAngle4d();
 
@@ -1121,7 +1121,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
    private Vector3d zAxis = new Vector3d(), yAxis = new Vector3d(), xAxis = new Vector3d();
 
-   public void computeTransform(Transform3D currXform)
+   public void computeTransform(Transform3d currXform)
    {
       update();
       CameraMountInterface cameraMount = getCameraMount();

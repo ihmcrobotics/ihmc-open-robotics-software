@@ -7,7 +7,7 @@ import static org.junit.Assert.assertTrue;
 import java.awt.Color;
 import java.util.ArrayList;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.vecmath.Point2d;
@@ -367,7 +367,7 @@ public class OneStepCaptureRegionCalculatorTest
          super(name, ReferenceFrame.getWorldFrame());
       }
 
-      protected void updateTransformToParent(Transform3D transformToParent)
+      protected void updateTransformToParent(Transform3d transformToParent)
       {
          transformToParent.setIdentity();
          transformToParent.setTranslation(offset);
@@ -414,7 +414,7 @@ public class OneStepCaptureRegionCalculatorTest
          {
             private static final long serialVersionUID = -261348843115593336L;
             @Override
-            protected void updateTransformToParent(Transform3D transformToParent)
+            protected void updateTransformToParent(Transform3d transformToParent)
             {
                transformToParent.setTranslation(new Vector3d(0.0, robotSide.negateIfRightSide(0.15), 0.0));
             }

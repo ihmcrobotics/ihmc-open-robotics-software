@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
@@ -23,7 +23,7 @@ public class YoRollingContactState implements PlaneContactState, ModifiableConta
    private final YoVariableRegistry registry;
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final ReferenceFrame updatableContactFrame;
-   private final Transform3D transformFromContactFrameToBodyFrame = new Transform3D();
+   private final Transform3d transformFromContactFrameToBodyFrame = new Transform3d();
    private final BooleanYoVariable inContact;
    private final DoubleYoVariable coefficientOfFriction;
    private final FrameVector contactNormalFrameVector;
@@ -45,7 +45,7 @@ public class YoRollingContactState implements PlaneContactState, ModifiableConta
          private static final long serialVersionUID = 6993243554111815201L;
 
          @Override
-         protected void updateTransformToParent(Transform3D transformToParent)
+         protected void updateTransformToParent(Transform3d transformToParent)
          {
             transformToParent.set(transformFromContactFrameToBodyFrame);
          }
@@ -122,7 +122,7 @@ public class YoRollingContactState implements PlaneContactState, ModifiableConta
       // The contact reference frame is updated such as:
       // 1- it remains tangential to the contactable cylindrical body,
       // 2- it remains under the contactable cylindrical body (at the lowest height)
-      Transform3D transformFromRigiBodyToWorld = getFrameAfterParentJoint().getTransformToDesiredFrame(worldFrame );
+      Transform3d transformFromRigiBodyToWorld = getFrameAfterParentJoint().getTransformToDesiredFrame(worldFrame );
       Matrix3d rotationFromRigiBodyToWorld = new Matrix3d();
       transformFromRigiBodyToWorld.get(rotationFromRigiBodyToWorld);
 

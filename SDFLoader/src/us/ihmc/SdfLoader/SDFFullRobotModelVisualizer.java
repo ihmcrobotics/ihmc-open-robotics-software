@@ -2,7 +2,7 @@ package us.ihmc.SdfLoader;
 
 import java.util.ArrayList;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
@@ -87,7 +87,7 @@ public class SDFFullRobotModelVisualizer implements RobotVisualizer
    {
       if(rootJoint != null)
       {
-         Transform3D rootTransform = rootJoint.getJointTransform3D();
+         Transform3d rootTransform = rootJoint.getJointTransform3D();
          rootTransform.get(tempOrientation, tempPosition);
          robot.setOrientation(tempOrientation);
          robot.setPositionInWorld(tempPosition);

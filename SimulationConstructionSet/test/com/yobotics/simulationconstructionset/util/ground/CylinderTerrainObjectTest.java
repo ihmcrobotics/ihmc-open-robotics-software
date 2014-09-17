@@ -3,7 +3,7 @@ package com.yobotics.simulationconstructionset.util.ground;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
@@ -23,7 +23,7 @@ public class CylinderTerrainObjectTest
    {
       double height = 1.3;
       double radius = 0.2;
-      Transform3D location = new Transform3D();
+      Transform3d location = new Transform3d();
       location.setTranslation(new Vector3d(0.0, 0.0, height/2.0));
 
       CylinderTerrainObject cylinderTerrainObject = new CylinderTerrainObject(location, height, radius, YoAppearance.Red());

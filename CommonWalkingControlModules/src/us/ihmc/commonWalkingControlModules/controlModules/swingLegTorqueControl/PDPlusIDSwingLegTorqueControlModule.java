@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.swingLegTorqueControl;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
@@ -102,7 +102,7 @@ public class PDPlusIDSwingLegTorqueControlModule implements SwingLegTorqueContro
       ReferenceFrame elevatorFrame = fullRobotModel.getElevatorFrame();
 
       // Desired positions
-      Transform3D footToPelvis = computeDesiredTransform(pelvisFrame, desiredFootPosition, desiredFootOrientation);
+      Transform3d footToPelvis = computeDesiredTransform(pelvisFrame, desiredFootPosition, desiredFootOrientation);
       Twist desiredTwistOfSwingFootWithRespectToWorld = computeDesiredTwist(worldFrame, footFrame, desiredFootVelocity, desiredFootAngularVelocity);
       desiredTwistOfSwingFootWithRespectToWorld.changeFrame(footCoMFrame);
       desiredTwistOfSwingFootWithRespectToWorld.changeBodyFrameNoRelativeTwist(footCoMFrame);
@@ -189,11 +189,11 @@ public class PDPlusIDSwingLegTorqueControlModule implements SwingLegTorqueContro
       legJointPositionControlModules.get(swingSide).resetScalesToDefault();
    }
    
-   private Transform3D computeDesiredTransform(ReferenceFrame pelvisFrame, FramePoint desiredFootPosition, FrameOrientation desiredFootOrientation)
+   private Transform3d computeDesiredTransform(ReferenceFrame pelvisFrame, FramePoint desiredFootPosition, FrameOrientation desiredFootOrientation)
    {
       desiredFootOrientation.changeFrame(pelvisFrame);
       desiredFootPosition.changeFrame(pelvisFrame);
-      Transform3D footToPelvis = createTransform(desiredFootOrientation, desiredFootPosition);
+      Transform3d footToPelvis = createTransform(desiredFootOrientation, desiredFootPosition);
 
       return footToPelvis;
    }
@@ -222,11 +222,11 @@ public class PDPlusIDSwingLegTorqueControlModule implements SwingLegTorqueContro
       return desiredAccelerationOfSwingFootWithRespectToWorld;
    }
 
-   private static Transform3D createTransform(FrameOrientation orientation, FramePoint framePoint)
+   private static Transform3d createTransform(FrameOrientation orientation, FramePoint framePoint)
    {
       orientation.checkReferenceFrameMatch(framePoint);
       Matrix3d rotationMatrix = orientation.getMatrix3dCopy();
-      Transform3D ret = new Transform3D(rotationMatrix, new Vector3d(framePoint.getPoint()), 1.0);
+      Transform3d ret = new Transform3d(rotationMatrix, new Vector3d(framePoint.getPoint()), 1.0);
 
       return ret;
    }

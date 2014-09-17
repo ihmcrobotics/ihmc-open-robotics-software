@@ -1,6 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor.state;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 
 import us.ihmc.utilities.kinematics.TimeStampedTransform3D;
 
@@ -24,7 +24,7 @@ public class HeadToSubFrameTransformBuffer implements PendableBuffer
       }
    }
 
-   public synchronized void addRawTransformAndTimestamp(long timestamp, Transform3D transform3D)
+   public synchronized void addRawTransformAndTimestamp(long timestamp, Transform3d transform3D)
    {
       transforms[currentIndex].setTimeStamp(timestamp);
       transforms[currentIndex].setTransform3D(transform3D);

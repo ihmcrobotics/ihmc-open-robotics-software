@@ -7,7 +7,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Random;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
@@ -140,12 +140,12 @@ public class LinearStickSlipGroundContactModelTest
       FlatGroundProfile flatGroundProfile = new FlatGroundProfile();
       groundContactModelOnFlat.setGroundProfile3D(flatGroundProfile);
       
-      Transform3D transform3D = new Transform3D();
+      Transform3d transform3D = new Transform3d();
       transform3D.rotX(0.3);
       transform3D.rotY(-0.7);
       transform3D.setTranslation(new Vector3d(0.1, 0.2, 0.3));
       
-      Transform3D inverseTransform3D = new Transform3D(transform3D);
+      Transform3d inverseTransform3D = new Transform3d(transform3D);
       inverseTransform3D.invert();
       
       Vector3d surfaceNormal = new Vector3d(0.0, 0.0, 1.0);

@@ -41,7 +41,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
@@ -312,13 +312,13 @@ public class AtlasJointMap implements DRCRobotJointMap
    }
 
    @Override
-   public Transform3D getSoleToAnkleFrameTransform(RobotSide robotSide)
+   public Transform3d getSoleToAnkleFrameTransform(RobotSide robotSide)
    {
       return AtlasPhysicalProperties.soleToAnkleFrameTransforms.get(robotSide);
    }
 
    @Override
-   public Transform3D getHandControlFrameToWristTransform(RobotSide robotSide)
+   public Transform3d getHandControlFrameToWristTransform(RobotSide robotSide)
    {
       return AtlasPhysicalProperties.handControlFrameToWristTransforms.get(robotSide);
    }

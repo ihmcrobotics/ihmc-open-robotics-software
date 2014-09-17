@@ -1,6 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.initialSetup;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
@@ -12,7 +12,7 @@ import com.yobotics.simulationconstructionset.GroundContactPoint;
 public class SquaredUpDRCRobotInitialSetup implements DRCRobotInitialSetup<SDFRobot>
 {
    private double groundZ;
-   private final Transform3D rootToWorld = new Transform3D();
+   private final Transform3d rootToWorld = new Transform3d();
    private final Vector3d offset = new Vector3d();
 
    public SquaredUpDRCRobotInitialSetup()

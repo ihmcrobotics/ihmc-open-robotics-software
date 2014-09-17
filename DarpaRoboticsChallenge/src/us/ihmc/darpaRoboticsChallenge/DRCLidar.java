@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Point3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
@@ -104,9 +104,9 @@ public class DRCLidar
       }
 
       @Override
-      public void scan(float[] scan, Transform3D lidarTransform, double time)
+      public void scan(float[] scan, Transform3d lidarTransform, double time)
       {
-         Transform3D transform = new Transform3D(lidarTransform);
+         Transform3d transform = new Transform3d(lidarTransform);
          final LidarScan lidarScan = new LidarScan(new LidarScanParameters(lidarScanParameters, TimeTools.secondsToNanoSeconds(time)), transform, transform,
                                         Arrays.copyOf(scan, scan.length));
 
@@ -145,9 +145,9 @@ public class DRCLidar
       }
 
       @Override
-      public void scan(float[] scan, Transform3D lidarTransform, double time)
+      public void scan(float[] scan, Transform3d lidarTransform, double time)
       {
-         Transform3D transform = new Transform3D(lidarTransform);
+         Transform3d transform = new Transform3d(lidarTransform);
          final LidarScan lidarScan = new LidarScan(new LidarScanParameters(lidarScanParameters, TimeTools.secondsToNanoSeconds(time)), transform, transform,
                                         Arrays.copyOf(scan, scan.length),lidarSensorId);
 

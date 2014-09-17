@@ -4,7 +4,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.vecmath.Matrix3d;
@@ -210,7 +210,7 @@ public class DesiredFootstepVisualizer
       FramePose pose = new FramePose();
       desiredFootstep.getPose(pose);
       pose.changeFrame(worldFrame);
-      Transform3D transform = new Transform3D();
+      Transform3d transform = new Transform3d();
       pose.getPose(transform);
       sixDoFJoints.get(swingLegSide).setPositionAndRotation(transform);
 
@@ -248,7 +248,7 @@ public class DesiredFootstepVisualizer
    private void computeMinZ(RobotSide swingLegSide)
    {
       ContactablePlaneBody bipedFoot = bipedFeet.get(swingLegSide);
-      Transform3D footToWorldTransform = sixDoFJoints.get(swingLegSide).getFrameAfterJoint().getTransformToDesiredFrame(worldFrame);
+      Transform3d footToWorldTransform = sixDoFJoints.get(swingLegSide).getFrameAfterJoint().getTransformToDesiredFrame(worldFrame);
       FramePoint minZPoint = DesiredFootstepCalculatorTools.computeMinZPointInFrame(footToWorldTransform, bipedFoot, worldFrame);
       this.minZ.set(minZPoint.getZ());
    }
@@ -264,7 +264,7 @@ public class DesiredFootstepVisualizer
       }
    }
 
-   private void setPoseToMoveToTransform(RobotSide swingLegSide, Transform3D transform)
+   private void setPoseToMoveToTransform(RobotSide swingLegSide, Transform3d transform)
    {
       sixDoFJoints.get(swingLegSide).setPositionAndRotation(transform);
       sixDoFJoints.get(swingLegSide).updateFramesRecursively();
@@ -357,7 +357,7 @@ public class DesiredFootstepVisualizer
 
       ReferenceFrame footBodyFrame = desiredFootstepVisualizer.getBipedFeet().get(RobotSide.LEFT).getFrameAfterParentJoint();
       ReferenceFrame footPlaneFrame = desiredFootstepVisualizer.getBipedFeet().get(RobotSide.LEFT).getSoleFrame();
-      Transform3D transformFromFootBodyFrameToFootPlaneFrame = footBodyFrame.getTransformToDesiredFrame(footPlaneFrame);
+      Transform3d transformFromFootBodyFrameToFootPlaneFrame = footBodyFrame.getTransformToDesiredFrame(footPlaneFrame);
       Vector3d trans = new Vector3d();
       transformFromFootBodyFrameToFootPlaneFrame.get(trans);
       double ankleHeight = trans.getZ();
@@ -424,7 +424,7 @@ public class DesiredFootstepVisualizer
          footstep.getPose(poseToMoveTo);
          poseToMoveTo.changeFrame(worldFrame);
 
-         Transform3D transform = new Transform3D();
+         Transform3d transform = new Transform3d();
          poseToMoveTo.getPose(transform);
          desiredFootstepVisualizer.setPoseToMoveToTransform(swingLegSide, transform);
 

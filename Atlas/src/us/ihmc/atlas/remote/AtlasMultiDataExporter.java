@@ -12,7 +12,7 @@ import java.io.PrintStream;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.swing.Action;
 import javax.swing.ActionMap;
 import javax.swing.JFileChooser;
@@ -500,7 +500,7 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
          double radius = cameraParameters[1];
          double height = cameraParameters[2];
 
-         Transform3D ret = new Transform3D();
+         Transform3d ret = new Transform3d();
          Vector3d cameraFix = new Vector3d();
          double angle = Math.PI / 2 + ((hour) * Math.PI / 6);
          Vector3d cameraPosition = new Vector3d(radius * Math.sin(angle), radius * Math.cos(angle), height);

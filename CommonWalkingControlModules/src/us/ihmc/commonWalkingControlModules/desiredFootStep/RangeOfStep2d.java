@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import java.awt.geom.Ellipse2D;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -13,7 +13,7 @@ public class RangeOfStep2d extends Ellipse2D.Double
 {
    private static final boolean DEBUG = false;
    private static final long serialVersionUID = -2194197143315735789L;
-   private static final Transform3D IDENTITY = new Transform3D();
+   private static final Transform3d IDENTITY = new Transform3d();
 
    private final RobotSide robotSide;
    private final RigidBody rigidBody;
@@ -56,7 +56,7 @@ public class RangeOfStep2d extends Ellipse2D.Double
 
    private void updateReferenceFrame(ReferenceFrame referenceFrame)
    {
-      Transform3D transform = this.referenceFrame.getTransformToDesiredFrame(referenceFrame);
+      Transform3d transform = this.referenceFrame.getTransformToDesiredFrame(referenceFrame);
 
       if (!transform.equals(IDENTITY))
          setReferenceFrame(referenceFrame);
@@ -64,7 +64,7 @@ public class RangeOfStep2d extends Ellipse2D.Double
 
    private void setReferenceFrame(ReferenceFrame referenceFrame)
    {
-      Transform3D transform = referenceFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
+      Transform3d transform = referenceFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
 
       this.referenceFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("translation", ReferenceFrame.getWorldFrame(), transform);
    }

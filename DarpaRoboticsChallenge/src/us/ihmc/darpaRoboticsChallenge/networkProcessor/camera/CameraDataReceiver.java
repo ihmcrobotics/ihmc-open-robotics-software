@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.camera;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
@@ -30,14 +30,14 @@ public abstract class CameraDataReceiver
    private final Vector3d cameraPositionVector = new Vector3d();
    
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
-   private final Transform3D cameraPose;
+   private final Transform3d cameraPose;
 
    public CameraDataReceiver(RobotPoseBuffer robotPoseBuffer, VideoSettings videoSettings, final DRCNetworkProcessorNetworkingManager networkingManager,
          PPSTimestampOffsetProvider ppsTimestampOffsetProvider)
    {
       this.robotPoseBuffer = robotPoseBuffer;
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
-      this.cameraPose = new Transform3D();
+      this.cameraPose = new Transform3d();
 
       compressedVideoDataServer = new CompressedVideoDataServer(videoSettings, new VideoPacketHandler(networkingManager));
       networkingManager.getControllerCommandHandler().setVideoCommandListener(compressedVideoDataServer);
@@ -53,7 +53,7 @@ public abstract class CameraDataReceiver
       updateLeftEyeImage(robotPoseData.getCameraPoses()[0], bufferedImage, timeStamp, fov);
    }
 
-   protected void updateLeftEyeImage(Transform3D worldToCamera, BufferedImage bufferedImage, long timeStamp, double fov)
+   protected void updateLeftEyeImage(Transform3d worldToCamera, BufferedImage bufferedImage, long timeStamp, double fov)
    {
       cameraPose.set(worldToCamera);
       cameraPose.get(cameraOrientation, cameraPositionVector);

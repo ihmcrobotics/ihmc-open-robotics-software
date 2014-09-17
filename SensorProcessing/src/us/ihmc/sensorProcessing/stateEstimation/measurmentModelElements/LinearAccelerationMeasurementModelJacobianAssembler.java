@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
@@ -39,7 +39,7 @@ public class LinearAccelerationMeasurementModelJacobianAssembler
    private final Twist twistOfMeasurementLink = new Twist();
    private final SpatialAccelerationVector spatialAccelerationOfMeasurementLink = new SpatialAccelerationVector();
 
-   private final Transform3D tempTransform = new Transform3D();
+   private final Transform3d tempTransform = new Transform3d();
    private final Matrix3d tempMatrix = new Matrix3d();
    private final Matrix3d tempMatrix2 = new Matrix3d();
 

@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.environment;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonAvatarInterfaces.CommonAvatarEnvironmentInterface;
@@ -52,7 +52,7 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
 
    private static ContactableToroidRobot createSteeringWheel(DRCVehicleModelObjects drcVehicleModelObjects)
    {
-      Transform3D steeringWheelTransform = drcVehicleModelObjects.getTransform(VehicleObject.STEERING_WHEEL);
+      Transform3d steeringWheelTransform = drcVehicleModelObjects.getTransform(VehicleObject.STEERING_WHEEL);
 
       /*
        * Quick estimates from 3D files:
@@ -88,7 +88,7 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
    private static void addContactableCylinderRobot(ArrayList<Robot> environmentRobots, ArrayList<Contactable> contactables, String name, double x, double y,
                                             double z, double roll, double pitch, double yaw, double radius, double height)
    {
-      Transform3D transform = new Transform3D();
+      Transform3d transform = new Transform3d();
       transform.setEuler(new Vector3d(roll, pitch, yaw));
 
       Vector3d position = new Vector3d(x, y, z);
@@ -131,7 +131,7 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
 
    private void addBox(double x, double y, double z, double roll, double pitch, double yaw, double sizeX, double sizeY, double sizeZ, CombinedTerrainObject3D terrainObject)
    {
-      Transform3D transform = new Transform3D();
+      Transform3d transform = new Transform3d();
       transform.setEuler(new Vector3d(roll, pitch, yaw));
       transform.setTranslation(new Vector3d(x, y, z));
       Box3d box = new Box3d(transform, sizeX, sizeY, sizeZ);

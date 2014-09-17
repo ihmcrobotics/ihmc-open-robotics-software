@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Matrix3d;
 
 import us.ihmc.utilities.math.geometry.FrameVector2d;
@@ -90,7 +90,7 @@ public class RateBasedDesiredHeadingControlModule implements DesiredHeadingContr
          super("DesiredHeadingFrame", ReferenceFrame.getWorldFrame(), false, false, true);
       }
 
-      protected void updateTransformToParent(Transform3D transformToParent)
+      protected void updateTransformToParent(Transform3d transformToParent)
       {
          Matrix3d rotation = new Matrix3d();
          rotation.rotZ(desiredHeading.getDoubleValue());

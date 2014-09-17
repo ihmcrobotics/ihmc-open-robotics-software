@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.stateEstimation.measurmentModelElements;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Matrix3d;
 
 import org.ejml.data.DenseMatrix64F;
@@ -41,7 +41,7 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
    private final DenseMatrix64F residual = new DenseMatrix64F(SIZE, 1);
 
    private final Matrix3d rotationFromEstimationToWorld = new Matrix3d();
-   private final Transform3D tempTransform = new Transform3D();
+   private final Transform3d tempTransform = new Transform3d();
    private final Matrix3d tempMatrix = new Matrix3d();
    private final FramePoint tempFramePoint = new FramePoint(ReferenceFrame.getWorldFrame());
    private final Twist tempTwist = new Twist();

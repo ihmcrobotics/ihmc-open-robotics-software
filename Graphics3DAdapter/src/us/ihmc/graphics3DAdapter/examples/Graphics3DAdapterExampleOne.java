@@ -8,7 +8,7 @@ import java.awt.FlowLayout;
 import java.util.ArrayList;
 import java.util.Random;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.vecmath.Color3f;
@@ -246,7 +246,7 @@ public class Graphics3DAdapterExampleOne
             if (scale > 2.0) scalingDown = true;
          }
          
-         Transform3D transform = new Transform3D();
+         Transform3d transform = new Transform3d();
          transform.setEuler(new Vector3d(Math.PI/2.0, 0.0, rotation));
          transform.setTranslation(new Vector3d(translation, 0.0, 0.0));
          transform.setScale(scale);

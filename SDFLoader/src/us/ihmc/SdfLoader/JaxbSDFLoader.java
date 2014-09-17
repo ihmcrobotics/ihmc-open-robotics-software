@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -103,7 +103,7 @@ public class JaxbSDFLoader
       return new SDFRobot(generalizedSDFRobotModels.get(modelName), sdfJointNameMap, useCollisionMeshes);
    }
    
-   public void addForceSensor(SDFJointNameMap jointMap, String sensorName, String parentJointName, Transform3D transformToParentJoint)
+   public void addForceSensor(SDFJointNameMap jointMap, String sensorName, String parentJointName, Transform3d transformToParentJoint)
    {
       generalizedSDFRobotModels.get(jointMap.getModelName()).addForceSensor(sensorName, parentJointName, transformToParentJoint);
    }

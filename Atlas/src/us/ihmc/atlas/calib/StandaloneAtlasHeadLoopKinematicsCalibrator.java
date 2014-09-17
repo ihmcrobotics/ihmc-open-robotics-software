@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 
 import org.ddogleg.optimization.FactoryOptimization;
 import org.ddogleg.optimization.UnconstrainedLeastSquares;
@@ -37,7 +37,7 @@ public class StandaloneAtlasHeadLoopKinematicsCalibrator
    private final ArrayList<Map<String, Object>> metaData;
    final ReferenceFrame cameraFrame;
 
-   Transform3D targetToEE = new Transform3D();
+   Transform3d targetToEE = new Transform3d();
 
    protected final Map<String, Double> qbias = new HashMap<>();
    protected final SDFFullRobotModel fullRobotModel;

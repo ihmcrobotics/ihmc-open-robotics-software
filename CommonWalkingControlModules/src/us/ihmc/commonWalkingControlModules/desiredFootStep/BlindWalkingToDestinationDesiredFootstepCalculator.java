@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import java.util.List;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector2d;
 
@@ -261,7 +261,7 @@ public class BlindWalkingToDestinationDesiredFootstepCalculator extends Abstract
 
    private Matrix3d computeDesiredFootRotation(double angleToDestination, RobotSide swingLegSide, ReferenceFrame supportFootFrame)
    {  
-      Transform3D supportFootToWorldTransform = supportFootFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
+      Transform3d supportFootToWorldTransform = supportFootFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
       Matrix3d supportFootToWorldRotation = new Matrix3d();
       supportFootToWorldTransform.get(supportFootToWorldRotation);
       

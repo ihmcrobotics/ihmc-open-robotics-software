@@ -5,7 +5,7 @@ import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.xml.bind.JAXBException;
 
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
@@ -56,7 +56,7 @@ public class DRCVehicleSDFLoader extends DRCWorld
       scs.addStaticLinkGraphics(drcVehicleSDFLoader.loadDRCVehicle(true));
       scs.addStaticLinkGraphics(drcVehicleSDFLoader.loadDRCVehicle(false));
 
-      Transform3D vehicleToWorldTransform = new Transform3D();
+      Transform3d vehicleToWorldTransform = new Transform3d();
       ReferenceFrame vehicleFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("vehicle", ReferenceFrame.getWorldFrame(),
             vehicleToWorldTransform, false, true, true);
       DRCVehicleModelObjects vehicleModelObjects = new DRCVehicleModelObjects();

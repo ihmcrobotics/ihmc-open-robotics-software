@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
@@ -175,7 +175,7 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
 
                Vector3d newDesiredVelocityDirection = new Vector3d(desiredHeading.getX(), desiredHeading.getY(), 0.0);
                newDesiredVelocityDirection.normalize();    // just to be sure
-               Transform3D transform3D = new Transform3D();
+               Transform3d transform3D = new Transform3d();
                transform3D.rotZ(-Math.PI / 4.0);
                transform3D.transform(newDesiredVelocityDirection);
 
@@ -190,7 +190,7 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
 
                Vector3d newDesiredVelocityDirection = new Vector3d(desiredHeading.getX(), desiredHeading.getY(), 0.0);
                newDesiredVelocityDirection.normalize();    // just to be sure
-               Transform3D transform3D = new Transform3D();
+               Transform3d transform3D = new Transform3d();
                transform3D.rotZ(Math.PI / 4.0);
                transform3D.transform(newDesiredVelocityDirection);
 

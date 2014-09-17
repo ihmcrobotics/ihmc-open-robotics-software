@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.captureRegion;
 
 import static org.junit.Assert.assertEquals;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.vecmath.Vector3d;
@@ -160,7 +160,7 @@ public class CaptureRegionCalculatorTest
          super(name, ReferenceFrame.getWorldFrame());
       }
 
-      protected void updateTransformToParent(Transform3D transformToParent)
+      protected void updateTransformToParent(Transform3d transformToParent)
       {
          transformToParent.setIdentity();
          transformToParent.setTranslation(offset);

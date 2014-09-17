@@ -2,7 +2,7 @@ package us.ihmc.graphics3DAdapter;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 
 import us.ihmc.utilities.lidar.polarLidar.LidarScan;
 import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
@@ -18,9 +18,9 @@ public class GPULidarScanBuffer extends LinkedBlockingQueue<LidarScan> implement
    }
    
    @Override
-   public void scan(float[] scan, Transform3D currentTransform, double time)
+   public void scan(float[] scan, Transform3d currentTransform, double time)
    {
-      add(new LidarScan(parameters, new Transform3D(currentTransform),
-               new Transform3D(currentTransform), scan));
+      add(new LidarScan(parameters, new Transform3d(currentTransform),
+               new Transform3d(currentTransform), scan));
    }
 }

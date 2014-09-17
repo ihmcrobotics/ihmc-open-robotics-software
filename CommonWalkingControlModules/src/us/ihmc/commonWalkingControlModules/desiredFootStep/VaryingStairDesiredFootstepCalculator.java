@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Matrix3d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBody;
@@ -35,7 +35,7 @@ public class VaryingStairDesiredFootstepCalculator extends SimpleWorldDesiredFoo
    @Override
    public void initializeDesiredFootstep(RobotSide supportLegSide)
    {
-      Transform3D footToWorldTransform = referenceFrames.getFootFrame(supportLegSide).getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
+      Transform3d footToWorldTransform = referenceFrames.getFootFrame(supportLegSide).getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
 
       FramePoint maxStanceXPoint = DesiredFootstepCalculatorTools.computeMaxXPointInFrame(footToWorldTransform, bipedFeet.get(supportLegSide),
                                       ReferenceFrame.getWorldFrame());

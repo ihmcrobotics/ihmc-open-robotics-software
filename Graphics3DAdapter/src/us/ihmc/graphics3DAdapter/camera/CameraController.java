@@ -1,12 +1,12 @@
 package us.ihmc.graphics3DAdapter.camera;
 
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 
 
 public interface CameraController
 {
-   public void computeTransform(Transform3D cameraTransform);
+   public void computeTransform(Transform3d cameraTransform);
    public double getHorizontalFieldOfViewInRadians();
    public double getClipNear();
    public double getClipFar();

@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.corruptors;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Vector3d;
 
@@ -218,7 +218,7 @@ public class FullRobotModelCorruptor
                OneDoFJoint hipYawJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_YAW);
                ReferenceFrame frameBeforeJoint = hipYawJoint.getFrameBeforeJoint();
 
-               Transform3D postCorruptionTransform = new Transform3D();
+               Transform3d postCorruptionTransform = new Transform3d();
                Vector3d offsetVector = hipYawOffset.getVector3dCopy();
                offsetVector.setY(robotSide.negateIfRightSide(offsetVector.getY()));
                postCorruptionTransform.setTranslation(offsetVector);
@@ -240,7 +240,7 @@ public class FullRobotModelCorruptor
             final ReferenceFrame frameBeforeJoint = oneDoFJoint.getFrameBeforeJoint();
             final Vector3d jointAxis = oneDoFJoint.getJointAxis().getVectorCopy();
 
-            final Transform3D preCorruptionTransform = new Transform3D();
+            final Transform3d preCorruptionTransform = new Transform3d();
 
             final DoubleYoVariable offset = new DoubleYoVariable(robotSide + legJointName.getCamelCaseNameForMiddleOfExpression() + "Offset", registry);
 
@@ -265,7 +265,7 @@ public class FullRobotModelCorruptor
          final ReferenceFrame frameBeforeJoint = oneDoFJoint.getFrameBeforeJoint();
          final Vector3d jointAxis = oneDoFJoint.getJointAxis().getVectorCopy();
 
-         final Transform3D preCorruptionTransform = new Transform3D();
+         final Transform3d preCorruptionTransform = new Transform3d();
 
          final DoubleYoVariable offset = new DoubleYoVariable(spineJointName.getCamelCaseNameForStartOfExpression() + "Offset", registry);
 

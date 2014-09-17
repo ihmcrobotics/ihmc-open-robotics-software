@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 import javax.xml.bind.JAXBContext;
@@ -127,7 +127,7 @@ public abstract class SDFRobotWriter
       sdfJoint.setName(scsJoint.getName());
       sdfJoint.setParent(scsJoint.getParentJoint().getLink().getName());
 
-      Transform3D scsJointOffset = new Transform3D();
+      Transform3d scsJointOffset = new Transform3d();
       scsJoint.getTransformToWorld(scsJointOffset);
       sdfJoint.setPose(getPoseFromTransform3D(scsJointOffset));
 
@@ -284,12 +284,12 @@ public abstract class SDFRobotWriter
       sdfInertial.setInertia(createSDFInertia(scsLink));
       sdfInertial.setMass(String.valueOf(scsLink.getMass()));
 
-      Transform3D comOffsetInWorld = new Transform3D();
+      Transform3d comOffsetInWorld = new Transform3d();
       scsLink.getParentJoint().getTransformToWorld(comOffsetInWorld);
       Vector3d com = new Vector3d();
       scsLink.getComOffset(com);
 
-      Transform3D comOffset = TransformTools.createTranslationTransform(com);
+      Transform3d comOffset = TransformTools.createTranslationTransform(com);
       comOffsetInWorld.mul(comOffset);
 
       sdfInertial.setPose(getPoseFromTransform3D(comOffsetInWorld));
@@ -314,7 +314,7 @@ public abstract class SDFRobotWriter
       return sdfInertia;
    }
 
-   private String getPoseFromTransform3D(Transform3D scsJointOffset)
+   private String getPoseFromTransform3D(Transform3d scsJointOffset)
    {
       Vector3d translation = new Vector3d();
       scsJointOffset.get(translation);

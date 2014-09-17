@@ -2,7 +2,7 @@ package us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidContr
 
 import java.util.EnumMap;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 
 import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -24,7 +24,7 @@ public class DrivingReferenceFrames
       for (VehicleObject vehicleObject : VehicleObject.values())
       {
          String name = FormattingTools.underscoredToCamelCase(vehicleObject.toString(), false);
-         Transform3D transform = vehicleModelObjects.getTransform(vehicleObject);
+         Transform3d transform = vehicleModelObjects.getTransform(vehicleObject);
          ReferenceFrame carObjectFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(name, vehicleFrame, transform);
          vehicleObjectFrames.put(vehicleObject, carObjectFrame);
       }

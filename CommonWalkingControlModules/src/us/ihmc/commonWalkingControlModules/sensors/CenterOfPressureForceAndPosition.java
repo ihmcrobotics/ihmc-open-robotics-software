@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.sensors;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
@@ -67,7 +67,7 @@ public class CenterOfPressureForceAndPosition extends ReferenceFrameHolder
 
    public void changeFrame(ReferenceFrame desiredFrame)
    {
-      Transform3D toDesired = referenceFrame.getTransformToDesiredFrame(desiredFrame);
+      Transform3d toDesired = referenceFrame.getTransformToDesiredFrame(desiredFrame);
       toDesired.transform(centerOfPressure);
       toDesired.transform(totalForce);
       this.referenceFrame = desiredFrame;

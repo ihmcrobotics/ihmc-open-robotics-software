@@ -1,6 +1,6 @@
 package us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.driving.manipulationBehaviors;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Matrix3d;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlModule;
@@ -120,7 +120,7 @@ public class PointPositionRotateSteeringWheelBehavior
 
       private final Matrix3d tempMatrix = new Matrix3d();
       private final FrameOrientation rotationFromGainOrientationToBody = new FrameOrientation(steeringWheelFrame);
-      private final Transform3D transform = new Transform3D();
+      private final Transform3d transform = new Transform3d();
       private final FrameVector force = new FrameVector();
       private final Wrench wrench = new Wrench();
 

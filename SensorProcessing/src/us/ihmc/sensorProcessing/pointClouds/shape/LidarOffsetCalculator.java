@@ -17,7 +17,7 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Point3d;
 
 import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
@@ -281,7 +281,7 @@ private List<Point3D_F64>[] loadPointCloud(int maxScans, LidarScanParameters par
       {
          String file = new Scanner(new BufferedReader(new FileReader(fileName))).useDelimiter("\\Z").next();
 
-         Transform3D start, end;
+         Transform3d start, end;
          float distance;
 
          List<String> allMatches = new ArrayList<String>();
@@ -306,12 +306,12 @@ private List<Point3D_F64>[] loadPointCloud(int maxScans, LidarScanParameters par
             double[] mx = new double[16];
             for (int j = 0; j < 16; j++)
                mx[j] = doubles[i++];
-            start = new Transform3D(mx);
+            start = new Transform3d(mx);
 
             mx = new double[16];
             for (int j = 0; j < 16; j++)
                mx[j] = doubles[i++];
-            end = new Transform3D(mx);
+            end = new Transform3d(mx);
 
             float[] ranges = new float[params.pointsPerSweep];
             for (int j = 0; j < params.pointsPerSweep; j++)

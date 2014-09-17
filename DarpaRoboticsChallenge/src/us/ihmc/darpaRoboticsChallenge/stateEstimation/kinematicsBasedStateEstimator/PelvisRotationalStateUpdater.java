@@ -2,7 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.stateEstimation.kinematicsBasedStateEstim
 
 import java.util.List;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
@@ -94,10 +94,10 @@ public class PelvisRotationalStateUpdater
       updateViz();
    }
 
-   private final Transform3D transformFromMeasurementFrameToWorld = new Transform3D();
+   private final Transform3d transformFromMeasurementFrameToWorld = new Transform3d();
    
-   private final Transform3D transformFromRootJointFrameToWorld = new Transform3D();
-   private final Transform3D transformFromRootJointFrameToMeasurementFrame = new Transform3D();
+   private final Transform3d transformFromRootJointFrameToWorld = new Transform3d();
+   private final Transform3d transformFromRootJointFrameToMeasurementFrame = new Transform3d();
 
    private final Matrix3d rotationFromRootJointFrameToWorld = new Matrix3d();
    private final Matrix3d orientationMeasurement = new Matrix3d();
