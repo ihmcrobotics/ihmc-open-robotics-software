@@ -352,8 +352,8 @@ public class ClosedFormJacobian
            double m21 = m21v.getY() / length;
            double m22 = m22v.getY() / length;
            
-           output[0][0] = m21;  output[0][1] = m11;
-           output[1][0] = m22;  output[1][1] = m12;
+           output[0][0] = -m21;  output[0][1] = -m11;
+           output[1][0] = -m22;  output[1][1] = -m12;
            break;  
            
         }else{
@@ -381,8 +381,8 @@ public class ClosedFormJacobian
 
            
            //this bizarre ordering means that actuators 0 and 1 were switched in the waist and that compression of the force sensors makes Val lean forward in the negative theta direction
-           output[0][0]=J2A_11; output[0][1]=J2A_12;
-           output[1][0]=J2A_21; output[1][1]=J2A_22;
+           output[0][0]=-J2A_11; output[0][1]=-J2A_12;
+           output[1][0]=-J2A_21; output[1][1]=-J2A_22;
            break;  
            
         }
