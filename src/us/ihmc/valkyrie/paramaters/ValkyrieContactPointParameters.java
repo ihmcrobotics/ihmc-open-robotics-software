@@ -6,7 +6,7 @@ import static us.ihmc.valkyrie.paramaters.ValkyriePhysicalProperties.footWidth;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -30,7 +30,7 @@ public class ValkyrieContactPointParameters extends DRCRobotContactPointParamete
       for (RobotSide robotSide : RobotSide.values)
       {
          footGroundContactPoints.put(robotSide, new ArrayList<Point2d>());
-         Transform3D ankleToSoleFrame = ValkyriePhysicalProperties.getAnkleToSoleFrameTransform(robotSide);
+         Transform3d ankleToSoleFrame = ValkyriePhysicalProperties.getAnkleToSoleFrameTransform(robotSide);
 
          ArrayList<Pair<String, Point2d>> footGCs = new ArrayList<>();
          String jointBeforeFootName = jointMap.getJointBeforeFootName(robotSide);
@@ -58,7 +58,7 @@ public class ValkyrieContactPointParameters extends DRCRobotContactPointParamete
    }
 
    @Override
-   public Transform3D getPelvisContactPointTransform()
+   public Transform3d getPelvisContactPointTransform()
    {
       return null;
    }
@@ -70,7 +70,7 @@ public class ValkyrieContactPointParameters extends DRCRobotContactPointParamete
    }
 
    @Override
-   public Transform3D getPelvisBackContactPointTransform()
+   public Transform3d getPelvisBackContactPointTransform()
    {
       return null;
    }
@@ -82,7 +82,7 @@ public class ValkyrieContactPointParameters extends DRCRobotContactPointParamete
    }
 
    @Override
-   public Transform3D getChestBackContactPointTransform()
+   public Transform3d getChestBackContactPointTransform()
    {
       return null;
    }
@@ -94,7 +94,7 @@ public class ValkyrieContactPointParameters extends DRCRobotContactPointParamete
    }
 
    @Override
-   public SideDependentList<Transform3D> getThighContactPointTransforms()
+   public SideDependentList<Transform3d> getThighContactPointTransforms()
    {
       return null;
    }
@@ -124,7 +124,7 @@ public class ValkyrieContactPointParameters extends DRCRobotContactPointParamete
    }
 
    @Override
-   public SideDependentList<Transform3D> getHandContactPointTransforms()
+   public SideDependentList<Transform3d> getHandContactPointTransforms()
    {
       return null;
    }

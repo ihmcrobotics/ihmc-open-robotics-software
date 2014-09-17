@@ -1,6 +1,6 @@
 package us.ihmc.valkyrie.paramaters;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
@@ -20,14 +20,14 @@ public class ValkyriePhysicalProperties extends DRCRobotPhysicalProperties
    public static final double shinLength = 0.406;
    public static final double pelvisToFoot = 0.887 + 0.3;
 
-   public static final SideDependentList<Transform3D> soleToAnkleFrameTransforms = new SideDependentList<>();
-   public static final SideDependentList<Transform3D> handControlFrameToWristTransforms = new SideDependentList<Transform3D>(new Transform3D(), new Transform3D());
+   public static final SideDependentList<Transform3d> soleToAnkleFrameTransforms = new SideDependentList<>();
+   public static final SideDependentList<Transform3d> handControlFrameToWristTransforms = new SideDependentList<Transform3d>(new Transform3d(), new Transform3d());
 
    static
    {
       for (RobotSide side : RobotSide.values)
       {
-         Transform3D soleToAnkleFrame = new Transform3D();
+         Transform3d soleToAnkleFrame = new Transform3d();
 //         soleToAnkleFrame.setEuler(new Vector3d(0.0, +0.13, 0.0));
          soleToAnkleFrame.setTranslation(new Vector3d(footLength / 2.0 - footBack, 0.0, -ValkyriePhysicalProperties.ankleHeight));
          soleToAnkleFrameTransforms.put(side, soleToAnkleFrame);
@@ -40,7 +40,7 @@ public class ValkyriePhysicalProperties extends DRCRobotPhysicalProperties
       return ankleHeight;
    }
 
-   public static Transform3D getAnkleToSoleFrameTransform(RobotSide side)
+   public static Transform3d getAnkleToSoleFrameTransform(RobotSide side)
    {
       return soleToAnkleFrameTransforms.get(side);
    }

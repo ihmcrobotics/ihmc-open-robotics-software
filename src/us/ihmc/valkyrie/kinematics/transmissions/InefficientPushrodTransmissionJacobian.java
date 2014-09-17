@@ -1,6 +1,6 @@
 package us.ihmc.valkyrie.kinematics.transmissions;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -50,8 +50,8 @@ public class InefficientPushrodTransmissionJacobian
    private final TranslationReferenceFrame beforeBottomJointFrame = new TranslationReferenceFrame("beforeBottomJointFrame", afterTopJointFrame);
    private final TransformReferenceFrame bottomFrame = new TransformReferenceFrame("bottomFrame", beforeBottomJointFrame);
 
-   private final Transform3D topJointTransform3D = new Transform3D();
-   private final Transform3D bottomJointTransform3D = new Transform3D();
+   private final Transform3d topJointTransform3D = new Transform3d();
+   private final Transform3d bottomJointTransform3D = new Transform3d();
 
    private final FramePoint b5InBottomFrame = new FramePoint();   
    private final FramePoint b6InBottomFrame = new FramePoint();   
@@ -114,11 +114,11 @@ public class InefficientPushrodTransmissionJacobian
       
       topFrame.updateTranslation(new FrameVector(worldFrame, 0.0, 0.0, 1.0));    // Arbitrary. Just put it in the air. If we wanted to have things align with the real robot, then this should be at the ankle.
       
-      Transform3D transformFromActuatorSlide5FrameToBoneFrame = new Transform3D();      
+      Transform3d transformFromActuatorSlide5FrameToBoneFrame = new Transform3d();      
       transformFromActuatorSlide5FrameToBoneFrame.rotY(-actuatorSlider5PitchRotation);
       transformFromActuatorSlide5FrameToBoneFrame.setTranslation(new Vector3d(rod5PointInBoneFrame));
       
-      Transform3D transformFromActuatorSlide6FrameToBoneFrame = new Transform3D();      
+      Transform3d transformFromActuatorSlide6FrameToBoneFrame = new Transform3d();      
       transformFromActuatorSlide6FrameToBoneFrame.rotY(-actuatorSlider6PitchRotation);
       transformFromActuatorSlide6FrameToBoneFrame.setTranslation(new Vector3d(rod6PointInBoneFrame));
 
@@ -420,7 +420,7 @@ public class InefficientPushrodTransmissionJacobian
       }
    }
 
-   private static void computeRotationTransform(Transform3D transform3DToPack, double rotationAngle, Axis rotationAxis)
+   private static void computeRotationTransform(Transform3d transform3DToPack, double rotationAngle, Axis rotationAxis)
    {
       transform3DToPack.setIdentity();
       switch(rotationAxis)
