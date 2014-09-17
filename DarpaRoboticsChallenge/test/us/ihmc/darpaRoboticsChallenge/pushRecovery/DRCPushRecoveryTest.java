@@ -31,7 +31,7 @@ import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimu
 
 public abstract class DRCPushRecoveryTest
 {
-   private static final boolean showGUI = true;
+   private static final boolean showGUI = false;
    private static final boolean KEEP_SCS_UP = false;
    
    private static String script = "scripts/ExerciseAndJUnitScripts/walkingPushTestScript.xml";
