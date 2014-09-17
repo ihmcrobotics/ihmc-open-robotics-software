@@ -66,39 +66,30 @@ public class ClosedFormJacobianTest {
     @Test
     public void testJacobianMatchesMATLABAnkle() {
         for (int i = 0; i < 7; i++) {
-            double[][] J = closedFormJacobianAnkle.getUpdatedTransform(-roll[i], -pitch[i]);
-
-            if (DEBUG) {
-                System.out.println("java: " + J[0][0] + ", " + J[0][1] + ", " + J[1][0] + ", " + J[1][1]);
-                System.out.println("matlab: " + -m21_matlab[i] + ", " + -m11_matlab[i] + ", " + -m22_matlab[i] + ", "
-                                   + -m12_matlab[i]);
-                System.out.println(" ");
-            }
-
-            assertEquals(J[0][0], -m21_matlab[i], TOLERANCE);
-            assertEquals(J[0][1], -m11_matlab[i], TOLERANCE);
-            assertEquals(J[1][0], -m22_matlab[i], TOLERANCE);
-            assertEquals(J[1][1], -m12_matlab[i], TOLERANCE);
+            double[][] efficientJacobian = closedFormJacobianAnkle.getUpdatedTransform(-roll[i], -pitch[i]);
+            double[][] matlabJacobian =  new double[2][2];
+            
+            matlabJacobian[0][0]=-m21_matlab[i];
+            matlabJacobian[0][1]=-m11_matlab[i];
+            matlabJacobian[1][0]=-m22_matlab[i];
+            matlabJacobian[1][1]=-m12_matlab[i];
+            
+            compareMatrices(efficientJacobian, matlabJacobian, TOLERANCE);
         }
     }
 
-    @Ignore
     @Test
     public void testJacobianMatchesMATLABWaist() {
         for (int i = 0; i < 7; i++) {
-            double[][] J = closedFormJacobianWaist.getUpdatedTransform(roll[i], pitch[i]);
-
-            if (DEBUG) {
-                System.out.println("m11_java: " + J[0][0] + ", m12_java: " + J[0][1] + ", m21_java: " + J[1][0]
-                                   + ", m22_java: " + J[1][1]);
-                System.out.println("m11_matlab: " + m12_matlab_waist[i] + ", m12_matlab: " + m11_matlab_waist[i]
-                                   + ", m21_matlab: " + -m22_matlab_waist[i] + ", m22_matlab: " + -m21_matlab_waist[i]);
-            }
-
-            assertEquals(J[0][0], m12_matlab_waist[i], TOLERANCE);
-            assertEquals(J[0][1], m11_matlab_waist[i], TOLERANCE);
-            assertEquals(J[1][0], -m22_matlab_waist[i], TOLERANCE);
-            assertEquals(J[1][1], -m21_matlab_waist[i], TOLERANCE);
+            double[][] efficientJacobian = closedFormJacobianWaist.getUpdatedTransform(roll[i], pitch[i]);
+            double[][] matlabJacobian = new double[2][2];
+            
+            matlabJacobian[0][0]=-m12_matlab_waist[i];
+            matlabJacobian[0][1]=-m22_matlab_waist[i];
+            matlabJacobian[1][0]=-m11_matlab_waist[i];
+            matlabJacobian[1][1]=-m21_matlab_waist[i];
+            
+            compareMatrices(efficientJacobian, matlabJacobian, TOLERANCE);
         }
     }
 
@@ -121,7 +112,7 @@ public class ClosedFormJacobianTest {
         }
     }
 
-    // The following test is just for achieving proper renishaw jacobian matrix signs/element indices.
+    // The following test is just for achieving proper renishaw jacobian matrix signs/element indices. It should never be used in Bamboo.
     @Ignore
     @Test
     public void testEfficientKindaMatchesInefficientJacobianAnkle() {
@@ -199,10 +190,10 @@ public class ClosedFormJacobianTest {
 
             interpolatedJacobian = interpolatedPushRodTransmission.getInterpolatedActuatorToJointJacobian(pitch[i],
                     roll[i], PushRodTransmissionJoint.WAIST);
-            modifiedInterpolatedJacobian[0][0] = -interpolatedJacobian[1][1];
-            modifiedInterpolatedJacobian[0][1] = interpolatedJacobian[0][1];
-            modifiedInterpolatedJacobian[1][0] = -interpolatedJacobian[1][0];
-            modifiedInterpolatedJacobian[1][1] = interpolatedJacobian[0][0];
+            modifiedInterpolatedJacobian[0][0] = interpolatedJacobian[1][1];
+            modifiedInterpolatedJacobian[0][1] = -interpolatedJacobian[0][1];
+            modifiedInterpolatedJacobian[1][0] = interpolatedJacobian[1][0];
+            modifiedInterpolatedJacobian[1][1] = -interpolatedJacobian[0][0];
             compareMatrices(efficientJacobian, modifiedInterpolatedJacobian, TOLERANCE_GOOD_ENOUGH_FOR_GOVERNMENT_WORK);
         }
     }
