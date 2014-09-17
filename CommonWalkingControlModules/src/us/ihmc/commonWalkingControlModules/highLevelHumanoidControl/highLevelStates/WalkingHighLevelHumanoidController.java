@@ -42,6 +42,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTrajectoryGener
 import us.ihmc.commonWalkingControlModules.trajectories.CoMXYTimeDerivativesData;
 import us.ihmc.commonWalkingControlModules.trajectories.ContactStatesAndUpcomingFootstepData;
 import us.ihmc.commonWalkingControlModules.trajectories.FlatThenPolynomialCoMHeightTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculationProvider;
 import us.ihmc.commonWalkingControlModules.trajectories.TransferTimeCalculationProvider;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
@@ -304,7 +305,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       pushRecoveryModule = new PushRecoveryControlModule(momentumBasedController, walkingControllerParameters, readyToGrabNextFootstep,
             icpAndMomentumBasedController, stateMachine, registry, swingTimeCalculationProvider, feet);
       
-      footExplorationControlModule = new FootExplorationControlModule(registry, momentumBasedController, yoTime);
+      footExplorationControlModule = new FootExplorationControlModule(registry, momentumBasedController, yoTime, 
+                                         (LookAheadCoMHeightTrajectoryGenerator) centerOfMassHeightTrajectoryGenerator, swingTimeCalculationProvider, feetManager);
 
       setupStateMachine();
       readyToGrabNextFootstep.set(true);
