@@ -6,7 +6,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.net.URL;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Color3f;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -136,7 +136,7 @@ public class NullGraphics3DAdapter implements Graphics3DAdapter
                   return 100.0;
                }
 
-               public void computeTransform(Transform3D cameraTransform)
+               public void computeTransform(Transform3d cameraTransform)
                {
                   // TODO Auto-generated method stub
 

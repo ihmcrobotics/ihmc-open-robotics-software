@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.stateEstimation;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
@@ -250,8 +250,8 @@ public class OrientationAndPositionFullRobotModelUpdater implements Runnable
 
    private final FramePoint tempCenterOfMassPositionState = new FramePoint(ReferenceFrame.getWorldFrame());
    private final FrameOrientation tempOrientationState = new FrameOrientation(ReferenceFrame.getWorldFrame());
-   private final Transform3D tempEstimationLinkToWorld = new Transform3D();
-   private final Transform3D tempRootJointToWorld = new Transform3D();
+   private final Transform3d tempEstimationLinkToWorld = new Transform3d();
+   private final Transform3d tempRootJointToWorld = new Transform3d();
 
    private void updateRootJointConfiguration(SixDoFJoint rootJoint, ReferenceFrame estimationFrame)
    {
@@ -268,7 +268,7 @@ public class OrientationAndPositionFullRobotModelUpdater implements Runnable
    private final Point3d tempEstimationLinkPosition = new Point3d();
    private final Vector3d tempEstimationLinkPositionVector3d = new Vector3d();
 
-   private void computeEstimationLinkTransform(ReferenceFrame estimationFrame, Transform3D estimationLinkToWorldToPack, FramePoint centerOfMassWorld,
+   private void computeEstimationLinkTransform(ReferenceFrame estimationFrame, Transform3d estimationLinkToWorldToPack, FramePoint centerOfMassWorld,
            FrameOrientation estimationLinkOrientation)
    {
       // r^{estimation}
@@ -293,10 +293,10 @@ public class OrientationAndPositionFullRobotModelUpdater implements Runnable
       estimationLinkToWorldToPack.setTranslation(tempEstimationLinkPositionVector3d);
    }
 
-   private final Transform3D tempRootJointFrameToEstimationFrame = new Transform3D();
+   private final Transform3d tempRootJointFrameToEstimationFrame = new Transform3d();
 
-   private void computeRootJointTransform(SixDoFJoint rootJoint, ReferenceFrame estimationFrame, Transform3D rootJointToWorldToPack,
-           Transform3D estimationLinkTransform)
+   private void computeRootJointTransform(SixDoFJoint rootJoint, ReferenceFrame estimationFrame, Transform3d rootJointToWorldToPack,
+           Transform3d estimationLinkTransform)
    {
       // H_{root}^{estimation}
       rootJoint.getFrameAfterJoint().getTransformToDesiredFrame(tempRootJointFrameToEstimationFrame, estimationFrame);

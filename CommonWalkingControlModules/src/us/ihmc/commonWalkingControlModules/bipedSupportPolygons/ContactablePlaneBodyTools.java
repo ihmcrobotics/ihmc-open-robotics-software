@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 
 import java.util.Random;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.utilities.RandomTools;
@@ -14,7 +14,7 @@ public class ContactablePlaneBodyTools
    
    public static RectangularContactableBody createTypicalContactablePlaneBodyForTests(RigidBody rigidBody, ReferenceFrame endEffectorFrame)
    {      
-      Transform3D transform3D = new Transform3D();
+      Transform3d transform3D = new Transform3d();
       transform3D.setTranslation(new Vector3d(0.1, 0.2, -0.5));
       transform3D.rotY(Math.PI/2.0);
       
@@ -34,7 +34,7 @@ public class ContactablePlaneBodyTools
       //TODO: Use a better frame than just world here.
       ReferenceFrame endEffectorFrame = ReferenceFrame.getWorldFrame(); //rigidBody.getParentJoint().getFrameAfterJoint();
       
-      Transform3D transform3D = RandomTools.generateRandomTransform(random);
+      Transform3d transform3D = RandomTools.generateRandomTransform(random);
       
       ReferenceFrame soleFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(rigidBody.getName() + "SoleFrame", endEffectorFrame, transform3D);
       

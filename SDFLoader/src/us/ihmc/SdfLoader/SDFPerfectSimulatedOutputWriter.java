@@ -2,7 +2,7 @@ package us.ihmc.SdfLoader;
 
 import java.util.ArrayList;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
@@ -88,7 +88,7 @@ public class SDFPerfectSimulatedOutputWriter
       FloatingJoint floatingJoint = rootJointPair.first();
       SixDoFJoint sixDoFJoint = rootJointPair.second();
       
-      Transform3D transform = sixDoFJoint.getJointTransform3D();
+      Transform3d transform = sixDoFJoint.getJointTransform3D();
       floatingJoint.setRotationAndTranslation(transform);
    }
 }

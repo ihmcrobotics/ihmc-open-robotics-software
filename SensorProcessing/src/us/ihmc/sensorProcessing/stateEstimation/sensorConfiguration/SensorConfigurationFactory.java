@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
@@ -132,12 +132,12 @@ public class SensorConfigurationFactory
 
    public static ReferenceFrame createMeasurementFrame(String sensorName, String frameName, IMUDefinition imuDefinition, RigidBody measurementBody)
    {
-      Transform3D transformFromIMUToJoint = new Transform3D();
+      Transform3d transformFromIMUToJoint = new Transform3d();
       imuDefinition.getTransformFromIMUToJoint(transformFromIMUToJoint);
 
       ReferenceFrame perfectFrameAfterJoint = measurementBody.getParentJoint().getFrameAfterJoint();
 
-      if (transformFromIMUToJoint.epsilonEquals(new Transform3D(), 1e-10))
+      if (transformFromIMUToJoint.epsilonEquals(new Transform3d(), 1e-10))
       {
          return perfectFrameAfterJoint;
       }

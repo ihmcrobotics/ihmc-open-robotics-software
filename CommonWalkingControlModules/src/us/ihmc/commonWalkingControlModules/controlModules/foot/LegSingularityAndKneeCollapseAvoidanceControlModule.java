@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Vector3d;
 
@@ -228,7 +228,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          private final FramePoint hipPitchPosition = new FramePoint();
 
          @Override
-         protected void updateTransformToParent(Transform3D transformToParent)
+         protected void updateTransformToParent(Transform3d transformToParent)
          {
             tempPoint.setToZero(frameBeforeHipPitchJoint);
             tempPoint.changeFrame(endEffectorFrame);
@@ -254,7 +254,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          private final FramePoint anklePitchPosition = new FramePoint();
 
          @Override
-         protected void updateTransformToParent(Transform3D transformToParent)
+         protected void updateTransformToParent(Transform3d transformToParent)
          {
             tempPoint.setToZero(frameBeforeHipPitchJoint);
             tempPoint.changeFrame(endEffectorFrame);

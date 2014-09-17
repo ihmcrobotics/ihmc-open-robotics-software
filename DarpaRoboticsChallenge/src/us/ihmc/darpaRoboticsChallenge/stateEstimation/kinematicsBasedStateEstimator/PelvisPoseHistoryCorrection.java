@@ -1,6 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.stateEstimation.kinematicsBasedStateEstimator;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
@@ -43,11 +43,12 @@ public class PelvisPoseHistoryCorrection
    private final TimeStampedTransform3D[] errorBuffer = new TimeStampedTransform3D[3];
    private int bufferIndex = 0;
 
-   private final Transform3D interpolatedError = new Transform3D();
-   private final Transform3D previousInterpolatedError = new Transform3D();
-   private final Transform3D interpolatorStartingPosition = new Transform3D();
-   private final Transform3D pelvisPose = new Transform3D();
-   private final Transform3D correctedPelvisPoseWorkingArea = new Transform3D();
+   private final Transform3d interpolatedError = new Transform3d();
+   private final Transform3d previousInterpolatedError = new Transform3d();
+   private final Transform3d interpolatorStartingPosition = new Transform3d();
+   private final Transform3d pelvisPose = new Transform3d();
+   private final Transform3d correctedPelvisPoseWorkingArea = new Transform3d();
+   private final Transform3d tempTransform = new Transform3d();
 
    private final AlphaFilteredYoVariable interpolationAlphaFilter;
    private final DoubleYoVariable confidenceFactor; // target for alpha filter
@@ -203,10 +204,10 @@ public class PelvisPoseHistoryCorrection
     * Calculates the instantaneous offset for this tick
     * @return
     */
-   private Transform3D getInterpolatedPelvisError()
+   private Transform3d getInterpolatedPelvisError()
    {
       //first interpolate the total error
-      Transform3D totalError = getTotalError();
+      Transform3d totalError = getTotalError();
       updateTotalErrorYoVariables(totalError);
 
       transformInterpolationCalculator.computeInterpolation(interpolatorStartingPosition, totalError, interpolatedError,
@@ -221,7 +222,7 @@ public class PelvisPoseHistoryCorrection
     * Returns the difference between the pelvis pose provided by an external source at t with the state estimated pelvis pose at t
     * @return external pelvis pose - state estimator pelvis pose
     */
-   private Transform3D getTotalError()
+   private Transform3d getTotalError()
    {
       int index = bufferIndex - 1;
       if (index < 0)
@@ -243,7 +244,7 @@ public class PelvisPoseHistoryCorrection
       
       if (stateEstimatorPelvisPoseBuffer.isInRange(timeStampedExternalPose.getTimeStamp()))
       {
-         Transform3D newPelvisPose = timeStampedExternalPose.getTransform3D();
+         Transform3d newPelvisPose = timeStampedExternalPose.getTransform3D();
          updateExternalPelvisPositionYoVariables(newPelvisPose);
          
          double confidence = newPacket.getConfidenceFactor();
@@ -289,8 +290,10 @@ public class PelvisPoseHistoryCorrection
       long timeStamp = localizationPose.getTimeStamp();
       errorToPack.setTimeStamp(timeStamp);
       TimeStampedTransform3D sePose = stateEstimatorPelvisPoseBuffer.interpolate(timeStamp);
-      Transform3D error = localizationPose.getTransform3D();
-      error.mulInverse(sePose.getTransform3D());
+      Transform3d error = localizationPose.getTransform3D();
+      tempTransform.set(sePose.getTransform3D());
+      tempTransform.invert();
+      error.mul(tempTransform);
       
       error.get(rotationMatrix);
       RotationFunctions.setYawPitchRoll(rotationMatrix, RotationFunctions.getYaw(rotationMatrix), 0, 0);
@@ -339,7 +342,7 @@ public class PelvisPoseHistoryCorrection
       previousInterpolatedPelvisErrorRoll.set(tempRots[2]);
    }
    
-   private void updateExternalPelvisPositionYoVariables(Transform3D externalPelvisPose)
+   private void updateExternalPelvisPositionYoVariables(Transform3d externalPelvisPose)
    {
       externalPelvisPose.get(tempVector);
       externalPelvisPose.get(rot);
@@ -352,7 +355,7 @@ public class PelvisPoseHistoryCorrection
       externalPelvisRoll.set(tempRots[2]);
    }
    
-   private void updateTotalErrorYoVariables(Transform3D totalError)
+   private void updateTotalErrorYoVariables(Transform3d totalError)
    {
       totalError.get(tempVector);
       totalError.get(rot);
@@ -398,7 +401,7 @@ public class PelvisPoseHistoryCorrection
             {
                long midTimeStamp = stateEstimatorPelvisPoseBuffer.getOldestTimestamp()
                      + ((stateEstimatorPelvisPoseBuffer.getNewestTimestamp() - stateEstimatorPelvisPoseBuffer.getOldestTimestamp()) / 2);
-               Transform3D pelvisPose = new Transform3D(stateEstimatorPelvisPoseBuffer.interpolate(midTimeStamp).getTransform3D());
+               Transform3d pelvisPose = new Transform3d(stateEstimatorPelvisPoseBuffer.interpolate(midTimeStamp).getTransform3D());
 
                TransformTools.rotate(pelvisPose, manualRotationOffsetInRadX.getDoubleValue(), Axis.X);
                TransformTools.rotate(pelvisPose, manualRotationOffsetInRadY.getDoubleValue(), Axis.Y);

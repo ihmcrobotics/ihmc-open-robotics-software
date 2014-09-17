@@ -1,10 +1,10 @@
 package us.ihmc.graphics3DAdapter.camera;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 
 public interface CameraMountInterface
 {
-   public abstract void getTransformToCamera(Transform3D transformToPack);
+   public abstract void getTransformToCamera(Transform3d transformToPack);
    public abstract double getFieldOfView();
    public abstract double getClipDistanceNear();
    public abstract double getClipDistanceFar();

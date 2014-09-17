@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.captureRegion;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Vector3d;
 
@@ -70,7 +70,7 @@ public class CaptureRegionMathTools
    }
    
    private final Vector3d negZRotationAxis = new Vector3d(0.0, 0.0, -1.0);
-   private final Transform3D rotation = new Transform3D();
+   private final Transform3d rotation = new Transform3d();
    private final FrameVector rotatedFromA = new FrameVector();
    private final AxisAngle4d axisAngle = new AxisAngle4d();
    /**

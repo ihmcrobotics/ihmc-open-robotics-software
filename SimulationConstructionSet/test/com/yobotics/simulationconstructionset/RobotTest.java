@@ -6,7 +6,7 @@ import static org.junit.Assert.assertFalse;
 import java.util.ArrayList;
 import java.util.Random;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
@@ -88,7 +88,7 @@ public class RobotTest
       pin2.setTau(-pin1.getTau().getDoubleValue());
 
       robot1.update();
-      Transform3D pin1ToWorld = new Transform3D();
+      Transform3d pin1ToWorld = new Transform3d();
       pin1.getTransformToWorld(pin1ToWorld);
       root2.setRotationAndTranslation(pin1ToWorld);
       root2.setPosition(root2.getQx().getDoubleValue(), root2.getQy().getDoubleValue(), root2.getQz().getDoubleValue());
@@ -166,9 +166,9 @@ public class RobotTest
 
       // EULER
       // moment about CoM
-      Transform3D transformToWorld = new Transform3D();
+      Transform3d transformToWorld = new Transform3d();
       root1.getTransformToWorld(transformToWorld);
-      Transform3D transformToBody = new Transform3D();
+      Transform3d transformToBody = new Transform3d();
       transformToBody.invert(transformToWorld);
       transformToBody.transform(force);
       Vector3d moment = new Vector3d();

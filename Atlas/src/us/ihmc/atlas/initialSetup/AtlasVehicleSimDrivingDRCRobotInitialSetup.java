@@ -16,7 +16,7 @@ import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_leg_aky;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_leg_hpy;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_leg_kny;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
@@ -27,7 +27,7 @@ public class AtlasVehicleSimDrivingDRCRobotInitialSetup implements DRCRobotIniti
 {
 
    private double groundZ;
-   private final Transform3D rootToWorld = new Transform3D();
+   private final Transform3d rootToWorld = new Transform3d();
    private final Vector3d offset = new Vector3d();
 
    public AtlasVehicleSimDrivingDRCRobotInitialSetup(double groundZ)

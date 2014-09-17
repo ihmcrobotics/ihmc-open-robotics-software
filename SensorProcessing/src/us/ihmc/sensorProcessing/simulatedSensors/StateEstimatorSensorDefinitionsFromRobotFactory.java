@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 
 import us.ihmc.utilities.ForceSensorDefinition;
 import us.ihmc.utilities.IMUDefinition;
@@ -56,7 +56,7 @@ public class StateEstimatorSensorDefinitionsFromRobotFactory
       {
          OneDegreeOfFreedomJoint forceTorqueSensorJoint = groundContactPointBasedWrenchCalculator.getJoint();
          OneDoFJoint sensorParentJoint = scsToInverseDynamicsJointMap.getInverseDynamicsOneDoFJoint(forceTorqueSensorJoint);
-         ForceSensorDefinition sensorDefinition = new ForceSensorDefinition(groundContactPointBasedWrenchCalculator.getName(), sensorParentJoint.getSuccessor(), new Transform3D());
+         ForceSensorDefinition sensorDefinition = new ForceSensorDefinition(groundContactPointBasedWrenchCalculator.getName(), sensorParentJoint.getSuccessor(), new Transform3d());
          forceSensorDefinitions.put(groundContactPointBasedWrenchCalculator, sensorDefinition);
          
       }
@@ -80,7 +80,7 @@ public class StateEstimatorSensorDefinitionsFromRobotFactory
       for (IMUMount imuMount : imuMounts)
       {
          RigidBody rigidBody = scsToInverseDynamicsJointMap.getRigidBody(imuMount.getParentJoint());
-         Transform3D transformFromMountToJoint = new Transform3D();
+         Transform3d transformFromMountToJoint = new Transform3d();
          imuMount.getTransformFromMountToJoint(transformFromMountToJoint);
          IMUDefinition imuDefinition = new IMUDefinition(imuMount.getName(), rigidBody, transformFromMountToJoint);
          imuDefinitions.put(imuMount, imuDefinition);

@@ -3,7 +3,7 @@ package us.ihmc.utilities.screwTheory;
 import java.util.LinkedHashMap;
 import java.util.Random;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -33,7 +33,7 @@ public class CentroidalMomentumMatrixTest
       Robot robot = new Robot("robot");
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       LinkedHashMap<RevoluteJoint, PinJoint> jointMap = new LinkedHashMap<RevoluteJoint, PinJoint>();
-      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new Transform3D());
+      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new Transform3d());
       RigidBody elevator = new RigidBody("elevator", elevatorFrame);
       double gravity = 0.0;
 
@@ -77,7 +77,7 @@ public class CentroidalMomentumMatrixTest
       robot.addRootJoint(rootJoint);
 
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new Transform3D());
+      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new Transform3d());
       RigidBody elevator = new RigidBody("elevator", elevatorFrame);
       SixDoFJoint sixDoFJoint = new SixDoFJoint("sixDoFJoint", elevator, elevatorFrame);
       ScrewTools.addRigidBody("rigidBody", sixDoFJoint, momentOfInertia, mass, comOffset);

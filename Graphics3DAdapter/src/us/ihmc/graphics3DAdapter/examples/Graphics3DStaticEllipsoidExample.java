@@ -3,7 +3,7 @@ package us.ihmc.graphics3DAdapter.examples;
 import java.util.ArrayList;
 import java.util.Random;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
@@ -30,7 +30,7 @@ public class Graphics3DStaticEllipsoidExample
       for (int i=0; i<numberOfEllipsoids; i++)
       {
         Vector3d center = generateRandomVector3d(random, minValues, maxValues);
-        Transform3D transform = new Transform3D();
+        Transform3d transform = new Transform3d();
         transform.setTranslation(center);
         double xRadius = generateRandomDoubleBetween(random, minRadius, maxRadius);
         double yRadius = generateRandomDoubleBetween(random, minRadius, maxRadius);

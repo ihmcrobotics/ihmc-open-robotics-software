@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.kinematics;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
@@ -238,7 +238,7 @@ public class StanceFullLegJacobian
       }
 
       @Override
-      protected void updateTransformToParent(Transform3D transformToParent)
+      protected void updateTransformToParent(Transform3d transformToParent)
       {
          transformToParent.setTranslation(new Vector3d(vtpX, 0.0, -footHeight));
       }
@@ -262,7 +262,7 @@ public class StanceFullLegJacobian
       }
 
       @Override
-      protected void updateTransformToParent(Transform3D transformToParent)
+      protected void updateTransformToParent(Transform3d transformToParent)
       {
          transformToParent.setTranslation(new Vector3d(0.0, vtpY, 0.0));
       }

@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.configurations;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.robotSide.SideDependentList;
@@ -11,7 +11,7 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public interface WalkingControllerParameters extends HeadOrientationControllerParameters
 {
-   public abstract SideDependentList<Transform3D> getDesiredHandPosesWithRespectToChestFrame();
+   public abstract SideDependentList<Transform3d> getDesiredHandPosesWithRespectToChestFrame();
 
    public abstract String[] getDefaultChestOrientationControlJointNames();
 

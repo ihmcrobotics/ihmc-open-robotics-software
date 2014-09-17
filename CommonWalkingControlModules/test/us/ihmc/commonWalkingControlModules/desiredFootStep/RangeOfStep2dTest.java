@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Vector3d;
 
 import org.junit.After;
@@ -99,7 +99,7 @@ public class RangeOfStep2dTest
       double y = 5.0;
       double z = 5.0;
 
-      Transform3D transform = new Transform3D();
+      Transform3d transform = new Transform3d();
       transform.setTranslation(new Vector3d(x, y, z));
       ReferenceFrame frame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("translatedFrame", ReferenceFrame.getWorldFrame(), transform);
 

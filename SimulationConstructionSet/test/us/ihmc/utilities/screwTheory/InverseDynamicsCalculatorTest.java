@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Random;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -60,7 +60,7 @@ public class InverseDynamicsCalculatorTest
       robot.setGravity(0.0);
 
       ReferenceFrame inertialFrame = ReferenceFrame.getWorldFrame();
-      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", inertialFrame, new Transform3D());
+      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", inertialFrame, new Transform3d());
       RigidBody elevator = new RigidBody("elevator", elevatorFrame);
 
       FloatingJoint rootJoint = new FloatingJoint("root", new Vector3d(), robot);
@@ -87,7 +87,7 @@ public class InverseDynamicsCalculatorTest
 
       Vector3d externalForce = new Vector3d();
       externalForcePoint.getForce(externalForce); // in world frame
-      Transform3D worldToBody = elevatorFrame.getTransformToDesiredFrame(bodyFixedFrame);
+      Transform3d worldToBody = elevatorFrame.getTransformToDesiredFrame(bodyFixedFrame);
       worldToBody.transform(externalForce);
 
       Wrench inputWrench = new Wrench(bodyFixedFrame, bodyFixedFrame, externalForce, new Vector3d());
@@ -112,7 +112,7 @@ public class InverseDynamicsCalculatorTest
       Robot robot = new Robot("robot");
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       LinkedHashMap<RevoluteJoint, PinJoint> jointMap = new LinkedHashMap<RevoluteJoint, PinJoint>();
-      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new Transform3D());
+      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new Transform3d());
       RigidBody elevator = new RigidBody("elevator", elevatorFrame);
       Vector3d[] jointAxes = {X, Y, Z, X};
       
@@ -132,7 +132,7 @@ public class InverseDynamicsCalculatorTest
       Robot robot = new Robot("robot");
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       LinkedHashMap<RevoluteJoint, PinJoint> jointMap = new LinkedHashMap<RevoluteJoint, PinJoint>();
-      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new Transform3D());
+      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new Transform3d());
       RigidBody elevator = new RigidBody("elevator", elevatorFrame);
       double gravity = 0.0;
 
@@ -157,7 +157,7 @@ public class InverseDynamicsCalculatorTest
       Robot robot = new Robot("robot");
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       LinkedHashMap<RevoluteJoint, PinJoint> jointMap = new LinkedHashMap<RevoluteJoint, PinJoint>();
-      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new Transform3D());
+      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new Transform3d());
       RigidBody elevator = new RigidBody("elevator", elevatorFrame);
       double gravity = -9.8;
 
@@ -185,7 +185,7 @@ public class InverseDynamicsCalculatorTest
       LinkedHashMap<RevoluteJoint, Double> tau_gravity = new LinkedHashMap<RevoluteJoint, Double>();
       LinkedHashMap<RevoluteJoint, Double> tau_cc = new LinkedHashMap<RevoluteJoint, Double>();
       LinkedHashMap<RevoluteJoint, Double> tau_qdd = new LinkedHashMap<RevoluteJoint, Double>();
-      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new Transform3D());
+      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new Transform3d());
       RigidBody elevator = new RigidBody("elevator", elevatorFrame);
       double gravity = -9.8;
 
@@ -225,7 +225,7 @@ public class InverseDynamicsCalculatorTest
       Robot robot = new Robot("robot");
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       LinkedHashMap<RevoluteJoint, PinJoint> jointMap = new LinkedHashMap<RevoluteJoint, PinJoint>();
-      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new Transform3D());
+      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new Transform3d());
       RigidBody elevator = new RigidBody("elevator", elevatorFrame);
       double gravity = -9.8;
 
@@ -254,7 +254,7 @@ public class InverseDynamicsCalculatorTest
       Robot robot = new Robot("robot");
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       LinkedHashMap<RevoluteJoint, PinJoint> jointMap = new LinkedHashMap<RevoluteJoint, PinJoint>();
-      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new Transform3D());
+      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new Transform3d());
       RigidBody elevator = new RigidBody("elevator", elevatorFrame);
       Vector3d[] jointAxes = {X, Y, Z, X};
       double gravity = -9.8;
@@ -272,7 +272,7 @@ public class InverseDynamicsCalculatorTest
       Robot robot = new Robot("robot");
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       LinkedHashMap<RevoluteJoint, PinJoint> jointMap = new LinkedHashMap<RevoluteJoint, PinJoint>();
-      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new Transform3D());
+      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new Transform3d());
       RigidBody elevator = new RigidBody("elevator", elevatorFrame);
       Vector3d[] jointAxes = {X, Y, Z, X};
       
@@ -589,7 +589,7 @@ public class InverseDynamicsCalculatorTest
    private static ReferenceFrame createOffsetFrame(InverseDynamicsJoint currentInverseDynamicsJoint, Vector3d offset, String frameName)
    {
       ReferenceFrame parentFrame = currentInverseDynamicsJoint.getFrameAfterJoint();
-      Transform3D transformToParent = new Transform3D();
+      Transform3d transformToParent = new Transform3d();
       transformToParent.set(offset);
       ReferenceFrame beforeJointFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent);
 

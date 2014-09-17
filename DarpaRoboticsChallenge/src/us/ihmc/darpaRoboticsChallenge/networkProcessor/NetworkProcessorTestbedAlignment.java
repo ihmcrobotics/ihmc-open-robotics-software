@@ -11,7 +11,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
@@ -129,7 +129,7 @@ public class NetworkProcessorTestbedAlignment implements Runnable
                if( first ) {
                   first = false;
                   Vector3d T = new Vector3d();
-                  Transform3D tran = polarLidarScan.getAverageTransform();
+                  Transform3d tran = polarLidarScan.getAverageTransform();
                   tran.get(T);
                   testbedLocation.set(T.x,T.y,T.z);
                }

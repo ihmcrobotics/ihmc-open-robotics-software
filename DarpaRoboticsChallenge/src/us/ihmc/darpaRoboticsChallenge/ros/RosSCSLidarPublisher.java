@@ -1,6 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.ros;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.AxisAngle4d;
 
 import org.ros.message.Time;
@@ -71,7 +71,7 @@ public class RosSCSLidarPublisher implements ObjectConsumer<LidarScan>
    
    private void publishLidarScanFrame(int sensorId, long timestamp)
    {
-      Transform3D spindleRotationTransform = getTransformFromJointAngle(sensorId, timestamp);
+      Transform3d spindleRotationTransform = getTransformFromJointAngle(sensorId, timestamp);
       if (spindleRotationTransform == null)
       {
          return;
@@ -82,20 +82,20 @@ public class RosSCSLidarPublisher implements ObjectConsumer<LidarScan>
       tfPublisher.publish(spindleRotationTransform, timestamp, sourceFrame, targetFrame);
    }
    
-   private Transform3D getTransformFromJointAngle(int sensorId, long timestamp)
+   private Transform3d getTransformFromJointAngle(int sensorId, long timestamp)
    {
       String sensorNameInSdf = lidarParameters[sensorId].getSensorNameInSdf();
       FrameVector spindleAxis = fullRobotModel.getLidarJointAxis(sensorNameInSdf);
-      Transform3D lidarBaseFrameTransform = fullRobotModel.getLidarBaseFrame(sensorNameInSdf).getTransformToParent();
+      Transform3d lidarBaseFrameTransform = fullRobotModel.getLidarBaseFrame(sensorNameInSdf).getTransformToParent();
       double angle = spindleAngleReceiver.interpolate(timestamp);
       if (angle == Double.NaN)
       {
          return null;
       }
       AxisAngle4d spindleRotation = new AxisAngle4d(spindleAxis.getVector(), angle);
-      Transform3D spindleRotationTransform = new Transform3D();
+      Transform3d spindleRotationTransform = new Transform3d();
       spindleRotationTransform.set(spindleRotation);
-      Transform3D transform = lidarBaseFrameTransform;
+      Transform3d transform = lidarBaseFrameTransform;
       transform.mul(spindleRotationTransform);
       return transform;
    }

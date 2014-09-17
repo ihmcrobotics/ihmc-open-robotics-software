@@ -5,7 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -192,7 +192,7 @@ public class CenterOfPressureResolverTest
       PoseReferenceFrame planeFrame = new PoseReferenceFrame(name, ReferenceFrame.getWorldFrame());
       Matrix3d rotationFromNormal = computeRotationFromNormal(planeSurfaceNormal);
       
-      Transform3D transform3D = new Transform3D(rotationFromNormal, new Vector3d(planeReferencePoint), 1.0);
+      Transform3d transform3D = new Transform3d(rotationFromNormal, new Vector3d(planeReferencePoint), 1.0);
       FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame(), transform3D);
       
       planeFrame.setPoseAndUpdate(framePose);
@@ -204,7 +204,7 @@ public class CenterOfPressureResolverTest
    private static PoseReferenceFrame createTranslatedZUpFrame(String name, Point3d frameCenterPoint)
    {
       PoseReferenceFrame translatedZUpFrame = new PoseReferenceFrame(name, ReferenceFrame.getWorldFrame());
-      Transform3D transform3D = new Transform3D();
+      Transform3d transform3D = new Transform3d();
       transform3D.setTranslation(new Vector3d(frameCenterPoint));
       
       FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame(), transform3D);

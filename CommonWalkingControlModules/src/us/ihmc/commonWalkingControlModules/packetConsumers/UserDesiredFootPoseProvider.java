@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.packetConsumers;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
@@ -67,7 +67,7 @@ public class UserDesiredFootPoseProvider implements FootPoseProvider
       ReferenceFrame footFrame = fullRobotModel.getEndEffectorFrame(robotSide, LimbName.LEG);
       Vector3d position = new Vector3d(userFootPoseX.getDoubleValue(), userFootPoseY.getDoubleValue(), userFootPoseZ.getDoubleValue());
       
-      Transform3D transform = new Transform3D();
+      Transform3d transform = new Transform3d();
       transform.setTranslation(position);
       
       

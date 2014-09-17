@@ -1,8 +1,8 @@
 package us.ihmc.utilities.ros;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 
 public interface RosTfPublisherInterface
 {
-   public void publish(Transform3D transform3d, long timeStamp, String parentFrame, String childFrame);
+   public void publish(Transform3d transform3d, long timeStamp, String parentFrame, String childFrame);
 }

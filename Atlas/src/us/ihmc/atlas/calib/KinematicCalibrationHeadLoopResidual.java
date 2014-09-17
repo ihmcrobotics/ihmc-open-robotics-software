@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
@@ -117,10 +117,10 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
       for (int i = 0; i < calJointNames.size(); i++)
          qoffset.put(calJointNames.get(i), input[inputCounter++]);
 
-      Transform3D targetToEE = computeTargetToEE(input, inputCounter,isLeft);
+      Transform3d targetToEE = computeTargetToEE(input, inputCounter,isLeft);
 
       ReferenceFrame cameraFrame = fullRobotModel.getCameraFrame("stereo_camera_left");
-      Transform3D imageToCamera = new Transform3D(new double[]{0, 0, 1, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 1});
+      Transform3d imageToCamera = new Transform3d(new double[]{0, 0, 1, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 1});
       ReferenceFrame cameraImageFrame = ReferenceFrame.
             constructBodyFrameWithUnchangingTransformToParent("cameraImage", cameraFrame, imageToCamera);
 
@@ -133,7 +133,7 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
 
          List<Point2D_F64> observations = (List) qdata.get(i).get(AtlasHeadLoopKinematicCalibrator.CHESSBOARD_DETECTIONS_KEY);
 
-         Transform3D targetToCamera = computeKinematicsTargetToCamera(cameraImageFrame, targetToEE);
+         Transform3d targetToCamera = computeKinematicsTargetToCamera(cameraImageFrame, targetToEE);
 
          computeError(observations, targetToCamera, output, offset);
 
@@ -141,7 +141,7 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
       }
    }
 
-   public static Transform3D computeTargetToEE(double param[], int offset, boolean isLeft)
+   public static Transform3d computeTargetToEE(double param[], int offset, boolean isLeft)
    {
       // Apply rotation around Y to the nominal rotation
       Vector3d tran = new Vector3d();
@@ -155,14 +155,14 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
       Matrix3d targetRotation = isLeft ? TARGET_LEFT_ROT : TARGET_RIGHT_ROT;
       rotFull.mul(matAxisY, targetRotation);
 
-      Transform3D targetToEE = new Transform3D();
+      Transform3d targetToEE = new Transform3d();
       targetToEE.setTranslation(tran);
       targetToEE.setRotation(rotFull);
 
       return targetToEE;
    }
 
-   private Transform3D computeKinematicsTargetToCamera(ReferenceFrame cameraImageFrame, Transform3D targetToEE)
+   private Transform3d computeKinematicsTargetToCamera(ReferenceFrame cameraImageFrame, Transform3d targetToEE)
    {
 
       ReferenceFrame activeArmEEFrame = fullRobotModel.getEndEffectorFrame(activeSide, LimbName.ARM);
@@ -170,7 +170,7 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
       return boardFrame.getTransformToDesiredFrame(cameraImageFrame);
    }
 
-   private void computeError(List<Point2D_F64> observations, Transform3D targetToCamera, double[] output, int offset)
+   private void computeError(List<Point2D_F64> observations, Transform3d targetToCamera, double[] output, int offset)
    {
 
       // Points in chessboard frame

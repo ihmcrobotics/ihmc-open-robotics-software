@@ -5,7 +5,7 @@ import static us.ihmc.atlas.ros.AtlasOrderedJointMap.back_bkz;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.jointNames;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.neck_ry;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
@@ -25,7 +25,7 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 public class AtlasWalkingControllerParameters implements WalkingControllerParameters
 {   
    private final boolean runningOnRealRobot;
-   private final SideDependentList<Transform3D> handPosesWithRespectToChestFrame = new SideDependentList<Transform3D>();
+   private final SideDependentList<Transform3d> handPosesWithRespectToChestFrame = new SideDependentList<Transform3d>();
 
    // Limits
    private final double neck_pitch_upper_limit = 1.14494; //0.83;    // true limit is = 1.134460, but pitching down more just looks at more robot chest
@@ -48,7 +48,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       
       for (RobotSide robotSide : RobotSide.values)
       {
-         Transform3D transform = new Transform3D();
+         Transform3d transform = new Transform3d();
 
          double x = 0.20;
          double y = robotSide.negateIfRightSide(0.35); //0.30);
@@ -633,7 +633,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    }
    
    @Override
-   public SideDependentList<Transform3D> getDesiredHandPosesWithRespectToChestFrame()
+   public SideDependentList<Transform3d> getDesiredHandPosesWithRespectToChestFrame()
    {
       return handPosesWithRespectToChestFrame;
    }

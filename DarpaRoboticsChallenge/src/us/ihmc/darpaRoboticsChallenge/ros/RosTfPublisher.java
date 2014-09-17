@@ -1,6 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.ros;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosTf1Publisher;
@@ -26,7 +26,7 @@ public class RosTfPublisher implements RosTfPublisherInterface
    }
 
    @Override
-   public void publish(Transform3D transform3d, long timeStamp,
+   public void publish(Transform3d transform3d, long timeStamp,
          String parentFrame, String childFrame)
    {
       tfPublisher.publish(transform3d, timeStamp, parentFrame, childFrame);

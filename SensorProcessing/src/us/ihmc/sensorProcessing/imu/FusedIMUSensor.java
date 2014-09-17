@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.imu;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
@@ -58,9 +58,9 @@ public class FusedIMUSensor implements IMUSensorReadOnly
    private final Matrix3d rotationFromIMUToWorld = new Matrix3d();
    private final Matrix3d rotationFromFusedIMUToWorld = new Matrix3d();
 
-   private final Transform3D transformFromIMUToWorld = new Transform3D();
-   private final Transform3D transformFromFusedIMUToIMU = new Transform3D();
-   private final Transform3D transformFromFusedIMUToWorld = new Transform3D();
+   private final Transform3d transformFromIMUToWorld = new Transform3d();
+   private final Transform3d transformFromFusedIMUToIMU = new Transform3d();
+   private final Transform3d transformFromFusedIMUToWorld = new Transform3d();
 
    private final FrameOrientation fusedFrameOrientation = new FrameOrientation();
    private final FrameOrientation firstFrameOrientation = new FrameOrientation();
@@ -157,8 +157,8 @@ public class FusedIMUSensor implements IMUSensorReadOnly
 
       firstMeasurementFrame.getParent().checkReferenceFrameMatch(secondMeasurementFrame.getParent());
 
-      Transform3D firstTransform = firstMeasurementFrame.getTransformToParent();
-      Transform3D secondTransform = secondMeasurementFrame.getTransformToParent();
+      Transform3d firstTransform = firstMeasurementFrame.getTransformToParent();
+      Transform3d secondTransform = secondMeasurementFrame.getTransformToParent();
 
       double[] firstYawPitchRoll = new double[3];
       RotationFunctions.getYawPitchRoll(firstYawPitchRoll, firstTransform);
@@ -184,7 +184,7 @@ public class FusedIMUSensor implements IMUSensorReadOnly
       Quat4d fusedQuaternion = new Quat4d();
       RotationFunctions.setQuaternionBasedOnYawPitchRoll(fusedQuaternion, fusedYawPitchRoll);
 
-      Transform3D fusedTransform = new Transform3D(fusedQuaternion, fusedOffset, 1.0);
+      Transform3d fusedTransform = new Transform3d(fusedQuaternion, fusedOffset, 1.0);
       ReferenceFrame fusedMeasurementFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(sensorName + "Frame",
             firstMeasurementFrame.getParent(), fusedTransform);
 

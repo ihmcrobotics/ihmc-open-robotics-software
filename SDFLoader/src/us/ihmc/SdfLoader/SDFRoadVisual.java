@@ -1,6 +1,6 @@
 package us.ihmc.SdfLoader;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
@@ -55,7 +55,7 @@ public class SDFRoadVisual extends Graphics3DObject
             Vector2d nextSide2d = new Vector2d(nextSide.x, nextSide.y);
             double angle = GeometryTools.getAngleFromFirstToSecondVector(toSide2d, nextSide2d);
             
-            Transform3D rotZ = new Transform3D();
+            Transform3d rotZ = new Transform3d();
             rotZ.rotZ(angle/2.0);
             
             rotZ.transform(toSide);

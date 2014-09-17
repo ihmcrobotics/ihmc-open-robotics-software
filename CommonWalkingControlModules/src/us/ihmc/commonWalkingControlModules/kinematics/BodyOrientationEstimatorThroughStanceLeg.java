@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.kinematics;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Matrix3d;
 
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonWalkingReferenceFrames;
@@ -39,10 +39,10 @@ public class BodyOrientationEstimatorThroughStanceLeg implements SensorProcessor
    private final double[] tempYawPitchRoll = new double[3];
    public void estimateBodyOrientation()
    {
-      Transform3D footToBody = referenceFrames.getIMUFrame().getTransformToDesiredFrame(referenceFrames.getFootFrame(robotSide));
+      Transform3d footToBody = referenceFrames.getIMUFrame().getTransformToDesiredFrame(referenceFrames.getFootFrame(robotSide));
       RotationFunctions.getYawPitchRoll(tempYawPitchRoll, footToBody);
       
-      Transform3D bodyToWorld = referenceFrames.getIMUFrame().getTransformToDesiredFrame(worldFrame);
+      Transform3d bodyToWorld = referenceFrames.getIMUFrame().getTransformToDesiredFrame(worldFrame);
       Matrix3d bodyToWorldRotation = new Matrix3d();
       bodyToWorld.get(bodyToWorldRotation);
       double bodyYaw = RotationFunctions.getYaw(bodyToWorldRotation);

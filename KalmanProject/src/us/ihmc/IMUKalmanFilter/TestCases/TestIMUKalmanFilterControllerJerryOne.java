@@ -2,7 +2,7 @@ package us.ihmc.IMUKalmanFilter.TestCases;
 
 import java.util.Random;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.IMUKalmanFilter.QuaternionBasedFullIMUKalmanFilter;
@@ -547,8 +547,8 @@ public class TestIMUKalmanFilterControllerJerryOne implements RobotController
    public void computeAccelerationsFromRobot()
    {
       // Get the transformation matrices from world coordinates to body coordinate systems:
-      Transform3D transformFromWorldToBody = new Transform3D();
-      Transform3D transformFromBodyToWorld = new Transform3D();
+      Transform3d transformFromWorldToBody = new Transform3d();
+      Transform3d transformFromBodyToWorld = new Transform3d();
 
       robot.getTransformFromWorld(transformFromBodyToWorld);
       transformFromWorldToBody.set(transformFromBodyToWorld);

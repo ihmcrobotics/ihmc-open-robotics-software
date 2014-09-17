@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
@@ -38,7 +38,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
    {
       this.robot = robot;
             
-      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", ReferenceFrame.getWorldFrame(), new Transform3D());
+      ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", ReferenceFrame.getWorldFrame(), new Transform3d());
       elevator = new RigidBody("elevator", elevatorFrame);
 
       ConcurrentLinkedQueue<Joint> jointQueue = new ConcurrentLinkedQueue<Joint>();
@@ -147,7 +147,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
    private final FrameVector originAcceleration = new FrameVector();
    private final FrameVector angularAcceleration = new FrameVector();
    
-   private final Transform3D positionAndRotation = new Transform3D();
+   private final Transform3d positionAndRotation = new Transform3d();
 
    public void updateInverseDynamicsRobotModelFromRobot(boolean updateRootJoints, boolean updateDesireds)
    {

@@ -1,6 +1,6 @@
 package us.ihmc.SdfLoader;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
@@ -40,9 +40,9 @@ public class SDFConversionsHelper
    
    }
 
-   public static Transform3D poseToTransform(String pose)
+   public static Transform3d poseToTransform(String pose)
    {
-      Transform3D ret = new Transform3D();
+      Transform3d ret = new Transform3d();
       if(pose == null)
       {
          return ret;
@@ -50,14 +50,14 @@ public class SDFConversionsHelper
       pose = pose.trim();
       String[] data = pose.split("\\s+");
       
-      Transform3D translation = new Transform3D();
+      Transform3d translation = new Transform3d();
       Vector3d translationVector = new Vector3d();
       translationVector.setX(Double.parseDouble(data[0]));
       translationVector.setY(Double.parseDouble(data[1]));
       translationVector.setZ(Double.parseDouble(data[2]));
       translation.set(translationVector);
    
-      Transform3D rotation = new Transform3D();
+      Transform3d rotation = new Transform3d();
       Vector3d eulerAngels = new Vector3d();
       eulerAngels.setX(Double.parseDouble(data[3]));
       eulerAngels.setY(Double.parseDouble(data[4]));

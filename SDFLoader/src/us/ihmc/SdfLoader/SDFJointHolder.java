@@ -3,7 +3,7 @@ package us.ihmc.SdfLoader;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
@@ -24,7 +24,7 @@ public class SDFJointHolder
    private final double velocityLimit;
    
    
-   private final Transform3D transformFromChildLink;
+   private final Transform3d transformFromChildLink;
    private double damping = 0.0;
    private double friction = 0.0;
    
@@ -36,7 +36,7 @@ public class SDFJointHolder
    private SDFLinkHolder child;
 
    //Calculated 
-   private Transform3D transformToParentJoint = null;
+   private Transform3d transformToParentJoint = null;
    private final Matrix3d linkRotation = new Matrix3d();
    private final Vector3d offsetFromParentJoint = new Vector3d();
    private final Vector3d axisInParentFrame = new Vector3d();
@@ -161,11 +161,11 @@ public class SDFJointHolder
    {
 
 
-      Transform3D modelToParentLink = getParent().getTransformFromModelReferenceFrame();
-      Transform3D modelToChildLink = getChild().getTransformFromModelReferenceFrame();
+      Transform3d modelToParentLink = getParent().getTransformFromModelReferenceFrame();
+      Transform3d modelToChildLink = getChild().getTransformFromModelReferenceFrame();
 
-      Transform3D rotationTransform = new Transform3D();
-      Transform3D parentLinkToParentJoint;
+      Transform3d rotationTransform = new Transform3d();
+      Transform3d parentLinkToParentJoint;
       
       SDFJointHolder parentJoint = parent.getJoint();
       if (parentJoint != null)
@@ -175,11 +175,11 @@ public class SDFJointHolder
       }
       else
       {
-         parentLinkToParentJoint = new Transform3D();
+         parentLinkToParentJoint = new Transform3d();
       }
 
-      Transform3D modelToParentJoint = new Transform3D();
-      Transform3D modelToChildJoint = new Transform3D();
+      Transform3d modelToParentJoint = new Transform3d();
+      Transform3d modelToChildJoint = new Transform3d();
 
       modelToParentJoint.mul(modelToParentLink, parentLinkToParentJoint);
       
@@ -187,10 +187,10 @@ public class SDFJointHolder
       
       modelToChildJoint.mul(modelToChildLink, transformFromChildLink);
 
-      Transform3D parentJointToModel = new Transform3D();
+      Transform3d parentJointToModel = new Transform3d();
       parentJointToModel.invert(modelToParentJoint);
 
-      Transform3D parentJointToChildJoint = new Transform3D();
+      Transform3d parentJointToChildJoint = new Transform3d();
       parentJointToChildJoint.mul(parentJointToModel, modelToChildJoint);
 
       transformToParentJoint = parentJointToChildJoint;
@@ -200,7 +200,7 @@ public class SDFJointHolder
       
       linkRotation.transform(axisInModelFrame, axisInParentFrame);
       
-      Transform3D transformFromParentJoint = new Transform3D(modelToChildJoint);
+      Transform3d transformFromParentJoint = new Transform3d(modelToChildJoint);
       transformFromParentJoint.transform(axisInParentFrame, axisInJointFrame);
       
    }
@@ -235,7 +235,7 @@ public class SDFJointHolder
       return hasLimits;
    }
 
-   public Transform3D getTransformFromChildLink()
+   public Transform3d getTransformFromChildLink()
    {
       return transformFromChildLink;
    }
@@ -250,7 +250,7 @@ public class SDFJointHolder
       return child;
    }
 
-   public Transform3D getTransformToParentJoint()
+   public Transform3d getTransformToParentJoint()
    {
       return transformToParentJoint;
    }

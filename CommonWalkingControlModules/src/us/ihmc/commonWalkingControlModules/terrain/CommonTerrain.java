@@ -4,7 +4,7 @@ import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.vecmath.Point2d;
@@ -430,7 +430,7 @@ public class CommonTerrain
          }
 
          case MOON :
-            groundProfile = new GroundProfileFromFile("GroundModels" + File.separator + "moonNew.asc", new Transform3D());
+            groundProfile = new GroundProfileFromFile("GroundModels" + File.separator + "moonNew.asc", new Transform3d());
 
             break;
 
@@ -444,7 +444,7 @@ public class CommonTerrain
 
                // This is where a real application would open the file.
                System.out.println("Opening: " + file.getName());
-               groundProfile = new GroundProfileFromFile(file.getAbsolutePath(), new Transform3D());
+               groundProfile = new GroundProfileFromFile(file.getAbsolutePath(), new Transform3d());
             }
             else
             {

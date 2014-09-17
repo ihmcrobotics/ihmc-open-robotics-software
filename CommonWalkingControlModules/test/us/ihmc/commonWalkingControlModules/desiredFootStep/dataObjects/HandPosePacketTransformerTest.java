@@ -5,7 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -35,7 +35,7 @@ public class HandPosePacketTransformerTest
    {
       int numberOfTests = 10;
       Random random = new Random(100L);
-      Transform3D transform3D;
+      Transform3d transform3D;
       HandPosePacket.Frame frame;
       RobotSide robotSide;
       HandPosePacket.DataType dataType;
@@ -76,7 +76,7 @@ public class HandPosePacketTransformerTest
       }
    }
 
-   private static void performEqualsTest(HandPosePacket starting, Transform3D transform3D, HandPosePacket ending)
+   private static void performEqualsTest(HandPosePacket starting, Transform3d transform3D, HandPosePacket ending)
    {
       // RobotSide robotSide;
       assertTrue(starting.getRobotSide().equals(ending.getRobotSide()));
@@ -103,7 +103,7 @@ public class HandPosePacketTransformerTest
       }
    }
 
-   private static double getDistanceBetweenPoints(Point3d startingPoint, Transform3D transform3D, Point3d endPoint)
+   private static double getDistanceBetweenPoints(Point3d startingPoint, Transform3d transform3D, Point3d endPoint)
    {
       ReferenceFrame ending = ReferenceFrame.constructARootFrame("ending", false, true, true);
       ReferenceFrame starting = ReferenceFrame.constructFrameWithUnchangingTransformToParent("starting", ending, transform3D, false, true, true);
@@ -116,7 +116,7 @@ public class HandPosePacketTransformerTest
       return end.distance(start);
    }
 
-   private static boolean areOrientationsEqualWithTransform(Quat4d orientationStart, Transform3D transform3D, Quat4d orientationEnd)
+   private static boolean areOrientationsEqualWithTransform(Quat4d orientationStart, Transform3d transform3D, Quat4d orientationEnd)
    {
       ReferenceFrame ending = ReferenceFrame.constructARootFrame("ending", false, true, true);
       ReferenceFrame starting = ReferenceFrame.constructFrameWithUnchangingTransformToParent("starting", ending, transform3D, false, true, true);

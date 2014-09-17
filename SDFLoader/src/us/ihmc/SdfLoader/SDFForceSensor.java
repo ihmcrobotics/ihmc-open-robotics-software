@@ -1,23 +1,23 @@
 package us.ihmc.SdfLoader;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 
 public class SDFForceSensor
 {
    private final String name;
-   private final Transform3D transform;
+   private final Transform3d transform;
 
    public String getName()
    {
       return name;
    }
 
-   public Transform3D getTransform()
+   public Transform3d getTransform()
    {
       return transform;
    }
 
-   public SDFForceSensor(String name, Transform3D transform)
+   public SDFForceSensor(String name, Transform3d transform)
    {
       this.name = name;
       this.transform = transform;

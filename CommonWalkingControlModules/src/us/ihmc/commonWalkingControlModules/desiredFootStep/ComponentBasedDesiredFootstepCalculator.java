@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import java.util.List;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
@@ -172,7 +172,7 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
 
    private Matrix3d computeDesiredFootRotationMatchSupportFootPlane(ReferenceFrame desiredHeadingFrame, ReferenceFrame supportFootFrame)
    {
-      Transform3D supportFootToWorldTransform = supportFootFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
+      Transform3d supportFootToWorldTransform = supportFootFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
       Matrix3d supportFootToWorldRotation = new Matrix3d();
       supportFootToWorldTransform.get(supportFootToWorldRotation);
 
@@ -181,7 +181,7 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
 
    private Matrix3d computeDesiredFootRotationJustMatchSupportFootYaw(ReferenceFrame desiredHeadingFrame)
    {
-      Transform3D footToSupportTransform = desiredHeadingFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
+      Transform3d footToSupportTransform = desiredHeadingFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
       Matrix3d footToSupportRotation = new Matrix3d();
       footToSupportTransform.get(footToSupportRotation);
       double yaw = RotationFunctions.getYaw(footToSupportRotation);

@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.camera;
 import java.awt.image.BufferedImage;
 import java.net.URI;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
@@ -61,13 +61,13 @@ public class RosCameraReceiver extends CameraDataReceiver
                logger.log(image, timeStamp);
             }
             
-            Transform3D worldToCameraTransform = getCameraPose(robotPoseBuffer, timeStamp, cameraParameters.getSensorId());
+            Transform3d worldToCameraTransform = getCameraPose(robotPoseBuffer, timeStamp, cameraParameters.getSensorId());
 
             if(worldToCameraTransform != null)
             {
                if (cameraParameters.useRosForTransformFromPoseToSensor())
                {
-                  Transform3D rosTransformFromHeadBaseToCamera = getFrameToCameraTransform(timeStamp);
+                  Transform3d rosTransformFromHeadBaseToCamera = getFrameToCameraTransform(timeStamp);
                   if (rosTransformFromHeadBaseToCamera == null)
                   {
                      return;
@@ -82,7 +82,7 @@ public class RosCameraReceiver extends CameraDataReceiver
       rosMainNode.attachSubscriber(cameraParameters.getRosTopic(), imageSubscriberSubscriber);
    }
 
-   private Transform3D getCameraPose(RobotPoseBuffer robotPoseBuffer, long timeStamp, int sensorId)
+   private Transform3d getCameraPose(RobotPoseBuffer robotPoseBuffer, long timeStamp, int sensorId)
    {
       RobotPoseData robotPoseData = robotPoseBuffer.floorEntry(ppsTimestampOffsetProvider.adjustTimeStampToRobotClock(timeStamp));
       if (robotPoseData != null)
@@ -92,7 +92,7 @@ public class RosCameraReceiver extends CameraDataReceiver
       return null;
    }
 
-   private Transform3D getFrameToCameraTransform(long rosTimestamp)
+   private Transform3d getFrameToCameraTransform(long rosTimestamp)
    {
       if (ppsTimestampOffsetProvider.offsetIsDetermined())
       {
@@ -112,7 +112,7 @@ public class RosCameraReceiver extends CameraDataReceiver
       this.robotPosePublisher = robotPosePublisher.createPosePublisher("cameraSensorPoses/multiSenseCamera" + cameraParameters.getSensorId());
    }
    
-   protected void publishCameraWorldPoseForDebugging(Transform3D transform, long timeStamp)
+   protected void publishCameraWorldPoseForDebugging(Transform3d transform, long timeStamp)
    {
       if(robotPosePublisher != null)
       {

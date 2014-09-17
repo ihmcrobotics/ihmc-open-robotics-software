@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
@@ -52,11 +52,11 @@ public class KinematicCalibrationHeadLoopResidualTest
    DRCRobotJointMap jointMap = robotModel.getJointMap();
    SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
 
-   Transform3D imageToCamera = new Transform3D(new double[]{0, 0, 1, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 1});
+   Transform3d imageToCamera = new Transform3d(new double[]{0, 0, 1, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 1});
 
    ReferenceFrame cameraFrame = fullRobotModel.getCameraFrame("stereo_camera_left");
 
-   Transform3D targetToEE;
+   Transform3d targetToEE;
 
    ReferenceFrame cameraImageFrame = ReferenceFrame.
          constructBodyFrameWithUnchangingTransformToParent("cameraImage", cameraFrame, imageToCamera);
@@ -78,7 +78,7 @@ public class KinematicCalibrationHeadLoopResidualTest
       Matrix3d rotFull = new Matrix3d();
       rotFull.mul(matAxisY, KinematicCalibrationHeadLoopResidual.TARGET_LEFT_ROT);
 
-      targetToEE = new Transform3D();
+      targetToEE = new Transform3d();
       targetToEE.setTranslation(tran);
       targetToEE.setRotation(rotFull);
    }
@@ -246,7 +246,7 @@ public class KinematicCalibrationHeadLoopResidualTest
 
          CalibUtil.setRobotModelFromData(fullRobotModel, qactual);
 
-         Transform3D targetToCamera = computeKinematicsTargetToCamera(fullRobotModel, cameraImageFrame, targetToEE);
+         Transform3d targetToCamera = computeKinematicsTargetToCamera(fullRobotModel, cameraImageFrame, targetToEE);
          List<Point2D_F64> observations = generatePerfectObservations(targetToCamera);
 
          qdata.put(AtlasHeadLoopKinematicCalibrator.CHESSBOARD_DETECTIONS_KEY, observations);
@@ -256,7 +256,7 @@ public class KinematicCalibrationHeadLoopResidualTest
       }
    }
 
-   private Transform3D computeKinematicsTargetToCamera(SDFFullRobotModel fullRobotModel, ReferenceFrame cameraImageFrame, Transform3D targetToEE)
+   private Transform3d computeKinematicsTargetToCamera(SDFFullRobotModel fullRobotModel, ReferenceFrame cameraImageFrame, Transform3d targetToEE)
    {
 
       ReferenceFrame leftEEFrame = fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM);
@@ -264,7 +264,7 @@ public class KinematicCalibrationHeadLoopResidualTest
       return boardFrame.getTransformToDesiredFrame(cameraImageFrame);
    }
 
-   private List<Point2D_F64> generatePerfectObservations(Transform3D targetToCamera)
+   private List<Point2D_F64> generatePerfectObservations(Transform3d targetToCamera)
    {
 
       List<Point2D_F64> observations = new ArrayList<>();

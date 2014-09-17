@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.media.j3d.Transform3D;
+import us.ihmc.utilities.math.geometry.Transform3d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packets.sensing.DepthDataClearCommand;
@@ -121,7 +121,7 @@ public class PointCloudDataReceiver implements RobotPoseBufferListener, NetState
       while (isNewScanAvailable())
       {
          PointCloudPacket pointCloud = pendingScans.poll();
-         Transform3D transformToWorld = getPointCloudTransform(pointCloud.getTimeStamp());
+         Transform3d transformToWorld = getPointCloudTransform(pointCloud.getTimeStamp());
          if (transformToWorld == null)
          {
             System.out.println("PointCloudDataReceiver: Transform to world start was null");
@@ -142,7 +142,7 @@ public class PointCloudDataReceiver implements RobotPoseBufferListener, NetState
       }
    }
 
-   private Transform3D getPointCloudTransform(long timeStamp)
+   private Transform3d getPointCloudTransform(long timeStamp)
    {
       RobotPoseData robotPoseData = robotPoseBuffer.interpolate(timeStamp);
       if (robotPoseData == null)
@@ -151,7 +151,7 @@ public class PointCloudDataReceiver implements RobotPoseBufferListener, NetState
          return null;
       }
 
-      Transform3D transform = new Transform3D(robotPoseData.getLidarPoses()[0]);
+      Transform3d transform = new Transform3d(robotPoseData.getLidarPoses()[0]);
 
       return transform;
    }
