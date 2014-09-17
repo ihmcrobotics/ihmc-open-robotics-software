@@ -926,6 +926,11 @@ public class MomentumBasedController
    {
       return yoPlaneContactStateList;
    }
+   
+   public List<ContactablePlaneBody> getContactablePlaneBodyList()
+   {
+      return contactablePlaneBodyList;
+   }
 
    public void clearContacts()
    {

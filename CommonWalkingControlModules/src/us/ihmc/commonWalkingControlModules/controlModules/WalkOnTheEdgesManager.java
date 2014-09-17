@@ -429,6 +429,11 @@ public class WalkOnTheEdgesManager
    {
       return doToeOffIfPossible.getBooleanValue();
    }
+   
+   public void setDoToeOffIfPossible(boolean value)
+   {
+      doToeOffIfPossible.set(value);
+   }
 
    public double getExtraCoMMaxHeightWithToes()
    {
