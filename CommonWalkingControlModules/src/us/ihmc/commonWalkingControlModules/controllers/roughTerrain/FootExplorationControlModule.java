@@ -1,9 +1,11 @@
 package us.ihmc.commonWalkingControlModules.controllers.roughTerrain;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.vecmath.Point2d;
+import javax.vecmath.Vector2d;
 
 import org.ejml.data.DenseMatrix64F;
 
@@ -18,7 +20,6 @@ import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculationProv
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLine2d;
-import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
@@ -61,29 +62,34 @@ public class FootExplorationControlModule
    private static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    
    // control of CoM height
-   private static boolean lowerCoMDuringSwing = false;
-   private static boolean adjustCoMHeightBasedOnICP = false;
-   private static double maxCoMHeightOffset = 0.02;
+   private static boolean adjustCoMHeightBasedOnICP = true;
+   private static boolean lowerCoMDuringSwing = false && !adjustCoMHeightBasedOnICP;
+   private static double maxCoMHeightOffset = 0.00;
    private static double minCoMHeightOffset = -0.1;
    
    // exploration timing
    private static double icpShiftTime = 1.5;
    private static double copShiftTime = 2;
    private static double copTransitionRestingTime = 1; // must be less than copShiftTime/2
+   private static double swingTimeForExploration = 1.5;
    
-   // detection of unstable situations
+   // unstable situations
    private static double maxICPAbsError = 0.04;
-   private static double maxICPAbsErrorForSingleSupport = 0.015;
-   private static double minCoPDistanceFromBorder = 0.005;
+   private static double maxICPAbsErrorForSingleSupport = 0.02;
+   private static double minCoPDistanceFromBorder = 0.01;
+   private static double recoverContactPointsScaleFactor = 0.9;
+   private static double recoverTime = 2;
    
-   // detection of foot tilt
+   // parameter of tilt foot
    private static double zeroVelocity = 0.2;
    private static double alphaForJointVelocity = 0.96;
    private static int numberOfJointCheckedForZeroVelocity = 2;
+   private static double safetyScalingOfCoP = 0.85;
    
-   // definition of constant ICP positions
+   //  ICP positions parameters
    private static double firstInternalICPPercentage = 0.8;
    private static double secondInternalICPPercentage = 0.95;
+   private static double icpPercentageToConsiderTransferFinished = 0.99;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    
@@ -120,6 +126,10 @@ public class FootExplorationControlModule
    private final List<ContactablePlaneBody> contactablePlaneBodyList;
    private final FeetManager feetManager;
    private final BooleanYoVariable defaultDoToeOff;
+   private final DoubleYoVariable defaultSwingTime;
+   private final HashMap<PlaneContactState, Boolean> needToResetContactPoints;
+   private final HashMap<PlaneContactState, ArrayList<Point2d>> defaultContactPoints;
+   private final BooleanYoVariable isRecovering;
    
    private Footstep nextFootStep;
    private RobotSide footUderCoPControl;
@@ -131,14 +141,16 @@ public class FootExplorationControlModule
    private FramePoint2d startCoP;
    private FrameVector2d desiredICPVelocityLocal;
    private ArrayList<Double> constantICPPoints;
-   private PlaneContactState currentPlaneContactState;
+   private PlaneContactState currentPlaneContactStateToExplore;
+   private PlaneContactState currentPlaneContactInSupport;
+   private PlaneContactState planeContactStateToRescale;
    private FramePoint initialCoP;
    private FramePoint finalCoP;
    private ReferenceFrame CoPFrame;
    private FootExplorationCoPPlanner footExplorationCoPPlanner;
    private InverseDynamicsJoint jointX, jointY;
    private DenseMatrix64F jointVelocityMatrix;
-   private List<? extends ContactPoint> defaultContactPoints;
+   
    
    public FootExplorationControlModule(YoVariableRegistry parentRegistry, MomentumBasedController momentumBasedController, DoubleYoVariable yoTime, 
                                        LookAheadCoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator, SwingTimeCalculationProvider swingTimeCalculationProvider, FeetManager feetManager)
@@ -153,7 +165,7 @@ public class FootExplorationControlModule
       swingIsFinished = new BooleanYoVariable("swingIsFinished", registry);
       ICPPositionPercentage = new DoubleYoVariable("ICPPositionPercentage", registry);
       finalICPPositionPercentage = new DoubleYoVariable("finalICPPositionPercentage", registry);
-      icpIsCloseEnoughToDesired = new BooleanYoVariable("icpIsInsideNextFootStep", registry);
+      icpIsCloseEnoughToDesired = new BooleanYoVariable("icpIsCloseEnoughToDesired", registry);
       explorationICPErrorAbs = new DoubleYoVariable("explorationICPErrorAbs", registry);
       footExplorationICPPlanner = new FootExplorationICPPlanner("footExplorationICPPlanner", worldFrame, totalPercentageProvider, initialICPPositionProvider,
                                                                 finalICPPositionProvider, registry);
@@ -165,8 +177,10 @@ public class FootExplorationControlModule
       explorationIsInProgress =  new BooleanYoVariable("explorationIsInProgress", registry);
       numberOfPlaneContactStates = new IntegerYoVariable("numberOfPlaneContactStates", registry);
       defaultDoToeOff = new BooleanYoVariable("defaultDoToeOff", registry);
+      defaultSwingTime = new DoubleYoVariable("defaultSwingTime", registry);
       icpIndex = new IntegerYoVariable("icpIndex", registry);
       CoPPositionPercentage = new DoubleYoVariable("CoPPositionPercentage", registry);
+      isRecovering = new BooleanYoVariable("isRecovering", registry);
       String namePrefix = "feetExploration";
       stateMachine = new StateMachine<>(namePrefix + "State", namePrefix + "SwitchTime", FeetExplorationState.class, yoTime, registry);
       footExplorationCoPPlanner = new FootExplorationCoPPlanner("footExplorationCoPPlanner", worldFrame, totalPercentageProvider, initialCoPPositionProvider, finalCoPPositionProvider, registry);
@@ -174,6 +188,8 @@ public class FootExplorationControlModule
       jointIsMoving = new BooleanYoVariable("jointIsMoving", registry);
       currentContactPointNumber = new IntegerYoVariable("currentContactPointNumber", registry);
       comIncrement = new DoubleYoVariable("comIncrement", registry);
+      needToResetContactPoints = new HashMap<PlaneContactState, Boolean>();
+      defaultContactPoints = new HashMap<PlaneContactState, ArrayList<Point2d>>();
       this.yoTime = yoTime;
       this.feetManager = feetManager;
       this.momentumBasedController = momentumBasedController;
@@ -209,28 +225,33 @@ public class FootExplorationControlModule
       icpIsCloseEnoughToDesired.set(explorationICPErrorAbs.getDoubleValue() < maxICPAbsError);
       icpIsCloseEnoughForSingleSupport.set(explorationICPErrorAbs.getDoubleValue() < maxICPAbsErrorForSingleSupport);
       
-      if (ICPPositionPercentage.getDoubleValue()>0.99 && icpIsCloseEnoughForSingleSupport.getBooleanValue())
-         transferToNextFootStepIsDone.set(true);
-      
-      if (adjustCoMHeightBasedOnICP)
+      if (ICPPositionPercentage.getDoubleValue()>icpPercentageToConsiderTransferFinished && icpIsCloseEnoughForSingleSupport.getBooleanValue())
       {
-         if (icpIsCloseEnoughToDesired.getBooleanValue())
-         {
-            comIncrement.add(0.0005);
-            comIncrement.set(Math.min(maxCoMHeightOffset, comIncrement.getDoubleValue()));
-            centerOfMassHeightTrajectoryGenerator.setOffsetHeightAboveGround(comIncrement.getDoubleValue());
-         }
-         else
-         {
-            comIncrement.add(-0.0005);
-            comIncrement.set(Math.max(minCoMHeightOffset, comIncrement.getDoubleValue()));
-            centerOfMassHeightTrajectoryGenerator.setOffsetHeightAboveGround(comIncrement.getDoubleValue());
-         }
-      }
+         scaleContactPointLocation(currentPlaneContactStateToExplore, safetyScalingOfCoP);
+         planeContactStateToRescale = currentPlaneContactStateToExplore;
+         currentPlaneContactInSupport = currentPlaneContactStateToExplore;
+         transferToNextFootStepIsDone.set(true);         
+      } 
    }
    
    public void initialize(Footstep nextFootStep, FrameConvexPolygon2d supportFootPolygon, RobotSide footUderCoPControl)
    {
+      for(int i = 0; i < numberOfPlaneContactStates.getIntegerValue(); i++)
+      {
+         PlaneContactState planeContactState = planeContactStates.get(i);
+         RigidBody planeBody = planeContactState.getRigidBody();
+         RigidBody nextFootStepBody = nextFootStep.getBody().getRigidBody();
+         
+         if(planeBody.equals(nextFootStepBody))
+            currentPlaneContactStateToExplore = planeContactState;
+      }
+      
+      if(needToResetContactPoints.get(currentPlaneContactStateToExplore) != null && needToResetContactPoints.get(currentPlaneContactStateToExplore))
+      {
+         resetContactPoints(defaultContactPoints.get(currentPlaneContactStateToExplore), currentPlaneContactStateToExplore.getContactPoints());
+         needToResetContactPoints.put(currentPlaneContactStateToExplore, false);
+      }
+      
       if (performCoPExploration.getBooleanValue())
       {
          this.nextFootStep = nextFootStep;
@@ -247,31 +268,25 @@ public class FootExplorationControlModule
          ICPTrajectory.set(worldFrame, supportFootCentroid.getX(), supportFootCentroid.getY(), nextFootStepCentroid.getX(), nextFootStepCentroid.getY());
          computeConstantICPPoints();
          
-         for(int i = 0; i < numberOfPlaneContactStates.getIntegerValue(); i++)
-         {
-            PlaneContactState planeContactState = planeContactStates.get(i);
-            RigidBody planeBody = planeContactState.getRigidBody();
-            RigidBody nextFootStepBody = nextFootStep.getBody().getRigidBody();
-            
-            if(planeBody.equals(nextFootStepBody))
-               currentPlaneContactState = planeContactState;
-         }
-         
          CoPFrame = momentumBasedController.getContactableFeet().get(footUderCoPControl).getSoleFrame();
          startCoP = new FramePoint2d(CoPFrame, 0.0, 0.0);
 
-         jointX = currentPlaneContactState.getRigidBody().getParentJoint();
-         jointY = currentPlaneContactState.getRigidBody().getParentJoint().getPredecessor().getParentJoint();
+         jointX = currentPlaneContactStateToExplore.getRigidBody().getParentJoint();
+         jointY = currentPlaneContactStateToExplore.getRigidBody().getParentJoint().getPredecessor().getParentJoint();
          jointVelocityMatrix = new DenseMatrix64F(numberOfJointCheckedForZeroVelocity, 1);
          
          defaultDoToeOff.set(feetManager.getWalkOnTheEdgesManager().doToeOffIfPossible());
          feetManager.getWalkOnTheEdgesManager().setDoToeOffIfPossible(false);
          
-         defaultContactPoints = currentPlaneContactState.getContactPoints();
+         defaultContactPoints.put(currentPlaneContactStateToExplore, getCopyOfContactPointLocation(currentPlaneContactStateToExplore.getContactPoints()));
+         needToResetContactPoints.put(currentPlaneContactStateToExplore, true);
+         
+         defaultSwingTime.set(swingTimeCalculationProvider.getValue());
+         swingTimeCalculationProvider.setSwingTime(swingTimeForExploration);
          
          isControllingSwingFoot.set(true);
          footExplorationICPPlanner.initialize();
-         swingTimeCalculationProvider.setSwingTime(1.5);
+
          stateMachine.setCurrentState(FeetExplorationState.SWING);  
       }
    }
@@ -304,17 +319,20 @@ public class FootExplorationControlModule
       DoneWithSubExplorationCondition doneWithExplorationCondition = new DoneWithSubExplorationCondition();
       DoneWithICPShiftCondition doneWithICPShiftCondition = new DoneWithICPShiftCondition();
       UnsafeICPCondition unsafeICPCondition = new UnsafeICPCondition();
+      DoneWithRecoverCondition doneWithRecoverCondition = new DoneWithRecoverCondition(); 
       
       StateTransition<FeetExplorationState> toICPShiftFromSwing = new StateTransition<FeetExplorationState>(FeetExplorationState.ICP_SHIFT, doneWithSwingCondition);
       StateTransition<FeetExplorationState> toICPShiftFromSubExploration = new StateTransition<FeetExplorationState>(FeetExplorationState.ICP_SHIFT, doneWithExplorationCondition);
       StateTransition<FeetExplorationState> toExploration = new StateTransition<FeetExplorationState>(FeetExplorationState.EXPLORATION, doneWithICPShiftCondition);
       StateTransition<FeetExplorationState> toRecover = new StateTransition<FeetExplorationState>(FeetExplorationState.RECOVER, unsafeICPCondition);
+      StateTransition<FeetExplorationState> toExplorationFromRecover = new StateTransition<FeetExplorationState>(FeetExplorationState.EXPLORATION, doneWithRecoverCondition);
       
       performingSwingState.addStateTransition(toICPShiftFromSwing);
       explorationState.addStateTransition(toRecover);
       explorationState.addStateTransition(toICPShiftFromSubExploration);
       icpShiftingState.addStateTransition(toRecover);
       icpShiftingState.addStateTransition(toExploration);
+      recover.addStateTransition(toExplorationFromRecover);
       
       stateMachine.addState(performingSwingState);
       stateMachine.addState(explorationState);
@@ -334,7 +352,10 @@ public class FootExplorationControlModule
       @Override
       public void doAction()
       {
-               
+         if (adjustCoMHeightBasedOnICP)
+         {
+            lowerICPBasedOnBoolean(icpIsCloseEnoughForSingleSupport.getBooleanValue());
+         }    
       }
 
       @Override
@@ -350,6 +371,12 @@ public class FootExplorationControlModule
       {
          finalICPPositionPercentage.set(constantICPPoints.get(0));
          icpIndex.increment();
+         swingTimeCalculationProvider.setSwingTime(defaultSwingTime.getDoubleValue());
+         if (planeContactStateToRescale != null)
+         {
+            scaleContactPointLocation(planeContactStateToRescale, 1 / safetyScalingOfCoP);
+            planeContactStateToRescale = null;
+         }
       }
    }
 
@@ -373,13 +400,13 @@ public class FootExplorationControlModule
       {
          //TODO: first attempt to find a suitable sartCoP (maybe explore both areas and select the bigger)
          
-         if (currentContactPointNumber.getIntegerValue() < currentPlaneContactState.getTotalNumberOfContactPoints())
+         if (currentContactPointNumber.getIntegerValue() < currentPlaneContactStateToExplore.getTotalNumberOfContactPoints())
          {
             if(currentContactPointNumber.getIntegerValue() != lastContactPointNumber)
             {
                initialCoPTime = yoTime.getDoubleValue();
                lastContactPointNumber =  currentContactPointNumber.getIntegerValue();
-               contactPoint = currentPlaneContactState.getContactPoints().get(currentContactPointNumber.getIntegerValue());
+               contactPoint = currentPlaneContactStateToExplore.getContactPoints().get(currentContactPointNumber.getIntegerValue());
                FramePoint2d position = contactPoint.getPosition2d();
                slopeCoP = 1/copShiftTime;
                initialCoP = new FramePoint(CoPFrame, startCoP.getX(), startCoP.getY(), 0.0);
@@ -394,7 +421,11 @@ public class FootExplorationControlModule
             
             if((copTime - copTransitionRestingTime)*slopeCoP > 1.5)
                currentContactPointNumber.increment();
-            
+         }
+
+         if (adjustCoMHeightBasedOnICP)
+         {
+            lowerICPBasedOnBoolean(icpIsCloseEnoughToDesired.getBooleanValue());
          }
          
          explorationTime.set(yoTime.getDoubleValue() - initialExplorationTime.getDoubleValue());         
@@ -435,14 +466,17 @@ public class FootExplorationControlModule
 
          if(jointIsMoving.getBooleanValue() && time > copTransitionRestingTime)
          {
-            contactPoint.getPosition().set(positionToPack.getX(), positionToPack.getY(), 0.0);
-            contactPoint.getPosition2d().set(positionToPack.getX(), positionToPack.getY());
+            double x = positionToPack.getX();
+            double y = positionToPack.getY();
+            Vector2d vector = new Vector2d(x, y);
+            contactPoint.getPosition().set(vector.getX(), vector.getY(), 0.0);
+            contactPoint.getPosition2d().set(vector.getX(), vector.getY());
             updateNextFootstepCentroid();
             footExplorationICPPlanner.initialize();
             currentContactPointNumber.increment();
          }
          
-         if(!jointIsMoving.getBooleanValue())
+         if(!jointIsMoving.getBooleanValue() && time > copTransitionRestingTime)
          {
             skipContactPointIfMirroredCoPIsCloseToBorder();
          }
@@ -453,7 +487,7 @@ public class FootExplorationControlModule
          outerloop: for (int i = 0; i < numberOfPlaneContactStates.getIntegerValue(); i++)
          {
             ContactablePlaneBody contactablePlaneBody = contactablePlaneBodyList.get(i);
-            if (contactablePlaneBody.getRigidBody() != currentPlaneContactState.getRigidBody())
+            if (contactablePlaneBody.getRigidBody() != currentPlaneContactStateToExplore.getRigidBody())
             {
                for (int j = 0; j < numberOfPlaneContactStates.getIntegerValue(); j++)
                {
@@ -465,7 +499,7 @@ public class FootExplorationControlModule
                   {
                      List<? extends ContactPoint> points = planeContactState.getContactPoints();
                      FramePoint2d localCoP = momentumBasedController.getCoP(contactablePlaneBody);
-                     double minDistance = getClosesEdgeDistance(points, localCoP);
+                     double minDistance = getClosestEdgeDistance(points, localCoP);
 
                      if (Math.abs(minDistance) < minCoPDistanceFromBorder)
                      {
@@ -478,16 +512,10 @@ public class FootExplorationControlModule
          }
       }
       
-      private double getClosesEdgeDistance(List<? extends ContactPoint> points, FramePoint2d pointToCheck)
+      private double getClosestEdgeDistance(List<? extends ContactPoint> points, FramePoint2d pointToCheck)
       {
          double ret = Double.POSITIVE_INFINITY;
-         ArrayList<FramePoint2d> frameVertices = new ArrayList<FramePoint2d>();
-         for(int i = 0; i < points.size(); i++)
-         {
-            frameVertices.add(points.get(i).getPosition2d());
-         }
-         FrameConvexPolygon2d polygon = new FrameConvexPolygon2d(frameVertices);
-         polygon.update();
+         FrameConvexPolygon2d polygon = createAPolygonFromContactPoints(points);
 
          for (int i = 0; i < polygon.getNumberOfVertices(); i++)
          {
@@ -498,11 +526,6 @@ public class FootExplorationControlModule
          }
          
          return ret;
-      }
-      
-      private void resetContactPoints(List<? extends ContactPoint> defaultPoint, List<? extends ContactPoint> oldPoints)
-      {
-         
       }
       
       private boolean checkJointIsNotMoving()
@@ -521,9 +544,9 @@ public class FootExplorationControlModule
       private void updateNextFootstepCentroid()
       {
          ArrayList<FramePoint2d> points = new ArrayList<FramePoint2d>(); 
-         for(int i = 0; i < currentPlaneContactState.getTotalNumberOfContactPoints(); i++)
+         for(int i = 0; i < currentPlaneContactStateToExplore.getTotalNumberOfContactPoints(); i++)
          {
-            points.add(currentPlaneContactState.getContactPoints().get(i).getPosition2d());
+            points.add(currentPlaneContactStateToExplore.getContactPoints().get(i).getPosition2d());
          }
          
          FrameConvexPolygon2d newPolygon = new FrameConvexPolygon2d(points);
@@ -571,6 +594,22 @@ public class FootExplorationControlModule
                centerOfMassHeightTrajectoryGenerator.setOffsetHeightAboveGround(0.0);
             }
          }
+
+         if (adjustCoMHeightBasedOnICP)
+         {
+            boolean controlBoolean;
+            
+            if(finalICPPositionPercentage.getDoubleValue() == constantICPPoints.get(constantICPPoints.size()-1))
+            {
+               controlBoolean = icpIsCloseEnoughForSingleSupport.getBooleanValue();
+            }
+            else
+            {
+               controlBoolean = icpIsCloseEnoughToDesired.getBooleanValue();
+            }
+            
+            lowerICPBasedOnBoolean(controlBoolean);
+         }
       }
 
       @Override
@@ -590,6 +629,8 @@ public class FootExplorationControlModule
    
    private class RecoverState extends State<FeetExplorationState>
    {
+      private double initialTime;
+      private double time;
 
       public RecoverState()
       {
@@ -599,14 +640,22 @@ public class FootExplorationControlModule
       @Override
       public void doAction()
       {
+         time = yoTime.getDoubleValue() - initialTime;
          
+         if(time > recoverTime)
+         {
+            scaleContactPointLocation(currentPlaneContactInSupport, recoverContactPointsScaleFactor);
+            isRecovering.set(false);
+         }
       }
 
       @Override
       public void doTransitionIntoAction()
       {
-         ICPPositionPercentage.set(0.0);
-         icpIndex.increment();
+         initialTime = yoTime.getDoubleValue();
+         isRecovering.set(true);
+//         ICPPositionPercentage.set(0.0);
+//         icpIndex.increment();
       }
 
       @Override
@@ -636,7 +685,19 @@ public class FootExplorationControlModule
       
       public boolean checkCondition()
       {
-         return currentContactPointNumber.getIntegerValue()+1 > currentPlaneContactState.getTotalNumberOfContactPoints();
+         return currentContactPointNumber.getIntegerValue()+1 > currentPlaneContactStateToExplore.getTotalNumberOfContactPoints();
+      }
+   }
+   
+   private class DoneWithRecoverCondition implements StateTransitionCondition
+   {
+      public DoneWithRecoverCondition()
+      { 
+      }
+      
+      public boolean checkCondition()
+      {
+         return !isRecovering.getBooleanValue();
       }
    }
    
@@ -776,6 +837,8 @@ public class FootExplorationControlModule
       }
    };
    
+   // CLASS METHODS
+  
    private void setICPLocalToDesired(FramePoint2d desiredICP)
    {
       ReferenceFrame icpReferenceFrame = desiredICPLocal.getReferenceFrame();
@@ -795,6 +858,7 @@ public class FootExplorationControlModule
       double lengthOfSegmentInsideSupportFoot = Math.abs(initialPoint.distance(pointOnEdge));
 //      constantICPPoints.add((lengthOfSegmentInsideSupportFoot * firstInternalICPPercentage)/footstepCentroidsDistance.getDoubleValue());
       constantICPPoints.add((lengthOfSegmentInsideSupportFoot * secondInternalICPPercentage)/footstepCentroidsDistance.getDoubleValue());
+      constantICPPoints.add(0.3);
       constantICPPoints.add(0.5);
       constantICPPoints.add(1.0);
    }
@@ -819,6 +883,77 @@ public class FootExplorationControlModule
       
       return ret;
    }
+   
+   private void lowerICPBasedOnBoolean(boolean adjust)
+   {
+      if (adjust)
+      {
+         comIncrement.add(0.002);
+         comIncrement.set(Math.min(maxCoMHeightOffset, comIncrement.getDoubleValue()));
+         centerOfMassHeightTrajectoryGenerator.setOffsetHeightAboveGround(comIncrement.getDoubleValue());
+      }
+      else
+      {
+         comIncrement.add(-0.002);
+         comIncrement.set(Math.max(minCoMHeightOffset, comIncrement.getDoubleValue()));
+         centerOfMassHeightTrajectoryGenerator.setOffsetHeightAboveGround(comIncrement.getDoubleValue());
+      }
+   }
+   
+   private ArrayList<Point2d> getCopyOfContactPointLocation(List<? extends ContactPoint> contactPoints)
+   {
+      ArrayList<Point2d> ret = new ArrayList<Point2d>();
+      
+      for(int i = 0; i < contactPoints.size(); i++)
+      { 
+         double x = contactPoints.get(i).getPosition().getX();
+         double y = contactPoints.get(i).getPosition().getY();
+         ret.add(new Point2d(x, y));
+      }
+      
+      return ret;
+   }
+   
+   private void resetContactPoints(ArrayList<Point2d> defaultPoint, List<? extends ContactPoint> oldPoints)
+   {
+      for(int i = 0; i < defaultPoint.size(); i++)
+      {
+         double x = defaultPoint.get(i).getX();
+         double y = defaultPoint.get(i).getY();
+         oldPoints.get(i).getPosition().set(x, y, 0.0);
+         oldPoints.get(i).getPosition2d().set(x, y);
+      }
+   }
+   
+   private void scaleContactPointLocation(PlaneContactState currentPlaneContactState, double factor)
+   {
+      FrameConvexPolygon2d polygon = createAPolygonFromContactPoints(currentPlaneContactState.getContactPoints());
+      FramePoint2d centroid = polygon.getCentroid();
+      polygon.scale(centroid, factor);
+      
+      for(int i = 0; i < currentPlaneContactState.getTotalNumberOfContactPoints(); i++)
+      {
+         ContactPoint contactPoint = currentPlaneContactState.getContactPoints().get(i);
+         FramePoint2d scaledPoint = polygon.getFrameVertex(i);
+         contactPoint.getPosition().set(scaledPoint.getX(), scaledPoint.getY(), 0.0);;
+         contactPoint.getPosition2d().set(scaledPoint.getX(), scaledPoint.getY());
+      }
+   }
+   
+   private FrameConvexPolygon2d createAPolygonFromContactPoints(List<? extends ContactPoint> points)
+   {
+      ArrayList<FramePoint2d> frameVertices = new ArrayList<FramePoint2d>();
+      for(int i = 0; i < points.size(); i++)
+      {
+         frameVertices.add(points.get(i).getPosition2d());
+      }
+      FrameConvexPolygon2d polygon = new FrameConvexPolygon2d(frameVertices);
+      polygon.update();
+      
+      return polygon;
+   }
+   
+   // API
    
    public boolean isDone()
    {
@@ -864,5 +999,4 @@ public class FootExplorationControlModule
    {
       this.swingIsFinished.set(swingIsFinished);
    }
-
 }
