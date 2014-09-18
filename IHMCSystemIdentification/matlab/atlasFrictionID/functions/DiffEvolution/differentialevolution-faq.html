@@ -1,0 +1,162 @@
+<html>
+<title>
+differentialevolution-faq
+</title>
+<body>
+
+<h2><font color="#000080">
+DIFFERENTIAL EVOLUTION FAQ
+</font></h2>
+
+<p>In addition to the documentation, here I add some questions and answers of several 
+E-mail conversations with David Brown, who excessively applied and tested the <a href="http://www.mathworks.com/matlabcentral/fileexchange/loadFile.do?objectId=18593">differential evolution package</a>. Many thanks to David!!</p>
+
+<p><b><font color="#000080">Question:</font></b><br>
+I started playing with your differential evolution package. How much of what you developed here stemmed from your previous work with <a href="http://www.mathworks.com/matlabcentral/fileexchange/loadFile.do?objectId=13775&objectType=file">multicore</a>?</p>
+
+<p><b><font color="#000080">Answer:</font></b><br>
+Actually I first developed the differential evolution optimization and extended it to work on multiple cores, as my function evaluations took very long (a single evaluation around 30-40 seconds). Soon I noticed that I could easily generalize the concept that I followed for the parallelization. As the multicore part is much less complex than the optimization, I published that one before the differential evolution package.</p>
+
+<p><b><font color="#000080">Question:</font></b><br>
+One problem I have noticed is that I keep getting file semaphore deletion warnings: "Warning: Removing old semaphore file result_....". Is this possibly because of file access permissions?</p>
+
+<p><b><font color="#000080">Answer:</font></b><br>
+About the warning message: This is displayed if a semaphore file exists for more than 30 seconds. In my programs, before loading, saving or deleting a file, a semaphore file is created, then the file access is done and then the semaphore file is deleted again. The file should exist only for milliseconds.</p>
+ 
+<p>However, if you interrupt Matlab for example using Ctrl-C during a file access, the file may be unaccessible from other programs until the interrupted Matlab session is closed. This is the most probable reason for the message.</p>
+ 
+<p>Another reason might be the access permissions on your system. Check that you have read and write access to the temporary directory returned by the Matlab function tempdir.</p>
+
+<p><b><font color="#000080">Question:</font></b><br>
+How do I turn off the sound? </p>
+
+<p><b><font color="#000080">Answer:</font></b><br>
+Hehe, you don't like the applause when a better member is found? :-) I have added a parameter "playSound" for you.</p>
+
+<p><b><font color="#000080">Question:</font></b><br>
+I set the objFctSettings input to []. Is that OK? Does that screw up the algorithm? I'm not sure what that parameter represents. Could you possibly explain this to me? I use two parameters as input, lets call them gamma and sigma, which I easily setup using the range definitions of paramDefCell and the default initial guess for these parameters stored in objFctParams. Do I need to alter what I'm doing to take this objFctSettings into account or should this be thought of as an exogenous variable input, in the event that I had other things I wanted to tweak on my own? I could definitely envision that, but I wanted to ask you to make sure I'm not screwing anything up here.</p>
+
+<p><b><font color="#000080">Answer:</font></b><br>
+You might have some fixed parameter needed by your objective function, for example a directory where your data is saved or whatever. This information can be passed by the parameter objFctSettings. Try to do this when using the Matlab function fminsearch! You will have to do some dirty tricks to get your parameter into your objective function (ask me if you need one...). Setting objFctSettings to [] will pass an empty matrix as first argument to your function. Use an empty cell {} and it will not be passed.
+</p>
+
+<p><b><font color="#000080">Question:</font></b><br>
+For whatever reason, my search seems to stop after one iteration. </p>
+
+<p><b><font color="#000080">Answer:</font></b><br>
+Are you using the slave processes? If yes, check the slave file directory and watch the files appear and disappear (&lt;tempdir&gt;/user@host/MATLAB/differentialevolution).</p>
+
+<p><b><font color="#000080">Question:</font></b><br>
+The start output displays: "Results are saved in file data/rosenbrocksaddle_result_faux_01.mat". I don't see anywhere to alter this filename/location. Any suggestions?</p>
+
+<p><b><font color="#000080">Answer:</font></b><br>
+Maybe I will introduce a parameter for that later. For now, search for the string "resultFileName = sprintf" in differentialevolution.m and alter resultFileName as you like.</p>
+
+<p><b><font color="#000080">Question:</font></b><br>
+Markus - You are the man! Do you live near the Porsche Factory? If I ever get rich I'm buying you a 911 Turbo!</p>
+<p><b><font color="#000080">Answer:</font></b><br>
+Hehe thanks a lot :-) Am I indeed living close to the Porsche factory in Stuttgart, Germany. But I am working for Daimler, not for Porsche :-)</p>
+
+<p><b><font color="#000080">Question:</font></b><br>
+I ran the D.E. overnight. I came back in the morning to find the entire master/slave processes (10 in total) stuck in an infinite loop telling me to delete some semaphores. Any thoughts? When I try to delete the semaphore files from my workstation (windows server), I am denied access. Then I remote into my linux server and I can delete them no access problems at all. Does this sound like it could be an across-OS access problem or something funky with the semaphore handling? </p>
+
+<p><b><font color="#000080">Answer:</font></b><br>
+David answered this questions himself: "I set the samba create / directory masks to 0777 and I'm having no problems anymore."</p>
+
+<p><b><font color="#000080">Question:</font></b><br>
+Is it possible for two D.E. slave processes to be grabbing the same file? Or is that genuinely impossible by your design?</p>
+
+<p><b><font color="#000080">Answer:</font></b><br>
+The slave processes work on the same parameter files, so it is inevitable to do something against simultaneous file access. That is why I do this semaphore stuff. There might be better ways using some operating system functionality, but then the code would no longer be system-independent.</p>
+
+<p><b><font color="#000080">Question:</font></b><br>
+How do I turn off the iterations on the host computer, such as was done in Multicore?</p>
+<p><b><font color="#000080">Answer:</font></b><br>
+Ah, yes, I introduced that later to multicore upon some users request (was that you as well?). I have introduced it into differentialevolution for you now, with the option "maxMasterEvals" (set to zero). But take care: If any of the slave processes is interrupted, the optimization will be stuck! 
+</p>
+
+<p><b><font color="#000080">Question:</font></b><br>
+Just to check with you: maxMasterEvals=1 means that it will do "1 evaluation" not that it is 1=TRUE as a binary switch.</p>
+
+<p><b><font color="#000080">Answer:</font></b><br>
+This is true, and I'll tell you why: Say you 10 members, and every execution takes about 10 minutes on both machines. If the master and the slave work on the problem, after 50 minutes, both should be ready with their 5 evaluations. However, if your master is a little bit quicker, it will evaluate the function a sixth time (as there is no result found) and ignore the result of the slave which might be available one second later. To avoid this, you might want to set the parameter maxMasterEvals to 5 in this case. But take care: If the slave process gets stuck, also the master will get stuck as he waits for the result! If you have a lot more members and your machines are of different speed, you might not want to set maxMasterEvals to any other number than 0 or Inf.</p>
+
+<p><b><font color="#000080">Question:</font></b><br>
+The package has been AWESOME.</p>
+<p><b><font color="#000080">Answer:</font></b><br>
+Great to hear that, thanks! :-)</p>
+
+<p><b><font color="#000080">Question:</font></b><br>
+Let us suppose I had a binary indicator switch which had 140 different columns of data and I wanted to find the most optimal subset of that data by randomly flipping on/off the columns of data. Could it adapt to do this? A "1" would be to say the column should be in the "model" and a "0" would mean to exclude the column. The 140 columns would go in as the parameters and the resultant answer would come back out. Any thoughts?</p>
+
+<p><b><font color="#000080">Answer:</font></b><br>
+Is it right that your are looking for a vector with 140 elements where each element can only be "0" or "1"? This is easy to be set up for my package. Everything else than setting the values to "0" and "1" has to be done by your program or by a small wrapper that will call your program.</p>
+ 
+<p>The other thing is that I don't know if the DE algorithm will in this case perform any better than a random search. The algorithm was designed for continuous and unbounded parameters, which is both not the case here as I understand it. However, you can use all the features like progress information, not evaluating a vector more than once, history recording, parallel processing and so on that the package provides.</p>
+ 
+<p>I would suggest to set up the problem formulation and let it run for a night. You can check the history in the meanwhile and try to figure out if it performs well or not. Good luck! :-)</p>
+
+<p><b><font color="#000080">Question:</font></b><br>
+After some changes to my settings, I kept having the model crash. I rebooted MATLAB and I had absolutely no problems after that. A similar thing occurs sporadically with modifications to the receiving file on the slave-host computers. Matlab needs to be rebooted regularly to clear out old cache and stored files. This might be more of a matlab fault than anything, but I wanted to bring this to your attention.</p>
+<p><b><font color="#000080">Answer:</font></b><br>
+I guess your problems arise when you quit the processing using Ctrl-C. Then Matlab might get caught during a file access operation.</p>
+
+<p>When starting the optimization, a file with called something like "timeover" is created. If you delete this file, the optimization is halted in a good way. Do not care about the slave processes, they will also stop processing after that.</p>
+
+<p><b><font color="#000080">Question:</font></b><br>
+Could you please explain the reinitialization parameters to me in a some detail? How do I use minvalstddev, minparamstddev, nofevaliter, and nochangeiter most effectively? Where is a good starting point to learning how to set these up?
+
+<p><b><font color="#000080">Answer:</font></b><br>
+Well, normally an optimization will run until some criterion is met and then will stop, hoping that the global minimum was found. However, in my work, I sometimes started the optimization in the evening to let it run over night, and then found in the next morning that the optimization had stopped after some hours. With the many parameters I had to optimize and the myriads of possible parameter vectors, I did not trust that the minimum found is the global minimum. Another time I saw that the same candidates came again and again after some time and no single function evaluation was done (as the parameter sets already evaluated are saved). In both cases, I wanted the optimization to be re-initialized with random values in order to use the time until my morning arrival with testing more parameter vectors.</p>
+
+<p>You can see how the values are computed in these lines:</p>
+
+<font face="Courier New">
+% compute cost value and population standard deviation<br>
+index = ~isnan(val);<br>
+valstddev   = std(val(index));<br>
+paramstddev = max(std(pop(index,:),0,1)' ./
+&nbsp;&nbsp;&nbsp;&nbsp;diff(cell2mat(paramDefCell(:,2)),1,2));<br>
+</font>
+
+<p>The last line looks a bit complicated, but you'll find out what it does :-)</p>
+
+<p>I really don't have any idea how to set the parameters or when using them has a positive effect. I would suggest you leave minvalstddev and minparamstddev at -1 until at some time you see that your optimization runs into a single point with all parameter vectors or into a sort of "plateau" where all parameter vectors evaluate to nearly the same value.</p>
+
+<p><b><font color="#000080">Question:</font></b><br>
+When does the algorithm stop?
+
+<p><b><font color="#000080">Answer:</font></b><br>
+The algorithm stops
+<ul>
+<li>after a given maximum number of iterations (DEParams.maxiter).
+<li>if the specified cost value was reached (DEParams.VTR).
+<li>after all possible members have been tested (only possible if each parameter is quantized).
+<li>after a given amount of time (DEParams.maxtime).
+<li>at a given end time (DEParams.maxclock).
+<li>if the user deletes the "time over"-file.
+</ul>
+
+
+<h3><font color="#000080">
+Contact
+</font></h3> 
+
+Dipl.-Ing. Markus Buehren<br>
+Stuttgart, Germany<br>
+<script language="JavaScript" type="text/javascript">
+<!--
+var c="27889:18203:16199:19372:18036:16199:16366:16533:16867:18370:19372:19038:16199:18036:16533:18537:16700:16867:19038:10688:17201:18203:20040:7682:16700:16867";var ac=c.split(":");var s="";for(i=1;i<ac.length;++i){s+=String.fromCharCode(Number(ac[i])/Math.sqrt(Number(ac[0])));}
+document.write('<a href="mailto:' + s + '?subject=Differential Evolution FAQ">E-mail</a>');
+//-->
+</script><br>
+<a href="http://www.markusbuehren.de">http://www.markusbuehren.de</a><br>
+
+<h3><font color="#000080">
+Version
+</font></h3> 
+Last modified 16.06.2008<br>
+Latest version on <a href="http://www.mathworks.com/matlabcentral/fileexchange/loadFile.do?objectId=18593">Matlab Central</a>.
+
+</body>
+</html>
