@@ -133,6 +133,7 @@ public class FootExplorationControlModule
    private final HashMap<PlaneContactState, Boolean> needToResetContactPoints;
    private final HashMap<PlaneContactState, ArrayList<Point2d>> defaultContactPoints;
    private final BooleanYoVariable isRecovering;
+   private final BooleanYoVariable stopExploration;
    
    private Footstep nextFootStep;
    private RobotSide footUderCoPControl;
@@ -191,6 +192,7 @@ public class FootExplorationControlModule
       jointIsMoving = new BooleanYoVariable("jointIsMoving", registry);
       currentContactPointNumber = new IntegerYoVariable("currentContactPointNumber", registry);
       comIncrement = new DoubleYoVariable("comIncrement", registry);
+      stopExploration = new BooleanYoVariable("stopExploration", registry);
       needToResetContactPoints = new HashMap<PlaneContactState, Boolean>();
       defaultContactPoints = new HashMap<PlaneContactState, ArrayList<Point2d>>();
       this.yoTime = yoTime;
@@ -258,7 +260,7 @@ public class FootExplorationControlModule
          }
       }
       
-      if (performCoPExploration.getBooleanValue())
+      if (performCoPExploration.getBooleanValue() && nextFootStep != null)
       {
          this.nextFootStep = nextFootStep;
          this.footUderCoPControl = footUderCoPControl;
@@ -305,6 +307,7 @@ public class FootExplorationControlModule
       footHoldIsSafeEnough.set(true);
       swingIsFinished.set(false);
       icpIsCloseEnoughToDesired.set(false);
+      stopExploration.set(false);
       constantICPPoints.clear();
       icpIndex.set(0);
       explorationIsInProgress.set(false);
@@ -964,7 +967,7 @@ public class FootExplorationControlModule
    
    public boolean isDone()
    {
-      return footHoldIsSafeEnough.getBooleanValue() && transferToNextFootStepIsDone.getBooleanValue();
+      return footHoldIsSafeEnough.getBooleanValue() && transferToNextFootStepIsDone.getBooleanValue() || stopExploration.getBooleanValue();
    }
    
    public boolean isActive()

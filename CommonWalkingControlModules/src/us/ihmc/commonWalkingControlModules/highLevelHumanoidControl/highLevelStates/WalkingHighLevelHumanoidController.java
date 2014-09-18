@@ -1305,11 +1305,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       public boolean checkCondition()
       {
+         boolean isNotExploringFoothold = !footExplorationControlModule.isControllingSwingFoot();
          boolean isNextFootstepNull = upcomingFootstepList.getNextFootstep() == null;
          boolean isSupportLegNull = supportLeg.getEnumValue() == null;
          boolean noMoreFootsteps = upcomingFootstepList.isFootstepProviderEmpty() && isNextFootstepNull;
          boolean noMoreFootPoses = footPoseProvider == null || !footPoseProvider.checkForNewPose(robotSide.getOppositeSide());
-         boolean readyToStopWalking = noMoreFootsteps && noMoreFootPoses && (isSupportLegNull || super.checkCondition());
+         boolean readyToStopWalking = noMoreFootsteps && noMoreFootPoses && (isSupportLegNull || super.checkCondition()) && isNotExploringFoothold;
          return readyToStopWalking;
       }
    }
