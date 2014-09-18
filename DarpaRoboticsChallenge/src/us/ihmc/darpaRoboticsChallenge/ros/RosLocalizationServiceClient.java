@@ -102,7 +102,7 @@ public class RosLocalizationServiceClient implements ObjectConsumer<Localization
                   @Override
                   public void onSuccess(EmptyResponse response)
                   {
-                     System.out.println("Reference has been reset");
+                     System.out.println("Map has been reset");
                   }
                   
                   @Override
@@ -125,9 +125,10 @@ public class RosLocalizationServiceClient implements ObjectConsumer<Localization
    @Override
    public void consumeObject(LocalizationPacket object)
    {
-      sendLocalizationMessage(object);
       if (object.getReset())
          sendResetReference(object);
+      else
+         sendLocalizationMessage(object);
    }
    
 }
