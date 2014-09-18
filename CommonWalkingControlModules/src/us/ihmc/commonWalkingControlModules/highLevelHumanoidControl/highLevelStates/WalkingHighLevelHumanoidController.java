@@ -306,7 +306,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             icpAndMomentumBasedController, stateMachine, registry, swingTimeCalculationProvider, feet);
       
       footExplorationControlModule = new FootExplorationControlModule(registry, momentumBasedController, yoTime, 
-                                         (LookAheadCoMHeightTrajectoryGenerator) centerOfMassHeightTrajectoryGenerator, swingTimeCalculationProvider, feetManager);
+                                         centerOfMassHeightTrajectoryGenerator, swingTimeCalculationProvider, feetManager);
 
       setupStateMachine();
       readyToGrabNextFootstep.set(true);

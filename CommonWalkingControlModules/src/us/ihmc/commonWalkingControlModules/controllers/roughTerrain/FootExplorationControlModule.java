@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactStat
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Footstep;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculationProvider;
 import us.ihmc.robotSide.RobotSide;
@@ -54,6 +55,8 @@ import us.ihmc.yoUtilities.stateMachines.StateTransitionCondition;
  */
 public class FootExplorationControlModule
 {
+   public static final boolean IS_ACTIVE = false;
+   
    public enum FeetExplorationState
    {
       SWING, EXPLORATION, ICP_SHIFT, RECOVER
@@ -71,7 +74,7 @@ public class FootExplorationControlModule
    private static double icpShiftTime = 1.5;
    private static double copShiftTime = 2;
    private static double copTransitionRestingTime = 1; // must be less than copShiftTime/2
-   private static double swingTimeForExploration = 1.5;
+   private static double swingTimeForExploration = 2;
    
    // unstable situations
    private static double maxICPAbsError = 0.04;
@@ -153,7 +156,7 @@ public class FootExplorationControlModule
    
    
    public FootExplorationControlModule(YoVariableRegistry parentRegistry, MomentumBasedController momentumBasedController, DoubleYoVariable yoTime, 
-                                       LookAheadCoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator, SwingTimeCalculationProvider swingTimeCalculationProvider, FeetManager feetManager)
+                                       CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator, SwingTimeCalculationProvider swingTimeCalculationProvider, FeetManager feetManager)
    {
       performCoPExploration = new BooleanYoVariable("performCoPExploration", registry);
       explorationTime = new DoubleYoVariable("explorationTime", registry);
@@ -193,9 +196,9 @@ public class FootExplorationControlModule
       this.yoTime = yoTime;
       this.feetManager = feetManager;
       this.momentumBasedController = momentumBasedController;
-      this.centerOfMassHeightTrajectoryGenerator = centerOfMassHeightTrajectoryGenerator;
+      this.centerOfMassHeightTrajectoryGenerator = (LookAheadCoMHeightTrajectoryGenerator) centerOfMassHeightTrajectoryGenerator;
       this.swingTimeCalculationProvider = swingTimeCalculationProvider;
-      performCoPExploration.set(false);
+      performCoPExploration.set(IS_ACTIVE);
       ICPTrajectory = new FrameLine2d(worldFrame, new Point2d(0.0, 0.0), new Point2d(1.0, 1.0));
       desiredICPLocal = new FramePoint2d(worldFrame);
       desiredICPVelocityLocal = new FrameVector2d(worldFrame);
@@ -236,20 +239,23 @@ public class FootExplorationControlModule
    
    public void initialize(Footstep nextFootStep, FrameConvexPolygon2d supportFootPolygon, RobotSide footUderCoPControl)
    {
-      for(int i = 0; i < numberOfPlaneContactStates.getIntegerValue(); i++)
+      if (nextFootStep != null)
       {
-         PlaneContactState planeContactState = planeContactStates.get(i);
-         RigidBody planeBody = planeContactState.getRigidBody();
-         RigidBody nextFootStepBody = nextFootStep.getBody().getRigidBody();
-         
-         if(planeBody.equals(nextFootStepBody))
-            currentPlaneContactStateToExplore = planeContactState;
-      }
-      
-      if(needToResetContactPoints.get(currentPlaneContactStateToExplore) != null && needToResetContactPoints.get(currentPlaneContactStateToExplore))
-      {
-         resetContactPoints(defaultContactPoints.get(currentPlaneContactStateToExplore), currentPlaneContactStateToExplore.getContactPoints());
-         needToResetContactPoints.put(currentPlaneContactStateToExplore, false);
+         for (int i = 0; i < numberOfPlaneContactStates.getIntegerValue(); i++)
+         {
+            PlaneContactState planeContactState = planeContactStates.get(i);
+            RigidBody planeBody = planeContactState.getRigidBody();
+            RigidBody nextFootStepBody = nextFootStep.getBody().getRigidBody();
+
+            if (planeBody.equals(nextFootStepBody))
+               currentPlaneContactStateToExplore = planeContactState;
+         }
+
+         if (needToResetContactPoints.get(currentPlaneContactStateToExplore) != null && needToResetContactPoints.get(currentPlaneContactStateToExplore))
+         {
+            resetContactPoints(defaultContactPoints.get(currentPlaneContactStateToExplore), currentPlaneContactStateToExplore.getContactPoints());
+            needToResetContactPoints.put(currentPlaneContactStateToExplore, false);
+         }
       }
       
       if (performCoPExploration.getBooleanValue())
@@ -377,6 +383,7 @@ public class FootExplorationControlModule
             scaleContactPointLocation(planeContactStateToRescale, 1 / safetyScalingOfCoP);
             planeContactStateToRescale = null;
          }
+         updateNextFootstepCentroid();
       }
    }
 
@@ -539,20 +546,6 @@ public class FootExplorationControlModule
          }
          
          return jointVelocity.getDoubleValue() > zeroVelocity;
-      }
-      
-      private void updateNextFootstepCentroid()
-      {
-         ArrayList<FramePoint2d> points = new ArrayList<FramePoint2d>(); 
-         for(int i = 0; i < currentPlaneContactStateToExplore.getTotalNumberOfContactPoints(); i++)
-         {
-            points.add(currentPlaneContactStateToExplore.getContactPoints().get(i).getPosition2d());
-         }
-         
-         FrameConvexPolygon2d newPolygon = new FrameConvexPolygon2d(points);
-         FramePoint2d tempCentroid = newPolygon.getCentroid();
-         nextFootStepCentroid = new FramePoint(tempCentroid.getReferenceFrame(), tempCentroid.getX(), tempCentroid.getY(), 0.0);
-         nextFootStepCentroid.changeFrame(worldFrame);
       }
    }
    
@@ -838,6 +831,20 @@ public class FootExplorationControlModule
    };
    
    // CLASS METHODS
+   
+   private void updateNextFootstepCentroid()
+   {
+      ArrayList<FramePoint2d> points = new ArrayList<FramePoint2d>(); 
+      for(int i = 0; i < currentPlaneContactStateToExplore.getTotalNumberOfContactPoints(); i++)
+      {
+         points.add(currentPlaneContactStateToExplore.getContactPoints().get(i).getPosition2d());
+      }
+      
+      FrameConvexPolygon2d newPolygon = new FrameConvexPolygon2d(points);
+      FramePoint2d tempCentroid = newPolygon.getCentroid();
+      nextFootStepCentroid = new FramePoint(tempCentroid.getReferenceFrame(), tempCentroid.getX(), tempCentroid.getY(), 0.0);
+      nextFootStepCentroid.changeFrame(worldFrame);
+   }
   
    private void setICPLocalToDesired(FramePoint2d desiredICP)
    {
