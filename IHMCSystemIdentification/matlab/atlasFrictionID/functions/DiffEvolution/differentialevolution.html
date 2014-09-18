@@ -1,0 +1,546 @@
+<html>
+<title>
+differentialevolution
+</title>
+<body>
+
+<h2><font color="#000080">
+DIFFERENTIAL EVOLUTION
+</font></h2>
+
+<h3><font color="#000080">
+Preamble
+</font></h3>
+
+I have put a lot of effort into this contribution to Matlab Central. As I 
+used the code successfully for myself for quite some time, I am sure that it can 
+be rather valuable for the one or the other. If you find any errors or bugs, 
+if you have problems in using the function or if you find the documentation 
+insufficiently detailed:
+
+<h4><font color="#660000">
+Please contact me and give me the chance to help you before giving a bad 
+rating on Matlab Central!
+</font></h4>
+
+Contact details at the bottom of this page.
+
+<h3><font color="#000080">
+Thanks
+</font></h3>
+
+I have spent many hours to develop this package. If you would like to let me know that you appreciate my work, you can do so by leaving a donation.<br><br>
+
+<form action="https://www.paypal.com/cgi-bin/webscr" method="post">
+<input type="hidden" name="cmd" value="_s-xclick">
+<input type="hidden" name="hosted_button_id" value="KAECWD2H7EJFN">
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="" border="0" src="https://www.paypalobjects.com/de_DE/i/scr/pixel.gif" width="1" height="1">
+</form>
+
+
+<h3><font color="#000080">Introduction
+</font></h3>
+
+This contribution provides functions for finding an optimum parameter set 
+using the <a href="http://en.wikipedia.org/wiki/Evolutionary_algorithm">
+Evolutionary Algorithm</a> of <b>Differential Evolution</b>. Simply 
+speaking: If you have some complicated function of which you are unable to 
+compute a derivative, and you want to find the parameter set minimizing the 
+output of the function, using this package is one possible way to go.<br><br>
+
+The core of the optimization is the Differential Evolution algorithm. For an 
+introduction to the algorithm, see the <a href="http://www.icsi.berkeley.edu/~storn/code.html#basi">
+basics section</a> on the <a href="http://www.icsi.berkeley.edu/~storn/code.html">
+<b>Differential Evolution homepage</b></a> of Rainer Storn. You will also find a demo 
+applet and code for different programming languages there. For in-depth documentation and 
+publications, check out the <a href="http://www.icsi.berkeley.edu/~storn/litera.html">
+Literature Section</a>. Even several <a href="http://www.icsi.berkeley.edu/~storn/code.html#link">
+books about Differential Evolution</a> are available.<br><br>
+
+This package provides much more than the code available on the referenced 
+homepage. Here is a list of some features:
+
+<ul>
+	<li>Optimization can run in parallel on multiple cores/computers.
+	<li>Extensive and configurable progress information during optimization.
+	<li>Intermediate results are stored for later review of optimization progress.
+	<li>Progress information can be sent by E-mail.
+	<li>Optimization toolbox is not needed.
+	<li>Quick start with demo functions.
+	<li>Intermediate results are displayed after the optimization.
+	<li>Different end conditions can be chosen (maximum time, value to reach etc.).
+	<li>Each parameter value can be constrained to an interval.
+	<li>Each parameter value can be quantized (for example for parameters of integer nature).
+	<li>Code can easily be extended to use the evolutionary algorithm of your choice.
+</ul>
+
+I have developed this package for an own project. A single evaluation of my 
+objective function took between 30 and 60 seconds and the parameter 
+space was galactically large. If your objective function needs only milliseconds to 
+evaluate and your optimization is expected to finish in seconds or minutes, 
+you can still use this package. However, much of its power (parallel processing, 
+progress notifications) will not be of much use.<br><br>
+
+In addition to this documentation, I have summarized E-mail conversations in 
+a list of <a href="differentialevolution-faq.html">Frequently Asked Questions.</a>
+
+<h3><font color="#000080">Quick start
+</font></h3>
+
+To get into the usage of the package quickly, check out the demo functions 
+<font face="Courier New" color="#000080">demo1.m</font>,
+<font face="Courier New" color="#000080">demo2.m</font> and 
+<font face="Courier New" color="#000080">demo3.m</font>. Modify those files 
+to start your first optimization. Essentially you only have to define 
+which parameters to optimize and provide a handle to your objective function. 
+You can learn about everything else later.
+
+Your objective function can be called in different ways:
+<ul>
+	<li>With a scalar or column vector as the only input argument.
+	<li>With a structure containing the current parameters as only input argument.
+	<li>With one or more user-defined fixed arguments first, then a parameter vector/structure as last argument.
+</ul>
+If your objective function has an argument list that does not comply with 
+one of these possibilities, you have to write a small wrapper function which 
+brings the arguments into the correct order and calls your objective function. 
+
+The definition of the parameters to optimize is expected as a cell array. The 
+first column of the cell array has to contain the parameter names. In the second 
+column, you have to provide the parameter ranges. For a scalar parameter, the 
+range is expected as a two-element row vector. For vector-valued parameters, you 
+have to give the ranges of the elements as a two-column matrix with ranges in 
+rows. The third column contains the parameter quantization steps as a 
+scalar or a column vector (set to zero for no quantization). The fourth column 
+(optional) can contain the initial values of the parameters. If your objective 
+function shall be called with a column parameter vector instead of a structure 
+as input, define only one single parameter with an empty string as parameter name. 
+See the help text (&quot;help differentialevolution&quot;) and the demos for 
+more details and examples.
+
+<h3><font color="#000080">Parallel processing on multiple cores
+</font></h3>
+This package allows to work in parallel on multiple cores in order to increase 
+the speed of the optimization. One process acts as the master and all other 
+processes act as slaves. The only requirements for parallel processing are:
+<ul>
+	<li>All involved processes have to have read- and write-access to a common directory, 
+	for example on a network share.
+	<li>All involved processes have to have access to identical code versions of the 
+	objective function.
+</ul>
+For parallel processing, the main function differentialevolution.m has to be started in 
+one Matlab process. In one or more other processes, the function differentialevolution<b>slave</b>.m 
+has to be started. The master process will save files including the parameter 
+sets to evaluate into the common directory. 
+The slave processes load the parameter files, evaluate the objective function and 
+save the obtainted results into other files. After each iteration, the master process 
+collects the evaluated results and feeds the slave processes with data files 
+again. If there are no results found, the master process will evaluate the 
+parameter sets himself. This way, the slaves can never cause the master to 
+get stuck.<br><br>
+
+The <a href="http://www.mathworks.com/matlabcentral/fileexchange/loadFile.do?objectId=13775&objectType=file">
+Multicore package</a> on Matlab Central actually emanated from this function 
+and works quite similar. 
+
+<h3><font color="#000080">The usage in detail
+</font></h3>
+
+The details of how to use the package are contained as help lines in the file 
+differentialevolution.m. I paste the same lines here:<br>
+
+<!--
+<table border="1">
+  <tr><td colspan="2">Output arguments:</td></tr>
+  <tr><td width="200"><code>bestmem</code></td><td>Best population member.</td></tr>
+  <tr><td>bestval</td><td>Lowest evaluated cost.</td></tr>
+  <tr><td>bestFctParams</td><td>Structure like input objFctParams containing the best parameter set.</td></tr>
+  <tr><td>nrOfIterations</td><td>Number of iterations done.</td></tr>
+</table>
+-->
+
+<pre>
+%DIFFERENTIALEVOLUTION  Start Differential Evolution optimization.
+%    BESTMEM = DIFFERENTIALEVOLUTION(DEPARAMS, ...) starts a Differential
+%    Evolution (DE) optimization to minimize the cost returned by a given
+%    function. For a quick start, check out and modify the functions DEMO1
+%    and DEMO2.
+%
+%    Output arguments:
+%
+%    bestmem          - Best population member.
+%    bestval          - Lowest evaluated cost.
+%    bestFctParams    - Structure like input objFctParams containing the
+%                       best parameter set.
+%    nrOfIterations   - Number of iterations done.
+%
+%
+%    Input arguments:
+%
+%    DEParams         - Struct with parameters for DE.
+%    paramDefCell     - Cell specifying the parameters to optimize.
+%    objFctHandle     - Handle to the objective function.
+%    objFctSettings   - Additional settings to be passed (a cell array will
+%                       be expanded using {:}). If no additional settings
+%                       are needed, set objFctSettings to an empty cell: {}
+%    objFctParams     - Struct with initial parameters.
+%    emailParams      - Struct with fields serveraddress, fromaddress,
+%                       toaddress, and, if needed, username and password.
+%                       Parameters are used for sending E-mail
+%                       notifications.
+%    optimInfo        - Info about current optimization task. Fields 'title'
+%                       and 'subtitle' are displayed and included in saved
+%                       files if existing. No influence on optimization.
+%
+%    The structure DEParams needs to contain the following fields:
+%
+%    VTR            "Value To Reach" (set to empty matrix for no VTR).
+%    NP             Number of population members (e.g. 10*D).
+%    F              DE-stepsize F from interval [0, 2]. A good initial guess
+%                   is the interval [0.5, 1], e.g. 0.8.
+%    CR             Crossover probability constant from interval [0, 1]. If
+%                   the parameters are correlated, high values of CR work
+%                   better. The reverse is true for no correlation.
+%    strategy       1 --> DE/best/1/exp (def.)   6 --> DE/best/1/bin
+%                   2 --> DE/rand/1/exp          7 --> DE/rand/1/bin
+%                   3 --> DE/rand-to-best/1/exp  8 --> DE/rand-to-best/1/bin
+%                   4 --> DE/best/2/exp          9 --> DE/best/2/bin
+%                   5 --> DE/rand/2/exp          else  DE/rand/2/bin
+%                   Experiments suggest that /bin likes to have a slightly
+%                   larger CR than /exp
+%    maxiter        Maximum number of iterations.
+%    maxtime        Maximum time (in seconds) before finishing optimization.
+%                   Set to empty or Inf for no time limit.
+%    maxclock       Time (as returned by function clock.m) when to
+%                   finish optimization. Set to empty for no end time.
+%    minvalstddev   Population is reinitialized if the standard deviation of
+%                   the cost values in the population is lower than
+%                   minvalstddev.
+%    minparamstddev Population is reinitialized if the maximum parameter
+%                   standard deviation (normalized to the parameter range)
+%                   is lower than minparamstddev.
+%    nofevaliter    Population is reinitialized if there was no function
+%                   evaluation during the last nofevaliter iterations.
+%    nochangeiter   Population is reinitialized if there was no change in
+%                   the population during the last nochangeiter iterations.
+%    refreshiter    Info is displayed and current state is saved every
+%                   refreshiter iterations.
+%    refreshtime    State is saved after refreshtime seconds.
+%    refreshtime2   Additional progress information is displayed every
+%                   refreshtime2 seconds (usually refreshtime2 >>
+%                   refreshtime).
+%    refreshtime3   Progress information is sent by E-mail every
+%                   refreshtime3 seconds (usually refreshtime3 >>
+%                   refreshtime2).
+%    useInitParams  If one, the given parameters in struct objFctParams
+%                   OR those in the fourth column of paramDefCell are used
+%                   as one of the initial population members. If two,
+%                   additionally the first twenty percent of the population
+%                   members are computed as the given initial parameter
+%                   vector plus small random noise.
+%    saveHistory    Save intermediate results.
+%    displayResults Draw graphs for visualization of the optimization
+%                   result.
+%    feedSlaveProc  Use slave process for parallel computation.
+%    maxMasterEvals Maximum number of function evaluations done by the
+%                   master process. Warning: Use this option with caution!
+%                   If maxMasterEvals is set to a number less than the
+%                   number of population members and one of the slave
+%                   processes is interrupted, the optimization will be
+%                   stuck!
+%    slaveFileDir   Base directory for saving slave files.
+%    minimizeValue  If true, the evaluation value is minimized, otherwise
+%                   maximized.
+%    validChkHandle Handle to a function which takes the same arguments as
+%                   the objective function and decides if a given parameter
+%                   set is valid (subject to a constraint) or not. The
+%                   function should return 1 if the constraint is fulfilled
+%                   and 0 if not. Set to empty string if no constraint is
+%                   needed.
+%    playSound      Play a short sound when a new best member was found.
+%
+%    If DEParams is empty or fields are missing, default parameters are used
+%    (see function GETDEFAULTPARAMS).
+%
+%    The cell array paramDefCell has to contain the names of the parameters
+%    to optimize, its ranges, their quantizations and the initial values.
+%    Each parameter may be a real-valued scalar or column vector.
+%
+%    Example 1 (only scalar parameters):
+%
+%    paramDefCell = {
+%      'useSmoothing',     [0    1],     1,   0
+%      'nrOfCoefficients', [5   20],     1,  10
+%      'threshold',        [0.01 1], 0.001, 0.5 }
+%
+%    The first cell in each row contains the name of the parameter, the
+%    second a two-element row vector specifying the allowed range, the third
+%    the quantization and the fourth the initial values (the fourth column
+%    of the cell array may be omitted). Provide a non-empty value either in
+%    objFctParams or in the fourth column of paramDefCell as initial value.
+%    If both are present, a warning message is issued and the value in
+%    paramDefCell is used. If objFctParams is empty and no initial
+%    parameters are given in paramDefCell, the centers of the parameter
+%    ranges are used as initial parameters.
+%
+%    Using parameter quantization allows for the use of binary variables
+%    like 'useSmoothing' above as well for parameters that are of integer
+%    nature, like a number of coefficients. If the quantization of a
+%    parameter is set to zero, the parameter is not quantized. Using a
+%    quantization grid for continuous parameters can save computational
+%    effort. If saveHistory is true, all evaluated parameter vectors are
+%    saved with the corresponding cost value and the same parameter value
+%    will never be evaluated twice. With quantization, it is more likely
+%    that a generated parameter vector was already evaluated and saved
+%    before.
+%
+%    Example 2 (vector parameter):
+%
+%    paramDefCell = {'weightings', [0 1; 0 2], [0.01; 0.02], [0.5; 0.5]};
+%
+%    Here, the parameter weightings is defined as a two-element column
+%    vector. The ranges are set to [0, 1] for the first element and [0, 2]
+%    for the second. The quantizations are 0.01 and 0.02 and the initial
+%    values are both 0.5.
+%
+%    The objective function (given as function handle objFctHandle) is
+%    started as
+%
+%    value = objFctHandle(objFctSettings,    objFctParams) or
+%    value = objFctHandle(objFctSettings{:}, objFctParams).
+%
+%    The second case is used if objFctSettings is a cell array, thus
+%    allowing for an arbitrary number of additional input arguments. The
+%    provided structure objFctParams may contain further fixed parameters
+%    and/or the current parameter values. The fields with the names of the
+%    parameters given in paramDefCell are overwritten by the values of the
+%    current parameters. If the objective function handle is empty, the
+%    distance to a randomly chosen optimal parameter vector is used as cost
+%    value (for testing purposes).
+%
+%    Example 3 (vector parameter):
+%
+%    paramDefCell = {'', [0 1; 0 2], [0.01; 0.02], [0.5; 0.5]};
+%
+%    In this special case (one single parameter with empty name), the
+%    objective function is called as
+%
+%    value = objFctHandle(objFctSettings,    paramVec) or
+%    value = objFctHandle(objFctSettings{:}, paramVec)
+%
+%    with the current parameters in column vector paramVec.
+%
+%    When displaying an info string, the current optimization state
+%    including all tested members etc. is saved in the file
+%    XXX_result_YYY_ZZ.mat, where XXX is the name of the objective function,
+%    YYY is the name of the current host and ZZ is a number between 1 and 50
+%    (to avoid overwriting old results).
+%
+%    A 'time over'-file is saved at the start of the optimization. The
+%    optimization is stopped if this file is deleted. Using this mechanism
+%    to stop the simulation avoids to break Matlab during saving a file,
+%    which can make a file unaccessible for the rest of the session and
+%    leads to repeating warning messages. The name of the file to delete is
+%    XXX_timeover_YYY.mat, where XXX is the name of the objective function
+%    and YYY is the hostname. Result- and 'time over'-files are saved in
+%    directory 'data' if existing, otherwise in the current directory.
+%
+%    The optimization can be performed in parallel by more than one
+%    processor/computer. Function DIFFERENTIALEVOLUTION has to be started in
+%    one Matlab session, function DIFFERENTIALEVOLUTIONSLAVE on one or
+%    more other Matlab sessions. Function DIFFERENTIALEVOLUTION acts as
+%    master and saves information about which function to evaluate and which
+%    parameters to use into files in a commonly accessible directory. The
+%    Distributed Computing toolbox is not used. If input parameter
+%    slaveFileDir is empty, the directory differentialevolution is used (or
+%    created) below the temporary directory returned by function TEMPDIR2
+%    (something like C:\Documents and Settings\<UserName>\Local Settings\
+%    Temp\<UserName>@<HostName>\MATLAB).
+%
+%    Function DIFFERENTIALEVOLUTION was developed for objective functions
+%    that need relatively long for one function evaluation (several seconds
+%    or more). When used with objective functions that evaluate very fast,
+%    memory problems could occur. When saveHistory is true, every evaluated
+%    parameter vector is kept in memory. Further, the overhead for checking
+%    if a parameter vector was already evaluated might be larger than a
+%    function evaluation itself.
+%
+%    Start this function without input arguments or with only the first
+%    input argument DEParams to run a demo optimization of Rosenbrock's
+%    saddle. No files are saved during the demo.
+%
+%    This function is based on the differential evolution (DE) algorithm of
+%    Rainer Storn (http://www.icsi.berkeley.edu/~storn/code.html). The core
+%    evolutionary algorithm was taken from function devec3.m.
+%
+%    <a href="differentialevolution.html">differentialevolution.html</a>  <a href="http://www.mathworks.com/matlabcentral/fileexchange/18593">File Exchange</a>  <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=KAECWD2H7EJFN">Donate via PayPal</a>
+%
+%    Markus Buehren
+%    Last modified 05.07.2011
+%
+%    See also DIFFERENTIALEVOLUTIONSLAVE, DISPLAYOPTIMIZATIONHISTORY,
+%    GETDEFAULTPARAMS, DEMO1, DEMO2, TEMPDIR2.
+</pre>
+
+Please check the help lines in file differentialevolution.m to be sure to read the 
+latest version.
+
+<h3><font color="#000080">Functions contained in this package
+</font></h3>
+In the following, the most important functions contained in this package are 
+listed. Every file contains its own help comments which you can access by 
+typing &quot;help functionname&quot; on the Matlab command line.
+
+<br><br><b><font color="#000080">differentialevolution.m
+</font></b><br>
+The main function to call after preparing the input arguments.
+
+<br><br><b><font color="#000080">getdefaultparams.m
+</font></b><br>
+When starting to work with this package, you probably do not want to handle 
+with every existing parameter for function differentialevolution.m. You can 
+get a default parameter set by calling getdefaultparams.m.
+
+<br><br><b><font color="#000080">differentialevolutionslave.m
+</font></b><br>
+When working in parallel on multiple cores/computers, this 
+function has to be started in every Matlab process that shall act as slave. 
+
+<br><br><b><font color="#000080">computenewpopulation.m
+</font></b><br>
+The core Differential Evolution algorithm resides in this functions. If you 
+like to use your own favorite evolutionary algorithm, you can put the code 
+into this function.
+
+<br><br><b><font color="#000080">demo1.m, demo2.m, demo3.m
+</font></b><br>
+Demo functions you can modify for a quick start.
+
+<br><br><b><font color="#000080">foxholes.m, rosenbrocksaddle.m
+</font></b><br>
+These two functions are used for the demos. They implement two functions that 
+are often cited in the context of optimization algorithms (&quot;Shekel's 
+Foxholes&quot; and &quot;Rosenbrock's Saddle&quot;). 
+
+<!--
+<br><br><b><font color="#000080">deletewithsemaphores.m, setfilesemaphore.m
+</font></b><br>
+These functions help to avoid simultaneous file access when working with 
+multiple cores. 
+
+<br><br><b><font color="#000080">sendmailblat.m
+</font></b><br>
+Function sendmailblat.m sends E-mail notifications using the freeware 
+executable blat.exe on Windows (file may no longer be included in this package, 
+see the <a href="http://www.blat.net/">Blat homepage</a> for download and more 
+information). There are alternatives for sending E-mails from Matlab on Windows, 
+but I don't see any need to change this.
+
+<br><br><b><font color="#000080">existfile.m, existfile.c</font></b><br>
+Test if a file exists. To use the faster mex-file, type 
+<font face="Courier New" color="#000080">&quot;mex -setup&quot;</font>, 
+select the builtin Lcc compiler and type
+<font face="Courier New" color="#000080">&quot;mex existfile.c&quot;</font>
+to compile the file. However, the package also works without using the mex-file.
+
+<h3><font color="#000080">
+Problems/open issues
+</font></h3>  
+-->
+
+<!--
+<b>Vector parameters</b><br><br>
+In my own project, I always passed the current parameter set as a structure 
+to my objective function. Each field contained a scalar parameter value. 
+Before releasing this package on Matlab Central, I introduced the possibility to 
+work with vector-valued parameters, either passed as a single column vector or as 
+a structure with vector-valued fields to the objective function. However, I did 
+not have the time to test vector-valued parameters extensively. If you find 
+any bugs with this, please let me know.<br><br>
+-->
+
+<b>Parameter quantization</b><br><br>
+The original Differential Evolution algorithm only knows unbounded, continuous 
+parameters. In order to include parameters of integer nature into the optimization, 
+I have extended the algorithm in this way. Internally, all parameters are 
+continuous. Only before passing them to the objective function, the parameter 
+values are quantized.<br><br>
+
+<b>Hard parameter bounds</b><br><br>
+In my own project, and I guess in most other optimization problems as well, 
+I always had an idea about the possible range for each optimal parameter. A hard
+parameter range has to be given here for every parameter. Using -Inf or Inf as 
+lower or upper bound is <b>not</b> possible. A side effect of the hard bounds 
+is that parameter sets including boundary values can be evaluated with higher 
+probability under certain circumstances.<br><br>
+
+<b>Breaking using Ctrl-C</b><br><br>
+When breaking the optimization using Ctrl-C, it might happen that you catch 
+Matlab just when writing to a file. When you start the optimization again and 
+the same file needs to be accessed again, the file is locked until you quit 
+and restart Matlab (at least on Windows). <br><br>
+
+To avoid the need for using Ctrl-C, a 'time-over'-file is saved in the current 
+directory. After each function evaluation, the master process checks if the file 
+is still existing. If it was deleted, the optimization is finished cheerfully. 
+So instead of pressing Ctrl-C, delete that file.<br><br>
+
+<b>Shrinking slave support in parallel processing</b><br><br>
+When processing in parallel, the master process feeds the slaves at the start 
+of each iteration and collects the results at the end. Further, as all parameter 
+sets that have been evaluated before are saved, not all parameter vectors in 
+the current population might need to be evaluated. If the population has already 
+converged very well, it can happen that there are less new parameter vectors 
+in the population than processes are working on the optimization problem. In 
+this case, some or all slaves are sleeping, as there is no more work to do.
+
+<br><br><b>Parameter vectors in rows and columns</b><br><br>
+I always save parameter vectors as column vectors. However, the core 
+Differential Evolution algorithm taken from the 
+<a href="http://www.icsi.berkeley.edu/~storn/code.html#matl">Differential 
+Evolution homepage</a> expects parameter vectors to be stored in rows. 
+Unfortunately, the code now contains a mixture of representations as rows 
+and columns. You will never get involved with this issue until you edit the 
+code. Parameter vectors are passed to your objective functions as column vectors. 
+If your objective function needs to get parameter vectors passed as row vectors, 
+you will have to write a small wrapper function that transposed the vectors 
+and calls the objective function in the right way.
+
+<h3><font color="#000080">
+Links
+</font></h3>  
+
+<a href="http://www.icsi.berkeley.edu/~storn/code.html">Differential Evolution
+homepage.</a><br>
+<a href="http://en.wikipedia.org/wiki/Evolutionary_algorithm">Wikipedia</a> about 
+Evolutionary Algorithms.<br>
+<a href="http://www.mathworks.com/matlabcentral/fileexchange/loadFile.do?objectId=18593">
+Latest Version of this package</a> on Matlab Central.<br>
+The <a href="http://www.mathworks.com/matlabcentral/fileexchange/loadFile.do?objectId=13775">
+Multicore package</a> on Matlab Central.<br>
+<a href="http://www.blat.net/">Blat homepage</a> (E-mails from the command line on Windows).
+
+<h3><font color="#000080">
+Contact
+</font></h3>  
+
+Dr.-Ing. Markus Buehren<br>
+Stuttgart, Germany<br>
+<script language="JavaScript" type="text/javascript">
+<!--
+var c="27889:18203:16199:19372:18036:16199:16366:16533:16867:18370:19372:19038:16199:18036:16533:18537:16700:16867:19038:10688:17201:18203:20040:7682:16700:16867";var ac=c.split(":");var s="";for(i=1;i<ac.length;++i){s+=String.fromCharCode(Number(ac[i])/Math.sqrt(Number(ac[0])));}
+document.write('<a href="mailto:' + s + '?subject=Differential Evolution">E-mail</a>');
+//-->
+</script><br>
+<a href="http://www.markusbuehren.de">http://www.markusbuehren.de</a><br>
+
+<h3><font color="#000080">
+Version
+</font></h3>  
+Last modified 20.09.2011<br>
+Latest version on <a href="http://www.mathworks.com/matlabcentral/fileexchange/loadFile.do?objectId=18593">Matlab Central</a>.
+
+</body>
+</html>
