@@ -20,7 +20,7 @@ public class GdxUtilTest
 				1, 2, 3, 4,
 				5, 6, 7, 8,
 				9, 10, 11, 12,
-				13, 14, 15, 16};
+				0, 0, 0, 1};
 
 		Transform3d src = new Transform3d();
 		Matrix4 dst = new Matrix4();
@@ -31,23 +31,26 @@ public class GdxUtilTest
 
 		float[] a= dst.getValues();
 
-		for( int y = 0; y < 4; y++ ) {
-			for( int x = 0; x < 4; x++ )  {
-				int index = x*4 + y;
-				int expected = y*4 + x + 1;
-				assertEquals(expected,a[index],1e-6f);
-			}
-		}
+		assertEquals(m[0],a[0],1e-6f);
+      assertEquals(m[4],a[1],1e-6f);
+      assertEquals(m[8],a[2],1e-6f);
+      assertEquals(m[12],a[3],1e-6f);
+      assertEquals(m[1],a[4],1e-6f);
+      assertEquals(m[5],a[5],1e-6f);
+      assertEquals(m[9],a[6],1e-6f);
+      assertEquals(m[13],a[7],1e-6f);
+      assertEquals(m[10],a[10],1e-6f);
+      assertEquals(m[15],a[15],1e-6f);
 	}
 
 	@Test
 	public void convert_m2t()
 	{
 		float[] m = new float[]{
-				1, 2, 3, 4,
-				5, 6, 7, 8,
-				9, 10, 11, 12,
-				13, 14, 15, 16};
+				1, 2, 3, 0,
+				5, 6, 7, 0,
+				9, 10, 11, 0,
+				13, 14, 15, 1};
 
 		Matrix4 src = new Matrix4();
 		Transform3d dst = new Transform3d();
@@ -58,13 +61,15 @@ public class GdxUtilTest
 
 		float[] a = new float[16];
 		dst.get(a);
-
-		for( int y = 0; y < 4; y++ ) {
-			for( int x = 0; x < 4; x++ )  {
-				int index = x*4 + y;
-				int expected = y*4 + x + 1;
-				assertEquals(expected,a[index],1e-6f);
-			}
-		}
+		assertEquals(m[0],a[0],1e-6f);
+		assertEquals(m[4],a[1],1e-6f);
+		assertEquals(m[8],a[2],1e-6f);
+		assertEquals(m[12],a[3],1e-6f);
+		assertEquals(m[1],a[4],1e-6f);
+		assertEquals(m[5],a[5],1e-6f);
+		assertEquals(m[9],a[6],1e-6f);
+		assertEquals(m[13],a[7],1e-6f);
+		assertEquals(m[10],a[10],1e-6f);
+		assertEquals(m[15],a[15],1e-6f);
 	}
 }
