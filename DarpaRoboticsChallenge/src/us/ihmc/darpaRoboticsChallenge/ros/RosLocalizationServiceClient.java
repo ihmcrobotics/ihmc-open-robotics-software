@@ -30,8 +30,8 @@ public class RosLocalizationServiceClient implements ObjectConsumer<Localization
       
       objectCommunicator.attachListener(LocalizationPacket.class, this);
       
-      rosMainNode.attachServiceClient("", localizationClient);
-      rosMainNode.attachServiceClient("", resetClient);
+      rosMainNode.attachServiceClient("/mapper_humanoid/set_mode", localizationClient);
+      rosMainNode.attachServiceClient("/mapper_humanoid/reset", resetClient);
    }
    
    public void sendLocalizationMessage(final LocalizationPacket localizationPacket)
