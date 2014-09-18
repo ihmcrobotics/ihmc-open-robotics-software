@@ -14,10 +14,12 @@ import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 public abstract class JointFrictionModelsHolder
 {
    private static final double SMALL_VELOCITY_ABS = 0.005;
-   private static final double ACCELERATION_THRESHOLD = 0.5;
+   private static final double ACCELERATION_THRESHOLD = 0.1;
+   private static final double ALPHA_EQUIVALENT_VELOCITY = 0.5;
    
    private final DoubleYoVariable stictionTransitionVelocity;
    private final AlphaFilteredYoVariable filteredVelocity;
+   private final AlphaFilteredYoVariable velocityForFrictionCalculation;
    private final DoubleYoVariable alphaForFilteredVelocity;
    private final DoubleYoVariable forceThreshold;
    private final DoubleYoVariable frictionCompensationEffectiveness;
@@ -45,6 +47,8 @@ public abstract class JointFrictionModelsHolder
       this.forceThreshold.set(Math.abs(forceThreshold));
       filteredVelocity = new AlphaFilteredYoVariable(name + "_alphaFilteredVelocity", registry, alphaForFilteredVelocity);
       filteredVelocity.update(0.0);
+      velocityForFrictionCalculation = new AlphaFilteredYoVariable(name + "_velocityForFrictionCalculation", registry, ALPHA_EQUIVALENT_VELOCITY);
+      velocityForFrictionCalculation.update(0.0);
       frictionCompensationEffectiveness = new DoubleYoVariable(name + "_frictionCompensationEffectiveness", registry);
       frictionCompensationEffectiveness.set(0.0);
       this.maxJointVelocityToCompensate = new DoubleYoVariable(name + "_maxJointVelocityToCompensate", registry);
@@ -52,27 +56,30 @@ public abstract class JointFrictionModelsHolder
       smallVelocityAbs = new DoubleYoVariable(name + "_stictionEquivalentVelocity", registry);
       smallVelocityAbs.set(Math.abs(SMALL_VELOCITY_ABS));
       accelerationThreshold = new DoubleYoVariable(name + "_accelerationThreshold", registry);
-      this.accelerationThreshold.set(Math.abs(ACCELERATION_THRESHOLD)); // maybe take in the constructor and set in the friction parameters
+      this.accelerationThreshold.set(Math.abs(ACCELERATION_THRESHOLD)); // maybe take as parameter in the constructor and set in the friction parameters
    }
 
-   // TODO update description
    /**
     * This method computes an equivalent joint velocity to use as input for the friction model. It also sets the state of the friction compensation.
     * If the active friction model is the OFF, than the friction compensation state is set to NOT_COMPENSATING.
-    * If the operator is not requesting a force or a velocity, or if the current joint velocity is bigger than a threshold the friction compensation state
+    * If the operator is not requesting a force or an acceleration, or if the current joint velocity is bigger than a threshold the friction compensation state
     * is set to NOT_COMPENSATING. The velocity threshold can be set to avoid compensation when the joint is moving too fast, this can be necessary to avoid over-compensations.
-    * If the abs of the filtered current joint velocity is bigger than the stiction velocity than the velocity that will be used to compute the friction force is the current joint velocity.
-    * Instead if the abs of the filtered current joint velocity is less than the stiction velocity (the joint is in stiction, but the operator is commanding a movement or a force), 
-    * the equivalent velocity is computed in two different way based on the value of the requested force.
-    * In case the requested force is greater than a force threshold, the equivalent velocity is computed as the stiction velocity with the sign of the desired force.
-    * In case of velocity the equivalent velocity is the desired velocity. 
+    * If the abs of the filtered current joint velocity is less than the stiction velocity (the joint is in stiction), but the operator is commanding a movement or a force, 
+    * the equivalent velocity is computed in two different way based on the value of the requested acceleration.
+    * In case the requested acceleration is greater than a threshold, the equivalent velocity is the SMALL_VELOCITY_ABS with the sign of the desired acceleration.
+    * If the desired acceleration is less than the threshold then the equivalent velocity is the SMALL_VELOCITY_ABS with the sign of the desired force.
+    * If the abs of the filtered current joint velocity is greater than the stiction velocity (the joint is out of stiction) we compute the equivalent velocity in a similar 
+    * way but instead of the force we use the current joint velocity. 
     * As current Joint velocity use the less noisy. 
-    * In case of stiction the discrimination between force or velocity mode is done based on the requested force value, so force control is predominant.
+    * This control can be really stiff from if you are trying to apply a force on the joint to move it. This because here are predominant the desired force exerted from the robot to the environment
+    * and the desired acceleration.
+    * 
+    * @return equivalent joint velocity - This velocity is computed to be used in any friction model also when the joint is in stiction.
+    * Is an alpha filtered variable to avoid oscillations when the requested force or requested acceleration are close their relative threshold
     * 
     */
    protected Double selectFrictionStateAndFrictionVelocity(double requestedForce, double currentJointVelocity, double requestedJointAcceleration)
    {
-      double velocityForFrictionCalculation;
       filteredVelocity.update(currentJointVelocity);
 
       if (activeFrictionModel.getEnumValue() == FrictionModel.OFF)
@@ -94,30 +101,30 @@ public abstract class JointFrictionModelsHolder
       {
          if (Math.abs(requestedJointAcceleration) < accelerationThreshold.getDoubleValue())
          {
-            frictionCompensationState.set(FrictionState.OUT_STICTION_CURRENT_VELOCITY);
-            velocityForFrictionCalculation = currentJointVelocity;
+            frictionCompensationState.set(FrictionState.OUT_ST_VELOCITY);
+            velocityForFrictionCalculation.update(currentJointVelocity);
          }
          else
          {
-            frictionCompensationState.set(FrictionState.OUT_STICTION_DESIRED_ACCELERATION);
-            velocityForFrictionCalculation = Math.signum(requestedJointAcceleration) * smallVelocityAbs.getDoubleValue();
+            frictionCompensationState.set(FrictionState.OUT_ST_ACCELERATION_D);
+            velocityForFrictionCalculation.update(Math.signum(requestedJointAcceleration) * smallVelocityAbs.getDoubleValue());
          }
       }
       else
       {
          if (Math.abs(requestedJointAcceleration) > accelerationThreshold.getDoubleValue())
          {
-            frictionCompensationState.set(FrictionState.IN_STICTION_DESIRED_ACCELERATION);
-            velocityForFrictionCalculation = Math.signum(requestedJointAcceleration) * smallVelocityAbs.getDoubleValue();
+            frictionCompensationState.set(FrictionState.IN_ST_ACCELERATION_D);
+            velocityForFrictionCalculation.update(Math.signum(requestedJointAcceleration) * smallVelocityAbs.getDoubleValue());
          }
          else
          {
-            frictionCompensationState.set(FrictionState.IN_STICTION_DESIRED_FORCE);
-            velocityForFrictionCalculation = Math.signum(requestedForce) * smallVelocityAbs.getDoubleValue();
+            frictionCompensationState.set(FrictionState.IN_ST_FORCE_D);
+            velocityForFrictionCalculation.update(Math.signum(requestedForce) * smallVelocityAbs.getDoubleValue());
          }
       }
 
-      return velocityForFrictionCalculation;
+      return velocityForFrictionCalculation.getDoubleValue();
    }
 
    public void setActiveFrictionModel(FrictionModel requestedFrictionModel)
@@ -141,6 +148,22 @@ public abstract class JointFrictionModelsHolder
             System.out.println("Requested model is null");
          }
       }
+   }  
+   
+   private double clampValue(double val, double min, double max)
+   {
+      return Math.max(min, Math.min(max, val));
+   }
+   
+   /**
+    * Use this method to adjust the exponential smoothing factor 'alpha' for the equivalent velocity.
+    * Increasing this number makes more smooth the transition between different 'FrictionState'.
+    * 
+    * @param alpha - smoothing factor
+    */
+   public void setSmoothFactorForEquivalentVelocity(double alpha)
+   {
+      velocityForFrictionCalculation.setAlpha(alpha);
    }
 
    /**
@@ -194,10 +217,25 @@ public abstract class JointFrictionModelsHolder
       stictionTransitionVelocity.set(value);
    }
    
-   private double clampValue(double val, double min, double max) 
+   public void resetVelocityForFrictionCalculation()
    {
-      return Math.max(min, Math.min(max, val));
-  }
+      velocityForFrictionCalculation.reset();
+   }
+   
+   public static double getSmallVelocityAbs()
+   {
+      return SMALL_VELOCITY_ABS;
+   }
+   
+   public static double getAccelerationThreshold()
+   {
+      return ACCELERATION_THRESHOLD;
+   }
+   
+   public static double getAlphaEquivalentVelocity()
+   {
+      return ALPHA_EQUIVALENT_VELOCITY;
+   }
 
    protected abstract void checkIfExistFrictionModelForThisJoint(FrictionModel requestedFrictionModel);
 }
