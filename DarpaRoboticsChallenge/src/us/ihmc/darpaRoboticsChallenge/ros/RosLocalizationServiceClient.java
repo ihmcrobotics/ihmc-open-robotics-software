@@ -22,6 +22,7 @@ public class RosLocalizationServiceClient implements ObjectConsumer<Localization
    private final RosServiceClient<EmptyRequest,EmptyResponse> resetClient = new RosServiceClient<EmptyRequest, EmptyResponse>(Empty._TYPE);
    private ObjectCommunicator objectCommunicator;
    private RosMainNode rosMainNode;
+   private static final boolean DEBUG = false;
    
    public RosLocalizationServiceClient(ObjectCommunicator objectCommunicator, RosMainNode rosMainNode)
    {
@@ -48,6 +49,12 @@ public class RosLocalizationServiceClient implements ObjectConsumer<Localization
                
                request.setLocalize(localizationPacket.getToggle());
                request.setMap(localizationPacket.getToggle());
+               
+               if (DEBUG)
+               {
+                  System.out.println("Sending message to ROS. Toggle = " + localizationPacket.getToggle());
+                  System.out.println("Reset = " + localizationPacket.getReset());
+               }
                
                localizationClient.call(request, new ServiceResponseListener<SetModeResponse>()
                {
