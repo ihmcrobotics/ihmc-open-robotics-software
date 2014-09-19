@@ -5,6 +5,7 @@ import java.net.URI;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.producers.RobotPoseBuffer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotCameraParameters;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotSensorInformation;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.CameraInfoReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.RosCameraInfoReciever;
@@ -36,7 +37,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
    }
 
    public void initializeSimulatedSensors(LocalObjectCommunicator scsCommunicator, ObjectCommunicator fieldCommunicator, RobotPoseBuffer robotPoseBuffer,
-         DRCNetworkProcessorNetworkingManager networkingManager, SDFFullRobotModel sdfFullRobotModel, DepthDataFilter lidarDataFilter, URI sensorURI)
+                                          DRCNetworkProcessorNetworkingManager networkingManager, SDFFullRobotModel sdfFullRobotModel, DepthDataFilter lidarDataFilter, URI sensorURI, DRCRobotPhysicalProperties physicalProperties)
    {
       new SCSCameraDataReceiver(robotPoseBuffer, sensorInformation.getCameraParameters(0), scsCommunicator, networkingManager, ppsTimestampOffsetProvider);
 
@@ -46,7 +47,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
    }
 
    public void initializePhysicalSensors(RobotPoseBuffer robotPoseBuffer, DRCNetworkProcessorNetworkingManager networkingManager,
-         SDFFullRobotModel sdfFullRobotModel, ObjectCommunicator objectCommunicator, DepthDataFilter lidarDataFilter, URI sensorURI)
+                                         SDFFullRobotModel sdfFullRobotModel, ObjectCommunicator objectCommunicator, DepthDataFilter lidarDataFilter, URI sensorURI, DRCRobotPhysicalProperties physicalProperties)
    {
       RosMainNode rosMainNode = new RosMainNode(rosCoreURI, "darpaRoboticsChallange/networkProcessor");
 
