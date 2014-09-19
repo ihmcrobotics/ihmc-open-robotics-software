@@ -90,9 +90,10 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
          new RosLocalizationUpdateSubscriber(rosMainNode, fieldObjectCommunicator, ppsTimestampOffsetProvider);
 
          
-         RosFootstepServiceClient rosFootstepServiceClient = new RosFootstepServiceClient(fieldObjectCommunicator, networkingManager, rosMainNode, physicalProperties);
-         
-         RosLocalizationServiceClient rosLocalizationServiceClient = new RosLocalizationServiceClient(fieldObjectCommunicator, rosMainNode);
+         RosFootstepServiceClient rosFootstepServiceClient = new RosFootstepServiceClient(networkingManager, rosMainNode, physicalProperties);
+         networkingManager.getControllerCommandHandler().setFootstepServiceClient(rosFootstepServiceClient);
+         RosLocalizationServiceClient rosLocalizationServiceClient = new RosLocalizationServiceClient(rosMainNode);
+         networkingManager.getControllerCommandHandler().setLocalizationServiceClient(rosLocalizationServiceClient);
 
          ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
          rosMainNode.execute();
@@ -150,6 +151,11 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
       FishEyeDataReceiver fishEyeDataReceiver = new FishEyeDataReceiver(robotPoseBuffer, sensorInformation.getCameraParameters(0).getVideoSettings(), rosMainNode, networkingManager,
             DRCSensorParameters.DEFAULT_FIELD_OF_VIEW, ppsTimestampOffsetProvider);
+            
+//      RosFootstepServiceClient rosFootstepServiceClient = new RosFootstepServiceClient(networkingManager, rosMainNode, physicalProperties);
+      RosLocalizationServiceClient rosLocalizationServiceClient = new RosLocalizationServiceClient(rosMainNode);
+      networkingManager.getControllerCommandHandler().setLocalizationServiceClient(rosLocalizationServiceClient);
+//      networkingManager.getControllerCommandHandler().setFootstepServiceClient(rosFootstepServiceClient);
     
       if (DRCConfigParameters.SEND_ROBOT_DATA_TO_ROS)
       {

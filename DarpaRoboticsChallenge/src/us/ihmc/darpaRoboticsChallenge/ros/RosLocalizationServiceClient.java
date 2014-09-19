@@ -16,20 +16,16 @@ import ethz_asl_icp_mapper.SetModeRequest;
 import ethz_asl_icp_mapper.SetModeResponse;
 
 
-public class RosLocalizationServiceClient implements ObjectConsumer<LocalizationPacket>
+public class RosLocalizationServiceClient
 {
    private final RosServiceClient<SetModeRequest, SetModeResponse> localizationClient = new RosServiceClient<SetModeRequest,SetModeResponse>(SetMode._TYPE);
    private final RosServiceClient<EmptyRequest,EmptyResponse> resetClient = new RosServiceClient<EmptyRequest, EmptyResponse>(Empty._TYPE);
-   private ObjectCommunicator objectCommunicator;
    private RosMainNode rosMainNode;
    private static final boolean DEBUG = false;
    
-   public RosLocalizationServiceClient(ObjectCommunicator objectCommunicator, RosMainNode rosMainNode)
+   public RosLocalizationServiceClient(RosMainNode rosMainNode)
    {
       this.rosMainNode = rosMainNode;
-      this.objectCommunicator = objectCommunicator;
-      
-      objectCommunicator.attachListener(LocalizationPacket.class, this);
       
       rosMainNode.attachServiceClient("/mapper_humanoid/set_mode", localizationClient);
       rosMainNode.attachServiceClient("/mapper_humanoid/reset", resetClient);
@@ -52,7 +48,7 @@ public class RosLocalizationServiceClient implements ObjectConsumer<Localization
                
                if (DEBUG)
                {
-                  System.out.println("Sending message to ROS. Toggle = " + localizationPacket.getToggle());
+                  System.out.println("Sending message to ROS. Localization = " + localizationPacket.getToggle());
                   System.out.println("Reset = " + localizationPacket.getReset());
                }
                
@@ -122,8 +118,7 @@ public class RosLocalizationServiceClient implements ObjectConsumer<Localization
       }
    }
 
-   @Override
-   public void consumeObject(LocalizationPacket object)
+   public void processLocalizationPacket(LocalizationPacket object)
    {
       if (object.getReset())
          sendResetReference(object);
