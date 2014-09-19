@@ -49,6 +49,8 @@ import us.ihmc.yoUtilities.stateMachines.StateTransitionCondition;
  * Eventually a new foothold is computed based on the performance of the previous test and 
  * the contact points of the foot are updated to take into account the limits of the foothold.
  * If the area of the new foothold is too small the module can request a re-planning of the footstep.
+ * 
+ * Note. this module to work needs the LookAheadCoMHeightTrajectoryGenerator.
  *  
  * @author Robot Lab
  *
@@ -134,9 +136,13 @@ public class FootExplorationControlModule
    private final HashMap<PlaneContactState, ArrayList<Point2d>> defaultContactPoints;
    private final BooleanYoVariable isRecovering;
    private final BooleanYoVariable stopExploration;
+   private final BooleanYoVariable doToeOffIfPossibleHasBeenChanged;
+   private final BooleanYoVariable swingTimeHasBeenChanged;
+   private final BooleanYoVariable comHeightOffsetHasBeenChanged;
+   private final DoubleYoVariable defaultCOMHeightOffset;
    
-   private Footstep nextFootStep;
-   private RobotSide footUderCoPControl;
+   private Footstep nextFootStep;  // be aware that is the nextfootstep from WalkingHighLevel (is not a copy), use only to re-plan
+   private RobotSide footUderCoPControl;  // be aware that is the swingSide from WalkingHighLevel (is not a copy)
    private FrameConvexPolygon2d supportFootPolygon;
    private FramePoint supportFootCentroid;
    private FramePoint nextFootStepCentroid; 
@@ -193,6 +199,10 @@ public class FootExplorationControlModule
       currentContactPointNumber = new IntegerYoVariable("currentContactPointNumber", registry);
       comIncrement = new DoubleYoVariable("comIncrement", registry);
       stopExploration = new BooleanYoVariable("stopExploration", registry);
+      doToeOffIfPossibleHasBeenChanged = new BooleanYoVariable("doToeOffIfPossibleHasBeenChanged", registry);
+      swingTimeHasBeenChanged = new BooleanYoVariable("swingTimeHasBeenChanged", registry);
+      comHeightOffsetHasBeenChanged = new BooleanYoVariable("comHeightHasBeenChanged", registry);
+      defaultCOMHeightOffset = new DoubleYoVariable("defaultCOMHeightOffset", registry);
       needToResetContactPoints = new HashMap<PlaneContactState, Boolean>();
       defaultContactPoints = new HashMap<PlaneContactState, ArrayList<Point2d>>();
       this.yoTime = yoTime;
@@ -205,15 +215,20 @@ public class FootExplorationControlModule
       desiredICPLocal = new FramePoint2d(worldFrame);
       desiredICPVelocityLocal = new FrameVector2d(worldFrame);
       nextFootStepCentroid = new FramePoint(worldFrame);
+      supportFootCentroid = new FramePoint(worldFrame);
       constantICPPoints = new ArrayList<Double>();
       
       numberOfPlaneContactStates.set(planeContactStates.size());
       initialTime.set(Double.NaN);
       initialExplorationTime.set(Double.NEGATIVE_INFINITY);
-      parentRegistry.addChild(registry);
+      doToeOffIfPossibleHasBeenChanged.set(false);
+      swingTimeHasBeenChanged.set(false);
+      comHeightOffsetHasBeenChanged.set(false);
       
       setupStateMachine();
       reset();
+      
+      parentRegistry.addChild(registry); 
    }
    
    public void controlSwingFoot(YoFramePoint2d desiredICPToPack, YoFrameVector2d desiredICPVelocityToPack, FramePoint2d currentCapturePoint)
@@ -270,7 +285,9 @@ public class FootExplorationControlModule
          supportFootCentroid = new FramePoint(tempCentroid.getReferenceFrame(), tempCentroid.getX(), tempCentroid.getY(), 0.0);
          supportFootCentroid.changeFrame(worldFrame);
 
-         nextFootStep.getPositionIncludingFrame(nextFootStepCentroid);
+         FramePoint tempNextFootStepCentroid = new FramePoint(worldFrame);
+         nextFootStep.getPositionIncludingFrame(tempNextFootStepCentroid);
+         nextFootStepCentroid = new FramePoint(tempNextFootStepCentroid.getReferenceFrame(),tempNextFootStepCentroid.getX(), tempNextFootStepCentroid.getY(), tempNextFootStepCentroid.getZ()); 
          nextFootStepCentroid.changeFrame(worldFrame);
 
          ICPTrajectory.set(worldFrame, supportFootCentroid.getX(), supportFootCentroid.getY(), nextFootStepCentroid.getX(), nextFootStepCentroid.getY());
@@ -285,12 +302,17 @@ public class FootExplorationControlModule
          
          defaultDoToeOff.set(feetManager.getWalkOnTheEdgesManager().doToeOffIfPossible());
          feetManager.getWalkOnTheEdgesManager().setDoToeOffIfPossible(false);
+         doToeOffIfPossibleHasBeenChanged.set(true);
+         
+         defaultCOMHeightOffset.set(centerOfMassHeightTrajectoryGenerator.getOffsetHeightAboveGround());
+         comHeightOffsetHasBeenChanged.set(true);
          
          defaultContactPoints.put(currentPlaneContactStateToExplore, getCopyOfContactPointLocation(currentPlaneContactStateToExplore.getContactPoints()));
          needToResetContactPoints.put(currentPlaneContactStateToExplore, true);
          
          defaultSwingTime.set(swingTimeCalculationProvider.getValue());
          swingTimeCalculationProvider.setSwingTime(swingTimeForExploration);
+         swingTimeHasBeenChanged.set(true);
          
          isControllingSwingFoot.set(true);
          footExplorationICPPlanner.initialize();
@@ -314,7 +336,7 @@ public class FootExplorationControlModule
       transferToNextFootStepIsDone.set(false);
       explorationTime.set(Double.POSITIVE_INFINITY);
       ICPPositionPercentage.set(0.0);
-      feetManager.getWalkOnTheEdgesManager().setDoToeOffIfPossible(defaultDoToeOff.getBooleanValue());
+      resetWalkingVariableIfNecessary();
    }
    
    private void setupStateMachine()
@@ -961,6 +983,27 @@ public class FootExplorationControlModule
       polygon.update();
       
       return polygon;
+   }
+   
+   public void resetWalkingVariableIfNecessary()
+   {
+      if (doToeOffIfPossibleHasBeenChanged.getBooleanValue())
+      {
+         feetManager.getWalkOnTheEdgesManager().setDoToeOffIfPossible(defaultDoToeOff.getBooleanValue());
+         doToeOffIfPossibleHasBeenChanged.set(false);
+      }
+      
+      if(swingTimeHasBeenChanged.getBooleanValue())
+      {
+         swingTimeCalculationProvider.setSwingTime(defaultSwingTime.getDoubleValue());
+         swingTimeHasBeenChanged.set(false);
+      }
+      
+      if (comHeightOffsetHasBeenChanged.getBooleanValue())
+      {
+         centerOfMassHeightTrajectoryGenerator.setOffsetHeightAboveGround(defaultCOMHeightOffset.getDoubleValue());
+         comHeightOffsetHasBeenChanged.set(false);
+      }
    }
    
    // API

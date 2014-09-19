@@ -20,6 +20,7 @@ import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.math.geometry.BoundingBox3d;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
 import com.yobotics.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -67,6 +68,12 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
    {
       BambooTools.reportTestStartedMessage();
       doUpRampTest(null, StepLength.SHORT);
+      
+      Point3d center = new Point3d(6.135997212353164, 0.008329425009630976, 1.3724038542384285);
+      Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
+      BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+      
       BambooTools.reportTestFinishedMessage();
    }
    
@@ -96,6 +103,12 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
+      
+      Point3d center = new Point3d(3.10779655899996, 0.02736263785195079, 0.7900430427277125);
+      Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
+      BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+      
       BambooTools.reportTestFinishedMessage();
    }
    
@@ -104,6 +117,12 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
    {
       BambooTools.reportTestStartedMessage();
       doUpRampTest(null, StepLength.MEDIUM);
+      
+      Point3d center = new Point3d(7.579638943201888, 0.020725665285290903, 1.46537366331119);
+      Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
+      BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+      
       BambooTools.reportTestFinishedMessage();
    }
 
@@ -119,6 +138,11 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
 
       doUpRampTest(footstepDataListCorruptor, StepLength.SHORT);
 
+      Point3d center = new Point3d(6.135997212353164, 0.008329425009630976, 1.3724038542384285);
+      Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
+      BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+
       BambooTools.reportTestFinishedMessage();
    }
 
@@ -133,6 +157,11 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       FootstepDataListCorruptor footstepDataListCorruptor = new FootstepDataListCorruptor(minLocationCorruption, maxLocationCorruption, maxRotationCorruption);
 
       doUpRampTest(footstepDataListCorruptor, StepLength.SHORT);
+      
+      Point3d center = new Point3d(6.135997212353164, 0.008329425009630976, 1.3724038542384285);
+      Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
+      BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
       BambooTools.reportTestFinishedMessage();
    }
