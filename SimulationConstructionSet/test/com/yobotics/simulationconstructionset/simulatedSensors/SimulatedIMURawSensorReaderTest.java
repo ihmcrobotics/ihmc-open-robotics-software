@@ -3,6 +3,8 @@ package com.yobotics.simulationconstructionset.simulatedSensors;
 import static org.junit.Assert.assertEquals;
 
 import us.ihmc.utilities.math.geometry.Transform3d;
+
+import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
@@ -108,6 +110,8 @@ public class SimulatedIMURawSensorReaderTest
       //randomBodyAxisAngle.set(0.0, 0.0, 0.0, 0.0); // for debugging
       
       randomTransformBodyToWorld.set(randomBodyAxisAngle);
+      Transform3d transform = new Transform3d();
+      transform.set(randomBodyAxisAngle);
    }
    
    private void generateAppliedVelocity()
