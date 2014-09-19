@@ -212,8 +212,8 @@ void LidarToPointCloudTransformer::laserScanCallback(const sensor_msgs::LaserSca
 
   // Robot self filter.
   pcl::PointCloud<pcl::PointXYZI>::Ptr pointCloudFiltered(new pcl::PointCloud<pcl::PointXYZI>());
-  selfFilter->updateShapeTransformCache(targetFrameId_, scantime);
-  selfFilter->filterPointClould(*pointCloudTransformed, *pointCloudFiltered);
+  selfFilter->updateShapeTransformCache(pointCloud->header.frame_id, scantime);
+  selfFilter->filterPointClould(*pointCloud, *pointCloudFiltered);
   filteredPointCloudPublisher_.publish(pointCloudFiltered);
 
   // Publish laser scan as point cloud.
@@ -222,7 +222,7 @@ void LidarToPointCloudTransformer::laserScanCallback(const sensor_msgs::LaserSca
   // Assemble point cloud.
   PointCloud::Ptr pointCloudAssembled(new PointCloud);
   bool assemblyCycleFinished;
-  if (!pointCloudAssembler_.assemble(pointCloud, pointCloudAssembled, assemblyCycleFinished)) return;
+  if (!pointCloudAssembler_.assemble(pointCloudFiltered, pointCloudAssembled, assemblyCycleFinished)) return;
 
   // Publish assembled point cloud.
   if (assemblyCycleFinished) {
