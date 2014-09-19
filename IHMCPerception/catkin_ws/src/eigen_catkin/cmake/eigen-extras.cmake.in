@@ -1,0 +1,1 @@
+set(@PROJECT_NAME@_INCLUDE_DIRS @CATKIN_DEVEL_PREFIX@/include/eigen3/)
