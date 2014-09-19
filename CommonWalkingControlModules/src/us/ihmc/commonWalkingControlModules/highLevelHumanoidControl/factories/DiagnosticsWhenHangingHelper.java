@@ -1,5 +1,8 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
+import java.util.ArrayList;
+
+import us.ihmc.robotSide.SideDependentList;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -21,6 +24,7 @@ public class DiagnosticsWhenHangingHelper
    private static final boolean DEBUG = true;
 
    private final OneDoFJoint parentJoint;
+   private final boolean isSpineJoint;
    
    private final CenterOfMassCalculator centerOfMassCalculator;
    private final YoFramePoint belowJointCoMInZUpFrame;
@@ -39,8 +43,14 @@ public class DiagnosticsWhenHangingHelper
 
    public DiagnosticsWhenHangingHelper(OneDoFJoint parentJoint, boolean preserveY, YoVariableRegistry registry)
    {
+      this(parentJoint, preserveY, false, null, registry);
+   }
+   
+   public DiagnosticsWhenHangingHelper(OneDoFJoint parentJoint, boolean preserveY, boolean isSpineJoint, SideDependentList<InverseDynamicsJoint> topLegJointsIfSpine, YoVariableRegistry registry)
+   {
       this.parentJoint = parentJoint;
-      centerOfMassCalculator = createCenterOfMassCalculatorInJointZUpFrame(parentJoint, preserveY);
+      this.isSpineJoint = isSpineJoint;
+      centerOfMassCalculator = createCenterOfMassCalculatorInJointZUpFrame(parentJoint, preserveY, isSpineJoint, topLegJointsIfSpine);
 
       belowJointCoMInZUpFrame = new YoFramePoint(parentJoint.getName() + "CoMInZUpFrame", centerOfMassCalculator.getDesiredFrame(), registry);
       centerOfMassPosition = new FramePoint(centerOfMassCalculator.getDesiredFrame());
@@ -60,7 +70,7 @@ public class DiagnosticsWhenHangingHelper
       torqueCorrectionPdController.setDerivativeGain(0.02);
    }
 
-   private static CenterOfMassCalculator createCenterOfMassCalculatorInJointZUpFrame(InverseDynamicsJoint parentJoint, boolean preserveY)
+   private static CenterOfMassCalculator createCenterOfMassCalculatorInJointZUpFrame(InverseDynamicsJoint parentJoint, boolean preserveY, boolean spineJoint, SideDependentList<InverseDynamicsJoint> topLegJointsIfSpine)
    {
       if (DEBUG)
          System.out.println("parentJoint = " + parentJoint);
@@ -84,7 +94,22 @@ public class DiagnosticsWhenHangingHelper
          jointZUpFrame = new ZUpFrame(ReferenceFrame.getWorldFrame(), jointFrame, jointName + "ZUp");
       }
 
-      RigidBody[] rigidBodies = ScrewTools.computeRigidBodiesAfterThisJoint(parentJoint);
+      
+      ArrayList<RigidBody> rigidBodies = new ArrayList<RigidBody>();
+      
+      if (spineJoint)
+      {
+         ScrewTools.computeRigidBodiesFromRootToThisJoint(rigidBodies, parentJoint);
+         for (InverseDynamicsJoint legJoint : topLegJointsIfSpine)
+         {
+            ScrewTools.computeRigidBodiesAfterThisJoint(rigidBodies, legJoint);         
+         }
+      }
+      else
+      {
+         ScrewTools.computeRigidBodiesAfterThisJoint(rigidBodies, parentJoint);         
+      }
+      
       CenterOfMassCalculator centerOfMassCalculator = new CenterOfMassCalculator(rigidBodies, jointZUpFrame);
 
       return centerOfMassCalculator;
@@ -138,6 +163,7 @@ public class DiagnosticsWhenHangingHelper
       rCrossFVector.cross(forceVector, jointToCenterOfMass);
       
       estimatedTorque.set(rCrossFVector.dot(jointAxis));
+      if (isSpineJoint) estimatedTorque.mul(-1.0);
    }
 
 
