@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 
 import us.ihmc.utilities.math.geometry.Transform3d;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
