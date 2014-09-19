@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<package>
+  <name>foothold_finding_msg</name>
+  <version>0.1.0</version>
+  <description>Message and service definitions for foothold finding.</description>
+  <maintainer email="pfankhauser@ethz.ch">Peter Fankhauser</maintainer>
+  <license>TODO</license>
+  <url type="website">http://leggedrobotics.ethz.ch/</url>
+  <author email="pfankhauser@ethz.ch">Peter Fankhauser</author>
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>message_generation</build_depend>
+  <run_depend>message_runtime</run_depend>
+</package>
