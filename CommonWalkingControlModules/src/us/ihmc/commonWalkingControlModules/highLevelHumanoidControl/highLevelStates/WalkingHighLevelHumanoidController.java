@@ -981,6 +981,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             nextFootstep = upcomingFootstepList.getNextFootstep();
             swingTimeCalculationProvider.updateSwingTime();
          }
+         
+         RobotSide supportSide = swingSide.getOppositeSide();
+         FrameConvexPolygon2d footPolygon = computeFootPolygon(supportSide, referenceFrames.getAnkleZUpFrame(supportSide));
+         footExplorationControlModule.initialize(nextFootstep, footPolygon, swingSide);
 
          if (nextFootstep != null)
             feetManager.requestSwing(swingSide, nextFootstep, mapFromFootstepsToTrajectoryParameters.get(nextFootstep));
@@ -995,8 +999,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          if (DEBUG)
             System.out.println("WalkingHighLevelHumanoidController: enteringSingleSupportState");
-         RobotSide supportSide = swingSide.getOppositeSide();
-
+         
          supportLeg.set(supportSide);
 
          transferTimeCalculationProvider.updateTransferTime();
@@ -1017,9 +1020,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          {
             desiredICP.set(capturePoint.getFramePoint2dCopy()); // TODO: currently necessary for stairs because of the omega0 jump, but should get rid of this
          }
-         
-         FrameConvexPolygon2d footPolygon = computeFootPolygon(supportSide, referenceFrames.getAnkleZUpFrame(supportSide));
-         footExplorationControlModule.initialize(nextFootstep, footPolygon, swingSide);
       }
 
       private void updateFootstepParameters()
@@ -1256,7 +1256,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             footSwitchActivated = footSwitch.hasFootHitGround();
          }
 
-         if (hasMinimumTimePassed.getBooleanValue() && justFall.getBooleanValue())
+         if (hasMinimumTimePassed.getBooleanValue() && justFall.getBooleanValue()  && !footExplorationControlModule.isControllingSwingFoot())
             return true;
 
          // Just switch states if icp is done, plus a little bit more. You had enough time and more isn't going to do any good.
@@ -1269,12 +1269,15 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          if (DO_TRANSITION_WHEN_TIME_IS_UP)
          {
-            if (hasICPPlannerFinished.getBooleanValue()
-                  && (yoTime.getDoubleValue() > timeThatICPPlannerFinished.getDoubleValue() + dwellInSingleSupportDuration.getDoubleValue()))
-               return true;
+            if (!footExplorationControlModule.isControllingSwingFoot())
+            {
+               if (hasICPPlannerFinished.getBooleanValue()
+                     && (yoTime.getDoubleValue() > timeThatICPPlannerFinished.getDoubleValue() + dwellInSingleSupportDuration.getDoubleValue()))
+                  return true;
+            }
          }
 
-         if (walkingControllerParameters.finishSwingWhenTrajectoryDone() || footExplorationControlModule.isControllingSwingFoot())
+         if (walkingControllerParameters.finishSwingWhenTrajectoryDone() && !footExplorationControlModule.isControllingSwingFoot())
          {
             return hasMinimumTimePassed.getBooleanValue() && (hasICPPlannerFinished.getBooleanValue() || footSwitchActivated);
          }

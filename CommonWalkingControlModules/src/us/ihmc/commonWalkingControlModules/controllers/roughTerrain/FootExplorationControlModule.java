@@ -74,7 +74,7 @@ public class FootExplorationControlModule
    private static double icpShiftTime = 1.5;
    private static double copShiftTime = 2;
    private static double copTransitionRestingTime = 1; // must be less than copShiftTime/2
-   private static double swingTimeForExploration = 2;
+   private static double swingTimeForExploration = 3;
    
    // unstable situations
    private static double maxICPAbsError = 0.04;
