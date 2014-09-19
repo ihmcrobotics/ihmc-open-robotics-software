@@ -633,4 +633,9 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    {
       offsetHeightAboveGround.set(value);
    }
+   
+   public double getOffsetHeightAboveGround()
+   {
+      return offsetHeightAboveGround.getDoubleValue();
+   }
 }
