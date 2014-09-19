@@ -95,7 +95,8 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
    
    public void setInitialTimePositionsAndVelocities()
    {
-	   t0 = startTime.getDoubleValue();
+	   t0 = startTimeProvider.getValue();
+	   startTime.set(startTimeProvider.getValue());
 	   timeIntoTouchdown.set(0.0);
 	      
 	   initialPositionSource.get(p0);
