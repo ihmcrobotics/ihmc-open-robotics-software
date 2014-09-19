@@ -60,7 +60,7 @@ public class PointPositionHandControlState extends State<HandControlState>
       this.momentumBasedController = momentumBasedController;
       this.twistCalculator = momentumBasedController.getTwistCalculator();
 
-      String stateName = FormattingTools.underscoredToCamelCase(this.stateEnum.toString(), true) + "State";
+      String stateName = FormattingTools.underscoredToCamelCase(this.getStateEnum().toString(), true) + "State";
       String name = robotSide.getCamelCaseNameForStartOfExpression() + stateName;
       registry = new YoVariableRegistry(name);
       String desiredHandPositionName = robotSide.getCamelCaseNameForStartOfExpression() + "HandDesPointPosition";

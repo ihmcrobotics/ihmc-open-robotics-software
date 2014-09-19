@@ -28,7 +28,7 @@ public abstract class TaskspaceHandControlState extends State<HandControlState>
    {
       super(stateEnum);
 
-      name = namePrefix + FormattingTools.underscoredToCamelCase(this.stateEnum.toString(), true) + "State";
+      name = namePrefix + FormattingTools.underscoredToCamelCase(this.getStateEnum().toString(), true) + "State";
       registry = new YoVariableRegistry(name);
 
       taskspaceConstraintData.set(base, endEffector);
