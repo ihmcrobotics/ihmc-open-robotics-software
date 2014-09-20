@@ -85,6 +85,7 @@ public class FootExplorationControlModule
    private static double minCoPDistanceFromBorder = 0.01;
    private static double recoverContactPointsScaleFactor = 0.9;
    private static double recoverTime = 2;
+   private static int minimumNumberOfContactPointsToHaveAPolygon = 3;
    
    // parameter of tilt foot
    private static double zeroVelocity = 0.2;
@@ -164,16 +165,16 @@ public class FootExplorationControlModule
    private DenseMatrix64F jointVelocityMatrix;
    
    // DEBUG TO REMOVE
-   private DoubleYoVariable debugRigidBodyName;
-   private final DoubleYoVariable debugNumberOfContactPoints;
-   private final YoFramePoint2d debugContactPoint2d0;
-   private final YoFramePoint2d debugContactPoint2d1;
-   private final YoFramePoint2d debugContactPoint2d2;
-   private final YoFramePoint2d debugContactPoint2d3;
-   private final YoFramePoint debugContactPoint0;
-   private final YoFramePoint debugContactPoint1;
-   private final YoFramePoint debugContactPoint2;
-   private final YoFramePoint debugContactPoint3;
+//   private DoubleYoVariable debugRigidBodyName;
+//   private final DoubleYoVariable debugNumberOfContactPoints;
+//   private final YoFramePoint2d debugContactPoint2d0;
+//   private final YoFramePoint2d debugContactPoint2d1;
+//   private final YoFramePoint2d debugContactPoint2d2;
+//   private final YoFramePoint2d debugContactPoint2d3;
+//   private final YoFramePoint debugContactPoint0;
+//   private final YoFramePoint debugContactPoint1;
+//   private final YoFramePoint debugContactPoint2;
+//   private final YoFramePoint debugContactPoint3;
    
    
    public FootExplorationControlModule(YoVariableRegistry parentRegistry, MomentumBasedController momentumBasedController, DoubleYoVariable yoTime, 
@@ -232,16 +233,16 @@ public class FootExplorationControlModule
       supportFootCentroid = new FramePoint(worldFrame);
       constantICPPoints = new ArrayList<Double>();
       
-      debugNumberOfContactPoints = new DoubleYoVariable("debugNumberOfContactPoints", registry);
-      debugContactPoint2d0 = new YoFramePoint2d("debugContactPoint2d0", worldFrame, registry);
-      debugContactPoint2d1 = new YoFramePoint2d("debugContactPoint2d1", worldFrame, registry);
-      debugContactPoint2d2 = new YoFramePoint2d("debugContactPoint2d2", worldFrame, registry);
-      debugContactPoint2d3 = new YoFramePoint2d("debugContactPoint2d3", worldFrame, registry);
-      debugContactPoint0 = new YoFramePoint("debugContactPoint0", worldFrame, registry);
-      debugContactPoint1 = new YoFramePoint("debugContactPoint1", worldFrame, registry);
-      debugContactPoint2 = new YoFramePoint("debugContactPoint2", worldFrame, registry);
-      debugContactPoint3 = new YoFramePoint("debugContactPoint3", worldFrame, registry);
-      debugRigidBodyName = new DoubleYoVariable("debugRigidBodyName", registry);
+//      debugNumberOfContactPoints = new DoubleYoVariable("debugNumberOfContactPoints", registry);
+//      debugContactPoint2d0 = new YoFramePoint2d("debugContactPoint2d0", worldFrame, registry);
+//      debugContactPoint2d1 = new YoFramePoint2d("debugContactPoint2d1", worldFrame, registry);
+//      debugContactPoint2d2 = new YoFramePoint2d("debugContactPoint2d2", worldFrame, registry);
+//      debugContactPoint2d3 = new YoFramePoint2d("debugContactPoint2d3", worldFrame, registry);
+//      debugContactPoint0 = new YoFramePoint("debugContactPoint0", worldFrame, registry);
+//      debugContactPoint1 = new YoFramePoint("debugContactPoint1", worldFrame, registry);
+//      debugContactPoint2 = new YoFramePoint("debugContactPoint2", worldFrame, registry);
+//      debugContactPoint3 = new YoFramePoint("debugContactPoint3", worldFrame, registry);
+//      debugRigidBodyName = new DoubleYoVariable("debugRigidBodyName", registry);
       
       
       numberOfPlaneContactStates.set(planeContactStates.size());
@@ -351,7 +352,7 @@ public class FootExplorationControlModule
    {
       isControllingSwingFoot.set(false);
 //      footHoldIsSafeEnough.set(false);
-      // TODO define better in the exploration phase
+      // TODO define better in the exploration phase and if is not safe enough (have a look to the area) re-plan
       footHoldIsSafeEnough.set(true);
       swingIsFinished.set(false);
       icpIsCloseEnoughToDesired.set(false);
@@ -456,7 +457,8 @@ public class FootExplorationControlModule
       @Override
       public void doAction()
       {
-         //TODO: first attempt to find a suitable sartCoP (maybe explore both areas and select the bigger)
+         //TODO: first attempt to find a suitable startCoP (maybe explore both areas and select the bigger)
+         // maybe find the axis of rotation.
          
          if (currentContactPointNumber.getIntegerValue() < currentPlaneContactStateToExplore.getTotalNumberOfContactPoints())
          {
@@ -553,24 +555,11 @@ public class FootExplorationControlModule
                   RigidBody planeBody = planeContactState.getRigidBody();
                   RigidBody contactablePlaneRigidBody = contactablePlaneBody.getRigidBody();
 
-                  if (planeBody.equals(contactablePlaneRigidBody))
-                  {                     
-                     if (contactablePlaneRigidBody.getName().contentEquals("l_foot"))
-                     {
-                        debugRigidBodyName.set(0.0);
-                     }
-                     else
-                     {
-                        if (contactablePlaneRigidBody.getName().contentEquals("r_foot"))
-                        {
-                           debugRigidBodyName.set(1.0);
-                        }
-                        else
-                        {
-                           debugRigidBodyName.set(2.0);
-                        }
-                     }
+                  if (planeBody.equals(contactablePlaneRigidBody) && planeContactState.inContact() 
+                      && planeContactState.getTotalNumberOfContactPoints() >= minimumNumberOfContactPointsToHaveAPolygon)
+                  {
                      List<? extends ContactPoint> points = planeContactState.getContactPoints();
+
                      FramePoint2d localCoP = momentumBasedController.getCoP(contactablePlaneBody);
                      double minDistance = getClosestEdgeDistance(points, localCoP);
 
@@ -590,13 +579,13 @@ public class FootExplorationControlModule
          double ret = Double.POSITIVE_INFINITY;
          FrameConvexPolygon2d polygon = createAPolygonFromContactPoints(points);
 
-//         for (int i = 0; i < polygon.getNumberOfVertices(); i++)
-//         {            
-//            FrameLine2d line = new FrameLine2d(polygon.getFrameVertex(i), polygon.getNextFrameVertex(i));
-//            double distance = line.distance(pointToCheck);
-//            if (distance < ret)
-//               ret = distance;
-//         }
+         for (int i = 0; i < polygon.getNumberOfVertices(); i++)
+         {            
+            FrameLine2d line = new FrameLine2d(polygon.getFrameVertex(i), polygon.getNextFrameVertex(i));
+            double distance = line.distance(pointToCheck);
+            if (distance < ret)
+               ret = distance;
+         }
          
          return ret;
       }
@@ -1018,20 +1007,6 @@ public class FootExplorationControlModule
       ArrayList<FramePoint2d> frameVertices = new ArrayList<FramePoint2d>();
       for(int i = 0; i < points.size(); i++)
       {
-         debugNumberOfContactPoints.set(points.size());
-         
-         if(i == 0)
-         {
-            debugContactPoint2d0.set(points.get(0).getPosition2d().getX(), points.get(0).getPosition2d().getY());
-            debugContactPoint2d1.set(points.get(1).getPosition2d().getX(), points.get(1).getPosition2d().getY());
-            debugContactPoint2d2.set(points.get(2).getPosition2d().getX(), points.get(2).getPosition2d().getY());
-            debugContactPoint2d3.set(points.get(3).getPosition2d().getX(), points.get(3).getPosition2d().getY());
-            debugContactPoint0.set(points.get(0).getPosition().getX(), points.get(0).getPosition().getY(), points.get(0).getPosition().getZ());
-            debugContactPoint1.set(points.get(1).getPosition().getX(), points.get(1).getPosition().getY(), points.get(1).getPosition().getZ());
-            debugContactPoint2.set(points.get(2).getPosition().getX(), points.get(2).getPosition().getY(), points.get(2).getPosition().getZ());
-            debugContactPoint3.set(points.get(3).getPosition().getX(), points.get(3).getPosition().getY(), points.get(3).getPosition().getZ());
-         }
-         
          frameVertices.add(points.get(i).getPosition2d());
       }
       FrameConvexPolygon2d polygon = new FrameConvexPolygon2d(frameVertices);
