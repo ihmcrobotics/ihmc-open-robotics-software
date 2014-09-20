@@ -4,8 +4,8 @@
   <version>0.1.0</version>
   <description>Foothold search and optimization for legged robotics.</description>
   <maintainer email="pfankhauser@ethz.ch">Peter Fankhauser</maintainer>
-  <license>TODO</license>
-  <url type="website">http://leggedrobotics.ethz.ch/</url>
+  <license>MIT</license>
+  <url type="website">https://github.com/ethz-asl/foothold_finding/</url>
   <author email="pfankhauser@ethz.ch">Peter Fankhauser</author>
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>cmake_modules</build_depend>

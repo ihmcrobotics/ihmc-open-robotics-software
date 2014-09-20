@@ -79,16 +79,13 @@ class FootholdFinder
 
   bool getMap(const Eigen::Vector2d& position, const double sideLength, grid_map::GridMap& map);
 
-  void clusterPolygonAreaInMap(const Polygon& polygon, grid_map::GridMap& map);
+  bool checkArea(const Polygon& polygon, grid_map::GridMap& map);
 
   /*!
-   * Request a part of the elevation map and cluster it.
-   * @param[in] position the desired center of the submap.
-   * @param[in] radius the search radius.
-   * @param[out] map the clustered map.
-   * @return true if successful, false if position is outside the map.
+   * Clusters the entire map.
+   * @param map the the grid map to be clustered.
    */
-  void clusterMap(const Eigen::Vector2d& position, const double radius, grid_map::GridMap& map);
+  void clusterMap(grid_map::GridMap& map);
 
   /*!
    * Positions and projects a rotated standard foot shape to the world horizontal plane.
@@ -140,6 +137,10 @@ class FootholdFinder
 
   //! Tolerance on how close the points have to lie on a plane to be regarded as same plane.
   double planeTolerance_;
+
+  double validCellCountThreshold_;
+
+  int minNumberOfCellsPerFoothold_;
 
   //! Shape of the footprint in the foot frame;
   Polygon footShape_;
