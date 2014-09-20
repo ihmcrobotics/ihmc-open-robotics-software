@@ -39,7 +39,7 @@ public class DiagnosticsWhenHangingHelper
    private final DoubleYoVariable totalMass;
    private final DoubleYoVariable estimatedTorque, torqueOffset, appliedTorque;
    
-   private final PDController torqueCorrectionPdController;
+   private final DoubleYoVariable torqueCorrectionAlpha;
 
    public DiagnosticsWhenHangingHelper(OneDoFJoint parentJoint, boolean preserveY, YoVariableRegistry registry)
    {
@@ -65,9 +65,8 @@ public class DiagnosticsWhenHangingHelper
       
       totalMass = new DoubleYoVariable("totalMass_" + parentJoint.getName(), registry);
       
-      torqueCorrectionPdController = new PDController("tau_corr_" + parentJoint.getName(), registry);
-      torqueCorrectionPdController.setProportionalGain(0.1);
-      torqueCorrectionPdController.setDerivativeGain(0.02);
+      torqueCorrectionAlpha = new DoubleYoVariable("torqueCorrectionAlpha_" + parentJoint.getName(), registry);
+      torqueCorrectionAlpha.set(0.001);
    }
 
    private static CenterOfMassCalculator createCenterOfMassCalculatorInJointZUpFrame(InverseDynamicsJoint parentJoint, boolean preserveY, boolean spineJoint, SideDependentList<InverseDynamicsJoint> topLegJointsIfSpine)
@@ -115,13 +114,19 @@ public class DiagnosticsWhenHangingHelper
       return centerOfMassCalculator;
    }
 
-   public double getTorqueToApply(double desiredTorque)
+   public double getTorqueToApply(double feedbackCorrectionTorque, boolean adaptTorqueOffset)
    {
-      if (appliedTorque.getDoubleValue() < 4)
-           torqueOffset.set(torqueCorrectionPdController.compute(torqueOffset.getDoubleValue(), estimatedTorque.getDoubleValue() - desiredTorque, 1.0, 1.0));
+      appliedTorque.set(feedbackCorrectionTorque + estimatedTorque.getDoubleValue()); 
       
-      appliedTorque.set(desiredTorque + estimatedTorque.getDoubleValue() - torqueOffset.getDoubleValue());
-      return appliedTorque.getDoubleValue();
+      if (adaptTorqueOffset && (Math.abs(appliedTorque.getDoubleValue()) < 4.0))
+      {
+         torqueOffset.sub(feedbackCorrectionTorque * torqueCorrectionAlpha.getDoubleValue());
+         
+         if (torqueOffset.getDoubleValue() > 10.0) torqueOffset.set(10.0);
+         if (torqueOffset.getDoubleValue() < -10.0) torqueOffset.set(-10.0);
+      }
+      
+      return appliedTorque.getDoubleValue() - torqueOffset.getDoubleValue();
    }
    
    public double getEstimatedTorque()
