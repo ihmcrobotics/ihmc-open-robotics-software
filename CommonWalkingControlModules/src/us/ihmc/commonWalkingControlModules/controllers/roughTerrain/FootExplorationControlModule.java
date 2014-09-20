@@ -174,7 +174,6 @@ public class FootExplorationControlModule
    private final YoFramePoint debugContactPoint1;
    private final YoFramePoint debugContactPoint2;
    private final YoFramePoint debugContactPoint3;
-   private int debugcounter;
    
    
    public FootExplorationControlModule(YoVariableRegistry parentRegistry, MomentumBasedController momentumBasedController, DoubleYoVariable yoTime, 
@@ -242,7 +241,7 @@ public class FootExplorationControlModule
       debugContactPoint1 = new YoFramePoint("debugContactPoint1", worldFrame, registry);
       debugContactPoint2 = new YoFramePoint("debugContactPoint2", worldFrame, registry);
       debugContactPoint3 = new YoFramePoint("debugContactPoint3", worldFrame, registry);
-      debugcounter = 0;
+      debugRigidBodyName = new DoubleYoVariable("debugRigidBodyName", registry);
       
       
       numberOfPlaneContactStates.set(planeContactStates.size());
@@ -555,10 +554,22 @@ public class FootExplorationControlModule
                   RigidBody contactablePlaneRigidBody = contactablePlaneBody.getRigidBody();
 
                   if (planeBody.equals(contactablePlaneRigidBody))
-                  {
-                     debugRigidBodyName = new DoubleYoVariable("debugRigidBodyName_" + contactablePlaneRigidBody.getName() + debugcounter, registry);
-                     debugcounter++;
-                     
+                  {                     
+                     if (contactablePlaneRigidBody.getName().contentEquals("l_foot"))
+                     {
+                        debugRigidBodyName.set(0.0);
+                     }
+                     else
+                     {
+                        if (contactablePlaneRigidBody.getName().contentEquals("r_foot"))
+                        {
+                           debugRigidBodyName.set(1.0);
+                        }
+                        else
+                        {
+                           debugRigidBodyName.set(2.0);
+                        }
+                     }
                      List<? extends ContactPoint> points = planeContactState.getContactPoints();
                      FramePoint2d localCoP = momentumBasedController.getCoP(contactablePlaneBody);
                      double minDistance = getClosestEdgeDistance(points, localCoP);
