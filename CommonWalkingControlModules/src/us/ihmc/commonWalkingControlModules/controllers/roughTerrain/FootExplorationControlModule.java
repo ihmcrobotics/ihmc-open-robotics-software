@@ -34,6 +34,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
+import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector2d;
 import us.ihmc.yoUtilities.math.trajectories.StraightLinePositionTrajectoryGenerator;
@@ -142,6 +143,14 @@ public class FootExplorationControlModule
    private final DoubleYoVariable defaultCOMHeightOffset;
    
    private final DoubleYoVariable debugNumberOfContactPoints;
+   private final YoFramePoint2d debugContactPoint2d0;
+   private final YoFramePoint2d debugContactPoint2d1;
+   private final YoFramePoint2d debugContactPoint2d2;
+   private final YoFramePoint2d debugContactPoint2d3;
+   private final YoFramePoint debugContactPoint0;
+   private final YoFramePoint debugContactPoint1;
+   private final YoFramePoint debugContactPoint2;
+   private final YoFramePoint debugContactPoint3;
      
    private Footstep nextFootStep;  // be aware that is the nextfootstep from WalkingHighLevel (is not a copy), use only to re-plan
    private RobotSide footUderCoPControl;  // be aware that is the swingSide from WalkingHighLevel (is not a copy)
@@ -205,7 +214,6 @@ public class FootExplorationControlModule
       swingTimeHasBeenChanged = new BooleanYoVariable("swingTimeHasBeenChanged", registry);
       comHeightOffsetHasBeenChanged = new BooleanYoVariable("comHeightOffsetHasBeenChanged", registry);
       defaultCOMHeightOffset = new DoubleYoVariable("defaultCOMHeightOffset", registry);
-      debugNumberOfContactPoints = new DoubleYoVariable("debugNumberOfContactPoints", registry);
       needToResetContactPoints = new HashMap<PlaneContactState, Boolean>();
       defaultContactPoints = new HashMap<PlaneContactState, ArrayList<Point2d>>();
       this.yoTime = yoTime;
@@ -220,6 +228,17 @@ public class FootExplorationControlModule
       nextFootStepCentroid = new FramePoint(worldFrame);
       supportFootCentroid = new FramePoint(worldFrame);
       constantICPPoints = new ArrayList<Double>();
+      
+      debugNumberOfContactPoints = new DoubleYoVariable("debugNumberOfContactPoints", registry);
+      debugContactPoint2d0 = new YoFramePoint2d("debugContactPoint2d0", worldFrame, registry);
+      debugContactPoint2d1 = new YoFramePoint2d("debugContactPoint2d1", worldFrame, registry);
+      debugContactPoint2d2 = new YoFramePoint2d("debugContactPoint2d2", worldFrame, registry);
+      debugContactPoint2d3 = new YoFramePoint2d("debugContactPoint2d3", worldFrame, registry);
+      debugContactPoint0 = new YoFramePoint("debugContactPoint0", worldFrame, registry);
+      debugContactPoint1 = new YoFramePoint("debugContactPoint1", worldFrame, registry);
+      debugContactPoint2 = new YoFramePoint("debugContactPoint2", worldFrame, registry);
+      debugContactPoint3 = new YoFramePoint("debugContactPoint3", worldFrame, registry);
+      
       
       numberOfPlaneContactStates.set(planeContactStates.size());
       initialTime.set(Double.NaN);
@@ -555,7 +574,7 @@ public class FootExplorationControlModule
          FrameConvexPolygon2d polygon = createAPolygonFromContactPoints(points);
 
          for (int i = 0; i < polygon.getNumberOfVertices(); i++)
-         {
+         {            
             FrameLine2d line = new FrameLine2d(polygon.getFrameVertex(i), polygon.getNextFrameVertex(i));
             double distance = line.distance(pointToCheck);
             if (distance < ret)
@@ -982,6 +1001,18 @@ public class FootExplorationControlModule
       ArrayList<FramePoint2d> frameVertices = new ArrayList<FramePoint2d>();
       for(int i = 0; i < points.size(); i++)
       {
+         if(i == 0)
+         {
+            debugContactPoint2d0.set(points.get(0).getPosition2d().getX(), points.get(0).getPosition2d().getY());
+            debugContactPoint2d1.set(points.get(1).getPosition2d().getX(), points.get(1).getPosition2d().getY());
+            debugContactPoint2d2.set(points.get(2).getPosition2d().getX(), points.get(2).getPosition2d().getY());
+            debugContactPoint2d3.set(points.get(3).getPosition2d().getX(), points.get(3).getPosition2d().getY());
+            debugContactPoint0.set(points.get(0).getPosition().getX(), points.get(0).getPosition().getY(), points.get(0).getPosition().getZ());
+            debugContactPoint1.set(points.get(1).getPosition().getX(), points.get(1).getPosition().getY(), points.get(1).getPosition().getZ());
+            debugContactPoint2.set(points.get(2).getPosition().getX(), points.get(2).getPosition().getY(), points.get(2).getPosition().getZ());
+            debugContactPoint3.set(points.get(3).getPosition().getX(), points.get(3).getPosition().getY(), points.get(3).getPosition().getZ());
+         }
+         
          frameVertices.add(points.get(i).getPosition2d());
       }
       FrameConvexPolygon2d polygon = new FrameConvexPolygon2d(frameVertices);
