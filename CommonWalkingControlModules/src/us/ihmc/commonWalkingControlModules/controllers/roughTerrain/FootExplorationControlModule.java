@@ -141,6 +141,8 @@ public class FootExplorationControlModule
    private final BooleanYoVariable comHeightOffsetHasBeenChanged;
    private final DoubleYoVariable defaultCOMHeightOffset;
    
+   private final DoubleYoVariable debugNumberOfContactPoints;
+     
    private Footstep nextFootStep;  // be aware that is the nextfootstep from WalkingHighLevel (is not a copy), use only to re-plan
    private RobotSide footUderCoPControl;  // be aware that is the swingSide from WalkingHighLevel (is not a copy)
    private FrameConvexPolygon2d supportFootPolygon;
@@ -201,8 +203,9 @@ public class FootExplorationControlModule
       stopExploration = new BooleanYoVariable("stopExploration", registry);
       doToeOffIfPossibleHasBeenChanged = new BooleanYoVariable("doToeOffIfPossibleHasBeenChanged", registry);
       swingTimeHasBeenChanged = new BooleanYoVariable("swingTimeHasBeenChanged", registry);
-      comHeightOffsetHasBeenChanged = new BooleanYoVariable("comHeightHasBeenChanged", registry);
+      comHeightOffsetHasBeenChanged = new BooleanYoVariable("comHeightOffsetHasBeenChanged", registry);
       defaultCOMHeightOffset = new DoubleYoVariable("defaultCOMHeightOffset", registry);
+      debugNumberOfContactPoints = new DoubleYoVariable("debugNumberOfContactPoints", registry);
       needToResetContactPoints = new HashMap<PlaneContactState, Boolean>();
       defaultContactPoints = new HashMap<PlaneContactState, ArrayList<Point2d>>();
       this.yoTime = yoTime;
@@ -546,6 +549,8 @@ public class FootExplorationControlModule
       
       private double getClosestEdgeDistance(List<? extends ContactPoint> points, FramePoint2d pointToCheck)
       {
+         debugNumberOfContactPoints.set(points.size());
+         
          double ret = Double.POSITIVE_INFINITY;
          FrameConvexPolygon2d polygon = createAPolygonFromContactPoints(points);
 
