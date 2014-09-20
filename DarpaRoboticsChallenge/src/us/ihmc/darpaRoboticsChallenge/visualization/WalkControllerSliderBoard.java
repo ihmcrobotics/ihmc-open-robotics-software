@@ -48,6 +48,7 @@ public class WalkControllerSliderBoard
 //      sliderBoardConfigurationManager.setKnob(8, "gainScaleFactor", registry, 0.0, 1.0, 3.5, 0.0);
 
       sliderBoardConfigurationManager.saveConfiguration(SliderBoardMode.WalkingGains.toString());
+
       sliderBoardConfigurationManager.clearControls();
 
 //      sliderBoardConfigurationManager.setSlider(1, "captureKpParallel", registry, 0.0, 2.0);
@@ -94,12 +95,19 @@ public class WalkControllerSliderBoard
 
 //    sliderBoardConfigurationManager.setKnob  (8, "sliderBoardMode", registry, 0.0, SliderBoardMode.values().length);
       sliderBoardConfigurationManager.setKnob(8, "gainScaleFactor", registry, 0.0, 1.0, 3.5, 0.0);
-
+      
       sliderBoardConfigurationManager.saveConfiguration(SliderBoardMode.WalkingDesireds.toString());
       sliderBoardConfigurationManager.clearControls();
       
+      /* Terrain Exploration Section */
+      sliderBoardConfigurationManager.setSlider(0, "footCoPOffsetX", registry, -0.1, 0.1);
+      sliderBoardConfigurationManager.setSlider(1, "footCoPOffsetY", registry, -0.1, 0.1);
+      sliderBoardConfigurationManager.setButton(1, registry.getVariable("MomentumBasedController","FeetCoPBasedControl"));
       
+      sliderBoardConfigurationManager.saveConfiguration(SliderBoardMode.TerrainExploration.toString());
+      sliderBoardConfigurationManager.clearControls();
        
+      //default
       sliderBoardMode.set(SliderBoardMode.WalkingGains);
 
       VariableChangedListener listener = new VariableChangedListener()
@@ -116,7 +124,7 @@ public class WalkControllerSliderBoard
 
    }
 
-   private enum SliderBoardMode {WalkingGains, WalkingDesireds };
+   private enum SliderBoardMode {WalkingGains, WalkingDesireds, TerrainExploration};
 
    private static final SliderBoardFactory factory = new SliderBoardFactory()
    {
