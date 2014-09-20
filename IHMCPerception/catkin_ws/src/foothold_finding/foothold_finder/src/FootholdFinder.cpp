@@ -58,12 +58,16 @@ bool FootholdFinder::readParameters()
   nodeHandle_.param("elevation_map_service", elevationMapServiceName_, string("/elevation_mapping/get_grid_map"));
   nodeHandle_.param("search_area_side_length", searchAreaSideLength_, 0.6);
   nodeHandle_.param("plane_tolerance", planeTolerance_, 0.05);
+  nodeHandle_.param("valid_cell_count_threshold", validCellCountThreshold_, 0.8);
+  nodeHandle_.param("min_number_of_cells_per_foothold", minNumberOfCellsPerFoothold_, 8);
 
   // TODO Parameterize this.
-  footShape_.push_back(Eigen::Vector2d(-0.08, -0.15));
-  footShape_.push_back(Eigen::Vector2d(-0.08, 0.15));
-  footShape_.push_back(Eigen::Vector2d(0.08, 0.15));
-  footShape_.push_back(Eigen::Vector2d(0.08, -0.15));
+  footShape_.push_back(Eigen::Vector2d(-0.09, 0.06));
+  footShape_.push_back(Eigen::Vector2d(0.105, 0.06));
+  footShape_.push_back(Eigen::Vector2d(0.165, 0.0475));
+  footShape_.push_back(Eigen::Vector2d(0.165, -0.0475));
+  footShape_.push_back(Eigen::Vector2d(0.105, -0.06));
+  footShape_.push_back(Eigen::Vector2d(-0.09, -0.06));
 
   return true;
 }
@@ -85,8 +89,6 @@ bool FootholdFinder::adaptCallback(foothold_finding_msg::AdaptFootholds::Request
     std::vector<foothold_finding_msg::Foothold> candidates;
     if (getMap(position, searchAreaSideLength_, map)) {
       findCandidates(foothold, map, candidates);
-
-
     } else {
       foothold_finding_msg::Foothold originalCopy = foothold;
       originalCopy.flag = 0; // unknown
@@ -94,6 +96,10 @@ bool FootholdFinder::adaptCallback(foothold_finding_msg::AdaptFootholds::Request
     }
     response.adaptedFoodholds.reserve(response.adaptedFoodholds.size() + distance(candidates.begin(), candidates.end()));
     response.adaptedFoodholds.insert(response.adaptedFoodholds.end(), candidates.begin(), candidates.end());
+  }
+
+  for (const auto& foothold : response.adaptedFoodholds) {
+    std::cout << foothold << std::endl;
   }
 
   ROS_INFO("Footholds adapted and send back.");
@@ -140,14 +146,17 @@ void FootholdFinder::checkAndAdaptFoothold(grid_map::GridMap& map, foothold_find
   // Check.
   Polygon footShape;
   getFootShapeInWorldFrame(pose, footShape);
-  clusterPolygonAreaInMap(footShape, map);
+  if (!checkArea(footShape, map)) {
+    foothold.flag = 3; // bad.
+    return;
+  }
 
   // Adapt.
   Pose adaptedPose;
   adaptedPose.getPosition().x() = foothold.pose.position.x;
   adaptedPose.getPosition().y() = foothold.pose.position.y;
   adaptedPose.getPosition().z() = (double) map.at("elevation", index);
-
+  adaptedPose.getRotation() = pose.getRotation();
   Eigen::Vector3d normal;
   map.getVector("surface_normal_", index, normal);
   matchToSurfaceNormal(normal, adaptedPose.getRotation());
@@ -156,20 +165,78 @@ void FootholdFinder::checkAndAdaptFoothold(grid_map::GridMap& map, foothold_find
   geometry_msgs::Pose poseMessage;
   kindr::poses::eigen_impl::convertToRosGeometryMsg(adaptedPose, poseMessage);
   foothold.pose = poseMessage;
-  foothold.flag = 1;  // verified.
+  foothold.flag = 2;  // verified.
 }
 
-void FootholdFinder::clusterPolygonAreaInMap(const Polygon& polygon, grid_map::GridMap& map)
+bool FootholdFinder::checkArea(const Polygon& polygon, grid_map::GridMap& map)
 {
   // Extend map with segmentation id data.
   if (!map.exists("segmentation_id")) map.add("segmentation_id", Eigen::MatrixXf::Constant(map.getBufferSize()(0), map.getBufferSize()(1), NAN));
 
   // Gather all valid and unsegmented indeces.
+  std::vector<Eigen::Array2i> validIndeces;
   std::vector<Eigen::Array2i> unsegmentedIndeces;
+  size_t nTotalCells = 0;
   for (grid_map_lib::PolygonIterator iterator(map, polygon); !iterator.isPassedEnd(); ++iterator) {
     std::vector<std::string> segmentationIdType;
     segmentationIdType.push_back("segmentation_id");
-    if (map.isValid(*iterator) && !map.isValid(*iterator, segmentationIdType)) unsegmentedIndeces.push_back(*iterator);
+    if (map.isValid(*iterator)) {
+      validIndeces.push_back(*iterator);
+      if (!map.isValid(*iterator, segmentationIdType))
+        unsegmentedIndeces.push_back(*iterator);
+    }
+    ++nTotalCells;
+  }
+
+  // Check if enough valid cells in area.
+  if (validIndeces.size() < minNumberOfCellsPerFoothold_) return false;
+  if (((double) validIndeces.size()) / nTotalCells < validCellCountThreshold_) return false;
+
+  // Random sort.
+  std::random_shuffle(unsegmentedIndeces.begin(), unsegmentedIndeces.end());
+
+  // Segment: Compare each cell from unsegmentedIndeces with remaining points.
+  size_t id = 0;
+  vector<Eigen::Array2i>::iterator iterator = unsegmentedIndeces.begin();
+  for (; iterator != unsegmentedIndeces.end();) {
+    map.at("segmentation_id", *iterator) = id;
+    vector<Eigen::Array2i>::iterator innerIterator = iterator + 1;
+    for (; innerIterator != unsegmentedIndeces.end();) {
+      if (isSameCluster(map, *iterator, *innerIterator)) {
+        map.at("segmentation_id", *innerIterator) = id;
+        innerIterator = unsegmentedIndeces.erase(innerIterator);
+      } else {
+        ++innerIterator;
+      }
+    }
+    iterator = unsegmentedIndeces.erase(iterator);
+    id++;
+  }
+
+  // Debugging visualization.
+  if (segmentationPublisher_.getNumSubscribers() > 0) {
+    sensor_msgs::PointCloud2 pointCloud;
+    map.toPointCloud(pointCloud, "elevation");
+    segmentationPublisher_.publish(pointCloud);
+  }
+
+  // Check if all points form same segment.
+  for (const auto& index : validIndeces) {
+    if (map.at("segmentation_id", index) != map.at("segmentation_id", validIndeces[0])) return false;
+  }
+
+  return true;
+}
+
+void FootholdFinder::clusterMap(grid_map::GridMap& map)
+{
+  // Extend map with segmentation id data.
+  map.add("segmentation_id", Eigen::MatrixXf::Constant(map.getBufferSize()(0), map.getBufferSize()(1), NAN));
+
+  // Gather all valid indeces.
+  std::vector<Eigen::Array2i> unsegmentedIndeces; // Move main index to start?
+  for (grid_map_lib::GridMapIterator iterator(map); !iterator.isPassedEnd(); ++iterator) { // TODO Use circle iterator.
+    if (map.isValid(*iterator)) unsegmentedIndeces.push_back(*iterator);
   }
 
   // Random sort.
@@ -199,46 +266,6 @@ void FootholdFinder::clusterPolygonAreaInMap(const Polygon& polygon, grid_map::G
     map.toPointCloud(pointCloud, "elevation");
     segmentationPublisher_.publish(pointCloud);
   }
-}
-
-void FootholdFinder::clusterMap(const Eigen::Vector2d& position, const double radius, grid_map::GridMap& map)
-{
-//  // Extend map with segmentation id data.
-//  map.add("segmentation_id", Eigen::MatrixXf::Constant(map.getBufferSize()(0), map.getBufferSize()(1), NAN));
-//
-//  // Gather all valid indeces.
-//  std::vector<Eigen::Array2i> unsegmentedIndeces; // Move main index to start?
-//  for (grid_map_lib::GridMapIterator iterator(map); !iterator.isPassedEnd(); ++iterator) { // TODO Use circle iterator.
-//    if (map.isValid(*iterator)) unsegmentedIndeces.push_back(*iterator);
-//  }
-//
-//  // Random sort.
-//  std::random_shuffle(unsegmentedIndeces.begin(), unsegmentedIndeces.end());
-//
-//  // Segment: Compare each cell from unsegmentedIndeces with remaining points.
-//  size_t id = 0;
-//  vector<Eigen::Array2i>::iterator iterator = unsegmentedIndeces.begin();
-//  for (; iterator != unsegmentedIndeces.end();) {
-//    map.at("segmentation_id", *iterator) = id;
-//    vector<Eigen::Array2i>::iterator innerIterator = iterator + 1;
-//    for (; innerIterator != unsegmentedIndeces.end();) {
-//      if (isSameCluster(map, *iterator, *innerIterator)) {
-//        map.at("segmentation_id", *innerIterator) = id;
-//        innerIterator = unsegmentedIndeces.erase(innerIterator);
-//      } else {
-//        ++innerIterator;
-//      }
-//    }
-//
-//    iterator = unsegmentedIndeces.erase(iterator);
-//    id++;
-//  }
-//
-//  if (segmentationPublisher_.getNumSubscribers() > 0) {
-//    sensor_msgs::PointCloud2 pointCloud;
-//    map.toPointCloud(pointCloud, "elevation");
-//    segmentationPublisher_.publish(pointCloud);
-//  }
 }
 
 void FootholdFinder::getFootShapeInWorldFrame(const Pose& pose, Polygon& footShape)
@@ -282,7 +309,10 @@ int FootholdFinder::checkFoothold(const grid_map::GridMap& map, const foothold_f
 void FootholdFinder::matchToSurfaceNormal(const Eigen::Vector3d& normal, Rotation& rotation)
 {
   Eigen::Vector3d reference = Eigen::Vector3d::UnitZ();
-
+  reference = rotation.getActive().rotate(reference);
+  Rotation correction;
+  correction.setFromVectors(reference, normal);
+  rotation = rotation * correction;
 }
 
 } /* namespace */
