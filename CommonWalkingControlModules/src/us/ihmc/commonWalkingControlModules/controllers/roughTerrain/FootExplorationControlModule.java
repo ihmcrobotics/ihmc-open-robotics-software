@@ -142,15 +142,6 @@ public class FootExplorationControlModule
    private final BooleanYoVariable comHeightOffsetHasBeenChanged;
    private final DoubleYoVariable defaultCOMHeightOffset;
    
-   private final DoubleYoVariable debugNumberOfContactPoints;
-   private final YoFramePoint2d debugContactPoint2d0;
-   private final YoFramePoint2d debugContactPoint2d1;
-   private final YoFramePoint2d debugContactPoint2d2;
-   private final YoFramePoint2d debugContactPoint2d3;
-   private final YoFramePoint debugContactPoint0;
-   private final YoFramePoint debugContactPoint1;
-   private final YoFramePoint debugContactPoint2;
-   private final YoFramePoint debugContactPoint3;
      
    private Footstep nextFootStep;  // be aware that is the nextfootstep from WalkingHighLevel (is not a copy), use only to re-plan
    private RobotSide footUderCoPControl;  // be aware that is the swingSide from WalkingHighLevel (is not a copy)
@@ -171,6 +162,19 @@ public class FootExplorationControlModule
    private FootExplorationCoPPlanner footExplorationCoPPlanner;
    private InverseDynamicsJoint jointX, jointY;
    private DenseMatrix64F jointVelocityMatrix;
+   
+   // DEBUG TO REMOVE
+   private DoubleYoVariable debugRigidBodyName;
+   private final DoubleYoVariable debugNumberOfContactPoints;
+   private final YoFramePoint2d debugContactPoint2d0;
+   private final YoFramePoint2d debugContactPoint2d1;
+   private final YoFramePoint2d debugContactPoint2d2;
+   private final YoFramePoint2d debugContactPoint2d3;
+   private final YoFramePoint debugContactPoint0;
+   private final YoFramePoint debugContactPoint1;
+   private final YoFramePoint debugContactPoint2;
+   private final YoFramePoint debugContactPoint3;
+   private int debugcounter;
    
    
    public FootExplorationControlModule(YoVariableRegistry parentRegistry, MomentumBasedController momentumBasedController, DoubleYoVariable yoTime, 
@@ -238,6 +242,7 @@ public class FootExplorationControlModule
       debugContactPoint1 = new YoFramePoint("debugContactPoint1", worldFrame, registry);
       debugContactPoint2 = new YoFramePoint("debugContactPoint2", worldFrame, registry);
       debugContactPoint3 = new YoFramePoint("debugContactPoint3", worldFrame, registry);
+      debugcounter = 0;
       
       
       numberOfPlaneContactStates.set(planeContactStates.size());
@@ -551,6 +556,9 @@ public class FootExplorationControlModule
 
                   if (planeBody.equals(contactablePlaneRigidBody))
                   {
+                     debugRigidBodyName = new DoubleYoVariable("debugRigidBodyName_" + contactablePlaneRigidBody.getName() + debugcounter, registry);
+                     debugcounter++;
+                     
                      List<? extends ContactPoint> points = planeContactState.getContactPoints();
                      FramePoint2d localCoP = momentumBasedController.getCoP(contactablePlaneBody);
                      double minDistance = getClosestEdgeDistance(points, localCoP);
@@ -567,19 +575,17 @@ public class FootExplorationControlModule
       }
       
       private double getClosestEdgeDistance(List<? extends ContactPoint> points, FramePoint2d pointToCheck)
-      {
-         debugNumberOfContactPoints.set(points.size());
-         
+      {        
          double ret = Double.POSITIVE_INFINITY;
          FrameConvexPolygon2d polygon = createAPolygonFromContactPoints(points);
 
-         for (int i = 0; i < polygon.getNumberOfVertices(); i++)
-         {            
-            FrameLine2d line = new FrameLine2d(polygon.getFrameVertex(i), polygon.getNextFrameVertex(i));
-            double distance = line.distance(pointToCheck);
-            if (distance < ret)
-               ret = distance;
-         }
+//         for (int i = 0; i < polygon.getNumberOfVertices(); i++)
+//         {            
+//            FrameLine2d line = new FrameLine2d(polygon.getFrameVertex(i), polygon.getNextFrameVertex(i));
+//            double distance = line.distance(pointToCheck);
+//            if (distance < ret)
+//               ret = distance;
+//         }
          
          return ret;
       }
@@ -1001,6 +1007,8 @@ public class FootExplorationControlModule
       ArrayList<FramePoint2d> frameVertices = new ArrayList<FramePoint2d>();
       for(int i = 0; i < points.size(); i++)
       {
+         debugNumberOfContactPoints.set(points.size());
+         
          if(i == 0)
          {
             debugContactPoint2d0.set(points.get(0).getPosition2d().getX(), points.get(0).getPosition2d().getY());
