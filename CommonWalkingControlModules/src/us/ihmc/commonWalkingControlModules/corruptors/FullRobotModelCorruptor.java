@@ -324,4 +324,9 @@ public class FullRobotModelCorruptor
          variableChangedListener.variableChanged(null);
       }
    }
+   
+   public YoVariableRegistry getYoVariableRegistry()
+   {
+      return registry;
+   }
 }
