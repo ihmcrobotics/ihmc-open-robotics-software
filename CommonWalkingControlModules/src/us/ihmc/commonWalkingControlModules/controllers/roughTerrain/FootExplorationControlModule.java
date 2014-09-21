@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
+import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
 
@@ -21,6 +22,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajec
 import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculationProvider;
 import us.ihmc.robotSide.RobotSide;
 import us.ihmc.robotSide.SideDependentList;
+import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLine2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -31,6 +33,7 @@ import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
 import us.ihmc.utilities.math.trajectories.providers.PositionProvider;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -430,18 +433,40 @@ public class FootExplorationControlModule
       int lastContactPointNumber;
       double copTime;
       ContactPoint contactPoint;
+      
+      Twist tmpTwist = new Twist();
+      Vector3d tmpVector = new Vector3d();
+      
+      ArrayList<Pair<RobotSide, DoubleYoVariable>> footAngularRate = new ArrayList<>();
 
       public ExplorationState()
       {
          super(FeetExplorationState.EXPLORATION);
          tempICP = new FramePoint2d(worldFrame);
+         for(RobotSide side : RobotSide.values)
+         {
+        	 footAngularRate.add(new Pair(side, new DoubleYoVariable(side.name()+"FootAngularRate", registry)));
+         }
+      }
+      
+      private void updateFootAngularRate()
+      {
+          for(Pair<RobotSide, DoubleYoVariable> entry: footAngularRate)
+          {
+         	 momentumBasedController.getTwistCalculator().packTwistOfBody(tmpTwist, momentumBasedController.getFullRobotModel().getFoot(entry.first()));
+         	 tmpTwist.changeFrame(ReferenceFrame.getWorldFrame());
+         	 tmpTwist.packAngularPart(tmpVector);;
+         	 entry.second().set(tmpVector.length());
+          }   	  
       }
 
       @Override
       public void doAction()
       {
+    	  updateFootAngularRate();
          //TODO: first attempt to find a suitable startCoP (maybe explore both areas and select the bigger)
          // maybe find the axis of rotation.
+    	  
          
          explorationTime.set(yoTime.getDoubleValue() - initialExplorationTime.getDoubleValue());
 
