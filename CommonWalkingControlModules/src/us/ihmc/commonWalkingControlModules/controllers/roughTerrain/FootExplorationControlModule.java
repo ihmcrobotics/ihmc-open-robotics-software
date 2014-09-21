@@ -592,13 +592,16 @@ public class FootExplorationControlModule
       
       private boolean checkJointIsNotMoving()
       {
+         double absVelocity = 0.0;
          jointX.packVelocityMatrix(jointVelocityMatrix, 0);
          jointY.packVelocityMatrix(jointVelocityMatrix, 1);
          int numRows = jointVelocityMatrix.getNumRows();
          for(int i = 0; i<numRows; i++)
          {
-            jointVelocity.update(jointVelocityMatrix.get(i, 0) * jointVelocityMatrix.get(i, 0));
+            if(Math.abs(jointVelocityMatrix.get(i, 0)) > absVelocity)
+            absVelocity = Math.abs(jointVelocityMatrix.get(i, 0));
          }
+         jointVelocity.update(absVelocity);
          
          return jointVelocity.getDoubleValue() > zeroVelocity;
       }
