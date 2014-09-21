@@ -218,7 +218,7 @@ public class FootExplorationControlModule
       defaultCOMHeightOffset = new DoubleYoVariable("defaultCOMHeightOffset", registry);
       needToResetContactPoints = new HashMap<PlaneContactState, Boolean>();
       defaultContactPoints = new HashMap<PlaneContactState, ArrayList<Point2d>>();
-      feetExplorationCoPError = new DoubleYoVariable("copError", registry);
+      feetExplorationCoPError = new DoubleYoVariable("feetExplorationCoPError", registry);
       this.yoTime = yoTime;
       this.feetManager = feetManager;
       this.momentumBasedController = momentumBasedController;
