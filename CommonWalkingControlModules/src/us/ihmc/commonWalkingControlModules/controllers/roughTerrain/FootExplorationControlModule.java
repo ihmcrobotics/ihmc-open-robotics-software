@@ -71,25 +71,25 @@ public class FootExplorationControlModule
    private static boolean adjustCoMHeightBasedOnICP = true;
    private static boolean lowerCoMDuringSwing = false && !adjustCoMHeightBasedOnICP;
    private static double maxCoMHeightOffset = 0.00;
-   private static double minCoMHeightOffset = -0.1;
+   private static double minCoMHeightOffset = -0.02;
    
    // exploration timing
-   private static double icpShiftTime = 1.5;
+   private static double icpShiftTime = 3;
    private static double copShiftTime = 2;
    private static double copTransitionRestingTime = 1; // must be less than copShiftTime/2
-   private static double swingTimeForExploration = 3;
+   private static double swingTimeForExploration = 4;
    
    // unstable situations
    private static double maxICPAbsError = 0.04;
    private static double maxICPAbsErrorForSingleSupport = 0.02;
    private static double minCoPDistanceFromBorder = 0.01;
    private static double recoverContactPointsScaleFactor = 0.9;
-   private static double recoverTime = 2;
+   private static double recoverTime = 5;
    private static int minimumNumberOfContactPointsToHaveAPolygon = 3;
    
    // parameter of tilt foot
-   private static double zeroVelocity = 0.2;
-   private static double alphaForJointVelocity = 0.96;
+   private static double zeroVelocity = 0.015;
+   private static double alphaForJointVelocity = 0.95;
    private static int numberOfJointCheckedForZeroVelocity = 2;
    private static double safetyScalingOfCoP = 0.85;
    
