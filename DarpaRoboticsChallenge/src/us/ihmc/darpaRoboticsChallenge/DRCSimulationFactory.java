@@ -1,10 +1,12 @@
 package us.ihmc.darpaRoboticsChallenge;
 
 import us.ihmc.utilities.math.geometry.Transform3d;
+
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HumanoidControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.controllers.PIDLidarTorqueController;
 import us.ihmc.darpaRoboticsChallenge.controllers.concurrent.ThreadDataSynchronizer;
@@ -87,6 +89,11 @@ public class DRCSimulationFactory
       setupJointDamping(simulatedRobot, drcRobotModel);
    }
 
+   public FullRobotModelCorruptor getFullRobotModelCorruptor()
+   {
+      return drcControllerThread.getFullRobotModelCorruptor();
+   }
+   
    private void createRobotController(DRCRobotModel drcRobotModel, HumanoidControllerFactory controllerFactory, GlobalDataProducer globalDataProducer,
          SDFRobot simulatedRobot, SimulationConstructionSet scs, DRCSCSInitialSetup scsInitialSetup,
          DRCRobotInitialSetup<SDFRobot> robotInitialSetup)
