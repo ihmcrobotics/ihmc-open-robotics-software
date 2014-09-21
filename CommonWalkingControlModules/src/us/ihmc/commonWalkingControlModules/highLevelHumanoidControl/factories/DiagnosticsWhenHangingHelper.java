@@ -157,6 +157,13 @@ public class DiagnosticsWhenHangingHelper
       yoJointToCenterOfMass.set(jointToCenterOfMassInWorld);
       
       totalMass.set(centerOfMassCalculator.getTotalMass());
+      
+//      if (totalMass.getName().contains("RightHip"))
+//      {
+//         System.out.println("setting " + totalMass.getName() + " to " + totalMass.getDoubleValue());
+//         System.out.println(totalMass.getClass().getName() + "@" + Integer.toHexString(totalMass.hashCode()));
+//      }
+      
       forceVector.setIncludingFrame(ReferenceFrame.getWorldFrame(), 0.0, 0.0, -9.81 * totalMass.getDoubleValue());
       forceVector.changeFrame(jointAxis.getReferenceFrame());
       

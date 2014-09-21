@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.corruptors;
 
-import us.ihmc.utilities.math.geometry.Transform3d;
+import java.util.ArrayList;
+
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Vector3d;
 
@@ -11,6 +12,7 @@ import us.ihmc.utilities.humanoidRobot.partNames.RobotSpecificJointNames;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.Transform3d;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RevoluteJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
@@ -31,7 +33,8 @@ public class FullRobotModelCorruptor
    private final YoFrameVector hipYawOffset;
 
    private final FramePoint tempFramePoint = new FramePoint();
-
+   private final ArrayList<VariableChangedListener> variableChangedListeners = new ArrayList<VariableChangedListener>();
+   
    public FullRobotModelCorruptor(final FullRobotModel fullRobotModel, YoVariableRegistry parentRegistry)
    {
       FramePoint originalChestCoMOffset = new FramePoint();
@@ -41,7 +44,7 @@ public class FullRobotModelCorruptor
       chestCoMOffset = new YoFramePoint("chestCoMOffset", originalChestCoMOffset.getReferenceFrame(), registry);
       chestCoMOffset.set(originalChestCoMOffset);
 
-      chestCoMOffset.attachVariableChangedListener(new VariableChangedListener()
+      VariableChangedListener chestCoMOffsetChangedListener = new VariableChangedListener()
       {
          @Override
          public void variableChanged(YoVariable<?> v)
@@ -49,12 +52,14 @@ public class FullRobotModelCorruptor
             chestCoMOffset.getFrameTupleIncludingFrame(tempFramePoint);
             chest.setCoMOffset(tempFramePoint);
          }
-      });
+      };
+      chestCoMOffset.attachVariableChangedListener(chestCoMOffsetChangedListener);
+      variableChangedListeners.add(chestCoMOffsetChangedListener);
 
       chestMass = new DoubleYoVariable("chestMass", registry);
       chestMass.set(chest.getInertia().getMass());
 
-      chestMass.addVariableChangedListener(new VariableChangedListener()
+      VariableChangedListener chestMassChangedListener = new VariableChangedListener()
       {
          @Override
          public void variableChanged(YoVariable<?> v)
@@ -62,7 +67,9 @@ public class FullRobotModelCorruptor
             RigidBody chest = fullRobotModel.getChest();
             chest.getInertia().setMass(chestMass.getDoubleValue());
          }
-      });
+      };
+      chestMass.addVariableChangedListener(chestMassChangedListener);
+      variableChangedListeners.add(chestMassChangedListener);
 
 
       //Thighs
@@ -73,20 +80,24 @@ public class FullRobotModelCorruptor
          final RigidBody thigh = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE).getPredecessor();
          thighMass.set(thigh.getInertia().getMass());
          
-         thighMass.addVariableChangedListener(new VariableChangedListener()
+         VariableChangedListener thighMassChangedListener = new VariableChangedListener()
          {
             @Override
             public void variableChanged(YoVariable<?> v)
             {
+//               System.out.println("Thigh mass changed to " + thighMass.getDoubleValue());
                thigh.getInertia().setMass(thighMass.getDoubleValue());
             }
-         });
+         };
+         thighMass.addVariableChangedListener(thighMassChangedListener);
+         variableChangedListeners.add(thighMassChangedListener);
+         
          FramePoint originalThighCoMOffset = new FramePoint();
          thigh.packCoMOffset(originalThighCoMOffset);
          final YoFramePoint thighCoMOffset = new YoFramePoint(sidePrefix + "ThighCoMOffset", originalThighCoMOffset.getReferenceFrame(), registry);
          thighCoMOffset.set(originalThighCoMOffset);
          
-         thighCoMOffset.attachVariableChangedListener(new VariableChangedListener()
+         VariableChangedListener thighCoMOffsetChangedListener = new VariableChangedListener()
          {
             private final FramePoint tempFramePoint = new FramePoint();
             @Override
@@ -95,7 +106,10 @@ public class FullRobotModelCorruptor
                thighCoMOffset.getFrameTupleIncludingFrame(tempFramePoint);
                thigh.setCoMOffset(tempFramePoint);
             }
-         });
+         };
+         thighCoMOffset.attachVariableChangedListener(thighCoMOffsetChangedListener);
+         variableChangedListeners.add(thighCoMOffsetChangedListener);
+
      }
 
       //Shins
@@ -106,20 +120,23 @@ public class FullRobotModelCorruptor
          final RigidBody shin = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE).getSuccessor();
          shinMass.set(shin.getInertia().getMass());
          
-         shinMass.addVariableChangedListener(new VariableChangedListener()
+         VariableChangedListener shinMassChangedListener = new VariableChangedListener()
          {
             @Override
             public void variableChanged(YoVariable<?> v)
             {
                shin.getInertia().setMass(shinMass.getDoubleValue());
             }
-         });
+         };
+         shinMass.addVariableChangedListener(shinMassChangedListener);
+         variableChangedListeners.add(shinMassChangedListener);
+
          FramePoint originalShinCoMOffset = new FramePoint();
          shin.packCoMOffset(originalShinCoMOffset);
          final YoFramePoint shinCoMOffset = new YoFramePoint(sidePrefix + "ShinCoMOffset", originalShinCoMOffset.getReferenceFrame(), registry);
          shinCoMOffset.set(originalShinCoMOffset);
          
-         shinCoMOffset.attachVariableChangedListener(new VariableChangedListener()
+         VariableChangedListener shinCoMOffsetChangedListener = new VariableChangedListener()
          {
             private final FramePoint tempFramePoint = new FramePoint();
             @Override
@@ -128,7 +145,10 @@ public class FullRobotModelCorruptor
                shinCoMOffset.getFrameTupleIncludingFrame(tempFramePoint);
                shin.setCoMOffset(tempFramePoint);
             }
-         });
+         };
+         shinCoMOffset.attachVariableChangedListener(shinCoMOffsetChangedListener);
+         variableChangedListeners.add(shinCoMOffsetChangedListener);
+
      }
       
       
@@ -141,20 +161,24 @@ public class FullRobotModelCorruptor
          final RigidBody foot = fullRobotModel.getFoot(robotSide);
          footMass.set(foot.getInertia().getMass());
          
-         footMass.addVariableChangedListener(new VariableChangedListener()
+         VariableChangedListener footMassChangedListener = new VariableChangedListener()
          {
             @Override
             public void variableChanged(YoVariable<?> v)
             {
                foot.getInertia().setMass(footMass.getDoubleValue());
             }
-         });
+         };
+         footMass.addVariableChangedListener(footMassChangedListener);
+         variableChangedListeners.add(footMassChangedListener);
+
+         
          FramePoint originalFootCoMOffset = new FramePoint();
          foot.packCoMOffset(originalFootCoMOffset);
          final YoFramePoint footCoMOffset = new YoFramePoint(sidePrefix + "FootCoMOffset", originalFootCoMOffset.getReferenceFrame(), registry);
          footCoMOffset.set(originalFootCoMOffset);
          
-         footCoMOffset.attachVariableChangedListener(new VariableChangedListener()
+         VariableChangedListener footCoMOffsetChangedListener = new VariableChangedListener()
          {
             private final FramePoint tempFramePoint = new FramePoint();
             @Override
@@ -163,7 +187,9 @@ public class FullRobotModelCorruptor
                footCoMOffset.getFrameTupleIncludingFrame(tempFramePoint);
                foot.setCoMOffset(tempFramePoint);
             }
-         });
+         };
+         footCoMOffset.attachVariableChangedListener(footCoMOffsetChangedListener);
+         variableChangedListeners.add(footCoMOffsetChangedListener);
      }
       
       
@@ -208,7 +234,7 @@ public class FullRobotModelCorruptor
 //      }
 
       hipYawOffset = new YoFrameVector("hipYawOffset", null, registry);
-      hipYawOffset.attachVariableChangedListener(new VariableChangedListener()
+      VariableChangedListener hipYawOffsetChangedListener = new VariableChangedListener()
       {
          @Override
          public void variableChanged(YoVariable<?> v)
@@ -225,7 +251,9 @@ public class FullRobotModelCorruptor
                frameBeforeJoint.corruptTransformToParentPostMultiply(postCorruptionTransform);
             }
          }
-      });
+      };
+      hipYawOffset.attachVariableChangedListener(hipYawOffsetChangedListener);
+      variableChangedListeners.add(hipYawOffsetChangedListener);
 
 
       // Joint Calibration offset errors:
@@ -244,7 +272,7 @@ public class FullRobotModelCorruptor
 
             final DoubleYoVariable offset = new DoubleYoVariable(robotSide + legJointName.getCamelCaseNameForMiddleOfExpression() + "Offset", registry);
 
-            offset.addVariableChangedListener(new VariableChangedListener()
+            VariableChangedListener legJointOffsetChangedListener = new VariableChangedListener()
             {
                @Override
                public void variableChanged(YoVariable<?> v)
@@ -253,7 +281,9 @@ public class FullRobotModelCorruptor
                   preCorruptionTransform.set(axisAngle);
                   frameBeforeJoint.corruptTransformToParentPreMultiply(preCorruptionTransform);
                }
-            });
+            };
+            offset.addVariableChangedListener(legJointOffsetChangedListener);
+            variableChangedListeners.add(legJointOffsetChangedListener);
          }
       }
 
@@ -269,7 +299,7 @@ public class FullRobotModelCorruptor
 
          final DoubleYoVariable offset = new DoubleYoVariable(spineJointName.getCamelCaseNameForStartOfExpression() + "Offset", registry);
 
-         offset.addVariableChangedListener(new VariableChangedListener()
+         VariableChangedListener spineJointOffsetChangedListener = new VariableChangedListener()
          {
             @Override
             public void variableChanged(YoVariable<?> v)
@@ -278,9 +308,20 @@ public class FullRobotModelCorruptor
                preCorruptionTransform.set(axisAngle);
                frameBeforeJoint.corruptTransformToParentPreMultiply(preCorruptionTransform);
             }
-         });
+         };
+         offset.addVariableChangedListener(spineJointOffsetChangedListener);
+         variableChangedListeners.add(spineJointOffsetChangedListener);
       }
 
       parentRegistry.addChild(registry);
+   }
+   
+   
+   public void corruptFullRobotModel()
+   {
+      for (VariableChangedListener variableChangedListener : variableChangedListeners)
+      {
+         variableChangedListener.variableChanged(null);
+      }
    }
 }

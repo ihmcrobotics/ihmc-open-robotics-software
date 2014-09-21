@@ -65,6 +65,8 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    
 
    private final SDFFullRobotModel controllerFullRobotModel;
+   private final FullRobotModelCorruptor fullRobotModelCorruptor;
+   
    private final ReferenceFrames controllerReferenceFrames;
 
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
@@ -110,8 +112,13 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       controllerFullRobotModel = threadDataSynchronizer.getControllerFullRobotModel();
       
       if (DRCConfigParameters.ALLOW_MODEL_CORRUPTION)
-         new FullRobotModelCorruptor(controllerFullRobotModel, registry);
-      
+      {
+         fullRobotModelCorruptor = new FullRobotModelCorruptor(controllerFullRobotModel, registry);
+      }
+      else
+      {
+         fullRobotModelCorruptor = null;
+      }
       
       forceSensorDataHolderForController = threadDataSynchronizer.getControllerForceSensorDataHolder();
 
@@ -153,6 +160,11 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       {
          robotVisualizer.addRegistry(registry, yoGraphicsListRegistry);
       }
+   }
+   
+   public FullRobotModelCorruptor getFullRobotModelCorruptor()
+   {
+      return fullRobotModelCorruptor;
    }
 
    public static RobotController createMomentumBasedController(SDFFullRobotModel controllerModel, ReferenceFrames referenceFramesForController,
