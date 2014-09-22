@@ -14,7 +14,6 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.bambooTools.BambooTools;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModule.QPSolverFlavor;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
@@ -29,7 +28,6 @@ import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.TimerTaskScheduler;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.time.GlobalTimer;
 
 import com.yobotics.simulationconstructionset.SimulationConstructionSet;
@@ -47,7 +45,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
 
    private static final boolean CREATE_MOVIE = BambooTools.doMovieCreation();
    private static final boolean checkNothingChanged = BambooTools.getCheckNothingChanged();
-   private static final boolean SHOW_GUI = true;//ALWAYS_SHOW_GUI || checkNothingChanged || CREATE_MOVIE;
+   private static final boolean SHOW_GUI = ALWAYS_SHOW_GUI || checkNothingChanged || CREATE_MOVIE;
    private DRCRobotModel robotModel;
 
    private BlockingSimulationRunner blockingSimulationRunner;
@@ -213,14 +211,10 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       DoubleYoVariable q_x = (DoubleYoVariable) scs.getVariable("q_x");
       DoubleYoVariable desiredSpeed = (DoubleYoVariable) scs.getVariable("desiredVelocityX");
       DoubleYoVariable desiredHeading = (DoubleYoVariable) scs.getVariable("desiredHeading");
-      BooleanYoVariable performCoPExploration = (BooleanYoVariable) scs.getVariable("FootExplorationControlModule", "performCoPExploration");
-      EnumYoVariable<QPSolverFlavor> requestedQPSolver = (EnumYoVariable<QPSolverFlavor>) scs.getVariable("OptimizationMomentumControlModule", "requestedQPSolver");
 
 //    DoubleYoVariable centerOfMassHeight = (DoubleYoVariable) scs.getVariable("ProcessedSensors.comPositionz");
-//      DoubleYoVariable comError = (DoubleYoVariable) scs.getVariable("positionError_comHeight");
-      
-      requestedQPSolver.set(QPSolverFlavor.CQP_OASES_DIRECT);
-      performCoPExploration.set(true);
+      DoubleYoVariable comError = (DoubleYoVariable) scs.getVariable("positionError_comHeight");
+
       initiateMotion(standingTimeDuration, blockingSimulationRunner, walk);
       desiredSpeed.set(desiredVelocityValue);
       desiredHeading.set(desiredHeadingValue);
@@ -229,21 +223,20 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
 
       double timeIncrement = 1.0;
       boolean done = false;
-      blockingSimulationRunner.simulateAndBlock(600);
-//      while (!done)
-//      {
-//         blockingSimulationRunner.simulateAndBlock(timeIncrement);
-//
-//         if (Math.abs(comError.getDoubleValue()) > 0.09)
-//         {
-//            fail("comError = " + Math.abs(comError.getDoubleValue()));
-//         }
-//
-//         if (scs.getTime() > standingTimeDuration + maximumWalkTime)
-//            done = true;
-//         if (q_x.getDoubleValue() > rampEndX)
-//            done = true;
-//      }
+      while (!done)
+      {
+         blockingSimulationRunner.simulateAndBlock(timeIncrement);
+
+         if (Math.abs(comError.getDoubleValue()) > 0.09)
+         {
+            fail("comError = " + Math.abs(comError.getDoubleValue()));
+         }
+
+         if (scs.getTime() > standingTimeDuration + maximumWalkTime)
+            done = true;
+         if (q_x.getDoubleValue() > rampEndX)
+            done = true;
+      }
 
       createMovie(scs);
    }
