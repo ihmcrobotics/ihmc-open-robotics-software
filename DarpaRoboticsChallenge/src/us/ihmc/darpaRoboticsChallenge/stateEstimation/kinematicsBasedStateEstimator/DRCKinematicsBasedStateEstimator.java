@@ -44,7 +44,6 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    private final PelvisLinearStateUpdater pelvisLinearStateUpdater;
 
    private final PelvisPoseHistoryCorrection pelvisPoseHistoryCorrection;
-   private final PelvisPoseNoiseGenerator pelvisPoseNoiseGenerator;
 
    private final double estimatorDT;
 
@@ -54,7 +53,6 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    private final CenterOfPressureVisualizer copVisualizer;
 
    private final BooleanYoVariable usePelvisCorrector;
-   private final BooleanYoVariable addNoise;
 
    public DRCKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, StateEstimatorParameters stateEstimatorParameters,
          SensorOutputMapReadOnly sensorOutputMapReadOnly, double gravitationalAcceleration, SideDependentList<WrenchBasedFootSwitch> footSwitches,
@@ -65,13 +63,11 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 
       
       usePelvisCorrector = new BooleanYoVariable("useExternalPelvisCorrector", registry);
-      addNoise = new BooleanYoVariable("useNoiseGenerator", registry);
       
       jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorOutputMapReadOnly, registry);
 
       this.pelvisPoseHistoryCorrection = new PelvisPoseHistoryCorrection(inverseDynamicsStructure, externalPelvisSubscriber,
             stateEstimatorParameters.getEstimatorDT(), registry, 1000, timestampProvider);
-      pelvisPoseNoiseGenerator = new PelvisPoseNoiseGenerator(inverseDynamicsStructure, registry);
 
       List<? extends IMUSensorReadOnly> imuProcessedOutputs = sensorOutputMapReadOnly.getIMUProcessedOutputs();
       List<IMUSensorReadOnly> imusToUse = new ArrayList<>();
@@ -151,11 +147,6 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       jointStateUpdater.updateJointState();
       pelvisRotationalStateUpdater.updateRootJointOrientationAndAngularVelocity();
       pelvisLinearStateUpdater.updateRootJointPositionAndLinearVelocity();
-      
-      if(addNoise.getBooleanValue())
-      {
-         pelvisPoseNoiseGenerator.addNoise();
-      }
       
       if (usePelvisCorrector.getBooleanValue() && pelvisPoseHistoryCorrection != null)
       {
