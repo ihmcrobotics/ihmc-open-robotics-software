@@ -36,7 +36,7 @@ import javax.swing.text.PlainDocument;
 import us.ihmc.atlas.AtlasOperatorUserInterface;
 import us.ihmc.atlas.AtlasRobotModelFactory;
 import us.ihmc.communication.util.NetworkConfigParameters;
-import us.ihmc.humanoidBehaviors.behaviorManager.BehaviorNetworkManager;
+import us.ihmc.humanoidBehaviors.behaviorManager.BehaviorManager;
 import us.ihmc.utilities.fixedPointRepresentation.UnsignedByteTools;
 import us.ihmc.utilities.gui.IHMCSwingTools;
 import us.ihmc.utilities.net.NetStateListener;
@@ -440,7 +440,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
          @Override
          public void actionPerformed(ActionEvent e)
          {
-            localSpawner.spawn(BehaviorNetworkManager.class, new String[]{}, new String[]{}, new ExitListener()
+            localSpawner.spawn(BehaviorManager.class, new String[]{}, new String[]{}, new ExitListener()
             {
                @Override
                public void exited(int statusValue)
