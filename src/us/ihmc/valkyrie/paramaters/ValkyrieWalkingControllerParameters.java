@@ -305,21 +305,21 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    public double getCaptureKpParallelToMotion()
    {
       if (!runningOnRealRobot) return 1.0;
-      return 1.0;
+      return 0.5;
    }
 
    @Override
    public double getCaptureKpOrthogonalToMotion()
    {
       if (!runningOnRealRobot) return 1.0;
-      return 1.0;
+      return 0.5;
    }
 
    @Override
    public double getCaptureKi()
    {
       if (!runningOnRealRobot) return 4.0;
-      return 4.0;
+      return 0.0;
    }
 
    @Override
@@ -374,7 +374,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    {
       YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("PelvisOrientation", registry);
 
-      double kp = runningOnRealRobot ? 80.0 : 100.0;
+      double kp = runningOnRealRobot ? 60.0 : 100.0;
       double zeta = runningOnRealRobot ? 0.5 : 0.8;
       double ki = 0.0;
       double maxIntegralError = 0.0;
@@ -460,12 +460,12 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    {
       YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("ChestOrientation", registry);
 
-      double kp = runningOnRealRobot ? 100.0 : 100.0;
-      double zeta = runningOnRealRobot ? 0.6 : 0.8;
+      double kp = runningOnRealRobot ? 60.0 : 100.0;
+      double zeta = runningOnRealRobot ? 0.5 : 0.8;
       double ki = 0.0;
       double maxIntegralError = 0.0;
-      double maxAccel = runningOnRealRobot ? 18.0 : 18.0;
-      double maxJerk = runningOnRealRobot ? 270.0 : 270.0;
+      double maxAccel = runningOnRealRobot ? 12.0 : 18.0;
+      double maxJerk = runningOnRealRobot ? 180.0 : 270.0;
 
       gains.setProportionalGain(kp);
       gains.setDampingRatio(zeta);
@@ -484,7 +484,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       YoFootSE3Gains gains = new YoFootSE3Gains("SwingFoot", registry);
 
       double kpXY = 100.0;
-      double kpZ = runningOnRealRobot ? 100.0 : 200.0;
+      double kpZ = runningOnRealRobot ? 200.0 : 200.0;
       double zetaXYZ = runningOnRealRobot ? 0.3 : 0.7;
       double kpXYOrientation = runningOnRealRobot ? 300.0 : 300.0;
       double kpZOrientation = runningOnRealRobot ? 40.0 : 200.0;
@@ -637,7 +637,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public double getContactThresholdForce()
    {
-      return runningOnRealRobot ? 80.0 : 5.0;
+      return runningOnRealRobot ? 25.0 : 5.0;
    }
    
    @Override
@@ -664,7 +664,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       momentumOptimizationSettings.setRhoPlaneContactRegularization(0.001);
       momentumOptimizationSettings.setMomentumWeight(1.0, 1.0, 10.0, 10.0);
       momentumOptimizationSettings.setRhoMin(4.0);
-      momentumOptimizationSettings.setRateOfChangeOfRhoPlaneContactRegularization(0.06);
+      momentumOptimizationSettings.setRateOfChangeOfRhoPlaneContactRegularization(0.12); //0.06);
       momentumOptimizationSettings.setRhoPenalizerPlaneContactRegularization(0.01);
    }
 }
