@@ -89,7 +89,7 @@ public class FootExplorationControlModule
 
    // unstable situations
    private static double maxICPAbsError = 0.04;
-   private static double maxICPAbsErrorForSingleSupport = 0.02;
+   private static double maxICPAbsErrorForSingleSupport = 0.03;
    private static double minCoPDistanceFromBorder = 0.01;
    private static double recoverStateContactPointsScaleFactor = 0.9;
    private static double recoverTime = 5;
@@ -1054,11 +1054,11 @@ public class FootExplorationControlModule
       FramePoint2d centroid = polygon.getCentroid();
       polygon.scale(centroid, factor);
       
-      for(int i = 0; i < currentPlaneContactState.getTotalNumberOfContactPoints(); i++)
+      for(int i = 0; i < polygon.getNumberOfVertices(); i++)
       {
          ContactPoint contactPoint = currentPlaneContactState.getContactPoints().get(i);
          FramePoint2d scaledPoint = polygon.getFrameVertex(i);
-         contactPoint.getPosition().set(scaledPoint.getX(), scaledPoint.getY(), 0.0);;
+         contactPoint.getPosition().set(scaledPoint.getX(), scaledPoint.getY(), 0.0);
          contactPoint.getPosition2d().set(scaledPoint.getX(), scaledPoint.getY());
       }
    }
