@@ -4,5 +4,6 @@ dependencies {
 	compile group: 'us.ihmc.thirdparty', name: 'mosek', version: 'x'
 	compile group: 'com.googlecode.efficient-java-matrix-library', name: 'ejml', version: '0.25'
 	
-	compile project(':JOptimizer')	
+	compile project(':JOptimizer')
+	compile project(':IHMCUtilities')
 }
