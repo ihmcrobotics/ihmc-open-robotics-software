@@ -29,12 +29,12 @@ public class ValkyrieArmControllerParameters implements ArmControllerParameters
    {
       YoPIDGains jointspaceControlGains = new YoPIDGains("ArmJointspace", registry);
 
-      double kp = runningOnRealRobot ? 120.0 : 80.0;
-      double zeta = runningOnRealRobot ? 1.0 : 0.6;
+      double kp = runningOnRealRobot ? 60.0 : 80.0;
+      double zeta = runningOnRealRobot ? 0.4 : 0.6;
       double ki = runningOnRealRobot ? 0.0 : 0.0;
       double maxIntegralError = 0.0;
-      double maxAccel = runningOnRealRobot ? 5.0 : Double.POSITIVE_INFINITY;
-      double maxJerk = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
+      double maxAccel = runningOnRealRobot ? 20.0 : Double.POSITIVE_INFINITY;
+      double maxJerk = runningOnRealRobot ? 200.0 : Double.POSITIVE_INFINITY;
 
       jointspaceControlGains.setKp(kp);
       jointspaceControlGains.setZeta(zeta);
