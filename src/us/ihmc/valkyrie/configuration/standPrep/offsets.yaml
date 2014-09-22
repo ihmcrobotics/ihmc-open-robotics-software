@@ -1,0 +1,64 @@
+LeftHipRotator:
+    tauOff: 0.0
+LeftHipAdductor:
+    tauOff: 0.0
+LeftHipExtensor:
+    tauOff: 0.0
+LeftKneeExtensor:
+    tauOff: 0.0 
+LeftAnkleExtensor:
+    tauOff: 0.0   
+LeftAnkle:
+    tauOff: 0.0   
+RightHipRotator:
+    tauOff: 0.0 
+RightHipAdductor:
+    tauOff: 0.0 
+RightHipExtensor:
+    tauOff: 0.0 
+RightKneeExtensor:
+    tauOff: 0.0   
+RightAnkleExtensor:
+    tauOff: 0.0 
+RightAnkle:
+    tauOff: 0.0     
+WaistRotator:
+    tauOff: 0.0 
+WaistExtensor:
+    tauOff: 0.0 
+WaistLateralExtensor:
+    tauOff: 0.0 
+LeftShoulderExtensor:
+    tauOff: 0.0 
+LeftShoulderAdductor:
+    tauOff: 0.0 
+LeftShoulderSupinator:
+    tauOff: 0.0  
+LeftElbowExtensor:
+    tauOff: 0.0 
+LeftForearmSupinator:
+    tauOff: 0.0 
+LeftWristExtensor:
+    tauOff: 0.0  
+LeftWrist:
+    tauOff: 0.0    
+LowerNeckExtensor:
+    tauOff: 0.0    
+NeckRotator:
+    tauOff: 0.0    
+UpperNeckExtensor:
+    tauOff: 0.0  
+RightShoulderExtensor:
+    tauOff: 0.0 
+RightShoulderAdductor:
+    tauOff: 0.0 
+RightShoulderSupinator:
+    tauOff: 0.0 
+RightElbowExtensor:
+    tauOff: 0.0 
+RightForearmSupinator:
+    tauOff: 0.0
+RightWristExtensor:
+    tauOff: 0.0   
+RightWrist:
+    tauOff: 0.0
