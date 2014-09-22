@@ -96,7 +96,7 @@ public class FootExplorationControlModule
    private static int minimumNumberOfContactPointsToHaveAPolygon = 3;
    
    // parameter of tilt foot
-   private static double zeroVelocity = 0.015;
+   private static double zeroVelocity = 0.01;
    private static double alphaForJointVelocity = 0.95;
    private static int numberOfJointCheckedForZeroVelocity = 2;
    private static double safetyScalingOfContactPoints = 0.85;
@@ -437,7 +437,7 @@ public class FootExplorationControlModule
       Twist tmpTwist = new Twist();
       Vector3d tmpVector = new Vector3d();
       
-      ArrayList<Pair<RobotSide, DoubleYoVariable>> footAngularRate = new ArrayList<>();
+      SideDependentList<DoubleYoVariable> footAngularRate = new SideDependentList<DoubleYoVariable>();
 
       public ExplorationState()
       {
@@ -445,19 +445,8 @@ public class FootExplorationControlModule
          tempICP = new FramePoint2d(worldFrame);
          for(RobotSide side : RobotSide.values)
          {
-        	 footAngularRate.add(new Pair(side, new DoubleYoVariable(side.name()+"FootAngularRate", registry)));
+        	 footAngularRate.put(side, new DoubleYoVariable(side.name()+"FootAngularRate", registry));
          }
-      }
-      
-      private void updateFootAngularRate()
-      {
-          for(Pair<RobotSide, DoubleYoVariable> entry: footAngularRate)
-          {
-         	 momentumBasedController.getTwistCalculator().packTwistOfBody(tmpTwist, momentumBasedController.getFullRobotModel().getFoot(entry.first()));
-         	 tmpTwist.changeFrame(ReferenceFrame.getWorldFrame());
-         	 tmpTwist.packAngularPart(tmpVector);;
-         	 entry.second().set(tmpVector.length());
-          }   	  
       }
 
       @Override
@@ -642,6 +631,13 @@ public class FootExplorationControlModule
       
       private boolean checkJointIsNotMoving()
       {
+         updateFootAngularRate();
+         
+         return footAngularRate.get(footUderCoPControl).getDoubleValue() > zeroVelocity;
+      }
+      
+      private boolean checkAnkleVelocity()
+      {         
          double absVelocity = 0.0;
          jointX.packVelocityMatrix(jointVelocityMatrix, 0);
          jointY.packVelocityMatrix(jointVelocityMatrix, 1);
@@ -653,7 +649,18 @@ public class FootExplorationControlModule
          }
          jointVelocity.update(absVelocity);
          
-         return jointVelocity.getDoubleValue() > zeroVelocity;
+         return absVelocity > zeroVelocity;
+      }
+      
+      private void updateFootAngularRate()
+      {
+          for(RobotSide side : RobotSide.values)
+          {
+             momentumBasedController.getTwistCalculator().packTwistOfBody(tmpTwist, momentumBasedController.getFullRobotModel().getFoot(side));
+             tmpTwist.changeFrame(ReferenceFrame.getWorldFrame());
+             tmpTwist.packAngularPart(tmpVector);
+             footAngularRate.get(side).set(tmpVector.length());
+          }      
       }
       
       private FramePoint2d setAndGetDesiredFootCop()
